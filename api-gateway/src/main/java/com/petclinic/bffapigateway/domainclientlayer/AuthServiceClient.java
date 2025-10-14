@@ -44,6 +44,8 @@ public class AuthServiceClient {
 
     private final CartServiceClient cartServiceClient;
 
+    private final String authServiceHost;
+
     @Autowired
     private Rethrower rethrower;
 
@@ -55,6 +57,7 @@ public class AuthServiceClient {
         this.customersServiceClient = customersServiceClient;
         this.vetsServiceClient = vetsServiceClient;
         this.cartServiceClient = cartServiceClient;
+        this.authServiceHost = authServiceHost;
         authServiceUrl = "http://" + authServiceHost + ":" + authServicePort;
     }
 
@@ -326,7 +329,7 @@ public class AuthServiceClient {
                 .toEntity(UserDetails.class)
                 .map(responseEntity -> {
                     HttpHeaders headers = new HttpHeaders();
-                    headers.add("Location", "http://localhost:8080/#!/login");
+                    headers.add("Location", authServiceUrl+"/#!/login");
                     return ResponseEntity.status(HttpStatus.FOUND)
                             .headers(headers)
                             .body(responseEntity.getBody());
@@ -349,7 +352,7 @@ public class AuthServiceClient {
                 .toEntity(UserDetails.class)
                 .map(responseEntity -> {
                     HttpHeaders headers = new HttpHeaders();
-                    headers.add("Location", "http://localhost:3000/users/login");
+                    headers.add("Location", "http://"+authServiceHost+":3000/users/login");
                     return ResponseEntity.status(HttpStatus.FOUND)
                             .headers(headers)
                             .body(responseEntity.getBody());
@@ -536,5 +539,34 @@ public class AuthServiceClient {
                 .cookie("Bearer", jwtToken)
                 .retrieve()
                 .bodyToMono(Role.class);
+    }
+    public Mono<String> updateUsername (final String userId, String username, String jwToken) {
+        return webClientBuilder.build()
+                .patch()
+                .uri(authServiceUrl + "/users/{userId}/username", userId)
+                .bodyValue(username)
+                .cookie("Bearer", jwToken)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, n -> rethrower.rethrow(n,
+                        x -> new GenericHttpException(x.get("message").toString(), (HttpStatus) n.statusCode())))
+                .bodyToMono(String.class);
+
+    }
+
+    public Mono<Boolean> checkUsernameAvailability(String username, String jwtToken) {
+        return webClientBuilder.build()
+                .get()
+                .uri(authServiceUrl + "/users/withoutPages")
+                .cookie("Bearer", jwtToken)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, n -> rethrower.rethrow(n,
+                        x -> new GenericHttpException(x.get("message").toString(), (HttpStatus) n.statusCode())))
+                .bodyToFlux(UserDetails.class)
+                .collectList()
+                .map(users -> {
+                    return users.stream()
+                            .noneMatch(user -> user.getUsername().equals(username));
+                });
     }
 }

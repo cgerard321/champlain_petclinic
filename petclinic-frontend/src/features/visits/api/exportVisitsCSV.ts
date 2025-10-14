@@ -4,7 +4,7 @@ export const exportVisitsCSV = async (): Promise<void> => {
   try {
     const response = await axiosInstance.get('/visits/export', {
       responseType: 'blob',
-      useV2: true,
+      useV2: false,
     });
 
     const url = window.URL.createObjectURL(new Blob([response.data]));

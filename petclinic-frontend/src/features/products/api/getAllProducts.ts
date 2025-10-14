@@ -10,6 +10,7 @@ export async function getAllProducts(
   deliveryType?: string,
   productType?: string
 ): Promise<ProductModel[]> {
+  // Build query parameters based on provided filters from within the function
   const params: Record<string, unknown> = {};
   if (minPrice !== undefined && minPrice !== null) params.minPrice = minPrice;
   if (maxPrice !== undefined && maxPrice !== null) params.maxPrice = maxPrice;
@@ -23,21 +24,25 @@ export async function getAllProducts(
   if (productType && productType !== 'default')
     params.productType = productType;
 
-  const res = await axiosInstance.get('/products', {
-    responseType: 'text',
-    params,
-    useV2: true,
-  });
+  try {
+    const response = await axiosInstance.get('/products', {
+      params,
+      useV2: false,
+    });
 
-  return res.data
-    .split('data:')
-    .map((dataChunk: string) => {
-      try {
-        if (dataChunk == '') return null;
-        return JSON.parse(dataChunk);
-      } catch (err) {
-        console.error('Could not parse JSON: ' + err);
-      }
-    })
-    .filter((data?: JSON) => data !== null);
+    return response.data
+      .split('data:')
+      .map((dataChunk: string) => {
+        try {
+          if (dataChunk == '') return null;
+          return JSON.parse(dataChunk);
+        } catch (error) {
+          console.error('Could not parse JSON: ' + error);
+        }
+      })
+      .filter((data?: JSON) => data !== null);
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    throw error;
+  }
 }

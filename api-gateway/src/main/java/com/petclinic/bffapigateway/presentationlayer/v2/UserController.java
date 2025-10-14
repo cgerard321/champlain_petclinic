@@ -3,10 +3,12 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
 import com.petclinic.bffapigateway.dtos.Auth.*;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
+import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -27,14 +29,15 @@ import java.util.List;
 public class UserController {
 
     private final AuthServiceClient authServiceClient;
-
+    @Value("${frontend.url}")
+    String frontendUrl;
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping("/verification/{token}")
     public Mono<ResponseEntity<UserDetails>> verifyUserUsingV2Endpoint(@PathVariable final String token) {
         return authServiceClient.verifyUserUsingV2Endpoint(token)
                 .map(userDetailsResponseEntity -> {
                     HttpHeaders headers = new HttpHeaders();
-                    headers.add("Location", "http://localhost:3000/users/login");
+                    headers.add("Location", frontendUrl+"/users/login");
                     return ResponseEntity.status(HttpStatus.FOUND)
                             .headers(headers)
                             .body(userDetailsResponseEntity.getBody());
@@ -135,5 +138,17 @@ public class UserController {
                 .map(userResponseDTO -> ResponseEntity.ok().body(userResponseDTO))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
+    @PatchMapping(value = "/users/{userId}/username", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @IsUserSpecific(idToMatch = {"userId"})
+    public Mono<ResponseEntity<String>> updateUsername(@PathVariable final String userId,
+                                                       @RequestBody final String username,
+                                                       @CookieValue("Bearer") String jwtToken
+    ) {
+        return authServiceClient.updateUsername(userId,username,jwtToken)
+                .map(usernameChangeRequestDTO -> ResponseEntity.ok().body(usernameChangeRequestDTO))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
 
 }

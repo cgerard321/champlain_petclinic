@@ -1,3 +1,208 @@
+/* This is the CSS for the profile page */
+.customers-container-profile {
+  min-height: 100vh;
+  padding: 60px 40px;
+  background-color: #f8f9fb;
+  display: flex;
+  justify-content: center;
+}
+.profile-picture {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e5e7eb; 
+}
+
+.customers-profile-card {
+  width: 100%;
+  max-width: 1100px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 40px 60px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.customers-profile-card h1 {
+  font-size: 1.8rem;
+  color: #2e2e2e;
+  margin: 0;
+  font-weight: 600;
+}
+
+/* user info area */
+.customers-profile-info {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px 40px;
+}
+
+.customers-profile-info p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #4a4a4a;
+  display: flex;
+  flex-direction: column;
+}
+
+.customers-profile-info strong {
+  font-size: 0.85rem;
+  color: #6b6b6b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+/* Pets section header with button */
+.customers-pets-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.customers-pets-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.customers-pets-header h3 {
+  font-size: 1.4rem;
+  color: #2e2e2e;
+  margin: 0;
+}
+
+.customers-add-pet-button {
+  background-color: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.25s,
+    transform 0.2s;
+}
+
+.customers-add-pet-button:hover {
+  background-color: #1d4ed8;
+  transform: translateY(-2px);
+}
+
+/* grid of pet cards, to have a grid look and prettier */
+.customers-pets-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.customers-pet-card {
+  background: #f3f4f6;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition:
+    box-shadow 0.2s,
+    transform 0.2s;
+}
+
+.customers-pet-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+}
+
+.customers-pet-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 8px;
+}
+
+.customers-pet-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.95rem;
+  color: #4b5563;
+}
+
+.customers-pet-detail strong {
+  font-weight: 600;
+  color: #374151;
+}
+
+.customers-pet-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.customers-edit-pet-button {
+  background-color: #10b981;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color 0.25s,
+    transform 0.2s;
+}
+
+.customers-edit-pet-button:hover {
+  background-color: #059669;
+  transform: translateY(-1px);
+}
+
+/* when there are no pets */
+.customers-no-pets {
+  text-align: center;
+  padding: 40px;
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  background: #f9fafb;
+  color: #6b7280;
+}
+
+.customers-no-pets-subtitle {
+  font-size: 0.9rem;
+  color: #9ca3af;
+}
+
+/* modify profile button */
+.customers-updateButton {
+  align-self: flex-end;
+  background-color: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.25s,
+    transform 0.2s;
+}
+
+.customers-updateButton:hover {
+  background-color: #1d4ed8;
+  transform: translateY(-2px);
+}
+
+/* makes it responsive */
+@media (max-width: 768px) {
+  .customers-profile-info {
+    grid-template-columns: 1fr;
+  }
+}
 .container-profile {
   display: flex;
   justify-content: center;
@@ -91,6 +296,24 @@ h1 {
 
 .add-pet-button:hover {
   background-color: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.customers-delete-pet-button {
+  background-color: #e42a16;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.customers-delete-pet-button:hover {
+  background-color: #e42a16;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }

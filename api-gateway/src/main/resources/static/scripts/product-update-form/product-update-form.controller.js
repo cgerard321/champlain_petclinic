@@ -1,37 +1,61 @@
 'use strict';
 
+
+
 angular.module('productUpdateForm')
-    .controller('ProductUpdateFormController', ["$http", '$state', '$stateParams', '$scope', 'InventoryService', function ($http, $state, $stateParams, $scope, InventoryService) {
-        var self = this;
-        var product = {}
-        var method = $stateParams.method;
-
-        var inventoryId = InventoryService.getInventoryId();
-        console.log("InventoryId: " + inventoryId);
-        var productId = $stateParams.productId;
-        console.log("ProductId: " + productId)
-        // post request to create a new product
-
+    .controller('ProductUpdateFormController', [
+        "$http", "$state", "$stateParams",
+        function ($http, $state, $stateParams) {
+            var self = this;
+            var productId = $stateParams.productId;
+            //hardcoded because no currently existing way to get
+            self.deliveryType = ["DELIVERY", "PICKUP", "DELIVERY_AND_PICKUP", "NO_DELIVERY_OPTION"];
+            self.productStatus = ["AVAILABLE", "PRE_ORDER", "OUT_OF_STOCK"];
+            self.productType = ["FOOD", "MEDICATION", "ACCESSORY", "EQUIPMENT"];
 
 
-        $http.get('/api/gateway/inventories/' + inventoryId + '/products/' + productId).then(function (resp) {
-            self.product = resp.data;
-        });
+            console.log("ProductId: " + productId);
 
-        self.submitProductUpdateForm = function () {
+            // Load product by ID
+            $http.get('/api/gateway/products/' + productId).then(function (resp) {
+                self.product = resp.data;
+                if (self.product.isUnlisted === undefined || self.product.isUnlisted === null) {
+                   self.product.isUnlisted = false;
+                }
+                var prod = self.product;
+                //fetch image
+                            $http.get('api/gateway/images/' + prod.imageId).then(function (imageResp){
+                            if(imageResp.data === ""){
+                               console.log("no image found");
+                               return;
+                            }
+                               prod.imageData = imageResp.data.imageData;
+                               prod.imageType = imageResp.data.imageType;
+                            })
+                               .catch(function (err) {
+                               console.error("Error fetching image: ", err);
+                            });
+            });
 
-            var data  = {
-                productName: self.product.productName,
-                productDescription: self.product.productDescription,
-                productPrice: self.product.productPrice,
-                productQuantity: self.product.productQuantity,
-                productSalePrice: self.product.productSalePrice
-            }
+            // update
+            self.submitProductUpdateForm = function () {
+                var data = {
+                    productName: self.product.productName,
+                    productDescription: self.product.productDescription,
+                    productPrice: self.product.productPrice,
+                    productQuantity: self.product.productQuantity,
+                    productSalePrice: self.product.productSalePrice,
+                    productType: self.product.productType,
+                    productStatus: self.product.productStatus,
+                    deliveryType: self.product.deliveryType,
+                    imageId: self.product.imageId,
+                    isUnlisted: self.product.isUnlisted
+                };
 
-            $http.put('/api/gateway/inventories/' + inventoryId + '/products/' + productId, data)
+                $http.put('/api/gateway/products/' + productId, data)
                     .then(function (response) {
                         console.log(response);
-                        $state.go('productList', {inventoryId: inventoryId});
+                        $state.go('productList');
                     }, function (response) {
                         var error = response.data;
                         error.errors = error.errors || [];
@@ -40,12 +64,9 @@ angular.module('productUpdateForm')
                         }).join("\r\n"));
                     });
 
-            if (!inventoryId) {
-                console.error("Inventory ID is missing");
-            }
-            if (!productId) {
-                console.error("Product ID is missing");
-            }
+                if (!productId) {
+                    console.error("Product ID is missing");
+                }
+            };
         }
-
-    }]);
+    ]);

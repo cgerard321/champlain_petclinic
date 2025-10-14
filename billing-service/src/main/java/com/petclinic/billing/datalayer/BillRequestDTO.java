@@ -1,7 +1,7 @@
 package com.petclinic.billing.datalayer;
 
 import lombok.*;
-
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
@@ -14,12 +14,12 @@ public class BillRequestDTO {
     private String visitType;
     private String vetId;
     private LocalDate date;
-    private double amount;
+    private BigDecimal amount;
     private BillStatus billStatus;
     private LocalDate dueDate;
 
 
-    public BillRequestDTO(String customerId, String visitType, String vetId, LocalDate date, double amount, BillStatus billStatus, LocalDate dueDate)
+    public BillRequestDTO(String customerId, String visitType, String vetId, LocalDate date, BigDecimal amount, BillStatus billStatus, LocalDate dueDate)
  {
         this.customerId = customerId;
         this.visitType = visitType;

@@ -93,58 +93,59 @@ select:focus {
 /* Break a line to prevent overflowing */
 .table th:nth-child(4),  /* Sale Price */
 .table th:nth-child(5),  /* Regular Price */
-.table th:nth-child(6) { /* Profit Margin */
-  word-spacing: 100vw; 
+.table th:nth-child(6) {
+  /* Profit Margin */
+  word-spacing: 100vw;
   overflow-wrap: break-word;
   word-break: break-word;
 }
 
 /* Supply Id */
-.table th:nth-child(1), 
+.table th:nth-child(1),
 .table td:nth-child(1) {
-  width: 8%; 
+  width: 8%;
 }
 
 /* Supply Name */
-.table th:nth-child(2), 
+.table th:nth-child(2),
 .table td:nth-child(2) {
-  width: 15%; 
+  width: 15%;
 }
 
 /* Description */
-.table th:nth-child(3), 
+.table th:nth-child(3),
 .table td:nth-child(3) {
-  width: 20%; 
+  width: 20%;
 }
 
 /* Sale Price */
-.table th:nth-child(4), 
+.table th:nth-child(4),
 .table td:nth-child(4) {
-  width: 8%; 
+  width: 8%;
 }
 
 /* Regular Price */
-.table th:nth-child(5), 
+.table th:nth-child(5),
 .table td:nth-child(5) {
-  width: 9%; 
+  width: 9%;
 }
 
 /* Profit Margin */
-.table th:nth-child(6), 
+.table th:nth-child(6),
 .table td:nth-child(6) {
-  width: 9%; 
+  width: 9%;
 }
 
 /* Quantity */
-.table th:nth-child(7), 
+.table th:nth-child(7),
 .table td:nth-child(7) {
-  width: 10%; 
+  width: 10%;
 }
 
 /* Status */
-.table th:nth-child(8), 
+.table th:nth-child(8),
 .table td:nth-child(8) {
-  width: 8%; 
+  width: 8%;
 }
 
 .table-striped tbody tr:nth-of-type(odd) {
@@ -157,7 +158,7 @@ select:focus {
   box-sizing: border-box;
 }
 
-.table thead th{
+.table thead th {
   text-align: center;
   vertical-align: middle;
 }
@@ -231,7 +232,9 @@ select:focus {
 }
 
 @media (min-width: 992px) {
-  .table { table-layout: auto; }
+  .table {
+    table-layout: auto;
+  }
 }
 
 #google_translate_element {
@@ -240,8 +243,8 @@ select:focus {
   max-width: 320px;
   margin: 12px 0 16px 16px;
 }
-.card button[type="submit"],
-form button[type="submit"].btn {
+.card button[type='submit'],
+form button[type='submit'].btn {
   width: auto !important;
   min-width: 10rem;
   max-width: 100%;
@@ -252,4 +255,93 @@ form button[type="submit"].btn {
 
 button.btn {
   word-break: keep-all;
+}
+
+.table.table-striped {
+  table-layout: auto !important;
+  min-width: 0 !important;
+}
+
+.table.table-striped th,
+.table.table-striped td {
+  overflow: visible !important;
+  white-space: normal;
+  text-overflow: clip !important;
+}
+
+.table.table-striped td:nth-child(1),
+.table.table-striped td:nth-child(3) {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.actions-cell {
+  white-space: normal !important;
+}
+.actions-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.actions-group .btn {
+  padding: 4px 8px;
+  line-height: 1.2;
+  font-size: 0.85rem;
+}
+
+.table.table-striped th:nth-child(9),
+.table.table-striped td:nth-child(9) {
+  width: 320px;
+  min-width: 260px;
+}
+
+.table.table-striped th:nth-child(4),
+.table.table-striped td:nth-child(4),
+.table.table-striped th:nth-child(5),
+.table.table-striped td:nth-child(5),
+.table.table-striped th:nth-child(6),
+.table.table-striped td:nth-child(6),
+.table.table-striped th:nth-child(7),
+.table.table-striped td:nth-child(7),
+.table.table-striped th:nth-child(8),
+.table.table-striped td:nth-child(8) {
+  width: 8%;
+  white-space: nowrap;
+}
+
+.table.table-striped thead th {
+  white-space: normal !important;
+  line-height: 1.15;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.th-2line {
+  display: inline-block;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.table.table-striped thead th:nth-child(4),
+.table.table-striped thead th:nth-child(5),
+.table.table-striped thead th:nth-child(6),
+.table.table-striped thead th:nth-child(7),
+.table.table-striped tbody td:nth-child(4),
+.table.table-striped tbody td:nth-child(5),
+.table.table-striped tbody td:nth-child(6),
+.table.table-striped tbody td:nth-child(7) {
+  min-width: 96px;
+  text-align: center;
+}
+
+.table.table-striped th:nth-child(9),
+.table.table-striped td:nth-child(9) {
+  width: 300px;
+  min-width: 260px;
+}
+
+.table.table-striped th,
+.table.table-striped td {
+  overflow: visible !important;
+  text-overflow: clip !important;
 }

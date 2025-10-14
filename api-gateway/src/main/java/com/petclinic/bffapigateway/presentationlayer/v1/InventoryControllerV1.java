@@ -38,6 +38,8 @@ public class InventoryControllerV1 {
                 .map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
 
+//     return Mono.just(ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build());
+
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER})
@@ -99,7 +101,7 @@ public class InventoryControllerV1 {
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
-    @GetMapping(value = "{inventoryId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/{inventoryId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<InventoryResponseDTO>> getInventoryById(@PathVariable String inventoryId) {
         return inventoryServiceClient.getInventoryById(inventoryId)
                 .map(product -> ResponseEntity.status(HttpStatus.OK).body(product))
@@ -314,6 +316,7 @@ public class InventoryControllerV1 {
     @GetMapping()//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<InventoryResponseDTO> searchInventory(@RequestParam Optional<Integer> page,
                                                       @RequestParam Optional<Integer> size,
+                                                      @RequestParam(required = false) String inventoryCode,
                                                       @RequestParam(required = false) String inventoryName,
                                                       @RequestParam(required = false) String inventoryType,
                                                       @RequestParam(required = false) String inventoryDescription,
@@ -325,7 +328,7 @@ public class InventoryControllerV1 {
         if (size.isEmpty()) {
             size = Optional.of(10);
         }
-        return inventoryServiceClient.searchInventory(page, size, inventoryName, inventoryType, inventoryDescription, importantOnly);
+        return inventoryServiceClient.searchInventory(page, size, inventoryCode, inventoryName, inventoryType, inventoryDescription, importantOnly);
     }
 
         @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})

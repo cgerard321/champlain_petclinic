@@ -4,8 +4,17 @@ import { ProductModel } from '@/features/products/models/ProductModels/ProductMo
 export async function getProductsByType(
   productType: string
 ): Promise<ProductModel[]> {
-  const res = await axiosInstance.get(`/products/filter/${productType}`, {
-    useV2: true,
-  });
-  return res.data;
+  try {
+    const response = await axiosInstance.get(
+      '/products/filter/' + productType,
+      {
+        useV2: false,
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching products by type:', error);
+    throw error;
+  }
 }

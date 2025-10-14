@@ -7,10 +7,13 @@ export async function addImage(formData: FormData): Promise<ImageModel> {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
-      responseType: 'json',
+      useV2: false,
     });
+
     return response.data as ImageModel;
   } catch (error) {
     throw new Error('Error uploading image');
   }
 }
+
+// This page needs to be deleted since react is only for customers and not employees.

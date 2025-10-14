@@ -16,18 +16,15 @@ cart-service:
 mailer-service:
   host: localhost
   port: 8888
-emailing-service:
-  host: localhost
-  port: 5115
 default-admin:
   username: admin
   password: admin
 
 #This was changed to the new endpoint using the new V2 functions, if you want to access the previous
-gateway:
-  origin: localhost:8080/api/v2/gateway
-  protocol: http
-  subdomain:
+frontend:
+  url: http://localhost:8080/api/v2/gateway
+customer-frontend:
+  url: http://localhost:3000
 
 
 ---
@@ -64,10 +61,26 @@ spring:
 
 ---
 # for docker
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus
 
 spring:
+  # performance optimizationn
+  main:
+    lazy-initialization: true
+  server:
+    netty:
+      connection-provider:
+        max-connections: 10
+    tomcat:
+      threads:
+        max: 50
+
   datasource:
-    url: jdbc:mysql://mysql4/auth-db
+    url: jdbc:mysql://mysql-auth/auth-db
     username: user
     password: pwd
 
@@ -96,12 +109,74 @@ emailing-service:
   host: emailing-service
   port: 5115
 
+#This was changed to the new endpoint using the new V2 functions, if you want to access the previous
+# this is to make it work in prod will be fixed later
+frontend:
+  url: http://localhost:8080/api/v2/gateway
+customer-frontend:
+  url: http://localhost:3000
+
 logging:
   level:
     root: INFO
     com.petclinic: DEBUG
 
+---
+#for production
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus
 
+spring:
+  # performance optimizationn
+  main:
+    lazy-initialization: true
+  server:
+    netty:
+      connection-provider:
+        max-connections: 10
+    tomcat:
+      threads:
+        max: 50
+
+  datasource:
+    url: jdbc:mysql://mysql-auth/auth-db
+    username: user
+    password: pwd
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+
+  config:
+    activate:
+      on-profile: prod
+
+  sql:
+    init:
+      platform: mysql
+      mode: always
+
+mailer-service:
+  host: mailer-service
+  port: 8080
+
+cart-service:
+  host: cart-service
+  port: 8080
+
+emailing-service:
+  host: emailing-service
+  port: 5115
+
+frontend:
+  url: https://petclinic-backend.benmusicgeek.synology.me/api/v2/gateway
+customer-frontend:
+  url: https://petclinic.benmusicgeek.synology.me/
+
+---
 server.port: 8080
 
 spring.datasource.hikari.initializationFailTimeout: 60000

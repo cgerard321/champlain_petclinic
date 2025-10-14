@@ -49,7 +49,7 @@
   resize: vertical;
 }
 
-.add-review-form button[type='submit']{
+.add-review-form button[type='submit'] {
   background-color: #0d6efd;
   border-color: #0d6efd;
   color: #fff;
@@ -111,6 +111,14 @@ button[type='submit']:hover {
   margin-top: -10px;
 }
 
+.add-review-form button.cancel {
+  background-color: red;
+}
+
+.add-review-form button.cancel:hover {
+  background-color: darkred;
+}
+
 .reviewer-name-display {
   margin: 4px 0 0 0;
   color: #343a40;
@@ -130,8 +138,8 @@ button[type='submit']:hover {
   color: blue;
 }
 
-.add-review-form button[type='submit']:hover {
-  background-color: #1d5fbd; 
+.add-review-form button.submit:hover {
+  background-color: #1d5fbd;
   border-color: #1d5fbd;
   color: #fff;
 }

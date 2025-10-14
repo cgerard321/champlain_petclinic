@@ -1,58 +1,172 @@
 .billsListTableContainer {
-  max-width: 85%;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 20px;
-  font-family: 'Arial', sans-serif;
+  padding: 15px;
+  font-family: Arial, sans-serif;
 }
 
 .filterContainer {
-  max-width: 85%;
-  margin: 0 auto;
-  padding-bottom: 10px;
-  font-family: 'Arial', sans-serif;
+  margin-bottom: 20px;
+  padding: 10px;
+}
+
+.filterContainer label {
+  margin-right: 10px;
+  font-weight: normal;
+}
+
+.filterContainer select {
+  padding: 5px 8px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 14px;
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
-  margin: 20px 0;
-  font-size: 18px;
+  margin: 0;
+  font-size: 13px;
   text-align: left;
+  background-color: white;
+  border: 1px solid #ddd;
 }
 
 .table th,
 .table td {
-  padding: 12px 15px;
+  padding: 8px 6px;
+  text-align: center;
+  vertical-align: middle;
+  border: 1px solid #ddd;
 }
 
-.table thead tr {
-  background-color: #009879;
-  color: #ffffff;
-  text-align: left;
-}
-
-.table tbody tr {
-  border-bottom: 1px solid #dddddd;
+.table th {
+  background-color: #f8f9fa;
+  color: #333;
+  font-weight: bold;
+  font-size: 12px;
 }
 
 .table tbody tr:nth-of-type(even) {
-  background-color: #f3f3f3;
-}
-
-.table tbody tr:last-of-type {
-  border-bottom: 2px solid #009879;
+  background-color: #f9f9f9;
 }
 
 .table tbody tr:hover {
-  background-color: #f1f1f1;
+  background-color: #f0f0f0;
+}
+
+/* Compact column widths for horizontal fit */
+.table th:nth-child(1),
+.table td:nth-child(1) {
+  width: 100px; /* Owner Name */
+  font-size: 12px;
+}
+
+.table th:nth-child(2),
+.table td:nth-child(2) {
+  width: 80px; /* Visit Type */
+}
+
+.table th:nth-child(3),
+.table td:nth-child(3) {
+  width: 80px; /* Vet Name */
+}
+
+.table th:nth-child(4),
+.table td:nth-child(4) {
+  width: 70px; /* Date */
+}
+
+.table th:nth-child(5),
+.table td:nth-child(5) {
+  width: 60px; /* Amount */
+}
+
+.table th:nth-child(6),
+.table td:nth-child(6) {
+  width: 60px; /* Tax */
+}
+
+.table th:nth-child(7),
+.table td:nth-child(7) {
+  width: 60px; /* Interest */
+}
+
+.table th:nth-child(8),
+.table td:nth-child(8) {
+  width: 70px; /* Total Due */
+}
+
+.table th:nth-child(9),
+.table td:nth-child(9) {
+  width: 70px; /* Status */
+}
+
+.table th:nth-child(10),
+.table td:nth-child(10) {
+  width: 80px; /* Due Date */
 }
 
 .table th:nth-child(11),
 .table td:nth-child(11) {
-  width: 160px;
+  width: 70px; /* Time Remaining */
 }
 
-.table th:nth-child(1),
-.table td:nth-child(1) {
-  width: 125px;
+.table th:nth-child(12),
+.table td:nth-child(12) {
+  width: 120px; /* Actions */
+}
+
+/* Button styling - simple and clean */
+.table button {
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 11px;
+  cursor: pointer;
+  margin: 1px;
+  background-color: white;
+}
+
+.table button:hover {
+  background-color: #f0f0f0;
+}
+
+/* Download button */
+.table button:first-of-type {
+  background-color: #17a2b8;
+  color: white;
+  border-color: #17a2b8;
+}
+
+.table button:first-of-type:hover {
+  background-color: #138496;
+}
+
+/* Pay button */
+.table button:last-of-type {
+  background-color: #28a745;
+  color: white;
+  border-color: #28a745;
+}
+
+.table button:last-of-type:hover {
+  background-color: #218838;
+}
+
+/* Remove responsive transforms for horizontal fit */
+@media (max-width: 1400px) {
+  .table {
+    font-size: 12px;
+  }
+
+  .table th,
+  .table td {
+    padding: 6px 4px;
+  }
+
+  .table button {
+    font-size: 10px;
+    padding: 3px 6px;
+  }
 }

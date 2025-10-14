@@ -11,6 +11,7 @@ import java.util.List;
 @EqualsAndHashCode
 public class InventoryResponseDTO {
     private String inventoryId;
+    private String inventoryCode;
     private String  inventoryName;
     private String inventoryType;
     private String inventoryDescription;
@@ -19,5 +20,6 @@ public class InventoryResponseDTO {
     private byte[] imageUploaded;
     private Boolean important;
     private List<ProductResponseDTO> products;
+    private String recentUpdateMessage;
 
 }

@@ -1,0 +1,248 @@
+.modal-backdrop,
+.cart-billing-modal-backdrop,
+.confirm-modal-backdrop {
+  --cart-modal-radius: 0px;
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  z-index: 1000;
+  padding: 2rem 1rem;
+}
+
+.modal-backdrop .modal-content {
+  position: relative;
+  background: radial-gradient(
+      120% 120% at 10% 0%,
+      rgba(37, 99, 235, 0.08),
+      rgba(255, 255, 255, 0)
+    ),
+    #ffffff;
+  padding: 2.25rem;
+  border-radius: var(--cart-modal-radius, 0px);
+  width: 500px;
+  max-width: min(90%, 520px);
+  box-shadow: 0 28px 60px rgba(15, 23, 42, 0.28);
+  margin: 0 auto;
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+  color: var(--cart-text, #0f172a);
+}
+
+.modal-close,
+.cart-billing-modal-close,
+.confirm-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--cart-muted, #475569);
+  line-height: 1;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close:hover,
+.cart-billing-modal-close:hover,
+.confirm-modal-close:hover {
+  color: var(--cart-brand, #2563eb);
+}
+
+.modal-content h2 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: clamp(1.4rem, 2.5vw, 1.65rem);
+  font-weight: 700;
+  color: var(--cart-text, #0f172a);
+}
+
+.cart-billing-modal-content {
+  --cart-panel-radius: var(--cart-modal-radius, 0px);
+  border-radius: var(--cart-modal-radius, 0px);
+  box-shadow: 0 28px 60px rgba(15, 23, 42, 0.28);
+}
+
+.billing-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.billing-form > input,
+.billing-form > select {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--cart-ring, #e5e7eb);
+  border-radius: 14px;
+  font-size: 1rem;
+  text-align: left;
+  box-sizing: border-box;
+  background: #ffffff;
+  color: var(--cart-text, #0f172a);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.billing-form select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 12px;
+  padding-right: 2.5rem;
+}
+
+::placeholder {
+  text-align: left;
+  color: #666666;
+}
+
+/* Form row for expiry and CVV to be on same line */
+.form-row {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+}
+
+.form-field {
+  flex: 1;
+}
+
+.form-field input {
+  width: 100%;
+  text-align: left;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--cart-ring, #e5e7eb);
+  border-radius: 14px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.billing-form > input:focus,
+.billing-form > select:focus,
+.form-field input:focus {
+  outline: none;
+  border-color: rgba(37, 99, 235, 0.55);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+}
+
+.billing-form button[type='submit'] {
+  margin-top: 0.75rem;
+}
+
+.error {
+  color: #b91c1c;
+  padding: 0.9rem;
+  background: rgba(239, 68, 68, 0.12);
+  border-radius: 14px;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.success {
+  color: #166534;
+  padding: 0.9rem;
+  background: rgba(34, 197, 94, 0.12);
+  border-radius: 14px;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(34, 197, 94, 0.18);
+}
+.main-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  width: 100%;
+  align-items: stretch;
+}
+
+.modal-content .main-fields > input,
+.modal-content .main-fields > select {
+  width: 100%;
+  text-align: left;
+  margin-bottom: 0.5rem;
+}
+
+.main-fields .form-row {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+  justify-content: flex-start;
+  align-items: stretch;
+}
+
+.main-fields .form-row .form-field {
+  flex: 1;
+}
+
+.main-fields .form-row .form-field input {
+  width: 100%;
+  text-align: left;
+}
+
+/* Confirmation modal backdrop */
+.confirm-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1100;
+}
+
+/* Confirmation modal content */
+.confirm-modal-content {
+  background: radial-gradient(
+      140% 120% at 0% 0%,
+      rgba(37, 99, 235, 0.08),
+      rgba(255, 255, 255, 0)
+    ),
+    #ffffff;
+  padding: 2rem;
+  border-radius: var(--cart-modal-radius, 0px);
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.26);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  color: var(--cart-text, #0f172a);
+  --cart-panel-radius: var(--cart-modal-radius, 0px);
+}
+
+.confirm-modal-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  width: 100%;
+}
+
+/* Buttons */
+.confirm-modal-buttons button {
+  padding: 0.65rem 1.25rem;
+  font-size: 0.95rem;
+}

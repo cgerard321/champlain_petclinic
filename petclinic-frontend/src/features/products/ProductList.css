@@ -5,7 +5,7 @@
   margin-top: 20px;
 }
 
-.card {
+/*.card {
   background-color: #fff;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
@@ -34,7 +34,7 @@
 
 .card .star-rating {
   margin-top: 12px;
-}
+}*/
 
 .main-content {
   padding: 20px;
@@ -202,9 +202,8 @@
   font-weight: bold;
 }
 
-
 /**THESE WERE ADDED FOR THE RECENTLY VIEWED TO BE HORIZONTAL**/
-.recently-viewed-flex{
+.recently-viewed-flex {
   display: flex;
   flex-direction: row;
   gap: 16px;
@@ -213,11 +212,9 @@
   padding: 10px;
 }
 
-.recently-viewed-flex > div{
+.recently-viewed-flex > div {
   flex: 0 0 350px;
   max-width: 350px;
   min-width: 350px;
-  height: 100%;
   scroll-snap-align: start;
-
 }

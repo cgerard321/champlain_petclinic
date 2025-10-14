@@ -35,7 +35,7 @@ class ProductControllerIntegrationTest {
 
        
         webTestClient.patch()
-                .uri("/api/v1/products/" + productId)
+                .uri("/products/" + productId)
                 .exchange()
                 .expectStatus().isNoContent();
 
@@ -51,7 +51,7 @@ class ProductControllerIntegrationTest {
 
        
         webTestClient.patch()
-                .uri("/api/v1/products/" + productId)
+                .uri("/products/" + productId)
                 .exchange()
                 .expectStatus().isNotFound();
 

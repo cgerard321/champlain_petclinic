@@ -2,7 +2,6 @@ package com.petclinic.cartsservice.presentationlayer;
 
 import com.petclinic.cartsservice.businesslayer.CartService;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
-import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
 import com.petclinic.cartsservice.domainclientlayer.AddProductRequestModel;
 import com.petclinic.cartsservice.domainclientlayer.UpdateProductQuantityRequestModel;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
@@ -278,6 +277,49 @@ public class CartController {
                     }
                 });
     }
+    //Move all wishlist items to cart
+    @PostMapping(value = "/{cartId}/wishlist/moveAll", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<CartResponseModel>> moveAllWishlistToCart(@PathVariable String cartId) {
+        return Mono.just(cartId)
+                .filter(id -> id.length() == 36) // match your other endpoints' ID check
+                .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
+                .flatMap(validId -> cartService.moveAllWishlistToCart(validId))
+                .map(ResponseEntity::ok)
+                .onErrorResume(InvalidInputException.class, e -> {
+                    CartResponseModel resp = new CartResponseModel();
+                    resp.setMessage(e.getMessage());
+                    return Mono.just(ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(resp));
+                })
+                .onErrorResume(NotFoundException.class, e -> {
+                    CartResponseModel resp = new CartResponseModel();
+                    resp.setMessage(e.getMessage());
+                    return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).body(resp));
+                })
+                .onErrorResume(OutOfStockException.class, e -> {
+                    CartResponseModel resp = new CartResponseModel();
+                    resp.setMessage(e.getMessage());
+                    return Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp));
+                })
+                .onErrorResume(Throwable.class, e -> {
+                    CartResponseModel resp = new CartResponseModel();
+                    resp.setMessage("Unexpected error");
+                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(resp));
+                });
+    }
 
+
+    @GetMapping("/{cartId}/recent-purchases")
+    public Mono<ResponseEntity<List<CartProduct>>> getRecentPurchases(@PathVariable String cartId) {
+        return cartService.getRecentPurchases(cartId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{cartId}/recommendation-purchases")
+    public Mono<ResponseEntity<List<CartProduct>>> getRecommendationPurchases(@PathVariable String cartId) {
+        return cartService.getRecommendationPurchases(cartId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 
 }

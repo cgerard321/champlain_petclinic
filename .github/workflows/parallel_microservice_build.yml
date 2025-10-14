@@ -4,6 +4,7 @@
 # documentation.
 # This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
+# Optimized for sub-2-minute execution with advanced caching and parallel processing
 
 name: Java CI with Gradle
 
@@ -16,6 +17,7 @@ on:
 jobs:
   api_gateway_test:
     runs-on: "ubuntu-22.04"
+    timeout-minutes: 15
     steps:
     - uses: actions/checkout@v4
     - name: Set up JDK 17
@@ -23,27 +25,38 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
+    - name: Cache Gradle packages
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-api-gateway-${{ hashFiles('**/api-gateway/*.gradle*', '**/api-gateway/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-api-gateway-
+          ${{ runner.os }}-gradle-
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
     - name: Make gradlew executable
       run: chmod +x ./gradlew
       working-directory: ./api-gateway
     - name: Build with Gradle Wrapper
-      run: ./gradlew clean build jacocoTestReport
+      run: ./gradlew clean build jacocoTestReport --daemon
       working-directory: ./api-gateway
     - name: Verify coverage threshold
-      run: ./gradlew jacocoTestCoverageVerification
+      run: ./gradlew jacocoTestCoverageVerification --daemon
       working-directory: ./api-gateway
-      continue-on-error: true
     - name: Upload coverage reports
       uses: actions/upload-artifact@v4
       with:
         name: coverage-reports-api-gateway
         path: ./api-gateway/build/reports/jacoco/test/html/
         retention-days: 30
+      if: always()
 
   visits_service_test:
     runs-on: "ubuntu-22.04"
+    timeout-minutes: 15
     steps:
     - name: Checkout sources
       uses: actions/checkout@v4
@@ -52,13 +65,26 @@ jobs:
       with:
         distribution: 'temurin'
         java-version: 17
+    - name: Cache Gradle packages
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-visits-${{ hashFiles('**/visits-service-new/*.gradle*', '**/visits-service-new/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-visits-
+          ${{ runner.os }}-gradle-
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
     - name: Make gradlew executable
       run: chmod +x ./gradlew
       working-directory: ./visits-service-new
     - name: Build with Gradle
-      run: ./gradlew clean build jacocoTestReport jacocoTestCoverageVerification
+      run: ./gradlew clean build jacocoTestReport --daemon
+      working-directory: ./visits-service-new
+    - name: Verify coverage threshold
+      run: ./gradlew jacocoTestCoverageVerification --daemon
       working-directory: ./visits-service-new
     - name: Upload coverage reports
       uses: actions/upload-artifact@v4
@@ -66,9 +92,11 @@ jobs:
         name: coverage-reports-visits-service
         path: ./visits-service-new/build/reports/jacoco/test/html/
         retention-days: 30
+      if: always()
 
   vet_service_test:
     runs-on: "ubuntu-22.04"
+    timeout-minutes: 15
     steps:
     - name: Checkout sources
       uses: actions/checkout@v4
@@ -77,13 +105,26 @@ jobs:
       with:
         distribution: 'temurin'
         java-version: 17
+    - name: Cache Gradle packages
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-vet-${{ hashFiles('**/vet-service/*.gradle*', '**/vet-service/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-vet-
+          ${{ runner.os }}-gradle-
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
     - name: Make gradlew executable
       run: chmod +x ./gradlew
       working-directory: ./vet-service
     - name: Build with Gradle
-      run: ./gradlew clean build jacocoTestReport jacocoTestCoverageVerification
+      run: ./gradlew clean build jacocoTestReport --daemon
+      working-directory: ./vet-service
+    - name: Verify coverage threshold
+      run: ./gradlew jacocoTestCoverageVerification --daemon
       working-directory: ./vet-service
     - name: Upload coverage reports
       uses: actions/upload-artifact@v4
@@ -91,10 +132,12 @@ jobs:
         name: coverage-reports-vet-service
         path: ./vet-service/build/reports/jacoco/test/html/
         retention-days: 30
+      if: always()
 
 
   customers_service_reactive_test:
     runs-on: "ubuntu-22.04"
+    timeout-minutes: 15
     steps:
     - name: Checkout sources
       uses: actions/checkout@v4
@@ -103,13 +146,26 @@ jobs:
       with:
         distribution: 'temurin'
         java-version: 17
+    - name: Cache Gradle packages
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-customers-${{ hashFiles('**/customers-service-reactive/*.gradle*', '**/customers-service-reactive/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-customers-
+          ${{ runner.os }}-gradle-
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
     - name: Make gradlew executable
       run: chmod +x ./gradlew
       working-directory: ./customers-service-reactive
     - name: Build with Gradle
-      run: ./gradlew clean build jacocoTestReport jacocoTestCoverageVerification
+      run: ./gradlew clean build jacocoTestReport --daemon
+      working-directory: ./customers-service-reactive
+    - name: Verify coverage threshold
+      run: ./gradlew jacocoTestCoverageVerification --daemon
       working-directory: ./customers-service-reactive
     - name: Upload coverage reports
       uses: actions/upload-artifact@v4
@@ -117,9 +173,11 @@ jobs:
         name: coverage-reports-customers-service
         path: ./customers-service-reactive/build/reports/jacoco/test/html/
         retention-days: 30
+      if: always()
 
   billing_service_test:
     runs-on: "ubuntu-22.04"
+    timeout-minutes: 15
     steps:
     - name: Checkout sources
       uses: actions/checkout@v4
@@ -128,13 +186,26 @@ jobs:
       with:
         distribution: 'temurin'
         java-version: 17
+    - name: Cache Gradle packages
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-billing-${{ hashFiles('**/billing-service/*.gradle*', '**/billing-service/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-billing-
+          ${{ runner.os }}-gradle-
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
     - name: Make gradlew executable
       run: chmod +x ./gradlew
       working-directory: ./billing-service
     - name: Build with Gradle
-      run: ./gradlew clean build jacocoTestReport jacocoTestCoverageVerification
+      run: ./gradlew clean build jacocoTestReport --daemon
+      working-directory: ./billing-service
+    - name: Verify coverage threshold
+      run: ./gradlew jacocoTestCoverageVerification --daemon
       working-directory: ./billing-service
     - name: Upload coverage reports
       uses: actions/upload-artifact@v4
@@ -142,9 +213,11 @@ jobs:
         name: coverage-reports-billing-service
         path: ./billing-service/build/reports/jacoco/test/html/
         retention-days: 30
+      if: always()
 
   auth_service_test:
     runs-on: "ubuntu-22.04"
+    timeout-minutes: 15
     steps:
     - name: Checkout sources
       uses: actions/checkout@v4
@@ -153,13 +226,26 @@ jobs:
       with:
         distribution: 'temurin'
         java-version: 17
+    - name: Cache Gradle packages
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-auth-${{ hashFiles('**/auth-service/*.gradle*', '**/auth-service/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-auth-
+          ${{ runner.os }}-gradle-
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
     - name: Make gradlew executable
       run: chmod +x ./gradlew
       working-directory: ./auth-service
     - name: Build with Gradle
-      run: ./gradlew clean build jacocoTestReport jacocoTestCoverageVerification
+      run: ./gradlew clean build jacocoTestReport --daemon
+      working-directory: ./auth-service
+    - name: Verify coverage threshold
+      run: ./gradlew jacocoTestCoverageVerification --daemon
       working-directory: ./auth-service
     - name: Upload coverage reports
       uses: actions/upload-artifact@v4
@@ -167,9 +253,11 @@ jobs:
         name: coverage-reports-auth-service
         path: ./auth-service/build/reports/jacoco/test/html/
         retention-days: 30
+      if: always()
 
   inventory_service_test:
     runs-on: "ubuntu-22.04"
+    timeout-minutes: 15
     steps:
     - name: Checkout sources
       uses: actions/checkout@v4
@@ -178,13 +266,26 @@ jobs:
       with:
         distribution: 'temurin'
         java-version: 17
+    - name: Cache Gradle packages
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-inventory-${{ hashFiles('**/inventory-service/*.gradle*', '**/inventory-service/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-inventory-
+          ${{ runner.os }}-gradle-
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
     - name: Make gradlew executable
       run: chmod +x ./gradlew
       working-directory: ./inventory-service
     - name: Build with Gradle
-      run: ./gradlew clean build jacocoTestReport jacocoTestCoverageVerification
+      run: ./gradlew clean build jacocoTestReport --daemon
+      working-directory: ./inventory-service
+    - name: Verify coverage threshold
+      run: ./gradlew jacocoTestCoverageVerification --daemon
       working-directory: ./inventory-service
     - name: Upload coverage reports
       uses: actions/upload-artifact@v4
@@ -192,9 +293,11 @@ jobs:
         name: coverage-reports-inventory-service
         path: ./inventory-service/build/reports/jacoco/test/html/
         retention-days: 30
+      if: always()
 
   products_service_test:
     runs-on: "ubuntu-22.04"
+    timeout-minutes: 15
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
@@ -203,13 +306,27 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: 17
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.gradle/daemon
+          key: ${{ runner.os }}-gradle-products-${{ hashFiles('**/products-service/*.gradle*', '**/products-service/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-products-
+            ${{ runner.os }}-gradle-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
       - name: Make gradlew executable
         run: chmod +x ./gradlew
         working-directory: ./products-service
       - name: Build with Gradle
-        run: ./gradlew clean build jacocoTestReport jacocoTestCoverageVerification
+        run: ./gradlew clean build jacocoTestReport --daemon
+        working-directory: ./products-service
+      - name: Verify coverage threshold
+        run: ./gradlew jacocoTestCoverageVerification --daemon
         working-directory: ./products-service
       - name: Upload coverage reports
         uses: actions/upload-artifact@v4
@@ -217,10 +334,12 @@ jobs:
           name: coverage-reports-products-service
           path: ./products-service/build/reports/jacoco/test/html/
           retention-days: 30
+        if: always()
 
 
   cart_service_test:
     runs-on: "ubuntu-22.04"
+    timeout-minutes: 15
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
@@ -229,13 +348,27 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: 17
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.gradle/daemon
+          key: ${{ runner.os }}-gradle-cart-${{ hashFiles('**/cart-service/*.gradle*', '**/cart-service/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-cart-
+            ${{ runner.os }}-gradle-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
       - name: Make gradlew executable
         run: chmod +x ./gradlew
         working-directory: ./cart-service
       - name: Build with Gradle
-        run: ./gradlew clean build jacocoTestReport jacocoTestCoverageVerification
+        run: ./gradlew clean build jacocoTestReport --daemon
+        working-directory: ./cart-service
+      - name: Verify coverage threshold
+        run: ./gradlew jacocoTestCoverageVerification --daemon
         working-directory: ./cart-service
       - name: Upload coverage reports
         uses: actions/upload-artifact@v4
@@ -243,12 +376,13 @@ jobs:
           name: coverage-reports-cart-service
           path: ./cart-service/build/reports/jacoco/test/html/
           retention-days: 30
+        if: always()
 
     
   coverage-summary:
     runs-on: "ubuntu-22.04"
     needs: [api_gateway_test, visits_service_test, vet_service_test, customers_service_reactive_test, billing_service_test, auth_service_test, inventory_service_test, products_service_test, cart_service_test]
-    if: github.event_name == 'pull_request'
+    if: always() && (github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
     steps:
     - name: Checkout sources
       uses: actions/checkout@v4
@@ -256,6 +390,13 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         path: coverage-reports
+    - name: List downloaded artifacts
+      run: |
+        echo "Downloaded artifacts:"
+        ls -la coverage-reports/ || echo "No coverage-reports directory found"
+        find coverage-reports -name "*.html" -type f | head -10 || echo "No HTML files found"
+        echo "Sample HTML content from first report:"
+        find coverage-reports -name "index.html" -type f | head -1 | xargs head -20 || echo "No index.html found"
     - name: Generate coverage summary
       run: |
         echo "## Code Coverage Summary" >> $GITHUB_STEP_SUMMARY
@@ -263,15 +404,30 @@ jobs:
         echo "Coverage reports have been generated for all microservices." >> $GITHUB_STEP_SUMMARY
         echo "View detailed reports in the Actions artifacts." >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        echo "### Coverage Thresholds" >> $GITHUB_STEP_SUMMARY
-        echo "- API Gateway: 65%" >> $GITHUB_STEP_SUMMARY
-        echo "- Auth Service: 90%" >> $GITHUB_STEP_SUMMARY
-        echo "- Billing Service: 50%" >> $GITHUB_STEP_SUMMARY
-        echo "- Cart Service: 0%" >> $GITHUB_STEP_SUMMARY
-        echo "- Inventory Service: 88%" >> $GITHUB_STEP_SUMMARY
-        echo "- Products Service: 90%" >> $GITHUB_STEP_SUMMARY
-        echo "- Visits Service: 85%" >> $GITHUB_STEP_SUMMARY
-        echo "- Customers Service: 80%" >> $GITHUB_STEP_SUMMARY
+        echo "### Actual Coverage Results" >> $GITHUB_STEP_SUMMARY
+        
+        for report_dir in coverage-reports/*/; do
+          if [ -d "$report_dir" ]; then
+            service_name=$(basename "$report_dir")
+            main_index="$report_dir/index.html"
+            if [ -f "$main_index" ]; then
+              coverage=$(grep -A 5 'tfoot' "$main_index" | grep -o '[0-9]*%' | head -1)
+              if [ -z "$coverage" ]; then
+                coverage=$(grep -o 'class="ctr2">[0-9]*%' "$main_index" | head -1 | grep -o '[0-9]*%')
+              fi
+              if [ -z "$coverage" ]; then
+                coverage=$(grep -o '[0-9]*%' "$main_index" | head -1)
+              fi
+              if [ -n "$coverage" ]; then
+                echo "- $service_name: $coverage" >> $GITHUB_STEP_SUMMARY
+              else
+                echo "- $service_name: Coverage data not found" >> $GITHUB_STEP_SUMMARY
+              fi
+            else
+              echo "- $service_name: No coverage report found" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+        done
 
   dependency-submission:
     runs-on: "ubuntu-22.04"

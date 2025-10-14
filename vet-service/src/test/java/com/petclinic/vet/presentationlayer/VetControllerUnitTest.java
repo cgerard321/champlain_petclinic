@@ -1,23 +1,31 @@
 package com.petclinic.vet.presentationlayer;
 
-import com.petclinic.vet.dataaccesslayer.Album;
-import com.petclinic.vet.dataaccesslayer.Photo;
-import com.petclinic.vet.dataaccesslayer.Vet;
-import com.petclinic.vet.dataaccesslayer.badges.Badge;
+import com.petclinic.vet.businesslayer.albums.AlbumService;
+import com.petclinic.vet.businesslayer.badges.BadgeService;
+import com.petclinic.vet.businesslayer.education.EducationService;
+import com.petclinic.vet.businesslayer.photos.PhotoService;
+import com.petclinic.vet.businesslayer.ratings.RatingService;
+import com.petclinic.vet.businesslayer.vets.VetService;
+import com.petclinic.vet.dataaccesslayer.albums.Album;
 import com.petclinic.vet.dataaccesslayer.badges.BadgeTitle;
+import com.petclinic.vet.dataaccesslayer.photos.Photo;
 import com.petclinic.vet.dataaccesslayer.ratings.PredefinedDescription;
 import com.petclinic.vet.dataaccesslayer.ratings.Rating;
-import com.petclinic.vet.exceptions.InvalidInputException;
-import com.petclinic.vet.exceptions.NotFoundException;
-import com.petclinic.vet.servicelayer.*;
-import com.petclinic.vet.servicelayer.badges.BadgeResponseDTO;
-import com.petclinic.vet.servicelayer.badges.BadgeService;
-import com.petclinic.vet.servicelayer.education.EducationRequestDTO;
-import com.petclinic.vet.servicelayer.education.EducationResponseDTO;
-import com.petclinic.vet.servicelayer.education.EducationService;
-import com.petclinic.vet.servicelayer.ratings.RatingRequestDTO;
-import com.petclinic.vet.servicelayer.ratings.RatingResponseDTO;
-import com.petclinic.vet.servicelayer.ratings.RatingService;
+import com.petclinic.vet.dataaccesslayer.vets.Vet;
+import com.petclinic.vet.presentationlayer.badges.BadgeResponseDTO;
+import com.petclinic.vet.presentationlayer.photos.PhotoRequestDTO;
+import com.petclinic.vet.presentationlayer.photos.PhotoResponseDTO;
+import com.petclinic.vet.presentationlayer.vets.VetAverageRatingDTO;
+import com.petclinic.vet.presentationlayer.vets.VetController;
+import com.petclinic.vet.presentationlayer.vets.VetRequestDTO;
+import com.petclinic.vet.presentationlayer.vets.VetResponseDTO;
+import com.petclinic.vet.presentationlayer.education.EducationRequestDTO;
+import com.petclinic.vet.presentationlayer.education.EducationResponseDTO;
+import com.petclinic.vet.presentationlayer.ratings.RatingRequestDTO;
+import com.petclinic.vet.presentationlayer.ratings.RatingResponseDTO;
+import com.petclinic.vet.utils.exceptions.GlobalControllerExceptionHandler;
+import com.petclinic.vet.utils.exceptions.NotFoundException;
+
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,20 +34,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.client.MultipartBodyBuilder;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.util.StreamUtils;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -57,7 +57,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @WebFluxTest(controllers=VetController.class)
-@ContextConfiguration(classes = {VetController.class})
+@ContextConfiguration(classes = {VetController.class, GlobalControllerExceptionHandler.class})
 class VetControllerUnitTest {
 
     @Autowired
@@ -568,7 +568,7 @@ class VetControllerUnitTest {
                 .uri("/vets/" + INVALID_VET_ID)
                 .accept(APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$").isNotEmpty();
@@ -585,7 +585,7 @@ class VetControllerUnitTest {
                 .body(Mono.just(vetRequestDTO), VetRequestDTO.class)
                 .accept(APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$").isNotEmpty();
@@ -602,7 +602,7 @@ class VetControllerUnitTest {
                 .uri("/vets/" + INVALID_VET_ID)
                 .accept(APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$").isNotEmpty();
@@ -766,17 +766,26 @@ class VetControllerUnitTest {
 
     @Test
     void getPhotoByVetId() {
+        PhotoResponseDTO photoResponse = PhotoResponseDTO.builder()
+                .vetId(VET_ID)
+                .filename("vet_photo.jpg")
+                .imgType("image/jpeg")
+                .resource(photo.getData())
+                .build();
+                
         when(photoService.getPhotoByVetId(anyString()))
-                .thenReturn(Mono.just(buildPhotoData()));
+                .thenReturn(Mono.just(photoResponse));
 
         client.get()
                 .uri("/vets/{vetId}/photo", VET_ID)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.IMAGE_JPEG_VALUE)
-                .expectBody(Resource.class)
+                .expectBody(PhotoResponseDTO.class)
                 .consumeWith(response -> {
-                    assertEquals(buildPhotoData(), response.getResponseBody());
+                    PhotoResponseDTO result = response.getResponseBody();
+                    assertNotNull(result);
+                    assertEquals(VET_ID, result.getVetId());
+                    assertEquals("vet_photo.jpg", result.getFilename());
                 });
 
         Mockito.verify(photoService, times(1))
@@ -807,26 +816,39 @@ class VetControllerUnitTest {
 */
     @Test
     void updatePhotoByVetId() {
-        Photo photo = buildPhoto();
-        Resource photoResource = buildPhotoData(photo);
+        PhotoRequestDTO photoRequest = PhotoRequestDTO.builder()
+                .vetId(VET_ID)
+                .filename("vet_photo.jpg")
+                .imgType("image/jpeg")
+                .data(photo.getData())
+                .build();
+                
+        PhotoResponseDTO photoResponse = PhotoResponseDTO.builder()
+                .vetId(VET_ID)
+                .filename("vet_photo.jpg")
+                .imgType("image/jpeg")
+                .resource(photo.getData())
+                .build();
 
-        when(photoService.updatePhotoByVetId(anyString(), anyString(), any(Mono.class)))
-                .thenReturn(Mono.just(photoResource));
+        when(photoService.updatePhotoByVetId(anyString(), any(Mono.class)))
+                .thenReturn(Mono.just(photoResponse));
 
         client.put()
-                .uri("/vets/{vetId}/photos/{photoName}", VET_ID, photo.getFilename())
-                .bodyValue(photoResource)
+                .uri("/vets/{vetId}/photo", VET_ID)
+                .bodyValue(photoRequest)
                 .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.IMAGE_JPEG_VALUE)
-                .expectBody(Resource.class)
+                .expectBody(PhotoResponseDTO.class)
                 .consumeWith(response -> {
-                    assertEquals(buildPhotoData(), response.getResponseBody());
+                    PhotoResponseDTO result = response.getResponseBody();
+                    assertNotNull(result);
+                    assertEquals(VET_ID, result.getVetId());
+                    assertEquals("vet_photo.jpg", result.getFilename());
                 });
 
         Mockito.verify(photoService, times(1))
-                .updatePhotoByVetId(anyString(), anyString(), any(Mono.class));
+                .updatePhotoByVetId(anyString(), any(Mono.class));
     }
 
     @Test
@@ -1148,6 +1170,7 @@ class VetControllerUnitTest {
                 .contains(album1, album2);
     }
 
+
     @Test
     void whenGetAllAlbumsByVetId_withError_thenLogError() {
 
@@ -1186,6 +1209,7 @@ class VetControllerUnitTest {
                 .exchange()
                 .expectStatus().isNotFound(); // Expecting 404 Not Found
     }
+
 
     @Test
     void whenDeleteAlbumPhotoById_withError_thenReturnServerError() {

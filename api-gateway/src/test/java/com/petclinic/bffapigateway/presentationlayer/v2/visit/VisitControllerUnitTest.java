@@ -1,31 +1,26 @@
 package com.petclinic.bffapigateway.presentationlayer.v2.visit;
 
+import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
-import com.petclinic.bffapigateway.dtos.Visits.Emergency.EmergencyRequestDTO;
-import com.petclinic.bffapigateway.dtos.Visits.Emergency.EmergencyResponseDTO;
-import com.petclinic.bffapigateway.dtos.Visits.Emergency.UrgencyLevel;
+import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
+import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Status;
+import com.petclinic.bffapigateway.dtos.Visits.TimeSlotDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewResponseDTO;
-import com.petclinic.bffapigateway.presentationlayer.BFFApiGatewayController;
-import com.petclinic.bffapigateway.presentationlayer.v2.VisitController;
+import com.petclinic.bffapigateway.presentationlayer.v1.VisitsControllerV1;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -35,37 +30,36 @@ import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.UUID;
 
 import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.jwtTokenForValidAdmin;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
-@WebFluxTest(controllers = VisitController.class)
+@WebFluxTest(controllers = VisitsControllerV1.class)
 @AutoConfigureWebTestClient
 @ContextConfiguration(classes = {
-        VisitController.class,
+        VisitsControllerV1.class,
         VisitsServiceClient.class
 })
 public class VisitControllerUnitTest {
     @Autowired
     private WebTestClient webTestClient;
 
-    @InjectMocks
-    private VisitController visitController;
-
     @MockBean
     private VisitsServiceClient visitsServiceClient;
 
     @MockBean
-    private BFFApiGatewayController bffApiGatewayController;
+    private CustomersServiceClient customersServiceClient;
 
-    private final String BASE_VISIT_URL = "/api/v2/gateway/visits";
+    private final String BASE_VISIT_URL = "/api/gateway/visits";
     private final String REVIEWS_URL = BASE_VISIT_URL + "/reviews";
 
-    private final String EMERGENCY_URL = BASE_VISIT_URL + "/emergency";
+    private final String EMERGENCY_URL = BASE_VISIT_URL + "/emergencies";
 
     //VisitResponseDTO Objects for testing purposes
     private final VisitResponseDTO visitResponseDTO1 = VisitResponseDTO.builder()
@@ -98,32 +92,6 @@ public class VisitControllerUnitTest {
             .reviewerName("Jane Doe")
             .rating(4)
             .dateSubmitted(LocalDateTime.now())
-            .build();
-
-
-    EmergencyRequestDTO emergencyRequestDTO = EmergencyRequestDTO.builder()
-            .visitDate(LocalDateTime.now())
-            .description("Updated Emergency")
-            .petId("Oscar")
-            .practitionerId("2332222232323234hhh232")
-            .urgencyLevel(UrgencyLevel.MEDIUM)
-            .emergencyType("Accident")
-            .build();
-
-     EmergencyResponseDTO emergencyResponseDTO = EmergencyResponseDTO.builder()
-            .visitEmergencyId(UUID.randomUUID().toString())
-            .visitDate(emergencyRequestDTO.getVisitDate())
-            .description(emergencyRequestDTO.getDescription())
-            .petId(emergencyRequestDTO.getPetId())
-             .petName("hamid")
-             .petBirthDate(new Date())
-             .practitionerId(emergencyRequestDTO.getPractitionerId())
-             .vetFirstName("carlos")
-             .vetLastName("ambock")
-             .vetEmail("carlos@gmail.com")
-             .vetPhoneNumber("540-233-2323")
-            .urgencyLevel(emergencyRequestDTO.getUrgencyLevel())
-            .emergencyType(emergencyRequestDTO.getEmergencyType())
             .build();
 
     @Test
@@ -422,144 +390,34 @@ public class VisitControllerUnitTest {
 
     @Test
     void getVisitsByOwnerId_whenOwnerExists_thenReturnFluxVisitResponseDTO() {
-        // Arrange
         String ownerId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a";
-        when(bffApiGatewayController.getVisitsByOwnerId(ownerId))
+
+        // Mock a pet returned from CustomersService
+        PetResponseDTO pet = PetResponseDTO.builder()
+                .petId("P001")
+                .name("Oscar")
+                .build();
+        when(customersServiceClient.getPetsByOwnerId(ownerId))
+                .thenReturn(Flux.just(pet));
+
+        // Mock visits for that pet
+        when(visitsServiceClient.getVisitsForPet("P001"))
                 .thenReturn(Flux.just(visitResponseDTO1));
 
-
-        // Act
         webTestClient.get()
-                .uri(BASE_VISIT_URL + "/owners/{ownerId}", ownerId)
+                .uri(BASE_VISIT_URL + "/owners/{ownerId}/visits", ownerId)
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(VisitResponseDTO.class)
-                .hasSize(1);
+                .hasSize(1)
+                .contains(visitResponseDTO1);
 
-        // Assert
-        verify(bffApiGatewayController, times(1)).getVisitsByOwnerId(ownerId);
+        verify(customersServiceClient, times(1)).getPetsByOwnerId(ownerId);
+        verify(visitsServiceClient, times(1)).getVisitsForPet("P001");
     }
 
-    //Emergency
 
-    @Test
-    void getAllEmergency_whenEmergencyExist_thenReturnFluxEmergencyResponseDTO() {
-        // Arrange
-        when(visitsServiceClient.getAllEmergency())
-                .thenReturn(Flux.just(emergencyResponseDTO));
-
-        // Act
-        webTestClient.get()
-                .uri(EMERGENCY_URL)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBodyList(EmergencyResponseDTO.class)
-                .hasSize(1);
-
-        // Assert
-        verify(visitsServiceClient, times(1)).getAllEmergency();
-    }
-
-    @Test
-    void getAllEmergencies_whenNoEmergenciesExist_thenReturnEmptyFlux() {
-        // Arrange
-        when(visitsServiceClient.getAllEmergency())
-                .thenReturn(Flux.empty());
-
-        // Act
-        webTestClient.get()
-                .uri(EMERGENCY_URL)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBodyList(EmergencyResponseDTO.class)
-                .hasSize(0);
-
-        // Assert
-        verify(visitsServiceClient, times(1)).getAllEmergency();
-    }
-
-    @Test
-    void postEmergency_whenValidRequest_thenReturnCreatedResponse() {
-        // Arrange
-        when(visitsServiceClient.createEmergency(any(Mono.class)))
-                .thenReturn(Mono.just(emergencyResponseDTO));
-
-        // Act
-        webTestClient.post()
-                .uri(EMERGENCY_URL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(emergencyRequestDTO)
-                .exchange()
-                .expectStatus().isCreated()
-                .expectBody(EmergencyResponseDTO.class)
-                .isEqualTo(emergencyResponseDTO);
-
-        // Assert
-        verify(visitsServiceClient, times(1)).createEmergency(any(Mono.class));
-    }
-
-    @Test
-    void getEmergencyVisitsByOwnerId_whenOwnerExists_thenReturnFluxVisitResponseDTO() {
-        // Arrange
-        String ownerId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a";
-        when(bffApiGatewayController.getEmergencyVisitsByOwnerId(ownerId))
-                .thenReturn(Flux.just(emergencyResponseDTO));
-
-
-        // Act
-        webTestClient.get()
-                .uri(BASE_VISIT_URL + "/emergency/owners/{ownerId}", ownerId)
-                .accept(MediaType.TEXT_EVENT_STREAM)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBodyList(EmergencyResponseDTO.class)
-                .hasSize(1);
-
-        // Assert
-        verify(bffApiGatewayController, times(1)).getEmergencyVisitsByOwnerId(ownerId);
-    }
-
-    @Test
-    void getEmergencyVisitsByOwnerId_whenOwnerDoesNotExist_thenReturnEmptyFlux() {
-        // Arrange
-        String ownerId = "e6c7398e-8ac4-4e10-9ee0-03ef33f03610";
-        when(bffApiGatewayController.getEmergencyVisitsByOwnerId(ownerId))
-                .thenReturn(Flux.empty());
-
-        // Act
-        webTestClient.get()
-                .uri(BASE_VISIT_URL + "/emergency/owners/{ownerId}", ownerId)
-                .accept(MediaType.TEXT_EVENT_STREAM)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBodyList(EmergencyResponseDTO.class)
-                .hasSize(0);
-
-        // Assert
-        verify(bffApiGatewayController, times(1)).getEmergencyVisitsByOwnerId(ownerId);
-    }
-
-    @Test
-    void getEmergencyByEmergencyId_whenValidEmergencyId_thenReturnEmergencyResponseDTO() {
-        // Arrange
-        when(visitsServiceClient.getEmergencyByEmergencyId(emergencyResponseDTO.getVisitEmergencyId()))
-                .thenReturn(Mono.just(emergencyResponseDTO));
-
-        // Act
-        webTestClient.get()
-                .uri(EMERGENCY_URL + "/{emergencyId}", emergencyResponseDTO.getVisitEmergencyId())
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(EmergencyResponseDTO.class)
-                .isEqualTo(emergencyResponseDTO);
-
-        // Assert
-        verify(visitsServiceClient, times(1)).getEmergencyByEmergencyId(emergencyResponseDTO.getVisitEmergencyId());
-    }
 
   /*  @Test
     void postEmergency_whenValidRequest_thenReturnCreatedResponse() {
@@ -662,23 +520,22 @@ public class VisitControllerUnitTest {
 
     @Test
     void getVisitsByOwnerId_whenOwnerDoesNotExist_thenReturnEmptyFlux() {
-        // Arrange
-        String ownerId = "e6c7398e-8ac4-4e10-9ee0-03ef33f03610";
-        when(bffApiGatewayController.getVisitsByOwnerId(ownerId))
-                .thenReturn(Flux.empty());
+        String ownerId = "nonExistingOwner";
+        when(customersServiceClient.getPetsByOwnerId(ownerId))
+                .thenReturn(Flux.empty()); // No pets for that owner
 
-        // Act
         webTestClient.get()
-                .uri(BASE_VISIT_URL + "/owners/{ownerId}", ownerId)
+                .uri(BASE_VISIT_URL + "/owners/{ownerId}/visits", ownerId)
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(VisitResponseDTO.class)
                 .hasSize(0);
 
-        // Assert
-        verify(bffApiGatewayController, times(1)).getVisitsByOwnerId(ownerId);
+        verify(customersServiceClient, times(1)).getPetsByOwnerId(ownerId);
+        verify(visitsServiceClient, never()).getVisitsForPet(anyString());
     }
+
 
     @Test
     void updateVisitStatus_ShouldReturnOK_WhenStatusUpdatedToCancelled() {
@@ -692,11 +549,11 @@ public class VisitControllerUnitTest {
                 .build();
 
         // Mocking the service layer to return the expected response
-        when(visitsServiceClient.patchVisitStatus(eq(visitId), eq(status)))
+        when(visitsServiceClient.updateStatusForVisitByVisitId(eq(visitId), eq(status)))
                 .thenReturn(Mono.just(visitResponseDTO));
 
         webTestClient.patch()
-                .uri(BASE_VISIT_URL + "/{visitId}/{status}", visitId, status)
+                .uri(BASE_VISIT_URL + "/{visitId}/status/{status}", visitId, status)
                 .exchange()
                 .expectStatus().isOk() // Expect 200 OK
                 .expectBody(VisitResponseDTO.class)
@@ -706,7 +563,7 @@ public class VisitControllerUnitTest {
                 });
 
         // Verify that the service was called with the correct parameters
-        verify(visitsServiceClient, times(1)).patchVisitStatus(eq(visitId), eq(status));
+        verify(visitsServiceClient, times(1)).updateStatusForVisitByVisitId(eq(visitId), eq(status));
     }
 
     @Test
@@ -715,16 +572,16 @@ public class VisitControllerUnitTest {
         String status = "CANCELLED";
 
         // Mocking the service to return an empty Mono, simulating a not found scenario
-        when(visitsServiceClient.patchVisitStatus(eq(visitId), eq(status)))
+        when(visitsServiceClient.updateStatusForVisitByVisitId(eq(visitId), eq(status)))
                 .thenReturn(Mono.empty());
 
         webTestClient.patch()
-                .uri(BASE_VISIT_URL + "/{visitId}/{status}", visitId, status)
+                .uri(BASE_VISIT_URL + "/{visitId}/status/{status}", visitId, status)
                 .exchange()
                 .expectStatus().isNotFound(); // Expect 404 NOT_FOUND
 
         // Verify that the service was called
-        verify(visitsServiceClient, times(1)).patchVisitStatus(eq(visitId), eq(status));
+        verify(visitsServiceClient, times(1)).updateStatusForVisitByVisitId(eq(visitId), eq(status));
     }
 
     @Test
@@ -744,7 +601,7 @@ public class VisitControllerUnitTest {
                 .thenReturn(Mono.just(visitResponseDTO));
 
         webTestClient.put()
-                .uri(BASE_VISIT_URL + "/completed/{visitId}/archive", visitId)
+                .uri(BASE_VISIT_URL + "/{visitId}/completed/archive", visitId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(visitRequestDTO)
                 .exchange()
@@ -767,11 +624,11 @@ public class VisitControllerUnitTest {
                 .thenReturn(Mono.empty());
 
         webTestClient.put()
-                .uri(BASE_VISIT_URL + "/completed/{visitId}/archive", visitId)
+                .uri(BASE_VISIT_URL + "/{visitId}/completed/archive", visitId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(visitRequestDTO)
                 .exchange()
-                .expectStatus().isBadRequest();
+                .expectStatus().isNotFound();
 
         verify(visitsServiceClient, times(1)).archiveCompletedVisit(eq(visitId), any(Mono.class));
     }
@@ -849,149 +706,6 @@ public class VisitControllerUnitTest {
     }
 
     @Test
-    void getReviewsByOwnerId_whenOwnerExists_thenReturnFluxReviewResponseDTO() {
-        // Arrange
-        String ownerId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a";
-        when(visitsServiceClient.getReviewsByOwnerId(ownerId))
-                .thenReturn(Flux.just(reviewResponseDTO));
-
-        // Act
-        webTestClient.get()
-                .uri(BASE_VISIT_URL + "/owners/{ownerId}/reviews", ownerId)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBodyList(ReviewResponseDTO.class)
-                .hasSize(1)
-                .contains(reviewResponseDTO);
-
-        // Assert
-        verify(visitsServiceClient, times(1)).getReviewsByOwnerId(ownerId);
-    }
-
-    @Test
-    void getReviewsByOwnerId_whenOwnerDoesNotExist_thenReturnEmptyFlux() {
-        // Arrange
-        String ownerId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361e";
-        when(visitsServiceClient.getReviewsByOwnerId(ownerId))
-                .thenReturn(Flux.empty());
-
-        // Act
-        webTestClient.get()
-                .uri(BASE_VISIT_URL + "/owners/{ownerId}/reviews", ownerId)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBodyList(ReviewResponseDTO.class)
-                .hasSize(0);
-
-        // Assert
-        verify(visitsServiceClient, times(1)).getReviewsByOwnerId(ownerId);
-    }
-
-    @Test
-    void addReviewCustomer_whenValidRequest_thenReturnCreatedResponse() {
-        String ownerId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a";
-        ReviewRequestDTO reviewRequestDTO = ReviewRequestDTO.builder()
-                .review("Great service")
-                .reviewerName("Jane Doe")
-                .rating(5)
-                .dateSubmitted(LocalDateTime.now())
-                .build();
-        ReviewResponseDTO reviewResponseDTO = ReviewResponseDTO.builder()
-                .reviewId("R001")
-                .review("Great service")
-                .reviewerName("Jane Doe")
-                .rating(5)
-                .dateSubmitted(LocalDateTime.now())
-                .build();
-
-        when(visitsServiceClient.addCustomerReview(eq(ownerId), any(ReviewRequestDTO.class)))
-                .thenReturn(Mono.just(reviewResponseDTO));
-
-        webTestClient.post()
-                .uri(BASE_VISIT_URL + "/owners/{ownerId}/reviews", ownerId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(reviewRequestDTO)
-                .exchange()
-                .expectStatus().isCreated()
-                .expectBody(ReviewResponseDTO.class)
-                .isEqualTo(reviewResponseDTO);
-
-        verify(visitsServiceClient, times(1)).addCustomerReview(eq(ownerId), any(ReviewRequestDTO.class));
-    }
-
-    @Test
-    void addReviewCustomer_whenInvalidRequest_thenReturnBadRequest() {
-        String ownerId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a";
-        ReviewRequestDTO reviewRequestDTO = ReviewRequestDTO.builder()
-                .review("")
-                .reviewerName("")
-                .rating(0)
-                .dateSubmitted(LocalDateTime.now())
-                .build();
-
-        when(visitsServiceClient.addCustomerReview(eq(ownerId), any(ReviewRequestDTO.class)))
-                .thenReturn(Mono.empty());
-
-        webTestClient.post()
-                .uri(BASE_VISIT_URL + "/owners/{ownerId}/reviews", ownerId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(reviewRequestDTO)
-                .exchange()
-                .expectStatus().isBadRequest();
-
-        verify(visitsServiceClient, times(1)).addCustomerReview(eq(ownerId), any(ReviewRequestDTO.class));
-    }
-
-    @Test
-    void deleteCustomerReview_whenValidOwnerIdAndReviewId_thenReturnOkResponse() {
-        String ownerId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a";
-        String reviewId = UUID.randomUUID().toString();
-
-        when(visitsServiceClient.deleteReview(ownerId, reviewId))
-                .thenReturn(Mono.empty());
-
-        webTestClient.delete()
-                .uri(BASE_VISIT_URL + "/owners/{ownerId}/reviews/{reviewId}", ownerId, reviewId)
-                .exchange()
-                .expectStatus().isNoContent();
-
-        verify(visitsServiceClient, times(1)).deleteReview(ownerId, reviewId);
-    }
-
-    @Test
-    void deleteCustomerReview_whenInvalidOwnerId_thenReturnNoContent() {
-        String ownerId = "invalidOwnerId";
-        String reviewId = UUID.randomUUID().toString();
-
-        when(visitsServiceClient.deleteReview(ownerId, reviewId))
-                .thenReturn(Mono.empty());
-
-        webTestClient.delete()
-                .uri(BASE_VISIT_URL + "/owners/{ownerId}/reviews/{reviewId}", ownerId, reviewId)
-                .exchange()
-                .expectStatus().isNoContent();
-
-        verify(visitsServiceClient, times(1)).deleteReview(ownerId, reviewId);
-    }
-
-    @Test
-    void deleteCustomerReview_whenInvalidReviewId_thenReturnNoContent() {
-        String ownerId = "validOwnerId";
-        String reviewId = UUID.randomUUID().toString();
-
-        when(visitsServiceClient.deleteReview(ownerId, reviewId))
-                .thenReturn(Mono.empty());
-
-        webTestClient.delete()
-                .uri(BASE_VISIT_URL + "/owners/{ownerId}/reviews/{reviewId}", ownerId, reviewId)
-                .exchange()
-                .expectStatus().isNoContent();
-
-        verify(visitsServiceClient, times(1)).deleteReview(ownerId, reviewId);
-    }
-    @Test
     void exportVisitsToCSV_ShouldReturnCSVFile() {
         // Sample data to return
         String csvContent = "VisitId,Description\n1,Checkup";
@@ -999,7 +713,7 @@ public class VisitControllerUnitTest {
         when(visitsServiceClient.exportVisitsToCSV()).thenReturn(Mono.just(csvData));
 
         webTestClient.get()
-                .uri("/api/v2/gateway/visits/export")
+                .uri("/api/gateway/visits/export")
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().valueEquals(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=visits.csv")
@@ -1017,10 +731,347 @@ public class VisitControllerUnitTest {
         when(visitsServiceClient.exportVisitsToCSV()).thenReturn(Mono.error(new RuntimeException("Service failed")));
 
         webTestClient.get()
-                .uri("/api/v2/gateway/visits/export")
+                .uri("/api/gateway/visits/export")
                 .exchange()
                 .expectStatus().is5xxServerError();
     }
+    @Test
+    void deleteVisit_whenValidVisitId_thenReturnNoContent() {
+        String visitId = "V001";
+        when(visitsServiceClient.deleteVisitByVisitId(visitId))
+                .thenReturn(Mono.empty());
+
+        webTestClient.delete()
+                .uri(BASE_VISIT_URL + "/{visitId}", visitId)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        verify(visitsServiceClient, times(1)).deleteVisitByVisitId(visitId);
+    }
+
+    @Test
+    void deleteVisit_whenInvalidVisitId_thenReturnNotFound() {
+        String visitId = "invalidVisitId";
+        when(visitsServiceClient.deleteVisitByVisitId(visitId))
+                .thenReturn(Mono.empty());
+
+        webTestClient.delete()
+                .uri(BASE_VISIT_URL + "/{visitId}", visitId)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        verify(visitsServiceClient, times(1)).deleteVisitByVisitId(visitId);
+    }
+    @Test
+    void deleteAllCancelledVisits_whenCancelledExist_thenReturnNoContent() {
+        when(visitsServiceClient.deleteAllCancelledVisits())
+                .thenReturn(Mono.empty());
+
+        webTestClient.delete()
+                .uri(BASE_VISIT_URL + "/cancelled")
+                .exchange()
+                .expectStatus().isNotFound();
+
+        verify(visitsServiceClient, times(1)).deleteAllCancelledVisits();
+    }
+
+    @Test
+    void deleteAllCancelledVisits_whenNoneExist_thenReturnNotFound() {
+        when(visitsServiceClient.deleteAllCancelledVisits())
+                .thenReturn(Mono.empty());
+
+        webTestClient.delete()
+                .uri(BASE_VISIT_URL + "/cancelled")
+                .exchange()
+                .expectStatus().isNotFound();
+
+        verify(visitsServiceClient, times(1)).deleteAllCancelledVisits();
+    }
+
+    @Test
+    void getVisitByVisitId_whenVisitExists_thenReturnVisitResponseDTO() {
+        when(visitsServiceClient.getVisitByVisitId("V001"))
+                .thenReturn(Mono.just(visitResponseDTO1));
+
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/{visitId}", "V001")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(VisitResponseDTO.class)
+                .isEqualTo(visitResponseDTO1);
+
+        verify(visitsServiceClient, times(1)).getVisitByVisitId("V001");
+    }
+
+    @Test
+    void getVisitByVisitId_whenVisitDoesNotExist_thenReturnNotFound() {
+        when(visitsServiceClient.getVisitByVisitId("INVALID"))
+                .thenReturn(Mono.empty());
+
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/{visitId}", "INVALID")
+                .exchange()
+                .expectStatus().isNotFound();
+
+        verify(visitsServiceClient, times(1)).getVisitByVisitId("INVALID");
+    }
+
+    @Test
+    void getVisitsForPet_whenVisitsExist_thenReturnFluxVisitResponseDTO() {
+        when(visitsServiceClient.getVisitsForPet("P001"))
+                .thenReturn(Flux.just(visitResponseDTO1));
+
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/pets/{petId}", "P001")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(VisitResponseDTO.class)
+                .hasSize(1);
+
+        verify(visitsServiceClient, times(1)).getVisitsForPet("P001");
+    }
+
+    @Test
+    void getVisitsForPet_whenNoVisitsExist_thenReturnEmptyFlux() {
+        when(visitsServiceClient.getVisitsForPet("P001"))
+                .thenReturn(Flux.empty());
+
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/pets/{petId}", "P001")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(VisitResponseDTO.class)
+                .hasSize(0);
+
+        verify(visitsServiceClient, times(1)).getVisitsForPet("P001");
+    }
+
+    @Test
+    void getVisitsForStatus_whenVisitsExist_thenReturnFluxVisitResponseDTO() {
+        when(visitsServiceClient.getVisitsForStatus("COMPLETED"))
+                .thenReturn(Flux.just(visitResponseDTO1));
+
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/status/{status}", "COMPLETED")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(VisitResponseDTO.class)
+                .hasSize(1);
+
+        verify(visitsServiceClient, times(1)).getVisitsForStatus("COMPLETED");
+    }
+
+    @Test
+    void getVisitsForStatus_whenNoVisitsExist_thenReturnEmptyFlux() {
+        when(visitsServiceClient.getVisitsForStatus("COMPLETED"))
+                .thenReturn(Flux.empty());
+
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/status/{status}", "COMPLETED")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(VisitResponseDTO.class)
+                .hasSize(0);
+
+        verify(visitsServiceClient, times(1)).getVisitsForStatus("COMPLETED");
+    }
+
+    @Test
+    void getVisitsByPractitionerId_whenVisitsExist_thenReturnFluxVisitResponseDTO() {
+        when(visitsServiceClient.getVisitByPractitionerId("PR001"))
+                .thenReturn(Flux.just(visitResponseDTO1));
+
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/vets/{practitionerId}/visits", "PR001")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(VisitResponseDTO.class)
+                .hasSize(1);
+
+        verify(visitsServiceClient, times(1)).getVisitByPractitionerId("PR001");
+    }
+
+    @Test
+    void getVisitsByPractitionerId_whenNoVisitsExist_thenReturnEmptyFlux() {
+        when(visitsServiceClient.getVisitByPractitionerId("PR001"))
+                .thenReturn(Flux.empty());
+
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/vets/{practitionerId}/visits", "PR001")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(VisitResponseDTO.class)
+                .hasSize(0);
+
+        verify(visitsServiceClient, times(1)).getVisitByPractitionerId("PR001");
+    }
+
+    @Test
+    void getAllVetsForAvailability_whenVetsExist_thenReturnFluxVetResponseDTO() {
+        // Arrange
+        VetResponseDTO vet = VetResponseDTO.builder()
+                .vetId("vet-123")
+                .firstName("John")
+                .lastName("Doe")
+                .build();
+
+        when(visitsServiceClient.getAllVetsForAvailability())
+                .thenReturn(Flux.just(vet));
+
+        // Act
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/availability/vets")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(VetResponseDTO.class)
+                .hasSize(1);
+
+        // Assert
+        verify(visitsServiceClient, times(1)).getAllVetsForAvailability();
+    }
+
+    @Test
+    void getAllVetsForAvailability_whenNoVetsExist_thenReturnEmptyFlux() {
+        // Arrange
+        when(visitsServiceClient.getAllVetsForAvailability())
+                .thenReturn(Flux.empty());
+
+        // Act
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/availability/vets")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(VetResponseDTO.class)
+                .hasSize(0);
+
+        // Assert
+        verify(visitsServiceClient, times(1)).getAllVetsForAvailability();
+    }
+
+    @Test
+    void getAvailableTimeSlots_whenSlotsExist_thenReturnFluxTimeSlotDTO() {
+        // Arrange
+        TimeSlotDTO slot = new TimeSlotDTO(
+                LocalDateTime.of(2025, 10, 13, 9, 0),
+                LocalDateTime.of(2025, 10, 13, 10, 0),
+                true
+        );
+
+        when(visitsServiceClient.getAvailableTimeSlots(anyString(), anyString()))
+                .thenReturn(Flux.just(slot));
+
+        // Act
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/availability/vets/vet-123/slots?date=2025-10-13")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(TimeSlotDTO.class)
+                .hasSize(1);
+
+        // Assert
+        verify(visitsServiceClient, times(1)).getAvailableTimeSlots(eq("vet-123"), eq("2025-10-13"));
+    }
+
+    @Test
+    void getAvailableTimeSlots_whenNoSlotsAvailable_thenReturnEmptyFlux() {
+        // Arrange
+        when(visitsServiceClient.getAvailableTimeSlots(anyString(), anyString()))
+                .thenReturn(Flux.empty());
+
+        // Act
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/availability/vets/vet-123/slots?date=2025-10-13")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(TimeSlotDTO.class)
+                .hasSize(0);
+
+        // Assert
+        verify(visitsServiceClient, times(1)).getAvailableTimeSlots(eq("vet-123"), eq("2025-10-13"));
+    }
+
+    @Test
+    void getAvailableDates_whenDatesExist_thenReturnFluxString() {
+        // Arrange
+        when(visitsServiceClient.getAvailableDates(anyString(), anyString(), anyString()))
+                .thenReturn(Flux.just("2025-10-13", "2025-10-14"));
+
+        // Act
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/availability/vets/vet-123/dates?startDate=2025-10-13&endDate=2025-10-20")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(String.class);
+
+        // Assert
+        verify(visitsServiceClient, times(1)).getAvailableDates(eq("vet-123"), eq("2025-10-13"), eq("2025-10-20"));
+    }
+
+    @Test
+    void getAvailableDates_whenNoDatesAvailable_thenReturnEmptyFlux() {
+        // Arrange
+        when(visitsServiceClient.getAvailableDates(anyString(), anyString(), anyString()))
+                .thenReturn(Flux.empty());
+
+        // Act
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/availability/vets/vet-123/dates?startDate=2025-10-13&endDate=2025-10-20")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(String.class)
+                .hasSize(0);
+
+        // Assert
+        verify(visitsServiceClient, times(1)).getAvailableDates(eq("vet-123"), eq("2025-10-13"), eq("2025-10-20"));
+    }
+
+    @Test
+    void getVeterinarianAvailability_whenVetExists_thenReturnVetResponseDTO() {
+        // Arrange
+        VetResponseDTO vet = VetResponseDTO.builder()
+                .vetId("vet-123")
+                .firstName("John")
+                .lastName("Doe")
+                .build();
+
+        when(visitsServiceClient.getVeterinarianAvailability("vet-123"))
+                .thenReturn(Mono.just(vet));
+
+        // Act
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/availability/vets/vet-123")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(VetResponseDTO.class);
+
+        // Assert
+        verify(visitsServiceClient, times(1)).getVeterinarianAvailability("vet-123");
+    }
+
+    @Test
+    void getVeterinarianAvailability_whenVetNotFound_thenReturnNotFound() {
+        // Arrange
+        when(visitsServiceClient.getVeterinarianAvailability("invalid-vet"))
+                .thenReturn(Mono.empty());
+
+        // Act
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/availability/vets/invalid-vet")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        // Assert
+        verify(visitsServiceClient, times(1)).getVeterinarianAvailability("invalid-vet");
+    }
+
 
 
 }

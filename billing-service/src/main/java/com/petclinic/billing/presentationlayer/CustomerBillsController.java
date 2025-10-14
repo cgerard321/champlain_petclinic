@@ -5,8 +5,8 @@ import com.petclinic.billing.datalayer.BillResponseDTO;
 import com.petclinic.billing.datalayer.BillStatus;
 import com.petclinic.billing.datalayer.PaymentRequestDTO;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
-import com.petclinic.billing.exceptions.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import java.math.BigDecimal;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import com.petclinic.billing.util.EntityDtoUtil;
 
 
 @RestController
@@ -63,7 +62,7 @@ public class CustomerBillsController {
     }
 
     @GetMapping(value = "/current-balance", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<Double> getCurrentBalance(@PathVariable String customerId) {
+    public Mono<BigDecimal> getCurrentBalance(@PathVariable String customerId) {
         return billService.calculateCurrentBalance(customerId);
     }
 
@@ -81,9 +80,4 @@ public class CustomerBillsController {
                         e -> Mono.just(ResponseEntity.status(e.getStatus()).build()));
 
     }
-
-
-
-
-
 }

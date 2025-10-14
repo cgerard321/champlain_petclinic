@@ -12,10 +12,19 @@ import { ProductModel } from '@/features/inventories/models/ProductModels/Produc
 import inventoryStyles from './InventoriesListTable.module.css';
 import cardStylesInventory from './CardInventoryTeam.module.css';
 // import axios from 'axios';
-import axiosInstance from '@/shared/api/axiosInstance';
+import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { toggleInventoryImportant } from './api/toggleInventoryImportant';
 
 export default function InventoriesListTable(): JSX.Element {
+  const isHttpUrl = (url: string): boolean => {
+    try {
+      const u = new URL(url);
+      return u.protocol === 'http:' || u.protocol === 'https:';
+    } catch {
+      return false;
+    }
+  }; //helper
+
   const [selectedInventories, setSelectedInventories] = useState<Inventory[]>(
     []
   );
@@ -59,12 +68,6 @@ export default function InventoriesListTable(): JSX.Element {
     updateFilters,
   } = useSearchInventories();
 
-  useEffect(() => {
-    getInventoryList('', '', '', showImportantOnly);
-    fetchAllInventoryTypes();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage]);
-
   const refreshInventoryTypes = async (): Promise<void> => {
     await fetchAllInventoryTypes();
   };
@@ -73,7 +76,7 @@ export default function InventoriesListTable(): JSX.Element {
     getInventoryList('', '', '', showImportantOnly);
     refreshInventoryTypes();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage]);
+  }, [currentPage, showImportantOnly]);
 
   const handleInventoryNameChange = (value: string): void => {
     setInventoryName(value);
@@ -150,9 +153,21 @@ export default function InventoriesListTable(): JSX.Element {
     }
   };
 
-  const deleteInventoryHandler = (inventoryToDelete: Inventory): void => {
-    deleteInventory(inventoryToDelete);
-    getInventoryList(inventoryName, inventoryType, inventoryDescription);
+  const deleteInventoryHandler = async (
+    inventoryToDelete: Inventory
+  ): Promise<void> => {
+    try {
+      await deleteInventory(inventoryToDelete);
+      await getInventoryList(
+        inventoryName,
+        inventoryType,
+        inventoryDescription
+      );
+    } catch (error) {
+      const msg =
+        error instanceof Error ? error.message : 'Failed to delete inventory.';
+      alert(msg);
+    }
   };
 
   const handleDeleteAllInventories = (confirm: boolean): void => {
@@ -216,8 +231,10 @@ export default function InventoriesListTable(): JSX.Element {
   };
 
   const fetchAllInventoryTypes = async (): Promise<void> => {
-    const data = await getAllInventoryTypes();
-    setInventoryTypeList(data);
+    try {
+      const data = await getAllInventoryTypes();
+      setInventoryTypeList(data);
+    } catch {}
   };
 
   const handleInventorySelection = (
@@ -238,15 +255,32 @@ export default function InventoriesListTable(): JSX.Element {
   };
 
   const deleteSelectedInventories = async (): Promise<void> => {
-    for (const inventory of selectedInventories) {
-      await deleteInventory(inventory); // Delete each selected inventory from the database
-    }
+    if (selectedInventories.length === 0) return;
 
-    // Refresh the inventory list after deleting
-    getInventoryList(inventoryName, inventoryType, inventoryDescription);
+    const results = await Promise.allSettled(
+      selectedInventories.map(inventory => deleteInventory(inventory))
+    );
 
-    // Clear the selected inventories
+    const failures: string[] = results
+      .map((r, i) => ({ r, inv: selectedInventories[i] }))
+      .filter(({ r }) => r.status === 'rejected')
+      .map(x => {
+        const reason = (x.r as PromiseRejectedResult).reason;
+        const msg =
+          reason instanceof Error ? reason.message : 'Failed to delete';
+        return `${x.inv.inventoryName}: ${msg}`;
+      });
+
+    await getInventoryList(inventoryName, inventoryType, inventoryDescription);
     setSelectedInventories([]);
+
+    if (failures.length > 0) {
+      alert(
+        failures.length === 1
+          ? `Failed to delete inventory:\n${failures[0]}`
+          : `Some inventories could not be deleted:\n${failures.join('\n')}`
+      );
+    }
   };
 
   const location = useLocation();
@@ -281,11 +315,11 @@ export default function InventoriesListTable(): JSX.Element {
             onClick={toggleActionsMenu}
             id={inventoryStyles.menuIcon}
             xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            fill="currentColor"
-            className="bi bi-list"
             viewBox="0 0 16 16"
+            fill="currentColor" // bars follow CSS 'color'
+            className="bi bi-list"
+            role="button"
+            aria-label="Open menu"
           >
             <path
               fillRule="evenodd"
@@ -357,15 +391,21 @@ export default function InventoriesListTable(): JSX.Element {
         </div>
       </div>
       <div>
-        <table className="table table-striped">
+        <table
+          className={`table table-striped ${inventoryStyles.inventoryTable} ${inventoryStyles.fixedTable} ${inventoryStyles.cleanTable}`}
+        >
           <thead>
             <tr>
               <td></td>
               <td style={{ fontWeight: 'bold' }}>Name</td>
               <td style={{ fontWeight: 'bold' }}>Type</td>
               <td style={{ fontWeight: 'bold' }}>Description</td>
-              <td style={{ fontWeight: 'bold' }}>Important</td>
-              <td></td>
+              <td className="text-center" style={{ fontWeight: 'bold' }}>
+                Important
+              </td>
+              <td className="text-center" style={{ fontWeight: 'bold' }}>
+                Clear
+              </td>
               <td></td>
             </tr>
             <tr>
@@ -400,25 +440,28 @@ export default function InventoriesListTable(): JSX.Element {
                   }
                 />
               </td>
-              <td>
-                <input
-                  type="checkbox"
-                  checked={showImportantOnly}
-                  onChange={e => {
-                    const value = e.target.checked;
-                    setShowImportantOnly(value);
-                    updateFilters({
-                      inventoryName,
-                      inventoryType,
-                      inventoryDescription,
-                      importantOnly: value,
-                    });
-                  }}
-                />
+              <td className="text-center align-middle">
+                <div className="form-check d-inline-flex align-items-center justify-content-center m-0">
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    checked={showImportantOnly}
+                    onChange={e => {
+                      const value = e.target.checked;
+                      setShowImportantOnly(value);
+                      updateFilters({
+                        inventoryName,
+                        inventoryType,
+                        inventoryDescription,
+                        importantOnly: value,
+                      });
+                    }}
+                  />
+                </div>
               </td>
               <td>
                 <button
-                  className="btn btn-info"
+                  className="btn btn-primary"
                   onClick={clearQueries}
                   title="Clear"
                 >
@@ -439,6 +482,7 @@ export default function InventoriesListTable(): JSX.Element {
             </tr>
           </thead>
         </table>
+
         {inventoryList.length === 0 &&
           (inventoryName !== '' ||
             inventoryType !== '' ||
@@ -467,15 +511,40 @@ export default function InventoriesListTable(): JSX.Element {
               style={{ cursor: 'pointer' }}
             >
               <div className={cardStylesInventory.imageContainer}>
-                <img
-                  src={
-                    inventory.imageUploaded instanceof Uint8Array
-                      ? `data:image/jpeg;base64,${arrayBufferToBase64(inventory.imageUploaded)}`
-                      : `data:image/jpeg;base64,${inventory.imageUploaded}`
-                  }
-                  alt={inventory.inventoryName}
-                  className={cardStylesInventory.cardImage}
-                />
+                {(() => {
+                  // pick the best available source for the card image
+                  const uploaded = inventory.imageUploaded
+                    ? inventory.imageUploaded instanceof Uint8Array
+                      ? `data:image/*;base64,${arrayBufferToBase64(inventory.imageUploaded)}`
+                      : `data:image/*;base64,${inventory.imageUploaded}`
+                    : '';
+
+                  const url = isHttpUrl(inventory.inventoryImage)
+                    ? inventory.inventoryImage
+                    : '';
+                  const fallback = isHttpUrl(inventory.inventoryBackupImage)
+                    ? inventory.inventoryBackupImage
+                    : '';
+
+                  const src = url || uploaded;
+
+                  return (
+                    <img
+                      src={src || fallback}
+                      alt={inventory.inventoryName}
+                      className={cardStylesInventory.cardImage}
+                      onError={e => {
+                        const img = e.currentTarget;
+                        // if main fails, try backup once; otherwise hide or swap to a placeholder
+                        if (fallback && img.src !== fallback) {
+                          img.src = fallback;
+                        } else {
+                          img.style.display = 'none'; // or: img.src = '/placeholder.png';
+                        }
+                      }}
+                    />
+                  );
+                })()}
               </div>
               <div className={cardStylesInventory.inventoryNameSection}>
                 <p id={cardStylesInventory.inventoryNameText}>
@@ -544,7 +613,7 @@ export default function InventoriesListTable(): JSX.Element {
                     <button
                       onClick={e => {
                         e.stopPropagation();
-                        navigate(`inventory/${inventory.inventoryId}/edit`);
+                        navigate(`/inventories/${inventory.inventoryId}/edit`);
                       }}
                       className="btn btn-warning"
                     >
@@ -590,34 +659,26 @@ export default function InventoriesListTable(): JSX.Element {
           className="d-flex justify-content-center"
           style={{ marginBottom: '100px' }}
         >
-          <div className="text-center">
-            <table>
-              <tbody>
-                <tr>
-                  <td>
-                    <button
-                      className="btn btn-primary btn-sm"
-                      onClick={pageBefore}
-                    >
-                      &lt;
-                    </button>
-                  </td>
-                  <td>
-                    <span className="mx-2">{realPage}</span>{' '}
-                    {/* Added margin for space */}
-                  </td>
-                  <td>
-                    <button
-                      className="btn btn-primary btn-sm"
-                      onClick={pageAfter}
-                      disabled={inventoryList.length === 0}
-                    >
-                      &gt;
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          <div className={inventoryStyles.pager}>
+            <button
+              className="btn btn-primary"
+              onClick={pageBefore}
+              disabled={currentPage === 0}
+              aria-label="Previous page"
+            >
+              &lt;
+            </button>
+
+            <span className={inventoryStyles.pageNumber}>{realPage}</span>
+
+            <button
+              className="btn btn-primary"
+              onClick={pageAfter}
+              disabled={inventoryList.length === 0}
+              aria-label="Next page"
+            >
+              &gt;
+            </button>
           </div>
         </div>
 

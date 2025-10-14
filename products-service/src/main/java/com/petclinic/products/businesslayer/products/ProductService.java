@@ -16,7 +16,7 @@ public interface ProductService {
     Mono<ProductResponseModel> addProduct(Mono<ProductRequestModel> productRequestModel);
     Mono<ProductResponseModel> updateProductByProductId(String productId, Mono<ProductRequestModel> productRequestModel);
     Mono<ProductResponseModel> patchListingStatus(String productId, Mono<ProductRequestModel> productRequestModel);
-    Mono<ProductResponseModel> deleteProductByProductId(String productId);
+    Mono<ProductResponseModel> deleteProductByProductId(String productId, boolean cascadeBundle);
     Mono<Void> requestCount(String productId);
     Mono<Void> DecreaseProductCount(String productId);//When item is sold in cart//temporarily in cart.
     Mono<Void> changeProductQuantity(String productId, Integer productQuantity);

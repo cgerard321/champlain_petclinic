@@ -1,11 +1,11 @@
 import axiosInstance from '@/shared/api/axiosInstance.ts';
-import { VisitResponseModel } from '@/features/visits/models/VisitResponseModel.ts';
+import { VisitResponseModel } from '../models/VisitResponseModel';
 
 export async function getAllVisits(): Promise<VisitResponseModel[]> {
   try {
     const response = await axiosInstance.get('/visits', {
       responseType: 'stream',
-      useV2: true,
+      useV2: false,
     });
     return response.data
       .split('data:')

@@ -17,8 +17,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.net.URI;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
-
 
 @Component
 @Slf4j
@@ -43,9 +45,7 @@ public class BillServiceClient {
         return webClientBuilder.build().get()
                 .uri(billServiceUrl + "/{billId}", billId)
                 .retrieve()
-                .bodyToMono(BillResponseDTO.class)
-                .doOnNext(t -> t.setTaxedAmount(((t.getAmount() * 15)/100)+ t.getAmount()))
-                .doOnNext(t -> t.setTaxedAmount(Math.round(t.getTaxedAmount() * 100.0) / 100.0));
+                .bodyToMono(BillResponseDTO.class);
     }
     public Flux<BillResponseDTO> getBillsByOwnerId(final String customerId) {
         return webClientBuilder.build().get()
@@ -183,6 +183,31 @@ public class BillServiceClient {
                 .retrieve()
                 .bodyToFlux(BillResponseDTO.class);
     }
+
+    public Flux<BillResponseDTO> getBillsByOwnerName(final String ownerFirstName, final String ownerLastName) {
+        return webClientBuilder.build().get()
+                .uri(billServiceUrl + "/owner/{ownerFirstName}/{ownerLastName}", ownerFirstName, ownerLastName)
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class)
+                .switchIfEmpty(Flux.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "No bills found for owner: " + ownerFirstName + " " + ownerLastName)));
+    }
+
+    public Flux<BillResponseDTO> getBillsByVetName(final String vetFirstName, final String vetLastName) {
+        return webClientBuilder.build().get()
+                .uri(billServiceUrl + "/vet/{vetFirstName}/{vetLastName}", vetFirstName, vetLastName)
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class)
+                .switchIfEmpty(Flux.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "No bills found for vet: " + vetFirstName + " " + vetLastName)));
+    }
+
+    public Flux<BillResponseDTO> getBillsByVisitType(final String visitType) {
+        return webClientBuilder.build().get()
+                .uri(billServiceUrl + "/visitType/{visitType}", visitType)
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class)
+                .switchIfEmpty(Flux.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "No bills found for visit type: " + visitType)));
+    }
+
     public Mono<BillResponseDTO> createBill(final BillRequestDTO model){
         return webClientBuilder.build().post()
                 .uri(billServiceUrl)
@@ -359,6 +384,42 @@ public class BillServiceClient {
                     // Fallback: let other statuses bubble up
                     return resp.createException().flatMap(Mono::error);
                 });
+    }
+
+    public Mono<Double> getInterest(String billId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(billServiceUrl + "/{billId}/interest", billId)
+                .retrieve()
+                .bodyToMono(Double.class);
+    }
+
+    public Mono<Double> getTotalWithInterest(String billId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(billServiceUrl + "/{billId}/total", billId)
+                .retrieve()
+                .bodyToMono(Double.class);
+    }
+
+    public Mono<Void> setInterestExempt(String billId, boolean exempt) {
+        URI uri = UriComponentsBuilder
+                .fromUriString(billServiceUrl + "/{billId}/exempt-interest")
+                .queryParam("exempt", exempt)
+                .build(billId);
+
+        return webClientBuilder.build()
+                .patch()
+                .uri(uri)
+                .retrieve()
+                .bodyToMono(Void.class);
+    }
+
+    public Flux<BillResponseDTO> archiveBill() {
+        return webClientBuilder.build().patch()
+                .uri(billServiceUrl + "/archive")
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class);
     }
 
 

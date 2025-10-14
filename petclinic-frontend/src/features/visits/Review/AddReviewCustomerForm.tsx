@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { FormEvent, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { addCustomerReview } from './Api/addCustomerReview';
+import { addReview } from './Api/addReview';
 import { ReviewRequestDTO } from './Model/ReviewRequestDTO';
 import './AddForm.css';
 import { useUser } from '@/context/UserContext';
@@ -61,6 +61,14 @@ const AddCustomerReviewForm: React.FC = (): JSX.Element => {
     }));
   };
 
+  const handleCancel = (): void => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate('/visits');
+    }
+  };
+
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
     if (!review.review) newErrors.review = 'Review text is required';
@@ -89,7 +97,7 @@ const AddCustomerReviewForm: React.FC = (): JSX.Element => {
 
     try {
       // Call the addCustomerReview API with the updated review state
-      await addCustomerReview(user.userId, review);
+      await addReview(review);
 
       // Success handling
       setSuccessMessage('Review added successfully!');
@@ -120,7 +128,7 @@ const AddCustomerReviewForm: React.FC = (): JSX.Element => {
   return (
     <div className="add-review-form">
       <h2>Add a Customer Review</h2>
-      {isLoading && <div className="loader">Loading...</div>}
+      {isLoading && <div className="loader"></div>}
       <form onSubmit={handleSubmit}>
         <div className="rating-section">
           <label>Rating:</label>
@@ -147,6 +155,9 @@ const AddCustomerReviewForm: React.FC = (): JSX.Element => {
           />
           {errors.review && <span className="error">{errors.review}</span>}
         </div>
+        <button className="cancel" type="submit" onClick={handleCancel}>
+          Cancel
+        </button>
         <button type="submit">Submit</button>
       </form>
 
@@ -160,5 +171,3 @@ const AddCustomerReviewForm: React.FC = (): JSX.Element => {
 };
 
 export default AddCustomerReviewForm;
-
-//just something

@@ -121,7 +121,7 @@ class ProductControllerIntegrationTest {
 
         // Act
         webTestClient.get()
-                .uri(uriBuilder -> uriBuilder.path("/api/v1/products")
+                .uri(uriBuilder -> uriBuilder.path("/products")
                         .queryParam("sort", "asc")
                         .build())
                 .accept(MediaType.TEXT_EVENT_STREAM)
@@ -175,7 +175,7 @@ class ProductControllerIntegrationTest {
 
         // Act
         webTestClient.get()
-                .uri(uriBuilder -> uriBuilder.path("/api/v1/products")
+                .uri(uriBuilder -> uriBuilder.path("/products")
                         .queryParam("sort", "desc")
                         .build())
                 .accept(MediaType.TEXT_EVENT_STREAM)
@@ -198,7 +198,7 @@ class ProductControllerIntegrationTest {
 
         // Act & Assert
         webTestClient.get()
-                .uri(uriBuilder -> uriBuilder.path("/api/v1/products")
+                .uri(uriBuilder -> uriBuilder.path("/products")
                         .queryParam("sort", invalidSortParameter)
                         .build())
                 .accept(MediaType.TEXT_EVENT_STREAM)
@@ -221,7 +221,7 @@ class ProductControllerIntegrationTest {
                 .verifyComplete();
 
         webTestClient.get()
-                .uri("/api/v1/products")
+                .uri("/products")
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
@@ -242,7 +242,7 @@ class ProductControllerIntegrationTest {
 
 
         webTestClient.get()
-                .uri("/api/v1/products")
+                .uri("/products")
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
@@ -258,7 +258,7 @@ class ProductControllerIntegrationTest {
     public void whenAddProduct_thenReturnProduct() {
         webTestClient
                 .post()
-                .uri("/api/v1/products")
+                .uri("/products")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(productRequestModel), ProductRequestModel.class)
                 .accept(MediaType.APPLICATION_JSON)
@@ -284,7 +284,7 @@ class ProductControllerIntegrationTest {
     public void whenAddProductWithInvalidSalePrice_thenThrowInvalidAmountException() {
         webTestClient
                 .post()
-                .uri("/api/v1/products")
+                .uri("/products")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(productRequestModelWithInavlidSalePrice), ProductRequestModel.class)
                 .accept(MediaType.APPLICATION_JSON)
@@ -304,7 +304,7 @@ class ProductControllerIntegrationTest {
     public void whenUpdateProduct_thenReturnUpdatedProduct() {
         webTestClient
                 .put()
-                .uri("/api/v1/products/" +  product1.getProductId())
+                .uri("/products/" +  product1.getProductId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(productRequestModel), ProductRequestModel.class)
                 .accept(MediaType.APPLICATION_JSON)
@@ -329,7 +329,7 @@ class ProductControllerIntegrationTest {
     public void whenUpdateProductWithNonExistentProductId_thenThrowNotFoundException() {
         webTestClient
                 .put()
-                .uri("/api/v1/products/" + NON_EXISTENT_PRODUCT_ID)
+                .uri("/products/" + NON_EXISTENT_PRODUCT_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(productRequestModel2), ProductRequestModel.class)
                 .accept(MediaType.APPLICATION_JSON)
@@ -350,7 +350,7 @@ class ProductControllerIntegrationTest {
     public void whenUpdateWithInvalidProductId_thenThrowInvalidInputException() {
         webTestClient
                 .put()
-                .uri("/api/v1/products/" + INVALID_PRODUCT_ID)
+                .uri("/products/" + INVALID_PRODUCT_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(productRequestModel2), ProductRequestModel.class)
                 .accept(MediaType.APPLICATION_JSON)
@@ -375,7 +375,7 @@ class ProductControllerIntegrationTest {
 
         webTestClient
                 .patch()
-                .uri("/api/v1/products/" + product1.getProductId() + "/status")
+                .uri("/products/" + product1.getProductId() + "/status")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(patchProductRequestModel), ProductRequestModel.class)
                 .accept(MediaType.APPLICATION_JSON)
@@ -401,7 +401,7 @@ class ProductControllerIntegrationTest {
 
         webTestClient
                 .patch()
-                .uri("/api/v1/products/" + NON_EXISTENT_PRODUCT_ID + "/status")
+                .uri("/products/" + NON_EXISTENT_PRODUCT_ID + "/status")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(patchProductRequestModel), ProductRequestModel.class)
                 .accept(MediaType.APPLICATION_JSON)
@@ -426,7 +426,7 @@ class ProductControllerIntegrationTest {
 
         webTestClient
                 .patch()
-                .uri("/api/v1/products/" + INVALID_PRODUCT_ID + "/status")
+                .uri("/products/" + INVALID_PRODUCT_ID + "/status")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(patchProductRequestModel), ProductRequestModel.class)
                 .accept(MediaType.APPLICATION_JSON)
@@ -447,7 +447,7 @@ class ProductControllerIntegrationTest {
     public void whenDeleteProduct_thenDeleteProduct() {
         webTestClient
                 .delete()
-                .uri("/api/v1/products/" + product1.getProductId())
+                .uri("/products/" + product1.getProductId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -471,7 +471,7 @@ class ProductControllerIntegrationTest {
     public void whenDeleteProductWithNonExistentProductId_thenThrowNotFoundException() {
         webTestClient
                 .delete()
-                .uri("/api/v1/products/" + NON_EXISTENT_PRODUCT_ID)
+                .uri("/products/" + NON_EXISTENT_PRODUCT_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound()
@@ -490,7 +490,7 @@ class ProductControllerIntegrationTest {
     public void whenDeleteWithInvalidProductId_thenThrowInvalidInputException() {
         webTestClient
                 .delete()
-                .uri("/api/v1/products/" + INVALID_PRODUCT_ID)
+                .uri("/products/" + INVALID_PRODUCT_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().is4xxClientError()
@@ -508,7 +508,7 @@ class ProductControllerIntegrationTest {
     @Test
     public void whenGetAllProductsWithMinPrice_thenReturnFilteredProducts() {
         webTestClient.get()
-                .uri(uriBuilder -> uriBuilder.path("/api/v1/products")
+                .uri(uriBuilder -> uriBuilder.path("/products")
                         .queryParam("minPrice", 60.00)
                         .build())
                 .accept(MediaType.TEXT_EVENT_STREAM)
@@ -526,7 +526,7 @@ class ProductControllerIntegrationTest {
     @Test
     public void whenGetAllProductsWithMaxPrice_thenReturnFilteredProducts() {
         webTestClient.get()
-                .uri(uriBuilder -> uriBuilder.path("/api/v1/products")
+                .uri(uriBuilder -> uriBuilder.path("/products")
                         .queryParam("maxPrice", 60.00)
                         .build())
                 .accept(MediaType.TEXT_EVENT_STREAM)
@@ -544,7 +544,7 @@ class ProductControllerIntegrationTest {
     @Test
     public void whenGetAllProductsWithMinAndMaxPrice_thenReturnFilteredProducts() {
         webTestClient.get()
-                .uri(uriBuilder -> uriBuilder.path("/api/v1/products")
+                .uri(uriBuilder -> uriBuilder.path("/products")
                         .queryParam("minPrice", 40.00)
                         .queryParam("maxPrice", 60.00)
                         .build())
@@ -563,7 +563,7 @@ class ProductControllerIntegrationTest {
     @Test
     public void whenGetAllProductsWithNoMatchingPrice_thenReturnEmptyList() {
         webTestClient.get()
-                .uri(uriBuilder -> uriBuilder.path("/api/v1/products")
+                .uri(uriBuilder -> uriBuilder.path("/products")
                         .queryParam("minPrice", 200.00)
                         .build())
                 .accept(MediaType.TEXT_EVENT_STREAM)
@@ -584,7 +584,7 @@ class ProductControllerIntegrationTest {
         requestModel.setProductQuantity(5);
 
         webTestClient.patch()
-                .uri("/api/v1/products/"+product1.getProductId()+ "/quantity")
+                .uri("/products/"+product1.getProductId()+ "/quantity")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(requestModel), ProductRequestModel.class)
                 .exchange()
@@ -626,7 +626,7 @@ class ProductControllerIntegrationTest {
 
             // Act & Assert
             webTestClient.post()
-                    .uri("/api/v1/products")
+                    .uri("/products")
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(Mono.just(requestModel), ProductRequestModel.class)
                     .exchange()
@@ -651,7 +651,7 @@ class ProductControllerIntegrationTest {
 
             // Act & Assert
             webTestClient.post()
-                    .uri("/api/v1/products")
+                    .uri("/products")
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(Mono.just(requestModel), ProductRequestModel.class)
                     .exchange()
@@ -676,7 +676,7 @@ class ProductControllerIntegrationTest {
 
             // Act & Assert
             webTestClient.post()
-                    .uri("/api/v1/products")
+                    .uri("/products")
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(Mono.just(requestModel), ProductRequestModel.class)
                     .exchange()
@@ -700,7 +700,7 @@ class ProductControllerIntegrationTest {
 
             // Act & Assert
             webTestClient.post()
-                    .uri("/api/v1/products")
+                    .uri("/products")
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(Mono.just(requestModel), ProductRequestModel.class)
                     .exchange()

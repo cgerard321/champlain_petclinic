@@ -31,7 +31,9 @@ public class AuthServiceClientIntegrationTest {
 
     @AfterEach
     void shutdown() throws IOException {
-        server.shutdown();
+        if (server != null) {
+            server.shutdown();
+        }
     }
 
 

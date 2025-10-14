@@ -5,14 +5,20 @@ import com.petclinic.bffapigateway.exceptions.ExistingRatingNotFoundException;
 import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.MultipartBodyBuilder;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.webjars.NotFoundException;
@@ -53,6 +59,7 @@ public class VetsServiceClient {
         return webClientBuilder.build()
                 .get()
                 .uri(vetsServiceUrl + "/" + vetId + "/photo")
+                .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, error->{
                     HttpStatusCode statusCode = error.statusCode();
@@ -63,7 +70,12 @@ public class VetsServiceClient {
                 .onStatus(HttpStatusCode::is5xxServerError,error->
                         Mono.error(new IllegalArgumentException("Something went wrong with the server"))
                 )
-                .bodyToMono(Resource.class);
+                .bodyToMono(PhotoResponseDTO.class)
+                .map(dto -> {
+                    byte[] data = dto.getResource() != null ? dto.getResource() : 
+                                  (dto.getResourceBase64() != null ? java.util.Base64.getDecoder().decode(dto.getResourceBase64()) : new byte[0]);
+                    return (Resource) new org.springframework.core.io.ByteArrayResource(data);
+                });
     }
     public Mono<PhotoResponseDTO> getDefaultPhotoByVetId(String vetId){
         return webClientBuilder.build()
@@ -82,44 +94,138 @@ public class VetsServiceClient {
                 .bodyToMono(PhotoResponseDTO.class);
     }
 
-    public Mono<Resource> addPhotoToVet(String vetId, String photoName, Mono<Resource> image) {
-        return webClientBuilder
-                .build()
+    public Mono<Resource> addPhotoToVetFromBytes(String vetId, String photoName, byte[] fileData) {
+        PhotoRequestDTO photoRequest = PhotoRequestDTO.builder()
+                .vetId(vetId)
+                .filename(photoName)
+                .imgType(determineContentType(photoName))
+                .data(fileData)
+                .build();
+                
+        return webClientBuilder.build()
                 .post()
-                .uri(vetsServiceUrl + "/" + vetId + "/photos/" + photoName)
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE)
-                .body(image, Resource.class)
+                .uri(vetsServiceUrl + "/" + vetId + "/photos")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(photoRequest)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, error -> {
-                    HttpStatusCode statusCode = error.statusCode();
-                    if (statusCode.equals(NOT_FOUND))
+                    if (error.statusCode().equals(NOT_FOUND)) {
                         return Mono.error(new NotFoundException("Photo for vet " + vetId + " not found"));
-                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
+                    }
+                    return Mono.error(new IllegalArgumentException("Client error"));
                 })
-                .onStatus(HttpStatusCode::is5xxServerError, error ->
-                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
-                )
-                .bodyToMono(Resource.class);
+                .onStatus(HttpStatusCode::is5xxServerError,
+                        error -> Mono.error(new IllegalArgumentException("Server error")))
+                .bodyToMono(PhotoResponseDTO.class)
+                .map(dto -> {
+                    byte[] data = dto.getResource() != null ? dto.getResource() : 
+                                  (dto.getResourceBase64() != null ? java.util.Base64.getDecoder().decode(dto.getResourceBase64()) : new byte[0]);
+                    return (Resource) new org.springframework.core.io.ByteArrayResource(data);
+                });
+    }
+    
+    private String determineContentType(String filename) {
+        if (filename == null) {
+            return "image/jpeg";
+        }
+        String lowerCase = filename.toLowerCase();
+        if (lowerCase.endsWith(".png")) {
+            return "image/png";
+        } else if (lowerCase.endsWith(".gif")) {
+            return "image/gif";
+        } else if (lowerCase.endsWith(".webp")) {
+            return "image/webp";
+        } else {
+            return "image/jpeg";
+        }
     }
 
-    public Mono<Resource> updatePhotoOfVet(String vetId, String photoName, Mono<Resource> image){
-        return webClientBuilder
-                .build()
-                .put()
-                .uri(vetsServiceUrl+"/"+vetId+"/photos/"+photoName)
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE)
-                .body(image, Resource.class)
-                .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, error->{
-                    HttpStatusCode statusCode = error.statusCode();
-                    if(statusCode.equals(NOT_FOUND))
-                        return Mono.error(new NotFoundException("Photo for vet "+vetId + " not found"));
-                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
+    public Mono<Resource> addPhotoToVet(String vetId, String photoName, FilePart filePart) {
+        return filePart.content()
+                .map(dataBuffer -> {
+                    byte[] bytes = new byte[dataBuffer.readableByteCount()];
+                    dataBuffer.read(bytes);
+                    return bytes;
                 })
-                .onStatus(HttpStatusCode::is5xxServerError,error->
-                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
-                )
-                .bodyToMono(Resource.class);
+                .reduce((byte[] a, byte[] b) -> {
+                    byte[] combined = new byte[a.length + b.length];
+                    System.arraycopy(a, 0, combined, 0, a.length);
+                    System.arraycopy(b, 0, combined, a.length, b.length);
+                    return combined;
+                })
+                .flatMap(bytes -> {
+                    String contentType = filePart.headers().getContentType() != null 
+                            ? filePart.headers().getContentType().toString() : "image/jpeg";
+                    PhotoRequestDTO photoRequest = PhotoRequestDTO.builder()
+                            .vetId(vetId)
+                            .filename(photoName)
+                            .imgType(contentType)
+                            .data(bytes)
+                            .build();
+                    return webClientBuilder.build()
+                            .post()
+                            .uri(vetsServiceUrl + "/" + vetId + "/photos")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .accept(MediaType.APPLICATION_JSON)
+                            .bodyValue(photoRequest)
+                            .retrieve()
+                            .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                                if (error.statusCode().equals(NOT_FOUND)) {
+                                    return Mono.error(new NotFoundException("Photo for vet " + vetId + " not found"));
+                                }
+                                return Mono.error(new IllegalArgumentException("Client error"));
+                            })
+                            .onStatus(HttpStatusCode::is5xxServerError,
+                                    error -> Mono.error(new IllegalArgumentException("Server error")))
+                            .bodyToMono(PhotoResponseDTO.class)
+                            .map(dto -> {
+                                byte[] data = dto.getResource() != null ? dto.getResource() : 
+                                              (dto.getResourceBase64() != null ? java.util.Base64.getDecoder().decode(dto.getResourceBase64()) : new byte[0]);
+                                return (Resource) new org.springframework.core.io.ByteArrayResource(data);
+                            });
+                });
+    }
+
+
+    public Mono<Resource> updatePhotoOfVet(String vetId, String photoName, Mono<Resource> image){
+        return image.flatMap(resource -> {
+            try {
+                byte[] data = resource.getInputStream().readAllBytes();
+                PhotoRequestDTO photoRequest = PhotoRequestDTO.builder()
+                        .vetId(vetId)
+                        .filename(photoName)
+                        .imgType(determineContentType(photoName))
+                        .data(data)
+                        .build();
+                        
+                return webClientBuilder
+                        .build()
+                        .put()
+                        .uri(vetsServiceUrl+"/"+vetId+"/photo")
+                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .bodyValue(photoRequest)
+                        .retrieve()
+                        .onStatus(HttpStatusCode::is4xxClientError, error->{
+                            HttpStatusCode statusCode = error.statusCode();
+                            if(statusCode.equals(NOT_FOUND))
+                                return Mono.error(new NotFoundException("Photo for vet "+vetId + " not found"));
+                            return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
+                        })
+                        .onStatus(HttpStatusCode::is5xxServerError,error->
+                                Mono.error(new IllegalArgumentException("Something went wrong with the server"))
+                        )
+                        .bodyToMono(PhotoResponseDTO.class)
+                        .map(dto -> {
+                            byte[] responseData = dto.getResource() != null ? dto.getResource() : 
+                                          (dto.getResourceBase64() != null ? java.util.Base64.getDecoder().decode(dto.getResourceBase64()) : new byte[0]);
+                            return (Resource) new org.springframework.core.io.ByteArrayResource(responseData);
+                        });
+            } catch (java.io.IOException e) {
+                return Mono.error(new IllegalArgumentException("Failed to read resource: " + e.getMessage()));
+            }
+        });
     }
 
     //Badge
@@ -633,7 +739,6 @@ public class VetsServiceClient {
                 .bodyToFlux(Album.class);
     }
 
-
     public Mono<Void> deletePhotoByVetId(String vetId) {
         return webClientBuilder
                 .build()
@@ -671,5 +776,48 @@ public class VetsServiceClient {
                 .bodyToMono(Void.class);
     }
 
+
+public Mono<Album> addAlbumPhotoFromBytes(String vetId, String photoName, byte[] fileData) {
+    return webClientBuilder.build()
+            .post()
+            .uri(vetsServiceUrl + "/" + vetId + "/albums/photos/" + photoName)
+            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+            .bodyValue(fileData)
+            .retrieve()
+            .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                if (error.statusCode().equals(NOT_FOUND)) {
+                    return Mono.error(new NotFoundException("Album source not found for vet " + vetId));
+                }
+                return Mono.error(new IllegalArgumentException("Client error while adding album photo"));
+            })
+            .onStatus(HttpStatusCode::is5xxServerError,
+                    error -> Mono.error(new IllegalArgumentException("Server error while adding album photo")))
+            .bodyToMono(Album.class);
+}
+
+public Mono<Album> addAlbumPhoto(String vetId, String photoName, FilePart filePart) {
+    return DataBufferUtils.join(filePart.content())
+            .map(buf -> {
+                byte[] bytes = new byte[buf.readableByteCount()];
+                buf.read(bytes);
+                DataBufferUtils.release(buf);
+                return bytes;
+            })
+            .flatMap(bytes -> webClientBuilder.build()
+                    .post()
+                    .uri(vetsServiceUrl + "/" + vetId + "/albums/photos/" + photoName)
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .bodyValue(bytes)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                        if (error.statusCode().equals(NOT_FOUND)) {
+                            return Mono.error(new NotFoundException("Album source not found for vet " + vetId));
+                        }
+                        return Mono.error(new IllegalArgumentException("Client error while adding album photo"));
+                    })
+                    .onStatus(HttpStatusCode::is5xxServerError,
+                            error -> Mono.error(new IllegalArgumentException("Server error while adding album photo")))
+                    .bodyToMono(Album.class));
+}
 
 }

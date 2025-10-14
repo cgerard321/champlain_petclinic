@@ -20,6 +20,7 @@ import reactor.test.StepVerifier;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -38,7 +39,9 @@ public class CustomerServiceClientIntegrationTest {
 
     final String test = "Test photo";
     final byte[] testBytes = test.getBytes();
-
+    private final String OWNER_ID = "ownerId-123";
+    private final String PET_ID = "petId-123";
+    private final String PET_TYPE_ID = "petTypeId-123";
     private final PhotoDetails TEST_PHOTO = PhotoDetails.builder()
             .id(2)
             .name("photo")
@@ -109,24 +112,6 @@ public class CustomerServiceClientIntegrationTest {
     void shutdown() throws IOException {
         this.server.shutdown();
     }
-
-    //TODO
-    /*@Test
-    void createOwnerPhoto() throws JsonProcessingException {
-
-        customersServiceClient.setOwnerPhoto(TEST_PHOTO, 1);
-        final String body = mapper.writeValueAsString(mapper.convertValue(TEST_PHOTO, PhotoDetails.class));
-        prepareResponse(response -> response
-                .setHeader("Content-Type", "application/json")
-                .setBody(body));
-
-        final PhotoDetails testPhoto = customersServiceClient.getOwnerPhoto(2).block();
-
-        assertEquals(TEST_PHOTO.getId(), testPhoto.getId());
-        assertEquals(TEST_PHOTO.getName(), testPhoto.getName());
-        assertEquals(TEST_PHOTO.getType(), testPhoto.getType());
-//        assertEquals(TEST_PHOTO.getPhoto(), testPhoto.getPhoto());
-    }*/
 
     @Test
     void insertOwner() throws JsonProcessingException {
@@ -407,6 +392,39 @@ public class CustomerServiceClientIntegrationTest {
         assertEquals(firstPetTypeFromFlux.getName(), TEST_PETTYPE.getName());
     }
 
+    @Test
+    void whenAddPetType_ShouldReturnCreatedPetType() throws Exception {
+        // Arrange
+        final PetTypeRequestDTO request = PetTypeRequestDTO.builder()
+                .name("Hamster")
+                .petTypeDescription("Small and friendly rodent")
+                .build();
+
+        final PetTypeResponseDTO expectedResponse = PetTypeResponseDTO.builder()
+                .petTypeId("petTypeId-xyz")
+                .name("Hamster")
+                .petTypeDescription("Small and friendly rodent")
+                .build();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(201)
+                .setHeader("Content-Type", "application/json")
+                .setBody(mapper.writeValueAsString(expectedResponse)));
+
+        Mono<PetTypeResponseDTO> result =
+                customersServiceClient.addPetType(Mono.just(request));
+
+        StepVerifier.create(result)
+                .expectNextMatches(r ->
+                        r.getPetTypeId().equals(expectedResponse.getPetTypeId()) &&
+                                r.getName().equals(expectedResponse.getName()) &&
+                                r.getPetTypeDescription().equals(expectedResponse.getPetTypeDescription()))
+                .verifyComplete();
+
+        RecordedRequest recorded = server.takeRequest();
+        assertEquals("/owners/petTypes", recorded.getPath());
+        assertEquals("POST", recorded.getMethod());
+    }
 
     @Test
     void testUpdatePet() throws Exception {
@@ -426,93 +444,208 @@ public class CustomerServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(mapper.writeValueAsString(petResponseDTO)));
 
-        // When
         Mono<PetResponseDTO> result = customersServiceClient.updatePet(Mono.just(petRequestDTO), petId);
 
-        // Then
         StepVerifier.create(result)
                 .expectNextMatches(response -> response.getPetId().equals(petId) && response.getName().equals("Buddy"))
                 .verifyComplete();
 
-        // Verify the request
         RecordedRequest request = server.takeRequest();
         assertEquals("/pet/" + petId, request.getPath());
         assertEquals("PUT", request.getMethod());
     }
-        
-    /*@Test
-    void getOwnerPhoto() throws JsonProcessingException {
+    @Test
+    void whenAddPet_thenReturnCreatedPet() throws Exception {
+        PetRequestDTO requestDTO = PetRequestDTO.builder().ownerId(OWNER_ID).name("New Pet").petTypeId("1").build();
+        PetResponseDTO responseDTO = PetResponseDTO.builder().petId("new-pet-id").ownerId(OWNER_ID).name("New Pet").petTypeId("1").build();
 
-        final String body = mapper.writeValueAsString(mapper.convertValue(TEST_PHOTO, PhotoDetails.class));
+        server.enqueue(new MockResponse()
+                .setResponseCode(201)
+                .setHeader("Content-Type", "application/json")
+                .setBody(mapper.writeValueAsString(responseDTO)));
+        Mono<PetResponseDTO> result = customersServiceClient.addPet(Mono.just(requestDTO));
+
+        StepVerifier.create(result)
+                .expectNextMatches(r -> r.getName().equals("New Pet"))
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("/pet", request.getPath());
+        assertEquals("POST", request.getMethod());
+    }
+
+    @Test
+    void whenCreatePetForOwner_thenReturnCreatedPet() throws Exception {
+        PetRequestDTO requestDTO = PetRequestDTO.builder().ownerId(OWNER_ID).name("New Owner Pet").petTypeId("1").build();
+        PetResponseDTO responseDTO = PetResponseDTO.builder().petId("new-owner-pet-id").ownerId(OWNER_ID).name("New Owner Pet").petTypeId("1").build();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(201)
+                .setHeader("Content-Type", "application/json")
+                .setBody(mapper.writeValueAsString(responseDTO)));
+
+        Mono<PetResponseDTO> result = customersServiceClient.createPetForOwner(OWNER_ID, requestDTO);
+
+        StepVerifier.create(result)
+                .expectNextMatches(r -> r.getName().equals("New Owner Pet") && r.getOwnerId().equals(OWNER_ID))
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("/pet/owners/" + OWNER_ID + "/pets", request.getPath());
+        assertEquals("POST", request.getMethod());
+    }
+
+    @Test
+    void whenGetPetByOwnerIdAndPetId_thenReturnPet() throws Exception {
+        final String body = mapper.writeValueAsString(TEST_PET);
+
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setBody(body));
 
-        final PhotoDetails testPhoto = customersServiceClient.getOwnerPhoto(2).block();
+        Mono<PetResponseDTO> result = customersServiceClient.getPet(OWNER_ID, PET_ID);
 
-        assertEquals(TEST_PHOTO.getId(), testPhoto.getId());
-        assertEquals(TEST_PHOTO.getName(), testPhoto.getName());
-        assertEquals(TEST_PHOTO.getType(), testPhoto.getType());
-//        assertEquals(TEST_PHOTO.getPhoto(), testPhoto.getPhoto());
+        StepVerifier.create(result)
+                .expectNextMatches(r -> r.getPetId().equals(PET_ID) && r.getOwnerId().equals(OWNER_ID))
+                .verifyComplete();
 
-    }*/
-//    @Test
-//    void createPetPhoto() throws JsonProcessingException {
-//
-//        customersServiceClient.setPetPhoto("ownerId-1", TEST_PHOTO,"1");
-//        final String body = mapper.writeValueAsString(mapper.convertValue(TEST_PHOTO, PhotoDetails.class));
-//        prepareResponse(response -> response
-//                .setHeader("Content-Type", "application/json")
-//                .setBody(body));
-//
-//        final PhotoDetails testPhoto = customersServiceClient.getPetPhoto("ownerId-2", "2").block();
-//
-//        assertEquals(TEST_PHOTO.getId(), testPhoto.getId());
-//        assertEquals(TEST_PHOTO.getName(), testPhoto.getName());
-//        assertEquals(TEST_PHOTO.getType(), testPhoto.getType());
-////        assertEquals(TEST_PHOTO.getPhoto(), testPhoto.getPhoto());
-//
-//    }
-//    @Test
-//    void getPetPhoto() throws JsonProcessingException {
-//
-//        final String body = mapper.writeValueAsString(mapper.convertValue(TEST_PHOTO, PhotoDetails.class));
-//        prepareResponse(response -> response
-//                .setHeader("Content-Type", "application/json")
-//                .setBody(body));
-//
-//        final PhotoDetails testPhoto = customersServiceClient.getPetPhoto("ownerId-3","1").block();
-//
-//        assertEquals(TEST_PHOTO.getId(), testPhoto.getId());
-//        assertEquals(TEST_PHOTO.getName(), testPhoto.getName());
-//        assertEquals(TEST_PHOTO.getType(), testPhoto.getType());
-//    }
+        RecordedRequest request = server.takeRequest();
+        assertEquals("/owners/" + OWNER_ID + "/pets/" + PET_ID, request.getPath());
+    }
+//Some of these tests, including this one don't use proper endpoints
+    // /pet/owner/{ownerId}/pets should never be an endpoint. Due to circonstances outside the customer team's control
+    //The endpoints were brought back to their original names, although they were previously modified.
+    //Since it would require another new ticket to change them back, they will remain as is for these tests and will have to be updated in another ticket yet again
+    @Test
+    void whenGetPetsByOwnerId_thenReturnPetsFlux() throws Exception {
+        List<PetResponseDTO> list = List.of(TEST_PET, TEST_PET);
+        final String body = mapper.writeValueAsString(list);
 
-//    @Test
-//    void deleteOwnerPhoto() throws JsonProcessingException {
-//
-//        final String body = mapper.writeValueAsString(mapper.convertValue(TEST_PHOTO, PhotoDetails.class));
-//        prepareResponse(response -> response
-//                .setHeader("Content-Type", "application/json")
-//                .setBody(body));
-//
-//        final Mono<Void> empty = customersServiceClient.deleteOwnerPhoto(TEST_PHOTO.getId());
-//
-//        assertEquals(empty.block(), null);
-//    }
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(body));
 
-//    @Test
-//    void deletePetPhoto() throws JsonProcessingException {
-//
-//        final String body = mapper.writeValueAsString(mapper.convertValue(TEST_PHOTO, PhotoDetails.class));
-//        prepareResponse(response -> response
-//                .setHeader("Content-Type", "application/json")
-//                .setBody(body));
-//
-//        final Mono<Void> empty = customersServiceClient.deletePetPhoto(1,TEST_PHOTO.getId());
-//
-//        assertEquals(empty.block(), null);
-//    }
+        Flux<PetResponseDTO> result = customersServiceClient.getPetsByOwnerId(OWNER_ID);
+
+        StepVerifier.create(result)
+                .expectNextCount(2)
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("/pet/owner/" + OWNER_ID + "/pets", request.getPath()); //worse naming for an endpoint ever
+    }
+
+    @Test
+    void whenGetAllPets_thenReturnAllPetsFlux() throws Exception {
+        List<PetResponseDTO> list = List.of(TEST_PET, TEST_PET);
+        final String body = mapper.writeValueAsString(list);
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(body));
+
+        Flux<PetResponseDTO> result = customersServiceClient.getAllPets();
+
+        StepVerifier.create(result)
+                .expectNextCount(2)
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("/pet", request.getPath());
+    }
+
+    @Test
+    void whenUpdatePetType_thenReturnUpdatedPetType() throws Exception {
+        PetTypeRequestDTO requestDTO = PetTypeRequestDTO.builder().name("Updated Dog").petTypeDescription("Updated Mammal").build();
+        PetTypeResponseDTO responseDTO = PetTypeResponseDTO.builder().petTypeId(PET_TYPE_ID).name("Updated Dog").petTypeDescription("Updated Mammal").build();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/json")
+                .setBody(mapper.writeValueAsString(responseDTO)));
+
+        Mono<PetTypeResponseDTO> result = customersServiceClient.updatePetType(PET_TYPE_ID, Mono.just(requestDTO));
+
+        StepVerifier.create(result)
+                .expectNextMatches(r -> r.getName().equals("Updated Dog"))
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("/owners/petTypes/" + PET_TYPE_ID, request.getPath());
+        assertEquals("PUT", request.getMethod());
+    }
+
+    @Test
+    void whenDeletePetTypeV2_thenReturnNoContent() throws Exception {
+        server.enqueue(new MockResponse().setResponseCode(204));
+
+        Mono<Void> result = customersServiceClient.deletePetTypeV2(PET_TYPE_ID);
+
+        StepVerifier.create(result).verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+
+        assertEquals("/owners/petTypes/" + PET_TYPE_ID, request.getPath());
+        assertEquals("DELETE", request.getMethod());
+    }
+
+    @Test
+    void whenGetPetTypesByPagination_thenReturnPetTypesFlux() throws Exception {
+        List<PetTypeResponseDTO> list = List.of(TEST_PETTYPE_RESPONSE);
+        final String body = mapper.writeValueAsString(list);
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(body));
+
+        Optional<Integer> page = Optional.of(0);
+        Optional<Integer> size =  Optional.of(10);
+
+        Flux<PetTypeResponseDTO> result = customersServiceClient.getPetTypesByPagination(page, size, PET_TYPE_ID, "Dog", null);
+
+        StepVerifier.create(result)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+         assertEquals("/owners/petTypes/pet-types-pagination?page=0&size=10&petTypeId=petTypeId-123&name=Dog", request.getPath());
+    }
+
+    @Test
+    void whenGetTotalNumberOfPetTypes() throws Exception {
+        long expectedCount = 5;
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(String.valueOf(expectedCount)));
+
+        Mono<Long> result = customersServiceClient.getTotalNumberOfPetTypes();
+
+        StepVerifier.create(result)
+                .expectNext(expectedCount)
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("/owners/petTypes/pet-types-count", request.getPath());
+    }
+
+    @Test
+    void whenGetTotalNumberOfPetTypesWithFilters_thenReturnCount() throws Exception {
+        long expectedCount = 1;
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(String.valueOf(expectedCount)));
+
+        Mono<Long> result = customersServiceClient.getTotalNumberOfPetTypesWithFilters(PET_TYPE_ID, "Dog", null);
+
+        StepVerifier.create(result)
+                .expectNext(expectedCount)
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("/owners/petTypes/pet-types-filtered-count?petTypeId=petTypeId-123&name=Dog", request.getPath());
+    }
 
     private void prepareResponse(Consumer<MockResponse> consumer) {
         MockResponse response = new MockResponse();
@@ -520,10 +653,26 @@ public class CustomerServiceClientIntegrationTest {
         this.server.enqueue(response);
     }
 
+    @Test
+    void whenGetOwnerPhoto_thenReturnPhotoBytes() throws Exception {
+        byte[] mockPhotoBytes = "mockPhotoData".getBytes();
 
-    //TODO apparently everything???
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "image/jpeg")
+                .setBody(new okio.Buffer().write(mockPhotoBytes)));
 
+        Mono<byte[]> result = customersServiceClient.getOwnerPhoto(OWNER_ID);
 
+        StepVerifier.create(result)
+                .expectNextMatches(bytes -> bytes.length == mockPhotoBytes.length &&
+                        new String(bytes).equals("mockPhotoData"))
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("/owners/" + OWNER_ID + "/photos", request.getPath());
+        assertEquals("GET", request.getMethod());
+    }
 
 
 }

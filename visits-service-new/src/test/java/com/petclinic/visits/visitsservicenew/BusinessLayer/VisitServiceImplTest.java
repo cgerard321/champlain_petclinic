@@ -1,5 +1,11 @@
 package com.petclinic.visits.visitsservicenew.BusinessLayer;
 
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.Auth.Role;
+import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.Auth.UserDetails;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.Mailing.Mail;
+import java.time.LocalDateTime;
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
@@ -22,10 +28,13 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -168,7 +177,7 @@ class VisitServiceImplTest {
     }
 
     @Test
-    public void getVisitsForPet () {
+    public void getVisitsForPet() {
         // Arrange
         String petId = "yourPetId";
 
@@ -190,7 +199,7 @@ class VisitServiceImplTest {
     }
 
     @Test
-    void getVisitsForStatus () {
+    void getVisitsForStatus() {
         when(visitRepo.findAllByStatus(anyString())).thenReturn(Flux.just(visit1));
         when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(visitResponseDTO));
 
@@ -268,7 +277,7 @@ class VisitServiceImplTest {
 //    }
 
     @Test
-    void addVisit_NoConflictingVisits_InsertsNewVisit () {
+    void addVisit_NoConflictingVisits_InsertsNewVisit() {
         // Arrange
         LocalDateTime visitDate = LocalDateTime.now().plusDays(1);
         String description = "Test Description";
@@ -308,7 +317,7 @@ class VisitServiceImplTest {
     }
 
     @Test
-    void addVisit_ConflictingVisits_ThrowsDuplicateTimeException () {
+    void addVisit_ConflictingVisits_ThrowsDuplicateTimeException() {
         // Arrange
         LocalDateTime visitDate = LocalDateTime.now().plusDays(1);
         String description = "Test Description";
@@ -355,7 +364,7 @@ class VisitServiceImplTest {
     }
 
     @Test
-    public void testAddVisit_NoDescription () {
+    public void testAddVisit_NoDescription() {
         // Arrange
         VisitRequestDTO requestDTO = buildVisitRequestDTO();
         Visit visit = buildVisit(requestDTO.getDescription());
@@ -379,8 +388,9 @@ class VisitServiceImplTest {
                 .expectError(BadRequestException.class)
                 .verify();
     }
+
     @Test
-    public void testAddVisit_BadVisitDate () {
+    public void testAddVisit_BadVisitDate() {
         // Arrange
         VisitRequestDTO requestDTO = buildVisitRequestDTO();
         Visit visit = buildVisit(requestDTO.getDescription());
@@ -404,8 +414,9 @@ class VisitServiceImplTest {
                 .expectError(BadRequestException.class)
                 .verify();
     }
+
     @Test
-    public void testAddVisit_DateInThePast () {
+    public void testAddVisit_DateInThePast() {
         // Arrange
         VisitRequestDTO requestDTO = buildVisitRequestDTO();
         Visit visit = buildVisit(requestDTO.getDescription());
@@ -432,7 +443,7 @@ class VisitServiceImplTest {
     }
 
     @Test
-    public void testAddVisit_PetIdNull () {
+    public void testAddVisit_PetIdNull() {
         // Arrange
         VisitRequestDTO requestDTO = buildVisitRequestDTO();
         Visit visit = buildVisit(requestDTO.getDescription());
@@ -459,7 +470,7 @@ class VisitServiceImplTest {
     }
 
     @Test
-    public void testAddVisit_VetIdNull () {
+    public void testAddVisit_VetIdNull() {
         // Arrange
         VisitRequestDTO requestDTO = buildVisitRequestDTO();
         Visit visit = buildVisit(requestDTO.getDescription());
@@ -545,6 +556,7 @@ class VisitServiceImplTest {
                 .expectNext(visitResponseDTO)
                 .verifyComplete();
     }
+
     @Test
     void updateStatusForVisitByVisitId_CANCELLED() {
         String status = "CANCELLED";
@@ -561,6 +573,7 @@ class VisitServiceImplTest {
                 .expectNext(visitResponseDTO)
                 .verifyComplete();
     }
+
     @Test
     void updateStatusForVisitByVisitId_UPCOMING() {
         String status = "UPCOMING";
@@ -577,6 +590,7 @@ class VisitServiceImplTest {
                 .expectNext(visitResponseDTO)
                 .verifyComplete();
     }
+
     @Test
     void updateVisit() {
 
@@ -596,7 +610,7 @@ class VisitServiceImplTest {
     }
 
     @Test
-    void deleteVisitById_visitId_shouldSucceed () {
+    void deleteVisitById_visitId_shouldSucceed() {
         //arrange
         String visitId = "73b5c112-5703-4fb7-b7bc-ac8186811ae1";
 
@@ -615,7 +629,7 @@ class VisitServiceImplTest {
     }
 
     @Test
-    void deleteVisitById_visitDoesNotExist_shouldThrowNotFoundException () {
+    void deleteVisitById_visitDoesNotExist_shouldThrowNotFoundException() {
         // Arrange
         String visitId = UUID.randomUUID().toString();
 
@@ -636,7 +650,7 @@ class VisitServiceImplTest {
     }
 
     @Test
-    void deleteAllCancelledVisits () {
+    void deleteAllCancelledVisits() {
 
         // Arrange
 
@@ -660,7 +674,7 @@ class VisitServiceImplTest {
     }
 
     @Test
-    void deleteAllCanceledVisits_shouldThrowRuntimeException () {
+    void deleteAllCanceledVisits_shouldThrowRuntimeException() {
         // Arrange
         List<Visit> cancelledVisits = new ArrayList<>();
         cancelledVisits.add(buildVisit("Cat is sick"));
@@ -682,7 +696,7 @@ class VisitServiceImplTest {
     }
 
 
-    private Visit buildVisit (String description){
+    private Visit buildVisit(String description) {
         return Visit.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
                 .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
@@ -692,7 +706,8 @@ class VisitServiceImplTest {
                 .status(Status.UPCOMING)
                 .build();
     }
-    private VisitResponseDTO buildVisitResponseDTO () {
+
+    private VisitResponseDTO buildVisitResponseDTO() {
         return VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
                 .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
@@ -702,7 +717,8 @@ class VisitServiceImplTest {
                 .status(Status.UPCOMING)
                 .build();
     }
-    private VisitRequestDTO buildVisitRequestDTO () {
+
+    private VisitRequestDTO buildVisitRequestDTO() {
         return VisitRequestDTO.builder()
                 .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("this is a dummy description")
@@ -712,8 +728,128 @@ class VisitServiceImplTest {
                 .build();
     }
 
-    private Mono<VisitRequestDTO> buildRequestDtoMono () {
+    private Mono<VisitRequestDTO> buildRequestDtoMono() {
         VisitRequestDTO requestDTO = buildVisitRequestDTO();
         return Mono.just(requestDTO);
+    }
+
+    @Test
+    void exportVisitsToCSV_shouldReturnCSVFile() {
+        Visit visit = buildVisit("Export test");
+        when(visitRepo.findAll()).thenReturn(Flux.just(visit));
+
+        StepVerifier.create(visitService.exportVisitsToCSV())
+                .consumeNextWith(resource -> {
+                    try {
+                        String csvContent = new String(resource.getInputStream().readAllBytes());
+                        assertTrue(csvContent.contains("VisitId,Description,VisitDate,PetId,PractitionerId,Status"));
+                        assertTrue(csvContent.contains(visit.getVisitId()));
+                        assertTrue(csvContent.contains("Export test"));
+                    } catch (Exception e) {
+                        fail("Failed to read InputStreamResource: " + e.getMessage());
+                    }
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void archiveCompletedVisit_completedVisit_shouldArchive() {
+        Visit visit = buildVisit("completed");
+        visit.setStatus(Status.COMPLETED);
+
+        // simulate repo.findByVisitId
+        when(visitRepo.findByVisitId("id")).thenReturn(Mono.just(visit));
+
+        // capture the saved visit and return with ARCHIVED status
+        when(visitRepo.save(any(Visit.class))).thenAnswer(invocation -> {
+            Visit savedVisit = invocation.getArgument(0);
+            savedVisit.setStatus(Status.ARCHIVED);
+            return Mono.just(savedVisit);
+        });
+
+        when(entityDtoUtil.toVisitResponseDTO(any()))
+                .thenAnswer(invocation -> {
+                    Visit v = invocation.getArgument(0);
+                    return Mono.just(buildVisitResponseDTOWithStatus(v.getStatus()));
+                });
+
+        StepVerifier.create(visitService.archiveCompletedVisit("id", Mono.just(buildVisitRequestDTO())))
+                .expectNextMatches(v -> v.getStatus() == Status.ARCHIVED)
+                .verifyComplete();
+    }
+
+
+    @Test
+    void archiveCompletedVisit_notCompletedVisit_shouldThrow() {
+        Visit visit = buildVisit("upcoming visit"); // Status = UPCOMING by default
+        when(visitRepo.findByVisitId(anyString())).thenReturn(Mono.just(visit));
+
+        Mono<VisitResponseDTO> result = visitService.archiveCompletedVisit("id", Mono.just(buildVisitRequestDTO()));
+
+        StepVerifier.create(result)
+                .expectError(BadRequestException.class)
+                .verify();
+    }
+
+    @Test
+    void getAllArchivedVisits_shouldReturnArchivedVisits() {
+        Visit archivedVisit = buildVisit("archived");
+        archivedVisit.setStatus(Status.ARCHIVED);
+
+        when(visitRepo.findAllByStatus("ARCHIVED")).thenReturn(Flux.just(archivedVisit));
+        when(entityDtoUtil.toVisitResponseDTO(archivedVisit)).thenReturn(Mono.just(buildVisitResponseDTO()));
+
+        StepVerifier.create(visitService.getAllArchivedVisits())
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    void deleteAllCancelledVisits_noCancelledVisits_shouldThrow() {
+        when(visitRepo.findAllByStatus("CANCELLED")).thenReturn(Flux.empty());
+        when(visitRepo.deleteAll(anyList())).thenReturn(Mono.empty()); // avoid null
+
+        StepVerifier.create(visitService.deleteAllCancelledVisits())
+                .verifyComplete();
+    }
+
+    private VisitResponseDTO buildVisitResponseDTOWithStatus(Status status) {
+        VisitResponseDTO dto = buildVisitResponseDTO();
+        dto.setStatus(status);
+        return dto;
+    }
+
+
+    @Test
+    void generateVisitRequestEmail_ShouldCreateCorrectEmail() {
+        // Arrange
+        Set<Role> roles = new HashSet<>();
+        roles.add(Role.builder().id(1).name("ROLE_USER").build());
+
+        UserDetails user = new UserDetails(
+                "user123",
+                "Test User",
+                "test@example.com",
+                roles
+        );
+        String petName = "Fluffy";
+        LocalDateTime visitDate = LocalDateTime.of(2025, 10, 15, 14, 30);
+
+        // Act
+        Mail result = ReflectionTestUtils.invokeMethod(
+                visitService,
+                "generateVisitRequestEmail",
+                user,
+                petName,
+                visitDate
+        );
+
+        // Assert
+        assertEquals("test@example.com", result.getEmailSendTo());
+        assertEquals("PetClinic Visit request", result.getEmailTitle());
+        assertTrue(result.getBody().contains("Dear " + user.getUsername() + ",\n" +
+                "We have received a request to schedule a visit for your pet with id: " + petName + " on the following date and time: " + visitDate.toString() + "." + "\n" +
+                "If you do not wish to create an account, please disregard this email."));
+        assertTrue(result.getSenderName().contains("ChamplainPetClinic@gmail.com"));
     }
 }

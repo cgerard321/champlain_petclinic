@@ -1,21 +1,19 @@
 package com.petclinic.billing.datalayer;
 
+import com.petclinic.billing.domainclientlayer.Auth.AuthServiceClient;
+import com.petclinic.billing.domainclientlayer.Auth.Rethrower;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
-import org.springframework.transaction.annotation.Transactional;
-import reactor.core.publisher.Flux;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Calendar;
-import java.util.Date;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 
 @DataMongoTest
 public class BillServicePersistenceTests {
@@ -23,7 +21,11 @@ public class BillServicePersistenceTests {
     @Autowired
     BillRepository repo;
 
-
+    @MockBean
+    AuthServiceClient authServiceClient;
+    
+    @MockBean
+    Rethrower rethrower;
 
     @Test
     void shouldSaveOneBill(){
@@ -56,7 +58,6 @@ public class BillServicePersistenceTests {
 
     }
 
-
     @Test
     void shouldFindBillByCustomerId(){
 
@@ -76,6 +77,7 @@ public class BillServicePersistenceTests {
                 .verifyComplete();
 
     }
+
     @Test
     void shouldFindBillByVetId(){
 
@@ -102,7 +104,6 @@ public class BillServicePersistenceTests {
         Bill originalBill = buildBill();
         repo.save(originalBill).block();
 
-
         Bill updatedBill = Bill.builder()
                 .id(originalBill.getId())
                 .billId(originalBill.getBillId())
@@ -110,18 +111,15 @@ public class BillServicePersistenceTests {
                 .vetId(originalBill.getVetId())
                 .visitType("New Visit Type")
                 .date(originalBill.getDate())
-                .amount(42.0)
+                .amount(new BigDecimal(42.0))
                 .build();
 
-
         Mono<Bill> updateMono = repo.save(updatedBill);
-
 
         StepVerifier
                 .create(updateMono)
                 .expectNext(updatedBill)
                 .verifyComplete();
-
 
         Mono<Bill> retrievedBillMono = repo.findById(originalBill.getId());
 
@@ -152,9 +150,6 @@ public class BillServicePersistenceTests {
                 .create(delete)
                 .expectNextCount(0)
                 .verifyComplete();
-
-
-
     }
 
     @Test
@@ -174,10 +169,8 @@ public class BillServicePersistenceTests {
                 .create(delete)
                 .expectNextCount(0)
                 .verifyComplete();
-
-
-
     }
+
     @Test
     void shouldDeleteBillsByCustomerId(){
 
@@ -197,7 +190,6 @@ public class BillServicePersistenceTests {
                 .verifyComplete();
     }
 
-
     private Bill buildBill(){
 
         Calendar calendar = Calendar.getInstance();
@@ -207,9 +199,8 @@ public class BillServicePersistenceTests {
                 .toLocalDate();;
 
 
-        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).build();
+        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).build();
     }
-
 
     @Test
     void shouldFindAllBillsByDateBetween(){
@@ -230,6 +221,4 @@ public class BillServicePersistenceTests {
                 .verifyComplete();
 
     }
-
-
 }

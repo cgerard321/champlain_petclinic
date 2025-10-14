@@ -43,9 +43,9 @@ public interface UserService {
 
     List<UserDetails> findAllWithoutPage();
 
-    Mail generateVerificationMail(User user);
+//    NewMail generateVerificationMail(User user);
 
-    void generateVerificationMailWithNewEmailingService(User user);
+    Mail generateVerificationMail(User user);
 
     UserPasswordLessDTO verifyEmailFromToken(String token);
 
@@ -73,4 +73,8 @@ public interface UserService {
 
     void processResetPassword(UserResetPwdWithTokenRequestModel resetRequest);
     UserPasswordLessDTO updateUserRole(String userId, RolesChangeRequestDTO roles, String token);
+    public String updateUserUsername(String userId, String username, String token);
+
+    User getUserbyUsername(String username);
+
 }

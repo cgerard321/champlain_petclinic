@@ -7,51 +7,35 @@ export async function updateUserRating(
   newRating: number,
   newReview: string | null
 ): Promise<RatingModel> {
-  const doesExist = await getUserRating(productId);
   const emptyResponse = { rating: 0, review: '' };
-  if (doesExist.rating == 0) {
-    const res = await axiosInstance.post<RatingModel>(
-      '/ratings/' + productId,
-      { rating: newRating, review: newReview },
-      {
-        responseType: 'json',
-      }
-    );
-    switch (res.status) {
-      case 401:
-        console.error('Could not get token, unauthorized..');
-        return emptyResponse;
-      case 404:
-        return emptyResponse;
-      case 422:
-        console.error('IDs are invalid');
-        return emptyResponse;
-      case 201:
-        return res.data;
-      default:
-        return emptyResponse;
+  try {
+    const doesUserRatingExist = await getUserRating(productId);
+    let response;
+    if (doesUserRatingExist.rating == 0) {
+      response = await axiosInstance.post<RatingModel>(
+        '/ratings/' + productId,
+        { rating: newRating, review: newReview },
+        {
+          responseType: 'json',
+          useV2: false,
+        }
+      );
+
+      return response.data;
+    } else {
+      response = await axiosInstance.put<RatingModel>(
+        '/ratings/' + productId,
+        { rating: newRating, review: newReview },
+        {
+          responseType: 'json',
+          useV2: false,
+        }
+      );
+
+      return response.data;
     }
-  } else {
-    const res = await axiosInstance.put<RatingModel>(
-      '/ratings/' + productId,
-      { rating: newRating, review: newReview },
-      {
-        responseType: 'json',
-      }
-    );
-    switch (res.status) {
-      case 401:
-        console.error('Could not get token, unauthorized..');
-        return emptyResponse;
-      case 404:
-        return emptyResponse;
-      case 422:
-        console.error('IDs are invalid');
-        return emptyResponse;
-      case 200:
-        return res.data;
-      default:
-        return emptyResponse;
-    }
+  } catch (error) {
+    console.error('Error updating user rating:', error);
+    return emptyResponse;
   }
 }

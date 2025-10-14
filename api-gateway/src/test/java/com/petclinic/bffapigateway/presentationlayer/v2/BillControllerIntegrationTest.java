@@ -22,6 +22,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.*;
@@ -43,7 +44,6 @@ public class BillControllerIntegrationTest {
     private MockServerConfigBillService mockServerConfigBillService;
     private MockServerConfigAuthService mockServerConfigAuthService;
 
-
     @BeforeAll
     public void startMockServer() {
         mockServerConfigBillService = new MockServerConfigBillService();
@@ -52,12 +52,10 @@ public class BillControllerIntegrationTest {
         mockServerConfigBillService.registerUpdateBillEndpoint();
         mockServerConfigBillService.registerPayBillEndpoint();
 
-
         mockServerConfigAuthService = new MockServerConfigAuthService();
         mockServerConfigAuthService.registerValidateTokenForAdminEndpoint();
         mockServerConfigAuthService.registerValidateTokenForOwnerEndpoint();
     }
-
 
     @AfterAll
     public void stopMockServer() {
@@ -70,11 +68,10 @@ public class BillControllerIntegrationTest {
             .visitType("general")
             .vetId("3")
             .date(LocalDate.parse("2024-10-11"))
-            .amount(100.0)
+            .amount(new BigDecimal("100.0"))
             .billStatus(BillStatus.UNPAID)
             .dueDate(LocalDate.parse("2024-10-13"))
             .build();
-
 
     private BillResponseDTO billresponse = BillResponseDTO.builder()
             .billId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361b")
@@ -82,8 +79,8 @@ public class BillControllerIntegrationTest {
             .visitType("general")
             .vetId("3")
             .date(LocalDate.parse("2024-10-11"))
-            .amount(100.0)
-            .taxedAmount(0.0)
+            .amount(new BigDecimal("100.0"))
+            .taxedAmount(new BigDecimal("0.0"))
             .billStatus(BillStatus.UNPAID)
             .dueDate(LocalDate.parse("2024-10-13"))
             .build();
@@ -94,13 +91,11 @@ public class BillControllerIntegrationTest {
             .visitType("general")
             .vetId("2")
             .date(LocalDate.parse("2024-10-11"))
-            .amount(120.0)
-            .taxedAmount(10.0)
+            .amount(new BigDecimal("120.0"))
+            .taxedAmount(new BigDecimal("10.0"))
             .billStatus(BillStatus.UNPAID)
             .dueDate(LocalDate.parse("2024-10-13"))
             .build();
-
-
 
     @Test
     void whenGetAllBills_asAdmin_thenReturnAllBills() {
@@ -125,7 +120,7 @@ public class BillControllerIntegrationTest {
     void whenCreateBill_thenReturnCreatedBill() {
         Mono<BillResponseDTO> result = webTestClient
                 .post()
-                .uri("/api/v2/gateway/bills/admin")
+                .uri("/api/gateway/bills")
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(billRequestDTO), BillRequestDTO.class)
@@ -145,13 +140,12 @@ public class BillControllerIntegrationTest {
                     assertEquals(billRequestDTO.getVisitType(), response.getVisitType());
                     assertEquals(billRequestDTO.getVetId(), response.getVetId());
                     assertEquals(billRequestDTO.getDate(), response.getDate());
-                    assertEquals(billRequestDTO.getAmount(), response.getAmount());
+                    assertEquals(0, billRequestDTO.getAmount().compareTo(response.getAmount()));
                     assertEquals(billRequestDTO.getBillStatus(), response.getBillStatus());
                     assertEquals(billRequestDTO.getDueDate(), response.getDueDate());
                     return true;})
                 .verifyComplete();
     }
-
 
     @Test
     void whenGetAllBillsByPageAsAdmin_thenReturnPaginatedBills() {
@@ -193,7 +187,7 @@ public class BillControllerIntegrationTest {
                 .visitType("operation")
                 .vetId("3")
                 .date(LocalDate.parse("2024-10-11"))
-                .amount(100.0)
+                .amount(new BigDecimal("100.0"))
                 .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.parse("2024-10-13"))
                 .build();
@@ -236,7 +230,7 @@ public class BillControllerIntegrationTest {
                 .visitType("operation")
                 .vetId("3")
                 .date(LocalDate.parse("2024-10-11"))
-                .amount(100.0)
+                .amount(new BigDecimal("100.0"))
                 .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.parse("2024-10-13"))
                 .build();
@@ -273,153 +267,65 @@ public class BillControllerIntegrationTest {
                 });
     }
 
+
+
+    @Test
+    void whenGetInterest_withInvalidRole_thenUnauthorized() {
+        String billId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a";
+
+        webTestClient.get()
+                .uri("/api/v2/gateway/bills/admin/{billId}/interest", billId)
+                .cookie("User", "invalidToken")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isUnauthorized();
+    }
+
+
+
+    @Test
+    void whenGetTotal_withInvalidRole_thenUnauthorized() {
+        String billId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361b";
+
+        webTestClient.get()
+                .uri("/api/v2/gateway/bills/admin/{billId}/total", billId)
+                .cookie("User", "invalidToken")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isUnauthorized();
+    }
+
+    // --- Customer endpoints (user-specific) ---
+
+
+
+    @Test
+    void whenGetInterestForCustomer_withInvalidRole_thenUnauthorized() {
+        String customerId = "cust-123";
+        String billId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361c";
+
+        webTestClient.get()
+                .uri("/api/v2/gateway/bills/customer/{customerId}/bills/{billId}/interest", customerId, billId)
+                .cookie("User", "invalidToken")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isUnauthorized();
+    }
+
+
+
+    @Test
+    void whenGetTotalForCustomer_withInvalidRole_thenUnauthorized() {
+        String customerId = "cust-123";
+        String billId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361d";
+
+        webTestClient.get()
+                .uri("/api/v2/gateway/bills/customer/{customerId}/bills/{billId}/total", customerId, billId)
+                .cookie("User", "invalidToken")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isUnauthorized();
+    }
+
+
 }
-
-//these tests keep returning 404 and i do not understand why
-
-//    @Test
-//    void payBill_Success() {
-//        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/29");
-//
-//        webTestClient.post()
-//                .uri("/api/v2/gateway/bills/customer/e6c7398e-8ac4-4e10-9ee0-03ef33f0361a/bills/1/pay")
-//                .cookie("Bearer", jwtTokenForValidOwnerId)  // Simulate valid owner token
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .body(Mono.just(paymentRequestDTO), PaymentRequestDTO.class)
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectBody(String.class)
-//                .value(response -> {
-//                    assertEquals("Payment successful", response);
-//                });
-//    }
-//
-//    @Test
-//    void payBill_Failure_InvalidCustomerId() {
-//        // Prepare a valid PaymentRequestDTO
-//        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
-//
-//        // Execute the POST request with an invalid customerId
-//        webTestClient.post()
-//                .uri("/api/v2/gateway/customer/{customerId}/bills/{billId}/pay", "invalid-customer-id", "1")
-//                .cookie("Bearer", MockServerConfigAuthService.jwtTokenForValidOwnerId)  // Simulate valid owner token
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .body(Mono.just(paymentRequestDTO), PaymentRequestDTO.class)
-//                .exchange()
-//                .expectStatus().isBadRequest()
-//                .expectBody(String.class)
-//                .value(response -> {
-//                    assertTrue(response.contains("Payment failed: Invalid customer ID"));
-//                });
-//    }
-//
-//    @Test
-//    void payBill_Failure_InvalidDetails() {
-//        // Prepare a PaymentRequestDTO with invalid payment details
-//        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("123", "12", "01/20");
-//
-//        // Execute the POST request and expect failure
-//        webTestClient.post()
-//                .uri("/api/v2/gateway/customer/{customerId}/bills/{billId}/pay", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", "1")
-//                .cookie("Bearer", jwtTokenForValidOwnerId)  // Simulate valid owner token
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .body(Mono.just(paymentRequestDTO), PaymentRequestDTO.class)
-//                .exchange()
-//                .expectStatus().isBadRequest()
-//                .expectBody(String.class)
-//                .value(response -> {
-//                    assertTrue(response.contains("Payment failed"));
-//                });
-//    }
-//
-//    @Test
-//    void payBill_UnauthorizedAccess() {
-//        // Prepare a valid PaymentRequestDTO
-//        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
-//
-//        // Attempt to make the payment without a valid token
-//        webTestClient.post()
-//                .uri("/api/v2/gateway/customer/{customerId}/bills/{billId}/pay", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", "1")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .body(Mono.just(paymentRequestDTO), PaymentRequestDTO.class)
-//                .exchange()
-//                .expectStatus().isUnauthorized(); // Expect Unauthorized access due to missing token
-//    }
-//
-//    @Test
-//    void payBill_ByAdminRole_Success() {
-//        // Prepare a valid PaymentRequestDTO
-//        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
-//
-//        // Execute the POST request with an admin token
-//        webTestClient.post()
-//                .uri("/api/v2/gateway/customer/{customerId}/bills/{billId}/pay", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", "1")
-//                .cookie("Bearer", jwtTokenForValidAdmin)  // Simulate valid admin token
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .body(Mono.just(paymentRequestDTO), PaymentRequestDTO.class)
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectBody(String.class)
-//                .value(response -> {
-//                    assertEquals("Payment successful", response);
-//                });
-//    }
-//
-//    @Test
-//    void payBill_InvalidCustomerId_Failure() {
-//        // Prepare a valid PaymentRequestDTO
-//        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
-//
-//        // Execute the POST request with an invalid customerId
-//        webTestClient.post()
-//                .uri("/api/v2/gateway/customer/{customerId}/bills/{billId}/pay", "invalidCustomerId", "1")
-//                .cookie("Bearer", jwtTokenForValidOwnerId)  // Simulate valid owner token
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .body(Mono.just(paymentRequestDTO), PaymentRequestDTO.class)
-//                .exchange()
-//                .expectStatus().isBadRequest()  // Expect a bad request error
-//                .expectBody(String.class)
-//                .value(response -> {
-//                    assertTrue(response.contains("Payment failed"));
-//                });
-//    }
-//
-//    @Test
-//    void payBill_InvalidBillId_Failure() {
-//        // Prepare a valid PaymentRequestDTO
-//        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
-//
-//        // Execute the POST request with an invalid billId
-//        webTestClient.post()
-//                .uri("/api/v2/gateway/customer/{customerId}/bills/{billId}/pay", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", "invalidBillId")
-//                .cookie("Bearer", jwtTokenForValidOwnerId)  // Simulate valid owner token
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .body(Mono.just(paymentRequestDTO), PaymentRequestDTO.class)
-//                .exchange()
-//                .expectStatus().isBadRequest()  // Expect a bad request error
-//                .expectBody(String.class)
-//                .value(response -> {
-//                    assertTrue(response.contains("Payment failed"));
-//                });
-//    }
-//
-//    @Test
-//    void payBill_MissingPaymentDetails_Failure() {
-//        // Prepare an incomplete PaymentRequestDTO
-//        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO(null, null, null);
-//
-//        // Execute the POST request with missing details
-//        webTestClient.post()
-//                .uri("/api/v2/gateway/bills/customer/e6c7398e-8ac4-4e10-9ee0-03ef33f0361a/bills/1/pay")
-//                .cookie("Bearer", jwtTokenForValidOwnerId)  // Simulate valid owner token
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .body(Mono.just(paymentRequestDTO), PaymentRequestDTO.class)
-//                .exchange()
-//                .expectStatus().isBadRequest()  // Expect a bad request error
-//                .expectBody(String.class)
-//                .value(response -> {
-//                    assertTrue(response.contains("Payment failed"));
-//                });
-//    }
-
-//}

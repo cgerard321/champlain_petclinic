@@ -28,9 +28,8 @@ import ServiceUnavailable from '@/pages/Error/ServiceUnavailable.tsx';
 import Forbidden from '@/pages/Error/Forbidden.tsx';
 import Unauthorized from '@/pages/Error/Unauthorized.tsx';
 import PageNotFound from '@/pages/Error/PageNotFound.tsx';
-import EmailingPage from '@/pages/Emailing/EmailingPage.tsx';
 import EditInventory from '@/features/inventories/EditInventory.tsx';
-import { ProtectedRoute } from './shared/components/ProtectedRouteProps';
+import { ProtectedRoute } from './shared/components';
 import CustomerDetailsPage from '@/pages/Customer/CustomerDetailsPage.tsx';
 import UpdateCustomerPage from '@/pages/Customer/UpdateCustomerPage.tsx';
 import VisitDetails from './features/visits/visits/VisitByVisitId';
@@ -39,10 +38,7 @@ import UpdateOwnerPetPage from '@/pages/Customer/UpdateOwnerPetPage.tsx';
 import EditInventoryProducts from './features/inventories/EditInventoryProducts';
 import AddSupplyToInventory from './features/inventories/AddSupplyToInventory';
 import AllUsers from '@/pages/Users/AllUsers.tsx';
-//import AddEmergencyForm from './features/visits/Emergency/AddEmergencyForm';
-//import EditEmergency from './features/visits/Emergency/EditEmergency';
-import EmergencyList from './features/visits/Emergency/EmergencyList';
-import ProductDetails from '@/features/products/api/ProductDetails.tsx';
+import ProductDetails from '@/features/products/components/ProductDetails';
 // import ProductsList from '@/features/products/ProductsList.tsx';
 import AddPetPage from '@/pages/Customer/AddPetPage.tsx';
 import EditProduct from './features/products/components/EditProduct';
@@ -51,17 +47,18 @@ import ResetPassword from '@/pages/User/ResetPassword.tsx';
 import PromoPage from '@/pages/Promos/PromoListPage.tsx';
 import AddPromoPage from '@/pages/Promos/AddPromoPage.tsx';
 import UpdatePromoPage from '@/pages/Promos/UpdatePromoPage.tsx';
-import CustomerEmergency from './pages/Visit/CustomerEmergency';
-import AddEmergencyForm from './features/visits/Emergency/AddEmergencyForm';
 import LowStockProducts from '@/features/inventories/LowStockProducts.tsx';
 import MoveInventoryProducts from '@/features/inventories/MoveInventoryProducts.tsx';
 import ReviewsCustomer from '@/pages/Review/CustomerReviews.tsx';
 import AddReviewsCustomer from '@/pages/Review/CustomerAddReviewForm.tsx';
-import EmergencyDetails from './features/visits/EmergencyByEmergencyId';
 import CustomerPromoPage from '@/pages/Promos/CustomerPromoPage.tsx';
 import UserDetailsPage from './pages/Users/UserDetailsPage';
 import UpdateUserPage from './pages/Users/UpdateUserPage';
 import AllRoles from '@/pages/Users/AllRoles.tsx';
+import OwnerBookAppointment from '@/pages/Visit/OwnerBookAppointment.tsx';
+import FAQ from './pages/FAQ/FAQ';
+import ContactPage from './pages/Contact/Contact';
+import PrivacyPolicyPage from './pages/PrivacyPolicy/PrivacyPolicy';
 
 const router = createBrowserRouter([
   {
@@ -113,40 +110,6 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <VisitDetails />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: AppRoutePaths.CustomerEmergency,
-        element: (
-          <ProtectedRoute>
-            <CustomerEmergency />
-          </ProtectedRoute>
-        ),
-      },
-
-      {
-        path: AppRoutePaths.Emergency,
-        element: (
-          <ProtectedRoute>
-            <AddEmergencyForm />
-          </ProtectedRoute>
-        ),
-      },
-
-      {
-        path: AppRoutePaths.EmergencyById,
-        element: (
-          <ProtectedRoute>
-            <EmergencyDetails />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: AppRoutePaths.EmergencyList,
-        element: (
-          <ProtectedRoute>
-            <EmergencyList />
           </ProtectedRoute>
         ),
       },
@@ -306,7 +269,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.Visits,
         element: (
-          <ProtectedRoute roles={['ADMIN']}>
+          <ProtectedRoute roles={['ADMIN', 'VET']}>
             <Visits />
           </ProtectedRoute>
         ),
@@ -368,14 +331,6 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: AppRoutePaths.Emailing,
-        element: (
-          <ProtectedRoute roles={['ADMIN']}>
-            <EmailingPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
         path: AppRoutePaths.CustomerProfile,
         element: (
           <ProtectedRoute roles={['OWNER']}>
@@ -426,7 +381,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.UpdatePet,
         element: (
-          <ProtectedRoute roles={['ADMIN', 'VET']}>
+          <ProtectedRoute roles={['ADMIN', 'VET', 'OWNER']}>
             <UpdateOwnerPetPage />
           </ProtectedRoute>
         ),
@@ -474,12 +429,32 @@ const router = createBrowserRouter([
     ),
   },
   {
+    path: AppRoutePaths.OwnerBookAppointment,
+    element: (
+      <ProtectedRoute roles={['OWNER']}>
+        <OwnerBookAppointment />
+      </ProtectedRoute>
+    ),
+  },
+  {
     path: AppRoutePaths.Default,
     element: <Navigate to={AppRoutePaths.Home} replace />,
   },
   {
+    path: AppRoutePaths.FAQ,
+    element: <FAQ />,
+  },
+  {
+    path: AppRoutePaths.Contact,
+    element: <ContactPage />,
+  },
+  {
     path: AppRoutePaths.Home,
     element: <Home />,
+  },
+  {
+    path: AppRoutePaths.Privacy,
+    element: <PrivacyPolicyPage />,
   },
   { path: AppRoutePaths.Login, element: <Login /> },
   { path: AppRoutePaths.SignUp, element: <SignUp /> },

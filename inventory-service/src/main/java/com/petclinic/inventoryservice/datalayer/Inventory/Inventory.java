@@ -19,6 +19,7 @@ public class Inventory {
     @Id
     private String id;
     private String inventoryId;
+    private String inventoryCode;
     private String inventoryName;
     private String inventoryType;
     private String inventoryDescription;

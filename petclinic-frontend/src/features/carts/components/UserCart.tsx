@@ -1,18 +1,31 @@
-// UserCart.tsx
-import { useState, useEffect, useCallback } from 'react';
-import CartBillingForm from './CartBillingForm';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useCallback, useEffect, useState } from 'react';
+import CartBillingForm, { BillingInfo } from './CartBillingForm';
+import { useNavigate, useParams } from 'react-router-dom';
 import CartItem from './CartItem';
 import { ProductModel } from '../models/ProductModel';
+import './cart-shared.css';
 import './UserCart.css';
 import { NavBar } from '@/layouts/AppNavBar';
-import { FaShoppingCart } from 'react-icons/fa'; // Importing the shopping cart icon
+import { FaShoppingCart } from 'react-icons/fa';
+import ImageContainer from '@/features/products/components/ImageContainer';
 import axiosInstance from '@/shared/api/axiosInstance';
-import { IsAdmin } from '@/context/UserContext';
+import { formatPrice } from '../utils/formatPrice';
+import {
+  IsAdmin,
+  IsInventoryManager,
+  IsReceptionist,
+  IsVet,
+} from '@/context/UserContext';
 import { AppRoutePaths } from '@/shared/models/path.routes';
-
-// NEW: cart change notifier (lets the NavBar update automatically)
-import { notifyCartChanged } from '../api/cartEvent';
+import { getProductByProductId } from '@/features/products/api/getProductByProductId';
+import {
+  bumpCartCountInLS,
+  notifyCartChanged,
+  setCartCountInLS,
+  setCartIdInLS,
+} from '../api/cartEvent';
+import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
+import axios from 'axios';
 
 interface ProductAPIResponse {
   productId: number;
@@ -35,36 +48,231 @@ interface Invoice {
 const UserCart = (): JSX.Element => {
   const { cartId } = useParams<{ cartId: string }>();
   const navigate = useNavigate();
+
+  const { confirm, ConfirmModal } = useConfirmModal();
+
+  // state: cart + wishlist
   const [cartItems, setCartItems] = useState<ProductModel[]>([]);
   const [wishlistItems, setWishlistItems] = useState<ProductModel[]>([]);
+
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [errorMessages, setErrorMessages] = useState<{ [key: number]: string }>(
+  const [errorMessages, setErrorMessages] = useState<Record<number, string>>(
     {}
   );
-  const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
-  const [invoices, setInvoices] = useState<Invoice[]>([]); // State to hold invoice details
-  const [cartItemCount, setCartItemCount] = useState<number>(0);
-  const [isCheckoutModalOpen, setIsCheckoutModalOpen] =
-    useState<boolean>(false); // Modal state
-  const [showBillingForm, setShowBillingForm] = useState<boolean>(false); // Billing form state
-  const [wishlistUpdated, setWishlistUpdated] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState<string | null>(
     null
-  ); // New state for notifications
+  );
+
+  const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [cartItemCount, setCartItemCount] = useState<number>(0);
+  const [isCheckoutModalOpen, setIsCheckoutModalOpen] =
+    useState<boolean>(false);
+  const [showBillingForm, setShowBillingForm] = useState<boolean>(false);
+  const [billingInfo, setBillingInfo] = useState<BillingInfo | null>(null);
+  const [checkoutDate, setCheckoutDate] = useState<string | null>(null);
+
+  const [wishlistUpdated, setWishlistUpdated] = useState(false);
   const [voucherCode, setVoucherCode] = useState<string>('');
   const [discount, setDiscount] = useState<number>(0);
   const [voucherError, setVoucherError] = useState<string | null>(null);
 
+  const [movingAll, setMovingAll] = useState<boolean>(false);
+
+  // Recent purchases state
+  const [recentPurchases, setRecentPurchases] = useState<
+    Array<{
+      productId: string;
+      productName: string;
+      productSalePrice: number;
+      imageId: string;
+      quantity: number;
+    }>
+  >([]);
+
+  // Quantity state for recent purchases
+  const [recentPurchaseQuantities, setRecentPurchaseQuantities] = useState<{
+    [productId: string]: number;
+  }>({});
+
+  // Handle quantity change for recent purchases
+  const handleRecentPurchaseQuantityChange = (
+    productId: string,
+    value: number
+  ): void => {
+    setRecentPurchaseQuantities(prev => ({
+      ...prev,
+      [productId]: Math.max(1, value),
+    }));
+  };
+
+  // Handle 'Purchase Again' action
+  const handlePurchaseAgain = async (item: {
+    productId: string;
+    productName: string;
+    productSalePrice: number;
+    imageId: string;
+    quantity: number;
+  }): Promise<void> => {
+    if (!cartId) return;
+
+    const quantity = Math.max(1, recentPurchaseQuantities[item.productId] || 1);
+
+    try {
+      // Concurrently add items to cart
+      const addPromises = Array.from({ length: quantity }, () =>
+        axiosInstance.post(
+          `/carts/${cartId}/${item.productId}`,
+          {},
+          { useV2: false }
+        )
+      );
+      await Promise.all(addPromises);
+
+      setNotificationMessage(
+        `${item.productName} (x${quantity}) added to cart!`
+      );
+      notifyCartChanged();
+
+      // Fetch updated cart and update state
+      const { data } = await axiosInstance.get(`/carts/${cartId}`, {
+        useV2: false,
+      });
+      if (Array.isArray(data.products)) {
+        const products: ProductModel[] = data.products.map(
+          (p: ProductAPIResponse) => ({
+            productId: p.productId,
+            imageId: p.imageId,
+            productName: p.productName,
+            productDescription: p.productDescription,
+            productSalePrice: p.productSalePrice,
+            averageRating: p.averageRating,
+            quantity: p.quantityInCart || 1,
+            productQuantity: p.productQuantity,
+          })
+        );
+        setCartItems(products);
+        const updatedCount = products.reduce(
+          (acc, p) => acc + (p.quantity || 0),
+          0
+        );
+        setCartCountInLS(updatedCount);
+      }
+    } catch (err: unknown) {
+      const msg =
+        (axios.isAxiosError(err) &&
+          (err.response?.data as { message?: string } | undefined)?.message) ||
+        `Failed to add ${item.productName} to cart.`;
+      setNotificationMessage(msg);
+    }
+  };
+
+  // Recommendation purchases state
+  const [recommendationPurchases, setRecommendationPurchases] = useState<
+    Array<{
+      productId: string;
+      productName: string;
+      productSalePrice: number;
+      imageId: string;
+      quantity: number;
+      averageRating?: number;
+    }>
+  >([]);
+
+  // Quantity state for recommendation purchases
+  const [
+    recommendationPurchaseQuantities,
+    setRecommendationPurchaseQuantities,
+  ] = useState<{
+    [productId: string]: number;
+  }>({});
+
+  // Handle quantity change for recommendation purchases
+  const handleRecommendationPurchaseQuantityChange = (
+    productId: string,
+    value: number
+  ): void => {
+    setRecommendationPurchaseQuantities(prev => ({
+      ...prev,
+      [productId]: Math.max(1, value),
+    }));
+  };
+
+  // Handle 'Purchase Recommendation' action
+  const handlePurchaseRecommendation = async (item: {
+    productId: string;
+    productName: string;
+    productSalePrice: number;
+    imageId: string;
+    quantity: number;
+  }): Promise<void> => {
+    if (!cartId) return;
+
+    const quantity = Math.max(
+      1,
+      recommendationPurchaseQuantities[item.productId] || 1
+    );
+
+    try {
+      for (let i = 0; i < quantity; i += 1) {
+        await axiosInstance.post(
+          `/carts/${cartId}/${item.productId}`,
+          {},
+          { useV2: false }
+        );
+      }
+      setNotificationMessage(
+        `${item.productName} (x${quantity}) added to cart!`
+      );
+      notifyCartChanged();
+      // Fetch updated cart and update state
+      const { data } = await axiosInstance.get(`/carts/${cartId}`, {
+        useV2: false,
+      });
+      if (Array.isArray(data.products)) {
+        const products: ProductModel[] = data.products.map(
+          (p: ProductAPIResponse) => ({
+            productId: p.productId,
+            imageId: p.imageId,
+            productName: p.productName,
+            productDescription: p.productDescription,
+            productSalePrice: p.productSalePrice,
+            averageRating: p.averageRating,
+            quantity: p.quantityInCart || 1,
+            productQuantity: p.productQuantity,
+          })
+        );
+        setCartItems(products);
+        const updatedCount = products.reduce(
+          (acc, p) => acc + (p.quantity || 0),
+          0
+        );
+        setCartCountInLS(updatedCount);
+      }
+    } catch (err: unknown) {
+      const msg =
+        (axios.isAxiosError(err) &&
+          (err.response?.data as { message?: string } | undefined)?.message) ||
+        `Failed to add ${item.productName} to cart.`;
+      setNotificationMessage(msg);
+    }
+  };
+
+  // rôles (read-only pour staff/admin)
+  const isAdmin = IsAdmin();
+  const isStaff =
+    isAdmin || IsInventoryManager() || IsVet() || IsReceptionist();
+
+  // derived totals
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
     0
   );
-  const tvq = subtotal * 0.09975; // Quebec tax rate
-  const tvc = subtotal * 0.05; // Canadian tax rate
+  const tvq = subtotal * 0.09975;
+  const tvc = subtotal * 0.05;
   const total = subtotal - discount + tvq + tvc;
 
-  // Function to update the cart item count
   const updateCartItemCount = useCallback(() => {
     const count = cartItems.reduce(
       (acc, item) => acc + (item.quantity || 0),
@@ -86,47 +294,91 @@ const UserCart = (): JSX.Element => {
           useV2: true,
         });
 
-        // Ensure that data.products exists and is an array
         if (!Array.isArray(data.products)) {
           throw new Error('Invalid data format: products should be an array');
         }
 
-        // Map data.products to the appropriate ProductModel format
         const products: ProductModel[] = data.products.map(
-          (product: ProductAPIResponse) => ({
-            productId: product.productId,
-            imageId: product.imageId,
-            productName: product.productName,
-            productDescription: product.productDescription,
-            productSalePrice: product.productSalePrice,
-            averageRating: product.averageRating,
-            quantity: product.quantityInCart || 1,
-            productQuantity: product.productQuantity,
+          (p: ProductAPIResponse) => ({
+            productId: p.productId,
+            imageId: p.imageId,
+            productName: p.productName,
+            productDescription: p.productDescription,
+            productSalePrice: p.productSalePrice,
+            averageRating: p.averageRating,
+            quantity: p.quantityInCart || 1,
+            productQuantity: p.productQuantity,
           })
         );
 
         setCartItems(products);
-        setWishlistItems(data.wishListProducts || []);
+        setCartIdInLS(cartId);
+        const countFromFetch = products.reduce(
+          (acc, p) => acc + (p.quantity || 0),
+          0
+        );
+        setCartCountInLS(countFromFetch);
+        const enrichedWishlist = await Promise.all(
+          (data.wishListProducts || []).map(async (item: ProductModel) => {
+            const fullProduct = await getProductByProductId(item.productId);
+            return {
+              ...fullProduct,
+              quantity: item.quantity ?? 1,
+            };
+          })
+        );
+        setWishlistItems(enrichedWishlist);
       } catch (err: unknown) {
-        // Changed from any to unknown
-        if (err instanceof Error) {
-          console.error(err.message);
-          setError('Failed to fetch cart items');
-        } else {
-          console.error('An unexpected error occurred');
-          setError('An unexpected error occurred');
-        }
+        console.error(err);
+        setError('Failed to fetch cart items');
       } finally {
         setLoading(false);
+        if (wishlistUpdated) setWishlistUpdated(false);
       }
     };
 
     fetchCartItems();
-    // Reset wishlistUpdated to avoid unnecessary fetches
-    setWishlistUpdated(false);
-    // Recalculate cart item count after setting cart items
+  }, [cartId, wishlistUpdated]);
+
+  useEffect(() => {
     updateCartItemCount();
-  }, [cartId, updateCartItemCount, wishlistUpdated]);
+  }, [cartItems, updateCartItemCount]);
+
+  // Fetch recent purchases
+  useEffect(() => {
+    if (!cartId) return;
+    const fetchRecentPurchases = async (): Promise<void> => {
+      try {
+        const { data } = await axiosInstance.get(
+          `/carts/${cartId}/recent-purchases`,
+          { useV2: false }
+        );
+        setRecentPurchases(data || []);
+      } catch (err) {
+        setRecentPurchases([]);
+      }
+    };
+    fetchRecentPurchases();
+  }, [cartId]);
+
+  // Fetch recommendation purchases
+  // Reusable function to fetch recommendation purchases
+  const fetchRecommendationPurchases = useCallback(async (): Promise<void> => {
+    if (!cartId) return;
+    try {
+      const { data } = await axiosInstance.get(
+        `/carts/${cartId}/recommendation-purchases`,
+        { useV2: false }
+      );
+      setRecommendationPurchases(data || []);
+    } catch (err) {
+      setRecommendationPurchases([]);
+    }
+  }, [cartId]);
+
+  useEffect(() => {
+    fetchRecommendationPurchases();
+  }, [cartId, fetchRecommendationPurchases]);
 
   const applyVoucherCode = async (): Promise<void> => {
     try {
@@ -142,23 +394,33 @@ const UserCart = (): JSX.Element => {
     }
   };
 
+  const blockIfReadOnly = useCallback((): boolean => {
+    if (isStaff) {
+      setNotificationMessage(
+        'Read-only mode: staff/admin cannot modify carts.'
+      );
+      return true;
+    }
+    return false;
+  }, [isStaff, setNotificationMessage]);
+
   const changeItemQuantity = useCallback(
     async (
       event: React.ChangeEvent<HTMLInputElement>,
       index: number
     ): Promise<void> => {
-      const newQuantity = Math.max(1, Number(event.target.value)); // Ensure quantity is at least 1
-      const item = cartItems[index];
+      if (blockIfReadOnly()) return;
 
+      const newQuantity = Math.max(1, Number(event.target.value));
+      const item = cartItems[index];
+      const prevQty = item.quantity || 1;
       if (newQuantity > item.productQuantity) {
-        // Display error message
         setErrorMessages(prevErrors => ({
           ...prevErrors,
           [index]: `You cannot add more than ${item.productQuantity} items. Only ${item.productQuantity} items left in stock.`,
         }));
         return;
       } else {
-        // Clear error message
         setErrorMessages(prevErrors => {
           const rest = { ...prevErrors };
           delete rest[index];
@@ -166,12 +428,11 @@ const UserCart = (): JSX.Element => {
         });
       }
 
-      // Update quantity in backend
       try {
         const { data } = await axiosInstance.put(
           `/carts/${cartId}/products/${item.productId}`,
           { quantity: newQuantity },
-          { useV2: true }
+          { useV2: false }
         );
 
         if (data && data.message) {
@@ -179,120 +440,112 @@ const UserCart = (): JSX.Element => {
             ...prevErrors,
             [index]: data.message || 'Failed to update quantity',
           }));
-          // Check if the product has been moved to wishlist
+
           if (
             typeof data.message === 'string' &&
             data.message.includes('moved to your wishlist')
           ) {
-            // Remove the item from cart
             setCartItems(prevItems =>
               prevItems.filter((_, idx) => idx !== index)
             );
-            // Add to wishlist
             setWishlistItems(prevItems => [...prevItems, item]);
             setNotificationMessage(data.message);
-
-            //notify navbar (product left cart)
-            notifyCartChanged();
+            bumpCartCountInLS(-prevQty);
+            notifyCartChanged(); // left cart
             return;
           }
         } else {
-          // Update local state
-          setCartItems(prevItems => {
-            const newItems = [...prevItems];
-            newItems[index].quantity = newQuantity;
-            return newItems;
+          setCartItems(prev => {
+            const next = [...prev];
+            next[index] = { ...next[index], quantity: newQuantity };
+            return next;
           });
-          // Optionally, display success message
           setNotificationMessage('Item quantity updated successfully.');
-
-          // notify navbar (cart quantity changed)
-          notifyCartChanged();
+          bumpCartCountInLS(newQuantity - prevQty);
+          notifyCartChanged(); // qty changed
         }
-      } catch (err: unknown) {
-        // Changed from any to unknown
+      } catch (err) {
         console.error('Error updating quantity:', err);
-        if (err instanceof Error) {
-          const errorMessage = err.message || 'Failed to update quantity';
-          setErrorMessages(prevErrors => ({
-            ...prevErrors,
-            [index]: errorMessage,
-          }));
-        } else {
-          setErrorMessages(prevErrors => ({
-            ...prevErrors,
-            [index]: 'Failed to update quantity',
-          }));
-        }
+        setErrorMessages(prev => ({
+          ...prev,
+          [index]: 'Failed to update quantity',
+        }));
       }
     },
-    [cartItems, cartId]
+    [cartItems, cartId, blockIfReadOnly]
   );
 
   const deleteItem = useCallback(
     async (productId: string, indexToDelete: number): Promise<void> => {
-      if (!cartId) {
-        console.error('Cart ID is missing');
-        return;
-      }
+      if (blockIfReadOnly()) return;
+      if (!cartId) return;
+
+      const ok = await confirm({
+        title: 'Remove item',
+        message: 'Remove this item from your cart?',
+        confirmText: 'Remove',
+        cancelText: 'Cancel',
+        variant: 'danger',
+      });
+      if (!ok) return;
 
       try {
         await axiosInstance.delete(`/carts/${cartId}/${productId}`, {
-          useV2: true,
+          useV2: false,
         });
 
-        setCartItems(prevItems =>
-          prevItems.filter((_, index) => index !== indexToDelete)
-        );
-        alert('Item successfully removed!');
-
-        // notify navbar (item removed)
-        notifyCartChanged();
-      } catch (error: unknown) {
-        // Changed from any to unknown
+        setCartItems(prev => {
+          const removedQty = prev[indexToDelete]?.quantity || 1;
+          setNotificationMessage('Item removed from cart.');
+          bumpCartCountInLS(-removedQty);
+          return prev.filter((_, idx) => idx !== indexToDelete);
+        });
+        notifyCartChanged(); // item removed
+      } catch (error) {
         console.error('Error deleting item: ', error);
-        if (error instanceof Error) {
-          alert(`Failed to delete item: ${error.message}`);
-        } else {
-          alert('Failed to delete item');
-        }
+        setNotificationMessage('Failed to delete item.');
       }
     },
-    [cartId]
+    [cartId, blockIfReadOnly, confirm]
   );
 
   const clearCart = async (): Promise<void> => {
+    if (blockIfReadOnly()) return;
+
     if (!cartId) {
-      alert('Invalid cart ID');
+      setNotificationMessage('Invalid cart ID');
+
       return;
     }
 
-    if (window.confirm('Are you sure you want to clear the cart?')) {
-      try {
-        await axiosInstance.delete(`/carts/${cartId}/clear`, { useV2: true });
+    const ok = await confirm({
+      title: 'Clear cart',
+      message: 'Are you sure you want to clear the cart?',
+      confirmText: 'Clear cart',
+      cancelText: 'Cancel',
+      variant: 'danger',
+    });
+    if (!ok) return;
 
-        setCartItems([]);
-        setCartItemCount(0);
-        alert('Cart has been successfully cleared!');
-
-        // notify navbar (cart cleared)
-        notifyCartChanged();
-      } catch (error: unknown) {
-        // Changed from any to unknown
-        console.error('Error clearing cart:', error);
-        if (error instanceof Error) {
-          alert(`Failed to clear cart: ${error.message}`);
-        } else {
-          alert('Failed to clear cart');
-        }
-      }
+    try {
+      await axiosInstance.delete(`/carts/${cartId}/clear`, { useV2: false });
+      setCartItems([]);
+      setCartItemCount(0);
+      setCartCountInLS(0);
+      notifyCartChanged();
+      setNotificationMessage('Cart has been cleared.');
+    } catch (error) {
+      console.error('Error clearing cart:', error);
+      setNotificationMessage('Failed to clear cart.');
     }
   };
 
-  // Add to Wishlist Function
   const addToWishlist = async (item: ProductModel): Promise<void> => {
+    if (blockIfReadOnly()) return;
+
     try {
       const productId = item.productId;
+
       const { data } = await axiosInstance.put(
         `/carts/${cartId}/wishlist/${productId}/toWishList`,
         {
@@ -301,39 +554,43 @@ const UserCart = (): JSX.Element => {
           productName: item.productName,
           productSalePrice: item.productSalePrice,
         },
-        { useV2: true }
+        { useV2: false }
       );
 
       if (data && data.message) {
-        // Display notification message from backend
         setNotificationMessage(data.message);
       } else {
-        alert(`${item.productName} has been added to your wishlist!`);
+        setNotificationMessage(
+          `${item.productName} has been added to your wishlist!`
+        );
       }
 
-      // Update wishlist state
       setWishlistItems(prevItems => [...prevItems, item]);
-
-      // Trigger the useEffect by updating the wishlistUpdated state
       setWishlistUpdated(true);
+
+      // Decrement LS count since item left the cart
+      bumpCartCountInLS(-(item.quantity || 1));
 
       //notify navbar (item moved out of cart)
       notifyCartChanged();
     } catch (error: unknown) {
-      // Changed from any to unknown
       console.error('Error adding to wishlist:', error);
-      if (error instanceof Error) {
-        alert(error.message || 'Failed to add item to wishlist.');
-      } else {
-        alert('Failed to add item to wishlist.');
-      }
+      alert('Failed to add item to wishlist.');
     }
   };
 
-  // Add to Cart Function (from Wishlist)
   const addToCartFunction = async (item: ProductModel): Promise<void> => {
+    if (blockIfReadOnly()) return;
+
+    if (item.productQuantity <= 0) {
+      setNotificationMessage(
+        `${item.productName} is out of stock and cannot be added to the cart.`
+      );
+      return;
+    }
     try {
       const productId = item.productId;
+
       const { data } = await axiosInstance.put(
         `/carts/${cartId}/wishlist/${productId}/toCart`,
         {
@@ -342,90 +599,126 @@ const UserCart = (): JSX.Element => {
           productName: item.productName,
           productSalePrice: item.productSalePrice,
         },
-        { useV2: true }
+        { useV2: false }
       );
 
       if (data && data.message) {
         setNotificationMessage(data.message);
       } else {
-        alert(`${item.productName} has been added to your cart!`);
+        setNotificationMessage(
+          `${item.productName} has been added to your cart!`
+        );
       }
 
-      // Update cart items state
       setCartItems(prevItems => [...prevItems, item]);
-
-      // Remove from wishlist
       setWishlistItems(prevItems =>
         prevItems.filter(product => product.productId !== item.productId)
       );
-
-      // Trigger the useEffect by updating the wishlistUpdated state
       setWishlistUpdated(true);
+
+      // Item entered the cart, increment LS count
+      bumpCartCountInLS(item.quantity || 1);
 
       //notify navbar (item moved into cart)
       notifyCartChanged();
     } catch (error: unknown) {
-      // Changed from any to unknown
       console.error('Error adding to cart:', error);
-      if (error instanceof Error) {
-        alert(error.message || 'Failed to add item to cart.');
-      } else {
-        alert('Failed to add item to cart.');
-      }
+      setNotificationMessage('Failed to add item to cart.');
     }
   };
 
-  // a function to remove from wishlist
   const removeFromWishlist = async (item: ProductModel): Promise<void> => {
+    if (blockIfReadOnly()) return;
     if (!cartId) return;
 
-    const ok = window.confirm(`Remove "${item.productName}" from wishlist?`);
+    const ok = await confirm({
+      title: 'Remove from wishlist',
+      message: `Remove "${item.productName}" from wishlist?`,
+      confirmText: 'Remove',
+      cancelText: 'Cancel',
+      variant: 'danger',
+    });
+
     if (!ok) return;
 
     try {
       await axiosInstance.delete(
         `/carts/${cartId}/wishlist/${item.productId}`,
-        { useV2: true }
+        { useV2: false }
       );
 
       setWishlistItems(prev =>
         prev.filter(p => p.productId !== item.productId)
       );
-      setNotificationMessage(`Removed "${item.productName}" from wishlist.`);
     } catch (e) {
       console.error(e);
-      alert('Could not remove item from wishlist.');
+      setNotificationMessage('Could not remove item from wishlist.');
+    }
+  };
+
+  const moveAllWishlistToCart = async (): Promise<void> => {
+    if (blockIfReadOnly()) return;
+    if (!cartId || wishlistItems.length === 0) return;
+
+    const ok = await confirm({
+      title: 'Move all from wishlist',
+      message: `Move ${wishlistItems.length} item(s) to your cart?`,
+      confirmText: 'Move all',
+      cancelText: 'Cancel',
+    });
+    if (!ok) return;
+
+    setMovingAll(true);
+    setNotificationMessage(null);
+
+    try {
+      const res = await axiosInstance.post(
+        `/carts/${cartId}/wishlist/moveAll`,
+        {},
+        { useV2: true, validateStatus: () => true }
+      );
+
+      if (res.status >= 200 && res.status < 300) {
+        setWishlistUpdated(true);
+        notifyCartChanged();
+        setNotificationMessage(null);
+      } else {
+        const msg =
+          (res.data &&
+            (res.data.message || res.data.error || res.data.title)) ||
+          `Move All failed (${res.status})`;
+        setNotificationMessage(msg);
+      }
+    } catch (e) {
+      console.error(e);
+      setNotificationMessage('Unexpected error while moving wishlist items.');
+    } finally {
+      setMovingAll(false);
     }
   };
 
   useEffect(() => {
-    const savedInvoices = localStorage.getItem('invoices');
-    if (savedInvoices) {
-      setInvoices(JSON.parse(savedInvoices));
-    }
+    const saved = localStorage.getItem('invoices');
+    if (saved) setInvoices(JSON.parse(saved));
   }, []);
-
   useEffect(() => {
     localStorage.setItem('invoices', JSON.stringify(invoices));
   }, [invoices]);
 
-  // role flag for conditional UI
-  const isAdmin = IsAdmin();
-
-  // method modified so admin can't check out anymore
   const handleCheckoutConfirmation = (): void => {
-    if (isAdmin) {
+    if (isStaff) {
       navigate(AppRoutePaths.Unauthorized, {
-        state: { message: 'Admins are not allowed to perform checkout.' },
+        state: { message: 'Staff/Admin cannot perform checkout.' },
       });
       return;
     }
-    // Non-admin flow: open billing form first; on submit we show confirm modal
     setShowBillingForm(true);
     setIsCheckoutModalOpen(false);
   };
 
   const handleCheckout = async (): Promise<void> => {
+    if (isStaff) return;
+
     if (!cartId) {
       setCheckoutMessage('Invalid cart ID');
       return;
@@ -435,26 +728,41 @@ const UserCart = (): JSX.Element => {
       await axiosInstance.post(
         `/carts/${cartId}/checkout`,
         {},
-        { useV2: true }
+        { useV2: false }
       );
 
       const invoiceItems: Invoice[] = cartItems.map(item => ({
-        productId: Number(item.productId), // Ensure productId is a number
+        productId: Number(item.productId),
         productName: item.productName,
         productSalePrice: item.productSalePrice,
         quantity: item.quantity || 1,
       }));
 
-      // Set the invoices state
       setInvoices(invoiceItems);
-
       setCheckoutMessage('Checkout successful! Your order is being processed.');
-      setCartItems([]); // Clear the cart after successful checkout
+      setCartItems([]);
       setCartItemCount(0);
       setIsCheckoutModalOpen(false);
 
+      // Reset LS so navbar badge = 0 without API
+      setCartCountInLS(0);
+
       // notify navbar (cart emptied)
       notifyCartChanged();
+
+      // Fetch recent purchases after checkout
+      try {
+        const { data } = await axiosInstance.get(
+          `/carts/${cartId}/recent-purchases`,
+          { useV2: false }
+        );
+        setRecentPurchases(data || []);
+      } catch (err) {
+        // Optionally handle error, but don't block checkout
+      }
+
+      // Fetch recommendation purchases after checkout
+      await fetchRecommendationPurchases();
     } catch (error: unknown) {
       if (error && typeof error === 'object' && 'response' in error) {
         const errorData = (
@@ -469,21 +777,56 @@ const UserCart = (): JSX.Element => {
     }
   };
 
-  if (loading) {
-    return <div className="loading">Loading cart items...</div>;
-  }
+  if (loading)
+    return (
+      <div
+        className="cart-loading-overlay"
+        role="status"
+        aria-label="Loading cart items"
+      >
+        <span className="sr-only">Loading cart items...</span>
+      </div>
+    );
+  if (error) return <div className="error">{error}</div>;
 
-  if (error) {
-    return <div className="error">{error}</div>;
-  }
+  // Helper to filter out duplicate recent purchases by productId
+  const uniqueRecentPurchases = recentPurchases.reduce<{
+    [id: string]: (typeof recentPurchases)[0];
+  }>((acc, item) => {
+    if (!acc[item.productId]) {
+      acc[item.productId] = item;
+    } else {
+      // Optionally, sum quantities if duplicate found
+      acc[item.productId].quantity += item.quantity;
+    }
+    return acc;
+  }, {});
+  const recentPurchasesList = Object.values(uniqueRecentPurchases);
+
+  // Helper to filter out duplicate recommendation purchases by productId
+  const uniqueRecommendationPurchases = recommendationPurchases.reduce<{
+    [id: string]: (typeof recommendationPurchases)[0];
+  }>((acc, item) => {
+    if (!acc[item.productId]) {
+      acc[item.productId] = item;
+    } else {
+      acc[item.productId].quantity += item.quantity;
+    }
+    return acc;
+  }, {});
+  const recommendationPurchasesList = Object.values(
+    uniqueRecommendationPurchases
+  );
+
+  const recommendationListClassName = `recommendation-purchases-list recent-purchases-list cart-scroll-strip${
+    recommendationPurchasesList.length === 0 ? ' recommendation-empty' : ''
+  }`;
 
   return (
     <div>
       <NavBar />
-      <h2 className="cart-header-title">Your Cart</h2>
-
+      <ConfirmModal />
       <div className="UserCart-container">
-        {/* Notification Message */}
         {notificationMessage && (
           <div className="notification-message">
             {notificationMessage}
@@ -497,12 +840,16 @@ const UserCart = (): JSX.Element => {
           </div>
         )}
 
-        {/* Main Flex Container for Cart and Checkout */}
         <div className="UserCart-checkout-flex">
-          {/* Cart Section */}
           <div className="UserCart">
-            {/* Cart Header with Badge */}
-            <div className="cart-header">
+            <div
+              className="cart-header"
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
               <div className="cart-badge-container">
                 <FaShoppingCart aria-label="Shopping Cart" />
                 {cartItemCount > 0 && (
@@ -514,9 +861,15 @@ const UserCart = (): JSX.Element => {
                   </span>
                 )}
               </div>
+              <button
+                className="continue-shopping-btn cart-button cart-button--outline"
+                onClick={() => navigate('/products')}
+                style={{ marginLeft: 'auto' }}
+              >
+                Continue Shopping
+              </button>
             </div>
 
-            {/* Cart Items */}
             <div className="cart-items-container">
               {cartItems.length > 0 ? (
                 cartItems.map((item, index) => (
@@ -534,28 +887,35 @@ const UserCart = (): JSX.Element => {
                   />
                 ))
               ) : (
-                <p className="empty-cart-message">No products in the cart.</p>
+                <div className="empty-cart-visual">
+                  <span
+                    className="empty-cart-icon"
+                    role="img"
+                    aria-label="empty-cart"
+                  >
+                    🛒
+                  </span>
+                  <div className="empty-cart-message">
+                    Looks like your cart is empty! Why not add something?
+                  </div>
+                </div>
               )}
             </div>
 
-            {/* Cart Control Buttons */}
             <div className="UserCart-buttons">
-              <button
-                className="continue-shopping-btn"
-                onClick={() => navigate('/products')}
-              >
-                Continue Shopping
-              </button>
-              <button className="clear-cart-btn" onClick={clearCart}>
-                Clear Cart
-              </button>
+              {cartItems.length > 0 && (
+                <button
+                  className="clear-cart-btn cart-button cart-button--danger"
+                  onClick={clearCart}
+                >
+                  Clear Cart
+                </button>
+              )}
             </div>
           </div>
 
-          {/* Checkout Section — hidden for admins */}
-          {!isAdmin && (
+          {!isStaff && (
             <div className="Checkout-section">
-              {/* Voucher Code Section */}
               <div className="voucher-code-section">
                 <input
                   type="text"
@@ -569,7 +929,7 @@ const UserCart = (): JSX.Element => {
                 />
                 <button
                   onClick={applyVoucherCode}
-                  className="apply-voucher-button"
+                  className="apply-voucher-button cart-button cart-button--brand"
                 >
                   Apply
                 </button>
@@ -580,83 +940,90 @@ const UserCart = (): JSX.Element => {
 
               <div className="CartSummary">
                 <h3>Cart Summary</h3>
-                <p className="summary-item">Subtotal: ${subtotal.toFixed(2)}</p>
-                <p className="summary-item">TVQ (9.975%): ${tvq.toFixed(2)}</p>
-                <p className="summary-item">TVC (5%): ${tvc.toFixed(2)}</p>
-                <p className="summary-item">Discount: ${discount.toFixed(2)}</p>
+                <p className="summary-item">
+                  Subtotal: {formatPrice(subtotal)}
+                </p>
+                <p className="summary-item">TVQ (9.975%): {formatPrice(tvq)}</p>
+                <p className="summary-item">TVC (5%): {formatPrice(tvc)}</p>
+                <p className="summary-item">
+                  Discount: {formatPrice(discount)}
+                </p>
                 <p className="total-price summary-item">
-                  Total: ${total.toFixed(2)}
+                  Total: {formatPrice(total)}
                 </p>
               </div>
 
               <button
-                className="checkout-btn"
+                className="checkout-btn cart-button cart-button--brand cart-button--block cart-button--disabled-muted"
                 onClick={handleCheckoutConfirmation}
                 disabled={cartItems.length === 0}
               >
                 Checkout
               </button>
 
-              {/* Cart Billing Form Modal */}
-              {showBillingForm && (
-                <div className="checkout-modal">
-                  <CartBillingForm
-                    onSubmit={() => {
-                      setShowBillingForm(false);
-                      setIsCheckoutModalOpen(true);
-                    }}
-                  />
-                  <button onClick={() => setShowBillingForm(false)}>
-                    Cancel
-                  </button>
-                </div>
-              )}
-
-              {/* Checkout Confirmation Modal */}
-              {isCheckoutModalOpen && (
-                <div className="checkout-modal">
-                  <h3>Confirm Checkout</h3>
-                  <p>Are you sure you want to checkout?</p>
-                  <button onClick={handleCheckout}>Yes</button>
-                  <button onClick={() => setIsCheckoutModalOpen(false)}>
-                    No
-                  </button>
-                </div>
-              )}
-
               {checkoutMessage && (
                 <div className="checkout-message">{checkoutMessage}</div>
               )}
 
-              {/* Invoice Section */}
               {invoices.length > 0 && (
                 <div className="invoices-section">
                   <h2>Invoice</h2>
                   <div className="invoice-summary">
+                    {billingInfo && (
+                      <div className="invoice-client-info">
+                        <h3>Client Information</h3>
+                        <p>
+                          <strong>Name:</strong> {billingInfo.fullName}
+                        </p>
+                        <p>
+                          <strong>Email:</strong> {billingInfo.email}
+                        </p>
+                        <p>
+                          <strong>Address:</strong> {billingInfo.address},{' '}
+                          {billingInfo.city}, {billingInfo.province},{' '}
+                          {billingInfo.postalCode}
+                        </p>
+                      </div>
+                    )}
+                    {checkoutDate && (
+                      <div className="invoice-date">
+                        <strong>Checkout Date/Time:</strong> {checkoutDate}
+                      </div>
+                    )}
                     <h3>Items</h3>
-                    {invoices.map(invoice => (
-                      <div key={invoice.productId} className="invoice-card">
-                        <h4>{invoice.productName}</h4>
-                        <p>Price: ${invoice.productSalePrice.toFixed(2)}</p>
-                        <p>Quantity: {invoice.quantity}</p>
+                    {invoices.map(inv => (
+                      <div key={inv.productId} className="invoice-card">
+                        <h4>{inv.productName}</h4>
+                        <p>Price: ${inv.productSalePrice.toFixed(2)}</p>
+                        <p>Quantity: {inv.quantity}</p>
                         <p>
                           Total: $
-                          {(
-                            invoice.productSalePrice * invoice.quantity
-                          ).toFixed(2)}
+                          {(inv.productSalePrice * inv.quantity).toFixed(2)}
                         </p>
                       </div>
                     ))}
-                    <h3>
-                      Total: $
-                      {invoices
-                        .reduce(
-                          (total, inv) =>
-                            total + inv.productSalePrice * inv.quantity,
+                    <div className="invoice-taxes">
+                      {(() => {
+                        const invoiceSubtotal = invoices.reduce(
+                          (sum, inv) =>
+                            sum + inv.productSalePrice * inv.quantity,
                           0
-                        )
-                        .toFixed(2)}
-                    </h3>
+                        );
+                        const invoiceTvq = invoiceSubtotal * 0.09975;
+                        const invoiceTvc = invoiceSubtotal * 0.05;
+                        const invoiceTotal =
+                          invoiceSubtotal + invoiceTvq + invoiceTvc - discount;
+                        return (
+                          <>
+                            <p>Subtotal: ${invoiceSubtotal.toFixed(2)}</p>
+                            <p>TVQ (9.975%): ${invoiceTvq.toFixed(2)}</p>
+                            <p>TVC (5%): ${invoiceTvc.toFixed(2)}</p>
+                            <p>Discount: -${discount.toFixed(2)}</p>
+                            <h3>Total: ${invoiceTotal.toFixed(2)}</h3>
+                          </>
+                        );
+                      })()}
+                    </div>
                   </div>
                 </div>
               )}
@@ -664,30 +1031,251 @@ const UserCart = (): JSX.Element => {
           )}
         </div>
 
-        {/* Wishlist Section */}
-        <div className="wishlist-section">
-          <h2>Your Wishlist</h2>
-          <div className="Wishlist-items">
-            {wishlistItems.length > 0 ? (
-              wishlistItems.map(item => (
-                <CartItem
+        {/* Recent Purchases Section - above Wishlist */}
+        <div className="recent-purchases-section cart-panel cart-panel--padded">
+          <h2>Recent Purchases</h2>
+          <div className="recent-purchases-list cart-scroll-strip">
+            {recentPurchasesList.length > 0 ? (
+              recentPurchasesList.map(item => (
+                <div
                   key={item.productId}
-                  item={item}
-                  index={-1}
-                  changeItemQuantity={() => {}}
-                  deleteItem={() => {}}
-                  addToWishlist={() => {}}
-                  addToCart={addToCartFunction}
-                  isInWishlist={true}
-                  removeFromWishlist={removeFromWishlist}
-                  showNotification={setNotificationMessage}
-                />
+                  className="recent-purchase-card cart-card"
+                >
+                  <div className="recent-purchase-image-container">
+                    <div className="recent-purchase-image">
+                      <ImageContainer imageId={item.imageId} />
+                    </div>
+                  </div>
+                  <div className="recent-purchase-name">{item.productName}</div>
+                  <div className="recent-purchase-price">
+                    ${item.productSalePrice.toFixed(2)}
+                  </div>
+                  <div className="recent-purchase-qty-row">
+                    <label
+                      htmlFor={`recent-qty-${item.productId}`}
+                      className="recent-purchase-qty-label"
+                    >
+                      Qty:
+                    </label>
+                    <input
+                      id={`recent-qty-${item.productId}`}
+                      type="number"
+                      min={1}
+                      value={recentPurchaseQuantities[item.productId] || 1}
+                      onChange={e =>
+                        handleRecentPurchaseQuantityChange(
+                          item.productId,
+                          Number(e.target.value)
+                        )
+                      }
+                      className="recent-purchase-qty-input"
+                    />
+                  </div>
+                  <button
+                    className="purchase-again-btn cart-button cart-button--brand"
+                    onClick={() => handlePurchaseAgain(item)}
+                  >
+                    Purchase Again
+                  </button>
+                  <div className="recent-purchase-total">
+                    Total: $
+                    {(
+                      item.productSalePrice *
+                      (recentPurchaseQuantities[item.productId] || 1)
+                    ).toFixed(2)}
+                  </div>
+                </div>
               ))
+            ) : (
+              <p>No recent purchases found.</p>
+            )}
+          </div>
+        </div>
+
+        {/* Wishlist */}
+        <div className="wishlist-section cart-panel cart-panel--padded">
+          {/* Header with Move All button */}
+          <div
+            className="wishlist-header"
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <h2 style={{ margin: 0 }}>Your Wishlist</h2>
+            {wishlistItems.length > 0 && (
+              <button
+                className="cart-button cart-button--accent"
+                onClick={moveAllWishlistToCart}
+                disabled={isStaff || movingAll}
+                aria-busy={movingAll}
+                aria-disabled={isStaff || movingAll}
+                title={
+                  isStaff
+                    ? 'Read-only: staff/admin cannot move wishlist items'
+                    : 'Move all wishlist items to cart'
+                }
+              >
+                {movingAll ? 'Moving…' : 'Move All to Cart'}
+              </button>
+            )}
+          </div>
+
+          {/* Wishlist items */}
+          <div className="Wishlist-items cart-scroll-strip">
+            {wishlistItems.length > 0 ? (
+              wishlistItems.map(item => {
+                const isOutOfStock = item.productQuantity <= 0;
+                return (
+                  <div key={item.productId} className="Wishlist-item cart-card">
+                    <div className="recent-purchase-image-container">
+                      <div className="recent-purchase-image">
+                        <ImageContainer imageId={item.imageId} />
+                      </div>
+                    </div>
+                    <div className="recent-purchase-name">
+                      {item.productName}
+                    </div>
+                    <div className="recent-purchase-price">
+                      {formatPrice(item.productSalePrice)}
+                    </div>
+                    <div className="Wishlist-item-actions">
+                      <button
+                        className="cart-button cart-button--accent cart-button--block cart-button--strike-disabled"
+                        onClick={() => addToCartFunction(item)}
+                        disabled={isStaff || isOutOfStock}
+                        aria-disabled={isStaff || isOutOfStock}
+                      >
+                        {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+                      </button>
+                      <button
+                        className="cart-button cart-button--danger cart-button--block cart-button--strike-disabled"
+                        onClick={() => removeFromWishlist(item)}
+                        disabled={isStaff}
+                        aria-disabled={isStaff}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
             ) : (
               <p>No products in the wishlist.</p>
             )}
           </div>
         </div>
+
+        {/* Recommendation Purchases Section */}
+        <div className="recommendation-purchases-section cart-panel cart-panel--padded">
+          <div className="recommendation-header">
+            <h2>Your Recommendations</h2>
+            <div className="recommendation-subtitle recent-purchases-intro">
+              Based on your recent purchases
+            </div>
+          </div>
+          <div className={recommendationListClassName}>
+            {recommendationPurchasesList.length > 0 ? (
+              recommendationPurchasesList.map(item => (
+                <div
+                  key={item.productId}
+                  className="recommendation-purchase-card cart-card"
+                >
+                  <div className="recent-purchase-image-container">
+                    <div className="recent-purchase-image">
+                      <ImageContainer imageId={item.imageId} />
+                    </div>
+                  </div>
+                  <div className="recommendation-product-name recent-purchase-name">
+                    {item.productName}
+                  </div>
+                  <div className="recommendation-product-price recent-purchase-price">
+                    ${formatPrice(item.productSalePrice)}
+                  </div>
+                  <div className="recommendation-qty-row recent-purchase-qty-row">
+                    <label
+                      htmlFor={`recommendation-qty-${item.productId}`}
+                      className="recommendation-qty-label recent-purchase-qty-label"
+                    >
+                      Qty:
+                    </label>
+                    <input
+                      id={`recommendation-qty-${item.productId}`}
+                      type="number"
+                      min={1}
+                      value={
+                        recommendationPurchaseQuantities[item.productId] || 1
+                      }
+                      onChange={e =>
+                        handleRecommendationPurchaseQuantityChange(
+                          item.productId,
+                          Number(e.target.value)
+                        )
+                      }
+                      className="recommendation-qty-input recent-purchase-qty-input"
+                    />
+                  </div>
+                  <button
+                    className="purchase-again-btn cart-button cart-button--brand"
+                    onClick={() => handlePurchaseRecommendation(item)}
+                  >
+                    Purchase Again
+                  </button>
+                  <div className="recommendation-total recent-purchase-total">
+                    Total: $
+                    {(
+                      item.productSalePrice *
+                      (recommendationPurchaseQuantities[item.productId] || 1)
+                    ).toFixed(2)}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="recommendation-empty-state">
+                <div className="recommendation-empty-message">
+                  No recommendations available yet.
+                  <br />
+                  Add more products to your cart to get personalized
+                  suggestions!
+                </div>
+                <button
+                  className="cta-browse-products-btn cart-button cart-button--brand"
+                  onClick={() => navigate('/products')}
+                >
+                  Browse Products
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Billing Form Modal */}
+        {showBillingForm && (
+          <div className="modal-backdrop">
+            <div className="modal-content">
+              <CartBillingForm
+                isOpen={true}
+                onClose={() => setShowBillingForm(false)}
+                onSubmit={async billing => {
+                  setBillingInfo(billing);
+                  setCheckoutDate(new Date().toLocaleString());
+                  await handleCheckout();
+                  setShowBillingForm(false);
+                }}
+              />
+            </div>
+          </div>
+        )}
+
+        {isCheckoutModalOpen && (
+          <div className="checkout-modal">
+            <h3>Confirm Checkout</h3>
+            <p>Are you sure you want to checkout?</p>
+            <button onClick={handleCheckout}>Yes</button>
+            <button onClick={() => setIsCheckoutModalOpen(false)}>No</button>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
+import com.petclinic.bffapigateway.exceptions.ForbiddenAccessException;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
@@ -17,6 +18,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
+
+import java.util.List;
 
 import static reactor.core.publisher.Mono.just;
 
@@ -27,6 +31,7 @@ import static reactor.core.publisher.Mono.just;
 @Validated
 public class PetController {
     private final CustomersServiceClient customersServiceClient;
+    private final AuthServiceClient authServiceClient;
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
     @PutMapping(value = "/{petId}")
@@ -78,28 +83,46 @@ public class PetController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
-    @GetMapping("/owner/{ownerId}/pets")
+    @GetMapping("/owners/{ownerId}/pets")
     public Flux<PetResponseDTO> getPetsByOwnerId(@PathVariable String ownerId) {
         return customersServiceClient.getPetsByOwnerId(ownerId);
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.OWNER, Roles.VET})
     @DeleteMapping(value = "/{petId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<PetResponseDTO>> deletePet(@PathVariable String petId) {
+    public Mono<ResponseEntity<PetResponseDTO>> deletePet(
+            @PathVariable String petId,
+            @CookieValue("Bearer") String jwtToken) {
+
         return Mono.just(petId)
                 .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided pet id is invalid: " + petId)))
-                .flatMap(customersServiceClient::deletePetByPetIdV2)
+                .flatMap(validPetId -> {
+                    // First get the pet to check ownership
+                    return customersServiceClient.getPetByPetId(validPetId)
+                            .flatMap(pet -> {
+                                // Validate token and get user info
+                                return authServiceClient.validateToken(jwtToken)
+                                        .flatMap(tokenResponse -> {
+                                            String userId = tokenResponse.getBody().getUserId();
+                                            List<String> roles = tokenResponse.getBody().getRoles();
+
+                                            // Check if user has ADMIN or VET role (bypass ownership check)
+                                            boolean isAdminOrVet = roles.contains("ADMIN") || roles.contains("VET");
+
+                                            if (isAdminOrVet || pet.getOwnerId().equals(userId)) {
+                                                // User is authorized to delete this pet
+                                                return customersServiceClient.deletePetByPetIdV2(validPetId);
+                                            } else {
+                                                // User is not authorized to delete this pet
+                                                return Mono.error(new ForbiddenAccessException("You are not allowed to delete this pet"));
+                                            }
+                                        });
+                            });
+                })
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @DeleteMapping(value = "owners/petTypes/{petTypeId}")
-    public Mono<ResponseEntity<Void>> deletePetTypeByPetTypeId(final @PathVariable String petTypeId){
-        return customersServiceClient.deletePetTypeV2(petTypeId)
-                .then(Mono.just(ResponseEntity.ok().<Void>build()))
-                .defaultIfEmpty(ResponseEntity.notFound().<Void>build());
-    }
 
 }

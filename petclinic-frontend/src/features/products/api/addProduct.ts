@@ -4,7 +4,7 @@ import { ProductModel } from '@/features/products/models/ProductModels/ProductMo
 export async function addProduct(product: ProductModel): Promise<ProductModel> {
   try {
     const response = await axiosInstance.post('/products', product, {
-      responseType: 'json',
+      useV2: false,
     });
 
     return response.data;
@@ -13,3 +13,5 @@ export async function addProduct(product: ProductModel): Promise<ProductModel> {
     throw error;
   }
 }
+
+// This page needs to be deleted since react is only for customers and not employees.

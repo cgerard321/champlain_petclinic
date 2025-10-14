@@ -86,12 +86,13 @@ public class InventoryController {
 @GetMapping()
 public Flux<InventoryResponseDTO> searchInventories(
         @RequestParam Optional<Integer> page, @RequestParam Optional<Integer> size,
+        @RequestParam(name = "inventoryCode", required = false) String inventoryCode,
         @RequestParam(name = "inventoryName", required = false) String inventoryName,
         @RequestParam(name = "inventoryType", required = false) String inventoryType,
         @RequestParam(name = "inventoryDescription", required = false) String inventoryDescription,
         @RequestParam(name = "importantOnly", required = false) Boolean importantOnly) {
 
-    return productInventoryService.searchInventories(PageRequest.of(page.orElse(0),size.orElse(10)), inventoryName, inventoryType, inventoryDescription, importantOnly);
+    return productInventoryService.searchInventories(PageRequest.of(page.orElse(0),size.orElse(10)), inventoryCode,inventoryName, inventoryType, inventoryDescription, importantOnly);
 }
 
 

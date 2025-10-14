@@ -1,8 +1,7 @@
 package com.petclinic.billing.datalayer;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
-
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
@@ -21,10 +20,12 @@ public class BillResponseDTO {
     private String vetFirstName;
     private String vetLastName;
     private LocalDate date;
-    private double amount;
-    private double taxedAmount;
+    private BigDecimal amount;
+    private BigDecimal taxedAmount;
+    private BigDecimal interest;
     private BillStatus billStatus;
     private LocalDate dueDate;
     private Long timeRemaining;
-
-    }
+    private Boolean archive;   
+    private boolean interestExempt;
+}

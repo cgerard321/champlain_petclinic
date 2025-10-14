@@ -50,7 +50,7 @@ public class ProductControllerUnitTest {
                 .build();
         when(productService.getAllProducts(null,null,null,null,null,null,null)).thenReturn(Flux.just(productResponseModel1, productResponseModel2));
 
-        webClient.get().uri("/api/v1/products")
+        webClient.get().uri("/products")
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
@@ -64,7 +64,7 @@ public class ProductControllerUnitTest {
 
         when(productService.getAllProducts(null,null,null,null,null,null,null)).thenReturn(Flux.empty());
 
-        webClient.get().uri("/api/v1/products")
+        webClient.get().uri("/products")
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
@@ -90,7 +90,7 @@ public class ProductControllerUnitTest {
 
         when(productService.getProductByProductId("ae2d3af7-f2a2-407f-ad31-ca7d8220cb7a")).thenReturn(Mono.just(productResponseModel));
 
-        webClient.get().uri("/api/v1/products/ae2d3af7-f2a2-407f-ad31-ca7d8220cb7a")
+        webClient.get().uri("/products/ae2d3af7-f2a2-407f-ad31-ca7d8220cb7a")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -108,7 +108,7 @@ public class ProductControllerUnitTest {
         when(productService.getProductByProductId(eq("ae2d3af7-f2a2-407f-ad31-ca7d8220cb7"))).thenReturn(Mono
                 .error(new InvalidInputException("Provided product id is invalid: ae2d3af7-f2a2-407f-ad31-ca7d8220cb7")));
 
-        webClient.get().uri("/api/v1/products/ae2d3af7-f2a2-407f-ad31-ca7d8220cb7")
+        webClient.get().uri("/products/ae2d3af7-f2a2-407f-ad31-ca7d8220cb7")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().is4xxClientError()
@@ -136,7 +136,7 @@ public class ProductControllerUnitTest {
 
         when(productService.addProduct(any(Mono.class))).thenReturn(Mono.just(productResponseModel));
 
-        webClient.post().uri("/api/v1/products")
+        webClient.post().uri("/products")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(productRequestModel)
                 .accept(MediaType.APPLICATION_JSON)
@@ -169,7 +169,7 @@ public class ProductControllerUnitTest {
 
         when(productService.updateProductByProductId(eq("ae2d3af7-f2a2-407f-ad31-ca7d8220cb7a"), any(Mono.class))).thenReturn(Mono.just(productResponseModel));
 
-        webClient.put().uri("/api/v1/products/ae2d3af7-f2a2-407f-ad31-ca7d8220cb7a")
+        webClient.put().uri("/products/ae2d3af7-f2a2-407f-ad31-ca7d8220cb7a")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(productRequestModel)
                 .accept(MediaType.APPLICATION_JSON)
@@ -185,28 +185,41 @@ public class ProductControllerUnitTest {
     }
 
     @Test
-    public void whenDeleteProduct_thenReturnDeletedProduct() {
-        ProductResponseModel productResponseModel = ProductResponseModel.builder()
-                .productId("ae2d3af7-f2a2-407f-ad31-ca7d8220cb7a")
+    void whenDeleteProduct_withCascadeTrue_thenReturnDeletedProductJson() {
+        // arrange
+        String id = "ae2d3af7-f2a2-407f-ad31-ca7d8220cb7a";
+        ProductResponseModel expected = ProductResponseModel.builder()
+                .productId(id)
                 .productName("Bird Cage")
                 .productDescription("Spacious cage for small birds like parakeets")
                 .productSalePrice(29.99)
                 .averageRating(0.0)
                 .build();
 
-        when(productService.deleteProductByProductId("ae2d3af7-f2a2-407f-ad31-ca7d8220cb7a")).thenReturn(Mono.just(productResponseModel));
+        when(productService.deleteProductByProductId(id, true))
+                .thenReturn(Mono.just(expected));
 
-        webClient.delete().uri("/api/v1/products/ae2d3af7-f2a2-407f-ad31-ca7d8220cb7a")
+        // act + assert
+        webClient.delete()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/products/{productId}")
+                        .queryParam("cascadeBundles", true)   // <-- include query param
+                        .build(id))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
+                .expectHeader().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
                 .expectBody(ProductResponseModel.class)
-                .value(response -> {
-                    assertNotNull(response);
-                    assertEquals("ae2d3af7-f2a2-407f-ad31-ca7d8220cb7a", response.getProductId());
+                .value(resp -> {
+                    assertNotNull(resp);
+                    assertEquals(expected.getProductId(), resp.getProductId());
+                    assertEquals(expected.getProductName(), resp.getProductName());
+                    assertEquals(expected.getProductDescription(), resp.getProductDescription());
+                    assertEquals(expected.getProductSalePrice(), resp.getProductSalePrice());
+                    assertEquals(expected.getAverageRating(), resp.getAverageRating());
                 });
 
-        verify(productService).deleteProductByProductId("ae2d3af7-f2a2-407f-ad31-ca7d8220cb7a");
+        verify(productService).deleteProductByProductId(id, true);
     }
 
     @Test
@@ -227,7 +240,7 @@ public class ProductControllerUnitTest {
 
         when(productBundleService.getAllProductBundles()).thenReturn(Flux.just(bundle1, bundle2));
 
-        webClient.get().uri("/api/v1/products/bundles")
+        webClient.get().uri("/products/bundles")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -253,7 +266,7 @@ public class ProductControllerUnitTest {
 
         when(productBundleService.getProductBundleById("bundle1")).thenReturn(Mono.just(bundle));
 
-        webClient.get().uri("/api/v1/products/bundles/bundle1")
+        webClient.get().uri("/products/bundles/bundle1")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -270,7 +283,7 @@ public class ProductControllerUnitTest {
     public void whenGetProductBundleByInvalidId_thenReturnNotFound() {
         when(productBundleService.getProductBundleById("invalid-id")).thenReturn(Mono.empty());
 
-        webClient.get().uri("/api/v1/products/bundles/invalid-id")
+        webClient.get().uri("/products/bundles/invalid-id")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound();
@@ -295,7 +308,7 @@ public class ProductControllerUnitTest {
 
         when(productBundleService.createProductBundle(any(Mono.class))).thenReturn(Mono.just(responseModel));
 
-        webClient.post().uri("/api/v1/products/bundles")
+        webClient.post().uri("/products/bundles")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestModel)
                 .accept(MediaType.APPLICATION_JSON)
@@ -327,7 +340,7 @@ public class ProductControllerUnitTest {
 
         when(productBundleService.updateProductBundle(eq("bundle1"), any(Mono.class))).thenReturn(Mono.just(responseModel));
 
-        webClient.put().uri("/api/v1/products/bundles/bundle1")
+        webClient.put().uri("/products/bundles/bundle1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestModel)
                 .accept(MediaType.APPLICATION_JSON)
@@ -346,7 +359,7 @@ public class ProductControllerUnitTest {
     public void whenDeleteProductBundle_thenReturnNoContent() {
         when(productBundleService.deleteProductBundle("bundle1")).thenReturn(Mono.empty());
 
-        webClient.delete().uri("/api/v1/products/bundles/bundle1")
+        webClient.delete().uri("/products/bundles/bundle1")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNoContent();

@@ -6,8 +6,8 @@ export default function Visits(): JSX.Element {
   return (
     <>
       <NavBar />
-      <div className="page-container">
-        <h2>Manage All Visits</h2>
+
+      <div>
         <VisitListTable />
       </div>
     </>

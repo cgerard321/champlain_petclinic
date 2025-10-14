@@ -7,8 +7,6 @@ import com.petclinic.authservice.datalayer.roles.Role;
 import com.petclinic.authservice.datalayer.user.*;
 import com.petclinic.authservice.datamapperlayer.UserMapper;
 import com.petclinic.authservice.domainclientlayer.Mail.MailService;
-import com.petclinic.authservice.domainclientlayer.NewEmailingService.DirectEmailModelRequestDTO;
-import com.petclinic.authservice.domainclientlayer.NewEmailingService.EmailingServiceClient;
 import com.petclinic.authservice.presentationlayer.User.UserIDLessUsernameLessDTO;
 import com.petclinic.authservice.presentationlayer.User.UserResetPwdRequestModel;
 import com.petclinic.authservice.security.JwtTokenUtil;
@@ -18,10 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
-import reactor.core.publisher.Mono;
 
 import java.util.*;
 
@@ -59,11 +55,6 @@ public class AuthServiceUserServiceTests {
 
     @MockBean
     private MailService mailService;
-
-    @MockBean
-    private EmailingServiceClient emailingServiceClient;
-
-
 
     @MockBean
     private JwtTokenUtil jwtService;
@@ -260,7 +251,7 @@ public class AuthServiceUserServiceTests {
                     .thenReturn(Optional.empty());
 
         // Act
-        assertThrows(IllegalArgumentException.class, () -> userService.updateResetPasswordToken(token, email));
+        assertThrows(NotFoundException.class, () -> userService.updateResetPasswordToken(token, email));
         // Assert
         // IllegalArgumentException should be thrown
     }
@@ -326,27 +317,7 @@ public class AuthServiceUserServiceTests {
         assertThrows(NotFoundException.class, () -> userService.deleteUser(nonExistentUserId));
     }
 
-    @Test
-    @DisplayName("generateVerificationMailWithNewEmailingService should send verification email")
-    void generateVerificationMailWithNewEmailingService_ShouldSendVerificationEmail() {
-        // Arrange
-        User user = User.builder()
-                .username(USER)
-                .email(EMAIL)
-                .password(passwordEncoder.encode(PASS))
-                .verified(false) // Unverified (since we're sending the email to verify it)
-                .build();
 
-        when(emailingServiceClient.sendEmail(any(DirectEmailModelRequestDTO.class)))
-                .thenReturn(Mono.just(HttpStatus.OK));
-
-        // Act
-        userService.generateVerificationMailWithNewEmailingService(user);
-
-        // Assert
-        verify(emailingServiceClient, times(1))
-                .sendEmail(any(DirectEmailModelRequestDTO.class));
-    }
 
 
 // Next Story

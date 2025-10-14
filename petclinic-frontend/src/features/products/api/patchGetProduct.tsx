@@ -1,12 +1,5 @@
-import axios from 'axios';
+import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { ProductModel } from '@/features/inventories/models/ProductModels/ProductModel.ts';
-
-const axiosInstance = axios.create({
-  baseURL: 'http://localhost:8080/api/v2/gateway',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
 
 export async function patchGetProduct(
   productId: string
@@ -16,9 +9,9 @@ export async function patchGetProduct(
       `/products/${productId}`,
       {},
       {
+        useV2: false,
         headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
+          'Content-Type': 'application/json',
         },
       }
     );
@@ -29,3 +22,5 @@ export async function patchGetProduct(
     throw error;
   }
 }
+
+// This page needs to be deleted since react is only for customers and not employees.

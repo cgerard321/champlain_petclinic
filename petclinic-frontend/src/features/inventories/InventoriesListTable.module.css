@@ -16,11 +16,12 @@
   width: 55px;
   height: 55px;
   cursor: pointer;
+  color: #0d6efd;
 }
 
 #menuIcon:hover {
-  box-shadow: 0 0 10px 3px rgba(0, 196, 255, 0.7);
-  border: none;
+  filter: drop-shadow(0 0 8px rgba(13, 110, 253, 0.45));
+  transform: translateY(-1px);
 }
 
 #actionsMenu {
@@ -68,4 +69,53 @@
   text-align: right;
   float: right;
   margin-right: 25px;
+}
+
+.inventoryTable {
+  border-collapse: collapse;
+}
+
+.cleanTable :global(thead th),
+.cleanTable :global(tbody td) {
+  border-bottom: 0 !important;
+}
+
+.cleanTable :global(tbody tr:nth-of-type(odd)) {
+  --bs-table-accent-bg: transparent !important;
+  background-color: transparent !important;
+}
+
+.inventoryTable :global(thead th:nth-child(1)),
+.inventoryTable :global(tbody td:nth-child(1)),
+.inventoryTable :global(thead th:nth-child(2)),
+.inventoryTable :global(tbody td:nth-child(2)),
+.inventoryTable :global(thead th:nth-child(3)),
+.inventoryTable :global(tbody td:nth-child(3)),
+.inventoryTable :global(thead th:nth-child(5)),
+.inventoryTable :global(tbody td:nth-child(5)) {
+  text-align: center;
+}
+
+.fixedTable {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.inventoryTable :global(th),
+.inventoryTable :global(td) {
+  border: 0 !important;
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 40px 0 80px;
+}
+
+.pageNumber {
+  min-width: 32px;
+  text-align: center;
+  font-weight: 600;
 }

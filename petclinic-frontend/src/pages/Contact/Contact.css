@@ -1,0 +1,106 @@
+.contact-root {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.contact-intro {
+  padding: 48px 20px 24px;
+  border-bottom: 1px solid var(--ring);
+  background: radial-gradient(
+      700px 180px at 20% -60px,
+      rgba(37, 99, 235, 0.06),
+      transparent 60%
+    ),
+    radial-gradient(
+      600px 140px at 80% -40px,
+      rgba(34, 197, 94, 0.06),
+      transparent 70%
+    );
+}
+
+.contact-intro-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.contact-title {
+  font-size: clamp(26px, 3.4vw, 40px);
+  font-weight: 800;
+}
+
+.contact-sub {
+  max-width: 700px;
+  margin: 8px auto 0;
+  color: var(--muted);
+}
+
+.contact-card .card-body {
+  padding: 14px;
+}
+
+.contact-detail {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.contact-detail .icon {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #f7fbff;
+  border: 1px solid #e6eefb;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.hours {
+  display: grid;
+  row-gap: 4px;
+}
+
+.hours > div {
+  display: flex;
+  justify-content: space-between;
+  color: #475569;
+}
+
+.map-link {
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.map-link:hover {
+  text-decoration: underline;
+}
+
+.hp {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.contact-card a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.contact-card a:hover {
+  text-decoration: underline;
+}
+
+.contact-card a:visited {
+  color: inherit;
+}
+
+.contact-card a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+  border-radius: 2px;
+}

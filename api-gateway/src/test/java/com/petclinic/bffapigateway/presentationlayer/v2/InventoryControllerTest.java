@@ -104,7 +104,7 @@ public class InventoryControllerTest {
         //Arrange
         Optional<Integer> page = Optional.of(0);
         Optional<Integer> size = Optional.of(2);
-        when(inventoryServiceClient.searchInventory(page, size, null, null, null, null))
+        when(inventoryServiceClient.searchInventory(page, size, null,null, null, null, null))
                 .thenReturn(Flux.just(buildInventoryDTO()));
 
         // Act
@@ -120,7 +120,7 @@ public class InventoryControllerTest {
 
         // Assert
         verify(inventoryServiceClient, times(1))
-                .searchInventory(eq(page), eq(size), eq(null), eq(null), eq(null), eq(null));
+                .searchInventory(eq(page), eq(size), eq(null), eq(null), eq(null), eq(null), eq(null));
     }
 
     @Test
@@ -128,7 +128,7 @@ public class InventoryControllerTest {
         // Arrange
         Optional<Integer> page = Optional.of(0);
         Optional<Integer> size = Optional.of(2);
-        when(inventoryServiceClient.searchInventory(page, size, "invt1", "Internal", "invtone", null))
+        when(inventoryServiceClient.searchInventory(page, size, null, "invt1", "Internal", "invtone", null))
                 .thenReturn(Flux.just(buildInventoryDTO()));
 
         // Act
@@ -144,7 +144,7 @@ public class InventoryControllerTest {
 
         // Assert
         verify(inventoryServiceClient, times(1))
-                .searchInventory(eq(page), eq(size), eq("invt1"), eq("Internal"), eq("invtone"), eq(null));
+                .searchInventory(eq(page), eq(size), eq(null), eq("invt1"), eq("Internal"), eq("invtone"), eq(null));
     }
 
     @Test
@@ -152,7 +152,7 @@ public class InventoryControllerTest {
         // Arrange
         Optional<Integer> page = Optional.of(0);
         Optional<Integer> size = Optional.of(2);
-        when(inventoryServiceClient.searchInventory(page, size, "invalid", "invalid", "invalid", null))
+        when(inventoryServiceClient.searchInventory(page, size, null, "invalid", "invalid", "invalid", null))
                 .thenReturn(Flux.empty());
 
         // Act
@@ -167,7 +167,7 @@ public class InventoryControllerTest {
 
         // Assert
         verify(inventoryServiceClient, times(1))
-                .searchInventory(eq(page), eq(size), eq("invalid"), eq("invalid"), eq("invalid"), eq(null));
+                .searchInventory(eq(page), eq(size), eq(null), eq("invalid"), eq("invalid"), eq("invalid"), eq(null));
     }
 
     @Test
@@ -687,7 +687,7 @@ public class InventoryControllerTest {
         verify(inventoryServiceClient, times(1))
                 .getQuantityOfProductsInInventory(eq(inventoryId));
     }
-    
+
     @Test
     void getQuantityOfProductsInInventory_withServerError_shouldReturnInternalServerError() {
         // Arrange
@@ -1127,7 +1127,7 @@ public class InventoryControllerTest {
     @Test
     void testUpdateProductInInventory() {
         // Create a sample ProductRequestDTO
-        ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", "Sample Description", 10.0, 100, 15.99);
+        ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", "Sample Description", 10.0, 100, 15.99, null);
 
         // Define the expected response
         ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
@@ -1169,7 +1169,7 @@ public class InventoryControllerTest {
     @DisplayName("Given valid inventoryId and valid productRequest Post and return productResponse")
     void testAddProductToInventory_ShouldSucceed() {
         // Create a sample ProductRequestDTO
-        ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", "Sample Description", 10.0, 100, 15.99);
+        ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", "Sample Description", 10.0, 100, 15.99, null);
 
         // Define the expected response
         ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
@@ -1212,7 +1212,7 @@ public class InventoryControllerTest {
     @DisplayName("Given invalid inventoryId and valid productRequest Post and return NotFoundException")
     void testAddProductToInventory_InvalidInventoryId_ShouldReturnNotFoundException() {
         // Create a sample ProductRequestDTO
-        ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", "Sample Description", 10.0, 100,15.99);
+        ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", "Sample Description", 10.0, 100,15.99, null);
 
 
         // Mock the behavior of the inventoryServiceClient
@@ -1553,4 +1553,168 @@ public class InventoryControllerTest {
                 .expectStatus().is5xxServerError();
     }
 
+    @Test
+    void addInventory_shouldReturnInventoryWithCode() {
+        InventoryRequestDTO requestDTO = InventoryRequestDTO.builder()
+                .inventoryName("Gateway Test Inventory")
+                .inventoryType("Internal")
+                .inventoryDescription("Testing via gateway")
+                .build();
+
+        InventoryResponseDTO responseDTO = InventoryResponseDTO.builder()
+                .inventoryId("generated_id")
+                .inventoryCode("INV-0001")
+                .inventoryName("Gateway Test Inventory")
+                .inventoryType("Internal")
+                .inventoryDescription("Testing via gateway")
+                .build();
+
+        when(inventoryServiceClient.addInventory(any(InventoryRequestDTO.class)))
+                .thenReturn(Mono.just(responseDTO));
+
+        client.post()
+                .uri(baseInventoryURL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(InventoryResponseDTO.class)
+                .value(response -> {
+                    assertNotNull(response.getInventoryCode());
+                    assertEquals("INV-0001", response.getInventoryCode());
+                });
+
+        verify(inventoryServiceClient, times(1)).addInventory(any(InventoryRequestDTO.class));
+    }
+
+    @Test
+    void getInventoryById_shouldReturnInventoryWithCode() {
+        String inventoryId = "test_id";
+
+        InventoryResponseDTO responseDTO = InventoryResponseDTO.builder()
+                .inventoryId(inventoryId)
+                .inventoryCode("INV-0042")
+                .inventoryName("Test Inventory")
+                .inventoryType("Internal")
+                .build();
+
+        when(inventoryServiceClient.getInventoryById(inventoryId))
+                .thenReturn(Mono.just(responseDTO));
+
+        client.get()
+                .uri(baseInventoryURL + "/{inventoryId}", inventoryId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(InventoryResponseDTO.class)
+                .value(response -> {
+                    assertNotNull(response.getInventoryCode());
+                    assertEquals("INV-0042", response.getInventoryCode());
+                });
+
+        verify(inventoryServiceClient, times(1)).getInventoryById(inventoryId);
+    }
+
+    @Test
+    void getAllInventories_withValidInventoryCode_shouldReturnInventory() {
+        Optional<Integer> page = Optional.of(0);
+        Optional<Integer> size = Optional.of(2);
+        String inventoryCode = "INV-0001";
+
+        when(inventoryServiceClient.searchInventory(page, size, inventoryCode, null, null, null, null))
+                .thenReturn(Flux.just(buildInventoryDTO()));
+
+        client.get()
+                .uri(baseInventoryURL + "?page=0&size=2&inventoryCode=" + inventoryCode)
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .acceptCharset(StandardCharsets.UTF_8)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(InventoryResponseDTO.class)
+                .hasSize(1);
+
+        verify(inventoryServiceClient, times(1))
+                .searchInventory(eq(page), eq(size), eq(inventoryCode), eq(null), eq(null), eq(null), eq(null));
+    }
+
+    @Test
+    void getAllInventories_withInvalidInventoryCode_shouldReturnEmpty() {
+        Optional<Integer> page = Optional.of(0);
+        Optional<Integer> size = Optional.of(2);
+        String invalidCode = "INV-9999";
+
+        when(inventoryServiceClient.searchInventory(page, size, invalidCode, null, null, null, null))
+                .thenReturn(Flux.empty());
+
+        client.get()
+                .uri(baseInventoryURL + "?page=0&size=2&inventoryCode=" + invalidCode)
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .acceptCharset(StandardCharsets.UTF_8)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(InventoryResponseDTO.class)
+                .hasSize(0);
+
+        verify(inventoryServiceClient, times(1))
+                .searchInventory(eq(page), eq(size), eq(invalidCode), eq(null), eq(null), eq(null), eq(null));
+    }
+
+    @Test
+    void getInventoryById_shouldReturnInventoryWithRecentUpdateMessage() {
+        String inventoryId = "test_id";
+
+        InventoryResponseDTO responseDTO = InventoryResponseDTO.builder()
+                .inventoryId(inventoryId)
+                .inventoryCode("INV-0042")
+                .inventoryName("Test Inventory")
+                .inventoryType("Internal")
+                .recentUpdateMessage("3 supplies updated in the last 15 min.")
+                .build();
+
+        when(inventoryServiceClient.getInventoryById(inventoryId))
+                .thenReturn(Mono.just(responseDTO));
+
+        client.get()
+                .uri(baseInventoryURL + "/{inventoryId}", inventoryId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(InventoryResponseDTO.class)
+                .value(response -> {
+                    assertNotNull(response.getRecentUpdateMessage());
+                    assertEquals("3 supplies updated in the last 15 min.", response.getRecentUpdateMessage());
+                });
+
+        verify(inventoryServiceClient, times(1)).getInventoryById(inventoryId);
+    }
+
+    @Test
+    void searchInventories_shouldReturnInventoriesWithRecentUpdateMessages() {
+        Optional<Integer> page = Optional.of(0);
+        Optional<Integer> size = Optional.of(2);
+
+        InventoryResponseDTO inventory1 = buildInventoryDTO();
+        inventory1.setRecentUpdateMessage("2 supplies updated in the last 15 min.");
+
+        InventoryResponseDTO inventory2 = buildInventoryDTO();
+        inventory2.setInventoryId("2");
+        inventory2.setRecentUpdateMessage("No recent updates.");
+
+        when(inventoryServiceClient.searchInventory(page, size, null, null, null, null, null))
+                .thenReturn(Flux.just(inventory1, inventory2));
+
+        client.get()
+                .uri(baseInventoryURL + "?page=0&size=2")
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .acceptCharset(StandardCharsets.UTF_8)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(InventoryResponseDTO.class)
+                .value(list -> {
+                    assertEquals(2, list.size());
+                    assertNotNull(list.get(0).getRecentUpdateMessage());
+                    assertNotNull(list.get(1).getRecentUpdateMessage());
+                });
+
+        verify(inventoryServiceClient, times(1))
+                .searchInventory(eq(page), eq(size), eq(null), eq(null), eq(null), eq(null), eq(null));
+    }
 }

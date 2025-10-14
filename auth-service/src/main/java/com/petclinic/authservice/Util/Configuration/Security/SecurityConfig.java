@@ -53,6 +53,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(authorizeRequests -> authorizeRequests
+                .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/actuator/prometheus")).permitAll()
                 .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET,"/users/verification/*")).permitAll()
                 .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/users/verification/**")).permitAll()
                 // should skip filters

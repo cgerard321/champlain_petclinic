@@ -18,15 +18,15 @@ angular.module('ownerList')
         /*------------------------------------------------------------*/
         vm.searchActive = false;
         /*------------------------------------------------------------*/
-        vm.baseURL = "api/gateway/owners-pagination";
-        vm.baseURLforTotalNumberOfOwnersByFiltering = "api/gateway/owners-filtered-count";
+        vm.baseURL = "api/gateway/owners/owners-pagination";
+        vm.baseURLforTotalNumberOfOwnersByFiltering = "api/gateway/owners/owners-filtered-count";
 
         // Initial data load
         loadDefaultData();
 
         function loadTotalItemForDefaultData() {
 
-            return $http.get('api/gateway/owners-count')
+            return $http.get('api/gateway/owners/owners-count')
                 .then(function (resp) {
                     console.log(resp);
                     return resp.data;
@@ -48,7 +48,7 @@ angular.module('ownerList')
                 loadTotalItemForDefaultData().then(function (totalItems) {
                     vm.totalItems = totalItems;
                     vm.totalPages = Math.ceil(vm.totalItems / parseInt(vm.pageSize));
-                    $http.get('api/gateway/owners-pagination?page=' + vm.currentPage + '&size=' + vm.pageSize)
+                    $http.get('api/gateway/owners/owners-pagination?page=' + vm.currentPage + '&size=' + vm.pageSize)
                         .then(function (resp) {
                             vm.owners = resp.data;
                             console.log(resp);

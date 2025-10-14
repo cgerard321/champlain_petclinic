@@ -23,7 +23,7 @@ public class RatingsServiceClient {
             @Value("${app.products-service.port}") String port
     ){
         this.webClientBuilder = wcb;
-        this.baseURL = "http://" + host + ":" + port + "/api/v1/ratings";
+        this.baseURL = "http://" + host + ":" + port + "/ratings";
     }
 
     public Flux<RatingResponseModel> getAllRatingsForProductId(final String productId){

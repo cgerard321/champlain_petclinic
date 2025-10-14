@@ -3,7 +3,6 @@ package com.petclinic.authservice.presentationlayer.User;
 import com.petclinic.authservice.Util.Exceptions.HTTPErrorMessage;
 import com.petclinic.authservice.datalayer.roles.Role;
 import com.petclinic.authservice.domainclientlayer.Mail.MailService;
-import com.petclinic.authservice.domainclientlayer.cart.CartService;
 import com.petclinic.authservice.security.JwtTokenUtil;
 import com.petclinic.authservice.datalayer.user.*;
 import org.aspectj.lang.annotation.Before;
@@ -33,7 +32,6 @@ import java.util.stream.Collectors;
 @AutoConfigureMockMvc
 class UserControllerIntegrationTest {
 
-
     @Autowired
     private JwtTokenUtil jwtService;
 
@@ -53,8 +51,6 @@ class UserControllerIntegrationTest {
     @MockBean
     private MailService mailService;
 
-    @MockBean
-    CartService cartService;
 
 
     private final String VALID_USER_ID = "7c0d42c2-0c2d-41ce-bd9c-6ca67478956f";
@@ -168,7 +164,7 @@ class UserControllerIntegrationTest {
 
 
     @Test
-    void userLoginWithInvalidCredentials_ShouldReturnUnauthorized(){
+    void userLoginWithInvalidCredentials_ShouldReturnNotFoundUser(){
 
 
 
@@ -183,7 +179,7 @@ class UserControllerIntegrationTest {
                 .expectStatus().isNotFound()
                 .expectBody(HTTPErrorMessage.class).
                 value(error -> {
-                    assertEquals(error.getMessage(),"No account found for email: invalidEmail");
+                    assertEquals(error.getMessage(),"User not found");
                     assertEquals(error.getStatusCode(),404);
                     assertNotNull(error.getTimestamp());
                 });
@@ -241,7 +237,7 @@ class UserControllerIntegrationTest {
                         .expectStatus().isUnauthorized()
                         .expectBody(HTTPErrorMessage.class)
                         .value(error -> {
-                            assertEquals("Incorrect password for user with email: admin@admin.com",error.getMessage());
+                            assertEquals("Incorrect username or password for user: admin@admin.com",error.getMessage());
                             assertEquals(401,error.getStatusCode());
                             assertNotNull(error.getTimestamp());
                         });

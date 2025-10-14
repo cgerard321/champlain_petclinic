@@ -1,16 +1,4 @@
 services:
-#  petclinicFrontend:
-#    image: petclinic-frontend
-#    container_name: petclinic-frontend
-#    build:
-#      context: ./petclinic-frontend
-#      dockerfile: Dockerfile
-#      args:
-#        - BUILD_MODE=development
-#    ports:
-#      - "3000:3000"
-#    volumes:
-#      - .petclinic-frontend/src:/app/src
   janus:
     image: nginx
     ports:
@@ -24,7 +12,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
-      - mongo2
+      - mongo-visits
       - mailer-service
 
   inventory-service:
@@ -40,8 +28,8 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
-      - mongo
-      - postgres
+      - mongo-vet
+      - postgres-vet
 
   customers-service-reactive:
     build: customers-service-reactive
@@ -61,14 +49,13 @@ services:
       - customers-service-reactive
       - vet-service
       - visits-service-new
-  #            - visits
-  #            - inventory-service
+
 
   auth-service:
     build: auth-service
     hostname: auth
     depends_on:
-      mysql4:
+      mysql-auth:
         condition: service_healthy
       mailer-service:
         condition: service_started
@@ -82,9 +69,8 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
-      - mongo1
-  #            mysql5:
-  #                condition: service_healthy
+      - mongo-billing
+
 
   mailer-service:
     build: mailer-service
@@ -110,85 +96,56 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
 
-  #    visits:
-  #        build: visits-service
-  #        hostname: visits
-  #        #mem_limit: 350m
-  #        environment:
-  #            - SPRING_PROFILES_ACTIVE=docker
-  #        depends_on:
-  #            mysql1:
-  #                condition: service_healthy
+  files-service:
+    build: files-service
+    environment:
+      - FILE_ENDPOINT=minio:9100
+      - FILE_ENV=dev
+    env_file:
+      - mailer.env
+    depends_on:
+      mysql-files:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
 
-  #    customers:
-  #        build: customers-service
-  #        hostname: customers
-  #        #mem_limit: 350m
-  #        environment:
-  #            - SPRING_PROFILES_ACTIVE=docker
-  #        depends_on:
-  #            mysql3:
-  #                condition: service_healthy
+  minio:
+    image: minio/minio:RELEASE.2025-04-22T22-12-26Z
+    command: server --address ":9100" --console-address ":9101" /data
+    environment:
+      MINIO_ROOT_USER: user
+      MINIO_ROOT_PASSWORD: password
+    ports:
+      - "9101:9101"
+    expose:
+      - "9100:9100"
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9100/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 10
 
-  #     mysql1:
-  #         image: mysql:5.7
-  #         platform: linux/amd64
-  #         #mem_limit: 350m
-  #         ports:
-  #             - "3307:3306"
-  #         environment:
-  #             - MYSQL_ROOT_PASSWORD=rootpwd
-  #             - MYSQL_DATABASE=visits-db
-  #             - MYSQL_USER=user
-  #             - MYSQL_PASSWORD=pwd
-  #         volumes:
-  #             - ./data/mysql1:/var/lib/mysql1
-  #             - ./data/init.d:/docker-entrypoint-initdb.d
-  #         healthcheck:
-  #             test:
-  #                 [
-  #                     "CMD",
-  #                     "mysqladmin",
-  #                     "ping",
-  #                     "-uuser",
-  #                     "-ppwd",
-  #                     "-h",
-  #                     "localhost"
-  #                 ]
-  #             interval: 10s
-  #             timeout: 5s
-  #             retries: 10
+  mysql-files:
+    image: mysql:5.7
+    platform: linux/amd64
+    ports:
+      - "3311:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpwd
+      - MYSQL_DATABASE=files-db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=pwd
+    volumes:
+      - ./data/mysql-files:/var/lib/mysql-files
+      - ./data/init.d:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-uuser", "-ppwd", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
-  #    mysql3:
-  #        image: mysql:5.7
-  #        platform: linux/amd64
-  #        #mem_limit: 350m
-  #        ports:
-  #            - "3309:3306"
-  #        environment:
-  #            - MYSQL_ROOT_PASSWORD=rootpwd
-  #            - MYSQL_DATABASE=customers-db
-  #            - MYSQL_USER=user
-  #            - MYSQL_PASSWORD=pwd
-  #        volumes:
-  #            - ./data/mysql3:/var/lib/mysql3
-  #            - ./data/init.d:/docker-entrypoint-initdb.d
-  #        healthcheck:
-  #            test:
-  #                [
-  #                    "CMD",
-  #                    "mysqladmin",
-  #                    "ping",
-  #                    "-uuser",
-  #                    "-ppwd",
-  #                    "-h",
-  #                    "localhost"
-  #                ]
-  #            interval: 10s
-  #            timeout: 5s
-  #            retries: 10
-
-  mysql4:
+  mysql-auth:
     image: mysql:5.7
     platform: linux/amd64 # for M1 Macs
     ports:
@@ -199,7 +156,7 @@ services:
       - MYSQL_USER=user
       - MYSQL_PASSWORD=pwd
     volumes:
-      - ./data/mysql4:/var/lib/mysql4
+      - ./data/mysql-auth:/var/lib/mysql-auth
       - ./data/init.d:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-uuser", "-ppwd", "-h", "localhost"]
@@ -211,66 +168,54 @@ services:
     image: phpmyadmin:5.2.0
     container_name: PhpMyAdmin
     links:
-      - mysql4
+      - mysql-auth
+      - mysql-files
     restart: always
     ports:
       - 5013:80
     environment:
       - PMA_ARBITRARY=1
-
-  phpmyadmin-emailing-service:
-    image: phpmyadmin/phpmyadmin
-    container_name: phpmyadmin-emailing-service
-    restart: always
-    ports:
-      - "5019:80"
-    environment:
-      - PMA_HOST=emailing-service-mysql-db
-      - MYSQL_ROOT_PASSWORD=Your_password123
-    #depends_on:
-    #  - emailing-service
-    #  - emailing-service-mysql-db
-
   # vet mongo container
-  mongo:
+  mongo-vet:
     image: mongo
-    container_name: mongo
+    container_name: mongo-vet
     restart: always
     ports:
       - 27017:27017
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: password
-  #      healthcheck:
-  #        test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
-  #        retries: 5
-  #        interval: 15s
-  #        start_period: 30s
+    #      healthcheck:
+    #        test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
+    #        retries: 5
+    #        interval: 15s
+    #        start_period: 30s
 
-  mongo-express:
+  mongo-express-vet:
     image: mongo-express
     restart: always
     environment:
       - ME_CONFIG_MONGODB_ADMINUSERNAME=root
       - ME_CONFIG_MONGODB_ADMINPASSWORD=password
-      - ME_CONFIG_MONGODB_SERVER=mongo
+      - ME_CONFIG_MONGODB_SERVER=mongo-vet
       - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
     ports:
       - 9000:8081
     depends_on:
-      - mongo
+      - mongo-vet
       - vet-service
 
   #Vet Images Postgres container
-  postgres:
+  postgres-vet:
     image: postgres
-    container_name: postgres
+    container_name: postgres-vet
     environment:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=pwd
       - POSTGRES_DB=images
     ports:
       - 5432:5432
+
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: pgadmin
@@ -281,41 +226,41 @@ services:
     ports:
       - 9003:80
     depends_on:
-      - postgres
+      - postgres-vet
 
   # billing mongo container
-  mongo1:
+  mongo-billing:
     image: mongo
-    container_name: mongo1
+    container_name: mongo-billing
     restart: always
     ports:
       - 27018:27017
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: password
-  #      healthcheck:
-  #        test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
-  #        retries: 5
-  #        interval: 15s
-  #        start_period: 30s
+    #      healthcheck:
+    #        test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
+    #        retries: 5
+    #        interval: 15s
+    #        start_period: 30s
 
-  mongo-express1:
+  mongo-express-billing:
     image: mongo-express
     restart: always
     environment:
       - ME_CONFIG_MONGODB_ADMINUSERNAME=root
       - ME_CONFIG_MONGODB_ADMINPASSWORD=password
-      - ME_CONFIG_MONGODB_SERVER=mongo1
+      - ME_CONFIG_MONGODB_SERVER=mongo-billing
       - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
     ports:
       - 8081:8081
     depends_on:
-      - mongo1
+      - mongo-billing
       - billing-service
 
-  mongo2:
+  mongo-visits:
     image: mongo
-    container_name: mongo2
+    container_name: mongo-visits
     restart: always
     ports:
       - 27015:27017
@@ -328,18 +273,18 @@ services:
       interval: 15s
       start_period: 30s
 
-  mongo-express2:
+  mongo-express-visits:
     image: mongo-express
     restart: always
     environment:
       - ME_CONFIG_MONGODB_ADMINUSERNAME=root
       - ME_CONFIG_MONGODB_ADMINPASSWORD=password
-      - ME_CONFIG_MONGODB_SERVER=mongo2
+      - ME_CONFIG_MONGODB_SERVER=mongo-visits
       - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
     ports:
       - 9001:8081
     depends_on:
-      - mongo2
+      - mongo-visits
       - visits-service-new
 
   mongo-customers:
@@ -376,11 +321,11 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: password
-  #      healthcheck:
-  #        test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
-  #        retries: 5
-  #        interval: 15s
-  #        start_period: 30s
+    #      healthcheck:
+    #        test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
+    #        retries: 5
+    #        interval: 15s
+    #        start_period: 30s
 
   mongo-express-inventory:
     image: mongo-express
@@ -429,6 +374,11 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: password
+    #      healthcheck:
+    #        test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
+    #        retries: 5
+    #        interval: 15s
+    #        start_period: 30s
 
   mongo-express-carts:
     image: mongo-express
@@ -443,30 +393,3 @@ services:
     depends_on:
       - mongo-carts
       - cart-service
-
-  emailing-service:
-    image: emailing-service
-    container_name: emailing-service-container
-    build:
-      context: ./emailing-service
-      dockerfile: emailing-service/Dockerfile
-    #  ports:
-    #    - "5000:5115" # Used for testing without gateway
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - DEFAULT_CONNECTION=Server=emailing-service-mysql-db;Port=3306;Database=MyAppDb;User=root;Password=Your_password123;
-    depends_on:
-      - emailing-service-mysql-db
-      - api-gateway
-    env_file:
-      - mailer.env
-  emailing-service-mysql-db:
-    image: mysql:8.0
-    container_name: emailing-service-mysql-db
-    platform: linux/amd64
-    environment:
-      - MYSQL_ROOT_PASSWORD=Your_password123
-      - MYSQL_DATABASE=MyAppDb
-      - SPRING_PROFILES_ACTIVE=docker
-    ports:
-      - "3308:3306"

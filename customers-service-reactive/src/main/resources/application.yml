@@ -18,6 +18,11 @@ spring:
     embedded:
       version: 4.0.21
 
+app:
+  files-service:
+    host: localhost
+    port: 8000
+
 ---
 spring:
   config:
@@ -31,6 +36,11 @@ spring:
       username: root
       password: password
       authentication-database: admin
+
+app:
+  files-service:
+    host: localhost
+    port: 8000
 ---
 spring:
   config:
@@ -44,3 +54,8 @@ spring:
       username: root
       password: password
       authentication-database: admin
+
+app:
+  files-service:
+    host: files-service
+    port: 8000

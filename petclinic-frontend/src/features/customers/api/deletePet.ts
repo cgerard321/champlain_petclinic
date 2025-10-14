@@ -1,11 +1,6 @@
-import { AxiosResponse } from 'axios';
 import axiosInstance from '@/shared/api/axiosInstance';
-import { PetResponseModel } from '@/features/customers/models/PetResponseModel.ts';
 
-export const deletePet = async (
-  petId: string
-): Promise<AxiosResponse<PetResponseModel>> => {
-  return await axiosInstance.delete<PetResponseModel>(`/pets/${petId}`, {
-    useV2: true,
-  });
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export const deletePet = async (petId: string) => {
+  return await axiosInstance.delete(`/pets/${petId}`, { useV2: false });
 };

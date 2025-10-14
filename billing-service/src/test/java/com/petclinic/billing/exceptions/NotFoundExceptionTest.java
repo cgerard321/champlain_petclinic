@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 class NotFoundExceptionTest {
+
     @Test
     void TestNotFoundEmptyConstructor() {
         assertThrows(NotFoundException.class, () -> {

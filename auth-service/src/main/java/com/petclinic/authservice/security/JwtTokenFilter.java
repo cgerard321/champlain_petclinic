@@ -20,7 +20,9 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
-
+import java.util.List;
+import java.util.Arrays;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -36,9 +38,12 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
     private final SecurityConst securityConst;
     private final JwtTokenUtil jwtTokenUtil;
+    private final List<AntPathRequestMatcher> excludedPaths = Arrays.asList(
+            new AntPathRequestMatcher("/actuator/prometheus", "GET"));
 
     private final UserRepo userRepo;
 
+    
 
     public JwtTokenFilter(SecurityConst securityConst, JwtTokenUtil jwtTokenUtil
             , UserRepo userRepo) {
@@ -46,6 +51,17 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         this.jwtTokenUtil = jwtTokenUtil;
         this.userRepo = userRepo;
     }
+
+    
+
+    // 2. Implement shouldNotFilter to skip processing for public paths
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return excludedPaths.stream().anyMatch(p -> p.matches(request));
+    }
+
+
+
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,

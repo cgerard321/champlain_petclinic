@@ -6,9 +6,9 @@ angular.module('petTypeList', ['ui.router'])
         $stateProvider
             .state('petTypes', {
                 parent: 'app',
-                url: '/petTypes',
+                url: '/petTypes?page&size&petTypeId&name&description',
                 template: '<pet-type-list></pet-type-list>',
                 controller: 'PetTypeListController',
-                controllerAs: 'vm'
+                controllerAs: '$ctrl'
             })
     }]);

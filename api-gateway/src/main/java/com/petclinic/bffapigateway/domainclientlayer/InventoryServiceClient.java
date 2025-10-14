@@ -7,8 +7,10 @@ import com.petclinic.bffapigateway.dtos.Inventory.ProductRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductResponseDTO;
 import com.petclinic.bffapigateway.exceptions.InvalidInputsInventoryException;
 import com.petclinic.bffapigateway.exceptions.InventoryNotFoundException;
+import com.petclinic.bffapigateway.exceptions.InventoryProductUnprocessableEntityException;
 import com.petclinic.bffapigateway.exceptions.ProductListNotFoundException;
 import com.petclinic.bffapigateway.utils.Rethrower;
+import io.netty.handler.codec.http.HttpStatusClass;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.petclinic.bffapigateway.dtos.Inventory.*;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,8 +56,12 @@ public class InventoryServiceClient {
                 .uri(inventoryServiceUrl + "/{inventoryId}", inventoryId)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
+                .onStatus(s -> s.value() == 404,
+                        resp -> rethrower.rethrow(resp,
+                                ex -> new InventoryNotFoundException(ex.get("message").toString(), NOT_FOUND)))
                 .onStatus(HttpStatusCode::is4xxClientError,
-                        resp -> rethrower.rethrow(resp, ex -> new InventoryNotFoundException(ex.get("message").toString(), NOT_FOUND)))
+                        resp -> rethrower.rethrow(resp,
+                                ex -> new InvalidInputsInventoryException(ex.get("message").toString(), BAD_REQUEST)))
                 .bodyToMono(InventoryResponseDTO.class);
     }
 
@@ -65,8 +71,12 @@ public class InventoryServiceClient {
                 .uri(inventoryServiceUrl + "/{inventoryId}/products/{productId}", inventoryId, productId)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
+                .onStatus(s -> s.value() == 404,
+                        resp -> rethrower.rethrow(resp, ex ->
+                                new ProductListNotFoundException(ex.get("message").toString(), NOT_FOUND)))
                 .onStatus(HttpStatusCode::is4xxClientError,
-                        resp -> rethrower.rethrow(resp, ex -> new ProductListNotFoundException(ex.get("message").toString(), NOT_FOUND)))
+                        resp -> rethrower.rethrow(resp, ex ->
+                                new InvalidInputsInventoryException(ex.get("message").toString(), BAD_REQUEST)))
                 .bodyToMono(ProductResponseDTO.class);
     }
 
@@ -77,6 +87,10 @@ public class InventoryServiceClient {
                 .body(Mono.just(model),ProductRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
+                .onStatus(status -> status.value() == 422,
+                        resp -> rethrower.rethrow(resp,
+                                ex -> new InventoryProductUnprocessableEntityException(
+                                        ex.get("message").toString(), UNPROCESSABLE_ENTITY)))
                 .onStatus(HttpStatusCode::is4xxClientError,
                         resp -> rethrower.rethrow(resp, ex -> new InvalidInputsInventoryException(ex.get("message").toString(), BAD_REQUEST)))
                 .bodyToMono(ProductResponseDTO.class);
@@ -91,8 +105,17 @@ public class InventoryServiceClient {
                 .body(Mono.just(model),InventoryRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
+                .onStatus(status -> status.value() == 422,
+                        resp -> rethrower.rethrow(resp,
+                                ex -> new InvalidInputsInventoryException(
+                                        ex.get("message").toString(), UNPROCESSABLE_ENTITY)))
+
+
                 .onStatus(HttpStatusCode::is4xxClientError,
-                        resp -> rethrower.rethrow(resp, ex -> new InvalidInputsInventoryException(ex.get("message").toString(), BAD_REQUEST)))
+                        resp -> rethrower.rethrow(resp,
+                                ex -> new InvalidInputsInventoryException(
+                                        ex.get("message").toString(), BAD_REQUEST)))
+
                 .bodyToMono(InventoryResponseDTO.class);
     }
 
@@ -101,11 +124,21 @@ public class InventoryServiceClient {
     public Mono<InventoryResponseDTO> updateInventory(InventoryRequestDTO model, String inventoryId){
         return webClient.put()
                 .uri(inventoryServiceUrl + "/{inventoryId}" , inventoryId)
+                .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(model),InventoryRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
+                .onStatus(s -> s.value() == 422,
+                        resp -> rethrower.rethrow(resp,
+                                ex -> new InvalidInputsInventoryException(ex.get("message").toString(), UNPROCESSABLE_ENTITY)))
+
+                .onStatus(s -> s.value() == 404,
+                        resp -> rethrower.rethrow(resp,
+                                ex -> new InventoryNotFoundException(ex.get("message").toString(), NOT_FOUND)))
+
                 .onStatus(HttpStatusCode::is4xxClientError,
-                        resp -> rethrower.rethrow(resp, ex -> new InvalidInputsInventoryException(ex.get("message").toString(), BAD_REQUEST)))
+                        resp -> rethrower.rethrow(resp,
+                                ex -> new InvalidInputsInventoryException(ex.get("message").toString(), BAD_REQUEST)))
                 .bodyToMono(InventoryResponseDTO.class);
     }
 
@@ -119,8 +152,15 @@ public class InventoryServiceClient {
                 .body(Mono.just(model),ProductRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError,
-                        resp -> rethrower.rethrow(resp, ex -> new InvalidInputsInventoryException(ex.get("message").toString(), BAD_REQUEST)))
+                .onStatus(s -> s.value() == 422, resp ->
+                        rethrower.rethrow(resp, ex ->
+                                new InvalidInputsInventoryException(ex.get("message").toString(), UNPROCESSABLE_ENTITY)))
+                .onStatus(s -> s.value() == 404, resp ->
+                        rethrower.rethrow(resp, ex ->
+                                new InvalidInputsInventoryException(ex.get("message").toString(), NOT_FOUND)))
+                .onStatus(HttpStatusCode::is4xxClientError, resp ->
+                        rethrower.rethrow(resp, ex ->
+                                new InvalidInputsInventoryException(ex.get("message").toString(), BAD_REQUEST)))
                 .bodyToMono(ProductResponseDTO.class);
     }
 
@@ -209,6 +249,7 @@ public class InventoryServiceClient {
     public Flux<InventoryResponseDTO> searchInventory(
             final Optional<Integer> page,
             final Optional<Integer> size,
+            final String inventoryCode,
             final String inventoryName,
             final String inventoryType,
             final String inventoryDescription,
@@ -217,6 +258,7 @@ public class InventoryServiceClient {
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(inventoryServiceUrl)
                 .queryParamIfPresent("page", page)
                 .queryParamIfPresent("size", size)
+                .queryParamIfPresent("inventoryCode", Optional.ofNullable(inventoryCode))
                 .queryParamIfPresent("inventoryName", Optional.ofNullable(inventoryName))
                 .queryParamIfPresent("inventoryType", Optional.ofNullable(inventoryType))
                 .queryParamIfPresent("inventoryDescription", Optional.ofNullable(inventoryDescription))
@@ -255,7 +297,16 @@ public class InventoryServiceClient {
                 .uri(inventoryServiceUrl + "/type")
                 .body(Mono.just(inventoryTypeRequestDTO),InventoryTypeRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
-                .retrieve().bodyToMono(InventoryTypeResponseDTO.class);
+                .retrieve()
+                .onStatus(s -> s.value() == 422,
+                        resp -> rethrower.rethrow(resp,
+                                ex -> new InvalidInputsInventoryException(
+                                        ex.get("message").toString(), HttpStatus.UNPROCESSABLE_ENTITY)))
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> rethrower.rethrow(resp,
+                                ex -> new InvalidInputsInventoryException(
+                                        ex.get("message").toString(), HttpStatus.BAD_REQUEST)))
+                .bodyToMono(InventoryTypeResponseDTO.class);
     }
 
     public Flux<InventoryTypeResponseDTO> getAllInventoryTypes(){
@@ -263,6 +314,10 @@ public class InventoryServiceClient {
                 .uri(inventoryServiceUrl + "/type")
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
+                .onStatus(status -> status.value() == 404,
+                        resp -> rethrower.rethrow(
+                                resp,
+                                ex -> new NotFoundException(String.valueOf(ex.get("message")))))
                 .bodyToFlux(InventoryTypeResponseDTO.class);
     }
 
@@ -272,7 +327,13 @@ public class InventoryServiceClient {
                 .uri(inventoryServiceUrl + "/{inventoryId}", inventoryId)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, resp -> rethrower.rethrow(resp, ex -> new NotFoundException(ex.get("message").toString())))
+                .onStatus(status -> status.value() == 404,
+                        resp -> rethrower.rethrow(resp,
+                                ex -> new NotFoundException(ex.get("message").toString())))
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> rethrower.rethrow(resp,
+                                ex -> new InvalidInputsInventoryException(
+                                        ex.get("message").toString(), BAD_REQUEST)))
                 .bodyToMono(Void.class);
     }
 
@@ -323,6 +384,13 @@ public class InventoryServiceClient {
                 .body(Mono.just(model),ProductRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
+                .onStatus(s -> s.value() == 422,
+                        resp -> rethrower.rethrow(resp,
+                                ex -> new InventoryProductUnprocessableEntityException(
+                                        ex.get("message").toString(), HttpStatus.UNPROCESSABLE_ENTITY)))
+                .onStatus(status -> status.value() == 404,
+                        resp -> rethrower.rethrow(resp,
+                                ex -> new NotFoundException(ex.get("message").toString())))
                 .onStatus(HttpStatusCode::is4xxClientError,
                         resp -> rethrower.rethrow(resp, ex -> new InvalidInputsInventoryException(ex.get("message").toString(), BAD_REQUEST)))
                 .bodyToMono(ProductResponseDTO.class);
@@ -355,6 +423,18 @@ public class InventoryServiceClient {
                 .uri("/{inventoryId}/products/download", inventoryId)
                 .accept(MediaType.APPLICATION_PDF) // Expect PDF response
                 .retrieve()
+                .onStatus(status -> status.value() == 422,
+                        resp -> rethrower.rethrow(
+                                resp,
+                                ex -> new InvalidInputsInventoryException(
+                                        ex.get("message").toString(),
+                                        HttpStatus.UNPROCESSABLE_ENTITY)))
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> rethrower.rethrow(
+                                resp,
+                                ex -> new InvalidInputsInventoryException(
+                                        ex.get("message").toString(),
+                                        HttpStatus.BAD_REQUEST)))
                 .bodyToMono(byte[].class); // Directly read the body as byte[]
     }
 
@@ -373,6 +453,13 @@ public class InventoryServiceClient {
                 .uri(inventoryServiceUrl)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
+                .onStatus(status -> status.value() == 404,
+                        resp -> rethrower.rethrow(resp,
+                                ex -> new NotFoundException(ex.get("message").toString())))
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> rethrower.rethrow(resp,
+                                ex -> new InvalidInputsInventoryException(
+                                        ex.get("message").toString(), BAD_REQUEST)))
                 .bodyToFlux(InventoryResponseDTO.class);
     }
 

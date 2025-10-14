@@ -1,52 +1,108 @@
-# name: Qodana
-# on:
-#   workflow_dispatch:
-#   pull_request:
-#   push:
-#     branches:
-#       - main
-#       - 'releases/*'
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
 
-# jobs:
-#   build:
-#     runs-on: ubuntu-latest
-#     permissions:
-#       contents: write
-#       pull-requests: write
-#       checks: write
-#     steps:
-#       - uses: actions/checkout@v3
-#         with:
-#           ref: ${{ github.event.pull_request.head.sha }}
-#           fetch-depth: 0
+name: Qodana Code Quality
 
-#       - name: Set up JDK 17
-#         uses: actions/setup-java@v2
-#         with:
-#           java-version: '17'
-#           distribution: 'adopt'
-#           cache: 'gradle'
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
-#       - name: Run Build
-#         run: ./gradlew build
-
-#       - name: Create coverage-data directory and copy contents
-#         run: |
-#           mkdir -p .qodana/code-coverage
-#           cp -R */build/reports/* .qodana/code-coverage/
-
-#       - name: Archive coverage data
-#         uses: actions/upload-artifact@v4
-#         with:
-#           name: gradle-coverage-data.zip
-#           path: .qodana/code-coverage
-
-# #      - name: 'Qodana Scan'
-# #        uses: JetBrains/qodana-action@v2023.2
-# #        env:
-# #          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
-# #        with:
-# #          args: "--linter,jetbrains/qodana-jvm:latest"
-# #          #todo Will setup the code-coverage percent to show on the Qodana reports in the future
-# ##          args: "-i,.qodana/code-coverage,--linter,jetbrains/qodana-jvm:latest"
-# #          pr-mode: false
+jobs:
+  qodana:
+    runs-on: "ubuntu-22.04"
+    permissions:
+      contents: write
+      pull-requests: write
+      checks: write
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - name: Cache Gradle packages
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v3
+    - name: Build Java services (non-PR only)
+      if: github.event_name != 'pull_request'
+      run: ./gradlew clean build -x test
+      working-directory: ./
+    - name: Show changed files for analysis
+      if: github.event_name == 'pull_request'
+      run: |
+        echo "## Files changed in this PR:" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "Debug info:" >> $GITHUB_STEP_SUMMARY
+        echo "- Base SHA: ${{ github.event.pull_request.base.sha }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Head SHA: ${{ github.event.pull_request.head.sha }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Base ref: ${{ github.event.pull_request.base.ref }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        # Get changed files using GitHub API or git diff
+        if [ -n "${{ github.event.pull_request.base.sha }}" ]; then
+          echo "Using base SHA for diff:" >> $GITHUB_STEP_SUMMARY
+          git diff --name-only ${{ github.event.pull_request.base.sha }}...HEAD | head -20 >> $GITHUB_STEP_SUMMARY
+        else
+          echo "Using origin/main for diff:" >> $GITHUB_STEP_SUMMARY
+          git diff --name-only origin/main...HEAD | head -20 >> $GITHUB_STEP_SUMMARY
+        fi
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Qodana will analyze complete files that have been modified**" >> $GITHUB_STEP_SUMMARY
+    - name: Prepare Qodana for complete file analysis
+      if: github.event_name == 'pull_request'
+      run: |
+        echo "Preparing Qodana for complete file analysis..."
+        if [ -n "${{ github.event.pull_request.base.sha }}" ]; then
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }}...HEAD | grep -E '\.java$' || true)
+        else
+          CHANGED_FILES=$(git diff --name-only origin/main...HEAD | grep -E '\.java$' || true)
+        fi
+        
+        if [ -n "$CHANGED_FILES" ]; then
+          echo "Files that will be analyzed completely:"
+          echo "$CHANGED_FILES"
+          echo ""
+          echo "Note: Qodana will now analyze the complete content of these files,"
+          echo "not just the changed lines. This provides more comprehensive"
+          echo "code quality analysis."
+        else
+          echo "No relevant files changed for analysis"
+        fi
+    - name: 'Qodana PR Analysis'
+      id: qodana
+      uses: JetBrains/qodana-action@v2025.2
+      env:
+        QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
+      with:
+        args: "--linter,jetbrains/qodana-jvm-community:latest"
+    - name: Display Qodana Cloud URL
+      run: |
+        echo "## Qodana Analysis Results" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Qodana analysis completed successfully!**" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**View detailed results:**" >> $GITHUB_STEP_SUMMARY
+        echo "- [Qodana Cloud Report](${{ steps.qodana.outputs.qodana-cloud-url }})" >> $GITHUB_STEP_SUMMARY
+        echo "- [Download Artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**PR Analysis includes:**" >> $GITHUB_STEP_SUMMARY
+        echo "- Complete file analysis for all modified files" >> $GITHUB_STEP_SUMMARY
+        echo "- Code quality issues in entire modified files" >> $GITHUB_STEP_SUMMARY
+        echo "- Security vulnerabilities in complete file context" >> $GITHUB_STEP_SUMMARY
+        echo "- Unused imports and dead code in full files" >> $GITHUB_STEP_SUMMARY
+        echo "- Regex warnings excluded (false positives)" >> $GITHUB_STEP_SUMMARY
+        echo "- **Comprehensive analysis** - Analyzes complete modified files" >> $GITHUB_STEP_SUMMARY

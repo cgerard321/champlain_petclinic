@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
@@ -22,9 +23,12 @@ public class BillResponseDTO {
     private String vetFirstName;
     private String vetLastName;
     private LocalDate date;
-    private double amount;
-    private double taxedAmount;
+    private BigDecimal amount;
+    private BigDecimal taxedAmount;
+    private BigDecimal interest;
     private BillStatus billStatus;
     private LocalDate dueDate;
     private Long timeRemaining;
+    private boolean interestExempt;
+    private Boolean archive;
 }

@@ -8,17 +8,50 @@ version: "1.0"
 profile:
   name: qodana.recommended
 
+# Use default scope - Qodana will analyze the entire project by default
+
 
 #Enable inspections
 include:
   - name: VulnerableLibrariesGlobal
   - name: UNUSED_IMPORT
   - name: FieldCanBeLocal
-#  - name: DefaultAnnotationParam
   - name: CommentedOutCode
-#  - name: JvmCoverageInspection
+  - name: JvmCoverageInspection
+  # Additional inspections for comprehensive file analysis
+  - name: UnusedDeclaration
+  - name: UnusedLocalVariable
+  - name: UnusedParameter
+  - name: UnusedField
+  - name: UnusedMethod
+  - name: UnusedClass
+
+
+exclude:
+  # Exclude regex warnings that are false positives in JaCoCo reports
+  - name: RegExpRedundantEscape
+  - name: RegExpDuplicateAlternationBranch
+  - name: RegExpUnnecessaryNonCapturingGroup
+  - name: RegExpSimplifiable
+  - name: RegExpSingleCharAlternation
+  - name: RegExpEmptyAlternationBranch
+  - name: RegExpSuspiciousBackref
+  - name: RegExpRepeatedSpace
+  - name: RegExpUnexpectedAnchor
+  - name: RegExpUnnecessaryEscape
+  - name: RegExpUnnecessaryQuantifier
+  - name: RegExpUnnecessaryGroup
+  - name: RegExpUnnecessaryCharacterClass
+  - name: RegExpUnnecessaryCaseInsensitiveFlag
+  - name: RegExpUnnecessaryDotAllFlag
+  - name: RegExpUnnecessaryMultilineFlag
+  - name: RegExpUnnecessaryUnicodeFlag
+  - name: RegExpUnnecessaryVerboseFlag
+  - name: RegExpUnnecessaryCommentsFlag
+  - name: RegExpUnnecessaryLiteralFlag
+  - name: RegExpUnnecessaryCanonEqFlag
 
 projectJDK: 17 #(Applied in CI/CD pipeline)
 
 #Specify Qodana linter for analysis (Applied in CI/CD pipeline)
-linter: jetbrains/qodana-jvm:latest
+linter: jetbrains/qodana-jvm-community:latest

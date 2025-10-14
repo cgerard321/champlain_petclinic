@@ -1,19 +1,101 @@
-.card {
+/*.card {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding-bottom: 90px;
+}*/
+
+.card {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.card:hover {
+  box-shadow: 0 4px 10px rga(0, 0, 0, 0.15);
+  transform: translateY(-3px);
+}
+
+.card img,
+.card .product-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.card h2 {
+  font-size: 1.2rem;
+  margin: 8px 0;
+  font-weight: bold;
+  color: #222;
+}
+
+.card p {
+  font-size: 0.95rem;
+  color: #555;
+  margin: 6px 0;
+  flex-grow: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card button {
+  background-color: #777;
+  color: white;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  cursor: pointer;
+  margin: auto;
+  display: block;
+  font-size: 0.9rem;
+  width: 125px;
+  height: 37px;
+  margin-top: auto;
+  border-radius: 20px;
+}
+
+.card button:hover {
+  background-color: #222;
+  border-color: #bbb;
 }
 
 .deliveryType-container {
-  display: flex;
-  justify-content: center;
-  background-color: #93d2fb;
-  border-radius: 5px;
-  color: #2375d9;
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
-  padding: 5px 10px;
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #888;
 }
+
+.product-title {
+  cursor: pointer;
+  color: #222;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin: 8px 0;
+}
+
+.product-title:hover {
+  color: #000;
+  text-decoration: underline;
+}
+
+.add-to-cart-btn.disabled,
+.add-to-wishlist-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+

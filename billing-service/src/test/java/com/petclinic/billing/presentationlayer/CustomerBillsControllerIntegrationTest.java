@@ -1,6 +1,8 @@
 package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.datalayer.*;
+import com.petclinic.billing.util.EntityDtoUtil;
+import com.petclinic.billing.util.InterestCalculationUtil;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +17,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.ZoneId;
 import java.util.Calendar;
 
@@ -82,17 +87,20 @@ public class CustomerBillsControllerIntegrationTest {
                 billRepository.save(bill).block();
 
                 StepVerifier.create(billRepository.findByCustomerId(bill.getCustomerId()))
-                                .assertNext(savedBill -> assertEquals(150.0, savedBill.getAmount()))
+                                .assertNext(savedBill -> {
+                                        assertEquals(new BigDecimal("150.00"), savedBill.getAmount());
+                                })
                                 .verifyComplete();
 
-                double expectedBalance = 150.0;
+                // buildBill2() creates UNPAID bill with no dueDate, so no interest is calculated
+                BigDecimal expectedBalance = new BigDecimal("150.00");
 
                 client.get()
                                 .uri("/bills/customer/" + bill.getCustomerId() + "/bills/current-balance")
                                 .exchange()
                                 .expectStatus().isOk()
-                                .expectBody(Double.class)
-                                .value(balance -> assertEquals(expectedBalance, balance, 0.01));
+                                .expectBody(BigDecimal.class)
+                                .value(balance -> assertEquals(expectedBalance, balance));
         }
 
         @Test
@@ -111,7 +119,7 @@ public class CustomerBillsControllerIntegrationTest {
         Bill bill = Bill.builder()
                 .billId("bill-456")
                 .customerId("cust-123")
-                .amount(200.0)
+                .amount(new BigDecimal(200.0))
                 .billStatus(BillStatus.UNPAID)
                 .dueDate(LocalDate.now().plusDays(10))
                 .build();
@@ -148,8 +156,6 @@ public class CustomerBillsControllerIntegrationTest {
                 .expectStatus().isNotFound();
     }
 
-
-
     private Bill buildBill() {
                 return Bill.builder()
                                 .billId("1")
@@ -157,8 +163,10 @@ public class CustomerBillsControllerIntegrationTest {
                                 .vetId("vetId")
                                 .visitType("surgery")
                                 .date(LocalDate.now().minusDays(10))
-                                .amount(150.0)
+                                .amount(new BigDecimal(150.0))
+                                .billStatus(BillStatus.UNPAID)
                                 .dueDate(LocalDate.now().plusDays(20))
+                                .archive(false)
                                 .build();
         }
 
@@ -174,8 +182,37 @@ public class CustomerBillsControllerIntegrationTest {
                                 .vetId("vetId")
                                 .visitType("surgery")
                                 .date(date)
-                                .amount(150.0)
+                                .amount(new BigDecimal("150.00"))
                                 .billStatus(BillStatus.UNPAID)
+                                .archive(false)
                                 .build();
+        }
+
+        @Test
+        void getBillByBillId_ShouldReturnInterest() {
+                billRepository.deleteAll().block();
+
+                Bill overdueBill = Bill.builder()
+                        .billId("overdue-1")
+                        .customerId("custId")
+                        .amount(new BigDecimal("100.00"))
+                        .billStatus(BillStatus.OVERDUE)
+                        .dueDate(LocalDate.now().minusMonths(1))
+                        .build();
+
+                billRepository.save(overdueBill).block();
+
+                // Use centralized utility for compound interest calculation
+                BigDecimal expectedInterest = InterestCalculationUtil.calculateCompoundInterest(
+                    overdueBill.getAmount(), overdueBill.getDueDate(), LocalDate.now());
+
+                client.get()
+                        .uri("/bills/" + overdueBill.getBillId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .exchange()
+                        .expectStatus().isOk()
+                        .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                        .expectBody()
+                        .jsonPath("$.interest").isEqualTo(expectedInterest.doubleValue());
         }
 }

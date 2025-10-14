@@ -3,18 +3,6 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <style>
-
-    .custom-card {
-        text-align: center;
-        background-color: #fff;
-        border: 1px solid #dcdcdc;
-        border-radius: 0.25rem;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        margin: 20px;
-        padding: 20px;
-        align-items: center;
-    }
-
     .custom-label {
         font-weight: bold;
     }
@@ -28,46 +16,64 @@
     }
 </style>
 
-<div class="bColor text-center">
-    <h2 class="" id="title">Product Details Info</h2>
-</div>
+<div class="container d-flex justify-content-center mt-5">
+    <div class="card shadow-sm p-4" style="max-width: 600px; width: 100%;">
+        <h4 class="mb-5 text-center">Products Details Infos</h4>
 
-<div class="card-mx-auto">
-    <div class="custom-card">
-        <div class="row custom-row">
-            <div class="col-md-2 custom-label">Inventory Id:</div>
-            <div class="col-md-2 custom-value">{{$ctrl.product.inventoryId}}</div>
+        <div class="p-3 formColor m-0">
+            <div class="row custom-row">
+                <div class="col-md-5 custom-label">Image:</div>
+                <img class="col-md-2 custom-value" ng-if="$ctrl.product.imageData" ng-src="data:{{$ctrl.product.imageType}};base64,{{$ctrl.product.imageData}}" alt="{{$ctrl.product.productName}}" width="120">
+            </div>
+            <div class="row custom-row">
+                <div class="col-md-5 custom-label">Product Name:</div>
+                <div class="col-md-2 custom-value">{{$ctrl.product.productName}}</div>
+            </div>
+            <div class="row custom-row">
+                <div class="col-md-5 custom-label">Product Id:</div>
+                <div class="col-md-2 custom-value">{{$ctrl.product.productId}}</div>
+            </div>
+
+            <div class="row custom-row">
+                <div class="col-md-5 custom-label">Product Description:</div>
+                <div class="col-md-2 custom-value">{{$ctrl.product.productDescription}}</div>
+            </div>
+
+            <div class="row custom-row">
+                <div class="col-md-5 custom-label">Product SalePrice:</div>
+                <div class="col-md-2 custom-value">{{$ctrl.product.productSalePrice | currency:"$":2}}</div>
+            </div>
+
+            <div class="row custom-row">
+                <div class="col-md-5 custom-label">Product Quantity:</div>
+                <div class="col-md-2 custom-value">{{$ctrl.product.productQuantity}}</div>
+            </div>
+            <div class="row custom-row">
+                <div class="col-md-5 custom-label">Product Rating:</div>
+                <div class="col-md-2 custom-value">{{$ctrl.product.averageRating}}</div>
+            </div>
+            <div class="row custom-row">
+                <div class="col-md-5 custom-label">Product Type:</div>
+                <div class="col-md-2 custom-value">{{$ctrl.product.productType}}</div>
+            </div>
+            <div class="row custom-row">
+                <div class="col-md-5 custom-label">Product Delivery Type:</div>
+                <div class="col-md-2 custom-value">{{$ctrl.product.deliveryType}}</div>
+            </div>
+            <div class="row custom-row">
+                <div class="col-md-5 custom-label">Product Status:</div>
+                <div class="col-md-2 custom-value">{{$ctrl.product.productStatus}}</div>
+            </div>
+            <div class="row custom-row">
+                <div class="col-md-5 custom-label">Product isUnlisted:</div>
+                <div class="col-md-2 custom-value">{{$ctrl.product.isUnlisted}}</div>
+            </div>
         </div>
 
-        <div class="row custom-row">
-            <div class="col-md-2 custom-label">Product Id:</div>
-            <div class="col-md-2 custom-value">{{$ctrl.product.productId}}</div>
+        <div class="text-center mt-5">
+            <a class="btn btn-primary" href="#!/products">
+                Back to Products page
+            </a>
         </div>
-
-        <div class="row custom-row">
-            <div class="col-md-2 custom-label">Product Description:</div>
-            <div class="col-md-2 custom-value">{{$ctrl.product.productDescription}}</div>
-        </div>
-
-        <div class="row custom-row">
-            <div class="col-md-2 custom-label">Product Price:</div>
-            <div class="col-md-2 custom-value">{{$ctrl.product.productPrice | currency:"$":2}}</div>
-        </div>
-
-        <div class="row custom-row">
-            <div class="col-md-2 custom-label">Product SalePrice:</div>
-            <div class="col-md-2 custom-value">{{$ctrl.product.productSalePrice | currency:"$":2}}</div>
-        </div>
-
-        <div class="row custom-row">
-            <div class="col-md-2 custom-label">Product Quantity:</div>
-            <div class="col-md-2 custom-value">{{$ctrl.product.productQuantity}}</div>
-        </div>
-    </div>
-
-    <div class="text-center mt-4">
-        <a class="btn btn-primary" href="#!/inventory/{{$ctrl.product.inventoryId}}/products">
-            Back to Products page
-        </a>
     </div>
 </div>

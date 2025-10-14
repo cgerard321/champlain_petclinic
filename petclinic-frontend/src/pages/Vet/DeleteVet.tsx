@@ -1,4 +1,5 @@
 import * as React from 'react'; // Correct import for React
+import { deleteVet } from '@/features/veterinarians/api/deleteVet';
 
 interface DeleteVetProps {
   vetId: string;
@@ -6,14 +7,19 @@ interface DeleteVetProps {
 }
 
 const DeleteVet: React.FC<DeleteVetProps> = ({ vetId, onVetDeleted }) => {
-  const handleDelete = (event: React.MouseEvent): void => {
-    // Added void as return type
-    event.stopPropagation(); // Prevent event from bubbling up
+  const handleDelete = async (
+    event: React.MouseEvent<HTMLButtonElement>
+  ): Promise<void> => {
+    event.stopPropagation();
     if (window.confirm('Are you sure you want to delete this vet?')) {
-      onVetDeleted(event, vetId);
+      try {
+        await deleteVet(vetId);
+        onVetDeleted(event, vetId);
+      } catch (error) {
+        console.error('Failed to delete vet:', error);
+      }
     }
   };
-
   return (
     <button onClick={handleDelete} className="btn btn-danger">
       Delete

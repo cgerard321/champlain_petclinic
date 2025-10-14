@@ -1,6 +1,5 @@
 package com.petclinic.authservice.presentationlayer.User;
 
-import com.petclinic.authservice.datalayer.roles.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

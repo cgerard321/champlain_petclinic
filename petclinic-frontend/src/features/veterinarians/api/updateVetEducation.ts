@@ -1,22 +1,26 @@
-import axios, { AxiosResponse } from 'axios';
 import axiosInstance from '@/shared/api/axiosInstance';
 import { EducationRequestModel } from '../models/EducationRequestModel';
+import { EducationResponseModel } from '../models/EducationResponseModel';
 
 export const updateVetEducation = async (
   vetId: string,
   educationId: string,
   education: EducationRequestModel
-): Promise<AxiosResponse<void>> => {
-  return await axiosInstance.put<void>(
+): Promise<EducationRequestModel> => {
+  return await axiosInstance.put(
     `/vets/${vetId}/educations/${educationId}`,
-    education
+    education,
+    {
+      useV2: false,
+    }
   );
 };
 
 export const getEducation = async (
   vetId: string
-): Promise<AxiosResponse<EducationRequestModel>> => {
-  return await axios.get<EducationRequestModel>(
-    `http://localhost:8080/api/gateway/vet/${vetId}/education`
+): Promise<EducationResponseModel> => {
+  const response = await axiosInstance.get<EducationResponseModel>(
+    `/vets/${vetId}/education`
   );
+  return response.data;
 };

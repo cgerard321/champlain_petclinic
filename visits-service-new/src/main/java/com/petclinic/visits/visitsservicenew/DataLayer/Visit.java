@@ -1,8 +1,12 @@
 package com.petclinic.visits.visitsservicenew.DataLayer;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import lombok.*;
 import org.springframework.data.annotation.Id;
+
+
 import java.time.LocalDateTime;
 
 /**
@@ -20,7 +24,7 @@ public class Visit {
 
     private String visitId;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     LocalDateTime visitDate;
 
     private String description;
@@ -31,7 +35,9 @@ public class Visit {
 
     private Status status;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     LocalDateTime visitEndDate;
+
+    private Boolean isEmergency;
 
 }

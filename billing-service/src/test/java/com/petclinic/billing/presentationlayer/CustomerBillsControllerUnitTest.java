@@ -1,5 +1,7 @@
 package com.petclinic.billing.presentationlayer;
 
+import com.petclinic.billing.domainclientlayer.Auth.AuthServiceClient;
+import com.petclinic.billing.domainclientlayer.Auth.Rethrower;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
 import com.petclinic.billing.businesslayer.BillService;
@@ -8,12 +10,17 @@ import com.petclinic.billing.datalayer.BillStatus;
 import com.petclinic.billing.datalayer.PaymentRequestDTO;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.util.EntityDtoUtil;
+import com.petclinic.billing.util.InterestCalculationUtil;
+import com.petclinic.billing.util.InterestCalculationUtil;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
+
+import java.math.RoundingMode;
+import java.time.LocalDate;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.server.ResponseStatusException;
@@ -25,6 +32,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
+import java.math.BigDecimal;
+
 @WebFluxTest(controllers = CustomerBillsController.class)
 public class CustomerBillsControllerUnitTest {
 
@@ -33,6 +42,11 @@ public class CustomerBillsControllerUnitTest {
 
     @MockBean
     BillService billService;
+    @MockBean
+    AuthServiceClient authServiceClient;
+
+    @MockBean
+    Rethrower rethrower;
 
     @Test
     void getBillsByCustomerId_shouldSucceed() {
@@ -73,7 +87,7 @@ public class CustomerBillsControllerUnitTest {
     @Test
     void getCurrentBalance_ValidCustomer_ShouldReturnBalance() {
         String customerId = "valid-customer-id";
-        double expectedBalance = 150.0;
+        BigDecimal expectedBalance = new BigDecimal("150.0");
 
         when(billService.calculateCurrentBalance(customerId)).thenReturn(Mono.just(expectedBalance));
 
@@ -82,7 +96,7 @@ public class CustomerBillsControllerUnitTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(Double.class)
+                .expectBody(BigDecimal.class)
                 .value(balance -> assertEquals(expectedBalance, balance));
 
         verify(billService, times(1)).calculateCurrentBalance(customerId);
@@ -111,7 +125,7 @@ public class CustomerBillsControllerUnitTest {
                 .vetId("vetId")
                 .visitType("surgery")
                 .billStatus(BillStatus.PAID)
-                .amount(150.0)
+                .amount(new BigDecimal(150.0))
                 .build();
     }
 
@@ -125,7 +139,7 @@ public class CustomerBillsControllerUnitTest {
                 .billId(billId)
                 .customerId(customerId)
                 .billStatus(BillStatus.PAID)
-                .amount(200.0)
+                .amount(new BigDecimal(200.0))
                 .build();
 
         when(billService.processPayment(customerId, billId, paymentRequest))
@@ -184,17 +198,35 @@ public class CustomerBillsControllerUnitTest {
         verify(billService, times(1)).processPayment(customerId, billId, paymentRequest);
     }
 
+    @Test
+        void getBillsByCustomerId_OverdueBill_ShouldReturnInterest() {
+                // Use centralized utility for compound interest calculation
+                BigDecimal amount = new BigDecimal("100.00");
+                LocalDate dueDate = LocalDate.now().minusMonths(1); // 1 month overdue
+                LocalDate currentDate = LocalDate.now();
+                BigDecimal calculatedInterest = InterestCalculationUtil.calculateCompoundInterest(amount, dueDate, currentDate);
+                
+                BillResponseDTO overdueBill = BillResponseDTO.builder()
+                        .billId("overdue-1")
+                        .customerId("custId")
+                        .amount(amount)
+                        .billStatus(BillStatus.OVERDUE)
+                        .interest(calculatedInterest)
+                        .build();
 
+                when(billService.getBillsByCustomerId(anyString())).thenReturn(Flux.just(overdueBill));
 
-
-
-
-
-
-
-
-
-
-
-
+                client.get()
+                        .uri("/bills/customer/{customerId}/bills", overdueBill.getCustomerId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .exchange()
+                        .expectStatus().isOk()
+                        .expectBodyList(BillResponseDTO.class)
+                        .consumeWith(response -> {
+                                assert response.getResponseBody() != null;
+                                // Compare using doubleValue to avoid BigDecimal precision issues (1.50 vs 1.5)
+                                assertEquals(calculatedInterest.doubleValue(), response.getResponseBody().get(0).getInterest().doubleValue());
+                        });
+                verify(billService, times(1)).getBillsByCustomerId(overdueBill.getCustomerId());
+        }
 }

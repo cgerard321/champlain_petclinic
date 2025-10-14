@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@/context/UserContext';
-import { getAllReviews } from './Api/getAllCustomerReviews';
+import { getAllReviews } from './Api/getAllReviews';
 import { ReviewResponseDTO } from './Model/ReviewResponseDTO';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 import { deleteReview } from './Api/deleteReview';
@@ -15,7 +15,7 @@ const CustomerReviewsList: React.FC = (): JSX.Element => {
   useEffect(() => {
     const fetchReviewsData = async (): Promise<void> => {
       try {
-        const response = await getAllReviews(user.userId);
+        const response = await getAllReviews();
         if (Array.isArray(response)) {
           setReviewList(response);
         } else {

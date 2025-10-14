@@ -8,6 +8,11 @@ import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
 import org.springframework.test.context.ActiveProfiles;
+
+import com.petclinic.vet.dataaccesslayer.vets.Vet;
+import com.petclinic.vet.dataaccesslayer.vets.VetRepository;
+import com.petclinic.vet.dataaccesslayer.vets.Workday;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;

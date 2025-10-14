@@ -2,10 +2,7 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 
 
 import com.petclinic.bffapigateway.domainclientlayer.CartServiceClient;
-import com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO;
-import com.petclinic.bffapigateway.dtos.Cart.CartResponseDTO;
-import com.petclinic.bffapigateway.dtos.Cart.UpdateProductQuantityRequestDTO;
-import com.petclinic.bffapigateway.dtos.Cart.PromoCodeResponseDTO;
+import com.petclinic.bffapigateway.dtos.Cart.*;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
@@ -21,6 +18,8 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -216,6 +215,38 @@ public class CartController {
                 });
     }
 
+
+    // move all Wishlist items into cart
+    @PostMapping(value = "/{cartId}/wishlist/moveAll", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<CartResponseDTO>> moveAllWishlistToCart(@PathVariable String cartId) {
+        return cartServiceClient.moveAllWishlistToCart(cartId)
+                .map(ResponseEntity::ok)
+                .onErrorResume(ex -> {
+                    if (ex instanceof org.springframework.web.reactive.function.client.WebClientResponseException.NotFound) {
+                        CartResponseDTO dto = new CartResponseDTO();
+                        dto.setMessage("Cart not found: " + cartId);
+                        return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).body(dto));
+                    }
+                    if (ex instanceof org.springframework.web.reactive.function.client.WebClientResponseException.UnprocessableEntity
+                            || ex instanceof com.petclinic.bffapigateway.exceptions.InvalidInputException) {
+                        CartResponseDTO dto = new CartResponseDTO();
+                        dto.setMessage(ex.getMessage());
+                        return Mono.just(ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(dto));
+                    }
+                    if (ex instanceof org.springframework.web.reactive.function.client.WebClientResponseException wce) {
+                        CartResponseDTO dto = new CartResponseDTO();
+                        String msg = (wce.getResponseBodyAsString() != null && !wce.getResponseBodyAsString().isBlank())
+                                ? wce.getResponseBodyAsString()
+                                : wce.getStatusText();
+                        dto.setMessage(msg);
+                        return Mono.just(ResponseEntity.status(wce.getStatusCode()).body(dto));
+                    }
+                    log.error("moveAllWishlistToCart unexpected error for cartId {}: {}", cartId, ex.getMessage(), ex);
+                    CartResponseDTO dto = new CartResponseDTO();
+                    dto.setMessage("Unexpected error");
+                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(dto));
+                });
+    }
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "promos", produces= MediaType.APPLICATION_JSON_VALUE)
     public Flux<PromoCodeResponseDTO> getAllPromos() {

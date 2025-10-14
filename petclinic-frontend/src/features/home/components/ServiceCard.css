@@ -1,0 +1,20 @@
+.service-emoji {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.service-card .card-body {
+  padding: 12px 14px;
+}
+
+.service-title {
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 0;
+}
+
+.service-desc {
+  color: #64748b;
+  font-size: 0.88rem;
+  margin-bottom: 0;
+}

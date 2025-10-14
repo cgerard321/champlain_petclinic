@@ -27,7 +27,7 @@ public class ProductsServiceClient {
                                  @Value("${app.products-service.host}") String productsServiceHost,
                                  @Value("${app.products-service.port}") String productsServicePort) {
         this.webClientBuilder = webClientBuilder;
-        productsServiceUrl = "http://" + productsServiceHost + ":" + productsServicePort + "/api/v1/products";
+        productsServiceUrl = "http://" + productsServiceHost + ":" + productsServicePort + "/products";
         this.webClient = webClientBuilder
                 .baseUrl(productsServiceUrl)
                 .build();
@@ -120,10 +120,12 @@ public class ProductsServiceClient {
 
     }
 
-    public Mono<ProductResponseDTO> deleteProduct(final String productId) {
+    public Mono<ProductResponseDTO> deleteProduct(final String productId, boolean cascadeBundles) {
         return webClientBuilder.build()
                 .delete()
-                .uri(productsServiceUrl + "/"  + productId)
+                .uri(uri -> uri.path("/"  + productId)
+                        .queryParam("cascadeBundles", cascadeBundles)
+                        .build())
                 .retrieve()
                 .bodyToMono(ProductResponseDTO.class);
     }

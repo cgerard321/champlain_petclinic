@@ -7,7 +7,7 @@ export const getReview = async (
 ): Promise<ReviewResponseDTO> => {
   const response = await axiosInstance.get<ReviewResponseDTO>(
     `/reviews/${reviewId}`,
-    { useV2: true }
+    { useV2: false }
   );
   return response.data; // Return only the data
 };

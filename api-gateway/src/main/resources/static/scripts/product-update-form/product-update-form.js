@@ -3,13 +3,10 @@
 angular.module('productUpdateForm', ['ui.router'])
     .config(['$stateProvider', function ($stateProvider) {
         $stateProvider
-
-            .state('updateProductInventory', {
+            .state('updateProduct', {
                 parent: 'app',
-                url: '/inventories/:inventoryId/products/:productId',
+                url: '/products/:productId',
                 template: '<product-update-form></product-update-form>'
             })
 
     }]);
-
-//url: '/inventory/:inventoryId/products/:productId/:method',

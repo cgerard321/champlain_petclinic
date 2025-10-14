@@ -24,7 +24,7 @@ class RatingsServiceClientIntegrationTest {
     @Test
     void getAllRatingsForProductId() {
         String productId = UUID.randomUUID().toString();
-        stubFor(get(urlEqualTo("/api/v1/ratings/%s".formatted(productId)))
+        stubFor(get(urlEqualTo("/ratings/%s".formatted(productId)))
                 .willReturn(okForContentType(MediaType.TEXT_EVENT_STREAM.toString(), "data:{\"rating\": 5, \"review\": \"It's great\"}\n\ndata: {\"rating\": 1, \"review\": \"Horrible\"}\n\n"))
         );
 
@@ -44,7 +44,7 @@ class RatingsServiceClientIntegrationTest {
     void getRatingForProductIdAndCustomerId() {
         String productId = UUID.randomUUID().toString();
         String customerId = UUID.randomUUID().toString();
-        stubFor(get(urlEqualTo("/api/v1/ratings/%s/%s".formatted(productId, customerId)))
+        stubFor(get(urlEqualTo("/ratings/%s/%s".formatted(productId, customerId)))
                 .willReturn(okForContentType(MediaType.APPLICATION_JSON.toString(), "{\"rating\": 5, \"review\": \"It's great\"}"))
         );
 
@@ -66,7 +66,7 @@ class RatingsServiceClientIntegrationTest {
                 .review("It's not bad neither good")
                 .build();
 
-        stubFor(post(urlEqualTo("/api/v1/ratings/%s/%s".formatted(productId, customerId)))
+        stubFor(post(urlEqualTo("/ratings/%s/%s".formatted(productId, customerId)))
                 .withRequestBody(matchingJsonSchema("{\"rating\": " + requestModel.getRating() + "}"))
                 .willReturn(created()
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON.toString())
@@ -92,7 +92,7 @@ class RatingsServiceClientIntegrationTest {
                 .review("It's not bad neither good")
                 .build();
 
-        stubFor(put(urlEqualTo("/api/v1/ratings/%s/%s".formatted(productId, customerId)))
+        stubFor(put(urlEqualTo("/ratings/%s/%s".formatted(productId, customerId)))
                 .withRequestBody(matchingJsonSchema("{\"rating\": " + requestModel.getRating() + "}"))
                 .willReturn(okForContentType(MediaType.APPLICATION_JSON.toString(), "{\"rating\":" + requestModel.getRating() + ", \"review\": \"" + requestModel.getReview() + "\"}"))
         );
@@ -110,7 +110,7 @@ class RatingsServiceClientIntegrationTest {
         String productId = UUID.randomUUID().toString();
         String customerId = UUID.randomUUID().toString();
 
-        stubFor(delete(urlEqualTo("/api/v1/ratings/%s/%s".formatted(productId, customerId)))
+        stubFor(delete(urlEqualTo("/ratings/%s/%s".formatted(productId, customerId)))
                 .willReturn(okForContentType(MediaType.APPLICATION_JSON.toString(), "{\"rating\": 5, \"review\": \"It's great\"}"))
         );
 

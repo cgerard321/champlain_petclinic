@@ -7,7 +7,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface ProductInventoryService {
-//    Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> productRequestDTOMono, String inventoryId);
+    //    Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> productRequestDTOMono, String inventoryId);
     Mono<InventoryResponseDTO> addInventory(Mono<InventoryRequestDTO> inventoryRequestDTO);
     Mono<InventoryResponseDTO> updateInventory(Mono<InventoryRequestDTO> inventoryRequestDTO, String inventoryId);
 
@@ -24,7 +24,7 @@ public interface ProductInventoryService {
 
     Mono<Void> updateImportantStatus(String inventoryId, Boolean important);
 
-    Flux<InventoryResponseDTO> searchInventories(Pageable page, String inventoryName, String inventoryType, String inventoryDescription, Boolean importantOnly);
+    Flux<InventoryResponseDTO> searchInventories(Pageable page, String inventoryCode, String inventoryName, String inventoryType, String inventoryDescription, Boolean importantOnly);
     Flux<InventoryTypeResponseDTO> getAllInventoryTypes();
 
     Mono<ProductResponseDTO> getProductByProductIdInInventory(String inventoryId, String productId);
@@ -32,7 +32,7 @@ public interface ProductInventoryService {
     Mono<Void> deleteAllProductsForAnInventory(String inventoryId);
 
 //    Mono<Void> deleteAllProductInventory(String inventoryId);
-  
+
     Flux<ProductResponseDTO> getLowStockProducts(String inventoryId, int stockThreshold);
 
     Flux<ProductResponseDTO> searchProducts(String inventoryId, String productName, String productDescription, Status status);
@@ -49,4 +49,6 @@ public interface ProductInventoryService {
     Mono<ProductResponseDTO> updateProductInventoryId(String currentInventoryId, String productId, String newInventoryId);
 
     Flux<InventoryResponseDTO> getAllInventories();
+
+    Mono<String> getRecentUpdateMessage(String inventoryId);
 }

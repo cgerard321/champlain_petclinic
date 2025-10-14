@@ -4,6 +4,14 @@ import { ProductBundleModel } from '@/features/products/models/ProductModels/Pro
 export async function getProductBundleById(
   bundleId: string
 ): Promise<ProductBundleModel> {
-  const res = await axiosInstance.get(`/products/bundles/${bundleId}`);
-  return res.data;
+  try {
+    const response = await axiosInstance.get('/products/bundles/' + bundleId, {
+      useV2: false,
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching product bundle:', error);
+    throw error;
+  }
 }

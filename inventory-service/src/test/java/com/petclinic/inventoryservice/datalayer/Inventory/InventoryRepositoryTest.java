@@ -229,6 +229,7 @@ class InventoryRepositoryTest {
         return Inventory.builder()
                 .inventoryName(inventoryName)
                 .inventoryId(inventoryId)
+                .inventoryCode("INV-000" + inventoryId.substring(inventoryId.length() - 1))
                 .inventoryType(inventoryType)
                 .inventoryDescription(inventoryDescription)
                 .inventoryImage(inventoryImage)
@@ -254,6 +255,38 @@ class InventoryRepositoryTest {
         StepVerifier
                 .create(inventoryRepository.findByImportant(true))
                 .expectNextMatches(result -> result.getImportant().equals(true))
+                .verifyComplete();
+    }
+
+    @Test
+    void findInventoryByInventoryCode_shouldSucceed() {
+        inventoryRepository.deleteAll().block();
+
+        Inventory inventory = buildInventory(
+                "inventoryId_code_1",
+                "Test Inventory",
+                "Internal",
+                "Test Description",
+                "https://www.fda.gov/files/iStock-157317886.jpg",
+                "https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14",
+                diagnosticKitImage
+        );
+        inventory.setInventoryCode("INV-0001");
+        inventoryRepository.save(inventory).block();
+
+        StepVerifier
+                .create(inventoryRepository.findInventoryByInventoryCode("INV-0001"))
+                .expectNextMatches(result ->
+                        result.getInventoryId().equals("inventoryId_code_1") &&
+                                result.getInventoryCode().equals("INV-0001"))
+                .verifyComplete();
+    }
+
+    @Test
+    void findInventoryByInventoryCode_withInvalidCode_shouldReturnEmpty() {
+        StepVerifier
+                .create(inventoryRepository.findInventoryByInventoryCode("INV-9999"))
+                .expectNextCount(0)
                 .verifyComplete();
     }
 

@@ -93,7 +93,7 @@ export async function getVetEducation(vetId: string, useV2: boolean = false): Pr
       );
       return response.data;
     } else {
-      // V1 API: Preferred approach for backwards compatibility
+      // v1 API: Preferred approach for backwards compatibility
       const response = await axiosInstance.get<EducationResponseModel>(
         `/vet/${vetId}/education`, 
         { useV2: false }
@@ -122,12 +122,12 @@ export async function getProducts(): Promise<ProductModel[]> {
   } catch (error) {
     // Only fallback to v2 if specifically needed for breaking changes
     if (import.meta.env.VITE_ENV === 'dev') {
-      console.warn('V1 API failed, trying V2 for development testing:', error);
+      console.warn('v1 API failed, trying V2 for development testing:', error);
       try {
         const response = await axiosInstance.get<ProductModel[]>('/products', { useV2: true });
         return response.data;
       } catch (v2Error) {
-        console.error('Both V1 and V2 APIs failed:', v2Error);
+        console.error('Both v1 and V2 APIs failed:', v2Error);
         throw v2Error;
       }
     }

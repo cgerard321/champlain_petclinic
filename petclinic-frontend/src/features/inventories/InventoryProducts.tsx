@@ -56,8 +56,8 @@ const InventoryProducts: React.FC = () => {
   const { productList, setProductList, getProductList } = useSearchProducts();
 
   // Declare state
-  const [inventoryName, setInventoryName] = useState<string>('');
   const [productName, setProductName] = useState<string>('');
+  const [inventoryName, setInventoryName] = useState<string>('');
   const [productDescription, setProductDescription] = useState<string>('');
   const [productStatus, setProductStatus] = useState<Status | ''>('');
   const [products, setProducts] = useState<ProductModel[]>([]);
@@ -73,7 +73,9 @@ const InventoryProducts: React.FC = () => {
       try {
         await createPdf(inventoryId);
       } catch (error) {
-        console.error('Failed to create PDF', error);
+        const msg =
+          error instanceof Error ? error.message : 'Failed to create PDF';
+        alert(msg);
       }
     }
   };
@@ -91,7 +93,6 @@ const InventoryProducts: React.FC = () => {
         console.warn('Failed to fetch inventory details', err);
       });
   }, [inventoryId]);
-
   useEffect(() => {
     const w = window as WindowWithGoogle;
 
@@ -160,6 +161,7 @@ const InventoryProducts: React.FC = () => {
       fetchProducts().catch(err => console.error(err));
     }
   }, [inventoryId, setProductList]);
+
   const deleteProduct = async (): Promise<void> => {
     if (productToDelete) {
       try {
@@ -385,9 +387,27 @@ const InventoryProducts: React.FC = () => {
             <th>Supply Id</th>
             <th>Supply Name</th>
             <th>Description</th>
-            <th>Sale Price</th>
-            <th>Cost Price</th>
-            <th>Profit Margin</th>
+            <th>
+              <span className="th-2line">
+                Sale
+                <br />
+                Price
+              </span>
+            </th>
+            <th>
+              <span className="th-2line">
+                Cost
+                <br />
+                Price
+              </span>
+            </th>
+            <th>
+              <span className="th-2line">
+                Profit
+                <br />
+                Margin
+              </span>
+            </th>
             <th>Quantity</th>
             <th>Status</th>
             <th>Actions</th>
@@ -433,20 +453,20 @@ const InventoryProducts: React.FC = () => {
                         e.stopPropagation();
                         navigate(`${product.productId}/edit`);
                       }}
-                      className="btn btn-warning"
+                      className="btn btn-warning btn-sm"
                     >
                       Edit
                     </button>
 
                     <button
-                      className="btn btn-danger"
+                      className="btn btn-danger btm-sm"
                       onClick={() => handleDeleteClick(product.productId)}
                     >
                       Delete
                     </button>
 
                     <button
-                      className="btn btn-success"
+                      className="btn btn-success btn-sm"
                       onClick={() =>
                         addQuantity(product.productId, product.productQuantity)
                       }
@@ -461,7 +481,7 @@ const InventoryProducts: React.FC = () => {
                     </button>
 
                     <button
-                      className="btn btn-info"
+                      className="btn btn-info btn-sm"
                       onClick={() =>
                         reduceQuantity(
                           product.productId,
@@ -479,9 +499,9 @@ const InventoryProducts: React.FC = () => {
                     <button
                       onClick={e => {
                         e.stopPropagation();
-                        navigate(`${product.productId}/move`);
+                        navigate(`${product.productId}`);
                       }}
-                      className="btn btn-info"
+                      className="btn btn-info btn-sm"
                     >
                       Move
                     </button>

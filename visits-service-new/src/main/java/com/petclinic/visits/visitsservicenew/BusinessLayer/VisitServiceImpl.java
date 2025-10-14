@@ -27,7 +27,9 @@ import reactor.core.publisher.Mono;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.Base64;
 
 import static java.lang.String.format;
 
@@ -407,6 +409,7 @@ public class VisitServiceImpl implements VisitService {
      * @return The DTO as Mono or BadRequestException if it doesn't respect the needed format
      */
     private Mono<VisitRequestDTO> validateVisitRequest(VisitRequestDTO dto) {
+
         if (dto.getDescription() == null || dto.getDescription().isBlank()) {
             return Mono.error(new BadRequestException("Please enter a description for this visit"));
         } else if (dto.getVisitDate() == null) {
@@ -434,56 +437,65 @@ public class VisitServiceImpl implements VisitService {
      * @return The email built from the message
      */
     private Mail generateVisitRequestEmail(UserDetails user, String petName, LocalDateTime visitDate) {
-        return Mail.builder()
-                .message(
-                        format("""
-                                <!DOCTYPE html>
-                                <html lang="en">
-                                <head>
-                                    <meta charset="UTF-8">
-                                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                    <title>Email Verification</title>
-                                    <style>
-                                        body {
-                                            font-family: Arial, sans-serif;
-                                            background-color: #f4f4f4;
-                                            margin: 0;
-                                            padding: 0;
-                                        }
-                                        .container {
-                                            max-width: 600px;
-                                            margin: 0 auto;
-                                            padding: 20px;
-                                            background-color: #fff;
-                                            border-radius: 5px;
-                                            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-                                        }
-                                        h1 {
-                                            color: #333;
-                                        }
-                                        p {
-                                            color: #555;
-                                        }
-                                        a {
-                                            color: #007BFF;
-                                        }
-                                    </style>
-                                </head>
-                                <body>
-                                    <div class="container">
-                                        <h1>Dear %s,</h1>
-                                        <h3>We have received a request to schedule a visit for your pet with id: %s on the following date and time: %s.</h3>
-                                        \s
-                                        <p>If you do not wish to create an account, please disregard this email.</p>
-                                        \s
-                                        <p>Thank you for choosing Pet Clinic.</p>
-                                    </div>
-                                </body>
-                                </html>
-                                """, user.getUsername(), petName, visitDate.toString()))
-                .subject("PetClinic Visit request")
-                .to(user.getEmail())
-                .build();
+
+
+        return new Mail(
+                user.getEmail(), "PetClinic Visit request", "Default", "PetClinic Visit request",
+                "Dear " + user.getUsername() + ",\n" +
+                        "We have received a request to schedule a visit for your pet with id: "+ petName +" on the following date and time: "+ visitDate.toString() +"." +"\n"+
+                        "If you do not wish to create an account, please disregard this email.",
+                "Thank you for choosing Pet Clinic.", user.getUsername(), "ChamplainPetClinic@gmail.com");
+        //Old way of doing it with old Mail entity in case of need to revert
+//        return Mail.builder()
+//                .message(
+//                        format("""
+//                                <!DOCTYPE html>
+//                                <html lang="en">
+//                                <head>
+//                                    <meta charset="UTF-8">
+//                                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+//                                    <title>Email Verification</title>
+//                                    <style>
+//                                        body {
+//                                            font-family: Arial, sans-serif;
+//                                            background-color: #f4f4f4;
+//                                            margin: 0;
+//                                            padding: 0;
+//                                        }
+//                                        .container {
+//                                            max-width: 600px;
+//                                            margin: 0 auto;
+//                                            padding: 20px;
+//                                            background-color: #fff;
+//                                            border-radius: 5px;
+//                                            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+//                                        }
+//                                        h1 {
+//                                            color: #333;
+//                                        }
+//                                        p {
+//                                            color: #555;
+//                                        }
+//                                        a {
+//                                            color: #007BFF;
+//                                        }
+//                                    </style>
+//                                </head>
+//                                <body>
+//                                    <div class="container">
+//                                        <h1>Dear %s,</h1>
+//                                        <h3>We have received a request to schedule a visit for your pet with id: %s on the following date and time: %s.</h3>
+//                                        \s
+//                                        <p>If you do not wish to create an account, please disregard this email.</p>
+//                                        \s
+//                                        <p>Thank you for choosing Pet Clinic.</p>
+//                                    </div>
+//                                </body>
+//                                </html>
+//                                """, user.getUsername(), petName, visitDate.toString()))
+//                .subject("PetClinic Visit request")
+//                .to(user.getEmail())
+//                .build();
     }
 
 

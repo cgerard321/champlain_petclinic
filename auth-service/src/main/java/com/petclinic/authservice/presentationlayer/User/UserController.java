@@ -35,13 +35,11 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Mono;
 
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/users")
@@ -82,10 +80,9 @@ public class UserController {
     public ResponseEntity<List<UserDetails>> getAllUsers(@RequestParam Optional<String> username) {
         List<UserDetails> users;
 
-        if(username.isPresent()) {
+        if (username.isPresent()) {
             users = userService.getUsersByUsernameContaining(username.get());
-        }
-        else {
+        } else {
             users = userService.findAllWithoutPage();
         }
 
@@ -93,24 +90,24 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserPasswordLessDTO> createUser(@RequestBody @Valid UserIDLessRoleLessDTO dto){
+    public ResponseEntity<UserPasswordLessDTO> createUser(@RequestBody @Valid UserIDLessRoleLessDTO dto) {
         final User saved = userService.createUser(dto);
         return ResponseEntity.ok()
                 .body(userMapper.modelToPasswordLessDTO(saved));
     }
 
     @PatchMapping("/{userId}")
-    public ResponseEntity<UserPasswordLessDTO> updateUserRole (@PathVariable String userId, @RequestBody RolesChangeRequestDTO roleChanged,@CookieValue("Bearer") String token) {
+    public ResponseEntity<UserPasswordLessDTO> updateUserRole(@PathVariable String userId, @RequestBody RolesChangeRequestDTO roleChanged, @CookieValue("Bearer") String token) {
         return ResponseEntity.ok().body(userService.updateUserRole(userId, roleChanged, token));
     }
 
     @PutMapping("/{userId}")
-    public ResponseEntity<User> updateUser (@PathVariable String userId, @RequestBody UserPasswordLessDTO userPasswordLessDTO) {
+    public ResponseEntity<User> updateUser(@PathVariable String userId, @RequestBody UserPasswordLessDTO userPasswordLessDTO) {
         return ResponseEntity.ok().body(userService.updateUser(userId, userPasswordLessDTO));
     }
 
     @GetMapping("/verification/{base64EncodedToken}")
-    public ResponseEntity <UserPasswordLessDTO> verifyEmail(@PathVariable String base64EncodedToken) {
+    public ResponseEntity<UserPasswordLessDTO> verifyEmail(@PathVariable String base64EncodedToken) {
 
         try {
             // Validate the base64EncodedToken (optional)
@@ -162,7 +159,7 @@ public class UserController {
                 .build();
 
         return ResponseEntity.ok(tokenResponseDTO);
-     
+
     }
 
     @PatchMapping("/{userId}/disable")
@@ -186,9 +183,8 @@ public class UserController {
     }
 
 
-
     @PostMapping("/reset_password")
-    public ResponseEntity<Void> processResetPassword(@RequestBody @Valid UserResetPwdWithTokenRequestModel resetRequest)  {
+    public ResponseEntity<Void> processResetPassword(@RequestBody @Valid UserResetPwdWithTokenRequestModel resetRequest) {
         userService.processResetPassword(resetRequest);
 
         return ResponseEntity.ok().build();
@@ -210,6 +206,11 @@ public class UserController {
         } catch (IllegalArgumentException e) {
             return false;
         }
+    }
+
+    @PatchMapping("/{userId}/username")
+    public ResponseEntity<String> updateUserUsername (@PathVariable String userId, @RequestBody String username, @CookieValue("Bearer") String token) {
+        return ResponseEntity.ok().body(userService.updateUserUsername(userId, username, token));
     }
 
 }

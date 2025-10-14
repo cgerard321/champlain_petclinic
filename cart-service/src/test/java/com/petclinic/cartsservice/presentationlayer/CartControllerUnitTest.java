@@ -11,13 +11,17 @@ import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
 import com.petclinic.cartsservice.utils.exceptions.OutOfStockException;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,6 +29,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -158,7 +163,7 @@ class CartControllerUnitTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .expectBodyList(CartResponseModel.class)
                 .value(result -> {
                     assertEquals(2, result.size());
@@ -687,6 +692,29 @@ class CartControllerUnitTest {
 
         verify(cartService, times(1)).addProductToWishList(VALID_CART_ID, wishListProduct1.getProductId(), 2);
     }
+    @Test
+    void addProductToCartFromProducts_ok_returns200() {
+        // given
+        String cartId = "01234567-0123-0123-0123-012345678901";
+        String productId = "11111111-1111-1111-1111-111111111111";
+
+        CartResponseModel resp = new CartResponseModel();
+        resp.setCartId(cartId);
+
+        when(cartService.addProductToCartFromProducts(cartId, productId))
+                .thenReturn(Mono.just(resp));
+
+        // when + then
+        webTestClient.post()
+                .uri("/api/v1/carts/{cartId}/{productId}", cartId, productId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(CartResponseModel.class)
+                .value(r -> assertEquals(cartId, r.getCartId()));
+
+        verify(cartService).addProductToCartFromProducts(cartId, productId);
+    }
+
 
     @Test
     void whenAddProductToWishList_thenProductIsAlreadyInWishList_thenSuccess(){
@@ -829,4 +857,304 @@ class CartControllerUnitTest {
     }
 
 
+
+    //NEGATIF
+
+    @Test
+    void removeProductFromWishlist_invalidIds_returns422() {
+        String badCartId = "short";
+        String badProductId = "short";
+
+        webTestClient.delete()
+                .uri("/api/v1/carts/{cartId}/wishlist/{productId}", badCartId, badProductId)
+                .exchange()
+                .expectStatus().isEqualTo(422)
+                .expectBody(CartResponseModel.class)
+                .value(r -> assertEquals("Provided cart id is invalid: " + badCartId, r.getMessage()));
+
+        verify(cartService, never()).removeProductFromWishlist(anyString(), anyString());
+    }
+
+    @Test
+    void removeProductFromWishlist_notFound_returns404() {
+        String cartId = "01234567-0123-0123-0123-012345678901";
+        String productId = "11111111-1111-1111-1111-111111111111";
+
+        when(cartService.removeProductFromWishlist(cartId, productId))
+                .thenReturn(Mono.error(new NotFoundException("Product not found in wishlist: " + productId)));
+
+        webTestClient.delete()
+                .uri("/api/v1/carts/{cartId}/wishlist/{productId}", cartId, productId)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody(CartResponseModel.class)
+                .value(r -> assertEquals("Product not found in wishlist: " + productId, r.getMessage()));
+    }
+
+
+    @Test
+    void moveProductFromCartToWishlist_invalidIds_returns422() {
+        String badCartId = "bad";
+        String badProductId = "bad";
+
+        webTestClient.put()
+                .uri("/api/v1/carts/{cartId}/wishlist/{productId}/toWishList", badCartId, badProductId)
+                .exchange()
+                .expectStatus().isEqualTo(422)
+                .expectBody(CartResponseModel.class)
+                .value(r -> assertEquals("Provided cart id is invalid: " + badCartId, r.getMessage()));
+
+        verify(cartService, never()).moveProductFromCartToWishlist(anyString(), anyString());
+    }
+
+    @Test
+    void testGetRecentPurchases_Found() {
+        // Arrange
+        CartService cartService = Mockito.mock(CartService.class);
+        CartController controller = new CartController(cartService);
+
+        String cartId = "cart123";
+        List<CartProduct> products = List.of(
+                CartProduct.builder().productId("prod1").build()
+        );
+        Mockito.when(cartService.getRecentPurchases(cartId)).thenReturn(Mono.just(products));
+
+        Mono<ResponseEntity<List<CartProduct>>> result = controller.getRecentPurchases(cartId);
+
+        StepVerifier.create(result)
+                .expectNextMatches(response -> response.getStatusCode().is2xxSuccessful()
+                        && response.getBody() != null
+                        && response.getBody().size() == 1
+                        && "prod1".equals(response.getBody().get(0).getProductId()))
+                .verifyComplete();
+    }
+    @Test
+    void testGetRecentPurchases_NotFound() {
+        CartService cartService = Mockito.mock(CartService.class);
+        CartController controller = new CartController(cartService);
+
+        String cartId = "missing-cart";
+        Mockito.when(cartService.getRecentPurchases(cartId)).thenReturn(Mono.empty());
+
+        Mono<ResponseEntity<List<CartProduct>>> result = controller.getRecentPurchases(cartId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextMatches(response -> response.getStatusCode().is4xxClientError()
+                        && response.getBody() == null)
+                .verifyComplete();
+    }
+    @Test
+    void addProductToCartFromProducts_success() {
+        String validCartId = "cart123456789012345678901234567890123456";
+        CartResponseModel response = CartResponseModel.builder().cartId(validCartId).build();
+        Mockito.when(cartService.addProductToCartFromProducts(validCartId, "prod456"))
+                .thenReturn(Mono.just(response));
+
+        webTestClient.post()
+                .uri("/api/v1/carts/" + validCartId + "/prod456")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(CartResponseModel.class)
+                .value(r -> r.getCartId().equals(validCartId));
+    }
+
+    @Test
+    void addProductToCartFromProducts_outOfStockOrInvalidInput() {
+        String validCartId = "cart123456789012345678901234567890123456";
+        Mockito.when(cartService.addProductToCartFromProducts(validCartId, "prod456"))
+                .thenReturn(Mono.error(new OutOfStockException("Out of stock")));
+
+        webTestClient.post()
+                .uri("/api/v1/carts/" + validCartId + "/prod456")
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+    @Test
+    void addProductToCartFromProducts_notFound() {
+        String validCartId = "cart123456789012345678901234567890123456";
+        Mockito.when(cartService.addProductToCartFromProducts(validCartId, "prod456"))
+                .thenReturn(Mono.error(new NotFoundException("Not found")));
+
+        webTestClient.post()
+                .uri("/api/v1/carts/" + validCartId + "/prod456")
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    // --- moveAllWishlistToCart endpoint ---
+
+    @Test
+    void moveAllWishlistToCart_success() {
+        String validCartId = "123456789012345678901234567890123456"; // 36 chars
+        CartResponseModel response = CartResponseModel.builder().cartId(validCartId).build();
+        Mockito.when(cartService.moveAllWishlistToCart(validCartId))
+                .thenReturn(Mono.just(response));
+
+        webTestClient.post()
+                .uri("/api/v1/carts/" + validCartId + "/wishlist/moveAll")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(CartResponseModel.class)
+                .value(r -> r.getCartId().equals(validCartId));
+    }
+
+    @Test
+    void moveAllWishlistToCart_invalidInput() {
+        String validCartId = "cart123456789012345678901234567890123456";
+        Mockito.when(cartService.moveAllWishlistToCart(validCartId))
+                .thenReturn(Mono.error(new InvalidInputException("Invalid input")));
+
+        webTestClient.post()
+                .uri("/api/v1/carts/" + validCartId + "/wishlist/moveAll")
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    @Test
+    void moveAllWishlistToCart_outOfStock() {
+        String validCartId = "123456789012345678901234567890123456"; // 36 chars
+        Mockito.when(cartService.moveAllWishlistToCart(validCartId))
+                .thenReturn(Mono.error(new OutOfStockException("Out of stock")));
+
+        webTestClient.post()
+                .uri("/api/v1/carts/" + validCartId + "/wishlist/moveAll")
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
+    @Test
+    void moveAllWishlistToCart_unexpectedError() {
+        String validCartId = "123456789012345678901234567890123456"; // 36 chars
+        Mockito.when(cartService.moveAllWishlistToCart(validCartId))
+                .thenReturn(Mono.error(new RuntimeException("Unexpected")));
+
+        webTestClient.post()
+                .uri("/api/v1/carts/" + validCartId + "/wishlist/moveAll")
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Test
+    void moveAllWishlistToCart_notFound() {
+        String validCartId = "123456789012345678901234567890123456";
+        Mockito.when(cartService.moveAllWishlistToCart(validCartId))
+                .thenReturn(Mono.error(new NotFoundException("Not found")));
+
+        webTestClient.post()
+                .uri("/api/v1/carts/" + validCartId + "/wishlist/moveAll")
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void moveAllWishlistToCart_invalidCartId() {
+        String invalidCartId = "short-id";
+        webTestClient.post()
+                .uri("/api/v1/carts/" + invalidCartId + "/wishlist/moveAll")
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+    @Test
+    void clearCart_success() {
+        String validCartId = "123456789012345678901234567890123456"; // 36 chars
+        CartResponseModel response = CartResponseModel.builder().cartId(validCartId).build();
+        Mockito.when(cartService.clearCart(validCartId))
+                .thenReturn(Flux.just(response));
+
+        webTestClient.delete()
+                .uri("/api/v1/carts/" + validCartId + "/clear")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(CartResponseModel.class)
+                .value(list -> {
+                    assertFalse(list.isEmpty());
+                    assertEquals(validCartId, list.get(0).getCartId());
+                });
+    }
+
+    @Test
+    void clearCart_invalidCartId() {
+        String invalidCartId = "short-id"; // Not 36 chars
+        webTestClient.delete()
+                .uri("/api/v1/carts/" + invalidCartId + "/clear")
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    @Test
+    void assignCartToCustomer_success() {
+        String customerId = "customer123";
+        List<CartProduct> products = List.of(
+                CartProduct.builder().productId("prod1").build(),
+                CartProduct.builder().productId("prod2").build()
+        );
+        CartResponseModel response = CartResponseModel.builder().customerId(customerId).products(products).build();
+        Mockito.when(cartService.assignCartToCustomer(customerId, products))
+                .thenReturn(Mono.just(response));
+
+        webTestClient.post()
+                .uri("/api/v1/carts/" + customerId + "/assign")
+                .bodyValue(products)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(CartResponseModel.class)
+                .value(cart -> assertEquals(customerId, cart.getCustomerId()));
+    }
+
+    @Test
+    void assignCartToCustomer_emptyResult() {
+        String customerId = "customer123";
+        List<CartProduct> products = List.of();
+        Mockito.when(cartService.assignCartToCustomer(customerId, products))
+                .thenReturn(Mono.empty());
+
+        webTestClient.post()
+                .uri("/api/v1/carts/" + customerId + "/assign")
+                .bodyValue(products)
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
+    @Test
+    void testGetRecommendationPurchases_ReturnsOk() {
+        // Arrange
+        CartService cartService = Mockito.mock(CartService.class);
+        CartController controller = new CartController(cartService);
+
+        String cartId = "test-cart-id";
+        List<CartProduct> recommendations = List.of(CartProduct.builder().productId("prod1").build());
+
+        Mockito.when(cartService.getRecommendationPurchases(cartId)).thenReturn(Mono.just(recommendations));
+
+        // Act
+        Mono<ResponseEntity<List<CartProduct>>> result = controller.getRecommendationPurchases(cartId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextMatches(response -> response.getStatusCode().is2xxSuccessful()
+                        && response.getBody() != null
+                        && response.getBody().size() == 1
+                        && "prod1".equals(response.getBody().get(0).getProductId()))
+                .verifyComplete();
+    }
+
+    @Test
+    void testGetRecommendationPurchases_ReturnsNotFound() {
+        // Arrange
+        CartService cartService = Mockito.mock(CartService.class);
+        CartController controller = new CartController(cartService);
+
+        String cartId = "missing-cart-id";
+        Mockito.when(cartService.getRecommendationPurchases(cartId)).thenReturn(Mono.empty());
+
+        // Act
+        Mono<ResponseEntity<List<CartProduct>>> result = controller.getRecommendationPurchases(cartId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextMatches(response -> response.getStatusCode().is4xxClientError()
+                        && response.getBody() == null)
+                .verifyComplete();
+    }
 }

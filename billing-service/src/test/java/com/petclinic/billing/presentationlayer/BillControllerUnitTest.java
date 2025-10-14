@@ -1,12 +1,12 @@
 package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.businesslayer.BillService;
-import com.petclinic.billing.datalayer.Bill;
-import com.petclinic.billing.datalayer.BillResponseDTO;
-import com.petclinic.billing.datalayer.BillStatus;
-import com.petclinic.billing.datalayer.PaymentRequestDTO;
+import com.petclinic.billing.datalayer.*;
+import com.petclinic.billing.domainclientlayer.Auth.AuthServiceClient;
+import com.petclinic.billing.domainclientlayer.Auth.Rethrower;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
+import com.petclinic.billing.util.InterestCalculationUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -19,12 +19,16 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
-
 import java.time.LocalDate;
 import java.time.Month;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
+import java.math.BigDecimal;
 import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.List;
@@ -33,14 +37,9 @@ import java.util.List;
 class BillControllerUnitTest {
 
     private BillResponseDTO responseDTO = buildBillResponseDTO();
-
     private BillResponseDTO unpaidResponseDTO = buildUnpaidBillResponseDTO();
-
-
     private BillResponseDTO overdueResponseDTO = buildBillOverdueResponseDTO();
-
     private final String BILL_ID_OK = responseDTO.getBillId();
-
     private final String CUSTOMER_ID_OK = responseDTO.getCustomerId();
     private final String VET_ID_OK = responseDTO.getVetId();
 
@@ -49,10 +48,11 @@ class BillControllerUnitTest {
 
     @MockBean
     BillService billService;
+    @MockBean
+    AuthServiceClient authServiceClient;
 
-
-
-
+    @MockBean
+    Rethrower rethrower;
 
     @Test
     void getBillByBillId() {
@@ -90,7 +90,6 @@ class BillControllerUnitTest {
                     Assertions.assertNotNull(billResponseDTOS);
                 });
         Mockito.verify(billService, times(1)).getAllBills();
-
     }
 
     @Test
@@ -167,9 +166,8 @@ class BillControllerUnitTest {
                     Assertions.assertNotNull(billResponseDTOS);
                 });
         Mockito.verify(billService, times(1)).getBillsByCustomerId(CUSTOMER_ID_OK);
-
-
     }
+
     @Test
     void getBillByVetId() {
 
@@ -188,8 +186,69 @@ class BillControllerUnitTest {
                 });
 
         Mockito.verify(billService, times(1)).getBillsByVetId(VET_ID_OK);
+    }
 
+    @Test
+    void getAllBillsByOwnerName() {
+        when(billService.getAllBillsByOwnerName(anyString(), anyString())).thenReturn(Flux.just(responseDTO));
 
+        client.get()
+                .uri("/bills/owner/" + responseDTO.getOwnerFirstName() + "/" + responseDTO.getOwnerLastName())
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
+                .expectBodyList(BillResponseDTO.class)
+                .consumeWith(response -> {
+                    List<BillResponseDTO> billResponseDTOS = response.getResponseBody();
+                    Assertions.assertNotNull(billResponseDTOS);
+                });
+
+        Mockito.verify(billService, times(1)).getAllBillsByOwnerName(responseDTO.getOwnerFirstName(), responseDTO.getOwnerLastName());
+    }
+
+    @Test
+    void getBillsByVetName() {
+        when(billService.getAllBillsByVetName(anyString(), anyString())).thenReturn(Flux.just(responseDTO));
+
+        client.get()
+                .uri("/bills/vet/" + responseDTO.getVetFirstName() + "/" + responseDTO.getVetLastName())
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
+                .expectBodyList(BillResponseDTO.class)
+                .consumeWith(response -> {
+                    List<BillResponseDTO> billResponseDTOS = response.getResponseBody();
+                    Assertions.assertNotNull(billResponseDTOS);
+                });
+
+        Mockito.verify(billService, times(1)).getAllBillsByVetName(responseDTO.getVetFirstName(), responseDTO.getVetLastName());
+    }
+
+    @Test
+    void getBillsByVisitType() {
+        String visitType = "Regular";
+
+        when(billService.getAllBillsByVisitType(eq(visitType)))
+                .thenReturn(Flux.just(responseDTO));
+
+        client.get()
+                .uri("/bills/visitType/{visitType}", visitType)
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectBodyList(BillResponseDTO.class)
+                .consumeWith(response -> {
+                    List<BillResponseDTO> billResponseDTOS = response.getResponseBody();
+                    Assertions.assertNotNull(billResponseDTOS);
+                    Assertions.assertFalse(billResponseDTOS.isEmpty());
+                    Assertions.assertEquals(visitType, billResponseDTOS.get(0).getVisitType());
+                });
+
+        Mockito.verify(billService, times(1)).getAllBillsByVisitType(visitType);
+        Mockito.verifyNoMoreInteractions(billService);
     }
 
     @Test
@@ -251,18 +310,44 @@ class BillControllerUnitTest {
         Mockito.verify(billService, times(1)).deleteBillsByCustomerId(CUSTOMER_ID_OK);
     }
 
+    @Test
+    void testArchiveBill() {
+        when(billService.archiveBill()).thenReturn(Flux.empty());
 
-    private BillResponseDTO buildBillResponseDTO(){
+        client.patch()
+                .uri("/bills/archive")
+                .exchange()
+                .expectStatus().isNoContent();
 
+        verify(billService, times(1)).archiveBill();
+    }
+
+
+    private BillResponseDTO buildBillResponseDTO() {
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
         LocalDate date = calendar.getTime().toInstant()
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate();
 
-        LocalDate dueDate = LocalDate.of(2022,Month.OCTOBER,15);
+        LocalDate dueDate = LocalDate.of(2022, Month.OCTOBER, 15);
 
-        return BillResponseDTO.builder().billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.PAID).dueDate(dueDate).build();
+        return BillResponseDTO.builder()
+                .billId("BillUUID")
+                .customerId("1")
+                .vetId("1")
+                .visitType("Regular")
+                .date(date)
+                .amount(new BigDecimal(13.37))
+                .taxedAmount(new BigDecimal(15.10))
+                .interest(new BigDecimal(0.00))
+                .billStatus(BillStatus.PAID)
+                .dueDate(dueDate)
+                .ownerFirstName("John")
+                .ownerLastName("Doe")
+                .vetFirstName("Jane") // Set valid vetFirstName
+                .vetLastName("Smith") // Set valid vetLastName
+                .build();
     }
 
     private BillResponseDTO buildUnpaidBillResponseDTO(){
@@ -275,7 +360,7 @@ class BillControllerUnitTest {
 
         LocalDate dueDate = LocalDate.of(2022, Month.OCTOBER, 5);
 
-        return BillResponseDTO.builder().billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.UNPAID).dueDate(dueDate).build();
+        return BillResponseDTO.builder().billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).billStatus(BillStatus.UNPAID).dueDate(dueDate).build();
     }
 
     private BillResponseDTO buildBillOverdueResponseDTO(){
@@ -288,16 +373,14 @@ class BillControllerUnitTest {
 
         LocalDate dueDate = LocalDate.of(2022, Month.AUGUST, 15);
 
-        return BillResponseDTO.builder().billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.OVERDUE).dueDate(dueDate).build();
+        return BillResponseDTO.builder().billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).billStatus(BillStatus.OVERDUE).dueDate(dueDate).build();
     }
 
     @Test
     void whenValidParametersForPaginationProvided_thenShouldCallServiceWithCorrectParams() {
-        // Mocking the service layer response
         when(billService.getAllBillsByPage(any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(Flux.just(responseDTO));
 
-        // Triggering the controller endpoint
         client.get()
                 .uri(uriBuilder -> uriBuilder.path("/bills")
                         .queryParam("page", 1)
@@ -308,12 +391,10 @@ class BillControllerUnitTest {
                 .expectBodyList(BillResponseDTO.class)
                 .hasSize(1);  // Checking that the response body has exactly 1 element
 
-        // Verifying the correct method calls
         Mockito.verify(billService, times(1))
                 .getAllBillsByPage(PageRequest.of(1, 10), null, null, null,
                         null, null, null, null, null);
     }
-
 
     @Test
     void whenGetBillsByMonthCalled_thenShouldCallServiceWithCorrectParams() {
@@ -349,5 +430,207 @@ class BillControllerUnitTest {
                 .expectStatus().isBadRequest();
     }
 
+    @Test
+    void whenPostingBillWithNoBillStatus_thenReturnsBadRequest() {
+        BillRequestDTO invalidBill = BillRequestDTO.builder()
+                .customerId("C001")
+                .visitType("Checkup")
+                .vetId("V100")
+                .date(LocalDate.now())
+                .amount(new BigDecimal(100.0))
+                .billStatus(null)
+                .dueDate(LocalDate.now().plusDays(10))
+                .build();
 
+        client.post()
+                .uri("/bills")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(invalidBill)
+                .exchange()
+                .expectStatus().isBadRequest();  // only check 400
+    }
+
+    @Test
+    void whenDeletingNonExistentBill_thenReturnNotFound() {
+        String invalidBillId = "NON_EXISTENT_ID";
+
+        Mockito.when(billService.deleteBill(invalidBillId))
+                .thenReturn(Mono.error(new NotFoundException("Bill not found")));
+
+        client.delete()
+                .uri("/bills/{billId}", invalidBillId)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Bill not found");
+    }
+
+    @Test
+    void getBillByBillId_ShouldReturnInterest() {
+        // Calculate expected compound interest using centralized utility
+        LocalDate dueDate = LocalDate.of(2022, Month.AUGUST, 15);
+        LocalDate currentDate = LocalDate.now();
+                
+        BigDecimal expectedInterest = InterestCalculationUtil.calculateCompoundInterest(
+                overdueResponseDTO.getAmount(), dueDate, currentDate);
+                overdueResponseDTO.setInterest(expectedInterest);
+
+                when(billService.getBillByBillId(anyString())).thenReturn(Mono.just(overdueResponseDTO));
+
+                client.get()
+                        .uri("/bills/" + overdueResponseDTO.getBillId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .exchange()
+                        .expectStatus().isOk()
+                        .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                        .expectBody()
+                        .jsonPath("$.interest").isEqualTo(expectedInterest);
+
+                Mockito.verify(billService, times(1)).getBillByBillId(overdueResponseDTO.getBillId());
+        }
+
+        @Test
+        void getInterest_WithValidBillId_ShouldReturnInterestAmount() {
+                BigDecimal expectedInterest = new BigDecimal("5.50");
+                BillResponseDTO billWithInterest = buildBillResponseDTO();
+                billWithInterest.setInterest(expectedInterest);
+
+                when(billService.getBillByBillId(BILL_ID_OK)).thenReturn(Mono.just(billWithInterest));
+
+                client.get()
+                        .uri("/bills/" + BILL_ID_OK + "/interest")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .exchange()
+                        .expectStatus().isOk()
+                        .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                        .expectBody(BigDecimal.class)
+                        .isEqualTo(expectedInterest);
+
+                Mockito.verify(billService, times(1)).getBillByBillId(BILL_ID_OK);
+        }
+
+        @Test
+        void getInterest_WithZeroInterest_ShouldReturnZero() {
+                BillResponseDTO billWithZeroInterest = buildBillResponseDTO();
+                billWithZeroInterest.setInterest(BigDecimal.ZERO);
+
+                when(billService.getBillByBillId(BILL_ID_OK)).thenReturn(Mono.just(billWithZeroInterest));
+
+                client.get()
+                        .uri("/bills/" + BILL_ID_OK + "/interest")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .exchange()
+                        .expectStatus().isOk()
+                        .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                        .expectBody(BigDecimal.class)
+                        .isEqualTo(BigDecimal.ZERO);
+
+                Mockito.verify(billService, times(1)).getBillByBillId(BILL_ID_OK);
+        }
+
+        @Test
+        void getInterest_WithNonExistentBillId_ShouldReturnError() {
+                String nonExistentBillId = "NON_EXISTENT_ID";
+
+                when(billService.getBillByBillId(nonExistentBillId))
+                        .thenReturn(Mono.error(new NotFoundException("Bill not found")));
+
+                client.get()
+                        .uri("/bills/" + nonExistentBillId + "/interest")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .exchange()
+                        .expectStatus().isNotFound();
+
+                Mockito.verify(billService, times(1)).getBillByBillId(nonExistentBillId);
+        }
+
+        @Test
+        void getTotal_WithValidBillId_ShouldReturnAmountPlusInterest() {
+                BigDecimal amount = new BigDecimal("100.00");
+                BigDecimal interest = new BigDecimal("5.50");
+                BigDecimal expectedTotal = amount.add(interest); // 105.50
+
+                BillResponseDTO billWithInterest = buildBillResponseDTO();
+                billWithInterest.setAmount(amount);
+                billWithInterest.setInterest(interest);
+
+                when(billService.getBillByBillId(BILL_ID_OK)).thenReturn(Mono.just(billWithInterest));
+
+                client.get()
+                        .uri("/bills/" + BILL_ID_OK + "/total")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .exchange()
+                        .expectStatus().isOk()
+                        .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                        .expectBody(BigDecimal.class)
+                        .isEqualTo(expectedTotal);
+
+                Mockito.verify(billService, times(1)).getBillByBillId(BILL_ID_OK);
+        }
+
+        @Test
+        void getTotal_WithZeroInterest_ShouldReturnOnlyAmount() {
+                BigDecimal amount = new BigDecimal("100.00");
+                BigDecimal interest = BigDecimal.ZERO;
+                BigDecimal expectedTotal = amount; // 100.00
+
+                BillResponseDTO billWithZeroInterest = buildBillResponseDTO();
+                billWithZeroInterest.setAmount(amount);
+                billWithZeroInterest.setInterest(interest);
+
+                when(billService.getBillByBillId(BILL_ID_OK)).thenReturn(Mono.just(billWithZeroInterest));
+
+                client.get()
+                        .uri("/bills/" + BILL_ID_OK + "/total")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .exchange()
+                        .expectStatus().isOk()
+                        .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                        .expectBody(BigDecimal.class)
+                        .isEqualTo(expectedTotal);
+
+                Mockito.verify(billService, times(1)).getBillByBillId(BILL_ID_OK);
+        }
+
+        @Test
+        void getTotal_WithNonExistentBillId_ShouldReturnError() {
+                String nonExistentBillId = "NON_EXISTENT_ID";
+
+                when(billService.getBillByBillId(nonExistentBillId))
+                        .thenReturn(Mono.error(new NotFoundException("Bill not found")));
+
+                client.get()
+                        .uri("/bills/" + nonExistentBillId + "/total")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .exchange()
+                        .expectStatus().isNotFound();
+
+                Mockito.verify(billService, times(1)).getBillByBillId(nonExistentBillId);
+        }
+
+        @Test
+        void getTotal_WithOverdueBill_ShouldReturnAmountPlusCompoundInterest() {
+                // Create an overdue bill with compound interest
+                LocalDate dueDate = LocalDate.of(2022, Month.AUGUST, 15);
+                BigDecimal amount = new BigDecimal("100.00");
+                BigDecimal expectedInterest = InterestCalculationUtil.calculateCompoundInterest(amount, dueDate, LocalDate.now());
+                BigDecimal expectedTotal = amount.add(expectedInterest);
+
+                BillResponseDTO overdueBill = buildBillOverdueResponseDTO();
+                overdueBill.setAmount(amount);
+                overdueBill.setInterest(expectedInterest);
+
+                when(billService.getBillByBillId(BILL_ID_OK)).thenReturn(Mono.just(overdueBill));
+
+                client.get()
+                        .uri("/bills/" + BILL_ID_OK + "/total")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .exchange()
+                        .expectStatus().isOk()
+                        .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                        .expectBody(BigDecimal.class)
+                        .isEqualTo(expectedTotal);
+
+                Mockito.verify(billService, times(1)).getBillByBillId(BILL_ID_OK);
+        }
 }

@@ -4,8 +4,11 @@
 }
 
 .review-box {
-  height: 7vh;
+  padding-top: 10px;
+  height: 15vh;
   text-align: left;
+  background-color: rgb(247, 247, 247);
+  border-color: rgb(247, 247, 247);
 }
 
 .reviewbox-container > button {

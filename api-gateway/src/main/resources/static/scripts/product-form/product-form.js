@@ -3,11 +3,9 @@
 angular.module('productForm', ['ui.router'])
     .config(['$stateProvider', function ($stateProvider) {
         $stateProvider
-            .state('productNew', {
+            .state('productAdd', {
                 parent: 'app',
-                url: '/inventories/:inventoryId/product/new',
-                params : {inventoryId: null},
-               // url: '/product/new',
+                url: '/product/new',
                 template: '<product-form></product-form>'
             })
 

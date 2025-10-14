@@ -1,0 +1,279 @@
+.interest-exempt-toggle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.interest-exempt-toggle.simple {
+  gap: 4px;
+}
+
+.interest-exempt-toggle.detailed {
+  gap: 8px;
+}
+
+/* Toggle Switch Styles (for simple variant) */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+.toggle-checkbox {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.3s;
+  border-radius: 24px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: '';
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-checkbox:checked + .toggle-slider {
+  background-color: #28a745;
+}
+
+.toggle-checkbox:checked + .toggle-slider:before {
+  transform: translateX(26px);
+}
+
+.toggle-checkbox:disabled + .toggle-slider {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.toggle-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  padding: 2px 6px;
+  border-radius: 8px;
+  min-width: 70px;
+}
+
+/* Detailed variant styles */
+.toggle-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.status-indicator {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+  text-align: center;
+  min-width: 80px;
+}
+
+.status-indicator.exempt,
+.toggle-label.exempt {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.status-indicator.not-exempt,
+.toggle-label.not-exempt {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.toggle-button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+}
+
+.toggle-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.exempt-btn {
+  background-color: #28a745;
+  color: white;
+}
+
+.exempt-btn:hover:not(:disabled) {
+  background-color: #218838;
+}
+
+.not-exempt-btn {
+  background-color: #dc3545;
+  color: white;
+}
+
+.not-exempt-btn:hover:not(:disabled) {
+  background-color: #c82333;
+}
+
+/* Confirmation Dialog Styles */
+.confirmation-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.confirmation-dialog {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.confirmation-dialog.simple {
+  max-width: 400px;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.confirmation-dialog h3 {
+  margin: 0 0 16px 0;
+  color: #333;
+  font-size: 18px;
+}
+
+.confirmation-dialog h4 {
+  margin: 0 0 12px 0;
+  color: #333;
+  font-size: 16px;
+}
+
+.confirmation-dialog p {
+  margin: 0 0 16px 0;
+  color: #666;
+  line-height: 1.5;
+}
+
+.confirmation-dialog.simple p {
+  line-height: 1.4;
+}
+
+.confirmation-dialog code {
+  background-color: #f8f9fa;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 13px;
+}
+
+.warning-message,
+.info-message {
+  padding: 12px;
+  border-radius: 6px;
+  margin: 16px 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.warning-message {
+  background-color: #fff3cd;
+  border: 1px solid #ffeaa7;
+  color: #856404;
+}
+
+.info-message {
+  background-color: #d1ecf1;
+  border: 1px solid #bee5eb;
+  color: #0c5460;
+}
+
+.confirmation-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.confirmation-dialog.simple .confirmation-buttons {
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.confirm-button,
+.cancel-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.confirmation-dialog.simple .confirm-button,
+.confirmation-dialog.simple .cancel-button {
+  padding: 8px 16px;
+  border-radius: 4px;
+}
+
+.confirm-button {
+  background-color: #007bff;
+  color: white;
+}
+
+.confirm-button:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+.confirm-button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.cancel-button {
+  background-color: #6c757d;
+  color: white;
+}
+
+.cancel-button:hover:not(:disabled) {
+  background-color: #545b62;
+}

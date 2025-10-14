@@ -18,7 +18,6 @@ public class MockServerConfigBillService {
         this.clientAndServer = ClientAndServer.startClientAndServer(BILL_SERVICE_SERVER_PORT);
     }
 
-
     public void registerGetAllBillsEndpoint() {
 
         String response = "["
@@ -159,8 +158,6 @@ public class MockServerConfigBillService {
                                 .withBody("{\"error\":\"Customer not found\"}")
                 );
     }
-
-
 
     public void stopMockServer() {
         if(clientAndServer != null)

@@ -11,9 +11,26 @@ import { InventoryType } from '@/features/inventories/models/InventoryType.ts';
 import { getAllInventoryTypes } from '@/features/inventories/api/getAllInventoryTypes.ts';
 import EditInventoryFormStyles from './EditInventoryForm.module.css';
 
-interface ApiError {
-  message: string;
+// interface ApiError {
+//   message: string;
+// }
+const MAX_IMAGE_BYTES = 160 * 1024;
+
+function base64ByteLength(b64: string): number {
+  const pure = b64.includes(',') ? b64.split(',')[1] : b64;
+  const len = pure.length;
+  const padding = pure.endsWith('==') ? 2 : pure.endsWith('=') ? 1 : 0;
+  return (len * 3) / 4 - padding;
 }
+
+const isHttpUrl = (url: string): boolean => {
+  try {
+    const u = new URL(url);
+    return u.protocol === 'http:' || u.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
 
 // Fields that support undo
 type FieldKey =
@@ -21,7 +38,57 @@ type FieldKey =
   | 'inventoryType'
   | 'inventoryDescription'
   | 'inventoryImage'
+  | 'inventoryBackupImage'
+  | 'uploadedImage';
+
+type TextFieldKey =
+  | 'inventoryName'
+  | 'inventoryType'
+  | 'inventoryDescription'
+  | 'inventoryImage'
   | 'inventoryBackupImage';
+
+function buildInventoryFieldErrorMessage(params: {
+  inventoryName: string;
+  inventoryType: string;
+  inventoryDescription: string;
+  inventoryImage: string;
+  inventoryBackupImage: string;
+  imageUploaded?: string;
+}): Partial<Record<FieldKey, string>> {
+  const {
+    inventoryName,
+    inventoryType,
+    inventoryDescription,
+    inventoryImage,
+    inventoryBackupImage,
+    imageUploaded,
+  } = params;
+
+  const next: Partial<Record<FieldKey, string>> = {};
+
+  const nameTrim = inventoryName.trim();
+  if (!nameTrim) next.inventoryName = 'Inventory name is required.';
+  else if (nameTrim.length < 3)
+    next.inventoryName = 'Name must be at least 3 characters.';
+
+  const typeTrim = inventoryType.trim();
+  if (!typeTrim) next.inventoryType = 'Inventory type is required.';
+
+  const descTrim = inventoryDescription.trim();
+  if (!descTrim) next.inventoryDescription = 'Description is required.';
+
+  if (inventoryImage && !isHttpUrl(inventoryImage)) {
+    next.inventoryImage = 'Must be a valid http/https URL.';
+  }
+  if (inventoryBackupImage && !isHttpUrl(inventoryBackupImage)) {
+    next.inventoryBackupImage = 'Must be a valid http/https URL.';
+  }
+  if (imageUploaded && base64ByteLength(imageUploaded) > MAX_IMAGE_BYTES) {
+    next.uploadedImage = 'Image too large (max 160KB).';
+  }
+  return next;
+}
 
 const EditInventory: React.FC = (): JSX.Element => {
   const { inventoryId } = useParams<{ inventoryId: string }>();
@@ -34,22 +101,27 @@ const EditInventory: React.FC = (): JSX.Element => {
     imageUploaded: '',
   });
   const [inventoryTypes, setInventoryTypes] = useState<InventoryType[]>([]);
-  const [error, setError] = useState<{ [key: string]: string }>({});
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const [fieldErrors, setFieldErrors] = useState<
+    Partial<Record<FieldKey, string>>
+  >({});
   const [showNotification, setShowNotification] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Undo state
-  const [history, setHistory] = useState<Record<FieldKey, string[]>>({
+  const [history, setHistory] = useState<Record<TextFieldKey, string[]>>({
     inventoryName: [''],
     inventoryType: [''],
     inventoryDescription: [''],
     inventoryImage: [''],
     inventoryBackupImage: [''],
   });
-  const [lastEditedFields, setLastEditedFields] = useState<string[]>([]);
+  const [lastEditedFields, setLastEditedFields] = useState<TextFieldKey[]>([]);
+
+  // Keep the original loaded inventory so Cancel can discard edits
+  const originalInventoryRef = useRef<InventoryRequestModel | null>(null);
 
   const navigate = useNavigate();
 
@@ -67,6 +139,16 @@ const EditInventory: React.FC = (): JSX.Element => {
             inventoryBackupImage: response.inventoryBackupImage,
             imageUploaded: response.imageUploaded,
           });
+
+          // store original values so Cancel can restore them
+          originalInventoryRef.current = {
+            inventoryName: response.inventoryName,
+            inventoryType: response.inventoryType,
+            inventoryDescription: response.inventoryDescription,
+            inventoryImage: response.inventoryImage,
+            inventoryBackupImage: response.inventoryBackupImage,
+            imageUploaded: response.imageUploaded || '',
+          };
 
           // Initialize undo history with loaded values
           setHistory({
@@ -109,7 +191,7 @@ const EditInventory: React.FC = (): JSX.Element => {
   };
 
   // Push snapshots at word boundaries
-  const handleFieldChange = (field: FieldKey, value: string): void => {
+  const handleFieldChange = (field: TextFieldKey, value: string): void => {
     setHistory(prev => {
       const fieldHist = prev[field] ?? [''];
       const lastRecorded = fieldHist[fieldHist.length - 1] ?? '';
@@ -133,7 +215,17 @@ const EditInventory: React.FC = (): JSX.Element => {
       return [...updated, field];
     });
 
-    setInventory({ ...inventory, [field]: value });
+    setFieldErrors(prev => ({ ...prev, [field]: undefined }));
+
+    if (field === 'inventoryImage') {
+      setInventory(prev => ({
+        ...prev,
+        inventoryImage: value,
+        imageUploaded: '',
+      }));
+    } else {
+      setInventory(prev => ({ ...prev, [field]: value }));
+    }
   };
 
   // Undo handler
@@ -141,7 +233,7 @@ const EditInventory: React.FC = (): JSX.Element => {
     const order = [...lastEditedFields];
 
     while (order.length > 0) {
-      const candidate = order[order.length - 1] as FieldKey;
+      const candidate = order[order.length - 1] as TextFieldKey;
       const fieldHist = history[candidate];
 
       if (fieldHist && fieldHist.length > 1) {
@@ -169,31 +261,41 @@ const EditInventory: React.FC = (): JSX.Element => {
     }
   };
 
-  const validate = (): boolean => {
-    const newError: { [key: string]: string } = {};
-    if (!inventory.inventoryName) {
-      newError.inventoryName = 'Inventory name is required';
+  // Cancel handler: discard local edits and close form (navigate back)
+  const handleCancel = (): void => {
+    if (originalInventoryRef.current) {
+      setInventory(originalInventoryRef.current);
     }
-    if (
-      inventory.inventoryType != 'Equipment' &&
-      inventory.inventoryType != 'Injections' &&
-      inventory.inventoryType != 'Medications' &&
-      inventory.inventoryType != 'Bandages'
-    ) {
-      newError.inventoryType = 'Inventory type is required';
-    }
-    if (!inventory.inventoryDescription) {
-      newError.inventoryDescription = 'Inventory description is required';
-    }
-    setError(newError);
-    return Object.keys(newError).length === 0;
+    navigate('/inventories');
   };
 
   const handleSubmit = async (
     event: FormEvent<HTMLFormElement>
   ): Promise<void> => {
     event.preventDefault();
-    if (!validate()) return;
+
+    const errorsBefore = buildInventoryFieldErrorMessage({
+      inventoryName: inventory.inventoryName,
+      inventoryType: inventory.inventoryType,
+      inventoryDescription: inventory.inventoryDescription,
+      inventoryImage: inventory.inventoryImage,
+      inventoryBackupImage: inventory.inventoryBackupImage,
+      imageUploaded:
+        typeof inventory.imageUploaded === 'string'
+          ? inventory.imageUploaded
+          : undefined,
+    });
+    const typeExists = inventoryTypes.some(
+      t => t.type === inventory.inventoryType
+    );
+    if (!typeExists) {
+      errorsBefore.inventoryType =
+        errorsBefore.inventoryType ?? 'Please select a valid inventory type.';
+    }
+    if (Object.keys(errorsBefore).length) {
+      setFieldErrors(errorsBefore);
+      return;
+    }
 
     setLoading(true);
     setErrorMessage('');
@@ -210,43 +312,86 @@ const EditInventory: React.FC = (): JSX.Element => {
         }, 2000);
       }
     } catch (error) {
-      const apiError = error as ApiError;
-      setErrorMessage(`Error updating inventory: ${apiError.message}`);
+      if (error instanceof Error) {
+        const msg = error.message.toLowerCase();
+
+        if (msg.includes('already exists')) {
+          setFieldErrors(prev => ({
+            ...prev,
+            inventoryName:
+              prev.inventoryName ||
+              'An inventory with this name already exists.',
+          }));
+          return;
+        }
+
+        if (msg.includes('uploaded image') || msg.includes('160kb')) {
+          setFieldErrors(prev => ({
+            ...prev,
+            uploadedImage: 'Image too large (max 160KB).',
+          }));
+          return;
+        }
+
+        setErrorMessage(error.message || 'Failed to update inventory.');
+        return;
+      }
+
+      const errorsAfter = buildInventoryFieldErrorMessage({
+        inventoryName: inventory.inventoryName,
+        inventoryType: inventory.inventoryType,
+        inventoryDescription: inventory.inventoryDescription,
+        inventoryImage: inventory.inventoryImage,
+        inventoryBackupImage: inventory.inventoryBackupImage,
+        imageUploaded:
+          typeof inventory.imageUploaded === 'string'
+            ? inventory.imageUploaded
+            : undefined,
+      });
+      if (Object.keys(errorsAfter).length) {
+        setFieldErrors(prev => ({ ...prev, ...errorsAfter }));
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const handleFileChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ): void => {
-    const file = event.target.files?.[0];
-    if (file) {
-      if (file.size > 160 * 1024) {
-        alert('File size must be less than 160KB.');
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-        }
-        return;
-      } else {
-        convertToBase64(file);
-      }
-    }
-  };
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const convertToBase64 = (file: File): void => {
+    // Clear the URL image via the same path as other text edits (so it's undoable)
+    handleFieldChange('inventoryImage', '');
+
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onloadend = () => {
-      if (reader.result) {
-        const base64String = (reader.result as string).split(',')[1];
-        setInventory({
-          ...inventory,
-          imageUploaded: base64String,
-        });
+      if (!reader.result) return;
+
+      const base64String = (reader.result as string).split(',')[1];
+      const byteLength = base64ByteLength(base64String);
+
+      if (byteLength > MAX_IMAGE_BYTES) {
+        setFieldErrors(prev => ({
+          ...prev,
+          uploadedImage: 'Image too large (max 160KB).',
+        }));
+        // keep imageUploaded empty
+        setInventory(prev => ({ ...prev, imageUploaded: '' }));
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        return;
       }
+
+      setInventory(prev => ({ ...prev, imageUploaded: base64String }));
+      setFieldErrors(prev => ({ ...prev, uploadedImage: undefined }));
     };
   };
+
+  const previewSrc = inventory.imageUploaded
+    ? `data:image/*;base64,${inventory.imageUploaded}`
+    : isHttpUrl(inventory.inventoryImage)
+      ? inventory.inventoryImage
+      : '';
 
   return (
     <div className="edit-inventory-form">
@@ -265,16 +410,20 @@ const EditInventory: React.FC = (): JSX.Element => {
                 <input
                   type="text"
                   name="inventoryName"
-                  placeholder="Inventory Name"
-                  className="form-control"
+                  className={`form-control ${fieldErrors.inventoryName ? 'invalid animate' : ''}`}
                   value={inventory.inventoryName}
                   onChange={e =>
                     handleFieldChange('inventoryName', e.target.value)
                   }
-                  required
+                  aria-invalid={!!fieldErrors.inventoryName}
+                  aria-describedby={
+                    fieldErrors.inventoryName ? 'err-inventoryName' : undefined
+                  }
                 />
-                {error.inventoryName && (
-                  <span className="error">{error.inventoryName}</span>
+                {fieldErrors.inventoryName && (
+                  <span id="err-inventoryName" className="error">
+                    {fieldErrors.inventoryName}
+                  </span>
                 )}
               </div>
             </div>
@@ -283,10 +432,14 @@ const EditInventory: React.FC = (): JSX.Element => {
                 <label>Inventory Type</label>
                 <select
                   name="inventoryType"
-                  className="form-control"
+                  className={`form-control ${fieldErrors.inventoryType ? 'invalid animate' : ''}`}
                   value={inventory.inventoryType}
                   onChange={e =>
                     handleFieldChange('inventoryType', e.target.value)
+                  }
+                  aria-invalid={!!fieldErrors.inventoryType}
+                  aria-describedby={
+                    fieldErrors.inventoryType ? 'err-inventoryType' : undefined
                   }
                   required
                 >
@@ -299,8 +452,10 @@ const EditInventory: React.FC = (): JSX.Element => {
                     </option>
                   ))}
                 </select>
-                {error.inventoryType && (
-                  <span className="error">{error.inventoryType}</span>
+                {fieldErrors.inventoryType && (
+                  <span id="err-inventoryType" className="error">
+                    {fieldErrors.inventoryType}
+                  </span>
                 )}
               </div>
             </div>
@@ -310,16 +465,24 @@ const EditInventory: React.FC = (): JSX.Element => {
                 <input
                   type="text"
                   name="inventoryDescription"
-                  className="form-control"
+                  className={`form-control ${fieldErrors.inventoryDescription ? 'invalid animate' : ''}`}
                   placeholder="Inventory Description"
                   value={inventory.inventoryDescription}
                   onChange={e =>
                     handleFieldChange('inventoryDescription', e.target.value)
                   }
+                  aria-invalid={!!fieldErrors.inventoryDescription}
+                  aria-describedby={
+                    fieldErrors.inventoryDescription
+                      ? 'err-inventoryDescription'
+                      : undefined
+                  }
                   required
                 />
-                {error.inventoryDescription && (
-                  <span className="error">{error.inventoryDescription}</span>
+                {fieldErrors.inventoryDescription && (
+                  <span id="err-inventoryDescription" className="error">
+                    {fieldErrors.inventoryDescription}
+                  </span>
                 )}
               </div>
             </div>
@@ -333,16 +496,23 @@ const EditInventory: React.FC = (): JSX.Element => {
                 <input
                   type="text"
                   name="inventoryImage"
-                  className="form-control"
+                  className={`form-control ${fieldErrors.inventoryImage ? 'invalid animate' : ''}`}
                   placeholder="Inventory Image"
                   value={inventory.inventoryImage}
                   onChange={e =>
                     handleFieldChange('inventoryImage', e.target.value)
                   }
-                  required
+                  aria-invalid={!!fieldErrors.inventoryImage}
+                  aria-describedby={
+                    fieldErrors.inventoryImage
+                      ? 'err-inventoryImage'
+                      : undefined
+                  }
                 />
-                {error.inventoryImage && (
-                  <span className="error">{error.inventoryImage}</span>
+                {fieldErrors.inventoryImage && (
+                  <span id="err-inventoryImage" className="error">
+                    {fieldErrors.inventoryImage}
+                  </span>
                 )}
               </div>
             </div>
@@ -354,16 +524,23 @@ const EditInventory: React.FC = (): JSX.Element => {
                 <input
                   type="text"
                   name="inventoryBackupImage"
-                  className="form-control"
+                  className={`form-control ${fieldErrors.inventoryBackupImage ? 'invalid animate' : ''}`}
                   placeholder="Inventory Backup Image"
                   value={inventory.inventoryBackupImage}
                   onChange={e =>
                     handleFieldChange('inventoryBackupImage', e.target.value)
                   }
-                  required
+                  aria-invalid={!!fieldErrors.inventoryBackupImage}
+                  aria-describedby={
+                    fieldErrors.inventoryBackupImage
+                      ? 'err-inventoryBackupImage'
+                      : undefined
+                  }
                 />
-                {error.inventoryBackupImage && (
-                  <span className="error">{error.inventoryBackupImage}</span>
+                {fieldErrors.inventoryBackupImage && (
+                  <span id="err-inventoryBackupImage" className="error">
+                    {fieldErrors.inventoryBackupImage}
+                  </span>
                 )}
               </div>
             </div>
@@ -375,13 +552,28 @@ const EditInventory: React.FC = (): JSX.Element => {
                 <input
                   type="file"
                   name="uploadedImage"
-                  className="form-control"
+                  className={`form-control ${fieldErrors.uploadedImage ? 'invalid animate' : ''}`}
                   accept="image/*"
                   onChange={handleFileChange}
                   ref={fileInputRef}
+                  aria-invalid={!!fieldErrors.uploadedImage}
+                  aria-describedby={
+                    fieldErrors.uploadedImage ? 'err-uploadedImage' : undefined
+                  }
                 />
-                {error.uploadedImage && (
-                  <span className="error">{error.uploadedImage}</span>
+                {fieldErrors.uploadedImage && (
+                  <span id="err-uploadedImage" className="error">
+                    {fieldErrors.uploadedImage}
+                  </span>
+                )}
+                {previewSrc && (
+                  <div style={{ marginTop: 8 }}>
+                    <img
+                      src={previewSrc}
+                      alt="Preview"
+                      style={{ maxWidth: 120, maxHeight: 120, borderRadius: 4 }}
+                    />
+                  </div>
                 )}
               </div>
             </div>
@@ -390,6 +582,14 @@ const EditInventory: React.FC = (): JSX.Element => {
           <div className="row">
             <button type="submit" className="btn btn-info">
               Update
+            </button>
+            {/* Cancel button: discard edits and close form */}
+            <button
+              type="button"
+              className="btn btn-light"
+              onClick={handleCancel}
+            >
+              Cancel
             </button>
             {/* Undo button */}
             <button

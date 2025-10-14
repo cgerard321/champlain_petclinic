@@ -1,71 +1,194 @@
-
 <style>
-    h3.titleOwner {
+    h3.titlePetType {
         color: #2f2b2b;
         text-align: left;
         padding-bottom: 20px;
         padding-top: 20px;
     }
 
-    .CurrentOwnersContainer {
+    .CurrentPetTypesContainer {
         margin: 20px;
     }
 
-    .FilterOwnersLabel {
+    .FilterPetTypesLabel {
         color: rgba(0, 0, 0, 0.5);
     }
 
     @media (max-width: 576px) {
-        /* Define styles for small screens */
-        .responsive-text {
-            font-size: 13px;
-        }
+        .responsive-text { font-size: 13px; }
     }
-
     @media (min-width: 577px) and (max-width: 992px) {
-        /* Define styles for medium screens */
-        .responsive-text {
-            font-size: 15px;
-        }
+        .responsive-text { font-size: 15px; }
     }
-
     @media (min-width: 993px) {
-        /* Define styles for large screens and above */
-        .responsive-text {
-            font-size: 17px;
-        }
+        .responsive-text { font-size: 17px; }
     }
 
-    .ownerTable thead tr th {
+    .petTypeTable thead tr th {
         font-weight: 400;
         color: gray;
     }
 
-    input[type="Text"] {
-        font-size: 15px;
-    }
+    input[type="text"] { font-size: 15px; }
 </style>
 
-<div class="CurrentOwnersContainer" ng-app="petTypeList" ng-controller="PetTypeListController">
-    <h3 class="titleOwner">Current Pet Types</h3>
-    <table id="owner" class="table table-striped table-responsive ownerTable pb-3">
+<div class="CurrentPetTypesContainer" ng-app="petTypeList" ng-controller="PetTypeListController as self">
+
+    <h3 class="titlePetType">Current Pet Types</h3>
+
+    <!-- Add Pet Type button & form -->
+    <button class="btn btn-success btn-sm mb-3" ng-click="self.toggleAddForm()">
+        + Add Pet Type
+    </button>
+
+    <div ng-show="self.showAddForm" class="border p-3 mb-3">
+        <form name="addForm" novalidate>
+            <h5>Add New Pet Type</h5>
+            <div class="form-group">
+                <label>Name:</label>
+                <input type="text"
+                       class="form-control"
+                       name="name"
+                       ng-model="self.newPetType.name"
+                       ng-pattern="/^[a-zA-Z\s]+$/"
+                       required>
+                <small class="text-danger" ng-show="addForm.name.$error.pattern">
+                    Letters and spaces only
+                </small>
+            </div>
+            <div class="form-group">
+                <label>Description:</label>
+                <input type="text"
+                       class="form-control"
+                       name="description"
+                       ng-model="self.newPetType.petTypeDescription"
+                       ng-pattern="/^[a-zA-Z\s]+$/"
+                       required>
+                <small class="text-danger" ng-show="addForm.description.$error.pattern">
+                    Letters and spaces only
+                </small>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm"
+                    ng-click="self.addPetType()">Save</button>
+            <button type="button" class="btn btn-secondary btn-sm"
+                    ng-click="self.toggleAddForm()">Cancel</button>
+        </form>
+    </div>
+
+    <!-- Filter & pagination controls -->
+    <form class="d-flex flex-column ng-pristine ng-valid">
+        <div class="d-flex flex-row justify-content-between align-items-end">
+            <div class="fw-bold">Filters</div>
+            <div class="d-flex flex-row gap-2">
+                <button type="button" style="color: gray;"
+                        class="border btn btn-light shadow-sm"
+                        ng-click="self.searchPetTypesByPaginationAndFilters()">Search</button>
+                <button type="button" style="color: gray;"
+                        class="border btn btn-light shadow-sm"
+                        ng-click="self.clearInputAndResetDefaultData()">Reset</button>
+            </div>
+        </div>
+
+        <hr class="m-0 mb-3 mt-3">
+
+        <div class="d-flex gap-4 mb-3 flex-wrap">
+            <div class="d-flex flex-column">
+                <input id="petTypeIdInput" type="text" placeholder="Search...">
+                <label style="font-size: 13px; color: gray;">Pet Type ID</label>
+            </div>
+            <div class="d-flex flex-column">
+                <input id="nameInput" type="text" placeholder="Search...">
+                <label style="font-size: 13px; color: gray;">Name</label>
+            </div>
+            <div class="d-none d-sm-flex flex-column">
+                <input id="descriptionInput" type="text" placeholder="Search...">
+                <label style="font-size: 13px; color: gray;">Description</label>
+            </div>
+        </div>
+
+        <div class="d-flex gap-4 mb-4 flex-wrap">
+            <div class="d-flex flex-column">
+                <select id="sizeInput" style="width: 100px">
+                    <option value=""></option>
+                    <option value="2">2</option>
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="15">15</option>
+                </select>
+                <label style="font-size: 13px; color: gray;">Size</label>
+            </div>
+        </div>
+    </form>
+
+    <!-- Table showing pet types with inline update/delete -->
+    <table id="petType" class="table table-striped table-responsive petTypeTable pb-3">
         <thead class="bg-white">
         <tr>
-            <th class="bg-white border">Pet Type ID</th>
-            <th class="bg-white border">Pet Type Name</th>
-            <th class="bg-white d-none d-sm-table-cell d-md-table-cell border">Description</th>
-            <th class="bg-white border">Delete</th>
+            <th class="bg-white border text-dark">Pet Type ID</th>
+            <th class="bg-white border text-dark">Pet Type Name</th>
+            <th class="bg-white d-none d-sm-table-cell d-md-table-cell border text-dark">Description</th>
+            <th class="bg-white border text-dark">Actions</th>
         </tr>
         </thead>
         <tbody class="border">
-        <tr ng-repeat="petType in $ctrl.petTypes">
-            <td>{{petType.petTypeId }}</td>
-            <td class="responsive-text">{{ petType.name }}</td>
-            <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{ petType.petTypeDescription }}</td>
+        <tr ng-repeat="petType in self.petTypes">
             <td>
-            <button class="btn btn-danger btn-sm" ng-click="$ctrl.deletePetType(petType.petTypeId)">Delete</button>
+                <a class="btn p-0 responsive-text" style="color: blue"
+                   ui-sref="petTypeDetails({ petTypeId: petType.petTypeId })">
+                    {{petType.petTypeId}}
+                </a>
+            </td>
+            <td class="responsive-text">
+                <span ng-if="self.editingPetType !== petType.petTypeId">{{petType.name}}</span>
+                <input ng-if="self.editingPetType === petType.petTypeId"
+                       type="text"
+                       ng-model="self.editForm.name"
+                       class="form-control form-control-sm">
+            </td>
+            <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">
+                <span ng-if="self.editingPetType !== petType.petTypeId">{{petType.petTypeDescription}}</span>
+                <input ng-if="self.editingPetType === petType.petTypeId"
+                       type="text"
+                       ng-model="self.editForm.petTypeDescription"
+                       class="form-control form-control-sm">
+            </td>
+            <td>
+                <button ng-if="self.editingPetType !== petType.petTypeId"
+                        class="btn btn-primary btn-sm me-2"
+                        ng-click="self.editPetType(petType)">Update</button>
+                <button ng-if="self.editingPetType === petType.petTypeId"
+                        class="btn btn-success btn-sm me-2"
+                        ng-click="self.savePetType(petType.petTypeId)">Save</button>
+                <button ng-if="self.editingPetType === petType.petTypeId"
+                        class="btn btn-secondary btn-sm me-2"
+                        ng-click="self.cancelEdit()">Cancel</button>
+                <button class="btn btn-danger btn-sm"
+                        ng-click="self.deletePetType(petType.petTypeId)">Delete</button>
             </td>
         </tr>
         </tbody>
     </table>
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-center pb-3">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
+                <li class="page-item">
+                    <a class="page-link text-dark" aria-label="Previous"
+                       ng-click="self.goPreviousPage()">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link text-dark" disabled>Page-{{self.currentPageOnSite}}</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link text-dark" aria-label="Next"
+                       ng-click="self.goNextPage()">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
 </div>

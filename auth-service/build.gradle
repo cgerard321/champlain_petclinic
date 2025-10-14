@@ -16,6 +16,7 @@ java {
 
 repositories {
     mavenCentral()
+    gradlePluginPortal()
 }
 ext {
     mapstructVersion = "1.4.1.Final"
@@ -28,6 +29,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation('org.springframework.boot:spring-boot-starter-data-jpa')
@@ -92,4 +94,9 @@ check.dependsOn jacocoTestCoverageVerification
 
 test {
     useJUnitPlatform()
+}
+
+
+bootJar {
+    layered
 }

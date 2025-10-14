@@ -40,6 +40,7 @@ LAYOUT_TOP_DOWN()
 SHOW_PERSON_OUTLINE()
 'HIDE_STEREOTYPE()
 
+
 title Container Diagram for Champlain Pet Clinic System
 
 Person(receptionist, "Receptionist", "An employee of the Champlain Pet Clinic who assists clients of the clinic.")
@@ -47,6 +48,8 @@ Person(inventoryManager, "Inventory Manager", "An employee of the  Champlain Pet
 Person(veterinarian, "Veterinarian", "An medical employee of the Champlain Pet Clinic who treats client pets.")
 Person(admin, "Admin", "An employee of the Champlain Pet Clinic responsible for account creation and handling overall system issues.")
 Person(customer, "Customer", "A customer of the Champlain Pet Clinic.")
+
+Container_Ext(minio, "Bucket Storage", "Minio", "Stores uploaded files externally")
 
 System_Boundary(c1, "Champlain Pet Clinic System"){
 
@@ -63,6 +66,7 @@ together {
 
 together {
     Container(api_gateway, "API-Gateway", "Java, Spring Boot", "Provides Champlain Pet Clinic functionality and hosts the Employee Web Application.", $sprite="spring_original", $tags = "microService-java")
+    Container(files_service, "files-service", "Go", "Makes API calls to store and access files for other services", $sprite="go", $tags = "microService-go")
     Container(auth_service, "auth-service", "Java, Spring Boot", "Provides authentication and authorization functionality.", $sprite="spring_original" , $tags = "microService-java")
     Container(customers_service, "customers-service", "Java, Spring Boot", "Provides customer functionality which includes owners, pets, and types.", $sprite="spring_original", $tags = "microService-java")
     Container(inventory_service, "inventory-service", "Java, Spring Boot", "Provides medical inventory functionality.", $sprite="spring_original", $tags = "microService-java")
@@ -76,6 +80,7 @@ together {
 }
     together {
         ContainerDb(auth_db, "auth-db", "MySQL 5.7.x", "Stores user information.", $sprite="mysql" , $tags = "storage-mysql")
+        ContainerDb(files_db, "files-db", "MySQL 5.7.x", "Stores files information.", $sprite="mysql" , $tags = "storage-mysql")
         ContainerDb(customers_db, "customers-db", "Mongo", "Stores owner, pet, and type information.", $sprite="mongodb", $tags = "storage-mongo")
         ContainerDb(inventory_db, "inventory-db", "Mongo", "Stores medical inventory information.", $sprite="mongodb", $tags = "storage-mongo")
         ContainerDb(vets_vets_db, "vets-db", "Mongo", "Stores veterinarian information.", $sprite="mongodb", $tags = "storage-mongo")
@@ -104,6 +109,10 @@ Rel(react_spa, api_gateway, "Makes API calls to", "JSON/REST/HTTPS")
 Rel(angular_spa, api_gateway, "Makes API calls to", "JSON/REST/HTTPS")
 
 
+Rel(customers_service, files_service, "Makes API calls to", "JSON/REST/HTTPS")
+
+Rel(files_service, files_db, "Reads from and writes to", "JDCB/SQL/TCP", $tags="blue-line")
+Rel(files_service, minio, "Makes API calls to", "JSON/REST/HTTPS")
 Rel(api_gateway, customers_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
 Rel(customers_service, customers_db, "Reads from and writes to", "Mongo/MQL/TCP")
 Rel(api_gateway, inventory_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
@@ -113,7 +122,6 @@ Rel(vets_service, vets_vets_db, "Reads from and writes to", "Mongo/MQL/TCP")
 Rel(vets_service, vets_images_db, "Reads from and writes to", "JDCB/SQL/TCP")
 Rel(api_gateway, emailing_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
 Rel(emailing_service, emailing_db, "Makes API calls to", "JSON/REST/HTTPS")
-Rel(api_gateway, visits_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
 
 Rel(api_gateway, products_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
 Rel(products_service, products_db, "Reads from and writes to", "Mongo/MQL/TCP")

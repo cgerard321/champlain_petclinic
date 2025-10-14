@@ -7,6 +7,6 @@ export const updateReview = async (
   review: ReviewRequestDTO
 ): Promise<void> => {
   await axiosInstance.put<void>(`/visits/reviews/${reviewId}`, review, {
-    useV2: true,
+    useV2: false,
   });
 };

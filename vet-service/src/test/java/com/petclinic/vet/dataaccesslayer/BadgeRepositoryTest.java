@@ -3,23 +3,23 @@
 
 //package com.petclinic.vet.dataaccesslayer;
 
-import com.petclinic.vet.dataaccesslayer.badges.Badge;
-import com.petclinic.vet.dataaccesslayer.badges.BadgeRepository;
-import com.petclinic.vet.dataaccesslayer.badges.BadgeTitle;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.reactivestreams.Publisher;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.r2dbc.init.R2dbcScriptDatabaseInitializer;
-import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
-import org.springframework.util.StreamUtils;
-import reactor.core.publisher.Flux;
-import reactor.test.StepVerifier;
+//import com.petclinic.vet.dataaccesslayer.badges.Badge;
+//import com.petclinic.vet.dataaccesslayer.badges.BadgeRepository;
+//import com.petclinic.vet.dataaccesslayer.badges.BadgeTitle;
+//import org.junit.jupiter.api.BeforeEach;
+//import org.junit.jupiter.api.Test;
+//import org.reactivestreams.Publisher;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.boot.r2dbc.init.R2dbcScriptDatabaseInitializer;
+//import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
+//import org.springframework.boot.test.mock.mockito.MockBean;
+//import org.springframework.core.io.ClassPathResource;
+//import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
+//import org.springframework.util.StreamUtils;
+//import reactor.core.publisher.Flux;
+//import reactor.test.StepVerifier;
 
-import java.io.IOException;
+//import java.io.IOException;
 
 /*@DataR2dbcTest
 class BadgeRepositoryTest {

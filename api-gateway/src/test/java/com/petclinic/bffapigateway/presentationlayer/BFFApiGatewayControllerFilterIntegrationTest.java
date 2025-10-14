@@ -59,7 +59,7 @@ class BFFApiGatewayControllerFilterIntegrationTest {
     @MockBean private JwtTokenUtil jwtTokenUtil;
     @MockBean private Utility utility;
 
-//    @Test
+// @Test
     void testGetAllCustomers_ShouldReturnUnauthorized() {
 
         client.get()
@@ -69,8 +69,6 @@ class BFFApiGatewayControllerFilterIntegrationTest {
                 .exchange()
                 .expectStatus().isUnauthorized();
     }
-
-
 
 //    @Test
     void testGetAllCustomers_ShouldReturnOk() {
@@ -97,8 +95,6 @@ class BFFApiGatewayControllerFilterIntegrationTest {
                 .exchange()
                 .expectStatus().isOk();
     }
-
-
 
 //    @Test
     void getUserByIdWithWrongAccount_ShouldFail(){

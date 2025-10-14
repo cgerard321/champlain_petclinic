@@ -19,7 +19,7 @@ public class ImageServiceClient {
                               @Value("${app.products-service.host}") String productsServiceHost,
                               @Value("${app.products-service.port}") String productsServicePort) {
         this.webClientBuilder = webClientBuilder;
-        imageServiceUrl = "http://" + productsServiceHost + ":" + productsServicePort + "/api/v1/images";
+        imageServiceUrl = "http://" + productsServiceHost + ":" + productsServicePort + "/images";
         this.webClient = webClientBuilder
                 .baseUrl(imageServiceUrl)
                 .build();

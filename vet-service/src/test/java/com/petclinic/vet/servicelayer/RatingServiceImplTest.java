@@ -2,14 +2,18 @@ package com.petclinic.vet.servicelayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.vet.dataaccesslayer.*;
+import com.petclinic.vet.businesslayer.photos.PhotoService;
+import com.petclinic.vet.businesslayer.ratings.RatingService;
 import com.petclinic.vet.dataaccesslayer.ratings.PredefinedDescription;
 import com.petclinic.vet.dataaccesslayer.ratings.Rating;
 import com.petclinic.vet.dataaccesslayer.ratings.RatingRepository;
-import com.petclinic.vet.exceptions.NotFoundException;
-import com.petclinic.vet.servicelayer.ratings.RatingRequestDTO;
-import com.petclinic.vet.servicelayer.ratings.RatingResponseDTO;
-import com.petclinic.vet.servicelayer.ratings.RatingService;
+import com.petclinic.vet.dataaccesslayer.vets.Vet;
+import com.petclinic.vet.dataaccesslayer.vets.VetRepository;
+import com.petclinic.vet.presentationlayer.ratings.RatingRequestDTO;
+import com.petclinic.vet.presentationlayer.ratings.RatingResponseDTO;
+import com.petclinic.vet.presentationlayer.vets.VetAverageRatingDTO;
+import com.petclinic.vet.utils.exceptions.NotFoundException;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.r2dbc.init.R2dbcScriptDatabaseInitializer;

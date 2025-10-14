@@ -7,9 +7,12 @@ export async function changeProductQuantity(
   try {
     await axiosInstance.patch(`/products/${productId}/quantity`, {
       productQuantity: newQuantity,
+      useV2: false,
     });
   } catch (err) {
     console.error(`Error updating quantity for product ${productId}:`, err);
     throw err;
   }
 }
+
+// This page needs to be deleted since react is only for customers and not employees.

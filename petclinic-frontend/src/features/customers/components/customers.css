@@ -1,0 +1,494 @@
+/* This is a universal CSS, that works for all files, instead of having indivudual files for each one. Easier to work with, less space*/
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  z-index: 1000;
+}
+
+.modal-content {
+  position: relative;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 40px 60px;
+  width: 90%;
+  max-width: 700px;
+  min-height: 300px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  text-align: left;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.modal-header h2 {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #2e2e2e;
+  margin: 0;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.close-button:hover {
+  background-color: #f3f4f6;
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.update-button {
+  background-color: #10b981;
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.25s,
+    transform 0.2s;
+}
+
+.update-button:hover {
+  background-color: #059669;
+  transform: translateY(-1px);
+}
+
+.cancel-button {
+  background-color: #6b7280;
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.25s,
+    transform 0.2s;
+}
+
+.cancel-button:hover {
+  background-color: #4b5563;
+  transform: translateY(-1px);
+}
+
+.delete-button {
+  background-color: #dc2626;
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.25s,
+    transform 0.2s;
+}
+
+.delete-button:hover {
+  background-color: #b91c1c;
+  transform: translateY(-1px);
+}
+
+.success-message {
+  background-color: #d1fae5;
+  color: #065f46;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* This is for the rectangular look */
+.customer-modal-overlay,
+.customer-pet-add-modal-overlay,
+.customer-pet-update-modal-overlay,
+.customer-pet-delete-modal-overlay,
+.customer-admin-update-customer-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  z-index: 1000;
+}
+
+.customer-modal-content,
+.customer-pet-add-modal,
+.customer-pet-update-modal,
+.customer-pet-delete-modal,
+.customer-admin-update-customer-modal {
+  position: relative;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 40px 60px;
+  width: 90%;
+  max-width: 700px;
+  min-height: 300px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  text-align: left;
+}
+
+/* Modal header with x button */
+.customer-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.customer-modal-header h2,
+.customer-pet-add-modal h2,
+.customer-pet-update-modal h2,
+.customer-pet-delete-modal h2,
+.customer-admin-update-customer-modal h2 {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #2e2e2e;
+  margin: 0;
+}
+.customer-modal-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  color: #6b7280;
+  cursor: pointer;
+  transition: color 0.25s;
+}
+.customer-modal-close:hover {
+  color: #1f2937;
+}
+
+/* Update form */
+.customer-add-pet-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.customer-add-pet-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.customer-add-pet-form label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #6b6b6b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.customer-add-pet-form .checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: none;
+  font-weight: 500;
+  color: #374151;
+}
+
+.customer-add-pet-form .checkbox-label input[type='checkbox'] {
+  margin: 0;
+  width: 16px;
+  height: 16px;
+}
+
+.customer-add-pet-form input,
+.customer-add-pet-form select,
+.customer-add-pet-form input[type='date'],
+.customer-add-pet-form input[type='number'] {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  background: #f9fafb;
+  font-size: 0.95rem;
+  color: #374151;
+  transition:
+    border-color 0.25s,
+    box-shadow 0.25s;
+}
+.customer-add-pet-form input:focus,
+.customer-add-pet-form select:focus,
+.customer-add-pet-form input[type='date']:focus,
+.customer-add-pet-form input[type='number']:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Error display */
+.customer-add-pet-form .error-message {
+  color: #dc2626;
+  font-size: 0.8rem;
+}
+
+/* Buttons inside of the form modal */
+.customer-modal-content .form-actions,
+.customer-add-pet-form .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.customer-modal-content .primary-button,
+.customer-add-pet-form .primary-button {
+  background-color: #2563eb;
+  color: #fff;
+  padding: 12px 32px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition:
+    background-color 0.25s,
+    transform 0.2s;
+}
+.customer-modal-content .primary-button:hover,
+.customer-add-pet-form .primary-button:hover {
+  background-color: #1d4ed8;
+  transform: translateY(-2px);
+}
+
+.customer-modal-content .secondary-button,
+.customer-add-pet-form .secondary-button {
+  background-color: #6b7280;
+  color: #fff;
+  padding: 12px 32px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition:
+    background-color 0.25s,
+    transform 0.2s;
+}
+.customer-modal-content .secondary-button:hover,
+.customer-add-pet-form .secondary-button:hover {
+  background-color: #4b5563;
+  transform: translateY(-2px);
+}
+
+.customer-modal-content .delete-button,
+.customer-add-pet-form .delete-button {
+  background-color: #dc2626;
+  color: #fff;
+  padding: 12px 32px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    transform 0.2s;
+}
+
+.customer-modal-content .delete-button:hover,
+.customer-add-pet-form .delete-button:hover {
+  background-color: #b91c1c;
+  transform: translateY(-2px);
+}
+
+/* Update Customer Form container */
+.update-customer-form-container {
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.update-customer-form {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #ffffff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.update-customer-form h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+  font-family: 'Arial', sans-serif;
+}
+
+.update-customer-form form {
+  display: flex;
+  flex-direction: column;
+}
+
+.update-customer-form label {
+  margin-bottom: 15px;
+  font-family: 'Arial', sans-serif;
+  color: #555;
+}
+
+.update-customer-form input {
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-family: 'Arial', sans-serif;
+  font-size: 16px;
+}
+
+.update-customer-form button {
+  padding: 12px;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 20px;
+  font-family: 'Arial', sans-serif;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.update-customer-form button:hover {
+  background-color: #1d4ed8;
+}
+
+.error {
+  color: red;
+  font-size: 0.8em;
+  margin-top: 5px;
+  font-family: 'Arial', sans-serif;
+}
+
+.update-customer-form input:focus {
+  border-color: #28a745;
+  box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
+  outline: none;
+}
+
+.customer-admin-update-customer-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.customer-admin-update-customer-modal {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 100%;
+}
+
+.customer-admin-update-customer-modal h2 {
+  margin-bottom: 10px;
+  font-size: 24px;
+}
+
+.customer-admin-update-customer-modal p {
+  margin-bottom: 20px;
+  font-size: 18px;
+}
+
+.customer-admin-update-customer-modal button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 10px 30px;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.customer-admin-update-customer-modal button:hover {
+  background-color: #45a049;
+}
+
+#back-button {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #ffffff;
+  background-color: #007bff;
+  text-decoration: none;
+  border-radius: 5px;
+  transition:
+    background-color 0.3s ease,
+    transform 0.2s ease;
+  white-space: nowrap;
+  position: fixed;
+  left: 15px;
+  bottom: 15px;
+  z-index: 1000;
+}
+
+#back-button:hover {
+  background-color: #0056b3;
+  color: #ffffff;
+}
+
+#back-button:active {
+  background-color: #004085;
+  transform: scale(0.98);
+}

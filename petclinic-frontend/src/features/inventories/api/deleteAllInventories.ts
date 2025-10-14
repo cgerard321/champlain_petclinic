@@ -8,3 +8,4 @@ export default async function deleteAllInventories(): Promise<void> {
     throw error;
   }
 }
+//plan to remove

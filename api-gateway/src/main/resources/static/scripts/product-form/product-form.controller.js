@@ -1,25 +1,33 @@
 'use strict';
 
+
 angular.module('productForm')
-    .controller('ProductFormController', ["$http", '$state', '$stateParams', '$scope', 'InventoryService', function ($http, $state , $scope,  $stateParams, InventoryService) {
+    .controller('ProductFormController', ["$http", '$state', '$stateParams', function ($http, $state , $stateParams) {
         var self = this;
-        var product = {}
+            //hardcoded because no currently existing way to get
+            self.deliveryType = ["DELIVERY", "PICKUP", "DELIVERY_AND_PICKUP", "NO_DELIVERY_OPTION"];
+            self.productStatus = ["AVAILABLE", "PRE_ORDER", "OUT_OF_STOCK"];
+            self.productType = ["FOOD", "MEDICATION", "ACCESSORY", "EQUIPMENT"];
         // post request to create a new product
-        self.submitProductForm = function (product) {
+        self.submitProductForm = function () {
             var data  = {
                 productName: self.product.productName,
                 productDescription: self.product.productDescription,
                 productPrice: self.product.productPrice,
                 productQuantity: self.product.productQuantity,
-                productSalePrice: self.product.productSalePrice
+                productSalePrice: self.product.productSalePrice,
+                productType: self.product.productType,
+                productStatus: self.product.productStatus,
+                deliveryType: self.product.deliveryType,
+                imageId: self.product.imageId,
+                isUnlisted: self.product.isUnlisted
             }
-            var inventoryId = InventoryService.getInventoryId();
-            console.log("InventoryId: " + inventoryId);
-            $http.post('/api/gateway/inventories/' + inventoryId + '/products', data
+            $http.post('/api/gateway/products', data
             )
                 .then(function (response) {
-                    console.log(response);
-                    $state.go('productList', {inventoryId: inventoryId});
+                    //console.log(response);
+                    $state.go('productList');
+
                 }, function (response) {
                     var error = response.data;
                     error.errors = error.errors || [];
@@ -28,6 +36,4 @@ angular.module('productForm')
                     }).join("\r\n"));
                 });
         }
-
-
     }]);
