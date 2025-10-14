@@ -10,6 +10,5 @@ export interface OwnerResponseModel {
   province: string;
   telephone: string;
   pets: PetResponseModel[];
-  photoId?: string;
   photo?: FileDetails;
 }

@@ -1,7 +1,7 @@
 import { AxiosResponse } from 'axios';
 import axiosInstance from '@/shared/api/axiosInstance';
 import { OwnerResponseModel } from '../models/OwnerResponseModel';
-import { FileRequestDTO } from '../models/FileRequestDTO';
+import { FileDetails } from '@/shared/models/FileDetails';
 
 export const uploadOwnerPhoto = async (
   ownerId: string,
@@ -9,15 +9,19 @@ export const uploadOwnerPhoto = async (
 ): Promise<AxiosResponse<OwnerResponseModel>> => {
   const fileData = await convertFileToBase64(file);
 
-  const fileRequest: FileRequestDTO = {
+  const photoRequest: FileDetails = {
     fileName: file.name,
     fileType: file.type,
     fileData: fileData,
   };
 
-  return await axiosInstance.post<OwnerResponseModel>(
-    `/owners/${ownerId}/photo`,
-    fileRequest,
+  const patchRequest = {
+    photo: photoRequest,
+  };
+
+  return await axiosInstance.patch<OwnerResponseModel>(
+    `/owners/${ownerId}`,
+    patchRequest,
     {
       useV2: false,
     }
