@@ -9,21 +9,14 @@ angular.module('inventoriesProductList', ['ui.router'])
                 template: '<inventories-product-list></inventories-product-list>',
             })
 
-            .state('deleteProduct', {
+            .state('deleteInventoriesProduct', {
                 parent: 'app',
                 url: '/inventories/:inventoryId/products/:productId',
                 template: '<inventory-product-item></inventory-product-item>'
             })
-            .state('deleteAllProducts', {
+            .state('deleteAllInventoriesProducts', {
                 parent: 'app',
                 url: '/inventories/:inventoryId/products',
                 template: '<inventory-product-item></inventory-product-item>'
             })
-            .state('inventoryProductDetails', {
-                    parent: 'app',
-                    url: '/inventory/:inventoryId/products/:productId/details',
-                    template: '<inventories-product-details-info></inventories-product-details-info>',
-                    controller: 'InventoriesProductDetailsInfoController',
-                    controllerAs: 'self'
-                  })
     }]);
