@@ -148,6 +148,31 @@ ul {
   border: 1px solid #ddd;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
+.vet-ratings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.add-rating-button {
+  background-color: #4d7cff;
+  border: none;
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+.add-rating-button:hover {
+  background-color: #3d68d9;
+  box-shadow: 0 8px 16px rgba(61, 104, 217, 0.2);
+}
+.add-rating-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(77, 124, 255, 0.25);
+}
 .rating-card {
   padding: 10px;
   background-color: #f5f5f5;
