@@ -313,7 +313,7 @@ services:
     container_name: tooljet
     restart: unless-stopped
     ports:
-      - "8091:80"
+      - "8030:80"
     environment:
       - PG_HOST=tooljet-db
       - PG_PORT=5432
@@ -321,7 +321,7 @@ services:
       - PG_USER=tooljet
       - PG_PASS=tooljetpwd
 
-      - TOOLJET_HOST=http://localhost:8091
+      - TOOLJET_HOST=http://localhost:8030
 
       - ENABLE_TOOLJET_DB=true
       - TOOLJET_DB_HOST=tooljet-db
@@ -329,7 +329,7 @@ services:
       - TOOLJET_DB=tooljet_db
       - TOOLJET_DB_USER=tooljet
       - TOOLJET_DB_PASS=tooljetpwd
-      - JWT_SECRET=${JWT_SECRET}
+      - JWT_SECRET=c0c9293e7ee90fffeb942188204af4f0
     depends_on:
       - tooljet-db
 
