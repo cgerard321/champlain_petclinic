@@ -377,3 +377,17 @@ services:
     #        retries: 5
     #        interval: 15s
     #        start_period: 30s
+
+  mongo-express-carts:
+    image: mongo-express
+    restart: always
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+      - ME_CONFIG_MONGODB_SERVER=mongo-products
+      - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
+    ports:
+      - 8087:8081
+    depends_on:
+      - mongo-carts
+      - cart-service

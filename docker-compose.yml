@@ -1,4 +1,17 @@
 services:
+  petclinicFrontend:
+    image: petclinic-frontend
+    container_name: petclinic-frontend
+    build:
+      context: ./petclinic-frontend
+      dockerfile: Dockerfile
+      args:
+        - BUILD_MODE=development
+    ports:
+      - "3000:3000"
+    volumes:
+      - .petclinic-frontend/src:/app/src
+
   janus:
     image: nginx
     ports:
@@ -49,6 +62,8 @@ services:
       - customers-service-reactive
       - vet-service
       - visits-service-new
+      - products-service
+      - cart-service
 
   auth-service:
     build: auth-service
@@ -173,7 +188,7 @@ services:
       - 5013:80
     environment:
       - PMA_ARBITRARY=1
-  # vet mongo container
+
   mongo-vet:
     image: mongo
     container_name: mongo-vet
@@ -319,11 +334,6 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: password
-    #      healthcheck:
-    #        test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
-    #        retries: 5
-    #        interval: 15s
-    #        start_period: 30s
 
   mongo-express-inventory:
     image: mongo-express
@@ -372,11 +382,6 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: password
-    #      healthcheck:
-    #        test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
-    #        retries: 5
-    #        interval: 15s
-    #        start_period: 30s
 
   mongo-express-carts:
     image: mongo-express
