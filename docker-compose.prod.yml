@@ -305,6 +305,8 @@ services:
       - "8978:8978"
     volumes:
       - cloudbeaver-data:/opt/cloudbeaver/workspace
+    environment:
+      - CB_EXTENSIONS_DEFAULT=1
     restart: unless-stopped
 
   # ---------- MONGO DB MANAGER ----------
