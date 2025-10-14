@@ -297,47 +297,87 @@ services:
       - mongo-carts-config:/data/configdb
     restart: unless-stopped
 
-  metabase:
-    image: metabase/metabase:latest
-    container_name: metabase
+  dbgate:
+    image: dbgate/dbgate:latest
+    container_name: dbgate
+    restart: unless-stopped
     ports:
-      - "8030:3000"                   # behind your reverse-proxy if public
+      - "8030:3000"
     environment:
-      - MB_ADMIN_EMAIL=admin@cpc.com
-      - MB_ADMIN_PASSWORD=password
+      - ADMIN_PASSWORD=${DBGATE_ADMIN_PASSWORD:-change-me}
 
-      - MB_DB_TYPE=postgres
-      - MB_DB_HOST=metabase-db
-      - MB_DB_PORT=5432
-      - MB_DB_DBNAME=metabase
-      - MB_DB_USER=mb_user
-      - MB_DB_PASS=mb_pass
+      - CONNECTIONS=mysqlAuth,mysqlFiles,pgVet,mongoVet,mongoBilling,mongoVisits,mongoCustomers,mongoInventory,mongoProducts,mongoCarts
 
-      - MB_ANON_TRACKING_ENABLED=false
-      - JAVA_TOOL_OPTIONS=-Xms512m -Xmx1024m
+      # MySQL — mysql-auth
+      - LABEL_mysqlAuth=MySQL (auth)
+      - ENGINE_mysqlAuth=mysql@dbgate-plugin-mysql
+      - SERVER_mysqlAuth=mysql-auth
+      - PORT_mysqlAuth=3306
+      - DATABASE_mysqlAuth=auth-db
+
+      # MySQL — mysql-files
+      - LABEL_mysqlFiles=MySQL (files)
+      - ENGINE_mysqlFiles=mysql@dbgate-plugin-mysql
+      - SERVER_mysqlFiles=mysql-files
+      - PORT_mysqlFiles=3306
+      - DATABASE_mysqlFiles=files-db
+
+      # PostgreSQL — postgres-vet
+      - LABEL_pgVet=PostgreSQL (vet)
+      - ENGINE_pgVet=postgres@dbgate-plugin-postgres
+      - SERVER_pgVet=postgres-vet
+      - PORT_pgVet=5432
+      - DATABASE_pgVet=images
+
+      # MongoDB — mongo-* (no creds → UI will ask)
+      - LABEL_mongoVet=MongoDB (vet)
+      - ENGINE_mongoVet=mongo@dbgate-plugin-mongo
+      - SERVER_mongoVet=mongo-vet
+      - PORT_mongoVet=27017
+
+      - LABEL_mongoBilling=MongoDB (billing)
+      - ENGINE_mongoBilling=mongo@dbgate-plugin-mongo
+      - SERVER_mongoBilling=mongo-billing
+      - PORT_mongoBilling=27017
+
+      - LABEL_mongoVisits=MongoDB (visits)
+      - ENGINE_mongoVisits=mongo@dbgate-plugin-mongo
+      - SERVER_mongoVisits=mongo-visits
+      - PORT_mongoVisits=27017
+
+      - LABEL_mongoCustomers=MongoDB (customers)
+      - ENGINE_mongoCustomers=mongo@dbgate-plugin-mongo
+      - SERVER_mongoCustomers=mongo-customers
+      - PORT_mongoCustomers=27017
+
+      - LABEL_mongoInventory=MongoDB (inventory)
+      - ENGINE_mongoInventory=mongo@dbgate-plugin-mongo
+      - SERVER_mongoInventory=mongo-inventory
+      - PORT_mongoInventory=27017
+
+      - LABEL_mongoProducts=MongoDB (products)
+      - ENGINE_mongoProducts=mongo@dbgate-plugin-mongo
+      - SERVER_mongoProducts=mongo-products
+      - PORT_mongoProducts=27017
+
+      - LABEL_mongoCarts=MongoDB (carts)
+      - ENGINE_mongoCarts=mongo@dbgate-plugin-mongo
+      - SERVER_mongoCarts=mongo-carts
+      - PORT_mongoCarts=27017
+
     volumes:
-      - metabase-plugins:/plugins
+      - ./dbgate-data:/root/.dbgate
     depends_on:
-      - metabase-db
-    restart: unless-stopped
-    labels:
-      - homepage.group=Admin
-      - homepage.name=Metabase (Analytics)
-      - homepage.icon=https://github.com/homarr-labs/dashboard-icons/blob/main/png/metabase.png?raw=true
-      - homepage.href=https://reports.benmusicgeek.synology.me/
-      - homepage.description=Query + dashboards for Postgres/MySQL/Mongo
-
-  metabase-db:
-    image: postgres:16
-    container_name: metabase-db
-    environment:
-      - POSTGRES_USER=mb_user
-      - POSTGRES_PASSWORD=mb_pass
-      - POSTGRES_DB=metabase
-    volumes:
-      - metabase-db-data:/var/lib/postgresql/data
-    restart: unless-stopped
-
+      - mysql-auth
+      - mysql-files
+      - postgres-vet
+      - mongo-vet
+      - mongo-billing
+      - mongo-visits
+      - mongo-customers
+      - mongo-inventory
+      - mongo-products
+      - mongo-carts
 
 # -------------------
 # VOLUMES
@@ -360,5 +400,3 @@ volumes:
   mongo-carts-config:
   postgres-vet-data:
   mysql-files-data:
-  metabase-db-data:
-  metabase-plugins:
