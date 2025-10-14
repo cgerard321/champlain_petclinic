@@ -22,13 +22,14 @@ import java.io.IOException;
 import java.rmi.ServerException;
 
 public class OwnerClientUnitTest {
+    
     private OwnerClient ownerClient;
-    private WebTestClient webTestClient;
     private static MockWebServer mockBackEnd;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Mock
     private WebClient webClient;
+
     @BeforeAll
     public static void setup() throws IOException {
         mockBackEnd = new MockWebServer();
@@ -37,7 +38,7 @@ public class OwnerClientUnitTest {
     @BeforeEach
     public void initialize(){
         ownerClient = new OwnerClient("localhost", String.valueOf(mockBackEnd.getPort()));
-        webTestClient = WebTestClient.bindToController(ownerClient).build();
+        WebTestClient.bindToController(ownerClient).build();
     }
     @AfterAll
     static void tearDown() throws IOException {

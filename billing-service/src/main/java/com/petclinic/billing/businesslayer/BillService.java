@@ -65,7 +65,7 @@ public interface BillService {
     Flux<BillResponseDTO> getBillsByCustomerIdAndStatus(String customerId, BillStatus status);
 
     // Method to generate the bill PDF
-    Mono<byte[]> generateBillPdf(String customerId, String billId);
+    Mono<byte[]> generateBillPdf(String customerId, String billId, String currency);
 
     // Method to fetch bills by month
     Flux<BillResponseDTO> getBillsByMonth(int year, int month);

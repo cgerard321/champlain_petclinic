@@ -77,7 +77,7 @@ export default function BillsListTable({
   ): Promise<void> => {
     try {
       const response = await axiosInstance.get(
-        `/customers/${customerId}/bills/${billId}/pdf`,
+        `/customers/${customerId}/bills/${billId}/pdf?currency=${currency}`,
         {
           responseType: 'blob',
           headers: {

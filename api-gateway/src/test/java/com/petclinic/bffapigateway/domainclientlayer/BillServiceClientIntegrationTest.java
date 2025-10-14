@@ -905,7 +905,7 @@ class BillServiceClientIntegrationTest {
                 .setBody("{\"message\":\"Bill not found\"}")
         );
 
-        Mono<byte[]> result = billServiceClient.downloadBillPdf("C-404", "B-missing");
+        Mono<byte[]> result = billServiceClient.downloadBillPdf("C-404", "B-missing", null);
 
         StepVerifier.create(result)
                 .expectErrorSatisfies(ex -> {
@@ -928,7 +928,7 @@ class BillServiceClientIntegrationTest {
                 .setBody(new Buffer().write(pdf))
         );
 
-        Mono<byte[]> result = billServiceClient.downloadBillPdf(customerId, billId);
+        Mono<byte[]> result = billServiceClient.downloadBillPdf(customerId, billId, null);
 
         StepVerifier.create(result)
                 .assertNext(bytes -> {

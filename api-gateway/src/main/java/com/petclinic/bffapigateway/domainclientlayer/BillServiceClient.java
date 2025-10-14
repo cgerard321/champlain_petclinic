@@ -31,8 +31,9 @@ public class BillServiceClient {
             @Value("${app.billing-service.port}") String billingServicePort
     ) {
         this.webClientBuilder = webClientBuilder;
-
-        billServiceUrl = "http://" + billingServiceHost + ":" + billingServicePort + "/bills";
+        String host = (billingServiceHost == null || billingServiceHost.isBlank()) ? "billing-service" : billingServiceHost;
+        String port = (billingServicePort == null || billingServicePort.isBlank()) ? "8080" : billingServicePort;
+        billServiceUrl = "http://" + host + ":" + port + "/bills";
     }
 
     public Mono<BillResponseDTO> getBillById(final String billId) {
@@ -319,10 +320,19 @@ public class BillServiceClient {
                 .bodyToFlux(BillResponseDTO.class);
     }
 
-    public Mono<byte[]> downloadBillPdf(String customerId, String billId) {
+    // Example PDF download method (replace with your actual method name/signature)
+    public Mono<byte[]> downloadBillPdf(String customerId, String billId, String currency) {
+        String cur = (currency == null || currency.isBlank()) ? "CAD" : currency;
+        String url = UriComponentsBuilder
+                .fromHttpUrl(billServiceUrl)
+                .path("/customer/{customerId}/bills/{billId}/pdf")
+                .queryParam("currency", cur)
+                .buildAndExpand(customerId, billId)
+                .toUriString();
+
         return webClientBuilder.build()
                 .get()
-                .uri(billServiceUrl + "/customer/{customerId}/bills/{billId}/pdf", customerId, billId)
+                .uri(url)
                 .accept(MediaType.APPLICATION_PDF)
                 .retrieve()
                 .bodyToMono(byte[].class);

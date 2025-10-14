@@ -35,9 +35,10 @@ public class CustomerBillController {
     @GetMapping(value = "/{billId}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
     public Mono<ResponseEntity<byte[]>> downloadBillPdf(
             @PathVariable String customerId, 
-            @PathVariable String billId) {
+            @PathVariable String billId,
+            @RequestParam(name = "currency", required = false, defaultValue = "CAD") String currency) {
 
-        return billService.downloadBillPdf(customerId, billId)
+        return billService.downloadBillPdf(customerId, billId, currency)
                 .map(pdf -> {
                     HttpHeaders headers = new HttpHeaders();
                     headers.setContentType(MediaType.APPLICATION_PDF);
@@ -71,5 +72,4 @@ public class CustomerBillController {
                 .onErrorResume(ResponseStatusException.class, e ->
                         Mono.just(ResponseEntity.status(e.getStatusCode()).build()));
     }
-
 }
