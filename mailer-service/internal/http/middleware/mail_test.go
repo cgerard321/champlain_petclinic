@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -46,6 +47,27 @@ func TestUnmarshalMail_InvalidPayload_Returns400(t *testing.T) {
 
 	body := []byte(`{"to":"a@b.com","body":"<p>x</p>"}`)
 	req := httptest.NewRequest(http.MethodPost, "/mail", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Fatalf("want 400, got %d", w.Code)
+	}
+}
+
+func TestUnmarshalMail_MalformedJSON_Returns400(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	r := gin.New()
+	r.Use(mw.UnmarshalMail())
+	r.POST("/mail", func(c *gin.Context) {
+		c.Status(http.StatusOK)
+	})
+
+	body := `{"to":"a@b.com","subject":"hi","body":"<p>x</p>"`
+	req := httptest.NewRequest(http.MethodPost, "/mail", strings.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 
 	w := httptest.NewRecorder()

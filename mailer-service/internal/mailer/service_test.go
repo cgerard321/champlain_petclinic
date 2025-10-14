@@ -96,3 +96,80 @@ func TestService_Send_SendsMessage(t *testing.T) {
 		t.Fatalf("send failed: %v", err)
 	}
 }
+
+func unreachablePort(t *testing.T) int {
+	t.Helper()
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	addr := ln.Addr().String()
+	_ = ln.Close()
+
+	_, portStr, _ := strings.Cut(addr, ":")
+	var port int
+	fmt.Sscanf(portStr, "%d", &port)
+	return port
+}
+
+func TestService_Send_EmptySenderName_UsesPlainFrom(t *testing.T) {
+	addr, stop := startFakeSMTP(t)
+	defer stop()
+
+	host, portStr, _ := strings.Cut(addr, ":")
+	var port int
+	fmt.Sscanf(portStr, "%d", &port)
+
+	d := NewDialer(Config{
+		Host: host, Port: port, InsecureSkipVerify: true,
+	})
+	s := NewService(d, "from@example.com")
+
+	err := s.Send(&pkg.Mail{
+		To:      "rcpt@example.com",
+		Subject: "No Name",
+		Body:    "<p>hello</p>",
+	})
+	if err != nil {
+		t.Fatalf("send failed: %v", err)
+	}
+}
+
+func TestService_Send_DialError_Propagates(t *testing.T) {
+	badPort := unreachablePort(t)
+	d := NewDialer(Config{
+		Host: "127.0.0.1", Port: badPort, InsecureSkipVerify: true,
+	})
+	s := NewService(d, "from@example.com")
+
+	err := s.Send(&pkg.Mail{
+		To:      "rcpt@example.com",
+		Subject: "x",
+		Body:    "<p>x</p>",
+	})
+	if err == nil {
+		t.Fatalf("expected error dialing unreachable SMTP server")
+	}
+}
+
+func TestService_Send_MinimalSubjectAndHTML(t *testing.T) {
+	addr, stop := startFakeSMTP(t)
+	defer stop()
+
+	host, portStr, _ := strings.Cut(addr, ":")
+	var port int
+	fmt.Sscanf(portStr, "%d", &port)
+
+	d := NewDialer(Config{
+		Host: host, Port: port, InsecureSkipVerify: true,
+	})
+	s := NewService(d, "from@example.com")
+
+	if err := s.Send(&pkg.Mail{
+		To:      "mini@example.com",
+		Subject: "x",
+		Body:    "<p>x</p>",
+	}); err != nil {
+		t.Fatalf("send failed: %v", err)
+	}
+}

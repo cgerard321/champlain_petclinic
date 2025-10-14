@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -41,6 +42,9 @@ func TestMailHandler_Post_Success(t *testing.T) {
 	}
 	if ms.got == nil || ms.got.To != "a@b.com" {
 		t.Fatalf("handler did not pass parsed mail to service")
+	}
+	if !strings.Contains(w.Body.String(), "Message sent to a@b.com") {
+		t.Fatalf("unexpected body: %s", w.Body.String())
 	}
 }
 
@@ -79,5 +83,23 @@ func TestMailHandler_Post_NoMailInContext_Returns400(t *testing.T) {
 
 	if w.Code != http.StatusBadRequest {
 		t.Fatalf("want 400, got %d", w.Code)
+	}
+}
+
+func TestMailHandler_Register_Smoke(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	ms := &mockService{}
+	h := handlers.NewMailHandler(ms)
+
+	r := gin.New()
+	h.Register(r)
+
+	req := httptest.NewRequest(http.MethodGet, "/mail", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusNotFound {
+		t.Fatalf("expected 404, got %d", w.Code)
 	}
 }
