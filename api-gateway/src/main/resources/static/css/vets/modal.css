@@ -38,6 +38,7 @@
 .modalOn {
     animation: 500ms fadeIn forwards;
     color: white;
+    display: flex !important;
 }
 
 .modalOff {
@@ -97,13 +98,7 @@
     margin-left: 10px;
 }
 
-.modalOn {
-    display: flex !important;
-}
 
-.modalOff {
-    display: none !important;
-}
 
 @keyframes fadeIn {
     0% {
