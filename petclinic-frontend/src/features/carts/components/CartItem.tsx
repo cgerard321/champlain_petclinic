@@ -1,4 +1,5 @@
 // src/features/carts/components/CartItem.tsx
+import './cart-shared.css';
 import './CartItem.css';
 import { ProductModel } from '../models/ProductModel';
 import ImageContainer from '@/features/products/components/ImageContainer';
@@ -136,7 +137,7 @@ const CartItem = ({
           <div className="cart-item-meta wishlist">
             <div className="cart-item-actions">
               <button
-                className="addToCart-button"
+                className="cart-button cart-button--accent cart-button--pill cart-button--block cart-button--strike-disabled"
                 onClick={handleAddToCart}
                 aria-label={`Add ${item.productName} to cart`}
                 disabled={isStaff || item.productQuantity === 0}
@@ -147,7 +148,7 @@ const CartItem = ({
               </button>
 
               <button
-                className="wishlist-button danger"
+                className="cart-button cart-button--danger cart-button--pill cart-button--block cart-button--strike-disabled"
                 onClick={() => removeFromWishlist && removeFromWishlist(item)}
                 aria-label={`Remove ${item.productName} from wishlist`}
                 disabled={isStaff}

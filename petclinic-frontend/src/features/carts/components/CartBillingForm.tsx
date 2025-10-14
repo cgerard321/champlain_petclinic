@@ -1,4 +1,5 @@
 import { useState, ChangeEvent, FormEvent } from 'react';
+import './cart-shared.css';
 import './CartBillingForm.css';
 export interface BillingInfo {
   fullName: string;
@@ -123,7 +124,7 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
 
   return (
     <div className="cart-billing-modal-backdrop">
-      <div className="cart-billing-modal-content">
+      <div className="cart-billing-modal-content cart-panel">
         <button
           className="cart-billing-modal-close"
           onClick={onClose}
@@ -223,7 +224,11 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
             </div>
           </div>
 
-          <button type="submit" disabled={loading}>
+          <button
+            type="submit"
+            className="cart-button cart-button--brand cart-button--block cart-button--tall cart-button--disabled-muted"
+            disabled={loading}
+          >
             {loading ? 'Processing...' : 'Submit Payment'}
           </button>
         </form>
@@ -231,14 +236,20 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
 
       {showConfirm && (
         <div className="confirm-modal-backdrop">
-          <div className="confirm-modal-content">
+          <div className="confirm-modal-content cart-panel cart-panel--padded">
             <h2>Confirm Checkout</h2>
             <p>Are you sure you want to checkout?</p>
             <div className="confirm-modal-buttons">
-              <button className="confirm" onClick={handleConfirm}>
+              <button
+                className="cart-button cart-button--brand cart-button--tall"
+                onClick={handleConfirm}
+              >
                 Yes
               </button>
-              <button className="cancel" onClick={handleCancel}>
+              <button
+                className="cart-button cart-button--danger cart-button--tall"
+                onClick={handleCancel}
+              >
                 No
               </button>
             </div>

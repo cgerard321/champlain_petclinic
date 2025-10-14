@@ -3,6 +3,7 @@ import CartBillingForm, { BillingInfo } from './CartBillingForm';
 import { useNavigate, useParams } from 'react-router-dom';
 import CartItem from './CartItem';
 import { ProductModel } from '../models/ProductModel';
+import './cart-shared.css';
 import './UserCart.css';
 import { NavBar } from '@/layouts/AppNavBar';
 import { FaShoppingCart } from 'react-icons/fa';
@@ -152,6 +153,11 @@ const UserCart = (): JSX.Element => {
           })
         );
         setCartItems(products);
+        const updatedCount = products.reduce(
+          (acc, p) => acc + (p.quantity || 0),
+          0
+        );
+        setCartCountInLS(updatedCount);
       }
     } catch (err: unknown) {
       const msg =
@@ -238,6 +244,11 @@ const UserCart = (): JSX.Element => {
           })
         );
         setCartItems(products);
+        const updatedCount = products.reduce(
+          (acc, p) => acc + (p.quantity || 0),
+          0
+        );
+        setCartCountInLS(updatedCount);
       }
     } catch (err: unknown) {
       const msg =
@@ -807,6 +818,10 @@ const UserCart = (): JSX.Element => {
     uniqueRecommendationPurchases
   );
 
+  const recommendationListClassName = `recommendation-purchases-list recent-purchases-list cart-scroll-strip${
+    recommendationPurchasesList.length === 0 ? ' recommendation-empty' : ''
+  }`;
+
   return (
     <div>
       <NavBar />
@@ -847,7 +862,7 @@ const UserCart = (): JSX.Element => {
                 )}
               </div>
               <button
-                className="continue-shopping-btn"
+                className="continue-shopping-btn cart-button cart-button--outline"
                 onClick={() => navigate('/products')}
                 style={{ marginLeft: 'auto' }}
               >
@@ -889,7 +904,10 @@ const UserCart = (): JSX.Element => {
 
             <div className="UserCart-buttons">
               {cartItems.length > 0 && (
-                <button className="clear-cart-btn" onClick={clearCart}>
+                <button
+                  className="clear-cart-btn cart-button cart-button--danger"
+                  onClick={clearCart}
+                >
                   Clear Cart
                 </button>
               )}
@@ -911,7 +929,7 @@ const UserCart = (): JSX.Element => {
                 />
                 <button
                   onClick={applyVoucherCode}
-                  className="apply-voucher-button"
+                  className="apply-voucher-button cart-button cart-button--brand"
                 >
                   Apply
                 </button>
@@ -936,7 +954,7 @@ const UserCart = (): JSX.Element => {
               </div>
 
               <button
-                className="checkout-btn"
+                className="checkout-btn cart-button cart-button--brand cart-button--block cart-button--disabled-muted"
                 onClick={handleCheckoutConfirmation}
                 disabled={cartItems.length === 0}
               >
@@ -1014,12 +1032,15 @@ const UserCart = (): JSX.Element => {
         </div>
 
         {/* Recent Purchases Section - above Wishlist */}
-        <div className="recent-purchases-section">
+        <div className="recent-purchases-section cart-panel cart-panel--padded">
           <h2>Recent Purchases</h2>
-          <div className="recent-purchases-list">
+          <div className="recent-purchases-list cart-scroll-strip">
             {recentPurchasesList.length > 0 ? (
               recentPurchasesList.map(item => (
-                <div key={item.productId} className="recent-purchase-card">
+                <div
+                  key={item.productId}
+                  className="recent-purchase-card cart-card"
+                >
                   <div className="recent-purchase-image-container">
                     <div className="recent-purchase-image">
                       <ImageContainer imageId={item.imageId} />
@@ -1051,7 +1072,7 @@ const UserCart = (): JSX.Element => {
                     />
                   </div>
                   <button
-                    className="purchase-again-btn"
+                    className="purchase-again-btn cart-button cart-button--brand"
                     onClick={() => handlePurchaseAgain(item)}
                   >
                     Purchase Again
@@ -1072,7 +1093,7 @@ const UserCart = (): JSX.Element => {
         </div>
 
         {/* Wishlist */}
-        <div className="wishlist-section">
+        <div className="wishlist-section cart-panel cart-panel--padded">
           {/* Header with Move All button */}
           <div
             className="wishlist-header"
@@ -1085,7 +1106,7 @@ const UserCart = (): JSX.Element => {
             <h2 style={{ margin: 0 }}>Your Wishlist</h2>
             {wishlistItems.length > 0 && (
               <button
-                className="move-all-to-cart-btn"
+                className="cart-button cart-button--accent"
                 onClick={moveAllWishlistToCart}
                 disabled={isStaff || movingAll}
                 aria-busy={movingAll}
@@ -1102,12 +1123,12 @@ const UserCart = (): JSX.Element => {
           </div>
 
           {/* Wishlist items */}
-          <div className="Wishlist-items">
+          <div className="Wishlist-items cart-scroll-strip">
             {wishlistItems.length > 0 ? (
               wishlistItems.map(item => {
                 const isOutOfStock = item.productQuantity <= 0;
                 return (
-                  <div key={item.productId} className="Wishlist-item">
+                  <div key={item.productId} className="Wishlist-item cart-card">
                     <div className="recent-purchase-image-container">
                       <div className="recent-purchase-image">
                         <ImageContainer imageId={item.imageId} />
@@ -1121,7 +1142,7 @@ const UserCart = (): JSX.Element => {
                     </div>
                     <div className="Wishlist-item-actions">
                       <button
-                        className="addToCart-button"
+                        className="cart-button cart-button--accent cart-button--block cart-button--strike-disabled"
                         onClick={() => addToCartFunction(item)}
                         disabled={isStaff || isOutOfStock}
                         aria-disabled={isStaff || isOutOfStock}
@@ -1129,7 +1150,7 @@ const UserCart = (): JSX.Element => {
                         {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
                       </button>
                       <button
-                        className="wishlist-button danger"
+                        className="cart-button cart-button--danger cart-button--block cart-button--strike-disabled"
                         onClick={() => removeFromWishlist(item)}
                         disabled={isStaff}
                         aria-disabled={isStaff}
@@ -1147,31 +1168,35 @@ const UserCart = (): JSX.Element => {
         </div>
 
         {/* Recommendation Purchases Section */}
-        <div className="recommendation-purchases-section">
-          <h2>Your Recommendations</h2>
-          <div className="recommendation-subtitle">
-            Based on your recent purchases
+        <div className="recommendation-purchases-section cart-panel cart-panel--padded">
+          <div className="recommendation-header">
+            <h2>Your Recommendations</h2>
+            <div className="recommendation-subtitle recent-purchases-intro">
+              Based on your recent purchases
+            </div>
           </div>
-          <div className="recommendation-purchases-list">
+          <div className={recommendationListClassName}>
             {recommendationPurchasesList.length > 0 ? (
               recommendationPurchasesList.map(item => (
                 <div
                   key={item.productId}
-                  className="recommendation-purchase-card hover-effect"
+                  className="recommendation-purchase-card cart-card"
                 >
-                  <div className="recommendation-purchase-image">
-                    <ImageContainer imageId={item.imageId} />
+                  <div className="recent-purchase-image-container">
+                    <div className="recent-purchase-image">
+                      <ImageContainer imageId={item.imageId} />
+                    </div>
                   </div>
-                  <div className="recommendation-product-name">
+                  <div className="recommendation-product-name recent-purchase-name">
                     {item.productName}
                   </div>
-                  <div className="recommendation-product-price">
+                  <div className="recommendation-product-price recent-purchase-price">
                     ${item.productSalePrice.toFixed(2)}
                   </div>
-                  <div className="recommendation-qty-row">
+                  <div className="recommendation-qty-row recent-purchase-qty-row">
                     <label
                       htmlFor={`recommendation-qty-${item.productId}`}
-                      className="recommendation-qty-label"
+                      className="recommendation-qty-label recent-purchase-qty-label"
                     >
                       Qty:
                     </label>
@@ -1188,16 +1213,16 @@ const UserCart = (): JSX.Element => {
                           Number(e.target.value)
                         )
                       }
-                      className="recommendation-qty-input"
+                      className="recommendation-qty-input recent-purchase-qty-input"
                     />
                   </div>
                   <button
-                    className="purchase-again-btn"
+                    className="purchase-again-btn cart-button cart-button--brand"
                     onClick={() => handlePurchaseRecommendation(item)}
                   >
                     Purchase Again
                   </button>
-                  <div className="recommendation-total">
+                  <div className="recommendation-total recent-purchase-total">
                     Total: $
                     {(
                       item.productSalePrice *
@@ -1215,7 +1240,7 @@ const UserCart = (): JSX.Element => {
                   suggestions!
                 </div>
                 <button
-                  className="cta-browse-products-btn"
+                  className="cta-browse-products-btn cart-button cart-button--brand"
                   onClick={() => navigate('/products')}
                 >
                   Browse Products

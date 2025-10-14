@@ -31,7 +31,6 @@
   width: 500px;
   max-width: min(90%, 520px);
   box-shadow: 0 28px 60px rgba(15, 23, 42, 0.28);
-  border: 1px solid rgba(37, 99, 235, 0.12);
   margin: 0 auto;
   max-height: calc(100vh - 4rem);
   overflow-y: auto;
@@ -73,7 +72,9 @@
 }
 
 .cart-billing-modal-content {
+  --cart-panel-radius: var(--cart-modal-radius, 0px);
   border-radius: var(--cart-modal-radius, 0px);
+  box-shadow: 0 28px 60px rgba(15, 23, 42, 0.28);
 }
 
 .billing-form {
@@ -109,7 +110,7 @@
 
 ::placeholder {
   text-align: left;
-  color: #999;
+  color: #666666;
 }
 
 /* Form row for expiry and CVV to be on same line */
@@ -146,31 +147,6 @@
 
 .billing-form button[type='submit'] {
   margin-top: 0.75rem;
-  padding: 0.85rem;
-  background: linear-gradient(135deg, var(--cart-brand, #2563eb), #1d4ed8);
-  color: white;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-  width: 100%;
-  box-shadow: 0 14px 32px rgba(37, 99, 235, 0.28);
-}
-
-.billing-form button[type='submit']:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 18px 38px rgba(37, 99, 235, 0.32);
-}
-
-.billing-form button[type='submit']:disabled {
-  background: #e2e8f0;
-  color: var(--cart-muted, #475569);
-  cursor: not-allowed;
-  box-shadow: none;
 }
 
 .error {
@@ -254,8 +230,8 @@
   flex-direction: column;
   align-items: center;
   gap: 1rem;
-  border: 1px solid rgba(37, 99, 235, 0.12);
   color: var(--cart-text, #0f172a);
+  --cart-panel-radius: var(--cart-modal-radius, 0px);
 }
 
 .confirm-modal-buttons {
@@ -268,34 +244,5 @@
 /* Buttons */
 .confirm-modal-buttons button {
   padding: 0.65rem 1.25rem;
-  border-radius: 999px;
-  border: 1px solid transparent;
   font-size: 0.95rem;
-  cursor: pointer;
-  font-weight: 600;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.confirm-modal-buttons button.confirm {
-  background: linear-gradient(135deg, var(--cart-brand, #2563eb), #1d4ed8);
-  color: #fff;
-  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.26);
-}
-
-.confirm-modal-buttons button.confirm:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 16px 34px rgba(37, 99, 235, 0.3);
-}
-
-.confirm-modal-buttons button.cancel {
-  background: linear-gradient(135deg, #fb7185, #ef4444);
-  color: #fff;
-  box-shadow: 0 12px 28px rgba(239, 68, 68, 0.26);
-}
-
-.confirm-modal-buttons button.cancel:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 16px 34px rgba(239, 68, 68, 0.3);
 }
