@@ -130,7 +130,8 @@
                                  style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; margin-bottom: 0.5rem; background-color: white; border-radius: 4px; border: 1px solid #dee2e6;">
                                 <span style="font-weight: 500;">{{specialty.name}}</span>
                                 <button class="btn btn-sm btn-danger"
-                                        style="padding: 0.25rem 0.75rem; font-size: 0.875rem;">
+                                        style="padding: 0.25rem 0.75rem; font-size: 0.875rem;"
+                                        ng-click="$ctrl.deleteSpecialty(specialty)">
                                     Delete
                                 </button>
                             </div>
