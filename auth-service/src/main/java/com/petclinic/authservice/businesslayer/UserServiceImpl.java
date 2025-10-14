@@ -195,7 +195,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public HashMap<String,Object> login(UserIDLessUsernameLessDTO login) throws IncorrectPasswordException {
-        User loggedInUser = getUserByEmail(login.getEmail());
+        User loggedInUser;
+        User usernameLogin = getUserbyUsername(login.getEmail());
+        User emailLogin = getUserByEmail(login.getEmail());
+        if (usernameLogin == null) {
+            loggedInUser = emailLogin;
+        }
+        else {
+            loggedInUser = usernameLogin;
+        }
+
+
 
         if (loggedInUser == null) {
             throw new NotFoundException("User not found");
@@ -234,7 +244,7 @@ public class UserServiceImpl implements UserService {
             }};
         }
         catch (BadCredentialsException e){
-            throw new IncorrectPasswordException("Incorrect password for user with email: " + login.getEmail());
+            throw new IncorrectPasswordException("Incorrect username or password for user: " + login.getEmail());
         }
     }
 
@@ -258,7 +268,7 @@ public class UserServiceImpl implements UserService {
             String resetPasswordLink =  userResetPwdRequestModel.getUrl() + token;
             sendEmailForgotPassword(email, resetPasswordLink);
         } catch (Exception ex) {
-            throw new InvalidInputException(ex.getMessage());
+            throw new NotFoundException(ex.getMessage());
         }
     }
 
@@ -274,7 +284,7 @@ public class UserServiceImpl implements UserService {
             ResetPasswordToken resetPasswordToken = new ResetPasswordToken(user.get().getId(), BCrypt.hashpw(token,salt));
             tokenRepository.save(resetPasswordToken);
         } else {
-            throw new IllegalArgumentException("Could not find any customer with the email " + email);
+            throw new NotFoundException("Could not find any customer with the email " + email);
         }
     }
 
@@ -353,8 +363,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserByEmail(String email) throws NotFoundException {
-        return userRepo.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException("No account found for email: " + email));
+        return userRepo.findByEmail(email).orElse(null);
     }
 
     @Override
@@ -421,6 +430,11 @@ public class UserServiceImpl implements UserService {
         existingUser.setUsername(username);
         userRepo.save(existingUser);
         return existingUser.getUsername();
+    }
+
+    @Override
+    public User getUserbyUsername(String username) throws NotFoundException {
+      return userRepo.findByUsername(username).orElse(null);
     }
 
 }
