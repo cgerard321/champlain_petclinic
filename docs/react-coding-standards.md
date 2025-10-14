@@ -376,7 +376,6 @@ export async function createCustomer(customer: CustomerRequestModel): Promise<Ap
   }
 }
 ```
->>>>>>> 536b605e (update coding standards to include a return message and to now have console.debug messages)
 
 ### TypeScript Best Practices
 
