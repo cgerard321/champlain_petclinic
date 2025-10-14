@@ -10,7 +10,7 @@ import { IsVet } from '@/context/UserContext';
 import { archiveVisit } from './api/archiveVisit';
 import { cancelVisit } from './api/cancelVisit';
 
-import ConfirmationModal from '@/shared/components/BasicModal';
+import BasicModal from '@/shared/components/BasicModal';
 import VisitDetails from '@/features/visits/components/VisitDetails';
 import EditingVisit from './components/EditingVisit';
 
@@ -301,12 +301,12 @@ export default function VisitListTable(): JSX.Element {
                     >
                       {renderViewButton()}
                     </a> */}
-                  <ConfirmationModal
+                  <BasicModal
                     title="Visit Details"
                     showButton={renderViewButton()}
                   >
                     <VisitDetails visitId={visit.visitId} />
-                  </ConfirmationModal>
+                  </BasicModal>
                   {!isVet && (
                     // <a
                     //   className="icon"
@@ -330,7 +330,7 @@ export default function VisitListTable(): JSX.Element {
                     // >
                     //   {renderArchiveButton()}
                     // </a>
-                    <ConfirmationModal
+                    <BasicModal
                       title="Archive Visit"
                       showButton={renderArchiveButton()}
                       onConfirm={() => handleArchive(visit.visitId)}
@@ -339,7 +339,7 @@ export default function VisitListTable(): JSX.Element {
                         This will set the status of this visit to Archived.
                       </div>
                       <div>Do you wish to proceed?</div>
-                    </ConfirmationModal>
+                    </BasicModal>
                     // </a>
                   )}
 
@@ -355,7 +355,7 @@ export default function VisitListTable(): JSX.Element {
                       //   <img src={xcrossIcon} />
                       // </a>
                       // <a className="icon" title="Delete">
-                      <ConfirmationModal
+                      <BasicModal
                         title="Cancel Visit"
                         showButton={renderCancelButton()}
                         onConfirm={() => handleCancel(visit.visitId)}
@@ -364,7 +364,7 @@ export default function VisitListTable(): JSX.Element {
                           This will set the status of this visit to Canceled.
                         </div>
                         <div>Do you wish to proceed?</div>
-                      </ConfirmationModal>
+                      </BasicModal>
                       // </a>
                     )}
                 </td>
