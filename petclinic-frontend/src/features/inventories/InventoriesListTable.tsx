@@ -309,6 +309,39 @@ export default function InventoriesListTable(): JSX.Element {
     setActionsMenu(prevState => !prevState);
   };
 
+  // Toggle archive/unarchive for an inventory (client-side, persisted to localStorage)
+  const toggleArchiveStatus = (e: React.MouseEvent, inventory: Inventory): void => {
+    e.stopPropagation();
+    const id = inventory.inventoryId;
+    setArchivedMap(prev => {
+      const next = { ...prev };
+      if (next[id]) {
+        delete next[id]; // unarchive
+      } else {
+        next[id] = true; // archive
+      }
+      return next;
+    });
+    // ensure archived items are removed from selection
+    setSelectedInventories(prev => prev.filter(si => si.inventoryId !== inventory.inventoryId));
+  };
+
+  // when archivedMap changes, drop archived items from selectedInventories (defensive)
+  useEffect(() => {
+    if (selectedInventories.length > 0) {
+      setSelectedInventories(prev => prev.filter(si => !archivedMap[si.inventoryId]));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [archivedMap]);
+
+  // Filter inventoryList based on viewMode and archivedMap.
+  const displayedInventories = inventoryList.filter(inv => {
+    const isArchived = !!archivedMap[inv.inventoryId];
+    if (viewMode === 'active') return !isArchived;
+    if (viewMode === 'archived') return isArchived;
+    return true; // 'all'
+  });
+
   return (
     <>
       <div id={inventoryStyles.menuSection}>
