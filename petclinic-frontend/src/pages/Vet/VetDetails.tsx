@@ -181,6 +181,7 @@ export default function VetDetails(): JSX.Element {
       setError('Failed to fetch vet ratings');
       setRatings([]);
     }
+  }, [vetId]);
   const requestDeleteAlbumPhoto = (photoId: number): void => {
     setPendingPhotoId(photoId);
     setConfirmOpen(true);
@@ -198,21 +199,6 @@ export default function VetDetails(): JSX.Element {
     setConfirmOpen(false);
     setPendingPhotoId(null);
   };
-
-  useEffect(() => {
-    const fetchVetRatings = async (): Promise<void> => {
-      try {
-        const response = await axiosInstance.get<RatingResponseType[]>(
-          `/vets/${vetId}/ratings`,
-          { useV2: true }
-        );
-        setRatings(response.data);
-      } catch (error) {
-        setError('Failed to fetch vet ratings');
-      }
-    };
-    fetchVetRatings();
-  }, [vetId]);
 
   useEffect(() => {
     void fetchVetRatings();
