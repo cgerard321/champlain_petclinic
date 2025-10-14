@@ -21,13 +21,25 @@ jobs:
         run: go install github.com/swaggo/swag/cmd/swag@v1.3.2
 
       - name: Swagger
-        run: cd mailer-service && swag init; cd -
+        run: |
+          cd mailer-service
+          swag init -g ./cmd/mailer/main.go -d .
+          cd -
 
       - name: Build
-        run: cd mailer-service && go build -v -o app; cd -
+        run: |
+          cd mailer-service
+          go build -v -o app ./cmd/mailer
+          cd -
 
       - name: Test
         run: cd mailer-service && go test -v ./...; cd -
+
+      - name: Build
+        run: cd files-service && go build -v -o app; cd -
+
+      - name: Test
+        run: cd files-service && go test -v ./...; cd -
 
       - name: Grant execute perm on cover.sh
         run: chmod +x cover.sh

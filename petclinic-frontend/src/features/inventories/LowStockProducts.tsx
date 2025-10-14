@@ -17,6 +17,9 @@ const LowStockPage: React.FC = () => {
   const [restockQuantity, setRestockQuantity] = useState<number>(0);
   const navigate = useNavigate();
   const [totalPrice, setTotalPrice] = useState<number>(0);
+  const [selectedInventoryId, setSelectedInventoryId] = useState<string | null>(
+    null
+  );
 
   // Fetch inventories from the backend
   useEffect(() => {
@@ -41,12 +44,17 @@ const LowStockPage: React.FC = () => {
       const lowStockData: { [key: string]: ProductResponseModel[] } = {};
       const promises = inventories.map(async inventory => {
         try {
-          const response = await axiosInstance.get<ProductResponseModel[]>(
+          const { data } = await axiosInstance.get<ProductResponseModel[]>(
             `/inventories/${inventory.inventoryId}/products/lowstock`,
             { useV2: false }
           );
-          if (response.data && response.data.length > 0) {
-            lowStockData[inventory.inventoryName] = response.data;
+          const needingRestock = (data || []).filter(
+            p =>
+              p.status === Status.RE_ORDER || p.status === Status.OUT_OF_STOCK
+          );
+
+          if (needingRestock.length > 0) {
+            lowStockData[inventory.inventoryId] = needingRestock;
           }
         } catch (error) {
           console.error(
@@ -106,61 +114,67 @@ const LowStockPage: React.FC = () => {
         Back to Inventories
       </button>
       <div className="low-stock-products">
-        {Object.keys(lowStockProductsByInventory).length > 0 ? (
-          Object.keys(lowStockProductsByInventory).map(inventoryName => (
-            <div key={inventoryName} className="inventory-section">
-              <h3>Low Stock Supplies for Inventory: {inventoryName}</h3>
-              <table className="table table-striped">
-                <thead>
-                  <tr>
-                    <th>Supply Name</th>
-                    <th>Description</th>
-                    <th>Price</th>
-                    <th>Quantity</th>
-                    <th>Status</th>
-                    <th>Restock</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {lowStockProductsByInventory[inventoryName].map(
-                    (product: ProductResponseModel) => (
-                      <tr key={product.productId}>
-                        <td>{product.productName}</td>
-                        <td>{product.productDescription}</td>
-                        <td>${product.productSalePrice}</td>
-                        <td>{product.productQuantity}</td>
-                        <td
-                          style={{
-                            color:
-                              product.status === Status.RE_ORDER
-                                ? '#f4a460'
-                                : product.status === Status.OUT_OF_STOCK
-                                  ? 'red'
-                                  : product.status === Status.AVAILABLE
-                                    ? 'green'
-                                    : 'inherit',
-                          }}
-                        >
-                          {product.status.replace('_', ' ')}
-                        </td>
-                        <td>
-                          <button
-                            className="btn btn-primary"
-                            onClick={() => {
-                              setSelectedProduct(product);
-                              setShowRestockForm(true);
+        {Object.entries(lowStockProductsByInventory).length > 0 ? (
+          Object.entries(lowStockProductsByInventory).map(
+            ([invId, products]) => {
+              const inv = inventories.find(i => i.inventoryId === invId);
+              const invName = inv?.inventoryName ?? invId;
+
+              return (
+                <div key={invId} className="inventory-section">
+                  <h3>Low Stock Supplies for Inventory: {invName}</h3>
+                  <table className="table table-striped">
+                    <thead>
+                      <tr>
+                        <th>Supply Name</th>
+                        <th>Description</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Status</th>
+                        <th>Restock</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {products.map(product => (
+                        <tr key={product.productId}>
+                          <td>{product.productName}</td>
+                          <td>{product.productDescription}</td>
+                          <td>${product.productSalePrice}</td>
+                          <td>{product.productQuantity}</td>
+                          <td
+                            style={{
+                              color:
+                                product.status === Status.RE_ORDER
+                                  ? '#f4a460'
+                                  : product.status === Status.OUT_OF_STOCK
+                                    ? 'red'
+                                    : product.status === Status.AVAILABLE
+                                      ? 'green'
+                                      : 'inherit',
                             }}
                           >
-                            Restock
-                          </button>
-                        </td>
-                      </tr>
-                    )
-                  )}
-                </tbody>
-              </table>
-            </div>
-          ))
+                            {product.status.replace('_', ' ')}
+                          </td>
+                          <td>
+                            <button
+                              className="btn btn-primary"
+                              onClick={() => {
+                                setSelectedProduct(product);
+                                setSelectedInventoryId(invId); // << keep the context
+                                setShowRestockForm(true);
+                              }}
+                            >
+                              Restock
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            }
+          )
         ) : (
           <p>No low stock supplies found across all inventories.</p>
         )}
@@ -187,13 +201,9 @@ const LowStockPage: React.FC = () => {
                 <form
                   onSubmit={e => {
                     e.preventDefault();
-                    const inventory = inventories.find(
-                      inv => inv.inventoryId === selectedProduct?.inventoryId
-                    );
-
-                    if (inventory) {
+                    if (selectedProduct && selectedInventoryId) {
                       restockProduct(
-                        inventory.inventoryId,
+                        selectedInventoryId,
                         selectedProduct.productId,
                         restockQuantity
                       );

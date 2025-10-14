@@ -1,0 +1,133 @@
+/* WriteReviewModal.css */
+
+.wrm-modal-dialog {
+  position: relative;
+  max-width: 500px;
+  padding: 0;
+}
+
+.wrm-close-btn {
+  position: absolute;
+  top: -15px;
+  right: 0px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #000;
+  z-index: 10;
+}
+
+.wrm-button-container {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.wrm-button-container > .btn {
+  padding: 5px 12px;
+  font-size: 15px;
+  font-weight: 400;
+  border-radius: 4px;
+}
+
+.wrm-button-container .cancel-btn {
+  background-color: #fff;
+  color: #000000;
+  border: 1.5px solid #b9b9b9;
+  padding: 5px 12px;
+  font-size: 14px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.wrm-button-container .cancel-btn:hover {
+  color: #000000;
+  background-color: #f0f0f0;
+  border: 1.5px solid #b9b9b9;
+}
+
+.wrm-button-container .cancel-btn:active {
+  background-color: #f9f9f9;
+  color: #000;
+  border: 1.5px solid #b9b9b9;
+  outline: none;
+}
+
+.wrm-button-container .cancel-btn:focus {
+  background-color: #f9f9f9;
+  color: #000;
+  border: 1.5px solid #b9b9b9;
+}
+
+.wrm-close-btn:hover,
+.wrm-close-btn:focus,
+.wrm-close-btn:active {
+  color: #000;
+  background: transparent;
+  box-shadow: none;
+}
+
+.wrm-body {
+  padding: 0px;
+}
+
+.wrm-title {
+  font-weight: 500;
+  font-size: 16px;
+  text-align: left;
+  margin-bottom: 4px;
+}
+
+.wrm-subtitle {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.wrm-section {
+  margin-bottom: 12px;
+}
+
+.wrm-label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+
+.wrm-footer > .btn:hover {
+  background-color: #007bff;
+}
+
+.reviewbox-container {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.review-box {
+  width: 100%;
+  min-height: 200px;
+  max-height: 300px;
+  resize: none;
+  padding: 8px 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: left;
+  overflow-y: auto;
+}
+
+.wrm-error {
+  background-color: #fee;
+  color: #c33;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  border: 1px solid #fcc;
+}
