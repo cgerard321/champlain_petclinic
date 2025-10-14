@@ -306,14 +306,6 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
     });
   };
 
-  if (loadingVets) {
-    return (
-      <div>
-        <div className="loading">Loading veterinarians...</div>
-      </div>
-    );
-  }
-
   const morningSlots = getMorningSlots();
   const afternoonSlots = getAfternoonSlots();
 
@@ -327,175 +319,182 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
       confirmText={isSubmitting ? 'Adding...' : 'Add'}
       errorMessage={errorMessage}
     >
-      <form id="addvisit" onSubmit={handleSubmit}>
-        <label htmlFor="petId">
-          Pet ID: <span className="required">*</span>{' '}
-          {errors.petId && <span className="error">{errors.petId}</span>}
-        </label>
-        <input
-          type="text"
-          id="petId"
-          name="petId"
-          value={visit.petId}
-          onChange={handleChange}
-          placeholder="Enter pet ID"
-        />
-
-        <br />
-        <div className="form-group">
-          <label htmlFor="description">
-            Description: <span className="required">*</span>{' '}
-            {errors.description && (
-              <span className="error">{errors.description}</span>
-            )}
+      {loadingVets ? (
+        <div>
+          <div className="loading">Loading veterinarians...</div>
+        </div>
+      ) : (
+        <form id="addvisit" onSubmit={handleSubmit}>
+          <label htmlFor="petId">
+            Pet ID: <span className="required">*</span>{' '}
+            {errors.petId && <span className="error">{errors.petId}</span>}
           </label>
-          <br />
-          <br />
-          <textarea
-            id="description"
-            name="description"
-            value={visit.description}
+          <input
+            type="text"
+            id="petId"
+            name="petId"
+            value={visit.petId}
             onChange={handleChange}
-            placeholder="Describe the reason for the visit..."
-            rows={4}
+            placeholder="Enter pet ID"
           />
-        </div>
-        <div className="form-group">
-          <label htmlFor="practitionerId">Veterinarian Preference:</label>
-          <select
-            id="practitionerId"
-            name="practitionerId"
-            value={visit.practitionerId}
-            onChange={handleChange}
-          >
-            <option value="no-preference">
-              No Preference (Show All Available Times)
-            </option>
-            {vets.map(vet => (
-              <option key={vet.vetId} value={vet.vetId}>
-                Dr. {vet.firstName} {vet.lastName}
-                {vet.specialties &&
-                  vet.specialties.length > 0 &&
-                  ` (${vet.specialties.map(s => s.name).join(', ')})`}
-              </option>
-            ))}
-          </select>
-          <small className="help-text">
-            {visit.practitionerId === 'no-preference'
-              ? 'Showing available slots from all veterinarians'
-              : 'Showing slots only for selected veterinarian'}
-          </small>
-        </div>
-        <br />
-        <label htmlFor="selectedDate">
-          Date: <span className="required">*</span>{' '}
-          {errors.selectedDate && (
-            <span className="error">{errors.selectedDate}</span>
-          )}
-        </label>
-        <input
-          type="date"
-          id="selectedDate"
-          name="selectedDate"
-          value={visit.selectedDate}
-          onChange={handleChange}
-          min={new Date().toISOString().split('T')[0]}
-        />
-        <br />
-        {visit.selectedDate && (
+
+          <br />
           <div className="form-group">
-            <label>
-              Available Time Slots:{' '}
-              {errors.selectedTimeSlot && (
-                <span className="error">{errors.selectedTimeSlot}</span>
+            <label htmlFor="description">
+              Description: <span className="required">*</span>{' '}
+              {errors.description && (
+                <span className="error">{errors.description}</span>
               )}
             </label>
-
-            {loadingSlots ? (
-              <div className="loading-slots">
-                {visit.practitionerId === 'no-preference'
-                  ? 'Loading available times from all veterinarians...'
-                  : 'Loading available times...'}
-              </div>
-            ) : timeSlots.length === 0 ? (
-              <div className="no-slots">
-                No available time slots for this date.
-              </div>
-            ) : (
-              <>
-                {/* Morning Slots */}
-                {morningSlots.length > 0 && (
-                  <div className="time-section">
-                    <h4>Morning</h4>
-                    <div className="time-slots-grid">
-                      {morningSlots.map((slot, index) => (
-                        <button
-                          key={index}
-                          type="button"
-                          className={`time-slot ${
-                            visit.selectedTimeSlot === slot.startTime
-                              ? 'selected'
-                              : ''
-                          }`}
-                          onClick={() => handleTimeSlotSelect(slot)}
-                          title={slot.vetName}
-                        >
-                          <div className="slot-time">
-                            {formatTimeSlot(slot.startTime)}
-                          </div>
-                          {visit.practitionerId === 'no-preference' && (
-                            <div className="slot-vet">{slot.vetName}</div>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Afternoon Slots */}
-                {afternoonSlots.length > 0 && (
-                  <div className="time-section">
-                    <h4>Afternoon</h4>
-                    <div className="time-slots-grid">
-                      {afternoonSlots.map((slot, index) => (
-                        <button
-                          key={index}
-                          type="button"
-                          className={`time-slot ${
-                            visit.selectedTimeSlot === slot.startTime
-                              ? 'selected'
-                              : ''
-                          }`}
-                          onClick={() => handleTimeSlotSelect(slot)}
-                          title={slot.vetName}
-                        >
-                          <div className="slot-time">
-                            {formatTimeSlot(slot.startTime)}
-                          </div>
-                          {visit.practitionerId === 'no-preference' && (
-                            <div className="slot-vet">{slot.vetName}</div>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </>
+            <br />
+            <br />
+            <textarea
+              id="description"
+              name="description"
+              value={visit.description}
+              onChange={handleChange}
+              placeholder="Describe the reason for the visit..."
+              rows={4}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="practitionerId">Veterinarian Preference:</label>
+            <select
+              id="practitionerId"
+              name="practitionerId"
+              value={visit.practitionerId}
+              onChange={handleChange}
+            >
+              <option value="no-preference">
+                No Preference (Show All Available Times)
+              </option>
+              {vets.map(vet => (
+                <option key={vet.vetId} value={vet.vetId}>
+                  Dr. {vet.firstName} {vet.lastName}
+                  {vet.specialties &&
+                    vet.specialties.length > 0 &&
+                    ` (${vet.specialties.map(s => s.name).join(', ')})`}
+                </option>
+              ))}
+            </select>
+            <small className="help-text">
+              {visit.practitionerId === 'no-preference'
+                ? 'Showing available slots from all veterinarians'
+                : 'Showing slots only for selected veterinarian'}
+            </small>
+          </div>
+          <br />
+          <label htmlFor="selectedDate">
+            Date: <span className="required">*</span>{' '}
+            {errors.selectedDate && (
+              <span className="error">{errors.selectedDate}</span>
             )}
-          </div>
-        )}
+          </label>
+          <input
+            type="date"
+            id="selectedDate"
+            name="selectedDate"
+            value={visit.selectedDate}
+            onChange={handleChange}
+            min={new Date().toISOString().split('T')[0]}
+          />
+          <br />
+          {visit.selectedDate && (
+            <div className="form-group">
+              <label>
+                Available Time Slots:{' '}
+                {errors.selectedTimeSlot && (
+                  <span className="error">{errors.selectedTimeSlot}</span>
+                )}
+              </label>
 
-        {/* Show assigned vet when "No Preference" */}
-        {visit.practitionerId === 'no-preference' && visit.assignedVetId && (
-          <div className="assigned-vet-info">
-            ✓ You will see:{' '}
-            {
-              timeSlots.find(s => s.startTime === visit.selectedTimeSlot)
-                ?.vetName
-            }
-          </div>
-        )}
-      </form>
+              {loadingSlots ? (
+                <div className="loading-slots">
+                  {visit.practitionerId === 'no-preference'
+                    ? 'Loading available times from all veterinarians...'
+                    : 'Loading available times...'}
+                </div>
+              ) : timeSlots.length === 0 ? (
+                <div className="no-slots">
+                  No available time slots for this date.
+                </div>
+              ) : (
+                <>
+                  {/* Morning Slots */}
+                  {morningSlots.length > 0 && (
+                    <div className="time-section">
+                      <h4>Morning</h4>
+                      <div className="time-slots-grid">
+                        {morningSlots.map((slot, index) => (
+                          <button
+                            key={index}
+                            type="button"
+                            className={`time-slot ${
+                              visit.selectedTimeSlot === slot.startTime
+                                ? 'selected'
+                                : ''
+                            }`}
+                            onClick={() => handleTimeSlotSelect(slot)}
+                            title={slot.vetName}
+                          >
+                            <div className="slot-time">
+                              {formatTimeSlot(slot.startTime)}
+                            </div>
+                            {visit.practitionerId === 'no-preference' && (
+                              <div className="slot-vet">{slot.vetName}</div>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Afternoon Slots */}
+                  {afternoonSlots.length > 0 && (
+                    <div className="time-section">
+                      <h4>Afternoon</h4>
+                      <div className="time-slots-grid">
+                        {afternoonSlots.map((slot, index) => (
+                          <button
+                            key={index}
+                            type="button"
+                            className={`time-slot ${
+                              visit.selectedTimeSlot === slot.startTime
+                                ? 'selected'
+                                : ''
+                            }`}
+                            onClick={() => handleTimeSlotSelect(slot)}
+                            title={slot.vetName}
+                          >
+                            <div className="slot-time">
+                              {formatTimeSlot(slot.startTime)}
+                            </div>
+                            {visit.practitionerId === 'no-preference' && (
+                              <div className="slot-vet">{slot.vetName}</div>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+
+          {/* Show assigned vet when "No Preference" */}
+          {visit.practitionerId === 'no-preference' && visit.assignedVetId && (
+            <div className="assigned-vet-info">
+              ✓ You will see:{' '}
+              {
+                timeSlots.find(s => s.startTime === visit.selectedTimeSlot)
+                  ?.vetName
+              }
+            </div>
+          )}
+        </form>
+      )}
+
       {showNotification && <div className="notification">{successMessage}</div>}
     </BasicModal>
   );

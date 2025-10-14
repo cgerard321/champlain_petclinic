@@ -189,22 +189,6 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
 
         <br />
         <label>
-          Visit Date:{' '}
-          {errors.visitStartDate && (
-            <span className="error">{errors.visitDate}</span>
-          )}
-        </label>
-
-        <input
-          type="datetime-local"
-          name="visitStartDate"
-          value={formatDate(visit.visitStartDate)}
-          onChange={handleChange}
-          required
-        />
-
-        <br />
-        <label>
           Description:{' '}
           {errors.description && (
             <span className="error">{errors.description}</span>
@@ -241,7 +225,21 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
             ))}
           </select>
         </div>
+        <br />
+        <label>
+          Visit Date:{' '}
+          {errors.visitStartDate && (
+            <span className="error">{errors.visitDate}</span>
+          )}
+        </label>
 
+        <input
+          type="datetime-local"
+          name="visitStartDate"
+          value={formatDate(visit.visitStartDate)}
+          onChange={handleChange}
+          required
+        />
         <br />
         <label>
           Status:{' '}
