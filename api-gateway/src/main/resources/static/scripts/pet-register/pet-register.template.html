@@ -26,17 +26,18 @@
                                    pattern="^[\x20-\x7F]+$" 
                                    required 
                                    placeholder="Enter pet name..."/>
-                            <span ng-show="petForm.name.$error.required" class="error-message">Pet name is required.</span>
+                            <span ng-show="petForm.name.$error.required && petForm.$submitted" class="error-message">Pet name is required.</span>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">Birth Date</label>
                             <input class="form-input" 
                                    ng-model="$ctrl.pet.birthDate" 
-                                   name="dbo" 
+                                   name="birthDate" 
                                    required 
                                    type="date" 
                                    ng-disabled="$ctrl.checked"/>
+                            <span ng-show="petForm.birthDate.$error.required && petForm.$submitted" class="error-message">Birth date is required.</span>
                         </div>
 
                         <div class="form-group">
@@ -49,6 +50,7 @@
                                    step="0.1"
                                    ng-disabled="$ctrl.checked"
                                    placeholder="Enter weight..."/>
+                            <span ng-show="petForm.weight.$error.required && petForm.$submitted" class="error-message">Weight is required.</span>
                         </div>
 
                         <div class="form-group full-width">
@@ -57,9 +59,11 @@
                                     ng-model="$ctrl.pet.type" 
                                     name="type" 
                                     ng-options="t as t.name for t in $ctrl.types track by t.id" 
-                                    ng-disabled="$ctrl.checked">
+                                    ng-disabled="$ctrl.checked"
+                                    required>
                                 <option value="">Select pet type...</option>
                             </select>
+                            <span ng-show="petForm.type.$error.required && petForm.$submitted" class="error-message">Pet type is required.</span>
                         </div>
                     </div>
 

@@ -275,6 +275,24 @@
     box-shadow: none;
 }
 
+.page-number-link-modern:disabled {
+    background: #f3f4f6;
+    color: #9ca3af;
+    border-color: #e5e7eb;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.page-number-link-modern:disabled:hover {
+    background: #f3f4f6;
+    color: #9ca3af;
+    border-color: #e5e7eb;
+    transform: none;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
 .responsive-text {
     font-size: 0.875rem;
     color: #374151;

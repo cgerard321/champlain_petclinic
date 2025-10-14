@@ -7,10 +7,30 @@ angular.module('petTypeList')
 
                 var self = this;
 
-
                 self.petTypes = [];
                 self.showAddForm = false;
                 self.newPetType = { name: '', petTypeDescription: '' };
+
+                self.notification = {
+                    show: false,
+                    message: '',
+                    type: 'info'
+                };
+
+                self.showNotification = function(message, type) {
+                    self.notification.show = true;
+                    self.notification.message = message;
+                    self.notification.type = type;
+                    
+                    setTimeout(function() {
+                        self.hideNotification();
+                    }, 5000);
+                };
+
+                self.hideNotification = function() {
+                    self.notification.show = false;
+                    self.notification.message = '';
+                };
 
                 self.toggleAddForm = function () {
                     self.showAddForm = !self.showAddForm;
@@ -24,23 +44,23 @@ angular.module('petTypeList')
 
                     if (!lettersOnly.test(self.newPetType.name) ||
                         !lettersOnly.test(self.newPetType.petTypeDescription)) {
-                        alert('Name and Description must contain letters and spaces only.');
+                        self.showNotification('Name and Description must contain letters and spaces only.', 'error');
                         return;
                     }
 
                     if (!self.newPetType.name || !self.newPetType.petTypeDescription) {
-                        alert('Name and Description are required.');
+                        self.showNotification('Name and Description are required.', 'error');
                         return;
                     }
 
                     $http.post('api/gateway/owners/petTypes', self.newPetType)
                         .then(function () {
-                            alert('Pet type added successfully!');
+                            self.showNotification('Pet type added successfully!', 'success');
                             self.showAddForm = false;
                             self.newPetType = { name: '', petTypeDescription: '' };
                             loadDefaultData();
                         }, function (error) {
-                            alert('Failed to add pet type: ' + (error.data.message || 'Unknown error'));
+                            self.showNotification('Failed to add pet type: ' + (error.data.message || 'Unknown error'), 'error');
                         });
                 };
 
@@ -58,11 +78,11 @@ angular.module('petTypeList')
                 self.savePetType = function (petTypeId) {
                     $http.put('api/gateway/owners/petTypes/' + petTypeId, self.editForm)
                         .then(function () {
-                            alert('Pet type updated successfully!');
+                            self.showNotification('Pet type updated successfully!', 'success');
                             loadDefaultData();
                             self.cancelEdit();
                         }, function (error) {
-                            alert('Failed to update pet type: ' + (error.data.message || 'Unknown error'));
+                            self.showNotification('Failed to update pet type: ' + (error.data.message || 'Unknown error'), 'error');
                         });
                 };
 
@@ -76,10 +96,10 @@ angular.module('petTypeList')
                     if (isConfirmed) {
                         $http.delete('api/gateway/owners/petTypes/' + petTypeId)
                             .then(function () {
-                                alert('Pet type deleted successfully!');
+                                self.showNotification('Pet type deleted successfully!', 'success');
                                 loadDefaultData();
                             }, function (error) {
-                                alert('Failed to delete pet type: ' + (error.data.message || 'Unknown error'));
+                                self.showNotification('Failed to delete pet type: ' + (error.data.message || 'Unknown error'), 'error');
                             });
                     }
                 };
@@ -126,7 +146,7 @@ angular.module('petTypeList')
                         self.description = document.getElementById('descriptionInput').value;
 
                         if (!self.petTypeId && !self.name && !self.description && !self.selectedSize) {
-                            alert('Oops! It seems like you forgot to enter any filter criteria.');
+                            self.showNotification('Oops! It seems like you forgot to enter any filter criteria.', 'warning');
                             return;
                         }
                     }
@@ -192,7 +212,7 @@ angular.module('petTypeList')
                     applyPagination();
                     updateCurrentPageOnSite();
 
-                    alert('All filters have been cleared successfully.');
+                    self.showNotification('All filters have been cleared successfully.', 'success');
                 };
 
                 self.goNextPage = function () {

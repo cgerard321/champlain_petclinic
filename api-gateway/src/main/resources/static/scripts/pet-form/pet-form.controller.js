@@ -59,18 +59,10 @@ angular.module('petForm')
 
         // Function to submit the form
         self.submit = function () {
-            var petTypeName = self.getPetTypeName(self.pet.petTypeId);
             var birthDate = new Date(self.pet.birthDate);
             var offset = birthDate.getTimezoneOffset();
             birthDate.setMinutes(birthDate.getMinutes() - offset);
-            var formattedBirthDate = birthDate.toISOString().split('T')[0];
-            if (confirm("Are you sure you want to submit this form with the following details?\n\n" +
-                "Pet Name: " + self.pet.name + "\n" +
-                "Pet Birth Date: " + formattedBirthDate + "\n" +
-                "Weight: " + self.pet.weight + " KG" + "\n" +
-                "Pet Type: " + petTypeName)) {
-
-                var data = {
+            var data = {
                     petId: self.pet.petId,
                     name: self.pet.name,
                     birthDate: new Date(self.pet.birthDate).toISOString(),
@@ -78,7 +70,7 @@ angular.module('petForm')
                     petTypeId: self.pet.petTypeId,
                     weight: self.pet.weight,
                     isActive: self.pet.isActive
-                };
+            };
 
                 var req;
 
@@ -93,6 +85,6 @@ angular.module('petForm')
                         return e.field + ": " + e.defaultMessage;
                     }).join("\r\n"));
                 });
-            }
+            
         };
     }]);
