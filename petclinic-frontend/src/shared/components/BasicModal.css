@@ -1,3 +1,8 @@
+.basic-modal > .modal-dialog {
+    display: flex;
+    justify-content: center;
+}
+
 .basic-modal-body {
     width: 90%;
     height: fit-content;
@@ -10,4 +15,8 @@
 .basic-modal-footer {
     margin-top: auto;
     display: flex;
+}
+
+.modal-dialog {
+    align-items: center;
 }

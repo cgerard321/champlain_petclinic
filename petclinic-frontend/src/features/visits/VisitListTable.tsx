@@ -311,35 +311,13 @@ export default function VisitListTable(): JSX.Element {
                       showButton={renderArchiveButton()}
                       onConfirm={() => handleArchive(visit.visitId)}
                     >
-                      <div>Archive Visit?</div>
+                      <div>
+                        This will set the status of this visit to Archived.
+                      </div>
+                      <div>Do you wish to proceed?</div>
                     </ConfirmationModal>
                     // </a>
                   )}
-
-                  {visit.status !== 'CANCELLED' &&
-                    visit.status !== 'ARCHIVED' &&
-                    visit.status !== 'COMPLETED' &&
-                    !isVet && (
-                      // <a
-                      //   className="icon"
-                      //   onClick={() => handleCancel(visit.visitId)}
-                      //   title="Cancel"
-                      // >
-                      //   <img src={xcrossIcon} />
-                      // </a>
-                      // <a className="icon" title="Delete">
-                      <ConfirmationModal
-                        title="Cancel Visit"
-                        showButton={renderCancelButton()}
-                        onConfirm={() => handleCancel(visit.visitId)}
-                      >
-                        <div>
-                          This will set the status of this visit to Archived.
-                        </div>
-                        <div>Do you wish to proceed?</div>
-                      </ConfirmationModal>
-                      // </a>
-                    )}
 
                   {visit.status !== 'CANCELLED' &&
                     visit.status !== 'ARCHIVED' &&

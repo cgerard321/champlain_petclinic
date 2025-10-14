@@ -91,6 +91,7 @@ const BasicModal: React.FC<BasicModalProps> = ({
         onHide={handleClose}
         backdrop={busy ? 'static' : true}
         size="xl"
+        className="basic-modal"
       >
         <h2 className="mx-auto">{title}</h2>
         <div className="basic-modal-body">{children}</div>
