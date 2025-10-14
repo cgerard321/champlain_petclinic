@@ -125,7 +125,7 @@ public class ProductsServiceClient {
                 .delete()
                 .uri(uri -> uri.path("/"  + productId)
                         .queryParam("cascadeBundles", cascadeBundles)
-                        .build(productId))
+                        .build())
                 .retrieve()
                 .bodyToMono(ProductResponseDTO.class);
     }
