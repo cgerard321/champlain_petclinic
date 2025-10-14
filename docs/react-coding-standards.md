@@ -20,10 +20,6 @@ Back to [Main page](../README.md)
     - [TypeScript Best Practices](#typescript-best-practices)
     - [React Component Standards](#react-component-standards)
   - [Shared Axios Instance Configuration](#shared-axios-instance-configuration)
->>>>>>> 536b605e (update coding standards to include a return message and to now have console.debug messages)
-    - [TypeScript Best Practices](#typescript-best-practices)
-    - [React Component Standards](#react-component-standards)
-  - [Shared Axios Instance Configuration](#shared-axios-instance-configuration)
 <!-- TOC -->
 
 ## Critical Issues - These Will Not Be Tolerated
@@ -196,23 +192,8 @@ interface ApiResponse<T> {
 
 export async function getAllVets(): Promise<ApiResponse<VetResponseModel[]>> {
   try {
-    const response = await axiosInstance.get<VetResponseModel[]>('/vets', {
-      responseType: 'stream'
-    });
-    
-    const parsedData = response.data
-      .split('data:')
-      .map((payload: string) => {
-        try {
-          if (payload === '') return null;
-          return JSON.parse(payload);
-        } catch (err) {
-          return null;
-        }
-      })
-      .filter((data?: JSON) => data !== null);
-
-    return { data: parsedData, errorMessage: null };
+    const response = await axiosInstance.get<VetResponseModel[]>('/vets', { useV2: false });
+    return { data: response.data, errorMessage: null };
   } catch (error) {
     return { 
       data: null, 
