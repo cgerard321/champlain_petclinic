@@ -297,42 +297,30 @@ services:
       - mongo-carts-config:/data/configdb
     restart: unless-stopped
 
-  tooljet-db:
-    image: postgres:14
-    container_name: tooljet-db
-    restart: unless-stopped
-    environment:
-      - POSTGRES_DB=tooljet
-      - POSTGRES_USER=tooljet
-      - POSTGRES_PASSWORD=tooljetpwd
-    volumes:
-      - tooljet-db-data:/var/lib/postgresql/data
-
-  tooljet:
-    image: tooljet/tooljet-ce:latest
-    container_name: tooljet
-    restart: unless-stopped
+  cloudbeaver:
+    image: dbeaver/cloudbeaver:latest
+    container_name: cloudbeaver
     ports:
-      - "8030:80"
+      - "8030:8978"           # Web UI (behind reverse-proxy if exposed)
     environment:
-      - PG_HOST=tooljet-db
-      - PG_PORT=5432
-      - PG_DB=tooljet
-      - PG_USER=tooljet
-      - PG_PASS=tooljetpwd
-
-      - TOOLJET_HOST=http://localhost:8030
-
-      - ENABLE_TOOLJET_DB=true
-      - TOOLJET_DB_HOST=tooljet-db
-      - TOOLJET_DB_PORT=5432
-      - TOOLJET_DB=tooljet_db
-      - TOOLJET_DB_USER=tooljet
-      - TOOLJET_DB_PASS=tooljetpwd
-      - JWT_SECRET=c0c9293e7ee90fffeb942188204af4f0
+      - CB_SERVER_PORT=8978
+      # Initial admin account for the CloudBeaver UI (not your DBs)
+      - CB_ADMIN_NAME=admin
+      - CB_ADMIN_PASSWORD=password
+    volumes:
+      - cloudbeaver-workspace:/opt/cloudbeaver/workspace
+    restart: unless-stopped
     depends_on:
-      - tooljet-db
-
+      - postgres-vet
+      - mysql-auth
+      - mysql-files
+      - mongo-vet
+      - mongo-billing
+      - mongo-visits
+      - mongo-customers
+      - mongo-inventory
+      - mongo-products
+      - mongo-carts
 
 # -------------------
 # VOLUMES
@@ -355,4 +343,4 @@ volumes:
   mongo-carts-config:
   postgres-vet-data:
   mysql-files-data:
-  tooljet-db-data:
+  cloudbeaver-workspace:
