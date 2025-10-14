@@ -247,13 +247,9 @@ public class VisitsControllerV1 {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN})
-    @GetMapping(value = "/owners/{ownerId}/reviews", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<ReviewResponseDTO> getReviewsByOwnerId(final @PathVariable String ownerId) {
-        return visitsServiceClient.getReviewsByOwnerId(ownerId);
-    }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+
+    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
     @PostMapping(value = "/reviews", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ReviewResponseDTO>> PostReview(@RequestBody Mono<ReviewRequestDTO> reviewRequestDTOMono){
         return visitsServiceClient.createReview(reviewRequestDTOMono)
@@ -261,14 +257,7 @@ public class VisitsControllerV1 {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN})
-    @PostMapping(value = "/owners/{ownerId}/reviews", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<ReviewResponseDTO>> addReviewCustomer(@PathVariable String ownerId, @RequestBody Mono<ReviewRequestDTO> reviewRequestDTOMono) {
-        return reviewRequestDTOMono
-                .flatMap(reviewRequestDTO -> visitsServiceClient.addCustomerReview(ownerId, reviewRequestDTO))
-                .map(c -> ResponseEntity.status(HttpStatus.CREATED).body(c))
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
-    }
+
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @IsUserSpecific(idToMatch = {"reviewId"})
@@ -293,13 +282,7 @@ public class VisitsControllerV1 {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN})
-    @DeleteMapping(value="/owners/{ownerId}/reviews/{reviewId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<Void>> deleteCustomerReview(@PathVariable String ownerId, @PathVariable String reviewId) {
-        return visitsServiceClient.deleteReview(ownerId, reviewId)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.noContent().build());
-    }
+
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "/export", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
