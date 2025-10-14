@@ -550,16 +550,20 @@ class CartServiceUnitTest {
     }
 
     @Test
-    void findCartByCustomerId_withNonExistentId_thenReturnNotFoundException() {
+    void findCartByCustomerId_withNonExistentId_thenReturnNewCart() {
         // Arrange
         Mockito.when(cartRepository.findCartByCustomerId(nonExistentCustomerId))
                 .thenReturn(Mono.empty());
+        Mockito.when(cartRepository.save(Mockito.any(Cart.class)))
+                .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
 
         // Act & Assert
         StepVerifier.create(cartService.findCartByCustomerId(nonExistentCustomerId))
-                .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
-                        throwable.getMessage().equals("Cart for customer id was not found: " + nonExistentCustomerId))
-                .verify();
+                .expectNextMatches(cartResponse ->
+                        cartResponse.getCustomerId().equals(nonExistentCustomerId) &&
+                                cartResponse.getProducts().isEmpty()
+                )
+                .verifyComplete();
     }
 
     @Test
@@ -1637,5 +1641,44 @@ class CartServiceUnitTest {
         StepVerifier.create(cartService.checkoutCart("empty"))
                 .expectErrorMatches(e -> e instanceof InvalidInputException)
                 .verify();
+    }
+
+    @Test
+    void testGetRecommendationPurchases_ReturnsRecommendations() {
+        CartRepository cartRepository = Mockito.mock(CartRepository.class);
+        ProductClient productClient = Mockito.mock(ProductClient.class);
+        CartServiceImpl service = new CartServiceImpl(cartRepository, productClient);
+
+        String cartId = "test-cart-id";
+        List<CartProduct> recommendations = List.of(CartProduct.builder().productId("prod1").build());
+        Cart cart = Mockito.mock(Cart.class);
+
+        Mockito.when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
+        Mockito.when(cart.getRecommendationPurchase()).thenReturn(recommendations);
+
+        Mono<List<CartProduct>> result = service.getRecommendationPurchases(cartId);
+
+        StepVerifier.create(result)
+                .expectNextMatches(list -> list.size() == 1 && "prod1".equals(list.get(0).getProductId()))
+                .verifyComplete();
+    }
+
+    @Test
+    void testGetRecommendationPurchases_ReturnsEmptyList() {
+        CartRepository cartRepository = Mockito.mock(CartRepository.class);
+        ProductClient productClient = Mockito.mock(ProductClient.class);
+        CartServiceImpl service = new CartServiceImpl(cartRepository, productClient);
+
+        String cartId = "empty-cart-id";
+        Cart cart = Mockito.mock(Cart.class);
+
+        Mockito.when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
+        Mockito.when(cart.getRecommendationPurchase()).thenReturn(null);
+
+        Mono<List<CartProduct>> result = service.getRecommendationPurchases(cartId);
+
+        StepVerifier.create(result)
+                .expectNextMatches(List::isEmpty)
+                .verifyComplete();
     }
 }

@@ -5,10 +5,6 @@ import { addSupplyToInventory } from '@/features/inventories/api/AddSupplyToInve
 import { ProductRequestModel } from '@/features/inventories/models/InventoryModels/ProductRequestModel';
 import './AddSupplyToInventory.css';
 
-interface ApiError {
-  message: string;
-}
-
 const AddSupplyToInventory: React.FC = (): JSX.Element => {
   const { inventoryId } = useParams<{ inventoryId: string }>();
   const [product, setProduct] = useState<ProductRequestModel>({
@@ -27,31 +23,25 @@ const AddSupplyToInventory: React.FC = (): JSX.Element => {
   const navigate = useNavigate();
 
   const validate = (): boolean => {
-    const newError: { [key: string]: string } = {};
-    if (!product.productName) {
-      newError.productName = 'Product name is required';
-    }
-    if (!product.productDescription) {
-      newError.productDescription = 'Product description is required';
-    }
-    if (!product.productPrice) {
-      newError.productPrice = 'Product price is required';
-    }
-    if (!product.productQuantity) {
-      newError.productQuantity = 'Product quantity is required';
-    }
-    if (!product.productSalePrice) {
-      newError.productSalePrice = 'Product sale price is required';
-    }
-    setError(newError);
-    return Object.keys(newError).length === 0;
+    const err: Record<string, string> = {};
+    if (!product.productName?.trim())
+      err.productName = 'Product name is required';
+    if (!product.productDescription?.trim())
+      err.productDescription = 'Product description is required';
+
+    setError(err);
+    return Object.keys(err).length === 0;
   };
 
   const handleSubmit = async (
     event: FormEvent<HTMLFormElement>
   ): Promise<void> => {
     event.preventDefault();
-    if (!validate()) return;
+
+    if (!validate()) {
+      setErrorMessage('Please fix the highlighted errors and try again.');
+      return;
+    }
 
     setLoading(true);
     setErrorMessage('');
@@ -63,13 +53,71 @@ const AddSupplyToInventory: React.FC = (): JSX.Element => {
         await addSupplyToInventory(inventoryId, product);
         setSuccessMessage('Supply added successfully');
         setShowNotification(true);
-        setTimeout(() => {
-          navigate(`/inventories/${inventoryId}/products`);
-        }, 2000);
+        setTimeout(
+          () => navigate(`/inventories/${inventoryId}/products`),
+          2000
+        );
       }
     } catch (error) {
-      const apiError = error as ApiError;
-      setErrorMessage(`Error adding supply: ${apiError.message}`);
+      const msg = error instanceof Error ? error.message || '' : '';
+      const lower = msg.toLowerCase();
+
+      if (/(already exists|duplicate|same name)/.test(lower)) {
+        setError(p => ({
+          ...p,
+          productName: p.productName || 'This product name is already in use.',
+        }));
+        setErrorMessage('');
+        return;
+      }
+
+      if (
+        lower.includes('price quantity and sale price') &&
+        lower.includes('greater than 0')
+      ) {
+        const next: Record<string, string> = {};
+        if (!(Number(product.productPrice) > 0))
+          next.productPrice = 'Product price must be greater than 0';
+        if (!(Number(product.productQuantity) > 0))
+          next.productQuantity = 'Product quantity must be greater than 0';
+        if (!(Number(product.productSalePrice) > 0))
+          next.productSalePrice = 'Product sale price must be greater than 0';
+        setError(p => ({ ...p, ...next }));
+        setErrorMessage('');
+        return;
+      }
+
+      if (
+        lower.includes('product quantity') &&
+        lower.includes('greater than 0')
+      ) {
+        setError(p => ({
+          ...p,
+          productQuantity: 'Product quantity must be greater than 0',
+        }));
+        setErrorMessage('');
+        return;
+      }
+      if (
+        lower.includes('product sale price') &&
+        lower.includes('greater than 0')
+      ) {
+        setError(p => ({
+          ...p,
+          productSalePrice: 'Product sale price must be greater than 0',
+        }));
+        setErrorMessage('');
+        return;
+      }
+      if (lower.includes('product price') && lower.includes('greater than 0')) {
+        setError(p => ({
+          ...p,
+          productPrice: 'Product price must be greater than 0',
+        }));
+        setErrorMessage('');
+        return;
+      }
+      setErrorMessage(msg || 'Request failed.');
     } finally {
       setLoading(false);
     }
@@ -77,13 +125,20 @@ const AddSupplyToInventory: React.FC = (): JSX.Element => {
 
   // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    setProduct({
-      ...product,
-      [e.target.name]:
-        e.target.type === 'number'
-          ? parseFloat(e.target.value)
-          : e.target.value,
-    });
+    const { name, value, type } = e.target;
+
+    setProduct(prev => ({
+      ...prev,
+      [name]:
+        type === 'number'
+          ? value === ''
+            ? ('' as unknown as number)
+            : Number(value)
+          : value,
+    }));
+
+    if (error[name]) setError(prev => ({ ...prev, [name]: '' }));
+    if (errorMessage) setErrorMessage('');
   };
 
   return (
@@ -93,34 +148,47 @@ const AddSupplyToInventory: React.FC = (): JSX.Element => {
         {errorMessage && (
           <p className="add-supply-error-message">{errorMessage}</p>
         )}
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} noValidate>
           <div className="add-supply-form-group">
             <label>Product Name</label>
             <input
-              className="add-supply-input"
+              className={`add-supply-input ${error.productName ? 'invalid animate' : ''}`}
               type="text"
               name="productName"
               value={product.productName}
               onChange={handleChange}
+              aria-invalid={!!error.productName}
+              aria-describedby={
+                error.productName ? 'err-productName' : undefined
+              }
               required
             />
             {error.productName && (
-              <span className="add-supply-error-text">{error.productName}</span>
+              <span id="err-productName" className="add-supply-error-text">
+                {error.productName}
+              </span>
             )}
           </div>
 
           <div className="add-supply-form-group">
             <label>Product Description</label>
             <input
-              className="add-supply-input"
+              className={`add-supply-input ${error.productDescription ? 'invalid animate' : ''}`}
               type="text"
               name="productDescription"
               value={product.productDescription}
               onChange={handleChange}
+              aria-invalid={!!error.productDescription}
+              aria-describedby={
+                error.productDescription ? 'err-productDescription' : undefined
+              }
               required
             />
             {error.productDescription && (
-              <span className="add-supply-error-text">
+              <span
+                id="err-productDescription"
+                className="add-supply-error-text"
+              >
                 {error.productDescription}
               </span>
             )}
@@ -129,15 +197,24 @@ const AddSupplyToInventory: React.FC = (): JSX.Element => {
           <div className="add-supply-form-group">
             <label>Product Price</label>
             <input
-              className="add-supply-input"
+              className={`add-supply-input ${error.productPrice ? 'invalid animate' : ''}`}
               type="number"
               name="productPrice"
-              value={product.productPrice}
+              value={product.productPrice ?? ''}
               onChange={handleChange}
-              required
+              step="any"
+              min={0}
+              inputMode="decimal"
+              onKeyDown={e => {
+                if (['-', '+', 'e', 'E'].includes(e.key)) e.preventDefault();
+              }}
+              aria-invalid={!!error.productPrice}
+              aria-describedby={
+                error.productPrice ? 'err-productPrice' : undefined
+              }
             />
             {error.productPrice && (
-              <span className="add-supply-error-text">
+              <span id="err-productPrice" className="add-supply-error-text">
                 {error.productPrice}
               </span>
             )}
@@ -146,15 +223,26 @@ const AddSupplyToInventory: React.FC = (): JSX.Element => {
           <div className="add-supply-form-group">
             <label>Product Quantity</label>
             <input
-              className="add-supply-input"
+              className={`add-supply-input ${error.productQuantity ? 'invalid animate' : ''}`}
               type="number"
               name="productQuantity"
-              value={product.productQuantity}
+              step={1}
+              min={0}
+              inputMode="numeric"
+              onKeyDown={e => {
+                if (['-', '+', 'e', 'E', '.'].includes(e.key))
+                  e.preventDefault();
+              }}
+              value={product.productQuantity ?? ''}
               onChange={handleChange}
+              aria-invalid={!!error.productQuantity}
+              aria-describedby={
+                error.productQuantity ? 'err-productQuantity' : undefined
+              }
               required
             />
             {error.productQuantity && (
-              <span className="add-supply-error-text">
+              <span id="err-productQuantity" className="add-supply-error-text">
                 {error.productQuantity}
               </span>
             )}
@@ -163,15 +251,25 @@ const AddSupplyToInventory: React.FC = (): JSX.Element => {
           <div className="add-supply-form-group">
             <label>Product Sale Price</label>
             <input
-              className="add-supply-input"
+              className={`add-supply-input ${error.productSalePrice ? 'invalid animate' : ''}`}
               type="number"
               name="productSalePrice"
-              value={product.productSalePrice}
+              value={product.productSalePrice ?? ''}
               onChange={handleChange}
+              step="any"
+              min={0}
+              inputMode="decimal"
+              onKeyDown={e => {
+                if (['-', '+', 'e', 'E'].includes(e.key)) e.preventDefault();
+              }}
+              aria-invalid={!!error.productSalePrice}
+              aria-describedby={
+                error.productSalePrice ? 'err-productSalePrice' : undefined
+              }
               required
             />
             {error.productSalePrice && (
-              <span className="add-supply-error-text">
+              <span id="err-productSalePrice" className="add-supply-error-text">
                 {error.productSalePrice}
               </span>
             )}

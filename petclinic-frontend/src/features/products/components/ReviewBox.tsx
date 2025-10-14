@@ -1,5 +1,5 @@
 import { JSX, useEffect, useState } from 'react';
-import { Alert, Button, Form } from 'react-bootstrap';
+import { Form, Alert } from 'react-bootstrap';
 import { RatingModel } from '../models/ProductModels/RatingModel';
 import './ReviewBox.css';
 
@@ -11,51 +11,32 @@ function ReviewBox({
   rating: RatingModel;
 }): JSX.Element {
   const [reviewText, setReviewText] = useState<string>(rating.review);
-  const [wasSubmitted, setSubmitted] = useState<boolean>(rating.review !== '');
-  const [isError, setError] = useState<string | null>();
+  const [isError, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setSubmitted(rating.review !== '');
     setReviewText(rating.review);
   }, [rating.review]);
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  const handleLocalChange = (text: string) => {
+    if (text.length > 2000) {
+      setError('Review cannot exceed 2000 characters!');
+    } else {
+      setError(null);
+      updateFunc(text); // propagate changes to parent
+    }
+    setReviewText(text);
+  };
 
   return (
     <div className="reviewbox-container">
-      {wasSubmitted === false ? (
-        <>
-          {isError && <Alert variant="warning">{isError}</Alert>}
-          <Form.Control
-            as="textarea"
-            rows={3}
-            className="review-box"
-            placeholder="Leave your review here.."
-            onChange={e => setReviewText(e.target.value)}
-            value={reviewText}
-          ></Form.Control>
-          <Button
-            onClick={() => {
-              updateFunc(reviewText);
-              if (rating.review.length > 2000) {
-                setError('Review cannot exceed 2000 characters!');
-              }
-              if (rating.rating !== 0) {
-                setSubmitted(true);
-                setError(null);
-              } else {
-                setError('Rating must be set (1-5)!');
-              }
-            }}
-          >
-            Submit
-          </Button>
-        </>
-      ) : (
-        <>
-          <h5>You previously left a review on this product:</h5>
-          <p className="past-review">{reviewText}</p>
-          <Button onClick={() => setSubmitted(false)}>Edit</Button>
-        </>
-      )}
+      {isError && <Alert variant="warning">{isError}</Alert>}
+      <Form.Control
+        as="textarea"
+        className="review-box"
+        placeholder="Leave your review here..."
+        value={reviewText}
+        onChange={e => handleLocalChange(e.target.value)} // now used
+      />
     </div>
   );
 }
