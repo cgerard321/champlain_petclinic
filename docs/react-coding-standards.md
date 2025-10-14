@@ -20,6 +20,10 @@ Back to [Main page](../README.md)
     - [TypeScript Best Practices](#typescript-best-practices)
     - [React Component Standards](#react-component-standards)
   - [Shared Axios Instance Configuration](#shared-axios-instance-configuration)
+>>>>>>> 536b605e (update coding standards to include a return message and to now have console.debug messages)
+    - [TypeScript Best Practices](#typescript-best-practices)
+    - [React Component Standards](#react-component-standards)
+  - [Shared Axios Instance Configuration](#shared-axios-instance-configuration)
 <!-- TOC -->
 
 ## Critical Issues - These Will Not Be Tolerated
@@ -125,14 +129,22 @@ export const getEducation = async (vetId: string) => {
 
 ```typescript
 // DO: Be explicit about API versioning and prefer v1 unless breaking changes needed
-export const updateVetEducation = async (vetId: string, educationId: string, education: EducationRequestModel) => {
-  // Use v1 API explicitly (preferred for backwards compatibility)
-  return await axiosInstance.put(`/vets/${vetId}/educations/${educationId}`, education, { useV2: false });
+export const updateVetEducation = async (vetId: string, educationId: string, education: EducationRequestModel): Promise<ApiResponse<EducationResponseModel>> => {
+  try {
+    const response = await axiosInstance.put(`/vets/${vetId}/educations/${educationId}`, education, { useV2: false });
+    return { data: response.data, errorMessage: null };
+  } catch (error) {
+    return { data: null, errorMessage: 'Unable to update education. Please try again.' };
+  }
 };
 
-export const getEducation = async (vetId: string) => {
-  // Use v1 API explicitly 
-  return await axiosInstance.get(`/vets/${vetId}/education`, { useV2: false });
+export const getEducation = async (vetId: string): Promise<ApiResponse<EducationResponseModel>> => {
+  try {
+    const response = await axiosInstance.get(`/vets/${vetId}/education`, { useV2: false });
+    return { data: response.data, errorMessage: null };
+  } catch (error) {
+    return { data: null, errorMessage: 'Unable to fetch education details. Please try again.' };
+  }
 };
 ```
 
@@ -142,14 +154,22 @@ export const getEducation = async (vetId: string) => {
 // DO: Prefer v1 API for new features unless breaking changes are required
 import axiosInstance from '@/shared/api/axiosInstance';
 
-export const updateVetEducation = async (vetId: string, educationId: string, education: EducationRequestModel) => {
-  // Use v1 API explicitly (preferred approach)
-  return await axiosInstance.put(`/vets/${vetId}/educations/${educationId}`, education, { useV2: false });
+export const updateVetEducation = async (vetId: string, educationId: string, education: EducationRequestModel): Promise<ApiResponse<EducationResponseModel>> => {
+  try {
+    const response = await axiosInstance.put(`/vets/${vetId}/educations/${educationId}`, education, { useV2: false });
+    return { data: response.data, errorMessage: null };
+  } catch (error) {
+    return { data: null, errorMessage: 'Unable to update education. Please try again.' };
+  }
 };
 
-export const getEducation = async (vetId: string) => {
-  // Only use v2 if you need breaking changes that would affect Angular frontend
-  return await axiosInstance.get(`/vet/${vetId}/education`, { useV2: true });
+export const getEducation = async (vetId: string): Promise<ApiResponse<EducationResponseModel>> => {
+  try {
+    const response = await axiosInstance.get(`/vet/${vetId}/education`, { useV2: true });
+    return { data: response.data, errorMessage: null };
+  } catch (error) {
+    return { data: null, errorMessage: 'Unable to fetch education details. Please try again.' };
+  }
 };
 ```
 
@@ -169,26 +189,35 @@ export const getEducation = async (vetId: string) => {
 import { VetResponseModel } from '@/features/veterinarians/models/VetResponseModel';
 import axiosInstance from '@/shared/api/axiosInstance';
 
-export async function getAllVets(): Promise<VetResponseModel[]> {
+interface ApiResponse<T> {
+  data: T | null;
+  errorMessage: string | null;
+}
+
+export async function getAllVets(): Promise<ApiResponse<VetResponseModel[]>> {
   try {
     const response = await axiosInstance.get<VetResponseModel[]>('/vets', {
       responseType: 'stream'
     });
     
-    return response.data
+    const parsedData = response.data
       .split('data:')
       .map((payload: string) => {
         try {
           if (payload === '') return null;
           return JSON.parse(payload);
         } catch (err) {
-          console.error("Can't parse JSON:", err);
+          return null;
         }
       })
       .filter((data?: JSON) => data !== null);
+
+    return { data: parsedData, errorMessage: null };
   } catch (error) {
-    console.error('Error fetching vets:', error);
-    throw error;
+    return { 
+      data: null, 
+      errorMessage: 'Unable to fetch veterinarians. Please try again later.' 
+    };
   }
 }
 ```
@@ -326,11 +355,47 @@ const VetList: React.FC = () => {
 #### Error Handling Best Practices
 
 - Always include try-catch blocks for async operations
-- Use consistent error messages and logging
-- Trust the axios interceptor for system-level error handling
-- Handle business logic errors at the component level
-- Provide meaningful user feedback for local errors
-- Log errors appropriately for debugging
+- Return structured responses with data and error messages instead of throwing errors
+- Let the axios interceptor handle global error responses
+- Use consistent `ApiResponse<T>` interface for all API functions
+- **Important**: If you use `console.error()` for debugging purposes, remove it before merging into production
+- **Error Property**: Use `errorMessage` instead of `error` to clearly indicate this is a user-friendly message intended to be displayed directly to the client. This is a local error message that components can show to users without additional processing.
+
+**Usage in Components:**
+
+```typescript
+const { data: customers, errorMessage } = await getAllCustomers();
+
+if (errorMessage) {
+  // Display error message directly to user
+  setErrorAlert(errorMessage);
+} else {
+  // Handle success case
+  setCustomers(customers);
+}
+```
+
+**Example:**
+
+```typescript
+interface ApiResponse<T> {
+  data: T | null;
+  errorMessage: string | null;
+}
+
+export async function createCustomer(customer: CustomerRequestModel): Promise<ApiResponse<CustomerResponseModel>> {
+  try {
+    const response = await axiosInstance.post<CustomerResponseModel>('/customers', customer, { useV2: false });
+    return { data: response.data, errorMessage: null };
+  } catch (error) {
+    return { 
+      data: null, 
+      errorMessage: 'Unable to create customer. Please check your information and try again.' 
+    };
+  }
+}
+```
+>>>>>>> 536b605e (update coding standards to include a return message and to now have console.debug messages)
 
 ### TypeScript Best Practices
 
