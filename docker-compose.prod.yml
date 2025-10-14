@@ -297,18 +297,19 @@ services:
       - mongo-carts-config:/data/configdb
     restart: unless-stopped
 
-  cloudbeaver:
-    image: dbeaver/cloudbeaver:latest
-    container_name: cloudbeaver
+  dbgate:
+    image: dbgate/dbgate:latest
+    container_name: dbgate
     ports:
-      - "8030:8978"           # Web UI (behind reverse-proxy if exposed)
+      - "8030:3000"                     # Web UI
     environment:
-      - CB_SERVER_PORT=8978
-      # Initial admin account for the CloudBeaver UI (not your DBs)
-      - CB_ADMIN_NAME=admin
-      - CB_ADMIN_PASSWORD=password
+      # bootstrap admin user for DbGate itself (not your DBs)
+      - DBGATE_PUBLIC_URL=https://petclinic-dbadmin.benmusicgeek.synology.me
+      - ADMIN_EMAIL=admin@admin.com
+      - ADMIN_PASSWORD=password
+      - AUTH_METHOD=local               # built-in auth
     volumes:
-      - cloudbeaver-workspace:/opt/cloudbeaver/workspace
+      - dbgate-data:/root/.dbgate       # persists connections/users
     restart: unless-stopped
     depends_on:
       - postgres-vet
