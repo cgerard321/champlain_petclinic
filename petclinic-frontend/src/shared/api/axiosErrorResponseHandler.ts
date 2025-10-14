@@ -3,6 +3,7 @@ import router from '@/router';
 
 // Map status codes to their respective error pages
 const errorPageRedirects: Record<number, string> = {
+  401: '/unauthorized',
   403: '/forbidden',
   408: '/request-timeout',
   500: '/internal-server-error',
@@ -20,8 +21,6 @@ export default function axiosErrorResponseHandler(
       'Unauthorized access. Clearing credentials and redirecting to home.'
     );
     localStorage.clear();
-    // Use the router here for a clean client-side navigation
-    router.navigate('/home');
     return;
   }
 
