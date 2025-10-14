@@ -256,7 +256,7 @@ export const getVets = async (): Promise<VetResponseModel[]> => {
   } catch (error) {
     // Only handle business logic errors here
     if (axios.isAxiosError(error) && error.response?.status === 404) {
-      throw new Error('No veterinarians found');
+      // Handle the error locally, warn client about the not found or show via ui the client that the item is not found
     }
     throw error; // Let other errors propagate
   }
