@@ -479,6 +479,7 @@ export default function BillsListTable({
                     }
                   >
                     {bill.billStatus}
+                  </td>
                   <td>
                     {currency === 'CAD'
                       ? `CAD $${bill.amount.toFixed(2)}`
