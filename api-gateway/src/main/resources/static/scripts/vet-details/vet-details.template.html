@@ -232,6 +232,28 @@
                    Add Education
                 </button>
             </div>
+            <!-- Education Form (conditionally shown) -->
+            <div class="container-fluid" ng-show="$ctrl.addEducationFormVisible" style="margin-top: 1rem; margin-bottom: 2rem;">
+                <form name="addEducationForm" ng-submit="$ctrl.saveEducation()" novalidate>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" placeholder="School" ng-model="$ctrl.newEducation.school" required>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" placeholder="Degree" ng-model="$ctrl.newEducation.degree" required>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="number" class="form-control" placeholder="Year" ng-model="$ctrl.newEducation.year" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 text-end">
+                            <button type="submit" class="btn btn-success" ng-disabled="addEducationForm.$invalid">Save</button>
+                            <button type="button" class="btn btn-secondary" ng-click="$ctrl.addEducationFormVisible = false">Cancel</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
         <br><br><br><br><br><br>
         </div>
     <hr>
