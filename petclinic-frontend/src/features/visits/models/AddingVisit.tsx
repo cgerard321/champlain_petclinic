@@ -10,6 +10,8 @@ import {
   TimeSlot,
 } from '@/features/visits/api/getAvailableSlots';
 import { VisitRequestModel } from '@/features/visits/models/VisitRequestModel';
+import { PetResponseModel } from '@/features/customers/models/PetResponseModel';
+import { getAllPets } from '@/features/visits/api/getAllPets';
 
 interface ApiError {
   message: string;
@@ -44,6 +46,8 @@ const AddingVisit: React.FC = (): JSX.Element => {
     isEmergency: false,
   });
 
+  const [pets, setPets] = useState<PetResponseModel[]>([]);
+  const [loadingPets, setLoadingPets] = useState<boolean>(true);
   const [vets, setVets] = useState<VetResponse[]>([]);
   const [timeSlots, setTimeSlots] = useState<TimeSlotWithVet[]>([]);
   const [loadingVets, setLoadingVets] = useState<boolean>(true);
@@ -55,6 +59,27 @@ const AddingVisit: React.FC = (): JSX.Element => {
   const [showNotification, setShowNotification] = useState<boolean>(false);
 
   const navigate = useNavigate();
+  //fetch pets
+  useEffect(() => {
+    const fetchPets = async (): Promise<void> => {
+      try {
+        setLoadingPets(true);
+        const petsData = await getAllPets();
+
+        // Filter only active pets
+        const activePets = petsData.filter(pet => pet.isActive === 'true');
+        setPets(activePets);
+      } catch (error) {
+        console.error('Error fetching pets:', error);
+        setErrorMessage('Failed to load pets. Please try again.');
+      } finally {
+        setLoadingPets(false);
+      }
+    };
+
+    fetchPets();
+  }, []);
+
   //fetch vets
   useEffect(() => {
     const fetchVets = async (): Promise<void> => {
@@ -218,7 +243,7 @@ const AddingVisit: React.FC = (): JSX.Element => {
 
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
-    if (!visit.petId) newErrors.petId = 'Pet ID is required';
+    if (!visit.petId) newErrors.petId = 'Please select a pet';
     if (!visit.description.trim())
       newErrors.description = 'Description is required';
     if (!visit.selectedDate) newErrors.selectedDate = 'Please select a date';
@@ -325,16 +350,26 @@ const AddingVisit: React.FC = (): JSX.Element => {
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="petId">
-            Pet ID: <span className="required">*</span>
+            Select Pet: <span className="required">*</span>
           </label>
-          <input
-            type="text"
-            id="petId"
-            name="petId"
-            value={visit.petId}
-            onChange={handleChange}
-            placeholder="Enter pet ID"
-          />
+          {loadingPets ? (
+            <p>Loading pets...</p>
+          ) : (
+            <select
+              id="petId"
+              name="petId"
+              value={visit.petId}
+              onChange={handleChange}
+              className={errors.petId ? 'error-input' : ''}
+            >
+              <option value="">-- Select a Pet --</option>
+              {pets.map(pet => (
+                <option key={pet.petId} value={pet.petId}>
+                  {pet.name}
+                </option>
+              ))}
+            </select>
+          )}
           {errors.petId && <span className="error">{errors.petId}</span>}
         </div>
 
@@ -493,7 +528,6 @@ const AddingVisit: React.FC = (): JSX.Element => {
           </div>
         )}
 
-        {/* Buttons */}
         <div className="button-group">
           <button className="cancel" type="button" onClick={handleCancel}>
             Cancel
