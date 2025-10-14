@@ -1,6 +1,6 @@
 # Dockerfile
 # Pin a CloudBeaver version you’re actually running
-FROM dbeaver/cloudbeaver:25.2.3
+FROM dbeaver/cloudbeaver:25.2.2
 
 # ---- Add MongoDB JDBC driver JAR(s)
 ARG MONGO_JDBC_VERSION=3.0.2
