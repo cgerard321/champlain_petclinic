@@ -1,12 +1,11 @@
 package com.petclinic.bffapigateway.presentationlayer.v1;
 
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.FileRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
-import com.petclinic.bffapigateway.dtos.Pets.PetType;
-import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
@@ -110,6 +109,16 @@ public class OwnerControllerV1 {
                         .map(updatedOwner -> ResponseEntity.ok().body(updatedOwner))
                         .defaultIfEmpty(ResponseEntity.notFound().build())
         );
+    }
+
+    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN, Roles.RECEPTIONIST})
+    @PatchMapping("/{ownerId}/photo")
+    public Mono<ResponseEntity<OwnerResponseDTO>> updateOwnerPhoto(
+            @PathVariable String ownerId,
+            @RequestBody Mono<FileRequestDTO> photoMono) {
+        return customersServiceClient.updateOwnerPhoto(ownerId, photoMono)
+                .map(updatedOwner -> ResponseEntity.ok().body(updatedOwner))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})

@@ -1,13 +1,12 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.FileRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.*;
-import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -416,6 +415,14 @@ public class CustomersServiceClient {
         return webClientBuilder.build().patch()
                 .uri(customersServiceUrl + "/owners/" + ownerId)
                 .body(ownerRequestDTOMono, OwnerRequestDTO.class)
+                .retrieve()
+                .bodyToMono(OwnerResponseDTO.class);
+    }
+
+    public Mono<OwnerResponseDTO> updateOwnerPhoto(String ownerId, Mono<FileRequestDTO> photoMono) {
+        return webClientBuilder.build().patch()
+                .uri(customersServiceUrl + "/owners/" + ownerId + "/photo")
+                .body(photoMono, FileRequestDTO.class)
                 .retrieve()
                 .bodyToMono(OwnerResponseDTO.class);
     }
