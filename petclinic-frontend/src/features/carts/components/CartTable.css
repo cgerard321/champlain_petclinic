@@ -1,32 +1,90 @@
-.view-button {
-  background-color: rgb(32, 101, 11);
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  cursor: pointer;
+.cart-list-container {
+  width: min(90vw, 960px);
+  margin: 2.5rem auto;
+  background: var(--cart-bg, #f8fafc);
+  border: 1px solid var(--cart-ring, #e5e7eb);
+  border-radius: 20px;
+  box-shadow: 0 20px 48px rgba(15, 23, 42, 0.12);
+  padding: 1.75rem;
+  color: var(--cart-text, #0f172a);
 }
 
-.view-button:hover {
-  background-color: rgb(2, 57, 12);
+.loading,
+.error,
+.no-carts {
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  border-radius: 16px;
+  background: radial-gradient(
+      120% 120% at 50% 0%,
+      rgba(37, 99, 235, 0.08),
+      rgba(255, 255, 255, 0)
+    ),
+    #ffffff;
+  border: 1px solid rgba(37, 99, 235, 0.12);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+  font-size: 1rem;
+  color: var(--cart-muted, #475569);
 }
 
-.delete-button {
-  background-color: #dc3545;
-  color: white;
+.error {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.22);
+  color: #b91c1c;
 }
 
-.delete-button:hover {
-  background-color: #c82333;
+.cart-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.25rem;
+  background: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.12);
+}
+
+.cart-table thead {
+  background: linear-gradient(
+    135deg,
+    rgba(37, 99, 235, 0.12),
+    rgba(34, 197, 94, 0.12)
+  );
+}
+
+.cart-table th {
+  text-align: left;
+  padding: 0.9rem 1.25rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--cart-text, #0f172a);
+}
+
+.cart-table tbody tr {
+  border-bottom: 1px solid var(--cart-ring, #e5e7eb);
+  transition: background-color 0.2s ease;
+}
+
+.cart-table tbody tr:hover {
+  background-color: rgba(37, 99, 235, 0.04);
+}
+
+.cart-table td {
+  padding: 0.9rem 1.25rem;
+  font-size: 0.93rem;
+  color: var(--cart-muted, #475569);
 }
 
 @media screen and (max-width: 768px) {
-  .cart-table {
-    font-size: 16px;
+  .cart-list-container {
+    padding: 1.25rem;
   }
 
-  .view-button,
-  .delete-button {
-    padding: 6px 10px;
-    font-size: 14px;
+  .cart-table {
+    font-size: 0.95rem;
+  }
+
+  .cart-table th,
+  .cart-table td {
+    padding: 0.75rem 1rem;
   }
 }

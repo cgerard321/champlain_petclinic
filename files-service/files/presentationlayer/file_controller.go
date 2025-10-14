@@ -96,7 +96,7 @@ func (i *FilesController) Routes(engine *gin.Engine) error {
 
 	filesGroup.GET("/:id", i.getFile)
 	filesGroup.POST("/", ValidateRequestBody, i.addFile)
-	filesGroup.PUT("/:id", i.updateFile)
+	filesGroup.PUT("/:id", ValidateRequestBody, i.updateFile)
 	filesGroup.DELETE("/:id", i.deleteFileByFileId)
 	return nil
 }
