@@ -339,6 +339,32 @@ public class MockServerConfigCustomersService {
                 );
     }
 
+    public void registerGetOwnerWithPhotoEndpoint(String ownerId, String ownerJson) {
+        mockServerClient_CustomersService
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/owners/" + ownerId)
+                                .withQueryStringParameter("includePhoto", "true")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withBody(ownerJson)
+                                .withHeader("Content-Type", "application/json")
+                );
+    }
+
+    public void clearExpectationsForOwner(String ownerId) {
+        //clear all expectations for this specific owner path
+        mockServerClient_CustomersService
+                .clear(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/owners/" + ownerId)
+                );
+    }
+
     public void stopMockServer() {
         if(clientAndServer != null)
             this.clientAndServer.stop();
