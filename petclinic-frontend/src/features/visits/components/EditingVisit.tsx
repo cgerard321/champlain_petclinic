@@ -1,18 +1,11 @@
 import * as React from 'react';
-<<<<<<< HEAD
-=======
-import { useNavigate } from 'react-router-dom';
->>>>>>> a50514b4 (Replaced View and Edit pages with modals for visits)
 import { FormEvent, useState, useEffect } from 'react';
 import { VisitRequestModel } from '@/features/visits/models/VisitRequestModel';
 import { Status } from '@/features/visits/models/Status';
 import { VisitResponseModel } from '../models/VisitResponseModel';
 import { getVisit } from '../api/getVisit';
 import { updateVisit } from '../api/updateVisit';
-<<<<<<< HEAD
 import { getAvailableVets, VetResponse } from '@/features/visits/api/getVets';
-=======
->>>>>>> a50514b4 (Replaced View and Edit pages with modals for visits)
 
 import BasicModal from '@/shared/components/BasicModal';
 
@@ -23,22 +16,17 @@ interface EditingVisitProps {
   visitId: string;
 }
 
-// interface ApiError {
-//   message: string;
-// }
+interface ApiError {
+  message: string;
+}
 
 type VisitType = {
   visitStartDate: Date;
   description: string;
   petId: string;
-<<<<<<< HEAD
   petName: string;
   practitionerId: string;
   isEmergency: boolean;
-=======
-  practitionerId: string;
-  // ownerId: string;
->>>>>>> a50514b4 (Replaced View and Edit pages with modals for visits)
   status: Status;
 };
 
@@ -55,27 +43,19 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
     visitStartDate: new Date(),
     description: '',
     petId: '',
-<<<<<<< HEAD
     petName: '',
     practitionerId: '',
     isEmergency: false,
-=======
-    practitionerId: '',
->>>>>>> a50514b4 (Replaced View and Edit pages with modals for visits)
     status: 'UPCOMING' as Status,
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  // const [successMessage, setSuccessMessage] = useState<string>('');
-  // const [errorMessage, setErrorMessage] = useState<string>('');
+  const [successMessage, setSuccessMessage] = useState<string>('');
+  const [errorMessage, setErrorMessage] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  // const [showNotification, setShowNotification] = useState<boolean>(false);
+  const [showNotification, setShowNotification] = useState<boolean>(false);
 
-<<<<<<< HEAD
   const [vets, setVets] = useState<VetResponse[]>([]);
-=======
-  const navigate = useNavigate();
->>>>>>> a50514b4 (Replaced View and Edit pages with modals for visits)
 
   useEffect(() => {
     const fetchVisitData = async (): Promise<void> => {
@@ -86,15 +66,10 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
             practitionerId: response.practitionerId,
             description: response.description,
             petId: response.petId,
-<<<<<<< HEAD
             petName: response.petName,
             visitStartDate: new Date(response.visitDate),
             status: response.status,
             isEmergency: response.isEmergency,
-=======
-            visitStartDate: new Date(response.visitDate),
-            status: response.status,
->>>>>>> a50514b4 (Replaced View and Edit pages with modals for visits)
           });
         } catch (error) {
           console.error(`Error fetching visit with ID ${visitId}:`, error);
@@ -107,7 +82,6 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
     }
   }, [visitId]);
 
-<<<<<<< HEAD
   //fetch vets
   useEffect(() => {
     const fetchVets = async (): Promise<void> => {
@@ -126,8 +100,6 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
     fetchVets();
   }, []);
 
-=======
->>>>>>> a50514b4 (Replaced View and Edit pages with modals for visits)
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ): void => {
@@ -158,9 +130,7 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
     if (!validate()) return;
 
     setIsLoading(true);
-<<<<<<< HEAD
     setErrorMessage('');
-<<<<<<< HEAD
     setSuccessMessage('');
 
     const formattedVisit: VisitRequestModel = {
@@ -169,48 +139,23 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
       petId: visit.petId,
       practitionerId: visit.practitionerId,
       isEmergency: visit.isEmergency,
-=======
-=======
-    // setErrorMessage('');
->>>>>>> 5f210cf1 (fixed styling for view and edit)
-    // setSuccessMessage('');
-
-    const formattedVisit: VisitRequestModel = {
-      visitDate: visit.visitStartDate
-        .toISOString()
-        .slice(0, 16)
-        .replace('T', ' '),
-      description: visit.description,
-      petId: visit.petId,
-      practitionerId: visit.practitionerId,
->>>>>>> a50514b4 (Replaced View and Edit pages with modals for visits)
       status: visit.status,
     };
 
     try {
       if (visitId) {
         await updateVisit(visitId, formattedVisit);
-<<<<<<< HEAD
         setSuccessMessage('Visit updated successfully!');
         setShowNotification(true);
         setTimeout(() => setShowNotification(false), 3000); // Hide notification after 3 seconds
-<<<<<<< HEAD
         setTimeout(() => {
           window.location.reload();
         }, 1000);
-=======
-=======
-        // setSuccessMessage('Visit updated successfully!');
-        // setShowNotification(true);
-        // setTimeout(() => setShowNotification(false), 3000); // Hide notification after 3 seconds
->>>>>>> 5f210cf1 (fixed styling for view and edit)
-        navigate('/visits'); // Navigate to a different page or clear form
->>>>>>> a50514b4 (Replaced View and Edit pages with modals for visits)
       }
     } catch (error) {
       // Use type assertion or check error type
-      // const apiError = error as ApiError;
-      // setErrorMessage(`Error updating visit: ${apiError.message}`);
+      const apiError = error as ApiError;
+      setErrorMessage(`Error updating visit: ${apiError.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -222,8 +167,6 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
       showButton={showButton}
       formId="modalform"
       validate={validate}
-<<<<<<< HEAD
-<<<<<<< HEAD
       // refreshPageOnConfirm={true}
       confirmText={isLoading ? 'Updating...' : 'Update'}
       errorMessage={errorMessage}
@@ -237,21 +180,10 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
           {errors.description && (
             <span className="error">{errors.description}</span>
           )}
-=======
-=======
-      refreshPageOnConfirm={true}
->>>>>>> 5f210cf1 (fixed styling for view and edit)
-      confirmText={isLoading ? 'Updating...' : 'Update'}
-    >
-      <form id="modalform" onSubmit={handleSubmit}>
-        <label>
-          Pet ID: {errors.petId && <span className="error">Required</span>}
->>>>>>> a50514b4 (Replaced View and Edit pages with modals for visits)
         </label>
 
         <input
           type="text"
-<<<<<<< HEAD
           name="description"
           value={visit.description}
           onChange={handleChange}
@@ -283,18 +215,6 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
           {errors.visitStartDate && (
             <span className="error">{errors.visitDate}</span>
           )}
-=======
-          name="petId"
-          value={visit.petId}
-          onChange={handleChange}
-          required
-        />
-
-        <br />
-        <label>
-          Visit Date:{' '}
-          {errors.visitStartDate && <span className="error">Required</span>}
->>>>>>> a50514b4 (Replaced View and Edit pages with modals for visits)
         </label>
 
         <input
@@ -304,7 +224,6 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
           onChange={handleChange}
           required
         />
-<<<<<<< HEAD
         <br />
         <label>
           Status:{' '}
@@ -344,57 +263,6 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
         </div>
       </form>
       {showNotification && <div className="notification">{successMessage}</div>}
-=======
-
-        <br />
-        <label>
-          Description:{' '}
-          {errors.description && (
-            <span className="error">{errors.description}</span>
-          )}
-        </label>
-
-        <input
-          type="text"
-          name="description"
-          value={visit.description}
-          onChange={handleChange}
-          required
-        />
-
-        <br />
-        <label>
-          Practitioner ID:{' '}
-          {errors.practitionerId && (
-            <span className="error">{errors.practitionerId}</span>
-          )}
-        </label>
-
-        <input
-          type="text"
-          name="practitionerId"
-          value={visit.practitionerId}
-          onChange={handleChange}
-          required
-        />
-
-        <br />
-        <label>
-          Status:{' '}
-          {errors.status && <span className="error">{errors.status}</span>}
-        </label>
-
-        <select name="status" value={visit.status} onChange={handleChange}>
-          <option value="CONFIRMED">Confirmed</option>
-          <option value="UPCOMING">Upcoming</option>
-          <option value="COMPLETED">Completed</option>
-          <option value="CANCELED">Canceled</option>
-          <option value="ARCHIVED">Archived</option>
-        </select>
-        <br />
-      </form>
-      {/* {showNotification && <div className="notification">{successMessage}</div>} */}
->>>>>>> a50514b4 (Replaced View and Edit pages with modals for visits)
     </BasicModal>
   );
 };

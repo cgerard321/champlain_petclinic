@@ -28,10 +28,6 @@ const VisitDetails: React.FC<VisitDetailsProps> = ({ visitId }) => {
 
   return (
     <div>
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 5f210cf1 (fixed styling for view and edit)
       <div className="visit-field">
         <span className="visit-label">Visit ID:</span>
         <span className="visit-value">{visit.visitId}</span>
@@ -45,13 +41,10 @@ const VisitDetails: React.FC<VisitDetailsProps> = ({ visitId }) => {
         <span className="visit-value">{visit.description}</span>
       </div>
       <div className="visit-field">
-<<<<<<< HEAD
         <span className="visit-label">Pet ID:</span>
         <span className="visit-value">{visit.petId}</span>
       </div>
       <div className="visit-field">
-=======
->>>>>>> 5f210cf1 (fixed styling for view and edit)
         <span className="visit-label">Pet Name:</span>
         <span className="visit-value">{visit.petName}</span>
       </div>
@@ -88,62 +81,6 @@ const VisitDetails: React.FC<VisitDetailsProps> = ({ visitId }) => {
       <div className="visit-field">
         <span className="visit-label">Visit End Date:</span>
         <span className="visit-value">{visit.visitEndDate}</span>
-<<<<<<< HEAD
-=======
-      <div className="visit-info">
-        <div className="visit-field">
-          <span className="visit-label">Visit ID:</span>
-          <span className="visit-value">{visit.visitId}</span>
-        </div>
-        <div className="visit-field">
-          <span className="visit-label">Visit Date:</span>
-          <span className="visit-value">{visit.visitDate}</span>
-        </div>
-        <div className="visit-field">
-          <span className="visit-label">Description:</span>
-          <span className="visit-value">{visit.description}</span>
-        </div>
-        <div className="visit-field">
-          <span className="visit-label">Pet Name:</span>
-          <span className="visit-value">{visit.petName}</span>
-        </div>
-        <div className="visit-field">
-          <span className="visit-label">Vet First Name:</span>
-          <span className="visit-value">{visit.vetFirstName}</span>
-        </div>
-        <div className="visit-field">
-          <span className="visit-label">Vet Last Name:</span>
-          <span className="visit-value">{visit.vetLastName}</span>
-        </div>
-        <div className="visit-field">
-          <span className="visit-label">Vet Email:</span>
-          <span className="visit-value">{visit.vetEmail}</span>
-        </div>
-        <div className="visit-field">
-          <span className="visit-label">Status:</span>
-          <span
-            className="visit-value"
-            style={{
-              color:
-                visit.status === 'CONFIRMED'
-                  ? 'green'
-                  : visit.status === 'UPCOMING'
-                    ? 'orange'
-                    : visit.status === 'COMPLETED'
-                      ? 'blue'
-                      : 'inherit',
-            }}
-          >
-            {visit.status}
-          </span>
-        </div>
-        <div className="visit-field">
-          <span className="visit-label">Visit End Date:</span>
-          <span className="visit-value">{visit.visitEndDate}</span>
-        </div>
->>>>>>> a50514b4 (Replaced View and Edit pages with modals for visits)
-=======
->>>>>>> 5f210cf1 (fixed styling for view and edit)
       </div>
     </div>
   );

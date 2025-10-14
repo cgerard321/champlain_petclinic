@@ -10,17 +10,6 @@ import { IsVet } from '@/context/UserContext';
 import { archiveVisit } from './api/archiveVisit';
 import { cancelVisit } from './api/cancelVisit';
 
-import ConfirmationModal from '@/shared/components/BasicModal';
-import VisitDetails from '@/features/visits/components/VisitDetails';
-import EditingVisit from './components/EditingVisit';
-
-import eyeIcon from '@/assets/Icons/eyeDark.svg';
-import pencilIcon from '@/assets/Icons/pencilDark.svg';
-import archiveIcon from '@/assets/Icons/archiveDark.svg';
-import xcrossIcon from '@/assets/Icons/xcrossDark.svg';
-import pentosquareIcon from '@/assets/Icons/pentosquareLight.svg';
-import starIcon from '@/assets/Icons/starEmptyLight.svg';
-
 import BasicModal from '@/shared/components/BasicModal';
 import VisitDetails from '@/features/visits/components/VisitDetails';
 import EditingVisit from './components/EditingVisit';
@@ -31,6 +20,7 @@ import archiveIcon from '@/assets/Icons/archiveDark.svg';
 import xcrossIcon from '@/assets/Icons/xcrossDark.svg';
 import pentosquareIcon from '@/assets/Icons/pentosquareLight.svg';
 import starIcon from '@/assets/Icons/starEmptyLight.svg';
+
 import AddingVisit from './components/AddingVisit';
 
 export default function VisitListTable(): JSX.Element {
@@ -312,20 +302,12 @@ export default function VisitListTable(): JSX.Element {
                     >
                       {renderViewButton()}
                     </a> */}
-<<<<<<< HEAD
                   <BasicModal
-=======
-                  <ConfirmationModal
->>>>>>> a50514b4 (Replaced View and Edit pages with modals for visits)
                     title="Visit Details"
                     showButton={renderViewButton()}
                   >
                     <VisitDetails visitId={visit.visitId} />
-<<<<<<< HEAD
                   </BasicModal>
-=======
-                  </ConfirmationModal>
->>>>>>> a50514b4 (Replaced View and Edit pages with modals for visits)
                   {!isVet && (
                     // <a
                     //   className="icon"
@@ -380,42 +362,10 @@ export default function VisitListTable(): JSX.Element {
                         onConfirm={() => handleCancel(visit.visitId)}
                       >
                         <div>
-<<<<<<< HEAD
                           This will set the status of this visit to Canceled.
                         </div>
                         <div>Do you wish to proceed?</div>
                       </BasicModal>
-=======
-                          This will set the status of this visit to Archived.
-                        </div>
-                        <div>Do you wish to proceed?</div>
-                      </ConfirmationModal>
-                      // </a>
-                    )}
-
-                  {visit.status !== 'CANCELLED' &&
-                    visit.status !== 'ARCHIVED' &&
-                    visit.status !== 'COMPLETED' &&
-                    !isVet && (
-                      // <a
-                      //   className="icon"
-                      //   onClick={() => handleCancel(visit.visitId)}
-                      //   title="Cancel"
-                      // >
-                      //   <img src={xcrossIcon} />
-                      // </a>
-                      // <a className="icon" title="Delete">
-                      <ConfirmationModal
-                        title="Cancel Visit"
-                        showButton={renderCancelButton()}
-                        onConfirm={() => handleCancel(visit.visitId)}
-                      >
-                        <div>
-                          This will set the status of this visit to Canceled.
-                        </div>
-                        <div>Do you wish to proceed?</div>
-                      </ConfirmationModal>
->>>>>>> 5f210cf1 (fixed styling for view and edit)
                       // </a>
                     )}
                 </td>
