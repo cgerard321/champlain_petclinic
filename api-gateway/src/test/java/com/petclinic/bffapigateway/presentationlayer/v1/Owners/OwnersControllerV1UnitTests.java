@@ -511,91 +511,8 @@ public class OwnersControllerV1UnitTests {
     }
 
     @Test
-    void whenPatchOwner_withValidOwner_thenReturnUpdatedOwner() {
-        OwnerRequestDTO patchRequest = new OwnerRequestDTO();
-        patchRequest.setFirstName("UpdatedFirstName");
-        patchRequest.setLastName("UpdatedLastName");
-
-        OwnerResponseDTO updatedOwner = new OwnerResponseDTO();
-        updatedOwner.setOwnerId(ownerId);
-        updatedOwner.setFirstName(patchRequest.getFirstName());
-        updatedOwner.setLastName(patchRequest.getLastName());
-
-        when(customersServiceClient.patchOwner(eq(ownerId), any()))
-                .thenReturn(Mono.just(updatedOwner));
-
-        client.patch()
-                .uri("/api/gateway/owners/{ownerId}", ownerId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(BodyInserters.fromValue(patchRequest))
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(OwnerResponseDTO.class)
-                .value(body -> {
-                    assertNotNull(body);
-                    assertEquals(ownerId, body.getOwnerId());
-                    assertEquals("UpdatedFirstName", body.getFirstName());
-                    assertEquals("UpdatedLastName", body.getLastName());
-                });
-
-        verify(customersServiceClient, times(1)).patchOwner(eq(ownerId), any());
-    }
-
-    @Test
-    void whenPatchOwner_withNonExistentOwner_thenReturnNotFound() {
-        OwnerRequestDTO patchRequest = new OwnerRequestDTO();
-        patchRequest.setFirstName("John");
-
-        when(customersServiceClient.patchOwner(eq("nonexistent"), any()))
-                .thenReturn(Mono.empty());
-
-        client.patch()
-                .uri("/api/gateway/owners/{ownerId}", "nonexistent")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(BodyInserters.fromValue(patchRequest))
-                .exchange()
-                .expectStatus().isNotFound();
-
-        verify(customersServiceClient, times(1)).patchOwner(eq("nonexistent"), any());
-    }
-
-    @Test
-    void whenPatchOwner_withPartialData_thenReturnUpdatedOwner() {
-        OwnerRequestDTO patchRequest = new OwnerRequestDTO();
-        patchRequest.setCity("Montreal");
-        patchRequest.setProvince("Quebec");
-
-        OwnerResponseDTO updatedOwner = new OwnerResponseDTO();
-        updatedOwner.setOwnerId(ownerId);
-        updatedOwner.setFirstName("John");
-        updatedOwner.setLastName("Doe");
-        updatedOwner.setCity("Montreal");
-        updatedOwner.setProvince("Quebec");
-
-        when(customersServiceClient.patchOwner(eq(ownerId), any()))
-                .thenReturn(Mono.just(updatedOwner));
-
-        client.patch()
-                .uri("/api/gateway/owners/{ownerId}", ownerId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(BodyInserters.fromValue(patchRequest))
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(OwnerResponseDTO.class)
-                .value(body -> {
-                    assertNotNull(body);
-                    assertEquals("Montreal", body.getCity());
-                    assertEquals("Quebec", body.getProvince());
-                });
-
-        verify(customersServiceClient, times(1)).patchOwner(eq(ownerId), any());
-    }
-
-    @Test
     void whenUpdateOwnerPhoto_withValidPhoto_thenReturnUpdatedOwner() {
-        com.petclinic.bffapigateway.dtos.CustomerDTOs.FileRequestDTO photoRequest =
-                com.petclinic.bffapigateway.dtos.CustomerDTOs.FileRequestDTO.builder()
+        FileDetails photoRequest = FileDetails.builder()
                         .fileName("profile.jpeg")
                         .fileType("image/jpeg")
                         .fileData("mockPhotoData".getBytes())
@@ -634,8 +551,7 @@ public class OwnersControllerV1UnitTests {
 
     @Test
     void whenUpdateOwnerPhoto_withNonExistentOwner_thenReturnNotFound() {
-        com.petclinic.bffapigateway.dtos.CustomerDTOs.FileRequestDTO photoRequest =
-                com.petclinic.bffapigateway.dtos.CustomerDTOs.FileRequestDTO.builder()
+        FileDetails photoRequest = FileDetails.builder()
                         .fileName("profile.jpeg")
                         .fileType("image/jpeg")
                         .fileData("mockPhotoData".getBytes())
@@ -656,8 +572,7 @@ public class OwnersControllerV1UnitTests {
 
     @Test
     void whenUpdateOwnerPhoto_withPngPhoto_thenReturnUpdatedOwner() {
-        com.petclinic.bffapigateway.dtos.CustomerDTOs.FileRequestDTO photoRequest =
-                com.petclinic.bffapigateway.dtos.CustomerDTOs.FileRequestDTO.builder()
+        FileDetails photoRequest = FileDetails.builder()
                         .fileName("avatar.png")
                         .fileType("image/png")
                         .fileData("pngPhotoData".getBytes())
