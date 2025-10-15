@@ -87,7 +87,7 @@ public interface BillService {
     Flux<BillResponseDTO> getBillsByCustomerIdAndStatus(String customerId, BillStatus status);
 
     // Method to generate the bill PDF
-    Mono<byte[]> generateBillPdf(String customerId, String billId);
+    Mono<byte[]> generateBillPdf(String customerId, String billId, String currency);
 
     Mono<BillResponseDTO> processPayment(String customerId, String billId, PaymentRequestDTO paymentRequestDTO);
 
