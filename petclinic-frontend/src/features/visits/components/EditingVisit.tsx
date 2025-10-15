@@ -261,9 +261,6 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
             value={visit.practitionerId}
             onChange={handleChange}
           >
-            <option value="no-preference">
-              No Preference (Show All Available Times)
-            </option>
             {vets.map(vet => (
               <option key={vet.vetId} value={vet.vetId}>
                 Dr. {vet.firstName} {vet.lastName}
