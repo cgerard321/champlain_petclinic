@@ -1,6 +1,6 @@
 import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { Inventory } from '@/features/inventories/models/Inventory.ts';
-import axios from 'axios';
+import { ApiResponse } from '@/shared/models/ApiResponse';
 
 export async function searchInventories(
   currentPage: number,
@@ -9,7 +9,7 @@ export async function searchInventories(
   inventoryType?: string,
   inventoryDescription?: string,
   importantOnly?: boolean
-): Promise<Inventory[]> {
+): Promise<ApiResponse<Inventory[]>> {
   try {
     const queryParams = new URLSearchParams();
     if (inventoryName) queryParams.append('inventoryName', inventoryName);
@@ -23,47 +23,17 @@ export async function searchInventories(
       ? `/inventories?page=${currentPage}&size=${listSize}&${queryString}`
       : `/inventories?page=${currentPage}&size=${listSize}`;
 
-    const response = await axiosInstance.get<Inventory[]>(url, {
+    const res = await axiosInstance.get<Inventory[]>(url, {
       useV2: false,
     });
-    return response.data;
-  } catch (error) {
-    if (!axios.isAxiosError(error)) throw error;
-
-    const status = error.response?.status ?? 0;
-    const payload: unknown = error.response?.data;
-
-    const data =
-      payload && typeof payload === 'object'
-        ? (payload as Record<string, unknown>)
-        : undefined;
-
-    const serverMessage = typeof data?.message === 'string' ? data.message : '';
-
-    switch (status) {
-      case 400: {
-        throw new Error(
-          serverMessage.trim()
-            ? serverMessage
-            : 'Invalid inventory data. Please review your input and try again.'
-        );
-      }
-      case 404: {
-        throw new Error(
-          serverMessage.trim()
-            ? serverMessage
-            : 'Inventory resource was not found.'
-        );
-      }
-      case 429: {
-        throw new Error(
-          serverMessage.trim()
-            ? serverMessage
-            : 'Too many requests. Please try again later.'
-        );
-      }
-      default:
-        throw error;
-    }
+    return { data: res.data, errorMessage: null };
+  } catch (error: unknown) {
+    const maybeMsg = (error as { response?: { data?: { message?: unknown } } })
+      ?.response?.data?.message;
+    const errorMessage =
+      typeof maybeMsg === 'string' && maybeMsg.trim()
+        ? maybeMsg.trim()
+        : 'Failed to load inventories. Please try again.';
+    return { data: null, errorMessage };
   }
 }
