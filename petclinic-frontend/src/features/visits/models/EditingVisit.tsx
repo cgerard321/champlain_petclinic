@@ -100,7 +100,12 @@ const EditingVisit: React.FC = (): JSX.Element => {
     const { name, value } = e.target;
     setVisit(prevVisit => ({
       ...prevVisit,
-      [name]: name === 'visitStartDate' ? new Date(value) : value, // Convert string to Date object for visitDate
+      [name]:
+        name === 'visitStartDate'
+          ? new Date(value)
+          : name === 'status'
+            ? (value as Status)
+            : value,
     }));
   };
 
@@ -128,10 +133,7 @@ const EditingVisit: React.FC = (): JSX.Element => {
     setSuccessMessage('');
 
     const formattedVisit: VisitRequestModel = {
-      visitDate: visit.visitStartDate
-        .toISOString()
-        .slice(0, 16)
-        .replace('T', ' '),
+      visitDate: visit.visitStartDate.toISOString(),
       description: visit.description,
       petId: visit.petId,
       practitionerId: visit.practitionerId,
@@ -216,7 +218,10 @@ const EditingVisit: React.FC = (): JSX.Element => {
         <br />
         <label>Status: </label>
         <select name="status" value={visit.status} onChange={handleChange}>
-          <option value="UPCOMING">Upcoming</option>
+          <option value="UPCOMING">UPCOMING</option>
+          <option value="COMPLETED">COMPLETED</option>
+          <option value="CANCELLED">CANCELLED</option>
+          <option value="ARCHIVED">ARCHIVED</option>
         </select>
         {errors.status && <span className="error">{errors.status}</span>}
         <br />

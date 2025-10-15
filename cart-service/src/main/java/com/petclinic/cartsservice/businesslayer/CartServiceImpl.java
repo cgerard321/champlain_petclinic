@@ -3,6 +3,8 @@ package com.petclinic.cartsservice.businesslayer;
 import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.CartRepository;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
+import com.petclinic.cartsservice.domainclientlayer.Auth.UserDetails;
+import com.petclinic.cartsservice.domainclientlayer.Mailing.Mail;
 import com.petclinic.cartsservice.domainclientlayer.ProductClient;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
 import com.petclinic.cartsservice.utils.EntityModelUtil;
@@ -682,5 +684,12 @@ public class CartServiceImpl implements CartService {
     public Mono<List<CartProduct>> getRecommendationPurchases(String cartId) {
         return cartRepository.findCartByCartId(cartId)
                 .map(cart -> cart.getRecommendationPurchase() != null ? cart.getRecommendationPurchase() : List.of());
+    }
+    private Mail generateCartsEmail(UserDetails user){
+        return new Mail(
+                user.getEmail(), "Pet Clinic - Item Added to Cart", "default", "Pet Clinic carts email test",
+                "Dear, " + user.getUsername() + "\n" +
+                        "Your cart item has been added",
+                "Thank you for choosing Pet Clinic.", user.getUsername(), "ChamplainPetClinic@gmail.com");
     }
 }

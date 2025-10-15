@@ -6,6 +6,7 @@ import com.petclinic.bffapigateway.dtos.Bills.PaymentRequestDTO;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,6 +16,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @RestController
 @RequiredArgsConstructor
@@ -72,5 +76,32 @@ public class CustomerBillController {
                 // billing-service returns 400 for invalid payment; the client maps that to ResponseStatusException(BAD_REQUEST)
                 .onErrorResume(ResponseStatusException.class, e ->
                         Mono.just(ResponseEntity.status(e.getStatusCode()).build()));
+    }
+
+    @IsUserSpecific(idToMatch = {"customerId"})
+    @GetMapping(value = "/filter-by-amount", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<BillResponseDTO> getBillsByAmountRange(
+            @PathVariable("customerId") String customerId,
+            @RequestParam("minAmount") BigDecimal minAmount,
+            @RequestParam("maxAmount") BigDecimal maxAmount) {
+        return billService.getBillsByAmountRange(customerId, minAmount, maxAmount);
+    }
+
+    @IsUserSpecific(idToMatch = {"customerId"})
+    @GetMapping(value = "/filter-by-due-date", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<BillResponseDTO> getBillsByDueDateRange(
+            @PathVariable("customerId") String customerId,
+            @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        return billService.getBillsByDueDateRange(customerId, startDate, endDate);
+    }
+
+    @IsUserSpecific(idToMatch = {"customerId"})
+    @GetMapping(value = "/filter-by-date", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<BillResponseDTO> getBillsByDateRange(
+            @PathVariable("customerId") String customerId,
+            @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        return billService.getBillsByDateRange(customerId, startDate, endDate);
     }
 }

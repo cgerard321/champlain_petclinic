@@ -46,7 +46,7 @@ export default function InventoriesListTable(): JSX.Element {
     [key: string]: number;
   }>({});
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-  const [isActionsMenuVisible, setActionsMenu] = useState(false);
+  // const [isActionsMenuVisible, setActionsMenu] = useState(false);
 
   const [showImportantOnly, setShowImportantOnly] = useState(false);
 
@@ -230,6 +230,22 @@ export default function InventoriesListTable(): JSX.Element {
     }
   };
 
+  const archiveSelectedInventories = (): void => {
+    if (selectedInventories.length === 0) return;
+
+    // mark all selected inventories as archived
+    setArchivedMap(prev => {
+      const next = { ...prev };
+      selectedInventories.forEach(inv => {
+        next[inv.inventoryId] = true;
+      });
+      return next;
+    });
+
+    // clear selection so archived items aren’t left checked
+    setSelectedInventories([]);
+  };
+
   useEffect(() => {
     if (inventoryList.length > 0) {
       inventoryList.forEach(inventory => {
@@ -349,10 +365,6 @@ export default function InventoriesListTable(): JSX.Element {
     return window.btoa(binary);
   };
 
-  const toggleActionsMenu = (): void => {
-    setActionsMenu(prevState => !prevState);
-  };
-
   const toggleArchiveStatus = (
     e: React.MouseEvent,
     inventory: Inventory
@@ -393,104 +405,93 @@ export default function InventoriesListTable(): JSX.Element {
 
   return (
     <>
-      <div id={inventoryStyles.menuSection}>
-        <div id={inventoryStyles.menuContainer}>
-          <svg
-            onClick={toggleActionsMenu}
-            id={inventoryStyles.menuIcon}
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 16 16"
-            fill="currentColor" // bars follow CSS 'color'
-            className="bi bi-list"
-            role="button"
-            aria-label="Open menu"
-          >
-            <path
-              fillRule="evenodd"
-              d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"
-            />
-          </svg>
+      <div className={inventoryStyles.menuSection}>
+        <div className={inventoryStyles.menuContainer}>
+          <div className={inventoryStyles.actionsMenu}>
+            {/* Add Inventory Button*/}
+            <button
+              className={`add-inventory-button btn btn-success ${inventoryStyles.btnSm}`}
+              onClick={() => setShowAddInventoryForm(true)}
+            >
+              Add Inventory
+            </button>
 
-          {isActionsMenuVisible && (
-            <div id={inventoryStyles.actionsMenu}>
-              <button
-                className="btn btn-danger"
-                onClick={deleteSelectedInventories}
-                disabled={selectedInventories.length === 0}
-              >
-                Delete Selected Inventories
-              </button>
-              <button
-                className="delete-bundle-button btn btn-success mx-1"
-                onClick={() => {
-                  handleDeleteAllInventories(false);
-                }}
-              >
-                Delete All Inventories
-              </button>
-              <button
-                className="add-inventory-button btn btn-success"
-                onClick={() => setShowAddInventoryForm(true)}
-              >
-                Add Inventory
-              </button>
-              <button
-                className="low-stock-button btn btn-warning mx-1"
-                onClick={async () => {
-                  if (inventoryList.length > 0) {
-                    lowStockProductsByInventory.current = {}; // Clear the current ref value
-                    try {
-                      // Collect all low stock products for each inventory
-                      for (const inventory of inventoryList) {
-                        await getAllLowStockProducts(inventory);
-                      }
+            {/* Add Inventory Type Button*/}
+            <button
+              className={`add-inventorytype-button btn btn-primary ${inventoryStyles.btnSm}`}
+              onClick={() => setShowAddTypeForm(true)}
+            >
+              Add InventoryType
+            </button>
 
-                      // Navigate to the other page and pass the collected data
-                      navigate('/products/lowstock', {
-                        state: {
-                          lowStockProducts: lowStockProductsByInventory.current,
-                        },
-                      });
-                    } catch (error) {
-                      console.error(
-                        'Error fetching low stock products:',
-                        error
-                      );
+            {/* Check Low Stock Button*/}
+            <button
+              className={`low-stock-button btn btn-warning ${inventoryStyles.btnSm}`}
+              onClick={async () => {
+                if (inventoryList.length > 0) {
+                  lowStockProductsByInventory.current = {}; // Clear the current ref value
+                  try {
+                    // Collect all low stock products for each inventory
+                    for (const inventory of inventoryList) {
+                      await getAllLowStockProducts(inventory);
                     }
-                  } else {
-                    console.error('No inventories found');
+
+                    // Navigate to the other page and pass the collected data
+                    navigate('/products/lowstock', {
+                      state: {
+                        lowStockProducts: lowStockProductsByInventory.current,
+                      },
+                    });
+                  } catch (error) {
+                    console.error('Error fetching low stock products:', error);
                   }
-                }}
-              >
-                Check Low Stock for All Inventories
-              </button>
-              <button
-                className="add-inventorytype-button btn btn-primary"
-                onClick={() => setShowAddTypeForm(true)}
-              >
-                Add InventoryType
-              </button>
-            </div>
-          )}
+                } else {
+                  console.error('No inventories found');
+                }
+              }}
+            >
+              Check Low Stock for All Inventories
+            </button>
+
+            {/* Archive Selected Inventory */}
+            <button
+              className={`btn btn-secondary ${inventoryStyles.btnSm}`}
+              onClick={archiveSelectedInventories}
+              disabled={selectedInventories.length === 0}
+              title={
+                selectedInventories.length === 0
+                  ? 'Select one or more inventories first'
+                  : 'Archive selected inventories'
+              }
+            >
+              Archive Selected Inventory
+            </button>
+
+            {/* Delete All Inventories Button*/}
+            <button
+              className={`btn btn-danger ${inventoryStyles.btnSm}`}
+              onClick={deleteSelectedInventories}
+              disabled={selectedInventories.length === 0}
+            >
+              Delete Selected Inventories
+            </button>
+          </div>
         </div>
       </div>
+
       <div>
         <table
           className={`table table-striped ${inventoryStyles.inventoryTable} ${inventoryStyles.fixedTable} ${inventoryStyles.cleanTable}`}
         >
           <thead>
             <tr>
-              <td></td>
-              <td style={{ fontWeight: 'bold' }}>Name</td>
-              <td style={{ fontWeight: 'bold' }}>Type</td>
-              <td style={{ fontWeight: 'bold' }}>Description</td>
-              <td className="text-center" style={{ fontWeight: 'bold' }}>
-                Important
-              </td>
-              <td className="text-center" style={{ fontWeight: 'bold' }}>
-                Clear
-              </td>
-              <td></td>
+              <th style={{ width: '5%' }}></th>
+              <th style={{ width: '20%', textAlign: 'center' }}>Name</th>
+              <th style={{ width: '15%', textAlign: 'center' }}>Type</th>
+              <th style={{ width: '25%', textAlign: 'center' }}>Description</th>
+              <th style={{ width: '10%', textAlign: 'center' }}>Important</th>
+              <th style={{ width: '10%', textAlign: 'center' }}>Clear</th>
+              <th style={{ width: '15%', textAlign: 'center' }}>Status</th>
             </tr>
             <tr>
               <td></td>

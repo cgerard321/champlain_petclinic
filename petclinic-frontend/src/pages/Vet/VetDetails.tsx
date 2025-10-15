@@ -2,7 +2,6 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import './VetDetails.css';
-import axiosInstance from '@/shared/api/axiosInstance';
 import DeleteVetPhoto from '@/pages/Vet/DeleteVetPhoto.tsx';
 import UpdateVetEducation from '@/pages/Vet/UpdateVetEducation';
 import AddEducation from '@/pages/Vet/AddEducation.tsx';
@@ -12,14 +11,23 @@ import UpdateVet from '@/pages/Vet/UpdateVet.tsx';
 import UploadAlbumPhoto from '@/features/veterinarians/api/UploadAlbumPhoto';
 import { getAlbumsByVetId } from '@/features/veterinarians/api/getAlbumByVetId.ts';
 import { fetchVetPhoto } from '@/features/veterinarians/api/fetchPhoto';
+import { fetchVet } from '@/features/veterinarians/api/fetchVetDetails.ts';
 import {
   IsInventoryManager,
   IsOwner,
   IsReceptionist,
   useUser,
 } from '@/context/UserContext';
+import { getOwner } from '@/features/customers/api/getOwner';
+import { deleteVetRating } from '@/features/veterinarians/api/deleteVetRating';
 import AddVetRatingModal from '@/pages/Vet/AddVetRatingModal';
 import { format } from 'date-fns';
+import { fetchVetRatings } from '@/features/veterinarians/api/fetchVetRatings';
+import { fetchEducationDetails } from '@/features/veterinarians/api/fetchEducationDetails';
+import { updateVetProfilePhoto } from '@/features/veterinarians/api/updateVetProfilePhoto';
+import { deleteAlbumPhoto } from '@/features/veterinarians/api/deleteAlbumPhoto';
+import { addSpecialty } from '@/features/veterinarians/api/addSpecialty';
+import { deleteSpecialty } from '@/features/veterinarians/api/deleteSpecialty';
 
 interface VetResponseType {
   vetId: string;
@@ -95,10 +103,10 @@ const formatRatingDate = (rateDate?: string): string => {
 
 export default function VetDetails(): JSX.Element {
   const { vetId } = useParams<{ vetId: string }>();
+  const { user } = useUser();
   const isInventoryManager = IsInventoryManager();
   const isOwner = IsOwner();
   const isReceptionist = IsReceptionist();
-  const { user } = useUser();
   const [vet, setVet] = useState<VetResponseType | null>(null);
   const [education, setEducation] = useState<EducationResponseType[] | null>(
     null
@@ -124,16 +132,14 @@ export default function VetDetails(): JSX.Element {
     useState<EducationResponseType | null>(null);
   const [ratings, setRatings] = useState<RatingResponseType[] | null>(null);
   const [selectedVet, setSelectedVet] = useState<VetRequestModel | null>(null);
+  const [currentCustomerName, setCurrentCustomerName] = useState<string>('');
   const canSubmitReview = Boolean(user.userId) && isOwner;
   const refreshVetDetails = useCallback(async (): Promise<void> => {
     try {
-      const response = await axiosInstance.get<VetResponseType>(
-        `/vets/${vetId}`,
-        {
-          useV2: false,
-        }
-      );
-      setVet(response.data);
+      if (!vetId)
+        throw new Error('Vet ID is required for fetching vet details');
+      const vetData = await fetchVet(vetId);
+      setVet(vetData);
     } catch (error) {
       console.error('Failed to fetch vet details:', error);
       setError('Failed to fetch vet details');
@@ -168,14 +174,11 @@ export default function VetDetails(): JSX.Element {
     vetBillId: vet.vetBillId,
   });
 
-  const fetchVetRatings = useCallback(async (): Promise<void> => {
+  const fetchRatings = useCallback(async (): Promise<void> => {
     if (!vetId) return;
     try {
-      const response = await axiosInstance.get<RatingResponseType[]>(
-        `/vets/${vetId}/ratings`,
-        { useV2: true }
-      );
-      setRatings(response.data ?? []);
+      const ratingsData = await fetchVetRatings(vetId);
+      setRatings(ratingsData ?? []);
     } catch (error) {
       console.error('Failed to fetch vet ratings:', error);
       setError('Failed to fetch vet ratings');
@@ -201,12 +204,12 @@ export default function VetDetails(): JSX.Element {
   };
 
   useEffect(() => {
-    void fetchVetRatings();
-  }, [fetchVetRatings]);
+    void fetchRatings();
+  }, [fetchRatings]);
 
   const handleRatingSubmitSuccess = useCallback((): void => {
-    void fetchVetRatings();
-  }, [fetchVetRatings]);
+    void fetchRatings();
+  }, [fetchRatings]);
 
   useEffect(() => {
     const fetchPhoto = async (): Promise<void> => {
@@ -225,12 +228,41 @@ export default function VetDetails(): JSX.Element {
     fetchPhoto();
   }, [vetId]);
 
+  useEffect(() => {
+    const fetchCurrentCustomerName = async (): Promise<void> => {
+      try {
+        if (user.userId) {
+          const ownerResponse = await getOwner(user.userId);
+          const customerName = `${ownerResponse.data.firstName} ${ownerResponse.data.lastName}`;
+          setCurrentCustomerName(customerName);
+        }
+      } catch (error) {
+        console.error('Failed to fetch customer name:', error);
+        setCurrentCustomerName('');
+      }
+    };
+
+    fetchCurrentCustomerName();
+  }, [user.userId]);
+
   const handleEducationDeleted = (deletedEducationId: string): void => {
     setEducation(prevEducation =>
       prevEducation
         ? prevEducation.filter(edu => edu.educationId !== deletedEducationId)
         : null
     );
+  };
+
+  const handleRatingDeleted = async (): Promise<void> => {
+    try {
+      if (vetId) {
+        await deleteVetRating(vetId);
+        await fetchRatings();
+      }
+    } catch (error) {
+      console.error('Error deleting rating:', error);
+      setError('Failed to delete rating');
+    }
   };
 
   const handlePhotoDeleted = (): void => {
@@ -241,35 +273,27 @@ export default function VetDetails(): JSX.Element {
   useEffect(() => {
     const fetchVetDetails = async (): Promise<void> => {
       try {
-        const response = await axiosInstance.get<VetResponseType>(
-          `/vets/${vetId}`,
-          {
-            useV2: false,
-          }
-        );
-        setVet(response.data);
+        if (!vetId) throw new Error('Vet ID undefined');
+        const vetData = await fetchVet(vetId);
+        setVet(vetData);
       } catch (error) {
         setError('Failed to fetch vet details');
       }
     };
 
-    const fetchEducationDetails = async (): Promise<void> => {
+    const fetchEducation = async (): Promise<void> => {
       try {
-        const response = await axiosInstance.get<EducationResponseType[]>(
-          `/vets/${vetId}/educations`,
-          {
-            useV2: false,
-          }
-        );
-        setEducation(response.data);
+        if (!vetId) throw new Error('Vet ID undefined');
+        const educationData = await fetchEducationDetails(vetId);
+        setEducation(educationData);
       } catch (error) {
         setError('Failed to fetch education details');
       }
     };
 
     fetchVetDetails().then(async () => {
-      await fetchEducationDetails();
-      await loadAlbumPhotos(); // ⬅ add this
+      await fetchEducation();
+      await loadAlbumPhotos();
       setLoading(false);
     });
   }, [vetId, loadAlbumPhotos]);
@@ -291,19 +315,7 @@ export default function VetDetails(): JSX.Element {
     setIsDefaultPhoto(false); // Set to false because a new photo is uploaded
 
     try {
-      const { data: blob } = await axiosInstance.put(
-        `/vets/${vetId}/photo/${encodeURIComponent(file.name)}`,
-        file,
-        {
-          params: { useV2: false },
-          headers: {
-            'Content-Type': file.type || 'application/octet-stream',
-            Accept: 'image/*',
-          },
-          responseType: 'blob',
-        }
-      );
-
+      const blob = await updateVetProfilePhoto(vetId!, file);
       const url = URL.createObjectURL(blob);
       setPhoto(url);
       setIsDefaultPhoto(false);
@@ -313,13 +325,9 @@ export default function VetDetails(): JSX.Element {
   };
   const handleDeleteAlbumPhoto = async (photoId: number): Promise<void> => {
     try {
-      await axiosInstance.delete(`/vets/${vetId}/albums/${photoId}`, {
-        useV2: true, // <-- go through BFF v2
-      });
+      await deleteAlbumPhoto(vetId!, photoId);
 
-      setAlbumPhotos(
-        prev => prev.filter(photo => photo.id !== photoId) // number vs number
-      );
+      setAlbumPhotos(prev => prev.filter(photo => photo.id !== photoId));
     } catch (error) {
       setError('Failed to delete album photo');
     }
@@ -426,9 +434,7 @@ export default function VetDetails(): JSX.Element {
     };
 
     try {
-      await axiosInstance.post(`/vets/${vetId}/specialties`, specialtyDTO, {
-        useV2: false,
-      });
+      await addSpecialty(vetId!, specialtyDTO);
       alert('Specialty added successfully!');
       setIsFormOpen(false); // Close form on success
       setSpecialtyId(''); // Clear fields
@@ -450,10 +456,7 @@ export default function VetDetails(): JSX.Element {
 
   const handleDeleteSpecialty = async (specialtyId: string): Promise<void> => {
     try {
-      // Make a DELETE request to the API
-      await axiosInstance.delete(`/vets/${vetId}/specialties/${specialtyId}`, {
-        useV2: false,
-      });
+      await deleteSpecialty(vetId!, specialtyId);
 
       // Update the vet data after deleting the specialty
       setVet(prevVet =>
@@ -462,7 +465,7 @@ export default function VetDetails(): JSX.Element {
               ...prevVet,
               specialties: prevVet.specialties.filter(
                 specialty => specialty.specialtyId !== specialtyId
-              ), // Remove the deleted specialty from the local state
+              ),
             }
           : null
       );
@@ -557,6 +560,25 @@ export default function VetDetails(): JSX.Element {
                   <strong>Rate Date:</strong>{' '}
                   {formatRatingDate(rating.rateDate)}
                 </p>
+                {currentCustomerName &&
+                  rating.customerName === currentCustomerName && (
+                    <button
+                      onClick={handleRatingDeleted}
+                      className="delete-rating-button"
+                      style={{
+                        backgroundColor: '#dc3545',
+                        color: 'white',
+                        border: 'none',
+                        padding: '8px 16px',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        marginTop: '10px',
+                        fontSize: '14px',
+                      }}
+                    >
+                      Delete My Rating
+                    </button>
+                  )}
                 <hr />
               </div>
             ))
