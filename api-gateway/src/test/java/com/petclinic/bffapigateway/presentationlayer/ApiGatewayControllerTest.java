@@ -1193,13 +1193,14 @@ class ApiGatewayControllerTest {
         successResponse.setBillId("1");
         successResponse.setBillStatus(PAID);
 
-        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class)))
+        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class), anyString()))
                 .thenReturn(Mono.just(successResponse));
 
         PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
 
         client.post()
                 .uri("/api/gateway/bills/customer/1/bills/1/pay")
+                .cookie("Bearer", "dummy-jwt-token")
                 .body(BodyInserters.fromValue(paymentRequestDTO))
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .exchange()
@@ -1213,45 +1214,48 @@ class ApiGatewayControllerTest {
 
     @Test
     void payBill_Failure() {
-        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class)))
+        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class), anyString()))
                 .thenReturn(Mono.error(new RuntimeException("Invalid payment details")));
 
         PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
 
         client.post()
                 .uri("/api/gateway/bills/customer/1/bills/1/pay")
+                .cookie("Bearer", "dummy-jwt-token")
                 .body(BodyInserters.fromValue(paymentRequestDTO))
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .exchange()
                 .expectStatus().isBadRequest()
-                .expectBody().isEmpty(); // <- empty body
+                .expectBody().isEmpty();
     }
 
     @Test
     void payBill_Failure_InvalidCustomerId() {
-        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class)))
+        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class), anyString()))
                 .thenReturn(Mono.error(new RuntimeException("Invalid customer ID")));
 
         PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
 
         client.post()
                 .uri("/api/gateway/bills/customer/invalid-customer-id/bills/1/pay")
+                .cookie("Bearer", "dummy-jwt-token")
                 .body(BodyInserters.fromValue(paymentRequestDTO))
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .exchange()
                 .expectStatus().isBadRequest()
-                .expectBody().isEmpty(); //  no “Payment failed: ...”
+                .expectBody().isEmpty();
     }
 
     @Test
     void payBill_Failure_InvalidBillId() {
-        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class)))
+        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class), anyString()))
                 .thenReturn(Mono.error(new RuntimeException("Invalid bill ID")));
 
         PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
 
         client.post()
                 .uri("/api/gateway/bills/customer/1/bills/invalid-bill-id/pay")
+                .cookie("Bearer", "dummy-jwt-token")
                 .body(BodyInserters.fromValue(paymentRequestDTO))
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .exchange()
@@ -1261,13 +1265,14 @@ class ApiGatewayControllerTest {
 
     @Test
     void payBill_Failure_ExpiredCard() {
-        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class)))
+        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class), anyString()))
                 .thenReturn(Mono.error(new RuntimeException("Card expired")));
 
         PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "01/20");
 
         client.post()
                 .uri("/api/gateway/bills/customer/1/bills/1/pay")
+                .cookie("Bearer", "dummy-jwt-token")
                 .body(BodyInserters.fromValue(paymentRequestDTO))
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .exchange()
@@ -1276,12 +1281,14 @@ class ApiGatewayControllerTest {
     }
 
 
+
     @Test
     void payBill_MissingPaymentDetails_Failure() {
         PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO(null, null, null);
 
         client.post()
                 .uri("/api/gateway/bills/customer/1/bills/1/pay")
+                .cookie("Bearer", "dummy-jwt-token")
                 .body(BodyInserters.fromValue(paymentRequestDTO))
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .exchange()
@@ -1296,6 +1303,7 @@ class ApiGatewayControllerTest {
 
         client.post()
                 .uri("/api/gateway/bills/customer/1/bills/1/pay")
+                .cookie("Bearer", "dummy-jwt-token")
                 .body(BodyInserters.fromValue(paymentRequestDTO))
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .exchange()
