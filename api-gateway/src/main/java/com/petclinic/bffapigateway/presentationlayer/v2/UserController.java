@@ -8,7 +8,6 @@ import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -29,15 +28,14 @@ import java.util.List;
 public class UserController {
 
     private final AuthServiceClient authServiceClient;
-    @Value("${frontend.url}")
-    String frontendUrl;
+
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping("/verification/{token}")
     public Mono<ResponseEntity<UserDetails>> verifyUserUsingV2Endpoint(@PathVariable final String token) {
         return authServiceClient.verifyUserUsingV2Endpoint(token)
                 .map(userDetailsResponseEntity -> {
                     HttpHeaders headers = new HttpHeaders();
-                    headers.add("Location", frontendUrl+"/users/login");
+                    headers.add("Location", "http://localhost:3000/users/login");
                     return ResponseEntity.status(HttpStatus.FOUND)
                             .headers(headers)
                             .body(userDetailsResponseEntity.getBody());

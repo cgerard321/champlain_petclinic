@@ -83,7 +83,7 @@ class AuthControllerUnitTest {
                 .uri("/api/v2/gateway/verification/{token}", validToken)
                 .exchange()
                 .expectStatus().isFound()
-                .expectHeader().valueEquals("Location", "${frontend.url}/users/login");
+                .expectHeader().valueEquals("Location", "http://localhost:3000/users/login");
     }
     @Test
     @DisplayName("Should fetch all users successfully")
