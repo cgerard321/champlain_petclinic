@@ -107,7 +107,6 @@ export default function VisitListTable(): JSX.Element {
     });
   };
 
-  // Handle canceling the visit
   const handleCancel = async (visitId: string): Promise<void> => {
     await cancelVisit(visitId, updatedVisit => {
       // Update the full visits list; the displayed list will update automatically
@@ -262,7 +261,7 @@ export default function VisitListTable(): JSX.Element {
                       />
                     </svg>
                   </a>
-                  {!isVet && (
+                  {
                     <a
                       className="icon"
                       onClick={() => navigate(`/visits/${visit.visitId}/edit`)}
@@ -282,7 +281,7 @@ export default function VisitListTable(): JSX.Element {
                         />
                       </svg>
                     </a>
-                  )}
+                  }
                   {visit.status === 'COMPLETED' && !isVet && (
                     <a
                       className="icon"
