@@ -11,7 +11,7 @@ import java.io.ByteArrayInputStream;
 
 /**
  * Sim //ple interface for all the request controller. Implemented in VisitServiceImpl
- */
+ */ //
 public interface VisitService {
     Flux<VisitResponseDTO> getAllVisits(String description);
 
