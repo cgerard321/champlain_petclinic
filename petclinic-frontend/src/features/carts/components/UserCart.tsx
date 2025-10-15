@@ -291,7 +291,7 @@ const UserCart = (): JSX.Element => {
 
       try {
         const { data } = await axiosInstance.get(`/carts/${cartId}`, {
-          useV2: true,
+          useV2: false,
         });
 
         if (!Array.isArray(data.products)) {
@@ -384,6 +384,7 @@ const UserCart = (): JSX.Element => {
     try {
       const { data } = await axiosInstance.get(
         `/promos/validate/${voucherCode}`,
+        // this API call is only in v2 for now
         { useV2: true }
       );
       setDiscount((subtotal * data.discount) / 100);
@@ -675,7 +676,7 @@ const UserCart = (): JSX.Element => {
       const res = await axiosInstance.post(
         `/carts/${cartId}/wishlist/moveAll`,
         {},
-        { useV2: true, validateStatus: () => true }
+        { useV2: false, validateStatus: () => true }
       );
 
       if (res.status >= 200 && res.status < 300) {
