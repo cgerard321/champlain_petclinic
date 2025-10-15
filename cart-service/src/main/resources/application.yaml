@@ -1,5 +1,7 @@
+# Default Spring Profile
 server:
   port: 7008
+
   error:
     include-message: always
 
@@ -8,31 +10,26 @@ logging:
     root: INFO
     com.petclinic: DEBUG
 
-spring:
-  config:
-    activate:
-      on-profile: default
-  data:
-    mongodb:
-      port: 0
-      database: carts
-
-de:
-  flapdoodle:
-    mongodb:
-      embedded:
-        version: 5.0.5
-
 ---
+#for tests
 
 spring:
   config:
     activate:
       on-profile: test
+
+
   data:
     mongodb:
+      username: root
+      password: password
+      host: localhost
       port: 0
       database: carts
+      authentication-database: admin
+      auto-index-creation: true
+
+de:
   flapdoodle:
     mongodb:
       embedded:
@@ -53,10 +50,7 @@ spring:
       password: password
       authentication-database: admin
 
-server:
-  port: 8080
-  error:
-    include-message: always
+server.port: 8080
 
 ---
 
@@ -64,6 +58,7 @@ spring:
   config:
     activate:
       on-profile: local
+
   data:
     mongodb:
       host: localhost

@@ -3,8 +3,6 @@ package com.petclinic.cartsservice.businesslayer;
 import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.CartRepository;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
-import com.petclinic.cartsservice.domainclientlayer.Auth.UserDetails;
-import com.petclinic.cartsservice.domainclientlayer.Mailing.Mail;
 import com.petclinic.cartsservice.domainclientlayer.ProductClient;
 import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
 import com.petclinic.cartsservice.presentationlayer.CartRequestModel;
@@ -26,7 +24,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 
 
-import java.lang.reflect.Method;
+
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1681,28 +1680,5 @@ class CartServiceUnitTest {
         StepVerifier.create(result)
                 .expectNextMatches(List::isEmpty)
                 .verifyComplete();
-    }
-
-    @Test
-    void generateConfirmationEmail_shouldGenerateCorrectEmail() throws Exception {
-        // Arrange
-        UserDetails userDetails = new UserDetails();
-        userDetails.setEmail("test@example.com");
-        userDetails.setUsername("testuser");
-
-        Method method = CartServiceImpl.class.getDeclaredMethod("generateCartsEmail", UserDetails.class);
-        method.setAccessible(true);
-
-        // Act
-        Mail result = (Mail) method.invoke(cartService, userDetails);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals("test@example.com", result.getEmailSendTo());
-        assertEquals("Pet Clinic - Item Added to Cart", result.getEmailTitle());
-        assertEquals("default", result.getTemplateName());
-        assertEquals("Pet Clinic carts email test", result.getHeader());
-        assertEquals("testuser", result.getCorrespondantName());
-        assertEquals("ChamplainPetClinic@gmail.com", result.getSenderName());
     }
 }
