@@ -23,6 +23,12 @@ var VALID_FILE_RESPONSE_MODEL = models.FileResponseModel{
 	FileData: []byte("fake image data"),
 }
 
+var UPDATE_FILE_REQUEST_MODEL = models.FileRequestModel{
+	FileName: "updated petclinic test image",
+	FileType: "image/png",
+	FileData: []byte("new fake image data"),
+}
+
 const NON_EXISTING_FILE_ID = "3e5a214b-009d-4a25-9313-344676e6157k"
 const EXISTING_FILE_ID = "3e5a214b-009d-4a25-9313-344676e6157d"
 
@@ -55,6 +61,40 @@ func TestWhenGetFileById_withNonExistingFileId_thenReturnError(t *testing.T) {
 
 	assert.NotNil(t, err)
 	assert.Nil(t, file)
+	mockRepo.AssertExpectations(t)
+}
+func TestWhenUpdateFile_withExistingFileId_thenReturnUpdatedFileResponseModel(t *testing.T) {
+	mockRepo, mockClient := setupFileServiceUnitTest()
+
+	mockRepo.On("GetFileInfo", EXISTING_FILE_ID).Return(&VALID_FILE_INFO)
+	mockRepo.On("DeleteFileInfo", EXISTING_FILE_ID).Return(nil)
+	mockRepo.On("AddFileInfo", mock.AnythingOfType("*datalayer.FileInfo")).Return(nil)
+	mockClient.On("DeleteFile", &VALID_FILE_INFO).Return(nil)
+	mockClient.On("AddFile", mock.AnythingOfType("*datalayer.FileInfo"), UPDATE_FILE_REQUEST_MODEL.FileData).Return(nil)
+
+	service := businesslayer.NewFileService(mockRepo, mockClient)
+	resp, err := service.UpdateFile(EXISTING_FILE_ID, &UPDATE_FILE_REQUEST_MODEL)
+
+	assert.Nil(t, err)
+	assert.NotNil(t, resp)
+	assert.Equal(t, EXISTING_FILE_ID, resp.FileId)
+	assert.Equal(t, "updated petclinic test image", resp.FileName)
+	assert.Equal(t, "image/png", resp.FileType)
+	assert.Equal(t, []byte("new fake image data"), resp.FileData)
+	mockRepo.AssertExpectations(t)
+	mockClient.AssertExpectations(t)
+}
+
+func TestWhenUpdateFile_withNonExistingFileId_thenReturnError(t *testing.T) {
+	mockRepo, mockClient := setupFileServiceUnitTest()
+	mockRepo.On("GetFileInfo", NON_EXISTING_FILE_ID).Return(nil)
+
+	service := businesslayer.NewFileService(mockRepo, mockClient)
+	resp, err := service.UpdateFile(NON_EXISTING_FILE_ID, &UPDATE_FILE_REQUEST_MODEL)
+
+	assert.NotNil(t, err)
+	assert.Nil(t, resp)
+	assert.EqualError(t, err, "fileId: "+NON_EXISTING_FILE_ID+" was not found")
 	mockRepo.AssertExpectations(t)
 }
 

@@ -76,7 +76,8 @@ public class RatingServiceImpl implements RatingService {
                     }
                 }))
                 .map(requestDto -> {
-                    if (requestDto.getPredefinedDescription() != null){
+                    if (requestDto.getPredefinedDescription() != null &&
+                            (requestDto.getRateDescription() == null || requestDto.getRateDescription().isBlank())) {
                         requestDto.setRateDescription(requestDto.getPredefinedDescription().name());
                     }
                     return requestDto;
@@ -158,7 +159,8 @@ public class RatingServiceImpl implements RatingService {
                                 .flatMap(r -> {
                                     if (r.getRateScore() < 1 || r.getRateScore() > 5)
                                         return Mono.error(new InvalidInputException("rateScore should be between 1 and 5" + r.getRateScore()));
-                                    if (r.getPredefinedDescription() != null){
+                                    if (r.getPredefinedDescription() != null &&
+                                            (r.getRateDescription() == null || r.getRateDescription().isBlank())) {
                                         r.setRateDescription(r.getPredefinedDescription().name());
                                     }
                                     return Mono.just(r);

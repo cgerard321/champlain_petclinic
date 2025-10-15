@@ -133,6 +133,55 @@ func TestWhenAddNewFile_withValidFileRequestModel_thenReturnFileResponseModel(t 
 	assert.EqualValues(t, VALID_FILE_RESPONSE_MODEL.FileData, got.FileData)
 }
 
+func TestWhenUpdateFile_withExistingFileId_thenReturnUpdatedFileResponseModel(t *testing.T) {
+	t.Cleanup(reset)
+
+	addFileToContext(&VALID_FILE_INFO, VALID_FILE_DATA)
+	router := gin.Default()
+	_ = controller.Routes(router)
+
+	updatedModel := models.FileRequestModel{
+		FileName: "updated petclinic image",
+		FileType: "image/jpeg",
+		FileData: []byte("new fake file data"),
+	}
+	body, err := json.Marshal(updatedModel)
+	assert.NoError(t, err)
+
+	req, _ := http.NewRequest(http.MethodPut, "/files/"+EXISTING_FILE_ID, bytes.NewReader(body))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	var got models.FileResponseModel
+	err = json.Unmarshal(w.Body.Bytes(), &got)
+	assert.NoError(t, err)
+	assert.Equal(t, updatedModel.FileName, got.FileName)
+	assert.Equal(t, updatedModel.FileType, got.FileType)
+	assert.Equal(t, updatedModel.FileData, got.FileData)
+}
+
+func TestWhenUpdateFile_withNonExistingFileId_thenReturnNotFound(t *testing.T) {
+	t.Cleanup(reset)
+
+	router := gin.Default()
+	_ = controller.Routes(router)
+
+	updatedModel := models.FileRequestModel{
+		FileName: "updated petclinic image",
+		FileType: "image/jpeg",
+		FileData: []byte("new fake file data"),
+	}
+	body, err := json.Marshal(updatedModel)
+	assert.NoError(t, err)
+
+	req, _ := http.NewRequest(http.MethodPut, "/files/"+NON_EXISTING_ID, bytes.NewReader(body))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+}
+
 func TestWhenGetFile_withExistingFileId_thenReturnFileResponseModel(t *testing.T) {
 	t.Cleanup(reset)
 	addFileToContext(&VALID_FILE_INFO, VALID_FILE_DATA)
