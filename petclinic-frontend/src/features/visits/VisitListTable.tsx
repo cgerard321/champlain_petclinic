@@ -261,7 +261,7 @@ export default function VisitListTable(): JSX.Element {
                       />
                     </svg>
                   </a>
-                  {!isVet && (
+                  {
                     <a
                       className="icon"
                       onClick={() => navigate(`/visits/${visit.visitId}/edit`)}
@@ -281,7 +281,7 @@ export default function VisitListTable(): JSX.Element {
                         />
                       </svg>
                     </a>
-                  )}
+                  }
                   {visit.status === 'COMPLETED' && !isVet && (
                     <a
                       className="icon"

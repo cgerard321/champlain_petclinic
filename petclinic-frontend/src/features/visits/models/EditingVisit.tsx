@@ -109,10 +109,7 @@ const EditingVisit: React.FC = (): JSX.Element => {
     setSuccessMessage('');
 
     const formattedVisit: VisitRequestModel = {
-      visitDate: visit.visitStartDate
-        .toISOString()
-        .slice(0, 16)
-        .replace('T', ' '),
+      visitDate: visit.visitStartDate.toISOString(),
       description: visit.description,
       petId: visit.petId,
       practitionerId: visit.practitionerId,
