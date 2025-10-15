@@ -1,12 +1,14 @@
 package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.datalayer.*;
+import com.petclinic.billing.domainclientlayer.OwnerClient;
 import com.petclinic.billing.util.InterestCalculationUtil;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
@@ -14,6 +16,8 @@ import reactor.test.StepVerifier;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -26,28 +30,44 @@ public class CustomerBillsControllerIntegrationTest {
         @Autowired
         private WebTestClient client;
 
+        @MockBean
+        private OwnerClient ownerClient;
+
+
         @Autowired
         private BillRepository billRepository;
 
-        @Test
-        void getBillsByCustomerId_shouldSucceed() {
-                Bill bill = buildBill();
-                Publisher<Bill> setup = billRepository.deleteAll().thenMany(billRepository.save(bill));
+    @Test
+    void getBillsByCustomerId_shouldSucceed() {
+        Bill bill = buildBill();
+        bill.setOwnerFirstName("John");
+        bill.setOwnerLastName("Doe");
 
-                StepVerifier.create(setup)
-                                .expectNextCount(1)
-                                .verifyComplete();
+        OwnerResponseDTO owner = new OwnerResponseDTO();
+        owner.setOwnerId(bill.getCustomerId());
+        owner.setFirstName("John");
+        owner.setLastName("Doe");
 
-                client.get()
-                                .uri("/bills/customer/{customerId}/bills", bill.getCustomerId())
-                                .accept(MediaType.APPLICATION_JSON)
-                                .exchange()
-                                .expectStatus().isOk()
-                                .expectBody()
-                                .jsonPath("$[0].customerId").isEqualTo(bill.getCustomerId());
-        }
+        when(ownerClient.getOwnerByOwnerId(bill.getCustomerId()))
+                .thenReturn(Mono.just(owner));
 
-        @Test
+        Publisher<Bill> setup = billRepository.deleteAll().thenMany(billRepository.save(bill));
+
+        StepVerifier.create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        client.get()
+                .uri("/bills/customer/{customerId}/bills", bill.getCustomerId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[0].customerId").isEqualTo(bill.getCustomerId());
+    }
+
+
+    @Test
         void testDownloadBillPdf() {
 
                 Bill bill = buildBill();
