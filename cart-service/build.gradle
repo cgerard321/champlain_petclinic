@@ -53,13 +53,10 @@ dependencies {
     testImplementation("org.mock-server:mockserver-client-java:5.13.0")
     testImplementation 'com.squareup.retrofit2:retrofit-mock:2.9.0'
     testImplementation 'jakarta.servlet:jakarta.servlet-api:6.0.0'
-// ✅ Use the core Flapdoodle dependency
     testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.12.3'
 
-// ✅ Add this to let Spring Boot test auto-configure embedded Mongo
     testImplementation 'org.springframework.boot:spring-boot-test-autoconfigure'
 
-// ✅ Add this (required for embedded Mongo auto-start with Spring Boot 3+)
     testImplementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
 
 
