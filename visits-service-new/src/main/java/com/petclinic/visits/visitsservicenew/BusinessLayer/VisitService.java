@@ -10,7 +10,7 @@ import reactor.core.publisher.Mono;
 import java.io.ByteArrayInputStream;
 
 /**
- * Simple interface for all the request controller. Implemented in VisitServiceImpl
+ * Sim //ple interface for all the request controller. Implemented in VisitServiceImpl
  */
 public interface VisitService {
     Flux<VisitResponseDTO> getAllVisits(String description);
