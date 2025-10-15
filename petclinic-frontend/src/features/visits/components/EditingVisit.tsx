@@ -238,6 +238,29 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
           <option value="ARCHIVED">Archived</option>
         </select>
         <br />
+        <div className="form-group emergency-toggle-group">
+          <label htmlFor="isEmergency">
+            <span className="emergency-label-text">
+              <span>Emergency Visit</span>
+            </span>
+            <div className="switch-wrapper">
+              <input
+                type="checkbox"
+                id="isEmergency"
+                name="isEmergency"
+                checked={visit.isEmergency}
+                onChange={e =>
+                  setVisit(prev => ({
+                    ...prev,
+                    isEmergency: e.target.checked,
+                  }))
+                }
+                className="switch-input"
+              />
+              <span className="switch-slider"></span>
+            </div>
+          </label>
+        </div>
       </form>
       {showNotification && <div className="notification">{successMessage}</div>}
     </BasicModal>

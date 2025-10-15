@@ -525,6 +525,30 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
               }
             </div>
           )}
+
+          <div className="form-group emergency-toggle-group">
+            <label htmlFor="isEmergency">
+              <span className="emergency-label-text">
+                <span>Emergency Visit</span>
+              </span>
+              <div className="switch-wrapper">
+                <input
+                  type="checkbox"
+                  id="isEmergency"
+                  name="isEmergency"
+                  checked={visit.isEmergency}
+                  onChange={e =>
+                    setVisit(prev => ({
+                      ...prev,
+                      isEmergency: e.target.checked,
+                    }))
+                  }
+                  className="switch-input"
+                />
+                <span className="switch-slider"></span>
+              </div>
+            </label>
+          </div>
         </form>
       )}
 
