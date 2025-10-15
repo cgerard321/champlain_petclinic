@@ -53,11 +53,6 @@ public class CustomerBillsControllerIntegrationTest {
         @Autowired
         private BillRepository billRepository;
 
-    @Test
-    void getBillsByCustomerId_shouldSucceed() {
-        Bill bill = buildBill();
-        bill.setOwnerFirstName("John");
-        bill.setOwnerLastName("Doe");
     @BeforeEach
     void setup() {
         // Fake user details
@@ -77,9 +72,12 @@ public class CustomerBillsControllerIntegrationTest {
 
 
     @Test
-        void getBillsByCustomerId_shouldSucceed() {
-                Bill bill = buildBill();
-                Publisher<Bill> setup = billRepository.deleteAll().thenMany(billRepository.save(bill));
+    void getBillsByCustomerId_shouldSucceed() {
+        Bill bill = buildBill();
+        bill.setOwnerFirstName("John");   // <-- set this
+        bill.setOwnerLastName("Doe");     // <-- set this
+
+        Publisher<Bill> setup = billRepository.deleteAll().thenMany(billRepository.save(bill));
 
         OwnerResponseDTO owner = new OwnerResponseDTO();
         owner.setOwnerId(bill.getCustomerId());
@@ -88,8 +86,6 @@ public class CustomerBillsControllerIntegrationTest {
 
         when(ownerClient.getOwnerByOwnerId(bill.getCustomerId()))
                 .thenReturn(Mono.just(owner));
-
-        Publisher<Bill> setup = billRepository.deleteAll().thenMany(billRepository.save(bill));
 
         StepVerifier.create(setup)
                 .expectNextCount(1)
