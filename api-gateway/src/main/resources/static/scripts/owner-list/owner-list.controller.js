@@ -3,45 +3,25 @@
 angular.module('ownerList')
     .controller('OwnerListController', ['$http', '$stateParams', '$scope', '$state', function ($http, $stateParams, $scope, $state) {
         var vm = this;
-        
+        /*------------------------------------------------------------*/
         vm.currentPage = $stateParams.page || 0;
         vm.pageSize = $stateParams.size || 5;
-        
+        /*------------------------------------------------------------*/
         vm.currentPageOnSite = parseInt(vm.currentPage) + 1;
-        
+        /*------------------------------------------------------------*/
         vm.ownerId = null;
         vm.firstName = null;
         vm.lastName = null;
         vm.phoneNumber = null;
         vm.city = null;
         vm.selectedSize = null;
-        
+        /*------------------------------------------------------------*/
         vm.searchActive = false;
-        
+        /*------------------------------------------------------------*/
         vm.baseURL = "api/gateway/owners/owners-pagination";
         vm.baseURLforTotalNumberOfOwnersByFiltering = "api/gateway/owners/owners-filtered-count";
 
-        vm.notification = {
-            show: false,
-            message: '',
-            type: 'info'
-        };
-
-        vm.showNotification = function(message, type) {
-            vm.notification.show = true;
-            vm.notification.message = message;
-            vm.notification.type = type;
-            
-            setTimeout(function() {
-                vm.hideNotification();
-            }, 5000);
-        };
-
-        vm.hideNotification = function() {
-            vm.notification.show = false;
-            vm.notification.message = '';
-        };
-
+        // Initial data load
         loadDefaultData();
 
         function loadTotalItemForDefaultData() {
@@ -62,6 +42,8 @@ angular.module('ownerList')
         }
 
         function loadDefaultData() {
+            // $state.transitionTo('owners', { page: vm.currentPage, size: vm.pageSize}, { notify: false });
+
             if(!vm.searchActive){
                 loadTotalItemForDefaultData().then(function (totalItems) {
                     vm.totalItems = totalItems;
@@ -78,6 +60,7 @@ angular.module('ownerList')
         }
 
         vm.searchOwnersByPaginationAndFilters = function (currentPage = 0, prevOrNextPressed = false) {
+            // Collect search parameters
             vm.selectedSize = document.getElementById("sizeInput").value;
 
             if(!prevOrNextPressed) {
@@ -87,14 +70,18 @@ angular.module('ownerList')
                 vm.phoneNumber = document.getElementById("phoneNumberInput").value;
                 vm.city = document.getElementById("cityInput").value;
 
+                // Check if all input fields are empty
                 if (checkIfAllInputFieldsAreEmptyOrNull(vm.ownerId, vm.firstName, vm.lastName, vm.phoneNumber, vm.city, vm.selectedSize)) {
-                    vm.showNotification("Oops! It seems like you forgot to enter any filter criteria. Please provide some filter input to continue.", 'warning');
+                    alert("Oops! It seems like you forgot to enter any filter criteria. Please provide some filter input to continue.");
                     return;
                 }
             }
 
+
+
             vm.searchActive = true;
 
+            // Construct the search URL
             var searchURL = vm.baseURL + "?page=" + currentPage.toString();
             var loadTotalNumberOfDataURL  = vm.baseURLforTotalNumberOfOwnersByFiltering + "?";
 
@@ -137,6 +124,7 @@ angular.module('ownerList')
                 vm.totalPages = Math.ceil(vm.totalItems / parseInt(vm.pageSize));
             });
 
+            // Rest of your data loading logic
             $http.get(searchURL)
                 .then(function (resp) {
                     vm.owners = resp.data;
@@ -187,7 +175,7 @@ angular.module('ownerList')
 
             loadDefaultData()
 
-            vm.showNotification("All filters have been cleared successfully.", 'success')
+            alert("All filters have been cleared successfully.")
         }
 
         vm.goNextPage = function () {
@@ -202,6 +190,7 @@ angular.module('ownerList')
                 } else {
                     loadDefaultData();
                 }
+
 
             }
         }
@@ -226,19 +215,24 @@ angular.module('ownerList')
         }
 
         function StringBuilder() {
+            // Initialize an empty array to store the string parts
             this.strings = [];
 
+            // Add a string to the array
             this.append = function (str) {
                 this.strings.push(str);
             };
 
+            // Convert the array to a single string and return it
             this.toString = function () {
                 return this.strings.join("");
             };
 
+            // Clear the contents of the string builder
             this.clear = function () {
                 this.strings = [];
             };
         }
 
     }]);
+

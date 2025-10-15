@@ -1,31 +1,12 @@
 'use strict';
 
+
+
 angular.module('ownerForm')
     .controller('OwnerFormController', ["$http", '$state', '$stateParams', function ($http, $state, $stateParams) {
         var self = this;
         var ownerId = $stateParams.ownerId || "";
         var method = $stateParams.method;
-
-        self.notification = {
-            show: false,
-            message: '',
-            type: 'info'
-        };
-
-        self.showNotification = function(message, type) {
-            self.notification.show = true;
-            self.notification.message = message;
-            self.notification.type = type;
-            
-            setTimeout(function() {
-                self.hideNotification();
-            }, 5000);
-        };
-
-        self.hideNotification = function() {
-            self.notification.show = false;
-            self.notification.message = '';
-        };
 
         if (!ownerId) {
             self.owner = {};
@@ -58,9 +39,11 @@ angular.module('ownerForm')
             }, function (response) {
                 var error = response.data;
                 error.errors = error.errors || [];
-                self.showNotification(error.error + "\r\n" + error.errors.map(function (e) {
+                alert(error.error + "\r\n" + error.errors.map(function (e) {
                     return e.field + ": " + e.defaultMessage;
-                }).join("\r\n"), 'error');
+                }).join("\r\n"));
             });
         };
     }]);
+
+
