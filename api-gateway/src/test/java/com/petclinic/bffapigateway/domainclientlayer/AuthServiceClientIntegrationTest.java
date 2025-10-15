@@ -9,8 +9,12 @@ import com.petclinic.bffapigateway.dtos.Vets.VetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.Workday;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
+import com.petclinic.bffapigateway.exceptions.InvalidInputException;
+import com.petclinic.bffapigateway.utils.Rethrower;
 import com.petclinic.bffapigateway.utils.Security.Variables.SecurityConst;
 import com.petclinic.bffapigateway.utils.Utility;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import lombok.RequiredArgsConstructor;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -31,10 +35,13 @@ import reactor.test.StepVerifier;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static reactor.core.publisher.Mono.when;
 
 /**
@@ -62,6 +69,9 @@ public class AuthServiceClientIntegrationTest {
 
     @MockBean
     private Utility utility;
+
+    @MockBean
+    private Rethrower rethrower;
 
     UserDetails userDetails = UserDetails.builder()
             .username("username")
@@ -108,17 +118,22 @@ public class AuthServiceClientIntegrationTest {
             .build();
 
     @BeforeEach
-    void setup() {
+    void setup() throws Exception {
 
         customersServiceClient = Mockito.mock(CustomersServiceClient.class);
         vetsServiceClient = Mockito.mock(VetsServiceClient.class);
         cartServiceClient = Mockito.mock(CartServiceClient.class);
+        rethrower = Mockito.mock(Rethrower.class);
         server = new MockWebServer();
         authServiceClient = new AuthServiceClient(
                 WebClient.builder(),
                 customersServiceClient, vetsServiceClient, server.getHostName(),
                 String.valueOf(server.getPort()), cartServiceClient);
         objectMapper = new ObjectMapper();
+
+        ReflectionTestUtils.setField(authServiceClient, "rethrower", rethrower);
+
+        Mockito.reset(customersServiceClient, vetsServiceClient, cartServiceClient, rethrower);
     }
 
     @AfterEach
@@ -213,66 +228,6 @@ public class AuthServiceClientIntegrationTest {
 
     }
 
-//
-////    @Test
-//    @DisplayName("Given valid Login, return JWT")
-//    void valid_login() throws Exception {
-//
-//        final UserDetails userDetails = objectMapper.convertValue(USER_REGISTER, UserDetails.class)
-//                .toBuilder()
-//                .id(1)
-//                .roles(Collections.emptySet())
-//                .password(null)
-//                .build();
-//
-//        final String asString = objectMapper.writeValueAsString(userDetails);
-//
-//        final Login login = Login.builder()
-//                .email(USER_REGISTER.getEmail())
-//                .password(USER_REGISTER.getPassword())
-//                .build();
-//        final String token = "some.valid.token";
-//
-//        final MockResponse mockResponse = new MockResponse();
-//        mockResponse
-//                .setHeader("Content-Type", "application/json")
-//                .setHeader("Authorization", token)
-//                .setBody(asString);
-//
-//        server.enqueue(mockResponse);
-//
-//        HttpEntity<UserPasswordLessDTO> response = authServiceClient.login(login);
-//
-//        assertEquals(USER_REGISTER.getEmail(), block.getT2().getEmail());
-//        assertEquals(USER_REGISTER.getUsername(), block.getT2().getUsername());
-//        assertNull(block.getT2().getPassword());
-//        assertNotNull(block.getT2().getId());
-//        assertEquals(0, block.getT2().getRoles().size());
-//        assertEquals(token, block.getT1());
-//    }
-
-//    @Test
-//    @DisplayName("Given invalid Login, throw 401")
-//    void invalid_login() throws JsonProcessingException {
-//
-//        final String errorMessage = "Unauthorized";
-//        final String asString = objectMapper.writeValueAsString(new HttpErrorInfo(UNAUTHORIZED.value(), errorMessage));
-//
-//        final MockResponse mockResponse = new MockResponse();
-//        mockResponse
-//                .setHeader("Content-Type", "application/json")
-//                .setBody(asString)
-//                .status("HTTP/1.1 401 Unauthorized");
-//
-//        server.enqueue(mockResponse);
-//
-//        final GenericHttpException ex = assertThrows(GenericHttpException.class, () -> authServiceClient.login(new Login()).block());
-//
-//        assertEquals(UNAUTHORIZED, ex.getHttpStatus());
-//        assertEquals(errorMessage, ex.getMessage());
-//    }
-
-
     @Test
     @DisplayName("Should validate a token")
     void ShouldValidateToken_ShouldReturnOk(){
@@ -285,7 +240,6 @@ public class AuthServiceClientIntegrationTest {
 
         final Mono<Void> validatedTokenResponse = authServiceClient.validateToken("token").then();
 
-        // check status response in step verifier
         StepVerifier.create(validatedTokenResponse)
                 .expectNextCount(0)
                 .verifyComplete();
@@ -308,13 +262,10 @@ public class AuthServiceClientIntegrationTest {
 
         final Mono<Void> validatedTokenResponse = authServiceClient.validateToken("inavlidToken").then();
 
-        // check status response in step verifier
         StepVerifier.create(validatedTokenResponse)
                 .expectNextCount(0)
                 .verifyError();
     }
-
-
 
     @Test
     @DisplayName("Should login a user")
@@ -333,7 +284,6 @@ public class AuthServiceClientIntegrationTest {
 
         final Mono<ResponseEntity<UserPasswordLessDTO>> validatedTokenResponse = authServiceClient.login(Mono.just(login));
 
-        // check status response in step verifier
         StepVerifier.create(Mono.just(validatedTokenResponse))
                 .expectNextCount(1)
                 .verifyComplete();
@@ -361,7 +311,6 @@ public class AuthServiceClientIntegrationTest {
 
         StepVerifier.create(logoutResponse)
                 .consumeNextWith(responseEntity -> {
-                    // Verify the HTTP status code directly
                     assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
                 })
                 .verifyComplete();
@@ -384,7 +333,6 @@ public class AuthServiceClientIntegrationTest {
 
         final Mono<ResponseEntity<Void>> validatedTokenResponse = authServiceClient.sendForgottenEmail(Mono.just(emailRequestDTO));
 
-        // check status response in step verifier
         StepVerifier.create(Mono.just(validatedTokenResponse))
                 .expectNextCount(1)
                 .verifyComplete();
@@ -407,7 +355,6 @@ public class AuthServiceClientIntegrationTest {
 
         final Mono<ResponseEntity<Void>> validatedTokenResponse = authServiceClient.changePassword(Mono.just(pwdChange));
 
-        // check status response in step verifier
         StepVerifier.create(Mono.just(validatedTokenResponse))
                 .expectNextCount(1)
                 .verifyComplete();
@@ -438,7 +385,6 @@ public class AuthServiceClientIntegrationTest {
 
         final Flux<UserDetails> validatedTokenResponse = authServiceClient.getUsers(validToken);
 
-        // check status response in step verifier
         StepVerifier.create(validatedTokenResponse)
                 .expectNextCount(2)
                 .verifyComplete();
@@ -447,7 +393,6 @@ public class AuthServiceClientIntegrationTest {
     @Test
     @DisplayName("Should return user details when valid userId is provided")
     void shouldReturnUserDetails_WhenValidUserIdIsProvided() throws IOException {
-        // Arrange
         UserDetails expectedUser = UserDetails.builder()
                 .username("username")
                 .userId("userId")
@@ -460,10 +405,8 @@ public class AuthServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(new ObjectMapper().writeValueAsString(expectedUser)));
 
-        // Act
         Mono<UserDetails> result = authServiceClient.getUserById(jwtToken, userId);
 
-        // Assert
         StepVerifier.create(result)
                 .expectNext(expectedUser)
                 .verifyComplete();
@@ -515,7 +458,6 @@ public class AuthServiceClientIntegrationTest {
 
         final Mono<Void> verifyUser = authServiceClient.verifyUser("token").then();
 
-        // check status response in step verifier
         StepVerifier.create(verifyUser)
                 .expectNextCount(0)
                 .verifyComplete();
@@ -535,7 +477,6 @@ public class AuthServiceClientIntegrationTest {
 
         final Mono<Void> validatedTokenResponse = authServiceClient.verifyUser("invalidToken").then();
 
-        // check status response in step verifier
         StepVerifier.create(validatedTokenResponse)
                 .expectNextCount(0)
                 .verifyError();
@@ -544,7 +485,6 @@ public class AuthServiceClientIntegrationTest {
     @Test
     @DisplayName("Should create a vet user")
     void shouldCreateVetUser() throws IOException {
-        // Arrange
         RegisterVet registerVet = RegisterVet.builder()
                 .username("username")
                 .password("password")
@@ -552,17 +492,14 @@ public class AuthServiceClientIntegrationTest {
                 .build();
         Mono<RegisterVet> registerVetMono = Mono.just(registerVet);
 
-        // Set up the MockWebServer to return a specific response
         final MockResponse mockResponse = new MockResponse();
         mockResponse
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(200);
         server.enqueue(mockResponse);
 
-        // Act
         Mono<VetResponseDTO> result = authServiceClient.createVetUser(registerVetMono);
 
-        // Assert
         StepVerifier.create(result)
                 .expectNextCount(0)
                 .verifyComplete();
@@ -581,7 +518,6 @@ public class AuthServiceClientIntegrationTest {
 
         final Mono<Void> validatedTokenResponse = authServiceClient.deleteUser(jwtToken, userId);
 
-        // check status response in step verifier
         StepVerifier.create(Mono.just(validatedTokenResponse))
                 .expectNextCount(1)
                 .verifyComplete();
@@ -667,7 +603,6 @@ public class AuthServiceClientIntegrationTest {
 
         final Mono<Void> deleteUserResponse = authServiceClient.deleteUser(jwtToken, userId);
 
-        // check status response in step verifier
         StepVerifier.create(deleteUserResponse)
                 .expectErrorMatches(throwable -> throwable instanceof GenericHttpException &&
                         ((GenericHttpException) throwable).getHttpStatus() == HttpStatus.BAD_REQUEST)
@@ -765,5 +700,1268 @@ public class AuthServiceClientIntegrationTest {
         StepVerifier.create(roleMono)
                 .expectNextMatches(r -> r.getName().equals("ROLE_ADMIN"))
                 .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Should update user successfully")
+    void shouldUpdateUser() throws Exception {
+        String userId = "user123";
+        String jwtToken = "valid-jwt-token";
+        UserPasswordLessDTO updateRequest = UserPasswordLessDTO.builder()
+                .userId(userId)
+                .email("updated@example.com")
+                .username("updateduser")
+                .build();
+
+        UserPasswordLessDTO updatedUser = UserPasswordLessDTO.builder()
+                .userId(userId)
+                .email("updated@example.com")
+                .username("updateduser")
+                .build();
+
+        String userJson = new ObjectMapper().writeValueAsString(updatedUser);
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200)
+                .setBody(userJson);
+
+        server.enqueue(mockResponse);
+
+        Mono<UserPasswordLessDTO> result = authServiceClient.updateUser(jwtToken, updateRequest, userId);
+
+        StepVerifier.create(result)
+                .expectNextMatches(user -> user.getUserId().equals(userId))
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Should update username successfully")
+    void shouldUpdateUsername() throws Exception {
+        String userId = "user123";
+        String jwtToken = "valid-jwt-token";
+        String newUsername = "newusername";
+
+        UserPasswordLessDTO updatedUser = UserPasswordLessDTO.builder()
+                .userId(userId)
+                .email("user@example.com")
+                .username(newUsername)
+                .build();
+
+        String userJson = new ObjectMapper().writeValueAsString(updatedUser);
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200)
+                .setBody("Username updated successfully");
+
+        server.enqueue(mockResponse);
+
+        Mono<String> result = authServiceClient.updateUsername(userId, newUsername, jwtToken);
+
+        StepVerifier.create(result)
+                .expectNextMatches(response -> response.contains("Username updated successfully"))
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Should check username availability - available")
+    void shouldCheckUsernameAvailability_Available() throws Exception {
+        String username = "availableuser";
+        String jwtToken = "valid-jwt-token";
+
+        UserDetails existingUser = UserDetails.builder()
+                .username("existinguser")
+                .userId("user123")
+                .email("existing@example.com")
+                .build();
+
+        String usersJson = new ObjectMapper().writeValueAsString(List.of(existingUser));
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200)
+                .setBody(usersJson);
+
+        server.enqueue(mockResponse);
+
+        Mono<Boolean> result = authServiceClient.checkUsernameAvailability(username, jwtToken);
+
+        StepVerifier.create(result)
+                .expectNextMatches(available -> available == true)
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Should check username availability - not available")
+    void shouldCheckUsernameAvailability_NotAvailable() throws Exception {
+        String username = "existinguser";
+        String jwtToken = "valid-jwt-token";
+
+        UserDetails existingUser = UserDetails.builder()
+                .username("existinguser")
+                .userId("user123")
+                .email("existing@example.com")
+                .build();
+
+        String usersJson = new ObjectMapper().writeValueAsString(List.of(existingUser));
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200)
+                .setBody(usersJson);
+
+        server.enqueue(mockResponse);
+
+        Mono<Boolean> result = authServiceClient.checkUsernameAvailability(username, jwtToken);
+
+        StepVerifier.create(result)
+                .expectNextMatches(available -> available == false)
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Should add vet user successfully")
+    void shouldAddVetUser() throws Exception {
+        UserPasswordLessDTO userResponse = UserPasswordLessDTO.builder()
+                .userId("vet123")
+                .email("vet@example.com")
+                .username("testvet")
+                .build();
+
+        VetResponseDTO vetResponse = VetResponseDTO.builder()
+                .vetId("vet123")
+                .firstName("John")
+                .lastName("Doe")
+                .email("vet@example.com")
+                .active(true)
+                .build();
+
+        String userJson = new ObjectMapper().writeValueAsString(userResponse);
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200)
+                .setBody(userJson);
+
+        server.enqueue(mockResponse);
+
+        when(vetsServiceClient.addVet(any(Mono.class))).thenReturn(Mono.just(vetResponse));
+        when(vetsServiceClient.deleteVet(any())).thenReturn(Mono.empty());
+
+        Mono<VetResponseDTO> result = authServiceClient.addVetUser(Mono.just(REGISTER_VETERINARIAN));
+
+        StepVerifier.create(result)
+                .expectNextMatches(vet -> vet.getVetId().equals("vet123"))
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Should create user with successful owner creation")
+    void shouldCreateUserWithOwnerCreation() throws Exception {
+        UserPasswordLessDTO userResponse = UserPasswordLessDTO.builder()
+                .userId("user123")
+                .email("user@example.com")
+                .username("testuser")
+                .build();
+
+        OwnerResponseDTO ownerResponse = OwnerResponseDTO.builder()
+                .ownerId("user123")
+                .firstName("John")
+                .lastName("Doe")
+                .address("123 Main St")
+                .city("Anytown")
+                .telephone("555-1234")
+                .pets(List.of())
+                .build();
+
+        String userJson = new ObjectMapper().writeValueAsString(userResponse);
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200)
+                .setBody(userJson);
+
+        server.enqueue(mockResponse);
+
+        when(customersServiceClient.createOwner(any(OwnerRequestDTO.class))).thenReturn(Mono.just(ownerResponse));
+        when(customersServiceClient.deleteOwner(any())).thenReturn(Mono.empty());
+
+        Mono<OwnerResponseDTO> result = authServiceClient.createUser(Mono.just(USER_REGISTER));
+
+        StepVerifier.create(result)
+                .expectNextMatches(owner -> owner.getOwnerId().equals("user123"))
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Should create user using V2 endpoint with cart assignment")
+    void shouldCreateUserUsingV2EndpointWithCartAssignment() throws Exception {
+        UserPasswordLessDTO userResponse = UserPasswordLessDTO.builder()
+                .userId("user123")
+                .email("user@example.com")
+                .username("testuser")
+                .build();
+
+        OwnerResponseDTO ownerResponse = OwnerResponseDTO.builder()
+                .ownerId("user123")
+                .firstName("John")
+                .lastName("Doe")
+                .address("123 Main St")
+                .city("Anytown")
+                .telephone("555-1234")
+                .pets(List.of())
+                .build();
+
+        String userJson = new ObjectMapper().writeValueAsString(userResponse);
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200)
+                .setBody(userJson);
+
+        server.enqueue(mockResponse);
+
+        when(customersServiceClient.addOwner(any(Mono.class))).thenReturn(Mono.just(ownerResponse));
+        when(customersServiceClient.deleteOwner(any())).thenReturn(Mono.empty());
+        when(cartServiceClient.assignCartToUser(any())).thenReturn(Mono.empty());
+
+        Mono<OwnerResponseDTO> result = authServiceClient.createUserUsingV2Endpoint(Mono.just(USER_REGISTER));
+
+        StepVerifier.create(result)
+                .expectNextMatches(owner -> owner.getOwnerId().equals("user123"))
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Should create vet user with successful vet creation")
+    void shouldCreateVetUserWithVetCreation() throws Exception {
+        UserPasswordLessDTO userResponse = UserPasswordLessDTO.builder()
+                .userId("vet123")
+                .email("vet@example.com")
+                .username("testvet")
+                .build();
+
+        VetResponseDTO vetResponse = VetResponseDTO.builder()
+                .vetId("vet123")
+                .firstName("John")
+                .lastName("Doe")
+                .email("vet@example.com")
+                .active(true)
+                .build();
+
+        String userJson = new ObjectMapper().writeValueAsString(userResponse);
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200)
+                .setBody(userJson);
+
+        server.enqueue(mockResponse);
+
+        when(vetsServiceClient.createVet(any(Mono.class))).thenReturn(Mono.just(vetResponse));
+        when(vetsServiceClient.deleteVet(any())).thenReturn(Mono.empty());
+
+        Mono<VetResponseDTO> result = authServiceClient.createVetUser(Mono.just(REGISTER_VETERINARIAN));
+
+        StepVerifier.create(result)
+                .expectNextMatches(vet -> vet.getVetId().equals("vet123"))
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Should handle 4xx error in getUserById")
+    void shouldHandle4xxErrorInGetUserById() throws Exception {
+        String userId = "invalid-user";
+        String jwtToken = "valid-jwt-token";
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(404)
+                .setBody("{\"message\": \"User not found\"}");
+
+        server.enqueue(mockResponse);
+
+        when(rethrower.rethrow(any(ClientResponse.class), any())).thenThrow(new GenericHttpException("User not found", HttpStatus.NOT_FOUND));
+
+        Mono<UserDetails> result = authServiceClient.getUserById(jwtToken, userId);
+
+        StepVerifier.create(result)
+                .verifyError(GenericHttpException.class);
+    }
+
+    @Test
+    @DisplayName("Should handle 4xx error in createUser")
+    void shouldHandle4xxErrorInCreateUser() throws Exception {
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(400)
+                .setBody("{\"message\": \"Invalid registration data\"}");
+
+        server.enqueue(mockResponse);
+
+        when(rethrower.rethrow(any(ClientResponse.class), any())).thenThrow(new GenericHttpException("Invalid registration data", HttpStatus.BAD_REQUEST));
+
+        Mono<OwnerResponseDTO> result = authServiceClient.createUser(Mono.just(USER_REGISTER));
+
+        StepVerifier.create(result)
+                .verifyError(GenericHttpException.class);
+    }
+
+    @Test
+    @DisplayName("Should handle error cleanup in createUser")
+    void shouldHandleErrorCleanupInCreateUser() throws Exception {
+        UserPasswordLessDTO userResponse = UserPasswordLessDTO.builder()
+                .userId("user123")
+                .email("user@example.com")
+                .username("testuser")
+                .build();
+
+        String userJson = new ObjectMapper().writeValueAsString(userResponse);
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200)
+                .setBody(userJson);
+
+        server.enqueue(mockResponse);
+
+        when(customersServiceClient.createOwner(any(OwnerRequestDTO.class))).thenReturn(Mono.error(new RuntimeException("Service error")));
+        when(customersServiceClient.deleteOwner(any())).thenReturn(Mono.empty());
+
+        Mono<OwnerResponseDTO> result = authServiceClient.createUser(Mono.just(USER_REGISTER));
+
+        StepVerifier.create(result)
+                .verifyError(RuntimeException.class);
+    }
+
+    @Test
+    @DisplayName("Should handle error cleanup in createVetUser")
+    void shouldHandleErrorCleanupInCreateVetUser() throws Exception {
+        UserPasswordLessDTO userResponse = UserPasswordLessDTO.builder()
+                .userId("vet123")
+                .email("vet@example.com")
+                .username("testvet")
+                .build();
+
+        String userJson = new ObjectMapper().writeValueAsString(userResponse);
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200)
+                .setBody(userJson);
+
+        server.enqueue(mockResponse);
+
+        when(vetsServiceClient.createVet(any(Mono.class))).thenReturn(Mono.error(new RuntimeException("Service error")));
+        when(vetsServiceClient.deleteVet(any())).thenReturn(Mono.empty());
+
+        Mono<VetResponseDTO> result = authServiceClient.createVetUser(Mono.just(REGISTER_VETERINARIAN));
+
+        StepVerifier.create(result)
+                .verifyError(RuntimeException.class);
+    }
+
+    @Test
+    @DisplayName("Should handle error cleanup in addVetUser")
+    void shouldHandleErrorCleanupInAddVetUser() throws Exception {
+        UserPasswordLessDTO userResponse = UserPasswordLessDTO.builder()
+                .userId("vet123")
+                .email("vet@example.com")
+                .username("testvet")
+                .build();
+
+        String userJson = new ObjectMapper().writeValueAsString(userResponse);
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200)
+                .setBody(userJson);
+
+        server.enqueue(mockResponse);
+
+        when(vetsServiceClient.addVet(any(Mono.class))).thenReturn(Mono.error(new RuntimeException("Service error")));
+        when(vetsServiceClient.deleteVet(any())).thenReturn(Mono.empty());
+
+        Mono<VetResponseDTO> result = authServiceClient.addVetUser(Mono.just(REGISTER_VETERINARIAN));
+
+        StepVerifier.create(result)
+                .verifyError(RuntimeException.class);
+    }
+
+    @Test
+    @DisplayName("Should handle error cleanup in createUserUsingV2Endpoint")
+    void shouldHandleErrorCleanupInCreateUserUsingV2Endpoint() throws Exception {
+        UserPasswordLessDTO userResponse = UserPasswordLessDTO.builder()
+                .userId("user123")
+                .email("user@example.com")
+                .username("testuser")
+                .build();
+
+        String userJson = new ObjectMapper().writeValueAsString(userResponse);
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200)
+                .setBody(userJson);
+
+        server.enqueue(mockResponse);
+
+        when(customersServiceClient.addOwner(any(Mono.class))).thenReturn(Mono.error(new RuntimeException("Service error")));
+        when(customersServiceClient.deleteOwner(any())).thenReturn(Mono.empty());
+
+        Mono<OwnerResponseDTO> result = authServiceClient.createUserUsingV2Endpoint(Mono.just(USER_REGISTER));
+
+        StepVerifier.create(result)
+                .verifyError(RuntimeException.class);
+    }
+
+    @Test
+    @DisplayName("Should handle 5xx error in changePassword")
+    void shouldHandle5xxErrorInChangePassword() throws Exception {
+        UserPasswordAndTokenRequestModel changePasswordRequest = UserPasswordAndTokenRequestModel.builder()
+                .token("token")
+                .password("newpass")
+                .build();
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(500)
+                .setBody("{\"message\": \"Internal server error\"}");
+
+        server.enqueue(mockResponse);
+
+
+        Mono<ResponseEntity<Void>> result = authServiceClient.changePassword(Mono.just(changePasswordRequest));
+
+        StepVerifier.create(result)
+                .verifyError(InvalidInputException.class);
+    }
+
+    @Test
+    @DisplayName("Should handle 5xx error in deleteUser")
+    void shouldHandle5xxErrorInDeleteUser() throws Exception {
+        String userId = "user123";
+        String jwtToken = "valid-jwt-token";
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(500)
+                .setBody("{\"message\": \"Internal server error\"}");
+
+        server.enqueue(mockResponse);
+
+
+        Mono<Void> result = authServiceClient.deleteUser(jwtToken, userId);
+
+        StepVerifier.create(result)
+                .verifyError(GenericHttpException.class);
+    }
+
+    @Test
+    @DisplayName("Should handle 5xx error in validateToken")
+    void shouldHandle5xxErrorInValidateToken() throws Exception {
+        String jwtToken = "valid-jwt-token";
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(500)
+                .setBody("{\"message\": \"Internal server error\"}");
+
+        server.enqueue(mockResponse);
+
+
+        Mono<ResponseEntity<TokenResponseDTO>> result = authServiceClient.validateToken(jwtToken);
+
+        StepVerifier.create(result)
+                .verifyError(InvalidInputException.class);
+    }
+
+    @Test
+    @DisplayName("Should handle 5xx error in sendForgottenEmail")
+    void shouldHandle5xxErrorInSendForgottenEmail() throws Exception {
+        UserEmailRequestDTO forgotPasswordRequest = UserEmailRequestDTO.builder()
+                .email("user@example.com")
+                .build();
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(500)
+                .setBody("{\"message\": \"Internal server error\"}");
+
+        server.enqueue(mockResponse);
+
+
+        Mono<ResponseEntity<Void>> result = authServiceClient.sendForgottenEmail(Mono.just(forgotPasswordRequest));
+
+        StepVerifier.create(result)
+                .verifyError(InvalidInputException.class);
+    }
+
+    @Test
+    @DisplayName("Should handle 5xx error in login")
+    void shouldHandle5xxErrorInLogin() throws Exception {
+        Login loginRequest = Login.builder()
+                .email("testuser@example.com")
+                .password("password")
+                .build();
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(500)
+                .setBody("{\"message\": \"Internal server error\"}");
+
+        server.enqueue(mockResponse);
+
+
+        Mono<ResponseEntity<UserPasswordLessDTO>> result = authServiceClient.login(Mono.just(loginRequest));
+
+        StepVerifier.create(result)
+                .verifyError(InvalidInputException.class);
+    }
+
+    @Test
+    @DisplayName("Should handle 5xx error in enableUser")
+    void shouldHandle5xxErrorInEnableUser() throws Exception {
+        String userId = "user123";
+        String jwtToken = "valid-jwt-token";
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(500)
+                .setBody("{\"message\": \"Internal server error\"}");
+
+        server.enqueue(mockResponse);
+
+
+        Mono<Void> result = authServiceClient.enableUser(userId, jwtToken);
+
+        StepVerifier.create(result)
+                .verifyError(GenericHttpException.class);
+    }
+
+    @Test
+    @DisplayName("Should handle 5xx error in disableUser")
+    void shouldHandle5xxErrorInDisableUser() throws Exception {
+        String userId = "user123";
+        String jwtToken = "valid-jwt-token";
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(500)
+                .setBody("{\"message\": \"Internal server error\"}");
+
+        server.enqueue(mockResponse);
+
+
+        Mono<Void> result = authServiceClient.disableUser(userId, jwtToken);
+
+        StepVerifier.create(result)
+                .verifyError(GenericHttpException.class);
+    }
+
+    @Test
+    @DisplayName("Should update user roles successfully")
+    void shouldUpdateUsersRoles() throws Exception {
+        String userId = "user123";
+        String jwtToken = "valid-jwt-token";
+        RolesChangeRequestDTO rolesRequest = RolesChangeRequestDTO.builder()
+                .roles(List.of("ADMIN", "USER"))
+                .build();
+
+        UserResponseDTO userResponse = UserResponseDTO.builder()
+                .id(123L)
+                .email("user@example.com")
+                .username("testuser")
+                .roles(Set.of(new Role(1, "ADMIN"), new Role(2, "USER")))
+                .build();
+
+        String userJson = new ObjectMapper().writeValueAsString(userResponse);
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200)
+                .setBody(userJson);
+
+        server.enqueue(mockResponse);
+
+        Mono<UserResponseDTO> result = authServiceClient.updateUsersRoles(userId, rolesRequest, jwtToken);
+
+        StepVerifier.create(result)
+                .expectNextMatches(user -> user.getId() == 123L && user.getRoles().stream().anyMatch(role -> role.getName().equals("ADMIN")))
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Should handle 4xx error in updateUsersRoles")
+    void shouldHandle4xxErrorInUpdateUsersRoles() throws Exception {
+        String userId = "user123";
+        String jwtToken = "valid-jwt-token";
+        RolesChangeRequestDTO rolesRequest = RolesChangeRequestDTO.builder()
+                .roles(List.of("ADMIN", "USER"))
+                .build();
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(400)
+                .setBody("{\"message\": \"Invalid roles\"}");
+
+        server.enqueue(mockResponse);
+
+        when(rethrower.rethrow(any(ClientResponse.class), any())).thenThrow(new GenericHttpException("Invalid roles", HttpStatus.BAD_REQUEST));
+
+        Mono<UserResponseDTO> result = authServiceClient.updateUsersRoles(userId, rolesRequest, jwtToken);
+
+        StepVerifier.create(result)
+                .verifyError(GenericHttpException.class);
+    }
+
+    @Test
+    @DisplayName("Should verify user using V2 endpoint successfully")
+    void shouldVerifyUserUsingV2Endpoint() throws Exception {
+        String jwtToken = "valid-jwt-token";
+
+        UserDetails userDetails = UserDetails.builder()
+                .userId("user123")
+                .email("user@example.com")
+                .username("testuser")
+                .roles(Set.of(new Role(1, "USER")))
+                .build();
+
+        String userJson = new ObjectMapper().writeValueAsString(userDetails);
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200)
+                .setBody(userJson);
+
+        server.enqueue(mockResponse);
+
+        Mono<ResponseEntity<UserDetails>> result = authServiceClient.verifyUserUsingV2Endpoint(jwtToken);
+
+        StepVerifier.create(result)
+                .expectNextMatches(response -> response.getBody() != null && response.getBody().getEmail().equals("user@example.com"))
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Should handle 4xx error in verifyUserUsingV2Endpoint")
+    void shouldHandle4xxErrorInVerifyUserUsingV2Endpoint() throws Exception {
+        String jwtToken = "invalid-jwt-token";
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(401)
+                .setBody("{\"message\": \"Invalid token\"}");
+
+        server.enqueue(mockResponse);
+
+        when(rethrower.rethrow(any(ClientResponse.class), any())).thenThrow(new GenericHttpException("Invalid token", HttpStatus.UNAUTHORIZED));
+
+        Mono<ResponseEntity<UserDetails>> result = authServiceClient.verifyUserUsingV2Endpoint(jwtToken);
+
+        StepVerifier.create(result)
+                .verifyError(GenericHttpException.class);
+    }
+
+    @Test
+    @DisplayName("Should get all users successfully")
+    void shouldGetAllUsers() throws Exception {
+        String jwtToken = "valid-jwt-token";
+
+        UserDetails user1 = UserDetails.builder()
+                .userId("user1")
+                .email("user1@example.com")
+                .username("user1")
+                .roles(Set.of(new Role(1, "USER")))
+                .build();
+
+        UserDetails user2 = UserDetails.builder()
+                .userId("user2")
+                .email("user2@example.com")
+                .username("user2")
+                .roles(Set.of(new Role(1, "ADMIN")))
+                .build();
+
+        String usersJson = new ObjectMapper().writeValueAsString(List.of(user1, user2));
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200)
+                .setBody(usersJson);
+
+        server.enqueue(mockResponse);
+
+        Flux<UserDetails> result = authServiceClient.getAllUsers(jwtToken);
+
+        StepVerifier.create(result)
+                .expectNextMatches(user -> user.getEmail().equals("user1@example.com"))
+                .expectNextMatches(user -> user.getEmail().equals("user2@example.com"))
+                .verifyComplete();
+    }
+
+
+    @Test
+    @DisplayName("Should handle 4xx error in createUserUsingV2Endpoint")
+    void shouldHandle4xxErrorInCreateUserUsingV2Endpoint() throws Exception {
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(400)
+                .setBody("{\"message\": \"Invalid registration data\"}");
+
+        server.enqueue(mockResponse);
+
+        when(rethrower.rethrow(any(ClientResponse.class), any())).thenThrow(new GenericHttpException("Invalid registration data", HttpStatus.BAD_REQUEST));
+
+        Mono<OwnerResponseDTO> result = authServiceClient.createUserUsingV2Endpoint(Mono.just(USER_REGISTER));
+
+        StepVerifier.create(result)
+                .verifyError(GenericHttpException.class);
+    }
+
+    @Test
+    @DisplayName("Should handle 4xx error in createVetUser")
+    void shouldHandle4xxErrorInCreateVetUser() throws Exception {
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(400)
+                .setBody("{\"message\": \"Invalid vet registration data\"}");
+
+        server.enqueue(mockResponse);
+
+        when(rethrower.rethrow(any(ClientResponse.class), any())).thenThrow(new GenericHttpException("Invalid vet registration data", HttpStatus.BAD_REQUEST));
+
+        Mono<VetResponseDTO> result = authServiceClient.createVetUser(Mono.just(REGISTER_VETERINARIAN));
+
+        StepVerifier.create(result)
+                .verifyError(GenericHttpException.class);
+    }
+
+    @Test
+    @DisplayName("Should handle 4xx error in addVetUser")
+    void shouldHandle4xxErrorInAddVetUser() throws Exception {
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(400)
+                .setBody("{\"message\": \"Invalid vet registration data\"}");
+
+        server.enqueue(mockResponse);
+
+        when(rethrower.rethrow(any(ClientResponse.class), any())).thenThrow(new GenericHttpException("Invalid vet registration data", HttpStatus.BAD_REQUEST));
+
+        Mono<VetResponseDTO> result = authServiceClient.addVetUser(Mono.just(REGISTER_VETERINARIAN));
+
+        StepVerifier.create(result)
+                .verifyError(GenericHttpException.class);
+    }
+
+    @Test
+    @DisplayName("Should handle 4xx error in createInventoryManagerUser")
+    void shouldHandle4xxErrorInCreateInventoryManagerUser() throws Exception {
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(400)
+                .setBody("{\"message\": \"Invalid inventory manager registration data\"}");
+
+        server.enqueue(mockResponse);
+
+        when(rethrower.rethrow(any(ClientResponse.class), any())).thenThrow(new GenericHttpException("Invalid inventory manager registration data", HttpStatus.BAD_REQUEST));
+
+        Mono<UserPasswordLessDTO> result = authServiceClient.createInventoryMangerUser(Mono.just(REGISTER_INVENTORY_MANAGER));
+
+        StepVerifier.create(result)
+                .verifyError(GenericHttpException.class);
+    }
+
+    @Test
+    @DisplayName("Should handle 4xx error in updateUser")
+    void shouldHandle4xxErrorInUpdateUser() throws Exception {
+        String userId = "user123";
+        String jwtToken = "valid-jwt-token";
+        UserPasswordLessDTO updateRequest = UserPasswordLessDTO.builder()
+                .userId(userId)
+                .email("updated@example.com")
+                .username("updateduser")
+                .build();
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(400)
+                .setBody("{\"message\": \"Invalid update data\"}");
+
+        server.enqueue(mockResponse);
+
+        when(rethrower.rethrow(any(ClientResponse.class), any())).thenThrow(new GenericHttpException("Invalid update data", HttpStatus.BAD_REQUEST));
+
+        Mono<UserPasswordLessDTO> result = authServiceClient.updateUser(jwtToken, updateRequest, userId);
+
+        StepVerifier.create(result)
+                .verifyError(GenericHttpException.class);
+    }
+
+    @Test
+    @DisplayName("Should handle 4xx error in updateUsername")
+    void shouldHandle4xxErrorInUpdateUsername() throws Exception {
+        String userId = "user123";
+        String jwtToken = "valid-jwt-token";
+        String newUsername = "newusername";
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(400)
+                .setBody("{\"message\": \"Username already exists\"}");
+
+        server.enqueue(mockResponse);
+
+        when(rethrower.rethrow(any(ClientResponse.class), any())).thenThrow(new GenericHttpException("Username already exists", HttpStatus.BAD_REQUEST));
+
+        Mono<String> result = authServiceClient.updateUsername(userId, newUsername, jwtToken);
+
+        StepVerifier.create(result)
+                .verifyError(GenericHttpException.class);
+    }
+
+    @Test
+    @DisplayName("Should handle 4xx error in checkUsernameAvailability")
+    void shouldHandle4xxErrorInCheckUsernameAvailability() throws Exception {
+        String username = "testuser";
+        String jwtToken = "valid-jwt-token";
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(403)
+                .setBody("{\"message\": \"Access denied\"}");
+
+        server.enqueue(mockResponse);
+
+        when(rethrower.rethrow(any(ClientResponse.class), any())).thenThrow(new GenericHttpException("Access denied", HttpStatus.FORBIDDEN));
+
+        Mono<Boolean> result = authServiceClient.checkUsernameAvailability(username, jwtToken);
+
+        StepVerifier.create(result)
+                .verifyError(GenericHttpException.class);
+    }
+
+    @Test
+    @DisplayName("Should handle 4xx error in changePassword")
+    void shouldHandle4xxErrorInChangePassword() throws Exception {
+        UserPasswordAndTokenRequestModel changePasswordRequest = UserPasswordAndTokenRequestModel.builder()
+                .token("token")
+                .password("newpass")
+                .build();
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(400)
+                .setBody("{\"message\": \"Invalid password\"}");
+
+        server.enqueue(mockResponse);
+
+        when(rethrower.rethrow(any(ClientResponse.class), any())).thenThrow(new GenericHttpException("Invalid password", HttpStatus.BAD_REQUEST));
+
+        Mono<ResponseEntity<Void>> result = authServiceClient.changePassword(Mono.just(changePasswordRequest));
+
+        StepVerifier.create(result)
+                .verifyError(GenericHttpException.class);
+    }
+
+    @Test
+    @DisplayName("Should handle 4xx error in verifyUser")
+    void shouldHandle4xxErrorInVerifyUser() throws Exception {
+        String jwtToken = "invalid-jwt-token";
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(401)
+                .setBody("{\"message\": \"Invalid token\"}");
+
+        server.enqueue(mockResponse);
+
+        when(rethrower.rethrow(any(ClientResponse.class), any())).thenThrow(new GenericHttpException("Invalid token", HttpStatus.UNAUTHORIZED));
+
+        Mono<ResponseEntity<UserDetails>> result = authServiceClient.verifyUser(jwtToken);
+
+        StepVerifier.create(result)
+                .verifyError(GenericHttpException.class);
+    }
+
+    @Test
+    @DisplayName("Should handle 4xx error in getUserById with proper lambda execution")
+    void shouldHandle4xxErrorInGetUserByIdWithLambdaExecution() throws Exception {
+        String userId = "invalid-user";
+        String jwtToken = "valid-jwt-token";
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(404)
+                .setBody("{\"message\": \"User not found\"}");
+
+        server.enqueue(mockResponse);
+
+        when(rethrower.rethrow(any(ClientResponse.class), any())).thenAnswer(invocation -> {
+            ClientResponse response = invocation.getArgument(0);
+            Function<Map, ? extends Throwable> lambda = invocation.getArgument(1);
+            Map<String, Object> errorMap = Map.of("message", "User not found");
+            return Mono.error(lambda.apply(errorMap));
+        });
+
+        Mono<UserDetails> result = authServiceClient.getUserById(jwtToken, userId);
+
+        StepVerifier.create(result)
+                .verifyError(GenericHttpException.class);
+    }
+
+    @Test
+    @DisplayName("Should handle 4xx error in createUser with proper lambda execution")
+    void shouldHandle4xxErrorInCreateUserWithLambdaExecution() throws Exception {
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(400)
+                .setBody("{\"message\": \"Invalid registration data\"}");
+
+        server.enqueue(mockResponse);
+
+        when(rethrower.rethrow(any(ClientResponse.class), any())).thenAnswer(invocation -> {
+            ClientResponse response = invocation.getArgument(0);
+            Function<Map, ? extends Throwable> lambda = invocation.getArgument(1);
+            Map<String, Object> errorMap = Map.of("message", "Invalid registration data");
+            return Mono.error(lambda.apply(errorMap));
+        });
+
+        Mono<OwnerResponseDTO> result = authServiceClient.createUser(Mono.just(USER_REGISTER));
+
+        StepVerifier.create(result)
+                .verifyError(GenericHttpException.class);
+    }
+
+    @Test
+    @DisplayName("Should handle 4xx error in createUserUsingV2Endpoint with proper lambda execution")
+    void shouldHandle4xxErrorInCreateUserUsingV2EndpointWithLambdaExecution() throws Exception {
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(400)
+                .setBody("{\"message\": \"Invalid registration data\"}");
+
+        server.enqueue(mockResponse);
+
+        when(rethrower.rethrow(any(ClientResponse.class), any())).thenAnswer(invocation -> {
+            ClientResponse response = invocation.getArgument(0);
+            Function<Map, ? extends Throwable> lambda = invocation.getArgument(1);
+            Map<String, Object> errorMap = Map.of("message", "Invalid registration data");
+            return Mono.error(lambda.apply(errorMap));
+        });
+
+        Mono<OwnerResponseDTO> result = authServiceClient.createUserUsingV2Endpoint(Mono.just(USER_REGISTER));
+
+        StepVerifier.create(result)
+                .verifyError(GenericHttpException.class);
+    }
+
+    @Test
+    @DisplayName("Should handle 4xx error in createVetUser with proper lambda execution")
+    void shouldHandle4xxErrorInCreateVetUserWithLambdaExecution() throws Exception {
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(400)
+                .setBody("{\"message\": \"Invalid vet registration data\"}");
+
+        server.enqueue(mockResponse);
+
+        when(rethrower.rethrow(any(ClientResponse.class), any())).thenAnswer(invocation -> {
+            ClientResponse response = invocation.getArgument(0);
+            Function<Map, ? extends Throwable> lambda = invocation.getArgument(1);
+            Map<String, Object> errorMap = Map.of("message", "Invalid vet registration data");
+            return Mono.error(lambda.apply(errorMap));
+        });
+
+        Mono<VetResponseDTO> result = authServiceClient.createVetUser(Mono.just(REGISTER_VETERINARIAN));
+
+        StepVerifier.create(result)
+                .verifyError(GenericHttpException.class);
+    }
+
+    @Test
+    @DisplayName("Should handle 4xx error in addVetUser with proper lambda execution")
+    void shouldHandle4xxErrorInAddVetUserWithLambdaExecution() throws Exception {
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(400)
+                .setBody("{\"message\": \"Invalid vet registration data\"}");
+
+        server.enqueue(mockResponse);
+
+        when(rethrower.rethrow(any(ClientResponse.class), any())).thenAnswer(invocation -> {
+            ClientResponse response = invocation.getArgument(0);
+            Function<Map, ? extends Throwable> lambda = invocation.getArgument(1);
+            Map<String, Object> errorMap = Map.of("message", "Invalid vet registration data");
+            return Mono.error(lambda.apply(errorMap));
+        });
+
+        Mono<VetResponseDTO> result = authServiceClient.addVetUser(Mono.just(REGISTER_VETERINARIAN));
+
+        StepVerifier.create(result)
+                .verifyError(GenericHttpException.class);
+    }
+
+    @Test
+    @DisplayName("Should handle 4xx error in createInventoryManagerUser with proper lambda execution")
+    void shouldHandle4xxErrorInCreateInventoryManagerUserWithLambdaExecution() throws Exception {
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(400)
+                .setBody("{\"message\": \"Invalid inventory manager registration data\"}");
+
+        server.enqueue(mockResponse);
+
+        when(rethrower.rethrow(any(ClientResponse.class), any())).thenAnswer(invocation -> {
+            ClientResponse response = invocation.getArgument(0);
+            Function<Map, ? extends Throwable> lambda = invocation.getArgument(1);
+            Map<String, Object> errorMap = Map.of("message", "Invalid inventory manager registration data");
+            return Mono.error(lambda.apply(errorMap));
+        });
+
+        Mono<UserPasswordLessDTO> result = authServiceClient.createInventoryMangerUser(Mono.just(REGISTER_INVENTORY_MANAGER));
+
+        StepVerifier.create(result)
+                .verifyError(GenericHttpException.class);
+    }
+
+    @Test
+    @DisplayName("Should handle 4xx error in updateUser with proper lambda execution")
+    void shouldHandle4xxErrorInUpdateUserWithLambdaExecution() throws Exception {
+        String userId = "user123";
+        String jwtToken = "valid-jwt-token";
+        UserPasswordLessDTO updateRequest = UserPasswordLessDTO.builder()
+                .userId(userId)
+                .email("updated@example.com")
+                .username("updateduser")
+                .build();
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(400)
+                .setBody("{\"message\": \"Invalid update data\"}");
+
+        server.enqueue(mockResponse);
+
+        when(rethrower.rethrow(any(ClientResponse.class), any())).thenAnswer(invocation -> {
+            ClientResponse response = invocation.getArgument(0);
+            Function<Map, ? extends Throwable> lambda = invocation.getArgument(1);
+            Map<String, Object> errorMap = Map.of("message", "Invalid update data");
+            return Mono.error(lambda.apply(errorMap));
+        });
+
+        Mono<UserPasswordLessDTO> result = authServiceClient.updateUser(jwtToken, updateRequest, userId);
+
+        StepVerifier.create(result)
+                .verifyError(GenericHttpException.class);
+    }
+
+    @Test
+    @DisplayName("Should handle 4xx error in updateUsername with proper lambda execution")
+    void shouldHandle4xxErrorInUpdateUsernameWithLambdaExecution() throws Exception {
+        String userId = "user123";
+        String jwtToken = "valid-jwt-token";
+        String newUsername = "newusername";
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(400)
+                .setBody("{\"message\": \"Username already exists\"}");
+
+        server.enqueue(mockResponse);
+
+        when(rethrower.rethrow(any(ClientResponse.class), any())).thenAnswer(invocation -> {
+            ClientResponse response = invocation.getArgument(0);
+            Function<Map, ? extends Throwable> lambda = invocation.getArgument(1);
+            Map<String, Object> errorMap = Map.of("message", "Username already exists");
+            return Mono.error(lambda.apply(errorMap));
+        });
+
+        Mono<String> result = authServiceClient.updateUsername(userId, newUsername, jwtToken);
+
+        StepVerifier.create(result)
+                .verifyError(GenericHttpException.class);
+    }
+
+    @Test
+    @DisplayName("Should handle 4xx error in checkUsernameAvailability with proper lambda execution")
+    void shouldHandle4xxErrorInCheckUsernameAvailabilityWithLambdaExecution() throws Exception {
+        String username = "testuser";
+        String jwtToken = "valid-jwt-token";
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(403)
+                .setBody("{\"message\": \"Access denied\"}");
+
+        server.enqueue(mockResponse);
+
+        when(rethrower.rethrow(any(ClientResponse.class), any())).thenAnswer(invocation -> {
+            ClientResponse response = invocation.getArgument(0);
+            Function<Map, ? extends Throwable> lambda = invocation.getArgument(1);
+            Map<String, Object> errorMap = Map.of("message", "Access denied");
+            return Mono.error(lambda.apply(errorMap));
+        });
+
+        Mono<Boolean> result = authServiceClient.checkUsernameAvailability(username, jwtToken);
+
+        StepVerifier.create(result)
+                .verifyError(GenericHttpException.class);
+    }
+
+    @Test
+    @DisplayName("Should handle 4xx error in changePassword with proper lambda execution")
+    void shouldHandle4xxErrorInChangePasswordWithLambdaExecution() throws Exception {
+        UserPasswordAndTokenRequestModel changePasswordRequest = UserPasswordAndTokenRequestModel.builder()
+                .token("token")
+                .password("newpass")
+                .build();
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(400)
+                .setBody("{\"message\": \"Invalid password\"}");
+
+        server.enqueue(mockResponse);
+
+        when(rethrower.rethrow(any(ClientResponse.class), any())).thenAnswer(invocation -> {
+            ClientResponse response = invocation.getArgument(0);
+            Function<Map, ? extends Throwable> lambda = invocation.getArgument(1);
+            Map<String, Object> errorMap = Map.of("message", "Invalid password");
+            return Mono.error(lambda.apply(errorMap));
+        });
+
+        Mono<ResponseEntity<Void>> result = authServiceClient.changePassword(Mono.just(changePasswordRequest));
+
+        StepVerifier.create(result)
+                .verifyError(GenericHttpException.class);
+    }
+
+    @Test
+    @DisplayName("Should handle 4xx error in verifyUser with proper lambda execution")
+    void shouldHandle4xxErrorInVerifyUserWithLambdaExecution() throws Exception {
+        String jwtToken = "invalid-jwt-token";
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(401)
+                .setBody("{\"message\": \"Invalid token\"}");
+
+        server.enqueue(mockResponse);
+
+        when(rethrower.rethrow(any(ClientResponse.class), any())).thenAnswer(invocation -> {
+            ClientResponse response = invocation.getArgument(0);
+            Function<Map, ? extends Throwable> lambda = invocation.getArgument(1);
+            Map<String, Object> errorMap = Map.of("message", "Invalid token");
+            return Mono.error(lambda.apply(errorMap));
+        });
+
+        Mono<ResponseEntity<UserDetails>> result = authServiceClient.verifyUser(jwtToken);
+
+        StepVerifier.create(result)
+                .verifyError(GenericHttpException.class);
+    }
+
+    @Test
+    @DisplayName("Should handle 4xx error in verifyUserUsingV2Endpoint with proper lambda execution")
+    void shouldHandle4xxErrorInVerifyUserUsingV2EndpointWithLambdaExecution() throws Exception {
+        String jwtToken = "invalid-jwt-token";
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(401)
+                .setBody("{\"message\": \"Invalid token\"}");
+
+        server.enqueue(mockResponse);
+
+        when(rethrower.rethrow(any(ClientResponse.class), any())).thenAnswer(invocation -> {
+            ClientResponse response = invocation.getArgument(0);
+            Function<Map, ? extends Throwable> lambda = invocation.getArgument(1);
+            Map<String, Object> errorMap = Map.of("message", "Invalid token");
+            return Mono.error(lambda.apply(errorMap));
+        });
+
+        Mono<ResponseEntity<UserDetails>> result = authServiceClient.verifyUserUsingV2Endpoint(jwtToken);
+
+        StepVerifier.create(result)
+                .verifyError(GenericHttpException.class);
+    }
+
+    @Test
+    @DisplayName("Should handle 4xx error in updateUsersRoles with proper lambda execution")
+    void shouldHandle4xxErrorInUpdateUsersRolesWithLambdaExecution() throws Exception {
+        String userId = "user123";
+        String jwtToken = "valid-jwt-token";
+        RolesChangeRequestDTO rolesRequest = RolesChangeRequestDTO.builder()
+                .roles(List.of("ADMIN", "USER"))
+                .build();
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(400)
+                .setBody("{\"message\": \"Invalid roles\"}");
+
+        server.enqueue(mockResponse);
+
+        when(rethrower.rethrow(any(ClientResponse.class), any())).thenAnswer(invocation -> {
+            ClientResponse response = invocation.getArgument(0);
+            Function<Map, ? extends Throwable> lambda = invocation.getArgument(1);
+            Map<String, Object> errorMap = Map.of("message", "Invalid roles");
+            return Mono.error(lambda.apply(errorMap));
+        });
+
+        Mono<UserResponseDTO> result = authServiceClient.updateUsersRoles(userId, rolesRequest, jwtToken);
+
+        StepVerifier.create(result)
+                .verifyError(GenericHttpException.class);
     }
 }
