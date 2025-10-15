@@ -472,6 +472,7 @@ public class BillServiceClient {
                 .uri(builder.build(customerId))
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .bodyToFlux(BillResponseDTO.class);
+                .bodyToFlux(BillResponseDTO.class)
+                .switchIfEmpty(Flux.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "No bills found in the specified date range")));
     }
 }
