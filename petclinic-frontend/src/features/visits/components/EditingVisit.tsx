@@ -213,7 +213,7 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
         <label>
           Visit Date:{' '}
           {errors.visitStartDate && (
-            <span className="error">{errors.visitDate}</span>
+            <span className="error">{errors.visitStartDate}</span>
           )}
         </label>
 
