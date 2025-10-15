@@ -11,6 +11,8 @@ import (
 	"mailer-service/internal/http/middleware"
 	mailsvc "mailer-service/internal/mailer"
 	"mailer-service/internal/util"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 // @title Mailer Service API
@@ -21,6 +23,7 @@ func main() {
 	r := gin.Default()
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	engine.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	host := util.Getenv("SMTP_SERVER")
 	user := util.Getenv("SMTP_USER")
