@@ -23,7 +23,7 @@ func main() {
 	r := gin.Default()
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	engine.GET("/metrics", gin.WrapH(promhttp.Handler()))
+	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	host := util.Getenv("SMTP_SERVER")
 	user := util.Getenv("SMTP_USER")
