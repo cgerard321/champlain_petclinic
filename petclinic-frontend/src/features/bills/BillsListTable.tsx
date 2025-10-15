@@ -256,30 +256,12 @@ export default function BillsListTable({
           {activeSection === 'date' ? 'Close Date' : 'Filter by Date'}
         </button>
       </div>
-      {/* Status and Currency dropdowns together */}
+      {/* Currency selector (status filter moved to button section) */}
       <div
         className="filterContainer"
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '16px',
-        }}
+        style={{ display: 'flex', alignItems: 'center', gap: '16px' }}
       >
-        <label htmlFor="statusFilter">Filter by Status:</label>
-        <select
-          id="statusFilter"
-          value={selectedStatus}
-          onChange={e => setSelectedStatus(e.target.value)}
-          style={{ width: '150px' }}
-        >
-          <option value="all">All</option>
-          <option value="overdue">Overdue</option>
-          <option value="paid">Paid</option>
-          <option value="unpaid">Unpaid</option>
-        </select>
-        <label htmlFor="currencyFilter" style={{ marginLeft: '8px' }}>
-          Currency:
-        </label>
+        <label htmlFor="currencyFilter">Currency:</label>
         <select
           id="currencyFilter"
           value={currency}
