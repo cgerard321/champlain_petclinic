@@ -125,7 +125,6 @@ export default function VisitListTable(): JSX.Element {
     }
   };
 
-  // Handle canceling the visit
   const handleCancel = async (visitId: string): Promise<void> => {
     try {
       await cancelVisit(visitId, updatedVisit => {

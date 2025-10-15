@@ -30,6 +30,9 @@ export function NavBar(): JSX.Element {
   const [navbarOpen, setNavbarOpen] = useState(false);
   const [cartLoading, setCartLoading] = useState(false);
 
+  const hasStaffVisits = isAdmin || isVet || isReceptionist;
+  const showVetVisitsDropdown = isVet;
+
   const logoutUser = (): void => {
     // Client-side logout only. Keep API calls out of navbar
     try {
@@ -138,7 +141,7 @@ export function NavBar(): JSX.Element {
                       Bills
                     </Nav.Link>
                   )}
-                {!isAdmin && !isInventoryManager && (
+                {!hasStaffVisits && (
                   <Nav.Link as={Link} to={AppRoutePaths.CustomerVisits}>
                     Visits
                   </Nav.Link>
@@ -148,10 +151,23 @@ export function NavBar(): JSX.Element {
                     Bills
                   </Nav.Link>
                 )}
-                {(isAdmin || isVet) && (
+                {hasStaffVisits && !showVetVisitsDropdown && (
                   <Nav.Link as={Link} to={AppRoutePaths.Visits}>
                     Visits
                   </Nav.Link>
+                )}
+                {showVetVisitsDropdown && (
+                  <NavDropdown title="Visits" id="visits-dropdown">
+                    <NavDropdown.Item as={Link} to={AppRoutePaths.Visits}>
+                      All Visits
+                    </NavDropdown.Item>
+                    <NavDropdown.Item
+                      as={Link}
+                      to={AppRoutePaths.CustomerVisits}
+                    >
+                      My Schedule
+                    </NavDropdown.Item>
+                  </NavDropdown>
                 )}
                 {(isInventoryManager || isAdmin) && (
                   <Nav.Link as={Link} to={AppRoutePaths.Inventories}>
