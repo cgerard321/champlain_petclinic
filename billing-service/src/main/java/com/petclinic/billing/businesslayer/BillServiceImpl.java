@@ -353,8 +353,19 @@ public class BillServiceImpl implements BillService{
 
     @Override
     public Flux<BillResponseDTO> getBillsByCustomerId(String customerId) {
-        /**/
-        return billRepository.findByCustomerId(customerId).map(EntityDtoUtil::toBillResponseDto);
+        // Fetch the owner info first
+        Mono<OwnerResponseDTO> ownerMono = ownerClient.getOwnerByOwnerId(customerId)
+                .switchIfEmpty(Mono.error(new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Customer ID does not exist"
+                )));
+
+        return ownerMono.flatMapMany(owner ->
+                billRepository.findByCustomerId(customerId)
+                        // Only return bills where first/last name match the owner record
+                        .filter(bill -> bill.getOwnerFirstName().equals(owner.getFirstName())
+                                && bill.getOwnerLastName().equals(owner.getLastName()))
+                        .map(EntityDtoUtil::toBillResponseDto)
+        );
     }
 
 ////////////////////// Used by CustomerBillsController only ///////////////////////////////////////////
