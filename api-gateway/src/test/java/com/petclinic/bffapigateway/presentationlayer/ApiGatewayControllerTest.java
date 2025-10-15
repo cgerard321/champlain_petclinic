@@ -162,12 +162,42 @@ class ApiGatewayControllerTest {
         client
                 .delete()
                 .uri("/api/gateway/vets/" + VET_ID + "/ratings/{ratingsId}", ratingResponseDTO.getRatingId())
+                .cookie("Bearer", "valid-jwt-token")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNoContent();
 
         Mockito.verify(vetsServiceClient, times(1))
                 .deleteRating(VET_ID, ratingResponseDTO.getRatingId());
+    }
+
+    @Test
+    void deleteVetRatingByCustomer() {
+        String customerName = "Test Customer";
+        when(vetsServiceClient.deleteRatingByCustomerName(VET_ID, customerName))
+                .thenReturn((Mono.empty()));
+        when(authServiceClient.validateToken(anyString()))
+                .thenReturn(Mono.just(ResponseEntity.ok(TokenResponseDTO.builder()
+                        .userId("userId123")
+                        .roles(List.of("OWNER"))
+                        .token("bearer-token")
+                        .build())));
+        when(customersServiceClient.getOwner("userId123"))
+                .thenReturn(Mono.just(OwnerResponseDTO.builder()
+                        .firstName("Test")
+                        .lastName("Customer")
+                        .build()));
+
+        client
+                .delete()
+                .uri("/api/gateway/vets/" + VET_ID + "/ratings/customer")
+                .cookie("Bearer", "valid-jwt-token")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        Mockito.verify(vetsServiceClient, times(1))
+                .deleteRatingByCustomerName(VET_ID, customerName);
     }
 
     @Test
@@ -1908,22 +1938,22 @@ class ApiGatewayControllerTest {
 
 
 //    @Test
-    //    void getSingleVisit_Invalid() {
-    //        final String invalidVisitId = "invalid";
-    //        final String expectedErrorMessage = "error message";
-    //
-    //        when(visitsServiceClient.getVisitByVisitId(invalidVisitId))
-    //                .thenThrow(new GenericHttpException(expectedErrorMessage, BAD_REQUEST));
-    //
-    //        client.get()
-    //                .uri("/api/gateway/visit/{visitId}", invalidVisitId)
-    //                .exchange()
-    //                .expectStatus().isBadRequest()
-    //                .expectBody()
-    //                .jsonPath("$.statusCode").isEqualTo(BAD_REQUEST.value())
-    //                .jsonPath("$.timestamp").exists()
-    //                .jsonPath("$.message").isEqualTo(expectedErrorMessage);
-    //    }
+//    void getSingleVisit_Invalid() {
+//        final String invalidVisitId = "invalid";
+//        final String expectedErrorMessage = "error message";
+//
+//        when(visitsServiceClient.getVisitByVisitId(invalidVisitId))
+//                .thenThrow(new GenericHttpException(expectedErrorMessage, BAD_REQUEST));
+//
+//        client.get()
+//                .uri("/api/gateway/visit/{visitId}", invalidVisitId)
+//                .exchange()
+//                .expectStatus().isBadRequest()
+//                .expectBody()
+//                .jsonPath("$.statusCode").isEqualTo(BAD_REQUEST.value())
+//                .jsonPath("$.timestamp").exists()
+//                .jsonPath("$.message").isEqualTo(expectedErrorMessage);
+//    }
 
     /*@Test
     @DisplayName("Should get the previous visits of a pet")
@@ -2682,7 +2712,10 @@ private VetAverageRatingDTO buildVetAverageRatingDTO(){
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(Mono.just(photoData), byte[].class)
                 .exchange()
-                .expectStatus().isCreated();
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .expectBody(byte[].class)
+                .isEqualTo(photoData);
 
         verify(vetsServiceClient).addPhotoToVetFromBytes(vetId, photoName, photoData);
     }
@@ -2702,7 +2735,8 @@ private VetAverageRatingDTO buildVetAverageRatingDTO(){
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(Mono.just(photoData), byte[].class)
                 .exchange()
-                .expectStatus().isBadRequest();
+                .expectStatus().isBadRequest()
+                .expectBody().isEmpty();
 
         verify(vetsServiceClient).addPhotoToVetFromBytes(vetId, photoName, photoData);
     }
