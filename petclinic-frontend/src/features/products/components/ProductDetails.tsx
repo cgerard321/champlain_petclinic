@@ -4,7 +4,7 @@ import {
 } from '@/features/products/models/ProductModels/ProductModel';
 import { NavBar } from '@/layouts/AppNavBar';
 import { useState, useEffect, JSX } from 'react';
-import { generatePath, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { updateUserRating } from '../api/updateUserRating';
 import { getProduct } from '../api/getProduct';
 import { deleteUserRating } from '../api/deleteUserRating';
@@ -17,14 +17,12 @@ import { AppRoutePaths } from '@/shared/models/path.routes';
 import { AxiosError } from 'axios';
 import ImageContainer from './ImageContainer';
 import { Button } from 'react-bootstrap';
-import { deleteProduct } from '@/features/products/api/deleteProduct';
 import {
   IsAdmin,
   IsInventoryManager,
   IsVet,
   IsReceptionist,
 } from '@/context/UserContext';
-import PatchListingStatusButton from './PatchListingStatusButton';
 import RecentlyViewedProducts from '@/features/products/components/RecentlyViewedProducts';
 import { useAddToCart } from '@/features/carts/api/addToCartFromProducts';
 import { useAddToWishlist } from '@/features/carts/api/addToWishlistFromProducts';
@@ -79,12 +77,12 @@ export default function ProductDetails(): JSX.Element {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  const navigateToEditProduct = (): void => {
-    if (!currentProduct || !productId) return;
-    navigate(generatePath(AppRoutePaths.EditProduct, { productId }), {
-      state: { product: currentProduct },
-    });
-  };
+  // const navigateToEditProduct = (): void => {
+  //   if (!currentProduct || !productId) return;
+  //   navigate(generatePath(AppRoutePaths.EditProduct, { productId }), {
+  //     state: { product: currentProduct },
+  //   });
+  // };
 
   const getProductTypeLabel = (productType: string): string => {
     if (productType === 'ACCESSORY') return 'Accessory';
@@ -154,15 +152,15 @@ export default function ProductDetails(): JSX.Element {
     }
   };
 
-  const handleDeleteProduct = async (): Promise<void> => {
-    if (!productId) return;
-    try {
-      await deleteProduct(productId);
-      navigate(AppRoutePaths.Products);
-    } catch (error) {
-      console.error('Failed to delete product:', error);
-    }
-  };
+  // const handleDeleteProduct = async (): Promise<void> => {
+  //   if (!productId) return;
+  //   try {
+  //     await deleteProduct(productId);
+  //     navigate(AppRoutePaths.Products);
+  //   } catch (error) {
+  //     console.error('Failed to delete product:', error);
+  //   }
+  // };
 
   const updateRating = async (
     newRating: number,
@@ -261,7 +259,7 @@ export default function ProductDetails(): JSX.Element {
                       }`,
                     }}
                   >
-                    <Button variant="warning" onClick={navigateToEditProduct}>
+                    {/* <Button variant="warning" onClick={navigateToEditProduct}>
                       Edit
                     </Button>
                     {productId && (
@@ -269,7 +267,7 @@ export default function ProductDetails(): JSX.Element {
                     )}
                     <Button variant="danger" onClick={handleDeleteProduct}>
                       Delete
-                    </Button>
+                    </Button> */}
                   </div>
 
                   <h2>
