@@ -256,12 +256,7 @@ export default function VetDetails(): JSX.Element {
     try {
       if (vetId) {
         await deleteVetRating(vetId);
-        // Refresh ratings after deletion
-        const response = await axiosInstance.get<RatingResponseType[]>(
-          `/vets/${vetId}/ratings`,
-          { useV2: true }
-        );
-        setRatings(response.data);
+        await fetchRatings();
       }
     } catch (error) {
       console.error('Error deleting rating:', error);
