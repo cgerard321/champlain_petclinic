@@ -1,12 +1,20 @@
 package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.datalayer.*;
+
+import com.petclinic.billing.domainclientlayer.OwnerClient;
+import com.petclinic.billing.domainclientlayer.Auth.AuthServiceClient;
+import com.petclinic.billing.domainclientlayer.Auth.UserDetails;
+import com.petclinic.billing.domainclientlayer.Mailing.Mail;
+import com.petclinic.billing.domainclientlayer.Mailing.MailService;
 import com.petclinic.billing.util.InterestCalculationUtil;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
@@ -14,6 +22,12 @@ import reactor.test.StepVerifier;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -23,31 +37,71 @@ import java.util.Calendar;
 @AutoConfigureWebTestClient
 public class CustomerBillsControllerIntegrationTest {
 
+        @MockBean
+        private AuthServiceClient authClient;
+
+        @MockBean
+        private MailService mailService;
+
         @Autowired
         private WebTestClient client;
+
+        @MockBean
+        private OwnerClient ownerClient;
+
 
         @Autowired
         private BillRepository billRepository;
 
-        @Test
-        void getBillsByCustomerId_shouldSucceed() {
-                Bill bill = buildBill();
-                Publisher<Bill> setup = billRepository.deleteAll().thenMany(billRepository.save(bill));
+    @BeforeEach
+    void setup() {
+        // Fake user details
+        UserDetails fakeUser = new UserDetails();
+        fakeUser.setUserId("cust-123");
+        fakeUser.setUsername("fakeUser");
+        fakeUser.setEmail("fakeUser@example.com");
 
-                StepVerifier.create(setup)
-                                .expectNextCount(1)
-                                .verifyComplete();
+        // Mock the AuthClient reactive call
+        when(authClient.getUserById(anyString(), anyString()))
+                .thenReturn(Mono.just(fakeUser));
 
-                client.get()
-                                .uri("/bills/customer/{customerId}/bills", bill.getCustomerId())
-                                .accept(MediaType.APPLICATION_JSON)
-                                .exchange()
-                                .expectStatus().isOk()
-                                .expectBody()
-                                .jsonPath("$[0].customerId").isEqualTo(bill.getCustomerId());
-        }
+        // Mock the MailService to avoid sending real emails
+        when(mailService.sendMail(any(Mail.class)))
+                .thenReturn("Mail sent successfully");
+    }
 
-        @Test
+
+    @Test
+    void getBillsByCustomerId_shouldSucceed() {
+        Bill bill = buildBill();
+        bill.setOwnerFirstName("John");   // <-- set this
+        bill.setOwnerLastName("Doe");     // <-- set this
+
+        Publisher<Bill> setup = billRepository.deleteAll().thenMany(billRepository.save(bill));
+
+        OwnerResponseDTO owner = new OwnerResponseDTO();
+        owner.setOwnerId(bill.getCustomerId());
+        owner.setFirstName("John");
+        owner.setLastName("Doe");
+
+        when(ownerClient.getOwnerByOwnerId(bill.getCustomerId()))
+                .thenReturn(Mono.just(owner));
+
+        StepVerifier.create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        client.get()
+                .uri("/bills/customer/{customerId}/bills", bill.getCustomerId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[0].customerId").isEqualTo(bill.getCustomerId());
+    }
+
+
+    @Test
         void testDownloadBillPdf() {
 
                 Bill bill = buildBill();
@@ -126,6 +180,7 @@ public class CustomerBillsControllerIntegrationTest {
         client.post()
                 .uri("/bills/customer/{customerId}/bills/{billId}/pay", bill.getCustomerId(), bill.getBillId())
                 .contentType(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", "dummy-jwt-token")
                 .bodyValue(paymentRequest)
                 .exchange()
                 .expectStatus().isOk()
@@ -146,6 +201,7 @@ public class CustomerBillsControllerIntegrationTest {
         client.post()
                 .uri("/bills/customer/{customerId}/bills/{billId}/pay", "cust-404", "bill-404")
                 .contentType(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", "dummy-jwt-token")
                 .bodyValue(paymentRequest)
                 .exchange()
                 .expectStatus().isNotFound();
@@ -210,4 +266,55 @@ public class CustomerBillsControllerIntegrationTest {
                         .expectBody()
                         .jsonPath("$.interest").isEqualTo(expectedInterest.doubleValue());
         }
+
+    @Test
+    void getBillsByAmountRange_integrationTest() {
+        Bill bill = buildBill();
+        billRepository.deleteAll().then(billRepository.save(bill)).block();
+
+        client.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/bills/customer/{customerId}/bills/filter-by-amount")
+                        .queryParam("minAmount", "100")
+                        .queryParam("maxAmount", "200")
+                        .build(bill.getCustomerId()))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[0].customerId").isEqualTo(bill.getCustomerId());
+    }
+
+    @Test
+    void getBillsByDueDateRange_integrationTest() {
+        Bill bill = buildBill();
+        billRepository.deleteAll().then(billRepository.save(bill)).block();
+
+        client.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/bills/customer/{customerId}/bills/filter-by-due-date")
+                        .queryParam("startDate", LocalDate.now().minusDays(1))
+                        .queryParam("endDate", LocalDate.now().plusDays(30))
+                        .build(bill.getCustomerId()))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[0].customerId").isEqualTo(bill.getCustomerId());
+    }
+
+    @Test
+    void getBillsByCustomerIdAndDateRange_integrationTest() {
+        Bill bill = buildBill();
+        billRepository.deleteAll().then(billRepository.save(bill)).block();
+
+        client.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/bills/customer/{customerId}/bills/filter-by-date")
+                        .queryParam("startDate", LocalDate.now().minusDays(20))
+                        .queryParam("endDate", LocalDate.now())
+                        .build(bill.getCustomerId()))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[0].customerId").isEqualTo(bill.getCustomerId());
+    }
 }

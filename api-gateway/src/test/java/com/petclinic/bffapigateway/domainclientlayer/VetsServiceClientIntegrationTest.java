@@ -3708,6 +3708,132 @@ class VetsServiceClientIntegrationTest {
                 .verifyComplete();
     }
 
+    @Test
+    void deleteRatingByCustomerName_ValidId_ShouldSucceed() {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+        String customerName = "John Doe";
+
+        prepareResponse(response -> response
+                .setResponseCode(204)
+                .setBody(""));
+
+        Mono<Void> result = vetsServiceClient.deleteRatingByCustomerName(vetId, customerName);
+
+        StepVerifier.create(result)
+                .verifyComplete();
+    }
+
+    @Test
+    void deleteRatingByCustomerName_NotFound_ShouldThrowNotFoundException() {
+        String vetId = "invalid-vet-id";
+        String customerName = "John Doe";
+
+        prepareResponse(response -> response
+                .setResponseCode(404)
+                .setBody("Not found"));
+
+        Mono<Void> result = vetsServiceClient.deleteRatingByCustomerName(vetId, customerName);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof NotFoundException &&
+                                throwable.getMessage().contains("vetId not found " + vetId + " or no rating found for customer: " + customerName))
+                .verify();
+    }
+
+    @Test
+    void deleteRatingByCustomerName_ClientError_ShouldThrowIllegalArgumentException() {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+        String customerName = "John Doe";
+
+        prepareResponse(response -> response
+                .setResponseCode(400)
+                .setBody("Bad request"));
+
+        Mono<Void> result = vetsServiceClient.deleteRatingByCustomerName(vetId, customerName);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof IllegalArgumentException &&
+                                throwable.getMessage().equals("Something went wrong with the client"))
+                .verify();
+    }
+
+    @Test
+    void deleteRatingByCustomerName_ServerError_ShouldThrowIllegalArgumentException() {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+        String customerName = "John Doe";
+
+        prepareResponse(response -> response
+                .setResponseCode(500)
+                .setBody("Internal server error"));
+
+        Mono<Void> result = vetsServiceClient.deleteRatingByCustomerName(vetId, customerName);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof IllegalArgumentException &&
+                                throwable.getMessage().equals("Something went wrong with the server"))
+                .verify();
+    }
+
+    @Test
+    void addPhotoToVetFromBytes_NotFound_ShouldThrowNotFoundException() throws Exception {
+        String vetId = "invalid-vet-id";
+        String photoName = "test_photo.jpg";
+        byte[] photoData = "mockImageData".getBytes();
+
+        prepareResponse(response -> response
+                .setResponseCode(404)
+                .setBody("Photo for vet " + vetId + " not found"));
+
+        Mono<Resource> result = vetsServiceClient.addPhotoToVetFromBytes(vetId, photoName, photoData);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof NotFoundException &&
+                                throwable.getMessage().contains("Photo for vet " + vetId + " not found"))
+                .verify();
+    }
+
+    @Test
+    void addPhotoToVetFromBytes_ClientError_ShouldThrowIllegalArgumentException() throws Exception {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+        String photoName = "test_photo.jpg";
+        byte[] photoData = "mockImageData".getBytes();
+
+        prepareResponse(response -> response
+                .setResponseCode(400)
+                .setBody("Bad request"));
+
+        Mono<Resource> result = vetsServiceClient.addPhotoToVetFromBytes(vetId, photoName, photoData);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof IllegalArgumentException &&
+                                throwable.getMessage().equals("Client error"))
+                .verify();
+    }
+
+    @Test
+    void addPhotoToVetFromBytes_ServerError_ShouldThrowIllegalArgumentException() throws Exception {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+        String photoName = "test_photo.jpg";
+        byte[] photoData = "mockImageData".getBytes();
+
+        prepareResponse(response -> response
+                .setResponseCode(500)
+                .setBody("Internal server error"));
+
+        Mono<Resource> result = vetsServiceClient.addPhotoToVetFromBytes(vetId, photoName, photoData);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof IllegalArgumentException &&
+                                throwable.getMessage().equals("Server error"))
+                .verify();
+    }
+
 
 }
 

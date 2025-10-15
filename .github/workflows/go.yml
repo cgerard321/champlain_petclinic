@@ -32,13 +32,13 @@ jobs:
           go build -v -o app ./cmd/mailer
           cd -
 
-      - name: Test
+      - name: Test Go Mailer
         run: cd mailer-service && go test -v ./...; cd -
 
       - name: Build
         run: cd files-service && go build -v -o app; cd -
 
-      - name: Test
+      - name: Test files-service
         run: cd files-service && go test -v ./...; cd -
 
       - name: Grant execute perm on cover.sh

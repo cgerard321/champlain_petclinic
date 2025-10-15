@@ -1,211 +1,336 @@
 package com.petclinic.customersservice.domainclientlayer;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.customersservice.customersExceptions.exceptions.BadRequestException;
-import com.petclinic.customersservice.customersExceptions.exceptions.InvalidInputException;
 import com.petclinic.customersservice.customersExceptions.exceptions.NotFoundException;
+import com.petclinic.customersservice.customersExceptions.exceptions.UnprocessableEntityException;
+import com.petclinic.customersservice.util.Rethrower;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
+import java.io.IOException;
+import java.lang.reflect.Field;
+
 class FilesServiceClientTest {
 
-    @Mock
-    private WebClient webClient;
-
-    @Mock
-    private WebClient.Builder webClientBuilder;
-    @Mock
-    private WebClient.RequestHeadersUriSpec requestHeadersUriSpec;
-    @Mock
-    private WebClient.RequestHeadersSpec requestHeadersSpec;
-    @Mock
-    private WebClient.RequestBodyUriSpec requestBodyUriSpec;
-    @Mock
-    private WebClient.ResponseSpec responseSpec;
-
-    @Mock
-    private FilesServiceRethrower rethrower;
-
-    @InjectMocks
+    private static MockWebServer mockBackEnd;
     private FilesServiceClient filesServiceClient;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final Rethrower rethrower = new Rethrower(objectMapper);
+
+    @BeforeAll
+    static void setup() throws IOException {
+        mockBackEnd = new MockWebServer();
+        mockBackEnd.start();
+    }
 
     @BeforeEach
-    void setUp() {
-        when(webClientBuilder.build()).thenReturn(webClient);
-        filesServiceClient = new FilesServiceClient(webClientBuilder, "test-host", "test-port");
-        when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
+    void initialize() throws Exception {
+        WebClient.Builder webClientBuilder = WebClient.builder();
+        filesServiceClient = new FilesServiceClient(
+                webClientBuilder,
+                "localhost",
+                String.valueOf(mockBackEnd.getPort())
+        );
+        
+        Field rethrowerField = FilesServiceClient.class.getDeclaredField("rethrower");
+        rethrowerField.setAccessible(true);
+        rethrowerField.set(filesServiceClient, rethrower);
+    }
+
+    @AfterAll
+    static void tearDown() throws IOException {
+        mockBackEnd.shutdown();
     }
 
     @Test
-    void testGetFile_WhenApiFails_ShouldRethrowAsNotFoundException() {
-        when(webClient.get()).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersUriSpec.uri(anyString(), anyString())).thenReturn(requestHeadersSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+    void getFile_WithValidFileId_ShouldReturnFile() throws Exception {
+        FileResponseDTO expectedResponse = FileResponseDTO.builder()
+                .fileId("file1")
+                .fileName("test.jpg")
+                .fileType("image/jpeg")
+                .fileData("base64data".getBytes())
+                .build();
 
-        doThrow(new NotFoundException("File not found")).when(rethrower).rethrow(any(), any());
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(expectedResponse)));
 
-        doAnswer(invocation -> {
-            try {
-                rethrower.rethrow(null, null);
-                return Mono.empty();
-            } catch (Throwable t) {
-                return Mono.error(t);
-            }
-        }).when(responseSpec).bodyToMono(FileResponseDTO.class);
+        StepVerifier.create(filesServiceClient.getFile("file1"))
+                .expectNextMatches(response ->
+                        response.getFileId().equals("file1") &&
+                                response.getFileName().equals("test.jpg") &&
+                                response.getFileType().equals("image/jpeg"))
+                .verifyComplete();
+    }
+
+    @Test
+    void getFile_WithNotFoundStatus_ShouldThrowNotFoundException() {
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\":\"File not found\"}"));
 
         StepVerifier.create(filesServiceClient.getFile("missing"))
                 .expectError(NotFoundException.class)
                 .verify();
-        verify(rethrower, times(1)).rethrow(any(), any());
     }
 
     @Test
-    void testAddFile_WhenApiFails_ShouldRethrowAsBadRequestException() {
-        FileRequestDTO requestDTO = new FileRequestDTO();
+    void getFile_WithBadRequestStatus_ShouldThrowBadRequestException() {
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\":\"Bad request\"}"));
 
-        when(webClient.post()).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.uri(anyString())).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.contentType(MediaType.APPLICATION_JSON)).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.bodyValue(any())).thenReturn(requestHeadersSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-        doThrow(new BadRequestException("Bad request")).when(rethrower).rethrow(any(), any());
-
-        doAnswer(invocation -> {
-            try {
-                rethrower.rethrow(null, null);
-                return Mono.empty();
-            } catch (Throwable t) {
-                return Mono.error(t);
-            }
-        }).when(responseSpec).bodyToMono(FileResponseDTO.class);
-
-        StepVerifier.create(filesServiceClient.AddFile(requestDTO))
+        StepVerifier.create(filesServiceClient.getFile("invalid"))
                 .expectError(BadRequestException.class)
                 .verify();
-        verify(rethrower, times(1)).rethrow(any(), any());
     }
 
     @Test
-    void testUpdateFile_WhenApiFails_ShouldRethrowAsInvalidInputException() {
-        FileRequestDTO requestDTO = new FileRequestDTO();
-
-        when(webClient.put()).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.uri(anyString(), anyString())).thenReturn((WebClient.RequestBodySpec) requestBodyUriSpec);
-        when(requestBodyUriSpec.contentType(MediaType.APPLICATION_JSON)).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.bodyValue(any())).thenReturn(requestHeadersSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-
-        doThrow(new InvalidInputException("Invalid input")).when(rethrower).rethrow(any(), any());
-        doAnswer(invocation -> {
-            try {
-                rethrower.rethrow(null, null);
-                return Mono.empty();
-            } catch (Throwable t) {
-                return Mono.error(t);
-            }
-        }).when(responseSpec).bodyToMono(FileResponseDTO.class);
-
-        StepVerifier.create(filesServiceClient.UpdateFile("file1", requestDTO))
-                .expectError(InvalidInputException.class)
-                .verify();
-        verify(rethrower, times(1)).rethrow(any(), any());
-    }
-
-    @Test
-    void testDeleteFile_WhenApiFails_ShouldRethrowAsGenericRuntimeException() {
-        when(webClient.delete()).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersUriSpec.uri(anyString(), anyString())).thenReturn(requestHeadersSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-
-        doThrow(new RuntimeException("Server error")).when(rethrower).rethrow(any(), any());
-
-        doAnswer(invocation -> {
-            try {
-                rethrower.rethrow(null, null);
-                return Mono.empty();
-            } catch (Throwable t) {
-                return Mono.error(t);
-            }
-        }).when(responseSpec).bodyToMono(Void.class);
-
-        StepVerifier.create(filesServiceClient.DeleteFile("file1"))
-                .expectError(RuntimeException.class)
-                .verify();
-        verify(rethrower, times(1)).rethrow(any(), any());
-    }
-
-    @Test
-    void testGetFile_ShouldReturnFileSuccessfully() {
-        FileResponseDTO expectedResponse = new FileResponseDTO();
-
-        when(webClient.get()).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersUriSpec.uri(anyString(), anyString())).thenReturn(requestHeadersSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-
-        when(responseSpec.bodyToMono(FileResponseDTO.class)).thenReturn(Mono.just(expectedResponse));
+    void getFile_WithInternalServerError_ShouldThrowRuntimeException() {
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\":\"Internal server error\"}"));
 
         StepVerifier.create(filesServiceClient.getFile("file1"))
-                .expectNext(expectedResponse)
+                .expectError(RuntimeException.class)
+                .verify();
+    }
+
+    @Test
+    void addFile_WithValidRequest_ShouldReturnCreatedFile() throws Exception {
+        FileRequestDTO requestDTO = FileRequestDTO.builder()
+                .fileName("newfile.jpg")
+                .fileType("image/jpeg")
+                .fileData("base64data".getBytes())
+                .build();
+
+        FileResponseDTO expectedResponse = FileResponseDTO.builder()
+                .fileId("newfile1")
+                .fileName("newfile.jpg")
+                .fileType("image/jpeg")
+                .fileData("base64data".getBytes())
+                .build();
+
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(201)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(expectedResponse)));
+
+        StepVerifier.create(filesServiceClient.addFile(requestDTO))
+                .expectNextMatches(response ->
+                        response.getFileId().equals("newfile1") &&
+                                response.getFileName().equals("newfile.jpg"))
                 .verifyComplete();
     }
 
     @Test
-    void testAddFile_ShouldCreateFileSuccessfully() {
-        FileRequestDTO requestDTO = new FileRequestDTO();
-        FileResponseDTO expectedResponse = new FileResponseDTO();
+    void addFile_WithUnprocessableEntityStatus_ShouldThrowUnprocessableEntityException() {
+        FileRequestDTO requestDTO = FileRequestDTO.builder()
+                .fileName("invalid.jpg")
+                .fileType("image/jpeg")
+                .fileData(new byte[0])
+                .build();
 
-        when(webClient.post()).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.uri(anyString())).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.contentType(MediaType.APPLICATION_JSON)).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.bodyValue(any())).thenReturn(requestHeadersSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(422)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\":\"Unprocessable entity\"}"));
 
-        when(responseSpec.bodyToMono(FileResponseDTO.class)).thenReturn(Mono.just(expectedResponse));
+        StepVerifier.create(filesServiceClient.addFile(requestDTO))
+                .expectError(UnprocessableEntityException.class)
+                .verify();
+    }
 
-        StepVerifier.create(filesServiceClient.AddFile(requestDTO))
-                .expectNext(expectedResponse)
+    @Test
+    void addFile_WithBadRequestStatus_ShouldThrowBadRequestException() {
+        FileRequestDTO requestDTO = FileRequestDTO.builder()
+                .fileName("test.jpg")
+                .fileType("image/jpeg")
+                .fileData("base64data".getBytes())
+                .build();
+
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\":\"Bad request\"}"));
+
+        StepVerifier.create(filesServiceClient.addFile(requestDTO))
+                .expectError(BadRequestException.class)
+                .verify();
+    }
+
+    @Test
+    void addFile_WithInternalServerError_ShouldThrowRuntimeException() {
+        FileRequestDTO requestDTO = FileRequestDTO.builder()
+                .fileName("test.jpg")
+                .fileType("image/jpeg")
+                .fileData("base64data".getBytes())
+                .build();
+
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\":\"Internal server error\"}"));
+
+        StepVerifier.create(filesServiceClient.addFile(requestDTO))
+                .expectError(RuntimeException.class)
+                .verify();
+    }
+
+    @Test
+    void updateFile_WithValidRequest_ShouldReturnUpdatedFile() throws Exception {
+        FileRequestDTO requestDTO = FileRequestDTO.builder()
+                .fileName("updated.jpg")
+                .fileType("image/jpeg")
+                .fileData("updatedbase64data".getBytes())
+                .build();
+
+        FileResponseDTO expectedResponse = FileResponseDTO.builder()
+                .fileId("file1")
+                .fileName("updated.jpg")
+                .fileType("image/jpeg")
+                .fileData("updatedbase64data".getBytes())
+                .build();
+
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(expectedResponse)));
+
+        StepVerifier.create(filesServiceClient.updateFile("file1", requestDTO))
+                .expectNextMatches(response ->
+                        response.getFileId().equals("file1") &&
+                                response.getFileName().equals("updated.jpg"))
                 .verifyComplete();
     }
 
     @Test
-    void testUpdateFile_ShouldUpdateFileSuccessfully() {
-        FileRequestDTO requestDTO = new FileRequestDTO();
-        FileResponseDTO expectedResponse = new FileResponseDTO();
+    void updateFile_WithNotFoundStatus_ShouldThrowNotFoundException() {
+        FileRequestDTO requestDTO = FileRequestDTO.builder()
+                .fileName("updated.jpg")
+                .fileType("image/jpeg")
+                .fileData("updatedbase64data".getBytes())
+                .build();
 
-        when(webClient.put()).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.uri(anyString(), anyString())).thenReturn((WebClient.RequestBodySpec) requestBodyUriSpec);
-        when(requestBodyUriSpec.contentType(MediaType.APPLICATION_JSON)).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.bodyValue(any())).thenReturn(requestHeadersSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\":\"File not found\"}"));
 
-        when(responseSpec.bodyToMono(FileResponseDTO.class)).thenReturn(Mono.just(expectedResponse));
+        StepVerifier.create(filesServiceClient.updateFile("missing", requestDTO))
+                .expectError(NotFoundException.class)
+                .verify();
+    }
 
-        StepVerifier.create(filesServiceClient.UpdateFile("file1", requestDTO))
-                .expectNext(expectedResponse)
+    @Test
+    void updateFile_WithUnprocessableEntityStatus_ShouldThrowUnprocessableEntityException() {
+        FileRequestDTO requestDTO = FileRequestDTO.builder()
+                .fileName("updated.jpg")
+                .fileType("image/jpeg")
+                .fileData(new byte[0])
+                .build();
+
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(422)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\":\"Unprocessable entity\"}"));
+
+        StepVerifier.create(filesServiceClient.updateFile("file1", requestDTO))
+                .expectError(UnprocessableEntityException.class)
+                .verify();
+    }
+
+    @Test
+    void updateFile_WithBadRequestStatus_ShouldThrowBadRequestException() {
+        FileRequestDTO requestDTO = FileRequestDTO.builder()
+                .fileName("updated.jpg")
+                .fileType("image/jpeg")
+                .fileData("updatedbase64data".getBytes())
+                .build();
+
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\":\"Bad request\"}"));
+
+        StepVerifier.create(filesServiceClient.updateFile("file1", requestDTO))
+                .expectError(BadRequestException.class)
+                .verify();
+    }
+
+    @Test
+    void updateFile_WithInternalServerError_ShouldThrowRuntimeException() {
+        FileRequestDTO requestDTO = FileRequestDTO.builder()
+                .fileName("updated.jpg")
+                .fileType("image/jpeg")
+                .fileData("updatedbase64data".getBytes())
+                .build();
+
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\":\"Internal server error\"}"));
+
+        StepVerifier.create(filesServiceClient.updateFile("file1", requestDTO))
+                .expectError(RuntimeException.class)
+                .verify();
+    }
+
+    @Test
+    void deleteFile_WithValidFileId_ShouldCompleteSuccessfully() {
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(204));
+
+        StepVerifier.create(filesServiceClient.deleteFile("file1"))
                 .verifyComplete();
     }
 
     @Test
-    void testDeleteFile_ShouldCompleteSuccessfully() {
-        when(webClient.delete()).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersUriSpec.uri(anyString(), anyString())).thenReturn(requestHeadersSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+    void deleteFile_WithNotFoundStatus_ShouldThrowNotFoundException() {
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\":\"File not found\"}"));
 
-        when(responseSpec.bodyToMono(Void.class)).thenReturn(Mono.empty());
+        StepVerifier.create(filesServiceClient.deleteFile("missing"))
+                .expectError(NotFoundException.class)
+                .verify();
+    }
 
-        StepVerifier.create(filesServiceClient.DeleteFile("file1"))
-                .verifyComplete();
+    @Test
+    void deleteFile_WithBadRequestStatus_ShouldThrowBadRequestException() {
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\":\"Bad request\"}"));
+
+        StepVerifier.create(filesServiceClient.deleteFile("invalid"))
+                .expectError(BadRequestException.class)
+                .verify();
+    }
+
+    @Test
+    void deleteFile_WithInternalServerError_ShouldThrowRuntimeException() {
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\":\"Internal server error\"}"));
+
+        StepVerifier.create(filesServiceClient.deleteFile("file1"))
+                .expectError(RuntimeException.class)
+                .verify();
     }
 }
