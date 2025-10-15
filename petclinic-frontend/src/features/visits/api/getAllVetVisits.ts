@@ -13,7 +13,7 @@ export async function getAllVetVisits(
       .split('data:')
       .map((dataChunk: string) => {
         try {
-          if (dataChunk == '') return null;
+          if (dataChunk === '') return null;
           return JSON.parse(dataChunk);
         } catch (err) {
           console.error('Could not parse JSON: ' + err);
