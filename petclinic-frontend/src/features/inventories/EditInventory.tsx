@@ -5,7 +5,6 @@ import {
   getInventory,
   updateInventory,
 } from '@/features/inventories/api/EditInventory.ts';
-import { InventoryResponseModel } from '@/features/inventories/models/InventoryModels/InventoryResponseModel.ts';
 import { InventoryRequestModel } from '@/features/inventories/models/InventoryModels/InventoryRequestModel.ts';
 import { InventoryType } from '@/features/inventories/models/InventoryType.ts';
 import { getAllInventoryTypes } from '@/features/inventories/api/getAllInventoryTypes.ts';
@@ -127,60 +126,55 @@ const EditInventory: React.FC = (): JSX.Element => {
 
   useEffect(() => {
     const fetchInventoryData = async (): Promise<void> => {
-      if (inventoryId) {
-        try {
-          const response: InventoryResponseModel =
-            await getInventory(inventoryId);
-          setInventory({
-            inventoryName: response.inventoryName,
-            inventoryType: response.inventoryType,
-            inventoryDescription: response.inventoryDescription,
-            inventoryImage: response.inventoryImage,
-            inventoryBackupImage: response.inventoryBackupImage,
-            imageUploaded: response.imageUploaded,
-          });
+      if (!inventoryId) return;
 
-          // store original values so Cancel can restore them
-          originalInventoryRef.current = {
-            inventoryName: response.inventoryName,
-            inventoryType: response.inventoryType,
-            inventoryDescription: response.inventoryDescription,
-            inventoryImage: response.inventoryImage,
-            inventoryBackupImage: response.inventoryBackupImage,
-            imageUploaded: response.imageUploaded || '',
-          };
-
-          // Initialize undo history with loaded values
-          setHistory({
-            inventoryName: [response.inventoryName],
-            inventoryType: [response.inventoryType],
-            inventoryDescription: [response.inventoryDescription],
-            inventoryImage: [response.inventoryImage],
-            inventoryBackupImage: [response.inventoryBackupImage],
-          });
-        } catch (error) {
-          console.error(
-            `Error fetching inventory with ID ${inventoryId}:`,
-            error
-          );
-        }
+      const res = await getInventory(inventoryId);
+      if (res.errorMessage || !res.data) {
+        setErrorMessage(res.errorMessage ?? 'Unable to load inventory.');
+        return;
       }
-    };
 
-    fetchInventoryData().catch(error =>
-      console.error('Error in fetchInventoryData:', error)
-    );
+      const response = res.data;
+      setInventory({
+        inventoryName: response.inventoryName,
+        inventoryType: response.inventoryType,
+        inventoryDescription: response.inventoryDescription,
+        inventoryImage: response.inventoryImage,
+        inventoryBackupImage: response.inventoryBackupImage,
+        imageUploaded: response.imageUploaded,
+      });
+
+      // store original values so Cancel can restore them
+      originalInventoryRef.current = {
+        inventoryName: response.inventoryName,
+        inventoryType: response.inventoryType,
+        inventoryDescription: response.inventoryDescription,
+        inventoryImage: response.inventoryImage,
+        inventoryBackupImage: response.inventoryBackupImage,
+        imageUploaded: response.imageUploaded || '',
+      };
+
+      // Initialize undo history with loaded values
+      setHistory({
+        inventoryName: [response.inventoryName],
+        inventoryType: [response.inventoryType],
+        inventoryDescription: [response.inventoryDescription],
+        inventoryImage: [response.inventoryImage],
+        inventoryBackupImage: [response.inventoryBackupImage],
+      });
+    };
 
     const fetchInventoryTypes = async (): Promise<void> => {
-      try {
-        const types = await getAllInventoryTypes();
-        setInventoryTypes(types);
-      } catch (error) {
-        console.error('Error fetching inventory types:', error);
+      const res = await getAllInventoryTypes();
+      if (res.errorMessage) {
+        setErrorMessage(prev => prev || res.errorMessage || '');
       }
+      setInventoryTypes(res.data ?? []);
     };
 
-    fetchInventoryTypes();
+    void (async () => {
+      await Promise.all([fetchInventoryData(), fetchInventoryTypes()]);
+    })();
   }, [inventoryId]);
 
   // Word-count helper
@@ -303,19 +297,16 @@ const EditInventory: React.FC = (): JSX.Element => {
     setShowNotification(false);
 
     try {
-      if (inventoryId) {
-        await updateInventory(inventoryId, inventory);
-        setSuccessMessage('Inventory updated successfully');
-        setShowNotification(true);
-        setTimeout(() => {
-          navigate('/inventories');
-        }, 2000);
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        const msg = error.message.toLowerCase();
+      const res = inventoryId
+        ? await updateInventory(inventoryId, inventory)
+        : { data: undefined, errorMessage: 'No inventory ID' };
 
-        if (msg.includes('already exists')) {
+      setLoading(false);
+
+      if (res.errorMessage) {
+        const msg = res.errorMessage.toLowerCase();
+
+        if (msg.includes('already exists') || msg.includes('same name')) {
           setFieldErrors(prev => ({
             ...prev,
             inventoryName:
@@ -332,25 +323,31 @@ const EditInventory: React.FC = (): JSX.Element => {
           }));
           return;
         }
-
-        setErrorMessage(error.message || 'Failed to update inventory.');
+        if (msg.includes('invalid inventory data')) {
+          const errorsAfter = buildInventoryFieldErrorMessage({
+            inventoryName: inventory.inventoryName,
+            inventoryType: inventory.inventoryType,
+            inventoryDescription: inventory.inventoryDescription,
+            inventoryImage: inventory.inventoryImage,
+            inventoryBackupImage: inventory.inventoryBackupImage,
+            imageUploaded:
+              typeof inventory.imageUploaded === 'string'
+                ? inventory.imageUploaded
+                : undefined,
+          });
+          if (Object.keys(errorsAfter).length) {
+            setFieldErrors(prev => ({ ...prev, ...errorsAfter }));
+          }
+        }
+        setErrorMessage(res.errorMessage || 'Failed to update inventory.');
         return;
       }
 
-      const errorsAfter = buildInventoryFieldErrorMessage({
-        inventoryName: inventory.inventoryName,
-        inventoryType: inventory.inventoryType,
-        inventoryDescription: inventory.inventoryDescription,
-        inventoryImage: inventory.inventoryImage,
-        inventoryBackupImage: inventory.inventoryBackupImage,
-        imageUploaded:
-          typeof inventory.imageUploaded === 'string'
-            ? inventory.imageUploaded
-            : undefined,
-      });
-      if (Object.keys(errorsAfter).length) {
-        setFieldErrors(prev => ({ ...prev, ...errorsAfter }));
-      }
+      setSuccessMessage('Inventory updated successfully');
+      setShowNotification(true);
+      setTimeout(() => {
+        navigate('/inventories');
+      }, 2000);
     } finally {
       setLoading(false);
     }

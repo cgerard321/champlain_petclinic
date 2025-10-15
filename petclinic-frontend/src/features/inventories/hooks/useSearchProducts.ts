@@ -23,13 +23,19 @@ export default function useSearchProducts(): useSearchProductsResponseModel {
     productDescription?: string,
     status?: Status
   ): Promise<void> => {
-    const data = await searchProducts(
+    const res = await searchProducts(
       inventoryId,
       productName,
       productDescription,
       status
     );
-    setProductList(data);
+
+    if (res.errorMessage) {
+      setProductList([]);
+      return;
+    }
+
+    setProductList(res.data ?? []);
   };
 
   return {

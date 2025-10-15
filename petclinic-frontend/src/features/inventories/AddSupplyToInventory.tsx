@@ -33,6 +33,17 @@ const AddSupplyToInventory: React.FC = (): JSX.Element => {
     return Object.keys(err).length === 0;
   };
 
+  const isValidNumbers =
+    Number(product.productPrice) > 0 &&
+    Number(product.productQuantity) > 0 &&
+    Number(product.productSalePrice) > 0;
+
+  const canSubmit =
+    !!product.productName.trim() &&
+    !!product.productDescription.trim() &&
+    isValidNumbers &&
+    !loading;
+
   const handleSubmit = async (
     event: FormEvent<HTMLFormElement>
   ): Promise<void> => {
@@ -42,27 +53,39 @@ const AddSupplyToInventory: React.FC = (): JSX.Element => {
       setErrorMessage('Please fix the highlighted errors and try again.');
       return;
     }
+    if (!isValidNumbers) {
+      const next: Record<string, string> = {};
+      if (!(Number(product.productPrice) > 0))
+        next.productPrice = 'Product price must be greater than 0';
+      if (!(Number(product.productQuantity) > 0))
+        next.productQuantity = 'Product quantity must be greater than 0';
+      if (!(Number(product.productSalePrice) > 0))
+        next.productSalePrice = 'Product sale price must be greater than 0';
+      setError(p => ({ ...p, ...next }));
+      setErrorMessage('Please fix the highlighted errors and try again.');
+      return;
+    }
 
     setLoading(true);
     setErrorMessage('');
     setSuccessMessage('');
     setShowNotification(false);
 
-    try {
-      if (inventoryId) {
-        await addSupplyToInventory(inventoryId, product);
-        setSuccessMessage('Supply added successfully');
-        setShowNotification(true);
-        setTimeout(
-          () => navigate(`/inventories/${inventoryId}/products`),
-          2000
-        );
-      }
-    } catch (error) {
-      const msg = error instanceof Error ? error.message || '' : '';
-      const lower = msg.toLowerCase();
+    if (!inventoryId) {
+      setErrorMessage('Inventory ID is missing in the URL.');
+      setLoading(false);
+      return;
+    }
 
-      if (/(already exists|duplicate|same name)/.test(lower)) {
+    const { errorMessage: apiError } = await addSupplyToInventory(
+      inventoryId,
+      product
+    );
+
+    setLoading(false);
+
+    if (apiError) {
+      if (/(already exists|duplicate|same name)/.test(apiError.toLowerCase())) {
         setError(p => ({
           ...p,
           productName: p.productName || 'This product name is already in use.',
@@ -70,57 +93,13 @@ const AddSupplyToInventory: React.FC = (): JSX.Element => {
         setErrorMessage('');
         return;
       }
-
-      if (
-        lower.includes('price quantity and sale price') &&
-        lower.includes('greater than 0')
-      ) {
-        const next: Record<string, string> = {};
-        if (!(Number(product.productPrice) > 0))
-          next.productPrice = 'Product price must be greater than 0';
-        if (!(Number(product.productQuantity) > 0))
-          next.productQuantity = 'Product quantity must be greater than 0';
-        if (!(Number(product.productSalePrice) > 0))
-          next.productSalePrice = 'Product sale price must be greater than 0';
-        setError(p => ({ ...p, ...next }));
-        setErrorMessage('');
-        return;
-      }
-
-      if (
-        lower.includes('product quantity') &&
-        lower.includes('greater than 0')
-      ) {
-        setError(p => ({
-          ...p,
-          productQuantity: 'Product quantity must be greater than 0',
-        }));
-        setErrorMessage('');
-        return;
-      }
-      if (
-        lower.includes('product sale price') &&
-        lower.includes('greater than 0')
-      ) {
-        setError(p => ({
-          ...p,
-          productSalePrice: 'Product sale price must be greater than 0',
-        }));
-        setErrorMessage('');
-        return;
-      }
-      if (lower.includes('product price') && lower.includes('greater than 0')) {
-        setError(p => ({
-          ...p,
-          productPrice: 'Product price must be greater than 0',
-        }));
-        setErrorMessage('');
-        return;
-      }
-      setErrorMessage(msg || 'Request failed.');
-    } finally {
-      setLoading(false);
+      setErrorMessage(apiError);
+      return;
     }
+
+    setSuccessMessage('Supply added successfully');
+    setShowNotification(true);
+    setTimeout(() => navigate(`/inventories/${inventoryId}/products`), 2000);
   };
 
   // Handle input changes
@@ -203,7 +182,7 @@ const AddSupplyToInventory: React.FC = (): JSX.Element => {
               value={product.productPrice ?? ''}
               onChange={handleChange}
               step="any"
-              min={0}
+              min={1}
               inputMode="decimal"
               onKeyDown={e => {
                 if (['-', '+', 'e', 'E'].includes(e.key)) e.preventDefault();
@@ -227,7 +206,7 @@ const AddSupplyToInventory: React.FC = (): JSX.Element => {
               type="number"
               name="productQuantity"
               step={1}
-              min={0}
+              min={1}
               inputMode="numeric"
               onKeyDown={e => {
                 if (['-', '+', 'e', 'E', '.'].includes(e.key))
@@ -257,7 +236,7 @@ const AddSupplyToInventory: React.FC = (): JSX.Element => {
               value={product.productSalePrice ?? ''}
               onChange={handleChange}
               step="any"
-              min={0}
+              min={1}
               inputMode="decimal"
               onKeyDown={e => {
                 if (['-', '+', 'e', 'E'].includes(e.key)) e.preventDefault();
@@ -278,7 +257,7 @@ const AddSupplyToInventory: React.FC = (): JSX.Element => {
           <button
             className="add-supply-submit-button"
             type="submit"
-            disabled={loading}
+            disabled={loading || !canSubmit}
           >
             {loading ? 'Adding...' : 'Add Supply'}
           </button>

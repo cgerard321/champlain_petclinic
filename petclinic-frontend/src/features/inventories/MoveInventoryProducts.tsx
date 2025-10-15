@@ -6,18 +6,14 @@ import {
   updateProductInventoryId,
 } from '@/features/inventories/api/moveInventoryProduct.ts';
 
-interface ApiError {
-  message: string;
-}
+type InventoryLite = { inventoryId: string; inventoryName: string };
 
 export default function MoveInventoryProducts(): JSX.Element {
   const { inventoryId, productId } = useParams<{
     inventoryId: string;
     productId: string;
   }>();
-  const [inventories, setInventories] = useState<
-    { inventoryId: string; inventoryName: string }[]
-  >([]);
+  const [inventories, setInventories] = useState<InventoryLite[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string>('');
@@ -29,16 +25,16 @@ export default function MoveInventoryProducts(): JSX.Element {
 
   useEffect(() => {
     const fetchInventories = async (): Promise<void> => {
-      try {
-        const response = await getAllInventories();
-        setInventories(response);
-      } catch (err) {
-        const msg =
-          err instanceof Error ? err.message : 'Error fetching inventories';
-        setFetchError(msg);
-      } finally {
-        setLoading(false);
-      }
+      setLoading(true);
+      const res = await getAllInventories(); // ApiResponse<InventoryResponseModel[]>
+      if (res.errorMessage) setFetchError(res.errorMessage);
+      const list =
+        res.data?.map(i => ({
+          inventoryId: i.inventoryId,
+          inventoryName: i.inventoryName,
+        })) ?? [];
+      setInventories(list);
+      setLoading(false);
     };
 
     fetchInventories();
@@ -69,21 +65,23 @@ export default function MoveInventoryProducts(): JSX.Element {
     setSuccessMessage('');
     setShowNotification(false);
 
-    try {
-      if (productId && newInventoryId && inventoryId) {
-        await updateProductInventoryId(inventoryId, productId, newInventoryId);
-        setSuccessMessage('Product updated successfully');
-        setShowNotification(true);
-        setTimeout(() => {
-          navigate(`/inventories/${newInventoryId}/products`);
-        }, 2000);
-      }
-    } catch (error) {
-      const apiError = error as ApiError;
-      setErrorMessage(`Error updating product: ${apiError.message}`);
-    } finally {
-      setLoading(false);
+    const res = await updateProductInventoryId(
+      inventoryId,
+      productId,
+      newInventoryId
+    );
+    setLoading(false);
+
+    if (res.errorMessage) {
+      setErrorMessage(res.errorMessage);
+      return;
     }
+
+    setSuccessMessage('Product moved successfully');
+    setShowNotification(true);
+    setTimeout(() => {
+      navigate(`/inventories/${newInventoryId}/products`);
+    }, 2000);
   };
 
   const handleNewInventoryChange = (
