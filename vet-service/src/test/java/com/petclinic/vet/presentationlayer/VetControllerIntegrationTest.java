@@ -252,7 +252,7 @@ class VetControllerIntegrationTest {
     }
 
     @Test
-    void addRatingWithWrittenDescriptionAndPredefinedValue_ShouldSetRatingDescriptionToPredefinedValue(){
+    void addRatingWithWrittenDescriptionAndPredefinedValue_ShouldKeepWrittenDescription(){
         Publisher<Vet> setup = vetRepository.deleteAll()
                 .then(vetRepository.save(vet));
 
@@ -288,7 +288,7 @@ class VetControllerIntegrationTest {
                     assertNotNull(ratingResponseDTO.getRatingId());
                     assertThat(ratingResponseDTO.getVetId()).isEqualTo(ratingRequestDTO.getVetId());
                     assertThat(ratingResponseDTO.getRateScore()).isEqualTo(ratingRequestDTO.getRateScore());
-                    assertThat(ratingResponseDTO.getRateDescription()).isEqualTo(ratingRequestDTO.getPredefinedDescription().name());
+                    assertThat(ratingResponseDTO.getRateDescription()).isEqualTo(ratingRequestDTO.getRateDescription());
                     assertThat(ratingResponseDTO.getPredefinedDescription()).isEqualTo(ratingRequestDTO.getPredefinedDescription());
                     assertThat(ratingResponseDTO.getRateDate()).isEqualTo(ratingRequestDTO.getRateDate());
                 });
@@ -456,6 +456,47 @@ class VetControllerIntegrationTest {
                     assertThat(ratingResponseDTO.getVetId()).isEqualTo(ratingRequestDTO.getVetId());
                     assertThat(ratingResponseDTO.getRateScore()).isEqualTo(ratingRequestDTO.getRateScore());
                     assertThat(ratingResponseDTO.getRateDescription()).isEqualTo(ratingRequestDTO.getPredefinedDescription().name());
+                    assertThat(ratingResponseDTO.getPredefinedDescription()).isEqualTo(ratingRequestDTO.getPredefinedDescription());
+                    assertThat(ratingResponseDTO.getRateDate()).isEqualTo(ratingRequestDTO.getRateDate());
+                });
+    }
+
+    @Test
+    void updateRating_withWrittenDescriptionAndPredefinedValue_ShouldKeepWrittenDescription() {
+        Publisher<Rating> setup = ratingRepository.deleteAll()
+                .then(vetRepository.save(vet))
+                .thenMany(ratingRepository.save(rating1));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        String existingRatingId = rating1.getRatingId();
+
+        RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
+                .vetId(VET_ID)
+                .rateScore(5.0)
+                .rateDescription("Follow-up visit was outstanding.")
+                .predefinedDescription(PredefinedDescription.EXCELLENT)
+                .rateDate("22/09/2023")
+                .build();
+
+        client.put()
+                .uri("/vets/" + VET_ID + "/ratings/" + existingRatingId)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(ratingRequestDTO)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(RatingResponseDTO.class)
+                .value(ratingResponseDTO -> {
+                    assertNotNull(ratingResponseDTO);
+                    assertNotNull(ratingResponseDTO.getRatingId());
+                    assertThat(ratingResponseDTO.getVetId()).isEqualTo(ratingRequestDTO.getVetId());
+                    assertThat(ratingResponseDTO.getRateScore()).isEqualTo(ratingRequestDTO.getRateScore());
+                    assertThat(ratingResponseDTO.getRateDescription()).isEqualTo(ratingRequestDTO.getRateDescription());
                     assertThat(ratingResponseDTO.getPredefinedDescription()).isEqualTo(ratingRequestDTO.getPredefinedDescription());
                     assertThat(ratingResponseDTO.getRateDate()).isEqualTo(ratingRequestDTO.getRateDate());
                 });
