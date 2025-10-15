@@ -3,7 +3,7 @@
 angular.module('inventoriesProductForm', ['ui.router'])
     .config(['$stateProvider', function ($stateProvider) {
         $stateProvider
-            .state('inventoriesProductNew', {
+            .state('productNew', {
                 parent: 'app',
                 url: '/inventories/:inventoryId/product/new',
                 params : {inventoryId: null},
