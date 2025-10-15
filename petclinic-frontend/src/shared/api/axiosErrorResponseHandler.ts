@@ -1,31 +1,41 @@
 import { AxiosError } from 'axios';
-import router from '@/router';
 
-// map status codes to error pages
+// Map status codes to their respective error pages
 const errorPageRedirects: Record<number, string> = {
-  401: '/unauthorized', // redirect to unauthorized
-  403: '/forbidden', // redirect to forbidden
-  408: '/request-timeout', // redirect to request
-  500: '/internal-server-error', // redirect to internal server
-  503: '/service-unavailable', // redirect to service unavailable
+  401: '/unauthorized',
+  403: '/forbidden',
+  408: '/request-timeout',
+  500: '/internal-server-error',
+  503: '/service-unavailable',
 };
 
-// handles error and redirects based on status codes
+// Handles redirection for globally managed errors
 export default function axiosErrorResponseHandler(
   error: AxiosError,
   statusCode: number
 ): void {
-  const redirectPath = errorPageRedirects[statusCode];
-  if (statusCode == 401) {
+  // Specific handling for 401 Unauthorized
+  if (statusCode === 401) {
+    console.error(
+      'Unauthorized access. Clearing credentials and redirecting to home.'
+    );
     localStorage.clear();
-    router.navigate('/home');
+    return;
   }
+
+  const redirectPath = errorPageRedirects[statusCode];
+
   if (redirectPath) {
-    // log for easy debug
-    console.error(`Redirecting to ${redirectPath} due to error:`, error);
-    router.navigate(redirectPath);
+    console.error(
+      `Redirecting to ${redirectPath} due to a server error:`,
+      error
+    );
+    // Use window.location for hard redirects on critical errors
+    if (typeof window !== 'undefined') {
+      window.location.href = redirectPath;
+    }
   } else {
-    // log whatever that wasn't handled
-    console.error('Unhandled error:', error, 'Status code:', statusCode);
+    // Log any unhandled global errors
+    console.error('Unhandled global error:', error, 'Status code:', statusCode);
   }
 }
