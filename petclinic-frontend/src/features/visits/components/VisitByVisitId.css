@@ -26,8 +26,7 @@
   justify-content: space-between;
   padding: 10px;
   background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 5px;
+  border-bottom: 1px solid #ddd;
 }
 
 .visit-label {
