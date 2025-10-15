@@ -53,7 +53,7 @@ const BasicModal: React.FC<BasicModalProps> = ({
 
     if (onConfirm) await onConfirm();
 
-    handleClose;
+    handleClose();
     setBusy(false);
   };
 
