@@ -57,10 +57,6 @@ public interface BillService {
 
     Mono<Void> deleteAllBills();
 
-    // Method to fetch bills by month
-    Flux<BillResponseDTO> getBillsByMonth(int year, int month);
-
-    Mono<BigDecimal> calculateCurrentBalance(String customerId);
 
     Mono<Void> setInterestExempt(String billId, boolean exempt);
 

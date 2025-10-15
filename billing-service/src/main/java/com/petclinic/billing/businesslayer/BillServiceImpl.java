@@ -451,23 +451,6 @@ public class BillServiceImpl implements BillService{
 
                 });
     }
-
-
-    public Mono<BigDecimal> getInterest(String billId, BigDecimal amount, int overdueMonths) {
-        return billRepository.findByBillId(billId)
-            .map(bill -> {
-                if (bill.isInterestExempt()) {
-                    return BigDecimal.ZERO;
-                } else {
-                    return InterestCalculationUtil.calculateInterest(bill);
-                }
-            });
-    }
-
-    public Mono<BigDecimal> getTotalWithInterest(String billId, BigDecimal amount, int overdueMonths) {
-        return getInterest(billId, amount, overdueMonths)
-            .map(interest -> amount.add(interest));
-    }
   
     @Override
     public Flux<BillResponseDTO> getBillsByAmountRange(String customerId, BigDecimal minAmount, BigDecimal maxAmount) {
