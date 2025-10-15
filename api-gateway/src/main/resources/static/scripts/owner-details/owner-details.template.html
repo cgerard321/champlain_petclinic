@@ -15,10 +15,10 @@
                         <h2 class="card-title">Owner Information</h2>
                         <div class="action-buttons">
                             <a class="btn-modern btn-edit" ui-sref="ownerEdit({ ownerId: $ctrl.owner.ownerId, method: 'edit' })">
-                                ✏️ Edit
+                                &#x270F; Edit
                             </a>
                             <a class="btn-modern btn-delete" ui-sref="ownerEdit({ ownerId: $ctrl.owner.ownerId, method: 'delete' })">
-                                🗑️ Delete
+                                &#x1F5D1; Delete
                             </a>
                         </div>
                     </div>
@@ -75,7 +75,7 @@
                     <div class="card-header">
                         <h2 class="card-title pets-title">Pets</h2>
                         <a class="btn-add-pet" ui-sref="petRegister({ownerId: $ctrl.owner.ownerId})">
-                            ➕ Add Pet
+                            &#x2795; Add Pet
                         </a>
                     </div>
 
@@ -94,7 +94,7 @@
                         </div>
 
                         <div ng-if="!$ctrl.pets || $ctrl.pets.length === 0" class="empty-state">
-                            <div class="empty-state-icon">🐾</div>
+                            <div class="empty-state-icon">&#x1F43E;</div>
                             <p class="empty-state-text">No pets registered yet</p>
                         </div>
                     </div>

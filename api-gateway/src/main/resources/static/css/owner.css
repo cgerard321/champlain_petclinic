@@ -79,7 +79,7 @@
 }
 
 .filters-title::before {
-    content: '🔍';
+    content: '\1F50D';
     font-size: 1.2rem;
 }
 
@@ -275,24 +275,6 @@
     box-shadow: none;
 }
 
-.page-number-link-modern:disabled {
-    background: #f3f4f6;
-    color: #9ca3af;
-    border-color: #e5e7eb;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-}
-
-.page-number-link-modern:disabled:hover {
-    background: #f3f4f6;
-    color: #9ca3af;
-    border-color: #e5e7eb;
-    transform: none;
-    box-shadow: none;
-    cursor: not-allowed;
-}
-
 .responsive-text {
     font-size: 0.875rem;
     color: #374151;
@@ -345,12 +327,12 @@
 }
 
 .card-title::before {
-    content: '👤';
+    content: '\1F464';
     font-size: 1.2rem;
 }
 
 .pets-title::before {
-    content: '🐾';
+    content: '\1F43E';
     font-size: 1.2rem;
 }
 
@@ -653,7 +635,7 @@
 }
 
 .form-title::before {
-    content: '👤';
+    content: '\1F464';
     font-size: 1.5rem;
 }
 
@@ -703,7 +685,7 @@
 }
 
 .btn-submit::before {
-    content: '✓';
+    content: '\2713';
     font-size: 1.1rem;
 }
 
@@ -727,7 +709,7 @@
 }
 
 .form-help-text::before {
-    content: '💡';
+    content: '\1F4A1';
     font-size: 1rem;
 }
 
