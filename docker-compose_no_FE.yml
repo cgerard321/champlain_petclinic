@@ -50,7 +50,6 @@ services:
       - vet-service
       - visits-service-new
 
-
   auth-service:
     build: auth-service
     hostname: auth
@@ -70,7 +69,6 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
       - mongo-billing
-
 
   mailer-service:
     build: mailer-service
@@ -140,7 +138,7 @@ services:
       - ./data/mysql-files:/var/lib/mysql-files
       - ./data/init.d:/docker-entrypoint-initdb.d
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-uuser", "-ppwd", "-h", "localhost" ]
+      test: ["CMD", "mysqladmin", "ping", "-uuser", "-ppwd", "-h", "localhost"]
       interval: 10s
       timeout: 5s
       retries: 10
