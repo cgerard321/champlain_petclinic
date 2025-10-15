@@ -5,12 +5,6 @@ export async function archiveVisit(
   visitId: string,
   onSuccess: (updatedVisit: Visit) => void
 ): Promise<void> {
-  const confirmArchive = window.confirm(
-    `Are you sure you want to archive visit with ID: ${visitId}?`
-  );
-
-  if (!confirmArchive) return;
-
   try {
     const requestBody = { status: 'ARCHIVED' };
     await axiosInstance.patch(`/visits/${visitId}`, requestBody, {

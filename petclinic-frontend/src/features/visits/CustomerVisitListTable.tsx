@@ -4,6 +4,7 @@ import { Visit } from '@/features/visits/models/Visit.ts';
 import { useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 import { getAllOwnerVisits } from './api/getAllOwnerVisits';
+import { getAllVetVisits } from './api/getAllVetVisits';
 
 export default function CustomerVisitListTable(): JSX.Element {
   const { user } = useUser();
@@ -14,11 +15,18 @@ export default function CustomerVisitListTable(): JSX.Element {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user.userId || isVet) return;
+    if (!user.userId) return;
 
     const fetchVisits = async (): Promise<void> => {
       try {
-        const visitData = await getAllOwnerVisits(user.userId);
+        let visitData;
+        if (isVet) {
+          // Fetch vet's visits
+          visitData = await getAllVetVisits(user.userId);
+        } else {
+          // Fetch owner's visits
+          visitData = await getAllOwnerVisits(user.userId);
+        }
         if (Array.isArray(visitData)) {
           setVisits(visitData);
         } else {

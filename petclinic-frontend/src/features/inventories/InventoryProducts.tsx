@@ -66,18 +66,20 @@ const InventoryProducts: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
+  const [pdfLoading, setPdfLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleCreatePdf = async (): Promise<void> => {
-    if (inventoryId) {
-      try {
-        await createPdf(inventoryId);
-      } catch (error) {
-        const msg =
-          error instanceof Error ? error.message : 'Failed to create PDF';
-        alert(msg);
-      }
+    if (!inventoryId || pdfLoading) return;
+    setPdfLoading(true);
+    setError(null);
+
+    const { errorMessage } = await createPdf(inventoryId);
+
+    if (errorMessage) {
+      setError(errorMessage);
     }
+    setPdfLoading(false);
   };
   useEffect(() => {
     if (!inventoryId) return;
@@ -337,8 +339,12 @@ const InventoryProducts: React.FC = () => {
         Go Back
       </button>
       <div id="google_translate_element"></div>
-      <button className="btn btn-primary" onClick={handleCreatePdf}>
-        Download PDF
+      <button
+        className="btn btn-primary"
+        onClick={handleCreatePdf}
+        disabled={pdfLoading}
+      >
+        {pdfLoading ? 'Downloading…' : 'Download PDF'}
       </button>
       <div className="products-filtering">
         <div className="filter-by-name">

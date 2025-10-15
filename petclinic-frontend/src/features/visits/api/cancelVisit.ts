@@ -5,12 +5,6 @@ export async function cancelVisit(
   visitId: string,
   onSuccess: (updatedVisit: Visit) => void
 ): Promise<void> {
-  const confirmCancel = window.confirm(
-    'Do you confirm you want to cancel the reservation?'
-  );
-
-  if (!confirmCancel) return;
-
   try {
     const requestBody = { status: 'CANCELLED' };
     await axiosInstance.patch(`/visits/${visitId}`, requestBody, {

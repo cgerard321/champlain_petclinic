@@ -41,7 +41,6 @@ spring:
   config:
     activate:
       on-profile: docker
-
   data:
     mongodb:
       host: mongo-carts

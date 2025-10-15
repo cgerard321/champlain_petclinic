@@ -71,7 +71,6 @@ public class EntityDtoUtil {
     public Visit toVisitEntity(VisitRequestDTO visitRequestDTO) {
         Visit visit = new Visit();
         BeanUtils.copyProperties(visitRequestDTO, visit);
-        visit.setStatus(Status.UPCOMING);
         return visit;
     }
 

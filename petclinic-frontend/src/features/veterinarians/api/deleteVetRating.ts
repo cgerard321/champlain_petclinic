@@ -1,4 +1,4 @@
-import axiosInstance from '@/shared/api/axiosInstance.ts';
+import axiosInstance from '@/shared/api/axiosInstance';
 
 export async function deleteVetRating(vetId: string): Promise<void> {
   try {

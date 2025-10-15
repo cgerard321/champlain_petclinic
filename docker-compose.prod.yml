@@ -184,7 +184,7 @@ services:
     volumes:
       - mysql-files-data:/var/lib/mysql
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-uuser", "-ppwd", "-h", "localhost" ]
+      test: ["CMD", "mysqladmin", "ping", "-uuser", "-ppwd", "-h", "localhost"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -297,6 +297,90 @@ services:
       - mongo-carts-config:/data/configdb
     restart: unless-stopped
 
+  dbgate:
+    image: dbgate/dbgate:latest
+    container_name: dbgate
+    ports:
+      - "8030:3000"
+    restart: unless-stopped
+    volumes:
+      - dbgate-data:/root/.dbgate
+    environment:
+      - BASIC_AUTH=1
+      - LOGIN=CPC_Admin
+      - PASSWORD=${DBGATE_PASSWORD:-change-me}
+      - SKIP_ALL_AUTH=0
+      - ADMIN_PASSWORD=${DBGATE_ADMIN_PASSWORD:-change-me}
+
+      - CONNECTIONS=mysqlAuth,mysqlFiles,postgresVet,mongoVet,mongoBilling,mongoVisits,mongoCustomers,mongoInventory,mongoProducts,mongoCarts
+
+      # MySQL (auth)
+      - LABEL_mysqlAuth=MySQL auth-db
+      - ENGINE_mysqlAuth=mysql@dbgate-plugin-mysql
+      - SERVER_mysqlAuth=mysql-auth
+      - PORT_mysqlAuth=3306
+      - USER_mysqlAuth=user
+      - PASSWORD_mysqlAuth=pwd
+      - DATABASE_mysqlAuth=auth-db
+
+      # MySQL (files)
+      - LABEL_mysqlFiles=MySQL files-db
+      - ENGINE_mysqlFiles=mysql@dbgate-plugin-mysql
+      - SERVER_mysqlFiles=mysql-files
+      - PORT_mysqlFiles=3306
+      - USER_mysqlFiles=user
+      - PASSWORD_mysqlFiles=pwd
+      - DATABASE_mysqlFiles=files-db
+
+      # Postgres (vet)
+      - LABEL_postgresVet=Postgres images
+      - ENGINE_postgresVet=postgres@dbgate-plugin-postgres
+      - SERVER_postgresVet=postgres
+      - PORT_postgresVet=5432
+      - USER_postgresVet=user
+      - PASSWORD_postgresVet=pwd
+      - DATABASE_postgresVet=images
+
+      # MongoDBs
+      - LABEL_mongoVet=Mongo (vet)
+      - ENGINE_mongoVet=mongo@dbgate-plugin-mongo
+      - URL_mongoVet=mongodb://root:password@mongo-vet:27017/?authSource=admin
+
+      - LABEL_mongoBilling=Mongo (billing)
+      - ENGINE_mongoBilling=mongo@dbgate-plugin-mongo
+      - URL_mongoBilling=mongodb://root:password@mongo-billing:27017/?authSource=admin
+
+      - LABEL_mongoVisits=Mongo (visits)
+      - ENGINE_mongoVisits=mongo@dbgate-plugin-mongo
+      - URL_mongoVisits=mongodb://root:password@mongo-visits:27017/?authSource=admin
+
+      - LABEL_mongoCustomers=Mongo (customers)
+      - ENGINE_mongoCustomers=mongo@dbgate-plugin-mongo
+      - URL_mongoCustomers=mongodb://root:password@mongo-customers:27017/?authSource=admin
+
+      - LABEL_mongoInventory=Mongo (inventory)
+      - ENGINE_mongoInventory=mongo@dbgate-plugin-mongo
+      - URL_mongoInventory=mongodb://root:password@mongo-inventory:27017/?authSource=admin
+
+      - LABEL_mongoProducts=Mongo (products)
+      - ENGINE_mongoProducts=mongo@dbgate-plugin-mongo
+      - URL_mongoProducts=mongodb://root:password@mongo-products:27017/?authSource=admin
+
+      - LABEL_mongoCarts=Mongo (carts)
+      - ENGINE_mongoCarts=mongo@dbgate-plugin-mongo
+      - URL_mongoCarts=mongodb://root:password@mongo-carts:27017/?authSource=admin
+    depends_on:
+      - mysql-auth
+      - mysql-files
+      - postgres-vet
+      - mongo-vet
+      - mongo-billing
+      - mongo-visits
+      - mongo-customers
+      - mongo-inventory
+      - mongo-products
+      - mongo-carts
+
 # -------------------
 # VOLUMES
 # -------------------
@@ -318,3 +402,4 @@ volumes:
   mongo-carts-config:
   postgres-vet-data:
   mysql-files-data:
+  dbgate-data:

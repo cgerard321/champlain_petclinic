@@ -338,7 +338,7 @@ public class VisitsServiceClient {
 
     public Mono<VisitResponseDTO> patchVisitStatus(String visitId, String status) {
         return webClient.patch()
-                .uri(reviewUrl + "/" + visitId + "/" + status) // Adjust URI based on visit-service
+                .uri(reviewUrl + "/" + visitId + "/status/" + status) // Adjust URI based on visit-service
                 .retrieve()
                 .bodyToMono(VisitResponseDTO.class); // Parse response into VisitResponseDTO
     }

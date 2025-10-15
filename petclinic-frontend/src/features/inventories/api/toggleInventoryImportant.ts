@@ -1,60 +1,28 @@
 import axiosInstance from '@/shared/api/axiosInstance.ts';
-import axios from 'axios';
+import { ApiResponse } from '@/shared/models/ApiResponse';
 
 export const toggleInventoryImportant = async (
   inventoryId: string,
   isImportant: boolean
-): Promise<void> => {
+): Promise<ApiResponse<void>> => {
   try {
     await axiosInstance.patch<void>(
       `/inventories/${inventoryId}/important`,
       { important: isImportant },
       { useV2: false }
     );
-  } catch (error) {
-    if (!axios.isAxiosError(error)) throw error;
+    return { data: undefined, errorMessage: null };
+  } catch (error: unknown) {
+    const maybeMsg = (error as { response?: { data?: { message?: unknown } } })
+      .response?.data?.message;
 
-    console.error('[toogleInventoryImportant]', {
-      url: (error.config?.baseURL || '') + (error.config?.url || ''),
-      method: (error.config?.method || '').toUpperCase(),
-      status: error.response?.status,
-      dataReceived: error.response?.data,
-    });
+    const fallback = 'Unable to update inventory importance. Please try again.';
 
-    const status = error.response?.status ?? 0;
-    const payload: unknown = error.response?.data;
+    const msg =
+      typeof maybeMsg === 'string' && maybeMsg.trim() ? maybeMsg.trim() : '';
 
-    const data =
-      payload && typeof payload === 'object'
-        ? (payload as Record<string, unknown>)
-        : undefined;
+    if (msg) return { data: null, errorMessage: msg };
 
-    const serverMessage = typeof data?.message === 'string' ? data.message : '';
-
-    switch (status) {
-      case 400: {
-        throw new Error(
-          serverMessage.trim()
-            ? serverMessage
-            : 'Invalid product data. Please review your input and try again.'
-        );
-      }
-      case 404: {
-        throw new Error(
-          serverMessage.trim()
-            ? serverMessage
-            : 'Inventory resource was not found.'
-        );
-      }
-      case 429: {
-        throw new Error(
-          serverMessage.trim()
-            ? serverMessage
-            : 'Too many requests. Please try again later.'
-        );
-      }
-      default:
-        throw error;
-    }
+    return { data: null, errorMessage: fallback };
   }
 };
