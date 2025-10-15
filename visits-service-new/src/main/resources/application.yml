@@ -63,7 +63,11 @@ spring:
   config:
     activate:
       on-profile: docker
-
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus
 app:
   vet-service:
     host: vet-service
