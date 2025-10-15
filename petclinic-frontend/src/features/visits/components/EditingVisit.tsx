@@ -237,61 +237,6 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
           {errors.status && <span className="error">{errors.status}</span>}
         </label>
 
-        <label>
-          Description:{' '}
-          {errors.description && (
-            <span className="error">{errors.description}</span>
-          )}
-        </label>
-
-        <input
-          type="text"
-          name="description"
-          value={visit.description}
-          onChange={handleChange}
-          required
-        />
-
-        <br />
-        <div className="form-group">
-          <label htmlFor="practitionerId">Veterinarian Preference:</label>
-          <select
-            id="practitionerId"
-            name="practitionerId"
-            value={visit.practitionerId}
-            onChange={handleChange}
-          >
-            {vets.map(vet => (
-              <option key={vet.vetId} value={vet.vetId}>
-                Dr. {vet.firstName} {vet.lastName}
-                {vet.specialties &&
-                  vet.specialties.length > 0 &&
-                  ` (${vet.specialties.map(s => s.name).join(', ')})`}
-              </option>
-            ))}
-          </select>
-        </div>
-        <br />
-        <label>
-          Visit Date:{' '}
-          {errors.visitStartDate && (
-            <span className="error">{errors.visitDate}</span>
-          )}
-        </label>
-
-        <input
-          type="datetime-local"
-          name="visitStartDate"
-          value={formatDate(visit.visitStartDate)}
-          onChange={handleChange}
-          required
-        />
-        <br />
-        <label>
-          Status:{' '}
-          {errors.status && <span className="error">{errors.status}</span>}
-        </label>
-
         <select name="status" value={visit.status} onChange={handleChange}>
           <option value="CONFIRMED">Confirmed</option>
           <option value="UPCOMING">Upcoming</option>
