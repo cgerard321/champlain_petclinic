@@ -43,38 +43,17 @@ dependencies {
     annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}", "org.projectlombok:lombok:${lombokVersion}", "org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}"
     testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 
-
-    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-    implementation 'com.squareup.retrofit2:converter-jackson:2.9.0'
-    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.9.0'
-
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'
-    testImplementation 'com.squareup.okhttp3:okhttp:4.12.0'
-    testImplementation 'com.squareup.okhttp3:mockwebserver:4.12.0'
+    testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring30x:4.9.2'
     testImplementation("org.mock-server:mockserver-netty:5.13.0")
     testImplementation("org.mock-server:mockserver-client-java:5.13.0")
-    testImplementation 'com.squareup.retrofit2:retrofit-mock:2.9.0'
-    testImplementation 'jakarta.servlet:jakarta.servlet-api:6.0.0'
-    testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.12.3'
-
-    testImplementation 'org.springframework.boot:spring-boot-test-autoconfigure'
-
-    testImplementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
-
-
-
-
-
-    // Testcontainers
-    testImplementation 'org.testcontainers:testcontainers:1.19.7'
-    testImplementation 'org.testcontainers:junit-jupiter:1.19.7'
-    testImplementation 'org.testcontainers:mongodb:1.19.7'
-    
-    // WireMock
-    testImplementation 'org.springframework.cloud:spring-cloud-contract-wiremock:4.1.1'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+
+
 }
+
 jacoco {
     toolVersion = "0.8.11"
 }
@@ -104,8 +83,8 @@ test.finalizedBy jacocoTestReport
 check.dependsOn jacocoTestCoverageVerification
 
 test {
+    jvmArgs '--enable-preview'
     useJUnitPlatform()
-    systemProperty "spring.profiles.active", "test"
     testLogging {
         events "passed", "skipped", "failed"
     }
