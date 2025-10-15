@@ -137,6 +137,52 @@ class RatingServiceImplTest {
     }
 
     @Test
+    void deleteRatingByVetIdAndCustomerName_ShouldSucceed() {
+        String customerName = "Test Customer";
+        when(vetRepository.findVetByVetId(anyString())).thenReturn(Mono.just(existingVet));
+        when(ratingRepository.findAllByVetId(anyString())).thenReturn(Flux.just(rating));
+        when(ratingRepository.delete(any())).thenReturn(Mono.empty());
+
+        Mono<Void> deletedRating = ratingService.deleteRatingByVetIdAndCustomerName(rating.getVetId(), customerName);
+
+        StepVerifier
+                .create(deletedRating)
+                .verifyComplete();
+    }
+
+    @Test
+    void deleteRatingByVetIdAndCustomerName_WithInvalidVetId_ShouldReturnNotFound() {
+        String invalidVetId = "invalidVetId";
+        String customerName = "Test Customer";
+
+        when(vetRepository.findVetByVetId(anyString())).thenReturn(Mono.empty());
+        when(ratingRepository.findAllByVetId(anyString())).thenReturn(Flux.empty());
+
+        Mono<Void> deletedRating = ratingService.deleteRatingByVetIdAndCustomerName(invalidVetId, customerName);
+
+        StepVerifier
+                .create(deletedRating)
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
+                        throwable.getMessage().equals("vetId not found: " + invalidVetId))
+                .verify();
+    }
+
+    @Test
+    void deleteRatingByVetIdAndCustomerName_WithNoMatchingCustomer_ShouldReturnNotFound() {
+        String customerName = "Non Existent Customer";
+        when(vetRepository.findVetByVetId(anyString())).thenReturn(Mono.just(existingVet));
+        when(ratingRepository.findAllByVetId(anyString())).thenReturn(Flux.empty());
+
+        Mono<Void> deletedRating = ratingService.deleteRatingByVetIdAndCustomerName(rating.getVetId(), customerName);
+
+        StepVerifier
+                .create(deletedRating)
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
+                        throwable.getMessage().equals("No rating found for customer: " + customerName))
+                .verify();
+    }
+
+    @Test
     void addRatingToVet() {
         when(vetRepository.findVetByVetId(anyString())).thenReturn(Mono.just(existingVet));
 
@@ -361,6 +407,7 @@ class RatingServiceImplTest {
                 .rateScore(5.0)
                 .rateDescription("Vet is the best vet in the wooooorld!")
                 .rateDate("16/09/2023")
+                .customerName("Test Customer")
                 .build();
     }
     private Rating buildRating2() {

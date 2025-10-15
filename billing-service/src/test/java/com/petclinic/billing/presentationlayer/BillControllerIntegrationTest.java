@@ -271,11 +271,21 @@ class BillControllerIntegrationTest {
     void getBillByCustomerId() {
 
         Bill billEntity = buildBill();
+        billEntity.setOwnerFirstName("John");
+        billEntity.setOwnerLastName("Doe");
+
+        // Mock the OwnerClient call
+        OwnerResponseDTO owner = new OwnerResponseDTO();
+        owner.setOwnerId(billEntity.getCustomerId());
+        owner.setFirstName("John");
+        owner.setLastName("Doe");
+
+        when(ownerClient.getOwnerByOwnerId(billEntity.getCustomerId()))
+                .thenReturn(Mono.just(owner));
 
         Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(billEntity));
 
-        StepVerifier
-                .create(setup)
+        StepVerifier.create(setup)
                 .expectNextCount(1)
                 .verifyComplete();
 
@@ -284,11 +294,13 @@ class BillControllerIntegrationTest {
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
                 .expectBodyList(Bill.class)
                 .consumeWith(response -> {
                     List<Bill> bills = response.getResponseBody();
                     Assertions.assertNotNull(bills);
+                    Assertions.assertFalse(bills.isEmpty());
+                    Assertions.assertEquals(billEntity.getCustomerId(), bills.get(0).getCustomerId());
                 });
     }
 

@@ -162,12 +162,42 @@ class ApiGatewayControllerTest {
         client
                 .delete()
                 .uri("/api/gateway/vets/" + VET_ID + "/ratings/{ratingsId}", ratingResponseDTO.getRatingId())
+                .cookie("Bearer", "valid-jwt-token")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNoContent();
 
         Mockito.verify(vetsServiceClient, times(1))
                 .deleteRating(VET_ID, ratingResponseDTO.getRatingId());
+    }
+
+    @Test
+    void deleteVetRatingByCustomer() {
+        String customerName = "Test Customer";
+        when(vetsServiceClient.deleteRatingByCustomerName(VET_ID, customerName))
+                .thenReturn((Mono.empty()));
+        when(authServiceClient.validateToken(anyString()))
+                .thenReturn(Mono.just(ResponseEntity.ok(TokenResponseDTO.builder()
+                        .userId("userId123")
+                        .roles(List.of("OWNER"))
+                        .token("bearer-token")
+                        .build())));
+        when(customersServiceClient.getOwner("userId123"))
+                .thenReturn(Mono.just(OwnerResponseDTO.builder()
+                        .firstName("Test")
+                        .lastName("Customer")
+                        .build()));
+
+        client
+                .delete()
+                .uri("/api/gateway/vets/" + VET_ID + "/ratings/customer")
+                .cookie("Bearer", "valid-jwt-token")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        Mockito.verify(vetsServiceClient, times(1))
+                .deleteRatingByCustomerName(VET_ID, customerName);
     }
 
     @Test
@@ -1193,13 +1223,14 @@ class ApiGatewayControllerTest {
         successResponse.setBillId("1");
         successResponse.setBillStatus(PAID);
 
-        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class)))
+        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class), anyString()))
                 .thenReturn(Mono.just(successResponse));
 
         PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
 
         client.post()
                 .uri("/api/gateway/bills/customer/1/bills/1/pay")
+                .cookie("Bearer", "dummy-jwt-token")
                 .body(BodyInserters.fromValue(paymentRequestDTO))
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .exchange()
@@ -1213,45 +1244,48 @@ class ApiGatewayControllerTest {
 
     @Test
     void payBill_Failure() {
-        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class)))
+        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class), anyString()))
                 .thenReturn(Mono.error(new RuntimeException("Invalid payment details")));
 
         PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
 
         client.post()
                 .uri("/api/gateway/bills/customer/1/bills/1/pay")
+                .cookie("Bearer", "dummy-jwt-token")
                 .body(BodyInserters.fromValue(paymentRequestDTO))
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .exchange()
                 .expectStatus().isBadRequest()
-                .expectBody().isEmpty(); // <- empty body
+                .expectBody().isEmpty();
     }
 
     @Test
     void payBill_Failure_InvalidCustomerId() {
-        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class)))
+        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class), anyString()))
                 .thenReturn(Mono.error(new RuntimeException("Invalid customer ID")));
 
         PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
 
         client.post()
                 .uri("/api/gateway/bills/customer/invalid-customer-id/bills/1/pay")
+                .cookie("Bearer", "dummy-jwt-token")
                 .body(BodyInserters.fromValue(paymentRequestDTO))
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .exchange()
                 .expectStatus().isBadRequest()
-                .expectBody().isEmpty(); //  no “Payment failed: ...”
+                .expectBody().isEmpty();
     }
 
     @Test
     void payBill_Failure_InvalidBillId() {
-        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class)))
+        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class), anyString()))
                 .thenReturn(Mono.error(new RuntimeException("Invalid bill ID")));
 
         PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
 
         client.post()
                 .uri("/api/gateway/bills/customer/1/bills/invalid-bill-id/pay")
+                .cookie("Bearer", "dummy-jwt-token")
                 .body(BodyInserters.fromValue(paymentRequestDTO))
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .exchange()
@@ -1261,13 +1295,14 @@ class ApiGatewayControllerTest {
 
     @Test
     void payBill_Failure_ExpiredCard() {
-        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class)))
+        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class), anyString()))
                 .thenReturn(Mono.error(new RuntimeException("Card expired")));
 
         PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "01/20");
 
         client.post()
                 .uri("/api/gateway/bills/customer/1/bills/1/pay")
+                .cookie("Bearer", "dummy-jwt-token")
                 .body(BodyInserters.fromValue(paymentRequestDTO))
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .exchange()
@@ -1276,12 +1311,14 @@ class ApiGatewayControllerTest {
     }
 
 
+
     @Test
     void payBill_MissingPaymentDetails_Failure() {
         PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO(null, null, null);
 
         client.post()
                 .uri("/api/gateway/bills/customer/1/bills/1/pay")
+                .cookie("Bearer", "dummy-jwt-token")
                 .body(BodyInserters.fromValue(paymentRequestDTO))
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .exchange()
@@ -1296,6 +1333,7 @@ class ApiGatewayControllerTest {
 
         client.post()
                 .uri("/api/gateway/bills/customer/1/bills/1/pay")
+                .cookie("Bearer", "dummy-jwt-token")
                 .body(BodyInserters.fromValue(paymentRequestDTO))
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .exchange()
@@ -1900,22 +1938,22 @@ class ApiGatewayControllerTest {
 
 
 //    @Test
-    //    void getSingleVisit_Invalid() {
-    //        final String invalidVisitId = "invalid";
-    //        final String expectedErrorMessage = "error message";
-    //
-    //        when(visitsServiceClient.getVisitByVisitId(invalidVisitId))
-    //                .thenThrow(new GenericHttpException(expectedErrorMessage, BAD_REQUEST));
-    //
-    //        client.get()
-    //                .uri("/api/gateway/visit/{visitId}", invalidVisitId)
-    //                .exchange()
-    //                .expectStatus().isBadRequest()
-    //                .expectBody()
-    //                .jsonPath("$.statusCode").isEqualTo(BAD_REQUEST.value())
-    //                .jsonPath("$.timestamp").exists()
-    //                .jsonPath("$.message").isEqualTo(expectedErrorMessage);
-    //    }
+//    void getSingleVisit_Invalid() {
+//        final String invalidVisitId = "invalid";
+//        final String expectedErrorMessage = "error message";
+//
+//        when(visitsServiceClient.getVisitByVisitId(invalidVisitId))
+//                .thenThrow(new GenericHttpException(expectedErrorMessage, BAD_REQUEST));
+//
+//        client.get()
+//                .uri("/api/gateway/visit/{visitId}", invalidVisitId)
+//                .exchange()
+//                .expectStatus().isBadRequest()
+//                .expectBody()
+//                .jsonPath("$.statusCode").isEqualTo(BAD_REQUEST.value())
+//                .jsonPath("$.timestamp").exists()
+//                .jsonPath("$.message").isEqualTo(expectedErrorMessage);
+//    }
 
     /*@Test
     @DisplayName("Should get the previous visits of a pet")
@@ -2674,7 +2712,10 @@ private VetAverageRatingDTO buildVetAverageRatingDTO(){
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(Mono.just(photoData), byte[].class)
                 .exchange()
-                .expectStatus().isCreated();
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .expectBody(byte[].class)
+                .isEqualTo(photoData);
 
         verify(vetsServiceClient).addPhotoToVetFromBytes(vetId, photoName, photoData);
     }
@@ -2694,7 +2735,8 @@ private VetAverageRatingDTO buildVetAverageRatingDTO(){
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(Mono.just(photoData), byte[].class)
                 .exchange()
-                .expectStatus().isBadRequest();
+                .expectStatus().isBadRequest()
+                .expectBody().isEmpty();
 
         verify(vetsServiceClient).addPhotoToVetFromBytes(vetId, photoName, photoData);
     }

@@ -15,9 +15,10 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import java.math.BigDecimal;
 import java.net.URI;
 import java.util.Optional;
-
+import java.time.LocalDate;
 @Component
 @Slf4j
 public class BillServiceClient {
@@ -363,11 +364,12 @@ public class BillServiceClient {
                 .bodyToMono(Double.class);
     }
 
-    public Mono<BillResponseDTO> payBill(String customerId, String billId, PaymentRequestDTO paymentRequestDTO) {
+    public Mono<BillResponseDTO> payBill(String customerId, String billId, PaymentRequestDTO paymentRequestDTO, String jwtToken) {
         return webClientBuilder.build()
                 .post()
                 .uri(billServiceUrl + "/customer/{customerId}/bills/{billId}/pay", customerId, billId)
                 .contentType(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", jwtToken)
                 .bodyValue(paymentRequestDTO)
                 .exchangeToMono(resp -> {
                     if (resp.statusCode().is2xxSuccessful()) {
@@ -424,5 +426,54 @@ public class BillServiceClient {
                 .uri(billServiceUrl + "/archive")
                 .retrieve()
                 .bodyToFlux(BillResponseDTO.class);
+    }
+
+    //for customerBillController
+    public Flux<BillResponseDTO> getBillsByAmountRange(String customerId, BigDecimal minAmount, BigDecimal maxAmount) {
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromUriString(billServiceUrl + "/customer/{customerId}/bills/filter-by-amount")
+                .queryParam("minAmount", minAmount)
+                .queryParam("maxAmount", maxAmount);
+
+        return webClientBuilder.build()
+                .get()
+                .uri(builder.build(customerId))
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class)
+                .switchIfEmpty(Flux.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "No bills found in the specified amount range")));
+    }
+
+    //for customerBillController
+    public Flux<BillResponseDTO> getBillsByDueDateRange(String customerId, LocalDate startDate, LocalDate endDate) {
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromUriString(billServiceUrl + "/customer/{customerId}/bills/filter-by-due-date")
+                .queryParam("startDate", startDate)
+                .queryParam("endDate", endDate);
+
+        return webClientBuilder.build()
+                .get()
+                .uri(builder.build(customerId))
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class)
+                .switchIfEmpty(Flux.error(new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "No bills found in the specified due date range")));
+    }
+
+    //for customerBillController
+    public Flux<BillResponseDTO> getBillsByDateRange(String customerId, LocalDate startDate, LocalDate endDate) {
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromUriString(billServiceUrl + "/customer/{customerId}/bills/filter-by-date")
+                .queryParam("startDate", startDate)
+                .queryParam("endDate", endDate);
+
+        return webClientBuilder.build()
+                .get()
+                .uri(builder.build(customerId))
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class)
+                .switchIfEmpty(Flux.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "No bills found in the specified date range")));
     }
 }

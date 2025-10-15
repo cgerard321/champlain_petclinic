@@ -114,10 +114,12 @@ public class CustomerBillControllerUnitTest {
         mockResponse.setBillId("1");
         mockResponse.setBillStatus(BillStatus.PAID);
 
-        when(billServiceClient.payBill("cust-1", "1", paymentRequestDTO)).thenReturn(Mono.just(mockResponse));
+        when(billServiceClient.payBill("cust-1", "1", paymentRequestDTO,"dummy-jwt-token"))
+                .thenReturn(Mono.just(mockResponse));
 
         webTestClient.post()
                 .uri("/api/v2/gateway/customers/{customerId}/bills/{billId}/pay", "cust-1", "1")
+                .cookie("Bearer", "dummy-jwt-token")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(paymentRequestDTO)
                 .exchange()
@@ -128,41 +130,43 @@ public class CustomerBillControllerUnitTest {
                     assertThat(bill.getBillStatus()).isEqualTo(BillStatus.PAID);
                 });
 
-        verify(billServiceClient, times(1)).payBill("cust-1", "1", paymentRequestDTO);
+        verify(billServiceClient, times(1)).payBill("cust-1", "1", paymentRequestDTO,"dummy-jwt-token");
     }
 
     @Test
     void payBill_InvalidPaymentDetails() {
         PaymentRequestDTO invalidRequest = new PaymentRequestDTO("123", "12", "99/99");
 
-        when(billServiceClient.payBill("cust-1", "1", invalidRequest))
+        when(billServiceClient.payBill("cust-1", "1", invalidRequest,"dummy-jwt-token"))
                 .thenReturn(Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid payment details")));
 
         webTestClient.post()
                 .uri("/api/v2/gateway/customers/{customerId}/bills/{billId}/pay", "cust-1", "1")
+                .cookie("Bearer", "dummy-jwt-token")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(invalidRequest)
                 .exchange()
                 .expectStatus().isBadRequest();
 
-        verify(billServiceClient, times(1)).payBill("cust-1", "1", invalidRequest);
+        verify(billServiceClient, times(1)).payBill("cust-1", "1", invalidRequest,"dummy-jwt-token");
     }
 
     @Test
     void payBill_BillNotFound() {
         PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
 
-        when(billServiceClient.payBill("cust-1", "does-not-exist", paymentRequestDTO))
+        when(billServiceClient.payBill("cust-1", "does-not-exist", paymentRequestDTO,"dummy-jwt-token"))
                 .thenReturn(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Bill not found")));
 
         webTestClient.post()
                 .uri("/api/v2/gateway/customers/{customerId}/bills/{billId}/pay", "cust-1", "does-not-exist")
+                .cookie("Bearer", "dummy-jwt-token")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(paymentRequestDTO)
                 .exchange()
                 .expectStatus().isNotFound();
 
-        verify(billServiceClient, times(1)).payBill("cust-1", "does-not-exist", paymentRequestDTO);
+        verify(billServiceClient, times(1)).payBill("cust-1", "does-not-exist", paymentRequestDTO,"dummy-jwt-token");
     }
 
 }

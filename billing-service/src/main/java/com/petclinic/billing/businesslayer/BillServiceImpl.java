@@ -1,8 +1,10 @@
 package com.petclinic.billing.businesslayer;
 
 import com.petclinic.billing.datalayer.*;
+import com.petclinic.billing.domainclientlayer.Auth.AuthServiceClient;
 import com.petclinic.billing.domainclientlayer.Auth.UserDetails;
 import com.petclinic.billing.domainclientlayer.Mailing.Mail;
+import com.petclinic.billing.domainclientlayer.Mailing.MailService;
 import com.petclinic.billing.domainclientlayer.OwnerClient;
 import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
@@ -31,6 +33,8 @@ public class BillServiceImpl implements BillService{
     private final BillRepository billRepository;
     private final VetClient vetClient;
     private final OwnerClient ownerClient;
+    private final AuthServiceClient authClient;
+    private final MailService mailService;
 
 
    @Override
@@ -164,26 +168,29 @@ public class BillServiceImpl implements BillService{
                         ));
                     }
 
-                    // Validate vetId and customerId
                     if (dto.getVetId() == null || dto.getVetId().isEmpty()) {
                         return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vet ID is required"));
                     }
+
                     if (dto.getCustomerId() == null || dto.getCustomerId().isEmpty()) {
                         return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer ID is required"));
                     }
 
                     // Fetch Vet and Owner details
                     Mono<VetResponseDTO> vetMono = vetClient.getVetByVetId(dto.getVetId());
-                    Mono<OwnerResponseDTO> ownerMono = ownerClient.getOwnerByOwnerId(dto.getCustomerId());
+                    Mono<OwnerResponseDTO> ownerMono = ownerClient.getOwnerByOwnerId(dto.getCustomerId())
+                            .switchIfEmpty(Mono.error(new ResponseStatusException(
+                                    HttpStatus.BAD_REQUEST, "Customer ID does not exist"
+                            )));
 
                     return Mono.zip(vetMono, ownerMono, Mono.just(dto));
                 })
-                .map(tuple -> {
+                .flatMap(tuple -> {
                     VetResponseDTO vet = tuple.getT1();
                     OwnerResponseDTO owner = tuple.getT2();
                     BillRequestDTO dto = tuple.getT3();
 
-                    // Map to Bill entity and populate names
+                    // Map to Bill entity and ALWAYS set the names from ownerClient
                     Bill bill = EntityDtoUtil.toBillEntity(dto);
                     bill.setBillId(EntityDtoUtil.generateUUIDString());
                     bill.setVetFirstName(vet.getFirstName());
@@ -191,9 +198,9 @@ public class BillServiceImpl implements BillService{
                     bill.setOwnerFirstName(owner.getFirstName());
                     bill.setOwnerLastName(owner.getLastName());
 
-                    return bill;
+                    // Save the bill
+                    return billRepository.insert(bill);
                 })
-                .flatMap(billRepository::insert)
                 .map(EntityDtoUtil::toBillResponseDto);
     }
 
@@ -240,12 +247,6 @@ public class BillServiceImpl implements BillService{
     }
 
     @Override
-    public Flux<BillResponseDTO> getBillsByCustomerId(String customerId) {
-/**/
-        return billRepository.findByCustomerId(customerId).map(EntityDtoUtil::toBillResponseDto);
-    }
-
-    @Override
     public Flux<BillResponseDTO> getBillsByVetId(String vetId) {
         return billRepository.findByVetId(vetId).map(EntityDtoUtil::toBillResponseDto);
     }
@@ -280,39 +281,6 @@ public class BillServiceImpl implements BillService{
 //                        .thenReturn(rc);
 //    }
 
-
-    // Fetch a specific bill for a customer
-    @Override
-    public Mono<BillResponseDTO> getBillByCustomerIdAndBillId(String customerId, String billId) {
-        return billRepository.findByBillId(billId)
-                .filter(bill -> bill.getCustomerId().equals(customerId))
-                .map(EntityDtoUtil::toBillResponseDto);
-    }
-
-    // Fetch filtered bills by status for a customer
-    @Override
-    public Flux<BillResponseDTO> getBillsByCustomerIdAndStatus(String customerId, BillStatus status) {
-        return billRepository.findByCustomerIdAndBillStatus(customerId, status)
-                .map(EntityDtoUtil::toBillResponseDto);
-    }
-
-    @Override
-    public Mono<byte[]> generateBillPdf(String customerId, String billId, String currency) {
-        return billRepository.findByBillId(billId)
-                .filter(bill -> bill.getCustomerId().equals(customerId))
-                .switchIfEmpty(Mono.error(new RuntimeException("Bill not found for given customer")))
-                .map(EntityDtoUtil::toBillResponseDto)
-                .flatMap(bill -> {
-                    try {
-                        byte[] pdfBytes = PdfGenerator.generateBillPdf(bill, currency);
-                        return Mono.just(pdfBytes);
-                    } catch (Exception e) {
-                        log.error("PDF generation failed for billId: {}, currency: {}. Error: {}", bill.getBillId(), currency, e.getMessage(), e);
-                        return Mono.error(new RuntimeException("Error generating PDF", e));
-                    }
-                });
-    }
-
     @Override
     public Flux<BillResponseDTO> getBillsByMonth(int year, int month) {
         YearMonth yearMonth = YearMonth.of(year, month);
@@ -322,54 +290,6 @@ public class BillServiceImpl implements BillService{
         return billRepository.findByDateBetween(start, end)
                 .map(EntityDtoUtil::toBillResponseDto)
                 .switchIfEmpty(Flux.empty());
-    }
-
-    public Mono<BigDecimal> calculateCurrentBalance(String customerId) {
-        return billRepository.findByCustomerIdAndBillStatus(customerId, BillStatus.UNPAID)
-            .concatWith(billRepository.findByCustomerIdAndBillStatus(customerId, BillStatus.OVERDUE))
-            .map(bill -> {
-                BigDecimal total = bill.getAmount();
-                // Check interest exemption first - if exempt, don't add interest regardless of status
-                if (!bill.isInterestExempt()) {
-                    BigDecimal interest = InterestCalculationUtil.calculateInterest(bill);
-                    total = total.add(interest);
-                }
-                return total;
-            })
-            .reduce(BigDecimal.ZERO, BigDecimal::add)
-            .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found")));
-        }
-
-    @Override
-    public Mono<BillResponseDTO> processPayment(String customerId, String billId, PaymentRequestDTO paymentRequestDTO)
-    {
-
-        // 1. Validate card details before reactive pipeline.
-        //    If card number, CVV, or expiration date lengths are invalid, throw InvalidPaymentException.
-        if (paymentRequestDTO.getCardNumber().length() != 16 ||
-                paymentRequestDTO.getCvv().length() != 3 ||
-                paymentRequestDTO.getExpirationDate().length() != 5) {
-            return Mono.error(new InvalidPaymentException("Invalid payment details"));
-        }
-
-        // 2. Try to find the bill by customerId and billId.
-        //    If no bill exists, immediately return a 404 ResponseStatusException.
-        return billRepository.findByCustomerIdAndBillId(customerId, billId)
-                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Bill not found")))
-
-                // 3. If the bill exists, calculate and preserve the interest, then set status to PAID.
-                .flatMap(bill -> {
-                    // Calculate and preserve the interest before changing status
-                    BigDecimal interestAtPayment = InterestCalculationUtil.calculateInterest(bill);
-                    bill.setInterest(interestAtPayment);
-                    bill.setBillStatus(BillStatus.PAID);
-
-                    // 4. Save the updated bill back into the repository.
-                    return billRepository.save(bill);
-                })
-
-                // 5. Map the updated Bill entity into a BillResponseDTO before returning.
-                .map(EntityDtoUtil::toBillResponseDto);
     }
 
     public Mono<BigDecimal> getInterest(String billId, BigDecimal amount, int overdueMonths) {
@@ -423,6 +343,149 @@ public class BillServiceImpl implements BillService{
                 "Dear, " + user.getUsername() + "\n" +
                 "Your bill has been succesfully paid",
                 "Thank you for choosing Pet Clinic.", user.getUsername(), "ChamplainPetClinic@gmail.com");
+    }
+
+
+
+
+
+//////////////// Used by both BillController and CustomerBillsController /////////////////////////////////
+
+    @Override
+    public Flux<BillResponseDTO> getBillsByCustomerId(String customerId) {
+        // Fetch the owner info first
+        Mono<OwnerResponseDTO> ownerMono = ownerClient.getOwnerByOwnerId(customerId)
+                .switchIfEmpty(Mono.error(new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Customer ID does not exist"
+                )));
+
+        return ownerMono.flatMapMany(owner ->
+                billRepository.findByCustomerId(customerId)
+                        // Only return bills where first/last name match the owner record
+                        .filter(bill -> bill.getOwnerFirstName().equals(owner.getFirstName())
+                                && bill.getOwnerLastName().equals(owner.getLastName()))
+                        .map(EntityDtoUtil::toBillResponseDto)
+        );
+    }
+
+////////////////////// Used by CustomerBillsController only ///////////////////////////////////////////
+
+    // Fetch a specific bill for a customer
+    @Override
+    public Mono<BillResponseDTO> getBillByCustomerIdAndBillId(String customerId, String billId) {
+        return billRepository.findByBillId(billId)
+                .filter(bill -> bill.getCustomerId().equals(customerId))
+                .map(EntityDtoUtil::toBillResponseDto);
+    }
+
+    // Fetch filtered bills by status for a customer
+    @Override
+    public Flux<BillResponseDTO> getBillsByCustomerIdAndStatus(String customerId, BillStatus status) {
+        return billRepository.findByCustomerIdAndBillStatus(customerId, status)
+                .map(EntityDtoUtil::toBillResponseDto);
+    }
+
+    @Override
+    public Mono<byte[]> generateBillPdf(String customerId, String billId, String currency) {
+        return billRepository.findByBillId(billId)
+                .filter(bill -> bill.getCustomerId().equals(customerId))
+                .switchIfEmpty(Mono.error(new RuntimeException("Bill not found for given customer")))
+                .map(EntityDtoUtil::toBillResponseDto)
+                .flatMap(bill -> {
+                    try {
+                        byte[] pdfBytes = PdfGenerator.generateBillPdf(bill, currency);
+                        return Mono.just(pdfBytes);
+                    } catch (Exception e) {
+                        log.error("PDF generation failed for billId: {}, currency: {}. Error: {}", bill.getBillId(), currency, e.getMessage(), e);
+                        return Mono.error(new RuntimeException("Error generating PDF", e));
+                    }
+                });
+    }
+
+    public Mono<BigDecimal> calculateCurrentBalance(String customerId) {
+        return billRepository.findByCustomerIdAndBillStatus(customerId, BillStatus.UNPAID)
+                .concatWith(billRepository.findByCustomerIdAndBillStatus(customerId, BillStatus.OVERDUE))
+                .map(bill -> {
+                    BigDecimal total = bill.getAmount();
+                    // Check interest exemption first - if exempt, don't add interest regardless of status
+                    if (!bill.isInterestExempt()) {
+                        BigDecimal interest = InterestCalculationUtil.calculateInterest(bill);
+                        total = total.add(interest);
+                    }
+                    return total;
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found")));
+    }
+
+    @Override
+    public Mono<BillResponseDTO> processPayment(String customerId, String billId, PaymentRequestDTO paymentRequestDTO, String jwtToken)
+    {
+        return authClient.getUserById(jwtToken, customerId)
+                .onErrorResume(e -> {
+                    log.error("Failed to authenticate or fetch user for customerId: {}. Error: {}", customerId, e.getMessage(), e);
+                    if (e instanceof ResponseStatusException) {
+                        return Mono.error(e);
+                    }
+                    // Customize error handling as needed, e.g., unauthorized or not found
+                    return Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication failed or user not found"));
+                })
+                .flatMap(user -> {
+
+                    // 1. Validate card details before reactive pipeline.
+                    //    If card number, CVV, or expiration date lengths are invalid, throw InvalidPaymentException.
+                    if (paymentRequestDTO.getCardNumber() == null || paymentRequestDTO.getCardNumber().length() != 16 ||
+                            paymentRequestDTO.getCvv() == null || paymentRequestDTO.getCvv().length() != 3 ||
+                            paymentRequestDTO.getExpirationDate() == null || paymentRequestDTO.getExpirationDate().length() != 5) {
+                        return Mono.error(new InvalidPaymentException("Invalid payment details"));
+                    }
+
+                    // 2. Try to find the bill by customerId and billId.
+                    //    If no bill exists, immediately return a 404 ResponseStatusException.
+                    return billRepository.findByCustomerIdAndBillId(customerId, billId)
+                            .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Bill not found")))
+
+                            // 3. If the bill exists, calculate and preserve the interest, then set status to PAID.
+                            .flatMap(bill -> {
+                                // Calculate and preserve the interest before changing status
+                                BigDecimal interestAtPayment = InterestCalculationUtil.calculateInterest(bill);
+                                bill.setInterest(interestAtPayment);
+                                bill.setBillStatus(BillStatus.PAID);
+
+                                //Generate confirmation email and Send email
+                                mailService.sendMail(generateConfirmationEmail(user));
+
+                                // 4. Save the updated bill back into the repository.
+                                return billRepository.save(bill);
+                            })
+
+                            // 5. Map the updated Bill entity into a BillResponseDTO before returning.
+                            .map(EntityDtoUtil::toBillResponseDto);
+
+
+                });
+    }
+  
+    @Override
+    public Flux<BillResponseDTO> getBillsByAmountRange(String customerId, BigDecimal minAmount, BigDecimal maxAmount) {
+        return billRepository.findByCustomerIdAndAmountBetween(customerId, minAmount, maxAmount)
+                .map(EntityDtoUtil::toBillResponseDto);
+    }
+
+    @Override
+    public Flux<BillResponseDTO> getBillsByDueDateRange(String customerId, LocalDate startDate, LocalDate endDate) {
+        return billRepository.findByCustomerIdAndDueDateBetween(customerId, startDate, endDate)
+                .switchIfEmpty(Flux.error(new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "No bills found between " + startDate + " and " + endDate)))
+                .map(EntityDtoUtil::toBillResponseDto);
+    }
+
+    @Override
+    public Flux<BillResponseDTO> getBillsByCustomerIdAndDateRange(String customerId, LocalDate startDate, LocalDate endDate) {
+        return billRepository.findByCustomerIdAndDateBetween(customerId, startDate, endDate)
+                .switchIfEmpty(Flux.error(new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "No bills found between " + startDate + " and " + endDate)))
+                .map(EntityDtoUtil::toBillResponseDto);
     }
 
 

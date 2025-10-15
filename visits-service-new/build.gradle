@@ -25,6 +25,8 @@ dependencies {
             'org.simplejavamail:simple-java-mail:8.3.1', 'net.markenwerk:utils-mail-dkim:2.0.1', //Simple Java Mail and DKIM a framework for DKIM signing and verification
             'com.squareup.retrofit2:retrofit:2.9.0', 'com.squareup.retrofit2:converter-jackson:2.9.0'
 
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
     compileOnly 'org.projectlombok:lombok',
             "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 

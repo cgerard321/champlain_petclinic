@@ -1,8 +1,10 @@
 package com.petclinic.billing.businesslayer;
 
 import com.petclinic.billing.datalayer.*;
+import com.petclinic.billing.domainclientlayer.Auth.AuthServiceClient;
 import com.petclinic.billing.domainclientlayer.Auth.UserDetails;
 import com.petclinic.billing.domainclientlayer.Mailing.Mail;
+import com.petclinic.billing.domainclientlayer.Mailing.MailService;
 import com.petclinic.billing.domainclientlayer.OwnerClient;
 import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
@@ -24,6 +26,7 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
 import static org.mockito.ArgumentMatchers.*;
 
 import java.lang.reflect.Method;
@@ -46,6 +49,12 @@ public class BillServiceImplTest {
 
     @MockBean
     VetClient vetClient;
+
+    @MockBean
+    AuthServiceClient authClient;
+
+    @MockBean
+    MailService mailService;
 
     @MockBean
     OwnerClient ownerClient;
@@ -454,16 +463,26 @@ public class BillServiceImplTest {
 
     @Test
     public void test_getBillByCustomerId() {
-
+        // Arrange
         Bill billEntity = buildBill();
+        billEntity.setOwnerFirstName("John");
+        billEntity.setOwnerLastName("Doe");
 
         String CUSTOMER_ID = billEntity.getCustomerId();
 
-        when(repo.findByCustomerId(anyString())).thenReturn(Flux.just(billEntity));
+        OwnerResponseDTO mockOwner = new OwnerResponseDTO();
+        mockOwner.setOwnerId(CUSTOMER_ID);
+        mockOwner.setFirstName("John");
+        mockOwner.setLastName("Doe");
 
-        Flux<BillResponseDTO> billDTOMono = billService.getBillsByCustomerId(CUSTOMER_ID);
+        when(ownerClient.getOwnerByOwnerId(CUSTOMER_ID)).thenReturn(Mono.just(mockOwner));
+        when(repo.findByCustomerId(CUSTOMER_ID)).thenReturn(Flux.just(billEntity));
 
-        StepVerifier.create(billDTOMono)
+        // Act
+        Flux<BillResponseDTO> result = billService.getBillsByCustomerId(CUSTOMER_ID);
+
+        // Assert
+        StepVerifier.create(result)
                 .consumeNextWith(foundBill -> {
                     assertEquals(billEntity.getBillId(), foundBill.getBillId());
                     assertEquals(billEntity.getAmount(), foundBill.getAmount());
@@ -471,6 +490,7 @@ public class BillServiceImplTest {
                 })
                 .verifyComplete();
     }
+
 
     @Test
     public void test_getBillByVetId() {
@@ -569,16 +589,27 @@ public class BillServiceImplTest {
 
     @Test
     public void test_getBillByNonExistentCustomerId() {
+        // Arrange
         String nonExistentCustomerId = "nonExistentId";
 
-        when(repo.findByCustomerId(nonExistentCustomerId)).thenReturn(Flux.empty());
+        when(ownerClient.getOwnerByOwnerId(nonExistentCustomerId))
+                .thenReturn(Mono.empty()); // Simulate missing owner
 
-        Flux<BillResponseDTO> billDTOMono = billService.getBillsByCustomerId(nonExistentCustomerId);
+        // Act
+        Flux<BillResponseDTO> result = billService.getBillsByCustomerId(nonExistentCustomerId);
 
-        StepVerifier.create(billDTOMono)
-                .expectNextCount(0)
-                .verifyComplete();
+        // Assert
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof ResponseStatusException &&
+                                ((ResponseStatusException) throwable).getStatus().equals(HttpStatus.NOT_FOUND) &&
+                                throwable.getMessage().contains("Customer ID does not exist"))
+                .verify();
+
+        verify(ownerClient, times(1)).getOwnerByOwnerId(nonExistentCustomerId);
+        verify(repo, never()).findByCustomerId(anyString()); // should never call repo
     }
+
 
     @Test
     public void test_createBillWithInvalidData() {
@@ -807,10 +838,22 @@ public void testGenerateBillPdf_BillNotFound() {
 
         String customerId = "customerId-1";
         String billId = "billId-1";
+        String jwtToken = "Bearer faketoken";
         Bill bill = buildBill();
         bill.setBillStatus(BillStatus.UNPAID);
 
         PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/23");
+
+        UserDetails fakeUser = new UserDetails();
+        fakeUser.setUserId("user-123");
+        fakeUser.setUsername("fakeUser");
+        fakeUser.setEmail("fakeUser@example.com");
+
+        when(authClient.getUserById(anyString(), anyString()))
+                .thenReturn(Mono.just(fakeUser));
+        when(mailService.sendMail(any(Mail.class)))
+                .thenReturn(null);
+
 
         when(repo.findByCustomerIdAndBillId(customerId, billId)).thenReturn(Mono.just(bill));
         when(repo.save(any(Bill.class))).thenAnswer(invocation -> {
@@ -819,7 +862,7 @@ public void testGenerateBillPdf_BillNotFound() {
         });
 
 
-        Mono<BillResponseDTO> result = billService.processPayment(customerId, billId, paymentRequest);
+        Mono<BillResponseDTO> result = billService.processPayment(customerId, billId, paymentRequest, jwtToken);
 
 
         StepVerifier.create(result)
@@ -834,9 +877,20 @@ public void testGenerateBillPdf_BillNotFound() {
     void processPayment_InvalidCardNumber_Failure() {
         String customerId = "customerId-1";
         String billId = "billId-1";
+        String jwtToken = "Bearer faketoken";
         PaymentRequestDTO paymentRequest = new PaymentRequestDTO("12345678", "123", "12/23");
 
-        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest))
+        UserDetails fakeUser = new UserDetails();
+        fakeUser.setUserId("user-123");
+        fakeUser.setUsername("fakeUser");
+        fakeUser.setEmail("fakeUser@example.com");
+
+        when(authClient.getUserById(anyString(), anyString()))
+                .thenReturn(Mono.just(fakeUser));
+        when(mailService.sendMail(any(Mail.class)))
+                .thenReturn(null);
+
+        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest, jwtToken))
                 .expectErrorMatches(throwable -> throwable instanceof InvalidPaymentException &&
                         throwable.getMessage().contains("Invalid payment details"))
                 .verify();
@@ -847,9 +901,20 @@ public void testGenerateBillPdf_BillNotFound() {
     void processPayment_InvalidCVV_Failure() {
         String customerId = "customerId-1";
         String billId = "billId-1";
+        String jwtToken = "Bearer faketoken";
         PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "12", "12/23");
 
-        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest))
+        UserDetails fakeUser = new UserDetails();
+        fakeUser.setUserId("user-123");
+        fakeUser.setUsername("fakeUser");
+        fakeUser.setEmail("fakeUser@example.com");
+
+        when(authClient.getUserById(anyString(), anyString()))
+                .thenReturn(Mono.just(fakeUser));
+        when(mailService.sendMail(any(Mail.class)))
+                .thenReturn(null);
+
+        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest, jwtToken))
                 .expectErrorMatches(throwable -> throwable instanceof InvalidPaymentException &&
                         throwable.getMessage().contains("Invalid payment details"))
                 .verify();
@@ -860,9 +925,20 @@ public void testGenerateBillPdf_BillNotFound() {
     void processPayment_InvalidExpirationDate_Failure() {
         String customerId = "customerId-1";
         String billId = "billId-1";
+        String jwtToken = "Bearer faketoken";
         PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "1223");
 
-        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest))
+        UserDetails fakeUser = new UserDetails();
+        fakeUser.setUserId("user-123");
+        fakeUser.setUsername("fakeUser");
+        fakeUser.setEmail("fakeUser@example.com");
+
+        when(authClient.getUserById(anyString(), anyString()))
+                .thenReturn(Mono.just(fakeUser));
+        when(mailService.sendMail(any(Mail.class)))
+                .thenReturn(null);
+
+        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest, jwtToken))
                 .expectErrorMatches(throwable -> throwable instanceof InvalidPaymentException &&
                         throwable.getMessage().contains("Invalid payment details"))
                 .verify();
@@ -872,11 +948,22 @@ public void testGenerateBillPdf_BillNotFound() {
     void processPayment_BillNotFound_Failure() {
         String customerId = "customerId-1";
         String billId = "billId-1";
+        String jwtToken = "Bearer faketoken";
         PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/23");
+
+        UserDetails fakeUser = new UserDetails();
+        fakeUser.setUserId("user-123");
+        fakeUser.setUsername("fakeUser");
+        fakeUser.setEmail("fakeUser@example.com");
+
+        when(authClient.getUserById(anyString(), anyString()))
+                .thenReturn(Mono.just(fakeUser));
+        when(mailService.sendMail(any(Mail.class)))
+                .thenReturn(null);
 
         when(repo.findByCustomerIdAndBillId(customerId, billId)).thenReturn(Mono.empty());
 
-        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest))
+        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest, jwtToken))
                 .expectErrorSatisfies(throwable -> {
                     assertThat(throwable).isInstanceOf(ResponseStatusException.class);
                     ResponseStatusException ex = (ResponseStatusException) throwable;
@@ -1859,5 +1946,118 @@ public void testGenerateBillPdf_BillNotFound() {
         assertEquals("Pet Clinic confirmation email", result.getHeader());
         assertEquals("testuser", result.getCorrespondantName());
         assertEquals("ChamplainPetClinic@gmail.com", result.getSenderName());
+    }
+
+    @Test
+    void getBillsByCustomerIdAndAmountRange_shouldReturnBills() {
+        String customerId = "cust-1";
+        Bill bill = Bill.builder()
+                .customerId(customerId)
+                .amount(new BigDecimal("100.00"))
+                .dueDate(LocalDate.now().plusDays(10)) // <--- add this!
+                .build();
+
+        when(repo.findByCustomerIdAndAmountBetween(customerId, new BigDecimal("50"), new BigDecimal("150")))
+                .thenReturn(Flux.just(bill));
+
+        StepVerifier.create(billService.getBillsByAmountRange(customerId, new BigDecimal("50"), new BigDecimal("150")))
+                .expectNextMatches(dto -> dto.getAmount().equals(new BigDecimal("100.00")))
+                .verifyComplete();
+    }
+
+    @Test
+    void getBillsByCustomerIdAndAmountRange_noBills_shouldReturnEmptyFlux() {
+        String customerId = "cust-999";
+        BigDecimal minAmount = new BigDecimal("500");
+        BigDecimal maxAmount = new BigDecimal("1000");
+
+        when(repo.findByCustomerIdAndAmountBetween(customerId, minAmount, maxAmount))
+                .thenReturn(Flux.empty());
+
+        StepVerifier.create(billService.getBillsByAmountRange(customerId, minAmount, maxAmount))
+                .expectNextCount(0) // Expect empty
+                .verifyComplete();
+    }
+
+    @Test
+    void getBillsByCustomerIdAndDueDateRange_shouldReturnBills() {
+        String customerId = "cust-3";
+        LocalDate start = LocalDate.now().minusDays(5);
+        LocalDate end = LocalDate.now().plusDays(5);
+
+        Bill bill = Bill.builder()
+                .billId("bill-456")
+                .customerId(customerId)
+                .vetId("vet-2")
+                .visitType("surgery")
+                .date(LocalDate.now().minusDays(2))
+                .dueDate(LocalDate.now().plusDays(2)) // <-- required for due date test
+                .amount(new BigDecimal("200.00"))
+                .billStatus(BillStatus.UNPAID)
+                .build();
+
+        when(repo.findByCustomerIdAndDueDateBetween(customerId, start, end))
+                .thenReturn(Flux.just(bill));
+
+        StepVerifier.create(billService.getBillsByDueDateRange(customerId, start, end))
+                .expectNextMatches(dto -> dto.getCustomerId().equals(customerId) && dto.getBillId().equals("bill-456"))
+                .verifyComplete();
+    }
+
+    @Test
+    void getBillsByCustomerIdAndDueDateRange_noBills_shouldReturnNotFound() {
+        String customerId = "cust-2";
+        LocalDate start = LocalDate.now().minusDays(10);
+        LocalDate end = LocalDate.now();
+
+        when(repo.findByCustomerIdAndDueDateBetween(customerId, start, end))
+                .thenReturn(Flux.empty());
+
+        StepVerifier.create(billService.getBillsByDueDateRange(customerId, start, end))
+                .expectError(ResponseStatusException.class)
+                .verify();
+    }
+
+    @Test
+    void getBillsByCustomerIdAndDateRange_shouldReturnBills() {
+        String customerId = "cust-3";
+        LocalDate start = LocalDate.now().minusDays(10);
+        LocalDate end = LocalDate.now();
+
+        Bill bill = Bill.builder()
+                .billId("bill-123")
+                .customerId(customerId)
+                .vetId("vet-1")
+                .visitType("checkup")
+                .date(LocalDate.now().minusDays(5))
+                .dueDate(LocalDate.now().plusDays(10)) // <-- prevent NPE
+                .amount(new BigDecimal("100.00"))
+                .billStatus(BillStatus.UNPAID)
+                .build();
+
+        when(repo.findByCustomerIdAndDateBetween(customerId, start, end))
+                .thenReturn(Flux.just(bill));
+
+        StepVerifier.create(billService.getBillsByCustomerIdAndDateRange(customerId, start, end))
+                .expectNextMatches(dto -> dto.getCustomerId().equals(customerId) && dto.getBillId().equals("bill-123"))
+                .verifyComplete();
+    }
+
+    @Test
+    void getBillsByCustomerIdAndDateRange_noBills_shouldEmitNotFound() {
+        String customerId = "cust-999";
+        LocalDate start = LocalDate.now().minusDays(10);
+        LocalDate end = LocalDate.now();
+
+        when(repo.findByCustomerIdAndDateBetween(customerId, start, end))
+                .thenReturn(Flux.empty());
+
+        StepVerifier.create(billService.getBillsByCustomerIdAndDateRange(customerId, start, end))
+                .expectErrorMatches(throwable ->
+                        throwable instanceof ResponseStatusException &&
+                                ((ResponseStatusException) throwable).getStatus() == HttpStatus.NOT_FOUND &&
+                                ((ResponseStatusException) throwable).getReason().contains("No bills found")
+                )
+                .verify();
     }
 }

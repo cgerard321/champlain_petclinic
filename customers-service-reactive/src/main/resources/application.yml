@@ -54,7 +54,11 @@ spring:
       username: root
       password: password
       authentication-database: admin
-
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus
 app:
   files-service:
     host: files-service

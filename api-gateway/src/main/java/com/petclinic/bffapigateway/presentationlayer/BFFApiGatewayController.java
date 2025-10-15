@@ -2,6 +2,8 @@ package com.petclinic.bffapigateway.presentationlayer;
 
 import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.Auth.*;
+import com.petclinic.bffapigateway.exceptions.InvalidCredentialsException;
+import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.Bills.PaymentRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
@@ -88,8 +90,9 @@ public class BFFApiGatewayController {
     public Mono<ResponseEntity<BillResponseDTO>> payBill(
             @PathVariable("customerId") String customerId,
             @PathVariable("billId") String billId,
-            @Valid @RequestBody PaymentRequestDTO paymentRequestDTO) {
-        return billServiceClient.payBill(customerId, billId, paymentRequestDTO)
+            @Valid @RequestBody PaymentRequestDTO paymentRequestDTO,
+            @CookieValue("Bearer") String jwtToken) {
+        return billServiceClient.payBill(customerId, billId, paymentRequestDTO, jwtToken)
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().build()));
     }
@@ -361,11 +364,27 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.OWNER})
     @DeleteMapping(value = "vets/{vetId}/ratings/{ratingId}")
     public Mono<ResponseEntity<Void>> deleteRatingByRatingId(@PathVariable String vetId,
-                                             @PathVariable String ratingId){
+                                             @PathVariable String ratingId,
+                                             @CookieValue("Bearer") String jwt){
         return vetsServiceClient.deleteRating(vetId,ratingId)
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
+    @DeleteMapping(value = "vets/{vetId}/ratings/customer")
+    public Mono<ResponseEntity<Void>> deleteRatingByCustomer(@PathVariable String vetId,
+                                                             @CookieValue("Bearer") String jwt){
+        return authServiceClient.validateToken(jwt)
+                .switchIfEmpty(Mono.error(new InvalidCredentialsException("Invalid credentials")))
+                .flatMap(tokenResponse -> customersServiceClient.getOwner(tokenResponse.getBody().getUserId()))
+                .flatMap(owner -> {
+                    String customerName = owner.getFirstName() + " " + owner.getLastName();
+                    return vetsServiceClient.deleteRatingByCustomerName(vetId, customerName);
+                })
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
