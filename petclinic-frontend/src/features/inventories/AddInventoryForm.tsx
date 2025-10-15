@@ -117,12 +117,11 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
 
   useEffect(() => {
     async function fetchInventoryTypes(): Promise<void> {
-      try {
-        const types = await getAllInventoryTypes();
-        setInventoryTypes(types);
-      } catch (error) {
-        console.error('Error fetching inventory types:', error);
+      const res = await getAllInventoryTypes();
+      if (res.errorMessage) {
+        setFormError(res.errorMessage);
       }
+      setInventoryTypes(res.data ?? []);
     }
 
     fetchInventoryTypes();

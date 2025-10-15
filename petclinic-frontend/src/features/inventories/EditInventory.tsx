@@ -165,8 +165,11 @@ const EditInventory: React.FC = (): JSX.Element => {
     };
 
     const fetchInventoryTypes = async (): Promise<void> => {
-      const types = await getAllInventoryTypes();
-      setInventoryTypes(types);
+      const res = await getAllInventoryTypes();
+      if (res.errorMessage) {
+        setErrorMessage(prev => prev || res.errorMessage || '');
+      }
+      setInventoryTypes(res.data ?? []);
     };
 
     void (async () => {

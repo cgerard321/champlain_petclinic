@@ -293,10 +293,8 @@ export default function InventoriesListTable(): JSX.Element {
   };
 
   const fetchAllInventoryTypes = async (): Promise<void> => {
-    try {
-      const data = await getAllInventoryTypes();
-      setInventoryTypeList(data);
-    } catch {}
+    const res = await getAllInventoryTypes();
+    setInventoryTypeList(res.data ?? []);
   };
 
   const handleInventorySelection = (
