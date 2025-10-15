@@ -306,21 +306,11 @@ export default function VisitListTable(): JSX.Element {
                   >
                     <VisitDetails visitId={visit.visitId} />
                   </BasicModal>
-                  {!isVet && (
-                    // <a
-                    //   className="icon"
-                    //   onClick={() =>
-                    //     navigate(`/visits/${visit.visitId}/edit`)
-                    //   }
-                    //   title="Edit"
-                    // >
-                    //   {renderEditButton()}
-                    // </a>
-                    <EditingVisit
-                      showButton={renderEditButton()}
-                      visitId={visit.visitId}
-                    />
-                  )}
+
+                  <EditingVisit
+                    showButton={renderEditButton()}
+                    visitId={visit.visitId}
+                  />
                   {visit.status === 'COMPLETED' && !isVet && (
                     // <a
                     //   className="icon"

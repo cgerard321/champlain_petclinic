@@ -241,7 +241,7 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
           <option value="CONFIRMED">Confirmed</option>
           <option value="UPCOMING">Upcoming</option>
           <option value="COMPLETED">Completed</option>
-          <option value="CANCELED">Canceled</option>
+          <option value="CANCELLED">Cancelled</option>
           <option value="ARCHIVED">Archived</option>
         </select>
         <br />
