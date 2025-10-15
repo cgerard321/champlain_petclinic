@@ -74,7 +74,11 @@ logging:
   level:
     root: INFO
     com.petclinic: DEBUG
-
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus
 server:
   error:
     include-message: always

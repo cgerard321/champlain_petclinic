@@ -63,8 +63,8 @@ export function NavBar(): JSX.Element {
       const { cartId: resolvedId } = await refreshFromAPI();
       if (resolvedId) {
         navigate(AppRoutePaths.UserCart.replace(':cartId', resolvedId));
-        // if no active cart, redirect to shop
       } else {
+        // if no active cart, redirect to shop
         navigate(AppRoutePaths.Products);
       }
     } catch (e) {
@@ -81,9 +81,10 @@ export function NavBar(): JSX.Element {
         <Navbar.Brand as={Link} to={AppRoutePaths.Home}>
           {clinic.name}
         </Navbar.Brand>
-        <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={toggleNavbar}>
-          <span className="navbar-toggler-icon"></span>
-        </Navbar.Toggle>
+        <Navbar.Toggle
+          aria-controls="basic-navbar-nav"
+          onClick={toggleNavbar}
+        />
         <Navbar.Collapse
           id="basic-navbar-nav"
           className={navbarOpen ? 'show' : ''}
@@ -92,7 +93,10 @@ export function NavBar(): JSX.Element {
             <Nav.Link as={Link} to={AppRoutePaths.Home}>
               Home
             </Nav.Link>
-            {user.userId && (
+            {
+              // check if user is logged in
+            }
+            {user && (
               <>
                 {(isAdmin || isVet) && (
                   <Nav.Link as={Link} to={AppRoutePaths.Vet}>
@@ -180,18 +184,14 @@ export function NavBar(): JSX.Element {
                     Promos
                   </Nav.Link>
                 )}
-                {
-                  <Nav.Link as={Link} to={AppRoutePaths.Products}>
-                    Shop
-                  </Nav.Link>
-                }
-
+                <Nav.Link as={Link} to={AppRoutePaths.Products}>
+                  Shop
+                </Nav.Link>
                 {isAdmin && (
                   <Nav.Link as={Link} to={AppRoutePaths.Carts}>
                     Carts
                   </Nav.Link>
                 )}
-
                 {isOwner && (
                   <Nav.Link
                     href="#"
@@ -218,8 +218,8 @@ export function NavBar(): JSX.Element {
             )}
           </Nav>
           <Nav className="ms-auto">
-            {user.userId ? (
-              <NavDropdown title={`${user.username}`} id="user-dropdown">
+            {user ? (
+              <NavDropdown title={user.username} id="user-dropdown">
                 {isOwner && (
                   <NavDropdown.Item
                     as={Link}
