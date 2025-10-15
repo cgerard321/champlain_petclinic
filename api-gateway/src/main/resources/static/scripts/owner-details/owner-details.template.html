@@ -1,105 +1,105 @@
-<link href="/css/owner.css" rel="stylesheet" type="text/css"/>
+<link href="/css/ownerdetail.css" rel="stylesheet" type="text/css"/>
 
-<div class="dashboard-container" ng-controller="OwnerDetailsController" ng-app="ownerDetails">
-    <div class="main-content">
-        <div class="page-header">
-            <h1 class="page-title">Owner Details</h1>
-            <p class="page-subtitle">View and manage owner information and their pets</p>
-        </div>
+    <div ng-controller="OwnerDetailsController" ng-app="ownerDetails" class="ownerRow justify-content-center mt-5 mb-5 gap-5">
+        <div class="ownerCol d-flex flex-column">
+            <div class=" d-flex flex-column p-5 shadow rounded">
+                <div class="d-flex flex-row justify-content-between">
+                    <h3 class="">Owner Details</h3>
 
-        <div class="content-wrapper">
-            <div class="details-grid">
-                <!-- Owner Information Card -->
-                <div class="details-card">
-                    <div class="card-header">
-                        <h2 class="card-title">Owner Information</h2>
-                        <div class="action-buttons">
-                            <a class="btn-modern btn-edit" ui-sref="ownerEdit({ ownerId: $ctrl.owner.ownerId, method: 'edit' })">
-                                &#x270F; Edit
-                            </a>
-                            <a class="btn-modern btn-delete" ui-sref="ownerEdit({ ownerId: $ctrl.owner.ownerId, method: 'delete' })">
-                                &#x1F5D1; Delete
-                            </a>
-                        </div>
+                    <div class="d-flex flex-row">
+                            <a style="color: rgba(0,0,0,0.5);" class="btn btn-light mx-2 px-2" ui-sref="ownerEdit({ownerId: $ctrl.owner.ownerId, method: 'edit'})">Edit</a>
+
+                            <a style="color: rgba(0,0,0,0.5);" class="btn btn-light mx-2 px-2" ui-sref="ownerEdit({ownerId: $ctrl.owner.ownerId, method: 'delete'})">Delete</a>
                     </div>
-
-                    <div class="profile-section">
-                        <div class="profile-avatar">
-                            <img src="../../images/default-user-icon.png" alt="Owner Avatar"/>
-                        </div>
-                        <h3 class="profile-name">{{$ctrl.owner.firstName}} {{$ctrl.owner.lastName}}</h3>
-                    </div>
-
-                    <form class="owner-form">
-                        <div class="form-grid">
-                            <div class="form-group full-width">
-                                <input class="form-input" value="{{$ctrl.owner.ownerId}}" readonly disabled/>
-                                <label class="form-label">Owner ID</label>
-                            </div>
-
-                            <div class="form-group">
-                                <input class="form-input" value="{{$ctrl.owner.firstName}}" readonly disabled/>
-                                <label class="form-label">First Name</label>
-                            </div>
-
-                            <div class="form-group">
-                                <input class="form-input" value="{{$ctrl.owner.lastName}}" readonly disabled/>
-                                <label class="form-label">Last Name</label>
-                            </div>
-
-                            <div class="form-group">
-                                <input class="form-input" value="{{$ctrl.owner.address}}" readonly disabled/>
-                                <label class="form-label">Address</label>
-                            </div>
-
-                            <div class="form-group">
-                                <input class="form-input" value="{{$ctrl.owner.city}}" readonly disabled/>
-                                <label class="form-label">City</label>
-                            </div>
-
-                            <div class="form-group">
-                                <input class="form-input" value="{{$ctrl.owner.province}}" readonly disabled/>
-                                <label class="form-label">Province</label>
-                            </div>
-
-                            <div class="form-group">
-                                <input class="form-input" value="{{$ctrl.owner.telephone}}" readonly disabled/>
-                                <label class="form-label">Phone Number</label>
-                            </div>
-                        </div>
-                    </form>
                 </div>
 
-                <!-- Pets Card -->
-                <div class="details-card">
-                    <div class="card-header">
-                        <h2 class="card-title pets-title">Pets</h2>
-                        <a class="btn-add-pet" ui-sref="petRegister({ownerId: $ctrl.owner.ownerId})">
-                            &#x2795; Add Pet
-                        </a>
-                    </div>
 
-                    <div class="pets-section">
-                        <div class="pets-list" ng-if="$ctrl.pets && $ctrl.pets.length > 0">
-                            <div ng-repeat="pet in $ctrl.pets" class="pet-item" ui-sref="petDetails({petId: pet.petId})">
-                                <div class="pet-avatar">
-                                    <img src="../../images/animaldefault.png" alt="Pet Avatar"/>
-                                </div>
-                                <div class="pet-info">
-                                    <h4 class="pet-name">{{pet.name}}</h4>
-                                    <p class="pet-type">{{$ctrl.getPetTypeName(pet.petTypeId)}}</p>
-                                    <p class="pet-birthday">{{$ctrl.getBirthday(pet.birthDate)}}</p>
-                                </div>
-                            </div>
-                        </div>
+                <div class="bg-white shadow-sm photoBorder mt-3 mb-1" style="width: 75px; height: 75px; border-radius: 50px;">
+                    <img style="width: 100%; height: 100%; border-radius: 50px" src="../../images/default-user-icon.png"/>
+                </div>
 
-                        <div ng-if="!$ctrl.pets || $ctrl.pets.length === 0" class="empty-state">
-                            <div class="empty-state-icon">&#x1F43E;</div>
-                            <p class="empty-state-text">No pets registered yet</p>
+                <form action="" class="pt-3">
+
+                    <div class="d-flex flex-row gap-3 pt-1">
+                        <div class="d-flex flex-column">
+                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.owner.ownerId}}" size="50" readonly disabled/>
+                            <label class="inputLabel">Owner Id</label>
                         </div>
                     </div>
+
+                    <div class="d-flex flex-row gap-3 pt-1">
+                        <div class="d-flex flex-column">
+                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.owner.firstName}}" readonly disabled/>
+                            <label class="inputLabel">First Name</label>
+                        </div>
+                        <div class="d-flex flex-column">
+                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.owner.lastName}}" readonly disabled/>
+                            <label class="inputLabel">Last Name</label>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-row gap-3 pt-1">
+                        <div class="d-flex flex-column">
+                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.owner.address}}" readonly disabled/>
+                            <label class="inputLabel">Address</label>
+                        </div>
+                        <div class="d-flex flex-column">
+                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.owner.city}}" readonly disabled/>
+                            <label class="inputLabel">City</label>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-row gap-3 pt-1">
+                        <div class="d-flex flex-column">
+                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.owner.province}}" readonly disabled/>
+                            <label class="inputLabel">Province</label>
+                        </div>
+                        <div class="d-flex flex-column">
+                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.owner.telephone}}" readonly disabled/>
+                            <label class="inputLabel">Phone Number</label>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+
+        </div>
+        <div class="ownerCol d-flex flex-column">
+            <div class="d-flex h-100 flex-column p-5 shadow rounded">
+
+                <div class="d-flex justify-content-between gap-5">
+                    <h3 class="">Pets</h3>
+                    <div class="border-5 rounded">
+                        <a style="color: rgba(0,0,0,0.5);" class="btn btn-light" ui-sref="petRegister({ownerId: $ctrl.owner.ownerId})">+</a>
+                    </div>
+                </div>
+                <hr class="hrColor">
+                <div class="w-100">
+                    <!-- Use ng-repeat to iterate through the owner's pets -->
+                    <div ng-repeat="pet in $ctrl.pets" class="petBody d-flex m-2" ui-sref="petDetails({petId: pet.petId})">
+                        <div class="bg-white shadow-sm m-2" style="width: 40px; height: 40px; border-radius: 50px;">
+                            <img style="width: 100%; height: 100%; border-radius: 50px" src="../../images/animaldefault.png"/>
+
+
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <p class="mt-2 mx-4">({{$ctrl.getPetTypeName(pet.petTypeId)}}) - {{pet.name}}<br>
+                            {{$ctrl.getBirthday(pet.birthDate)}}</p>
+                        </div>
+                    </div>
+                </div>
+
+                    </div>
+
+
+                </div>
+
+
+
                 </div>
             </div>
-        </div>
-    </div>
-</div>
+
+
+
+
+

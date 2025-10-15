@@ -1,113 +1,168 @@
-<link href="/css/owner.css" rel="stylesheet" type="text/css"/>
 
-<div class="dashboard-container" ng-app="ownerList" ng-controller="OwnerListController">
-    <div class="main-content">
-        <div class="page-header">
-            <h1 class="page-title">Current Owners</h1>
-            <p class="page-subtitle">Manage and view all pet owners in the system</p>
+<style>
+    h3.titleOwner {
+        color: #2f2b2b;
+        text-align: left;
+        padding-bottom: 20px;
+        padding-top: 20px;
+    }
+
+    .CurrentOwnersContainer {
+        margin: 20px;
+    }
+
+    .FilterOwnersLabel {
+        color:rgba(0,0,0,0.5);
+    }
+
+    @media (max-width: 576px) {
+        /* Define styles for small screens */
+        .responsive-text {
+            font-size: 13px;
+        }
+    }
+
+    @media (min-width: 577px) and (max-width: 992px) {
+        /* Define styles for medium screens */
+        .responsive-text {
+            font-size: 15px;
+        }
+    }
+
+    @media (min-width: 993px) {
+        /* Define styles for large screens and above */
+        .responsive-text {
+            font-size: 17px;
+        }
+    }
+
+    .ownerTable thead tr th {
+        font-weight: 400;
+        color: gray;
+    }
+
+    input[type="Text"]{
+        font-size: 15px;
+    }
+
+</style>
+
+<div class="CurrentOwnersContainer" ng-app="ownerList" ng-controller="OwnerListController">
+
+    <h3 class="titleOwner">Current Owners</h3>
+
+    <!--<form onsubmit="javascript:void(0)" style="" class="ng-pristine ng-valid py-4">
+        <div class="d-flex flex-row gap-3">
+            <label class="FilterOwnersLabel">Filter Owners : </label>
+
+            <input type="text" class="ng-pristine ng-untouched ng-valid ng-empty ps-2" placeholder="Search Filter" ng-model="$ctrl.query">
+        </div>
+    </form>-->
+
+    <form class="d-flex flex-column ng-pristine ng-valid">
+        <div class="d-flex flex-row justify-content-between align-items-end">
+            <div class="fw-bold">
+                Filters
+            </div>
+            <div class="d-flex flex-row gap-2">
+                <button style="color: gray;" class="border btn btn-light shadow-sm" ng-click="$ctrl.searchOwnersByPaginationAndFilters()">Search</button>
+                <button style="color: gray;" class="border btn btn-light shadow-sm" ng-click="$ctrl.clearInputAndResetDefaultData()">Reset</button>
+            </div>
         </div>
 
-        <div class="content-wrapper">
-            <div class="filters-card">
-                <div class="filters-header">
-                    <div class="filters-title">Search & Filter</div>
-                    <div class="action-buttons">
-                        <button class="btn-modern btn-search" ng-click="$ctrl.searchOwnersByPaginationAndFilters()">
-                            &#x1F50D; Search
-                        </button>
-                        <button class="btn-modern btn-reset" ng-click="$ctrl.clearInputAndResetDefaultData()">
-                            &#x21BB; Reset
-                        </button>
-                    </div>
-                </div>
+        <hr class="m-0 mb-3 mt-3">
 
-                <div class="filters-grid">
-                    <div class="filter-group">
-                        <input id="ownerIdInput" type="text" class="filter-input" placeholder="Enter Owner ID...">
-                        <label class="filter-label">Owner ID</label>
-                    </div>
-
-                    <div class="filter-group">
-                        <input id="firstNameInput" type="text" class="filter-input" placeholder="Enter first name...">
-                        <label class="filter-label">First Name</label>
-                    </div>
-
-                    <div class="filter-group">
-                        <input id="lastNameInput" type="text" class="filter-input" placeholder="Enter last name...">
-                        <label class="filter-label">Last Name</label>
-                    </div>
-
-                    <div class="filter-group d-none d-sm-flex">
-                        <input id="cityInput" type="text" class="filter-input" placeholder="Enter city...">
-                        <label class="filter-label">City</label>
-                    </div>
-
-                    <div class="filter-group d-none d-sm-flex">
-                        <input id="phoneNumberInput" type="text" class="filter-input" placeholder="Enter phone...">
-                        <label class="filter-label">Phone Number</label>
-                    </div>
-
-                    <div class="filter-group">
-                        <select id="sizeInput" class="filter-input" style="width: 100%">
-                            <option value="">Select page size</option>
-                            <option value="2">2 per page</option>
-                            <option value="5">5 per page</option>
-                            <option value="10">10 per page</option>
-                            <option value="15">15 per page</option>
-                        </select>
-                        <label class="filter-label">Page Size</label>
-                    </div>
-                </div>
+        <div class="d-flex gap-4 mb-3 flex-wrap">
+            <div class="d-flex flex-column">
+                <input id="ownerIdInput" type="text" placeholder="Search...">
+                <label style="font-size: 13px; color: gray;">OwnerID</label>
             </div>
 
-            <div class="table-card">
-                <table id="owner" class="table table-modern">
-                    <thead>
-                        <tr>
-                            <th>Owner ID</th>
-                            <th>Full Name</th>
-                            <th class="d-none d-sm-table-cell d-md-table-cell">Address</th>
-                            <th class="d-none d-sm-table-cell d-md-table-cell">City</th>
-                            <th class="d-none d-sm-table-cell d-md-table-cell">Province</th>
-                            <th class="d-none d-sm-table-cell d-md-table-cell">Phone Number</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr ng-repeat="owner in $ctrl.owners">
-                            <td>
-                                <a class="link-modern" ui-sref="ownerDetails({ ownerId: owner.ownerId })">
-                                    {{owner.ownerId}}
-                                </a>
-                            </td>
-                            <td class="responsive-text">{{owner.firstName}} {{owner.lastName}}</td>
-                            <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{owner.address}}</td>
-                            <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{owner.city}}</td>
-                            <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{owner.province}}</td>
-                            <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{owner.telephone}}</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="d-flex flex-column">
+                <input id="firstNameInput" type="text" placeholder="Search...">
+                <label style="font-size: 13px; color: gray;">First Name</label>
             </div>
 
-            <div class="pagination-card">
-                <nav aria-label="Page navigation">
-                    <ul class="pagination-modern">
-                        <li class="page-item-modern">
-                            <a class="page-link-modern" aria-label="Previous" ng-click="$ctrl.goPreviousPage()">
-                                &#x2039;
-                            </a>
-                        </li>
-                        <li class="page-item-modern">
-                            <a class="page-number-link-modern" disabled>Page {{$ctrl.currentPageOnSite}}</a>
-                        </li>
-                        <li class="page-item-modern">
-                            <a class="page-link-modern" aria-label="Next" ng-click="$ctrl.goNextPage()">
-                                 &#x203A;
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
+            <div class="d-flex flex-column">
+                <input id="lastNameInput" type="text" placeholder="Search...">
+                <label style="font-size: 13px; color: gray;">Last Name</label>
+            </div>
+
+            <div class="d-none d-sm-flex flex-column">
+                <input id="cityInput" type="text" placeholder="Search...">
+                <label style="font-size: 13px; color: gray;">City</label>
+            </div>
+
+        </div>
+
+        <div class="d-flex gap-4 mb-4 flex-wrap">
+            <div class="d-none d-sm-flex flex-column">
+                <input id="phoneNumberInput" type="text" placeholder="Search...">
+                <label style="font-size: 13px; color: gray;">Phone Number</label>
+            </div>
+
+            <div class="d-flex flex-column">
+                <select id="sizeInput" style="width: 100px">
+                    <option value=""> </option>
+                    <option value="2">2</option>
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="15">15</option>
+                </select>
+                <label style="font-size: 13px; color: gray;">Size</label>
             </div>
         </div>
+
+    </form>
+
+        <table id="owner" class="table table-striped table-responsive ownerTable pb-3">
+            <thead class="bg-white">
+                <tr>
+                    <th class="bg-white border" >Owner ID</th>
+                    <th class="bg-white border">Full Name</th>
+                    <th class="bg-white d-none d-sm-table-cell d-md-table-cell border">Address</th>
+                    <th class="bg-white d-none d-sm-table-cell d-md-table-cell border">City</th>
+                    <th class="bg-white d-none d-sm-table-cell d-md-table-cell border">Province</th>
+                    <th class="bg-white d-none d-sm-table-cell d-md-table-cell border">Phone Number</th>
+                </tr>
+            </thead>
+
+            <tbody class="border">
+
+                <tr class="" id="ownerTd" ng-repeat="owner in $ctrl.owners">
+                    <td>
+                        <a class="btn p-0 responsive-text" style="color: blue" ui-sref="ownerDetails({ ownerId: owner.ownerId })">
+                            {{owner.ownerId}}
+                        </a>
+                    </td>
+                    <td class="responsive-text">{{owner.firstName}} {{owner.lastName}}</td>
+                    <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{owner.address}}</td>
+                    <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{owner.city}}</td>
+                    <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{owner.province}}</td>
+                    <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{owner.telephone}}</td>
+                </tr>
+            </tbody>
+        </table>
+
+    <div class="d-flex justify-content-center pb-3">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
+                <li class="page-item">
+                    <a class="page-link text-dark" aria-label="Previous" ng-click="$ctrl.goPreviousPage()">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+
+                <li class="page-item">
+                    <a class="page-link text-dark" disabled>Page-{{$ctrl.currentPageOnSite}}</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link text-dark" aria-label="Next" ng-click="$ctrl.goNextPage()">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
     </div>
+
 </div>
