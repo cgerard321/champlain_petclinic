@@ -5,6 +5,35 @@ angular.module('vetDetails')
         var self = this;
         //var vetId = $stateParams.vetId || 0;
 
+        self.showConfirmationModal = function(title, body, confirmCallback) {
+            const backdrop = document.getElementById('confirmationBackdrop');
+            const modalTitle = document.getElementById('confirmationModalTitle');
+            const modalBody = document.getElementById('confirmationModalBody');
+            const confirmBtn = document.getElementById('confirmationModalConfirmBtn');
+            const cancelBtn = document.getElementById('confirmationModalCancelBtn');
+
+            modalTitle.textContent = title;
+            modalBody.textContent = body;
+
+            const hideModal = () => {
+                backdrop.classList.remove('modalOn');
+                backdrop.classList.add('modalOff');
+            };
+
+            cancelBtn.onclick = hideModal;
+
+            confirmBtn.onclick = () => {
+                if (confirmCallback) {
+                    confirmCallback();
+                }
+                hideModal();
+            };
+
+            backdrop.classList.remove('modalOff');
+            backdrop.classList.add('modalOn');
+        };
+
+
         this.show = ($event, vetID) => {
             let child = document.getElementsByClassName("m" + vetID)[0];
             let left = $event.pageX;
@@ -140,28 +169,23 @@ angular.module('vetDetails')
         });
 
         $scope.deleteVetEducation = function (educationId) {
-            let varIsConf = confirm('Are you sure you want to delete this educationId: ' + educationId + '?');
-            if (varIsConf) {
-
+            const deleteAction = function() {
                 $http.delete('api/gateway/vets/' + $stateParams.vetId + '/educations/' + educationId)
-                    .then(successCallback, errorCallback)
-
-                function successCallback(response) {
-                    $scope.errors = [];
-                    alert(educationId + " Deleted Successfully!");
-                    console.log(response, 'res');
-                    //refresh list
-                    $http.get('api/gateway/vets/' + $stateParams.vetId + '/educations').then(function (resp) {
-                        self.educations = resp.data;
-                        arr = resp.data;
+                    .then(function successCallback(response) {
+                        self.showConfirmationModal('Success', "Education " + educationId + " was deleted successfully!", null);
+                        $http.get('api/gateway/vets/' + $stateParams.vetId + '/educations').then(function (resp) {
+                            self.educations = resp.data;
+                        });
+                    }, function errorCallback(error) {
+                        self.showConfirmationModal('Error', error.data.errors || 'Could not delete education.', null);
                     });
-                }
+            };
 
-                function errorCallback(error) {
-                    alert(data.errors);
-                    console.log(error, 'cannot get data.');
-                }
-            }
+            self.showConfirmationModal(
+                'Confirm Deletion',
+                'Are you sure you want to delete education ' + educationId + '?',
+                deleteAction
+            );
         };
 
         //update education
@@ -186,39 +210,37 @@ angular.module('vetDetails')
             };
 
             if (updateContainer.style.display === "none") {
-                // Show the update form
                 updateContainer.style.display = "block";
                 btn.textContent = "Save";
             } else if (btn.textContent === "Save") {
-                if (
-                    updatedDegree === "" ||
-                    updatedSchoolName === "" ||
-                    updatedFieldOfStudy === "" ||
-                    updatedStartDate === "" ||
-                    updatedEndDate === ""
-                ) {
-                    alert("Please fill in all education fields.");
+                if (!updatedDegree || !updatedSchoolName || !updatedFieldOfStudy || !updatedStartDate || !updatedEndDate) {
+                    self.showConfirmationModal('Validation Error', 'Please fill in all education fields.', null);
                     return;
                 }
 
-                // Save the updated education
-                $http.put("api/gateway/vets/" + $stateParams.vetId + "/educations/" + educationId, updatedEducation).then(function (resp) {
-                    console.log(resp.data);
-                    self.updatedEducation = resp.data;
-                    alert('Your education was successfully updated!');
+                const confirmUpdate = function() {
+                    $http.put("api/gateway/vets/" + $stateParams.vetId + "/educations/" + educationId, updatedEducation)
+                        .then(function (resp) {
+                            self.updatedEducation = resp.data;
+                            self.showConfirmationModal('Success', 'Your education was successfully updated!', null);
 
-                    // Refresh list
-                    $http.get('api/gateway/vets/' + $stateParams.vetId + '/educations').then(function (resp) {
-                        console.log(resp.data);
-                        self.educations = resp.data;
-                    });
-                });
+                            $http.get('api/gateway/vets/' + $stateParams.vetId + '/educations').then(function (resp) {
+                                self.educations = resp.data;
+                            });
+                        })
+                        .catch(function(error) {
+                            self.showConfirmationModal('Error', error.data.errors || 'Could not update education.', null);
+                        });
 
+                    updateContainer.style.display = "none";
+                    btn.textContent = "Update";
+                };
 
-                // Hide the update form
-                updateContainer.style.display = "none";
-                btn.textContent = "Update";
-
+                self.showConfirmationModal(
+                    'Confirm Update',
+                    'Are you sure you want to save these changes?',
+                    confirmUpdate
+                );
             }
         };
 
@@ -267,36 +289,24 @@ angular.module('vetDetails')
         };
 
         $scope.deleteVetRating = function (ratingId) { //added $scope in this class
-            let varIsConf = confirm('Are you sure you want to delete this ratingId: ' + ratingId + '?');
-            if (varIsConf) {
-
+            const deleteAction = function() {
                 $http.delete('api/gateway/vets/' + $stateParams.vetId + '/ratings/' + ratingId)
-                    .then(successCallback, errorCallback)
+                    .then(function successCallback(response) {
+                        self.showConfirmationModal('Success', ratingId + " Deleted Successfully!", null);
 
-                function successCallback(response) {
-                    $scope.errors = [];
-                    alert(ratingId + " Deleted Successfully!");
-                    console.log(response, 'res');
-                    //refresh list
-                    $http.get('api/gateway/vets/' + $stateParams.vetId + '/ratings').then(function (resp) {
-                        self.ratings = resp.data;
-                        arr = resp.data;
+                        $http.get('api/gateway/vets/' + $stateParams.vetId + '/ratings').then(function (resp) {
+                            self.ratings = resp.data;
+                        });
+                    }, function errorCallback(error) {
+                        self.showConfirmationModal('Error', error.data.errors || 'Could not delete rating.', null);
                     });
-                    //refresh percentages
-                    percentageOfRatings();
+            };
 
-                    //refresh badge
-                    $http.get('api/gateway/vets/'+$stateParams.vetId+'/badge').then(function(resp){
-                        self.badge=resp.data;
-                        console.log(resp.data)
-                    })
-                }
-
-                function errorCallback(error) {
-                    alert(data.errors);
-                    console.log(error, 'cannot get data.');
-                }
-            }
+            self.showConfirmationModal(
+                'Confirm Deletion',
+                'Are you sure you want to delete rating ' + ratingId + '?',
+                deleteAction
+            );
         };
 
         self.updateRating = function (ratingId) {
@@ -337,40 +347,36 @@ angular.module('vetDetails')
                 btn.textContent = "Save";
             } else if (btn.textContent === "Save") {
                 // Save the updated rating
-                $http.put("api/gateway/vets/" + $stateParams.vetId + "/ratings/" + ratingId, updatedRating).then(function (resp) {
-                    console.log(resp.data);
-                    self.updatedRating = resp.data;
-                    alert('Your review was successfully updated!');
+                const confirmUpdate = function() {
+                    $http.put("api/gateway/vets/" + $stateParams.vetId + "/ratings/" + ratingId, updatedRating)
+                        .then(function (resp) {
+                            self.updatedRating = resp.data;
+                            self.showConfirmationModal('Success', 'Your review was successfully updated!', null);
 
-                    // Refresh list
-                    $http.get('api/gateway/vets/' + $stateParams.vetId + '/ratings').then(function (resp) {
-                        console.log(resp.data);
-                        self.ratings = resp.data;
+                            $http.get('api/gateway/vets/' + $stateParams.vetId + '/ratings').then(function (resp) {
+                                self.ratings = resp.data;
+                            });
+                            percentageOfRatings();
+                            $http.get('api/gateway/vets/' + $stateParams.vetId + '/badge').then(function(resp){
+                                self.badge = resp.data;
+                            });
+                        })
+                        .catch(function(error) {
+                            self.showConfirmationModal('Error', error.data.errors || 'Could not update rating.', null);
+                        });
+
+                    updateContainer.style.display = "none";
+                    btn.textContent = "Update";
+                    document.querySelectorAll('input[name="predefinedDescriptionUpdate' + ratingId + '"]').forEach(function (radio) {
+                        radio.checked = false;
                     });
+                };
 
-                    // Refresh percentages
-                    percentageOfRatings();
-
-                    //refresh badge
-                    $http.get('api/gateway/vets/'+$stateParams.vetId+'/badge').then(function(resp){
-                        self.badge=resp.data;
-                        console.log(resp.data)
-                    })
-                });
-
-                // Hide the update form
-                updateContainer.style.display = "none";
-                btn.textContent = "Update";
-
-                // reset predefinedDescription radio buttons to unchecked
-                document.querySelectorAll('input[name="predefinedDescriptionUpdate' + ratingId + '"]').forEach(function (radio) {
-                    radio.checked = false;
-                });
-
-                //ADDTIION
-                document.querySelectorAll('input[name="Year:' + ratingId + '"]').forEach(function (radio) {
-                    radio.checked = true;
-                });
+                self.showConfirmationModal(
+                    'Confirm Update',
+                    'Are you sure you want to save this rating?',
+                    confirmUpdate
+                );
             }
         };
 
@@ -497,26 +503,20 @@ angular.module('vetDetails')
             // Send a POST request to add the new education
             $http.post("api/gateway/vets/" + $stateParams.vetId + "/educations", education)
                 .then(function (resp) {
-                    console.log(resp.data);
                     self.education = resp.data;
                     self.addEducationFormVisible = false;
-                    alert('Your education was successfully added!');
+                    self.showConfirmationModal('Success', 'Your education was successfully added!', null);
 
                     $http.get('api/gateway/vets/' + $stateParams.vetId + '/educations').then(function (resp) {
-                        console.log(resp.data);
                         self.educations = resp.data;
                     });
-                    // clear the form with .reset()
-
-                    document.getElementById("educationForm").reset();
-              
-                    // Refresh the education data
-                    $http.get('api/gateway/vets/' + $stateParams.vetId + '/educations').then(function (resp) {
-                        console.log(resp.data);
-                        self.educations = resp.data;
-                    });
+                    self.newEducation = {}; // Reset the model instead of the non-existent form
                 }, function (error) {
-                    alert('Error adding education: ' + error.data.message);
+                    let errorMessage = 'An error occurred while adding the education.';
+                    if (error.data && error.data.message) {
+                        errorMessage = error.data.message;
+                    }
+                    self.showConfirmationModal('Error', 'Error adding education: ' + errorMessage, null);
                 });
         };
 
@@ -568,44 +568,6 @@ angular.module('vetDetails')
 
 
     }]);
-
-// function getOlderRatingBasedOnDate(vet){
-//     let year = new Date().getFullYear()
-//
-//     let old = year - 4
-//
-//     $http.get('api/gateway/vets/{vetId}/ratings/date?year=' + old).then(function (resp) {
-//         console.log(resp.data);
-//         vet.showRating=true;
-//         vet.ratingDate = parseFloat(resp.data.toFixed(1));
-//
-//     });
-//
-// }
-
-    // $scope.refreshList = self.vetList;
-    //
-    // $scope.ReloadData = function () {
-    //     let url = 'api/gateway/vets/' + $stateParams.vetId + '/ratings/date?year=' + year;
-    //     let optionSelection = document.getElementById("filterOption").value;
-    //     if (optionSelection === "Recent") {
-    //         url+= '/date?year=2024';
-    //     } else if (optionSelection === "Old") {
-    //         url += '/date?year=2020';
-    //     }
-    //     self.selectedFilter=optionSelection;
-    //
-    //     $http.get(url).then(function (resp) {
-    //         self.vetList = resp.data;
-    //         arr = resp.data;
-    //         angular.forEach(self.vetList, function(vet) {
-    //             getRecentRatingBasedOnDate(vet)
-    //             // getOlderRatingBasedOnDate(ratingsOld)
-    //         });
-    //
-    //     });
-    //
-    // }
 
 
 
