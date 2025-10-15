@@ -255,6 +255,7 @@ export default function BillsListTable({
         <button className="filter-btn" onClick={() => toggleSection('date')}>
           {activeSection === 'date' ? 'Close Date' : 'Filter by Date'}
         </button>
+      </div>
       {/* Status and Currency dropdowns together */}
       <div
         className="filterContainer"
