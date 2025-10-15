@@ -168,26 +168,29 @@ public class BillServiceImpl implements BillService{
                         ));
                     }
 
-                    // Validate vetId and customerId
                     if (dto.getVetId() == null || dto.getVetId().isEmpty()) {
                         return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vet ID is required"));
                     }
+
                     if (dto.getCustomerId() == null || dto.getCustomerId().isEmpty()) {
                         return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer ID is required"));
                     }
 
                     // Fetch Vet and Owner details
                     Mono<VetResponseDTO> vetMono = vetClient.getVetByVetId(dto.getVetId());
-                    Mono<OwnerResponseDTO> ownerMono = ownerClient.getOwnerByOwnerId(dto.getCustomerId());
+                    Mono<OwnerResponseDTO> ownerMono = ownerClient.getOwnerByOwnerId(dto.getCustomerId())
+                            .switchIfEmpty(Mono.error(new ResponseStatusException(
+                                    HttpStatus.BAD_REQUEST, "Customer ID does not exist"
+                            )));
 
                     return Mono.zip(vetMono, ownerMono, Mono.just(dto));
                 })
-                .map(tuple -> {
+                .flatMap(tuple -> {
                     VetResponseDTO vet = tuple.getT1();
                     OwnerResponseDTO owner = tuple.getT2();
                     BillRequestDTO dto = tuple.getT3();
 
-                    // Map to Bill entity and populate names
+                    // Map to Bill entity and ALWAYS set the names from ownerClient
                     Bill bill = EntityDtoUtil.toBillEntity(dto);
                     bill.setBillId(EntityDtoUtil.generateUUIDString());
                     bill.setVetFirstName(vet.getFirstName());
@@ -195,9 +198,9 @@ public class BillServiceImpl implements BillService{
                     bill.setOwnerFirstName(owner.getFirstName());
                     bill.setOwnerLastName(owner.getLastName());
 
-                    return bill;
+                    // Save the bill
+                    return billRepository.insert(bill);
                 })
-                .flatMap(billRepository::insert)
                 .map(EntityDtoUtil::toBillResponseDto);
     }
 
@@ -245,8 +248,19 @@ public class BillServiceImpl implements BillService{
 
     @Override
     public Flux<BillResponseDTO> getBillsByCustomerId(String customerId) {
-/**/
-        return billRepository.findByCustomerId(customerId).map(EntityDtoUtil::toBillResponseDto);
+        // Fetch the owner info first
+        Mono<OwnerResponseDTO> ownerMono = ownerClient.getOwnerByOwnerId(customerId)
+                .switchIfEmpty(Mono.error(new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Customer ID does not exist"
+                )));
+
+        return ownerMono.flatMapMany(owner ->
+                billRepository.findByCustomerId(customerId)
+                        // Only return bills where first/last name match the owner record
+                        .filter(bill -> bill.getOwnerFirstName().equals(owner.getFirstName())
+                                && bill.getOwnerLastName().equals(owner.getLastName()))
+                        .map(EntityDtoUtil::toBillResponseDto)
+        );
     }
 
     @Override
