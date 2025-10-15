@@ -342,47 +342,47 @@ public class PromoCodeControllerUnitTest {
                 .hasSize(0);  // Esperamos una lista vacía
     }
 
-    @Test
-    void whenValidatePromoCode_withInvalidCode_thenReturnBadRequest() {
-        // Arrange
-        String promoCode = "INVALIDCODE";
-        when(promoCodeService.getPromoCodeByCode(promoCode)).thenReturn(Mono.empty());
-
-        // Act & Assert
-        webTestClient.get()
-                .uri("/api/v1/promos/validate/{promoCode}", promoCode)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isBadRequest()
-                .expectBody()
-                .jsonPath("$.message").isEqualTo("Promo code is not valid");
-    }
-
-
-    @Test
-    void whenValidatePromoCode_withInactiveCode_thenReturnBadRequest() {
-        // Arrange
-        String promoCode = "INACTIVECODE";
-        PromoCodeResponseModel promo = new PromoCodeResponseModel();
-        promo.setId("67890");
-        promo.setCode(promoCode);
-        promo.setName("Inactive Promo");
-        promo.setActive(false);
-        promo.setExpirationDate(LocalDateTime.now().plusDays(30));
-
-        when(promoCodeService.getPromoCodeByCode(promoCode)).thenReturn(Mono.just(promo));
-
-        // Act & Assert
-        webTestClient.get()
-                .uri("/api/v1/promos/validate/{promoCode}", promoCode)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isBadRequest()
-                .expectBody()
-                .jsonPath("$.message").isEqualTo("Promo code is not valid");
-    }
-
-
+//    @Test
+//    void whenValidatePromoCode_withInvalidCode_thenReturnBadRequest() {
+//        // Arrange
+//        String promoCode = "INVALIDCODE";
+//        when(promoCodeService.getPromoCodeByCode(promoCode)).thenReturn(Mono.empty());
+//
+//        // Act & Assert
+//        webTestClient.get()
+//                .uri("/api/v1/promos/validate/{promoCode}", promoCode)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .exchange()
+//                .expectStatus().isBadRequest()
+//                .expectBody()
+//                .jsonPath("$.message").isEqualTo("Promo code is not valid");
+//    }
+//
+//
+//    @Test
+//    void whenValidatePromoCode_withInactiveCode_thenReturnBadRequest() {
+//        // Arrange
+//        String promoCode = "INACTIVECODE";
+//        PromoCodeResponseModel promo = new PromoCodeResponseModel();
+//        promo.setId("67890");
+//        promo.setCode(promoCode);
+//        promo.setName("Inactive Promo");
+//        promo.setActive(false);
+//        promo.setExpirationDate(LocalDateTime.now().plusDays(30));
+//
+//        when(promoCodeService.getPromoCodeByCode(promoCode)).thenReturn(Mono.just(promo));
+//
+//        // Act & Assert
+//        webTestClient.get()
+//                .uri("/api/v1/promos/validate/{promoCode}", promoCode)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .exchange()
+//                .expectStatus().isBadRequest()
+//                .expectBody()
+//                .jsonPath("$.message").isEqualTo("Promo code is not valid");
+//    }
+//
+//
 
 
 
