@@ -1,14 +1,10 @@
 import axiosInstance from '@/shared/api/axiosInstance.ts';
-import { Visit } from '@/features/visits/models/Visit.ts';
+import { VisitResponseModel } from '../models/VisitResponseModel';
 
-export async function getAllVisits(searchTerm: string): Promise<Visit[]> {
+export async function getAllVisits(): Promise<VisitResponseModel[]> {
   try {
-    const params: Record<string, string> = {};
-    if (searchTerm !== '') params.searchTerm = searchTerm;
-
     const response = await axiosInstance.get('/visits', {
-      responseType: 'text',
-      params,
+      responseType: 'stream',
       useV2: false,
     });
     return response.data
@@ -20,8 +16,9 @@ export async function getAllVisits(searchTerm: string): Promise<Visit[]> {
         } catch (err) {
           console.error("Can't parse JSON:", err);
         }
+        return null;
       })
-      .filter((data?: JSON) => data !== null);
+      .filter((data?: VisitResponseModel | null) => data !== null);
   } catch (error) {
     console.error('Error fetching visits:', error);
     throw error;

@@ -4,7 +4,6 @@ import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.Bills.PaymentRequestDTO;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
-import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -36,9 +35,10 @@ public class CustomerBillController {
     @GetMapping(value = "/{billId}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
     public Mono<ResponseEntity<byte[]>> downloadBillPdf(
             @PathVariable String customerId, 
-            @PathVariable String billId) {
+            @PathVariable String billId,
+            @RequestParam(name = "currency", required = false, defaultValue = "CAD") String currency) {
 
-        return billService.downloadBillPdf(customerId, billId)
+        return billService.downloadBillPdf(customerId, billId, currency)
                 .map(pdf -> {
                     HttpHeaders headers = new HttpHeaders();
                     headers.setContentType(MediaType.APPLICATION_PDF);
@@ -64,13 +64,13 @@ public class CustomerBillController {
     public Mono<ResponseEntity<BillResponseDTO>> payBill(
             @PathVariable String customerId,
             @PathVariable String billId,
-            @RequestBody PaymentRequestDTO paymentRequestDTO) {
+            @RequestBody PaymentRequestDTO paymentRequestDTO,
+            @CookieValue("Bearer") String jwtToken) {
 
-        return billService.payBill(customerId, billId, paymentRequestDTO)
+        return billService.payBill(customerId, billId, paymentRequestDTO, jwtToken)
                 .map(ResponseEntity::ok)
                 // billing-service returns 400 for invalid payment; the client maps that to ResponseStatusException(BAD_REQUEST)
                 .onErrorResume(ResponseStatusException.class, e ->
                         Mono.just(ResponseEntity.status(e.getStatusCode()).build()));
     }
-
 }

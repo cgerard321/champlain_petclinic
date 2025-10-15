@@ -1,35 +1,28 @@
 package com.petclinic.billing.presentationlayer;
 
+import com.petclinic.billing.domainclientlayer.Auth.AuthServiceClient;
+import com.petclinic.billing.domainclientlayer.Auth.Rethrower;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
 import com.petclinic.billing.businesslayer.BillService;
 import com.petclinic.billing.datalayer.BillResponseDTO;
 import com.petclinic.billing.datalayer.BillStatus;
 import com.petclinic.billing.datalayer.PaymentRequestDTO;
-import com.petclinic.billing.exceptions.InvalidPaymentException;
-import com.petclinic.billing.util.EntityDtoUtil;
-import com.petclinic.billing.util.InterestCalculationUtil;
 import com.petclinic.billing.util.InterestCalculationUtil;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
-
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.server.ResponseStatusException;
-
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
-
 import java.math.BigDecimal;
 
 @WebFluxTest(controllers = CustomerBillsController.class)
@@ -40,6 +33,11 @@ public class CustomerBillsControllerUnitTest {
 
     @MockBean
     BillService billService;
+    @MockBean
+    AuthServiceClient authServiceClient;
+
+    @MockBean
+    Rethrower rethrower;
 
     @Test
     void getBillsByCustomerId_shouldSucceed() {
@@ -126,6 +124,7 @@ public class CustomerBillsControllerUnitTest {
     void payBill_ValidRequest_ShouldReturnUpdatedBill() {
         String customerId = "cust-123";
         String billId = "bill-456";
+        String jwtToken = "fake-cookie-token";
         PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/25");
 
         BillResponseDTO billResponse = BillResponseDTO.builder()
@@ -135,11 +134,12 @@ public class CustomerBillsControllerUnitTest {
                 .amount(new BigDecimal(200.0))
                 .build();
 
-        when(billService.processPayment(customerId, billId, paymentRequest))
+        when(billService.processPayment(customerId, billId, paymentRequest, jwtToken))
                 .thenReturn(Mono.just(billResponse));
 
         client.post()
                 .uri("/bills/customer/{customerId}/bills/{billId}/pay", customerId, billId)
+                .cookie("Bearer", jwtToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(paymentRequest)
                 .exchange()
@@ -150,45 +150,49 @@ public class CustomerBillsControllerUnitTest {
                     assertEquals(BillStatus.PAID, response.getResponseBody().getBillStatus());
                 });
 
-        verify(billService, times(1)).processPayment(customerId, billId, paymentRequest);
+        verify(billService, times(1)).processPayment(customerId, billId, paymentRequest, jwtToken);
     }
 
     @Test
     void payBill_InvalidPayment_ShouldReturnBadRequest() {
         String customerId = "cust-123";
         String billId = "bill-456";
+        String jwtToken = "fake-cookie-token";
         PaymentRequestDTO invalidPayment = new PaymentRequestDTO("123", "12", "12");
 
-        when(billService.processPayment(customerId, billId, invalidPayment))
+        when(billService.processPayment(customerId, billId, invalidPayment, jwtToken))
                 .thenReturn(Mono.error(new InvalidPaymentException("Invalid payment details")));
 
         client.post()
                 .uri("/bills/customer/{customerId}/bills/{billId}/pay", customerId, billId)
                 .contentType(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", jwtToken)
                 .bodyValue(invalidPayment)
                 .exchange()
                 .expectStatus().isBadRequest();
 
-        verify(billService, times(1)).processPayment(customerId, billId, invalidPayment);
+        verify(billService, times(1)).processPayment(customerId, billId, invalidPayment, jwtToken);
     }
 
     @Test
     void payBill_NonExistentBill_ShouldReturnNotFound() {
         String customerId = "cust-123";
         String billId = "bill-404";
+        String jwtToken = "fake-cookie-token";
         PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/25");
 
-        when(billService.processPayment(customerId, billId, paymentRequest))
+        when(billService.processPayment(customerId, billId, paymentRequest, jwtToken))
                 .thenReturn(Mono.error(new NotFoundException("Bill not found")));
 
         client.post()
                 .uri("/bills/customer/{customerId}/bills/{billId}/pay", customerId, billId)
                 .contentType(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", jwtToken)
                 .bodyValue(paymentRequest)
                 .exchange()
                 .expectStatus().isNotFound();
 
-        verify(billService, times(1)).processPayment(customerId, billId, paymentRequest);
+        verify(billService, times(1)).processPayment(customerId, billId, paymentRequest, jwtToken);
     }
 
     @Test

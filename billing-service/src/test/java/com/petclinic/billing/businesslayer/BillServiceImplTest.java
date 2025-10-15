@@ -1,17 +1,19 @@
 package com.petclinic.billing.businesslayer;
 
 import com.petclinic.billing.datalayer.*;
+import com.petclinic.billing.domainclientlayer.Auth.AuthServiceClient;
+import com.petclinic.billing.domainclientlayer.Auth.UserDetails;
+import com.petclinic.billing.domainclientlayer.Mailing.Mail;
+import com.petclinic.billing.domainclientlayer.Mailing.MailService;
 import com.petclinic.billing.domainclientlayer.OwnerClient;
 import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
 import com.petclinic.billing.util.EntityDtoUtil;
 import com.petclinic.billing.util.InterestCalculationUtil;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,14 +29,13 @@ import reactor.test.StepVerifier;
 
 import static org.mockito.ArgumentMatchers.*;
 
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZoneId;
 import java.util.*;
-
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -48,6 +49,12 @@ public class BillServiceImplTest {
 
     @MockBean
     VetClient vetClient;
+
+    @MockBean
+    AuthServiceClient authClient;
+
+    @MockBean
+    MailService mailService;
 
     @MockBean
     OwnerClient ownerClient;
@@ -599,45 +606,47 @@ public class BillServiceImplTest {
 
     @Test
     public void testGenerateBillPdf() {
-        Bill mockBill = Bill.builder()
-                .billId("billId-1")
-                .customerId("customerId-1")
-                .ownerFirstName("John")
-                .ownerLastName("Doe")
-                .visitType("General")
-                .vetId("vetId-1")
-                .amount(new BigDecimal(100.0))
-                .billStatus(BillStatus.PAID)
-                .date(LocalDate.now())
-                .dueDate(LocalDate.now().plusDays(15))
-                .build();
+    Bill mockBill = Bill.builder()
+            .billId("billId-1")
+            .customerId("customerId-1")
+            .ownerFirstName("John")
+            .ownerLastName("Doe")
+            .visitType("General")
+            .vetId("vetId-1")
+            .amount(new BigDecimal(100.0))
+            .billStatus(BillStatus.PAID)
+            .date(LocalDate.now())
+            .dueDate(LocalDate.now().plusDays(15))
+            .build();
 
-        String customerId = mockBill.getCustomerId();
-        String billId = mockBill.getBillId();
+    String customerId = mockBill.getCustomerId();
+    String billId = mockBill.getBillId();
+    String currency = "USD";
 
-        when(repo.findByBillId(billId)).thenReturn(Mono.just(mockBill));
+    when(repo.findByBillId(billId)).thenReturn(Mono.just(mockBill));
 
-        Mono<byte[]> pdfBytesMono = billService.generateBillPdf(customerId, billId);
+    Mono<byte[]> pdfBytesMono = billService.generateBillPdf(customerId, billId, currency);
 
-        StepVerifier.create(pdfBytesMono)
-                .assertNext(pdfBytes -> {
-                    assertNotNull(pdfBytes);
-                    assertTrue(pdfBytes.length > 0);
-                })
-                .verifyComplete();
-    }
+    StepVerifier.create(pdfBytesMono)
+            .assertNext(pdfBytes -> {
+                assertNotNull(pdfBytes);
+                assertTrue(pdfBytes.length > 0);
+            })
+            .verifyComplete();
+}
 
-    @Test
-    public void testGenerateBillPdf_BillNotFound() {
-        when(repo.findByBillId(anyString())).thenReturn(Mono.empty());
+@Test
+public void testGenerateBillPdf_BillNotFound() {
+    when(repo.findByBillId(anyString())).thenReturn(Mono.empty());
 
-        Mono<byte[]> pdfMono = billService.generateBillPdf("nonexistentCustomerId", "nonexistentBillId");
+    String currency = "USD";
+    Mono<byte[]> pdfMono = billService.generateBillPdf("nonexistentCustomerId", "nonexistentBillId", currency);
 
-        StepVerifier.create(pdfMono)
-                .expectErrorMatches(throwable -> throwable instanceof RuntimeException &&
-                        throwable.getMessage().equals("Bill not found for given customer"))
-                .verify();
-    }
+    StepVerifier.create(pdfMono)
+            .expectErrorMatches(throwable -> throwable instanceof RuntimeException &&
+                    throwable.getMessage().equals("Bill not found for given customer"))
+            .verify();
+}
 
     private BillRequestDTO buildInvalidBillRequestDTO() {
         LocalDate date = LocalDate.now();
@@ -668,7 +677,6 @@ public class BillServiceImplTest {
 
     private Bill buildUnpaidBill() {
 
-        VetResponseDTO vetDTO = buildVetDTO();
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
         LocalDate date = calendar.getTime().toInstant()
@@ -697,8 +705,6 @@ public class BillServiceImplTest {
 
     private BillRequestDTO buildBillRequestDTO() {
 
-        VetResponseDTO vetDTO = buildVetDTO();
-
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
         LocalDate date = calendar.getTime().toInstant()
@@ -709,20 +715,6 @@ public class BillServiceImplTest {
 
         return BillRequestDTO.builder().customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).billStatus(BillStatus.PAID).dueDate(dueDate).build();
 
-    }
-
-    private VetResponseDTO buildVetDTO() {
-        return VetResponseDTO.builder()
-                .vetId("d9d3a7ac-6817-4c13-9a09-c09da74fb65f")
-                .vetBillId("53c2d16e-1ba3-4dbc-8e31-6decd2eaa99a")
-                .firstName("Pauline")
-                .lastName("LeBlanc")
-                .email("skjfhf@gmail.com")
-                .phoneNumber("947-238-2847")
-                .resume("Just became a vet")
-                .specialties(new HashSet<>())
-                .active(false)
-                .build();
     }
 
     @Test
@@ -819,16 +811,27 @@ public class BillServiceImplTest {
                 .verifyComplete();
     }
 
-
     @Test
     void processPayment_Success() {
 
         String customerId = "customerId-1";
         String billId = "billId-1";
+        String jwtToken = "Bearer faketoken";
         Bill bill = buildBill();
         bill.setBillStatus(BillStatus.UNPAID);
 
         PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/23");
+
+        UserDetails fakeUser = new UserDetails();
+        fakeUser.setUserId("user-123");
+        fakeUser.setUsername("fakeUser");
+        fakeUser.setEmail("fakeUser@example.com");
+
+        when(authClient.getUserById(anyString(), anyString()))
+                .thenReturn(Mono.just(fakeUser));
+        when(mailService.sendMail(any(Mail.class)))
+                .thenReturn(null);
+
 
         when(repo.findByCustomerIdAndBillId(customerId, billId)).thenReturn(Mono.just(bill));
         when(repo.save(any(Bill.class))).thenAnswer(invocation -> {
@@ -837,7 +840,7 @@ public class BillServiceImplTest {
         });
 
 
-        Mono<BillResponseDTO> result = billService.processPayment(customerId, billId, paymentRequest);
+        Mono<BillResponseDTO> result = billService.processPayment(customerId, billId, paymentRequest, jwtToken);
 
 
         StepVerifier.create(result)
@@ -852,9 +855,20 @@ public class BillServiceImplTest {
     void processPayment_InvalidCardNumber_Failure() {
         String customerId = "customerId-1";
         String billId = "billId-1";
+        String jwtToken = "Bearer faketoken";
         PaymentRequestDTO paymentRequest = new PaymentRequestDTO("12345678", "123", "12/23");
 
-        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest))
+        UserDetails fakeUser = new UserDetails();
+        fakeUser.setUserId("user-123");
+        fakeUser.setUsername("fakeUser");
+        fakeUser.setEmail("fakeUser@example.com");
+
+        when(authClient.getUserById(anyString(), anyString()))
+                .thenReturn(Mono.just(fakeUser));
+        when(mailService.sendMail(any(Mail.class)))
+                .thenReturn(null);
+
+        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest, jwtToken))
                 .expectErrorMatches(throwable -> throwable instanceof InvalidPaymentException &&
                         throwable.getMessage().contains("Invalid payment details"))
                 .verify();
@@ -865,9 +879,20 @@ public class BillServiceImplTest {
     void processPayment_InvalidCVV_Failure() {
         String customerId = "customerId-1";
         String billId = "billId-1";
+        String jwtToken = "Bearer faketoken";
         PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "12", "12/23");
 
-        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest))
+        UserDetails fakeUser = new UserDetails();
+        fakeUser.setUserId("user-123");
+        fakeUser.setUsername("fakeUser");
+        fakeUser.setEmail("fakeUser@example.com");
+
+        when(authClient.getUserById(anyString(), anyString()))
+                .thenReturn(Mono.just(fakeUser));
+        when(mailService.sendMail(any(Mail.class)))
+                .thenReturn(null);
+
+        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest, jwtToken))
                 .expectErrorMatches(throwable -> throwable instanceof InvalidPaymentException &&
                         throwable.getMessage().contains("Invalid payment details"))
                 .verify();
@@ -878,9 +903,20 @@ public class BillServiceImplTest {
     void processPayment_InvalidExpirationDate_Failure() {
         String customerId = "customerId-1";
         String billId = "billId-1";
+        String jwtToken = "Bearer faketoken";
         PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "1223");
 
-        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest))
+        UserDetails fakeUser = new UserDetails();
+        fakeUser.setUserId("user-123");
+        fakeUser.setUsername("fakeUser");
+        fakeUser.setEmail("fakeUser@example.com");
+
+        when(authClient.getUserById(anyString(), anyString()))
+                .thenReturn(Mono.just(fakeUser));
+        when(mailService.sendMail(any(Mail.class)))
+                .thenReturn(null);
+
+        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest, jwtToken))
                 .expectErrorMatches(throwable -> throwable instanceof InvalidPaymentException &&
                         throwable.getMessage().contains("Invalid payment details"))
                 .verify();
@@ -890,11 +926,22 @@ public class BillServiceImplTest {
     void processPayment_BillNotFound_Failure() {
         String customerId = "customerId-1";
         String billId = "billId-1";
+        String jwtToken = "Bearer faketoken";
         PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/23");
+
+        UserDetails fakeUser = new UserDetails();
+        fakeUser.setUserId("user-123");
+        fakeUser.setUsername("fakeUser");
+        fakeUser.setEmail("fakeUser@example.com");
+
+        when(authClient.getUserById(anyString(), anyString()))
+                .thenReturn(Mono.just(fakeUser));
+        when(mailService.sendMail(any(Mail.class)))
+                .thenReturn(null);
 
         when(repo.findByCustomerIdAndBillId(customerId, billId)).thenReturn(Mono.empty());
 
-        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest))
+        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest, jwtToken))
                 .expectErrorSatisfies(throwable -> {
                     assertThat(throwable).isInstanceOf(ResponseStatusException.class);
                     ResponseStatusException ex = (ResponseStatusException) throwable;
@@ -1465,11 +1512,13 @@ public class BillServiceImplTest {
         verify(repo, never()).deleteBillByBillId(anyString());
     }
 
+
     @Test
     void generateBillPdf_Negative_BillNotForCustomer_ShouldErrorAndSkipPdf() {
         String billId = "B-42";
         String repoCustomer = "C-123";
         String requestedCustomer = "C-999";
+        String currency = "USD";
 
         Bill bill = buildBill();
         bill.setBillId(billId);
@@ -1477,17 +1526,18 @@ public class BillServiceImplTest {
 
         when(repo.findByBillId(billId)).thenReturn(Mono.just(bill));
 
-        Mono<byte[]> result = billService.generateBillPdf(requestedCustomer, billId);
+        Mono<byte[]> result = billService.generateBillPdf(requestedCustomer, billId, currency);
 
         StepVerifier.create(result)
-                .expectErrorSatisfies(ex -> {
-                    assertTrue(ex instanceof RuntimeException);
-                    assertEquals("Bill not found for given customer", ex.getMessage());
-                })
-                .verify();
+            .expectErrorSatisfies(ex -> {
+                assertTrue(ex instanceof RuntimeException);
+                assertEquals("Bill not found for given customer", ex.getMessage());
+            })
+            .verify();
 
         verify(repo, times(1)).findByBillId(billId);
     }
+
 
     @Test
     void test_EntityDtoUtil_ToBillResponseDto_WithOverdueBill_ShouldCalculateFreshInterest() {
@@ -1851,5 +1901,28 @@ public class BillServiceImplTest {
                 assertEquals(expectedTaxedAmount, dto.getTaxedAmount());
             })
             .verifyComplete();
+    }
+
+    @Test
+    void generateConfirmationEmail_shouldGenerateCorrectEmail() throws Exception {
+        // Arrange
+        UserDetails userDetails = new UserDetails();
+        userDetails.setEmail("test@example.com");
+        userDetails.setUsername("testuser");
+
+        Method method = BillServiceImpl.class.getDeclaredMethod("generateConfirmationEmail", UserDetails.class);
+        method.setAccessible(true);
+
+        // Act
+        Mail result = (Mail) method.invoke(billService, userDetails);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals("test@example.com", result.getEmailSendTo());
+        assertEquals("Pet Clinic - Payment Confirmation", result.getEmailTitle());
+        assertEquals("default", result.getTemplateName());
+        assertEquals("Pet Clinic confirmation email", result.getHeader());
+        assertEquals("testuser", result.getCorrespondantName());
+        assertEquals("ChamplainPetClinic@gmail.com", result.getSenderName());
     }
 }

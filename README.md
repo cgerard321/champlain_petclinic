@@ -10,6 +10,7 @@ Champlain Final Project 1 420-N52-LA Pet Clinic repo
 - [Pull Request Guidelines](docs/pull-requests.md)
 - [Git Guidelines](docs/git-tips.md)
 - [React Coding Standards](docs/react-coding-standards.md)
+- [Files Services Usage Standards](docs/files-service-usage.md)
 - [Playwright Testing](docs/playwright-testing.md)
 - [Java (Spring) Coding Standards](docs/java-coding-standards.md)
 - [API Versioning Guidelines](docs/api-versioning.md)

@@ -3,27 +3,18 @@ package com.petclinic.bffapigateway.presentationlayer;
 import com.petclinic.bffapigateway.config.GlobalExceptionHandler;
 import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.Auth.*;
-import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
-import com.petclinic.bffapigateway.dtos.Bills.BillStatus;
 import com.petclinic.bffapigateway.dtos.Bills.PaymentRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
-import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
-import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
-import com.petclinic.bffapigateway.dtos.Inventory.ProductRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductResponseDTO;
-import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
-import com.petclinic.bffapigateway.dtos.Pets.PetType;
-import com.petclinic.bffapigateway.dtos.Pets.PetTypeResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.*;
 import com.petclinic.bffapigateway.dtos.Visits.Status;
 import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
-import com.petclinic.bffapigateway.utils.InventoryUtils.ImageUtil;
 import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
@@ -61,24 +52,16 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
-import org.springframework.web.util.UriComponentsBuilder;
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
-
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-
 import static com.petclinic.bffapigateway.dtos.Bills.BillStatus.PAID;
-import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.jwtTokenForValidAdmin;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -231,7 +214,6 @@ class ApiGatewayControllerTest {
                 .exchange()
                 .expectStatus().isEqualTo(UNPROCESSABLE_ENTITY);
                 //  .expectHeader().contentType(MediaType.APPLICATION_JSON)
-
     }
 
     @Test
@@ -265,7 +247,6 @@ class ApiGatewayControllerTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$[0].date").isEqualTo("2023");
-
     }
 
     @Test
@@ -290,7 +271,6 @@ class ApiGatewayControllerTest {
                 .expectBody(Double.class)
                 .value(resp->
                         assertEquals(rating.getRateScore(), ratingResponseDTO.getRateScore()));
-
     }
 
     @Test
@@ -307,8 +287,6 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$").isEqualTo("1");
     }
-
-
 
    @Test
     void addRatingToAVet_withRateDescriptionAndPredefinedDesc_ShouldSetRateDescriptionToPredefinedDesc() {
@@ -429,6 +407,7 @@ class ApiGatewayControllerTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
     }
+
     @Test
     void updateRatingForVet_withPredefinedDescriptionOnly_ShouldSetRateDescriptionToPredefinedDesc() {
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
@@ -489,7 +468,6 @@ class ApiGatewayControllerTest {
                 .expectBody();
     }
 
-
     @Test
     void getAllEducationsByVetId_WithValidId_ShouldSucceed(){
         EducationResponseDTO educationResponseDTO = buildEducation();
@@ -534,6 +512,7 @@ class ApiGatewayControllerTest {
         Mockito.verify(vetsServiceClient, times(1))
                 .deleteEducation(VET_ID, educationResponseDTO.getEducationId());
     }
+
     @Test
     void updateEducationForVet(){
         EducationRequestDTO updatedEducation = EducationRequestDTO.builder()
@@ -755,9 +734,6 @@ class ApiGatewayControllerTest {
         when(authServiceClient.createVetUser(any(Mono.class)))
                 .thenReturn((Mono.just(vetResponseDTO)));
 
-
-
-
         client
                 .post()
                 .uri("/api/gateway/users/vets")
@@ -881,6 +857,7 @@ class ApiGatewayControllerTest {
         Mockito.verify(vetsServiceClient, times(1))
                 .getPhotoByVetId(VET_ID);
     }
+
     @Test
     void getDefaultPhotoByVetId() throws IOException {
         PhotoResponseDTO photoResponseDTO = PhotoResponseDTO.builder()
@@ -909,7 +886,6 @@ class ApiGatewayControllerTest {
         Mockito.verify(vetsServiceClient, times(1))
                 .getDefaultPhotoByVetId(VET_ID);
     }
-
 
     @Test
     void addPhotoToVet_multipart_ok() {
@@ -999,15 +975,11 @@ class ApiGatewayControllerTest {
                 .getBadgeByVetId(VET_ID);
     }
 
-
     @Test
     void toStringBuilderVets() {
         System.out.println(VetResponseDTO.builder());
         System.out.println(VetRequestDTO.builder());
     }
-
-
-
 
 //    @Test
 //    void getOwnerDetails_withAvailableVisitsService() {
@@ -1102,9 +1074,6 @@ class ApiGatewayControllerTest {
                     assertEquals(dto.getEmail(),userResponse.getEmail());
                     assertEquals(dto.getRoles(),userResponse.getRoles());
                 });
-
-
-
     }
 
     @Test
@@ -1162,8 +1131,6 @@ class ApiGatewayControllerTest {
                     assertEquals(dto.getProvince(),owner.getProvince());
                     assertEquals(dto.getTelephone(),owner.getTelephone());
                 });
-
-
 
     }
     /*@Test
@@ -1250,20 +1217,20 @@ class ApiGatewayControllerTest {
 //    }
     //private static final int BILL_ID = 1;
 
-
     @Test
     void payBill_Success() {
         BillResponseDTO successResponse = new BillResponseDTO();
         successResponse.setBillId("1");
         successResponse.setBillStatus(PAID);
 
-        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class)))
+        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class), anyString()))
                 .thenReturn(Mono.just(successResponse));
 
         PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
 
         client.post()
                 .uri("/api/gateway/bills/customer/1/bills/1/pay")
+                .cookie("Bearer", "dummy-jwt-token")
                 .body(BodyInserters.fromValue(paymentRequestDTO))
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .exchange()
@@ -1277,45 +1244,48 @@ class ApiGatewayControllerTest {
 
     @Test
     void payBill_Failure() {
-        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class)))
+        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class), anyString()))
                 .thenReturn(Mono.error(new RuntimeException("Invalid payment details")));
 
         PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
 
         client.post()
                 .uri("/api/gateway/bills/customer/1/bills/1/pay")
+                .cookie("Bearer", "dummy-jwt-token")
                 .body(BodyInserters.fromValue(paymentRequestDTO))
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .exchange()
                 .expectStatus().isBadRequest()
-                .expectBody().isEmpty(); // <- empty body
+                .expectBody().isEmpty();
     }
 
     @Test
     void payBill_Failure_InvalidCustomerId() {
-        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class)))
+        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class), anyString()))
                 .thenReturn(Mono.error(new RuntimeException("Invalid customer ID")));
 
         PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
 
         client.post()
                 .uri("/api/gateway/bills/customer/invalid-customer-id/bills/1/pay")
+                .cookie("Bearer", "dummy-jwt-token")
                 .body(BodyInserters.fromValue(paymentRequestDTO))
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .exchange()
                 .expectStatus().isBadRequest()
-                .expectBody().isEmpty(); //  no “Payment failed: ...”
+                .expectBody().isEmpty();
     }
 
     @Test
     void payBill_Failure_InvalidBillId() {
-        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class)))
+        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class), anyString()))
                 .thenReturn(Mono.error(new RuntimeException("Invalid bill ID")));
 
         PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
 
         client.post()
                 .uri("/api/gateway/bills/customer/1/bills/invalid-bill-id/pay")
+                .cookie("Bearer", "dummy-jwt-token")
                 .body(BodyInserters.fromValue(paymentRequestDTO))
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .exchange()
@@ -1325,13 +1295,14 @@ class ApiGatewayControllerTest {
 
     @Test
     void payBill_Failure_ExpiredCard() {
-        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class)))
+        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class), anyString()))
                 .thenReturn(Mono.error(new RuntimeException("Card expired")));
 
         PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "01/20");
 
         client.post()
                 .uri("/api/gateway/bills/customer/1/bills/1/pay")
+                .cookie("Bearer", "dummy-jwt-token")
                 .body(BodyInserters.fromValue(paymentRequestDTO))
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .exchange()
@@ -1340,12 +1311,14 @@ class ApiGatewayControllerTest {
     }
 
 
+
     @Test
     void payBill_MissingPaymentDetails_Failure() {
         PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO(null, null, null);
 
         client.post()
                 .uri("/api/gateway/bills/customer/1/bills/1/pay")
+                .cookie("Bearer", "dummy-jwt-token")
                 .body(BodyInserters.fromValue(paymentRequestDTO))
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .exchange()
@@ -1360,6 +1333,7 @@ class ApiGatewayControllerTest {
 
         client.post()
                 .uri("/api/gateway/bills/customer/1/bills/1/pay")
+                .cookie("Bearer", "dummy-jwt-token")
                 .body(BodyInserters.fromValue(paymentRequestDTO))
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .exchange()
@@ -1369,8 +1343,6 @@ class ApiGatewayControllerTest {
                     assertTrue(response.contains("CVV must be 3 digits"));
                 });
     }
-
-
 
     @Test
     void getAllBillsByOwnerName() {
@@ -1397,7 +1369,6 @@ class ApiGatewayControllerTest {
                 });
     }
 
-
     @Test
     public void getBillsByOwnerId(){
         BillResponseDTO bill = new BillResponseDTO();
@@ -1421,9 +1392,6 @@ class ApiGatewayControllerTest {
                     Assertions.assertNotNull(billResponseDTOS);
                 });
     }
-
-
-
 
 
     /**
@@ -1519,8 +1487,6 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.status").isEqualTo("UPCOMING")
                 .jsonPath("$.practitionerId").isEqualTo(1)
                 .jsonPath("$.visitEndDate").isEqualTo("2021-12-12 15:00");
-
-
     }
 
     //@Test
@@ -1564,8 +1530,6 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.practitionerId").isEqualTo("1")
                 .jsonPath("$.visitEndDate").isEqualTo("2021-12-12 15:00");
     }
-
-
 
    /* @Test
     void shouldDeleteAVisit() {
@@ -1729,7 +1693,6 @@ class ApiGatewayControllerTest {
         // Verifying the method call with the right argument
         Mockito.verify(visitsServiceClient, times(1)).getAllVisits(description);
     }
-
 
     //@Test
     void getVisitsByOwnerId_shouldReturnOk(){
