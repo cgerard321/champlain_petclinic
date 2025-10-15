@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
-import com.petclinic.bffapigateway.dtos.Visits.Emergency.EmergencyRequestDTO;
-import com.petclinic.bffapigateway.dtos.Visits.Emergency.EmergencyResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Status;
 import com.petclinic.bffapigateway.dtos.Visits.TimeSlotDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
@@ -338,87 +336,6 @@ public class VisitsServiceClient {
     }
 
 
-    //emergencies
-    public Flux<EmergencyResponseDTO> getAllEmergency() {
-        return webClient
-                .get()
-                .uri(reviewUrl + "/emergencies")
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .bodyToFlux(EmergencyResponseDTO.class);
-    }
-
-    public Flux<EmergencyResponseDTO> getEmergencyVisitForPet(final String petId) {
-        return webClient
-                .get()
-                .uri("/emergencies/pets/{petId}", petId)
-                .retrieve()
-                .bodyToFlux(EmergencyResponseDTO.class);
-    }
-
-    public Mono<EmergencyResponseDTO> createEmergency(Mono<EmergencyRequestDTO> model) {
-        String emergencyId = UUID.randomUUID().toString();
-        return model.flatMap(emergencyRequestDTO -> {
-            return webClient
-                    .post()
-                    .uri(reviewUrl + "/emergencies")
-                    .body(BodyInserters.fromValue(emergencyRequestDTO))
-                    .retrieve()
-                    .bodyToMono(EmergencyResponseDTO.class);
-        });
-
-    }
-
-    public Mono<EmergencyResponseDTO> getEmergencyByEmergencyId(String visitEmergencyId) {
-        return webClient
-                .get()
-                .uri(reviewUrl + "/emergencies/" + visitEmergencyId)
-                .retrieve()
-                .bodyToMono(EmergencyResponseDTO.class);
-    }
-
-    /* public Mono<EmergencyResponseDTO> createEmergency(Mono<EmergencyRequestDTO> model) {
-         String emergencyId= UUID.randomUUID().toString();
-         return model.flatMap(emergencyRequestDTO -> {
-             return webClient
-                     .post()
-                     .uri(reviewUrl + "/emergencies")
-                     .body(BodyInserters.fromValue(emergencyRequestDTO))
-                     .retrieve()
-                     .bodyToMono(EmergencyResponseDTO.class);
-         });
-
-     }
- */
-    public Mono<EmergencyResponseDTO> updateEmergency(String emergencyId, Mono<EmergencyRequestDTO> emergencyRequestDTOMono) {
-        return emergencyRequestDTOMono.flatMap(requestDTO ->
-                webClient
-                        .put()
-                        .uri(reviewUrl + "/emergencies/" + emergencyId)
-                        .body(BodyInserters.fromValue(requestDTO))
-                        .retrieve()
-                        .bodyToMono(EmergencyResponseDTO.class)
-        );
-    }
-/*
-    public Mono<EmergencyResponseDTO> getEmergencyByEmergencyId(String emergencyId) {
-        return webClient
-                .get()
-                .uri(reviewUrl + "/emergencies/" + emergencyId)
-                .retrieve()
-                .bodyToMono(EmergencyResponseDTO.class);
-    }
-    */
-
-    public Mono<EmergencyResponseDTO> deleteEmergency(String emergencyId) {
-        return webClient
-                .delete()
-                .uri(reviewUrl + "/emergencies/" + emergencyId)
-                .retrieve()
-                .bodyToMono(EmergencyResponseDTO.class);
-    }
-
-
     public Mono<VisitResponseDTO> patchVisitStatus(String visitId, String status) {
         return webClient.patch()
                 .uri(reviewUrl + "/" + visitId + "/" + status) // Adjust URI based on visit-service
@@ -433,36 +350,6 @@ public class VisitsServiceClient {
                 .bodyToMono(ReviewResponseDTO.class);
     }
 
-    //reviews for owner
-    public Flux<ReviewResponseDTO> getReviewsByOwnerId(String ownerId) {
-        return webClient
-                .get()
-                .uri(reviewUrl + "/owners/" + ownerId + "/reviews")
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .bodyToFlux(ReviewResponseDTO.class);
-    }
-
-    public Mono<ReviewResponseDTO> addCustomerReview(String ownerId, ReviewRequestDTO reviewRequestDTO) {
-        return webClient
-                .post()
-                .uri("/owners/{ownerId}/reviews", ownerId)
-                .body(BodyInserters.fromValue(reviewRequestDTO))
-                .retrieve()
-                .bodyToMono(ReviewResponseDTO.class);
-    }
-
-    public Mono<Void> deleteReview(String ownerId, String reviewId) {
-        return webClient
-                .delete()
-                .uri("/owners/{ownerId}/reviews/{reviewId}", ownerId, reviewId)
-                .retrieve()
-                .onStatus(status -> status.is4xxClientError(), clientResponse ->
-                        Mono.error(new NotFoundException("Review not found for owner ID: " + ownerId + " and review ID: " + reviewId)))
-                .onStatus(status -> status.is5xxServerError(), clientResponse ->
-                        Mono.error(new RuntimeException("Server error during review deletion")))
-                .bodyToMono(Void.class);
-    }
 
     public Mono<InputStreamResource> exportVisitsToCSV() {
         return webClient

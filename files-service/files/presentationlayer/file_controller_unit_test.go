@@ -1,6 +1,7 @@
 package presentationlayer_test
 
 import (
+	"bytes"
 	"encoding/json"
 	"files-service/files/models"
 	"files-service/files/presentationlayer"
@@ -81,6 +82,69 @@ func TestWhenGetFileById_withInvalidFileId_thenReturnInvalidFileIdException(t *t
 	err := json.Unmarshal(w.Body.Bytes(), &resp)
 	assert.NoError(t, err)
 	assert.Equal(t, "Invalid fileId: "+INVALID_FILE_ID, resp)
+}
+
+func TestWhenUpdateFile_withExistingFileId_thenReturnUpdatedFileResponseModel_Unit(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	controller, mockService := setUpControllerUnitTests()
+	router := gin.Default()
+	_ = controller.Routes(router)
+
+	updateModel := models.FileRequestModel{
+		FileName: "updated petclinic image",
+		FileType: "image/png",
+		FileData: []byte("new fake data"),
+	}
+
+	expectedResponse := models.FileResponseModel{
+		FileId:   EXISTING_FILE_ID,
+		FileName: "updated petclinic image",
+		FileType: "image/png",
+		FileData: []byte("new fake data"),
+	}
+
+	mockService.On("UpdateFile", EXISTING_FILE_ID, &updateModel).Return(&expectedResponse, nil)
+
+	body, _ := json.Marshal(updateModel)
+	req, _ := http.NewRequest(http.MethodPut, "/files/"+EXISTING_FILE_ID, bytes.NewReader(body))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	var got models.FileResponseModel
+	err := json.Unmarshal(w.Body.Bytes(), &got)
+	assert.NoError(t, err)
+	assert.Equal(t, expectedResponse.FileName, got.FileName)
+	assert.Equal(t, expectedResponse.FileType, got.FileType)
+	assert.Equal(t, expectedResponse.FileData, got.FileData)
+	mockService.AssertExpectations(t)
+}
+
+func TestWhenUpdateFile_withNonExistingFileId_thenReturnNotFound_Unit(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	controller, mockService := setUpControllerUnitTests()
+	router := gin.Default()
+	_ = controller.Routes(router)
+
+	updateModel := models.FileRequestModel{
+		FileName: "updated petclinic image",
+		FileType: "image/png",
+		FileData: []byte("new fake data"),
+	}
+
+	mockService.On("UpdateFile", NON_EXISTING_ID, &updateModel).Return(nil, exception.NewNotFoundException("fileId: "+NON_EXISTING_ID+" was not found"))
+
+	body, _ := json.Marshal(updateModel)
+	req, _ := http.NewRequest(http.MethodPut, "/files/"+NON_EXISTING_ID, bytes.NewReader(body))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+	var resp string
+	err := json.Unmarshal(w.Body.Bytes(), &resp)
+	assert.NoError(t, err)
+	assert.Equal(t, "fileId: "+NON_EXISTING_ID+" was not found", resp)
+	mockService.AssertExpectations(t)
 }
 
 func TestWhenDeleteFile_withExistingFileId_thenReturnSuccess(t *testing.T) {

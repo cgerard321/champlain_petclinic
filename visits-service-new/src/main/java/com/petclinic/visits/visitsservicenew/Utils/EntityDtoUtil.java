@@ -1,7 +1,6 @@
 package com.petclinic.visits.visitsservicenew.Utils;
 
 
-import com.petclinic.visits.visitsservicenew.DataLayer.Emergency.Emergency;
 import com.petclinic.visits.visitsservicenew.DataLayer.Review.Review;
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
@@ -9,8 +8,6 @@ import com.petclinic.visits.visitsservicenew.DomainClientLayer.PetResponseDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.PetsClient;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetsClient;
-import com.petclinic.visits.visitsservicenew.PresentationLayer.Emergency.EmergencyRequestDTO;
-import com.petclinic.visits.visitsservicenew.PresentationLayer.Emergency.EmergencyResponseDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewResponseDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
@@ -61,6 +58,7 @@ public class EntityDtoUtil {
                             .vetPhoneNumber(vetResponseDTO.getPhoneNumber())
                             .status(visit.getStatus())
                             .visitEndDate(visit.getVisitDate().plusHours(1))
+                            .isEmergency(visit.getIsEmergency())
                             .build());
                 });
     }
@@ -93,48 +91,8 @@ public class EntityDtoUtil {
                 .build();
     }
 
-    public  Mono<EmergencyResponseDTO> toEmergencyResponseDTO(Emergency emergency){
-        Mono<PetResponseDTO> petResponseDTOMono = petsClient.getPetById(emergency.getPetId());
-        Mono<VetDTO> vetResponseDTOMono = vetsClient.getVetByVetId(emergency.getPractitionerId());
-
-        return Mono.zip(petResponseDTOMono, vetResponseDTOMono)
-                .flatMap(tuple -> {
-                    PetResponseDTO petResponseDTO = tuple.getT1();
-                    VetDTO vetResponseDTO = tuple.getT2();
-
-                    return Mono.just(EmergencyResponseDTO.builder()
-                            .visitEmergencyId(emergency.getVisitEmergencyId())
-                            .visitDate(emergency.getVisitDate())
-                            .description(emergency.getDescription())
-                            .petId(emergency.getPetId())
-                            .petName(petResponseDTO.getName())
-                            .petBirthDate(petResponseDTO.getBirthDate())
-                            .practitionerId(emergency.getPractitionerId())
-                            .vetFirstName(vetResponseDTO.getFirstName())
-                            .vetLastName(vetResponseDTO.getLastName())
-                            .vetEmail(vetResponseDTO.getEmail())
-                            .vetPhoneNumber(vetResponseDTO.getPhoneNumber())
-                            .emergencyType(emergency.getEmergencyType())
-                            .urgencyLevel(emergency.getUrgencyLevel())
-                            .build());
-                });
-    }
-
-    public  Emergency toEmergencyEntity(EmergencyRequestDTO emergencyRequestDTO){
-        return Emergency.builder()
-                .visitEmergencyId(generateVisitIdString())
-                .visitDate(emergencyRequestDTO.getVisitDate())
-                .description(emergencyRequestDTO.getDescription())
-                .petId(emergencyRequestDTO.getPetId())
-                .practitionerId(emergencyRequestDTO.getPractitionerId())
-                .urgencyLevel(emergencyRequestDTO.getUrgencyLevel())
-                .emergencyType(emergencyRequestDTO.getEmergencyType())
-                .build();
-    }
-
-
     /**
-     * Generate a random UUID and returns it. IS NOT ERROR FREEa
+     * Generate a random UUID and returns it. IS NOT ERROR FREE
      * @return The UUID as a string
      */
     public String generateVisitIdString() {

@@ -21,10 +21,16 @@ jobs:
         run: go install github.com/swaggo/swag/cmd/swag@v1.3.2
 
       - name: Swagger
-        run: cd mailer-service && swag init; cd -
+        run: |
+          cd mailer-service
+          swag init -g ./cmd/mailer/main.go -d .
+          cd -
 
       - name: Build
-        run: cd mailer-service && go build -v -o app; cd -
+        run: |
+          cd mailer-service
+          go build -v -o app ./cmd/mailer
+          cd -
 
       - name: Test Go Mailer
         run: cd mailer-service && go test -v ./...; cd -

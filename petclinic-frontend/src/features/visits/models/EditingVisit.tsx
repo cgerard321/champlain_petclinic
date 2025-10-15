@@ -7,6 +7,8 @@ import { Status } from '@/features/visits/models/Status';
 import { VisitResponseModel } from './VisitResponseModel';
 import { getVisit } from '../api/getVisit';
 import { updateVisit } from '../api/updateVisit';
+import { getAllPets } from '@/features/visits/api/getAllPets';
+import { PetResponseModel } from '@/features/customers/models/PetResponseModel';
 
 interface ApiError {
   message: string;
@@ -19,6 +21,7 @@ type VisitType = {
   practitionerId: string;
   // ownerId: string;
   status: Status;
+  isEmergency: boolean;
 };
 
 const formatDate = (date: Date): string => {
@@ -34,6 +37,7 @@ const EditingVisit: React.FC = (): JSX.Element => {
     petId: '',
     practitionerId: '',
     status: 'UPCOMING' as Status,
+    isEmergency: false,
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -41,6 +45,8 @@ const EditingVisit: React.FC = (): JSX.Element => {
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showNotification, setShowNotification] = useState<boolean>(false);
+  const [pets, setPets] = useState<PetResponseModel[]>([]);
+  const [loadingPets, setLoadingPets] = useState<boolean>(true);
 
   const navigate = useNavigate();
 
@@ -55,6 +61,7 @@ const EditingVisit: React.FC = (): JSX.Element => {
             petId: response.petId,
             visitStartDate: new Date(response.visitDate),
             status: response.status,
+            isEmergency: response.isEmergency,
           });
         } catch (error) {
           console.error(`Error fetching visit with ID ${visitId}:`, error);
@@ -66,6 +73,26 @@ const EditingVisit: React.FC = (): JSX.Element => {
       fetchVisitData();
     }
   }, [visitId]);
+
+  useEffect(() => {
+    const fetchPets = async (): Promise<void> => {
+      try {
+        setLoadingPets(true);
+        const petsData = await getAllPets();
+
+        // Filter only active pets
+        const activePets = petsData.filter(pet => pet.isActive === 'true');
+        setPets(activePets);
+      } catch (error) {
+        console.error('Error fetching pets:', error);
+        setErrorMessage('Failed to load pets. Please try again.');
+      } finally {
+        setLoadingPets(false);
+      }
+    };
+
+    fetchPets();
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -79,7 +106,7 @@ const EditingVisit: React.FC = (): JSX.Element => {
 
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
-    if (!visit.petId) newErrors.petId = 'Pet ID is required';
+    if (!visit.petId) newErrors.petId = 'Please select a pet';
     if (!visit.visitStartDate)
       newErrors.visitStartDate = 'Visit date is required';
     if (!visit.description) newErrors.description = 'Description is required';
@@ -109,6 +136,7 @@ const EditingVisit: React.FC = (): JSX.Element => {
       petId: visit.petId,
       practitionerId: visit.practitionerId,
       status: visit.status,
+      isEmergency: visit.isEmergency,
     };
 
     try {
@@ -132,13 +160,24 @@ const EditingVisit: React.FC = (): JSX.Element => {
     <div className="profile-edit">
       <h1>Edit Visit</h1>
       <form onSubmit={handleSubmit}>
-        <label>Pet ID: </label>
-        <input
-          type="text"
-          name="petId"
-          value={visit.petId}
-          onChange={handleChange}
-        />
+        <label>Select Pet: </label>
+        {loadingPets ? (
+          <p>Loading pets...</p>
+        ) : (
+          <select
+            name="petId"
+            value={visit.petId}
+            onChange={handleChange}
+            className={errors.petId ? 'error-input' : ''}
+          >
+            <option value="">-- Select a Pet --</option>
+            {pets.map(pet => (
+              <option key={pet.petId} value={pet.petId}>
+                {pet.name}
+              </option>
+            ))}
+          </select>
+        )}
         {errors.petId && <span className="error">{errors.petId}</span>}
         <br />
         <label>Visit Date: </label>
@@ -181,7 +220,7 @@ const EditingVisit: React.FC = (): JSX.Element => {
         </select>
         {errors.status && <span className="error">{errors.status}</span>}
         <br />
-        <button type="submit" disabled={isLoading}>
+        <button type="submit" disabled={isLoading || loadingPets}>
           {isLoading ? 'Updating...' : 'Update'}
         </button>
       </form>

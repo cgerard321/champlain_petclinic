@@ -1,7 +1,8 @@
 package com.petclinic.billing.businesslayer;
 
-import com.itextpdf.text.DocumentException;
 import com.petclinic.billing.datalayer.*;
+import com.petclinic.billing.domainclientlayer.Auth.UserDetails;
+import com.petclinic.billing.domainclientlayer.Mailing.Mail;
 import com.petclinic.billing.domainclientlayer.OwnerClient;
 import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
@@ -19,7 +20,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.function.Predicate;
 
@@ -197,8 +197,6 @@ public class BillServiceImpl implements BillService{
                 .map(EntityDtoUtil::toBillResponseDto);
     }
 
-
-
     @Override
     public Mono<BillResponseDTO> updateBill(String billId, Mono<BillRequestDTO> billRequestDTO) {
         return billRequestDTO
@@ -236,7 +234,6 @@ public class BillServiceImpl implements BillService{
                 });
     }
 
-
     @Override
     public Flux<Void> deleteBillsByVetId(String vetId) {
         return billRepository.deleteBillsByVetId(vetId);
@@ -247,8 +244,6 @@ public class BillServiceImpl implements BillService{
 /**/
         return billRepository.findByCustomerId(customerId).map(EntityDtoUtil::toBillResponseDto);
     }
-
-
 
     @Override
     public Flux<BillResponseDTO> getBillsByVetId(String vetId) {
@@ -302,16 +297,17 @@ public class BillServiceImpl implements BillService{
     }
 
     @Override
-    public Mono<byte[]> generateBillPdf(String customerId, String billId) {
+    public Mono<byte[]> generateBillPdf(String customerId, String billId, String currency) {
         return billRepository.findByBillId(billId)
                 .filter(bill -> bill.getCustomerId().equals(customerId))
                 .switchIfEmpty(Mono.error(new RuntimeException("Bill not found for given customer")))
                 .map(EntityDtoUtil::toBillResponseDto)
                 .flatMap(bill -> {
                     try {
-                        byte[] pdfBytes = PdfGenerator.generateBillPdf(bill);
+                        byte[] pdfBytes = PdfGenerator.generateBillPdf(bill, currency);
                         return Mono.just(pdfBytes);
-                    } catch (DocumentException e) {
+                    } catch (Exception e) {
+                        log.error("PDF generation failed for billId: {}, currency: {}. Error: {}", bill.getBillId(), currency, e.getMessage(), e);
                         return Mono.error(new RuntimeException("Error generating PDF", e));
                     }
                 });
@@ -419,6 +415,14 @@ public class BillServiceImpl implements BillService{
                     }
                     return Mono.just(bill);
                 });
+    }
+
+    private Mail generateConfirmationEmail(UserDetails user){
+        return new Mail(
+                user.getEmail(), "Pet Clinic - Payment Confirmation", "default", "Pet Clinic confirmation email",
+                "Dear, " + user.getUsername() + "\n" +
+                "Your bill has been succesfully paid",
+                "Thank you for choosing Pet Clinic.", user.getUsername(), "ChamplainPetClinic@gmail.com");
     }
 
 
