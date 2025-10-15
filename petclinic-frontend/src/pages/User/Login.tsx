@@ -46,6 +46,7 @@ export default function Login(): JSX.Element {
         },
         {
           useV2: false,
+          handleLocally: true,
         }
       );
 

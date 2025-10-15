@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 // Assuming this function gets the visit by visitId
 import { Visit } from '../models/Visit';
-import './VisitDetails.css';
+import './VisitByVisitId.css';
 import { getVisit } from '../api/getVisit';
 
 export default function VisitDetails(): JSX.Element {

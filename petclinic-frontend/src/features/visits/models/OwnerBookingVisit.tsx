@@ -11,6 +11,8 @@ import {
   getAvailableSlots,
   TimeSlot,
 } from '@/features/visits/api/getAvailableSlots';
+import { PetResponseModel } from '@/features/customers/models/PetResponseModel';
+import { getAllPets } from '@/features/visits/api/getAllPets';
 
 interface ApiError {
   message: string;
@@ -45,6 +47,8 @@ const OwnerBookingVisit: React.FC = (): JSX.Element => {
     isEmergency: false,
   });
 
+  const [pets, setPets] = useState<PetResponseModel[]>([]);
+  const [loadingPets, setLoadingPets] = useState<boolean>(true);
   const [vets, setVets] = useState<VetResponse[]>([]);
   const [timeSlots, setTimeSlots] = useState<TimeSlotWithVet[]>([]);
   const [loadingVets, setLoadingVets] = useState<boolean>(true);
@@ -56,6 +60,27 @@ const OwnerBookingVisit: React.FC = (): JSX.Element => {
   const [showNotification, setShowNotification] = useState<boolean>(false);
 
   const navigate = useNavigate();
+
+  //Fetch pets
+  useEffect(() => {
+    const fetchPets = async (): Promise<void> => {
+      try {
+        setLoadingPets(true);
+        const petsData = await getAllPets();
+
+        // Filter only active pets
+        const activePets = petsData.filter(pet => pet.isActive === 'true');
+        setPets(activePets);
+      } catch (error) {
+        console.error('Error fetching pets:', error);
+        setErrorMessage('Failed to load pets. Please try again.');
+      } finally {
+        setLoadingPets(false);
+      }
+    };
+
+    fetchPets();
+  }, []);
 
   useEffect(() => {
     const fetchVets = async (): Promise<void> => {
@@ -210,7 +235,7 @@ const OwnerBookingVisit: React.FC = (): JSX.Element => {
 
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
-    if (!visit.petId) newErrors.petId = 'Pet ID is required';
+    if (!visit.petId) newErrors.petId = 'Please select a pet';
     if (!visit.description.trim())
       newErrors.description = 'Description is required';
     if (!visit.selectedDate) newErrors.selectedDate = 'Please select a date';
@@ -320,18 +345,29 @@ const OwnerBookingVisit: React.FC = (): JSX.Element => {
       <h1>Schedule Visit For Your Pet</h1>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="petId">Pet ID: </label>
-          <input
-            type="text"
-            id="petId"
-            name="petId"
-            value={visit.petId}
-            onChange={handleChange}
-            placeholder="Enter pet ID"
-          />
+          <label htmlFor="petId">
+            Select Pet: <span className="required">*</span>
+          </label>
+          {loadingPets ? (
+            <p>Loading pets...</p>
+          ) : (
+            <select
+              id="petId"
+              name="petId"
+              value={visit.petId}
+              onChange={handleChange}
+              className={errors.petId ? 'error-input' : ''}
+            >
+              <option value="">Select a Pet</option>
+              {pets.map(pet => (
+                <option key={pet.petId} value={pet.petId}>
+                  {pet.name}
+                </option>
+              ))}
+            </select>
+          )}
           {errors.petId && <span className="error">{errors.petId}</span>}
         </div>
-
         <div className="form-group">
           <label htmlFor="description">Description: </label>
           <textarea

@@ -1,12 +1,11 @@
 package com.petclinic.bffapigateway.presentationlayer.v1;
 
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
+import com.petclinic.bffapigateway.dtos.Files.FileDetails;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
-import com.petclinic.bffapigateway.dtos.Pets.PetType;
-import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
@@ -23,7 +22,7 @@ import java.util.Optional;
 @RestController()
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("api/gateway/owners")
+@RequestMapping("/api/gateway/owners")
 public class OwnerControllerV1 {
     private final CustomersServiceClient customersServiceClient;
 
@@ -78,20 +77,14 @@ public class OwnerControllerV1 {
 
     @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN})
     @GetMapping(value = "/{ownerId}")
-    public Mono<ResponseEntity<OwnerResponseDTO>> getOwnerDetails(final @PathVariable String ownerId) {
-        return customersServiceClient.getOwner(ownerId)
+    public Mono<ResponseEntity<OwnerResponseDTO>> getOwnerDetails(final @PathVariable String ownerId, @RequestParam(required = false, defaultValue = "false") boolean includePhoto) {
+        return customersServiceClient.getOwner(ownerId, includePhoto)
                 .map(ownerResponseDTO -> ResponseEntity.status(HttpStatus.OK).body(ownerResponseDTO))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
 
 
-    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN,Roles.RECEPTIONIST})
-    @PostMapping(value = "/{ownerId}/photos")
-    public Mono<ResponseEntity<String>> setOwnerPhoto(@RequestBody PhotoDetails photoDetails, @PathVariable String ownerId) {
-        return customersServiceClient.setOwnerPhoto(photoDetails, ownerId).map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
-    }
 
 
     @IsUserSpecific(idToMatch = {"ownerId"})
@@ -104,6 +97,16 @@ public class OwnerControllerV1 {
                         .map(updatedOwner -> ResponseEntity.ok().body(updatedOwner))
                         .defaultIfEmpty(ResponseEntity.notFound().build())
         );
+    }
+
+    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN, Roles.RECEPTIONIST})
+    @PatchMapping("/{ownerId}/photo")
+    public Mono<ResponseEntity<OwnerResponseDTO>> updateOwnerPhoto(
+            @PathVariable String ownerId,
+            @RequestBody Mono<FileDetails> photoMono) {
+        return customersServiceClient.updateOwnerPhoto(ownerId, photoMono)
+                .map(updatedOwner -> ResponseEntity.ok().body(updatedOwner))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
@@ -141,16 +144,5 @@ public class OwnerControllerV1 {
         return customersServiceClient.deletePet(ownerId,petId).then(Mono.just(ResponseEntity.noContent().<PetResponseDTO>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-
-    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN, Roles.RECEPTIONIST})
-    @GetMapping("/{ownerId}/photos")
-    public Mono<ResponseEntity<byte[]>> getOwnerPhoto(@PathVariable String ownerId) {
-        return customersServiceClient.getOwnerPhoto(ownerId)
-                .map(bytes -> ResponseEntity.ok()
-                        .contentType(MediaType.IMAGE_PNG)
-                        .body(bytes))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-
 
 }

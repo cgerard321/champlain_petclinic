@@ -7,6 +7,9 @@ import com.petclinic.billing.datalayer.PaymentRequestDTO;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import lombok.extern.slf4j.Slf4j;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -46,17 +49,19 @@ public class CustomerBillsController {
     }
 
     @GetMapping(value = "/{billId}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
-    public Mono<ResponseEntity<byte[]>> downloadBillPdf(@PathVariable String customerId,
-                                                        @PathVariable String billId) {
-        return billService.generateBillPdf(customerId, billId)
+    public Mono<ResponseEntity<byte[]>> downloadBillPdf(
+            @PathVariable String customerId,
+            @PathVariable String billId,
+            @RequestParam(name = "currency", required = false, defaultValue = "CAD") String currency) {
+        return billService.generateBillPdf(customerId, billId, currency)
                 .map(pdf -> {
                     HttpHeaders headers = new HttpHeaders();
                     headers.setContentType(MediaType.APPLICATION_PDF);
-                    headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=bill-" + billId + ".pdf"); //inline lets the browser open the PDF in a new tab.
+                    headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=bill-" + billId + ".pdf");
                     return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
                 })
                 .onErrorResume(e -> {
-                    log.error("Error generating PDF for billId: {}", billId, e);
+                    log.error("Error generating PDF for billId: {} currency: {} error: {}", billId, currency, e.getMessage(), e);
                     return Mono.just(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
                 });
     }
@@ -70,14 +75,41 @@ public class CustomerBillsController {
     public Mono<ResponseEntity<BillResponseDTO>> payBill(
             @PathVariable String customerId,
             @PathVariable String billId,
-            @RequestBody PaymentRequestDTO paymentRequest) {
+            @RequestBody PaymentRequestDTO paymentRequest,
+            @CookieValue("Bearer") String jwtToken) {
 
-        return billService.processPayment(customerId, billId, paymentRequest)
-                .map(ResponseEntity::ok)   // already BillResponseDTO
-                .onErrorResume(InvalidPaymentException.class,
-                        e -> Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).build()))
-                .onErrorResume(ResponseStatusException.class,
-                        e -> Mono.just(ResponseEntity.status(e.getStatus()).build()));
 
+        return billService.processPayment(customerId, billId, paymentRequest,jwtToken)
+                .map(ResponseEntity::ok)
+                        .onErrorResume(InvalidPaymentException.class,
+                                e -> Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).build()))
+                        .onErrorResume(ResponseStatusException.class,
+                                e -> Mono.just(ResponseEntity.status(e.getStatus()).build()));
+
+    }
+
+    @GetMapping(value = "/filter-by-amount", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<BillResponseDTO> getBillsByAmountRange(
+            @PathVariable("customerId") String customerId,
+            @RequestParam("minAmount") BigDecimal minAmount,
+            @RequestParam("maxAmount") BigDecimal maxAmount) {
+        return billService.getBillsByAmountRange(customerId, minAmount, maxAmount);
+    }
+
+    @GetMapping(value = "/filter-by-due-date", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<BillResponseDTO> getBillsByDueDateRange(
+            @PathVariable("customerId") String customerId,
+            @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+
+        return billService.getBillsByDueDateRange(customerId, startDate, endDate);
+    }
+
+    @GetMapping(value = "/filter-by-date", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<BillResponseDTO> getBillsByCustomerIdAndDateRange(
+            @PathVariable("customerId") String customerId,
+            @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        return billService.getBillsByCustomerIdAndDateRange(customerId, startDate, endDate);
     }
 }

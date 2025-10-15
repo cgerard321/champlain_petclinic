@@ -1,8 +1,10 @@
 import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { InventoryType } from '@/features/inventories/models/InventoryType.ts';
-import axios from 'axios';
+import { ApiResponse } from '@/shared/models/ApiResponse.ts';
 
-export async function getAllInventoryTypes(): Promise<InventoryType[]> {
+export async function getAllInventoryTypes(): Promise<
+  ApiResponse<InventoryType[]>
+> {
   try {
     const response = await axiosInstance.get<InventoryType[]>(
       '/inventories/types',
@@ -10,22 +12,16 @@ export async function getAllInventoryTypes(): Promise<InventoryType[]> {
         useV2: false,
       }
     );
-    return response.data;
-  } catch (error) {
-    if (!axios.isAxiosError(error)) throw error;
+    return { data: response.data, errorMessage: null };
+  } catch (error: unknown) {
+    const maybeMsg = (error as { response?: { data?: { message?: unknown } } })
+      .response?.data?.message;
 
-    console.error('[getAllInventoryTypes]', {
-      url: (error.config?.baseURL || '') + (error.config?.url || ''),
-      method: (error.config?.method || '').toUpperCase(),
-      status: error.response?.status,
-      dataReceived: error.response?.data,
-    });
+    const errorMessage =
+      typeof maybeMsg === 'string' && maybeMsg.trim()
+        ? maybeMsg.trim()
+        : 'Unable to add inventory. Please check your information and try again.';
 
-    const status = error.response?.status ?? 0;
-    if (status === 404) {
-      return [];
-    }
-
-    throw error;
+    return { data: null, errorMessage };
   }
 }

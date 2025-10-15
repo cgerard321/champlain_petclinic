@@ -9,19 +9,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
+import java.math.BigDecimal;
 import java.net.URI;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Optional;
-
+import java.time.LocalDate;
 @Component
 @Slf4j
 public class BillServiceClient {
@@ -29,16 +26,19 @@ public class BillServiceClient {
     private final WebClient.Builder webClientBuilder;
     private final String billServiceUrl;
 
-
     public BillServiceClient(
             WebClient.Builder webClientBuilder,
             @Value("${app.billing-service.host}") String billingServiceHost,
             @Value("${app.billing-service.port}") String billingServicePort
     ) {
         this.webClientBuilder = webClientBuilder;
-
+        if (billingServiceHost == null || billingServiceHost.isBlank()) {
+            throw new IllegalArgumentException("Configuration property 'app.billing-service.host' must be set and non-blank");
+        }
+        if (billingServicePort == null || billingServicePort.isBlank()) {
+            throw new IllegalArgumentException("Configuration property 'app.billing-service.port' must be set and non-blank");
+        }
         billServiceUrl = "http://" + billingServiceHost + ":" + billingServicePort + "/bills";
-
     }
 
     public Mono<BillResponseDTO> getBillById(final String billId) {
@@ -318,10 +318,6 @@ public class BillServiceClient {
                 .bodyToFlux(BillResponseDTO.class);
     }
 
-
-
-
-
     public Flux<BillResponseDTO> getBillsByCustomerIdPaginated(final String customerId, Optional<Integer> page, Optional<Integer> size) {
         return webClientBuilder.build().get()
                 .uri(billServiceUrl + "/customer/" + customerId + "/paginated?page=" + page.orElse(0) + "&size=" + size.orElse(10))
@@ -329,10 +325,19 @@ public class BillServiceClient {
                 .bodyToFlux(BillResponseDTO.class);
     }
 
-    public Mono<byte[]> downloadBillPdf(String customerId, String billId) {
+    // Example PDF download method (replace with your actual method name/signature)
+    public Mono<byte[]> downloadBillPdf(String customerId, String billId, String currency) {
+        String cur = (currency == null || currency.isBlank()) ? "CAD" : currency;
+        String url = UriComponentsBuilder
+                .fromHttpUrl(billServiceUrl)
+                .path("/customer/{customerId}/bills/{billId}/pdf")
+                .queryParam("currency", cur)
+                .buildAndExpand(customerId, billId)
+                .toUriString();
+
         return webClientBuilder.build()
                 .get()
-                .uri(billServiceUrl + "/customer/{customerId}/bills/{billId}/pdf", customerId, billId)
+                .uri(url)
                 .accept(MediaType.APPLICATION_PDF)
                 .retrieve()
                 .bodyToMono(byte[].class);
@@ -359,11 +364,12 @@ public class BillServiceClient {
                 .bodyToMono(Double.class);
     }
 
-    public Mono<BillResponseDTO> payBill(String customerId, String billId, PaymentRequestDTO paymentRequestDTO) {
+    public Mono<BillResponseDTO> payBill(String customerId, String billId, PaymentRequestDTO paymentRequestDTO, String jwtToken) {
         return webClientBuilder.build()
                 .post()
                 .uri(billServiceUrl + "/customer/{customerId}/bills/{billId}/pay", customerId, billId)
                 .contentType(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", jwtToken)
                 .bodyValue(paymentRequestDTO)
                 .exchangeToMono(resp -> {
                     if (resp.statusCode().is2xxSuccessful()) {
@@ -422,6 +428,52 @@ public class BillServiceClient {
                 .bodyToFlux(BillResponseDTO.class);
     }
 
+    //for customerBillController
+    public Flux<BillResponseDTO> getBillsByAmountRange(String customerId, BigDecimal minAmount, BigDecimal maxAmount) {
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromUriString(billServiceUrl + "/customer/{customerId}/bills/filter-by-amount")
+                .queryParam("minAmount", minAmount)
+                .queryParam("maxAmount", maxAmount);
 
+        return webClientBuilder.build()
+                .get()
+                .uri(builder.build(customerId))
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class)
+                .switchIfEmpty(Flux.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "No bills found in the specified amount range")));
+    }
 
+    //for customerBillController
+    public Flux<BillResponseDTO> getBillsByDueDateRange(String customerId, LocalDate startDate, LocalDate endDate) {
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromUriString(billServiceUrl + "/customer/{customerId}/bills/filter-by-due-date")
+                .queryParam("startDate", startDate)
+                .queryParam("endDate", endDate);
+
+        return webClientBuilder.build()
+                .get()
+                .uri(builder.build(customerId))
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class)
+                .switchIfEmpty(Flux.error(new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "No bills found in the specified due date range")));
+    }
+
+    //for customerBillController
+    public Flux<BillResponseDTO> getBillsByDateRange(String customerId, LocalDate startDate, LocalDate endDate) {
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromUriString(billServiceUrl + "/customer/{customerId}/bills/filter-by-date")
+                .queryParam("startDate", startDate)
+                .queryParam("endDate", endDate);
+
+        return webClientBuilder.build()
+                .get()
+                .uri(builder.build(customerId))
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class)
+                .switchIfEmpty(Flux.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "No bills found in the specified date range")));
+    }
 }

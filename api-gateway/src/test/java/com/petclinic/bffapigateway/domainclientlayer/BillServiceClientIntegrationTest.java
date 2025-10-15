@@ -26,7 +26,6 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import static org.junit.jupiter.api.Assertions.*;
 
-
 class BillServiceClientIntegrationTest {
 
     private BillServiceClient billServiceClient;
@@ -117,7 +116,6 @@ class BillServiceClientIntegrationTest {
                 .expectNextMatches(returnedBillResponseDTO1 -> returnedBillResponseDTO1.getBillId().equals("1"))
                 .verifyComplete();
     }
-
 
     @Test
     void getBillByVetId() throws Exception {
@@ -566,7 +564,7 @@ class BillServiceClientIntegrationTest {
                 .setBody(body)
         );
 
-        Mono<BillResponseDTO> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO);
+        Mono<BillResponseDTO> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO,"dummy-jwt-token");
 
         StepVerifier.create(resultMono)
                 .expectNextMatches(bill -> bill.getBillId().equals("1") && bill.getBillStatus() == BillStatus.PAID)
@@ -583,7 +581,7 @@ class BillServiceClientIntegrationTest {
                 .setBody("{\"error\": \"Payment failed\"}")
         );
 
-        Mono<BillResponseDTO> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO);
+        Mono<BillResponseDTO> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO,"dummy-jwt-token");
 
         StepVerifier.create(resultMono)
                 .expectErrorMatches(throwable -> throwable instanceof ResponseStatusException &&
@@ -601,7 +599,7 @@ class BillServiceClientIntegrationTest {
                 .setBody("{\"error\": \"Invalid card number\"}")
         );
 
-        Mono<BillResponseDTO> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO);
+        Mono<BillResponseDTO> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO,"dummy-jwt-token");
 
         StepVerifier.create(resultMono)
                 .expectErrorMatches(throwable -> throwable instanceof ResponseStatusException &&
@@ -619,7 +617,7 @@ class BillServiceClientIntegrationTest {
                 .setBody("{\"error\": \"Invalid expiry date\"}")
         );
 
-        Mono<BillResponseDTO> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO);
+        Mono<BillResponseDTO> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO,"dummy-jwt-token");
 
         StepVerifier.create(resultMono)
                 .expectErrorMatches(throwable -> throwable instanceof ResponseStatusException &&
@@ -637,7 +635,7 @@ class BillServiceClientIntegrationTest {
                 .setBody("{\"error\": \"Card expired\"}")
         );
 
-        Mono<BillResponseDTO> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO);
+        Mono<BillResponseDTO> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO,"dummy-jwt-token");
 
         StepVerifier.create(resultMono)
                 .expectErrorMatches(throwable -> throwable instanceof ResponseStatusException &&
@@ -655,7 +653,7 @@ class BillServiceClientIntegrationTest {
                 .setBody("{\"error\": \"Invalid CVV\"}")
         );
 
-        Mono<BillResponseDTO> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO);
+        Mono<BillResponseDTO> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO,"dummy-jwt-token");
 
         StepVerifier.create(resultMono)
                 .expectErrorMatches(throwable -> throwable instanceof ResponseStatusException &&
@@ -673,7 +671,7 @@ class BillServiceClientIntegrationTest {
                 .setBody("{\"error\": \"Bill not found\"}")
         );
 
-        Mono<BillResponseDTO> resultMono = billServiceClient.payBill("1", "nonexistent-bill-id", paymentRequestDTO);
+        Mono<BillResponseDTO> resultMono = billServiceClient.payBill("1", "nonexistent-bill-id", paymentRequestDTO,"dummy-jwt-token");
 
         StepVerifier.create(resultMono)
                 .expectErrorMatches(throwable -> throwable instanceof ResponseStatusException &&
@@ -691,7 +689,7 @@ class BillServiceClientIntegrationTest {
                 .setBody("{\"error\": \"Payment service timeout\"}")
         );
 
-        Mono<BillResponseDTO> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO);
+        Mono<BillResponseDTO> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO,"dummy-jwt-token");
 
         StepVerifier.create(resultMono)
                 .expectErrorMatches(throwable -> throwable instanceof ResponseStatusException &&
@@ -709,7 +707,7 @@ class BillServiceClientIntegrationTest {
                 .setBody("{\"error\": \"Invalid customer ID\"}")
         );
 
-        Mono<BillResponseDTO> resultMono = billServiceClient.payBill("invalid-customer-id", "1", paymentRequestDTO);
+        Mono<BillResponseDTO> resultMono = billServiceClient.payBill("invalid-customer-id", "1", paymentRequestDTO,"dummy-jwt-token");
 
         StepVerifier.create(resultMono)
                 .expectErrorMatches(throwable -> throwable instanceof ResponseStatusException &&
@@ -802,8 +800,7 @@ class BillServiceClientIntegrationTest {
                     return true;
                 })
                 .verifyComplete();
-    }
-
+        }
 
     void deleteBill_WhenBillIsUnpaid_ShouldReturn422_AndNotInvokeDelete() throws Exception {
         String billId = "B-123";
@@ -908,7 +905,7 @@ class BillServiceClientIntegrationTest {
                 .setBody("{\"message\":\"Bill not found\"}")
         );
 
-        Mono<byte[]> result = billServiceClient.downloadBillPdf("C-404", "B-missing");
+        Mono<byte[]> result = billServiceClient.downloadBillPdf("C-404", "B-missing", null);
 
         StepVerifier.create(result)
                 .expectErrorSatisfies(ex -> {
@@ -931,7 +928,7 @@ class BillServiceClientIntegrationTest {
                 .setBody(new Buffer().write(pdf))
         );
 
-        Mono<byte[]> result = billServiceClient.downloadBillPdf(customerId, billId);
+        Mono<byte[]> result = billServiceClient.downloadBillPdf(customerId, billId, null);
 
         StepVerifier.create(result)
                 .assertNext(bytes -> {
