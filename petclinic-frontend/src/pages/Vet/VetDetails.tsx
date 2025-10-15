@@ -136,7 +136,8 @@ export default function VetDetails(): JSX.Element {
   const canSubmitReview = Boolean(user.userId) && isOwner;
   const refreshVetDetails = useCallback(async (): Promise<void> => {
     try {
-      if (!vetId) throw new Error('Vet ID is required for fetching vet details');
+      if (!vetId)
+        throw new Error('Vet ID is required for fetching vet details');
       const vetData = await fetchVet(vetId);
       setVet(vetData);
     } catch (error) {
