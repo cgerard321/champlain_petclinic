@@ -1,4 +1,3 @@
-import * as React from 'react';
 import ReviewModal from './reviewComponents/ReviewModal';
 import { FormEvent, useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -30,7 +29,6 @@ const AddCustomerReviewForm: React.FC = (): JSX.Element => {
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [successMessage, setSuccessMessage] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showNotification, setShowNotification] = useState<boolean>(false);
@@ -105,7 +103,6 @@ const AddCustomerReviewForm: React.FC = (): JSX.Element => {
     // Set loading state
     setIsLoading(true);
     setErrorMessage('');
-    setSuccessMessage('');
 
     const payload: ReviewRequestDTO = {
       ...review,
@@ -118,7 +115,6 @@ const AddCustomerReviewForm: React.FC = (): JSX.Element => {
       await addReview(payload);
 
       // Success handling
-      setSuccessMessage('Review added successfully!');
       setShowNotification(true);
 
       // Auto-hide success message after 3 seconds
@@ -188,7 +184,6 @@ const AddCustomerReviewForm: React.FC = (): JSX.Element => {
         <button type="submit">Submit</button>
       </form>
 
-      {successMessage && <p className="success-message">{successMessage}</p>}
       {errorMessage && <p className="error-message">{errorMessage}</p>}
       {showNotification && (
         <div className="notification">Review added successfully!</div>

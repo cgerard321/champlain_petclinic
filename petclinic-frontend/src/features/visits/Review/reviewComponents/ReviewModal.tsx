@@ -23,28 +23,28 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="review-modal-title"
-      className="modal-overlay"
+      className="review-modal__overlay"
       onClick={onBackdropClick}
     >
-      <div className="modal-card" onClick={e => e.stopPropagation()}>
-        <h3 id="review-modal-title" style={{ marginTop: 0 }}>
+      <div className="review-modal__card" onClick={e => e.stopPropagation()}>
+        <h3 id="review-modal-title" className="review-modal__title">
           Woah! Watch your language, pal!
         </h3>
 
-        <div className="modal-body">
+        <div className="review-modal__body">
           <p>
             It seems like your review contains some words that are not
             appropriate. Please change it before submitting.
           </p>
-          <div className="profanity-preview">
+          <div className="review-modal__preview">
             <strong>Preview:</strong>
             <br />
             {maskedPreview}
           </div>
         </div>
 
-        <div className="modal-actions">
-          <button onClick={onClose} className="btn-primary">
+        <div className="review-modal__actions">
+          <button onClick={onClose} className="review-modal__btn-primary">
             Go back
           </button>
         </div>
