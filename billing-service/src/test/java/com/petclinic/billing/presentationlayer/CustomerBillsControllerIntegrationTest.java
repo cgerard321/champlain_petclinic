@@ -1,8 +1,14 @@
 package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.datalayer.*;
+
 import com.petclinic.billing.domainclientlayer.OwnerClient;
+import com.petclinic.billing.domainclientlayer.Auth.AuthServiceClient;
+import com.petclinic.billing.domainclientlayer.Auth.UserDetails;
+import com.petclinic.billing.domainclientlayer.Mailing.Mail;
+import com.petclinic.billing.domainclientlayer.Mailing.MailService;
 import com.petclinic.billing.util.InterestCalculationUtil;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +22,10 @@ import reactor.test.StepVerifier;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -26,6 +36,12 @@ import java.util.Calendar;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient
 public class CustomerBillsControllerIntegrationTest {
+
+        @MockBean
+        private AuthServiceClient authClient;
+
+        @MockBean
+        private MailService mailService;
 
         @Autowired
         private WebTestClient client;
@@ -42,6 +58,28 @@ public class CustomerBillsControllerIntegrationTest {
         Bill bill = buildBill();
         bill.setOwnerFirstName("John");
         bill.setOwnerLastName("Doe");
+    @BeforeEach
+    void setup() {
+        // Fake user details
+        UserDetails fakeUser = new UserDetails();
+        fakeUser.setUserId("cust-123");
+        fakeUser.setUsername("fakeUser");
+        fakeUser.setEmail("fakeUser@example.com");
+
+        // Mock the AuthClient reactive call
+        when(authClient.getUserById(anyString(), anyString()))
+                .thenReturn(Mono.just(fakeUser));
+
+        // Mock the MailService to avoid sending real emails
+        when(mailService.sendMail(any(Mail.class)))
+                .thenReturn("Mail sent successfully");
+    }
+
+
+    @Test
+        void getBillsByCustomerId_shouldSucceed() {
+                Bill bill = buildBill();
+                Publisher<Bill> setup = billRepository.deleteAll().thenMany(billRepository.save(bill));
 
         OwnerResponseDTO owner = new OwnerResponseDTO();
         owner.setOwnerId(bill.getCustomerId());
@@ -146,6 +184,7 @@ public class CustomerBillsControllerIntegrationTest {
         client.post()
                 .uri("/bills/customer/{customerId}/bills/{billId}/pay", bill.getCustomerId(), bill.getBillId())
                 .contentType(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", "dummy-jwt-token")
                 .bodyValue(paymentRequest)
                 .exchange()
                 .expectStatus().isOk()
@@ -166,6 +205,7 @@ public class CustomerBillsControllerIntegrationTest {
         client.post()
                 .uri("/bills/customer/{customerId}/bills/{billId}/pay", "cust-404", "bill-404")
                 .contentType(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", "dummy-jwt-token")
                 .bodyValue(paymentRequest)
                 .exchange()
                 .expectStatus().isNotFound();
