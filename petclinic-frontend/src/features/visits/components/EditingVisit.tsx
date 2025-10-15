@@ -24,8 +24,8 @@ type VisitType = {
   visitStartDate: Date;
   description: string;
   petId: string;
+  petName: string;
   practitionerId: string;
-  // ownerId: string;
   isEmergency: boolean;
   status: Status;
 };
@@ -43,6 +43,7 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
     visitStartDate: new Date(),
     description: '',
     petId: '',
+    petName: '',
     practitionerId: '',
     isEmergency: false,
     status: 'UPCOMING' as Status,
@@ -65,6 +66,7 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
             practitionerId: response.practitionerId,
             description: response.description,
             petId: response.petId,
+            petName: response.petName,
             visitStartDate: new Date(response.visitDate),
             status: response.status,
             isEmergency: response.isEmergency,
@@ -170,19 +172,8 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
       errorMessage={errorMessage}
     >
       <form id="modalform" onSubmit={handleSubmit}>
-        <label>
-          Pet ID:{' '}
-          {errors.petId && <span className="error">{errors.petId}</span>}
-        </label>
-
-        <input
-          type="text"
-          name="petId"
-          value={visit.petId}
-          onChange={handleChange}
-          required
-        />
-
+        <label>Pet Name:</label>
+        <input disabled={true} value={visit.petName}></input>
         <br />
         <label>
           Description:{' '}
@@ -208,9 +199,6 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
             value={visit.practitionerId}
             onChange={handleChange}
           >
-            <option value="no-preference">
-              No Preference (Show All Available Times)
-            </option>
             {vets.map(vet => (
               <option key={vet.vetId} value={vet.vetId}>
                 Dr. {vet.firstName} {vet.lastName}

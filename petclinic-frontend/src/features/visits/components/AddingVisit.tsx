@@ -10,6 +10,8 @@ import {
 } from '@/features/visits/api/getAvailableSlots';
 import { VisitRequestModel } from '@/features/visits/models/VisitRequestModel';
 import BasicModal from '@/shared/components/BasicModal';
+import { getAllPets } from '@/features/visits/api/getAllPets';
+import { PetResponseModel } from '@/features/customers/models/PetResponseModel';
 
 interface ApiError {
   message: string;
@@ -50,6 +52,8 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
     isEmergency: false,
   });
 
+  const [pets, setPets] = useState<PetResponseModel[]>([]);
+  const [loadingPets, setLoadingPets] = useState<boolean>(true);
   const [vets, setVets] = useState<VetResponse[]>([]);
   const [timeSlots, setTimeSlots] = useState<TimeSlotWithVet[]>([]);
   const [loadingVets, setLoadingVets] = useState<boolean>(true);
@@ -60,7 +64,24 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [showNotification, setShowNotification] = useState<boolean>(false);
 
-  // const navigate = useNavigate();
+  //Fetch pets
+  useEffect(() => {
+    const fetchPets = async (): Promise<void> => {
+      try {
+        setLoadingPets(true);
+        const petsData = await getAllPets();
+
+        setPets(petsData);
+      } catch (error) {
+        console.error('Error fetching pets:', error);
+        setErrorMessage('Failed to load pets. Please try again.');
+      } finally {
+        setLoadingPets(false);
+      }
+    };
+
+    fetchPets();
+  }, []);
   //fetch vets
   useEffect(() => {
     const fetchVets = async (): Promise<void> => {
@@ -188,6 +209,7 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
 
     fetchTimeSlots();
   }, [visit.practitionerId, visit.selectedDate, vets]);
+
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
@@ -327,17 +349,27 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
       ) : (
         <form id="addvisit" onSubmit={handleSubmit}>
           <label htmlFor="petId">
-            Pet ID: <span className="required">*</span>{' '}
+            Select Pet: <span className="required">*</span>{' '}
             {errors.petId && <span className="error">{errors.petId}</span>}
           </label>
-          <input
-            type="text"
-            id="petId"
-            name="petId"
-            value={visit.petId}
-            onChange={handleChange}
-            placeholder="Enter pet ID"
-          />
+          {loadingPets ? (
+            <p>Loading pets...</p>
+          ) : (
+            <select
+              id="petId"
+              name="petId"
+              value={visit.petId}
+              onChange={handleChange}
+              className={errors.petId ? 'error-input' : ''}
+            >
+              <option value="">Select a Pet</option>
+              {pets.map(pet => (
+                <option key={pet.petId} value={pet.petId}>
+                  {pet.name} {pet.isActive === 'false' ? '(Inactive)' : ''}
+                </option>
+              ))}
+            </select>
+          )}
 
           <br />
           <div className="form-group">
