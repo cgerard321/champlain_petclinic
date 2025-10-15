@@ -20,6 +20,12 @@ var VALID_FILE_INFO = datalayer.FileInfo{
 	FileType: "image/png",
 }
 
+var UPDATED_FILE_INFO = datalayer.FileInfo{
+	FileId:   EXISTING_FILE_ID,
+	FileName: "updated petclinic test image",
+	FileType: "image/jpeg",
+}
+
 var (
 	fileRepo datalayer.FileInfoRepository
 	db       *sql.DB
@@ -63,6 +69,42 @@ func TestWhenGetFileInfo_withNonExistingFileId_thenReturnNilFileInfo(t *testing.
 	file := fileRepo.GetFileInfo(NON_EXISTING_FILE_ID)
 
 	assert.Nil(t, file)
+}
+
+func TestWhenUpdateFileInfo_withExistingFileId_thenUpdateSuccessfully(t *testing.T) {
+	t.Cleanup(reset)
+	err := fileRepo.AddFileInfo(&VALID_FILE_INFO)
+	assert.Nil(t, err)
+
+	err = fileRepo.DeleteFileInfo(EXISTING_FILE_ID)
+	assert.Nil(t, err)
+	err = fileRepo.AddFileInfo(&UPDATED_FILE_INFO)
+	assert.Nil(t, err)
+
+	updated := fileRepo.GetFileInfo(EXISTING_FILE_ID)
+	assert.NotNil(t, updated)
+	assert.Equal(t, UPDATED_FILE_INFO.FileName, updated.FileName)
+	assert.Equal(t, UPDATED_FILE_INFO.FileType, updated.FileType)
+}
+
+func TestWhenUpdateFileInfo_withNonExistingFileId_thenReturnNoEffect(t *testing.T) {
+	t.Cleanup(reset)
+
+	err := fileRepo.DeleteFileInfo(NON_EXISTING_FILE_ID)
+	assert.Nil(t, err)
+
+	newInfo := datalayer.FileInfo{
+		FileId:   NON_EXISTING_FILE_ID,
+		FileName: "non-existing update",
+		FileType: "image/jpeg",
+	}
+
+	err = fileRepo.AddFileInfo(&newInfo)
+	assert.Nil(t, err)
+
+	file := fileRepo.GetFileInfo(NON_EXISTING_FILE_ID)
+	assert.NotNil(t, file)
+	assert.Equal(t, "non-existing update", file.FileName)
 }
 
 func TestWhenDeleteFileInfo_withExistingFileId_thenDeleteSuccessfully(t *testing.T) {
