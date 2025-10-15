@@ -7,6 +7,9 @@ import com.petclinic.billing.datalayer.PaymentRequestDTO;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import lombok.extern.slf4j.Slf4j;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -83,5 +86,30 @@ public class CustomerBillsController {
                         .onErrorResume(ResponseStatusException.class,
                                 e -> Mono.just(ResponseEntity.status(e.getStatus()).build()));
 
+    }
+
+    @GetMapping(value = "/filter-by-amount", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<BillResponseDTO> getBillsByAmountRange(
+            @PathVariable("customerId") String customerId,
+            @RequestParam("minAmount") BigDecimal minAmount,
+            @RequestParam("maxAmount") BigDecimal maxAmount) {
+        return billService.getBillsByAmountRange(customerId, minAmount, maxAmount);
+    }
+
+    @GetMapping(value = "/filter-by-due-date", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<BillResponseDTO> getBillsByDueDateRange(
+            @PathVariable("customerId") String customerId,
+            @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+
+        return billService.getBillsByDueDateRange(customerId, startDate, endDate);
+    }
+
+    @GetMapping(value = "/filter-by-date", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<BillResponseDTO> getBillsByCustomerIdAndDateRange(
+            @PathVariable("customerId") String customerId,
+            @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        return billService.getBillsByCustomerIdAndDateRange(customerId, startDate, endDate);
     }
 }
