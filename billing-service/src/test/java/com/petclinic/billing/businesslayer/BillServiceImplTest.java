@@ -459,16 +459,26 @@ public class BillServiceImplTest {
 
     @Test
     public void test_getBillByCustomerId() {
-
+        // Arrange
         Bill billEntity = buildBill();
+        billEntity.setOwnerFirstName("John");
+        billEntity.setOwnerLastName("Doe");
 
         String CUSTOMER_ID = billEntity.getCustomerId();
 
-        when(repo.findByCustomerId(anyString())).thenReturn(Flux.just(billEntity));
+        OwnerResponseDTO mockOwner = new OwnerResponseDTO();
+        mockOwner.setOwnerId(CUSTOMER_ID);
+        mockOwner.setFirstName("John");
+        mockOwner.setLastName("Doe");
 
-        Flux<BillResponseDTO> billDTOMono = billService.getBillsByCustomerId(CUSTOMER_ID);
+        when(ownerClient.getOwnerByOwnerId(CUSTOMER_ID)).thenReturn(Mono.just(mockOwner));
+        when(repo.findByCustomerId(CUSTOMER_ID)).thenReturn(Flux.just(billEntity));
 
-        StepVerifier.create(billDTOMono)
+        // Act
+        Flux<BillResponseDTO> result = billService.getBillsByCustomerId(CUSTOMER_ID);
+
+        // Assert
+        StepVerifier.create(result)
                 .consumeNextWith(foundBill -> {
                     assertEquals(billEntity.getBillId(), foundBill.getBillId());
                     assertEquals(billEntity.getAmount(), foundBill.getAmount());
@@ -476,6 +486,7 @@ public class BillServiceImplTest {
                 })
                 .verifyComplete();
     }
+
 
     @Test
     public void test_getBillByVetId() {
@@ -574,16 +585,27 @@ public class BillServiceImplTest {
 
     @Test
     public void test_getBillByNonExistentCustomerId() {
+        // Arrange
         String nonExistentCustomerId = "nonExistentId";
 
-        when(repo.findByCustomerId(nonExistentCustomerId)).thenReturn(Flux.empty());
+        when(ownerClient.getOwnerByOwnerId(nonExistentCustomerId))
+                .thenReturn(Mono.empty()); // Simulate missing owner
 
-        Flux<BillResponseDTO> billDTOMono = billService.getBillsByCustomerId(nonExistentCustomerId);
+        // Act
+        Flux<BillResponseDTO> result = billService.getBillsByCustomerId(nonExistentCustomerId);
 
-        StepVerifier.create(billDTOMono)
-                .expectNextCount(0)
-                .verifyComplete();
+        // Assert
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof ResponseStatusException &&
+                                ((ResponseStatusException) throwable).getStatus().equals(HttpStatus.NOT_FOUND) &&
+                                throwable.getMessage().contains("Customer ID does not exist"))
+                .verify();
+
+        verify(ownerClient, times(1)).getOwnerByOwnerId(nonExistentCustomerId);
+        verify(repo, never()).findByCustomerId(anyString()); // should never call repo
     }
+
 
     @Test
     public void test_createBillWithInvalidData() {
