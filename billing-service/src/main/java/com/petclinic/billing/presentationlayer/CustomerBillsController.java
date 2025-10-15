@@ -75,14 +75,16 @@ public class CustomerBillsController {
     public Mono<ResponseEntity<BillResponseDTO>> payBill(
             @PathVariable String customerId,
             @PathVariable String billId,
-            @RequestBody PaymentRequestDTO paymentRequest) {
+            @RequestBody PaymentRequestDTO paymentRequest,
+            @CookieValue("Bearer") String jwtToken) {
 
-        return billService.processPayment(customerId, billId, paymentRequest)
-                .map(ResponseEntity::ok)   // already BillResponseDTO
-                .onErrorResume(InvalidPaymentException.class,
-                        e -> Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).build()))
-                .onErrorResume(ResponseStatusException.class,
-                        e -> Mono.just(ResponseEntity.status(e.getStatus()).build()));
+
+        return billService.processPayment(customerId, billId, paymentRequest,jwtToken)
+                .map(ResponseEntity::ok)
+                        .onErrorResume(InvalidPaymentException.class,
+                                e -> Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).build()))
+                        .onErrorResume(ResponseStatusException.class,
+                                e -> Mono.just(ResponseEntity.status(e.getStatus()).build()));
 
     }
 

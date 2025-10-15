@@ -70,7 +70,8 @@ public interface BillService {
 
     Flux<Bill> archiveBill();
 
-
+    // Method to fetch bills by month
+    Flux<BillResponseDTO> getBillsByMonth(int year, int month);
 
 
 ///////////////// Used by both BillController and CustomerBillsController /////////////////////
@@ -89,7 +90,9 @@ public interface BillService {
     // Method to generate the bill PDF
     Mono<byte[]> generateBillPdf(String customerId, String billId, String currency);
 
-    Mono<BillResponseDTO> processPayment(String customerId, String billId, PaymentRequestDTO paymentRequestDTO);
+    Mono<BigDecimal> calculateCurrentBalance(String customerId);
+
+    Mono<BillResponseDTO> processPayment(String customerId, String billId, PaymentRequestDTO paymentRequestDTO, String jwtToken);
 
     Flux<BillResponseDTO> getBillsByAmountRange(String customerId, BigDecimal minAmount, BigDecimal maxAmount);
 
