@@ -176,6 +176,25 @@ class VetControllerUnitTest {
     }
 
     @Test
+    void deleteRatingForVetByCustomerName_ShouldSucceed() {
+        String customerName = "Test Customer";
+        String vetId = "694ac37f-1e07-43c2-93bc-61839e61d989";
+
+        when(ratingService.deleteRatingByVetIdAndCustomerName(vetId, customerName))
+                .thenReturn((Mono.empty()));
+
+        client
+                .delete()
+                .uri("/vets/" + vetId + "/ratings/customer/{customerName}", customerName)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        Mockito.verify(ratingService, times(1))
+                .deleteRatingByVetIdAndCustomerName(vetId, customerName);
+    }
+
+    @Test
     void addRatingWithVetId_ValidValues_ShouldSucceed() {
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
                 .vetId(VET_ID)
