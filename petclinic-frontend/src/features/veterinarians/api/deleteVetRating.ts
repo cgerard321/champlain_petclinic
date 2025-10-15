@@ -1,12 +1,12 @@
-import axiosInstance from '@/shared/api/axiosInstance';
+import axiosInstance from '@/shared/api/axiosInstance.ts';
 
-export const deleteVetRating = async (vetId: string): Promise<void> => {
+export async function deleteVetRating(vetId: string): Promise<void> {
   try {
     await axiosInstance.delete(`/vets/${vetId}/ratings/customer`, {
       useV2: false,
     });
   } catch (error) {
-    console.error('Failed to delete vet rating:', error);
-    throw new Error('Failed to delete vet rating');
+    console.error('Error deleting vet rating:', error);
+    throw error;
   }
-};
+}
