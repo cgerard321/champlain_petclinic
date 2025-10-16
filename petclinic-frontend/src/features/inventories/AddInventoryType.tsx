@@ -9,6 +9,15 @@ interface AddInventoryTypeProps {
   refreshInventoryTypes: () => void;
 }
 
+//helper
+function mapServerMessageToFieldErrors(msg: string): string | null {
+  const m = msg.toLowerCase();
+  if (m.includes('already exists') || m.includes('duplicate')) {
+    return 'This inventory type already exists.';
+  }
+  return null;
+}
+
 export default function AddInventoryType({
   show,
   handleClose,
@@ -42,22 +51,19 @@ export default function AddInventoryType({
     }
     setIsSubmitting(true);
 
-    try {
-      const newInventoryType: Omit<InventoryType, 'typeId'> = {
-        type: trimmed,
-      };
-      await addInventoryType(newInventoryType);
-      refreshInventoryTypes(); // Call this function to update the list
-      handleClose();
-    } catch (error) {
-      setFieldError(
-        error instanceof Error
-          ? error.message
-          : 'Failed to add inventory type. Please try again.'
-      );
-    } finally {
+    const payload: Omit<InventoryType, 'typeId'> = { type: trimmed };
+    const { errorMessage } = await addInventoryType(payload);
+
+    if (errorMessage) {
+      const mapped = mapServerMessageToFieldErrors(errorMessage);
+      setFieldError(mapped ?? errorMessage);
       setIsSubmitting(false);
+      return;
     }
+
+    await refreshInventoryTypes();
+    handleClose();
+    setIsSubmitting(false);
   };
 
   if (!show) return null; // Return null when `show` is false

@@ -32,16 +32,14 @@ import EditInventory from '@/features/inventories/EditInventory.tsx';
 import { ProtectedRoute } from './shared/components';
 import CustomerDetailsPage from '@/pages/Customer/CustomerDetailsPage.tsx';
 import UpdateCustomerPage from '@/pages/Customer/UpdateCustomerPage.tsx';
-import VisitDetails from './features/visits/visits/VisitByVisitId';
+import VisitDetails from './features/visits/components/VisitByVisitId';
 import CustomerVisits from '@/pages/Visit/CustomerVisits.tsx';
 import UpdateOwnerPetPage from '@/pages/Customer/UpdateOwnerPetPage.tsx';
 import EditInventoryProducts from './features/inventories/EditInventoryProducts';
 import AddSupplyToInventory from './features/inventories/AddSupplyToInventory';
 import AllUsers from '@/pages/Users/AllUsers.tsx';
 import ProductDetails from '@/features/products/components/ProductDetails';
-// import ProductsList from '@/features/products/ProductsList.tsx';
 import AddPetPage from '@/pages/Customer/AddPetPage.tsx';
-import EditProduct from './features/products/components/EditProduct';
 import ForgotPassword from '@/pages/User/ForgotPassword.tsx';
 import ResetPassword from '@/pages/User/ResetPassword.tsx';
 import PromoPage from '@/pages/Promos/PromoListPage.tsx';
@@ -258,14 +256,14 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      {
-        path: AppRoutePaths.EditProduct,
-        element: (
-          <ProtectedRoute roles={['ADMIN', 'INVENTORY_MANAGER']}>
-            <EditProduct />
-          </ProtectedRoute>
-        ),
-      },
+      // {
+      //   path: AppRoutePaths.EditProduct,
+      //   element: (
+      //     <ProtectedRoute roles={['ADMIN', 'INVENTORY_MANAGER']}>
+      //       <EditProduct />
+      //     </ProtectedRoute>
+      //   ),
+      // },
       {
         path: AppRoutePaths.Visits,
         element: (
