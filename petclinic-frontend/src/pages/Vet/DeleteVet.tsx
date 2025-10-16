@@ -46,15 +46,40 @@ interface DeleteVetProps {
  */
 const DeleteVet: React.FC<DeleteVetProps> = () => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const cardElementRef = React.useRef<HTMLElement | null>(null);
+  const prevPositionRef = React.useRef<string | null>(null);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>): void => {
     event.stopPropagation();
+
+    // Find the nearest card container so the overlay will be positioned inside it.
+    const cardEl = (event.currentTarget as HTMLElement).closest(
+      '.card-vets'
+    ) as HTMLElement | null;
+
+    if (cardEl) {
+      cardElementRef.current = cardEl;
+      prevPositionRef.current = cardEl.style.position || '';
+      // Ensure overlay absolute positioning is relative to the card
+      if (!prevPositionRef.current || prevPositionRef.current === 'static') {
+        cardEl.style.position = 'relative';
+      }
+    }
+
     setIsModalOpen(true);
   };
 
   const closeModal = (event?: React.MouseEvent): void => {
     event?.stopPropagation();
     setIsModalOpen(false);
+
+    // restore previous position if we changed it
+    const cardEl = cardElementRef.current;
+    if (cardEl) {
+      cardEl.style.position = prevPositionRef.current ?? '';
+      cardElementRef.current = null;
+      prevPositionRef.current = null;
+    }
   };
 
   return (
@@ -69,9 +94,13 @@ const DeleteVet: React.FC<DeleteVetProps> = () => {
           aria-modal="true"
           aria-label="Delete disabled"
           onClick={closeModal}
+          // NOTE: use absolute so it stays inside the card (card must be positioned)
           style={{
-            position: 'fixed',
-            inset: 0,
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
             backgroundColor: 'rgba(0,0,0,0.5)',
             display: 'flex',
             alignItems: 'center',
