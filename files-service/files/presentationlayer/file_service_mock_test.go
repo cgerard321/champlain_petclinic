@@ -33,7 +33,7 @@ func (m *MockFileService) UpdateFile(id string, model *models.FileRequestModel) 
 	}
 	return args.Get(0).(*models.FileResponseModel), args.Error(1)
 }
-func (m *MockFileService) DeleteFileByFileId(id string) error {
+func (m *MockFileService) DeleteFile(id string) error {
 	args := m.Called(id)
 	return args.Error(0)
 }

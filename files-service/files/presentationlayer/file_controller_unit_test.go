@@ -153,7 +153,7 @@ func TestWhenDeleteFile_withExistingFileId_thenReturnSuccess(t *testing.T) {
 	router := gin.Default()
 	_ = controller.Routes(router)
 
-	mockService.On("DeleteFileByFileId", EXISTING_FILE_ID).Return(nil)
+	mockService.On("DeleteFile", EXISTING_FILE_ID).Return(nil)
 
 	req, _ := http.NewRequest(http.MethodDelete, "/files/"+EXISTING_FILE_ID, nil)
 	w := httptest.NewRecorder()

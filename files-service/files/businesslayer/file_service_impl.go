@@ -5,6 +5,7 @@ import (
 	"files-service/files/datalayer"
 	"files-service/files/models"
 	"files-service/files/util/exception"
+	"mime"
 	"path"
 	"strings"
 
@@ -23,31 +24,45 @@ func NewFileService(repository datalayer.FileInfoRepository, minioServiceClient 
 	}
 }
 
-func (i *FilesServiceImpl) saveFile(fileInfo *datalayer.FileInfo, data []byte) (*models.FileResponseModel, error) {
+func (i *FilesServiceImpl) saveFile(fileId string, model *models.FileRequestModel) (*models.FileResponseModel, error) {
+	fileName := strings.Replace(strings.TrimSuffix(model.FileName, path.Ext(model.FileName)), "_", " ", -1)
+	mediaType, _, err := mime.ParseMediaType(model.FileType)
+
+	if err != nil { //This error should never happen here as it is already handled in the Body Validation
+		return nil, err
+	}
+
+	fileInfo := &datalayer.FileInfo{
+		FileId:   fileId,
+		FileType: mediaType,
+		FileName: fileName,
+	}
+
 	if err := i.repository.AddFileInfo(fileInfo); err != nil {
 		return nil, err
 	}
-	if err := i.minioServiceClient.AddFile(fileInfo, data); err != nil {
-		_ = i.repository.DeleteFileInfo(fileInfo.FileId)
+	if err := i.minioServiceClient.AddFile(fileInfo, model.FileData); err != nil {
+		if err2 := i.repository.DeleteFileInfo(fileInfo.FileId); err2 != nil { //this is here to remove the data from the database if adding the file to minio failed
+			return nil, err2
+		}
 		return nil, err
 	}
+
 	return &models.FileResponseModel{
 		FileId:   fileInfo.FileId,
 		FileName: fileInfo.FileName,
 		FileType: fileInfo.FileType,
-		FileData: data,
+		FileData: model.FileData,
 	}, nil
 }
 
 func (i *FilesServiceImpl) GetFile(id string) (*models.FileResponseModel, error) {
 	fileInfo := i.repository.GetFileInfo(id)
-
 	if fileInfo == nil {
 		return nil, exception.NewNotFoundException("fileId: " + id + " was not found")
 	}
 
 	resp, err := i.minioServiceClient.GetFile(fileInfo)
-
 	if err != nil {
 		return nil, err
 	}
@@ -71,56 +86,22 @@ func (i *FilesServiceImpl) AddFile(model *models.FileRequestModel) (*models.File
 		}
 	}
 
-	fileName := strings.Replace(strings.TrimSuffix(model.FileName, path.Ext(model.FileName)), "_", " ", -1)
-	fileInfo := &datalayer.FileInfo{
-		FileId:   fileId,
-		FileType: model.FileType,
-		FileName: fileName,
-	}
-
-	err := i.repository.AddFileInfo(fileInfo)
-	if err != nil {
-		return nil, err
-	}
-
-	err = i.minioServiceClient.AddFile(fileInfo, model.FileData)
-	if err != nil {
-		err2 := i.repository.DeleteFileInfo(fileInfo.FileId) //this is here to remove the data from the database if adding the file to minio failed
-		if err2 != nil {
-			return nil, err2
-		}
-		return nil, err
-	}
-
-	response := &models.FileResponseModel{
-		FileId:   fileInfo.FileId,
-		FileName: fileName,
-		FileType: model.FileType,
-		FileData: model.FileData,
-	}
-
-	return response, nil
+	return i.saveFile(fileId, model)
 }
+
 func (i *FilesServiceImpl) UpdateFile(id string, model *models.FileRequestModel) (*models.FileResponseModel, error) {
 	fileInfo := i.repository.GetFileInfo(id)
 	if fileInfo == nil {
 		return nil, exception.NewNotFoundException("fileId: " + id + " was not found")
 	}
-	if err := i.DeleteFileByFileId(id); err != nil {
+	if err := i.DeleteFile(id); err != nil {
 		return nil, err
 	}
-	fileName := strings.Replace(strings.TrimSuffix(model.FileName, path.Ext(model.FileName)), "_", " ", -1)
 
-	newFileInfo := &datalayer.FileInfo{
-		FileId:   id,
-		FileName: fileName,
-		FileType: model.FileType,
-	}
-
-	return i.saveFile(newFileInfo, model.FileData)
+	return i.saveFile(id, model)
 }
 
-func (i *FilesServiceImpl) DeleteFileByFileId(id string) error {
+func (i *FilesServiceImpl) DeleteFile(id string) error {
 	fileInfo := i.repository.GetFileInfo(id)
 	if fileInfo == nil {
 		return exception.NewNotFoundException("fileId: " + id + " was not found")
