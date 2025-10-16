@@ -1,3 +1,5 @@
+/*
+// Original delete logic (commented out for now)
 import * as React from 'react'; // Correct import for React
 import { deleteVet } from '@/features/veterinarians/api/deleteVet';
 
@@ -24,6 +26,94 @@ const DeleteVet: React.FC<DeleteVetProps> = ({ vetId, onVetDeleted }) => {
     <button onClick={handleDelete} className="btn btn-danger">
       Delete
     </button>
+  );
+};
+
+export default DeleteVet;
+*/
+
+import * as React from 'react';
+
+interface DeleteVetProps {
+  vetId: string;
+  onVetDeleted: (event: React.MouseEvent, vetId: string) => void;
+}
+
+/**
+ * Temporary replacement for the delete button.
+ * Original delete logic is commented out above so it can be restored easily.
+ * This component now shows a modal explaining the delete feature is disabled.
+ */
+const DeleteVet: React.FC<DeleteVetProps> = () => {
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>): void => {
+    event.stopPropagation();
+    setIsModalOpen(true);
+  };
+
+  const closeModal = (event?: React.MouseEvent): void => {
+    event?.stopPropagation();
+    setIsModalOpen(false);
+  };
+
+  return (
+    <>
+      <button onClick={handleClick} className="btn btn-danger">
+        Delete
+      </button>
+
+      {isModalOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Delete disabled"
+          onClick={closeModal}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: '#fff',
+              padding: '20px',
+              borderRadius: '8px',
+              maxWidth: '400px',
+              width: '90%',
+              textAlign: 'center',
+            }}
+          >
+            <h3>Function temporarily disabled</h3>
+            <p>
+              The delete vet feature is temporarily disabled. It will be
+              re-enabled later.
+            </p>
+            <div style={{ marginTop: '16px' }}>
+              <button
+                onClick={closeModal}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '4px',
+                  border: 'none',
+                  background: '#007bff',
+                  color: '#fff',
+                  cursor: 'pointer',
+                }}
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
