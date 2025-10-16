@@ -34,17 +34,13 @@ export default DeleteVet;
 
 import * as React from 'react';
 
-interface DeleteVetProps {
-  vetId: string;
-  onVetDeleted: (event: React.MouseEvent, vetId: string) => void;
-}
 
 /**
  * Temporary replacement for the delete button.
  * Original delete logic is commented out above so it can be restored easily.
  * This component now shows a modal explaining the delete feature is disabled.
  */
-const DeleteVet: React.FC<DeleteVetProps> = () => {
+const DeleteVet: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const cardElementRef = React.useRef<HTMLElement | null>(null);
   const prevPositionRef = React.useRef<string | null>(null);
