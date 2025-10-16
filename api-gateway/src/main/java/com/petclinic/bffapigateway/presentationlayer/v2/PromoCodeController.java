@@ -25,7 +25,7 @@ public class PromoCodeController {
     private final CartServiceClient cartServiceClient;
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<PromoCodeResponseDTO> getAllPromos() {
         return cartServiceClient.getAllPromoCodes();
     }

@@ -12,8 +12,10 @@ import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class DataLoaderService implements CommandLineRunner {
 
     @Autowired
@@ -30,7 +32,6 @@ public class DataLoaderService implements CommandLineRunner {
             }
 
         } catch (Exception e) {
-            System.out.println("Error checking if carts exist: " + e.getMessage());
             return;
         }
 
@@ -173,8 +174,8 @@ public class DataLoaderService implements CommandLineRunner {
         Flux.just(cart1, cart2, cart3, cart4, cart5, cart6, cart7, cart8, cart9, cart10)
 
                 .flatMap(cartRepository::insert)
-                .doOnNext(savedCart -> System.out.println("Inserted cart: " + savedCart.getCartId()))
-                .doOnError(error -> System.err.println("Error inserting cart: " + error.getMessage()))
+                .doOnNext(savedCart -> log.info("Inserted cart: {}", savedCart.getCartId()))
+                .doOnError(error -> log.error("Error inserting cart: {}", error.getMessage(), error))
                 .subscribe();
     }
 }
