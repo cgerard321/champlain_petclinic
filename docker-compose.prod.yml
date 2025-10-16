@@ -26,6 +26,28 @@ services:
       - homepage.description=Petclinic Frontend Container
       - homepage.siteMonitor=https://petclinic.benmusicgeek.synology.me/
 
+  angularFrontend:
+    image: angular-frontend
+    container_name: angular-frontend
+    pull_policy: never
+    build:
+      context: ./angular-frontend
+      dockerfile: Dockerfile
+      args:
+        - BUILD_MODE=production
+    ports:
+      - "8082:8082"
+    volumes:
+      - ./angular-frontend/src:/app/src
+    restart: unless-stopped
+    labels:
+      - homepage.group=Development
+      - homepage.name=Angular Frontend
+      - homepage.icon=https://github.com/homarr-labs/dashboard-icons/blob/main/png/angular.png?raw=true
+      - homepage.href=https://petclinic-backend.benmusicgeek.synology.me/
+      - homepage.description=Angular Frontend Container
+      - homepage.siteMonitor=https://petclinic-backend.benmusicgeek.synology.me/
+
   # -------------------
   # BACKEND MICROSERVICES
   # -------------------

@@ -49,6 +49,11 @@ services:
       - customers-service-reactive
       - vet-service
       - visits-service-new
+      - products-service
+      - cart-service
+      - inventory-service
+      - billing-service
+      - auth-service
 
   auth-service:
     build: auth-service

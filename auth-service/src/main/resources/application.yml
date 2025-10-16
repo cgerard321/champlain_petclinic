@@ -24,7 +24,7 @@ default-admin:
 frontend:
   url: http://localhost:8080/api/v2/gateway
 customer-frontend:
-  url: http://localhost:3000
+  url: http://localhost:3000,http://localhost:8082
 
 
 ---
@@ -114,7 +114,7 @@ emailing-service:
 frontend:
   url: http://localhost:8080/api/v2/gateway
 customer-frontend:
-  url: http://localhost:3000
+  url: http://localhost:3000,http://localhost:8082
 
 logging:
   level:
@@ -174,7 +174,7 @@ emailing-service:
 frontend:
   url: https://petclinic-backend.benmusicgeek.synology.me/api/v2/gateway
 customer-frontend:
-  url: https://petclinic.benmusicgeek.synology.me/
+  url: https://petclinic.benmusicgeek.synology.me/,https://petclinic-backend.benmusicgeek.synology.me/
 
 ---
 server.port: 8080

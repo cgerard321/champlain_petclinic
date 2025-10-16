@@ -1,0 +1,27 @@
+{
+  "name": "angular-frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 8082 --host --mode dev",
+    "build": "vite build",
+    "build:development": "vite build --mode dev",
+    "build:production": "vite build --mode prod",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "angular": "^1.8.3",
+    "angular-ui-router": "^1.0.30",
+    "angular-resource": "^1.8.3",
+    "angular-ui-bootstrap": "^2.5.6",
+    "axios": "^1.7.7",
+    "bootstrap": "^5.1.0",
+    "jquery": "^3.2.1",
+    "popper.js": "^1.12.9"
+  },
+  "devDependencies": {
+    "vite": "^5.4.8",
+    "@vitejs/plugin-legacy": "^5.4.0"
+  }
+}

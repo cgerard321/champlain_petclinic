@@ -41,17 +41,40 @@ or
 docker-compose -f docker-compose_no_FE.yml up --build
 ```
 ## Bring up Frontend
-React frontend:
+
+### React Frontend (Standalone Development)
+```bash
+cd petclinic-frontend
+npm install
+npm run dev
 ```
-localhost:3000/
-```
+Access at: `localhost:3000/`
 Until it is fixed, to login on React frontend, use need to enter the following URI:
 ```
 localhost:3000/users/login
 ```
-Angular frontend:
+
+### Angular Frontend (Standalone Development)
+```bash
+cd angular-frontend
+npm install
+npm run dev
 ```
-localhost:8080/
+Access at: `localhost:8082/`
+
+### Running Frontends with Backend
+1. Start backend services (without frontends):
+```bash
+docker-compose -f docker-compose_no_FE.yml up --build
+```
+
+2. Start frontend in separate terminal:
+```bash
+# For React
+cd petclinic-frontend && npm run dev
+
+# For Angular  
+cd angular-frontend && npm run dev
 ```
 In terminal:
 

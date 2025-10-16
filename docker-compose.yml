@@ -12,6 +12,19 @@ services:
     volumes:
       - .petclinic-frontend/src:/app/src
 
+  angularFrontend:
+    image: angular-frontend
+    container_name: angular-frontend
+    build:
+      context: ./angular-frontend
+      dockerfile: Dockerfile
+      args:
+        - BUILD_MODE=development
+    ports:
+      - "8082:8082"
+    volumes:
+      - ./angular-frontend/src:/app/src
+
   janus:
     image: nginx
     ports:

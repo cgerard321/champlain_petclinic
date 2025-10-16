@@ -23,7 +23,6 @@ angular.module('billHistory', ['ui.router'])
             })
     }]);
 
-
 var expectedOwnerId = function (expectedOwnerId, key) {
     return element.all(by.repeater(key + ' in owners').column(key + '.customerId')).then(function (arr) {
         return arr.forEach(function (wd, i) {
@@ -58,3 +57,4 @@ it('should return the expected vetId with strict comparison', async function () 
     strict.click();
     await expectedVetId(['3'], 'bill');
 });
+

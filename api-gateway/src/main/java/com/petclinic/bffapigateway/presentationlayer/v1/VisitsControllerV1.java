@@ -68,6 +68,7 @@ public class VisitsControllerV1 {
         return visitsServiceClient.getVisitsForStatus(status);
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
     @GetMapping(value = "/vets/{practitionerId}/visits", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VisitResponseDTO> getVisitByPractitionerId(@PathVariable String practitionerId){
         return visitsServiceClient.getVisitByPractitionerId(practitionerId);
@@ -146,6 +147,8 @@ public class VisitsControllerV1 {
 //        return visitsServiceClient.getVisitsForPet(ownerId).flatMap(petResponseDTO -> visitsServiceClient.getVisitsForPet(petResponseDTO.getPetId()));
 //    }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET, Roles.OWNER})
+    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN, Roles.VET})
     @GetMapping(value = "/owners/{ownerId}/visits", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VisitResponseDTO> getVisitsByOwnerId(@PathVariable String ownerId) {
         return customersServiceClient.getPetsByOwnerId(ownerId)

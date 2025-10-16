@@ -24,14 +24,11 @@ dependencies {
 
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.2', 'io.jsonwebtoken:jjwt-jackson:0.11.2'
 
-    implementation 'org.webjars:bootstrap:5.1.0', // https://mvnrepository.com/artifact/org.webjars/bootstrap
-            'org.springframework.boot:spring-boot-starter-webflux',
+    implementation 'org.springframework.boot:spring-boot-starter-webflux',
             'org.springframework.boot:spring-boot-starter-actuator',
             'org.springframework.boot:spring-boot-starter-validation',
             'io.jsonwebtoken:jjwt-api:0.11.2',
-            'org.webjars:angularjs:2.0.0-alpha.22',
-            'org.webjars.bower:angular-ui-router:1.0.28',
-            'org.webjars:webjars-locator-core:0.47', // https://mvnrepository.com/artifact/org.webjars/webjars-locator-core
+            'org.webjars:webjars-locator-core:0.47',
             'ro.isdc.wro4j:wro4j-core:1.10.1', // https://mvnrepository.com/artifact/ro.isdc.wro4j/wro4j-core
             'com.github.houbie:lesscss-gradle-plugin:1.0.3-less-1.7.0', // https://mvnrepository.com/artifact/com.github.houbie/lesscss-gradle-plugin
             'org.jolokia:jolokia-core:1.7.0', // https://mvnrepository.com/artifact/org.jolokia/jolokia-core

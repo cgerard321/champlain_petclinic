@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+  angular-frontend:
+    image: angular-frontend
+    container_name: angular-frontend
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - BUILD_MODE=development
+    ports:
+      - "8082:8082"
+    volumes:
+      - ./src:/app/src
+    environment:
+      - NODE_ENV=development
+    restart: unless-stopped

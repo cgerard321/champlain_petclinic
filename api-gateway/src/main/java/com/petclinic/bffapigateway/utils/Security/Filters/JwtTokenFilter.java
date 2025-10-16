@@ -75,7 +75,25 @@ public class JwtTokenFilter implements WebFilter {
 
         String path = exchange.getRequest().getURI().getPath();
 
-        exchange.getResponse().getHeaders().add("Access-Control-Allow-Origin", frontendOrigin);
+        // Fix CORS so both frontends can work at the same time
+        String requestOrigin = exchange.getRequest().getHeaders().getFirst("Origin");
+        String[] allowedOrigins = frontendOrigin.split(",");
+        
+        boolean isAllowedOrigin = false;
+        if (requestOrigin != null) {
+            for (String allowedOrigin : allowedOrigins) {
+                if (allowedOrigin.trim().equals(requestOrigin)) {
+                    isAllowedOrigin = true;
+                    break;
+                }
+            }
+        }
+        
+        if (isAllowedOrigin) {
+            exchange.getResponse().getHeaders().add("Access-Control-Allow-Origin", requestOrigin);
+        } else {
+            exchange.getResponse().getHeaders().add("Access-Control-Allow-Origin", allowedOrigins[0].trim());
+        }
 
         exchange.getResponse().getHeaders().add("Access-Control-Allow-Credentials", "true");
 

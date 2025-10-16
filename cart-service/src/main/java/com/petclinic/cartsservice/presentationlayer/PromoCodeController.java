@@ -14,7 +14,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:8082"}, allowCredentials = "true")
 @RequestMapping("/api/v1/promos")
 @Slf4j
 public class PromoCodeController {
