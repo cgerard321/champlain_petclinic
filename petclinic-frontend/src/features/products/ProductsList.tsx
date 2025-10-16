@@ -51,7 +51,7 @@ export default function ProductList({
         filters.maxPrice,
         filters.minStars,
         filters.maxStars,
-        filters.ratingSort ?? 'default',
+        //filters.ratingSort ?? 'default',
         filters.deliveryType ?? '',
         filters.productType ?? ''
       );
