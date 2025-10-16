@@ -86,7 +86,7 @@ export default function VetCardTable({
                 {!isVet && isAdmin && (
                   <DeleteVet
                     vetId={vet.vetId}
-                    onVetDeleted={() => {}}
+                    onVetDeleted={event => handleVetDelete(event, vet.vetId)}
                   />
                 )}
               </div>
