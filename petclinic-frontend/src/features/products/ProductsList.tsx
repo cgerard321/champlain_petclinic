@@ -25,12 +25,14 @@ interface ProductsListProps {
     deliveryType?: string;
     productType?: string;
   };
+  sortCriteria?: string;
 }
 
 export default function ProductList({
   searchQuery,
   view,
   filters,
+  sortCriteria,
 }: ProductsListProps): JSX.Element {
   const [productList, setProductList] = useState<ProductModel[]>([]);
   const [bundleList, setBundleList] = useState<ProductBundleModel[]>([]);
@@ -49,7 +51,7 @@ export default function ProductList({
         filters.maxPrice,
         filters.minStars,
         filters.maxStars,
-        filters.ratingSort ?? 'default',
+        //filters.ratingSort ?? 'default',
         filters.deliveryType ?? '',
         filters.productType ?? ''
       );
@@ -81,16 +83,47 @@ export default function ProductList({
   }, [fetchProducts, user.userId]);
 
   useEffect(() => {
+    const sorted = [...productList];
+
+    switch (sortCriteria) {
+      case 'rating-desc':
+        sorted.sort((a, b) => b.averageRating - a.averageRating);
+        break;
+      case 'rating-asc':
+        sorted.sort((a, b) => a.averageRating - b.averageRating);
+        break;
+      case 'price-desc':
+        sorted.sort((a, b) => b.productSalePrice - a.productSalePrice);
+        break;
+      case 'price-asc':
+        sorted.sort((a, b) => a.productSalePrice - b.productSalePrice);
+        break;
+      default:
+        break;
+    }
+
     if (searchQuery === '') {
-      setFilteredList(productList);
+      setFilteredList(sorted);
     } else {
       setFilteredList(
-        productList.filter(p =>
+        sorted.filter(p =>
           p.productName.toLowerCase().includes(searchQuery.toLowerCase())
         )
       );
     }
-  }, [searchQuery, productList]);
+  }, [sortCriteria, productList, searchQuery]);
+
+  // useEffect(() => {
+  //   if (searchQuery === '') {
+  //     setFilteredList(productList);
+  //   } else {
+  //     setFilteredList(
+  //       productList.filter(p =>
+  //         p.productName.toLowerCase().includes(searchQuery.toLowerCase())
+  //       )
+  //     );
+  //   }
+  // }, [searchQuery, productList]);
 
   const handleProductClick = (product: ProductModel): void => {
     setRecentlyClickedProducts(prev => {
