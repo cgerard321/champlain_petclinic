@@ -82,6 +82,25 @@
                         </button>
                     </div>
                 </form>
+                <!-- Confirmation Modal -->
+                <div class="pet-modal-overlay" ng-show="$ctrl.showModal">
+                    <div class="pet-modal-box">
+                        <h2>Confirm Pet Update</h2>
+                        <p>Are you sure you want to submit this form with the following details?</p>
+                    <div class="pet-modal-details">
+                        <p><strong>Pet Name:</strong> {{$ctrl.pet.name}}</p>
+                        <p><strong>Pet Birth Date:</strong> {{$ctrl.pet.birthDate | date:'yyyy-MM-dd'}}</p>
+                        <p><strong>Weight:</strong> {{$ctrl.pet.weight}} KG</p>
+                        <p><strong>Pet Type:</strong> {{$ctrl.getPetTypeName($ctrl.pet.petTypeId)}}</p>
+                    </div>
+                    <div class="pet-modal-actions">
+                        <button class="pet-modal-cancel" ng-click="$ctrl.cancelModal()">Cancel</button>
+                        <button class="pet-modal-confirm" ng-click="$ctrl.confirmModal()">Confirm</button>
+                    </div>
+                    </div>
+                </div>
+                
+
 
                 <div class="form-help">
                     <p class="form-help-text">Make sure all information is accurate before submitting</p>

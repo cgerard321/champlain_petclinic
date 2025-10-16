@@ -106,6 +106,28 @@
                         </button>
                     </div>
                 </form>
+                <!-- Confirmation Modal -->
+                <div class="modal-backdrop" ng-show="$ctrl.showModal">
+                    <div class="modal-card">
+                        <h3 class="modal-title">Confirm Owner Update</h3>
+                        <p class="modal-text">
+                            Are you sure you want to proceed with the following owner details?
+                        </p>
+                        <ul class="modal-details">
+                            <li><strong>First Name:</strong> {{$ctrl.owner.firstName}}</li>
+                            <li><strong>Last Name:</strong> {{$ctrl.owner.lastName}}</li>
+                            <li><strong>Address:</strong> {{$ctrl.owner.address}}</li>
+                            <li><strong>City:</strong> {{$ctrl.owner.city}}</li>
+                            <li><strong>Province:</strong> {{$ctrl.owner.province}}</li>
+                            <li><strong>Telephone:</strong> {{$ctrl.owner.telephone}}</li>
+                        </ul>
+                        <div class="modal-actions">
+                            <button class="btn-cancel" ng-click="$ctrl.cancelModal()">Cancel</button>
+                            <button class="btn-confirm" ng-click="$ctrl.confirmModal()">Confirm</button>
+                        </div>
+                    </div>
+                </div>
+
 
                 <div class="form-help">
                     <p class="form-help-text">Make sure all information is accurate before submitting</p>

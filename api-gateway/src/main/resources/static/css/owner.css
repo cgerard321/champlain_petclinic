@@ -777,3 +777,78 @@
         flex-direction: column;
     }
 }
+
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-card {
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    max-width: 450px;
+    width: 90%;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+    text-align: center;
+}
+
+.modal-title {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.modal-text {
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.modal-details {
+    text-align: left;
+    margin-bottom: 25px;
+    list-style: none;
+    padding-left: 0;
+}
+
+.modal-details li {
+    margin-bottom: 8px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: space-between;
+}
+
+.btn-cancel {
+    background: #ccc;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-cancel:hover {
+    background: #b3b3b3;
+}
+
+.btn-confirm {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-confirm:hover {
+    background: #218838;
+}

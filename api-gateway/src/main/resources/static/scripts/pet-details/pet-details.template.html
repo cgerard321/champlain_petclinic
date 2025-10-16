@@ -78,11 +78,24 @@
                             <span ng-if="$ctrl.pet.isActive === 'true'">Deactivate</span>
                             <span ng-if="$ctrl.pet.isActive !== 'true'">Activate</span>
                         </button>
-                        <button class="btn-modern btn-delete" ng-click="$ctrl.deletePet($ctrl.pet.petId)">
+                        <button class="btn-modern btn-delete" ng-click="$ctrl.confirmDeletePet($ctrl.pet.petId)">
                             Delete Pet
                         </button>
+
                     </div>
                 </form>
+                <!-- Delete Confirmation Modal -->
+                <div class="custom-delete-modal" ng-if="$ctrl.showDeleteModal">
+                    <div class="custom-delete-modal-content">
+                        <h3>Confirm Delete</h3>
+                        <p>Are you sure you want to delete <strong>{{$ctrl.pet.name}}</strong>?</p>
+                        <div class="modal-buttons">
+                            <button class="btn-submit" ng-click="$ctrl.deletePet()">Yes, Delete</button>
+                            <button class="btn-secondary" ng-click="$ctrl.cancelDelete()">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+
 
                 <div class="info-card">
                     <p class="info-text">Use the buttons above to manage this pet's status and information</p>
