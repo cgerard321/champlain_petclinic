@@ -73,7 +73,7 @@ const DeleteVet: React.FC<DeleteVetProps> = () => {
     event?.stopPropagation();
     setIsModalOpen(false);
 
-    // restore previous position if we changed it
+    // Restore previous position if we changed it
     const cardEl = cardElementRef.current;
     if (cardEl) {
       cardEl.style.position = prevPositionRef.current ?? '';
