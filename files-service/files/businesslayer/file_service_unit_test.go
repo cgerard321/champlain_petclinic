@@ -105,7 +105,7 @@ func TestWhenDeleteFileById_withExistingFileId_thenDeleteSuccessfully(t *testing
 	mockClient.On("DeleteFile", &VALID_FILE_INFO).Return(nil)
 
 	service := businesslayer.NewFileService(mockRepo, mockClient)
-	err := service.DeleteFileByFileId(EXISTING_FILE_ID)
+	err := service.DeleteFile(EXISTING_FILE_ID)
 
 	assert.Nil(t, err)
 	mockRepo.AssertExpectations(t)
@@ -117,7 +117,7 @@ func TestWhenDeleteFileById_withNonExistingFileId_thenReturnError(t *testing.T) 
 	mockRepo.On("GetFileInfo", NON_EXISTING_FILE_ID).Return(nil)
 
 	service := businesslayer.NewFileService(mockRepo, mockClient)
-	err := service.DeleteFileByFileId(NON_EXISTING_FILE_ID)
+	err := service.DeleteFile(NON_EXISTING_FILE_ID)
 
 	assert.NotNil(t, err)
 	assert.EqualError(t, err, "fileId: "+NON_EXISTING_FILE_ID+" was not found")

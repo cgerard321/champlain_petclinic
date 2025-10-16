@@ -7,6 +7,7 @@ import (
 	"files-service/files/util/exception"
 	"io"
 	"log"
+	"mime"
 	"net/http"
 	"path"
 	"strings"
@@ -27,9 +28,12 @@ func GlobalExceptionHandler(c *gin.Context) {
 			code = http.StatusNotFound
 			message = err.Error()
 
-		case *exception.InvalidFileIdException, *exception.InvalidRequestModelException:
+		case *exception.InvalidFileIdException:
 			code = http.StatusBadRequest
 			message = err.Error()
+
+		case *exception.InvalidRequestModelException:
+			code = http.StatusUnprocessableEntity
 
 		default:
 			code = http.StatusInternalServerError
@@ -55,13 +59,15 @@ func ValidateRequestBody(c *gin.Context) {
 		return
 	}
 
-	// --- Validate fileType ---
-	fileType := requiredField(body, "fileType", c)
+	// --- Validate contentType ---
+	contentType := requiredField(body, "contentType", c)
 	if c.IsAborted() {
 		return
 	}
-	if splits := strings.Split(fileType, "/"); len(splits) != 2 {
-		cancel(c, exception.NewInvalidRequestModelValueException("fileType", fileType))
+
+	mediaType, _, err := mime.ParseMediaType(contentType)
+	if err != nil {
+		cancel(c, exception.NewInvalidRequestModelValueException("contentType", contentType))
 		return
 	}
 
@@ -78,7 +84,7 @@ func ValidateRequestBody(c *gin.Context) {
 		cancel(c, exception.NewInvalidRequestModelValueException("fileName", fileName))
 		return
 	}
-	if ext := path.Ext(fileName); ext != "" && ext != "."+path.Base(fileType) {
+	if ext := path.Ext(fileName); ext != "" && mime.TypeByExtension(ext) != mediaType {
 		cancel(c, exception.NewInvalidRequestModelValueException("fileName", fileName))
 		return
 	}
