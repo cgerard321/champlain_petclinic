@@ -51,7 +51,6 @@ export default function ProductList({
         filters.maxPrice,
         filters.minStars,
         filters.maxStars,
-        //filters.ratingSort ?? 'default',
         filters.deliveryType ?? '',
         filters.productType ?? ''
       );
@@ -112,18 +111,6 @@ export default function ProductList({
       );
     }
   }, [sortCriteria, productList, searchQuery]);
-
-  // useEffect(() => {
-  //   if (searchQuery === '') {
-  //     setFilteredList(productList);
-  //   } else {
-  //     setFilteredList(
-  //       productList.filter(p =>
-  //         p.productName.toLowerCase().includes(searchQuery.toLowerCase())
-  //       )
-  //     );
-  //   }
-  // }, [searchQuery, productList]);
 
   const handleProductClick = (product: ProductModel): void => {
     setRecentlyClickedProducts(prev => {

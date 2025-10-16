@@ -6,7 +6,6 @@ export async function getAllProducts(
   maxPrice?: number,
   minRating?: number,
   maxRating?: number,
-  //sort?: string,
   deliveryType?: string,
   productType?: string
 ): Promise<ProductModel[]> {
@@ -18,7 +17,6 @@ export async function getAllProducts(
     params.minRating = minRating;
   if (maxRating !== undefined && maxRating !== null)
     params.maxRating = maxRating;
-  // if (sort) params.sort = sort;
   if (deliveryType && deliveryType !== 'default')
     params.deliveryType = deliveryType;
   if (productType && productType !== 'default')

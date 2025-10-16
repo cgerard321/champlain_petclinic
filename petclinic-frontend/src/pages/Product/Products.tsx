@@ -93,22 +93,27 @@ export default function Products(): JSX.Element {
             className="sort-button"
             type="button"
             onClick={() => setShowSortOptions(prev => !prev)}
+            aria-haspopup="menu"
+            aria-controls="sort-menu"
+            aria-expanded={showSortOptions}
           >
             Sort By
           </button>
           {showSortOptions && (
-            <div className="sort-options">
-              <button onClick={() => handleSort('default')}>Sort by</button>
-              <button onClick={() => handleSort('rating-desc')}>
+            <div className="sort-options" role="menu" id="sort-menu">
+              <button role="menuitem" onClick={() => handleSort('default')}>
+                Sort by
+              </button>
+              <button role="menuitem" onClick={() => handleSort('rating-desc')}>
                 Rating: High → Low
               </button>
-              <button onClick={() => handleSort('rating-asc')}>
+              <button role="menuitem" onClick={() => handleSort('rating-asc')}>
                 Rating: Low → High
               </button>
-              <button onClick={() => handleSort('price-desc')}>
+              <button role="menuitem" onClick={() => handleSort('price-desc')}>
                 Price: High → Low
               </button>
-              <button onClick={() => handleSort('price-asc')}>
+              <button role="menuitem" onClick={() => handleSort('price-asc')}>
                 Price: Low → High
               </button>
             </div>
@@ -196,14 +201,6 @@ export default function Products(): JSX.Element {
                 updateRating={setMaxStars}
               />
             </div>
-            {/*<select
-              value={ratingSort}
-              onChange={e => setRatingSort(e.target.value)}
-            >
-              <option value="default">Sort by Rating</option>
-              <option value="asc">Low to High</option>
-              <option value="desc">High to Low</option>
-            </select>*/}
 
             <button onClick={toggleSidebar}>Apply</button>
             <button onClick={clearFilters}>Clear</button>
