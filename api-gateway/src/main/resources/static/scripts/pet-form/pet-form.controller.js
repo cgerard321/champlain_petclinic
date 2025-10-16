@@ -6,43 +6,29 @@ angular.module('petForm')
         var ownerId = $stateParams.ownerId || 0;
         var petId = $stateParams.petId || 0;
 
+        // Helper to get pet type name
         self.getPetTypeName = function (petTypeId) {
             switch (petTypeId) {
-                case '1':
-                    return 'Cat';
-                case '2':
-                    return 'Dog';
-                case '3':
-                    return 'Lizard';
-                case '4':
-                    return 'Snake';
-                case '5':
-                    return 'Bird';
-                case '6':
-                    return 'Hamster';
-                default:
-                    return 'Unknown';
+                case '1': return 'Cat';
+                case '2': return 'Dog';
+                case '3': return 'Lizard';
+                case '4': return 'Snake';
+                case '5': return 'Bird';
+                case '6': return 'Hamster';
+                default: return 'Unknown';
             }
         };
- // Clear the form fields
-        self.pet = {}; // Changed $ctrl.pet to self.pet
 
+        // Initialize
+        self.pet = {};
+        self.showModal = false;
+
+        // Load types
         $http.get('api/gateway/owners/petTypes').then(function (resp) {
             self.types = resp.data;
         });
 
-        $http.get('api/gateway/pets/' + petId).then(function (resp) {
-            self.pet = resp.data;
-        }).catch(function (error) {
-            console.error('Error loading pet details:', error);
-        });
-
-        $http.get('api/gateway/owners/' + ownerId).then(function (resp) {
-            var ownerData = resp.data;
-            var owner = ownerData.firstName + " " + ownerData.lastName; // Added "var" before owner
-            self.pet.owner = owner; // Changed self.pet = { owner: owner } to self.pet.owner = owner
-        });
-
+        // Load pet & owner info
         $q.all([
             $http.get('api/gateway/pets/' + petId),
             $http.get('api/gateway/owners/' + ownerId)
@@ -55,44 +41,47 @@ angular.module('petForm')
 
             self.pet = petData;
             self.checked = false;
+        }).catch(function (error) {
+            console.error('Error loading pet/owner details:', error);
         });
 
-        // Function to submit the form
+        // Open modal
         self.submit = function () {
-            var petTypeName = self.getPetTypeName(self.pet.petTypeId);
-            var birthDate = new Date(self.pet.birthDate);
-            var offset = birthDate.getTimezoneOffset();
-            birthDate.setMinutes(birthDate.getMinutes() - offset);
-            var formattedBirthDate = birthDate.toISOString().split('T')[0];
-            if (confirm("Are you sure you want to submit this form with the following details?\n\n" +
-                "Pet Name: " + self.pet.name + "\n" +
-                "Pet Birth Date: " + formattedBirthDate + "\n" +
-                "Weight: " + self.pet.weight + " KG" + "\n" +
-                "Pet Type: " + petTypeName)) {
+            self.showModal = true;
+        };
 
-                var data = {
-                    petId: self.pet.petId,
-                    name: self.pet.name,
-                    birthDate: new Date(self.pet.birthDate).toISOString(),
-                    ownerId: self.pet.ownerId,
-                    petTypeId: self.pet.petTypeId,
-                    weight: self.pet.weight,
-                    isActive: self.pet.isActive
-                };
+        // Cancel modal
+        self.cancelModal = function () {
+            self.showModal = false;
+        };
 
-                var req;
+        // Confirm modal (submit form)
+        self.confirmModal = function () {
+            self.showModal = false;
 
-                req = $http.put("api/gateway/pets/" + petId, data);
+            var data = {
+                petId: self.pet.petId,
+                name: self.pet.name,
+                birthDate: new Date(self.pet.birthDate).toISOString(),
+                ownerId: self.pet.ownerId,
+                petTypeId: self.pet.petTypeId,
+                weight: self.pet.weight,
+                isActive: self.pet.isActive
+            };
 
-                req.then(function () {
-                    $state.go('petDetails', {petId: petId});
-                }).catch(function (response) {
+
+
+
+            $http.put("api/gateway/pets/" + self.pet.petId, data)
+                .then(function () {
+                    $state.go('petDetails', { petId: self.pet.petId });
+                })
+                .catch(function (response) {
                     var error = response.data;
                     error.errors = error.errors || [];
                     alert(error.error + "\r\n" + error.errors.map(function (e) {
                         return e.field + ": " + e.defaultMessage;
                     }).join("\r\n"));
                 });
-            }
         };
     }]);

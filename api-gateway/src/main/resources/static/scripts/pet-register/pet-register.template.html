@@ -1,42 +1,103 @@
-<div class="bColor"><h2 class="titleOwner form">Register New Pet</h2></div>
+<link href="/css/pet.css" rel="stylesheet" type="text/css"/>
 
-<form id="petForm" name="petForm" class="form-horizontal" enctype="multipart/form-data" ng-submit="$ctrl.submitPetForm()">
-  <div class="form-group formColor">
-    <label class="col-sm-2 control-label">Name</label>
-    <div class="pet col-sm-6">
-      <input class="form-control col-sm-4" ng-model="$ctrl.pet.name" name="name"
-             ng-disabled="$ctrl.checked" maxlength="50" pattern="^[\x20-\x7F]+$" required />
+<div class="dashboard-container">
+    <div class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Register New Pet</h1>
+            <p class="page-subtitle">Add a new pet to the owner's account</p>
+        </div>
+
+        <div class="content-wrapper">
+            <div class="form-card">
+                <div class="form-header">
+                    <h2 class="form-title">Pet Registration</h2>
+                    <p class="form-subtitle">Please fill in all the required information</p>
+                </div>
+
+                <form id="petForm" name="petForm" ng-submit="$ctrl.submitPetForm()">
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label class="form-label">Pet Name</label>
+                            <input class="form-input" 
+                                   ng-model="$ctrl.pet.name" 
+                                   name="name"
+                                   ng-disabled="$ctrl.checked" 
+                                   maxlength="50" 
+                                   pattern="^[\x20-\x7F]+$" 
+                                   required 
+                                   placeholder="Enter pet name..."/>
+                            <span ng-show="petForm.name.$error.required && petForm.$submitted" class="error-message">Pet name is required.</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Birth Date</label>
+                            <input class="form-input" 
+                                   ng-model="$ctrl.pet.birthDate" 
+                                   name="birthDate" 
+                                   required 
+                                   type="date" 
+                                   ng-disabled="$ctrl.checked"/>
+                            <span ng-show="petForm.birthDate.$error.required && petForm.$submitted" class="error-message">Birth date is required.</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Weight (Kilograms)</label>
+                            <input class="form-input" 
+                                   ng-model="$ctrl.pet.weight" 
+                                   name="weight" 
+                                   required 
+                                   type="number" 
+                                   step="0.1"
+                                   ng-disabled="$ctrl.checked"
+                                   placeholder="Enter weight..."/>
+                            <span ng-show="petForm.weight.$error.required && petForm.$submitted" class="error-message">Weight is required.</span>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label class="form-label">Pet Type</label>
+                            <select class="form-select" 
+                                    ng-model="$ctrl.pet.type" 
+                                    name="type" 
+                                    ng-options="t as t.name for t in $ctrl.types track by t.id" 
+                                    ng-disabled="$ctrl.checked"
+                                    required>
+                                <option value="">Select pet type...</option>
+                            </select>
+                            <span ng-show="petForm.type.$error.required && petForm.$submitted" class="error-message">Pet type is required.</span>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="btn-submit" type="submit" ng-disabled="petForm.$invalid">
+                            Register Pet
+                        </button>
+                    </div>
+                </form>
+                <!-- Confirmation Modal -->
+                <div class="pet-register-modal-overlay" ng-show="$ctrl.showModal">
+                    <div class="pet-register-modal">
+                        <h3>Confirm Registration</h3>
+                        <p>
+                            Are you sure you want to register this pet with the following details?
+                        </p>
+                        <ul class="modal-details">
+                            <li><strong>Name:</strong> {{$ctrl.pet.name}}</li>
+                            <li><strong>Birth Date:</strong> {{$ctrl.pet.birthDate | date:'yyyy/MM/dd'}}</li>
+                            <li><strong>Weight:</strong> {{$ctrl.pet.weight}} kg</li>
+                            <li><strong>Type:</strong> {{$ctrl.pet.type.name}}</li>
+                        </ul>
+                        <div class="modal-actions">
+                            <button class="btn-cancel" ng-click="$ctrl.cancelModal()">Cancel</button>
+                            <button class="pet-modal-confirm" ng-click="$ctrl.confirmModal()">Confirm</button>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="form-help">
+                    <p class="form-help-text">Make sure all information is accurate before submitting</p>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-
-  <div class="form-group formColor">
-    <label class="col-sm-2 control-label">Birth date</label>
-    <div class="pet col-sm-6">
-      <input class="form-control" ng-model="$ctrl.pet.birthDate" name="dbo" required type="date" ng-disabled="$ctrl.checked"/>
-    </div>
-  </div>
-
-  <div class="form-group formColor">
-    <label class="col-sm-2 control-label"> Pet Weight (Kilograms) </label>
-    <div class="pet col-sm-6">
-      <input class="form-control col-sm-4" ng-model="$ctrl.pet.weight" name="weight" required type="text" ng-disabled="$ctrl.checked"/>
-    </div>
-  </div>
-
-  <div class="form-group formColor">
-    <label class="col-sm-2 control-label">Pet Type</label>
-    <div class="pet col-sm-6">
-      <select class="form-control" ng-model="$ctrl.pet.type" name="type" ng-options="t as t.name for t in $ctrl.types track by t.id" ng-disabled="$ctrl.checked"></select>
-    </div>
-  </div>
-
-  <div class="form-group formColor">
-    <div class="pet marg col-sm-6 col-sm-offset-2">
-      <button id="newBtn" class="btn btn-default" type="submit">
-        Submit
-      </button>
-    </div>
-  </div>
-
-</form>
-
+</div>
