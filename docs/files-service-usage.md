@@ -29,19 +29,13 @@ Back to [Main page](../README.md)
     - This ensures a single API call returns both entity and file data when needed.
 
 
-3. Use the `Rethrower` utility for error propagation.
-    - Never build custom error messages for Files Service responses.
-    - Always pass back the error received from the Files Service through the `Rethrower`.
-    - This guarantees consistent error handling and uniform API responses across all services.
-
-
-4. Files are owned and managed by the services that reference them.
+3. Files are owned and managed by the services that reference them.
     - Each service is responsible for creating, updating, and deleting its associated files via the Files Service.
     - When deleting an entity that has a file, always delete the associated file (unless it’s a shared or default file).
     - Never let orphaned files remain in the Files Service.
 
 
-5. Entities should only store the File ID, not the file content.
+4. Entities should only store the File ID, not the file content.
     - File data should only exist in memory when being sent to or received from the Files Service.
     - Database entities must store only the file’s `fileId` field.
     - The actual file data (e.g., `byte[] fileData`) belongs exclusively in the Files Service.
@@ -57,71 +51,16 @@ All of these are already implemented properly in the customer-service.
 You will first need to add the FilesServiceClient to your service. This file should be almost identical across all services that use the files service.
 For an example of what the file should look like please take a look at the one from the customer-service.
 
-#### 2. Add Rethrower
-We are adding a rethrower because the errors you will get as Response Entity will already tell you what is wrong.
-As such the rethrower handles the error received by the files Service Client and sends back a new one to the api-gateway with the original message and technically the same error code.
+#### 2. Handle the Files Service Client Errors
+When handling errors returned by the Files Service, other services should not simply mirror the HTTP status code or expose the raw error message from the Files Service. Doing so may leak sensitive implementation details and create inconsistencies in how errors are reported to clients.
 
-```java
-    @RequiredArgsConstructor
-    @Component
-    public class Rethrower {
-    
-        private static final Logger log = LoggerFactory.getLogger(Rethrower.class);
-        private final ObjectMapper objectMapper;
-    
-        public Mono<? extends Throwable> rethrow(ClientResponse clientResponse, Function<Map, ? extends Throwable> exceptionProvider) {
-            return clientResponse.createException().flatMap(n ->
-            {
-                try {
-                    final Map map =
-                            objectMapper.readValue(n.getResponseBodyAsString(), Map.class);
-                    return Mono.error(exceptionProvider.apply(map));
-                } catch (JsonProcessingException e) {
-                    log.error(e.getMessage());
-                    return Mono.error(e);
-                }
-            });
-        }
-    
-    }
-```
+Instead, each service should interpret the error in context and return an HTTP status code that accurately reflects what happened from its own perspective.
 
-#### 3. Handle the Files Service Client Errors
-The Files Service can currently return 4 different types of error when a request is made, not found, bad request, unprocessable entity or internal server error.
+For example, if the Files Service returns a 404 Not Found, the calling service should not return 404 to its client. From the calling service’s perspective, the issue lies in a downstream dependency, so a more appropriate response would be 424 Failed Dependency.
 
-This is an example of how errors are handled in the Files Service Client:
-```
-    .onStatus(HttpStatus.NOT_FOUND::equals, resp -> rethrower.rethrow(resp, ex -> new NotFoundException(ex.get("message").toString())))
-    .onStatus(HttpStatus.UNPROCESSABLE_ENTITY::equals, resp -> rethrower.rethrow(resp, ex -> new InvalidInputException(ex.get("message").toString())))
-    .onStatus(HttpStatus.BAD_REQUEST::equals, resp -> rethrower.rethrow(resp, ex -> new BadRequestException(ex.get("message").toString())))
-    .onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, resp -> rethrower.rethrow(resp, ex -> new RuntimeException(ex.get("message").toString())))
-```
+This approach ensures consistent, meaningful, and secure error reporting across all services.
 
-As you can see, we are using 1 exception class per error code. These exception class can be anything, but it is probably simpler if you name them the following:
-
-- NotFoundException
-- UnprocessableEntityException
-- BadRequestException
-- InternalServerException
-
-These can be named anything as long as you handle them the right way in your global exception handler.
-
-#### 4. Update Global Exception Handler
-
-Each exception class added for handling the Files Service Client errors will need to be handled so that they return the right error code.
-
-Here is the example to handle one, you need to handle them all.
-```java
-    @ResponseStatus(BAD_REQUEST)
-    @ExceptionHandler(BadRequestException.class)
-    public HttpErrorInfo handleBadRequestException(ServerHttpRequest request, Exception ex){
-        return createHttpErrorInfo(BAD_REQUEST, request, ex);
-    }
-```
-
-In this case, this error will always be thrown when a bad request is sent to the Files Service Client so we want the error being sent back to the gateway to also be 400 Bad Request.
-
-#### 5. Add Host and Port to application.yaml
+#### 3. Add Host and Port to application.yaml
 You will need to add the host and port in the application.yaml of your service for the client to work.
 
 ```yaml
@@ -131,7 +70,7 @@ app:
     port: 8000
 ```
 
-#### 6. Update Service Implement
+#### 4. Update Service Implement
 You will need to add the following variable to your service implement
 
 ```java
@@ -166,7 +105,7 @@ public class FileRequestDTO {
 }
 ```
 
-#### 8. Include FileDetails in the Models
+#### 5. Include FileDetails in the Models
 
 Your Response and Request Model should be modified to include a FileDetails field.
 
@@ -208,7 +147,7 @@ public class OwnerRequestDTO {
 }
 ```
 
-#### 9. Add FileId Field to the Entity
+#### 6. Add FileId Field to the Entity
 
 Your Entity should only store the id of the file that it wishes to access later.
 
@@ -235,7 +174,7 @@ public class Owner {
 }
 ```
 
-#### 10. Update EntityMapper
+#### 7. Update EntityMapper
 You will also need to update your EntityModelMapper to handle the file fields correctly:
 
 Request Model → Entity <br>
