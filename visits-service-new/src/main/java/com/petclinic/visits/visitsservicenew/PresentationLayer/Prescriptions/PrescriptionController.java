@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/visits/{visitId}/prescriptions")
@@ -27,19 +28,22 @@ public class PrescriptionController {
     }
 
     @GetMapping(value = "/{prescriptionId}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
-    public ResponseEntity<byte[]> downloadPdf(
+    public Mono<ResponseEntity<byte[]>> downloadPdf(
             @PathVariable String visitId,
             @PathVariable String prescriptionId) {
-        try {
-            byte[] pdf = prescriptionService.getPrescriptionPdf(visitId, prescriptionId);
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=prescription-" + prescriptionId + ".pdf");
-            return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
-        } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+
+        return prescriptionService.getPrescriptionPdf(visitId, prescriptionId)
+                .map(pdf -> {
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.setContentType(MediaType.APPLICATION_PDF);
+                    headers.add(HttpHeaders.CONTENT_DISPOSITION,
+                            "inline; filename=prescription-" + prescriptionId + ".pdf");
+                    return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
+                })
+                .onErrorResume(NotFoundException.class, e ->
+                        Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).build()))
+                .onErrorResume(Exception.class, e ->
+                        Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()));
     }
+
 }
