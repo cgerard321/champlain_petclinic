@@ -9,9 +9,10 @@ jobs:
       - name: 'Checkout'
         uses: actions/checkout@master
       - name: 'Yamllint'
-        uses: ibiqlik/action-yamllint@v3
+        uses: karancode/yamllint-github-action@master
         with:
-          file_or_dir: .
-          no_warnings: true
+          yamllint_file_or_dir: .
+          yamllint_strict: false
+          yamllint_comment: true
         env:
           GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
