@@ -16,7 +16,7 @@ import java.util.Optional;
 public class PrescriptionPdfGenerator {
 
     public static byte[] generatePrescriptionPdf(PrescriptionResponseDTO prescription) throws DocumentException {
-        Document document = new Document(PageSize.A4, 50, 50, 50, 50);
+        Document document = new Document(PageSize.LETTER, 50, 50, 50, 50);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PdfWriter.getInstance(document, out);
         document.open();
