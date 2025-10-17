@@ -1,0 +1,252 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Deployment.puml
+skinparam linetype polyline
+
+AddElementTag("edge", $bgColor="#eef7ff", $borderColor="#438DD5")
+AddElementTag("internal", $bgColor="#f5f5f5", $borderColor="#999999")
+AddElementTag("svc", $bgColor="#e8fff4", $borderColor="#2f9e44")
+AddElementTag("db", $bgColor="#fff4e6", $borderColor="#d9480f")
+
+title Pet Clinic – C4 Deployment
+
+' ---------------------------
+' CLIENTS / INTERNET
+' ---------------------------
+Deployment_Node(pc, "User's Computer", "Windows 10/11, linux or macOS") {
+    Container(browser, "Web Browser", "Chrome/Firefox/Edge/Safari", "Accesses the Petclinic Frontend SPA.")
+}
+
+Deployment_Node(mobile, "User's Mobile Device", "iOS or Android") {
+    Container(mobile_browser, "Mobile Browser", "Chrome/Safari", "Accesses the Petclinic Frontend SPA.")
+}
+
+Deployment_Node(internet_dns, "Synology DDNS", "DNS + Dynamic IP updates"){
+    Container(ddns, "*.benmusicgeek.synology.me", "DNS A record", "Resolves to the home public IP, updated automatically by the NAS")
+}
+
+
+rectangle "Home Network" as network #line.dashed {
+
+Deployment_Node(nas, "Synology NAS", "DS920+", "DDNS: benmusicgeek.synology.me"){
+
+  Container(rp, "Reverse Proxy", "NGINX", "Routes incoming requests to services based on domain/subdomain.")
+
+    note right of rp
+    SSL termination here
+    end note
+}
+
+'--------------------------
+' Infra
+'--------------------------
+Deployment_Node(cpc, "Proxmox Server", "Proxmox 8.4.14 Server"){
+
+  Deployment_Node(lxc_networking, "Networking LXC ", "Debian GNU/Linux 12 (bookworm)"){
+      Deployment_Node(docker_networking, "Docker Engine", "Compose"){
+        Container(bw, "Bunker Web", "Reverse Proxy (NGINX)", "Routes incoming requests to services based on domain/subdomain.")
+      }
+  }
+
+  Deployment_Node(lxc, "self-hosting LXC", "Debian GNU/Linux 12 (bookworm)"){
+
+    Deployment_Node(minio_host, "MinIO (systemd service)", "RELEASE.2025-09-07"){
+      ContainerDb(minio_s3, "MinIO Object Storage", "S3-compatible (HTTP)", "")
+
+         note left of minio_s3
+           API is accessible at https://petclinic-bucket.benmusicgeek.synology.me/
+         end note
+
+    }
+
+    Deployment_Node(docker, "Docker Engine", "Compose v3.9"){
+
+      ' -------- FRONTEND ----------
+      Deployment_Node(frontend_host, "petclinic-frontend container", "Node.js/React"){
+        Container(petclinic_fe, "Petclinic Frontend", "React app", "SPA served by the frontend container; talks to API Gateway.")
+
+
+          note right of petclinic_fe
+          Accessible at https://petclinic.benmusicgeek.synology.me/
+          end note
+      }
+
+
+      ' -------- API GATEWAY ----------
+      Deployment_Node(netty_api_gateway, "api-gateway container", "Spring Boot (WebFlux/Netty)"){
+        Container(api_gateway, "API Gateway", "Java + Spring Boot (WebFlux)", "Routes/aggregates requests to backend microservices. Profile: prod.")
+
+            note right of api_gateway
+            Accessible at https://petclinic-backend.benmusicgeek.synology.me/
+            end note
+      }
+
+      ' -------- BACKEND MICROSERVICES ----------
+      Deployment_Node(customers_svc_node, "customers-service-reactive container", "Spring Boot (WebFlux/Netty)"){
+        Container(customers_svc, "Customers Service", "Java + Spring Boot", "Customer/Owner aggregate. Profile: docker.")
+      }
+
+      Deployment_Node(vet_svc_node, "vet-service container", "Spring Boot (WebFlux/Netty)"){
+        Container(vet_svc, "Vet Service", "Java + Spring Boot", "Vet directory & images; uses Postgres + Mongo. Profile: docker.")
+      }
+
+      Deployment_Node(visits_svc_node, "visits-service-new container", "Spring Boot (WebFlux/Netty)"){
+        Container(visits_svc, "Visits Service", "Java + Spring Boot", "Visits domain & mail triggers. Profile: docker.")
+      }
+
+      Deployment_Node(products_svc_node, "products-service container", "Spring Boot (WebFlux/Netty)"){
+        Container(products_svc, "Products Service", "Java + Spring Boot", "Products & pricing. Profile: docker.")
+      }
+
+      Deployment_Node(cart_svc_node, "cart-service container", "Spring Boot (WebFlux/Netty)"){
+        Container(cart_svc, "Cart Service", "Java + Spring Boot", "Shopping cart. Profile: docker.")
+      }
+
+      Deployment_Node(inventory_svc_node, "inventory-service container", "Spring Boot (WebFlux/Netty)"){
+        Container(inventory_svc, "Inventory Service", "Java + Spring Boot", "Inventory stock levels. Profile: docker.")
+      }
+
+      Deployment_Node(billing_svc_node, "billing-service container", "Spring Boot (WebFlux/Netty)"){
+        Container(billing_svc, "Billing Service", "Java + Spring Boot", "Bills, payments, interest. Profile: docker.")
+      }
+
+      Deployment_Node(auth_svc_node, "auth-service container", "Spring Boot (Web)"){
+        Container(auth_svc, "Auth Service", "Java + Spring Boot", "Authentication & authorization; uses MySQL and mail. Profile: prod.")
+      }
+
+      Deployment_Node(files_svc_node, "files-service container", "Golang"){
+        Container(files_svc, "Files Service", "Go", "File metadata + object storage integration (FILE_ENDPOINT).")
+      }
+
+      Deployment_Node(mailer_svc_node, "mailer-service container", "Golang"){
+        Container(mailer_svc, "Mailer Service", "Go", "Sends emails via SMTP (smtp.gmail.com).")
+      }
+
+      ' -------- ADMIN / TOOLS ----------
+      Deployment_Node(dbgate_node, "dbgate container", "DbGate"){
+        Container(dbgate, "DBGate", "Web admin", "Unified DB admin over MySQL/Postgres/Mongo instances.")
+
+            note right of dbgate
+            Accessible at https://petclinic-admin-db.benmusicgeek.synology.me/
+            end note
+
+      }
+
+      ' --------- DATABASES ----------
+      Deployment_Node(mysql_auth_node, "mysql-auth container", "MySQL 5.7"){
+        ContainerDb(mysql_auth, "auth-db", "MySQL", "Users, tokens, etc.")
+      }
+
+      Deployment_Node(mysql_files_node, "mysql-files container", "MySQL 5.7"){
+        ContainerDb(mysql_files, "files-db", "MySQL", "Files metadata.")
+      }
+
+      Deployment_Node(pg_vet_node, "postgres-vet container", "PostgreSQL"){
+        ContainerDb(pg_vet, "images", "Postgres", "Vet images / assets.")
+      }
+
+      Deployment_Node(mongo_vet_node, "mongo-vet container", "MongoDB"){
+        ContainerDb(mongo_vet, "vet-db", "MongoDB", "Vet data (NoSQL).")
+      }
+
+      Deployment_Node(mongo_billing_node, "mongo-billing container", "MongoDB"){
+        ContainerDb(mongo_billing, "billing-db", "MongoDB", "Billing data.")
+      }
+
+      Deployment_Node(mongo_visits_node, "mongo-visits container", "MongoDB"){
+        ContainerDb(mongo_visits, "visits-db", "MongoDB", "Visits data.")
+      }
+
+      Deployment_Node(mongo_customers_node, "mongo-customers container", "MongoDB"){
+        ContainerDb(mongo_customers, "customers-db", "MongoDB", "Customers data.")
+      }
+
+      Deployment_Node(mongo_inventory_node, "mongo-inventory container", "MongoDB"){
+        ContainerDb(mongo_inventory, "inventory-db", "MongoDB", "Inventory data.")
+      }
+
+      Deployment_Node(mongo_products_node, "mongo-products container", "MongoDB"){
+        ContainerDb(mongo_products, "products-db", "MongoDB", "Products data.")
+      }
+
+      Deployment_Node(mongo_carts_node, "mongo-carts container", "MongoDB"){
+        ContainerDb(mongo_carts, "carts-db", "MongoDB", "Cart data.")
+      }
+    }
+  }
+}
+
+
+        ' -------- EXTERNAL SYSTEMS ----------
+        System_Ext(smtp_srv, "smtp.gmail.com", "SMTP server", "Sends email (via Mailer Service)")
+
+      '--------------------------
+      ' RELATIONSHIPS
+      '--------------------------
+      Rel_D(petclinic_fe, api_gateway, "HTTPS/HTTP calls", "REST/JSON")
+      Rel_D(api_gateway, customers_svc, "Routes requests to", "HTTP")
+      Rel_D(api_gateway, vet_svc, "Routes requests to", "HTTP")
+      Rel_D(api_gateway, visits_svc, "Routes requests to", "HTTP")
+      Rel_D(api_gateway, products_svc, "Routes requests to", "HTTP")
+      Rel_D(api_gateway, cart_svc, "Routes requests to", "HTTP")
+      Rel_D(api_gateway, inventory_svc, "Routes requests to", "HTTP")
+      Rel_D(api_gateway, billing_svc, "Routes requests to", "HTTP")
+      Rel_D(api_gateway, auth_svc, "Routes requests to", "HTTP")
+
+      Rel_D(auth_svc, mysql_auth, "JDBC")
+      Rel_D(files_svc, mysql_files, "JDBC")
+      Rel_D(vet_svc, pg_vet, "R2DBC")
+      Rel_D(vet_svc, mongo_vet, "Reactive MongoDB driver")
+      Rel_D(billing_svc, mongo_billing, "Reactive MongoDB driver")
+      Rel_D(visits_svc, mongo_visits, "Reactive MongoDB driver")
+      Rel_D(customers_svc, mongo_customers, "Reactive MongoDB driver")
+      Rel_D(inventory_svc, mongo_inventory, "Reactive MongoDB driver")
+      Rel_D(products_svc, mongo_products, "Reactive MongoDB driver")
+      Rel_D(cart_svc, mongo_carts, "Reactive MongoDB driver")
+
+      Rel_D(mailer_svc, smtp_srv, "SMTP", "587")
+
+      Rel_U(visits_svc, mailer_svc, "Send email request", "HTTP/REST")
+      Rel_U(auth_svc, mailer_svc, "Send email request", "HTTP/REST")
+      Rel_U(billing_svc, mailer_svc, "Send email request", "HTTP/REST")
+
+      Rel(customers_svc, files_svc, "Store/Fetch profile pictures", "HTTP/REST")
+
+      Rel_D(files_svc, minio_s3, "Store/Fetch objects", "S3 API (HTTPS)")
+
+      Rel(visits_svc, auth_svc, "Validate tokens", "HTTP/REST")
+      Rel(billing_svc, auth_svc, "Validate tokens", "HTTP/REST")
+
+
+
+      ' Admin tool connections (read-only for ops)
+      Rel_U(dbgate, mysql_auth, "MySQL Driver")
+      Rel_U(dbgate, mysql_files, "MySQL Driver")
+      Rel_U(dbgate, pg_vet, "Postgres Driver")
+      Rel_U(dbgate, mongo_vet, "Mongo Driver")
+      Rel_U(dbgate, mongo_billing, "Mongo Driver")
+      Rel_U(dbgate, mongo_visits, "Mongo Driver")
+      Rel_U(dbgate, mongo_customers, "Mongo Driver")
+      Rel_U(dbgate, mongo_inventory, "Mongo Driver")
+      Rel_U(dbgate, mongo_products, "Mongo Driver")
+      Rel_U(dbgate, mongo_carts, "Mongo Driver")
+
+
+' Routes through reverse proxy
+Rel_D(rp, bw, "HTTP", "*.benmusicgeek.synology.me")
+Rel_D(bw, petclinic_fe, "HTTP", "petclinic.benmusicgeek.synology.me")
+Rel_D(bw, api_gateway, "HTTP", "petclinic-backend.benmusicgeek.synology.me")
+Rel_D(bw, dbgate, "HTTP", "petclinic-admin-db.benmusicgeek.synology.me")
+dbgate --right[hidden]-- bw
+Rel_D(bw, minio_s3, "HTTP", "petclinic-bucket.benmusicgeek.synology.me")
+}
+
+
+Rel_D(browser, ddns, "DNS lookup", "UDP/TCP 53")
+Rel_D(mobile_browser, ddns, "DNS lookup", "UDP/TCP 53")
+rp --up[hidden]-- ddns
+Rel_D(browser, rp, "HTTPS", "*.benmusicgeek.synology.me")
+Rel_D(mobile_browser, rp, "HTTPS", "*.benmusicgeek.synology.me")
+
+
+SHOW_LEGEND()
+@enduml
