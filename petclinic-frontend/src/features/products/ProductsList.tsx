@@ -1,5 +1,5 @@
-/* eslint-disable import/default */
-import React, { useState, useEffect, useCallback, JSX } from 'react';
+import * as React from 'react';
+import { useState, useEffect, useCallback, JSX } from 'react';
 import { getAllProducts } from '@/features/products/api/getAllProducts.ts';
 import './ProductList.css';
 import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
