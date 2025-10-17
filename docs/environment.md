@@ -26,10 +26,10 @@ VITE_BACKEND_URL="https://your-production-domain.com/api/v2/gateway/"
 
 ### Angular Frontend (angular-frontend)
 
-**No environment variables required!**
+No environment variables required
 
 The Angular frontend uses relative URLs for API calls (`/api/gateway/...`) which are handled by:
-- **Development**: Vite proxy (configured in `vite.config.js`) proxies `/api` to `http://localhost:8080`
-- **Production**: Nginx proxy (configured in `nginx.conf`) proxies `/api` to `http://api-gateway:8080`
+- Development: Vite proxy (configured in `vite.config.js`) proxies `/api` to `http://localhost:8080`
+- Production: Nginx proxy (configured in `nginx.conf`) proxies `/api` to `http://api-gateway:8080`
 
-Everything works out of the box with no configuration needed.
+

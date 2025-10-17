@@ -23,7 +23,7 @@ services:
     ports:
       - "4200:4200"
     volumes:
-      - ./angular-frontend/src:/app/src
+      - ./angular-frontend/public:/app/public
     depends_on:
       - api-gateway
 
