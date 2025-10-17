@@ -28,7 +28,7 @@ public class CustomerBillsController {
 
     private final BillService billService;
 
-    private JwtLogger jwtLogger;
+    private final JwtLogger jwtLogger;
 
     public CustomerBillsController(BillService billService, JwtLogger jwtLogger) {
         this.billService = billService;
