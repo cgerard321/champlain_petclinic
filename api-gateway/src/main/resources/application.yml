@@ -40,7 +40,7 @@ logging:
     com.petclinic: DEBUG
 
 frontend:
-  url: http://localhost:3000,http://localhost:8082
+  url: http://localhost:3000,http://localhost:4200
 
 ---
 spring:
@@ -93,7 +93,7 @@ logging:
     com.petclinic: DEBUG
 
 frontend:
-  url: http://localhost:3000,http://localhost:8082
+  url: http://localhost:3000,http://localhost:4200
 
 ---
 spring:

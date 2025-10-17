@@ -16,10 +16,10 @@
         <td>{{bill.billId}}</td>
         <td>{{bill.customerId}}</td>
         <td>{{bill.vetId}}</td>
-        <td><a href="http://localhost:8080/#!/vets/details/{{bill.vetId}}">Vet Details</a></td>
-        <td><a href="http://localhost:8080/#!/bills/details/{{bill.billId}}/owner/{{bill.customerId}}">Bill Details</a></td>
+        <td><a href="#!/vets/details/{{bill.vetId}}">Vet Details</a></td>
+        <td><a href="#!/bills/details/{{bill.billId}}/owner/{{bill.customerId}}">Bill Details</a></td>
     </tr>
 </table>
-<a class="newBtn btn btn-primary" href="http://localhost:8080/#!/bills">
+<a class="newBtn btn btn-primary" href="#!/bills">
     View all Bills</a> <br>
 <a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBillsByVetId(bill.vetId)">Delete All Bills</a>

@@ -24,7 +24,7 @@ default-admin:
 frontend:
   url: http://localhost:8080/api/v2/gateway
 customer-frontend:
-  url: http://localhost:3000,http://localhost:8082
+  url: http://localhost:3000,http://localhost:4200
 
 
 ---
@@ -114,7 +114,7 @@ emailing-service:
 frontend:
   url: http://localhost:8080/api/v2/gateway
 customer-frontend:
-  url: http://localhost:3000,http://localhost:8082
+  url: http://localhost:3000,http://localhost:4200
 
 logging:
   level:

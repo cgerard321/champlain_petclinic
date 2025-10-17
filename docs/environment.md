@@ -11,8 +11,8 @@ Back to [Main page](../README.md)
 
 **Required Environment Variables:**
 
+### React Frontend (petclinic-frontend)
 ```bash
-# For Vite (React) Frontend
 # Create a file in the root of the petclinic-frontend folder: .env
 # For development
 VITE_ENV=dev
@@ -23,3 +23,13 @@ VITE_BACKEND_URL="http://localhost:8080/api/v2/gateway/"
 VITE_ENV=prod
 VITE_BACKEND_URL="https://your-production-domain.com/api/v2/gateway/"
 ```
+
+### Angular Frontend (angular-frontend)
+
+**No environment variables required!**
+
+The Angular frontend uses relative URLs for API calls (`/api/gateway/...`) which are handled by:
+- **Development**: Vite proxy (configured in `vite.config.js`) proxies `/api` to `http://localhost:8080`
+- **Production**: Nginx proxy (configured in `nginx.conf`) proxies `/api` to `http://api-gateway:8080`
+
+Everything works out of the box with no configuration needed.

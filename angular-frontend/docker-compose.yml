@@ -10,9 +10,15 @@ services:
       args:
         - BUILD_MODE=development
     ports:
-      - "8082:8082"
+      - "4200:4200"
     volumes:
       - ./src:/app/src
     environment:
       - NODE_ENV=development
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:4200"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

@@ -110,7 +110,7 @@ class UserControllerIntegrationTest {
         webTestClient.post()
                 .uri("/users/validate-token")
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Origin", "http://localhost:3000")//We only accept requests from 3000(React frontend), 8082(Angular frontend) and 9200(for tests)
+                .header("Origin", "http://localhost:3000")//We only accept requests from 3000(React frontend), 4200(Angular frontend) and 9200(for tests)
                 .cookie("Bearer", token)
                 .bodyValue(token)
                 .exchange()

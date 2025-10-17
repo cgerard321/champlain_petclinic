@@ -60,7 +60,7 @@ cd angular-frontend
 npm install
 npm run dev
 ```
-Access at: `localhost:8082/`
+Access at: `localhost:4200/`
 
 ### Running Frontends with Backend
 1. Start backend services (without frontends):

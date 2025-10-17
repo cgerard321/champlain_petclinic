@@ -1,7 +1,7 @@
 
 <h2 class="titleOwner">Bill History for customer {{$ctrl.owner.firstName}}, {{$ctrl.owner.lastName}}</h2>
 
-<a class="newBtn btn btn-primary" href="http://localhost:8080/#!/bills">View all Bills</a>
+<a class="newBtn btn btn-primary" href="#!/bills">View all Bills</a>
 <a class="btn btn-danger float-end" href="javascript:void(0)" ng-click="deleteBillsByOwnerId($ctrl.owner.id)">DELETE ALL BILLS FOR {{$ctrl.owner.firstName}}, {{$ctrl.owner.lastName}}</a>
 
 <table class="table table-striped">
@@ -17,8 +17,8 @@
     <tr id="customerId" ng-repeat="bill in $ctrl.billsByOwnerId">
         <td>{{bill.billId}}</td>
         <td>{{bill.customerId}}</td>
-        <td><a href="http://localhost:8080/#!/owners/details/{{bill.customerId}}">Owner Details</a></td>
-        <td><a href="http://localhost:8080/#!/bills/details/{{bill.billId}}/owner/{{bill.customerId}}">Bill Details</a></td>
+        <td><a href="#!/owners/details/{{bill.customerId}}">Owner Details</a></td>
+        <td><a href="#!/bills/details/{{bill.billId}}/owner/{{bill.customerId}}">Bill Details</a></td>
     </tr>
 
 </table>

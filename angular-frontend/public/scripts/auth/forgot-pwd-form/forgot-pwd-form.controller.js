@@ -14,7 +14,7 @@ angular.module('forgotPwdForm')
             console.log($scope.isLoading)
             $http.post("/api/gateway/users/forgot_password", {
                 email: $scope.forgotPwdPost.email,
-                url: "http://localhost:8080/#!/reset_password/"
+                url: window.location.origin + "/#!/reset_password/"
             })
 
                 .then(response => {

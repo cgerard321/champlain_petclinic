@@ -5,7 +5,7 @@
 <div class="container mt-5">
     <div class="row">
         <div class="col-md-6">
-            <a class="btn btn-primary" href="http://localhost:8080/#!/bills">Back to History</a>
+            <a class="btn btn-primary" href="#!/bills">Back to History</a>
         </div>
         <div class="col-md-6 text-end">
             <a class="newBtn btn btn-primary" ui-sref="billEdit({ billId: $ctrl.bills.billId, method: 'edit' })">Update Bill</a>
@@ -47,9 +47,9 @@
             <hr>
             <br>
             <div>
-                <a class="newBtn btn btn-primary" href="http://localhost:8080/#!/bills/customerId/{{$ctrl.bills.customerId}}">
+                <a class="newBtn btn btn-primary" href="#!/bills/customerId/{{$ctrl.bills.customerId}}">
                     All bills of customer</a>
-                <a class="newBtn btn btn-primary" href="http://localhost:8080/#!/bills/vetId/{{$ctrl.bills.vetId}}">
+                <a class="newBtn btn btn-primary" href="#!/bills/vetId/{{$ctrl.bills.vetId}}">
                     All bills of veterinarian</a>
             </div>
         </div>

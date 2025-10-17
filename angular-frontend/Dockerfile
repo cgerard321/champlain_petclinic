@@ -26,12 +26,13 @@ RUN chown -R nginx:0 /usr/share/nginx/html && \
     chmod -R g+r+rwX /usr/share/nginx/html
 
 COPY --from=build /app/dist /usr/share/nginx/html
+# Copy node_modules for Angular dependencies
 COPY --from=build /app/node_modules /usr/share/nginx/html/node_modules
 # Copy the default Nginx configuration file
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# Expose port 8082 for the NGINX web server
-EXPOSE 8082
+# Expose port 4200 for the NGINX web server
+EXPOSE 4200
 
 # Command to run NGINX
 CMD ["nginx", "-g", "daemon off;"]

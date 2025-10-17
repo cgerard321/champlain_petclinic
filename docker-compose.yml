@@ -21,7 +21,7 @@ services:
       args:
         - BUILD_MODE=development
     ports:
-      - "8082:8082"
+      - "4200:4200"
     volumes:
       - ./angular-frontend/src:/app/src
     depends_on:

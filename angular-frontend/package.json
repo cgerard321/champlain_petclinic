@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --port 8082 --host --mode dev",
+    "dev": "vite --port 4200 --host --mode dev",
     "build": "vite build",
     "build:development": "vite build --mode dev",
     "build:production": "vite build --mode prod",
@@ -27,8 +27,6 @@
   "devDependencies": {
     "vite": "^5.4.8",
     "@vitejs/plugin-legacy": "^5.4.0",
-    "@playwright/test": "^1.48.2",
-    "eslint": "^8.57.1",
-    "eslint-plugin-playwright": "^2.2.2"
+    "@playwright/test": "^1.48.2"
   }
 }

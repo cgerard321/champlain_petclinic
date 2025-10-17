@@ -1,7 +1,8 @@
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import legacy from '@vitejs/plugin-legacy';
 
-export default defineConfig(() => {
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
   return {
     plugins: [
       legacy({
@@ -10,13 +11,13 @@ export default defineConfig(() => {
     ],
     resolve: {
       alias: {
-        '@': new URL('./src/', import.meta.url).pathname,
+        '@': new URL('./public/', import.meta.url).pathname,
       },
     },
     build: {
       modulePreload: false,
       target: 'esnext',
-      assetsDir: 'src/assets',
+      assetsDir: 'public/assets',
       rollupOptions: {
         input: {
           main: './index.html'
@@ -25,11 +26,11 @@ export default defineConfig(() => {
     },
     publicDir: 'public',
     server: {
-      port: 8082,
+      port: 4200,
       host: true,
       proxy: {
         '/api': {
-          target: 'http://localhost:8080',
+          target: env.VITE_API_TARGET || 'http://localhost:8080',
           changeOrigin: true,
           secure: false
         }

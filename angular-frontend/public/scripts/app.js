@@ -1,4 +1,5 @@
 'use strict';
+
 // Whitelist for all things related to auth and Q 401/403 handling
 const whiteList = new Set([
     'login',
@@ -9,7 +10,7 @@ const whiteList = new Set([
 
 /* App Module */
 const petClinicApp = angular.module('petClinicApp', [
-    'ui.router', 'ui.bootstrap', 'layoutNav', 'layoutFooter', 'layoutWelcome', 'ownerList', 'ownerDetails', 'ownerForm', 'ownerRegister', 'petRegister', 'petForm',
+    'ngResource', 'ui.router', 'ui.bootstrap', 'layoutNav', 'layoutFooter', 'layoutWelcome', 'ownerList', 'ownerDetails', 'ownerForm', 'ownerRegister', 'petRegister', 'petForm',
     'productDetailsInfo', 'productForm', 'productList', 'productUpdateForm', 'visits', 'visit', 'visitList' , 'vetList','vetForm',
     'vetDetails', 'billForm', 'billUpdateForm', 'loginForm', 'rolesDetails', 'signupForm',
     'billDetails', 'billsByOwnerId', 'billHistory','billsByVetId','inventoriesList', 'inventoriesForm','inventoriesService','inventoriesProductList', 'inventoriesUpdateForm', 'inventoriesProductUpdateForm','inventoriesProductDetailsInfo','inventoriesProductForm',
@@ -22,12 +23,6 @@ petClinicApp.factory("authProvider", ["$window", function ($window) {
 
     return {
         setUser: ({ username, email, userId, roles }) => {
-            console.log("Setting user")
-            console.log(username)
-            console.log(email)
-            console.log(userId)
-            console.log(roles)
-
             $window.localStorage.setItem("username", username)
             $window.localStorage.setItem("email", email)
             $window.localStorage.setItem("UUID", userId)
@@ -35,7 +30,6 @@ petClinicApp.factory("authProvider", ["$window", function ($window) {
             roles.forEach(role => {
                 rolesArr.push(role.name)
             });
-            console.log(rolesArr.toString())
             $window.localStorage.setItem("roles", rolesArr.toString())
         },
         getUser: () => ({
@@ -64,7 +58,6 @@ petClinicApp.factory("httpErrorInterceptor", ["$q", "$location", "authProvider",
                 return $q(() => null)
             }else if(rej.status === 403){
                 $location.path('/welcome');
-                console.log("You are not authorized to access this page")
                 return $q(() => null)
             }
 
@@ -75,18 +68,13 @@ petClinicApp.factory("httpErrorInterceptor", ["$q", "$location", "authProvider",
 
 petClinicApp.run(['$rootScope', '$location', 'authProvider', function ($rootScope, $location, authProvider) {
     $rootScope.$on('$locationChangeSuccess', function (event) {
-
         if(whiteList.has($location.path().substring(1)) || $location.path().startsWith('/reset_password')) {
-            return console.log("WHITE LISTED: Ignoring");
+            return;
         }
 
         if (!authProvider.isLoggedIn()) {
-            console.log('DENY : Redirecting to Login');
             event.preventDefault();
             $location.path('/login');
-        }
-        else {
-            console.log('ALLOW');
         }
     });
 }])
