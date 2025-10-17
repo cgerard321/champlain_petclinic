@@ -19,40 +19,40 @@ jobs:
     runs-on: "ubuntu-22.04"
     timeout-minutes: 15
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-    - name: Cache Gradle packages
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-api-gateway-${{ hashFiles('**/api-gateway/*.gradle*', '**/api-gateway/gradle-wrapper.properties') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-api-gateway-
-          ${{ runner.os }}-gradle-
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v3
-    - name: Make gradlew executable
-      run: chmod +x ./gradlew
-      working-directory: ./api-gateway
-    - name: Build with Gradle Wrapper
-      run: ./gradlew clean build jacocoTestReport --daemon
-      working-directory: ./api-gateway
-    - name: Verify coverage threshold
-      run: ./gradlew jacocoTestCoverageVerification --daemon
-      working-directory: ./api-gateway
-    - name: Upload coverage reports
-      uses: actions/upload-artifact@v4
-      with:
-        name: coverage-reports-api-gateway
-        path: ./api-gateway/build/reports/jacoco/test/html/
-        retention-days: 30
-      if: always()
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-api-gateway-${{ hashFiles('**/api-gateway/*.gradle*', '**/api-gateway/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-api-gateway-
+            ${{ runner.os }}-gradle-
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+        working-directory: ./api-gateway
+      - name: Build with Gradle Wrapper
+        run: ./gradlew clean build jacocoTestReport --daemon
+        working-directory: ./api-gateway
+      - name: Verify coverage threshold
+        run: ./gradlew jacocoTestCoverageVerification --daemon
+        working-directory: ./api-gateway
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports-api-gateway
+          path: ./api-gateway/build/reports/jacoco/test/html/
+          retention-days: 30
+        if: always()
 
   visits_service_test:
     runs-on: "ubuntu-22.04"
@@ -404,7 +404,7 @@ jobs:
           echo "View detailed reports in the Actions artifacts." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Actual Coverage Results" >> $GITHUB_STEP_SUMMARY
-          
+
           for report_dir in coverage-reports/*/; do
             if [ -d "$report_dir" ]; then
               service_name=$(basename "$report_dir")
