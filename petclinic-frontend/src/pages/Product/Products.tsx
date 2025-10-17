@@ -2,7 +2,7 @@ import { NavBar } from '@/layouts/AppNavBar.tsx';
 import ProductsList from '@/features/products/ProductsList.tsx';
 import './Products.css';
 import TrendingList from '@/features/products/TrendingList';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import ProductSearch from '@/features/products/components/ProductSearch';
 import StarRating from '@/features/products/components/StarRating';
 import { ProductType } from '@/features/products/api/ProductTypeEnum';
@@ -41,15 +41,26 @@ export default function Products(): JSX.Element {
     setValidationMessage('');
   };
 
-  const filters = {
-    minPrice,
-    maxPrice,
-    ratingSort,
-    minStars,
-    maxStars,
-    deliveryType,
-    productType,
-  };
+  const filters = useMemo(
+    () => ({
+      minPrice,
+      maxPrice,
+      ratingSort,
+      minStars,
+      maxStars,
+      deliveryType,
+      productType,
+    }),
+    [
+      minPrice,
+      maxPrice,
+      ratingSort,
+      minStars,
+      maxStars,
+      deliveryType,
+      productType,
+    ]
+  );
 
   return (
     <div>
@@ -102,7 +113,7 @@ export default function Products(): JSX.Element {
           {showSortOptions && (
             <div className="sort-options" role="menu" id="sort-menu">
               <button role="menuitem" onClick={() => handleSort('default')}>
-                Sort by
+                Sort by Default
               </button>
               <button role="menuitem" onClick={() => handleSort('rating-desc')}>
                 Rating: High → Low

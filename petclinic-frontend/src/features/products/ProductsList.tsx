@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, JSX } from 'react';
+/* eslint-disable import/default */
+import React, { useState, useEffect, useCallback, JSX } from 'react';
 import { getAllProducts } from '@/features/products/api/getAllProducts.ts';
 import './ProductList.css';
 import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
@@ -28,7 +29,7 @@ interface ProductsListProps {
   sortCriteria?: string;
 }
 
-export default function ProductList({
+const ProductList = function Productlist({
   searchQuery,
   view,
   filters,
@@ -185,4 +186,5 @@ export default function ProductList({
       </div>
     </div>
   );
-}
+};
+export default React.memo(ProductList);
