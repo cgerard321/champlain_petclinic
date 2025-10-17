@@ -1,5 +1,6 @@
 package com.petclinic.visits.visitsservicenew.BusinessLayer;
 
+import com.petclinic.visits.visitsservicenew.BusinessLayer.Prescriptions.PrescriptionService;
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
@@ -17,8 +18,10 @@ import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
 import com.petclinic.visits.visitsservicenew.Utils.EntityDtoUtil;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FilesServiceClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -27,9 +30,7 @@ import reactor.core.publisher.Mono;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.Base64;
 
 import static java.lang.String.format;
 
@@ -56,6 +57,11 @@ public class VisitServiceImpl implements VisitService {
     private final EntityDtoUtil entityDtoUtil;
     private final AuthServiceClient authServiceClient;
     private final MailService mailService;
+
+    private final PrescriptionService prescriptionService;
+
+    @Autowired
+    FilesServiceClient filesServiceClient;
 
     /**
      * Get all visits from the repo
@@ -141,16 +147,48 @@ public class VisitServiceImpl implements VisitService {
     /**
      * We get a single visit by its VisitId
      *
-     * @param visitId The visit ID we search with
+     * @param visitId             The visit ID we search with
      * @return Return a single visit with the corresponding ID
      */
+//    @Override
+//    public Mono<VisitResponseDTO> getVisitByVisitId(String visitId) {
+//        return repo.findByVisitId(visitId)
+//                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("No visit was found with visitId: " + visitId))))
+//                .doOnNext(visit -> log.debug("The visit entity is: " + visit.toString()))
+//                .flatMap(entityDtoUtil::toVisitResponseDTO);
+//    }
+
     @Override
-    public Mono<VisitResponseDTO> getVisitByVisitId(String visitId) {
+    public Mono<VisitResponseDTO> getVisitByVisitId(String visitId, boolean includePrescription) {
         return repo.findByVisitId(visitId)
-                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("No visit was found with visitId: " + visitId))))
-                .doOnNext(visit -> log.debug("The visit entity is: " + visit.toString()))
-                .flatMap(entityDtoUtil::toVisitResponseDTO);
+                .switchIfEmpty(Mono.error(new NotFoundException("Visit with ID " + visitId + " not found")))
+                .flatMap(visit ->
+                        entityDtoUtil.toVisitResponseDTO(visit)
+                                .flatMap(dto -> {
+                                    String prescriptionId = visit.getPrescriptionId();
+                                    if (includePrescription && prescriptionId != null && !prescriptionId.isBlank()) {
+                                        // Fetch the prescription PDF file details from Files Service
+                                        return filesServiceClient.getFile(prescriptionId)
+                                                .map(file -> {
+                                                    dto.setPrescription(file); // expects FileResponseDTO
+                                                    return dto;
+                                                })
+                                                .onErrorResume(ex -> {
+                                                    log.warn("Could not retrieve prescription file {} for visit {}: {}", prescriptionId, visitId, ex.getMessage());
+                                                    return Mono.just(dto); // return visit without prescription file
+                                                });
+                                    }
+                                    // No prescription requested or linked
+                                    return Mono.just(dto);
+                                })
+                )
+                .doOnError(ex -> log.error("Error retrieving visit {}: {}", visitId, ex.getMessage()));
     }
+
+
+
+
+
 
     /**
      * Safe add visit. Need authentication to work and uses JwtToken

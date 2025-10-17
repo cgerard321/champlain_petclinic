@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 import { getAllOwnerVisits } from './api/getAllOwnerVisits';
 import { getAllVetVisits } from './api/getAllVetVisits';
+import { downloadPrescription } from './Prescription/api/downloadPrescription';
 
 export default function CustomerVisitListTable(): JSX.Element {
   const { user } = useUser();
@@ -44,6 +45,25 @@ export default function CustomerVisitListTable(): JSX.Element {
     fetchVisits();
   }, [user.userId, isVet]);
 
+  const handleDownloadPrescription = async (
+    visitId: string,
+    prescriptionId: string
+  ): Promise<void> => {
+    try {
+      const blob = await downloadPrescription(visitId, prescriptionId);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `prescription-${visitId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      setError('Failed to download prescription');
+    }
+  };
+
   return (
     <div>
       <div className="visit-actions">
@@ -82,6 +102,7 @@ export default function CustomerVisitListTable(): JSX.Element {
               <th>Visit Description</th>
               <th>Vet Name</th>
               <th>Status</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -110,6 +131,22 @@ export default function CustomerVisitListTable(): JSX.Element {
                   }}
                 >
                   {visit.status}
+                </td>
+                <td>
+                  {visit.prescriptionId && (
+                    <button
+                      className="btn btn-primary btn-sm"
+                      onClick={() =>
+                        handleDownloadPrescription(
+                          visit.visitId,
+                          visit.prescriptionId!
+                        )
+                      }
+                      title="Download Prescription"
+                    >
+                      📄 Download Prescription
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}

@@ -87,8 +87,8 @@ public class VisitController {
      * @return The visit we searched for or a not found exception
      */
     @GetMapping("/{visitId}")
-    public Mono<ResponseEntity<VisitResponseDTO>> getVisitByVisitId(@PathVariable String visitId) {
-        return visitService.getVisitByVisitId(visitId)
+    public Mono<ResponseEntity<VisitResponseDTO>> getVisitByVisitId(@PathVariable String visitId, @RequestParam(required = false, defaultValue = "false") boolean includePrescription) {
+        return visitService.getVisitByVisitId(visitId, includePrescription)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }

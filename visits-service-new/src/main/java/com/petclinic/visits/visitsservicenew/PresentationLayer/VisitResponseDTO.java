@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FileRequestDTO;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FileResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -36,5 +38,6 @@ public class VisitResponseDTO {
     private LocalDateTime visitEndDate;
     @JsonProperty("isEmergency")
     private Boolean isEmergency;
+    private FileResponseDTO prescription;
 
 }

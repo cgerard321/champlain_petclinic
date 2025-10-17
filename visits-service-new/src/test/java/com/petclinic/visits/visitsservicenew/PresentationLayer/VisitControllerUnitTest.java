@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -125,7 +124,7 @@ class VisitControllerUnitTest {
 
     @Test
     void getVisitByVisitId() {
-        when(visitService.getVisitByVisitId(anyString())).thenReturn(Mono.just(visitResponseDTO));
+        when(visitService.getVisitByVisitId(anyString(), includePrescription)).thenReturn(Mono.just(visitResponseDTO));
 
         webTestClient.get()
                 .uri("/visits/" + Visit_UUID_OK)
@@ -141,7 +140,7 @@ class VisitControllerUnitTest {
                 .jsonPath("$.practitionerId").isEqualTo(visitResponseDTO.getPractitionerId())
                 .jsonPath("$.status").isEqualTo("UPCOMING");
 
-        verify(visitService, times(1)).getVisitByVisitId(Visit_UUID_OK);
+        verify(visitService, times(1)).getVisitByVisitId(Visit_UUID_OK, includePrescription);
     }
 
     @Test

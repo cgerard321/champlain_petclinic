@@ -2,6 +2,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
 import federation from '@originjs/vite-plugin-federation';
+import path from 'path';
 
 export default defineConfig(() => {
   return {
@@ -14,7 +15,7 @@ export default defineConfig(() => {
     ],
     resolve: {
       alias: {
-        '@/': new URL('./src/', import.meta.url).pathname,
+        '@': path.resolve(__dirname, './src'),
       },
     },
     envDir: 'src/environments/',

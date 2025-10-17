@@ -14,6 +14,9 @@ app:
   mailer-service:
     host: localhost
     port: 8888
+  files-service:
+    host: localhost
+    port: 8000
 
 
 logging:
@@ -44,6 +47,11 @@ spring:
       username: root
       password: password
       authentication-database: admin
+
+app:
+  files-service:
+    host: localhost
+    port: 8000
 ---
 spring:
   config:
@@ -81,6 +89,9 @@ app:
   mailer-service:
     host: mailer-service
     port: 8080
+  files-service:
+    host: localhost
+    port: 8000
 
 logging:
   level:
