@@ -1,12 +1,15 @@
-import axios from 'axios';
+import axiosInstance from '@/shared/api/axiosInstance';
 
 export const downloadPrescription = async (
   visitId: string,
   prescriptionId: string
 ): Promise<Blob> => {
-  const response = await axios.get(
+  const response = await axiosInstance.get(
     `/visits/${visitId}/prescriptions/${prescriptionId}/pdf`,
-    { responseType: 'blob' }
+    {
+      responseType: 'blob',
+      useV2: false,
+    }
   );
   return response.data;
 };

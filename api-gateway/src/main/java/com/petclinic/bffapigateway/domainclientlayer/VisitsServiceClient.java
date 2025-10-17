@@ -29,6 +29,7 @@ import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.UUID;
@@ -418,7 +419,7 @@ public class VisitsServiceClient {
     public Mono<PrescriptionResponseDTO> createPrescription(String visitId, Mono<PrescriptionResponseDTO> request) {
         String url = UriComponentsBuilder
                 .fromHttpUrl(visitServiceUrl)
-                .path("/visits/{visitId}/prescriptions")
+                .path("/{visitId}/prescriptions")
                 .buildAndExpand(visitId)
                 .toUriString();
 
