@@ -85,6 +85,7 @@ export function NavBar(): JSX.Element {
           aria-controls="basic-navbar-nav"
           onClick={toggleNavbar}
         />
+
         <Navbar.Collapse
           id="basic-navbar-nav"
           className={navbarOpen ? 'show' : ''}
@@ -96,7 +97,7 @@ export function NavBar(): JSX.Element {
             {
               // check if user is logged in
             }
-            {user && (
+            {user.userId && (
               <>
                 {(isAdmin || isVet) && (
                   <Nav.Link as={Link} to={AppRoutePaths.Vet}>
@@ -218,7 +219,7 @@ export function NavBar(): JSX.Element {
             )}
           </Nav>
           <Nav className="ms-auto">
-            {user ? (
+            {user.userId ? (
               <NavDropdown title={user.username} id="user-dropdown">
                 {isOwner && (
                   <NavDropdown.Item
