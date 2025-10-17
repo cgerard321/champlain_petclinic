@@ -3,15 +3,11 @@ package com.petclinic.bffapigateway.presentationlayer;
 import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.Auth.*;
 import com.petclinic.bffapigateway.exceptions.InvalidCredentialsException;
-import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.Bills.PaymentRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.*;
 import com.petclinic.bffapigateway.dtos.Vets.*;
-import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
-import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewResponseDTO;
-import com.petclinic.bffapigateway.utils.JwtLogger;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
@@ -58,7 +54,6 @@ public class BFFApiGatewayController {
 
     private final InventoryServiceClient inventoryServiceClient;
 
-    private final JwtLogger jwtLogger;
 
 
     //to be changed
@@ -95,7 +90,6 @@ public class BFFApiGatewayController {
             @PathVariable("billId") String billId,
             @Valid @RequestBody PaymentRequestDTO paymentRequestDTO,
             @CookieValue("Bearer") String jwtToken) {
-        jwtLogger.logJwt("API Gateway", "BFFApiGatewayController", "payBill", jwtToken);
         return billServiceClient.payBill(customerId, billId, paymentRequestDTO, jwtToken)
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().build()));
