@@ -139,8 +139,7 @@ class ProductInventoryServiceUnitTest {
                 .thenReturn(Flux.just(product, product2, product1));
 
         Flux<ProductResponseDTO> productResponseDTOMono = productInventoryService
-                .getProductsInInventoryByInventoryIdAndProductsFieldsPagination(product.getInventoryId(), null,null, null,
-                        pageable);
+                .getProductsInInventoryByInventoryIdAndProductsFieldsPagination(product.getInventoryId(), null, null, null, null, null, null, pageable);
         StepVerifier.create(productResponseDTOMono)
                 .expectNextMatches(prod -> prod.getProductId().equals(product.getProductId()))
                 .expectNextMatches(prod -> prod.getProductId().equals(product2.getProductId()))
@@ -151,17 +150,16 @@ class ProductInventoryServiceUnitTest {
     @Test
     void getProductsInInventoryByInventoryIdAndProductFieldsPagination_WithPriceAndQuantity_ShouldSucceed() {
         Pageable pageable = PageRequest.of(0, 2);
-        when(productRepository.findAllProductsByInventoryIdAndProductPriceAndProductQuantity(
-                product.getInventoryId(), 10.00, 5))
+        when(productRepository.findAllProductsByInventoryIdAndProductPriceBetween(
+                product.getInventoryId(), 10.00, 200.00))
                 .thenReturn(Flux.just(product, product2));
 
         Flux<ProductResponseDTO> productResponseDTOMono = productInventoryService
                 .getProductsInInventoryByInventoryIdAndProductsFieldsPagination(
-                        product.getInventoryId(), null, 10.00, 5, pageable);
+                        product.getInventoryId(), null, 10.00, 200.00, 10, null, null, pageable);
 
         StepVerifier.create(productResponseDTOMono)
                 .expectNextMatches(prod -> prod.getProductId().equals(product.getProductId()))
-                .expectNextMatches(prod -> prod.getProductId().equals(product2.getProductId()))
                 .expectComplete()
                 .verify();
     }
@@ -169,13 +167,13 @@ class ProductInventoryServiceUnitTest {
     @Test
     void getProductsInInventoryByInventoryIdAndProductFieldsPagination_WithPriceOnly_ShouldSucceed() {
         Pageable pageable = PageRequest.of(0, 2);
-        when(productRepository.findAllProductsByInventoryIdAndProductPrice(
-                product.getInventoryId(), 10.00))
+        when(productRepository.findAllProductsByInventoryIdAndProductPriceBetween(
+                product.getInventoryId(), 10.00, 200.00))
                 .thenReturn(Flux.just(product, product2));
 
         Flux<ProductResponseDTO> productResponseDTOMono = productInventoryService
                 .getProductsInInventoryByInventoryIdAndProductsFieldsPagination(
-                        product.getInventoryId(), null, 10.00, null, pageable);
+                        product.getInventoryId(), null, 10.00, 200.00, null, null, null, pageable);
 
         StepVerifier.create(productResponseDTOMono)
                 .expectNextMatches(prod -> prod.getProductId().equals(product.getProductId()))
@@ -193,7 +191,7 @@ class ProductInventoryServiceUnitTest {
 
         Flux<ProductResponseDTO> productResponseDTOMono = productInventoryService
                 .getProductsInInventoryByInventoryIdAndProductsFieldsPagination(
-                        product.getInventoryId(), null, null, 5, pageable);
+                        product.getInventoryId(), null, null, null, 5, null, null, pageable);
 
         StepVerifier.create(productResponseDTOMono)
                 .expectNextMatches(prod -> prod.getProductId().equals(product.getProductId()))
@@ -211,7 +209,7 @@ class ProductInventoryServiceUnitTest {
 
         Flux<ProductResponseDTO> productResponseDTOMono = productInventoryService
                 .getProductsInInventoryByInventoryIdAndProductsFieldsPagination(
-                        product.getInventoryId(), "name", null, null, pageable);
+                        product.getInventoryId(), "name", null, null, null, null, null, pageable);
 
         StepVerifier.create(productResponseDTOMono)
                 .expectNextMatches(prod -> prod.getProductId().equals(product.getProductId()))
@@ -224,28 +222,28 @@ class ProductInventoryServiceUnitTest {
     void getAllProductsByInventoryId_andProductName_andProductPrice_andProductQuantity_withValidFields_shouldSucceed(){
         String inventoryId = "1";
         String productName = "Benzodiazepines";
-        Double productPrice = 100.00;
+        Double minPrice = 100.00;
+        Double maxPrice = 100.00;
         Integer productQuantity = 10;
-        Double productSalePrice = 200.00;
-
-
+        Double minSalePrice = 15.99;
+        Double maxSalePrice = 15.99;
 
         when(productRepository
-                .findAllProductsByInventoryIdAndProductNameAndProductPriceAndProductQuantityAndProductSalePrice(
+                .findAllProductsByInventoryIdAndProductPriceBetween(
                         inventoryId,
-                        productName,
-                        productPrice,
-                        productQuantity,
-                        productSalePrice))
+                        minPrice,
+                        maxPrice))
                 .thenReturn(Flux.just(product));
 
         Flux<ProductResponseDTO> productResponseDTOMono = productInventoryService
                 .getProductsInInventoryByInventoryIdAndProductsField(
                         inventoryId,
                         productName,
-                        productPrice,
+                        minPrice,
+                        maxPrice,
                         productQuantity,
-                        productSalePrice);
+                        minSalePrice,
+                        maxSalePrice);
 
         StepVerifier
                 .create(productResponseDTOMono)
@@ -256,23 +254,25 @@ class ProductInventoryServiceUnitTest {
     @Test
     void getAllProductsByInventoryId_andProductPrice_andProductQuantity_withValidFields_shouldSucceed(){
         String inventoryId = "1";
-        Double productPrice = 100.00;
+        Double minPrice = 100.00;
+        Double maxPrice = 100.00;
         Integer productQuantity = 10;
 
-
         when(productRepository
-                .findAllProductsByInventoryIdAndProductPriceAndProductQuantity(
+                .findAllProductsByInventoryIdAndProductPriceBetween(
                         inventoryId,
-                        productPrice,
-                        productQuantity))
+                        minPrice,
+                        maxPrice))
                 .thenReturn(Flux.just(product));
 
         Flux<ProductResponseDTO> productResponseDTOMono = productInventoryService
                 .getProductsInInventoryByInventoryIdAndProductsField(
                         inventoryId,
                         null,
-                        productPrice,
+                        minPrice,
+                        maxPrice,
                         productQuantity,
+                        null,
                         null
                 );
 
@@ -309,19 +309,23 @@ class ProductInventoryServiceUnitTest {
     @Test
     void getAllProductsByInventoryId_andProductPrice_withValidFields_shouldSucceed(){
         String inventoryId = "1";
-        Double productPrice = 100.00;
+        Double minPrice = 100.00;
+        Double maxPrice = 100.00;
 
         when(productRepository
-                .findAllProductsByInventoryIdAndProductPrice(
+                .findAllProductsByInventoryIdAndProductPriceBetween(
                         inventoryId,
-                        productPrice))
+                        minPrice,
+                        maxPrice))
                 .thenReturn(Flux.just(product));
 
         Flux<ProductResponseDTO> productResponseDTOMono = productInventoryService
                 .getProductsInInventoryByInventoryIdAndProductsField(
                         inventoryId,
                         null,
-                        productPrice,
+                        minPrice,
+                        maxPrice,
+                        null,
                         null,
                         null);
 
@@ -347,7 +351,9 @@ class ProductInventoryServiceUnitTest {
                         inventoryId,
                         null,
                         null,
+                        null,
                         productQuantity,
+                        null,
                         null);
 
         StepVerifier
@@ -359,12 +365,14 @@ class ProductInventoryServiceUnitTest {
     @Test
     void getAllProductsByInventoryId_andProductSalePrice_withValidFields_shouldSucceed(){
         String inventoryId = "1";
-        Double productSalePrice = 20.00;
+        Double minSalePrice = 15.99;
+        Double maxSalePrice = 15.99;
 
         when(productRepository
-                .findAllProductsByInventoryIdAndProductSalePrice(
+                .findAllProductsByInventoryIdAndProductSalePriceBetween(
                         inventoryId,
-                        productSalePrice))
+                        minSalePrice,
+                        maxSalePrice))
                 .thenReturn(Flux.just(product));
 
         Flux<ProductResponseDTO> productResponseDTOMono = productInventoryService
@@ -373,7 +381,9 @@ class ProductInventoryServiceUnitTest {
                         null,
                         null,
                         null,
-                        productSalePrice);
+                        null,
+                        minSalePrice,
+                        maxSalePrice);
 
         StepVerifier
                 .create(productResponseDTOMono)
@@ -1290,6 +1300,8 @@ class ProductInventoryServiceUnitTest {
                         productName,
                         null,
                         null,
+                        null,
+                        null,
                         null);
 
         StepVerifier
@@ -1309,6 +1321,8 @@ class ProductInventoryServiceUnitTest {
         Flux<ProductResponseDTO> productResponseDTOMono = productInventoryService
                 .getProductsInInventoryByInventoryIdAndProductsField(
                         inventoryId,
+                        null,
+                        null,
                         null,
                         null,
                         null,
