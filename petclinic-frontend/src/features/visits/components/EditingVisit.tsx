@@ -8,6 +8,7 @@ import { updateVisit } from '../api/updateVisit';
 import { getAvailableVets, VetResponse } from '@/features/visits/api/getVets';
 
 import BasicModal from '@/shared/components/BasicModal';
+import PrescriptionModal from '@/features/visits/Prescription/prescriptionComponents/prescriptionModal';
 
 import './EditVisit.css';
 
@@ -28,6 +29,8 @@ type VisitType = {
   practitionerId: string;
   isEmergency: boolean;
   status: Status;
+  ownerFirstName?: string;
+  ownerLastName?: string;
 };
 
 const formatDate = (date: Date): string => {
@@ -56,6 +59,8 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
   const [showNotification, setShowNotification] = useState<boolean>(false);
 
   const [vets, setVets] = useState<VetResponse[]>([]);
+  const [showPrescriptionModal, setShowPrescriptionModal] =
+    useState<boolean>(false);
 
   useEffect(() => {
     const fetchVisitData = async (): Promise<void> => {
@@ -167,6 +172,32 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
     }
   };
 
+  const handlePrescriptionClick = (): void => {
+    setShowPrescriptionModal(true);
+  };
+
+  if (showPrescriptionModal) {
+    const prescriptionButton = (
+      <button className="button">Create Prescription</button>
+    );
+
+    return (
+      <PrescriptionModal
+        showButton={prescriptionButton}
+        visitId={visitId}
+        vetFirstName={
+          vets.find(vet => vet.vetId === visit.practitionerId)?.firstName || ''
+        }
+        vetLastName={
+          vets.find(vet => vet.vetId === visit.practitionerId)?.lastName || ''
+        }
+        ownerFirstName={visit.ownerFirstName || ''}
+        ownerLastName={visit.ownerLastName || ''}
+        petName={visit.petName}
+      />
+    );
+  }
+
   return (
     <BasicModal
       title="Edit Visit"
@@ -268,6 +299,18 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
             </div>
           </label>
         </div>
+        <br />
+        {visit.status === 'COMPLETED' && (
+          <div>
+            <button
+              type="button"
+              onClick={handlePrescriptionClick}
+              className="button"
+            >
+              Create Prescription
+            </button>
+          </div>
+        )}
       </form>
       {showNotification && <div className="notification">{successMessage}</div>}
     </BasicModal>
