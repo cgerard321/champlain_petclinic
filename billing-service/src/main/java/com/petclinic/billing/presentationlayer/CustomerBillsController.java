@@ -15,7 +15,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
@@ -31,9 +30,9 @@ public class CustomerBillsController {
 
     private JwtLogger jwtLogger;
 
-    public CustomerBillsController(BillService billService) {
+    public CustomerBillsController(BillService billService, JwtLogger jwtLogger) {
         this.billService = billService;
-        this.jwtLogger = new JwtLogger();
+        this.jwtLogger = jwtLogger;
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
