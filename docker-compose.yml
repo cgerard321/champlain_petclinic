@@ -24,6 +24,8 @@ services:
       - "8082:8082"
     volumes:
       - ./angular-frontend/src:/app/src
+    depends_on:
+      - api-gateway
 
   janus:
     image: nginx

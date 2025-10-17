@@ -1,67 +1,138 @@
-<div class="bColor"><h2 class="titleOwner form">Edit Owner</h2></div>
+<link href="/css/owner.css" rel="stylesheet" type="text/css"/>
 
-<form id="ownerForm" class="form-horizontal" enctype="multipart/form-data" ng-submit="$ctrl.submitOwnerForm()">
-    <div class="form-group formColor">
-        <label class="col-sm-2 control-label">First Name</label>
-        <div class="owner col-sm-6">
-            <input class="form-control col-sm-4" ng-model="$ctrl.owner.firstName" name="firstName"
-                   ng-disabled="$ctrl.checked" maxlength="50" pattern="^[\x20-\x7F]+$" required />
-            <span ng-show="ownerForm.firstName.$error.required" class="help-block">First name is required.</span>
+<div class="dashboard-container">
+    <div class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Edit Owner</h1>
+            <p class="page-subtitle">Update owner information and details</p>
+        </div>
+
+        <div class="content-wrapper">
+            <div class="form-card">
+                <div class="form-header">
+                    <h2 class="form-title">Owner Information</h2>
+                    <p class="form-subtitle">Update the owner's personal details</p>
+                </div>
+
+                <div ng-if="$ctrl.checked" class="warning-section">
+                    <div class="warning-icon">&#x26A0;</div>
+                    <p class="warning-text">This owner is currently disabled and cannot be edited.</p>
+                </div>
+
+                <form id="ownerForm" ng-submit="$ctrl.submitOwnerForm()">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">First Name</label>
+                            <input class="form-input" 
+                                   ng-model="$ctrl.owner.firstName" 
+                                   name="firstName"
+                                   ng-disabled="$ctrl.checked" 
+                                   maxlength="50" 
+                                   pattern="^[\x20-\x7F]+$" 
+                                   required 
+                                   placeholder="Enter first name..."/>
+                            <span ng-show="ownerForm.firstName.$error.required" class="error-message">First name is required.</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Last Name</label>
+                            <input class="form-input" 
+                                   ng-model="$ctrl.owner.lastName" 
+                                   name="lastName"
+                                   ng-disabled="$ctrl.checked" 
+                                   maxlength="50" 
+                                   pattern="^[\x20-\x7F]+$" 
+                                   required 
+                                   placeholder="Enter last name..."/>
+                            <span ng-show="ownerForm.lastName.$error.required" class="error-message">Last name is required.</span>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label class="form-label">Address</label>
+                            <input class="form-input" 
+                                   ng-model="$ctrl.owner.address" 
+                                   name="address"
+                                   ng-disabled="$ctrl.checked" 
+                                   maxlength="50" 
+                                   pattern="^[\x20-\x7F]+$" 
+                                   required 
+                                   placeholder="Enter address..."/>
+                            <span ng-show="ownerForm.address.$error.required" class="error-message">Address is required.</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">City</label>
+                            <input class="form-input" 
+                                   ng-model="$ctrl.owner.city" 
+                                   name="city"
+                                   ng-disabled="$ctrl.checked" 
+                                   maxlength="50" 
+                                   pattern="^[\x20-\x7F]+$" 
+                                   required 
+                                   placeholder="Enter city..."/>
+                            <span ng-show="ownerForm.city.$error.required" class="error-message">City is required.</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Province</label>
+                            <input class="form-input" 
+                                   ng-model="$ctrl.owner.province" 
+                                   name="province"
+                                   ng-disabled="$ctrl.checked" 
+                                   maxlength="50" 
+                                   pattern="^[\x20-\x7F]+$" 
+                                   required 
+                                   placeholder="Enter province..."/>
+                            <span ng-show="ownerForm.province.$error.required" class="error-message">Province is required.</span>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label class="form-label">Telephone</label>
+                            <input class="form-input" 
+                                   ng-model="$ctrl.owner.telephone" 
+                                   name="telephone"
+                                   ng-disabled="$ctrl.checked" 
+                                   maxlength="50" 
+                                   pattern="^[\x20-\x7F]+$" 
+                                   required 
+                                   placeholder="Enter telephone number..."/>
+                            <span ng-show="ownerForm.telephone.$error.required" class="error-message">Telephone is required.</span>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="btn-submit" type="submit" ng-disabled="ownerForm.$invalid || $ctrl.checked">
+                            Update Owner
+                        </button>
+                    </div>
+                </form>
+                <!-- Confirmation Modal -->
+                <div class="modal-backdrop" ng-show="$ctrl.showModal">
+                    <div class="modal-card">
+                        <h3 class="modal-title">Confirm Owner Update</h3>
+                        <p class="modal-text">
+                            Are you sure you want to proceed with the following owner details?
+                        </p>
+                        <ul class="modal-details">
+                            <li><strong>First Name:</strong> {{$ctrl.owner.firstName}}</li>
+                            <li><strong>Last Name:</strong> {{$ctrl.owner.lastName}}</li>
+                            <li><strong>Address:</strong> {{$ctrl.owner.address}}</li>
+                            <li><strong>City:</strong> {{$ctrl.owner.city}}</li>
+                            <li><strong>Province:</strong> {{$ctrl.owner.province}}</li>
+                            <li><strong>Telephone:</strong> {{$ctrl.owner.telephone}}</li>
+                        </ul>
+                        <div class="modal-actions">
+                            <button class="btn-cancel" ng-click="$ctrl.cancelModal()">Cancel</button>
+                            <button class="btn-confirm" ng-click="$ctrl.confirmModal()">Confirm</button>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="form-help">
+                    <p class="form-help-text">Make sure all information is accurate before submitting</p>
+                </div>
+            </div>
         </div>
     </div>
-
-    <div class="form-group formColor">
-        <label class="col-sm-2 control-label">Last Name</label>
-        <div class="owner col-sm-6">
-            <input class="form-control col-sm-4" ng-model="$ctrl.owner.lastName" name="lastName"
-                   ng-disabled="$ctrl.checked" maxlength="50" pattern="^[\x20-\x7F]+$" required />
-            <span ng-show="ownerForm.lastName.$error.required" class="help-block">Last name is required.</span>
-      </div>
-    </div>
-
-    <div class="form-group formColor">
-        <label class="col-sm-2 control-label">Address</label>
-        <div class="owner col-sm-6">
-            <input class="form-control col-sm-4" ng-model="$ctrl.owner.address" name="address"
-                   ng-disabled="$ctrl.checked" maxlength="50" pattern="^[\x20-\x7F]+$" required />
-            <span ng-show="ownerForm.address.$error.required" class="help-block">Address is required.</span>
-        </div>
-    </div>
-
-    <div class="form-group formColor">
-        <label class="col-sm-2 control-label">City</label>
-        <div class="owner col-sm-6">
-            <input class="form-control col-sm-4" ng-model="$ctrl.owner.city" name="city"
-                   ng-disabled="$ctrl.checked" maxlength="50" pattern="^[\x20-\x7F]+$" required />
-            <span ng-show="ownerForm.city.$error.required" class="help-block">City is required.</span>
-        </div>
-    </div>
-
-    <div class="form-group formColor">
-        <label class="col-sm-2 control-label">Province</label>
-        <div class="owner col-sm-6">
-            <input class="form-control col-sm-4" ng-model="$ctrl.owner.province" name="province"
-                   ng-disabled="$ctrl.checked" maxlength="50" pattern="^[\x20-\x7F]+$" required />
-            <span ng-show="ownerForm.city.$error.required" class="help-block">Province is required.</span>
-        </div>
-    </div>
-
-    <div class="form-group formColor">
-        <label class="col-sm-2 control-label">Telephone</label>
-        <div class="owner col-sm-6">
-            <input class="form-control col-sm-4" ng-model="$ctrl.owner.telephone" name="telephone"
-                   ng-disabled="$ctrl.checked" maxlength="50" pattern="^[\x20-\x7F]+$" required />
-            <span ng-show="ownerForm.telephone.$error.required" class="help-block">Telephone is required.</span>
-        </div>
-    </div>
-
-    <div class="form-group formColor">
-        <div class="owner marg col-sm-6">
-            <button id="newBtn" class="btn btn-default" type="submit" ng-disabled="ownerForm.$invalid">Submit</button>
-        </div>
-    </div>
-
-</form>
-
-
-
+</div>
