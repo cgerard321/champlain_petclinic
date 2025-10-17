@@ -15,7 +15,6 @@ import java.util.Date;
 public class PetRequestDTO {
 
     private String ownerId;
-    private String petId;
     private String name;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date birthDate;

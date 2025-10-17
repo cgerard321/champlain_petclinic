@@ -37,7 +37,7 @@ public class PetControllerV1 {
         return customersServiceClient.getAllPets();
     }
 
-
+    //TODO remove this endpoint
     @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN, Roles.VET})
     @GetMapping("/owners/{ownerId}/pets/{petId}")
     public Mono<ResponseEntity<PetResponseDTO>> getPetForOwner(

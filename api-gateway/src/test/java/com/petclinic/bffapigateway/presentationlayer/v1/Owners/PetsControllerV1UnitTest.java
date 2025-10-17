@@ -39,7 +39,7 @@ import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
         )
 )
 @AutoConfigureWebTestClient
-class PetsControllerV1UnitTests {
+class PetsControllerV1UnitTest {
 
     @Autowired
     private WebTestClient client;

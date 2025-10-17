@@ -70,7 +70,6 @@ public class OwnerController {
 
     @PostMapping()
     public Mono<Owner> insertOwner(@RequestBody Mono<Owner> ownerMono) {
-        log.info("OwnerController.insertOwner");
         return ownerService.insertOwner(ownerMono);
     }
 

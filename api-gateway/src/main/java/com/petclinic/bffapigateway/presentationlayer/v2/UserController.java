@@ -45,15 +45,6 @@ public class UserController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @PostMapping(value = "/users",
-            consumes = "application/json",
-            produces = "application/json")
-    public Mono<ResponseEntity<OwnerResponseDTO>> createUserUsingV2Endpoint(@RequestBody @Valid Mono<Register> model) {
-        return authServiceClient.createUserUsingV2Endpoint(model).map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
-    }
-
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping("/users")
     public Flux<UserDetails> getAllUsers(@CookieValue("Bearer") String jwtToken) {

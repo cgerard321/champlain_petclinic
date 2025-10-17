@@ -100,6 +100,7 @@ public class CustomersServiceClient {
                 .bodyToMono(Long.class);
     }
 
+    //TODO is this endpoint really needed??
     public Mono<Long> getTotalNumberOfOwnersWithFilters(String ownerId, String firstName, String lastName, String phoneNumber, String city){
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(customersServiceUrl + "/owners/owners-filtered-count");
 
@@ -139,6 +140,7 @@ public class CustomersServiceClient {
         );
     }
 
+    //TODO WTF is this endpoint
     public Flux<OwnerResponseDTO> createOwners() {
         return webClientBuilder.build().post()
                 .uri(customersServiceUrl)
@@ -146,52 +148,22 @@ public class CustomersServiceClient {
                 .retrieve().bodyToFlux(OwnerResponseDTO.class);
     }
 
-    public Mono<OwnerResponseDTO> createOwner(OwnerRequestDTO model) {
-        log.info("createOwner");
-
-        if (Objects.isNull(model)) {
-            log.info("model is null");
-            return Mono.error(new InvalidInputException("Owner request cannot be null"));
-        } else {
-            log.info("model is not null");
-        }
-
-                return webClientBuilder.build()
-                        .post()
-                        .uri(customersServiceUrl + "/owners")
-                        .bodyValue(model)
-                        .retrieve()
-                        .bodyToMono(OwnerResponseDTO.class);
-//        return webClientBuilder.build()
-//                .post()
-//                .uri(customersServiceUrl + "/owners")
-//                .accept(MediaType.APPLICATION_JSON)
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .body(model, OwnerRequestDTO.class)
-//                .retrieve()
-//                .bodyToMono(OwnerResponseDTO.class);
-    }
-
-    public Mono<OwnerResponseDTO> addOwner(Mono<OwnerRequestDTO> model) {
-        String ownerId = UUID.randomUUID().toString();
-        return model.flatMap(requestDTO -> {
-            if(requestDTO.getOwnerId() == null || requestDTO.getOwnerId().isEmpty()){
-                requestDTO.setOwnerId(ownerId);
-            }
-            return webClientBuilder.build()
+    public Mono<OwnerResponseDTO> createOwner(Mono<OwnerRequestDTO> model) {
+        return model.flatMap(requestDTO ->
+             webClientBuilder.build()
                     .post()
                     .uri(customersServiceUrl + "/owners")
-                    .body(BodyInserters.fromValue(requestDTO))
+                    .bodyValue(requestDTO)
                     .retrieve()
-                    .bodyToMono(OwnerResponseDTO.class);
-        });
+                    .bodyToMono(OwnerResponseDTO.class)
+        );
     }
 
-    public Flux<PetType> getPetTypes() {
+    public Flux<PetTypeResponseDTO> getPetTypes() {
         return webClientBuilder.build().get()
                 .uri(customersServiceUrl + "/owners/petTypes")
                 .retrieve()
-                .bodyToFlux(PetType.class);
+                .bodyToFlux(PetTypeResponseDTO.class);
     }
 
     public Flux<PetResponseDTO> getAllPets() {
@@ -222,39 +194,25 @@ public class CustomersServiceClient {
                 .bodyToFlux(PetResponseDTO.class);
     }
 
-    public Mono<PetResponseDTO> createPet(PetResponseDTO model, final String ownerId) {
-        return webClientBuilder.build().post()
-                .uri(customersServiceUrl + "/pet", ownerId)
-                .body(just(model), PetResponseDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve().bodyToMono(PetResponseDTO.class);
-    }
-
     public Mono<PetResponseDTO> addPet(Mono<PetRequestDTO> model) {
-        String petId = UUID.randomUUID().toString();
-        return model.flatMap(requestDTO -> {
-            if(requestDTO.getPetId() == null || requestDTO.getPetId().isEmpty()){
-                requestDTO.setPetId(petId);
-            }
-            return webClientBuilder.build()
-                    .post()
-                    .uri(customersServiceUrl + "/pet")
-                    .body(BodyInserters.fromValue(requestDTO))
-                    .retrieve()
-                    .bodyToMono(PetResponseDTO.class);
-        });
+        return model.flatMap(requestDTO ->
+                webClientBuilder.build()
+                        .post()
+                        .uri(customersServiceUrl + "/pet")
+                        .body(BodyInserters.fromValue(requestDTO))
+                        .retrieve()
+                        .bodyToMono(PetResponseDTO.class));
     }
 
     public Mono<PetResponseDTO> updatePet(Mono<PetRequestDTO> petRequestDTO, String petId) {
-        return petRequestDTO.flatMap(requestDTO -> {
-            requestDTO.setPetId(petId);
-            return webClientBuilder.build().put()
-                    .uri(customersServiceUrl + "/pet/" + petId)
-                    .body(BodyInserters.fromValue(requestDTO))
-                    .retrieve()
-                    .bodyToMono(PetResponseDTO.class);
-        });
+        return petRequestDTO.flatMap(requestDTO ->
+                webClientBuilder.build().put()
+                        .uri(customersServiceUrl + "/pet/" + petId)
+                        .body(BodyInserters.fromValue(requestDTO))
+                        .retrieve()
+                        .bodyToMono(PetResponseDTO.class));
     }
+
     public Mono<PetResponseDTO> patchPet(PetRequestDTO model, String petId) {
         return webClientBuilder.build().patch()
                 .uri(customersServiceUrl + "/pet/{petId}", petId)

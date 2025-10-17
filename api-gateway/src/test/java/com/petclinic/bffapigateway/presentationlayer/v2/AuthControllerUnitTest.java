@@ -152,66 +152,6 @@ class AuthControllerUnitTest {
                 .exchange()
                 .expectStatus().is5xxServerError();
     }
-    @Test
-    @DisplayName("Given valid Register object, create user successfully")
-    void createUserUsingV2Endpoint_shouldSucceed() {
-
-        OwnerResponseDTO responseDTO = OwnerResponseDTO.builder()
-                .ownerId("8f49e2d4-21da-4316-a5ce-56fee11becb6")
-                .firstName("firstName")
-                .lastName("lastName")
-                .address("Address")
-                .city("City")
-                .province("Province")
-                .telephone("1234567891")
-                .build();
-
-        Register registerRequest = new Register();
-        registerRequest.setUserId("12345");
-        registerRequest.setPassword("password");
-        registerRequest.setOwner(OwnerRequestDTO.builder()
-                .ownerId("8f49e2d4-21da-4316-a5ce-56fee11becb6")
-                .firstName("firstName")
-                .lastName("lastName")
-                .address("Address")
-                .city("City")
-                .province("Province")
-                .telephone("1234567891")
-                .build());
-        registerRequest.setUsername("newUser");
-        registerRequest.setEmail("newuser@mail.com");
-
-        when(authServiceClient.createUserUsingV2Endpoint(any(Mono.class)))
-                .thenReturn(Mono.just(responseDTO));
-
-        client.post()
-                .uri("/api/v2/gateway/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(registerRequest)
-                .exchange()
-                .expectStatus().isCreated()
-                .expectBody(OwnerResponseDTO.class)
-                .value(response -> {
-                    Assertions.assertEquals("8f49e2d4-21da-4316-a5ce-56fee11becb6", response.getOwnerId());
-                    Assertions.assertEquals("firstName", response.getFirstName());
-                });
-    }
-
-    @Test
-    @DisplayName("Given data with no id, return not found")
-    void createUserUsingV2Endpoint_shouldReturnBadRequest() {
-        Register invalidRegisterRequest = new Register();
-
-        when(authServiceClient.createUserUsingV2Endpoint(Mono.just(invalidRegisterRequest)))
-                .thenReturn(Mono.empty());
-
-        client.post()
-                .uri("/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(invalidRegisterRequest)
-                .exchange()
-                .expectStatus().isNotFound();
-    }
 
     @Test
     @DisplayName("Should delete a user successfully")

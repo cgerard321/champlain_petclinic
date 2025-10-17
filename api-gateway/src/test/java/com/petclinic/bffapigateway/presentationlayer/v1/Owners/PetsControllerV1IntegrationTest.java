@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @ActiveProfiles("test")
 @AutoConfigureWebTestClient
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class PetsControllerV1IntegrationTests {
+class PetsControllerV1IntegrationTest {
 
     @Autowired
     private WebTestClient webTestClient;

@@ -39,7 +39,6 @@ class PetControllerUnitTest {
 
         // Set up test data
         petRequestDTO = PetRequestDTO.builder()
-                .petId("pet123")
                 .ownerId("owner123")
                 .name("Fluffy")
                 .birthDate(new Date())

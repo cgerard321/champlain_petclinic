@@ -36,7 +36,7 @@ import static org.mockito.Mockito.*;
         )
 )
 @AutoConfigureWebTestClient
-public class PetTypesControllerV1UnitTests {
+public class PetTypesControllerV1UnitTest {
 
     @Autowired
     private WebTestClient client;

@@ -44,7 +44,7 @@ import static org.mockito.Mockito.*;
         )
 )
 @AutoConfigureWebTestClient
-public class OwnersControllerV1UnitTests {
+public class OwnersControllerV1UnitTest {
 
     @Autowired
     private WebTestClient client;
@@ -181,7 +181,6 @@ public class OwnersControllerV1UnitTests {
     void whenUpdateOwner_thenReturnUpdatedOwner() {
         String ownerId = "f470653d-05c5-4c45-b7a0-7d70f003d2ac";
         OwnerRequestDTO updatedOwnerData = new OwnerRequestDTO();
-        updatedOwnerData.setOwnerId(ownerId);
         updatedOwnerData.setFirstName("UpdatedFirstName");
         updatedOwnerData.setLastName("UpdatedLastName");
 
