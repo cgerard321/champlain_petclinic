@@ -101,7 +101,6 @@ class ApiGatewayControllerTest {
     @Mock
     private CustomersServiceClient customersServiceClientMock;
 
-
     VetResponseDTO vetResponseDTO = buildVetResponseDTO();
     VetRequestDTO vetRequestDTO = buildVetRequestDTO();
     VetResponseDTO vetResponseDTO2 = buildVetResponseDTO2();

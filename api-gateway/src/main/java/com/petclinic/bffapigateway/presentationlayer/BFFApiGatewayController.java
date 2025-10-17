@@ -55,7 +55,6 @@ public class BFFApiGatewayController {
     private final InventoryServiceClient inventoryServiceClient;
 
 
-
     //to be changed
 //    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
 //    @GetMapping(value = "bills/bills-pagination", produces = MediaType.APPLICATION_JSON_VALUE)

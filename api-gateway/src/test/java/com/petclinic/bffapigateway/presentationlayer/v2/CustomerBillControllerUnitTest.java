@@ -30,8 +30,8 @@ public class CustomerBillControllerUnitTest {
     @Autowired
     private WebTestClient webTestClient;
 
-    @MockBean private BillServiceClient billServiceClient;
-
+    @MockBean
+    private BillServiceClient billServiceClient;
 
     private final String baseBillUrl = "/api/v2/gateway/customers/1/bills";
 

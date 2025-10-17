@@ -27,7 +27,6 @@ public class CustomerBillsController {
 
     private final BillService billService;
 
-
     public CustomerBillsController(BillService billService) {
         this.billService = billService;
     }
@@ -74,7 +73,6 @@ public class CustomerBillsController {
 
     @PostMapping("/{billId}/pay")
     public Mono<ResponseEntity<BillResponseDTO>> payBill(
-
             @PathVariable String customerId,
             @PathVariable String billId,
             @RequestBody PaymentRequestDTO paymentRequest,
