@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 
 import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
 import com.petclinic.bffapigateway.dtos.Bills.PaymentRequestDTO;
+import com.petclinic.bffapigateway.utils.JwtLogger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +31,9 @@ public class CustomerBillControllerUnitTest {
     @Autowired
     private WebTestClient webTestClient;
 
-    @MockBean
-    private BillServiceClient billServiceClient;
+    @MockBean private BillServiceClient billServiceClient;
+    @MockBean private JwtLogger jwtLogger;
+
 
     private final String baseBillUrl = "/api/v2/gateway/customers/1/bills";
 

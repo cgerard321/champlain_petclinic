@@ -15,6 +15,7 @@ import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
+import com.petclinic.bffapigateway.utils.JwtLogger;
 import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
@@ -94,12 +95,15 @@ class ApiGatewayControllerTest {
     @MockBean private AuthServiceClient authServiceClient;
     @MockBean private BillServiceClient billServiceClient;
     @MockBean private InventoryServiceClient inventoryServiceClient;
+    @MockBean private JwtLogger jwtLogger;
 
     @InjectMocks
     private BFFApiGatewayController apiGatewayController;
 
     @Mock
     private CustomersServiceClient customersServiceClientMock;
+
+
 
     VetResponseDTO vetResponseDTO = buildVetResponseDTO();
     VetRequestDTO vetRequestDTO = buildVetRequestDTO();
