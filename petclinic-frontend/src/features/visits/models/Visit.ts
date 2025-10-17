@@ -11,4 +11,5 @@ export interface Visit {
   status: string;
   visitEndDate: string;
   isEmergency: boolean;
+  prescriptionId?: string;
 }
