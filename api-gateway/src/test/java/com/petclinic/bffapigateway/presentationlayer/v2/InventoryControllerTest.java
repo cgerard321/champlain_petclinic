@@ -1081,7 +1081,7 @@ public class InventoryControllerTest {
         Optional<Integer> page = Optional.of(0);
         Optional<Integer> size = Optional.of(2);
         Flux<ProductResponseDTO> resp = Flux.just(expectedResponse);
-        when(inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductFieldPagination("1", null,null,null, page, size))
+        when(inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductFieldPagination("1", null, null, null, null, null, null, page, size))
                 .thenReturn(resp);
         client.get()
                 .uri("/api/gateway/inventories/{inventoryId}/products-pagination?page={page}&size={size}","1", page.get(), size.get())
@@ -1111,7 +1111,7 @@ public class InventoryControllerTest {
                 .productPrice(65.00)
                 .productQuantity(3)
                 .build();
-        when(inventoryServiceClient.getTotalNumberOfProductsWithRequestParams("1",null,null,null))
+        when(inventoryServiceClient.getTotalNumberOfProductsWithRequestParams("1", null, null, null, null, null, null))
                 .thenReturn(Flux.just(expectedResponse).count());
         client.get()
                 .uri("/api/gateway/inventories/{inventoryId}/products-count","1")
