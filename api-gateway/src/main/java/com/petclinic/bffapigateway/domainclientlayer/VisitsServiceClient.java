@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
+import com.petclinic.bffapigateway.dtos.Visits.Prescriptions.PrescriptionResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Status;
 import com.petclinic.bffapigateway.dtos.Visits.TimeSlotDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
@@ -23,6 +24,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -32,6 +34,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
 
 /**
  * @author Maciej Szarlinski
@@ -41,9 +44,11 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 @Slf4j
 @Component
 public class VisitsServiceClient {
+
     private final WebClient webClient;
     private final WebClient availabilityWebClient;
     private final String reviewUrl;
+    private final String visitServiceUrl;
 
     private Rethrower rethrower;
 
@@ -61,6 +66,8 @@ public class VisitsServiceClient {
         this.availabilityWebClient = WebClient.builder()
                 .baseUrl(baseUrl)
                 .build();
+
+        visitServiceUrl = "http://" + visitsServiceHost + ":" + visitsServicePort + "/visits";
     }
 
     public Flux<VisitResponseDTO> getAllVisits(String description) {
@@ -393,5 +400,41 @@ public class VisitsServiceClient {
                 .retrieve()
                 .bodyToMono(VetResponseDTO.class);
     }
+
+    public Mono<byte[]> downloadPrescriptionPdf(String visitId, String prescriptionId) {
+        String url = UriComponentsBuilder
+                .fromHttpUrl(visitServiceUrl)
+                .path("/{visitId}/prescriptions/{prescriptionId}/pdf")
+                .buildAndExpand(visitId, prescriptionId)
+                .toUriString();
+
+        return webClient.get()
+                .uri(url)
+                .accept(MediaType.APPLICATION_PDF)
+                .retrieve()
+                .bodyToMono(byte[].class);
+    }
+
+    public Mono<PrescriptionResponseDTO> createPrescription(String visitId, Mono<PrescriptionResponseDTO> request) {
+        String url = UriComponentsBuilder
+                .fromHttpUrl(visitServiceUrl)
+                .path("/visits/{visitId}/prescriptions")
+                .buildAndExpand(visitId)
+                .toUriString();
+
+        return webClient.post()
+                .uri(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body(request, PrescriptionResponseDTO.class)
+                .retrieve()
+                .bodyToMono(PrescriptionResponseDTO.class);
+    }
+
+
+
+
+
+
 
 }

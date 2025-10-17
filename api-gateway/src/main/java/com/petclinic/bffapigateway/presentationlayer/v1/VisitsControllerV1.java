@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.presentationlayer.v1;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
+import com.petclinic.bffapigateway.dtos.Visits.Prescriptions.PrescriptionResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.TimeSlotDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
@@ -256,6 +257,41 @@ public class VisitsControllerV1 {
     public Mono<ResponseEntity<VetResponseDTO>> getVeterinarianAvailability(@PathVariable String vetId) {
         return visitsServiceClient.getVeterinarianAvailability(vetId)
                 .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+
+    /////////////////////////////////////////////
+    /////////// Prescription Methods ////////////
+    /////////////////////////////////////////////
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @PostMapping(
+            value = "/{visitId}/prescriptions",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<PrescriptionResponseDTO>> createPrescription(
+            @PathVariable String visitId,
+            @RequestBody Mono<PrescriptionResponseDTO> prescriptionRequest) {
+
+        return visitsServiceClient.createPrescription(visitId, prescriptionRequest)
+                .map(created -> ResponseEntity.status(HttpStatus.CREATED).body(created))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @GetMapping(value = "/{visitId}/prescriptions/{prescriptionId}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    public Mono<ResponseEntity<byte[]>> downloadPrescriptionPdf(
+            @PathVariable String visitId,
+            @PathVariable String prescriptionId) {
+
+        return visitsServiceClient.downloadPrescriptionPdf(visitId, prescriptionId)
+                .map(pdfBytes -> {
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.setContentType(MediaType.APPLICATION_PDF);
+                    headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=prescription-" + prescriptionId + ".pdf");
+                    return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+                })
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
