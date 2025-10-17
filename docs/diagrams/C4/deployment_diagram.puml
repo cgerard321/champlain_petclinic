@@ -174,10 +174,12 @@ Deployment_Node(cpc, "Proxmox Server", "Proxmox 8.4.14 Server"){
     }
   }
 }
+}
+
+' -------- EXTERNAL SYSTEMS ---------
+System_Ext(smtp_srv, "smtp.gmail.com", "SMTP server", "Sends email (via Mailer Service)")
 
 
-        ' -------- EXTERNAL SYSTEMS ----------
-        System_Ext(smtp_srv, "smtp.gmail.com", "SMTP server", "Sends email (via Mailer Service)")
 
       '--------------------------
       ' RELATIONSHIPS
@@ -238,7 +240,7 @@ Rel_D(bw, api_gateway, "HTTP", "petclinic-backend.benmusicgeek.synology.me")
 Rel_D(bw, dbgate, "HTTP", "petclinic-admin-db.benmusicgeek.synology.me")
 dbgate --right[hidden]-- bw
 Rel_D(bw, minio_s3, "HTTP", "petclinic-bucket.benmusicgeek.synology.me")
-}
+
 
 
 Rel_D(browser, ddns, "DNS lookup", "UDP/TCP 53")
@@ -246,6 +248,7 @@ Rel_D(mobile_browser, ddns, "DNS lookup", "UDP/TCP 53")
 rp --up[hidden]-- ddns
 Rel_D(browser, rp, "HTTPS", "*.benmusicgeek.synology.me")
 Rel_D(mobile_browser, rp, "HTTPS", "*.benmusicgeek.synology.me")
+
 
 
 SHOW_LEGEND()
