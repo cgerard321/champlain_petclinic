@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import CartBillingForm, { BillingInfo } from './CartBillingForm';
+import InvoiceComponent, {
+  InvoiceFull as InvoiceFullType,
+  InvoiceItem as InvoiceItemType,
+} from './Invoice';
 import { useNavigate, useParams } from 'react-router-dom';
 import CartItem from './CartItem';
 import { ProductModel } from '../models/ProductModel';
@@ -15,6 +19,7 @@ import {
   IsInventoryManager,
   IsReceptionist,
   IsVet,
+  useUser,
 } from '@/context/UserContext';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import { getProductByProductId } from '@/features/products/api/getProductByProductId';
@@ -26,7 +31,6 @@ import {
 } from '../api/cartEvent';
 import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
 import axios from 'axios';
-
 interface ProductAPIResponse {
   productId: number;
   imageId: string;
@@ -45,13 +49,37 @@ interface Invoice {
   quantity: number;
 }
 
-const UserCart = (): JSX.Element => {
-  const { cartId } = useParams<{ cartId: string }>();
+// localStorage helpers (per-user)
+const invoicesStorageKey = (userId: string | undefined): string =>
+  userId ? `invoices_${userId}` : 'invoices_anonymous';
+
+const loadInvoicesForUser = (userId?: string): InvoiceFullType[] => {
+  if (!userId) return [];
+  try {
+    const raw = localStorage.getItem(invoicesStorageKey(userId));
+    return raw ? (JSON.parse(raw) as InvoiceFullType[]) : [];
+  } catch {
+    return [];
+  }
+};
+
+const saveInvoicesForUser = (
+  userId: string | undefined,
+  invoices: InvoiceFullType[]
+): void => {
+  if (!userId) return;
+  try {
+    localStorage.setItem(invoicesStorageKey(userId), JSON.stringify(invoices));
+  } catch {
+    // ignore localStorage errors
+  }
+};
+
+// Main component
+const UserCart: React.FC = () => {
   const navigate = useNavigate();
-
+  const { cartId } = useParams<{ cartId?: string }>();
   const { confirm, ConfirmModal } = useConfirmModal();
-
-  // state: cart + wishlist
   const [cartItems, setCartItems] = useState<ProductModel[]>([]);
   const [wishlistItems, setWishlistItems] = useState<ProductModel[]>([]);
 
@@ -65,13 +93,14 @@ const UserCart = (): JSX.Element => {
   );
 
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [userInvoices, setUserInvoices] = useState<InvoiceFullType[]>([]);
+  const [currentInvoiceIndex, setCurrentInvoiceIndex] = useState<number>(-1);
+  const [showInvoiceModal, setShowInvoiceModal] = useState<boolean>(false);
   const [cartItemCount, setCartItemCount] = useState<number>(0);
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] =
     useState<boolean>(false);
   const [showBillingForm, setShowBillingForm] = useState<boolean>(false);
   const [billingInfo, setBillingInfo] = useState<BillingInfo | null>(null);
-  const [checkoutDate, setCheckoutDate] = useState<string | null>(null);
 
   const [wishlistUpdated, setWishlistUpdated] = useState(false);
   const [voucherCode, setVoucherCode] = useState<string>('');
@@ -698,13 +727,13 @@ const UserCart = (): JSX.Element => {
     }
   };
 
+  const { user } = useUser();
+
   useEffect(() => {
-    const saved = localStorage.getItem('invoices');
-    if (saved) setInvoices(JSON.parse(saved));
-  }, []);
-  useEffect(() => {
-    localStorage.setItem('invoices', JSON.stringify(invoices));
-  }, [invoices]);
+    const loaded = loadInvoicesForUser(user?.userId);
+    setUserInvoices(loaded);
+    setCurrentInvoiceIndex(loaded.length > 0 ? loaded.length - 1 : -1);
+  }, [user?.userId]);
 
   const handleCheckoutConfirmation = (): void => {
     if (isStaff) {
@@ -717,7 +746,7 @@ const UserCart = (): JSX.Element => {
     setIsCheckoutModalOpen(false);
   };
 
-  const handleCheckout = async (): Promise<void> => {
+  const handleCheckout = async (billing?: BillingInfo): Promise<void> => {
     if (isStaff) return;
 
     if (!cartId) {
@@ -738,8 +767,51 @@ const UserCart = (): JSX.Element => {
         productSalePrice: item.productSalePrice,
         quantity: item.quantity || 1,
       }));
+      // build full invoice and persist per-user
+      const invoiceItemsForFull: InvoiceItemType[] = invoiceItems.map(i => ({
+        productId: i.productId,
+        productName: i.productName,
+        productSalePrice: i.productSalePrice,
+        quantity: i.quantity,
+      }));
 
-      setInvoices(invoiceItems);
+      const invoiceSubtotal = invoiceItemsForFull.reduce(
+        (s, it) => s + it.productSalePrice * it.quantity,
+        0
+      );
+      const invoiceTvq = invoiceSubtotal * 0.09975;
+      const invoiceTvc = invoiceSubtotal * 0.05;
+      const invoiceTotal = invoiceSubtotal + invoiceTvq + invoiceTvc - discount;
+
+      const usedBilling = billing ?? billingInfo ?? null;
+
+      const newInvoice: InvoiceFullType = {
+        invoiceId: `${Date.now()}`,
+        userId: user?.userId || 'anonymous',
+        billing: usedBilling
+          ? {
+              fullName: usedBilling.fullName,
+              email: usedBilling.email,
+              address: usedBilling.address,
+              city: usedBilling.city,
+              province: usedBilling.province,
+              postalCode: usedBilling.postalCode,
+            }
+          : null,
+        date: new Date().toISOString(),
+        items: invoiceItemsForFull,
+        subtotal: invoiceSubtotal,
+        tvq: invoiceTvq,
+        tvc: invoiceTvc,
+        discount,
+        total: invoiceTotal,
+      };
+
+      const updated = [...loadInvoicesForUser(user?.userId), newInvoice];
+      setUserInvoices(updated);
+      saveInvoicesForUser(user?.userId, updated);
+      setCurrentInvoiceIndex(updated.length - 1);
+      setShowInvoiceModal(true);
       setCheckoutMessage('Checkout successful! Your order is being processed.');
       setCartItems([]);
       setCartItemCount(0);
@@ -966,67 +1038,17 @@ const UserCart = (): JSX.Element => {
                 <div className="checkout-message">{checkoutMessage}</div>
               )}
 
-              {invoices.length > 0 && (
-                <div className="invoices-section">
-                  <h2>Invoice</h2>
-                  <div className="invoice-summary">
-                    {billingInfo && (
-                      <div className="invoice-client-info">
-                        <h3>Client Information</h3>
-                        <p>
-                          <strong>Name:</strong> {billingInfo.fullName}
-                        </p>
-                        <p>
-                          <strong>Email:</strong> {billingInfo.email}
-                        </p>
-                        <p>
-                          <strong>Address:</strong> {billingInfo.address},{' '}
-                          {billingInfo.city}, {billingInfo.province},{' '}
-                          {billingInfo.postalCode}
-                        </p>
-                      </div>
-                    )}
-                    {checkoutDate && (
-                      <div className="invoice-date">
-                        <strong>Checkout Date/Time:</strong> {checkoutDate}
-                      </div>
-                    )}
-                    <h3>Items</h3>
-                    {invoices.map(inv => (
-                      <div key={inv.productId} className="invoice-card">
-                        <h4>{inv.productName}</h4>
-                        <p>Price: ${inv.productSalePrice.toFixed(2)}</p>
-                        <p>Quantity: {inv.quantity}</p>
-                        <p>
-                          Total: $
-                          {(inv.productSalePrice * inv.quantity).toFixed(2)}
-                        </p>
-                      </div>
-                    ))}
-                    <div className="invoice-taxes">
-                      {(() => {
-                        const invoiceSubtotal = invoices.reduce(
-                          (sum, inv) =>
-                            sum + inv.productSalePrice * inv.quantity,
-                          0
-                        );
-                        const invoiceTvq = invoiceSubtotal * 0.09975;
-                        const invoiceTvc = invoiceSubtotal * 0.05;
-                        const invoiceTotal =
-                          invoiceSubtotal + invoiceTvq + invoiceTvc - discount;
-                        return (
-                          <>
-                            <p>Subtotal: ${invoiceSubtotal.toFixed(2)}</p>
-                            <p>TVQ (9.975%): ${invoiceTvq.toFixed(2)}</p>
-                            <p>TVC (5%): ${invoiceTvc.toFixed(2)}</p>
-                            <p>Discount: -${discount.toFixed(2)}</p>
-                            <h3>Total: ${invoiceTotal.toFixed(2)}</h3>
-                          </>
-                        );
-                      })()}
-                    </div>
-                  </div>
-                </div>
+              {userInvoices.length > 0 && (
+                <button
+                  className="view-receipt-btn cart-button cart-button--brand cart-button--block"
+                  onClick={() => {
+                    setCurrentInvoiceIndex(userInvoices.length - 1);
+                    setShowInvoiceModal(true);
+                  }}
+                  style={{ marginTop: '1rem' }}
+                >
+                  View Receipts
+                </button>
               )}
             </div>
           )}
@@ -1260,8 +1282,7 @@ const UserCart = (): JSX.Element => {
                 onClose={() => setShowBillingForm(false)}
                 onSubmit={async billing => {
                   setBillingInfo(billing);
-                  setCheckoutDate(new Date().toLocaleString());
-                  await handleCheckout();
+                  await handleCheckout(billing);
                   setShowBillingForm(false);
                 }}
               />
@@ -1273,9 +1294,17 @@ const UserCart = (): JSX.Element => {
           <div className="checkout-modal">
             <h3>Confirm Checkout</h3>
             <p>Are you sure you want to checkout?</p>
-            <button onClick={handleCheckout}>Yes</button>
+            <button onClick={() => handleCheckout()}>Yes</button>
             <button onClick={() => setIsCheckoutModalOpen(false)}>No</button>
           </div>
+        )}
+        {showInvoiceModal && currentInvoiceIndex >= 0 && (
+          <InvoiceComponent
+            invoices={userInvoices}
+            index={currentInvoiceIndex}
+            onIndexChange={setCurrentInvoiceIndex}
+            onClose={() => setShowInvoiceModal(false)}
+          />
         )}
       </div>
     </div>
