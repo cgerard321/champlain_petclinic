@@ -15,7 +15,6 @@ scale 0.4
 !include $ICONURL/font-awesome-5/database.puml
 !include $ICONURL/font-awesome-5/user.puml
 
-
 AddElementTag("microService-java", $shape=EightSidedShape(), $bgColor="#6DB33F", $fontColor="black", $legendText="API Java \neight sided")
 AddElementTag("microService-go", $shape=EightSidedShape(), $bgColor="#29BEB0", $fontColor="white", $legendText="API Go \neight sided")
 AddElementTag("microService-c#", $shape=EightSidedShape(), $bgColor="#512bd4", $fontColor="white", $legendText="API C# \neight sided")
@@ -76,9 +75,7 @@ together {
     Container(products_service, "products-service", "Java, Spring Boot", "Provides product management functionality for the online store.", $sprite="spring_original", $tags = "microService-java")
     Container(cart_service, "cart-service", "Java, Spring Boot", "Provides cart management functionality for the online store.", $sprite="spring_original", $tags = "microService-java")
     Container(mailer_service, "mailer-service", "Go", "Provides email functionality for the auth-service.", $sprite="go", $tags = "microService-go")
-    Container(emailing_service, "emailing-service", "C#, ASP.NET Core", "Provides email functionality.", $sprite="dotnetcore", $tags = "microService-c#")
 }
-    together {
         ContainerDb(auth_db, "auth-db", "MySQL 5.7.x", "Stores user information.", $sprite="mysql" , $tags = "storage-mysql")
         ContainerDb(files_db, "files-db", "MySQL 5.7.x", "Stores files information.", $sprite="mysql" , $tags = "storage-mysql")
         ContainerDb(customers_db, "customers-db", "Mongo", "Stores owner, pet, and type information.", $sprite="mongodb", $tags = "storage-mongo")
@@ -89,8 +86,7 @@ together {
         ContainerDb(billing_db, "billing-db", "Mongo", "Stores billing information.", $sprite="mongodb", $tags = "storage-mongo")
         ContainerDb(products_db, "products-db", "Mongo", "Stores product information.", $sprite="mongodb", $tags = "storage-mongo")
         ContainerDb(cart_db, "cart-db", "Mongo", "Stores cart information.", $sprite="mongodb", $tags = "storage-mongo")
-        ContainerDb(emailing_db, "emailing-db", "MySQL 8.0", "Stores email information.", $sprite="mysql", $tags = "storage-mysql")
-    }
+
 }
 
 Rel(customer, client_app, "Visits petclinic.benmusicgeek.synology.me/ using", "HTTPS")
@@ -120,8 +116,6 @@ Rel(inventory_service, inventory_db, "Reads from and writes to", "Mongo/MQL/TCP"
 Rel(api_gateway, vets_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
 Rel(vets_service, vets_vets_db, "Reads from and writes to", "Mongo/MQL/TCP")
 Rel(vets_service, vets_images_db, "Reads from and writes to", "JDCB/SQL/TCP")
-Rel(api_gateway, emailing_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
-Rel(emailing_service, emailing_db, "Makes API calls to", "JSON/REST/HTTPS")
 
 Rel(api_gateway, products_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
 Rel(products_service, products_db, "Reads from and writes to", "Mongo/MQL/TCP")
@@ -129,7 +123,6 @@ Rel(products_service, products_db, "Reads from and writes to", "Mongo/MQL/TCP")
 Rel(api_gateway, auth_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
 Rel(auth_service, mailer_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="blue-line")
 Rel(auth_service, cart_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="blue-line")
-Rel(auth_service, emailing_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="blue-line")
 Rel(auth_service, auth_db, "Reads from and writes to", "JDCB/SQL/TCP", $tags="blue-line")
 Rel(api_gateway, billing_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
 Rel(billing_service, customers_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="red-line")
@@ -140,7 +133,6 @@ Rel(cart_service, products_service, "Makes API calls to", "JSON/REST/HTTPS", $ta
 Rel(cart_service, cart_db, "Reads from and writes to", "Mongo/MQL/TCP", $tags="green-line")
 Rel(api_gateway, visits_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
 Rel(visits_service, visits_db, "Reads from and writes to", "Mongo/MQL/TCP", $tags="orange-line")
-Rel(visits_service, emailing_service, "Reads from and writes to", "Mongo/MQL/TCP", $tags="orange-line")
 Rel(visits_service, auth_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="orange-line")
 Rel(visits_service, customers_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="orange-line")
 Rel(visits_service, vets_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="orange-line")

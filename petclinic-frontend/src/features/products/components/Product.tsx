@@ -11,6 +11,7 @@ import {
   IsReceptionist,
 } from '@/context/UserContext';
 import { useAddToWishlist } from '@/features/carts/api/addToWishlistFromProducts';
+import StarRating from './StarRating';
 
 export default function Product({
   product,
@@ -117,6 +118,13 @@ export default function Product({
 
       <div className="deliveryType-container">
         <p>{getDeliveryTypeLabel(currentProduct.deliveryType)}</p>
+      </div>
+
+      <div className="avgrating-container">
+        <StarRating
+          currentRating={currentProduct.averageRating}
+          viewOnly={true}
+        />
       </div>
 
       {/* Only show Add to Cart/Wishlist for customers */}
