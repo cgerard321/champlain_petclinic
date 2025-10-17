@@ -84,9 +84,8 @@ export function NavBar(): JSX.Element {
         <Navbar.Toggle
           aria-controls="basic-navbar-nav"
           onClick={toggleNavbar}
-        >
-          <span className="navbar-toggler-icon"></span>
-      </Navbar.Toggle>
+        />
+
         <Navbar.Collapse
           id="basic-navbar-nav"
           className={navbarOpen ? 'show' : ''}
