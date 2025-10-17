@@ -1,3 +1,4 @@
+---
 server.port: 7001
 
 server:
@@ -47,9 +48,6 @@ spring:
 #  password: pc
 
 spring.datasource.hikari.initializationFailTimeout: 60000
-
-
-
 ---
 spring.profiles: docker
 

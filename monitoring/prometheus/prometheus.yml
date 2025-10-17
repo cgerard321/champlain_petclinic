@@ -15,7 +15,7 @@ scrape_configs:
           - "billing-service:8080"
           - "products-service:8080"
           - "cart-service:8080"
-    
+
   - job_name: 'mailer-service'
     metrics_path: "/metrics"
     static_configs:
