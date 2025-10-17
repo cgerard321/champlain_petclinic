@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.Bills.PaymentRequestDTO;
+import com.petclinic.bffapigateway.utils.JwtLogger;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -28,6 +30,7 @@ import java.time.LocalDate;
 public class CustomerBillController {
     
     private final BillServiceClient billService;
+    private final JwtLogger jwtLogger;
 
     @IsUserSpecific(idToMatch = {"customerId"})
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -70,6 +73,9 @@ public class CustomerBillController {
             @PathVariable String billId,
             @RequestBody PaymentRequestDTO paymentRequestDTO,
             @CookieValue("Bearer") String jwtToken) {
+
+        jwtLogger.logJwt("API Gateway", "CustomerBillController", "payBill", jwtToken);
+
 
         return billService.payBill(customerId, billId, paymentRequestDTO, jwtToken)
                 .map(ResponseEntity::ok)

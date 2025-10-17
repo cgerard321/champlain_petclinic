@@ -5,6 +5,7 @@ import com.petclinic.billing.datalayer.BillResponseDTO;
 import com.petclinic.billing.datalayer.BillStatus;
 import com.petclinic.billing.datalayer.PaymentRequestDTO;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
+import com.petclinic.billing.util.JwtLogger;
 import lombok.extern.slf4j.Slf4j;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
@@ -27,8 +29,11 @@ public class CustomerBillsController {
 
     private final BillService billService;
 
+    private JwtLogger jwtLogger;
+
     public CustomerBillsController(BillService billService) {
         this.billService = billService;
+        this.jwtLogger = new JwtLogger();
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -73,10 +78,13 @@ public class CustomerBillsController {
 
     @PostMapping("/{billId}/pay")
     public Mono<ResponseEntity<BillResponseDTO>> payBill(
+
             @PathVariable String customerId,
             @PathVariable String billId,
             @RequestBody PaymentRequestDTO paymentRequest,
             @CookieValue("Bearer") String jwtToken) {
+        jwtLogger.logJwt("Billing Service", "CustomerBillsController", "payBill", jwtToken);
+
 
 
         return billService.processPayment(customerId, billId, paymentRequest,jwtToken)

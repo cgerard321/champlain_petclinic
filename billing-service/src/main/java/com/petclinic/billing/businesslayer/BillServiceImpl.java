@@ -11,6 +11,7 @@ import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
 import com.petclinic.billing.util.EntityDtoUtil;
 import com.petclinic.billing.util.InterestCalculationUtil;
+import com.petclinic.billing.util.JwtLogger;
 import com.petclinic.billing.util.PdfGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +36,7 @@ public class BillServiceImpl implements BillService{
     private final OwnerClient ownerClient;
     private final AuthServiceClient authClient;
     private final MailService mailService;
+    private final JwtLogger jwtLogger;
 
 
    @Override
@@ -421,6 +423,7 @@ public class BillServiceImpl implements BillService{
     @Override
     public Mono<BillResponseDTO> processPayment(String customerId, String billId, PaymentRequestDTO paymentRequestDTO, String jwtToken)
     {
+        jwtLogger.logJwt("Billing Service", "BillServiceImpl", "processPayment", jwtToken);
         return authClient.getUserById(jwtToken, customerId)
                 .onErrorResume(e -> {
                     log.error("Failed to authenticate or fetch user for customerId: {}. Error: {}", customerId, e.getMessage(), e);
