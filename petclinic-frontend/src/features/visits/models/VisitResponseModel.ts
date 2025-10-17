@@ -15,4 +15,6 @@ export interface VisitResponseModel {
   visitId: string;
   visitEndDate: string;
   isEmergency: boolean;
+  ownerFirstName: string;
+  ownerLastName: string;
 }
