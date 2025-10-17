@@ -35,4 +35,11 @@ jobs:
     - name: Run build to ensure no build errors
       run: npm run build
       working-directory: ./petclinic-frontend
+    
+    - name: Install dependencies
+      run: npm install
+      working-directory: ./angular-frontend
+    - name: Run build to ensure no build errors
+      run: npm run build
+      working-directory: ./angular-frontend
 
