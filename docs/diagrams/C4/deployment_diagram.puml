@@ -1,5 +1,6 @@
 @startuml
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Deployment.puml
+!pragma layout smetana
 skinparam linetype polyline
 
 AddElementTag("edge", $bgColor="#eef7ff", $borderColor="#438DD5")
@@ -7,7 +8,19 @@ AddElementTag("internal", $bgColor="#f5f5f5", $borderColor="#999999")
 AddElementTag("svc", $bgColor="#e8fff4", $borderColor="#2f9e44")
 AddElementTag("db", $bgColor="#fff4e6", $borderColor="#d9480f")
 
-title Pet Clinic – C4 Deployment
+AddRelTag("http",         $lineColor="#1E90FF", $legendText="HTTP/REST (internal)")
+AddRelTag("route",        $lineColor="#A020F0", $legendText="Reverse proxy routing")
+AddRelTag("https-client", $lineColor="#00BFFF", $legendText="Client → Reverse Proxy (HTTPS)")
+AddRelTag("dns",          $lineColor="#DA70D6", $legendText="DNS lookups")
+AddRelTag("jdbc-mysql",   $lineColor="#FFA500", $legendText="JDBC")
+AddRelTag("r2dbc",        $lineColor="#FF0000", $legendText="R2DBC")
+AddRelTag("mongo",        $lineColor="#32CD32", $legendText="Mongo driver")
+AddRelTag("s3",           $lineColor="#00CED1", $legendText="S3 / Object storage")
+AddRelTag("smtp",         $lineColor="#FF1493", $legendText="SMTP")
+AddRelTag("admin",        $lineColor="#FFD700", $legendText="Admin DB drivers")
+
+
+title Pet Clinic - C4 Deployment
 
 ' ---------------------------
 ' CLIENTS / INTERNET
@@ -176,79 +189,65 @@ Deployment_Node(cpc, "Proxmox Server", "Proxmox 8.4.14 Server"){
 }
 }
 
-' -------- EXTERNAL SYSTEMS ---------
 System_Ext(smtp_srv, "smtp.gmail.com", "SMTP server", "Sends email (via Mailer Service)")
 
+      Rel_D(petclinic_fe, api_gateway, "HTTPS/HTTP calls", "REST/JSON", $tags="http")
+      Rel_D(api_gateway, customers_svc, "Routes requests to", "HTTP", $tags="http")
+      Rel_D(api_gateway, vet_svc, "Routes requests to", "HTTP", $tags="http")
+      Rel_D(api_gateway, visits_svc, "Routes requests to", "HTTP", $tags="http")
+      Rel_D(api_gateway, products_svc, "Routes requests to", "HTTP", $tags="http")
+      Rel_D(api_gateway, cart_svc, "Routes requests to", "HTTP", $tags="http")
+      Rel_D(api_gateway, inventory_svc, "Routes requests to", "HTTP", $tags="http")
+      Rel_D(api_gateway, billing_svc, "Routes requests to", "HTTP", $tags="http")
+      Rel_D(api_gateway, auth_svc, "Routes requests to", "HTTP", $tags="http")
 
+      Rel_D(auth_svc, mysql_auth, "JDBC", "", $tags="jdbc-mysql")
+      Rel_D(files_svc, mysql_files, "JDBC", "", $tags="jdbc-mysql")
+      Rel_D(vet_svc, pg_vet, "R2DBC", "", $tags="r2dbc")
+      Rel_D(vet_svc, mongo_vet, "Reactive MongoDB driver", "", $tags="mongo")
+      Rel_D(billing_svc, mongo_billing, "Reactive MongoDB driver", "", $tags="mongo")
+      Rel_D(visits_svc, mongo_visits, "Reactive MongoDB driver", "", $tags="mongo")
+      Rel_D(customers_svc, mongo_customers, "Reactive MongoDB driver", "", $tags="mongo")
+      Rel_D(inventory_svc, mongo_inventory, "Reactive MongoDB driver", "", $tags="mongo")
+      Rel_D(products_svc, mongo_products, "Reactive MongoDB driver", "", $tags="mongo")
+      Rel_D(cart_svc, mongo_carts, "Reactive MongoDB driver", "", $tags="mongo")
 
-      '--------------------------
-      ' RELATIONSHIPS
-      '--------------------------
-      Rel_D(petclinic_fe, api_gateway, "HTTPS/HTTP calls", "REST/JSON")
-      Rel_D(api_gateway, customers_svc, "Routes requests to", "HTTP")
-      Rel_D(api_gateway, vet_svc, "Routes requests to", "HTTP")
-      Rel_D(api_gateway, visits_svc, "Routes requests to", "HTTP")
-      Rel_D(api_gateway, products_svc, "Routes requests to", "HTTP")
-      Rel_D(api_gateway, cart_svc, "Routes requests to", "HTTP")
-      Rel_D(api_gateway, inventory_svc, "Routes requests to", "HTTP")
-      Rel_D(api_gateway, billing_svc, "Routes requests to", "HTTP")
-      Rel_D(api_gateway, auth_svc, "Routes requests to", "HTTP")
+      Rel_D(mailer_svc, smtp_srv, "SMTP", "587", $tags="smtp")
 
-      Rel_D(auth_svc, mysql_auth, "JDBC")
-      Rel_D(files_svc, mysql_files, "JDBC")
-      Rel_D(vet_svc, pg_vet, "R2DBC")
-      Rel_D(vet_svc, mongo_vet, "Reactive MongoDB driver")
-      Rel_D(billing_svc, mongo_billing, "Reactive MongoDB driver")
-      Rel_D(visits_svc, mongo_visits, "Reactive MongoDB driver")
-      Rel_D(customers_svc, mongo_customers, "Reactive MongoDB driver")
-      Rel_D(inventory_svc, mongo_inventory, "Reactive MongoDB driver")
-      Rel_D(products_svc, mongo_products, "Reactive MongoDB driver")
-      Rel_D(cart_svc, mongo_carts, "Reactive MongoDB driver")
+      Rel_U(visits_svc,  mailer_svc, "Send email request", "HTTP/REST", $tags="http")
+      Rel_U(auth_svc,    mailer_svc, "Send email request", "HTTP/REST", $tags="http")
+      Rel_U(billing_svc, mailer_svc, "Send email request", "HTTP/REST", $tags="http")
 
-      Rel_D(mailer_svc, smtp_srv, "SMTP", "587")
+      Rel(customers_svc, files_svc, "Store/Fetch profile pictures", "HTTP/REST", $tags="http")
 
-      Rel_U(visits_svc, mailer_svc, "Send email request", "HTTP/REST")
-      Rel_U(auth_svc, mailer_svc, "Send email request", "HTTP/REST")
-      Rel_U(billing_svc, mailer_svc, "Send email request", "HTTP/REST")
+      Rel_D(files_svc, minio_s3, "Store/Fetch objects", "S3 API (HTTPS)", $tags="s3")
 
-      Rel(customers_svc, files_svc, "Store/Fetch profile pictures", "HTTP/REST")
+      Rel(visits_svc,  auth_svc, "Validate tokens", "HTTP/REST", $tags="http")
+      Rel(billing_svc, auth_svc, "Validate tokens", "HTTP/REST", $tags="http")
 
-      Rel_D(files_svc, minio_s3, "Store/Fetch objects", "S3 API (HTTPS)")
+      Rel_U(dbgate, mysql_auth,      "MySQL Driver", "", $tags="admin")
+      Rel_U(dbgate, mysql_files,     "MySQL Driver", "", $tags="admin")
+      Rel_U(dbgate, pg_vet,          "Postgres Driver", "", $tags="admin")
+      Rel_U(dbgate, mongo_vet,       "Mongo Driver", "", $tags="admin")
+      Rel_U(dbgate, mongo_billing,   "Mongo Driver", "", $tags="admin")
+      Rel_U(dbgate, mongo_visits,    "Mongo Driver", "", $tags="admin")
+      Rel_U(dbgate, mongo_customers, "Mongo Driver", "", $tags="admin")
+      Rel_U(dbgate, mongo_inventory, "Mongo Driver", "", $tags="admin")
+      Rel_U(dbgate, mongo_products,  "Mongo Driver", "", $tags="admin")
+      Rel_U(dbgate, mongo_carts,     "Mongo Driver", "", $tags="admin")
 
-      Rel(visits_svc, auth_svc, "Validate tokens", "HTTP/REST")
-      Rel(billing_svc, auth_svc, "Validate tokens", "HTTP/REST")
+      Rel_D(rp, bw, "HTTP", "*.benmusicgeek.synology.me", $tags="route")
+      Rel_D(bw, petclinic_fe, "HTTP", "petclinic.benmusicgeek.synology.me", $tags="route")
+      Rel_D(bw, api_gateway,  "HTTP", "petclinic-backend.benmusicgeek.synology.me", $tags="route")
+      Rel_D(bw, dbgate,       "HTTP", "petclinic-admin-db.benmusicgeek.synology.me", $tags="route")
+      dbgate --left[hidden]-- bw
+      Rel_D(bw, minio_s3,     "HTTP", "petclinic-bucket.benmusicgeek.synology.me", $tags="route")
 
-
-
-      ' Admin tool connections (read-only for ops)
-      Rel_U(dbgate, mysql_auth, "MySQL Driver")
-      Rel_U(dbgate, mysql_files, "MySQL Driver")
-      Rel_U(dbgate, pg_vet, "Postgres Driver")
-      Rel_U(dbgate, mongo_vet, "Mongo Driver")
-      Rel_U(dbgate, mongo_billing, "Mongo Driver")
-      Rel_U(dbgate, mongo_visits, "Mongo Driver")
-      Rel_U(dbgate, mongo_customers, "Mongo Driver")
-      Rel_U(dbgate, mongo_inventory, "Mongo Driver")
-      Rel_U(dbgate, mongo_products, "Mongo Driver")
-      Rel_U(dbgate, mongo_carts, "Mongo Driver")
-
-
-' Routes through reverse proxy
-Rel_D(rp, bw, "HTTP", "*.benmusicgeek.synology.me")
-Rel_D(bw, petclinic_fe, "HTTP", "petclinic.benmusicgeek.synology.me")
-Rel_D(bw, api_gateway, "HTTP", "petclinic-backend.benmusicgeek.synology.me")
-Rel_D(bw, dbgate, "HTTP", "petclinic-admin-db.benmusicgeek.synology.me")
-dbgate --right[hidden]-- bw
-Rel_D(bw, minio_s3, "HTTP", "petclinic-bucket.benmusicgeek.synology.me")
-
-
-
-Rel_D(browser, ddns, "DNS lookup", "UDP/TCP 53")
-Rel_D(mobile_browser, ddns, "DNS lookup", "UDP/TCP 53")
-rp --up[hidden]-- ddns
-Rel_D(browser, rp, "HTTPS", "*.benmusicgeek.synology.me")
-Rel_D(mobile_browser, rp, "HTTPS", "*.benmusicgeek.synology.me")
-
+      Rel_D(browser,        ddns, "DNS lookup", "UDP/TCP 53", $tags="dns")
+      Rel_D(mobile_browser, ddns, "DNS lookup", "UDP/TCP 53", $tags="dns")
+      rp --up[hidden]-- ddns
+      Rel_D(browser,        rp, "HTTPS", "*.benmusicgeek.synology.me", $tags="https-client")
+      Rel_D(mobile_browser, rp, "HTTPS", "*.benmusicgeek.synology.me", $tags="https-client")
 
 
 SHOW_LEGEND()
