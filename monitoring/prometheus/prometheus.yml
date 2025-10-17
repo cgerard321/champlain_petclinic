@@ -1,3 +1,4 @@
+---
 global:
   scrape_interval: 15s
 
@@ -6,23 +7,21 @@ scrape_configs:
     metrics_path: "/actuator/prometheus"
     static_configs:
       - targets:
-          - "auth-service:8080" 
-          - "visits-service-new:8080" 
-          - "inventory-service:8080" 
-          - "vet-service:8080" 
-          - "customers-service-reactive:8080" 
-          - "billing-service:8080" 
-          - "products-service:8080" 
+          - "auth-service:8080"
+          - "visits-service-new:8080"
+          - "inventory-service:8080"
+          - "vet-service:8080"
+          - "customers-service-reactive:8080"
+          - "billing-service:8080"
+          - "products-service:8080"
           - "cart-service:8080"
     
   - job_name: 'mailer-service'
     metrics_path: "/metrics"
     static_configs:
-      - targets: ['mailer-service:8080'] 
+      - targets: ['mailer-service:8080']
 
   - job_name: 'files-service'
     metrics_path: "/metrics"
     static_configs:
-      - targets: ['files-service:8080'] 
-
-
+      - targets: ['files-service:8080']
