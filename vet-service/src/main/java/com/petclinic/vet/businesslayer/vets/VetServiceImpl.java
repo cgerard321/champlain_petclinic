@@ -154,28 +154,22 @@ public class VetServiceImpl implements VetService {
 
     @Transactional
     @Override
-    public Mono<Void> deleteVetByVetId(String vetId) {
+    public Mono<VetResponseDTO> deleteVetByVetId(String vetId) {
         return vetRepository.findVetByVetId(vetId)
                 .switchIfEmpty(Mono.error(new NotFoundException("No vet with this vetId was found: " + vetId)))
                 .flatMap(vet -> {
                     log.info("Deleting associated data for vetId: {}", vetId);
+                    vet.setActive(false);
 
-                    //Mono<Void> deleteBadges = badgeRepository.deleteByVetId(vetId);
+                    return Mono.when()
+                            .then(vetRepository.save(vet))
+                            .map(EntityDtoUtil::vetEntityToResponseDTO)
+                            .doOnSuccess(updateVet -> log.info("Successfully deactivated vet with vetId: {}", vet.getVetId()))
+                            .doOnError(error -> log.info("Error deactivating vet with vetId: {}", vet.getVetId()));
 
-                    Mono<Void> deletePhotos = photoRepository.findByVetId(vetId)
-                            .flatMap(photoRepository::delete)
-                            .then();
-
-                    Mono<String> deleteRatings = ratingRepository.deleteByVetId(vetId);
-
-                    Mono<String> deleteEducations = educationRepository.deleteByVetId(vetId);
-
-                    return Mono.when(deletePhotos, deleteRatings, deleteEducations)
-                            .then(vetRepository.delete(vet))
-                            .doOnSuccess(unused -> log.info("Successfully deleted vetId: {}", vetId))
-                            .doOnError(error -> log.error("Error deleting vetId: {}", vetId, error));
                 });
     }
+
 
 
     private byte[] loadImage(String imagePath) {
