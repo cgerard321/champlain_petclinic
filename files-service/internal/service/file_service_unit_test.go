@@ -40,7 +40,7 @@ func setupFileServiceUnitTest() (*tm.MockFileInfoRepo, *tm.MockMinioServiceClien
 func TestWhenGetFileById_withExistingFileId_thenReturnFileResponseModel(t *testing.T) {
 	mockRepo, mockClient := setupFileServiceUnitTest()
 	mockRepo.On("GetFileInfo", EXISTING_FILE_ID).Return(&VALID_FILE_INFO)
-	mockClient.On("GetFile", mock.AnythingOfType("*datalayer.FileInfo")).Return(&VALID_FILE_RESPONSE_MODEL, nil)
+	mockClient.On("GetFile", mock.AnythingOfType("*domain.FileInfo")).Return(&VALID_FILE_RESPONSE_MODEL, nil)
 
 	sr := service.NewFileService(mockRepo, mockClient)
 	file, err := sr.GetFile(EXISTING_FILE_ID)
@@ -69,9 +69,9 @@ func TestWhenUpdateFile_withExistingFileId_thenReturnUpdatedFileResponseModel(t 
 
 	mockRepo.On("GetFileInfo", EXISTING_FILE_ID).Return(&VALID_FILE_INFO)
 	mockRepo.On("DeleteFileInfo", EXISTING_FILE_ID).Return(nil)
-	mockRepo.On("AddFileInfo", mock.AnythingOfType("*datalayer.FileInfo")).Return(nil)
+	mockRepo.On("AddFileInfo", mock.AnythingOfType("*domain.FileInfo")).Return(nil)
 	mockClient.On("DeleteFile", &VALID_FILE_INFO).Return(nil)
-	mockClient.On("AddFile", mock.AnythingOfType("*datalayer.FileInfo"), UPDATE_FILE_REQUEST_MODEL.FileData).Return(nil)
+	mockClient.On("AddFile", mock.AnythingOfType("*domain.FileInfo"), UPDATE_FILE_REQUEST_MODEL.FileData).Return(nil)
 
 	sr := service.NewFileService(mockRepo, mockClient)
 	resp, err := sr.UpdateFile(EXISTING_FILE_ID, &UPDATE_FILE_REQUEST_MODEL)
