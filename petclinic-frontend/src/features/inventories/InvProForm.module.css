@@ -12,6 +12,27 @@
   z-index: 2147483647; 
 }
 
+.form-container form > button[type="submit"]{
+  display: block;
+  width: 100%;
+  margin-top: calc(var(--gap) + 4px);
+}
+
+.form-container form > button:not([type="submit"]){
+  margin-top: var(--gap);
+}
+
+
+.form-container form > button[type="button"] + button[type="button"]{
+  margin-left: var(--gap);
+}
+
+@media (min-width: 0){
+  .form-container form > button:not([type="submit"]){
+    display: inline-block;
+  }
+}
+
 .form-container{
   --gap: 14px;
   --radius: 16px;
