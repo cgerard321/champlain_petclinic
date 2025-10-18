@@ -10,6 +10,7 @@ type Props = {
   onClose: () => void;
   inventoryIdProp?: string;
   onAdded?: () => void;
+  existingProductNames?: string[];
 };
 
 const AddSupplyToInventory: React.FC<Props> = ({
@@ -17,6 +18,7 @@ const AddSupplyToInventory: React.FC<Props> = ({
   onClose,
   inventoryIdProp,
   onAdded,
+  existingProductNames = [],
 }): JSX.Element | null => {
   const routeId = useParams<{ inventoryId: string }>().inventoryId;
   const inventoryId = inventoryIdProp ?? routeId;
@@ -75,6 +77,19 @@ const AddSupplyToInventory: React.FC<Props> = ({
         next.productSalePrice = 'Product sale price must be greater than 0';
       setError(p => ({ ...p, ...next }));
       setErrorMessage('Please fix the highlighted errors and try again.');
+      return;
+    }
+
+    const submitted = product.productName.trim().toLowerCase();
+    const nameClashes = existingProductNames.some(
+      n => n.trim().toLowerCase() === submitted
+    );
+    if (nameClashes) {
+      setError(prev => ({
+        ...prev,
+        productName: 'This product name is already in use.',
+      }));
+      setErrorMessage(''); // no global error banner needed
       return;
     }
 

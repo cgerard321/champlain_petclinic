@@ -18,6 +18,7 @@ type Props = {
   inventoryIdProp?: string;
   productIdProp?: string;
   onUpdated?: () => void;
+  existingProductNames?: string[];
 };
 
 const EditInventoryProducts: React.FC<Props> = ({
@@ -26,6 +27,7 @@ const EditInventoryProducts: React.FC<Props> = ({
   inventoryIdProp,
   productIdProp,
   onUpdated,
+  existingProductNames = [],
 }): JSX.Element | null => {
   const route = useParams<{ inventoryId: string; productId: string }>();
   const inventoryId = inventoryIdProp ?? route.inventoryId;
@@ -45,6 +47,7 @@ const EditInventoryProducts: React.FC<Props> = ({
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const [originalName, setOriginalName] = useState<string>('');
   const [showNotification, setShowNotification] = useState<boolean>(false);
 
   const canSubmit =
@@ -81,6 +84,7 @@ const EditInventoryProducts: React.FC<Props> = ({
         productQuantity: p.productQuantity,
         productSalePrice: p.productSalePrice,
       });
+      setOriginalName(p.productName);
       setLoading(false);
     };
     void fetchProduct();
@@ -113,6 +117,24 @@ const EditInventoryProducts: React.FC<Props> = ({
     event.preventDefault();
     if (!validate()) {
       setErrorMessage('Please fix the highlighted errors and try again.');
+      return;
+    }
+    const submitted = product.productName.trim().toLowerCase();
+    const orig = originalName.trim().toLowerCase();
+    const nameChanged = submitted !== orig;
+    const clash =
+      nameChanged &&
+      (existingProductNames ?? []).some(
+        n => n.trim().toLowerCase() === submitted
+      );
+
+    if (clash) {
+      setError(prev => ({
+        ...prev,
+        productName:
+          'A product with this name already exists in this inventory.',
+      }));
+      setErrorMessage('');
       return;
     }
 

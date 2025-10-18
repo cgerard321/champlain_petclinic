@@ -7,21 +7,14 @@ interface AddInventoryTypeProps {
   show: boolean;
   handleClose: () => void;
   refreshInventoryTypes: () => void;
-}
-
-//helper
-function mapServerMessageToFieldErrors(msg: string): string | null {
-  const m = msg.toLowerCase();
-  if (m.includes('already exists') || m.includes('duplicate')) {
-    return 'This inventory type already exists.';
-  }
-  return null;
+  existingTypeNames?: string[];
 }
 
 export default function AddInventoryType({
   show,
   handleClose,
   refreshInventoryTypes,
+  existingTypeNames,
 }: AddInventoryTypeProps): React.ReactElement | null {
   const [type, setType] = useState('');
   const [fieldError, setFieldError] = useState<string>('');
@@ -49,14 +42,23 @@ export default function AddInventoryType({
       setFieldError('Type name must be between 3 and 50 characters.');
       return;
     }
+
+    if (
+      existingTypeNames?.some(
+        n => n.trim().toLowerCase() === trimmed.toLowerCase()
+      )
+    ) {
+      setFieldError('This inventory type already exists.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     const payload: Omit<InventoryType, 'typeId'> = { type: trimmed };
     const { errorMessage } = await addInventoryType(payload);
 
     if (errorMessage) {
-      const mapped = mapServerMessageToFieldErrors(errorMessage);
-      setFieldError(mapped ?? errorMessage);
+      setFieldError(errorMessage);
       setIsSubmitting(false);
       return;
     }

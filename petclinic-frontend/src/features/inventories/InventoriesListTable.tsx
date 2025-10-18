@@ -860,6 +860,7 @@ export default function InventoriesListTable(): JSX.Element {
             showAddInventoryForm={showAddInventoryForm}
             handleInventoryClose={() => setShowAddInventoryForm(false)}
             refreshInventoryTypes={refreshInventoryTypes}
+            existingInventoryNames={inventoryList.map(i => i.inventoryName)}
           />
         )}
 
@@ -868,6 +869,7 @@ export default function InventoriesListTable(): JSX.Element {
             show={showAddTypeForm}
             handleClose={() => setShowAddTypeForm(false)}
             refreshInventoryTypes={refreshInventoryTypes}
+            existingTypeNames={inventoryTypeList.map(t => t.type)}
           />
         )}
 
@@ -899,6 +901,7 @@ export default function InventoriesListTable(): JSX.Element {
           <EditInventory
             open={editOpen}
             inventoryIdProp={editInventoryId}
+            existingInventoryNames={inventoryList.map(i => i.inventoryName)}
             onClose={() => {
               setEditOpen(false);
               setEditInventoryId(null);

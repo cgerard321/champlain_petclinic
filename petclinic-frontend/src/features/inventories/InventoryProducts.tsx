@@ -545,6 +545,7 @@ const InventoryProducts: React.FC = () => {
           open={addOpen}
           onClose={() => setAddOpen(false)}
           inventoryIdProp={inventoryId}
+          existingProductNames={products.map(p => p.productName)}
           onAdded={() => {
             setAddOpen(false);
             void loadProducts(); // refresh table after add
@@ -561,6 +562,9 @@ const InventoryProducts: React.FC = () => {
           }}
           inventoryIdProp={inventoryId}
           productIdProp={editProductId ?? undefined}
+          existingProductNames={products
+            .filter(p => p.productId !== editProductId)
+            .map(p => p.productName)}
           onUpdated={() => {
             setEditOpen(false);
             setEditProductId(null);
