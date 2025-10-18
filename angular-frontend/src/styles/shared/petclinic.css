@@ -1,0 +1,169 @@
+.table > thead > tr > th {
+  background-color: #3c3834;
+  color: #f1f1f1;
+}
+.table-filter {
+  background-color: #34302D;
+  padding: 9px 12px;
+}
+.xd-container {
+  margin-top: 40px;
+  margin-bottom: 100px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+.index-page--subtitle {
+  font-size: 16px;
+  line-height: 24px;
+  margin: 0 0 30px;
+}
+.form-horizontal button.btn-inverse {
+  margin-left: 32px;
+}
+#job-params-modal .modal-dialog {
+  width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+}
+[ng-cloak].splash {
+  display: block !important;
+}
+[ng-cloak] {
+  display: none;
+}
+.splash {
+  background: #6db33f;
+  color: #34302D;
+  display: none;
+}
+.error-page {
+  margin-top: 100px;
+  text-align: center;
+}
+.error-page .error-title {
+  font-size: 24px;
+  line-height: 24px;
+  margin: 30px 0 0;
+}
+table td {
+  vertical-align: middle;
+}
+table td .progress {
+  margin-bottom: 0;
+}
+table td.action-column {
+  width: 1px;
+}
+.help-block {
+  color: #b6afaa;
+}
+.xd-containers {
+  font-size: 15px;
+}
+.cluster-view > table td {
+  vertical-align: top;
+}
+.cluster-view .label,
+.cluster-view .column-block {
+  display: block;
+}
+.cluster-view .input-group-addon {
+  width: 0%;
+}
+.cluster-view {
+  margin-bottom: 0;
+}
+.container-details-table th {
+  background-color: #3c3834;
+  color: #f1f1f1;
+}
+.status-help-content-table td {
+  color: #34302D;
+}
+.myspinner {
+  animation-name: spinner;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+  -webkit-transform-origin: 49% 50%;
+  -webkit-animation-name: spinner;
+  -webkit-animation-duration: 2s;
+  -webkit-animation-iteration-count: infinite;
+  -webkit-animation-timing-function: linear;
+}
+@keyframes spinner {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@-webkit-keyframes spinner {
+  from {
+    -webkit-transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+a.newBtn:hover, button#newBtn:hover{
+  text-decoration-color: blue;
+  text-decoration: underline;
+}
+
+#owner {
+  border: 1px solid black;
+}
+
+table:not(.noColor) {
+  background-color: white;
+  color: black;
+}
+
+h2.form {
+  background-color: rgba(0, 0, 0, 0.05);
+  margin-bottom: 0px;
+}
+
+div.bColor {
+  background-color: white;
+}
+
+div.formColor {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+p.pet {
+  margin-bottom: 0px;
+}
+
+#owner, #petForm>div>label, #ownerForm>div>label {
+  color: black;
+  font-weight: bold;
+}
+
+#petForm, #ownerForm {
+  text-align: center;
+  background-color: white;
+  margin: auto;
+  font-size: large;
+}
+
+div.pet, div.owner {
+  margin: auto;
+}
+
+div.pet:not(.marg), div.owner:not(.marg){
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+#owner.table>tbody>tr>td {
+  border-style: none;
+  font-weight: normal;
+}
+
+#bg {
+  /*background-image: url("../images/tracks-pattern.png");*/
+}

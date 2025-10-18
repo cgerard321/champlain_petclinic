@@ -1,0 +1,17 @@
+@media screen and (max-width: 768px) {
+    .vet_phone {
+        display: none;
+    }
+}
+
+@media screen and (max-width: 550px) {
+    .vet_email {
+        display: none;
+    }
+}
+
+@media screen and (max-width: 380px) {
+    .vet_speciality {
+        display: none;
+    }
+}

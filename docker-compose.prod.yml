@@ -38,7 +38,7 @@ services:
     ports:
       - "4200:4200"
     volumes:
-      - ./angular-frontend/public:/app/public
+      - ./angular-frontend/src:/app/src
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:4200"]

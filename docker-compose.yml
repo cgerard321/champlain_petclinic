@@ -23,9 +23,7 @@ services:
     ports:
       - "4200:4200"
     volumes:
-      - ./angular-frontend/public:/app/public
-    depends_on:
-      - api-gateway
+      - ./angular-frontend/src:/app/src
 
   janus:
     image: nginx

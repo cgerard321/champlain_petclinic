@@ -1,0 +1,38 @@
+.form-label-rating {
+    text-align: center;
+    font-size: 20px;
+}
+
+.ratingButton {
+    margin: 5px;
+}
+
+.add-rating-container {
+    padding: 20px;
+    background-color: #f8f9fa;
+}
+
+@media (max-width: 768px) {
+    .row.g-5 {
+        flex-direction: column;
+    }
+
+    .col-md-6 {
+        width: 100%;
+    }
+}
+
+
+.rating-stars {
+    color: gold;
+    font-size: 18px;
+}
+
+.rating-value {
+    margin-left: 10px;
+}
+
+.large-button {
+    padding: 10px 20px;
+    font-size: 16px;
+}

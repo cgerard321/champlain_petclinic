@@ -1,0 +1,43 @@
+.inputFieldsStyle{
+    border-color: rgba(0,0,0,0.1);
+    border-top: 0;
+    border-left: 0;
+    border-right: 0;
+    border-bottom: 1.5px solid rgba(0,0,0,0.1);
+    color: #2f2b2b;
+}
+.ownerRow{
+    display: flex;
+}
+.ownerCol{
+    flex: .35;
+    padding: 1em;
+}
+
+.hrColor{
+    border-top: 1px solid rgba(143,143,143,.30);
+}
+
+.ownerDetailContainer {
+    background-Color:white;
+    border-radius: 10px;
+    width: 550px
+}
+
+.inputLabel{
+    font-size:10px;
+    text-align:left;
+    color:rgba(0,0,0,0.25);
+}
+.photoBorder{
+    border: 1px solid rgba(143,143,143,.5);
+    box-shadow: 0 0 5px rgba(143,143,143,.5);
+}
+.petBody{
+    );
+    box-shadow: 0 0 5px rgba(143,143,143,.5);
+}
+.petBody:hover{
+    border: 1px solid #6db33f;
+    box-shadow: 0 0 5px #6db33f;
+}

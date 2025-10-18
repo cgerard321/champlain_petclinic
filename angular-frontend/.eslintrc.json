@@ -1,75 +1,24 @@
 {
-  "env": { 
-    "browser": true, 
-    "es2020": true,
-    "node": true,
-    "jquery": true
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "module",
+    "project": "./tsconfig.json"
   },
-  "globals": {
-    "angular": "readonly",
-    "expect": "readonly",
-    "it": "readonly",
-    "element": "readonly",
-    "by": "readonly",
-    "editDateParsing": "readonly",
-    "visitDate": "readonly",
-    "petId": "readonly",
-    "arr": "writable",
-    "data": "writable",
-    "$scope": "readonly",
-    "n": "readonly"
-  },
+  "plugins": ["@typescript-eslint", "prettier"],
   "extends": [
     "eslint:recommended",
-    "plugin:prettier/recommended"
+    "plugin:@typescript-eslint/recommended",
+    "plugin:playwright/recommended",
+    "prettier"
   ],
-  "ignorePatterns": ["dist", "node_modules/*"],
-  "parserOptions": {
-    "ecmaVersion": 2020,
-    "sourceType": "module"
-  },
-  "plugins": ["prettier"],
   "rules": {
-    "no-console": ["error", { "allow": ["warn", "error"] }],
-    "no-unused-vars": "error"
+    "prettier/prettier": "error",
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/explicit-module-boundary-types": "off"
   },
-  "overrides": [
-    {
-      "files": ["tests/**/*.spec.ts", "tests/**/*.test.ts"],
-      "parser": "@typescript-eslint/parser",
-      "extends": ["plugin:playwright/recommended"],
-      "rules": {
-        "playwright/expect-expect": "error",
-        "playwright/max-nested-describe": ["error", { "max": 1 }],
-        "playwright/missing-playwright-await": "error",
-        "playwright/no-conditional-in-test": "error",
-        "playwright/no-element-handle": "error",
-        "playwright/no-eval": "error",
-        "playwright/no-focused-test": "error",
-        "playwright/no-force-option": "error",
-        "playwright/no-nested-step": "error",
-        "playwright/no-networkidle": "error",
-        "playwright/no-page-pause": "error",
-        "playwright/no-restricted-matchers": "error",
-        "playwright/no-skipped-test": "warn",
-        "playwright/no-unsafe-references": "error",
-        "playwright/no-useless-await": "error",
-        "playwright/no-useless-not": "error",
-        "playwright/no-wait-for-timeout": "error",
-        "playwright/prefer-strict-equal": "error",
-        "playwright/prefer-to-be": "error",
-        "playwright/prefer-to-contain": "error",
-        "playwright/prefer-to-have-count": "error",
-        "playwright/prefer-to-have-length": "error",
-        "playwright/prefer-web-first-assertions": "error",
-        "playwright/require-top-level-describe": "error",
-        "playwright/valid-describe-callback": "error",
-        "playwright/valid-expect": "error",
-        "playwright/valid-expect-in-promise": "error",
-        "playwright/valid-title": "error",
-        "no-console": "off"
-      }
-    }
-  ]
+  "ignorePatterns": ["dist", "node_modules", "*.config.ts"]
 }
+
 

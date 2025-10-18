@@ -11,4 +11,5 @@ services:
         - BUILD_MODE=development
     ports:
       - "4200:4200"
-
+    volumes:
+      - ./public:/app/public

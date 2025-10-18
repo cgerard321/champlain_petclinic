@@ -1,0 +1,42 @@
+{
+  "name": "angular-frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 4200 --host --mode dev",
+    "build": "vite build",
+    "build:development": "vite build --mode dev",
+    "build:production": "vite build --mode prod",
+    "preview": "vite preview",
+    "lint": "eslint tests --ext ts --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "npm run lint -- --fix",
+    "lint:src": "eslint public/scripts --ext js",
+    "lint:src:fix": "npm run lint:src -- --fix",
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug"
+  },
+  "dependencies": {
+    "angular": "^1.8.3",
+    "angular-resource": "^1.8.3",
+    "angular-ui-bootstrap": "^2.5.6",
+    "angular-ui-router": "^1.0.30",
+    "axios": "^1.7.7",
+    "bootstrap": "^5.1.0",
+    "jquery": "^3.2.1",
+    "popper.js": "^1.12.9"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.2",
+    "@typescript-eslint/parser": "^8.46.1",
+    "@vitejs/plugin-legacy": "^5.4.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-playwright": "^2.2.2",
+    "eslint-plugin-prettier": "^5.5.4",
+    "prettier": "^3.6.2",
+    "vite": "^5.4.8"
+  }
+}

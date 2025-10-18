@@ -1,0 +1,26 @@
+/* Test style to verify CSS is loading */
+.vet_name {
+    color: #007bff !important;
+    font-weight: bold;
+    background-color: #f0f8ff !important;
+    padding: 5px !important;
+    border-radius: 3px !important;
+}
+
+@media screen and (max-width: 768px) {
+    .vet_phone {
+        display: none;
+    }
+}
+
+@media screen and (max-width: 550px) {
+    .vet_email {
+        display: none;
+    }
+}
+
+@media screen and (max-width: 380px) {
+    .vet_speciality {
+        display: none;
+    }
+}

@@ -1,0 +1,139 @@
+.modal_image img {
+    height: 100px;
+    margin: 0 auto;
+}
+
+.modal_image {
+    grid-area: a;
+}
+
+.modal_email {
+    display: none;
+}
+
+.modal_phone {
+    display: none;
+}
+
+.modal {
+    border-radius: 20px;
+    width: 400px !important;
+    height: 150px !important;
+    background: rgba(0, 0, 0, 0.95) !important;
+    color: white !important;
+    display: grid !important;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    margin: 0 0;
+    transform: translate(-50%, -50%);
+    z-index: 100000;
+    text-align: center;
+    grid-template-columns:0.55fr 1fr;
+    grid-template-areas:'a .'
+                     'a .';
+}
+
+.modalOn {
+    animation: 500ms fadeIn forwards;
+    color: white;
+    display: flex !important;
+}
+
+.modalOff {
+    display: none !important;
+}
+
+.modal_specialty {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+
+.confirmation-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 1040;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.confirmation-modal {
+    background: white;
+    color: #333;
+    border-radius: 8px;
+    padding: 20px;
+    width: 90%;
+    max-width: 450px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    text-align: left;
+}
+
+.confirmation-modal-header {
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.confirmation-modal-header h5 {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.confirmation-modal-footer {
+    border-top: 1px solid #dee2e6;
+    padding-top: 15px;
+    margin-top: 20px;
+    text-align: right;
+}
+
+.confirmation-modal-footer .btn {
+    margin-left: 10px;
+}
+
+
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@media screen and (max-width: 960px) {
+    .modal {
+        width: 334.5px !important;
+        height: 400px !important;
+        grid-template-columns:1fr;
+        grid-template-areas:'a'
+                        '.';
+    }
+}
+
+@media screen and (max-width: 768px) {
+
+    .modal_phone {
+        display: block;
+    }
+}
+
+@media screen and (max-width: 550px) {
+    .modal_email {
+        display: block;
+    }
+}
+
+@media screen and (max-width: 370px) {
+    .modal {
+        width: 290px !important;
+    }
+}

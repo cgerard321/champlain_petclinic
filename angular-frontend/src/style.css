@@ -1,0 +1,20 @@
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+
+@import './styles/shared/petclinic.css';
+
+@import './styles/customers/owner.css';
+@import './styles/customers/ownerdetail.css';
+@import './styles/customers/pet.css';
+@import './styles/customers/registration.css';
+
+@import './styles/vets/form.css';
+@import './styles/vets/modal.css';
+@import './styles/vets/ratings.css';
+@import './styles/vets/sevenDaysCalendar.css';
+@import './styles/vets/vetTable.css';
+
+@import './styles/visits/addVisitFormStyle.css';
+@import './styles/visits/visitsCalendarStyle.css';
+
+@import './styles/billing/bill-history.css';
