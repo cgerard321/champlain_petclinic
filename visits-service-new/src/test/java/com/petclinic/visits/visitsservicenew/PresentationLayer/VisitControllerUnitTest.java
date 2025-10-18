@@ -124,7 +124,7 @@ class VisitControllerUnitTest {
 
     @Test
     void getVisitByVisitId() {
-        when(visitService.getVisitByVisitId(anyString(), includePrescription)).thenReturn(Mono.just(visitResponseDTO));
+        when(visitService.getVisitByVisitId(anyString(), true)).thenReturn(Mono.just(visitResponseDTO));
 
         webTestClient.get()
                 .uri("/visits/" + Visit_UUID_OK)
@@ -140,7 +140,7 @@ class VisitControllerUnitTest {
                 .jsonPath("$.practitionerId").isEqualTo(visitResponseDTO.getPractitionerId())
                 .jsonPath("$.status").isEqualTo("UPCOMING");
 
-        verify(visitService, times(1)).getVisitByVisitId(Visit_UUID_OK, includePrescription);
+        verify(visitService, times(1)).getVisitByVisitId(Visit_UUID_OK, true);
     }
 
     @Test

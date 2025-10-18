@@ -59,9 +59,7 @@ public class VisitServiceImpl implements VisitService {
     private final MailService mailService;
 
     private final PrescriptionService prescriptionService;
-
-    @Autowired
-    FilesServiceClient filesServiceClient;
+    private final FilesServiceClient filesServiceClient;
 
     /**
      * Get all visits from the repo
