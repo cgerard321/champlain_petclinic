@@ -9,6 +9,7 @@ interface AddInventoryProps {
   showAddInventoryForm: boolean;
   handleInventoryClose: () => void;
   refreshInventoryTypes: () => void;
+  existingInventoryNames?: string[];
 }
 const isHttpUrl = (url: string): boolean => {
   try {
@@ -90,6 +91,7 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
   showAddInventoryForm,
   handleInventoryClose,
   refreshInventoryTypes,
+  existingInventoryNames = [],
 }: AddInventoryProps): React.ReactElement | null => {
   const [inventoryName, setInventoryName] = useState<string>('');
   const [inventoryType, setInventoryType] = useState<string>('');
@@ -272,6 +274,17 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
     });
     if (Object.keys(errorsBeforeSubmit).length) {
       setFieldErrors(errorsBeforeSubmit);
+      return;
+    }
+
+    const trimmedName = inventoryName.trim().toLowerCase();
+    if (
+      existingInventoryNames.some(n => n.trim().toLowerCase() === trimmedName)
+    ) {
+      setFieldErrors(prev => ({
+        ...prev,
+        inventoryName: 'An inventory with this name already exists.',
+      }));
       return;
     }
 

@@ -15,6 +15,7 @@ type EditInventoryProps = {
   open?: boolean;
   onClose?: () => void;
   inventoryIdProp?: string;
+  existingInventoryNames?: string[];
 };
 // interface ApiError {
 //   message: string;
@@ -100,6 +101,7 @@ const EditInventory: React.FC<EditInventoryProps> = ({
   open = true,
   onClose,
   inventoryIdProp,
+  existingInventoryNames = [],
 }: EditInventoryProps): JSX.Element | null => {
   const params = useParams<{ inventoryId: string }>();
   const inventoryId = inventoryIdProp ?? params.inventoryId;
@@ -353,6 +355,22 @@ const EditInventory: React.FC<EditInventoryProps> = ({
     }
     if (Object.keys(errorsBefore).length) {
       setFieldErrors(errorsBefore);
+      return;
+    }
+
+    const submitted = inventory.inventoryName.trim().toLowerCase();
+    const original = originalInventoryRef.current?.inventoryName
+      ?.trim()
+      .toLowerCase();
+    const nameClashes =
+      existingInventoryNames.some(n => n.trim().toLowerCase() === submitted) &&
+      submitted !== original;
+
+    if (nameClashes) {
+      setFieldErrors(prev => ({
+        ...prev,
+        inventoryName: 'An inventory with this name already exists.',
+      }));
       return;
     }
 
