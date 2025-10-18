@@ -1,22 +1,35 @@
 import * as React from 'react';
-import { FormEvent, useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { FormEvent, useEffect, useRef, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import {
   getProductByProductIdInInventory,
   updateProductInInventory,
 } from '@/features/inventories/api/EditInventoryProducts.ts';
 import { ProductRequestModel } from '@/features/inventories/models/InventoryModels/ProductRequestModel';
-import './EditInventoryProduct.css';
+import styles from './InvProForm.module.css';
 
 const MAX_QTY = 100;
 
 type ProductKeys = keyof ProductRequestModel;
 
-const EditInventoryProducts: React.FC = (): JSX.Element => {
-  const { inventoryId, productId } = useParams<{
-    inventoryId: string;
-    productId: string;
-  }>();
+type Props = {
+  open: boolean;
+  onClose: () => void;
+  inventoryIdProp?: string;
+  productIdProp?: string;
+  onUpdated?: () => void;
+};
+
+const EditInventoryProducts: React.FC<Props> = ({
+  open,
+  onClose,
+  inventoryIdProp,
+  productIdProp,
+  onUpdated,
+}): JSX.Element | null => {
+  const route = useParams<{ inventoryId: string; productId: string }>();
+  const inventoryId = inventoryIdProp ?? route.inventoryId;
+  const productId = productIdProp ?? route.productId;
 
   const [product, setProduct] = useState<ProductRequestModel>({
     productName: '',
@@ -43,7 +56,7 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
     Number(product.productQuantity) <= MAX_QTY &&
     !loading;
 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProduct = async (): Promise<void> => {
@@ -71,7 +84,7 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
       setLoading(false);
     };
     void fetchProduct();
-  }, [inventoryId, productId]);
+  }, [open, inventoryId, productId]);
 
   const validate = (): boolean => {
     const errors: Record<string, string> = {};
@@ -157,9 +170,8 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
 
     setSuccessMessage('Product updated successfully');
     setShowNotification(true);
-    setTimeout(() => {
-      navigate(`/inventories/${inventoryId}/products`);
-    }, 2000);
+    onUpdated?.();
+    setTimeout(() => onClose(), 800);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -231,24 +243,77 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
     if (error.message) setErrorMessage('');
   };
 
+  const overlayRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    requestAnimationFrame(() => overlayRef.current?.focus());
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
+
+  const handleEsc: React.KeyboardEventHandler<HTMLDivElement> = e => {
+    if (e.key === 'Escape' || e.key === 'Esc') onClose();
+  };
+
+  const handleBackdropClick: React.MouseEventHandler<HTMLDivElement> = e => {
+    if (e.target === e.currentTarget) onClose();
+  };
+
+  if (!open) return null;
+
   return (
-    <div className="edit-product-container">
-      <div className="edit-product-form-container">
+    <div
+      ref={overlayRef}
+      className={styles.overlay}
+      role="dialog"
+      aria-modal="true"
+      tabIndex={-1}
+      onKeyDown={handleEsc}
+      onMouseDown={handleBackdropClick}
+    >
+      <div className={styles['form-container']}>
         <h2>Edit Product</h2>
 
+        {loading && (
+          <div className="loading-overlay">
+            <div className="loader" />
+          </div>
+        )}
+
         {errorMessage && (
-          <div className="edit-product-error-message">{errorMessage}</div>
+          <div className="field-error" style={{ marginTop: 8 }}>
+            {errorMessage}
+          </div>
         )}
         {successMessage && showNotification && (
-          <div className="edit-product-success-message">{successMessage}</div>
+          <div
+            style={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              background: '#28a745',
+              color: '#fff',
+              padding: '6px 10px',
+              borderRadius: 4,
+              fontSize: 12,
+            }}
+            role="status"
+            aria-live="polite"
+          >
+            {successMessage}
+          </div>
         )}
 
         <form onSubmit={handleSubmit} noValidate>
-          <div className="edit-product-form-group">
+          <div>
             <label htmlFor="productName">Name</label>
             <input
               id="productName"
-              className={`edit-product-input ${error.productName ? 'invalid animate' : ''}`}
+              className={error.productName ? 'invalid animate' : ''}
               type="text"
               name="productName"
               value={product.productName}
@@ -259,17 +324,17 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
               }
             />
             {error.productName && (
-              <div id="err-productName" className="edit-product-error-text">
+              <div id="err-productName" className="field-error">
                 {error.productName}
               </div>
             )}
           </div>
 
-          <div className="edit-product-form-group">
+          <div>
             <label htmlFor="productDescription">Description</label>
             <input
               id="productDescription"
-              className={`edit-product-input ${error.productDescription ? 'invalid animate' : ''}`}
+              className={error.productDescription ? 'invalid animate' : ''}
               type="text"
               name="productDescription"
               value={product.productDescription}
@@ -280,20 +345,17 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
               }
             />
             {error.productDescription && (
-              <div
-                id="err-productDescription"
-                className="edit-product-error-text"
-              >
+              <div id="err-productDescription" className="field-error">
                 {error.productDescription}
               </div>
             )}
           </div>
 
-          <div className="edit-product-form-group">
+          <div>
             <label htmlFor="productPrice">Cost Price</label>
             <input
               id="productPrice"
-              className={`edit-product-input ${error.productPrice ? 'invalid animate' : ''}`}
+              className={error.productPrice ? 'invalid animate' : ''}
               type="number"
               name="productPrice"
               value={product.productPrice}
@@ -306,16 +368,17 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
               }
             />
             {error.productPrice && (
-              <div id="err-productPrice" className="edit-product-error-text">
+              <div id="err-productPrice" className="field-error">
                 {error.productPrice}
               </div>
             )}
           </div>
-          <div className="edit-product-form-group">
+
+          <div>
             <label htmlFor="productQuantity">Quantity</label>
             <input
               id="productQuantity"
-              className={`edit-product-input ${error.productQuantity ? 'invalid animate' : ''}`}
+              className={error.productQuantity ? 'invalid animate' : ''}
               type="number"
               name="productQuantity"
               value={product.productQuantity ?? ''}
@@ -335,17 +398,17 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
               }
             />
             {error.productQuantity && (
-              <div id="err-productQuantity" className="edit-product-error-text">
+              <div id="err-productQuantity" className="field-error">
                 {error.productQuantity}
               </div>
             )}
           </div>
 
-          <div className="edit-product-form-group">
+          <div>
             <label htmlFor="productSalePrice">Sale Price</label>
             <input
               id="productSalePrice"
-              className={`edit-product-input ${error.productSalePrice ? 'invalid animate' : ''}`}
+              className={error.productSalePrice ? 'invalid animate' : ''}
               type="number"
               name="productSalePrice"
               value={product.productSalePrice}
@@ -358,21 +421,17 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
               }
             />
             {error.productSalePrice && (
-              <div
-                id="err-productSalePrice"
-                className="edit-product-error-text"
-              >
+              <div id="err-productSalePrice" className="field-error">
                 {error.productSalePrice}
               </div>
             )}
           </div>
 
-          <button
-            type="submit"
-            className="edit-product-submit-button"
-            disabled={!canSubmit}
-          >
+          <button type="submit" disabled={!canSubmit}>
             {loading ? 'Updating…' : 'Update'}
+          </button>
+          <button type="button" className="cancel" onClick={onClose}>
+            Cancel
           </button>
         </form>
       </div>
