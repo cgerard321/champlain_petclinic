@@ -77,8 +77,6 @@ public class CustomerBillsController {
             @PathVariable String billId,
             @RequestBody PaymentRequestDTO paymentRequest,
             @CookieValue("Bearer") String jwtToken) {
-
-
         return billService.processPayment(customerId, billId, paymentRequest,jwtToken)
                 .map(ResponseEntity::ok)
                         .onErrorResume(InvalidPaymentException.class,
