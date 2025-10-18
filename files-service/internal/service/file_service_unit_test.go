@@ -2,8 +2,8 @@ package service_test
 
 import (
 	"files-service/internal/domain"
-	"files-service/internal/mock"
-	models2 "files-service/internal/model"
+	tm "files-service/internal/mock"
+	"files-service/internal/model"
 	"files-service/internal/service"
 	"testing"
 
@@ -17,14 +17,14 @@ var VALID_FILE_INFO = domain.FileInfo{
 	FileType: "image/jpg",
 }
 
-var VALID_FILE_RESPONSE_MODEL = models2.FileResponseModel{
+var VALID_FILE_RESPONSE_MODEL = model.FileResponseModel{
 	FileId:   "3e5a214b-009d-4a25-9313-344676e6157d",
 	FileName: "petclinic test image",
 	FileType: "image/jpg",
 	FileData: []byte("fake image data"),
 }
 
-var UPDATE_FILE_REQUEST_MODEL = models2.FileRequestModel{
+var UPDATE_FILE_REQUEST_MODEL = model.FileRequestModel{
 	FileName: "updated petclinic test image",
 	FileType: "image/png",
 	FileData: []byte("new fake image data"),
@@ -33,8 +33,8 @@ var UPDATE_FILE_REQUEST_MODEL = models2.FileRequestModel{
 const NON_EXISTING_FILE_ID = "3e5a214b-009d-4a25-9313-344676e6157k"
 const EXISTING_FILE_ID = "3e5a214b-009d-4a25-9313-344676e6157d"
 
-func setupFileServiceUnitTest() (*mock.MockFileInfoRepo, *mock.MockMinioServiceClient) {
-	return new(mock.MockFileInfoRepo), new(mock.MockMinioServiceClient)
+func setupFileServiceUnitTest() (*tm.MockFileInfoRepo, *tm.MockMinioServiceClient) {
+	return new(tm.MockFileInfoRepo), new(tm.MockMinioServiceClient)
 }
 
 func TestWhenGetFileById_withExistingFileId_thenReturnFileResponseModel(t *testing.T) {
@@ -42,8 +42,8 @@ func TestWhenGetFileById_withExistingFileId_thenReturnFileResponseModel(t *testi
 	mockRepo.On("GetFileInfo", EXISTING_FILE_ID).Return(&VALID_FILE_INFO)
 	mockClient.On("GetFile", mock.AnythingOfType("*datalayer.FileInfo")).Return(&VALID_FILE_RESPONSE_MODEL, nil)
 
-	service := service.NewFileService(mockRepo, mockClient)
-	file, err := service.GetFile(EXISTING_FILE_ID)
+	sr := service.NewFileService(mockRepo, mockClient)
+	file, err := sr.GetFile(EXISTING_FILE_ID)
 
 	assert.Nil(t, err)
 	assert.EqualValues(t, VALID_FILE_INFO.FileName, file.FileName)
@@ -57,8 +57,8 @@ func TestWhenGetFileById_withNonExistingFileId_thenReturnError(t *testing.T) {
 	mockRepo, mockClient := setupFileServiceUnitTest()
 	mockRepo.On("GetFileInfo", NON_EXISTING_FILE_ID).Return(nil)
 
-	service := service.NewFileService(mockRepo, mockClient)
-	file, err := service.GetFile(NON_EXISTING_FILE_ID)
+	sr := service.NewFileService(mockRepo, mockClient)
+	file, err := sr.GetFile(NON_EXISTING_FILE_ID)
 
 	assert.NotNil(t, err)
 	assert.Nil(t, file)
@@ -73,8 +73,8 @@ func TestWhenUpdateFile_withExistingFileId_thenReturnUpdatedFileResponseModel(t 
 	mockClient.On("DeleteFile", &VALID_FILE_INFO).Return(nil)
 	mockClient.On("AddFile", mock.AnythingOfType("*datalayer.FileInfo"), UPDATE_FILE_REQUEST_MODEL.FileData).Return(nil)
 
-	service := service.NewFileService(mockRepo, mockClient)
-	resp, err := service.UpdateFile(EXISTING_FILE_ID, &UPDATE_FILE_REQUEST_MODEL)
+	sr := service.NewFileService(mockRepo, mockClient)
+	resp, err := sr.UpdateFile(EXISTING_FILE_ID, &UPDATE_FILE_REQUEST_MODEL)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, resp)
@@ -90,8 +90,8 @@ func TestWhenUpdateFile_withNonExistingFileId_thenReturnError(t *testing.T) {
 	mockRepo, mockClient := setupFileServiceUnitTest()
 	mockRepo.On("GetFileInfo", NON_EXISTING_FILE_ID).Return(nil)
 
-	service := service.NewFileService(mockRepo, mockClient)
-	resp, err := service.UpdateFile(NON_EXISTING_FILE_ID, &UPDATE_FILE_REQUEST_MODEL)
+	sr := service.NewFileService(mockRepo, mockClient)
+	resp, err := sr.UpdateFile(NON_EXISTING_FILE_ID, &UPDATE_FILE_REQUEST_MODEL)
 
 	assert.NotNil(t, err)
 	assert.Nil(t, resp)
@@ -105,8 +105,8 @@ func TestWhenDeleteFileById_withExistingFileId_thenDeleteSuccessfully(t *testing
 	mockRepo.On("DeleteFileInfo", EXISTING_FILE_ID).Return(nil)
 	mockClient.On("DeleteFile", &VALID_FILE_INFO).Return(nil)
 
-	service := service.NewFileService(mockRepo, mockClient)
-	err := service.DeleteFile(EXISTING_FILE_ID)
+	sr := service.NewFileService(mockRepo, mockClient)
+	err := sr.DeleteFile(EXISTING_FILE_ID)
 
 	assert.Nil(t, err)
 	mockRepo.AssertExpectations(t)
@@ -117,8 +117,8 @@ func TestWhenDeleteFileById_withNonExistingFileId_thenReturnError(t *testing.T) 
 	mockRepo, mockClient := setupFileServiceUnitTest()
 	mockRepo.On("GetFileInfo", NON_EXISTING_FILE_ID).Return(nil)
 
-	service := service.NewFileService(mockRepo, mockClient)
-	err := service.DeleteFile(NON_EXISTING_FILE_ID)
+	sr := service.NewFileService(mockRepo, mockClient)
+	err := sr.DeleteFile(NON_EXISTING_FILE_ID)
 
 	assert.NotNil(t, err)
 	assert.EqualError(t, err, "fileId: "+NON_EXISTING_FILE_ID+" was not found")

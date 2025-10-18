@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"files-service/internal/http/handlers"
 	"files-service/internal/mock"
-	models2 "files-service/internal/model"
+	"files-service/internal/model"
 	"files-service/internal/util/exception"
 	"net/http"
 	"net/http/httptest"
@@ -35,7 +35,7 @@ func TestWhenGetFileById_withExistingFileId_thenReturnFileResponseModel(t *testi
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	var got models2.FileResponseModel
+	var got model.FileResponseModel
 	err := json.Unmarshal(w.Body.Bytes(), &got)
 	assert.NoError(t, err)
 	assert.EqualValues(t, VALID_FILE_RESPONSE_MODEL.FileId, got.FileId)
@@ -91,13 +91,13 @@ func TestWhenUpdateFile_withExistingFileId_thenReturnUpdatedFileResponseModel_Un
 	router := gin.Default()
 	_ = controller.Routes(router)
 
-	updateModel := models2.FileRequestModel{
+	updateModel := model.FileRequestModel{
 		FileName: "updated petclinic image",
 		FileType: "image/png",
 		FileData: []byte("new fake data"),
 	}
 
-	expectedResponse := models2.FileResponseModel{
+	expectedResponse := model.FileResponseModel{
 		FileId:   EXISTING_FILE_ID,
 		FileName: "updated petclinic image",
 		FileType: "image/png",
@@ -112,7 +112,7 @@ func TestWhenUpdateFile_withExistingFileId_thenReturnUpdatedFileResponseModel_Un
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	var got models2.FileResponseModel
+	var got model.FileResponseModel
 	err := json.Unmarshal(w.Body.Bytes(), &got)
 	assert.NoError(t, err)
 	assert.Equal(t, expectedResponse.FileName, got.FileName)
@@ -127,7 +127,7 @@ func TestWhenUpdateFile_withNonExistingFileId_thenReturnNotFound_Unit(t *testing
 	router := gin.Default()
 	_ = controller.Routes(router)
 
-	updateModel := models2.FileRequestModel{
+	updateModel := model.FileRequestModel{
 		FileName: "updated petclinic image",
 		FileType: "image/png",
 		FileData: []byte("new fake data"),
