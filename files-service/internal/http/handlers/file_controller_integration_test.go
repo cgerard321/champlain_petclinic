@@ -8,7 +8,7 @@ import (
 	"files-service/internal/client"
 	"files-service/internal/domain"
 	"files-service/internal/http/handlers"
-	models2 "files-service/internal/model"
+	"files-service/internal/model"
 	"files-service/internal/repository"
 	"files-service/internal/service"
 	"files-service/internal/util"
@@ -126,7 +126,7 @@ func TestWhenAddNewFile_withValidFileRequestModel_thenReturnFileResponseModel(t 
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusCreated, w.Code)
-	var got models2.FileResponseModel
+	var got model.FileResponseModel
 	err = json.Unmarshal(w.Body.Bytes(), &got)
 	assert.NoError(t, err)
 	assert.EqualValues(t, VALID_FILE_RESPONSE_MODEL.FileName, got.FileName)
@@ -141,7 +141,7 @@ func TestWhenUpdateFile_withExistingFileId_thenReturnUpdatedFileResponseModel(t 
 	router := gin.Default()
 	_ = controller.Routes(router)
 
-	updatedModel := models2.FileRequestModel{
+	updatedModel := model.FileRequestModel{
 		FileName: "updated petclinic image",
 		FileType: "image/jpeg",
 		FileData: []byte("new fake file data"),
@@ -154,7 +154,7 @@ func TestWhenUpdateFile_withExistingFileId_thenReturnUpdatedFileResponseModel(t 
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	var got models2.FileResponseModel
+	var got model.FileResponseModel
 	err = json.Unmarshal(w.Body.Bytes(), &got)
 	assert.NoError(t, err)
 	assert.Equal(t, updatedModel.FileName, got.FileName)
@@ -168,7 +168,7 @@ func TestWhenUpdateFile_withNonExistingFileId_thenReturnNotFound(t *testing.T) {
 	router := gin.Default()
 	_ = controller.Routes(router)
 
-	updatedModel := models2.FileRequestModel{
+	updatedModel := model.FileRequestModel{
 		FileName: "updated petclinic image",
 		FileType: "image/jpeg",
 		FileData: []byte("new fake file data"),
@@ -194,7 +194,7 @@ func TestWhenGetFile_withExistingFileId_thenReturnFileResponseModel(t *testing.T
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	var got models2.FileResponseModel
+	var got model.FileResponseModel
 	err := json.Unmarshal(w.Body.Bytes(), &got)
 	assert.NoError(t, err)
 	assert.EqualValues(t, VALID_FILE_RESPONSE_MODEL.FileName, got.FileName)
