@@ -3,7 +3,7 @@ import { Inventory } from './models/Inventory';
 import { getAllInventoryTypes } from '@/features/inventories/api/getAllInventoryTypes.ts';
 import addInventory from '@/features/inventories/api/addInventory.ts';
 import { InventoryType } from '@/features/inventories/models/InventoryType.ts';
-import './AddInventoryForm.css';
+import styles from './InvProForm.module.css';
 
 interface AddInventoryProps {
   showAddInventoryForm: boolean;
@@ -125,6 +125,21 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
     }
 
     fetchInventoryTypes();
+  }, []);
+
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
+
+  useEffect(() => {
+    const root = document.getElementById('app-root');
+    if (!root) return;
+    root.setAttribute('inert', '');
+    return () => root.removeAttribute('inert');
   }, []);
 
   // When form opens, initialize history baseline with current values
@@ -342,8 +357,8 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
   }
 
   return (
-    <div className="overlay">
-      <div className="form-container">
+    <div className={styles.overlay}>
+      <div className={styles['form-container']}>
         <h2>Add Inventory</h2>
         <form onSubmit={handleSubmit}>
           <div>
