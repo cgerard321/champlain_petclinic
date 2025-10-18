@@ -29,7 +29,7 @@ jobs:
     - name: Install dependencies
       run: npm install
       working-directory: ./petclinic-frontend
-    - name: Run npm lint to ensure frontend code is linted
+    - name: Run npm lint to ensure Petclinic frontend code is linted
       run: npm run lint
       working-directory: ./petclinic-frontend
     - name: Run build to ensure no build errors
@@ -38,6 +38,9 @@ jobs:
     
     - name: Install dependencies
       run: npm install
+      working-directory: ./angular-frontend
+    - name: Run npm lint to ensure Angular frontend code is linted
+      run: npm run lint
       working-directory: ./angular-frontend
     - name: Run build to ensure no build errors
       run: npm run build
