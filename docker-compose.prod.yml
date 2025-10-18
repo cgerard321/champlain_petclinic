@@ -140,6 +140,7 @@ services:
   files-service:
     build: files-service
     environment:
+      - FILE_DATABASE=user:pwd@tcp(mysql-files:3306)/files-db
       - FILE_ENDPOINT=petclinic-bucket.benmusicgeek.synology.me
       - FILE_ENV=prod
     env_file:

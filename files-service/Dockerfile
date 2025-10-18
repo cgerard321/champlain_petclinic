@@ -2,7 +2,7 @@ FROM golang:1.24 AS builder
 WORKDIR /app/GoFiles
 COPY . .
 RUN go get -d -v ./...
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app . && chmod +x app
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app ./cmd/files
 
 FROM scratch
 COPY --from=builder /app/GoFiles/app /
