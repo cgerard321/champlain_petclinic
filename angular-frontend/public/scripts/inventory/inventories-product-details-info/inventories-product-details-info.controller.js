@@ -1,8 +1,10 @@
 'use strict';
 
-angular.module('inventoriesProductDetailsInfo')
+angular
+  .module('inventoriesProductDetailsInfo')
   .controller('InventoriesProductDetailsInfoController', [
-    '$http', '$stateParams',
+    '$http',
+    '$stateParams',
     function ($http, $stateParams) {
       var self = this;
       self.loading = true;
@@ -15,7 +17,10 @@ angular.module('inventoriesProductDetailsInfo')
 
       self.inventoryId = inventoryId;
 
-      $http.get('api/gateway/inventories/' + inventoryId + '/products/' + productId)
+      $http
+        .get(
+          'api/gateway/inventories/' + inventoryId + '/products/' + productId
+        )
         .then(function (resp) {
           self.product = resp.data;
           self.loading = false;
@@ -25,9 +30,8 @@ angular.module('inventoriesProductDetailsInfo')
           self.error = 'Could not load product details.';
           self.loading = false;
         });
-      $http.get('api/gateway/inventories/' + inventoryId)
-          .then(function(resp){
-              self.inventory = resp.data;
-          });
-    }
+      $http.get('api/gateway/inventories/' + inventoryId).then(function (resp) {
+        self.inventory = resp.data;
+      });
+    },
   ]);

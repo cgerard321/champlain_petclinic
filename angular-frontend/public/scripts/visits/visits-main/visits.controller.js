@@ -1,100 +1,116 @@
 'use strict';
 
-angular.module('visits')
-    .controller('VisitsController', ['$http', '$state', '$stateParams', '$filter','$scope','$rootScope', '$window','$location',  function ($http, $state, $stateParams, $filter, $scope, $rootScope, $window, $location) {
-        var self = this
-        //var petId = $stateParams.petId || 0
-        var postURL = "api/gateway/visit/owners/"+$window.localStorage.getItem("UUID")+"/pets/9/visits"
-        var vetsUrl = "api/gateway/vets"
-        var billsUrl = "api/gateway/bill"
-        var visitId = 0
-        self.practitionerId = 0
-        // self.date = new Date()
-        self.desc = ""
-        self.chosenDate = null
-        self.chosenTime = null
-        self.ownerId = 0
-        self.petId = 0
+angular.module('visits').controller('VisitsController', [
+  '$http',
+  '$state',
+  '$stateParams',
+  '$filter',
+  '$scope',
+  '$rootScope',
+  '$window',
+  '$location',
+  function ($http, $state, $stateParams, $filter, $scope, $rootScope, $window) {
+    var self = this;
+    //var petId = $stateParams.petId || 0
+    var postURL =
+      'api/gateway/visit/owners/' +
+      $window.localStorage.getItem('UUID') +
+      '/pets/9/visits';
+    var vetsUrl = 'api/gateway/vets';
+    var billsUrl = 'api/gateway/bill';
+    var visitId = 0;
+    self.practitionerId = 0;
+    // self.date = new Date()
+    self.desc = '';
+    self.chosenDate = null;
+    self.chosenTime = null;
+    self.ownerId = 0;
+    self.petId = 0;
 
+    // $http.get("api/gateway/visits/"+petId).then(function (resp) {
+    //     self.visits = resp.data;
+    //     self.sortFetchedVisits();
+    // });
 
+    //back button to visit list
+    $scope.goBack = function () {
+      $state.go('visitList');
+    };
 
+    $scope.$on('selectedDateChanged', function (event, selectedDate) {
+      // console.log removed('Received selected date:', selectedDate);
+      // Set dateChosen to the received selected date
+      self.chosenDate = selectedDate;
+    });
 
-        // $http.get("api/gateway/visits/"+petId).then(function (resp) {
-        //     self.visits = resp.data;
-        //     self.sortFetchedVisits();
-        // });
+    // Function to... get the current date ;)
+    function getCurrentDate() {
+      let dateObj = new Date();
+      var dd = String(dateObj.getDate()).padStart(2, '0');
+      var mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+      var yyyy = dateObj.getFullYear();
+      // console.log removed('got currentDate');
+      return Date.parse(yyyy + '-' + mm + '-' + dd);
+    }
 
+    //TODO: make a function to parse the date to localDate
+    //----------------------------------------------------
+    // Container div for all alerts
+    let alertsContainer = $('#alertsContainer');
 
-        //back button to visit list
-        $scope.goBack = function() {
-            $state.go('visitList');
-        };
-
-        $scope.$on('selectedDateChanged', function(event, selectedDate) {
-            console.log("Received selected date:", selectedDate)
-            // Set dateChosen to the received selected date
-            self.chosenDate = selectedDate
-        })
-
-        // Function to... get the current date ;)
-        function getCurrentDate() {
-            let dateObj = new Date()
-            var dd = String(dateObj.getDate()).padStart(2, '0')
-            var mm = String(dateObj.getMonth() + 1).padStart(2, '0')
-            var yyyy = dateObj.getFullYear()
-            console.log("got currentDate")
-            return Date.parse(yyyy + '-' + mm + '-' + dd)
+    // Function to delete last added alert
+    function deleteAlertAfter(alertId, time) {
+      setTimeout(function () {
+        if (
+          alertsContainer.children().length === 1 &&
+          alertsContainer.children('.alert:first-child').attr('id') === alertId
+        ) {
+          alertsContainer.children('.alert:first-child').remove();
         }
+      }, time);
+    }
 
-        //TODO: make a function to parse the date to localDate
-        //----------------------------------------------------
-        // Container div for all alerts
-        let alertsContainer = $('#alertsContainer')
+    let alertId = 0;
+    // Function to create alert
+    function createAlert(alertType, alertMessage) {
+      // Create an alert based on parameters
+      alertsContainer.append(
+        '<div id="alert-' +
+          ++alertId +
+          '" class="alert alert-' +
+          alertType +
+          '" role="alert">' +
+          '<p>' +
+          alertMessage +
+          '</p>' +
+          '</div>'
+      );
 
-        // Function to delete last added alert
-        function deleteAlertAfter(alertId, time) {
-            setTimeout(function() {
-                if(alertsContainer.children().length === 1 && alertsContainer.children(".alert:first-child").attr("id") === alertId) {
-                    alertsContainer.children(".alert:first-child").remove()
-                }
-            }, time)
+      // If there is already an alert make place for new one
+      if (alertsContainer.children().length > 1) {
+        alertsContainer.children('.alert:first-child').remove();
+      }
+
+      // console.log removed(alertsContainer.children().length);
+
+      // Delete the alert after x amount of time (millis)
+      deleteAlertAfter('alert-' + alertId, 3000);
+    }
+
+    // Lists holding visits for the table to display
+    self.upcomingVisits = [];
+    self.sortFetchedVisits = function () {
+      let currentDate = getCurrentDate();
+
+      $.each(self.visits, function (i, visit) {
+        let selectedVisitDate = Date.parse(visit.date);
+
+        if (selectedVisitDate >= currentDate) {
+          self.upcomingVisits.push(visit);
         }
-
-        let alertId = 0
-        // Function to create alert
-        function createAlert(alertType, alertMessage) {
-            // Create an alert based on parameters
-            alertsContainer.append(
-                "<div id=\"alert-"+ ++alertId +"\" class=\"alert alert-"+ alertType +"\" role=\"alert\">" +
-                "<p>" + alertMessage + "</p>" +
-                "</div>"
-            )
-
-            // If there is already an alert make place for new one
-            if(alertsContainer.children().length > 1) {
-                alertsContainer.children(".alert:first-child").remove()
-            }
-
-            console.log(alertsContainer.children().length)
-
-            // Delete the alert after x amount of time (millis)
-            deleteAlertAfter("alert-" + alertId, 3000)
-        }
-
-        // Lists holding visits for the table to display
-        self.upcomingVisits = []
-        self.sortFetchedVisits = function() {
-            let currentDate = getCurrentDate()
-
-            $.each(self.visits, function(i, visit) {
-                let selectedVisitDate = Date.parse(visit.date)
-
-                if(selectedVisitDate >= currentDate) {
-                    self.upcomingVisits.push(visit)
-                }
-            })
-        }
-        /*
+      });
+    };
+    /*
         self.getVisitsForPractitionerIdAndMonth = function() {
             let pIdAndMonth = localStorage.getItem("practitionerIdAndMonth");
 
@@ -102,7 +118,7 @@ angular.module('visits')
                 let info = pIdAndMonth.split(",");
 
                 if(info[0] !== undefined){
-                    console.log(info[0].toString());
+                    // console.log removed(info[0].toString());
                     let practitionerId = parseInt(info[0]);
                     let startDate = info[1];
                     let endDate = info[2];
@@ -127,569 +143,627 @@ angular.module('visits')
         }
         */
 
-        $http.get(vetsUrl).then(function (resp) {
-            self.vets = resp.data;
-        })
+    $http.get(vetsUrl).then(function (resp) {
+      self.vets = resp.data;
+    });
 
-        self.loadVetInfo = function() {
-            let selectedVetsId = $("#selectedVet").val()
+    self.loadVetInfo = function () {
+      let selectedVetsId = $('#selectedVet').val();
 
-            let foundVet = false
-            let vetPhoneNumber = ""
-            let vetEmailAddress = ""
-            let vetWorkdays = ""
-            let vetSpecialtiesObject = null
+      let foundVet = false;
+      let vetPhoneNumber = '';
+      let vetEmailAddress = '';
+      let vetWorkdays = '';
+      let vetSpecialtiesObject = null;
 
-            $.each(self.vets, function(i, vet) {
-                if(selectedVetsId == vet.vetId) {
-                    foundVet = true
-                    vetPhoneNumber = vet.phoneNumber
-                    vetEmailAddress = vet.email
-                    vetSpecialtiesObject = vet.specialties
-                    vetWorkdays = vet.workday
+      $.each(self.vets, function (i, vet) {
+        if (selectedVetsId == vet.vetId) {
+          foundVet = true;
+          vetPhoneNumber = vet.phoneNumber;
+          vetEmailAddress = vet.email;
+          vetSpecialtiesObject = vet.specialties;
+          vetWorkdays = vet.workday;
 
-                    return false
-                }
-            })
-
-            let vetSpecialties = ""
-            $.each(vetSpecialtiesObject, function(i, specialty) {
-                if(i < vetSpecialtiesObject.length - 1) {
-                    vetSpecialties += specialty.name + ", "
-                } else {
-                    vetSpecialties += specialty.name
-                }
-            })
-
-            if(foundVet) {
-                $("#vetPhoneNumber").val(vetPhoneNumber)
-                $("#vetEmailAddress").val(vetEmailAddress)
-                $("#vetSpecialties").val(vetSpecialties)
-                $("#vetWorkdays").val(vetWorkdays).trigger("change")
-            } else {
-                $("#vetPhoneNumber").val("")
-                $("#vetEmailAddress").val("")
-                $("#vetSpecialties").val("")
-                $("#vetWorkdays").val("")
-            }
+          return false;
         }
+      });
 
-        self.getPractitionerName = function (id){
-            var practitionerName = ""
-            $.each(self.vets, function (i, vet){
-                if (vet.vetId == id){
-                    practitionerName = vet.firstName + " " + vet.lastName
-                    return false
-                }
-            })
-            return practitionerName
+      let vetSpecialties = '';
+      $.each(vetSpecialtiesObject, function (i, specialty) {
+        if (i < vetSpecialtiesObject.length - 1) {
+          vetSpecialties += specialty.name + ', ';
+        } else {
+          vetSpecialties += specialty.name;
         }
+      });
 
-        //Get Owners
-        var ownersUrl = "api/gateway/owners";
-        $http.get(ownersUrl).then(function (resp) {
-            self.owners = resp.data;
-            console.log(self.owners)
-        });
+      if (foundVet) {
+        $('#vetPhoneNumber').val(vetPhoneNumber);
+        $('#vetEmailAddress').val(vetEmailAddress);
+        $('#vetSpecialties').val(vetSpecialties);
+        $('#vetWorkdays').val(vetWorkdays).trigger('change');
+      } else {
+        $('#vetPhoneNumber').val('');
+        $('#vetEmailAddress').val('');
+        $('#vetSpecialties').val('');
+        $('#vetWorkdays').val('');
+      }
+    };
 
-        //get pets of owners
-        //whenever the owner is selected, this calls to the back end to get the pets of that owner
-/*        self.loadOwnerInfo = function() {
+    self.getPractitionerName = function (id) {
+      var practitionerName = '';
+      $.each(self.vets, function (i, vet) {
+        if (vet.vetId == id) {
+          practitionerName = vet.firstName + ' ' + vet.lastName;
+          return false;
+        }
+      });
+      return practitionerName;
+    };
+
+    //Get Owners
+    var ownersUrl = 'api/gateway/owners';
+    $http.get(ownersUrl).then(function (resp) {
+      self.owners = resp.data;
+      // console.log removed(self.owners);
+    });
+
+    //get pets of owners
+    //whenever the owner is selected, this calls to the back end to get the pets of that owner
+    /*        self.loadOwnerInfo = function() {
             let ownerId = self.ownerId;
             let petId = self.petId
             $http.get("api/gateway/owners/" + ownerId).then(function(resp) {
                 self.pets = resp.data.pets;
             });
-            console.log(ownerId)
+            // console.log removed(ownerId)
         };
 
         self.logPetId = function() {
-            console.log("Selected Pet ID:", self.petId);
+            // console.log removed("Selected Pet ID:", self.petId);
         }*/
 
-        self.loadOwnerInfo = function() {
-            $http.get("api/gateway/owners/" + self.ownerId).then(function(resp) {
-                self.pets = resp.data.pets;
-                self.ownerId = $("#selectedOwner").val()
-                console.log(" Selected Owner ID:", self.ownerId);
-            });
-            let ownerIdI = self.ownerId
-            console.log(self.ownerId);
+    self.loadOwnerInfo = function () {
+      $http.get('api/gateway/owners/' + self.ownerId).then(function (resp) {
+        self.pets = resp.data.pets;
+        self.ownerId = $('#selectedOwner').val();
+        // console.log removed(' Selected Owner ID:', self.ownerId);
+      });
+      // let ownerIdI = self.ownerId;
+      // console.log removed(self.ownerId);
+    };
+
+    self.logPetId = function () {
+      // let petIdI = self.petId;
+      self.petId = $('#selectedPet').val();
+      // console.log removed('S  Selected Pet ID:', self.petId);
+      // console.log removed('Selected Pet ID:', self.petId);
+    };
+
+    self.getVisitDate = function (id) {
+      // console.log removed('Getting date for visitId:', id);
+      var visitDate = null;
+      $.each(self.visits, function (i, visit) {
+        if (visit.visitId == id) {
+          visitDate = visit.visitDate;
+          // console.log removed('Found date:', visitDate);
+          return false;
+        }
+      });
+      return visitDate;
+    };
+
+    self.showConfirmationModal = function (
+      e,
+      visitId = 0,
+      status = 0,
+      practitionerId = 0,
+      // date = null,
+      description = ''
+    ) {
+      // Get the name of button sender
+      let buttonText = $(e.target).text();
+
+      // Check if form needs to be valid for adding and updating a visit
+      if (buttonText === 'Add New Visit' || buttonText === 'Update Visit') {
+        var form = document.querySelector('form');
+
+        // If form isn't valid then don't display confirmation popup and alert required fields
+        if (!form.reportValidity()) {
+          return false;
+        }
+      }
+
+      // Set modal's title and body to match the sender's request
+      $('#confirmationModalTitle').text(buttonText);
+      $('#confirmationModalBody').text(
+        'Are you sure you want to ' + buttonText.toLowerCase() + '?'
+      );
+
+      // The confirm button on the popup modal
+      let modalConfirmButton = $('#confirmationModalConfirmButton');
+
+      // Check if the sender was the Add New Visit Button
+      if (buttonText !== 'Create Visit') {
+        // Set the targeted visit data attribute to the visit's id
+        modalConfirmButton.data('targetVisit', visitId);
+
+        // Set other data attributes if the button is for cancel
+        if (buttonText.toLowerCase().includes('cancel')) {
+          modalConfirmButton.data('targetStatus', status);
+          modalConfirmButton.data('targetPractitionerId', practitionerId);
+          modalConfirmButton.data('targetDate', visitDate);
+          modalConfirmButton.data('targetDescription', description);
+          modalConfirmButton.data(
+            'cancel-index',
+            $(e.target).closest('tr').data('index')
+          );
+        }
+
+        if (buttonText.toLowerCase() === 'delete visit') {
+          modalConfirmButton.data(
+            'delete-index',
+            $(e.target).closest('tr').data('index')
+          );
+          modalConfirmButton.data(
+            'delete-table-name',
+            $(e.target).closest('tr').data('table-name')
+          );
+        }
+      }
+
+      // Show the modal
+      $('#confirmationModal').modal('show');
+    };
+
+    self.completeFormAction = function () {
+      // Check which button modal was called by and perform appropriate action
+      let modalTitle = $('#confirmationModalTitle').text();
+      let modalButton = $('#confirmationModalConfirmButton');
+
+      if (modalTitle === $('#submit_button').text()) {
+        $('#visitForm').submit();
+
+        if (modalTitle.toLowerCase() === 'update visit') {
+          self.resetForm();
+        }
+      } else if (modalTitle.toLowerCase() === 'delete visit') {
+        self.deleteVisit(modalButton.data('targetVisit'));
+      } else if (modalTitle.toLowerCase().includes('cancel')) {
+        self.cancelVisit(
+          modalButton.data('targetVisit'),
+          modalButton.data('targetStatus'),
+          modalButton.data('targetPractitionerId'),
+          modalButton.data('targetDate'),
+          modalButton.data('targetDescription')
+        );
+      }
+
+      // Hide modal after performing action
+      $('#confirmationModal').modal('hide');
+    };
+
+    self.switchToUpdateForm = function (
+      e,
+      practitionerId,
+      date,
+      description,
+      id,
+      visitStatus
+    ) {
+      visitId = id;
+      $("#selectedVet option[value='" + practitionerId + "']").prop(
+        'selected',
+        true
+      );
+      $('#date_input').val(date);
+      // console.log removed(date);
+      $('#description_textarea').val(description);
+      $('#submit_button').text('Update Visit');
+      $('#cancel_button').css('visibility', 'visible');
+
+      let d = date.toString().split('-');
+      editDateParsing(d[0], d[1], d[2]);
+
+      self.loadVetInfo();
+
+      // Save the sender's index to data attribute on visitForm called data-update-index
+      let modalConfirmButton = $('#confirmationModalConfirmButton');
+      modalConfirmButton.data(
+        'update-table',
+        $(e.target).closest('tr').data('table-name')
+      );
+      modalConfirmButton.data(
+        'update-index',
+        $(e.target).closest('tr').data('index')
+      );
+
+      self.submit = function () {
+        // console.log removed('Date in Submit:', self.date);
+        var data = {
+          //date: $('#date_input').val(),
+          date: $filter('date')(self.date, 'yyyy-MM-ddTHH:mm:ss'),
+          description: $('#description_textarea').val(),
+          petId: $('#selectedPet').val(),
+          ownerId: $('#selectedOwner').val(),
+          practitionerId: $('#selectedVet').val(),
+          status: visitStatus,
         };
 
-        self.logPetId = function() {
-            let petIdI = self.petId
-            self.petId = $("#selectedPet").val()
-            console.log("S  Selected Pet ID:", self.petId);
-            console.log("Selected Pet ID:", self.petId);
-        };
+        let putURL =
+          'api/gateway/owners/*/pets/' + petId + '/visits/' + visitId;
 
-
-
-
-
-
-        self.getVisitDate = function (id) {
-            console.log("Getting date for visitId:", id);
-            var visitDate = null;
-            $.each(self.visits, function (i, visit) {
-                if (visit.visitId == id) {
-                    visitDate = visit.visitDate;
-                    console.log("Found date:", visitDate);
-                    return false;
-                }
-            });
-            return visitDate;
-        };
-
-
-
-        self.showConfirmationModal = function(e, visitId = 0, status = 0, practitionerId = 0, date = null, description = "") {
-            // Get the name of button sender
-            let buttonText = $(e.target).text();
-
-            // Check if form needs to be valid for adding and updating a visit
-            if(buttonText === "Add New Visit" || buttonText === "Update Visit") {
-                var form = document.querySelector('form');
-
-                // If form isn't valid then don't display confirmation popup and alert required fields
-                if(!form.reportValidity()) {
-                    return false;
-                }
-            }
-
-            // Set modal's title and body to match the sender's request
-            $('#confirmationModalTitle').text(buttonText);
-            $('#confirmationModalBody').text("Are you sure you want to " + buttonText.toLowerCase() + "?");
-
-            // The confirm button on the popup modal
+        $http.put(putURL, data).then(
+          function (response) {
+            let currentDate = getCurrentDate();
             let modalConfirmButton = $('#confirmationModalConfirmButton');
 
-            // Check if the sender was the Add New Visit Button
-            if(buttonText !== "Create Visit") {
-                // Set the targeted visit data attribute to the visit's id
-                modalConfirmButton.data("targetVisit", visitId);
+            // Get the index of the visit to be updated
+            let index = parseInt(modalConfirmButton.data('update-index'));
 
-                // Set other data attributes if the button is for cancel
-                if(buttonText.toLowerCase().includes("cancel")) {
-                    modalConfirmButton.data("targetStatus", status);
-                    modalConfirmButton.data("targetPractitionerId", practitionerId);
-                    modalConfirmButton.data("targetDate", visitDate);
-                    modalConfirmButton.data("targetDescription", description);
-                    modalConfirmButton.data("cancel-index", $(e.target).closest("tr").data("index"));
-                }
+            // See if the unedited visit was in upcoming
+            let outdatedVisitWasInUpcoming =
+              modalConfirmButton.data('update-table') === 'upcomingVisits';
 
-                if(buttonText.toLowerCase() === "delete visit") {
-                    modalConfirmButton.data("delete-index", $(e.target).closest("tr").data("index"));
-                    modalConfirmButton.data("delete-table-name", $(e.target).closest("tr").data("table-name"));
-                }
+            // See if the edited visit will be in upcoming or not
+            let updatedVisitWillBeInUpcoming =
+              Date.parse(response.data.date) >= currentDate;
+
+            // Perform an action depending on where the visit was located and where it will be
+            if (
+              outdatedVisitWasInUpcoming === true &&
+              updatedVisitWillBeInUpcoming === true
+            ) {
+              self.upcomingVisits[index] = response.data;
+            }
+            if (
+              outdatedVisitWasInUpcoming === false &&
+              updatedVisitWillBeInUpcoming === false
+            ) {
+              self.previousVisits[index] = response.data;
+            }
+            if (
+              outdatedVisitWasInUpcoming === true &&
+              updatedVisitWillBeInUpcoming === false
+            ) {
+              // Remove the old visit from upcoming
+              self.upcomingVisits.splice(index, 1);
+
+              // Add the edited visit to previous visits
+              self.previousVisits.push(response.data);
+            }
+            if (
+              outdatedVisitWasInUpcoming === false &&
+              updatedVisitWillBeInUpcoming === true
+            ) {
+              // Remove the old visit from upcoming
+              self.previousVisits.splice(index, 1);
+
+              // Add the edited visit to previous visits
+              self.upcomingVisits.push(response.data);
             }
 
-            // Show the modal
-            $('#confirmationModal').modal('show');
-        }
+            // Call the last sort after adding if there is one
+            callLastSort(updatedVisitWillBeInUpcoming);
 
-        self.completeFormAction = function() {
-            // Check which button modal was called by and perform appropriate action
-            let modalTitle = $('#confirmationModalTitle').text();
-            let modalButton = $('#confirmationModalConfirmButton');
+            createAlert('success', 'Successfully updated visit!');
+          },
+          function () {
+            createAlert('danger', 'Failed to update visit!');
+          }
+        );
+      };
+    };
 
-            if(modalTitle === $('#submit_button').text()) {
-                $('#visitForm').submit();
+    // This value will be set depending on what was last clicked
+    let lastSort = '';
+    let dateSortName = 'Date';
+    let descSortName = 'Description';
+    let vetSortName = 'Veterinarian';
+    let statusSortName = 'Status';
 
-                if(modalTitle.toLowerCase() === "update visit") {
-                    self.resetForm();
-                }
-            }
-            else if(modalTitle.toLowerCase() === "delete visit") {
-                self.deleteVisit(modalButton.data("targetVisit"));
-            }
-            else if(modalTitle.toLowerCase().includes("cancel")) {
-                self.cancelVisit(modalButton.data("targetVisit"), modalButton.data("targetStatus"), modalButton.data("targetPractitionerId"), modalButton.data("targetDate"), modalButton.data("targetDescription"));
-            }
+    // This function will call the last sorted option without changing ascending or descending
+    function callLastSort(isForUpcoming) {
+      switch (lastSort) {
+        case dateSortName:
+          self.SortTableByDate(isForUpcoming, false);
+          break;
+        case descSortName:
+          self.SortTableByDesc(isForUpcoming, false);
+          break;
+        case vetSortName:
+          self.SortTableByVet(isForUpcoming, false);
+          break;
+        case statusSortName:
+          self.SortTableByStatus(isForUpcoming, false);
+          break;
+      }
+    }
 
-            // Hide modal after performing action
-            $('#confirmationModal').modal('hide');
-        }
+    self.resetForm = function () {
+      // Reset the Add Visit Form to default functionality
+      $('#visitForm')[0].reset();
 
-        self.switchToUpdateForm = function (e, practitionerId, date, description, id, visitStatus){
-            visitId = id;
-            $("#selectedVet option[value='"+practitionerId+"']").prop("selected", true);
-            $('#date_input').val(date);
-            console.log(date);
-            $('#description_textarea').val(description);
-            $('#submit_button').text("Update Visit");
-            $('#cancel_button').css("visibility", "visible");
+      // Restore default button name
+      $('#submit_button').text('Create Visit');
 
-            let d = date.toString().split("-");
-            editDateParsing(d[0], d[1], d[2]);
+      // Hide the cancel button
+      $('#cancel_button').css('visibility', 'hidden');
 
-            self.loadVetInfo();
-
-            // Save the sender's index to data attribute on visitForm called data-update-index
-            let modalConfirmButton = $('#confirmationModalConfirmButton');
-            modalConfirmButton.data("update-table", $(e.target).closest('tr').data("table-name"));
-            modalConfirmButton.data("update-index", $(e.target).closest('tr').data("index"));
-
-            self.submit = function () {
-                console.log('Date in Submit:', self.date);
-                var data = {
-                    //date: $('#date_input').val(),
-                    date: $filter('date')(self.date, "yyyy-MM-ddTHH:mm:ss"),
-                    description: $('#description_textarea').val(),
-                    petId: $("#selectedPet").val(),
-                    ownerId: $("#selectedOwner").val(),
-                    practitionerId: $("#selectedVet").val(),
-                    status: visitStatus
-                };
-
-                let putURL = "api/gateway/owners/*/pets/" + petId + "/visits/" + visitId;
-
-                $http.put(putURL, data).then(function(response) {
-                    let currentDate = getCurrentDate();
-                    let modalConfirmButton = $('#confirmationModalConfirmButton');
-
-                    // Get the index of the visit to be updated
-                    let index = parseInt(modalConfirmButton.data("update-index"));
-
-                    // See if the unedited visit was in upcoming
-                    let outdatedVisitWasInUpcoming = modalConfirmButton.data("update-table") === "upcomingVisits";
-
-                    // See if the edited visit will be in upcoming or not
-                    let updatedVisitWillBeInUpcoming = Date.parse(response.data.date) >= currentDate;
-
-                    // Perform an action depending on where the visit was located and where it will be
-                    if(outdatedVisitWasInUpcoming === true && updatedVisitWillBeInUpcoming === true) {
-                        self.upcomingVisits[index] = response.data;
-                    }
-                    if(outdatedVisitWasInUpcoming === false && updatedVisitWillBeInUpcoming === false) {
-                        self.previousVisits[index] = response.data;
-                    }
-                    if(outdatedVisitWasInUpcoming === true && updatedVisitWillBeInUpcoming === false) {
-                        // Remove the old visit from upcoming
-                        self.upcomingVisits.splice(index, 1);
-
-                        // Add the edited visit to previous visits
-                        self.previousVisits.push(response.data);
-                    }
-                    if(outdatedVisitWasInUpcoming === false && updatedVisitWillBeInUpcoming === true) {
-                        // Remove the old visit from upcoming
-                        self.previousVisits.splice(index, 1);
-
-                        // Add the edited visit to previous visits
-                        self.upcomingVisits.push(response.data);
-                    }
-
-                    // Call the last sort after adding if there is one
-                    callLastSort(updatedVisitWillBeInUpcoming);
-
-                    createAlert("success", "Successfully updated visit!");
-                }, function () {
-                    createAlert("danger", "Failed to update visit!");
-                });
-            };
+      // Restore default functionality of form submit
+      self.submit = function () {
+        var data = {
+          date: getCurrentDate(),
+          description: self.desc,
+          practitionerId: self.practitionerId,
+          status: true,
         };
 
-        // This value will be set depending on what was last clicked
-        let lastSort = "";
-        let dateSortName = "Date";
-        let descSortName = "Description";
-        let vetSortName = "Veterinarian";
-        let statusSortName = "Status";
+        var billData = {
+          ownerId: $stateParams.ownerId,
+          date: getCurrentDate(),
+          visitType: $('#selectedVisitType').val(),
+        };
 
-        // This function will call the last sorted option without changing ascending or descending
-        function callLastSort(isForUpcoming) {
-            switch (lastSort) {
-                case dateSortName:
-                    self.SortTableByDate(isForUpcoming, false);
-                    break;
-                case descSortName:
-                    self.SortTableByDesc(isForUpcoming, false);
-                    break;
-                case vetSortName:
-                    self.SortTableByVet(isForUpcoming, false);
-                    break;
-                case statusSortName:
-                    self.SortTableByStatus(isForUpcoming, false);
-                    break;
-            }
-        }
+        $http.post(postURL, data).then(
+          function (response) {
+            let currentDate = getCurrentDate();
 
-        self.resetForm = function() {
-            // Reset the Add Visit Form to default functionality
-            $('#visitForm')[0].reset();
-
-            // Restore default button name
-            $('#submit_button').text("Create Visit");
-
-            // Hide the cancel button
-            $('#cancel_button').css("visibility", "hidden");
-
-            // Restore default functionality of form submit
-            self.submit = function () {
-                var data = {
-                    date: getCurrentDate(),
-                    description: self.desc,
-                    practitionerId: self.practitionerId,
-                    status: true
-                };
-
-                var billData = {
-                    ownerId: $stateParams.ownerId,
-                    date: getCurrentDate(),
-                    visitType : $("#selectedVisitType").val()
-                }
-
-                $http.post(postURL, data).then(function(response) {
-                    let currentDate = getCurrentDate();
-
-                    // Add the visit to one of the lists depending on its date
-                    let isForUpcomingVisitsTable = Date.parse(response.data.date) >= currentDate;
-                    if(isForUpcomingVisitsTable) {
-                        self.upcomingVisits.push(response.data);
-                    } else {
-                        self.previousVisits.push(response.data);
-                    }
-
-                    // Call the last sort after adding if there is one
-                    callLastSort(isForUpcomingVisitsTable);
-
-                    createAlert("success", "Successfully created visit!");
-                },function () {
-                    createAlert("danger", "Failed to add visit!");
-                });
-
-                $http.post(billsUrl, billData).then(function () {
-
-                }, function () {
-                    console.log("Failed to create corresponding bill!");
-                });
-            }
-
-            return false;
-        }
-
-        let ResetSortButtonArrows = function(isForUpcoming) {
-            if(isForUpcoming) {
-                $('#sortByDateButtonUpcomingVisits').text("Sort by date ⇅");
-                $('#sortByDescButtonUpcomingVisits').text("Sort by description ⇅");
-                $('#sortByVetButtonUpcomingVisits').text("Sort by veterinarian ⇅");
-                $('#sortByStatusButtonUpcomingVisits').text("Sort by status ⇅");
+            // Add the visit to one of the lists depending on its date
+            let isForUpcomingVisitsTable =
+              Date.parse(response.data.date) >= currentDate;
+            if (isForUpcomingVisitsTable) {
+              self.upcomingVisits.push(response.data);
             } else {
-                $('#sortByDateButtonPreviousVisits').text("Sort by date ⇅");
-                $('#sortByDescButtonPreviousVisits').text("Sort by description ⇅");
-                $('#sortByVetButtonPreviousVisits').text("Sort by veterinarian ⇅");
-                $('#sortByStatusButtonPreviousVisits').text("Sort by status ⇅");
+              self.previousVisits.push(response.data);
             }
+
+            // Call the last sort after adding if there is one
+            callLastSort(isForUpcomingVisitsTable);
+
+            createAlert('success', 'Successfully created visit!');
+          },
+          function () {
+            createAlert('danger', 'Failed to add visit!');
+          }
+        );
+
+        $http.post(billsUrl, billData).then(
+          function () {},
+          function () {
+            // console.log removed('Failed to create corresponding bill!');
+          }
+        );
+      };
+
+      return false;
+    };
+
+    let ResetSortButtonArrows = function (isForUpcoming) {
+      if (isForUpcoming) {
+        $('#sortByDateButtonUpcomingVisits').text('Sort by date ⇅');
+        $('#sortByDescButtonUpcomingVisits').text('Sort by description ⇅');
+        $('#sortByVetButtonUpcomingVisits').text('Sort by veterinarian ⇅');
+        $('#sortByStatusButtonUpcomingVisits').text('Sort by status ⇅');
+      } else {
+        $('#sortByDateButtonPreviousVisits').text('Sort by date ⇅');
+        $('#sortByDescButtonPreviousVisits').text('Sort by description ⇅');
+        $('#sortByVetButtonPreviousVisits').text('Sort by veterinarian ⇅');
+        $('#sortByStatusButtonPreviousVisits').text('Sort by status ⇅');
+      }
+    };
+
+    let sortTableDateAscendingUpcomingVisits = false;
+    let sortTableDateAscendingPreviousVisits = false;
+    self.SortTableByDate = function (isForUpcoming, flipSortingBool = true) {
+      lastSort = dateSortName;
+      ResetSortButtonArrows(isForUpcoming);
+
+      if (isForUpcoming) {
+        if (flipSortingBool) {
+          sortTableDateAscendingUpcomingVisits =
+            !sortTableDateAscendingUpcomingVisits;
         }
 
-        let sortTableDateAscendingUpcomingVisits = false;
-        let sortTableDateAscendingPreviousVisits = false;
-        self.SortTableByDate = function(isForUpcoming, flipSortingBool = true) {
-            lastSort = dateSortName;
-            ResetSortButtonArrows(isForUpcoming);
-
-            if(isForUpcoming) {
-                if(flipSortingBool) {
-                    sortTableDateAscendingUpcomingVisits = !sortTableDateAscendingUpcomingVisits;
-                }
-
-                if(sortTableDateAscendingUpcomingVisits) {
-                    self.upcomingVisits.sort(function (a, b) {
-                        return Date.parse(b.date) - Date.parse(a.date);
-                    });
-                    $('#sortByDateButtonUpcomingVisits').text("Sort by date ↓")
-                } else {
-                    self.upcomingVisits.sort(function (a, b) {
-                        return Date.parse(b.date) + Date.parse(a.date);
-                    });
-                    $('#sortByDateButtonUpcomingVisits').text("Sort by date ↑")
-                }
-            } else {
-                if(flipSortingBool) {
-                    sortTableDateAscendingPreviousVisits = !sortTableDateAscendingPreviousVisits;
-                }
-
-                if(sortTableDateAscendingPreviousVisits) {
-                    self.previousVisits.sort(function (a, b) {
-                        return Date.parse(b.date) - Date.parse(a.date);
-                    });
-                    $('#sortByDateButtonPreviousVisits').text("Sort by date ↓")
-                } else {
-                    self.previousVisits.sort(function (a, b) {
-                        return Date.parse(b.date) + Date.parse(a.date);
-                    });
-                    $('#sortByDateButtonPreviousVisits').text("Sort by date ↑")
-                }
-            }
+        if (sortTableDateAscendingUpcomingVisits) {
+          self.upcomingVisits.sort(function (a, b) {
+            return Date.parse(b.date) - Date.parse(a.date);
+          });
+          $('#sortByDateButtonUpcomingVisits').text('Sort by date ↓');
+        } else {
+          self.upcomingVisits.sort(function (a, b) {
+            return Date.parse(b.date) + Date.parse(a.date);
+          });
+          $('#sortByDateButtonUpcomingVisits').text('Sort by date ↑');
+        }
+      } else {
+        if (flipSortingBool) {
+          sortTableDateAscendingPreviousVisits =
+            !sortTableDateAscendingPreviousVisits;
         }
 
-        let sortDescriptionAscendingUpcomingVisits = false;
-        let sortDescriptionAscendingPreviousVisits = false;
-        self.SortTableByDesc = function(isForUpcoming, flipSortingBool = true) {
-            lastSort = descSortName;
-            ResetSortButtonArrows(isForUpcoming);
+        if (sortTableDateAscendingPreviousVisits) {
+          self.previousVisits.sort(function (a, b) {
+            return Date.parse(b.date) - Date.parse(a.date);
+          });
+          $('#sortByDateButtonPreviousVisits').text('Sort by date ↓');
+        } else {
+          self.previousVisits.sort(function (a, b) {
+            return Date.parse(b.date) + Date.parse(a.date);
+          });
+          $('#sortByDateButtonPreviousVisits').text('Sort by date ↑');
+        }
+      }
+    };
 
-            if(isForUpcoming) {
-                if(flipSortingBool) {
-                    sortDescriptionAscendingUpcomingVisits = !sortDescriptionAscendingUpcomingVisits;
-                }
+    let sortDescriptionAscendingUpcomingVisits = false;
+    let sortDescriptionAscendingPreviousVisits = false;
+    self.SortTableByDesc = function (isForUpcoming, flipSortingBool = true) {
+      lastSort = descSortName;
+      ResetSortButtonArrows(isForUpcoming);
 
-                if(sortDescriptionAscendingUpcomingVisits) {
-                    self.upcomingVisits.sort(function (a, b) {
-                        a = a.description.toLowerCase();
-                        b = b.description.toLowerCase();
-
-                        return a < b ? -1 : a > b ? 1 : 0;
-                    });
-                    $('#sortByDescButtonUpcomingVisits').text("Sort by description ↓")
-                } else {
-                    self.upcomingVisits.sort(function (a, b) {
-                        a = a.description.toLowerCase();
-                        b = b.description.toLowerCase();
-
-                        return a > b ? -1 : a < b ? 1 : 0;
-                    });
-                    $('#sortByDescButtonUpcomingVisits').text("Sort by description ↑")
-                }
-            } else {
-                if(flipSortingBool) {
-                    sortDescriptionAscendingPreviousVisits = !sortDescriptionAscendingPreviousVisits;
-                }
-
-                if(sortDescriptionAscendingPreviousVisits) {
-                    self.previousVisits.sort(function (a, b) {
-                        a = a.description.toLowerCase();
-                        b = b.description.toLowerCase();
-
-                        return a < b ? -1 : a > b ? 1 : 0;
-                    });
-                    $('#sortByDescButtonPreviousVisits').text("Sort by description ↓")
-                } else {
-                    self.previousVisits.sort(function (a, b) {
-                        a = a.description.toLowerCase();
-                        b = b.description.toLowerCase();
-
-                        return a > b ? -1 : a < b ? 1 : 0;
-                    });
-                    $('#sortByDescButtonPreviousVisits').text("Sort by description ↑")
-                }
-            }
+      if (isForUpcoming) {
+        if (flipSortingBool) {
+          sortDescriptionAscendingUpcomingVisits =
+            !sortDescriptionAscendingUpcomingVisits;
         }
 
+        if (sortDescriptionAscendingUpcomingVisits) {
+          self.upcomingVisits.sort(function (a, b) {
+            a = a.description.toLowerCase();
+            b = b.description.toLowerCase();
 
-        let sortVetAscendingUpcomingVisits = false;
-        let sortVetAscendingPreviousVisits = false;
-        self.SortTableByVet = function(isForUpcoming, flipSortingBool = true) {
-            lastSort = vetSortName;
-            ResetSortButtonArrows(isForUpcoming);
+            return a < b ? -1 : a > b ? 1 : 0;
+          });
+          $('#sortByDescButtonUpcomingVisits').text('Sort by description ↓');
+        } else {
+          self.upcomingVisits.sort(function (a, b) {
+            a = a.description.toLowerCase();
+            b = b.description.toLowerCase();
 
-            if(isForUpcoming) {
-                if(flipSortingBool) {
-                    sortVetAscendingUpcomingVisits = !sortVetAscendingUpcomingVisits;
-                }
-
-                if(sortVetAscendingUpcomingVisits) {
-                    self.upcomingVisits.sort(function (a, b) {
-                        a = self.getPractitionerName(a.practitionerId).toLowerCase();
-                        b = self.getPractitionerName(b.practitionerId).toLowerCase();
-
-                        return a < b ? -1 : a > b ? 1 : 0;
-                    });
-                    $('#sortByVetButtonUpcomingVisits').text("Sort by veterinarian ↓")
-                } else {
-                    self.upcomingVisits.sort(function (a, b) {
-                        a = self.getPractitionerName(a.practitionerId).toLowerCase();
-                        b = self.getPractitionerName(b.practitionerId).toLowerCase();
-
-                        return a > b ? -1 : a < b ? 1 : 0;
-                    });
-                    $('#sortByVetButtonUpcomingVisits').text("Sort by veterinarian ↑")
-                }
-            } else {
-                if(flipSortingBool) {
-                    sortVetAscendingPreviousVisits = !sortVetAscendingPreviousVisits;
-                }
-
-                if(sortVetAscendingPreviousVisits) {
-                    self.previousVisits.sort(function (a, b) {
-                        a = self.getPractitionerName(a.practitionerId).toLowerCase();
-                        b = self.getPractitionerName(b.practitionerId).toLowerCase();
-
-                        return a < b ? -1 : a > b ? 1 : 0;
-                    });
-                    $('#sortByVetButtonPreviousVisits').text("Sort by veterinarian ↓")
-                } else {
-                    self.previousVisits.sort(function (a, b) {
-                        a = self.getPractitionerName(a.practitionerId).toLowerCase();
-                        b = self.getPractitionerName(b.practitionerId).toLowerCase();
-
-                        return a > b ? -1 : a < b ? 1 : 0;
-                    });
-                    $('#sortByVetButtonPreviousVisits').text("Sort by veterinarian ↑")
-                }
-            }
+            return a > b ? -1 : a < b ? 1 : 0;
+          });
+          $('#sortByDescButtonUpcomingVisits').text('Sort by description ↑');
+        }
+      } else {
+        if (flipSortingBool) {
+          sortDescriptionAscendingPreviousVisits =
+            !sortDescriptionAscendingPreviousVisits;
         }
 
-        let sortStatusAscendingUpcomingVisits = false;
-        let sortStatusAscendingPreviousVisits = false;
-        self.SortTableByStatus = function(isForUpcoming, flipSortingBool = true) {
-            lastSort = statusSortName;
-            ResetSortButtonArrows(isForUpcoming);
+        if (sortDescriptionAscendingPreviousVisits) {
+          self.previousVisits.sort(function (a, b) {
+            a = a.description.toLowerCase();
+            b = b.description.toLowerCase();
 
-            if(isForUpcoming) {
-                if(flipSortingBool) {
-                    sortStatusAscendingUpcomingVisits = !sortStatusAscendingUpcomingVisits;
-                }
+            return a < b ? -1 : a > b ? 1 : 0;
+          });
+          $('#sortByDescButtonPreviousVisits').text('Sort by description ↓');
+        } else {
+          self.previousVisits.sort(function (a, b) {
+            a = a.description.toLowerCase();
+            b = b.description.toLowerCase();
 
-                if(sortStatusAscendingUpcomingVisits) {
-                    self.upcomingVisits.sort(function (a, b) {
-                        a = self.getStatus(a.status).toLowerCase();
-                        b = self.getStatus(b.status).toLowerCase();
-
-                        return a < b ? -1 : a > b ? 1 : 0;
-                    });
-                    $('#sortByStatusButtonUpcomingVisits').text("Sort by status ↓")
-                } else {
-                    self.upcomingVisits.sort(function (a, b) {
-                        a = self.getStatus(a.status).toLowerCase();
-                        b = self.getStatus(b.status).toLowerCase();
-
-                        return a > b ? -1 : a < b ? 1 : 0;
-                    });
-                    $('#sortByStatusButtonUpcomingVisits').text("Sort by status ↑")
-                }
-            } else {
-                if(flipSortingBool) {
-                    sortStatusAscendingPreviousVisits = !sortStatusAscendingPreviousVisits;
-                }
-
-                if(sortStatusAscendingPreviousVisits) {
-                    self.previousVisits.sort(function (a, b) {
-                        a = self.getStatus(a.status).toLowerCase();
-                        b = self.getStatus(b.status).toLowerCase();
-
-                        return a < b ? -1 : a > b ? 1 : 0;
-                    });
-                    $('#sortByStatusButtonPreviousVisits').text("Sort by status ↓")
-                } else {
-                    self.previousVisits.sort(function (a, b) {
-                        a = self.getStatus(a.status).toLowerCase();
-                        b = self.getStatus(b.status).toLowerCase();
-
-                        return a > b ? -1 : a < b ? 1 : 0;
-                    });
-                    $('#sortByStatusButtonPreviousVisits').text("Sort by status ↑")
-                }
-            }
+            return a > b ? -1 : a < b ? 1 : 0;
+          });
+          $('#sortByDescButtonPreviousVisits').text('Sort by description ↑');
         }
-        $scope.$on('selectedDateChanged', function(event, selectedDate) {
-            self.chosenDate = selectedDate;
-            console.log("Received and set chosen date:", self.chosenDate);
-        });
+      }
+    };
 
+    let sortVetAscendingUpcomingVisits = false;
+    let sortVetAscendingPreviousVisits = false;
+    self.SortTableByVet = function (isForUpcoming, flipSortingBool = true) {
+      lastSort = vetSortName;
+      ResetSortButtonArrows(isForUpcoming);
 
-        /*self.submit = function () {
+      if (isForUpcoming) {
+        if (flipSortingBool) {
+          sortVetAscendingUpcomingVisits = !sortVetAscendingUpcomingVisits;
+        }
+
+        if (sortVetAscendingUpcomingVisits) {
+          self.upcomingVisits.sort(function (a, b) {
+            a = self.getPractitionerName(a.practitionerId).toLowerCase();
+            b = self.getPractitionerName(b.practitionerId).toLowerCase();
+
+            return a < b ? -1 : a > b ? 1 : 0;
+          });
+          $('#sortByVetButtonUpcomingVisits').text('Sort by veterinarian ↓');
+        } else {
+          self.upcomingVisits.sort(function (a, b) {
+            a = self.getPractitionerName(a.practitionerId).toLowerCase();
+            b = self.getPractitionerName(b.practitionerId).toLowerCase();
+
+            return a > b ? -1 : a < b ? 1 : 0;
+          });
+          $('#sortByVetButtonUpcomingVisits').text('Sort by veterinarian ↑');
+        }
+      } else {
+        if (flipSortingBool) {
+          sortVetAscendingPreviousVisits = !sortVetAscendingPreviousVisits;
+        }
+
+        if (sortVetAscendingPreviousVisits) {
+          self.previousVisits.sort(function (a, b) {
+            a = self.getPractitionerName(a.practitionerId).toLowerCase();
+            b = self.getPractitionerName(b.practitionerId).toLowerCase();
+
+            return a < b ? -1 : a > b ? 1 : 0;
+          });
+          $('#sortByVetButtonPreviousVisits').text('Sort by veterinarian ↓');
+        } else {
+          self.previousVisits.sort(function (a, b) {
+            a = self.getPractitionerName(a.practitionerId).toLowerCase();
+            b = self.getPractitionerName(b.practitionerId).toLowerCase();
+
+            return a > b ? -1 : a < b ? 1 : 0;
+          });
+          $('#sortByVetButtonPreviousVisits').text('Sort by veterinarian ↑');
+        }
+      }
+    };
+
+    let sortStatusAscendingUpcomingVisits = false;
+    let sortStatusAscendingPreviousVisits = false;
+    self.SortTableByStatus = function (isForUpcoming, flipSortingBool = true) {
+      lastSort = statusSortName;
+      ResetSortButtonArrows(isForUpcoming);
+
+      if (isForUpcoming) {
+        if (flipSortingBool) {
+          sortStatusAscendingUpcomingVisits =
+            !sortStatusAscendingUpcomingVisits;
+        }
+
+        if (sortStatusAscendingUpcomingVisits) {
+          self.upcomingVisits.sort(function (a, b) {
+            a = self.getStatus(a.status).toLowerCase();
+            b = self.getStatus(b.status).toLowerCase();
+
+            return a < b ? -1 : a > b ? 1 : 0;
+          });
+          $('#sortByStatusButtonUpcomingVisits').text('Sort by status ↓');
+        } else {
+          self.upcomingVisits.sort(function (a, b) {
+            a = self.getStatus(a.status).toLowerCase();
+            b = self.getStatus(b.status).toLowerCase();
+
+            return a > b ? -1 : a < b ? 1 : 0;
+          });
+          $('#sortByStatusButtonUpcomingVisits').text('Sort by status ↑');
+        }
+      } else {
+        if (flipSortingBool) {
+          sortStatusAscendingPreviousVisits =
+            !sortStatusAscendingPreviousVisits;
+        }
+
+        if (sortStatusAscendingPreviousVisits) {
+          self.previousVisits.sort(function (a, b) {
+            a = self.getStatus(a.status).toLowerCase();
+            b = self.getStatus(b.status).toLowerCase();
+
+            return a < b ? -1 : a > b ? 1 : 0;
+          });
+          $('#sortByStatusButtonPreviousVisits').text('Sort by status ↓');
+        } else {
+          self.previousVisits.sort(function (a, b) {
+            a = self.getStatus(a.status).toLowerCase();
+            b = self.getStatus(b.status).toLowerCase();
+
+            return a > b ? -1 : a < b ? 1 : 0;
+          });
+          $('#sortByStatusButtonPreviousVisits').text('Sort by status ↑');
+        }
+      }
+    };
+    $scope.$on('selectedDateChanged', function (event, selectedDate) {
+      self.chosenDate = selectedDate;
+      // console.log removed('Received and set chosen date:', self.chosenDate);
+    });
+
+    /*self.submit = function () {
             var data = {
                 visitDate: $filter('date')(self.chosenDate, "yyyy-MM-dd HH:mm"),
                 description: self.desc,
@@ -719,7 +793,7 @@ angular.module('visits')
 
                 createAlert("success", "Successfully created visit!");
             },function(errorResponse) {
-                console.log(errorResponse);
+                // console.log removed(errorResponse);
                 const errorMessage = errorResponse.data.message || "Unknown error";
 
                 createAlert("danger", "Failed to add visit: " + errorMessage);
@@ -728,46 +802,51 @@ angular.module('visits')
             $http.post(billsUrl, billData).then(function () {
 
             }, function () {
-                console.log("Failed to create corresponding bill!");
+                // console.log removed("Failed to create corresponding bill!");
             });
         }*/
 
-        self.someFunction = function() {
-            console.log('Using ownerId in someFunction:', self.ownerId);
-            console.log('Using petId in someFunction:', self.petId);
-        };
-        $scope.goBack = function() {
-            $state.go('visitList');
-        };
+    self.someFunction = function () {
+      // console.log removed('Using ownerId in someFunction:', self.ownerId);
+      // console.log removed('Using petId in someFunction:', self.petId);
+    };
+    $scope.goBack = function () {
+      $state.go('visitList');
+    };
 
-        self.submit = function () {
-            // Ensure ownerId and petId are set correctly when owner and pet are selected
-            self.someFunction();
+    self.submit = function () {
+      // Ensure ownerId and petId are set correctly when owner and pet are selected
+      self.someFunction();
 
+      // Check if ownerId and petId are set before creating the URL and proceeding with the POST request
+      var postURL =
+        'api/gateway/visit/owners/' +
+        self.ownerId +
+        '/pets/' +
+        self.petId +
+        '/visits';
+      var billsUrl = 'api/gateway/bills'; // Replace with your actual URL for bill creation
 
-            // Check if ownerId and petId are set before creating the URL and proceeding with the POST request
-            var postURL = "api/gateway/visit/owners/" + self.ownerId + "/pets/" + self.petId + "/visits";
-            var billsUrl = "api/gateway/bills"; // Replace with your actual URL for bill creation
+      var data = {
+        visitDate: $filter('date')(self.chosenDate, 'yyyy-MM-dd HH:mm'),
+        description: self.desc,
+        petId: self.petId,
+        practitionerId: self.practitionerId,
+        status: 'UPCOMING',
+      };
 
-            var data = {
-                visitDate: $filter('date')(self.chosenDate, "yyyy-MM-dd HH:mm"),
-                description: self.desc,
-                petId: self.petId,
-                practitionerId: self.practitionerId,
-                status: 'UPCOMING'
-            };
+      var billData = {
+        ownerId: self.ownerId, // This should be the ownerId, as fetched from the selected owner
+        date: $filter('date')(self.chosenDate, 'yyyy-MM-dd'),
+        visitType: $('#selectedVisitType').val(), // Consider using AngularJS data binding instead of directly accessing the DOM with jQuery
+      };
 
-            var billData = {
-                ownerId: self.ownerId, // This should be the ownerId, as fetched from the selected owner
-                date: $filter('date')(self.chosenDate, "yyyy-MM-dd"),
-                visitType: $("#selectedVisitType").val() // Consider using AngularJS data binding instead of directly accessing the DOM with jQuery
-            }
-
-            // Proceed with your existing logic for the POST request and response handling
-            $http.post(postURL, data).then(function (response) {
-                console.log(response)
-                $state.go('visitList');
-/*                let currentDate = getCurrentDate();
+      // Proceed with your existing logic for the POST request and response handling
+      $http.post(postURL, data).then(
+        function () {
+          // console.log removed(response);
+          $state.go('visitList');
+          /*                let currentDate = getCurrentDate();
 
                 // Add the visit to one of the lists depending on its date
                 let isForUpcomingVisitsTable = Date.parse(response.data.date) >= currentDate;
@@ -781,115 +860,131 @@ angular.module('visits')
                 callLastSort(isForUpcomingVisitsTable);
 
                 createAlert("success", "Successfully created visit!");*/
+        },
+        function (errorResponse) {
+          // console.log removed(errorResponse);
+          const errorMessage = errorResponse.data.message || 'Unknown error';
 
+          createAlert('danger', 'Failed to add visit: ' + errorMessage);
+        }
+      );
 
-            }, function (errorResponse) {
-                console.log(errorResponse);
-                const errorMessage = errorResponse.data.message || "Unknown error";
+      $http.post(billsUrl, billData).then(
+        function () {
+          // Handle successful bill creation
+        },
+        function () {
+          // console.log removed('Failed to create corresponding bill!');
+        }
+      );
+    };
 
-                createAlert("danger", "Failed to add visit: " + errorMessage);
-            });
+    self.deleteVisit = function (visitId) {
+      $http.delete('api/gateway/visits/' + visitId).then(
+        function () {
+          // Get the parent row of the sender
+          let modalConfirmButton = $('#confirmationModalConfirmButton');
 
-            $http.post(billsUrl, billData).then(function () {
-                // Handle successful bill creation
-            }, function (errorResponse) {
-                console.log("Failed to create corresponding bill!");
-            });
+          // Get the index of the sender from the parent table row data attribute
+          let index = parseInt(modalConfirmButton.data('delete-index'));
+
+          // See if the sender is in upcoming or previous visits
+          let deleteFromUpcomingVisits =
+            modalConfirmButton.data('delete-table-name') === 'upcomingVisits';
+
+          // Remove the visit from the list of either upcoming or previous visits
+          if (deleteFromUpcomingVisits) {
+            self.upcomingVisits.splice(index, 1);
+          } else {
+            self.previousVisits.splice(index, 1);
+          }
+
+          createAlert('success', 'Successfully deleted visit!');
+        },
+        function () {
+          createAlert('danger', 'Failed to delete visit!');
+        }
+      );
+    };
+
+    self.getStatus = function (status) {
+      var statusText = '';
+
+      if (status === false) {
+        statusText = 'Canceled';
+      } else {
+        statusText = 'Not Canceled';
+      }
+
+      return statusText;
+    };
+
+    self.cancelVisit = function (
+      id,
+      visitStatus,
+      visitPractitionerId,
+      visitDate,
+      visitDescription
+    ) {
+      visitId = id;
+      var data = {};
+
+      if (visitStatus) {
+        data = {
+          date: visitDate,
+          description: visitDescription,
+          practitionerId: visitPractitionerId,
+          status: false,
         };
-
-
-        self.deleteVisit = function (visitId){
-            $http.delete("api/gateway/visits/" + visitId).then(function () {
-                // Get the parent row of the sender
-                let modalConfirmButton = $('#confirmationModalConfirmButton');
-
-                // Get the index of the sender from the parent table row data attribute
-                let index = parseInt(modalConfirmButton.data("delete-index"));
-
-                // See if the sender is in upcoming or previous visits
-                let deleteFromUpcomingVisits = modalConfirmButton.data("delete-table-name") === "upcomingVisits";
-
-                // Remove the visit from the list of either upcoming or previous visits
-                if(deleteFromUpcomingVisits) {
-                    self.upcomingVisits.splice(index, 1);
-                } else {
-                    self.previousVisits.splice(index, 1);
-                }
-
-                createAlert("success", "Successfully deleted visit!");
-            }, function () {
-                createAlert("danger", "Failed to delete visit!");
-            });
+      } else {
+        data = {
+          date: visitDate,
+          description: visitDescription,
+          practitionerId: visitPractitionerId,
+          status: true,
         };
+      }
 
-        self.getStatus = function (status) {
-            var statusText = "";
+      let putURL = 'api/gateway/owners/*/pets/' + petId + '/visits/' + visitId;
 
-            if(status === false){
-                statusText = "Canceled";
-            }
-            else{
-                statusText = "Not Canceled";
-            }
+      $http.put(putURL, data).then(
+        function (response) {
+          let index = parseInt(
+            $('#confirmationModalConfirmButton').data('cancel-index')
+          );
 
-            return statusText;
-        };
+          // Delete that visit (must delete in order to update index when sorted)
+          self.upcomingVisits[index] = response.data;
 
-        self.cancelVisit = function (id, visitStatus, visitPractitionerId, visitDate, visitDescription){
-            visitId = id;
-            var data = {};
+          // Call the last sort if there was one
+          callLastSort(true);
 
-            if (visitStatus) {
-                data = {
-                    date: visitDate,
-                    description: visitDescription,
-                    practitionerId: visitPractitionerId,
-                    status: false
-                };
-            }else {
-                data = {
-                    date: visitDate,
-                    description: visitDescription,
-                    practitionerId: visitPractitionerId,
-                    status: true
-                };
-            }
+          if (!visitStatus) {
+            createAlert('success', 'Successfully reverted cancel on visit!');
+          } else {
+            createAlert('success', 'Successfully cancelled visit!');
+          }
+        },
+        function () {
+          if (!visitStatus) {
+            createAlert('danger', 'Failed to revert cancel on visit!');
+          } else {
+            createAlert('danger', 'Failed to cancel visit!');
+          }
+        }
+      );
+    };
 
-            let putURL = "api/gateway/owners/*/pets/" + petId + "/visits/" + visitId;
+    self.setCancelButtonText = function (visitStatus) {
+      var cancelText = '';
 
-            $http.put(putURL, data).then(function(response) {
-                let index = parseInt($('#confirmationModalConfirmButton').data("cancel-index"));
+      if (visitStatus) {
+        cancelText = 'Cancel';
+      } else {
+        cancelText = 'Revert Cancel';
+      }
 
-                // Delete that visit (must delete in order to update index when sorted)
-                self.upcomingVisits[index] = response.data;
-
-                // Call the last sort if there was one
-                callLastSort(true);
-
-                if(!visitStatus) {
-                    createAlert("success", "Successfully reverted cancel on visit!");
-                } else {
-                    createAlert("success", "Successfully cancelled visit!");
-                }
-            },function() {
-                if(!visitStatus) {
-                    createAlert("danger", "Failed to revert cancel on visit!");
-                } else {
-                    createAlert("danger", "Failed to cancel visit!");
-                }
-            });
-        };
-
-        self.setCancelButtonText = function (visitStatus){
-            var cancelText = "";
-
-            if (visitStatus){
-                cancelText = "Cancel";
-            }
-            else {
-                cancelText = "Revert Cancel";
-            }
-
-            return cancelText;
-        };
-    }]);
+      return cancelText;
+    };
+  },
+]);
