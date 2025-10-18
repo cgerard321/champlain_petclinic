@@ -4,7 +4,7 @@ on:
   pull_request:
     types: [closed]
     branches:
-      - main 
+      - main
 
 jobs:
   call_webhook:
@@ -13,11 +13,11 @@ jobs:
     steps:
       - name: Call webhook
         env:
-          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }} 
-          SHA: ${{ github.event.pull_request.merge_commit_sha }} 
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+          SHA: ${{ github.event.pull_request.merge_commit_sha }}
         run: |
           if [ -z "$WEBHOOK_URL" ]; then
             echo "WEBHOOK_URL secret not set. Skipping webhook call."
             exit 1
-          fi        
+          fi
           curl --location --request POST "$WEBHOOK_URL"

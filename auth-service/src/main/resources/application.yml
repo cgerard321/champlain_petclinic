@@ -1,3 +1,4 @@
+---
 # Default Spring Profile
 server:
   error:

@@ -1,3 +1,4 @@
+---
 services:
   petclinicFrontend:
     image: petclinic-frontend

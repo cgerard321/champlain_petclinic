@@ -1,3 +1,4 @@
+---
 server.port: 7006
 
 logging:

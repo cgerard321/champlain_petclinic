@@ -1,3 +1,4 @@
+---
 server.port: 7004
 
 logging:
@@ -117,4 +118,3 @@ server:
 #  #    initialization-mode: always
 #
 #spring.datasource.hikari.initializationFailTimeout: 60000
-
