@@ -3,9 +3,12 @@ import { useEffect, useState } from 'react';
 import { ProductBundleModel } from '@/features/products/models/ProductModels/ProductBundleModel';
 import { getProductByProductId } from '@/features/products/api/getProductByProductId';
 import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, generatePath } from 'react-router-dom';
 import './ProductBundle.css';
 import ImageContainer from './ImageContainer';
+import { useUser } from '@/context/UserContext';
+import { addProductToRecentlyViewed } from '@/features/products/utils/recentlyViewed';
+import { AppRoutePaths } from '@/shared/models/path.routes';
 
 interface ProductBundleProps {
   bundle: ProductBundleModel;
@@ -16,7 +19,9 @@ const ProductBundle: React.FC<ProductBundleProps> = ({ bundle }) => {
   const [bundleStatus, setBundleStatus] = useState<
     'available' | 'unavailable' | 'hidden'
   >('available');
+
   const navigate = useNavigate();
+  const { user } = useUser();
 
   useEffect(() => {
     const fetchProducts = async (): Promise<void> => {
@@ -69,12 +74,26 @@ const ProductBundle: React.FC<ProductBundleProps> = ({ bundle }) => {
             key={product.productId}
             className="product-bundle-item"
             style={{ cursor: 'pointer' }}
-            onClick={() => navigate(`/products/${product.productId}`)}
+            onClick={() => {
+              addProductToRecentlyViewed(product, user?.userId); //
+              navigate(
+                generatePath(AppRoutePaths.ProductDetails, {
+                  // uses project route mapping
+                  productId: product.productId,
+                })
+              );
+            }}
             tabIndex={0}
             role="button"
             onKeyDown={e => {
               if (e.key === 'Enter' || e.key === ' ') {
-                navigate(`/products/${product.productId}`);
+                addProductToRecentlyViewed(product, user?.userId); //mirror for keyboard users
+                navigate(
+                  generatePath(AppRoutePaths.ProductDetails, {
+                    productId: product.productId,
+                    //navigate(`/products/${product.productId}`);
+                  })
+                );
               }
             }}
           >
