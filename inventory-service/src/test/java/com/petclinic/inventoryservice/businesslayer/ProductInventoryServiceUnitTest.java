@@ -392,6 +392,62 @@ class ProductInventoryServiceUnitTest {
     }
 
     @Test
+    void getAllProductsByInventoryId_andOnlyMinPrice_shouldSucceed() {
+        String inventoryId = "1";
+        Double minPrice = 50.00;
+
+        when(productRepository.findAllProductsByInventoryIdAndProductPriceBetween(inventoryId, minPrice, Double.MAX_VALUE))
+                .thenReturn(Flux.just(product));
+
+        Flux<ProductResponseDTO> result = productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(
+                inventoryId, null, minPrice, null, null, null, null);
+
+        StepVerifier.create(result).expectNextCount(1).verifyComplete();
+    }
+
+    @Test
+    void getAllProductsByInventoryId_andOnlyMaxPrice_shouldSucceed() {
+        String inventoryId = "1";
+        Double maxPrice = 200.00;
+
+        when(productRepository.findAllProductsByInventoryIdAndProductPriceBetween(inventoryId, 0.0, maxPrice))
+                .thenReturn(Flux.just(product));
+
+        Flux<ProductResponseDTO> result = productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(
+                inventoryId, null, null, maxPrice, null, null, null);
+
+        StepVerifier.create(result).expectNextCount(1).verifyComplete();
+    }
+
+    @Test
+    void getAllProductsByInventoryId_andOnlyMinSalePrice_shouldSucceed() {
+        String inventoryId = "1";
+        Double minSalePrice = 10.00;
+
+        when(productRepository.findAllProductsByInventoryIdAndProductSalePriceBetween(inventoryId, minSalePrice, Double.MAX_VALUE))
+                .thenReturn(Flux.just(product));
+
+        Flux<ProductResponseDTO> result = productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(
+                inventoryId, null, null, null, null, minSalePrice, null);
+
+        StepVerifier.create(result).expectNextCount(1).verifyComplete();
+    }
+
+    @Test
+    void getAllProductsByInventoryId_andOnlyMaxSalePrice_shouldSucceed() {
+        String inventoryId = "1";
+        Double maxSalePrice = 50.00;
+
+        when(productRepository.findAllProductsByInventoryIdAndProductSalePriceBetween(inventoryId, 0.0, maxSalePrice))
+                .thenReturn(Flux.just(product));
+
+        Flux<ProductResponseDTO> result = productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(
+                inventoryId, null, null, null, null, null, maxSalePrice);
+
+        StepVerifier.create(result).expectNextCount(1).verifyComplete();
+    }
+
+    @Test
     public void deleteProduct_validProductAndInventory_ShouldSucceed() {
         //arrange
         String productId = "123F567C9";

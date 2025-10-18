@@ -1102,6 +1102,30 @@ public class InventoryControllerTest {
     }
 
     @Test
+    void getProductsInInventory_withOnlyMinPrice_shouldSucceed() {
+        when(inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductsField(
+                "1", null, 50.00, null, null, null, null))
+                .thenReturn(Flux.just(buildProductDTO()));
+
+        client.get()
+                .uri("/api/gateway/inventories/1/products?minPrice=50.00")
+                .exchange()
+                .expectStatus().isOk();
+    }
+
+    @Test
+    void getProductsInInventory_withOnlyMaxPrice_shouldSucceed() {
+        when(inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductsField(
+                "1", null, null, 200.00, null, null, null))
+                .thenReturn(Flux.just(buildProductDTO()));
+
+        client.get()
+                .uri("/api/gateway/inventories/1/products?maxPrice=200.00")
+                .exchange()
+                .expectStatus().isOk();
+    }
+
+    @Test
     void getTotalNumberOfProductsWithRequestParams(){
         ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
                 .productId("1234")
