@@ -8,6 +8,7 @@ import { getAllVetVisits } from './api/getAllVetVisits';
 import axios from 'axios';
 import { downloadPrescription } from '@/features/visits/Prescription/api/downloadPrescription';
 import './CustomerVisitListTable.css';
+import BasicModal from '@/shared/components/BasicModal';
 
 export default function CustomerVisitListTable(): JSX.Element {
   const { user } = useUser();
@@ -175,41 +176,31 @@ export default function CustomerVisitListTable(): JSX.Element {
       )}
 
       {showErrorDialog && (
-        <div
-          className="cvlt-modal-overlay"
-          onClick={() => {
-            setShowErrorDialog(false);
-            navigate(AppRoutePaths.CustomerVisits);
-          }}
-        >
-          <div
-            className="cvlt-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="cvlt-modal-title"
-            onClick={e => e.stopPropagation()}
+        <>
+          {(() => {
+            // Auto-open the BasicModal immediately after render
+            setTimeout(() => {
+              document.getElementById('error-modal-trigger')?.click();
+            }, 0);
+            return null;
+          })()}
+          <BasicModal
+            title="Download error"
+            confirmText="OK"
+            onConfirm={async () => {
+              setShowErrorDialog(false);
+              navigate(AppRoutePaths.CustomerVisits);
+            }}
+            showButton={
+              <button id="error-modal-trigger" style={{ display: 'none' }} />
+            }
           >
-            <h3 id="cvlt-modal-title" className="cvlt-modal-title">
-              Download error
-            </h3>
             <p className="cvlt-modal-body">
               {errorDialogMessage ??
                 'An error occurred while downloading the prescription.'}
             </p>
-            <div className="cvlt-modal-actions">
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={() => {
-                  setShowErrorDialog(false);
-                  navigate(AppRoutePaths.CustomerVisits);
-                }}
-              >
-                OK
-              </button>
-            </div>
-          </div>
-        </div>
+          </BasicModal>
+        </>
       )}
     </div>
   );
