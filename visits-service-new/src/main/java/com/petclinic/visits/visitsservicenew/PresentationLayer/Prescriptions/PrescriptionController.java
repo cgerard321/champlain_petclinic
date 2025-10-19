@@ -27,18 +27,13 @@ public class PrescriptionController {
                 .map(ResponseEntity::ok);
     }
 
-    @GetMapping(value = "/{prescriptionId}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    @GetMapping(value = "/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
     public Mono<ResponseEntity<byte[]>> downloadPdf(
-            @PathVariable String visitId,
-            @PathVariable String prescriptionId) {
+            @PathVariable String visitId) {
 
-        return prescriptionService.getPrescriptionPdf(visitId, prescriptionId)
+        return prescriptionService.getPrescriptionPdf(visitId)
                 .map(pdf -> {
-                    HttpHeaders headers = new HttpHeaders();
-                    headers.setContentType(MediaType.APPLICATION_PDF);
-                    headers.add(HttpHeaders.CONTENT_DISPOSITION,
-                            "inline; filename=prescription-" + prescriptionId + ".pdf");
-                    return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
+                    return new ResponseEntity<>(pdf,HttpStatus.OK);
                 })
                 .onErrorResume(NotFoundException.class, e ->
                         Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).build()))
