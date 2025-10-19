@@ -130,7 +130,7 @@ export class InventoriesProductDetailsInfoComponent implements OnInit {
         this.product = product;
         this.loading = false;
       },
-      error: (err) => {
+      error: () => {
         this.error = 'Could not load product details.';
         this.loading = false;
       }
@@ -142,7 +142,7 @@ export class InventoriesProductDetailsInfoComponent implements OnInit {
       next: (inventory) => {
         this.inventory = inventory;
       },
-      error: (err) => {
+      error: () => {
       }
     });
   }

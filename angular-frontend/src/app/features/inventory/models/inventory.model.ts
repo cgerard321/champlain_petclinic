@@ -29,6 +29,7 @@ export interface ProductRequest {
   productDescription: string;
   productPrice: number;
   productQuantity: number;
+  productSalePrice?: number;
   inventoryId: string;
 }
 
