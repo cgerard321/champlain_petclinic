@@ -165,22 +165,10 @@ export const routes: Routes = [
     title: 'Bill History'
   },
   {
-    path: 'bills/:billId',
-    loadComponent: () => import('./features/bills/pages/bill-details/bill-details.component').then(m => m.BillDetailsComponent),
-    canActivate: [authGuard],
-    title: 'Bill Details'
-  },
-  {
     path: 'bills/new',
     loadComponent: () => import('./features/bills/pages/bill-form/bill-form.component').then(m => m.BillFormComponent),
     canActivate: [authGuard],
     title: 'New Bill'
-  },
-  {
-    path: 'bills/:billId/edit',
-    loadComponent: () => import('./features/bills/pages/bill-form/bill-form.component').then(m => m.BillFormComponent),
-    canActivate: [authGuard],
-    title: 'Edit Bill'
   },
   {
     path: 'bills/owner/:ownerId',
@@ -193,6 +181,18 @@ export const routes: Routes = [
     loadComponent: () => import('./features/bills/pages/bills-by-vet-id/bills-by-vet-id.component').then(m => m.BillsByVetIdComponent),
     canActivate: [authGuard],
     title: 'Bills by Vet'
+  },
+  {
+    path: 'bills/:billId/edit',
+    loadComponent: () => import('./features/bills/pages/bill-form/bill-form.component').then(m => m.BillFormComponent),
+    canActivate: [authGuard],
+    title: 'Edit Bill'
+  },
+  {
+    path: 'bills/:billId',
+    loadComponent: () => import('./features/bills/pages/bill-details/bill-details.component').then(m => m.BillDetailsComponent),
+    canActivate: [authGuard],
+    title: 'Bill Details'
   },
 
   // Inventory routes

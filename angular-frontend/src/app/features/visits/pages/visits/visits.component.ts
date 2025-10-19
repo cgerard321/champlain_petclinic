@@ -804,7 +804,9 @@ export class VisitsComponent implements OnInit, AfterViewInit {
       customerId: this.ownerId,
       visitType: this.visitType,
       vetId: this.practitionerId,
+      date: this.chosenDate!.toISOString().split('T')[0],
       amount: this.calculateBillAmount(), // Calculate based on visit type
+      billStatus: 'UNPAID' as any,
       dueDate: dueDate.toISOString().split('T')[0] // Format as YYYY-MM-DD
     };
 
