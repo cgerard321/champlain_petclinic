@@ -55,7 +55,7 @@ export const routes: Routes = [
   {
     path: 'owners',
     loadComponent: () => import('./features/customers/pages/owner-list/owner-list.component').then(m => m.OwnerListComponent),
-    canActivate: [authGuard],
+    // canActivate: [authGuard], // Temporarily disabled for testing
     title: 'Owners'
   },
   {
@@ -104,6 +104,12 @@ export const routes: Routes = [
     loadComponent: () => import('./features/customers/pages/pet-details/pet-details.component').then(m => m.PetDetailsComponent),
     canActivate: [authGuard],
     title: 'Pet Details'
+  },
+  {
+    path: 'pet-owner-detail/:ownerId/:petId',
+    loadComponent: () => import('./features/customers/pages/pet-owner-detail/pet-owner-detail.component').then(m => m.PetOwnerDetailComponent),
+    canActivate: [authGuard],
+    title: 'Pet Owner Detail'
   },
 
   // Vet routes

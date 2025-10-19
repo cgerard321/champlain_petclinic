@@ -117,11 +117,11 @@ export class BillFormComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  trackByOwnerId(index: number, owner: any): string {
+  trackByOwnerId(_index: number, owner: any): string {
     return owner.ownerId;
   }
 
-  trackByVetId(index: number, vet: any): string {
+  trackByVetId(_index: number, vet: any): string {
     return vet.vetId;
   }
 
