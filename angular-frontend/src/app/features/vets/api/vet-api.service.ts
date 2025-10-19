@@ -5,7 +5,7 @@ import { map } from 'rxjs/operators';
 import { Vet, VetRequest } from '../models/vet.model';
 import { Education, EducationRequest } from '../models/education.model';
 import { Rating, RatingRequest } from '../models/rating.model';
-import { Badge, BadgeRequest } from '../models/badge.model';
+import { Badge } from '../models/badge.model';
 import { Photo, PhotoRequest } from '../models/photo.model';
 import { environment } from '../../../../environments/environment.dev';
 
