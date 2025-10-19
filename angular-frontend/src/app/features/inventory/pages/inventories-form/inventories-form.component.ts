@@ -62,7 +62,6 @@ export class InventoriesFormComponent implements OnInit {
   private loadInventoryTypes(): void {
     this.inventoryApi.getInventoryTypes().subscribe({
       next: (types) => {
-        // Includes all types inside the array
         types.forEach((type: any) => {
           this.inventoryTypeOptions.push(type.type);
         });
@@ -70,7 +69,7 @@ export class InventoriesFormComponent implements OnInit {
           this.selectedOption = this.inventoryTypeOptions[0];
         }
       },
-      error: (error) => this.handleHttpError(error)
+      error: (_error) => this.handleHttpError(_error)
     });
   }
 
@@ -98,10 +97,10 @@ export class InventoriesFormComponent implements OnInit {
             next: () => {
               this.router.navigate(['/inventories']);
             },
-            error: (error) => this.handleHttpError(error)
+            error: (_error) => this.handleHttpError(_error)
           });
         },
-        error: (error) => this.handleHttpError(error)
+        error: (_error) => this.handleHttpError(_error)
       });
     } else {
       data = {
@@ -114,7 +113,7 @@ export class InventoriesFormComponent implements OnInit {
         next: () => {
           this.router.navigate(['/inventories']);
         },
-        error: (error) => this.handleHttpError(error)
+        error: (_error) => this.handleHttpError(_error)
       });
     }
   }
@@ -133,8 +132,6 @@ export class InventoriesFormComponent implements OnInit {
   }
 
   private handleHttpError(response: any): void {
-    try { 
-    } catch (e) {}
 
     let data = response && response.data;
     const status = response && response.status;
@@ -189,5 +186,3 @@ export class InventoriesFormComponent implements OnInit {
     alert(fieldText ? (baseMsg + '\r\n' + fieldText) : baseMsg);
   }
 }
-
-

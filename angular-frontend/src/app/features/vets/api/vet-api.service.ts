@@ -36,7 +36,6 @@ export class VetApiService {
               if (payload === '') return null;
               return JSON.parse(payload);
             } catch (err) {
-              console.error("Can't parse JSON:", err);
               return null;
             }
           })
@@ -237,7 +236,6 @@ export class VetApiService {
               if (dataChunk === '') return null;
               return JSON.parse(dataChunk);
             } catch (err) {
-              console.error('Could not parse JSON: ' + err);
               return null;
             }
           })

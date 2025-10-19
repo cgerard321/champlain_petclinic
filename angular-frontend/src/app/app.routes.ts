@@ -6,7 +6,6 @@ export const routes: Routes = [
   { path: '', redirectTo: '/welcome', pathMatch: 'full' },
   { path: 'welcome', component: HomeComponent, title: 'Welcome' },
   
-  // Auth routes
   {
     path: 'login',
     loadComponent: () => import('./features/auth/pages/login/login.component').then(m => m.LoginComponent),
@@ -50,12 +49,23 @@ export const routes: Routes = [
     canActivate: [authGuard],
     title: 'Role Update'
   },
+  {
+    path: 'manager-form',
+    loadComponent: () => import('./features/auth/pages/manager-form/manager-form.component').then(m => m.ManagerFormComponent),
+    canActivate: [authGuard],
+    title: 'Create Inventory Manager'
+  },
+  {
+    path: 'vet-form',
+    loadComponent: () => import('./features/auth/pages/vet-form/vet-form.component').then(m => m.VetFormComponent),
+    canActivate: [authGuard],
+    title: 'Create Veterinarian'
+  },
 
-  // Owner/Customer routes
   {
     path: 'owners',
     loadComponent: () => import('./features/customers/pages/owner-list/owner-list.component').then(m => m.OwnerListComponent),
-    // canActivate: [authGuard], // Temporarily disabled for testing
+    canActivate: [authGuard],
     title: 'Owners'
   },
   {
@@ -112,7 +122,6 @@ export const routes: Routes = [
     title: 'Pet Owner Detail'
   },
 
-  // Vet routes
   {
     path: 'vets',
     loadComponent: () => import('./features/vets/pages/vet-list/vet-list.component').then(m => m.VetListComponent),
@@ -138,7 +147,6 @@ export const routes: Routes = [
     title: 'Edit Vet'
   },
 
-  // Visit routes
   {
     path: 'visits',
     loadComponent: () => import('./features/visits/pages/visits/visits.component').then(m => m.VisitsComponent),
@@ -158,7 +166,6 @@ export const routes: Routes = [
     title: 'Visit Details'
   },
 
-  // Billing routes
   {
     path: 'bills',
     redirectTo: 'bills/history',
@@ -201,7 +208,6 @@ export const routes: Routes = [
     title: 'Bill Details'
   },
 
-  // Inventory routes
   {
     path: 'inventories',
     loadComponent: () => import('./features/inventory/pages/inventories-list/inventories-list.component').then(m => m.InventoriesListComponent),
@@ -245,7 +251,6 @@ export const routes: Routes = [
     title: 'Product Details'
   },
 
-  // Products routes
   {
     path: 'products',
     loadComponent: () => import('./features/products/pages/product-list/product-list.component').then(m => m.ProductListComponent),

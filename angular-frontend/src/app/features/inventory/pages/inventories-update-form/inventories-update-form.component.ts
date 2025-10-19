@@ -65,14 +65,13 @@ export class InventoriesUpdateFormComponent implements OnInit {
         this.inventory = inventory;
         this.loadInventoryTypes();
       },
-      error: (error) => this.handleHttpError(error)
+      error: (_error) => this.handleHttpError(_error)
     });
   }
 
   private loadInventoryTypes(): void {
     this.inventoryApi.getInventoryTypes().subscribe({
       next: (types) => {
-        // Includes all types inside the array
         types.forEach((type: any) => {
           this.inventoryTypeUpdateOptions.push(type.type);
         });
@@ -84,7 +83,7 @@ export class InventoriesUpdateFormComponent implements OnInit {
           this.inventoryTypeFormUpdateSearch = this.inventoryTypeUpdateOptions[0];
         }
       },
-      error: (error) => this.handleHttpError(error)
+      error: (_error) => this.handleHttpError(_error)
     });
   }
 
@@ -106,7 +105,6 @@ export class InventoriesUpdateFormComponent implements OnInit {
         inventoryDescription: this.inventory.inventoryDescription
       };
 
-      // First create the new type, then update the inventory
       this.inventoryApi.createInventoryType({ name: this.selectedUpdateOption }).subscribe({
         next: () => {
           if (this.method === 'edit') {
@@ -114,12 +112,12 @@ export class InventoriesUpdateFormComponent implements OnInit {
               next: () => {
                 this.router.navigate(['/inventories']);
               },
-              error: (error) => this.handleHttpError(error)
+              error: (_error) => this.handleHttpError(_error)
             });
           } else {
           }
         },
-        error: (error) => this.handleHttpError(error)
+        error: (_error) => this.handleHttpError(_error)
       });
     } else {
       data = {
@@ -133,7 +131,7 @@ export class InventoriesUpdateFormComponent implements OnInit {
           next: () => {
             this.router.navigate(['/inventories']);
           },
-          error: (error) => this.handleHttpError(error)
+          error: (_error) => this.handleHttpError(_error)
         });
       } else {
       }
@@ -161,7 +159,6 @@ export class InventoriesUpdateFormComponent implements OnInit {
     const status = response && response.status;
     const statusText = (response && response.statusText) || '';
 
-    // Try to normalize data if it's a string JSON
     if (typeof data === 'string') {
       try {
         data = JSON.parse(data);
@@ -176,12 +173,10 @@ export class InventoriesUpdateFormComponent implements OnInit {
     }
     data = data || {};
 
-    // Common server shapes we might see
     const violations = data.violations || data.constraintViolations || [];
     const detailsArr = Array.isArray(data.details) ? data.details : [];
     const errorsArr = Array.isArray(data.errors) ? data.errors : [];
 
-    // Build fieldText from any array-ish error shapes
     function mapErr(e: any) {
       if (typeof e === 'string') return e;
       const field = e.field || e.path || e.parameter || e.property || '';
@@ -197,7 +192,6 @@ export class InventoriesUpdateFormComponent implements OnInit {
       .filter(Boolean)
       .join('\r\n');
 
-    // Choose a base message with lots of fallbacks
     const baseMsg =
       data.message ||
       data.error_description ||
