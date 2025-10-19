@@ -11,6 +11,7 @@ import { Status } from '@/features/inventories/models/ProductModels/Status.ts';
 import axiosInstance from '@/shared/api/axiosInstance';
 import AddSupplyToInventory from '@/features/inventories/AddSupplyToInventory';
 import EditInventoryProducts from '@/features/inventories/EditInventoryProducts';
+import MoveInventoryProducts from '@/features/inventories/MoveInventoryProducts';
 
 const MAX_QTY = 100;
 
@@ -71,6 +72,8 @@ const InventoryProducts: React.FC = () => {
   const [addOpen, setAddOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editProductId, setEditProductId] = useState<string | null>(null);
+  const [moveOpen, setMoveOpen] = useState(false);
+  const [moveProductId, setMoveProductId] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const handleCreatePdf = async (): Promise<void> => {
@@ -497,7 +500,8 @@ const InventoryProducts: React.FC = () => {
                     <button
                       onClick={e => {
                         e.stopPropagation();
-                        navigate(`${product.productId}`);
+                        setMoveProductId(product.productId);
+                        setMoveOpen(true);
                       }}
                       className="btn btn-info btn-sm"
                     >
@@ -554,6 +558,22 @@ const InventoryProducts: React.FC = () => {
             setEditOpen(false);
             setEditProductId(null);
             void loadProducts(); // refresh table after update
+          }}
+        />
+      )}
+      {moveOpen && moveProductId && (
+        <MoveInventoryProducts
+          open={moveOpen}
+          onClose={() => {
+            setMoveOpen(false);
+            setMoveProductId(null);
+          }}
+          inventoryIdProp={inventoryId!}
+          productIdProp={moveProductId}
+          onMoved={() => {
+            setMoveOpen(false);
+            setMoveProductId(null);
+            void loadProducts();
           }}
         />
       )}
