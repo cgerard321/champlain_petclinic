@@ -164,4 +164,6 @@ div.pet:not(.marg), div.owner:not(.marg){
   font-weight: normal;
 }
 
-
+#bg {
+  /*background-image: url("../images/tracks-pattern.png");*/
+}
