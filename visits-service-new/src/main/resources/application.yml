@@ -15,7 +15,7 @@ app:
     host: localhost
     port: 8888
   files-service:
-    host: localhost
+    host: files-service
     port: 8000
 
 
@@ -50,7 +50,7 @@ spring:
 
 app:
   files-service:
-    host: localhost
+    host: files-service
     port: 8000
 ---
 spring:
@@ -90,7 +90,7 @@ app:
     host: mailer-service
     port: 8080
   files-service:
-    host: localhost
+    host: files-service
     port: 8000
 
 logging:

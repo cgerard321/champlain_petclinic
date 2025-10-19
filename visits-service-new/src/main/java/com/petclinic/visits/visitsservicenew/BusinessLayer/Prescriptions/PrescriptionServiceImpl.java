@@ -1,36 +1,35 @@
 package com.petclinic.visits.visitsservicenew.BusinessLayer.Prescriptions;
 
 import com.itextpdf.text.DocumentException;
+import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FilesServiceClient;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FileRequestDTO;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FileResponseDTO;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Prescriptions.PrescriptionResponseDTO;
 import com.petclinic.visits.visitsservicenew.Utils.PrescriptionPdfGenerator;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
-import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class PrescriptionServiceImpl implements PrescriptionService {
 
-    private final Map<String, Map<String, PrescriptionResponseDTO>> store = new ConcurrentHashMap<>();
-    private final Map<String, Map<String, byte[]>> pdfStore = new ConcurrentHashMap<>();
-
     private final VisitRepo visitRepository;
-    private final FilesServiceClient filesClient;
+    private final FilesServiceClient filesServiceClient;
 
-    public PrescriptionServiceImpl(VisitRepo visitRepository, FilesServiceClient filesClient) {
+    public PrescriptionServiceImpl(VisitRepo visitRepository, FilesServiceClient filesServiceClient) {
         this.visitRepository = visitRepository;
-        this.filesClient = filesClient;
+        this.filesServiceClient = filesServiceClient;
     }
 
     @Override
-    public PrescriptionResponseDTO createPrescription(String visitId, PrescriptionResponseDTO request) {
+    public Mono<PrescriptionResponseDTO> createPrescription(String visitId, PrescriptionResponseDTO request) {
         String prescriptionId = request.getPrescriptionId();
         if (prescriptionId == null || prescriptionId.isBlank()) {
             prescriptionId = UUID.randomUUID().toString();
@@ -41,52 +40,48 @@ public class PrescriptionServiceImpl implements PrescriptionService {
             request.setDate(LocalDate.now());
         }
 
-        store.computeIfAbsent(visitId, k -> new ConcurrentHashMap<>())
-                .put(prescriptionId, request);
+        final String finalPrescriptionId = prescriptionId;
+        byte[] pdf;
 
         try {
-            byte[] pdf = PrescriptionPdfGenerator.generatePrescriptionPdf(request);
-            pdfStore.computeIfAbsent(visitId, k -> new ConcurrentHashMap<>())
-                    .put(prescriptionId, pdf);
+            pdf = PrescriptionPdfGenerator.generatePrescriptionPdf(request);
         } catch (DocumentException e) {
-            throw new RuntimeException("Failed to generate prescription PDF", e);
+            return Mono.error(new RuntimeException("Failed to generate prescription PDF", e));
         }
 
-        return request;
+        FileRequestDTO fileRequest = new FileRequestDTO();
+        fileRequest.setFileName("prescription-" + finalPrescriptionId + ".pdf");
+        fileRequest.setFileType("application/pdf");
+        fileRequest.setFileData(pdf);
+
+        // Find the visit → upload file → save fileId → save visit → return prescription info
+        return visitRepository.findByVisitId(visitId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Visit not found: " + visitId)))
+                .flatMap(visit ->
+                        filesServiceClient.addFile(fileRequest)
+                                .flatMap(fileDetails -> {
+                                    visit.setPrescriptionId(finalPrescriptionId);
+                                    visit.setPrescriptionFileId(fileDetails.getFileId());
+                                    return visitRepository.save(visit);
+                                })
+                                .thenReturn(request)
+                );
     }
 
 
     @Override
     public Mono<byte[]> getPrescriptionPdf(String visitId, String prescriptionId) {
-        // Step 1: try in-memory cache
-        Map<String, byte[]> visitPdfs = pdfStore.get(visitId);
-        if (visitPdfs != null && visitPdfs.containsKey(prescriptionId)) {
-            return Mono.just(visitPdfs.get(prescriptionId));
-        }
-
-        // Step 2: fallback — verify visit and fetch from Files Service
         return visitRepository.findByVisitId(visitId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Visit not found: " + visitId)))
                 .flatMap(visit -> {
-                    if (visit.getPrescriptionId() == null || !visit.getPrescriptionId().equals(prescriptionId)) {
-                        return Mono.error(new NotFoundException(
-                                "Prescription " + prescriptionId + " not found for visit " + visitId));
+                    if (visit.getPrescriptionFileId() == null) {
+                        return Mono.error(new NotFoundException("No prescription file linked to visit: " + visitId));
                     }
 
-                    // Fetch file metadata + bytes, then return the bytes only
-                    return filesClient.getFile(prescriptionId)
-                            .map(file -> {
-                                byte[] data = file.getFileData();
-                                if (data == null || data.length == 0) {
-                                    throw new NotFoundException("Prescription PDF not found for " + prescriptionId);
-                                }
-                                return data;
-                            })
-                            .switchIfEmpty(Mono.error(new NotFoundException(
-                                    "Prescription PDF not found for " + prescriptionId)));
+                    return filesServiceClient.getFile(visit.getPrescriptionFileId())
+                            .flatMap(fileResponse -> Mono.just(fileResponse.getFileData()));
                 });
     }
-
 
 
 }

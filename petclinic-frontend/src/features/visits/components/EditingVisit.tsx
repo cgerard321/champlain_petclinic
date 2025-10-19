@@ -6,6 +6,7 @@ import { VisitResponseModel } from '../models/VisitResponseModel';
 import { getVisit } from '../api/getVisit';
 import { updateVisit } from '../api/updateVisit';
 import { getAvailableVets, VetResponse } from '@/features/visits/api/getVets';
+import { /*useUser,*/ IsVet, IsAdmin } from '@/context/UserContext';
 
 import BasicModal from '@/shared/components/BasicModal';
 import PrescriptionModal from '@/features/visits/Prescription/prescriptionComponents/prescriptionModal';
@@ -61,6 +62,9 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
   const [vets, setVets] = useState<VetResponse[]>([]);
   const [showPrescriptionModal, setShowPrescriptionModal] =
     useState<boolean>(false);
+  //const { user } = useUser();
+  const isVet = IsVet();
+  const isAdmin = typeof IsAdmin === 'function' ? IsAdmin() : false;
 
   useEffect(() => {
     const fetchVisitData = async (): Promise<void> => {
@@ -300,7 +304,7 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
           </label>
         </div>
         <br />
-        {visit.status === 'COMPLETED' && (
+        {visit.status === 'COMPLETED' && (isVet || isAdmin) && (
           <div>
             <button
               type="button"

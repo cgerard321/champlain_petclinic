@@ -19,12 +19,12 @@ public class PrescriptionController {
         this.prescriptionService = prescriptionService;
     }
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<PrescriptionResponseDTO> createPrescription(
+    @PostMapping("")
+    public Mono<ResponseEntity<PrescriptionResponseDTO>> createPrescription(
             @PathVariable String visitId,
-            @RequestBody PrescriptionResponseDTO request) {
-        PrescriptionResponseDTO created = prescriptionService.createPrescription(visitId, request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+            @RequestBody PrescriptionResponseDTO dto) {
+        return prescriptionService.createPrescription(visitId, dto)
+                .map(ResponseEntity::ok);
     }
 
     @GetMapping(value = "/{prescriptionId}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
