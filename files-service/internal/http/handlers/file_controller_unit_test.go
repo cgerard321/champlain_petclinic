@@ -15,8 +15,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func setUpControllerUnitTests() (*handlers.FilesController, *mock.MockFileService) {
-	fs := new(mock.MockFileService)
+func setUpControllerUnitTests() (*handlers.FilesController, *mock.FileService) {
+	fs := new(mock.FileService)
 	return handlers.NewFileController(fs), fs
 }
 

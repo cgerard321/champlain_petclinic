@@ -39,7 +39,7 @@ var EXISTING_FILE_RESPONSE_MODEL = model.FileResponseModel{
 
 var (
 	minioClient  *minio.Client
-	minioService domain.MinioServiceClient
+	minioService domain.MinioClient
 	ctx          context.Context
 )
 
@@ -69,7 +69,7 @@ func TestMain(m *testing.M) {
 		minioClient.MakeBucket(ctx, bucket, minio.MakeBucketOptions{})
 	}
 
-	minioService = client.NewMinioServiceClient(minioClient)
+	minioService = client.NewMinioClient(minioClient)
 
 	os.Exit(m.Run())
 }

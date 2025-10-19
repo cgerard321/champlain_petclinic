@@ -33,8 +33,8 @@ var UPDATE_FILE_REQUEST_MODEL = model.FileRequestModel{
 const NON_EXISTING_FILE_ID = "3e5a214b-009d-4a25-9313-344676e6157k"
 const EXISTING_FILE_ID = "3e5a214b-009d-4a25-9313-344676e6157d"
 
-func setupFileServiceUnitTest() (*tm.MockFileInfoRepo, *tm.MockMinioServiceClient) {
-	return new(tm.MockFileInfoRepo), new(tm.MockMinioServiceClient)
+func setupFileServiceUnitTest() (*tm.FileInfoRepository, *tm.MinioClient) {
+	return new(tm.FileInfoRepository), new(tm.MinioClient)
 }
 
 func TestWhenGetFileById_withExistingFileId_thenReturnFileResponseModel(t *testing.T) {

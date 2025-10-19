@@ -6,11 +6,11 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-type MockFileInfoRepo struct {
+type FileInfoRepository struct {
 	mock.Mock
 }
 
-func (m *MockFileInfoRepo) GetFileInfo(fileId string) *domain.FileInfo {
+func (m *FileInfoRepository) GetFileInfo(fileId string) *domain.FileInfo {
 	args := m.Called(fileId)
 	if args.Get(0) == nil {
 		return nil
@@ -18,17 +18,17 @@ func (m *MockFileInfoRepo) GetFileInfo(fileId string) *domain.FileInfo {
 	return args.Get(0).(*domain.FileInfo)
 }
 
-func (m *MockFileInfoRepo) AddFileInfo(fileInfo *domain.FileInfo) error {
+func (m *FileInfoRepository) AddFileInfo(fileInfo *domain.FileInfo) error {
 	args := m.Called(fileInfo)
 	return args.Error(0)
 }
 
-func (m *MockFileInfoRepo) DeleteFileInfo(fileId string) error {
+func (m *FileInfoRepository) DeleteFileInfo(fileId string) error {
 	args := m.Called(fileId)
 	return args.Error(0)
 }
 
-func (m *MockFileInfoRepo) ExistsById(fileId string) (bool, error) {
+func (m *FileInfoRepository) ExistsById(fileId string) (bool, error) {
 	//TODO implement me
 	panic("implement me")
 }

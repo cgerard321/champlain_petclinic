@@ -27,7 +27,7 @@ import (
 
 var (
 	controller   *handlers.FilesController
-	minioService domain.MinioServiceClient
+	minioService domain.MinioClient
 	fileRepo     domain.FileInfoRepository
 	minioClient  *minio.Client
 	db           *sql.DB
@@ -68,7 +68,7 @@ func TestMain(m *testing.M) {
 		minioClient.MakeBucket(ctx, bucket, minio.MakeBucketOptions{})
 	}
 
-	minioService = client.NewMinioServiceClient(minioClient)
+	minioService = client.NewMinioClient(minioClient)
 	controller = handlers.NewFileController(service.NewFileService(fileRepo, minioService))
 
 	os.Exit(m.Run())

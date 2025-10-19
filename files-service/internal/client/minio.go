@@ -10,17 +10,17 @@ import (
 	"github.com/minio/minio-go/v7"
 )
 
-type MinioServiceClientImpl struct {
+type MinioClient struct {
 	client *minio.Client
 }
 
-func NewMinioServiceClient(client *minio.Client) *MinioServiceClientImpl {
-	return &MinioServiceClientImpl{
+func NewMinioClient(client *minio.Client) *MinioClient {
+	return &MinioClient{
 		client: client,
 	}
 }
 
-func (msc *MinioServiceClientImpl) GetFile(fileInfo *domain.FileInfo) (*model.FileResponseModel, error) {
+func (msc *MinioClient) GetFile(fileInfo *domain.FileInfo) (*model.FileResponseModel, error) {
 	ctx := context.Background()
 	object, err := msc.client.GetObject(ctx, fileInfo.GetFileBucket(), fileInfo.GetFileLink(), minio.GetObjectOptions{})
 	if err != nil {
@@ -43,7 +43,7 @@ func (msc *MinioServiceClientImpl) GetFile(fileInfo *domain.FileInfo) (*model.Fi
 	return &file, nil
 }
 
-func (msc *MinioServiceClientImpl) AddFile(fileInfo *domain.FileInfo, data []byte) error {
+func (msc *MinioClient) AddFile(fileInfo *domain.FileInfo, data []byte) error {
 	ctx := context.Background()
 	obj := bytes.NewReader(data)
 
@@ -51,7 +51,7 @@ func (msc *MinioServiceClientImpl) AddFile(fileInfo *domain.FileInfo, data []byt
 	return err
 }
 
-func (msc *MinioServiceClientImpl) DeleteFile(fileInfo *domain.FileInfo) error {
+func (msc *MinioClient) DeleteFile(fileInfo *domain.FileInfo) error {
 	ctx := context.Background()
 	return msc.client.RemoveObject(ctx, fileInfo.GetFileBucket(), fileInfo.GetFileLink(), minio.RemoveObjectOptions{})
 }

@@ -73,7 +73,7 @@ func main() {
 
 	ir := repository.NewFileInfoRepo(db)
 
-	mc := client.NewMinioServiceClient(minioClient)
+	mc := client.NewMinioClient(minioClient)
 	is := service.NewFileService(ir, mc)
 
 	ic := handlers.NewFileController(is)

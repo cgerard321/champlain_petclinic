@@ -11,19 +11,19 @@ import (
 	"github.com/google/uuid"
 )
 
-type FilesServiceImpl struct {
+type FilesService struct {
 	repository         domain.FileInfoRepository
-	minioServiceClient domain.MinioServiceClient
+	minioServiceClient domain.MinioClient
 }
 
-func NewFileService(repository domain.FileInfoRepository, minioServiceClient domain.MinioServiceClient) *FilesServiceImpl {
-	return &FilesServiceImpl{
+func NewFileService(repository domain.FileInfoRepository, minioServiceClient domain.MinioClient) *FilesService {
+	return &FilesService{
 		repository:         repository,
 		minioServiceClient: minioServiceClient,
 	}
 }
 
-func (i *FilesServiceImpl) saveFile(fileId string, model *models2.FileRequestModel) (*models2.FileResponseModel, error) {
+func (i *FilesService) saveFile(fileId string, model *models2.FileRequestModel) (*models2.FileResponseModel, error) {
 	fileName := strings.NewReplacer("_", " ", "-", " ").Replace(strings.TrimSuffix(model.FileName, path.Ext(model.FileName)))
 	mediaType, _, err := mime.ParseMediaType(model.FileType)
 
@@ -55,7 +55,7 @@ func (i *FilesServiceImpl) saveFile(fileId string, model *models2.FileRequestMod
 	}, nil
 }
 
-func (i *FilesServiceImpl) GetFile(id string) (*models2.FileResponseModel, error) {
+func (i *FilesService) GetFile(id string) (*models2.FileResponseModel, error) {
 	fileInfo := i.repository.GetFileInfo(id)
 	if fileInfo == nil {
 		return nil, exception.NewNotFoundException("fileId: " + id + " was not found")
@@ -71,7 +71,7 @@ func (i *FilesServiceImpl) GetFile(id string) (*models2.FileResponseModel, error
 	return resp, nil
 }
 
-func (i *FilesServiceImpl) AddFile(model *models2.FileRequestModel) (*models2.FileResponseModel, error) {
+func (i *FilesService) AddFile(model *models2.FileRequestModel) (*models2.FileResponseModel, error) {
 	var fileId string
 	for {
 		fileId = uuid.New().String()
@@ -88,7 +88,7 @@ func (i *FilesServiceImpl) AddFile(model *models2.FileRequestModel) (*models2.Fi
 	return i.saveFile(fileId, model)
 }
 
-func (i *FilesServiceImpl) UpdateFile(id string, model *models2.FileRequestModel) (*models2.FileResponseModel, error) {
+func (i *FilesService) UpdateFile(id string, model *models2.FileRequestModel) (*models2.FileResponseModel, error) {
 	fileInfo := i.repository.GetFileInfo(id)
 	if fileInfo == nil {
 		return nil, exception.NewNotFoundException("fileId: " + id + " was not found")
@@ -100,7 +100,7 @@ func (i *FilesServiceImpl) UpdateFile(id string, model *models2.FileRequestModel
 	return i.saveFile(id, model)
 }
 
-func (i *FilesServiceImpl) DeleteFile(id string) error {
+func (i *FilesService) DeleteFile(id string) error {
 	fileInfo := i.repository.GetFileInfo(id)
 	if fileInfo == nil {
 		return exception.NewNotFoundException("fileId: " + id + " was not found")
