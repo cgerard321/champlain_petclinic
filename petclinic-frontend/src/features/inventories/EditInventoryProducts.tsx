@@ -8,8 +8,6 @@ import {
 import { ProductRequestModel } from '@/features/inventories/models/InventoryModels/ProductRequestModel';
 import styles from './InvProForm.module.css';
 
-const MAX_QTY = 100;
-
 type ProductKeys = keyof ProductRequestModel;
 
 type Props = {
@@ -56,7 +54,6 @@ const EditInventoryProducts: React.FC<Props> = ({
     Number(product.productPrice) > 0 &&
     Number(product.productQuantity) > 0 &&
     Number(product.productSalePrice) > 0 &&
-    Number(product.productQuantity) <= MAX_QTY &&
     !loading;
 
   // const navigate = useNavigate();
@@ -102,8 +99,6 @@ const EditInventoryProducts: React.FC<Props> = ({
       errors.productPrice = 'Product price must be greater than 0';
     if (!(Number(product.productQuantity) > 0))
       errors.productQuantity = 'Product quantity must be greater than 0';
-    else if (Number(product.productQuantity) > MAX_QTY)
-      errors.productQuantity = `Product quantity must not exceed ${MAX_QTY}`;
     if (!(Number(product.productSalePrice) > 0))
       errors.productSalePrice = 'Sale price must be greater than 0';
 
@@ -214,8 +209,6 @@ const EditInventoryProducts: React.FC<Props> = ({
         const next = { ...prev };
         if (!Number.isFinite(qty) || qty <= 0) {
           next.productQuantity = 'Product quantity must be greater than 0';
-        } else if (qty > MAX_QTY) {
-          next.productQuantity = `Product quantity must not exceed ${MAX_QTY}`;
         } else {
           next.productQuantity = '';
         }
@@ -409,7 +402,6 @@ const EditInventoryProducts: React.FC<Props> = ({
               pattern="\d*"
               step={1}
               min={1}
-              max={MAX_QTY}
               onKeyDown={e => {
                 if (['.', '-', 'e', 'E', '+'].includes(e.key))
                   e.preventDefault();

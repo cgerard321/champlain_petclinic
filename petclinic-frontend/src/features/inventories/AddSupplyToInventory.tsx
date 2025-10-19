@@ -13,6 +13,8 @@ type Props = {
   existingProductNames?: string[];
 };
 
+type ProductKeys = keyof ProductRequestModel;
+
 const AddSupplyToInventory: React.FC<Props> = ({
   open,
   onClose,
@@ -26,9 +28,9 @@ const AddSupplyToInventory: React.FC<Props> = ({
   const [product, setProduct] = useState<ProductRequestModel>({
     productName: '',
     productDescription: '',
-    productPrice: 0,
-    productQuantity: 0,
-    productSalePrice: 0,
+    productPrice: '' as unknown as number,
+    productQuantity: '' as unknown as number,
+    productSalePrice: '' as unknown as number,
   });
   const [error, setError] = useState<{ [key: string]: string }>({});
   const [successMessage, setSuccessMessage] = useState<string>('');
@@ -42,6 +44,17 @@ const AddSupplyToInventory: React.FC<Props> = ({
       err.productName = 'Product name is required';
     if (!product.productDescription?.trim())
       err.productDescription = 'Product description is required';
+
+    if (!(Number(product.productPrice) > 0))
+      err.productPrice = 'Product price must be greater than 0';
+
+    if (!(Number(product.productQuantity) > 0))
+      err.productQuantity = 'Product quantity must be greater than 0';
+    else if (Number(product.productQuantity) > 100)
+      err.productQuantity = 'Product quantity cannot exceed 100';
+
+    if (!(Number(product.productSalePrice) > 0))
+      err.productSalePrice = 'Product sale price must be greater than 0';
 
     setError(err);
     return Object.keys(err).length === 0;
@@ -89,7 +102,7 @@ const AddSupplyToInventory: React.FC<Props> = ({
         ...prev,
         productName: 'This product name is already in use.',
       }));
-      setErrorMessage(''); // no global error banner needed
+      setErrorMessage('');
       return;
     }
 
@@ -132,17 +145,65 @@ const AddSupplyToInventory: React.FC<Props> = ({
 
   // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    const { name, value, type } = e.target;
+    const { name, type, value } = e.target as HTMLInputElement & {
+      name: ProductKeys;
+    };
+
+    if (name === 'productQuantity') {
+      const digitsOnly = value.replace(/[^\d]/g, '');
+      setProduct(prev => ({
+        ...prev,
+        productQuantity:
+          digitsOnly === '' ? ('' as unknown as number) : Number(digitsOnly),
+      }));
+
+      const qty = Number(digitsOnly);
+      setError(prev => {
+        const next = { ...prev };
+        if (!Number.isFinite(qty) || qty <= 0) {
+          next.productQuantity = 'Product quantity must be greater than 0';
+        } else {
+          next.productQuantity = '';
+        }
+        return next;
+      });
+
+      if (errorMessage) setErrorMessage('');
+      return;
+    }
 
     setProduct(prev => ({
       ...prev,
       [name]:
         type === 'number'
           ? value === ''
-            ? ('' as unknown as number)
+            ? (undefined as unknown as number)
             : Number(value)
           : value,
     }));
+    setError(prev => {
+      const next = { ...prev };
+      if (name === 'productPrice') {
+        const n = Number(value);
+        next.productPrice =
+          !Number.isFinite(n) || n <= 0
+            ? 'Product price must be greater than 0'
+            : '';
+      } else if (name === 'productSalePrice') {
+        const n = Number(value);
+        next.productSalePrice =
+          !Number.isFinite(n) || n <= 0
+            ? 'Product sale price must be greater than 0'
+            : '';
+      } else if (name === 'productName') {
+        next.productName = value.trim() ? '' : 'Product name is required';
+      } else if (name === 'productDescription') {
+        next.productDescription = value.trim()
+          ? ''
+          : 'Product description is required';
+      }
+      return next;
+    });
 
     if (error[name]) setError(prev => ({ ...prev, [name]: '' }));
     if (errorMessage) setErrorMessage('');
@@ -258,6 +319,7 @@ const AddSupplyToInventory: React.FC<Props> = ({
               aria-describedby={
                 error.productPrice ? 'err-productPrice' : undefined
               }
+              required
             />
             {error.productPrice && (
               <div id="err-productPrice" className="field-error">
