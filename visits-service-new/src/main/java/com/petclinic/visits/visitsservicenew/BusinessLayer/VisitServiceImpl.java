@@ -163,20 +163,18 @@ public class VisitServiceImpl implements VisitService {
                 .flatMap(visit ->
                         entityDtoUtil.toVisitResponseDTO(visit)
                                 .flatMap(dto -> {
-                                    String prescriptionId = visit.getPrescriptionId();
-                                    if (includePrescription && prescriptionId != null && !prescriptionId.isBlank()) {
-                                        // Fetch the prescription PDF file details from Files Service
-                                        return filesServiceClient.getFile(prescriptionId)
+                                    String prescriptionFileId = visit.getPrescriptionFileId();
+                                    if (includePrescription && prescriptionFileId != null && !prescriptionFileId.isBlank()) {
+                                        return filesServiceClient.getFile(prescriptionFileId)
                                                 .map(file -> {
                                                     dto.setPrescription(file); // expects FileResponseDTO
                                                     return dto;
                                                 })
                                                 .onErrorResume(ex -> {
-                                                    log.warn("Could not retrieve prescription file {} for visit {}: {}", prescriptionId, visitId, ex.getMessage());
+                                                    log.warn("Could not retrieve prescription file {} for visit {}: {}", prescriptionFileId, visitId, ex.getMessage());
                                                     return Mono.just(dto); // return visit without prescription file
                                                 });
                                     }
-                                    // No prescription requested or linked
                                     return Mono.just(dto);
                                 })
                 )

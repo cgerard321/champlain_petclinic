@@ -5,13 +5,19 @@ import { useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 import { getAllOwnerVisits } from './api/getAllOwnerVisits';
 import { getAllVetVisits } from './api/getAllVetVisits';
-import { downloadPrescription } from './Prescription/api/downloadPrescription';
+import axios from 'axios';
+import { downloadPrescription } from '@/features/visits/Prescription/api/downloadPrescription';
+import './CustomerVisitListTable.css';
 
 export default function CustomerVisitListTable(): JSX.Element {
   const { user } = useUser();
   const isVet = IsVet();
   const [visits, setVisits] = useState<Visit[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [showErrorDialog, setShowErrorDialog] = useState(false);
+  const [errorDialogMessage, setErrorDialogMessage] = useState<string | null>(
+    null
+  );
 
   const navigate = useNavigate();
 
@@ -47,19 +53,25 @@ export default function CustomerVisitListTable(): JSX.Element {
 
   const handleDownloadPrescription = async (
     visitId: string,
-    prescriptionId: string
+    downloadName?: string
   ): Promise<void> => {
     try {
-      const blob = await downloadPrescription(visitId, prescriptionId);
+      const blob = await downloadPrescription(visitId);
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `prescription-${visitId}.pdf`);
+      link.download = downloadName || `prescription-${visitId}.pdf`;
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
-    } catch (err) {
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        setErrorDialogMessage('No prescription is associated with this visit.');
+        setShowErrorDialog(true);
+        return;
+      }
+      console.error(e);
       setError('Failed to download prescription');
     }
   };
@@ -133,16 +145,24 @@ export default function CustomerVisitListTable(): JSX.Element {
                   {visit.status}
                 </td>
                 <td>
-                  {visit.prescriptionId && (
+                  {['CONFIRMED', 'UPCOMING', 'COMPLETED'].includes(
+                    visit.status
+                  ) && (
                     <button
+                      type="button"
                       className="btn btn-primary btn-sm"
-                      onClick={() =>
-                        handleDownloadPrescription(
-                          visit.visitId,
-                          visit.prescriptionId!
-                        )
-                      }
-                      title="Download Prescription"
+                      onClick={async ev => {
+                        ev.preventDefault();
+                        ev.stopPropagation();
+
+                        try {
+                          await handleDownloadPrescription(
+                            visit.visitId,
+                            visit.prescriptionFile?.fileName ||
+                              `prescription-${visit.visitId}.pdf`
+                          );
+                        } catch {}
+                      }}
                     >
                       📄 Download Prescription
                     </button>
@@ -152,6 +172,44 @@ export default function CustomerVisitListTable(): JSX.Element {
             ))}
           </tbody>
         </table>
+      )}
+
+      {showErrorDialog && (
+        <div
+          className="cvlt-modal-overlay"
+          onClick={() => {
+            setShowErrorDialog(false);
+            navigate(AppRoutePaths.CustomerVisits);
+          }}
+        >
+          <div
+            className="cvlt-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cvlt-modal-title"
+            onClick={e => e.stopPropagation()}
+          >
+            <h3 id="cvlt-modal-title" className="cvlt-modal-title">
+              Download error
+            </h3>
+            <p className="cvlt-modal-body">
+              {errorDialogMessage ??
+                'An error occurred while downloading the prescription.'}
+            </p>
+            <div className="cvlt-modal-actions">
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => {
+                  setShowErrorDialog(false);
+                  navigate(AppRoutePaths.CustomerVisits);
+                }}
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

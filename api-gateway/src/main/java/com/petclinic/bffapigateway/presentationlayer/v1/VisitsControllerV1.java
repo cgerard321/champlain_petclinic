@@ -284,17 +284,13 @@ public class VisitsControllerV1 {
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET, Roles.OWNER})
-    @GetMapping(value = "/{visitId}/prescriptions/{prescriptionId}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    @GetMapping(value = "/{visitId}/prescriptions/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
     public Mono<ResponseEntity<byte[]>> downloadPrescriptionPdf(
-            @PathVariable String visitId,
-            @PathVariable String prescriptionId) {
+            @PathVariable String visitId) {
 
-        return visitsServiceClient.downloadPrescriptionPdf(visitId, prescriptionId)
+        return visitsServiceClient.downloadPrescriptionPdf(visitId)
                 .map(pdfBytes -> {
-                    HttpHeaders headers = new HttpHeaders();
-                    headers.setContentType(MediaType.APPLICATION_PDF);
-                    headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=prescription-" + prescriptionId + ".pdf");
-                    return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+                    return new ResponseEntity<>(pdfBytes, HttpStatus.OK);
                 })
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }

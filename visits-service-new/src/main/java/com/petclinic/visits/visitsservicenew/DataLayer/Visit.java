@@ -40,7 +40,6 @@ public class Visit {
 
     private Boolean isEmergency;
 
-    private String prescriptionId;
     private String prescriptionFileId;
 
 }

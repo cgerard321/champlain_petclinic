@@ -402,11 +402,11 @@ public class VisitsServiceClient {
                 .bodyToMono(VetResponseDTO.class);
     }
 
-    public Mono<byte[]> downloadPrescriptionPdf(String visitId, String prescriptionId) {
+    public Mono<byte[]> downloadPrescriptionPdf(String visitId) {
         String url = UriComponentsBuilder
                 .fromHttpUrl(visitServiceUrl)
-                .path("/{visitId}/prescriptions/{prescriptionId}/pdf")
-                .buildAndExpand(visitId, prescriptionId)
+                .path("/{visitId}/prescriptions/pdf")
+                .buildAndExpand(visitId)
                 .toUriString();
 
         return webClient.get()

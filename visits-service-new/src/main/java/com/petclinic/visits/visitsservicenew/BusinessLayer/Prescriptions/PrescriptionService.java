@@ -6,5 +6,5 @@ import reactor.core.publisher.Mono;
 
 public interface PrescriptionService {
     Mono<PrescriptionResponseDTO> createPrescription(String visitId, PrescriptionResponseDTO request);
-    Mono<byte[]> getPrescriptionPdf(String visitId, String prescriptionId);
+    Mono<byte[]> getPrescriptionPdf(String visitId);
 }

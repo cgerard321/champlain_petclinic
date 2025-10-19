@@ -1,3 +1,5 @@
+import { FileDetails } from '@/shared/models/FileDetails';
+
 export interface Visit {
   visitId: string;
   visitDate: string;
@@ -11,5 +13,5 @@ export interface Visit {
   status: string;
   visitEndDate: string;
   isEmergency: boolean;
-  prescriptionId?: string;
+  prescriptionFile?: FileDetails;
 }

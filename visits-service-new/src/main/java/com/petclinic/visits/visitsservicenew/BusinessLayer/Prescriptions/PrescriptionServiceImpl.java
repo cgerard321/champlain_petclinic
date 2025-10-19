@@ -60,7 +60,6 @@ public class PrescriptionServiceImpl implements PrescriptionService {
                 .flatMap(visit ->
                         filesServiceClient.addFile(fileRequest)
                                 .flatMap(fileDetails -> {
-                                    visit.setPrescriptionId(finalPrescriptionId);
                                     visit.setPrescriptionFileId(fileDetails.getFileId());
                                     return visitRepository.save(visit);
                                 })
@@ -70,7 +69,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
 
 
     @Override
-    public Mono<byte[]> getPrescriptionPdf(String visitId, String prescriptionId) {
+    public Mono<byte[]> getPrescriptionPdf(String visitId) {
         return visitRepository.findByVisitId(visitId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Visit not found: " + visitId)))
                 .flatMap(visit -> {
