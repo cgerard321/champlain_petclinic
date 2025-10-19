@@ -9,6 +9,7 @@ import axios from 'axios';
 import { downloadPrescription } from '@/features/visits/Prescription/api/downloadPrescription';
 import './CustomerVisitListTable.css';
 import BasicModal from '@/shared/components/BasicModal';
+import '@/shared/components/BasicModal.css'; // use BasicModal CSS
 
 export default function CustomerVisitListTable(): JSX.Element {
   const { user } = useUser();
@@ -178,7 +179,6 @@ export default function CustomerVisitListTable(): JSX.Element {
       {showErrorDialog && (
         <>
           {(() => {
-            // Auto-open the BasicModal immediately after render
             setTimeout(() => {
               document.getElementById('error-modal-trigger')?.click();
             }, 0);
@@ -195,7 +195,7 @@ export default function CustomerVisitListTable(): JSX.Element {
               <button id="error-modal-trigger" style={{ display: 'none' }} />
             }
           >
-            <p className="cvlt-modal-body">
+            <p className="basic-modal-body">
               {errorDialogMessage ??
                 'An error occurred while downloading the prescription.'}
             </p>
