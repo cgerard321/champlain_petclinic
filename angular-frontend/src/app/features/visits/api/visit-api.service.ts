@@ -3,18 +3,17 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Visit, VisitRequest, VisitStatus, Owner, Pet, Vet } from '../models/visit.model';
-import { environment } from '../../../../environments/environment.dev';
+import { ApiConfigService } from '../../../shared/api/api-config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class VisitApiService {
-  private readonly BASE_URL_V1 = `${environment.apiUrl}/visits`;
-  private readonly BASE_URL_V2 = `${environment.apiUrlV2}/visits`;
   private http = inject(HttpClient);
+  private apiConfig = inject(ApiConfigService);
 
   private getBaseUrl(useV2: boolean = false): string {
-    return useV2 ? this.BASE_URL_V2 : this.BASE_URL_V1;
+    return this.apiConfig.getFullUrl('/visits', useV2);
   }
 
   getAllVisits(useV2: boolean = false): Observable<Visit[]> {
@@ -97,15 +96,13 @@ export class VisitApiService {
   }
 
   createVisit(visit: VisitRequest, ownerId: string, petId: string, useV2: boolean = false): Observable<Visit> {
-    const baseUrl = useV2 ? environment.apiUrlV2 : environment.apiUrl;
-    return this.http.post<Visit>(`${baseUrl}/visit/owners/${ownerId}/pets/${petId}/visits`, visit, {
+    return this.http.post<Visit>(this.apiConfig.getFullUrl(`/visit/owners/${ownerId}/pets/${petId}/visits`, useV2), visit, {
       withCredentials: true
     });
   }
 
   updateVisit(visitId: string, visit: VisitRequest, petId: string, useV2: boolean = false): Observable<Visit> {
-    const baseUrl = useV2 ? environment.apiUrlV2 : environment.apiUrl;
-    return this.http.put<Visit>(`${baseUrl}/owners/*/pets/${petId}/visits/${visitId}`, visit, {
+    return this.http.put<Visit>(this.apiConfig.getFullUrl(`/owners/*/pets/${petId}/visits/${visitId}`, useV2), visit, {
       withCredentials: true
     });
   }
@@ -137,7 +134,7 @@ export class VisitApiService {
   }
 
   getOwners(): Observable<Owner[]> {
-    return this.http.get(`${environment.apiUrlV2}/owners`, {
+    return this.http.get(this.apiConfig.getFullUrl('/owners', true), {
       responseType: 'text',
       withCredentials: true
     }).pipe(
@@ -159,7 +156,7 @@ export class VisitApiService {
   }
 
   getPetsByOwner(ownerId: string): Observable<Pet[]> {
-    return this.http.get(`${environment.apiUrl}/owners/${ownerId}/pets`, {
+    return this.http.get(this.apiConfig.getFullUrl(`/owners/${ownerId}/pets`), {
       responseType: 'text',
       withCredentials: true
     }).pipe(
@@ -181,7 +178,7 @@ export class VisitApiService {
   }
 
   getVets(): Observable<Vet[]> {
-    return this.http.get(`${environment.apiUrlV2}/vets`, {
+    return this.http.get(this.apiConfig.getFullUrl('/vets', true), {
       responseType: 'text',
       withCredentials: true
     }).pipe(

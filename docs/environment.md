@@ -25,11 +25,18 @@ VITE_BACKEND_URL="https://your-production-domain.com/api/v2/gateway/"
 ```
 
 ### Angular Frontend (angular-frontend)
+```bash
+# Create files in src/environments/ folder: .env.dev and .env.prod
+# For development (.env.dev)
+VITE_ENV=dev
+VITE_BACKEND_URL="/api/gateway"
+VITE_BACKEND_URL_V2="/api/v2/gateway"
 
-No environment variables required
+# For production (.env.prod)
+VITE_ENV=prod
+VITE_BACKEND_URL="https://petclinic-backend.benmusicgeek.synology.me/api/gateway"
+VITE_BACKEND_URL_V2="https://petclinic-backend.benmusicgeek.synology.me/api/v2/gateway"
+```
 
-The Angular frontend uses relative URLs for API calls (`/api/gateway/...`) which are handled by:
-- Development: Vite proxy (configured in `vite.config.js`) proxies `/api` to `http://localhost:8080`
-- Production: Nginx proxy (configured in `nginx.conf`) proxies `/api` to `http://api-gateway:8080`
 
 

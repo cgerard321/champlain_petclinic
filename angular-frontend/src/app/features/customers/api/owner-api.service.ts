@@ -3,18 +3,17 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Owner, OwnerRequest } from '../models/owner.model';
-import { environment } from '../../../../environments/environment.dev';
+import { ApiConfigService } from '../../../shared/api/api-config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class OwnerApiService {
-  private readonly BASE_URL_V1 = `${environment.apiUrl}/owners`; // v1 for individual operations
-  private readonly BASE_URL_V2 = `${environment.apiUrlV2}/owners`; // v2 for paginated lists
   private http = inject(HttpClient);
+  private apiConfig = inject(ApiConfigService);
 
   getOwnersPaginated(_page: number = 0, _size: number = 5): Observable<Owner[]> {
-    return this.http.get(`${this.BASE_URL_V2}`, {
+    return this.http.get(this.apiConfig.getFullUrl('/owners', true), {
       responseType: 'text',
       withCredentials: true
     }).pipe(
@@ -37,7 +36,7 @@ export class OwnerApiService {
 
  
   getOwnersCount(): Observable<number> {
-    return this.http.get<number>(`${this.BASE_URL_V1}/owners-count`, {
+    return this.http.get<number>(`${this.apiConfig.getFullUrl('/owners', false)}/owners-count`, {
       withCredentials: true
     });
   }
@@ -60,7 +59,7 @@ export class OwnerApiService {
       }
     });
 
-    return this.http.get<Owner[]>(`${this.BASE_URL_V1}/owners-pagination`, { 
+    return this.http.get<Owner[]>(`${this.apiConfig.getFullUrl('/owners', false)}/owners-pagination`, { 
       params,
       withCredentials: true
     });
@@ -82,7 +81,7 @@ export class OwnerApiService {
       }
     });
 
-    return this.http.get<number>(`${this.BASE_URL_V1}/owners-filtered-count`, { 
+    return this.http.get<number>(`${this.apiConfig.getFullUrl('/owners', false)}/owners-filtered-count`, { 
       params,
       withCredentials: true
     });
@@ -95,33 +94,33 @@ export class OwnerApiService {
 
  
   getOwnerById(ownerId: string): Observable<Owner> {
-    return this.http.get<Owner>(`${this.BASE_URL_V1}/${ownerId}`, {
+    return this.http.get<Owner>(`${this.apiConfig.getFullUrl('/owners', false)}/${ownerId}`, {
       withCredentials: true
     });
   }
 
   
   createOwner(owner: OwnerRequest): Observable<Owner> {
-    return this.http.post<Owner>(`${this.BASE_URL_V2}`, owner, {
+    return this.http.post<Owner>(`${this.apiConfig.getFullUrl('/owners', true)}`, owner, {
       withCredentials: true
     });
   }
 
   updateOwner(ownerId: string, owner: OwnerRequest): Observable<Owner> {
-    return this.http.put<Owner>(`${this.BASE_URL_V2}/${ownerId}`, owner, {
+    return this.http.put<Owner>(`${this.apiConfig.getFullUrl('/owners', true)}/${ownerId}`, owner, {
       withCredentials: true
     });
   }
 
   deleteOwner(ownerId: string): Observable<void> {
-    return this.http.delete<void>(`${this.BASE_URL_V2}/${ownerId}`, {
+    return this.http.delete<void>(`${this.apiConfig.getFullUrl('/owners', true)}/${ownerId}`, {
       withCredentials: true
     });
   }
 
  
   getOwnerPets(ownerId: string): Observable<string> {
-    return this.http.get(`${this.BASE_URL_V1}/${ownerId}/pets`, { 
+    return this.http.get(`${this.apiConfig.getFullUrl('/owners', false)}/${ownerId}/pets`, { 
       responseType: 'text',
       withCredentials: true
     });

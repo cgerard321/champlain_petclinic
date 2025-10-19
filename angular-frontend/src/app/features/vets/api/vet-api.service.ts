@@ -7,18 +7,17 @@ import { Education, EducationRequest } from '../models/education.model';
 import { Rating, RatingRequest } from '../models/rating.model';
 import { Badge } from '../models/badge.model';
 import { Photo, PhotoRequest } from '../models/photo.model';
-import { environment } from '../../../../environments/environment.dev';
+import { ApiConfigService } from '../../../shared/api/api-config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class VetApiService {
-  private readonly BASE_URL_V1 = `${environment.apiUrl}/vets`;
-  private readonly BASE_URL_V2 = `${environment.apiUrlV2}/vets`;
   private http = inject(HttpClient);
+  private apiConfig = inject(ApiConfigService);
 
   private getBaseUrl(useV2: boolean = false): string {
-    return useV2 ? this.BASE_URL_V2 : this.BASE_URL_V1;
+    return this.apiConfig.getFullUrl('/vets', useV2);
   }
 
   
@@ -224,7 +223,7 @@ export class VetApiService {
   }
 
   getVetVisits(vetId: string): Observable<any[]> {
-    return this.http.get(`${environment.apiUrl}/visits/vets/${vetId}/visits`, {
+    return this.http.get(this.apiConfig.getFullUrl(`/visits/vets/${vetId}/visits`), {
       responseType: 'text',
       withCredentials: true
     }).pipe(

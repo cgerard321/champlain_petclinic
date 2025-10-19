@@ -3,14 +3,14 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Product, ProductRequest } from '../models/product.model';
-import { environment } from '../../../../environments/environment.dev';
+import { ApiConfigService } from '../../../shared/api/api-config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductApiService {
-  private readonly BASE_URL = `${environment.apiUrl}/products`;
   private http = inject(HttpClient);
+  private apiConfig = inject(ApiConfigService);
 
   
   getAllProducts(
@@ -29,7 +29,7 @@ export class ProductApiService {
     if (deliveryType && deliveryType !== 'default') params.deliveryType = deliveryType;
     if (productType && productType !== 'default') params.productType = productType;
 
-    return this.http.get(`${this.BASE_URL}`, { 
+    return this.http.get(`${this.apiConfig.getFullUrl('/products')}`, { 
       params,
       responseType: 'text',
       withCredentials: true 
@@ -52,27 +52,27 @@ export class ProductApiService {
 
   
   getProductById(productId: string): Observable<Product> {
-    return this.http.get<Product>(`${this.BASE_URL}/${productId}`);
+    return this.http.get<Product>(`${this.apiConfig.getFullUrl('/products')}/${productId}`);
   }
 
   
   createProduct(product: ProductRequest): Observable<Product> {
-    return this.http.post<Product>(`${this.BASE_URL}`, product);
+    return this.http.post<Product>(`${this.apiConfig.getFullUrl('/products')}`, product);
   }
 
   
   updateProduct(productId: string, product: ProductRequest): Observable<Product> {
-    return this.http.put<Product>(`${this.BASE_URL}/${productId}`, product);
+    return this.http.put<Product>(`${this.apiConfig.getFullUrl('/products')}/${productId}`, product);
   }
 
   
   deleteProduct(productId: string, cascade?: boolean): Observable<void> {
     const params = cascade ? { cascadeBundles: true } : undefined;
-    return this.http.delete<void>(`${this.BASE_URL}/${productId}`, { params });
+    return this.http.delete<void>(`${this.apiConfig.getFullUrl('/products')}/${productId}`, { params });
   }
 
   searchProducts(searchTerm: string): Observable<Product[]> {
-    return this.http.get<Product[]>(`${this.BASE_URL}/search`, {
+    return this.http.get<Product[]>(`${this.apiConfig.getFullUrl('/products')}/search`, {
       params: { q: searchTerm },
       withCredentials: true
     });
@@ -83,7 +83,7 @@ export class ProductApiService {
   }
 
   getProductImage(imageId: string): Observable<any> {
-    return this.http.get(`${environment.apiUrl}/images/${imageId}`, {
+    return this.http.get(this.apiConfig.getFullUrl(`/images/${imageId}`), {
       withCredentials: true
     });
   }

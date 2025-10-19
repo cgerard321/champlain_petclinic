@@ -2,25 +2,25 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Pet, PetType, PetRequest } from '../models/pet.model';
-import { environment } from '../../../../environments/environment.dev';
+import { ApiConfigService } from '../../../shared/api/api-config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PetApiService {
-  private readonly BASE_URL = environment.apiUrl;
   private http = inject(HttpClient);
+  private apiConfig = inject(ApiConfigService);
 
   
   getPetById(petId: string): Observable<Pet> {
-    return this.http.get<Pet>(`${this.BASE_URL}/pets/${petId}`, {
+    return this.http.get<Pet>(this.apiConfig.getFullUrl(`/pets/${petId}`), {
       withCredentials: true
     });
   }
 
   
   getPetByIdFresh(petId: string): Observable<Pet> {
-    return this.http.get<Pet>(`${this.BASE_URL}/pets/${petId}?_=${new Date().getTime()}`, {
+    return this.http.get<Pet>(this.apiConfig.getFullUrl(`/pets/${petId}?_=${new Date().getTime()}`), {
       headers: { 'Cache-Control': 'no-cache' },
       withCredentials: true
     });
@@ -28,49 +28,49 @@ export class PetApiService {
 
   
   createPet(ownerId: string, pet: PetRequest): Observable<Pet> {
-    return this.http.post<Pet>(`${this.BASE_URL}/owners/${ownerId}/pets`, pet, {
+    return this.http.post<Pet>(this.apiConfig.getFullUrl(`/owners/${ownerId}/pets`), pet, {
       withCredentials: true
     });
   }
 
   
   updatePet(petId: string, pet: PetRequest): Observable<Pet> {
-    return this.http.put<Pet>(`${this.BASE_URL}/pets/${petId}`, pet, {
+    return this.http.put<Pet>(this.apiConfig.getFullUrl(`/pets/${petId}`), pet, {
       withCredentials: true
     });
   }
 
   
   deletePet(petId: string): Observable<void> {
-    return this.http.delete<void>(`${this.BASE_URL}/pets/${petId}`, {
+    return this.http.delete<void>(this.apiConfig.getFullUrl(`/pets/${petId}`), {
       withCredentials: true
     });
   }
 
   
   getAllPetTypes(): Observable<PetType[]> {
-    return this.http.get<PetType[]>(`${this.BASE_URL}/owners/petTypes`, {
+    return this.http.get<PetType[]>(this.apiConfig.getFullUrl('/owners/petTypes'), {
       withCredentials: true
     });
   }
 
   
   createPetType(petType: Omit<PetType, 'petTypeId'>): Observable<PetType> {
-    return this.http.post<PetType>(`${this.BASE_URL}/owners/petTypes`, petType, {
+    return this.http.post<PetType>(this.apiConfig.getFullUrl('/owners/petTypes'), petType, {
       withCredentials: true
     });
   }
 
   
   updatePetType(petTypeId: string, petType: Partial<PetType>): Observable<PetType> {
-    return this.http.put<PetType>(`${this.BASE_URL}/owners/petTypes/${petTypeId}`, petType, {
+    return this.http.put<PetType>(this.apiConfig.getFullUrl(`/owners/petTypes/${petTypeId}`), petType, {
       withCredentials: true
     });
   }
 
   
   deletePetType(petTypeId: string): Observable<void> {
-    return this.http.delete<void>(`${this.BASE_URL}/owners/petTypes/${petTypeId}`, {
+    return this.http.delete<void>(this.apiConfig.getFullUrl(`/owners/petTypes/${petTypeId}`), {
       withCredentials: true
     });
   }
