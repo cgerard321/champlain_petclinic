@@ -52,33 +52,75 @@
   gap: 12px;
 }
 
-/* Inner layout */
+/* Inner layout: two vertical columns so fields stack as requested */
 .billCardContent {
   display: flex;
-  gap: 18px;
-  align-items: center;
+  align-items: flex-start;
   flex: 1;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
-/* Fields */
+/* Each column stacks its fields vertically */
+.billColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+  flex: 1 1 0;
+}
+
+/* make left column a bit wider to emphasize vet/total */
+.billColumn.leftColumn {
+  flex-basis: 55%;
+  max-width: 55%;
+}
+
+.billColumn.rightColumn {
+  flex-basis: 45%;
+  max-width: 45%;
+}
+
+/* Fields: label and value on the same line */
 .billField {
-  min-width: 120px;
+  display: flex;
+  flex-direction: row; /* inline label + value */
+  align-items: center;
+  gap: 4px;
+  width: 100%;
   font-size: 14px;
 }
 
-.billField.vet { min-width: 180px; }
-.billField.date { min-width: 160px; }
-.billField.total { min-width: 160px; }
-.billField.status { min-width: 120px; }
+.billField strong {
+  display: inline-block;
+  margin-bottom: 0;
+  font-weight: 600;
+  min-width: 0;
+}
+
+.billValue {
+  font-weight: 400;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Narrower min-widths for specific fields to prevent wrap */
+.billField.vet strong { min-width: 0; }
+.billField.date strong { min-width: 0; }
+.billField.total strong { min-width: 0; }
+.billField.status strong { min-width: 0; }
 
 /* Actions */
 .billActions {
   display: flex;
   gap: 8px;
   align-items: center;
+  margin-left: 12px;
+  white-space: nowrap;
 }
 
+/* keep details button style */
 .detailsButton {
   padding: 8px 12px;
   border-radius: 6px;
@@ -191,4 +233,40 @@
     padding: 10px;
     margin: 8px 12px;
   }
+}
+
+/* Responsive tweaks: stack columns on small screens */
+@media (max-width: 640px) {
+  .billCardContent {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .billColumn.leftColumn, .billColumn.rightColumn {
+    flex-basis: auto;
+    max-width: 100%;
+  }
+
+  .billActions {
+    margin-left: 0;
+  }
+
+  /* stack columns vertically on small screens */
+  .billCardContent {
+    flex-direction: column;
+  }
+
+  .billColumn.leftColumn, .billColumn.rightColumn {
+    flex-basis: auto;
+    max-width: 50%;
+  }
+
+  /* allow label/value to wrap if necessary */
+  .billField {
+
+    font-size: 13px;
+  }
+
+  .billField strong { min-width: 0; }
+  .billValue { white-space: normal; }
 }

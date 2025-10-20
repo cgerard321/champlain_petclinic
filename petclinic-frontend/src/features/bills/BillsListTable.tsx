@@ -22,8 +22,6 @@ export default function BillsListTable({
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
   const [showPaymentForm, setShowPaymentForm] = useState<boolean>(false);
-
-  // New state for details modal
   const [detailBill, setDetailBill] = useState<Bill | null>(null);
   const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
 
@@ -74,7 +72,6 @@ export default function BillsListTable({
     }
   }, [selectedStatus, bills]);
 
-  // Function to handle downloading the PDF for a bill
   const handleDownloadPdf = async (
     customerId: string,
     billId: string
@@ -116,7 +113,6 @@ export default function BillsListTable({
   const handlePaymentSuccess = (): void => {
     setShowPaymentForm(false);
 
-    // Update bill status to PAID
     if (selectedBill) {
       setBills(prevBills => {
         const updatedBills = prevBills.map(bill =>
@@ -124,8 +120,6 @@ export default function BillsListTable({
             ? { ...bill, billStatus: 'PAID' }
             : bill
         );
-
-        // Update filtered bills to reflect the change immediately
         setFilteredBills(
           updatedBills.filter(bill => {
             if (selectedStatus === 'all') return true;
@@ -140,12 +134,8 @@ export default function BillsListTable({
     }
 
     setSelectedBill(null);
-
-    // Trigger a refresh of the current balance and bills data
-    // to ensure everything is in sync
     setTimeout(() => {
       fetchBills();
-      // Notify CurrentBalance component to refresh
       window.dispatchEvent(new CustomEvent('paymentSuccess'));
     }, 100);
   };
@@ -155,19 +145,16 @@ export default function BillsListTable({
     setSelectedBill(null);
   };
 
-  // Open details modal for a bill
   const openDetails = (bill: Bill): void => {
     setDetailBill(bill);
     setShowDetailModal(true);
   };
 
-  // Close details modal
   const closeDetails = (): void => {
     setShowDetailModal(false);
     setDetailBill(null);
   };
 
-  // helper to format displayed total due according to selected currency
   const formatTotalDue = (bill: Bill): string => {
     const amount = bill.taxedAmount ?? bill.amount ?? 0;
     if (currency === 'CAD') {
@@ -219,34 +206,44 @@ export default function BillsListTable({
                 className="billCard"
                 data-bill-id={bill.billId}
               >
+                {/* two vertical columns: left = Vet + Total, right = Appointment date + Status */}
                 <div className="billCardContent">
-                  <div className="billField vet">
-                    <strong>Vet:</strong> {bill.vetFirstName} {bill.vetLastName}
+                  <div className="billColumn leftColumn">
+                    <div className="billField vet">
+                      <strong>Vet:</strong>
+                      <span className="billValue">
+                        {bill.vetFirstName} {bill.vetLastName}
+                      </span>
+                    </div>
+
+                    <div className="billField total">
+                      <strong>Total due:</strong>
+                      <span className="billValue">{formatTotalDue(bill)}</span>
+                    </div>
                   </div>
 
-                  <div className="billField date">
-                    <strong>Appointment date:</strong> {bill.date}
-                  </div>
+                  <div className="billColumn rightColumn">
+                    <div className="billField date">
+                      <strong>Appointment date:</strong>
+                      <span className="billValue">{bill.date}</span>
+                    </div>
 
-                  <div className="billField total">
-                    <strong>Total due:</strong> {formatTotalDue(bill)}
-                  </div>
-
-                  <div className="billField status">
-                    <strong>Status:</strong>{' '}
-                    <span
-                      className={
-                        bill.billStatus === 'OVERDUE'
-                          ? 'status--overdue'
-                          : bill.billStatus === 'PAID'
-                            ? 'status--paid'
-                            : undefined
-                      }
-                    >
-                      {bill.billStatus === 'OVERDUE'
-                        ? 'Overdue'
-                        : bill.billStatus}
-                    </span>
+                    <div className="billField status">
+                      <strong>Status:</strong>
+                      <span
+                        className={
+                          bill.billStatus === 'OVERDUE'
+                            ? 'status--overdue billValue'
+                            : bill.billStatus === 'PAID'
+                              ? 'status--paid billValue'
+                              : 'billValue'
+                        }
+                      >
+                        {bill.billStatus === 'OVERDUE'
+                          ? 'Overdue'
+                          : bill.billStatus}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
