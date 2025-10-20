@@ -3,6 +3,8 @@ package com.petclinic.cartsservice.businesslayer;
 import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.CartRepository;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
+import com.petclinic.cartsservice.domainclientlayer.CustomerClient;
+import com.petclinic.cartsservice.domainclientlayer.CustomerResponseModel;
 import com.petclinic.cartsservice.domainclientlayer.ProductClient;
 import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
 import com.petclinic.cartsservice.presentationlayer.CartRequestModel;
@@ -11,6 +13,7 @@ import com.petclinic.cartsservice.utils.EntityModelUtil;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
 import com.petclinic.cartsservice.utils.exceptions.OutOfStockException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,7 +25,9 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-
+import static org.mockito.Mockito.when;
+import org.mockito.MockitoAnnotations;
+import static org.mockito.Mockito.lenient;
 
 
 
@@ -46,6 +51,21 @@ class CartServiceUnitTest {
 
     @Mock
     private ProductClient productClient;
+
+    @Mock
+    private CustomerClient customerClient;
+
+    @BeforeEach
+    void init() {
+        lenient().when(cartRepository.findAll()).thenReturn(Flux.empty());
+        lenient().when(cartRepository.findCartByCartId(anyString())).thenReturn(Mono.empty());
+        lenient().when(cartRepository.findCartByCustomerId(anyString())).thenReturn(Mono.empty());
+        lenient().when(cartRepository.save(any(Cart.class)))
+                .thenAnswer(inv -> Mono.just(inv.getArgument(0)));
+
+        lenient().when(customerClient.getCustomerById(anyString()))
+                .thenReturn(Mono.just(new CustomerResponseModel()));
+    }
 
     private final CartProduct product1 = CartProduct.builder()
             .productId("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223")
@@ -1455,7 +1475,7 @@ class CartServiceUnitTest {
     @Test
     void testGetRecentPurchases_ReturnsList() {
         CartRepository cartRepository = Mockito.mock(CartRepository.class);
-        CartServiceImpl service = new CartServiceImpl(cartRepository, null);
+        CartServiceImpl service = new CartServiceImpl(cartRepository, null, customerClient);
 
         String cartId = "cart123";
         List<CartProduct> recentPurchases = List.of(
@@ -1474,7 +1494,7 @@ class CartServiceUnitTest {
     @Test
     void testGetRecentPurchases_ReturnsEmptyListIfNull() {
         CartRepository cartRepository = Mockito.mock(CartRepository.class);
-        CartServiceImpl service = new CartServiceImpl(cartRepository, null);
+        CartServiceImpl service = new CartServiceImpl(cartRepository, null, customerClient);
 
         String cartId = "cart456";
         Cart cart = Cart.builder().cartId(cartId).recentPurchases(null).build();
@@ -1647,7 +1667,7 @@ class CartServiceUnitTest {
     void testGetRecommendationPurchases_ReturnsRecommendations() {
         CartRepository cartRepository = Mockito.mock(CartRepository.class);
         ProductClient productClient = Mockito.mock(ProductClient.class);
-        CartServiceImpl service = new CartServiceImpl(cartRepository, productClient);
+        CartServiceImpl service = new CartServiceImpl(cartRepository, productClient, customerClient);
 
         String cartId = "test-cart-id";
         List<CartProduct> recommendations = List.of(CartProduct.builder().productId("prod1").build());
@@ -1667,7 +1687,7 @@ class CartServiceUnitTest {
     void testGetRecommendationPurchases_ReturnsEmptyList() {
         CartRepository cartRepository = Mockito.mock(CartRepository.class);
         ProductClient productClient = Mockito.mock(ProductClient.class);
-        CartServiceImpl service = new CartServiceImpl(cartRepository, productClient);
+        CartServiceImpl service = new CartServiceImpl(cartRepository, productClient, customerClient);
 
         String cartId = "empty-cart-id";
         Cart cart = Mockito.mock(Cart.class);
