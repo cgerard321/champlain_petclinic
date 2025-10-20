@@ -33,7 +33,7 @@ const ProfilePage = (): JSX.Element => {
   const [selectedPetId, setSelectedPetId] = useState<string>('');
   const [petTypes, setPetTypes] = useState<PetTypeModel[]>([]);
   const navigate = useNavigate();
-
+    const [isDeletePhotoModalOpen, setIsDeletePhotoModalOpen] = useState<boolean>(false);
   useEffect(() => {
     const fetchPetTypes = async (): Promise<void> => {
       try {
@@ -232,18 +232,13 @@ const ProfilePage = (): JSX.Element => {
   };
 
     const handleDeletePhoto = async (): Promise<void> => {
-        if (!profilePicUrl) return;
-        const confirmed = window.confirm(
-            'Are you sure you want to delete your profile picture?'
-        );
-        if (!confirmed) return;
-
         try {
             await deleteOwnerPhoto(user.userId);
             if (profilePicUrl) {
                 URL.revokeObjectURL(profilePicUrl);
             }
             setProfilePicUrl('');
+            setIsDeletePhotoModalOpen(false);
         } catch (error) {
             console.error('Error deleting profile photo:', error);
             alert('Failed to delete profile photo. Please try again.');
@@ -389,55 +384,36 @@ const ProfilePage = (): JSX.Element => {
             className="customers-profile-header"
             style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}
           >
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '8px',
-              }}
-            >
-              <img
-                src={profilePicUrl || defaultProfile}
-                alt="Profile Picture"
-                className="profile-picture"
-                style={{
-                  width: '96px',
-                  height: '96px',
-                  borderRadius: '50%',
-                  objectFit: 'cover',
-                }}
-              />
-              <button
-                onClick={handleOpenUploadPhotoModal}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#007bff',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  marginTop: '8px',
-                }}
+              <div
+                  style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '8px',
+                  }}
               >
-                Change Photo
-              </button>
-              <button
-                        onClick={handleDeletePhoto}
-                        style={{
-                            padding: '8px 16px',
-                            backgroundColor: '#97131e',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '14px',
-                        }}
-                    >
-                        Delete Photo
-              </button>
-            </div>
+                  <img
+                      src={profilePicUrl || defaultProfile}
+                      alt="Profile Picture"
+                      className="profile-picture"
+                  />
+                  <div className="photo-buttons-container">
+                      <button
+                          onClick={handleOpenUploadPhotoModal}
+                          className="photo-button change"
+                      >
+                          Change Photo
+                      </button>
+                      {profilePicUrl && (
+                          <button
+                              onClick={() => setIsDeletePhotoModalOpen(true)}
+                              className="photo-button delete"
+                          >
+                              Delete Photo
+                          </button>
+                      )}
+                  </div>
+              </div>
             <h1>
               {owner.firstName} {owner.lastName}&apos;s Profile
             </h1>
@@ -550,6 +526,39 @@ const ProfilePage = (): JSX.Element => {
         ownerId={user.userId}
         onPhotoUploaded={handlePhotoUploaded}
       />
+
+        {isDeletePhotoModalOpen && (
+            <div className="modal-overlay" onClick={() => setIsDeletePhotoModalOpen(false)}>
+                <div className="modal-content" onClick={e => e.stopPropagation()}>
+                    <div className="modal-header">
+                        <h2>Delete Profile Photo</h2>
+                        <button
+                            className="close-button"
+                            onClick={() => setIsDeletePhotoModalOpen(false)}
+                        >
+                            ×
+                        </button>
+                    </div>
+                    <div className="modal-body">
+                        <p>Are you sure you want to delete your profile photo?</p>
+                        <div className="modal-footer">
+                            <button
+                                onClick={() => setIsDeletePhotoModalOpen(false)}
+                                className="cancel-button"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleDeletePhoto}
+                                className="delete-button"
+                            >
+                                Delete Photo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )}
     </div>
   );
 };
