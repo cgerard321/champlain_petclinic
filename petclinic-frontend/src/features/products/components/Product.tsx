@@ -108,9 +108,9 @@ export default function Product({
       }`}
       key={currentProduct.productId}
     >
-      <ImageContainer imageId={currentProduct.imageId} />
-
       <h2 onClick={handleProductTitleClick} className="product-title">
+        <ImageContainer imageId={currentProduct.imageId} />
+
         {currentProduct.productName}
       </h2>
 
