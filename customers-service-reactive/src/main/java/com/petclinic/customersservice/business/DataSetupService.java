@@ -1,8 +1,6 @@
 package com.petclinic.customersservice.business;
 
-import com.petclinic.customersservice.data.Owner;
-import com.petclinic.customersservice.data.Pet;
-import com.petclinic.customersservice.data.PetType;
+import com.petclinic.customersservice.data.*;
 import com.petclinic.customersservice.presentationlayer.PetResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -16,30 +14,28 @@ import java.util.List;
 
 @Service
 public class DataSetupService implements CommandLineRunner {
-    @Autowired
-    private PetTypeService petTypeService;
+    private final OwnerRepo ownerRepository;
+    private final PetTypeRepo petTypeRepository;
+    private final PetRepo petRepository;
 
-    @Autowired
-    private PetService petService;
-
-    @Autowired
-    private OwnerService ownerService;
+    public DataSetupService(OwnerRepo ownerRepository, PetTypeRepo petTypeRepository, PetRepo petRepository) {
+        this.ownerRepository = ownerRepository;
+        this.petTypeRepository = petTypeRepository;
+        this.petRepository = petRepository;
+    }
 
     @Override
     public void run(String... args) throws Exception {
 
         // If the db is not empty, then skip the data setup
         try {
-
-            if (Boolean.TRUE.equals(petTypeService.getAllPetTypes().hasElements().block())) return;
-            if (Boolean.TRUE.equals(petService.getAllPets().hasElements().block())) return;
-            if (Boolean.TRUE.equals(ownerService.getAllOwners().hasElements().block())) return;
-
+            if (Boolean.TRUE.equals(ownerRepository.findAll().hasElements().block())) return;
+            if (Boolean.TRUE.equals(petRepository.findAll().hasElements().block())) return;
+            if (Boolean.TRUE.equals(petTypeRepository.findAll().hasElements().block())) return;
         } catch (Exception e) {
             System.out.println("Error checking if data exists: " + e.getMessage());
             return;
         }
-
 
         PetType pt1 = new PetType("1", "4283c9b8-4ffd-4866-a5ed-287117c60a40", "Cat", "Mammal");
         PetType pt2 = new PetType("2", "1233c9b8-4ffd-4866-4h36-287117c60a35", "Dog", "Mammal");
@@ -50,10 +46,9 @@ public class DataSetupService implements CommandLineRunner {
         PetType pt7 = new PetType("7", "9993c9b8-4ffd-4866-a5ed-287117c60a99", "Others", "Various");
 
         Flux.just(pt1, pt2, pt3, pt4, pt5, pt6, pt7)
-                .flatMap(p -> petTypeService.insertPetType(Mono.just(p))
-                        .log(p.toString()))
+                .flatMap(petTypeRepository::insert)
+                .log()
                 .subscribe();
-
 
         Pet p1 = new Pet("c3eecf3a-d732-46d6-9e51-ab03314f3c4d", "0e4d8481-b611-4e52-baed-af16caa8bf8a", "f470653d-05c5-4c45-b7a0-7d70f003d2ac", "Leo", new SimpleDateFormat("yyyyMMdd").parse("2010-05-20"), "1", "1", "false", "3.7");
         Pet p2 = new Pet("180143e7-547d-46c2-82fd-7c84547e126c", "ecb109cd-57ea-4b85-b51e-99751fd1c349", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", "Basil", new SimpleDateFormat("yyyyMMdd").parse("2002-08-06"), "6", "1", "true", "0.20");
@@ -71,79 +66,35 @@ public class DataSetupService implements CommandLineRunner {
 
 
         Flux.just(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13)
-                .flatMap(p -> petService.insertPet(Mono.just(p))
-                        .log(p.toString()))
+                .flatMap(petRepository::insert)
+                .log()
                 .subscribe();
-
-
-        Flux<PetResponseDTO> petResponseFlux = petService.getPetsByOwnerId("f470653d-05c5-4c45-b7a0-7d70f003d2ac");
-        Mono<List<PetResponseDTO>> petResponseListMono = petResponseFlux.collectList();
-        List<PetResponseDTO> petResponseList = petResponseListMono.block();
-
-        Flux<PetResponseDTO> petResponseFlux2 = petService.getPetsByOwnerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a");
-        Mono<List<PetResponseDTO>> petResponseListMono2 = petResponseFlux2.collectList();
-        List<PetResponseDTO> petResponseList2 = petResponseListMono2.block();
-
-        Flux<PetResponseDTO> petResponseFlux3 = petService.getPetsByOwnerId("3f59dca2-903e-495c-90c3-7f4d01f3a2aa");
-        Mono<List<PetResponseDTO>> petResponseListMono3 = petResponseFlux3.collectList();
-        List<PetResponseDTO> petResponseList3 = petResponseListMono3.block();
-
-        Flux<PetResponseDTO> petResponseFlux4 = petService.getPetsByOwnerId("a6e0e5b0-5f60-45f0-8ac7-becd8b330486");
-        Mono<List<PetResponseDTO>> petResponseListMono4 = petResponseFlux4.collectList();
-        List<PetResponseDTO> petResponseList4 = petResponseListMono4.block();
-
-        Flux<PetResponseDTO> petResponseFlux5 = petService.getPetsByOwnerId("c6a0fb9d-fc6f-4c21-95fc-4f5e7311d0e2");
-        Mono<List<PetResponseDTO>> petResponseListMono5 = petResponseFlux5.collectList();
-        List<PetResponseDTO> petResponseList5 = petResponseListMono5.block();
-
-        Flux<PetResponseDTO> petResponseFlux6 = petService.getPetsByOwnerId("b3d09eab-4085-4b2d-a121-78a0a2f9e501");
-        Mono<List<PetResponseDTO>> petResponseListMono6 = petResponseFlux6.collectList();
-        List<PetResponseDTO> petResponseList6 = petResponseListMono6.block();
-
-        Flux<PetResponseDTO> petResponseFlux7 = petService.getPetsByOwnerId("5fe81e29-1f1d-4f9d-b249-8d3e0cc0b7dd");
-        Mono<List<PetResponseDTO>> petResponseListMono7 = petResponseFlux7.collectList();
-        List<PetResponseDTO> petResponseList7 = petResponseListMono7.block();
-
-        Flux<PetResponseDTO> petResponseFlux8 = petService.getPetsByOwnerId("48f9945a-4ee0-4b0b-9b44-3da829a0f0f7");
-        Mono<List<PetResponseDTO>> petResponseListMono8 = petResponseFlux8.collectList();
-        List<PetResponseDTO> petResponseList8 = petResponseListMono8.block();
-
-        Flux<PetResponseDTO> petResponseFlux9 = petService.getPetsByOwnerId("9f6accd1-e943-4322-932e-199d93824317");
-        Mono<List<PetResponseDTO>> petResponseListMono9 = petResponseFlux9.collectList();
-        List<PetResponseDTO> petResponseList9 = petResponseListMono9.block();
-
-        Flux<PetResponseDTO> petResponseFlux10 = petService.getPetsByOwnerId("7c0d42c2-0c2d-41ce-bd9c-6ca67478956f");
-        Mono<List<PetResponseDTO>> petResponseListMono10 = petResponseFlux10.collectList();
-        List<PetResponseDTO> petResponseList10 = petResponseListMono10.block();
 
 
         Owner o1 = new Owner("1", "f470653d-05c5-4c45-b7a0-7d70f003d2ac", "George", "Franklin",
-                "110 W. Liberty St.", "Madison", "Ontario", "6085551023", petResponseList, "3e5a214b-009d-4a25-9313-344676e6157d");
+                "110 W. Liberty St.", "Madison", "Ontario", "6085551023", "3e5a214b-009d-4a25-9313-344676e6157d");
         Owner o2 = new Owner("2", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", "Betty", "Davis",
-                "638 Cardinal Ave.", "Sun Prairie", "Quebec", "6085551749", petResponseList2, null);
+                "638 Cardinal Ave.", "Sun Prairie", "Quebec", "6085551749", null);
         Owner o3 = new Owner("3", "3f59dca2-903e-495c-90c3-7f4d01f3a2aa", "Eduardo", "Rodriguez",
-                "2693 Commerce St.", "McFarland", "Ontario", "6085558763", petResponseList3, null);
+                "2693 Commerce St.", "McFarland", "Ontario", "6085558763", null);
         Owner o4 = new Owner("4", "a6e0e5b0-5f60-45f0-8ac7-becd8b330486", "Harold", "Davis",
-                "563 Friendly St.", "Windsor", "Ontario", "6085553198", petResponseList4, null);
+                "563 Friendly St.", "Windsor", "Ontario", "6085553198", null);
         Owner o5 = new Owner("5", "c6a0fb9d-fc6f-4c21-95fc-4f5e7311d0e2", "Peter", "McTavish",
-                "2387 S. Fair Way", "Madison", "Quebec", "6085552765", petResponseList5, null);
+                "2387 S. Fair Way", "Madison", "Quebec", "6085552765", null);
         Owner o6 = new Owner("6", "b3d09eab-4085-4b2d-a121-78a0a2f9e501", "Jean", "Coleman",
-                "105 N. Lake St.", "Monona", "Quebec", "6085552654", petResponseList6, null);
+                "105 N. Lake St.", "Monona", "Quebec", "6085552654", null);
         Owner o7 = new Owner("7", "5fe81e29-1f1d-4f9d-b249-8d3e0cc0b7dd", "Jeff", "Black",
-                "1450 Oak Blvd.", "Monona", "Quebec", "6085555387", petResponseList7, null);
+                "1450 Oak Blvd.", "Monona", "Quebec", "6085555387", null);
         Owner o8 = new Owner("8", "48f9945a-4ee0-4b0b-9b44-3da829a0f0f7", "Maria", "Escobito",
-                "345 Maple St.", "Madison", "Quebec", "6085557683", petResponseList8, null);
+                "345 Maple St.", "Madison", "Quebec", "6085557683", null);
         Owner o9 = new Owner("9", "9f6accd1-e943-4322-932e-199d93824317", "David", "Schroeder",
-                "2749 Blackhawk Trail", "Madison", "Quebec", "6085559435", petResponseList9, null);
+                "2749 Blackhawk Trail", "Madison", "Quebec", "6085559435", null);
         Owner o10 = new Owner("10", "7c0d42c2-0c2d-41ce-bd9c-6ca67478956f", "Carlos", "Esteban",
-                "2335 Independence La.", "Waunakee", "Ontario", "6085555487", petResponseList10, null);
+                "2335 Independence La.", "Waunakee", "Ontario", "6085555487", null);
 
         Flux.just(o1, o2, o3, o4, o5, o6, o7, o8, o9, o10)
-                .flatMap(p -> ownerService.insertOwner(Mono.just(p))
-                        .log(p.toString()))
+                .flatMap(ownerRepository::insert)
+                .log()
                 .subscribe();
-
-
     }
 }
-

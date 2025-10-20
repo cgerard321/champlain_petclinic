@@ -33,10 +33,9 @@ public class PetTypeControllerV1 {
     }
 
     @GetMapping(value = "", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<PetType> getPetTypes(){
+    public Flux<PetTypeResponseDTO> getPetTypes(){
         return customersServiceClient.getPetTypes();
     }
-
 
     @SecuredEndpoint(allowedRoles = {Roles.ALL})
     @GetMapping(value = "/{petTypeId}")
