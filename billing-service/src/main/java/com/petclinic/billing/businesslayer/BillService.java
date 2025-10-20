@@ -2,6 +2,7 @@ package com.petclinic.billing.businesslayer;
 
 import java.math.BigDecimal;
 import com.petclinic.billing.datalayer.*;
+import com.petclinic.billing.domainclientlayer.Mailing.Mail;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -44,7 +45,7 @@ public interface BillService {
 
     Flux<BillResponseDTO> getAllBillsByVisitType(String visitType);
 
-    Mono<BillResponseDTO> createBill(@RequestBody Mono<BillRequestDTO> model);
+    Mono<BillResponseDTO> createBill(@RequestBody Mono<BillRequestDTO> model, boolean sendEmail, String JWTToken);
 
     Mono<Void> deleteBill(@RequestParam(value = "billId", required = true) String billId);
 

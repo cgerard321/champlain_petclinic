@@ -144,7 +144,7 @@ public class PdfGenerator {
         return byteArrayOutputStream.toByteArray();
     }
 
-    private static String formatCurrency(BigDecimal value, String currency) {
+    public static String formatCurrency(BigDecimal value, String currency) {
         Locale locale = "USD".equalsIgnoreCase(currency) ? Locale.US : Locale.CANADA;
         return NumberFormat.getCurrencyInstance(locale).format(value);
     }

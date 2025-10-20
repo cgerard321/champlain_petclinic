@@ -25,13 +25,15 @@ public class BillController {
 
     // Create Bill //
     @PostMapping("/bills")
-    public Mono<ResponseEntity<BillResponseDTO>> createBill(@RequestBody Mono<BillRequestDTO> billDTO) {
+    public Mono<ResponseEntity<BillResponseDTO>> createBill(@RequestBody Mono<BillRequestDTO> billDTO,
+                                                            @RequestParam(required = false) boolean sendEmail,
+                                                            @CookieValue("Bearer") String jwtToken) {
         return billDTO
                 .flatMap(dto -> {
                     if (dto.getBillStatus() == null) {
                         return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bill status is required"));
                     }
-                    return billService.createBill(Mono.just(dto));
+                    return billService.createBill(Mono.just(dto), sendEmail, jwtToken);
                 })
                 .map(bill -> ResponseEntity.status(HttpStatus.CREATED).body(bill));
     }

@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -158,7 +159,7 @@ public class BillServiceImpl implements BillService{
 
 
     @Override
-    public Mono<BillResponseDTO> createBill(Mono<BillRequestDTO> billRequestDTO) {
+    public Mono<BillResponseDTO> createBill(Mono<BillRequestDTO> billRequestDTO, boolean sendEmail, String jwtToken) {
         return billRequestDTO
                 .flatMap(dto -> {
                     // Validate required fields
@@ -175,7 +176,6 @@ public class BillServiceImpl implements BillService{
                     if (dto.getCustomerId() == null || dto.getCustomerId().isEmpty()) {
                         return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer ID is required"));
                     }
-
                     // Fetch Vet and Owner details
                     Mono<VetResponseDTO> vetMono = vetClient.getVetByVetId(dto.getVetId());
                     Mono<OwnerResponseDTO> ownerMono = ownerClient.getOwnerByOwnerId(dto.getCustomerId())
@@ -200,6 +200,22 @@ public class BillServiceImpl implements BillService{
 
                     // Save the bill
                     return billRepository.insert(bill);
+                })
+                .flatMap(billResponse -> {
+                    if (sendEmail) {
+                        // Fetch User Details for email
+                        return authClient.getUserById(billResponse.getCustomerId(), jwtToken)
+                                .switchIfEmpty(Mono.error(new ResponseStatusException(
+                                        HttpStatus.BAD_REQUEST, "Customer ID does not exist"
+                                )))
+                                .flatMap(userDetails -> {
+                                    Mail mail = generateReceiptEmail(userDetails, EntityDtoUtil.toBillResponseDto(billResponse), "USD");
+                                    mailService.sendMail(mail);
+                                    return Mono.just(billResponse);
+                                });
+                    } else {
+                        return Mono.just(billResponse);
+                    }
                 })
                 .map(EntityDtoUtil::toBillResponseDto);
     }
@@ -344,6 +360,44 @@ public class BillServiceImpl implements BillService{
                 "Your bill has been succesfully paid",
                 "Thank you for choosing Pet Clinic.", user.getUsername(), "ChamplainPetClinic@gmail.com");
     }
+
+    private Mail generateReceiptEmail(UserDetails user, BillResponseDTO bill, String currency) {
+        String formattedAmount = PdfGenerator.formatCurrency(bill.getAmount(), currency);
+        String formattedInterest = PdfGenerator.formatCurrency(bill.getInterest(), currency);
+        String formattedTotal = PdfGenerator.formatCurrency(bill.getAmount().add(bill.getInterest()), currency);
+
+        return new Mail(
+                user.getEmail(),
+                "Pet Clinic - Payment Receipt",
+                "default",
+                "Pet Clinic payment receipt",
+                "Pet Clinic Payment Receipt",
+                String.format(
+                        "Dear %s,\n\n" +
+                                "Please find below the details of your payment receipt:\n\n" +
+                                "--------------------------------------------\n" +
+                                "Bill ID: %s\n" +
+                                "Date: %s\n" +
+                                "Subtotal: %s\n" +
+                                "Interest: %s\n" +
+                                "Total Due: %s\n" +
+                                "--------------------------------------------\n\n" +
+                                "Thank you for choosing Pet Clinic.\n\n" +
+                                "Best regards,\n" +
+                                "Pet Clinic Team",
+                        user.getUsername(),
+                        bill.getBillId(),
+                        bill.getDate(),
+                        formattedAmount,
+                        formattedInterest,
+                        formattedTotal
+                ),
+                user.getEmail(),
+                user.getUsername()
+        );
+    }
+
+
 
 
 
