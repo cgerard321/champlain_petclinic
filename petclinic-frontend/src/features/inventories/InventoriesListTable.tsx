@@ -4,7 +4,6 @@ import { Inventory } from '@/features/inventories/models/Inventory.ts';
 import { InventoryType } from '@/features/inventories/models/InventoryType.ts';
 import useSearchInventories from '@/features/inventories/hooks/useSearchInventories.ts';
 import { getAllInventoryTypes } from '@/features/inventories/api/getAllInventoryTypes.ts';
-import deleteAllInventories from '@/features/inventories/api/deleteAllInventories.ts';
 import deleteInventory from '@/features/inventories/api/deleteInventory.ts';
 import AddInventory from '@/features/inventories/AddInventoryForm.tsx';
 import AddInventoryType from '@/features/inventories/AddInventoryType.tsx';
