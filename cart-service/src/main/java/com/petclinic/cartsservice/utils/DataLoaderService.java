@@ -4,37 +4,26 @@ package com.petclinic.cartsservice.utils;
 import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.CartRepository;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.Profile;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Profile("local")
 @Slf4j
+@RequiredArgsConstructor
 public class DataLoaderService implements CommandLineRunner {
 
-    @Autowired
-    CartRepository cartRepository;
+    private final CartRepository cartRepository;
 
     @Override
-    public void run(String... args) throws Exception {
-
-        // If the db is not empty, then return
-        try {
-
-            if (Boolean.TRUE.equals(cartRepository.findAll().hasElements().block())) {
-                return;
-            }
-
-        } catch (Exception e) {
-            return;
-        }
-
+    public void run(String... args) {
         CartProduct product1 = CartProduct.builder()
                 .productId("06a7d573-bcab-4db3-956f-773324b92a80")
                 .imageId("08a5af6b-3501-4157-9a99-1aa82387b9e4")
@@ -171,9 +160,13 @@ public class DataLoaderService implements CommandLineRunner {
                 .wishListProducts(wishListProducts)
                 .build();
 
-        Flux.just(cart1, cart2, cart3, cart4, cart5, cart6, cart7, cart8, cart9, cart10)
+        Flux<Cart> demoCarts = Flux.just(cart1, cart2, cart3, cart4, cart5, cart6, cart7, cart8, cart9, cart10);
 
-                .flatMap(cartRepository::insert)
+        cartRepository.findAll().hasElements()
+                .flatMapMany(has -> has ? Flux.empty() : demoCarts.flatMap(cartRepository::insert))
+                .then()
+                .doOnSuccess(v -> log.info("Demo carts loaded (if collection was empty)"))
+                .doOnError(e -> log.error("Failed to load demo carts", e))
                 .subscribe();
     }
 }
