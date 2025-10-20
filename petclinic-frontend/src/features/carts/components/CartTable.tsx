@@ -394,7 +394,7 @@ export default function CartListTable(): JSX.Element {
                       <th>Qty</th>
                       <th>Unit $</th>
                       <th>Line $</th>
-                      <th>Action</th> {/* ADDED */}
+                      <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
