@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BillApiService } from '../../api/bill-api.service';
-import { BillRequest } from '../../models/bill.model';
+import { BillRequest, BillStatus } from '../../models/bill.model';
 
 @Component({
   selector: 'app-bill-form',
@@ -150,7 +150,7 @@ export class BillFormComponent implements OnInit {
     visitType: '',
     date: new Date().toISOString().split('T')[0],
     amount: 0,
-    billStatus: 'UNPAID',
+    billStatus: BillStatus.UNPAID,
     dueDate: new Date().toISOString().split('T')[0],
   };
 

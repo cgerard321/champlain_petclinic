@@ -344,7 +344,7 @@ export class VetFormComponent implements OnInit {
     if (this.isEdit && this.vetId) {
       this.vetApi.getVetById(this.vetId).subscribe({
         next: vet => {
-          this.vet = vet;
+          this.vet = vet as any;
         },
         error: () => alert('Failed to load vet'),
       });
@@ -365,7 +365,11 @@ export class VetFormComponent implements OnInit {
     }
 
     const namePattern = /^[a-zA-Z -]+/;
-    if (!namePattern.test(vet.firstName) || vet.firstName.length > 30 || vet.firstName.length < 2) {
+    if (
+      !namePattern.test(vet.firstName as string) ||
+      (vet.firstName as string).length > 30 ||
+      (vet.firstName as string).length < 2
+    ) {
       alert(
         'first name should be minimum 2 characters and maximum of 30 characters, only letters, spaces, and hyphens: ' +
           vet.firstName
@@ -373,7 +377,11 @@ export class VetFormComponent implements OnInit {
       return;
     }
 
-    if (!namePattern.test(vet.lastName) || vet.lastName.length > 30 || vet.lastName.length < 2) {
+    if (
+      !namePattern.test(vet.lastName as string) ||
+      (vet.lastName as string).length > 30 ||
+      (vet.lastName as string).length < 2
+    ) {
       alert(
         'last name should be minimum 2 characters and maximum of 30 characters, only letters, spaces, and hyphens: ' +
           vet.lastName
@@ -381,12 +389,12 @@ export class VetFormComponent implements OnInit {
       return;
     }
 
-    if (!vet.phoneNumber || vet.phoneNumber.trim() === '') {
+    if (!vet.phoneNumber || (vet.phoneNumber as string).trim() === '') {
       alert('Phone number is required');
       return;
     }
 
-    if (vet.resume.length < 10) {
+    if ((vet.resume as string).length < 10) {
       alert('resume should be minimum 10 characters: ' + vet.resume);
       return;
     }
@@ -403,7 +411,7 @@ export class VetFormComponent implements OnInit {
     };
 
     if (this.isEdit && this.vetId) {
-      this.vetApi.updateVet(this.vetId, vetData).subscribe({
+      this.vetApi.updateVet(this.vetId, vetData as any).subscribe({
         next: updatedVet => {
           this.updatePhoto(updatedVet.vetId);
         },
@@ -437,8 +445,9 @@ export class VetFormComponent implements OnInit {
   getSelectedWorkdays(): string[] {
     const workdays: string[] = [];
     const workdayInputs = document.querySelectorAll('input.workday:checked');
-    workdayInputs.forEach((input: HTMLInputElement) => {
-      workdays.push(input.value);
+    Array.from(workdayInputs).forEach(input => {
+      const element = input as HTMLInputElement;
+      workdays.push(element.value);
     });
     return workdays;
   }
@@ -446,9 +455,10 @@ export class VetFormComponent implements OnInit {
   getSelectedSpecialties(): unknown[] {
     const specialties: unknown[] = [];
     const specialtyInputs = document.querySelectorAll('input.specialty:checked');
-    specialtyInputs.forEach((input: HTMLInputElement) => {
+    Array.from(specialtyInputs).forEach(input => {
+      const element = input as HTMLInputElement;
       try {
-        const specialty = JSON.parse(input.value);
+        const specialty = JSON.parse(element.value);
         specialties.push(specialty);
       } catch (e) {
         console.error('Error parsing specialty:', e);
@@ -542,11 +552,11 @@ export class VetFormComponent implements OnInit {
   }
 
   onFileSelected(event: Event): void {
-    const file = event.target.files[0];
+    const file = (event.target as HTMLInputElement).files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (e: ProgressEvent<FileReader>) => {
-        this.previewImage = e.target.result.split(',')[1];
+        this.previewImage = (e.target?.result as string).split(',')[1];
       };
       reader.readAsDataURL(file);
     }

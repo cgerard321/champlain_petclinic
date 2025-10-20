@@ -30,13 +30,13 @@ export class ProductApiService {
 
     return this.http
       .get(`${this.apiConfig.getFullUrl('/products')}`, {
-        params,
-        responseType: 'text',
+        params: params as any,
+        responseType: 'text' as any,
         withCredentials: true,
       })
       .pipe(
         map(response => {
-          return response
+          return (response as unknown as string)
             .split('data:')
             .map((dataChunk: string) => {
               try {
@@ -46,7 +46,7 @@ export class ProductApiService {
                 return null;
               }
             })
-            .filter((data: unknown) => data !== null);
+            .filter((data: unknown): data is Product => data !== null);
         })
       );
   }

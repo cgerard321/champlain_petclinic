@@ -197,7 +197,7 @@ export class OwnerListComponent implements OnInit {
           const size = this.pageSize || 5;
           this.totalPages = Math.ceil(this.totalItems / Number(size));
 
-          this.ownerApi.getOwnersPaginated(this.currentPage, Number(size)).subscribe({
+          this.ownerApi.getOwnersPaginated().subscribe({
             next: owners => {
               this.owners = owners;
               this.updateCurrentPageOnSite();

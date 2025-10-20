@@ -54,7 +54,7 @@ export class RoleUpdateComponent implements OnInit {
   loadUserDetails(): void {
     this.authApi.getUserDetails(this.userId).subscribe({
       next: (user: { roles: Array<{ name: string }> }) => {
-        this.user = user;
+        this.user = user as UserDetails;
         this.availableRoles.forEach(role => {
           this.selectedRoles[role] = user.roles.some((r: { name: string }) => r.name === role);
         });

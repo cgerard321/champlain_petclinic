@@ -5,7 +5,11 @@ import { Pipe, PipeTransform } from '@angular/core';
   standalone: true,
 })
 export class OrderByPipe implements PipeTransform {
-  transform<T>(array: T[], property: string, reverse: boolean = false): T[] {
+  transform<T extends Record<string, unknown>>(
+    array: T[],
+    property: string,
+    reverse: boolean = false
+  ): T[] {
     if (!array || !property) {
       return array;
     }
@@ -14,10 +18,10 @@ export class OrderByPipe implements PipeTransform {
       const aVal = this.getNestedProperty(a, property);
       const bVal = this.getNestedProperty(b, property);
 
-      if (aVal < bVal) {
+      if (String(aVal) < String(bVal)) {
         return reverse ? 1 : -1;
       }
-      if (aVal > bVal) {
+      if (String(aVal) > String(bVal)) {
         return reverse ? -1 : 1;
       }
       return 0;
@@ -25,6 +29,8 @@ export class OrderByPipe implements PipeTransform {
   }
 
   private getNestedProperty(obj: Record<string, unknown>, path: string): unknown {
-    return path.split('.').reduce((o, p) => o && o[p], obj);
+    return path
+      .split('.')
+      .reduce((o: unknown, p: string) => o && (o as Record<string, unknown>)[p], obj);
   }
 }

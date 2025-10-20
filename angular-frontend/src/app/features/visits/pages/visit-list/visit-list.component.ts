@@ -943,7 +943,7 @@ export class VisitListComponent implements OnInit, OnDestroy {
         return;
     }
 
-    this.visitApi.updateVisitStatus(visitId, newStatus).subscribe({
+    this.visitApi.updateVisitStatus(visitId, newStatus as VisitStatus).subscribe({
       next: () => {
         alert(visitId + ' visit was confirmed successfully');
         this.delayedReload();
@@ -960,7 +960,7 @@ export class VisitListComponent implements OnInit, OnDestroy {
       return; // Can only cancel upcoming visits
     }
 
-    this.visitApi.updateVisitStatus(visitId, 'CANCELLED').subscribe({
+    this.visitApi.updateVisitStatus(visitId, VisitStatus.CANCELLED).subscribe({
       next: () => {
         alert(visitId + ' visit was cancelled successfully');
         this.delayedReload();

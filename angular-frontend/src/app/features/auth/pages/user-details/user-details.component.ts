@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthApiService } from '../../api/auth-api.service';
-import { UserDetails } from '../../models/user.model';
+import { User, UserDetails } from '../../models/user.model';
 
 @Component({
   selector: 'app-user-details',
@@ -56,8 +56,8 @@ export class UserDetailsComponent implements OnInit {
 
   loadUserDetails(): void {
     this.authApi.getUserDetails(this.userId).subscribe({
-      next: (user: Record<string, unknown>) => {
-        this.user = user;
+      next: (user: User) => {
+        this.user = user as UserDetails;
       },
       error: () => {},
     });

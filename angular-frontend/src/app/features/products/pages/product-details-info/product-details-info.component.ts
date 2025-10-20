@@ -127,8 +127,8 @@ export class ProductDetailsInfoComponent implements OnInit {
             return;
           }
           if (this.product) {
-            this.product.imageData = imageResp.imageData;
-            this.product.imageType = imageResp.imageType;
+            this.product.imageData = (imageResp as any).imageData;
+            this.product.imageType = (imageResp as any).imageType;
           }
         },
         error: () => {},

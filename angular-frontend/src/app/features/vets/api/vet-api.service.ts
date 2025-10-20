@@ -38,7 +38,7 @@ export class VetApiService {
                 return null;
               }
             })
-            .filter((data: unknown) => data !== null);
+            .filter((data: unknown): data is Vet => data !== null);
         })
       );
   }
@@ -263,7 +263,7 @@ export class VetApiService {
                 return null;
               }
             })
-            .filter((data: unknown) => data !== null);
+            .filter((data: unknown): data is Vet => data !== null);
         })
       );
   }

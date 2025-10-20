@@ -327,22 +327,22 @@ export class InventoriesProductListComponent implements OnInit {
         // Apply filters
         if (queryParams.productName) {
           filteredProducts = filteredProducts.filter(p =>
-            p.productName.toLowerCase().includes(queryParams.productName.toLowerCase())
+            p.productName.toLowerCase().includes((queryParams.productName as string).toLowerCase())
           );
         }
         if (queryParams.productQuantity) {
           filteredProducts = filteredProducts.filter(p =>
-            p.productQuantity.toString().includes(queryParams.productQuantity)
+            p.productQuantity.toString().includes(queryParams.productQuantity as string)
           );
         }
         if (queryParams.productPrice) {
           filteredProducts = filteredProducts.filter(p =>
-            p.productPrice.toString().includes(queryParams.productPrice)
+            p.productPrice.toString().includes(queryParams.productPrice as string)
           );
         }
         if (queryParams.productSalePrice) {
           filteredProducts = filteredProducts.filter(p =>
-            (p.productSalePrice || 0).toString().includes(queryParams.productSalePrice)
+            (p.productSalePrice || 0).toString().includes(queryParams.productSalePrice as string)
           );
         }
 

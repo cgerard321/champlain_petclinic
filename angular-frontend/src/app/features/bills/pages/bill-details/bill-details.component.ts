@@ -177,11 +177,11 @@ export class BillDetailsComponent implements OnInit {
       const firstName = foundOwner.firstName;
       const lastName = foundOwner.lastName;
 
-      const ownerInfo = this.ownersInfoArray.find(owner => {
+      const ownerInfo = this.ownersInfoArray.find((owner: any) => {
         return owner.firstName === firstName && owner.lastName === lastName;
       });
       if (ownerInfo) {
-        return ownerInfo.ownerId;
+        return (ownerInfo as any).ownerId;
       }
     }
 

@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { VisitApiService } from '../../api/visit-api.service';
 import { VisitRequest, Owner, Pet, Vet } from '../../models/visit.model';
 import { BillApiService } from '../../../bills/api/bill-api.service';
-import { BillRequest } from '../../../bills/models/bill.model';
+import { BillRequest, BillStatus } from '../../../bills/models/bill.model';
 
 @Component({
   selector: 'app-visits',
@@ -278,7 +278,7 @@ export class VisitsComponent implements OnInit, AfterViewInit {
 
   // Calendar variables
   private date = new Date();
-  private selectedDateNum: number = this.date.getDate();
+  private selectedDateNum: number | null = this.date.getDate();
   private selectedTime: string = '';
   private availableDays: number[] = [];
   private vetAvailabilityStr: string = '';
@@ -370,7 +370,7 @@ export class VisitsComponent implements OnInit, AfterViewInit {
         '' +
           months[this.date.getMonth()] +
           ' ' +
-          (parseInt(this.selectedDateNum.toString()) + 1) +
+          (parseInt((this.selectedDateNum || 0).toString()) + 1) +
           ', ' +
           this.date.getFullYear()
       ) < new Date()
@@ -472,13 +472,13 @@ export class VisitsComponent implements OnInit, AfterViewInit {
           this.date.getFullYear() === new Date().getFullYear()) ||
         this.date.getFullYear() < new Date().getFullYear()
       ) {
-        if (i.toString() === this.selectedDateNum.toString()) {
+        if (i.toString() === (this.selectedDateNum || 0).toString()) {
           days += `<div id="day${i}" data-target="${i}" class="editSelected unavailable day">${i}</div>`;
         } else {
           days += `<div id="day${i}" data-target="${i}" class="unavailable day">${i}</div>`;
         }
       } else if (workDay === false || scheduledVisits === true) {
-        if (i.toString() === this.selectedDateNum.toString()) {
+        if (i.toString() === (this.selectedDateNum || 0).toString()) {
           days += `<div id="day${i}" data-target="${i}" class="editSelected holiday day">${i}</div>`;
         } else if (this.getDateFullFormatEqualsTo(i)) {
           days += `<div id="day${i}" data-target="${i}" class="today_holiday day">${i}</div>`;
@@ -535,7 +535,7 @@ export class VisitsComponent implements OnInit, AfterViewInit {
       if (
         isMonthUnavailable ||
         formattedDate === this.date.getFullYear().toString() ||
-        (new Date().getDate() === parseInt(this.selectedDateNum.toString()) &&
+        (new Date().getDate() === parseInt((this.selectedDateNum || 0).toString()) &&
           new Date().getMonth() === this.date.getMonth() &&
           new Date().getFullYear() === this.date.getFullYear())
       ) {
@@ -574,7 +574,7 @@ export class VisitsComponent implements OnInit, AfterViewInit {
             month = 1;
           }
 
-          if (sDate < 10) {
+          if ((sDate || 0) < 10) {
             sDate = parseInt('0' + sDate);
           }
 
@@ -616,7 +616,7 @@ export class VisitsComponent implements OnInit, AfterViewInit {
     const daysContainer = document.querySelector('.days');
     if (daysContainer) {
       daysContainer.addEventListener('click', (event: Event) => {
-        const target = event.target.dataset.target;
+        const target = (event.target as HTMLElement).dataset.target;
         if (target !== undefined) {
           if (target.substring(0, 13) === 'previous-page') {
             this.selectedDateNum = parseInt(target.substring(14, 16).trim());
@@ -639,7 +639,7 @@ export class VisitsComponent implements OnInit, AfterViewInit {
     const timesContainer = document.querySelector('.times');
     if (timesContainer) {
       timesContainer.addEventListener('click', (event: Event) => {
-        const selected = event.target.dataset.target;
+        const selected = (event.target as HTMLElement).dataset.target;
         if (selected !== undefined) {
           this.selectedTime = selected;
           if (this.chosenDate) {
@@ -752,11 +752,11 @@ export class VisitsComponent implements OnInit, AfterViewInit {
     let wasMaxReached = false;
 
     for (const a of this.availableDays) {
-      if (a > this.selectedDateNum && wasMaxReached === false) {
+      if (a > (this.selectedDateNum || 0) && wasMaxReached === false) {
         valMax = a;
         wasMaxReached = true;
       }
-      if (a < this.selectedDateNum) {
+      if (a < (this.selectedDateNum || 0)) {
         valMin = a;
       }
     }
@@ -766,7 +766,7 @@ export class VisitsComponent implements OnInit, AfterViewInit {
     } else if (valMax === 0) {
       this.selectedDateNum = valMin;
     } else {
-      if (valMax - this.selectedDateNum <= this.selectedDateNum - valMin) {
+      if (valMax - (this.selectedDateNum || 0) <= (this.selectedDateNum || 0) - valMin) {
         this.selectedDateNum = valMax;
       } else {
         this.selectedDateNum = valMin;
@@ -905,9 +905,9 @@ export class VisitsComponent implements OnInit, AfterViewInit {
     };
 
     this.visitApi.createVisit(visitData, this.ownerId, this.petId).subscribe({
-      next: visit => {
+      next: () => {
         // Create corresponding bill after successful visit creation
-        this.createBill(visit);
+        this.createBill();
         this.createAlert('success', 'Successfully created visit!');
         this.router.navigate(['/visit-list']);
       },
@@ -995,7 +995,7 @@ export class VisitsComponent implements OnInit, AfterViewInit {
       vetId: this.practitionerId,
       date: this.chosenDate!.toISOString().split('T')[0],
       amount: this.calculateBillAmount(), // Calculate based on visit type
-      billStatus: 'UNPAID',
+      billStatus: BillStatus.UNPAID,
       dueDate: dueDate.toISOString().split('T')[0], // Format as YYYY-MM-DD
     };
 

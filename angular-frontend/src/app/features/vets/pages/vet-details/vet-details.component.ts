@@ -941,9 +941,10 @@ export class VetDetailsComponent implements OnInit {
     const checkboxes = document.querySelectorAll(
       `input[type="checkbox"][name="predefinedDescriptionUpdate${ratingId}"]`
     );
-    checkboxes.forEach((checkbox: HTMLInputElement) => {
-      if (checkbox.value !== value) {
-        checkbox.checked = false;
+    Array.from(checkboxes).forEach(checkbox => {
+      const input = checkbox as HTMLInputElement;
+      if (input.value !== value) {
+        input.checked = false;
       }
     });
   }
@@ -1196,11 +1197,12 @@ export class VetDetailsComponent implements OnInit {
 
         if (updateContainer) updateContainer.style.display = 'none';
         if (btn) btn.textContent = 'Update';
-        document
-          .querySelectorAll(`input[name="predefinedDescriptionUpdate${ratingId}"]`)
-          .forEach((radio: HTMLInputElement) => {
-            radio.checked = false;
-          });
+        Array.from(
+          document.querySelectorAll(`input[name="predefinedDescriptionUpdate${ratingId}"]`)
+        ).forEach(radio => {
+          const input = radio as HTMLInputElement;
+          input.checked = false;
+        });
       };
 
       this.showConfirmationModal(
@@ -1261,10 +1263,15 @@ export class VetDetailsComponent implements OnInit {
           ratingsArray.push({ rating: parseFloat(score), percentage });
         }
 
-        ratingsArray.sort((a, b) => b.rating - a.rating);
+        ratingsArray.sort(
+          (a, b) =>
+            (b as { rating: number; percentage: number }).rating -
+            (a as { rating: number; percentage: number }).rating
+        );
 
         for (const ratingObj of ratingsArray) {
-          html += ratingObj.rating + ' stars - ' + ratingObj.percentage.toFixed(0) + '%';
+          const obj = ratingObj as { rating: number; percentage: number };
+          html += obj.rating + ' stars - ' + obj.percentage.toFixed(0) + '%';
           html += '<br>';
         }
 

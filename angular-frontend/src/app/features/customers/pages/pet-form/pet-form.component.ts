@@ -220,8 +220,8 @@ export class PetFormComponent implements OnInit {
         next: () => {
           this.router.navigate(['/owners', this.pet.ownerId, 'pets', this.petId]);
         },
-        error: () => {
-          this.handleError(_error);
+        error: error => {
+          this.handleError(error);
         },
       });
     }

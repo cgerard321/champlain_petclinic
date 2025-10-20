@@ -31,7 +31,7 @@ export class OwnerApiService {
                 return null;
               }
             })
-            .filter((data: unknown) => data !== null);
+            .filter((data: unknown): data is Owner => data !== null);
         })
       );
   }
@@ -95,7 +95,7 @@ export class OwnerApiService {
   }
 
   getOwners(): Observable<Owner[]> {
-    return this.getOwnersPaginated(0, 1000);
+    return this.getOwnersPaginated();
   }
 
   getOwnerById(ownerId: string): Observable<Owner> {

@@ -139,16 +139,16 @@ export class InventoriesProductFormComponent implements OnInit {
     const data = (response && response.data) || {};
     const baseMsg =
       (typeof data === 'string' && data) ||
-      data.message ||
-      data.error ||
-      (response && response.status
-        ? 'HTTP ' + response.status + ' ' + (response.statusText || '')
+      (data as any).message ||
+      (data as any).error ||
+      (response && (response as any).status
+        ? 'HTTP ' + (response as any).status + ' ' + ((response as any).statusText || '')
         : 'Request failed');
 
     const fieldErrors =
-      (Array.isArray(data.errors) && data.errors) ||
-      (Array.isArray(data.details) && data.details) ||
-      data.fieldErrors ||
+      (Array.isArray((data as any).errors) && (data as any).errors) ||
+      (Array.isArray((data as any).details) && (data as any).details) ||
+      (data as any).fieldErrors ||
       [];
 
     let fieldText = '';
@@ -164,7 +164,7 @@ export class InventoriesProductFormComponent implements OnInit {
           }) => {
             if (typeof e === 'string') return e;
             const field = e.field || e.path || e.parameter || '';
-            const msg = e.defaultMessage || e.message || e.reason || JSON.stringify(e);
+            const msg = e.defaultMessage || e.message || (e as any).reason || JSON.stringify(e);
             return field ? field + ': ' + msg : msg;
           }
         )

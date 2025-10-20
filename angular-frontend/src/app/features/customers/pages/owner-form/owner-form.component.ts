@@ -271,8 +271,8 @@ export class OwnerFormComponent implements OnInit {
             alert('Owner updated successfully!');
             this.router.navigate(['/owners']);
           },
-          error: () => {
-            this.handleError(_error);
+          error: error => {
+            this.handleError(error);
           },
         });
       } else {
@@ -281,8 +281,8 @@ export class OwnerFormComponent implements OnInit {
             alert('Owner deleted successfully!');
             this.router.navigate(['/owners']);
           },
-          error: () => {
-            this.handleError(_error);
+          error: error => {
+            this.handleError(error);
           },
         });
       }
@@ -292,8 +292,8 @@ export class OwnerFormComponent implements OnInit {
           alert('Owner created successfully!');
           this.router.navigate(['/owners']);
         },
-        error: () => {
-          this.handleError(_error);
+        error: error => {
+          this.handleError(error);
         },
       });
     }

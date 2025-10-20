@@ -13,11 +13,8 @@ RUN npm install
 # Copy the rest of the application code to the working directory
 COPY . .
 
-# Copy environment files based on build mode
-ARG BUILD_MODE
-COPY src/environments/.env.${BUILD_MODE} src/environments/.env
-
 # Build the Angular app
+ARG BUILD_MODE
 RUN npm run build:${BUILD_MODE}
 
 # Use a smaller, lightweight base image for the final image

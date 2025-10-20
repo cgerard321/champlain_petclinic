@@ -158,15 +158,15 @@ export class InventoriesProductUpdateFormComponent implements OnInit {
     }
 
     let data = response && response.data;
-    const status = response && response.status;
-    const statusText = (response && response.statusText) || '';
+    const status = response && (response as any).status;
+    const statusText = (response && (response as any).statusText) || '';
 
     // Normalize string bodies (plain text or JSON-as-string)
     if (typeof data === 'string') {
       try {
         data = JSON.parse(data);
       } catch (e) {
-        const plain = data.trim();
+        const plain = (data as string).trim();
         if (plain) {
           alert(plain);
           return;
@@ -177,10 +177,10 @@ export class InventoriesProductUpdateFormComponent implements OnInit {
     data = data || {};
 
     // Possible arrays the backend may use
-    const errorsArr = Array.isArray(data.errors) ? data.errors : [];
-    const detailsArr = Array.isArray(data.details) ? data.details : [];
-    const violations = Array.isArray(data.violations || data.constraintViolations)
-      ? data.violations || data.constraintViolations
+    const errorsArr = Array.isArray((data as any).errors) ? (data as any).errors : [];
+    const detailsArr = Array.isArray((data as any).details) ? (data as any).details : [];
+    const violations = Array.isArray((data as any).violations || (data as any).constraintViolations)
+      ? (data as any).violations || (data as any).constraintViolations
       : [];
 
     function mapErr(e: {
@@ -209,13 +209,13 @@ export class InventoriesProductUpdateFormComponent implements OnInit {
       .join('\r\n');
 
     const baseMsg =
-      data.message ||
-      data.error_description ||
-      data.errorMessage ||
-      data.error ||
-      data.title ||
-      data.detail ||
-      (typeof data === 'object' && Object.keys(data).length ? JSON.stringify(data) : '') ||
+      (data as any).message ||
+      (data as any).error_description ||
+      (data as any).errorMessage ||
+      (data as any).error ||
+      (data as any).title ||
+      (data as any).detail ||
+      (typeof data === 'object' && data && Object.keys(data).length ? JSON.stringify(data) : '') ||
       (status ? 'HTTP ' + status + (statusText ? ' ' + statusText : '') : 'Request failed');
 
     alert(fieldText ? baseMsg + '\r\n' + fieldText : baseMsg);

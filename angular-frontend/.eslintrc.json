@@ -31,14 +31,14 @@
       }
     ],
     "@typescript-eslint/no-unused-vars": "error",
-    "@typescript-eslint/no-explicit-any": "warn",
-    "@typescript-eslint/explicit-module-boundary-types": "off"
+    "@typescript-eslint/no-explicit-any": "off"
   },
   "overrides": [
     {
       "files": ["tests/**/*.spec.ts", "tests/**/*.test.ts", "e2e/**/*.spec.ts", "e2e/**/*.test.ts"],
       "extends": ["plugin:playwright/recommended"],
       "rules": {
+        // Playwright best practices
         "playwright/expect-expect": "error",
         "playwright/max-nested-describe": ["error", { "max": 1 }],
         "playwright/missing-playwright-await": "error",
@@ -68,6 +68,7 @@
         "playwright/valid-expect-in-promise": "error",
         "playwright/valid-title": "error",
         
+        // Relax some TypeScript rules for tests
         "@typescript-eslint/explicit-function-return-type": "off",
         "no-console": "off"
       }

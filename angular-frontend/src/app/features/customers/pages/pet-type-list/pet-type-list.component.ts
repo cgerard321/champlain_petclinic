@@ -293,8 +293,8 @@ export class PetTypeListComponent implements OnInit {
         this.newPetType = { name: '', petTypeDescription: '' };
         this.loadDefaultData();
       },
-      error: () => {
-        alert('Failed to add pet type: ' + (_error.error?.message || 'Unknown error'));
+      error: error => {
+        alert('Failed to add pet type: ' + (error.error?.message || 'Unknown error'));
       },
     });
   }
@@ -314,8 +314,8 @@ export class PetTypeListComponent implements OnInit {
         this.loadDefaultData();
         this.cancelEdit();
       },
-      error: () => {
-        alert('Failed to update pet type: ' + (_error.error?.message || 'Unknown error'));
+      error: error => {
+        alert('Failed to update pet type: ' + (error.error?.message || 'Unknown error'));
       },
     });
   }
@@ -333,8 +333,8 @@ export class PetTypeListComponent implements OnInit {
           alert('Pet type deleted successfully!');
           this.loadDefaultData();
         },
-        error: () => {
-          alert('Failed to delete pet type: ' + (_error.error?.message || 'Unknown error'));
+        error: error => {
+          alert('Failed to delete pet type: ' + (error.error?.message || 'Unknown error'));
         },
       });
     }
@@ -436,7 +436,7 @@ export class PetTypeListComponent implements OnInit {
       this.updateCurrentPageOnSite();
 
       if (this.searchActive) {
-        this.searchPetTypesByPaginationAndFilters(currentPageInt, true);
+        this.searchPetTypesByPaginationAndFilters(true);
       } else {
         this.applyPagination();
       }
@@ -450,7 +450,7 @@ export class PetTypeListComponent implements OnInit {
       this.updateCurrentPageOnSite();
 
       if (this.searchActive) {
-        this.searchPetTypesByPaginationAndFilters(currentPageInt, true);
+        this.searchPetTypesByPaginationAndFilters(true);
       } else {
         this.applyPagination();
       }

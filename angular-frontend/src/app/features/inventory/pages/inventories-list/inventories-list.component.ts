@@ -261,7 +261,7 @@ export class InventoriesListComponent implements OnInit {
   private loadInventoryTypes(): void {
     this.inventoryApi.getInventoryTypes().subscribe({
       next: types => {
-        this.inventoryTypeOptions = types.map((type: { type: string }) => type.type);
+        this.inventoryTypeOptions = types.map((type: any) => type.type);
       },
       error: () => {},
     });

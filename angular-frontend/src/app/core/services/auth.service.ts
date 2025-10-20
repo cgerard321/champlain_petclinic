@@ -38,7 +38,7 @@ export class AuthService {
             userId: response.userId,
             roles: response.roles,
           };
-          this.setUserDataFromResponse(userData);
+          this.setUserDataFromResponse(userData as unknown as User);
         })
       );
   }

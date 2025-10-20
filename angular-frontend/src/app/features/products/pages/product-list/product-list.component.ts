@@ -313,8 +313,8 @@ export class ProductListComponent implements OnInit {
             if (imageResp === 0) {
               return;
             }
-            product.imageData = imageResp.imageData;
-            product.imageType = imageResp.imageType;
+            product.imageData = (imageResp as any).imageData;
+            product.imageType = (imageResp as any).imageType;
           },
           error: () => {},
         });
@@ -463,7 +463,7 @@ export class ProductListComponent implements OnInit {
     autoHideMs?: number;
   }): void {
     if (this.toastTimer) {
-      clearTimeout(this.toastTimer);
+      clearTimeout(this.toastTimer as any);
       this.toastTimer = null;
     }
     this.toast.title = title;
@@ -481,7 +481,7 @@ export class ProductListComponent implements OnInit {
     this.toast.lines = [];
     this.toast.actions = [];
     if (this.toastTimer) {
-      clearTimeout(this.toastTimer);
+      clearTimeout(this.toastTimer as any);
       this.toastTimer = null;
     }
   }
@@ -490,7 +490,7 @@ export class ProductListComponent implements OnInit {
     try {
       const action = this.toast.actions[index];
       this.toastHide();
-      if (action && typeof action.onClick === 'function') action.onClick();
+      if (action && typeof (action as any).onClick === 'function') (action as any).onClick();
     } catch (e) {}
   }
 }

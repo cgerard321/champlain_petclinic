@@ -53,7 +53,7 @@ export class BillApiService {
                 return null;
               }
             })
-            .filter((data: unknown) => data !== null);
+            .filter((data: unknown): data is Bill => data !== null);
         })
       );
   }
@@ -76,7 +76,7 @@ export class BillApiService {
                 return null;
               }
             })
-            .filter((data: unknown) => data !== null);
+            .filter((data: unknown): data is Bill => data !== null);
         })
       );
   }

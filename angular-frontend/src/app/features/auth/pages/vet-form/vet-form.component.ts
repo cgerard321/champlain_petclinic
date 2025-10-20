@@ -509,18 +509,18 @@ export class VetFormComponent {
   }
 
   onSpecialtyChange(event: Event): void {
-    const checkbox = event.target;
+    const checkbox = event.target as HTMLInputElement;
     const specialty = JSON.parse(checkbox.value);
 
     if (checkbox.checked) {
       this.selectedSpecialties.push(specialty);
     } else {
-      this.selectedSpecialties = this.selectedSpecialties.filter(s => s.id !== specialty.id);
+      this.selectedSpecialties = this.selectedSpecialties.filter((s: any) => s.id !== specialty.id);
     }
   }
 
   onWorkdayChange(event: Event): void {
-    const checkbox = event.target;
+    const checkbox = event.target as HTMLInputElement;
     const workday = checkbox.value;
 
     if (checkbox.checked) {
@@ -531,7 +531,7 @@ export class VetFormComponent {
   }
 
   onFileSelected(event: Event): void {
-    const file = event.target.files[0];
+    const file = (event.target as HTMLInputElement).files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {

@@ -35,7 +35,7 @@ export class VisitApiService {
                 return null;
               }
             })
-            .filter((data: unknown) => data !== null);
+            .filter((data: unknown): data is Visit => data !== null);
         })
       );
   }
@@ -59,7 +59,7 @@ export class VisitApiService {
                 return null;
               }
             })
-            .filter((data: unknown) => data !== null);
+            .filter((data: unknown): data is Visit => data !== null);
         })
       );
   }
@@ -83,7 +83,7 @@ export class VisitApiService {
                 return null;
               }
             })
-            .filter((data: unknown) => data !== null);
+            .filter((data: unknown): data is Visit => data !== null);
         })
       );
   }
@@ -185,7 +185,7 @@ export class VisitApiService {
                 return null;
               }
             })
-            .filter((data: unknown) => data !== null);
+            .filter((data: unknown): data is Owner => data !== null);
         })
       );
   }
@@ -209,7 +209,7 @@ export class VisitApiService {
                 return null;
               }
             })
-            .filter((data: unknown) => data !== null);
+            .filter((data: unknown): data is Pet => data !== null);
         })
       );
   }
@@ -233,7 +233,7 @@ export class VisitApiService {
                 return null;
               }
             })
-            .filter((data: unknown) => data !== null);
+            .filter((data: unknown): data is Vet => data !== null);
         })
       );
   }

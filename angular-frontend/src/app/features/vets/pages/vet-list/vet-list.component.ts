@@ -186,7 +186,7 @@ export class VetListComponent implements OnInit {
         this.vets.forEach(vet => {
           this.getAverageRating(vet);
           this.getCountOfRatings(vet);
-          this.getTopThreeVetsWithHighestRating(vet);
+          this.getTopThreeVetsWithHighestRating();
         });
       },
       error: error => console.error('Error loading vets:', error),
@@ -205,7 +205,7 @@ export class VetListComponent implements OnInit {
         this.vets.forEach(vet => {
           this.getAverageRating(vet);
           this.getCountOfRatings(vet);
-          this.getTopThreeVetsWithHighestRating(vet);
+          this.getTopThreeVetsWithHighestRating();
         });
       },
       error: error => console.error('Error loading filtered vets:', error),

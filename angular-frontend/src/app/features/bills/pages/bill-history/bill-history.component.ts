@@ -339,7 +339,7 @@ export class BillHistoryComponent implements OnInit {
 
   goNextPage(): void {
     if (parseInt(this.currentPage.toString()) + 1 < this.totalPages) {
-      this.currentPage = (parseInt(this.currentPage.toString()) + 1).toString();
+      this.currentPage = parseInt(this.currentPage.toString()) + 1;
       this.updateCurrentPageOnSite();
       this.loadDefaultData();
     }
@@ -347,7 +347,7 @@ export class BillHistoryComponent implements OnInit {
 
   goPreviousPage(): void {
     if (this.currentPage - 1 >= 0) {
-      this.currentPage = (parseInt(this.currentPage.toString()) - 1).toString();
+      this.currentPage = parseInt(this.currentPage.toString()) - 1;
       this.updateCurrentPageOnSite();
       this.loadDefaultData();
     }
@@ -378,20 +378,20 @@ export class BillHistoryComponent implements OnInit {
       if (o.ownerId === String(customerId)) foundOwner = o;
     });
     if (foundOwner && this.ownersInfoArray) {
-      const match = this.ownersInfoArray.find(o => {
-        return o.firstName === foundOwner.firstName && o.lastName === foundOwner.lastName;
+      const match = this.ownersInfoArray.find((o: any) => {
+        return o.firstName === foundOwner?.firstName && o.lastName === foundOwner?.lastName;
       });
-      if (match) return match.ownerId;
+      if (match) return (match as any).ownerId;
     }
     return customerId || 'Unknown Owner';
   }
 
   getVetDetails(vetId: string): string {
     if (!this.vetList) return 'Unknown Vet';
-    const viaBillId = this.vetList.find(v => v.vetBillId === vetId);
-    const viaVetId = this.vetList.find(v => v.vetId === vetId);
+    const viaBillId = this.vetList.find((v: any) => v.vetBillId === vetId);
+    const viaVetId = this.vetList.find((v: any) => v.vetId === vetId);
     const v = viaBillId || viaVetId;
-    return v ? v.firstName + ' ' + v.lastName : 'Unknown Vet';
+    return v ? (v as any).firstName + ' ' + (v as any).lastName : 'Unknown Vet';
   }
 
   getCustomerDetails(customerId: string): string {

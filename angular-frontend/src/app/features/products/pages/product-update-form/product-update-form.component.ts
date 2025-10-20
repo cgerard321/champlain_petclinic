@@ -244,8 +244,8 @@ export class ProductUpdateFormComponent implements OnInit {
           if (imageResp === '') {
             return;
           }
-          this.product.imageData = imageResp.imageData;
-          this.product.imageType = imageResp.imageType;
+          this.product.imageData = (imageResp as any).imageData;
+          this.product.imageType = (imageResp as any).imageType;
         },
         error: () => {},
       });

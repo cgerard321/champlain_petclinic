@@ -112,7 +112,7 @@ export class InventoriesUpdateFormComponent implements OnInit {
   private loadInventoryTypes(): void {
     this.inventoryApi.getInventoryTypes().subscribe({
       next: types => {
-        types.forEach((type: { type: string }) => {
+        types.forEach((type: any) => {
           this.inventoryTypeUpdateOptions.push(type.type);
         });
 
@@ -198,14 +198,14 @@ export class InventoriesUpdateFormComponent implements OnInit {
     } catch (e) {}
 
     let data = response && response.data;
-    const status = response && response.status;
-    const statusText = (response && response.statusText) || '';
+    const status = response && (response as any).status;
+    const statusText = (response && (response as any).statusText) || '';
 
     if (typeof data === 'string') {
       try {
         data = JSON.parse(data);
       } catch (e) {
-        const plain = data.trim();
+        const plain = (data as string).trim();
         if (plain) {
           alert(plain);
           return;
@@ -215,9 +215,9 @@ export class InventoriesUpdateFormComponent implements OnInit {
     }
     data = data || {};
 
-    const violations = data.violations || data.constraintViolations || [];
-    const detailsArr = Array.isArray(data.details) ? data.details : [];
-    const errorsArr = Array.isArray(data.errors) ? data.errors : [];
+    const violations = (data as any).violations || (data as any).constraintViolations || [];
+    const detailsArr = Array.isArray((data as any).details) ? (data as any).details : [];
+    const errorsArr = Array.isArray((data as any).errors) ? (data as any).errors : [];
 
     function mapErr(e: {
       field?: string;
@@ -245,13 +245,15 @@ export class InventoriesUpdateFormComponent implements OnInit {
       .join('\r\n');
 
     const baseMsg =
-      data.message ||
-      data.error_description ||
-      data.errorMessage ||
-      data.error ||
-      data.title ||
-      data.detail ||
-      (typeof data === 'object' && Object.keys(data).length === 0 ? '' : JSON.stringify(data)) ||
+      (data as any).message ||
+      (data as any).error_description ||
+      (data as any).errorMessage ||
+      (data as any).error ||
+      (data as any).title ||
+      (data as any).detail ||
+      (typeof data === 'object' && data && Object.keys(data).length === 0
+        ? ''
+        : JSON.stringify(data)) ||
       (status ? 'HTTP ' + status + (statusText ? ' ' + statusText : '') : 'Request failed');
 
     alert(fieldText ? baseMsg + '\r\n' + fieldText : baseMsg);

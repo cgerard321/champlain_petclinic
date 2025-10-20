@@ -178,16 +178,18 @@ export class BillUpdateFormComponent implements OnInit {
             error?: { errors?: Array<{ field: string; defaultMessage: string }>; error?: string };
           }) => {
             const error = response.error;
-            error.errors = error.errors || [];
-            alert(
-              error.error +
-                '\r\n' +
-                error.errors
-                  .map((e: { field: string; defaultMessage: string }) => {
-                    return e.field + ': ' + e.defaultMessage;
-                  })
-                  .join('\r\n')
-            );
+            if (error) {
+              error.errors = error.errors || [];
+              alert(
+                error.error +
+                  '\r\n' +
+                  error.errors
+                    .map((e: { field: string; defaultMessage: string }) => {
+                      return e.field + ': ' + e.defaultMessage;
+                    })
+                    .join('\r\n')
+              );
+            }
           },
         });
       } else {
@@ -199,16 +201,18 @@ export class BillUpdateFormComponent implements OnInit {
             error?: { errors?: Array<{ field: string; defaultMessage: string }>; error?: string };
           }) => {
             const error = response.error;
-            error.errors = error.errors || [];
-            alert(
-              error.error +
-                '\r\n' +
-                error.errors
-                  .map((e: { field: string; defaultMessage: string }) => {
-                    return e.field + ': ' + e.defaultMessage;
-                  })
-                  .join('\r\n')
-            );
+            if (error) {
+              error.errors = error.errors || [];
+              alert(
+                error.error +
+                  '\r\n' +
+                  error.errors
+                    .map((e: { field: string; defaultMessage: string }) => {
+                      return e.field + ': ' + e.defaultMessage;
+                    })
+                    .join('\r\n')
+              );
+            }
           },
         });
       }
@@ -231,16 +235,18 @@ export class BillUpdateFormComponent implements OnInit {
           error?: { errors?: Array<{ field: string; defaultMessage: string }>; error?: string };
         }) => {
           const error = response.error;
-          error.errors = error.errors || [];
-          alert(
-            error.error +
-              '\r\n' +
-              error.errors
-                .map((e: { field: string; defaultMessage: string }) => {
-                  return e.field + ': ' + e.defaultMessage;
-                })
-                .join('\r\n')
-          );
+          if (error) {
+            error.errors = error.errors || [];
+            alert(
+              error.error +
+                '\r\n' +
+                error.errors
+                  .map((e: { field: string; defaultMessage: string }) => {
+                    return e.field + ': ' + e.defaultMessage;
+                  })
+                  .join('\r\n')
+            );
+          }
         },
       });
     }
