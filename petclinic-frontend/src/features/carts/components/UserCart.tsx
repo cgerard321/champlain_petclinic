@@ -49,32 +49,6 @@ interface Invoice {
   quantity: number;
 }
 
-// localStorage helpers (per-user)
-const invoicesStorageKey = (userId: string | undefined): string =>
-  userId ? `invoices_${userId}` : 'invoices_anonymous';
-
-const loadInvoicesForUser = (userId?: string): InvoiceFullType[] => {
-  if (!userId) return [];
-  try {
-    const raw = localStorage.getItem(invoicesStorageKey(userId));
-    return raw ? (JSON.parse(raw) as InvoiceFullType[]) : [];
-  } catch {
-    return [];
-  }
-};
-
-const saveInvoicesForUser = (
-  userId: string | undefined,
-  invoices: InvoiceFullType[]
-): void => {
-  if (!userId) return;
-  try {
-    localStorage.setItem(invoicesStorageKey(userId), JSON.stringify(invoices));
-  } catch {
-    // ignore localStorage errors
-  }
-};
-
 // Main component
 const UserCart: React.FC = () => {
   const navigate = useNavigate();
@@ -93,9 +67,10 @@ const UserCart: React.FC = () => {
   );
 
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
-  const [userInvoices, setUserInvoices] = useState<InvoiceFullType[]>([]);
-  const [currentInvoiceIndex, setCurrentInvoiceIndex] = useState<number>(-1);
+  // invoices are shown in-memory only; no stored invoice list
   const [showInvoiceModal, setShowInvoiceModal] = useState<boolean>(false);
+  // keep only the last invoice in memory for immediate modal display; do not persist
+  const [lastInvoice, setLastInvoice] = useState<InvoiceFullType | null>(null);
   const [cartItemCount, setCartItemCount] = useState<number>(0);
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] =
     useState<boolean>(false);
@@ -728,12 +703,7 @@ const UserCart: React.FC = () => {
   };
 
   const { user } = useUser();
-
-  useEffect(() => {
-    const loaded = loadInvoicesForUser(user?.userId);
-    setUserInvoices(loaded);
-    setCurrentInvoiceIndex(loaded.length > 0 ? loaded.length - 1 : -1);
-  }, [user?.userId]);
+  // do NOT persist invoices to localStorage; we keep the most recent invoice in memory only
 
   const handleCheckoutConfirmation = (): void => {
     if (isStaff) {
@@ -806,11 +776,8 @@ const UserCart: React.FC = () => {
         discount,
         total: invoiceTotal,
       };
-
-      const updated = [...loadInvoicesForUser(user?.userId), newInvoice];
-      setUserInvoices(updated);
-      saveInvoicesForUser(user?.userId, updated);
-      setCurrentInvoiceIndex(updated.length - 1);
+      // Keep the full invoice in memory only for immediate display; do not persist
+      setLastInvoice(newInvoice);
       setShowInvoiceModal(true);
       setCheckoutMessage('Checkout successful! Your order is being processed.');
       setCartItems([]);
@@ -1038,16 +1005,15 @@ const UserCart: React.FC = () => {
                 <div className="checkout-message">{checkoutMessage}</div>
               )}
 
-              {userInvoices.length > 0 && (
+              {lastInvoice && (
                 <button
                   className="view-receipt-btn cart-button cart-button--brand cart-button--block"
                   onClick={() => {
-                    setCurrentInvoiceIndex(userInvoices.length - 1);
                     setShowInvoiceModal(true);
                   }}
                   style={{ marginTop: '1rem' }}
                 >
-                  View Receipts
+                  View Receipt
                 </button>
               )}
             </div>
@@ -1298,12 +1264,15 @@ const UserCart: React.FC = () => {
             <button onClick={() => setIsCheckoutModalOpen(false)}>No</button>
           </div>
         )}
-        {showInvoiceModal && currentInvoiceIndex >= 0 && (
+        {showInvoiceModal && lastInvoice && (
           <InvoiceComponent
-            invoices={userInvoices}
-            index={currentInvoiceIndex}
-            onIndexChange={setCurrentInvoiceIndex}
-            onClose={() => setShowInvoiceModal(false)}
+            invoices={[lastInvoice]}
+            index={0}
+            onIndexChange={() => {}}
+            onClose={() => {
+              setShowInvoiceModal(false);
+              // keep lastInvoice so the "View Receipt" button remains available
+            }}
           />
         )}
       </div>

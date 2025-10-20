@@ -74,37 +74,7 @@ function Invoice({
       aria-label="Invoice receipt"
     >
       <div className="invoice-modal-content" onClick={e => e.stopPropagation()}>
-        <div className="invoice-modal-header">
-          <div className="invoice-nav">
-            <button
-              className="cart-button"
-              onClick={() => onIndexChange(Math.max(0, index - 1))}
-              disabled={index <= 0}
-              aria-label="Previous invoice"
-            >
-              ← Prev
-            </button>
-            <button
-              className="cart-button"
-              onClick={() =>
-                onIndexChange(Math.min(invoices.length - 1, index + 1))
-              }
-              disabled={index >= invoices.length - 1}
-              aria-label="Next invoice"
-              style={{ marginLeft: 8 }}
-            >
-              Next →
-            </button>
-          </div>
-
-          <button
-            className="invoice-close"
-            onClick={onClose}
-            aria-label="Close invoice"
-          >
-            ×
-          </button>
-        </div>
+        <div className="invoice-modal-header" />
 
         <div className="invoice-body">
           {inv.billing && (
