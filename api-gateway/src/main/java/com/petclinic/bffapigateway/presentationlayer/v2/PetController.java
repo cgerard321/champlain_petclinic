@@ -37,33 +37,9 @@ public class PetController {
     @PutMapping(value = "/{petId}")
     public Mono<ResponseEntity<PetResponseDTO>> updatePet(@RequestBody Mono<PetRequestDTO> petRequestDTO, @PathVariable String petId) {
         return petRequestDTO
-                .flatMap(requestDTO -> {
-                    requestDTO.setPetId(petId); // Ensure petId is set
-                    return customersServiceClient.updatePet(just(requestDTO), petId)
-                            .flatMap(petResponse -> customersServiceClient.getOwner(petResponse.getOwnerId())
-                                    .flatMap(owner -> {
-                                        // Remove the old pet and add the updated pet
-                                        owner.getPets().removeIf(pet -> pet.getPetId().equals(petId));
-                                        owner.getPets().add(petResponse);
-
-                                        // Create OwnerRequestDTO with existing owner details
-                                        OwnerRequestDTO ownerRequestDTO = OwnerRequestDTO.builder()
-                                                .ownerId(owner.getOwnerId())
-                                                .firstName(owner.getFirstName())
-                                                .lastName(owner.getLastName())
-                                                .address(owner.getAddress())
-                                                .city(owner.getCity())
-                                                .province(owner.getProvince())
-                                                .telephone(owner.getTelephone())
-                                                .build();
-
-                                        return customersServiceClient.updateOwner(ownerRequestDTO.getOwnerId(), just(ownerRequestDTO))
-                                                .thenReturn(petResponse);
-                                    })
-                            );
-                })
+                .flatMap(requestDTO -> customersServiceClient.updatePet(just(requestDTO), petId)
                 .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
+                .defaultIfEmpty(ResponseEntity.badRequest().build()));
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})

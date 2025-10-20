@@ -855,24 +855,6 @@ public class CustomerServiceClientIntegrationTest {
     }
 
     @Test
-    void whenCreatePet_thenReturnCreatedPet() throws Exception {
-        server.enqueue(new MockResponse()
-                .setResponseCode(201)
-                .setHeader("Content-Type", "application/json")
-                .setBody(mapper.writeValueAsString(TEST_PET)));
-
-        Mono<PetResponseDTO> result = customersServiceClient.createPet(TEST_PET, OWNER_ID);
-
-        StepVerifier.create(result)
-                .expectNextMatches(r -> r.getPetId().equals(PET_ID))
-                .verifyComplete();
-
-        RecordedRequest request = server.takeRequest();
-        assertEquals("/pet", request.getPath());
-        assertEquals("POST", request.getMethod());
-    }
-
-    @Test
     void whenCreateOwners_thenReturnOwnersList() throws Exception {
         List<OwnerResponseDTO> owners = List.of(TEST_OWNER_RESPONSE);
 

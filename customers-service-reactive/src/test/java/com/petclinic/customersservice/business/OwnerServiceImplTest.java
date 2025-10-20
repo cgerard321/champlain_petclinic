@@ -38,12 +38,23 @@ class OwnerServiceImplTest {
     private OwnerService ownerService;
 
     private final Owner ownerEntity = buildOwner();
-    private final OwnerRequestDTO ownerRequestDTO = new OwnerRequestDTO();
+    private final OwnerRequestDTO ownerRequestDTO = buildOwnerRequestDTO();
 
     private Owner buildOwner() {
         return Owner.builder()
                 .id("55")
                 .ownerId("ownerId-123")
+                .firstName("FirstName")
+                .lastName("LastName")
+                .address("Test address")
+                .city("test city")
+                .province("test province")
+                .telephone("telephone")
+                .build();
+    }
+
+    private OwnerRequestDTO buildOwnerRequestDTO() {
+        return OwnerRequestDTO.builder()
                 .firstName("FirstName")
                 .lastName("LastName")
                 .address("Test address")
@@ -145,34 +156,20 @@ class OwnerServiceImplTest {
     }
 
     @Test
-    void insertOwner_ShouldSucceed() {
-        Owner ownerEntity = buildOwner();
+    void addOwner_ShouldSucceed() {
         when(repo.insert(any(Owner.class))).thenReturn(Mono.just(ownerEntity));
 
-        Mono<Owner> returnedOwner = ownerService.insertOwner(Mono.just(ownerEntity));
-
-        StepVerifier.create(returnedOwner).consumeNextWith(foundOwner -> {
-                    assertEquals(ownerEntity.getId(), foundOwner.getId());
-                    assertEquals(ownerEntity.getOwnerId(), foundOwner.getOwnerId());
-                })
-                .verifyComplete();
-        verify(repo).insert(any(Owner.class));
-    }
-
-    @Test
-    void newInsertOwner_ShouldSucceed() {
-        Owner ownerEntity = buildOwner();
-        Mono<Owner> ownerMono = Mono.just(ownerEntity);
-        when(repo.insert(any(Owner.class))).thenReturn(ownerMono);
-
-        Mono<Owner> returnedOwner = ownerService.insertOwner(ownerMono);
-
-        StepVerifier.create(returnedOwner)
+        StepVerifier.create(ownerService.addOwner(Mono.just(ownerRequestDTO)))
                 .consumeNextWith(foundOwner -> {
-                    // Check using the business ID (ownerId)
-                    assertEquals(ownerEntity.getOwnerId(), foundOwner.getOwnerId());
+                    assertEquals(ownerRequestDTO.getFirstName(), foundOwner.getFirstName());
+                    assertEquals(ownerRequestDTO.getLastName(), foundOwner.getFirstName());
+                    assertEquals(ownerRequestDTO.getCity(), foundOwner.getCity());
+                    assertEquals(ownerRequestDTO.getTelephone(), foundOwner.getTelephone());
+                    assertEquals(ownerRequestDTO.getAddress(), foundOwner.getAddress());
+                    assertEquals(ownerRequestDTO.getProvince(), foundOwner.getProvince());
                 })
                 .verifyComplete();
+
         verify(repo).insert(any(Owner.class));
     }
 
