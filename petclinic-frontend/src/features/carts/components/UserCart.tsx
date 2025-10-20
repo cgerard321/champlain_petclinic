@@ -49,7 +49,11 @@ interface Invoice {
   quantity: number;
 }
 
-// Main component
+/**
+ * UserCart component displays the user's shopping cart, allowing them to view, update, and remove items,
+ * manage billing information, and proceed to checkout. It also handles displaying invoices and notifications,
+ * and interacts with the backend to fetch and update cart data.
+ */
 const UserCart: React.FC = () => {
   const navigate = useNavigate();
   const { cartId } = useParams<{ cartId?: string }>();
@@ -67,9 +71,7 @@ const UserCart: React.FC = () => {
   );
 
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
-  // invoices are shown in-memory only; no stored invoice list
   const [showInvoiceModal, setShowInvoiceModal] = useState<boolean>(false);
-  // keep only the last invoice in memory for immediate modal display; do not persist
   const [lastInvoice, setLastInvoice] = useState<InvoiceFullType | null>(null);
   const [cartItemCount, setCartItemCount] = useState<number>(0);
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] =
@@ -703,7 +705,6 @@ const UserCart: React.FC = () => {
   };
 
   const { user } = useUser();
-  // do NOT persist invoices to localStorage; we keep the most recent invoice in memory only
 
   const handleCheckoutConfirmation = (): void => {
     if (isStaff) {
@@ -737,7 +738,7 @@ const UserCart: React.FC = () => {
         productSalePrice: item.productSalePrice,
         quantity: item.quantity || 1,
       }));
-      // build full invoice and persist per-user
+
       const invoiceItemsForFull: InvoiceItemType[] = invoiceItems.map(i => ({
         productId: i.productId,
         productName: i.productName,
@@ -776,7 +777,6 @@ const UserCart: React.FC = () => {
         discount,
         total: invoiceTotal,
       };
-      // Keep the full invoice in memory only for immediate display; do not persist
       setLastInvoice(newInvoice);
       setShowInvoiceModal(true);
       setCheckoutMessage('Checkout successful! Your order is being processed.');
@@ -1271,7 +1271,6 @@ const UserCart: React.FC = () => {
             onIndexChange={() => {}}
             onClose={() => {
               setShowInvoiceModal(false);
-              // keep lastInvoice so the "View Receipt" button remains available
             }}
           />
         )}
