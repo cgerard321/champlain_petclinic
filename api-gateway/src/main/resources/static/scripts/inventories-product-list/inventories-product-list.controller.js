@@ -159,22 +159,6 @@ angular.module('inventoriesProductList')
                 });
         };
 
-        $scope.deleteAllProducts = function () {
-            let varIsConf = confirm('Are you sure you want to delete all products for this inventory?');
-            if (varIsConf) {
-                let inventoryId = $stateParams.inventoryId;  // Retrieve the inventoryId from the appropriate location
-
-                $http.delete('api/gateway/inventories/' + inventoryId + '/products')
-                    .then(function(response) {
-                        alert("All products for this inventory have been deleted!");
-                        fetchProductList();
-                    }, function(error) {
-                        alert(error.data.errors);
-                        console.log(error, 'Failed to delete all products.');
-                    });
-            }
-        };
-
         function fetchProductList(productName, productPrice, productQuantity, productSalePrice) {
             if (productName || productPrice || productQuantity) {
                 self.lastParams.productName = productName;
