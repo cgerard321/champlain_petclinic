@@ -165,6 +165,6 @@ public class DataLoaderService implements CommandLineRunner {
                 .then()
                 .doOnSuccess(v -> log.info("Demo carts loaded (if collection was empty)"))
                 .doOnError(e -> log.error("Failed to load demo carts", e))
-                .subscribe();
+                .block();
     }
 }
