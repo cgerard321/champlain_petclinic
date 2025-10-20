@@ -3,12 +3,12 @@ import axiosInstance from '@/shared/api/axiosInstance';
 import { OwnerResponseModel } from '../models/OwnerResponseModel';
 
 export const deleteOwnerPhoto = async (
-    ownerId: string
+  ownerId: string
 ): Promise<AxiosResponse<OwnerResponseModel>> => {
-    return await axiosInstance.delete<OwnerResponseModel>(
-        `/owners/${ownerId}/photo`,
-        {
-            useV2: false,
-        }
-    );
+  return await axiosInstance.delete<OwnerResponseModel>(
+    `/owners/${ownerId}/photo`,
+    {
+      useV2: false,
+    }
+  );
 };
