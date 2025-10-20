@@ -58,7 +58,6 @@
   margin-top: 0.5rem;
 }
 
-/* Filters */
 .filterContainer {
   margin-bottom: 20px;
   padding: 10px;
@@ -79,7 +78,6 @@
   font-size: 14px;
 }
 
-/* Bills list container */
 .billsListContainer {
   display: flex;
   flex-direction: column;
@@ -90,14 +88,13 @@
   margin: 0 auto;
 }
 
-/* Bill card - using shadow + color from CurrentBalance */
 .billCard {
   width: 680px;
   max-width: 95%;
   padding: 12px 16px;
   border-radius: 8px;
-  background-color: #f7f7f7; /* matched from CurrentBalance */
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1); /* matched shadow */
+  background-color: #f7f7f7;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
   border: 1px solid #e6e6e6;
   display: flex;
   align-items: center;
@@ -105,7 +102,6 @@
   gap: 12px;
 }
 
-/* Inner layout: two vertical columns so fields stack as requested */
 .billCardContent {
   display: flex;
   align-items: flex-start;
@@ -113,7 +109,6 @@
   flex-wrap: nowrap;
 }
 
-/* Each column stacks its fields vertically */
 .billColumn {
   display: flex;
   flex-direction: column;
@@ -122,7 +117,6 @@
   flex: 1 1 0;
 }
 
-/* make left column a bit wider to emphasize vet/total */
 .billColumn.leftColumn {
   flex-basis: 55%;
   max-width: 55%;
@@ -133,10 +127,9 @@
   max-width: 45%;
 }
 
-/* Fields: label and value on the same line */
 .billField {
   display: flex;
-  flex-direction: row; /* inline label + value */
+  flex-direction: row;
   align-items: center;
   gap: 4px;
   width: 100%;
@@ -158,13 +151,11 @@
   text-overflow: ellipsis;
 }
 
-/* Narrower min-widths for specific fields to prevent wrap */
 .billField.vet strong { min-width: 0; }
 .billField.date strong { min-width: 0; }
 .billField.total strong { min-width: 0; }
 .billField.status strong { min-width: 0; }
 
-/* Actions */
 .billActions {
   display: flex;
   gap: 8px;
@@ -173,7 +164,6 @@
   white-space: nowrap;
 }
 
-/* keep details button style */
 .detailsButton {
   padding: 8px 12px;
   border-radius: 6px;
@@ -188,7 +178,6 @@
   background-color: #0069d9;
 }
 
-/* Status modifiers */
 .status--overdue {
   color: red;
   font-weight: 600;
@@ -199,7 +188,6 @@
   font-weight: 600;
 }
 
-/* Modal (kept) */
 .modalOverlay {
   position: fixed;
   inset: 0;
@@ -220,7 +208,6 @@
   overflow-y: auto;
 }
 
-/* Filter section and small helpers (kept if used elsewhere) */
 .filter-button-row {
   display: flex;
   justify-content: space-evenly;
@@ -259,7 +246,6 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
-/* Responsive tweaks */
 @media (max-width: 600px) {
   .billCard {
     width: 100%;
@@ -288,7 +274,6 @@
   }
 }
 
-/* Responsive tweaks: stack columns on small screens */
 @media (max-width: 640px) {
   .billCardContent {
     flex-direction: column;
@@ -304,7 +289,6 @@
     margin-left: 0;
   }
 
-  /* stack columns vertically on small screens */
   .billCardContent {
     flex-direction: column;
   }
@@ -314,7 +298,6 @@
     max-width: 50%;
   }
 
-  /* allow label/value to wrap if necessary */
   .billField {
     font-size: 13px;
   }
@@ -322,7 +305,7 @@
   .billField strong { min-width: 0; }
   .billValue { white-space: normal; }
 }
-/* Archive toggle specific styles */
+
 .archive-toggle button {
   background-color: #1585f5;
   color: #fff;
@@ -339,7 +322,6 @@
   background-color: #115293;
 }
 
-/* Pagination controls */
 .pagination-controls {
   display: flex;
   justify-content: center;
@@ -356,7 +338,6 @@
   visibility: hidden;
 }
 
-/* Additional legacy styles that might be needed */
 .create-bill-form {
   display: flex;
   flex-direction: column;
