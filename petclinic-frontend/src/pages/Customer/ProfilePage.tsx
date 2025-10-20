@@ -18,6 +18,7 @@ import axiosInstance from '@/shared/api/axiosInstance';
 import { getPetTypeName } from '@/features/customers/utils/petTypeMapping';
 import { deletePet } from '@/features/customers/api/deletePet';
 import defaultProfile from '@/assets/Owners/defaultProfilePicture.png';
+import {deleteOwnerPhoto} from "@/features/customers/api/deleteOwnerPhoto.ts";
 
 const ProfilePage = (): JSX.Element => {
   const [profilePicUrl, setProfilePicUrl] = useState<string>('');
@@ -230,6 +231,25 @@ const ProfilePage = (): JSX.Element => {
     }
   };
 
+    const handleDeletePhoto = async (): Promise<void> => {
+        if (!profilePicUrl) return;
+        const confirmed = window.confirm(
+            'Are you sure you want to delete your profile picture?'
+        );
+        if (!confirmed) return;
+
+        try {
+            await deleteOwnerPhoto(user.userId);
+            if (profilePicUrl) {
+                URL.revokeObjectURL(profilePicUrl);
+            }
+            setProfilePicUrl('');
+        } catch (error) {
+            console.error('Error deleting profile photo:', error);
+            alert('Failed to delete profile photo. Please try again.');
+        }
+    };
+
   const handleDeletePet = async (petId: string): Promise<void> => {
     const confirmed = window.confirm(
       'Are you sure you want to delete this pet? This action cannot be undone.'
@@ -402,6 +422,20 @@ const ProfilePage = (): JSX.Element => {
                 }}
               >
                 Change Photo
+              </button>
+              <button
+                        onClick={handleDeletePhoto}
+                        style={{
+                            padding: '8px 16px',
+                            backgroundColor: '#97131e',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            fontSize: '14px',
+                        }}
+                    >
+                        Delete Photo
               </button>
             </div>
             <h1>
