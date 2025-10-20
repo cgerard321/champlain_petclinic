@@ -518,9 +518,6 @@ const InventoryProducts: React.FC = () => {
       >
         Add
       </button>
-      <button className="btn btn-danger" onClick={handleDeleteAllProducts}>
-        Delete All Products
-      </button>
       <ConfirmationModal
         show={showConfirmation}
         message="Are you sure you want to delete this product?"
