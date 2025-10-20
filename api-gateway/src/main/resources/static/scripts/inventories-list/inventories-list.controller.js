@@ -173,7 +173,7 @@ angular.module('inventoriesList')
                     .catch(function(err){
                         tries++;
                         if (err && err.status === 401) {
-                            alert('Wrong email or password. Please try again.');
+                            alert('Wrong password. Please try again.');
                             if (tries < maxTries) return ask();
                             return reject(new Error('max-tries'));
                         }
