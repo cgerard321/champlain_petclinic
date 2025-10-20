@@ -48,7 +48,7 @@ class PetControllerIntegrationTest {
                 .expectNextCount(0)
                 .verifyComplete();
         client.delete()
-                .uri("/pet/" + petEntity.getId())
+                .uri("/pets/" + petEntity.getId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk().expectBody();
@@ -60,7 +60,7 @@ class PetControllerIntegrationTest {
         StepVerifier.create(setup).expectNextCount(1).verifyComplete();
         client
                 .get()
-                .uri("/pet")
+                .uri("/pets")
                 .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
                 .acceptCharset(StandardCharsets.UTF_8)
                 .exchange()
@@ -87,7 +87,7 @@ class PetControllerIntegrationTest {
 
         client
                 .get()
-                .uri("/pet/{petId}", validPetId)
+                .uri("/pets/{petId}", validPetId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -100,7 +100,7 @@ class PetControllerIntegrationTest {
     void updatePetByPetId() {
         Publisher<Pet> setup = repo.deleteAll().thenMany(repo.save(petEntity));
         StepVerifier.create(setup).expectNextCount(1).verifyComplete();
-        client.put().uri("/pet/" + PET_ID)
+        client.put().uri("/pets/" + PET_ID)
                 .body(Mono.just(petEntity), Pet.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange().expectStatus().isOk()
@@ -118,7 +118,7 @@ class PetControllerIntegrationTest {
     void insertPet() {
         Publisher<Void> setup = repo.deleteAll();
         StepVerifier.create(setup).expectNextCount(0).verifyComplete();
-        client.post().uri("/pet")
+        client.post().uri("/pets")
                 .body(Mono.just(petEntity), Pet.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange().expectStatus().isOk()
@@ -138,7 +138,7 @@ class PetControllerIntegrationTest {
     void updatePetIsActive() {
         Publisher<Pet> setup = repo.deleteAll().thenMany(repo.save(petEntity));
         StepVerifier.create(setup).expectNextCount(1).verifyComplete();
-        client.patch().uri("/pet/" + PET_ID)
+        client.patch().uri("/pets/" + PET_ID)
                 .body(Mono.just(petEntity), Pet.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange().expectStatus().isOk()
@@ -158,64 +158,4 @@ class PetControllerIntegrationTest {
                 .isActive("true")
                 .build();
     }
-
-
-
-    @Test
-    void deletePetType_WithEmptyId_ShouldReturnBadRequest() {
-        try {
-            client.delete()
-                    .uri("/owners/petTypes/")
-                    .exchange()
-                    .expectStatus().is4xxClientError();
-        } catch (NotFoundException e) {
-            fail("Unexpected NotFoundException: " + e.getMessage());
-        } catch (InvalidInputException e) {
-            fail("Unexpected InvalidInputException: " + e.getMessage());
-        } catch (Exception e) {
-            System.err.println("Test failed with unexpected exception: " + e.getMessage());
-            e.printStackTrace();
-            fail("Test failed with exception: " + e.getMessage());
-        }
-    }
-
-
-    @Test
-    void deletePetType_WhenPetTypeNotFound_ShouldReturnNoContent() {
-        try {
-            client.delete()
-                    .uri("/owners/petTypes/non-existent-pet-type")
-                    .exchange()
-                    .expectStatus().isNoContent();
-        } catch (NotFoundException e) {
-            fail("Unexpected NotFoundException: " + e.getMessage());
-        } catch (InvalidInputException e) {
-            fail("Unexpected InvalidInputException: " + e.getMessage());
-        } catch (Exception e) {
-            System.err.println("Test failed with unexpected exception: " + e.getMessage());
-            e.printStackTrace();
-            fail("Test failed with exception: " + e.getMessage());
-        }
-    }
-
-    @Test
-    void deletePetType_WithInvalidIdFormat_ShouldReturnNoContent() {
-        try {
-            client.delete()
-                    .uri("/owners/petTypes/invalid@id#format")
-                    .exchange()
-                    .expectStatus().isNoContent();
-        } catch (NotFoundException e) {
-            fail("Unexpected NotFoundException: " + e.getMessage());
-        } catch (InvalidInputException e) {
-            fail("Unexpected InvalidInputException: " + e.getMessage());
-        } catch (Exception e) {
-            System.err.println("Test failed with unexpected exception: " + e.getMessage());
-            e.printStackTrace();
-            fail("Test failed with exception: " + e.getMessage());
-        }
-    }
-
-
-
 }

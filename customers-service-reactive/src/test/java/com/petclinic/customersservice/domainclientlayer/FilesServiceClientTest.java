@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.customersservice.customersExceptions.exceptions.BadRequestException;
 import com.petclinic.customersservice.customersExceptions.exceptions.NotFoundException;
 import com.petclinic.customersservice.customersExceptions.exceptions.UnprocessableEntityException;
-import com.petclinic.customersservice.util.Rethrower;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
@@ -24,7 +23,6 @@ class FilesServiceClientTest {
     private static MockWebServer mockBackEnd;
     private FilesServiceClient filesServiceClient;
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final Rethrower rethrower = new Rethrower(objectMapper);
 
     @BeforeAll
     static void setup() throws IOException {
@@ -40,10 +38,6 @@ class FilesServiceClientTest {
                 "localhost",
                 String.valueOf(mockBackEnd.getPort())
         );
-        
-        Field rethrowerField = FilesServiceClient.class.getDeclaredField("rethrower");
-        rethrowerField.setAccessible(true);
-        rethrowerField.set(filesServiceClient, rethrower);
     }
 
     @AfterAll
