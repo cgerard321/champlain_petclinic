@@ -215,20 +215,6 @@ export default function InventoriesListTable(): JSX.Element {
     }
   };
 
-  const handleDeleteAllInventories = (confirm: boolean): void => {
-    if (confirm) {
-      setInventoryList([]);
-      deleteAllInventories();
-      setShowConfirmDialog(false);
-    } else {
-      if (showConfirmDialog) {
-        setShowConfirmDialog(false);
-        return;
-      }
-      setShowConfirmDialog(true);
-    }
-  };
-
   const archiveSelectedInventories = (): void => {
     if (selectedInventories.length === 0) return;
 
