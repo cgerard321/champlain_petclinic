@@ -38,7 +38,7 @@ export default function Product({
   const { addToCart } = useAddToCart();
   const { addToWishlist } = useAddToWishlist();
 
-  const handleProductTitleClick = (): void => {
+  const handleProductClick = (): void => {
     navigate(
       generatePath(AppRoutePaths.ProductDetails, {
         productId: product.productId,
@@ -108,11 +108,11 @@ export default function Product({
       }`}
       key={currentProduct.productId}
     >
-      <h2 onClick={handleProductTitleClick} className="product-title">
+      <div onClick={handleProductClick} className="product-title">
         <ImageContainer imageId={currentProduct.imageId} />
 
-        {currentProduct.productName}
-      </h2>
+        <h2 className="product-title">{currentProduct.productName}</h2>
+      </div>
 
       <p>Price: ${currentProduct.productSalePrice.toFixed(2)}</p>
 
