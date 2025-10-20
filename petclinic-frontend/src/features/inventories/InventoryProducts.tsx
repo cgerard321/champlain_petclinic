@@ -184,17 +184,6 @@ const InventoryProducts: React.FC = () => {
     }
   };
 
-  const handleDeleteAllProducts = async (): Promise<void> => {
-    try {
-      await deleteAllProductsFromInventory({ inventoryId: inventoryId! });
-      setProducts([]);
-      setFilteredProducts([]);
-      alert('All products deleted successfully.');
-    } catch (err) {
-      setError('Failed to delete all products.');
-    }
-  };
-
   const handleFilter = async (): Promise<void> => {
     if (productName || productDescription || productStatus) {
       await getProductList(
