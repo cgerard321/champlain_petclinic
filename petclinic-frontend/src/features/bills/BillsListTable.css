@@ -5,9 +5,13 @@
   font-family: Arial, sans-serif;
 }
 
+/* Filters */
 .filterContainer {
   margin-bottom: 20px;
   padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 .filterContainer label {
@@ -22,163 +26,113 @@
   font-size: 14px;
 }
 
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 0;
-  font-size: 13px;
-  text-align: left;
-  background-color: white;
-  border: 1px solid #ddd;
+/* Bills list container */
+.billsListContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding-top: 12px;
+  max-width: 100%;
+  margin: 0 auto;
 }
 
-.table th,
-.table td {
-  padding: 8px 6px;
-  text-align: center;
-  vertical-align: middle;
-  border: 1px solid #ddd;
+/* Bill card - using shadow + color from CurrentBalance */
+.billCard {
+  width: 680px;
+  max-width: 95%;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background-color: #f7f7f7; /* matched from CurrentBalance */
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1); /* matched shadow */
+  border: 1px solid #e6e6e6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
-.table th {
-  background-color: #f8f9fa;
-  color: #333;
-  font-weight: bold;
-  font-size: 12px;
+/* Inner layout */
+.billCardContent {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  flex: 1;
+  flex-wrap: wrap;
 }
 
-.table tbody tr:nth-of-type(even) {
-  background-color: #f9f9f9;
+/* Fields */
+.billField {
+  min-width: 120px;
+  font-size: 14px;
 }
 
-.table tbody tr:hover {
-  background-color: #f0f0f0;
+.billField.vet { min-width: 180px; }
+.billField.date { min-width: 160px; }
+.billField.total { min-width: 160px; }
+.billField.status { min-width: 120px; }
+
+/* Actions */
+.billActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
-/* Compact column widths for horizontal fit */
-.table th:nth-child(1),
-.table td:nth-child(1) {
-  width: 100px; /* Owner Name */
-  font-size: 12px;
-}
-
-.table th:nth-child(2),
-.table td:nth-child(2) {
-  width: 80px; /* Visit Type */
-}
-
-.table th:nth-child(3),
-.table td:nth-child(3) {
-  width: 80px; /* Vet Name */
-}
-
-.table th:nth-child(4),
-.table td:nth-child(4) {
-  width: 70px; /* Date */
-}
-
-.table th:nth-child(5),
-.table td:nth-child(5) {
-  width: 60px; /* Amount */
-}
-
-.table th:nth-child(6),
-.table td:nth-child(6) {
-  width: 60px; /* Tax */
-}
-
-.table th:nth-child(7),
-.table td:nth-child(7) {
-  width: 60px; /* Interest */
-}
-
-.table th:nth-child(8),
-.table td:nth-child(8) {
-  width: 70px; /* Total Due */
-}
-
-.table th:nth-child(9),
-.table td:nth-child(9) {
-  width: 70px; /* Status */
-}
-
-.table th:nth-child(10),
-.table td:nth-child(10) {
-  width: 80px; /* Due Date */
-}
-
-.table th:nth-child(11),
-.table td:nth-child(11) {
-  width: 70px; /* Time Remaining */
-}
-
-.table th:nth-child(12),
-.table td:nth-child(12) {
-  width: 120px; /* Actions */
-}
-
-/* Button styling - simple and clean */
-.table button {
-  padding: 4px 8px;
-  border: 1px solid #ccc;
-  border-radius: 3px;
-  font-size: 11px;
+.detailsButton {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #007bff;
+  background-color: #007bff;
+  color: #ffffff;
   cursor: pointer;
-  margin: 1px;
-  background-color: white;
+  font-size: 14px;
 }
 
-.table button:hover {
-  background-color: #f0f0f0;
+.detailsButton:hover {
+  background-color: #0069d9;
 }
 
-/* Download button */
-.table button:first-of-type {
-  background-color: #17a2b8;
-  color: white;
-  border-color: #17a2b8;
+/* Status modifiers */
+.status--overdue {
+  color: red;
+  font-weight: 600;
 }
 
-.table button:first-of-type:hover {
-  background-color: #138496;
+.status--paid {
+  color: green;
+  font-weight: 600;
 }
 
-/* Pay button */
-.table button:last-of-type {
-  background-color: #28a745;
-  color: white;
-  border-color: #28a745;
+/* Modal (kept) */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
 }
 
-.table button:last-of-type:hover {
-  background-color: #218838;
+.modalContent {
+  background: #fff;
+  padding: 20px;
+  border-radius: 6px;
+  width: 90%;
+  max-width: 720px;
+  max-height: 90%;
+  overflow-y: auto;
 }
 
-/* Remove responsive transforms for horizontal fit */
-@media (max-width: 1400px) {
-  .table {
-    font-size: 12px;
-  }
-
-  .table th,
-  .table td {
-    padding: 6px 4px;
-  }
-
-  .table button {
-    font-size: 10px;
-    padding: 3px 6px;
-  }
-}
-
-/* Filter button row - evenly spaced and centered */
+/* Filter section and small helpers (kept if used elsewhere) */
 .filter-button-row {
   display: flex;
   justify-content: space-evenly;
   align-items: center;
   gap: 12px;
   max-width: 720px;
-  margin: 12px auto; /* center horizontally and add vertical spacing */
+  margin: 12px auto;
   padding: 0 8px;
 }
 
@@ -197,39 +151,30 @@
 
 .filter-btn:hover {
   background-color: #0069d9;
-  box-shadow: 0 2px 6px rgba(0,123,255,0.12);
+  box-shadow: 0 2px 6px rgba(0, 123, 255, 0.12);
 }
 
-.filter-btn:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(0,123,255,0.12);
-}
-
-/* Centered filter section box */
 .filter-section {
   max-width: 720px;
-  margin: 8px auto 18px; /* center and vertical spacing */
+  margin: 8px auto 18px;
   padding: 12px 16px;
   border: 1px solid #e6e6e6;
   border-radius: 8px;
   background-color: #ffffff;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
-/* Make inner controls tidy */
-.filter-section label {
-  margin-right: 8px;
-  font-weight: 500;
-}
-
-.filter-section .filter-actions {
-  margin-top: 8px;
-  display: flex;
-  gap: 8px;
-}
-
-/* Responsive: stack buttons and filters on narrow screens */
+/* Responsive tweaks */
 @media (max-width: 600px) {
+  .billCard {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .billField {
+    min-width: 100%;
+  }
+
   .filter-button-row {
     flex-direction: column;
     gap: 8px;
