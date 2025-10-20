@@ -896,15 +896,16 @@ export default function VetDetails(): JSX.Element {
           >
             <h3 style={{ marginTop: 0 }}>Delete this photo?</h3>
             <p>
-              You're about to delete <strong>photo #{pendingPhotoId}</strong>.
+              You&apos;re about to delete{' '}
+              <strong>photo #{pendingPhotoId}</strong>.
             </p>
             <p>
               <strong>Vet:</strong>{' '}
               {vet ? `${vet.firstName} ${vet.lastName}` : 'Loading...'}
             </p>
             <p style={{ fontSize: 13, opacity: 0.85 }}>
-              This can't be undone. Make sure this is the correct veterinarian
-              profile.
+              This can&apos;t be undone. Make sure this is the correct
+              veterinarian profile.
             </p>
             <div
               style={{
