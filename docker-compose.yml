@@ -125,8 +125,11 @@ services:
   files-service:
     build: files-service
     environment:
+      - FILE_DATABASE=user:pwd@tcp(mysql-files:3306)/files-db
       - FILE_ENDPOINT=minio:9100
       - FILE_ENV=dev
+      - FILE_DEV_BUCKET=petclinic-dev
+      - FILE_DEV_DATA=petclinic-bucket.benmusicgeek.synology.me
     env_file:
       - mailer.env
     depends_on:
