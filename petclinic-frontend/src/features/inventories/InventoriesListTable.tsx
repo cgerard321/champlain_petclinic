@@ -860,21 +860,6 @@ export default function InventoriesListTable(): JSX.Element {
               className={inventoryStyles.overlay}
               onClick={() => setShowConfirmDialog(false)}
             ></div>
-            <div className={inventoryStyles.confirmDialog}>
-              <p>Are you sure you want to delete all inventories?</p>
-              <button
-                className={'btn-danger mx-1'}
-                onClick={() => handleDeleteAllInventories(true)}
-              >
-                Yes
-              </button>
-              <button
-                className={'btn-warning mx-1'}
-                onClick={() => setShowConfirmDialog(false)}
-              >
-                No
-              </button>
-            </div>
           </>
         )}
       </div>
