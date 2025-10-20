@@ -174,8 +174,6 @@ public class DataLoaderService implements CommandLineRunner {
         Flux.just(cart1, cart2, cart3, cart4, cart5, cart6, cart7, cart8, cart9, cart10)
 
                 .flatMap(cartRepository::insert)
-                .doOnNext(savedCart -> log.info("Inserted cart: {}", savedCart.getCartId()))
-                .doOnError(error -> log.error("Error inserting cart: {}", error.getMessage(), error))
                 .subscribe();
     }
 }
