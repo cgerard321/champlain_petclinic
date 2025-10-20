@@ -185,7 +185,7 @@ export default function CustomerVisitListTable(): JSX.Element {
             return null;
           })()}
           <BasicModal
-            title="Download error"
+            title="No Prescription Available"
             confirmText="OK"
             onConfirm={async () => {
               setShowErrorDialog(false);

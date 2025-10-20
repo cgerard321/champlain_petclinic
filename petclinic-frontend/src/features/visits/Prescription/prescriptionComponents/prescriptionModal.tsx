@@ -267,7 +267,19 @@ const PrescriptionModal: React.FC<PrescriptionModalProps> = ({
         />
       </form>
 
+      {/* Optional success notice */}
       {showNotification && <div className="notification">{successMessage}</div>}
+
+      {/* Cancel button to close and return to Edit modal */}
+      <div className="basic-modal-footer">
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={() => onClose?.()}
+        >
+          Cancel
+        </button>
+      </div>
     </BasicModal>
   );
 };
