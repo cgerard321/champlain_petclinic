@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('inventoriesProductList')
-    .controller('InventoriesProductController', ['$http', '$scope', '$stateParams','$window', 'InventoryService', function ($http, $scope, $stateParams, $window, InventoryService) {
+    .controller('InventoriesProductController', ['$http', '$scope', '$stateParams','$window', '$location', 'InventoryService', function ($http, $scope, $stateParams, $window, $location, InventoryService) {
         var self = this;
         var inventoryId
         const pageSize = 15;
@@ -23,31 +23,110 @@ angular.module('inventoriesProductList')
         });
         fetchProductList();
 
-        $scope.deleteProduct = function(product) {
-            let ifConfirmed = confirm('Are you sure you want to remove this inventory?');
-            if (ifConfirmed) {
-                // Step 1: Mark as temporarily deleted on frontend.
-                product.isTemporarilyDeleted = true;
+        // ===== helper to get the logged-in user's email (stored at login) =====
+        function getCurrentEmail() {
+            try {
+                var stored = localStorage.getItem('auth.user');
+                if (stored) {
+                    var obj = JSON.parse(stored);
+                    return obj && obj.email ? obj.email : null;
+                }
+            } catch (e) {}
+            return null;
+        }
 
-                // Display an Undo button for say, 5 seconds.
-                setTimeout(function() {
-                    if (product.isTemporarilyDeleted) {
-                        // If it's still marked as deleted after 5 seconds, proceed with actual deletion.
-                        proceedToDelete(product);
-                    }
-                }, 5000);  // 5 seconds = 5000ms.
+        // Fallback: if email is stored as raw string, support that too (non-breaking)
+        (function patchEmailFallback(){
+            if (!getCurrentEmail.__patched) {
+                var _orig = getCurrentEmail;
+                getCurrentEmail = function(){
+                    var v = _orig.call(this);
+                    if (v) return v;
+                    try { return localStorage.getItem('email') || null; } catch(e) { return null; }
+                };
+                getCurrentEmail.__patched = true;
             }
+        })();
+
+        // Temporarily whitelist current route so a 401 from the login probe won't purge/redirect
+        function withTempWhitelist(run) {
+            var added = false;
+            try {
+                var key = $location.path().substring(1); // same logic as interceptor
+                if (typeof whiteList !== 'undefined' && !whiteList.has(key)) {
+                    whiteList.add(key);
+                    added = true;
+                }
+            } catch (e) {}
+            return Promise.resolve()
+                .then(run)
+                .finally(function () {
+                    try {
+                        if (added) {
+                            var key = $location.path().substring(1);
+                            whiteList.delete(key);
+                        }
+                    } catch (e) {}
+                });
+        }
+
+        // Prompt for creds with up to N retries; never logs the user out
+        function promptAndVerify(maxTries) {
+            var tries = 0;
+            return new Promise(function(resolve, reject) {
+                (function ask() {
+                    var email = getCurrentEmail() || prompt('Enter your account email to confirm:');
+                    if (!email) return reject(new Error('cancelled'));
+                    var password = prompt('Enter ADMIN or INVENTORY MANAGER password to confirm:');
+                    if (!password) return reject(new Error('cancelled'));
+
+                    withTempWhitelist(function () {
+                        return $http.post('/api/gateway/users/login', { email: email, password: password });
+                    })
+                    .then(function(){ resolve({ email: email, password: password }); })
+                    .catch(function(err){
+                        tries++;
+                        if (err && err.status === 401) {
+                            alert('Wrong email or password. Please try again.');
+                            if (tries < maxTries) return ask();
+                            return reject(new Error('max-tries'));
+                        }
+                        alert('Authentication failed. Please try again.');
+                        reject(err || new Error('auth-failed'));
+                    });
+                })();
+            });
+        }
+
+        // ===== refined delete: warn -> (retrying) verify -> delete =====
+        $scope.deleteProduct = function (product) {
+            // Acceptance criteria: show irreversible warning
+            if (!confirm('Warning: Deleting this product cannot be undone. Continue?')) {
+                return;
+            }
+
+            // Verify with retries (3 tries) WITHOUT logging out on 401
+            promptAndVerify(3)
+                .then(function () {
+                    // Only after successful auth, proceed to actual deletion
+                    return proceedToDelete(product);
+                })
+                .catch(function (e) {
+                    if (e && e.message === 'cancelled') return;        // user cancelled a prompt
+                    if (e && e.message === 'max-tries') { alert('Too many failed attempts.'); return; }
+                    // Other errors already alerted in promptAndVerify
+                });
         };
 
+        // Keeping undo function to avoid breaking other parts, but it no longer gates deletion.
         $scope.undoDelete = function(product) {
             product.isTemporarilyDeleted = false;
             // Hide the undo button.
         };
 
         function proceedToDelete(product) {
-            if (!product.isTemporarilyDeleted) return;  // In case the user clicked undo just before the timeout.
-
-            $http.delete('api/gateway/inventories/' + product.inventoryId + '/products/' + product.productId)
+            // Do not rely on temporary flag; delete only after auth above
+            return $http.delete('api/gateway/inventories/' + product.inventoryId + '/products/' + product.productId)
                 .then(successCallback, errorCallback)
 
             function showNotification(message) {
@@ -64,22 +143,26 @@ angular.module('inventoriesProductList')
                 $scope.errors = [];
                 console.log(response, 'res');
 
-                // After deletion, wait for a short moment (e.g., 1 second) before showing the notification
+                // After deletion, wait for a short moment before showing the notification
                 setTimeout(() => {
                     showNotification(product.productName + " has been deleted successfully!");
-                    // Then, after displaying the notification for 5 seconds, reload the page
+                    // Then, quick refresh (kept your existing behavior)
                     setTimeout(() => {
                         location.reload();
                     }, 1000);
                 }, 1000);  // Wait for 1 second before showing notification
             }
             function errorCallback(error) {
+                // Do not change UI; deletion didn’t happen
                 // If the error message is nested under 'data.errors' in your API response:
-                alert(error.data.errors);
+                try {
+                    alert(error.data.errors || error.data.message || 'Delete failed');
+                } catch (e) {
+                    alert('Delete failed');
+                }
                 console.log(error, 'Data is inaccessible.');
             }
         }
-
 
         $scope.clearQueries = function (){
             self.lastParams.productName = '';
@@ -128,7 +211,6 @@ angular.module('inventoriesProductList')
                 queryString += "productSalePrice=" + productSalePrice;
                 self.lastParams.productSalePrice = productSalePrice;
             }
-
 
             var apiUrl = "api/gateway/inventories/" + inventoryId + "/products";
             if (queryString !== '') {
