@@ -2,7 +2,7 @@ import { NavBar } from '@/layouts/AppNavBar.tsx';
 import ProductsList from '@/features/products/ProductsList.tsx';
 import './Products.css';
 import TrendingList from '@/features/products/TrendingList';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import ProductSearch from '@/features/products/components/ProductSearch';
 import StarRating from '@/features/products/components/StarRating';
 import { ProductType } from '@/features/products/api/ProductTypeEnum';
@@ -23,6 +23,12 @@ export default function Products(): JSX.Element {
 
   const toggleSidebar = (): void => setIsSidebarOpen(!isSidebarOpen);
   const handleOverlayClick = (): void => setIsSidebarOpen(false);
+  const [showSortOptions, setShowSortOptions] = useState(false);
+  const [sortCriteria, setSortCriteria] = useState('default');
+  const handleSort = (criteria: string): void => {
+    setSortCriteria(criteria);
+    setShowSortOptions(false);
+  };
 
   const clearFilters = (): void => {
     setMinPrice(undefined);
@@ -35,15 +41,26 @@ export default function Products(): JSX.Element {
     setValidationMessage('');
   };
 
-  const filters = {
-    minPrice,
-    maxPrice,
-    ratingSort,
-    minStars,
-    maxStars,
-    deliveryType,
-    productType,
-  };
+  const filters = useMemo(
+    () => ({
+      minPrice,
+      maxPrice,
+      ratingSort,
+      minStars,
+      maxStars,
+      deliveryType,
+      productType,
+    }),
+    [
+      minPrice,
+      maxPrice,
+      ratingSort,
+      minStars,
+      maxStars,
+      deliveryType,
+      productType,
+    ]
+  );
 
   return (
     <div>
@@ -82,13 +99,37 @@ export default function Products(): JSX.Element {
           />
         </div>
 
-        <button
-          className="toggle-sidebar-button"
-          type="button"
-          aria-label="Sort By"
-        >
-          Sort By
-        </button>
+        <div className="sort-dropdown">
+          <button
+            className="sort-button"
+            type="button"
+            onClick={() => setShowSortOptions(prev => !prev)}
+            aria-haspopup="menu"
+            aria-controls="sort-menu"
+            aria-expanded={showSortOptions}
+          >
+            Sort By
+          </button>
+          {showSortOptions && (
+            <div className="sort-options" role="menu" id="sort-menu">
+              <button role="menuitem" onClick={() => handleSort('default')}>
+                Sort by Default
+              </button>
+              <button role="menuitem" onClick={() => handleSort('rating-desc')}>
+                Rating: High → Low
+              </button>
+              <button role="menuitem" onClick={() => handleSort('rating-asc')}>
+                Rating: Low → High
+              </button>
+              <button role="menuitem" onClick={() => handleSort('price-desc')}>
+                Price: High → Low
+              </button>
+              <button role="menuitem" onClick={() => handleSort('price-asc')}>
+                Price: Low → High
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {isSidebarOpen && (
@@ -172,15 +213,6 @@ export default function Products(): JSX.Element {
               />
             </div>
 
-            <select
-              value={ratingSort}
-              onChange={e => setRatingSort(e.target.value)}
-            >
-              <option value="default">Sort by Rating</option>
-              <option value="asc">Low to High</option>
-              <option value="desc">High to Low</option>
-            </select>
-
             <button onClick={toggleSidebar}>Apply</button>
             <button onClick={clearFilters}>Clear</button>
             {validationMessage && (
@@ -194,6 +226,7 @@ export default function Products(): JSX.Element {
         view="catalog"
         searchQuery={searchQuery}
         filters={filters}
+        sortCriteria={sortCriteria}
       />
 
       <div className="block">

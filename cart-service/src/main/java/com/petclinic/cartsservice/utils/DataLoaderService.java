@@ -1,6 +1,5 @@
 package com.petclinic.cartsservice.utils;
 
-
 import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.CartRepository;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
@@ -19,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 public class DataLoaderService implements CommandLineRunner {
-
     private final CartRepository cartRepository;
 
     @Override
