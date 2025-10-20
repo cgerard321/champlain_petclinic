@@ -18,7 +18,7 @@ export interface Bill {
 export enum BillStatus {
   UNPAID = 'UNPAID',
   PAID = 'PAID',
-  OVERDUE = 'OVERDUE'
+  OVERDUE = 'OVERDUE',
 }
 
 export interface BillRequest {
@@ -38,4 +38,3 @@ export interface PaginatedBills {
   totalPages: number;
   totalItems: number;
 }
-

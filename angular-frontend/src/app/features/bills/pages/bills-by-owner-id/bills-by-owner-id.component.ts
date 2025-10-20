@@ -9,10 +9,17 @@ import { Bill } from '../../models/bill.model';
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <h2 class="titleOwner">Bill History for customer {{owner.firstName}}, {{owner.lastName}}</h2>
+    <h2 class="titleOwner">
+      Bill History for customer {{ owner.firstName }}, {{ owner.lastName }}
+    </h2>
 
     <a class="newBtn btn btn-primary" [routerLink]="['/bills']">View all Bills</a>
-    <a class="btn btn-danger float-end" href="javascript:void(0)" (click)="deleteBillsByOwnerId(owner.id)">DELETE ALL BILLS FOR {{owner.firstName}}, {{owner.lastName}}</a>
+    <a
+      class="btn btn-danger float-end"
+      href="javascript:void(0)"
+      (click)="deleteBillsByOwnerId(owner.id)"
+      >DELETE ALL BILLS FOR {{ owner.firstName }}, {{ owner.lastName }}</a
+    >
 
     <table class="table table-striped">
       <thead>
@@ -25,14 +32,18 @@ import { Bill } from '../../models/bill.model';
       </thead>
 
       <tr id="customerId" *ngFor="let bill of billsByOwnerId">
-        <td>{{bill.billId}}</td>
-        <td>{{bill.customerId}}</td>
+        <td>{{ bill.billId }}</td>
+        <td>{{ bill.customerId }}</td>
         <td><a [routerLink]="['/owners/details', bill.customerId]">Owner Details</a></td>
-        <td><a [routerLink]="['/bills/details', bill.billId, 'owner', bill.customerId]">Bill Details</a></td>
+        <td>
+          <a [routerLink]="['/bills/details', bill.billId, 'owner', bill.customerId]"
+            >Bill Details</a
+          >
+        </td>
       </tr>
     </table>
   `,
-  styles: []
+  styles: [],
 })
 export class BillsByOwnerIdComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -40,7 +51,7 @@ export class BillsByOwnerIdComponent implements OnInit {
 
   customerId: string = '';
   billsByOwnerId: Bill[] = [];
-  owner: any = {};
+  owner: Record<string, unknown> = {};
 
   ngOnInit(): void {
     this.customerId = this.route.snapshot.paramMap.get('customerId') || '';
@@ -50,10 +61,10 @@ export class BillsByOwnerIdComponent implements OnInit {
 
   loadBills(): void {
     this.billApi.getBillsByCustomer(this.customerId).subscribe({
-      next: (bills) => {
+      next: bills => {
         this.billsByOwnerId = bills;
       },
-      error: () => {}
+      error: () => {},
     });
   }
 
@@ -61,23 +72,26 @@ export class BillsByOwnerIdComponent implements OnInit {
     this.owner = {
       id: this.customerId,
       firstName: 'John',
-      lastName: 'Doe'
+      lastName: 'Doe',
     };
   }
 
   deleteBillsByOwnerId(customerId: string): void {
-    const varIsConf = confirm('You are about to delete all the bills for the owner with ownerId ' + customerId + '. Are you sure this is what you want to do?');
+    const varIsConf = confirm(
+      'You are about to delete all the bills for the owner with ownerId ' +
+        customerId +
+        '. Are you sure this is what you want to do?'
+    );
     if (varIsConf) {
       this.billApi.deleteAllBillsByVet(customerId).subscribe({
         next: () => {
-          alert("The bills for owner with id " + customerId + " were deleted successfully");
+          alert('The bills for owner with id ' + customerId + ' were deleted successfully');
           this.loadBills();
         },
         error: () => {
-          alert("Could not delete bills");
-        }
+          alert('Could not delete bills');
+        },
       });
     }
   }
 }
-

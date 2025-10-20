@@ -12,39 +12,51 @@ import { UserDetails } from '../../models/user.model';
   template: `
     <h2 class="admin-panel">Users</h2>
 
-    <div class="dropdown" style="float: right; margin-bottom: 1%; margin-right: 10px; position: relative;">
-      <button 
-        type="button" 
-        class="btn btn-success dropdown-toggle" 
-        data-toggle="dropdown" 
-        aria-haspopup="true" 
+    <div
+      class="dropdown"
+      style="float: right; margin-bottom: 1%; margin-right: 10px; position: relative;"
+    >
+      <button
+        type="button"
+        class="btn btn-success dropdown-toggle"
+        data-toggle="dropdown"
+        aria-haspopup="true"
         aria-expanded="false"
-        (click)="toggleDropdown()">
+        (click)="toggleDropdown()"
+      >
         <i class="glyphicon glyphicon-user"></i> Create User <span class="caret"></span>
       </button>
-      <div class="dropdown-menu p-2" [class.show]="showDropdown" style="min-width: 240px; right: 0; left: auto; transform: translateX(0%);">
-        <a 
-          routerLink="/vet-form" 
-          class="btn btn-block text-left mb-2" 
-          style="background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;">
+      <div
+        class="dropdown-menu p-2"
+        [class.show]="showDropdown"
+        style="min-width: 240px; right: 0; left: auto; transform: translateX(0%);"
+      >
+        <a
+          routerLink="/vet-form"
+          class="btn btn-block text-left mb-2"
+          style="background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;"
+        >
           Veterinarian
         </a>
-        <a 
-          routerLink="/manager-form" 
-          class="btn btn-block text-left mb-2" 
-          style="background-color: #e2e3e5; color: #383d41; border: 1px solid #d6d8db;">
+        <a
+          routerLink="/manager-form"
+          class="btn btn-block text-left mb-2"
+          style="background-color: #e2e3e5; color: #383d41; border: 1px solid #d6d8db;"
+        >
           Inventory Manager
         </a>
-        <a 
-          routerLink="/signup" 
-          class="btn btn-block text-left mb-2" 
-          style="background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb;">
+        <a
+          routerLink="/signup"
+          class="btn btn-block text-left mb-2"
+          style="background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb;"
+        >
           Owner
         </a>
-        <div 
-          class="btn btn-block text-left mb-2" 
-          style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; opacity: 0.7; cursor: not-allowed;" 
-          title="Coming soon">
+        <div
+          class="btn btn-block text-left mb-2"
+          style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; opacity: 0.7; cursor: not-allowed;"
+          title="Coming soon"
+        >
           Receptionist
         </div>
       </div>
@@ -52,14 +64,15 @@ import { UserDetails } from '../../models/user.model';
 
     <form onsubmit="javascript:void(0)" style="max-width: 20em; margin-top: 2em;">
       <div class="form-group">
-        <input 
-          type="text" 
-          class="form-control" 
-          placeholder="Search Filter" 
-          [(ngModel)]="query" 
-          name="query" 
-          [ngModelOptions]="{standalone: true}" />
-        <br/>
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Search Filter"
+          [(ngModel)]="query"
+          name="query"
+          [ngModelOptions]="{ standalone: true }"
+        />
+        <br />
       </div>
     </form>
 
@@ -86,15 +99,14 @@ import { UserDetails } from '../../models/user.model';
             </span>
           </td>
           <td>
-            <input 
-              class="add-vet-button btn btn-success" 
-              type="button" 
-              value="Delete" 
+            <input
+              class="add-vet-button btn btn-success"
+              type="button"
+              value="Delete"
               (click)="removeUser(user.userId)"
-              style="margin-right: 8px"/>
-            <button 
-              class="btn btn-warning" 
-              [routerLink]="['/role-update', user.userId]">
+              style="margin-right: 8px"
+            />
+            <button class="btn btn-warning" [routerLink]="['/role-update', user.userId]">
               Update Role
             </button>
           </td>
@@ -102,94 +114,102 @@ import { UserDetails } from '../../models/user.model';
       </tbody>
     </table>
   `,
-  styles: [`
-    .admin-panel {
-      margin-bottom: 20px;
-      font-weight: bold;
-    }
+  styles: [
+    `
+      .admin-panel {
+        margin-bottom: 20px;
+        font-weight: bold;
+      }
 
-    .dropdown-menu.show {
-      display: block;
-    }
+      .dropdown-menu.show {
+        display: block;
+      }
 
-    .mb-2 {
-      margin-bottom: 8px;
-    }
+      .mb-2 {
+        margin-bottom: 8px;
+      }
 
-    .table {
-      width: 100%;
-      margin-bottom: 1rem;
-      color: #212529;
-    }
+      .table {
+        width: 100%;
+        margin-bottom: 1rem;
+        color: #212529;
+      }
 
-    .table-striped tbody tr:nth-of-type(odd) {
-      background-color: rgba(0, 0, 0, 0.05);
-    }
+      .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(0, 0, 0, 0.05);
+      }
 
-    .table th,
-    .table td {
-      padding: 0.75rem;
-      vertical-align: top;
-      border-top: 1px solid #dee2e6;
-    }
+      .table th,
+      .table td {
+        padding: 0.75rem;
+        vertical-align: top;
+        border-top: 1px solid #dee2e6;
+      }
 
-    .table thead th {
-      vertical-align: bottom;
-      border-bottom: 2px solid #dee2e6;
-    }
+      .table thead th {
+        vertical-align: bottom;
+        border-bottom: 2px solid #dee2e6;
+      }
 
-    .btn {
-      display: inline-block;
-      font-weight: 400;
-      text-align: center;
-      white-space: nowrap;
-      vertical-align: middle;
-      user-select: none;
-      border: 1px solid transparent;
-      padding: 0.375rem 0.75rem;
-      font-size: 1rem;
-      line-height: 1.5;
-      border-radius: 0.25rem;
-      transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-    }
+      .btn {
+        display: inline-block;
+        font-weight: 400;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        user-select: none;
+        border: 1px solid transparent;
+        padding: 0.375rem 0.75rem;
+        font-size: 1rem;
+        line-height: 1.5;
+        border-radius: 0.25rem;
+        transition:
+          color 0.15s ease-in-out,
+          background-color 0.15s ease-in-out,
+          border-color 0.15s ease-in-out,
+          box-shadow 0.15s ease-in-out;
+      }
 
-    .btn-success {
-      color: #fff;
-      background-color: #28a745;
-      border-color: #28a745;
-    }
+      .btn-success {
+        color: #fff;
+        background-color: #28a745;
+        border-color: #28a745;
+      }
 
-    .btn-warning {
-      color: #212529;
-      background-color: #ffc107;
-      border-color: #ffc107;
-    }
+      .btn-warning {
+        color: #212529;
+        background-color: #ffc107;
+        border-color: #ffc107;
+      }
 
-    .dropdown-toggle::after {
-      display: inline-block;
-      margin-left: 0.255em;
-      vertical-align: 0.255em;
-      content: "";
-      border-top: 0.3em solid;
-      border-right: 0.3em solid transparent;
-      border-bottom: 0;
-      border-left: 0.3em solid transparent;
-    }
+      .dropdown-toggle::after {
+        display: inline-block;
+        margin-left: 0.255em;
+        vertical-align: 0.255em;
+        content: '';
+        border-top: 0.3em solid;
+        border-right: 0.3em solid transparent;
+        border-bottom: 0;
+        border-left: 0.3em solid transparent;
+      }
 
-    .form-control {
-      display: block;
-      width: 100%;
-      padding: 0.375rem 0.75rem;
-      font-size: 1rem;
-      line-height: 1.5;
-      color: #495057;
-      background-color: #fff;
-      background-clip: padding-box;
-      border: 1px solid #ced4da;
-      border-radius: 0.25rem;
-      transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-    }
-  `]
+      .form-control {
+        display: block;
+        width: 100%;
+        padding: 0.375rem 0.75rem;
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #495057;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        transition:
+          border-color 0.15s ease-in-out,
+          box-shadow 0.15s ease-in-out;
+      }
+    `,
+  ],
 })
 export class AdminPanelComponent implements OnInit {
   private authApi = inject(AuthApiService);
@@ -205,18 +225,17 @@ export class AdminPanelComponent implements OnInit {
 
   loadUsers(): void {
     this.authApi.getAllUsers().subscribe({
-      next: (users) => {
+      next: users => {
         this.users = users;
         this.filteredUsers = users;
       },
-      error: (_error) => {
-      }
+      error: () => {},
     });
   }
 
   ngDoCheck(): void {
     if (this.query) {
-      this.filteredUsers = this.users.filter(user => 
+      this.filteredUsers = this.users.filter(user =>
         user.username.toLowerCase().includes(this.query.toLowerCase())
       );
     } else {
@@ -232,10 +251,10 @@ export class AdminPanelComponent implements OnInit {
         alert('User deleted successfully!');
         this.loadUsers();
       },
-      error: (error) => {
+      error: error => {
         const errorMsg = error.error?.message || error.error?.error || 'Failed to delete user.';
         alert('Failed to delete user: ' + errorMsg);
-      }
+      },
     });
   }
 
@@ -243,4 +262,3 @@ export class AdminPanelComponent implements OnInit {
     this.showDropdown = !this.showDropdown;
   }
 }
-

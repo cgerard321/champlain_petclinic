@@ -18,40 +18,84 @@ import { ProductRequest } from '../../models/inventory.model';
         <div class="row">
           <div class="col-sm-6 form-group">
             <label class="control-label" for="item">Product</label>
-            <input class="form-control" id="item" [(ngModel)]="product.productName" name="productName" type="text" placeholder="Please enter product name." />
-            <input type="hidden" [(ngModel)]="product.inventoryId" [value]="inventoryId">
+            <input
+              class="form-control"
+              id="item"
+              [(ngModel)]="product.productName"
+              name="productName"
+              type="text"
+              placeholder="Please enter product name."
+            />
+            <input type="hidden" [(ngModel)]="product.inventoryId" [value]="inventoryId" />
           </div>
         </div>
         <div class="col-sm-6 form-group">
           <label class="control-label" for="description">Description</label>
-          <input class="form-control col-sm-4" id="description" [(ngModel)]="product.productDescription" name="productDescription" type="text" placeholder="Please enter product description." />
+          <input
+            class="form-control col-sm-4"
+            id="description"
+            [(ngModel)]="product.productDescription"
+            name="productDescription"
+            type="text"
+            placeholder="Please enter product description."
+          />
         </div>
         <div class="row">
           <div class="form-group col-sm-12">
             <label class="control-label" for="price">Price</label>
-            <input class="form-control" id="price" step="0.01" min="0" [(ngModel)]="product.productPrice" name="productPrice" type="number" placeholder="Please enter a price" />
+            <input
+              class="form-control"
+              id="price"
+              step="0.01"
+              min="0"
+              [(ngModel)]="product.productPrice"
+              name="productPrice"
+              type="number"
+              placeholder="Please enter a price"
+            />
           </div>
         </div>
         <div class="form-group p-3">
           <div class="bundle marg col-sm-12">
             <label class="control-label" for="quantity">Quantity</label>
-            <input class="form-control" id="quantity" min="0" [(ngModel)]="product.productQuantity" name="productQuantity" type="number" required title="Please enter quantities." />
+            <input
+              class="form-control"
+              id="quantity"
+              min="0"
+              [(ngModel)]="product.productQuantity"
+              name="productQuantity"
+              type="number"
+              required
+              title="Please enter quantities."
+            />
           </div>
         </div>
         <div class="form-group p-3">
           <div class="bundle marg col-sm-12">
             <label class="control-label" for="salePrice">Sale Price</label>
-            <input class="form-control" id="salePrice" step="0.01" min="0" [(ngModel)]="product.productSalePrice" name="productSalePrice" type="number" required title="Please enter the sale price." />
+            <input
+              class="form-control"
+              id="salePrice"
+              step="0.01"
+              min="0"
+              [(ngModel)]="product.productSalePrice"
+              name="productSalePrice"
+              type="number"
+              required
+              title="Please enter the sale price."
+            />
           </div>
         </div>
         <div class="form-group formColor">
           <div class="owner marg col-sm-6">
-            <button id="newBtn" class="btn btn-default" type="button" (click)="submitProductForm()">Submit</button>
+            <button id="newBtn" class="btn btn-default" type="button" (click)="submitProductForm()">
+              Submit
+            </button>
           </div>
         </div>
       </div>
     </div>
-  `
+  `,
 })
 export class InventoriesProductFormComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -64,7 +108,7 @@ export class InventoriesProductFormComponent implements OnInit {
     productDescription: '',
     productPrice: 0,
     productQuantity: 0,
-    inventoryId: ''
+    inventoryId: '',
   };
 
   ngOnInit(): void {
@@ -78,27 +122,29 @@ export class InventoriesProductFormComponent implements OnInit {
       productDescription: this.product.productDescription,
       productPrice: this.product.productPrice,
       productQuantity: this.product.productQuantity,
-      productSalePrice: this.product.productSalePrice || 0
+      productSalePrice: this.product.productSalePrice || 0,
     };
 
     this.inventoryApi.addProductToInventory(this.inventoryId, data).subscribe({
       next: () => {
         this.router.navigate(['/inventories', this.inventoryId, 'products']);
       },
-      error: (response) => {
+      error: response => {
         this.handleHttpError(response);
-      }
+      },
     });
   }
 
-  private handleHttpError(response: any): void {
+  private handleHttpError(response: { data?: unknown }): void {
     const data = (response && response.data) || {};
     const baseMsg =
       (typeof data === 'string' && data) ||
       data.message ||
       data.error ||
-      (response && response.status ? ('HTTP ' + response.status + ' ' + (response.statusText || '')) : 'Request failed');
-    
+      (response && response.status
+        ? 'HTTP ' + response.status + ' ' + (response.statusText || '')
+        : 'Request failed');
+
     const fieldErrors =
       (Array.isArray(data.errors) && data.errors) ||
       (Array.isArray(data.details) && data.details) ||
@@ -107,16 +153,24 @@ export class InventoriesProductFormComponent implements OnInit {
 
     let fieldText = '';
     if (Array.isArray(fieldErrors) && fieldErrors.length) {
-      fieldText = fieldErrors.map((e: any) => {
-        if (typeof e === 'string') return e;
-        const field = e.field || e.path || e.parameter || '';
-        const msg = e.defaultMessage || e.message || e.reason || JSON.stringify(e);
-        return field ? (field + ': ' + msg) : msg;
-      }).join('\r\n');
+      fieldText = fieldErrors
+        .map(
+          (e: {
+            field?: string;
+            path?: string;
+            parameter?: string;
+            defaultMessage?: string;
+            message?: string;
+          }) => {
+            if (typeof e === 'string') return e;
+            const field = e.field || e.path || e.parameter || '';
+            const msg = e.defaultMessage || e.message || e.reason || JSON.stringify(e);
+            return field ? field + ': ' + msg : msg;
+          }
+        )
+        .join('\r\n');
     }
 
-    alert(fieldText ? (baseMsg + '\r\n' + fieldText) : baseMsg);
+    alert(fieldText ? baseMsg + '\r\n' + fieldText : baseMsg);
   }
 }
-
-

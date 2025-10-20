@@ -51,4 +51,3 @@ export interface RoleUpdate {
   userId: string;
   roles: string[];
 }
-

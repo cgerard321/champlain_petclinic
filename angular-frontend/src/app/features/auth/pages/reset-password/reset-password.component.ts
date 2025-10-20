@@ -13,28 +13,44 @@ import { ResetPasswordRequest } from '../../models/user.model';
     <div style="display: flex; justify-content: center; padding: 40px 20px">
       <div style="width: 100%; max-width: 25em">
         <h2 class="text-center" style="margin-bottom: 30px">Reset Your Password</h2>
-        
-        <form #resetForm="ngForm" (ngSubmit)="resetPassword()" style="max-width: 25em; margin: 0 auto">
-          <div class="alert alert-danger alert-dismissible text-center" role="alert" *ngFor="let error of errorMessages">
-            <a class="close" aria-label="close" (click)="clearErrorMessages()" style="cursor: pointer">&times;</a>
+
+        <form
+          #resetForm="ngForm"
+          (ngSubmit)="resetPassword()"
+          style="max-width: 25em; margin: 0 auto"
+        >
+          <div
+            class="alert alert-danger alert-dismissible text-center"
+            role="alert"
+            *ngFor="let error of errorMessages"
+          >
+            <a
+              class="close"
+              aria-label="close"
+              (click)="clearErrorMessages()"
+              style="cursor: pointer"
+              >&times;</a
+            >
             <strong>Error:</strong> {{ error }}
           </div>
 
           <div class="group-form" style="margin-bottom: 20px">
             <label for="pwd">New Password</label>
-            <input 
-              id="pwd" 
-              [type]="showPassword ? 'text' : 'password'" 
-              class="form-control" 
-              [(ngModel)]="resetPasswordData.newPassword" 
+            <input
+              id="pwd"
+              [type]="showPassword ? 'text' : 'password'"
+              class="form-control"
+              [(ngModel)]="resetPasswordData.newPassword"
               (ngModelChange)="updatePasswordStrength()"
-              name="password" 
-              [ngModelOptions]="{standalone: true}"
-              required/>
-            <i 
-              (click)="togglePasswordVisibility()" 
-              style="margin-left: 180px; margin-top: -700px; cursor: pointer" 
-              [class]="showPassword ? 'bi bi-eye' : 'bi bi-eye-slash'">
+              name="password"
+              [ngModelOptions]="{ standalone: true }"
+              required
+            />
+            <i
+              (click)="togglePasswordVisibility()"
+              style="margin-left: 180px; margin-top: -700px; cursor: pointer"
+              [class]="showPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"
+            >
             </i>
             <div [class]="'password-strength strength-' + passwordStrength">
               {{ strengthText }}
@@ -43,7 +59,12 @@ import { ResetPasswordRequest } from '../../models/user.model';
           </div>
 
           <div class="group-form d-flex justify-content-center" style="margin-top: 30px">
-            <button id="button" class="btn btn-default" type="submit" [disabled]="resetForm.invalid">
+            <button
+              id="button"
+              class="btn btn-default"
+              type="submit"
+              [disabled]="resetForm.invalid"
+            >
               Reset Password
             </button>
           </div>
@@ -51,28 +72,30 @@ import { ResetPasswordRequest } from '../../models/user.model';
       </div>
     </div>
   `,
-  styles: [`
-    label {
-      font-weight: bold;
-    }
+  styles: [
+    `
+      label {
+        font-weight: bold;
+      }
 
-    .password-strength {
-      font-weight: bold;
-      margin-top: 5px;
-    }
+      .password-strength {
+        font-weight: bold;
+        margin-top: 5px;
+      }
 
-    .strength-1 {
-      color: red;
-    }
+      .strength-1 {
+        color: red;
+      }
 
-    .strength-2 {
-      color: orange;
-    }
+      .strength-2 {
+        color: orange;
+      }
 
-    .strength-3 {
-      color: green;
-    }
-  `]
+      .strength-3 {
+        color: green;
+      }
+    `,
+  ],
 })
 export class ResetPasswordComponent implements OnInit {
   private authApi = inject(AuthApiService);
@@ -81,7 +104,7 @@ export class ResetPasswordComponent implements OnInit {
 
   resetPasswordData: ResetPasswordRequest = {
     token: '',
-    newPassword: ''
+    newPassword: '',
   };
 
   errorMessages: string[] = [];
@@ -103,10 +126,13 @@ export class ResetPasswordComponent implements OnInit {
         alert('Password was reset !');
         this.router.navigate(['/login']);
       },
-      error: (error) => {
-        const errorMsg = error.error?.message || error.error?.error || 'Failed to reset password. Please try again.';
+      error: error => {
+        const errorMsg =
+          error.error?.message ||
+          error.error?.error ||
+          'Failed to reset password. Please try again.';
         this.errorMessages = errorMsg.split('\n');
-      }
+      },
     });
   }
 
@@ -136,13 +162,13 @@ export class ResetPasswordComponent implements OnInit {
   getStrengthText(strength: number): string {
     switch (strength) {
       case 1:
-        return "Weak";
+        return 'Weak';
       case 2:
-        return "Medium";
+        return 'Medium';
       case 3:
-        return "Strong";
+        return 'Strong';
       default:
-        return "";
+        return '';
     }
   }
 
@@ -150,4 +176,3 @@ export class ResetPasswordComponent implements OnInit {
     this.errorMessages = [];
   }
 }
-

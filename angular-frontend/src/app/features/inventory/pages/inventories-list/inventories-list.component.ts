@@ -11,10 +11,12 @@ import { Inventory } from '../../models/inventory.model';
   imports: [CommonModule, FormsModule, RouterLink],
   template: `
     <style>
-      .table-striped tbody tr:hover { background-color: #D8D8D8; }
+      .table-striped tbody tr:hover {
+        background-color: #d8d8d8;
+      }
       .btn:hover {
         transform: translateY(2px);
-        box-shadow: 0 0 rgba(0,0,0,2);
+        box-shadow: 0 0 rgba(0, 0, 0, 2);
         border-bottom-width: 1px;
       }
     </style>
@@ -35,42 +37,52 @@ import { Inventory } from '../../models/inventory.model';
         </tr>
         <tr>
           <td>
-            <input type="text"
-                   [(ngModel)]="inventoryCode"
-                   placeholder="INV-XXXX"
-                   (keyup.enter)="searchInventory()">
+            <input
+              type="text"
+              [(ngModel)]="inventoryCode"
+              placeholder="INV-XXXX"
+              (keyup.enter)="searchInventory()"
+            />
           </td>
           <td>
-            <input type="text"
-                   [(ngModel)]="inventoryName"
-                   (keyup.enter)="searchInventory()">
+            <input type="text" [(ngModel)]="inventoryName" (keyup.enter)="searchInventory()" />
           </td>
           <td>
-            <select class="form-control col-sm-4"
-                    id="inventoryType"
-                    [(ngModel)]="inventoryType"
-                    name="inventoryType"
-                    (keyup.enter)="searchInventory()">
+            <select
+              class="form-control col-sm-4"
+              id="inventoryType"
+              [(ngModel)]="inventoryType"
+              name="inventoryType"
+              (keyup.enter)="searchInventory()"
+            >
               <option value=""></option>
-              <option *ngFor="let type of inventoryTypeOptions" [value]="type">{{type}}</option>
+              <option *ngFor="let type of inventoryTypeOptions" [value]="type">{{ type }}</option>
             </select>
           </td>
           <td>
-            <input type="text"
-                   [(ngModel)]="inventoryDescription"
-                   (keyup.enter)="searchInventory()">
+            <input
+              type="text"
+              [(ngModel)]="inventoryDescription"
+              (keyup.enter)="searchInventory()"
+            />
           </td>
           <td></td>
           <td>
             <a class="btn btn-success" type="button" (click)="clearQueries()" title="Clear">
-              <lord-icon src="https://cdn.lordicon.com/zxvuvcnc.json" trigger="hover" style="width:32px;height:32px"></lord-icon>
+              <lord-icon
+                src="https://cdn.lordicon.com/zxvuvcnc.json"
+                trigger="hover"
+                style="width:32px;height:32px"
+              ></lord-icon>
             </a>
           </td>
           <td>
-            <a class="btn btn-success" type="button"
-               (click)="searchInventory()"
-               title="Search">
-              <lord-icon src="https://cdn.lordicon.com/fkdzyfle.json" trigger="hover" style="width:32px;height:32px"></lord-icon>
+            <a class="btn btn-success" type="button" (click)="searchInventory()" title="Search">
+              <lord-icon
+                src="https://cdn.lordicon.com/fkdzyfle.json"
+                trigger="hover"
+                style="width:32px;height:32px"
+              ></lord-icon>
             </a>
           </td>
           <td></td>
@@ -78,23 +90,32 @@ import { Inventory } from '../../models/inventory.model';
       </thead>
 
       <tbody>
-        <tr *ngFor="let inventory of inventoryList" 
-            (click)="navigateToProducts(inventory.inventoryId)">
-
-          <td><span>{{inventory.inventoryCode}}</span></td>
+        <tr
+          *ngFor="let inventory of inventoryList"
+          (click)="navigateToProducts(inventory.inventoryId)"
+        >
+          <td>
+            <span>{{ inventory.inventoryCode }}</span>
+          </td>
 
           <td>
             <span>
-              <a style="text-decoration: none;"
-                 [routerLink]="['/inventories', inventory.inventoryId, 'products']"
-                 (click)="$event.stopPropagation()">
+              <a
+                style="text-decoration: none;"
+                [routerLink]="['/inventories', inventory.inventoryId, 'products']"
+                (click)="$event.stopPropagation()"
+              >
                 {{ inventory.inventoryName }}
               </a>
             </span>
           </td>
 
-          <td><span>{{inventory.inventoryType}}</span></td>
-          <td><span>{{inventory.inventoryDescription}}</span></td>
+          <td>
+            <span>{{ inventory.inventoryType }}</span>
+          </td>
+          <td>
+            <span>{{ inventory.inventoryDescription }}</span>
+          </td>
 
           <!-- NEW: last update message (Show Supply Updates) -->
           <td>
@@ -103,28 +124,43 @@ import { Inventory } from '../../models/inventory.model';
 
           <!-- Edit -->
           <td>
-            <a class="btn btn-warning"
-               [routerLink]="['/inventories', inventory.inventoryId, 'edit']"
-               (click)="$event.stopPropagation()" title="Edit">
-              <lord-icon src="https://cdn.lordicon.com/wkvacbiw.json" trigger="hover" style="width:32px;height:32px"></lord-icon>
+            <a
+              class="btn btn-warning"
+              [routerLink]="['/inventories', inventory.inventoryId, 'edit']"
+              (click)="$event.stopPropagation()"
+              title="Edit"
+            >
+              <lord-icon
+                src="https://cdn.lordicon.com/wkvacbiw.json"
+                trigger="hover"
+                style="width:32px;height:32px"
+              ></lord-icon>
             </a>
           </td>
 
           <!-- Delete / Restore -->
           <td>
-            <a *ngIf="!inventory.isTemporarilyDeleted"
-               class="btn btn-danger"
-               href="javascript:void(0)"
-               (click)="deleteInventory(inventory); $event.stopPropagation()"
-               title="Delete">
-              <lord-icon src="https://cdn.lordicon.com/skkahier.json" trigger="hover" style="width:32px;height:32px"></lord-icon>
+            <a
+              *ngIf="!inventory.isTemporarilyDeleted"
+              class="btn btn-danger"
+              href="javascript:void(0)"
+              (click)="deleteInventory(inventory); $event.stopPropagation()"
+              title="Delete"
+            >
+              <lord-icon
+                src="https://cdn.lordicon.com/skkahier.json"
+                trigger="hover"
+                style="width:32px;height:32px"
+              ></lord-icon>
             </a>
 
-            <a *ngIf="inventory.isTemporarilyDeleted"
-               class="btn btn-info"
-               href="javascript:void(0)"
-               (click)="undoDelete(inventory); $event.stopPropagation()"
-               title="Restore">
+            <a
+              *ngIf="inventory.isTemporarilyDeleted"
+              class="btn btn-info"
+              href="javascript:void(0)"
+              (click)="undoDelete(inventory); $event.stopPropagation()"
+              title="Restore"
+            >
               Restore
             </a>
           </td>
@@ -139,15 +175,19 @@ import { Inventory } from '../../models/inventory.model';
       <table class="mx-auto">
         <tr>
           <td><a class="btn btn-success btn-sm" (click)="pageBefore()"><</a></td>
-          <td><span>{{realPage}}</span></td>
+          <td>
+            <span>{{ realPage }}</span>
+          </td>
           <td><a class="btn btn-success btn-sm" (click)="pageAfter()">></a></td>
         </tr>
       </table>
     </div>
 
     <div id="loadingObject" style="display: none;">Loading...</div>
-    <div id="notification"
-         style="display: none; position: fixed; bottom: 10px; right: 10px; background-color: #4CAF50; color: white; padding: 10px; border-radius: 5px;">
+    <div
+      id="notification"
+      style="display: none; position: fixed; bottom: 10px; right: 10px; background-color: #4CAF50; color: white; padding: 10px; border-radius: 5px;"
+    >
       Notification Text Here
     </div>
 
@@ -159,34 +199,38 @@ import { Inventory } from '../../models/inventory.model';
       <button class="add-inventory-button btn btn-success">Add Inventory</button>
     </a>
   `,
-  styles: [`
-    .table-striped tbody tr:hover { background-color: #D8D8D8; }
-    .btn:hover {
-      transform: translateY(2px);
-      box-shadow: 0 0 rgba(0,0,0,2);
-      border-bottom-width: 1px;
-    }
-  `]
+  styles: [
+    `
+      .table-striped tbody tr:hover {
+        background-color: #d8d8d8;
+      }
+      .btn:hover {
+        transform: translateY(2px);
+        box-shadow: 0 0 rgba(0, 0, 0, 2);
+        border-bottom-width: 1px;
+      }
+    `,
+  ],
 })
 export class InventoriesListComponent implements OnInit {
   private inventoryApi = inject(InventoryApiService);
   private router = inject(Router);
-  
+
   inventoryList: Inventory[] = [];
   inventoryTypeOptions: string[] = [];
-  
+
   // Search parameters
   inventoryCode: string = '';
   inventoryName: string = '';
   inventoryType: string = '';
   inventoryDescription: string = '';
-  
+
   // Pagination
   currentPage: number = 0;
   listSize: number = 10;
   realPage: number = 1;
   numberOfPage: number = 0;
-  
+
   // Search state
   private name: string = '';
   private code: string = '';
@@ -200,26 +244,26 @@ export class InventoriesListComponent implements OnInit {
 
   private getInventoryList(): void {
     this.inventoryApi.getAllInventories(this.currentPage, this.listSize).subscribe({
-      next: (inventories) => {
+      next: inventories => {
         this.inventoryList = inventories;
         this.numberOfPage = Math.ceil(inventories.length / 10);
       },
-      error: (error) => {
+      error: error => {
         if (error.status === 404) {
           alert('inventory not found.');
         } else {
           alert('An error occurred: ' + error.statusText);
         }
-      }
+      },
     });
   }
 
   private loadInventoryTypes(): void {
     this.inventoryApi.getInventoryTypes().subscribe({
-      next: (types) => {
-        this.inventoryTypeOptions = types.map((type: any) => type.type);
+      next: types => {
+        this.inventoryTypeOptions = types.map((type: { type: string }) => type.type);
       },
-      error: () => {}
+      error: () => {},
     });
   }
 
@@ -236,35 +280,35 @@ export class InventoriesListComponent implements OnInit {
 
     if (this.inventoryCode != null && this.inventoryCode !== '') {
       this.code = this.inventoryCode.toUpperCase();
-      queryString += "inventoryCode=" + this.code;
+      queryString += 'inventoryCode=' + this.code;
     }
 
     if (this.inventoryName != null && this.inventoryName !== '') {
       this.name = this.inventoryName;
-      queryString += "inventoryName=" + this.inventoryName;
+      queryString += 'inventoryName=' + this.inventoryName;
     }
 
     if (this.inventoryType) {
       if (queryString !== '') {
-        queryString += "&";
+        queryString += '&';
       }
       this.type = this.inventoryType;
-      queryString += "inventoryType=" + this.inventoryType;
+      queryString += 'inventoryType=' + this.inventoryType;
     }
 
     if (this.inventoryDescription) {
       if (queryString !== '') {
-        queryString += "&";
+        queryString += '&';
       }
       this.desc = this.inventoryDescription;
-      queryString += "inventoryDescription=" + this.inventoryDescription;
+      queryString += 'inventoryDescription=' + this.inventoryDescription;
     }
 
     const searchParams = {
       inventoryCode: this.code,
       inventoryName: this.name,
       inventoryType: this.type,
-      inventoryDescription: this.desc
+      inventoryDescription: this.desc,
     };
 
     if (queryString !== '') {
@@ -272,31 +316,31 @@ export class InventoriesListComponent implements OnInit {
       this.realPage = this.currentPage + 1;
 
       this.inventoryApi.getAllInventories(this.currentPage, this.listSize, searchParams).subscribe({
-        next: (inventories) => {
+        next: inventories => {
           this.numberOfPage = Math.ceil(inventories.length / 10);
           this.inventoryList = inventories;
         },
-        error: (error) => {
+        error: error => {
           if (error.status === 404) {
             alert('inventory not found.');
           } else {
             alert('An error occurred: ' + error.statusText);
           }
-        }
+        },
       });
     } else {
       this.inventoryApi.getAllInventories(this.currentPage, this.listSize).subscribe({
-        next: (inventories) => {
+        next: inventories => {
           this.numberOfPage = Math.ceil(inventories.length / 10);
           this.inventoryList = inventories;
         },
-        error: (error) => {
+        error: error => {
           if (error.status === 404) {
             alert('inventory not found.');
           } else {
             alert('An error occurred: ' + error.statusText);
           }
-        }
+        },
       });
     }
   }
@@ -314,12 +358,12 @@ export class InventoriesListComponent implements OnInit {
     if (varIsConf) {
       this.inventoryApi.deleteAllInventories().subscribe({
         next: () => {
-          alert("All inventory entries have been cleared!");
+          alert('All inventory entries have been cleared!');
           this.inventoryList = [];
         },
-        error: (error) => {
+        error: error => {
           alert(error.data?.errors || 'Failed to clear inventory entries.');
-        }
+        },
       });
     }
   }
@@ -336,7 +380,7 @@ export class InventoriesListComponent implements OnInit {
           // If it's still marked as deleted after 5 seconds, proceed with actual deletion.
           this.proceedToDelete(inventory);
         }
-      }, 5000);  // 5 seconds = 5000ms.
+      }, 5000); // 5 seconds = 5000ms.
     }
   }
 
@@ -346,19 +390,24 @@ export class InventoriesListComponent implements OnInit {
   }
 
   private proceedToDelete(inventory: Inventory): void {
-    if (!inventory.isTemporarilyDeleted) return;  // In case the user clicked undo just before the timeout.
+    if (!inventory.isTemporarilyDeleted) return; // In case the user clicked undo just before the timeout.
 
     this.inventoryApi.deleteInventory(inventory.inventoryId).subscribe({
       next: () => {
-        this.showNotification(inventory.inventoryCode + " - " + inventory.inventoryName + " has been deleted successfully!");
+        this.showNotification(
+          inventory.inventoryCode +
+            ' - ' +
+            inventory.inventoryName +
+            ' has been deleted successfully!'
+        );
         // Then, after displaying the notification for 5 seconds, reload the page
         setTimeout(() => {
           location.reload();
         }, 1000);
       },
-      error: (error) => {
+      error: error => {
         alert(error.data?.errors || 'Data is inaccessible.');
-      }
+      },
     });
   }
 
@@ -370,7 +419,7 @@ export class InventoriesListComponent implements OnInit {
 
       setTimeout(() => {
         notificationElement.style.display = 'none';
-      }, 5000);  // Hide after 5 seconds
+      }, 5000); // Hide after 5 seconds
     }
   }
 
@@ -394,4 +443,3 @@ export class InventoriesListComponent implements OnInit {
     this.router.navigate(['/inventories', inventoryId, 'products']);
   }
 }
-

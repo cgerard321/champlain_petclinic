@@ -20,7 +20,7 @@ export interface RatingRequest {
 
 export const PREDEFINED_DESCRIPTIONS: PredefinedDescription[] = [
   'POOR',
-  'AVERAGE', 
+  'AVERAGE',
   'GOOD',
-  'EXCELLENT'
+  'EXCELLENT',
 ];

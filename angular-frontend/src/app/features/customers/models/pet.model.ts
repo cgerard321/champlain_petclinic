@@ -21,4 +21,3 @@ export interface PetRequest {
   petTypeId: string;
   weight?: number;
 }
-

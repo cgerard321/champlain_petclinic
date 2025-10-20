@@ -38,5 +38,3 @@ export interface PaginatedVets {
   totalPages: number;
   totalItems: number;
 }
-
-

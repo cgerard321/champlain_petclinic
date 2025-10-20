@@ -12,143 +12,248 @@ import { BillRequest } from '../../../bills/models/bill.model';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-
     <div class="container-calendar">
-        <div class="calendar">
-            <div class="month">
-                <i class="fas fa-angle-left prev" (click)="previousMonth()"></i>
-                <div class="date">
-                    <h1></h1>
-                    <p></p>
-                </div>
-                <i class="fas fa-angle-right next" (click)="nextMonth()"></i>
-            </div>
-            <div class="weekdays">
-                <div>Sun</div>
-                <div>Mon</div>
-                <div>Tue</div>
-                <div>Wed</div>
-                <div>Thu</div>
-                <div>Fri</div>
-                <div>Sat</div>
-            </div>
-            <div class="days"></div>
-
-            <div class="time-picker">
-                <div class="time-date">
-                    <i class="fas fa-angle-left prev-day"></i>
-                    <div class="title-date">
-                        <h1></h1>
-                    </div>
-                    <i class="fas fa-angle-right next-day"></i>
-                </div>
-                <div class="times">
-                </div>
-            </div>
+      <div class="calendar">
+        <div class="month">
+          <i class="fas fa-angle-left prev" (click)="previousMonth()"></i>
+          <div class="date">
+            <h1></h1>
+            <p></p>
+          </div>
+          <i class="fas fa-angle-right next" (click)="nextMonth()"></i>
         </div>
+        <div class="weekdays">
+          <div>Sun</div>
+          <div>Mon</div>
+          <div>Tue</div>
+          <div>Wed</div>
+          <div>Thu</div>
+          <div>Fri</div>
+          <div>Sat</div>
+        </div>
+        <div class="days"></div>
+
+        <div class="time-picker">
+          <div class="time-date">
+            <i class="fas fa-angle-left prev-day"></i>
+            <div class="title-date">
+              <h1></h1>
+            </div>
+            <i class="fas fa-angle-right next-day"></i>
+          </div>
+          <div class="times"></div>
+        </div>
+      </div>
     </div>
 
-      <h2>Visits</h2>
+    <h2>Visits</h2>
 
     <form id="visitForm" (ngSubmit)="submit()" onsubmit="return false;">
-        <!-- Sensitive Action Confirmation Modal -->
-        <div class="visitModal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="confirmationModalTitle">PLACEHOLDER</h5>
-                        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <p id="confirmationModalBody">PLACEHOLDER</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" id="confirmationModalDismissButton" data-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-primary" id="confirmationModalConfirmButton" (click)="completeFormAction()">Confirm</button>
-                    </div>
-                </div>
+      <!-- Sensitive Action Confirmation Modal -->
+      <div
+        class="visitModal fade"
+        id="confirmationModal"
+        tabindex="-1"
+        role="dialog"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="confirmationModalTitle">PLACEHOLDER</h5>
+              <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
             </div>
+            <div class="modal-body">
+              <p id="confirmationModalBody">PLACEHOLDER</p>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                id="confirmationModalDismissButton"
+                data-dismiss="modal"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary"
+                id="confirmationModalConfirmButton"
+                (click)="completeFormAction()"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <div class="form-group">
-            <label for="selectedVet">Practitioner</label>
-            <select id="selectedVet" [(ngModel)]="practitionerId" (change)="loadVetInfo(); getVisitsForPractitionerIdAndMonth()" [ngModelOptions]="{standalone: true}">
-                <option disabled selected value>Please Select A Veterinarian</option>
-                <option *ngFor="let p of vets" [value]="p.vetId" [attr.data-target]="p.firstName + ' ' + p.lastName">{{p.firstName}} {{p.lastName}}</option>
-            </select>
+      <div class="form-group">
+        <label for="selectedVet">Practitioner</label>
+        <select
+          id="selectedVet"
+          [(ngModel)]="practitionerId"
+          (change)="loadVetInfo(); getVisitsForPractitionerIdAndMonth()"
+          [ngModelOptions]="{ standalone: true }"
+        >
+          <option disabled selected value>Please Select A Veterinarian</option>
+          <option
+            *ngFor="let p of vets"
+            [value]="p.vetId"
+            [attr.data-target]="p.firstName + ' ' + p.lastName"
+          >
+            {{ p.firstName }} {{ p.lastName }}
+          </option>
+        </select>
 
-            <br>
+        <br />
 
-            <label for="vetPhoneNumber" style="margin-top: 10px;">Phone Number:</label>
-            <input id="vetPhoneNumber" disabled="disabled" style="background-color: #dbd9ce;" [value]="selectedVet?.phoneNumber"/>
+        <label for="vetPhoneNumber" style="margin-top: 10px;">Phone Number:</label>
+        <input
+          id="vetPhoneNumber"
+          disabled="disabled"
+          style="background-color: #dbd9ce;"
+          [value]="selectedVet?.phoneNumber"
+        />
 
-            <label for="vetEmailAddress">Email Address:</label>
-            <input id="vetEmailAddress" disabled="disabled" style="background-color: #dbd9ce;" [value]="selectedVet?.email"/>
+        <label for="vetEmailAddress">Email Address:</label>
+        <input
+          id="vetEmailAddress"
+          disabled="disabled"
+          style="background-color: #dbd9ce;"
+          [value]="selectedVet?.email"
+        />
 
-            <label for="vetSpecialties">Specialties:</label>
-            <input id="vetSpecialties" disabled="disabled" style="background-color: #dbd9ce;" [value]="getVetSpecialties()"/>
+        <label for="vetSpecialties">Specialties:</label>
+        <input
+          id="vetSpecialties"
+          disabled="disabled"
+          style="background-color: #dbd9ce;"
+          [value]="getVetSpecialties()"
+        />
 
-            <label for="vetWorkdays">Workdays:</label>
-            <input id="vetWorkdays" disabled="disabled" style="background-color: #dbd9ce;" [value]="getVetWorkdays()" (change)="selectChanged()" />
-        </div>
+        <label for="vetWorkdays">Workdays:</label>
+        <input
+          id="vetWorkdays"
+          disabled="disabled"
+          style="background-color: #dbd9ce;"
+          [value]="getVetWorkdays()"
+          (change)="selectChanged()"
+        />
+      </div>
 
-        <div class="form-group">
-            <!--Owners Drop down-->
-            <label for="selectedOwner">Owner</label>
-            <select id="selectedOwner" [(ngModel)]="ownerId" (change)="loadOwnerInfo()" [ngModelOptions]="{standalone: true}">
-                <option disabled selected value="">Please Select An Owner</option>
-                <option *ngFor="let o of owners" [value]="o.ownerId">{{o.firstName}} {{o.lastName}}</option>
-            </select>
-            <!--Display pets drop down-->
-            <label for="selectedPet">Pet</label>
-            <select id="selectedPet" [(ngModel)]="petId" (change)="logPetId()" [ngModelOptions]="{standalone: true}">
-                <option disabled selected value="">Please Select a Pet</option>
-                <option *ngFor="let p of pets" [value]="p.petId">{{p.name}}</option>
-            </select>
-        </div>
+      <div class="form-group">
+        <!--Owners Drop down-->
+        <label for="selectedOwner">Owner</label>
+        <select
+          id="selectedOwner"
+          [(ngModel)]="ownerId"
+          (change)="loadOwnerInfo()"
+          [ngModelOptions]="{ standalone: true }"
+        >
+          <option disabled selected value="">Please Select An Owner</option>
+          <option *ngFor="let o of owners" [value]="o.ownerId">
+            {{ o.firstName }} {{ o.lastName }}
+          </option>
+        </select>
+        <!--Display pets drop down-->
+        <label for="selectedPet">Pet</label>
+        <select
+          id="selectedPet"
+          [(ngModel)]="petId"
+          (change)="logPetId()"
+          [ngModelOptions]="{ standalone: true }"
+        >
+          <option disabled selected value="">Please Select a Pet</option>
+          <option *ngFor="let p of pets" [value]="p.petId">{{ p.name }}</option>
+        </select>
+      </div>
 
-        <div class="form-group" style="margin-top: 12px">
-            <label for="selectedVisitType">Visit Type:</label>
-            <select id="selectedVisitType" name="selectedVisitType" [(ngModel)]="visitType" [ngModelOptions]="{standalone: true}">
-                <option disabled selected value>Please Select A Visit Type</option>
-                <option value="Examinations">Examinations</option>
-                <option value="Injury">Injury</option>
-                <option value="Medical">Medical</option>
-                <option value="Chronic">Chronic</option>
-                <option value="Consultations">Consultations</option>
-                <option value="Operations">Operations</option>
-            </select>
-        </div>
+      <div class="form-group" style="margin-top: 12px">
+        <label for="selectedVisitType">Visit Type:</label>
+        <select
+          id="selectedVisitType"
+          name="selectedVisitType"
+          [(ngModel)]="visitType"
+          [ngModelOptions]="{ standalone: true }"
+        >
+          <option disabled selected value>Please Select A Visit Type</option>
+          <option value="Examinations">Examinations</option>
+          <option value="Injury">Injury</option>
+          <option value="Medical">Medical</option>
+          <option value="Chronic">Chronic</option>
+          <option value="Consultations">Consultations</option>
+          <option value="Operations">Operations</option>
+        </select>
+      </div>
 
-        <div class="form-group" style="margin-top: 4px">
-            <label for="date_input">Date</label>
-            <input id="date_input" type="date" class="form-control" [(ngModel)]="selectedDate" disabled [ngModelOptions]="{standalone: true}"/>
-        </div>
+      <div class="form-group" style="margin-top: 4px">
+        <label for="date_input">Date</label>
+        <input
+          id="date_input"
+          type="date"
+          class="form-control"
+          [(ngModel)]="selectedDate"
+          disabled
+          [ngModelOptions]="{ standalone: true }"
+        />
+      </div>
 
-        <div class="form-group">
-            <label for="description_textarea">Description</label>
-            <textarea id="description_textarea" class="form-control" [(ngModel)]="desc" style="resize:vertical;" [ngModelOptions]="{standalone: true}"></textarea>
-        </div>
+      <div class="form-group">
+        <label for="description_textarea">Description</label>
+        <textarea
+          id="description_textarea"
+          class="form-control"
+          [(ngModel)]="desc"
+          style="resize:vertical;"
+          [ngModelOptions]="{ standalone: true }"
+        ></textarea>
+      </div>
 
-        <div class="form-group" style="margin-top: 6px; margin-bottom: 6px">
-            <button id="submit_button" (click)="showConfirmationModal($event)" class="btn btn-default" type="button" style="border: 1px solid gray; border-radius: 4px">Add New Visit</button>
-            <button id="cancel_button" (click)="resetForm()" class="btn btn-default" type="button" style="visibility: hidden; border: 1px solid gray; border-radius: 4px">Cancel</button>
-        </div>
-      </form>
+      <div class="form-group" style="margin-top: 6px; margin-bottom: 6px">
+        <button
+          id="submit_button"
+          (click)="showConfirmationModal($event)"
+          class="btn btn-default"
+          type="button"
+          style="border: 1px solid gray; border-radius: 4px"
+        >
+          Add New Visit
+        </button>
+        <button
+          id="cancel_button"
+          (click)="resetForm()"
+          class="btn btn-default"
+          type="button"
+          style="visibility: hidden; border: 1px solid gray; border-radius: 4px"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
 
     <!-- Notifications Container-->
     <h3 style="margin-top: 12px">Notifications</h3>
     <div id="alertsContainer" class="form-group"></div>
-    <button (click)="goBack()" class="btn btn-default" type="button" style="border: 1px solid gray; border-radius: 4px">Back</button>
+    <button
+      (click)="goBack()"
+      class="btn btn-default"
+      type="button"
+      style="border: 1px solid gray; border-radius: 4px"
+    >
+      Back
+    </button>
   `,
-  styles: [`
-    @import url('/css/petclinic.css');
-    @import url('/css/visitsCalendarStyle.css');
-    @import url('/css/addVisitFormStyle.css');
-  `],
-  encapsulation: ViewEncapsulation.None
+  styles: [
+    `
+      @import url('/css/petclinic.css');
+      @import url('/css/visitsCalendarStyle.css');
+      @import url('/css/addVisitFormStyle.css');
+    `,
+  ],
+  encapsulation: ViewEncapsulation.None,
 })
 export class VisitsComponent implements OnInit, AfterViewInit {
   private visitApi = inject(VisitApiService);
@@ -180,7 +285,7 @@ export class VisitsComponent implements OnInit, AfterViewInit {
   private nameOnCalenderStr: string = '';
   private availabilities: number[] = [];
 
-  constructor() { }
+  constructor() {}
 
   ngOnInit(): void {
     this.loadVets();
@@ -216,8 +321,18 @@ export class VisitsComponent implements OnInit, AfterViewInit {
 
   private renderCalendar(): void {
     const months = [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December"
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
 
     this.date.setDate(1);
@@ -232,42 +347,63 @@ export class VisitsComponent implements OnInit, AfterViewInit {
     const lastDayIndex = this.getDateTemplate(1).getDay();
     const nextDays = 7 - lastDayIndex - 1;
 
-    localStorage.setItem("practitionerIdAndMonth", this.getFormatPractitionerIdAndMonth());
+    localStorage.setItem('practitionerIdAndMonth', this.getFormatPractitionerIdAndMonth());
 
-    let showSelectedDate = new Date("" + months[this.date.getMonth()] + " " + this.selectedDateNum + ", " + this.date.getFullYear());
-    let formattedDate = showSelectedDate.toDateString().substring(0, 3) + ", " + showSelectedDate.toDateString().substring(3, 10).trim() + ", " + this.date.getFullYear();
+    const showSelectedDate = new Date(
+      '' +
+        months[this.date.getMonth()] +
+        ' ' +
+        this.selectedDateNum +
+        ', ' +
+        this.date.getFullYear()
+    );
+    let formattedDate =
+      showSelectedDate.toDateString().substring(0, 3) +
+      ', ' +
+      showSelectedDate.toDateString().substring(3, 10).trim() +
+      ', ' +
+      this.date.getFullYear();
 
     let isMonthUnavailable = false;
-    if ((new Date("" + months[this.date.getMonth()] + " " + (parseInt(this.selectedDateNum.toString()) + 1) + ", " + this.date.getFullYear()) < new Date())) {
+    if (
+      new Date(
+        '' +
+          months[this.date.getMonth()] +
+          ' ' +
+          (parseInt(this.selectedDateNum.toString()) + 1) +
+          ', ' +
+          this.date.getFullYear()
+      ) < new Date()
+    ) {
       isMonthUnavailable = true;
       formattedDate = this.date.getFullYear().toString();
     }
 
     this.availableDays = [];
-    let vetWorkDays: number[] = [];
-    let days = "";
+    const vetWorkDays: number[] = [];
+    let days = '';
 
     let vetsArray: string[] | null = null;
     if (this.vetAvailabilityStr !== undefined && this.vetAvailabilityStr !== null) {
-      vetsArray = this.vetAvailabilityStr.split(",");
+      vetsArray = this.vetAvailabilityStr.split(',');
     }
 
     if (vetsArray !== null) {
       for (const d of vetsArray) {
         switch (d.toLowerCase().trim()) {
-          case "monday":
+          case 'monday':
             vetWorkDays.push(1);
             break;
-          case "tuesday":
+          case 'tuesday':
             vetWorkDays.push(2);
             break;
-          case "wednesday":
+          case 'wednesday':
             vetWorkDays.push(3);
             break;
-          case "thursday":
+          case 'thursday':
             vetWorkDays.push(4);
             break;
-          case "friday":
+          case 'friday':
             vetWorkDays.push(5);
             break;
           default:
@@ -276,7 +412,7 @@ export class VisitsComponent implements OnInit, AfterViewInit {
       }
     } else {
       formattedDate = this.date.getFullYear().toString();
-      this.selectedDateNum = null as any;
+      this.selectedDateNum = null;
     }
 
     if (this.nameOnCalenderStr === undefined) {
@@ -284,9 +420,9 @@ export class VisitsComponent implements OnInit, AfterViewInit {
     }
 
     // Update UI elements
-    const dateP = document.querySelector(".date p");
-    const timeDateH1 = document.querySelector(".time-date h1");
-    const dateH1 = document.querySelector(".date h1");
+    const dateP = document.querySelector('.date p');
+    const timeDateH1 = document.querySelector('.time-date h1');
+    const dateH1 = document.querySelector('.date h1');
 
     if (dateP) dateP.innerHTML = formattedDate;
     if (timeDateH1) timeDateH1.innerHTML = this.nameOnCalenderStr;
@@ -294,7 +430,7 @@ export class VisitsComponent implements OnInit, AfterViewInit {
 
     // Generate calendar days
     for (let x = firstDayIndex; x > 0; x--) {
-      let d = prevLastDay - x + 1;
+      const d = prevLastDay - x + 1;
       if (this.CheckWeekend(d, -1)) {
         days += `<div id="day${d}" data-target="previous-page-${d}" class="prev-date unavailable day">${d}</div>`;
       } else {
@@ -305,7 +441,7 @@ export class VisitsComponent implements OnInit, AfterViewInit {
     // Generate current month days
     for (let i = 1; i <= lastDay; i++) {
       let workDay = false;
-      for (let w of vetWorkDays) {
+      for (const w of vetWorkDays) {
         if (this.getWeekDay(i, 0) === w) {
           workDay = true;
         }
@@ -313,19 +449,29 @@ export class VisitsComponent implements OnInit, AfterViewInit {
 
       let scheduledVisits = false;
       if (this.availabilities != null) {
-        for (let a of this.availabilities) {
+        for (const a of this.availabilities) {
           if (a === i) {
             scheduledVisits = true;
           }
         }
       }
 
-      if (this.CheckWeekend(i, 0) && this.getDateFullFormatEqualsTo(i) && this.vetAvailabilityStr !== null) {
+      if (
+        this.CheckWeekend(i, 0) &&
+        this.getDateFullFormatEqualsTo(i) &&
+        this.vetAvailabilityStr !== null
+      ) {
         days += `<div id="day${i}" data-target="${i}" class="today_weekend day">${i}</div>`;
-      } else if ((this.CheckWeekend(i, 0) || this.vetAvailabilityStr === null) ||
-        (i < new Date().getDate() && this.date.getMonth() <= new Date().getMonth() && this.date.getFullYear() === new Date().getFullYear()) ||
-        (this.date.getMonth() < new Date().getMonth() && this.date.getFullYear() === new Date().getFullYear()) || this.date.getFullYear() < new Date().getFullYear()) {
-
+      } else if (
+        this.CheckWeekend(i, 0) ||
+        this.vetAvailabilityStr === null ||
+        (i < new Date().getDate() &&
+          this.date.getMonth() <= new Date().getMonth() &&
+          this.date.getFullYear() === new Date().getFullYear()) ||
+        (this.date.getMonth() < new Date().getMonth() &&
+          this.date.getFullYear() === new Date().getFullYear()) ||
+        this.date.getFullYear() < new Date().getFullYear()
+      ) {
         if (i.toString() === this.selectedDateNum.toString()) {
           days += `<div id="day${i}" data-target="${i}" class="editSelected unavailable day">${i}</div>`;
         } else {
@@ -362,14 +508,14 @@ export class VisitsComponent implements OnInit, AfterViewInit {
     monthDays.innerHTML = days;
 
     // Generate time slots
-    let slots = "";
+    let slots = '';
     let timeIsSelected = false;
 
     for (let i = 9; i < 17; i++) {
       let addition = 1;
       let val = i;
-      let is1AM = true, is2AM = true;
-      let firstTime, secondTime;
+      let is1AM = true,
+        is2AM = true;
 
       if (i > 12) {
         val = i - 12;
@@ -383,10 +529,16 @@ export class VisitsComponent implements OnInit, AfterViewInit {
         is1AM = false;
       }
 
-      firstTime = this.getAMorPM(is1AM);
-      secondTime = this.getAMorPM(is2AM);
+      const firstTime = this.getAMorPM(is1AM);
+      const secondTime = this.getAMorPM(is2AM);
 
-      if (isMonthUnavailable || formattedDate === this.date.getFullYear().toString() || (new Date().getDate() === parseInt(this.selectedDateNum.toString())) && new Date().getMonth() === this.date.getMonth() && new Date().getFullYear() === this.date.getFullYear()) {
+      if (
+        isMonthUnavailable ||
+        formattedDate === this.date.getFullYear().toString() ||
+        (new Date().getDate() === parseInt(this.selectedDateNum.toString()) &&
+          new Date().getMonth() === this.date.getMonth() &&
+          new Date().getFullYear() === this.date.getFullYear())
+      ) {
         slots += `<div data-target="${i} " class="time-slots time-unavailable">${val} ${firstTime} - ${val + addition} ${secondTime}</div>`;
       } else if (i === parseInt(this.selectedTime)) {
         slots += `<div data-target="${i} " class="time-slots time-selected">${val} ${firstTime} - ${val + addition} ${secondTime}</div>`;
@@ -400,9 +552,9 @@ export class VisitsComponent implements OnInit, AfterViewInit {
       slots += `<div class="confirmation-time">
                 <div class="submitBTN">Confirm</div>
               </div>`;
-      document.querySelector(".time-picker")?.classList.add("time-picker-selected");
+      document.querySelector('.time-picker')?.classList.add('time-picker-selected');
     } else {
-      document.querySelector(".time-picker")?.classList.remove("time-picker-selected");
+      document.querySelector('.time-picker')?.classList.remove('time-picker-selected');
     }
 
     timeSlots.innerHTML = slots;
@@ -415,7 +567,7 @@ export class VisitsComponent implements OnInit, AfterViewInit {
           let sDate = this.selectedDateNum;
 
           if (month < 9) {
-            month = parseInt("0" + (month + 1));
+            month = parseInt('0' + (month + 1));
           } else if (month !== 12) {
             month += 1;
           } else {
@@ -423,17 +575,16 @@ export class VisitsComponent implements OnInit, AfterViewInit {
           }
 
           if (sDate < 10) {
-            sDate = parseInt("0" + sDate);
+            sDate = parseInt('0' + sDate);
           }
 
           const dateInput = document.getElementById('date_input') as HTMLInputElement;
           if (dateInput) {
-            dateInput.value = this.date.getFullYear() + "-" + month + "-" + sDate;
+            dateInput.value = this.date.getFullYear() + '-' + month + '-' + sDate;
           }
         });
       }
     }
-
   }
 
   private attachEventListeners(): void {
@@ -464,13 +615,13 @@ export class VisitsComponent implements OnInit, AfterViewInit {
     // Date selection
     const daysContainer = document.querySelector('.days');
     if (daysContainer) {
-      daysContainer.addEventListener('click', (event: any) => {
-        let target = event.target.dataset.target;
+      daysContainer.addEventListener('click', (event: Event) => {
+        const target = event.target.dataset.target;
         if (target !== undefined) {
-          if (target.substring(0, 13) === "previous-page") {
+          if (target.substring(0, 13) === 'previous-page') {
             this.selectedDateNum = parseInt(target.substring(14, 16).trim());
             this.date.setMonth(this.date.getMonth() - 1);
-          } else if (target.substring(0, 9) === "next-page") {
+          } else if (target.substring(0, 9) === 'next-page') {
             this.selectedDateNum = parseInt(target.substring(10, 12).trim());
             this.date.setMonth(this.date.getMonth() + 1);
           } else {
@@ -487,8 +638,8 @@ export class VisitsComponent implements OnInit, AfterViewInit {
     // Time selection
     const timesContainer = document.querySelector('.times');
     if (timesContainer) {
-      timesContainer.addEventListener('click', (event: any) => {
-        let selected = event.target.dataset.target;
+      timesContainer.addEventListener('click', (event: Event) => {
+        const selected = event.target.dataset.target;
         if (selected !== undefined) {
           this.selectedTime = selected;
           if (this.chosenDate) {
@@ -510,9 +661,9 @@ export class VisitsComponent implements OnInit, AfterViewInit {
       const day = String(this.chosenDate.getDate()).padStart(2, '0');
       const hours = String(this.chosenDate.getHours()).padStart(2, '0');
       const minutes = String(this.chosenDate.getMinutes()).padStart(2, '0');
-      
+
       const dateTimeString = `${year}-${month}-${day}T${hours}:${minutes}`;
-      
+
       // Update the date input field
       const dateInput = document.getElementById('visitDate') as HTMLInputElement;
       if (dateInput) {
@@ -523,18 +674,48 @@ export class VisitsComponent implements OnInit, AfterViewInit {
 
   // Helper methods
   private CheckWeekend(tempDate: number, month: number): boolean {
-    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    let weekend = new Date("" + months[this.date.getMonth() + month] + " " + tempDate + ", " + this.date.getFullYear()).getDay();
-    return (weekend === 0 || weekend === 6);
+    const months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+    const weekend = new Date(
+      '' + months[this.date.getMonth() + month] + ' ' + tempDate + ', ' + this.date.getFullYear()
+    ).getDay();
+    return weekend === 0 || weekend === 6;
   }
 
   private getWeekDay(day: number, month: number): number {
-    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    return new Date("" + months[this.date.getMonth() + month] + " " + day + ", " + this.date.getFullYear()).getDay();
+    const months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+    return new Date(
+      '' + months[this.date.getMonth() + month] + ' ' + day + ', ' + this.date.getFullYear()
+    ).getDay();
   }
 
   private getAMorPM(isAM: boolean): string {
-    return isAM ? "AM" : "PM";
+    return isAM ? 'AM' : 'PM';
   }
 
   private getDateTemplate(monthAddition: number): Date {
@@ -542,23 +723,27 @@ export class VisitsComponent implements OnInit, AfterViewInit {
   }
 
   private getDateFullFormatEqualsTo(chosenDate: number): boolean {
-    return (chosenDate === new Date().getDate() && this.date.getMonth() === new Date().getMonth() && new Date().getFullYear() === this.date.getFullYear());
+    return (
+      chosenDate === new Date().getDate() &&
+      this.date.getMonth() === new Date().getMonth() &&
+      new Date().getFullYear() === this.date.getFullYear()
+    );
   }
 
   private getFormatPractitionerIdAndMonth(): string {
-    let lastDayOfMonth = new Date(this.date.getFullYear(), this.date.getMonth() + 1, 0).getDate();
+    const lastDayOfMonth = new Date(this.date.getFullYear(), this.date.getMonth() + 1, 0).getDate();
     let month = this.date.getMonth() + 1;
 
     if (month < 10) {
-      month = parseInt("0" + month);
+      month = parseInt('0' + month);
     }
 
-    let startDate = this.date.getFullYear() + "-" + month + "-01";
-    let endDate = this.date.getFullYear() + "-" + month + "-" + lastDayOfMonth;
+    const startDate = this.date.getFullYear() + '-' + month + '-01';
+    const endDate = this.date.getFullYear() + '-' + month + '-' + lastDayOfMonth;
 
     const selectedVet = document.getElementById('selectedVet') as HTMLSelectElement;
     const selectedOption = selectedVet?.selectedOptions[0];
-    return (selectedOption?.getAttribute('value') || '') + "," + startDate + "," + endDate;
+    return (selectedOption?.getAttribute('value') || '') + ',' + startDate + ',' + endDate;
   }
 
   private fixDays(): void {
@@ -566,7 +751,7 @@ export class VisitsComponent implements OnInit, AfterViewInit {
     let valMax = 0;
     let wasMaxReached = false;
 
-    for (let a of this.availableDays) {
+    for (const a of this.availableDays) {
       if (a > this.selectedDateNum && wasMaxReached === false) {
         valMax = a;
         wasMaxReached = true;
@@ -581,7 +766,7 @@ export class VisitsComponent implements OnInit, AfterViewInit {
     } else if (valMax === 0) {
       this.selectedDateNum = valMin;
     } else {
-      if ((valMax - this.selectedDateNum <= (this.selectedDateNum - valMin))) {
+      if (valMax - this.selectedDateNum <= this.selectedDateNum - valMin) {
         this.selectedDateNum = valMax;
       } else {
         this.selectedDateNum = valMin;
@@ -591,37 +776,39 @@ export class VisitsComponent implements OnInit, AfterViewInit {
 
   selectChanged(): void {
     this.vetAvailabilityStr = this.getVetWorkdays();
-    this.nameOnCalenderStr = this.selectedVet ? `${this.selectedVet.firstName} ${this.selectedVet.lastName}` : '';
+    this.nameOnCalenderStr = this.selectedVet
+      ? `${this.selectedVet.firstName} ${this.selectedVet.lastName}`
+      : '';
     this.renderCalendar();
   }
 
   // API methods
   loadVets(): void {
     this.visitApi.getVets().subscribe({
-      next: (vets) => {
+      next: vets => {
         this.vets = vets;
       },
-      error: (error) => {
+      error: error => {
         console.error('Error loading vets:', error);
-      }
+      },
     });
   }
 
   loadOwners(): void {
     this.visitApi.getOwners().subscribe({
-      next: (owners) => {
+      next: owners => {
         this.owners = owners;
       },
-      error: (error) => {
+      error: error => {
         console.error('Error loading owners:', error);
-      }
+      },
     });
   }
 
   loadVetInfo(): void {
     const selectedVetId = this.practitionerId;
     this.selectedVet = this.vets.find(vet => vet.vetId === selectedVetId) || null;
-    
+
     if (this.selectedVet) {
       this.vetAvailabilityStr = this.selectedVet.workday.join(', '); // For calendar logic
       this.nameOnCalenderStr = `${this.selectedVet.firstName} ${this.selectedVet.lastName}`; // For calendar title
@@ -635,12 +822,12 @@ export class VisitsComponent implements OnInit, AfterViewInit {
   loadOwnerInfo(): void {
     if (this.ownerId) {
       this.visitApi.getPetsByOwner(this.ownerId).subscribe({
-        next: (pets) => {
+        next: pets => {
           this.pets = pets;
         },
-        error: (error) => {
+        error: error => {
           console.error('Error loading pets:', error);
-        }
+        },
       });
     }
   }
@@ -657,8 +844,6 @@ export class VisitsComponent implements OnInit, AfterViewInit {
     return this.selectedVet ? this.selectedVet.workday.join(', ') : '';
   }
 
-
-
   getVisitsForPractitionerIdAndMonth(): void {
     // Method for loading visits for calendar display
   }
@@ -667,7 +852,7 @@ export class VisitsComponent implements OnInit, AfterViewInit {
     const button = event.target as HTMLButtonElement;
     const buttonText = button.textContent || '';
 
-    if (buttonText === "Add New Visit" || buttonText === "Update Visit") {
+    if (buttonText === 'Add New Visit' || buttonText === 'Update Visit') {
       const form = document.querySelector('form');
       if (!form || !(form as HTMLFormElement).reportValidity()) {
         return;
@@ -678,7 +863,8 @@ export class VisitsComponent implements OnInit, AfterViewInit {
     const modalBody = document.getElementById('confirmationModalBody');
 
     if (modalTitle) modalTitle.textContent = buttonText;
-    if (modalBody) modalBody.textContent = "Are you sure you want to " + buttonText.toLowerCase() + "?";
+    if (modalBody)
+      modalBody.textContent = 'Are you sure you want to ' + buttonText.toLowerCase() + '?';
 
     this.showModal();
   }
@@ -715,20 +901,23 @@ export class VisitsComponent implements OnInit, AfterViewInit {
       visitDate: this.chosenDate!.toISOString(),
       description: this.desc,
       petId: this.petId,
-      practitionerId: this.practitionerId
+      practitionerId: this.practitionerId,
     };
 
     this.visitApi.createVisit(visitData, this.ownerId, this.petId).subscribe({
-      next: (visit) => {
+      next: visit => {
         // Create corresponding bill after successful visit creation
         this.createBill(visit);
         this.createAlert('success', 'Successfully created visit!');
         this.router.navigate(['/visit-list']);
       },
-      error: (error) => {
+      error: error => {
         console.error('Error creating visit:', error);
-        this.createAlert('danger', 'Failed to create visit: ' + (error.error?.message || 'Unknown error'));
-      }
+        this.createAlert(
+          'danger',
+          'Failed to create visit: ' + (error.error?.message || 'Unknown error')
+        );
+      },
     });
   }
 
@@ -791,7 +980,7 @@ export class VisitsComponent implements OnInit, AfterViewInit {
     return true;
   }
 
-  private createBill(_visit: any): void {
+  private createBill(): void {
     if (!this.ownerId || !this.practitionerId || !this.visitType) {
       return;
     }
@@ -806,30 +995,29 @@ export class VisitsComponent implements OnInit, AfterViewInit {
       vetId: this.practitionerId,
       date: this.chosenDate!.toISOString().split('T')[0],
       amount: this.calculateBillAmount(), // Calculate based on visit type
-      billStatus: 'UNPAID' as any,
-      dueDate: dueDate.toISOString().split('T')[0] // Format as YYYY-MM-DD
+      billStatus: 'UNPAID',
+      dueDate: dueDate.toISOString().split('T')[0], // Format as YYYY-MM-DD
     };
 
     this.billApi.createBill(billData).subscribe({
-      next: () => {
-      },
-      error: (error) => {
+      next: () => {},
+      error: error => {
         console.error('Failed to create corresponding bill:', error);
-      }
+      },
     });
   }
 
   private calculateBillAmount(): number {
     // Calculate bill amount based on visit type
     const visitTypeAmounts: { [key: string]: number } = {
-      'Examinations': 100,
-      'Injury': 150,
-      'Medical': 200,
-      'Chronic': 250,
-      'Consultations': 75,
-      'Operations': 500
+      Examinations: 100,
+      Injury: 150,
+      Medical: 200,
+      Chronic: 250,
+      Consultations: 75,
+      Operations: 500,
     };
-    
+
     return visitTypeAmounts[this.visitType] || 100; // Default to $100
   }
 

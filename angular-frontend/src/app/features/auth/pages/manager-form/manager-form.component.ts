@@ -13,7 +13,11 @@ import { AuthApiService } from '../../api/auth-api.service';
       <div style="width: 400px;">
         <h2 class="text-center">Create Inventory Manager</h2>
 
-        <div class="alert alert-danger alert-dismissible text-center" role="alert" *ngFor="let error of errorMessages">
+        <div
+          class="alert alert-danger alert-dismissible text-center"
+          role="alert"
+          *ngFor="let error of errorMessages"
+        >
           <a class="close" aria-label="close" (click)="clearErrorMessages()">&times;</a>
           <strong>Error:</strong> {{ error }}
         </div>
@@ -21,31 +25,37 @@ import { AuthApiService } from '../../api/auth-api.service';
         <form class="form-horizontal" #managerForm="ngForm" (ngSubmit)="createManager()">
           <div class="form-group">
             <label for="username">Username</label>
-            <input 
-              id="username" 
-              class="form-control" 
-              [(ngModel)]="managerData.username" 
-              name="username" 
-              [ngModelOptions]="{standalone: true}"
-              maxlength="50" 
-              pattern="^[\\x20-\\x7F]+$" 
-              required />
+            <input
+              id="username"
+              class="form-control"
+              [(ngModel)]="managerData.username"
+              name="username"
+              [ngModelOptions]="{ standalone: true }"
+              maxlength="50"
+              pattern="^[\\x20-\\x7F]+$"
+              required
+            />
             <span *ngIf="!managerData.username" class="help-block">Username is required.</span>
           </div>
 
           <div class="form-group">
             <label for="password">Password</label>
             <div class="input-group">
-              <input 
-                id="password" 
-                class="form-control" 
-                [type]="showPassword ? 'text' : 'password'" 
-                [(ngModel)]="managerData.password" 
-                name="password" 
-                [ngModelOptions]="{standalone: true}"
+              <input
+                id="password"
+                class="form-control"
+                [type]="showPassword ? 'text' : 'password'"
+                [(ngModel)]="managerData.password"
+                name="password"
+                [ngModelOptions]="{ standalone: true }"
                 (ngModelChange)="updatePasswordStrength()"
-                required />
-              <span class="input-group-addon" (click)="togglePasswordVisibility()" style="cursor: pointer;">
+                required
+              />
+              <span
+                class="input-group-addon"
+                (click)="togglePasswordVisibility()"
+                style="cursor: pointer;"
+              >
                 <i [class]="showPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"></i>
               </span>
             </div>
@@ -57,14 +67,15 @@ import { AuthApiService } from '../../api/auth-api.service';
 
           <div class="form-group">
             <label for="email">Email</label>
-            <input 
-              id="email" 
-              class="form-control" 
+            <input
+              id="email"
+              class="form-control"
               type="email"
-              [(ngModel)]="managerData.email" 
-              name="email" 
-              [ngModelOptions]="{standalone: true}"
-              required />
+              [(ngModel)]="managerData.email"
+              name="email"
+              [ngModelOptions]="{ standalone: true }"
+              required
+            />
             <span *ngIf="!managerData.email" class="help-block">Email is required.</span>
           </div>
 
@@ -73,7 +84,11 @@ import { AuthApiService } from '../../api/auth-api.service';
           </div>
 
           <div class="form-group text-center">
-            <button class="btn btn-primary" type="submit" [disabled]="managerForm.invalid || isLoading">
+            <button
+              class="btn btn-primary"
+              type="submit"
+              [disabled]="managerForm.invalid || isLoading"
+            >
               Submit
             </button>
           </div>
@@ -81,50 +96,56 @@ import { AuthApiService } from '../../api/auth-api.service';
       </div>
     </div>
   `,
-  styles: [`
-    .loader {
-      border: 8px solid #f3f3f3;
-      border-top: 8px solid #005d9a;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-    }
+  styles: [
+    `
+      .loader {
+        border: 8px solid #f3f3f3;
+        border-top: 8px solid #005d9a;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+      }
 
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
 
-    .form-group {
-      margin-bottom: 20px;
-    }
+      .form-group {
+        margin-bottom: 20px;
+      }
 
-    label {
-      font-weight: bold;
-    }
+      label {
+        font-weight: bold;
+      }
 
-    .help-block {
-      color: red;
-    }
+      .help-block {
+        color: red;
+      }
 
-    .password-strength {
-      font-weight: bold;
-      margin-top: 5px;
-    }
+      .password-strength {
+        font-weight: bold;
+        margin-top: 5px;
+      }
 
-    .strength-1 {
-      color: red;
-    }
+      .strength-1 {
+        color: red;
+      }
 
-    .strength-2 {
-      color: orange;
-    }
+      .strength-2 {
+        color: orange;
+      }
 
-    .strength-3 {
-      color: green;
-    }
-  `]
+      .strength-3 {
+        color: green;
+      }
+    `,
+  ],
 })
 export class ManagerFormComponent {
   private authApi = inject(AuthApiService);
@@ -133,7 +154,7 @@ export class ManagerFormComponent {
   managerData = {
     username: '',
     email: '',
-    password: ''
+    password: '',
   };
 
   errorMessages: string[] = [];
@@ -149,14 +170,19 @@ export class ManagerFormComponent {
     this.authApi.createInventoryManager(this.managerData).subscribe({
       next: () => {
         this.isLoading = false;
-        alert('Inventory manager created successfully! Please check your email to verify the account.');
+        alert(
+          'Inventory manager created successfully! Please check your email to verify the account.'
+        );
         this.router.navigate(['/admin-panel']);
       },
-      error: (error) => {
+      error: error => {
         this.isLoading = false;
-        const errorMsg = error.error?.message || error.error?.error || 'Failed to create inventory manager. Please try again.';
+        const errorMsg =
+          error.error?.message ||
+          error.error?.error ||
+          'Failed to create inventory manager. Please try again.';
         this.errorMessages = errorMsg.split('\n');
-      }
+      },
     });
   }
 
@@ -186,13 +212,13 @@ export class ManagerFormComponent {
   getStrengthText(strength: number): string {
     switch (strength) {
       case 1:
-        return "Weak";
+        return 'Weak';
       case 2:
-        return "Medium";
+        return 'Medium';
       case 3:
-        return "Strong";
+        return 'Strong';
       default:
-        return "";
+        return '';
     }
   }
 

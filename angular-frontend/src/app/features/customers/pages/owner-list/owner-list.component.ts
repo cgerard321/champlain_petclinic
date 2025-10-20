@@ -11,7 +11,7 @@ import { Owner } from '../../models/owner.model';
   imports: [CommonModule, RouterLink, FormsModule],
   encapsulation: ViewEncapsulation.None,
   template: `
-    <link href="/css/customers/owner.css" rel="stylesheet" type="text/css"/>
+    <link href="/css/customers/owner.css" rel="stylesheet" type="text/css" />
 
     <div class="dashboard-container">
       <div class="main-content">
@@ -21,13 +21,15 @@ import { Owner } from '../../models/owner.model';
         </div>
 
         <div class="content-wrapper">
-
           <!-- Filters Card -->
           <div class="filters-card">
             <div class="filters-header">
               <div class="filters-title">Search & Filter</div>
               <div class="action-buttons">
-                <button class="btn-modern btn-search" (click)="searchOwnersByPaginationAndFilters()">
+                <button
+                  class="btn-modern btn-search"
+                  (click)="searchOwnersByPaginationAndFilters()"
+                >
                   &#x1F50D; Search
                 </button>
                 <button class="btn-modern btn-reset" (click)="clearInputAndResetDefaultData()">
@@ -38,27 +40,52 @@ import { Owner } from '../../models/owner.model';
 
             <div class="filters-grid">
               <div class="filter-group">
-                <input id="ownerIdInput" type="text" class="filter-input" placeholder="Enter Owner ID...">
+                <input
+                  id="ownerIdInput"
+                  type="text"
+                  class="filter-input"
+                  placeholder="Enter Owner ID..."
+                />
                 <label class="filter-label">Owner ID</label>
               </div>
 
               <div class="filter-group">
-                <input id="firstNameInput" type="text" class="filter-input" placeholder="Enter first name...">
+                <input
+                  id="firstNameInput"
+                  type="text"
+                  class="filter-input"
+                  placeholder="Enter first name..."
+                />
                 <label class="filter-label">First Name</label>
               </div>
 
               <div class="filter-group">
-                <input id="lastNameInput" type="text" class="filter-input" placeholder="Enter last name...">
+                <input
+                  id="lastNameInput"
+                  type="text"
+                  class="filter-input"
+                  placeholder="Enter last name..."
+                />
                 <label class="filter-label">Last Name</label>
               </div>
 
               <div class="filter-group d-none d-sm-flex">
-                <input id="cityInput" type="text" class="filter-input" placeholder="Enter city...">
+                <input
+                  id="cityInput"
+                  type="text"
+                  class="filter-input"
+                  placeholder="Enter city..."
+                />
                 <label class="filter-label">City</label>
               </div>
 
               <div class="filter-group d-none d-sm-flex">
-                <input id="phoneNumberInput" type="text" class="filter-input" placeholder="Enter phone...">
+                <input
+                  id="phoneNumberInput"
+                  type="text"
+                  class="filter-input"
+                  placeholder="Enter phone..."
+                />
                 <label class="filter-label">Phone Number</label>
               </div>
 
@@ -92,14 +119,22 @@ import { Owner } from '../../models/owner.model';
                 <tr *ngFor="let owner of owners">
                   <td>
                     <a class="link-modern" [routerLink]="['/owners', owner.ownerId]">
-                      {{owner.ownerId}}
+                      {{ owner.ownerId }}
                     </a>
                   </td>
-                  <td class="responsive-text">{{owner.firstName}} {{owner.lastName}}</td>
-                  <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{owner.address}}</td>
-                  <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{owner.city}}</td>
-                  <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{owner.province}}</td>
-                  <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{owner.telephone}}</td>
+                  <td class="responsive-text">{{ owner.firstName }} {{ owner.lastName }}</td>
+                  <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">
+                    {{ owner.address }}
+                  </td>
+                  <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">
+                    {{ owner.city }}
+                  </td>
+                  <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">
+                    {{ owner.province }}
+                  </td>
+                  <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">
+                    {{ owner.telephone }}
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -115,7 +150,7 @@ import { Owner } from '../../models/owner.model';
                   </a>
                 </li>
                 <li class="page-item-modern">
-                  <a class="page-number-link-modern" disabled>Page {{currentPageOnSite}}</a>
+                  <a class="page-number-link-modern" disabled>Page {{ currentPageOnSite }}</a>
                 </li>
                 <li class="page-item-modern">
                   <a class="page-link-modern" aria-label="Next" (click)="goNextPage()">
@@ -129,11 +164,11 @@ import { Owner } from '../../models/owner.model';
       </div>
     </div>
   `,
-  styles: []
+  styles: [],
 })
 export class OwnerListComponent implements OnInit {
   private ownerApi = inject(OwnerApiService);
-  
+
   owners: Owner[] = [];
   currentPage = 0;
   pageSize: number | string = 5;
@@ -157,20 +192,20 @@ export class OwnerListComponent implements OnInit {
   loadDefaultData(): void {
     if (!this.searchActive) {
       this.ownerApi.getOwnersCount().subscribe({
-        next: (count) => {
+        next: count => {
           this.totalItems = count;
           const size = this.pageSize || 5;
           this.totalPages = Math.ceil(this.totalItems / Number(size));
-          
+
           this.ownerApi.getOwnersPaginated(this.currentPage, Number(size)).subscribe({
-            next: (owners) => {
+            next: owners => {
               this.owners = owners;
               this.updateCurrentPageOnSite();
             },
-            error: () => {}
+            error: () => {},
           });
         },
-        error: () => {}
+        error: () => {},
       });
     }
   }
@@ -195,7 +230,9 @@ export class OwnerListComponent implements OnInit {
 
       // Check if all input fields are empty
       if (this.checkIfAllInputFieldsAreEmptyOrNull()) {
-        alert('Oops! It seems like you forgot to enter any filter criteria. Please provide some filter input to continue.');
+        alert(
+          'Oops! It seems like you forgot to enter any filter criteria. Please provide some filter input to continue.'
+        );
         return;
       }
     }
@@ -203,9 +240,9 @@ export class OwnerListComponent implements OnInit {
     this.searchActive = true;
 
     // Build search filters
-    const searchFilters: any = {
+    const searchFilters: Record<string, unknown> = {
       page: currentPage,
-      size: this.selectedSize || this.pageSize
+      size: this.selectedSize || this.pageSize,
     };
 
     if (this.ownerId) searchFilters.ownerId = this.ownerId;
@@ -220,19 +257,19 @@ export class OwnerListComponent implements OnInit {
     delete countFilters.size;
 
     this.ownerApi.getFilteredOwnersCount(countFilters).subscribe({
-      next: (count) => {
+      next: count => {
         this.totalItems = count;
         this.totalPages = Math.ceil(this.totalItems / Number(searchFilters.size));
 
         this.ownerApi.searchOwners(searchFilters).subscribe({
-          next: (owners) => {
+          next: owners => {
             this.owners = owners;
             this.updateCurrentPageOnSite();
           },
-          error: () => {}
+          error: () => {},
         });
       },
-      error: () => {}
+      error: () => {},
     });
   }
 
@@ -310,4 +347,3 @@ export class OwnerListComponent implements OnInit {
     );
   }
 }
-

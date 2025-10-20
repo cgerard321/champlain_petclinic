@@ -2,10 +2,10 @@ import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
   name: 'filter',
-  standalone: true
+  standalone: true,
 })
 export class FilterPipe implements PipeTransform {
-  transform(array: any[], searchObj: any, _query: string): any[] {
+  transform<T>(array: T[], searchObj: Record<string, unknown>): T[] {
     if (!array || !searchObj) {
       return array;
     }
@@ -27,7 +27,7 @@ export class FilterPipe implements PipeTransform {
     });
   }
 
-  private getNestedProperty(obj: any, path: string): any {
+  private getNestedProperty(obj: Record<string, unknown>, path: string): unknown {
     return path.split('.').reduce((o, p) => o && o[p], obj);
   }
 }

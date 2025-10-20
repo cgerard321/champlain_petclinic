@@ -1,20 +1,20 @@
 @import 'bootstrap/dist/css/bootstrap.min.css';
 @import 'bootstrap-icons/font/bootstrap-icons.css';
 
-@import './styles/shared/petclinic.css';
+@import '/css/petclinic.css';
 
-@import './styles/customers/owner.css';
-@import './styles/customers/ownerdetail.css';
-@import './styles/customers/pet.css';
-@import './styles/customers/registration.css';
+@import '/css/customers/owner.css';
+@import '/css/customers/ownerdetail.css';
+@import '/css/customers/pet.css';
+@import '/css/customers/registration.css';
 
-@import './styles/vets/form.css';
-@import './styles/vets/modal.css';
-@import './styles/vets/ratings.css';
-@import './styles/vets/sevenDaysCalendar.css';
-@import './styles/vets/vetTable.css';
+@import '/css/vets/form.css';
+@import '/css/vets/modal.css';
+@import '/css/vets/ratings.css';
+@import '/css/vets/sevenDaysCalendar.css';
+@import '/css/vets/vetTable.css';
 
-@import './styles/visits/addVisitFormStyle.css';
-@import './styles/visits/visitsCalendarStyle.css';
+@import '/css/visits/addVisitFormStyle.css';
+@import '/css/visits/visitsCalendarStyle.css';
 
-@import './styles/billing/bill-history.css';
+@import '/css/bill-history.css';

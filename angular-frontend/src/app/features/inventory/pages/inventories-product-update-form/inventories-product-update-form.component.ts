@@ -18,40 +18,84 @@ import { InventoryProduct } from '../../models/inventory.model';
         <div class="row">
           <div class="col-sm-6 form-group">
             <label class="control-label" for="item">Product</label>
-            <input class="form-control" id="item" [(ngModel)]="product.productName" name="productName" type="text" placeholder="Please enter product name." />
-            <input type="hidden" [(ngModel)]="product.inventoryId" [value]="inventoryId">
+            <input
+              class="form-control"
+              id="item"
+              [(ngModel)]="product.productName"
+              name="productName"
+              type="text"
+              placeholder="Please enter product name."
+            />
+            <input type="hidden" [(ngModel)]="product.inventoryId" [value]="inventoryId" />
           </div>
         </div>
         <div class="col-sm-6 form-group">
           <label class="control-label" for="description">Description</label>
-          <input class="form-control col-sm-4" id="description" [(ngModel)]="product.productDescription" name="productDescription" type="text" placeholder="Please enter product description." />
+          <input
+            class="form-control col-sm-4"
+            id="description"
+            [(ngModel)]="product.productDescription"
+            name="productDescription"
+            type="text"
+            placeholder="Please enter product description."
+          />
         </div>
         <div class="row">
           <div class="form-group col-sm-12">
             <label class="control-label" for="price">Price</label>
-            <input class="form-control" id="price" [(ngModel)]="product.productPrice" name="productPrice" type="number" placeholder="Please enter a price" />
+            <input
+              class="form-control"
+              id="price"
+              [(ngModel)]="product.productPrice"
+              name="productPrice"
+              type="number"
+              placeholder="Please enter a price"
+            />
           </div>
         </div>
         <div class="form-group p-3">
           <div class="bundle marg col-sm-12">
             <label class="control-label" for="quantity">Quantity</label>
-            <input class="form-control" id="quantity" [(ngModel)]="product.productQuantity" name="productQuantity" type="number" required title="Please enter quantities." />
+            <input
+              class="form-control"
+              id="quantity"
+              [(ngModel)]="product.productQuantity"
+              name="productQuantity"
+              type="number"
+              required
+              title="Please enter quantities."
+            />
           </div>
         </div>
         <div class="form-group p-3">
           <div class="bundle marg col-sm-12">
             <label class="control-label" for="salePrice">Sale Price</label>
-            <input class="form-control" id="salePrice" [(ngModel)]="product.productSalePrice" name="productSalePrice" type="number" required title="Please enter the sale price." />
+            <input
+              class="form-control"
+              id="salePrice"
+              [(ngModel)]="product.productSalePrice"
+              name="productSalePrice"
+              type="number"
+              required
+              title="Please enter the sale price."
+            />
           </div>
         </div>
         <div class="form-group formColor">
           <div class="owner marg col-sm-6">
-            <button id="newBtn" class="btn btn-default" type="button" (click)="submitProductUpdateForm()">Submit</button>
+            <button
+              id="newBtn"
+              class="btn btn-default"
+              type="button"
+              (click)="submitProductUpdateForm()"
+            >
+              Submit
+            </button>
           </div>
         </div>
       </div>
     </div>
-  `
+  `,
 })
 export class InventoriesProductUpdateFormComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -71,10 +115,10 @@ export class InventoriesProductUpdateFormComponent implements OnInit {
 
   private loadProduct(): void {
     this.inventoryApi.getInventoryProduct(this.inventoryId, this.productId).subscribe({
-      next: (product) => {
+      next: product => {
         this.product = product;
       },
-      error: (error) => this.handleHttpError(error)
+      error: error => this.handleHttpError(error),
     });
   }
 
@@ -82,11 +126,11 @@ export class InventoriesProductUpdateFormComponent implements OnInit {
     if (!this.product) return;
 
     if (!this.inventoryId) {
-      alert("Inventory ID is missing.");
+      alert('Inventory ID is missing.');
       return;
     }
     if (!this.productId) {
-      alert("Product ID is missing.");
+      alert('Product ID is missing.');
       return;
     }
 
@@ -95,20 +139,23 @@ export class InventoriesProductUpdateFormComponent implements OnInit {
       productDescription: this.product.productDescription,
       productPrice: this.product.productPrice,
       productQuantity: this.product.productQuantity,
-      productSalePrice: this.product.productSalePrice || 0
+      productSalePrice: this.product.productSalePrice || 0,
     };
 
     this.inventoryApi.updateInventoryProduct(this.inventoryId, this.productId, data).subscribe({
       next: () => {
         this.router.navigate(['/inventories', this.inventoryId, 'products']);
       },
-      error: (error) => this.handleHttpError(error)
+      error: error => this.handleHttpError(error),
     });
   }
 
-  private handleHttpError(response: any): void {
-    try { 
-    } catch (e) {}
+  private handleHttpError(response: { data?: unknown }): void {
+    try {
+      // Handle error processing
+    } catch (e) {
+      // Handle catch error
+    }
 
     let data = response && response.data;
     const status = response && response.status;
@@ -133,14 +180,25 @@ export class InventoriesProductUpdateFormComponent implements OnInit {
     const errorsArr = Array.isArray(data.errors) ? data.errors : [];
     const detailsArr = Array.isArray(data.details) ? data.details : [];
     const violations = Array.isArray(data.violations || data.constraintViolations)
-      ? (data.violations || data.constraintViolations) : [];
+      ? data.violations || data.constraintViolations
+      : [];
 
-    function mapErr(e: any) {
+    function mapErr(e: {
+      field?: string;
+      path?: string;
+      parameter?: string;
+      property?: string;
+      defaultMessage?: string;
+      message?: string;
+      reason?: string;
+      detail?: string;
+      title?: string;
+    }): string {
       if (typeof e === 'string') return e;
       const field = e.field || e.path || e.parameter || e.property || '';
       const msg = e.defaultMessage || e.message || e.reason || e.detail || e.title || '';
       const asStr = msg || JSON.stringify(e);
-      return field ? (field + ': ' + asStr) : asStr;
+      return field ? field + ': ' + asStr : asStr;
     }
 
     const fieldText = ([] as string[])
@@ -158,10 +216,8 @@ export class InventoriesProductUpdateFormComponent implements OnInit {
       data.title ||
       data.detail ||
       (typeof data === 'object' && Object.keys(data).length ? JSON.stringify(data) : '') ||
-      (status ? ('HTTP ' + status + (statusText ? (' ' + statusText) : '')) : 'Request failed');
+      (status ? 'HTTP ' + status + (statusText ? ' ' + statusText : '') : 'Request failed');
 
-    alert(fieldText ? (baseMsg + '\r\n' + fieldText) : baseMsg);
+    alert(fieldText ? baseMsg + '\r\n' + fieldText : baseMsg);
   }
 }
-
-

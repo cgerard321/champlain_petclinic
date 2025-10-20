@@ -6,7 +6,7 @@ import { User, LoginRequest } from '../../features/auth/models/user.model';
 import { ApiConfigService } from '../../shared/api/api-config.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(this.getUserFromStorage());
@@ -15,22 +15,36 @@ export class AuthService {
   private http = inject(HttpClient);
   private apiConfig = inject(ApiConfigService);
 
-  login(credentials: LoginRequest): Observable<any> {
-    return this.http.post<any>(this.apiConfig.getFullUrl('/users/login'), credentials).pipe(
-      tap(response => {
-        const userData = {
-          username: response.username,
-          email: response.email,
-          userId: response.userId,
-          roles: response.roles
-        };
-        this.setUserDataFromResponse(userData);
-      })
-    );
+  login(credentials: LoginRequest): Observable<{
+    token: string;
+    username: string;
+    email: string;
+    userId: string;
+    roles: string[];
+  }> {
+    return this.http
+      .post<{
+        token: string;
+        username: string;
+        email: string;
+        userId: string;
+        roles: string[];
+      }>(this.apiConfig.getFullUrl('/users/login'), credentials)
+      .pipe(
+        tap(response => {
+          const userData = {
+            username: response.username,
+            email: response.email,
+            userId: response.userId,
+            roles: response.roles,
+          };
+          this.setUserDataFromResponse(userData);
+        })
+      );
   }
 
-  signup(userData: any): Observable<any> {
-    return this.http.post(this.apiConfig.getFullUrl('/users'), userData); 
+  signup(userData: Record<string, unknown>): Observable<unknown> {
+    return this.http.post(this.apiConfig.getFullUrl('/users'), userData);
   }
 
   logout(): void {
@@ -56,8 +70,7 @@ export class AuthService {
     return this.currentUserSubject.value;
   }
 
-
-  private setUserDataFromResponse(userData: any): void {
+  private setUserDataFromResponse(userData: User): void {
     localStorage.setItem('user', JSON.stringify(userData));
     this.currentUserSubject.next(userData);
   }

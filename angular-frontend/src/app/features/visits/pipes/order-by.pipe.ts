@@ -2,10 +2,10 @@ import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
   name: 'orderBy',
-  standalone: true
+  standalone: true,
 })
 export class OrderByPipe implements PipeTransform {
-  transform(array: any[], property: string, reverse: boolean = false): any[] {
+  transform<T>(array: T[], property: string, reverse: boolean = false): T[] {
     if (!array || !property) {
       return array;
     }
@@ -24,7 +24,7 @@ export class OrderByPipe implements PipeTransform {
     });
   }
 
-  private getNestedProperty(obj: any, path: string): any {
+  private getNestedProperty(obj: Record<string, unknown>, path: string): unknown {
     return path.split('.').reduce((o, p) => o && o[p], obj);
   }
 }

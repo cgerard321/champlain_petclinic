@@ -39,5 +39,3 @@ export interface PaginatedInventories {
   totalPages: number;
   totalItems: number;
 }
-
-

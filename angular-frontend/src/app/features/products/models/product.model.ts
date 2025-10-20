@@ -40,5 +40,3 @@ export interface PaginatedProducts {
   totalPages: number;
   totalItems: number;
 }
-
-

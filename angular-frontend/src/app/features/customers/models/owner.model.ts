@@ -26,5 +26,3 @@ export interface PaginatedOwners {
   totalPages: number;
   totalItems: number;
 }
-
-

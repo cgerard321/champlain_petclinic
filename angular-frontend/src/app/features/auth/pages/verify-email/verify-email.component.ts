@@ -15,7 +15,7 @@ import { AuthApiService } from '../../api/auth-api.service';
       </div>
     </div>
   `,
-  styles: []
+  styles: [],
 })
 export class VerifyEmailComponent implements OnInit {
   private authApi = inject(AuthApiService);
@@ -41,13 +41,14 @@ export class VerifyEmailComponent implements OnInit {
         next: () => {
           this.router.navigate(['/login']);
         },
-        error: (error) => {
-          const errorMsg = error.error?.message || error.error?.error || 'Email verification failed. The link may be invalid or expired.';
+        error: error => {
+          const errorMsg =
+            error.error?.message ||
+            error.error?.error ||
+            'Email verification failed. The link may be invalid or expired.';
           this.errorMessages = errorMsg.split('\n');
-        }
+        },
       });
     });
   }
 }
-
-

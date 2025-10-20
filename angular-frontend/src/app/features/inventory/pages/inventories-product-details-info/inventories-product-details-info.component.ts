@@ -9,9 +9,16 @@ import { InventoryProduct, Inventory } from '../../models/inventory.model';
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
-          integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link
+      crossorigin="anonymous"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
+      integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
 
     <style>
       .custom-card {
@@ -46,51 +53,52 @@ import { InventoryProduct, Inventory } from '../../models/inventory.model';
       <div class="custom-card">
         <div class="row custom-row">
           <div class="col-md-2 custom-label">Inventory Id:</div>
-          <div class="col-md-2 custom-value">{{product.inventoryId}}</div>
+          <div class="col-md-2 custom-value">{{ product.inventoryId }}</div>
         </div>
         <div class="row custom-row">
           <div class="col-md-2 custom-label">Inventory Code:</div>
-          <div class="col-md-2 custom-value">{{inventory.inventoryCode}}</div>
+          <div class="col-md-2 custom-value">{{ inventory.inventoryCode }}</div>
         </div>
 
         <div class="row custom-row">
           <div class="col-md-2 custom-label">Product Id:</div>
-          <div class="col-md-2 custom-value">{{product.productId}}</div>
+          <div class="col-md-2 custom-value">{{ product.productId }}</div>
         </div>
 
         <div class="row custom-row">
           <div class="col-md-2 custom-label">Product Name:</div>
-          <div class="col-md-2 custom-value">{{product.productName}}</div>
+          <div class="col-md-2 custom-value">{{ product.productName }}</div>
         </div>
 
         <div class="row custom-row">
           <div class="col-md-2 custom-label">Product Description:</div>
-          <div class="col-md-2 custom-value">{{product.productDescription}}</div>
+          <div class="col-md-2 custom-value">{{ product.productDescription }}</div>
         </div>
 
         <div class="row custom-row">
           <div class="col-md-2 custom-label">Product Price:</div>
-          <div class="col-md-2 custom-value">{{product.productPrice | currency:"$":2}}</div>
+          <div class="col-md-2 custom-value">{{ product.productPrice | currency: '$' : 2 }}</div>
         </div>
 
         <div class="row custom-row">
           <div class="col-md-2 custom-label">Product SalePrice:</div>
-          <div class="col-md-2 custom-value">{{product.productSalePrice | currency:"$":2}}</div>
+          <div class="col-md-2 custom-value">
+            {{ product.productSalePrice | currency: '$' : 2 }}
+          </div>
         </div>
 
         <div class="row custom-row">
           <div class="col-md-2 custom-label">Product Quantity:</div>
-          <div class="col-md-2 custom-value">{{product.productQuantity}}</div>
+          <div class="col-md-2 custom-value">{{ product.productQuantity }}</div>
         </div>
-        
+
         <div class="row custom-row">
           <div class="col-md-2 custom-label">Product Last Updated:</div>
-          <div class="col-md-2 custom-value">{{product.lastUpdated | date:'medium'}}</div>
+          <div class="col-md-2 custom-value">{{ product.lastUpdated | date: 'medium' }}</div>
         </div>
 
         <div class="text-center mt-4" *ngIf="!loading">
-          <a class="btn btn-primary"
-             [routerLink]="['/inventories', inventoryId, 'products']">
+          <a class="btn btn-primary" [routerLink]="['/inventories', inventoryId, 'products']">
             Back to Inventory Products page
           </a>
         </div>
@@ -102,9 +110,9 @@ import { InventoryProduct, Inventory } from '../../models/inventory.model';
     </div>
 
     <div *ngIf="error" class="text-center text-danger">
-      <p>{{error}}</p>
+      <p>{{ error }}</p>
     </div>
-  `
+  `,
 })
 export class InventoriesProductDetailsInfoComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -126,26 +134,23 @@ export class InventoriesProductDetailsInfoComponent implements OnInit {
 
   private loadProduct(): void {
     this.inventoryApi.getInventoryProduct(this.inventoryId, this.productId).subscribe({
-      next: (product) => {
+      next: product => {
         this.product = product;
         this.loading = false;
       },
       error: () => {
         this.error = 'Could not load product details.';
         this.loading = false;
-      }
+      },
     });
   }
 
   private loadInventory(): void {
     this.inventoryApi.getInventoryById(this.inventoryId).subscribe({
-      next: (inventory) => {
+      next: inventory => {
         this.inventory = inventory;
       },
-      error: () => {
-      }
+      error: () => {},
     });
   }
 }
-
-

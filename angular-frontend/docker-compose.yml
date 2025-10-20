@@ -8,7 +8,11 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        - BUILD_MODE=development
+        - BUILD_MODE=${BUILD_MODE:-development}
     ports:
       - "4200:4200"
+    environment:
+      - BUILD_MODE=${BUILD_MODE:-development}
+    volumes:
+      - ./src:/app/src
 

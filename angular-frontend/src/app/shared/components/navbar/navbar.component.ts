@@ -15,7 +15,11 @@ import { User } from '../../../features/auth/models/user.model';
         <span class="navbar-toggler-icon"></span>
       </button>
 
-      <div class="collapse navbar-collapse justify-content-between" [class.show]="isNavbarOpen" id="navbarSupportedContent">
+      <div
+        class="collapse navbar-collapse justify-content-between"
+        [class.show]="isNavbarOpen"
+        id="navbarSupportedContent"
+      >
         <ul class="navbar-nav mr-auto" *ngIf="currentUser">
           <li class="nav-item active">
             <a class="nav-link" routerLink="/">Home <span class="sr-only">(current)</span></a>
@@ -23,11 +27,27 @@ import { User } from '../../../features/auth/models/user.model';
           <li class="nav-item">
             <a class="nav-link" routerLink="/vets">Veterinarians</a>
           </li>
-          <li class="nav-item dropdown" (mouseenter)="isDropdownOpen = true" (mouseleave)="isDropdownOpen = false">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" [attr.data-toggle]="'dropdown'" [attr.aria-haspopup]="true" [attr.aria-expanded]="isDropdownOpen">
+          <li
+            class="nav-item dropdown"
+            (mouseenter)="isDropdownOpen = true"
+            (mouseleave)="isDropdownOpen = false"
+          >
+            <a
+              class="nav-link dropdown-toggle"
+              href="#"
+              id="navbarDropdown"
+              role="button"
+              [attr.data-toggle]="'dropdown'"
+              [attr.aria-haspopup]="true"
+              [attr.aria-expanded]="isDropdownOpen"
+            >
               Owners
             </a>
-            <div class="dropdown-menu" [class.show]="isDropdownOpen" aria-labelledby="navbarDropdown">
+            <div
+              class="dropdown-menu"
+              [class.show]="isDropdownOpen"
+              aria-labelledby="navbarDropdown"
+            >
               <a class="nav-link" routerLink="/owners">Owners</a>
               <a class="nav-link" [routerLink]="['/owners', currentUser?.userId]">Edit Account</a>
               <a class="nav-link" routerLink="/pet-types">Pet Types</a>
@@ -68,7 +88,7 @@ import { User } from '../../../features/auth/models/user.model';
       </div>
     </nav>
   `,
-  styles: []
+  styles: [],
 })
 export class NavbarComponent implements OnInit {
   currentUser: User | null = null;

@@ -10,7 +10,7 @@ import { PetType } from '../../models/pet.model';
   imports: [CommonModule, FormsModule],
   encapsulation: ViewEncapsulation.None,
   template: `
-    <link href="/css/customers/pet.css" rel="stylesheet" type="text/css"/>
+    <link href="/css/customers/pet.css" rel="stylesheet" type="text/css" />
 
     <div class="dashboard-container">
       <div class="main-content">
@@ -21,42 +21,42 @@ import { PetType } from '../../models/pet.model';
 
         <div class="content-wrapper">
           <div class="add-pet-type-card">
-            <button class="btn-add" (click)="toggleAddForm()">
-              &#x2795; Add New Pet Type
-            </button>
+            <button class="btn-add" (click)="toggleAddForm()">&#x2795; Add New Pet Type</button>
 
             <div *ngIf="showAddForm && newPetType" class="add-form">
               <form name="addForm" #addForm="ngForm" novalidate>
                 <h5>Add New Pet Type</h5>
                 <div class="form-group">
                   <label>Name:</label>
-                  <input type="text"
-                         class="form-control"
-                         name="name"
-                         [(ngModel)]="newPetType.name"
-                         pattern="^[a-zA-Z\\s]+$"
-                         required>
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="name"
+                    [(ngModel)]="newPetType.name"
+                    pattern="^[a-zA-Z\\s]+$"
+                    required
+                  />
                   <small class="error-message" *ngIf="addForm.name?.$error?.pattern">
                     Letters and spaces only
                   </small>
                 </div>
                 <div class="form-group">
                   <label>Description:</label>
-                  <input type="text"
-                         class="form-control"
-                         name="description"
-                         [(ngModel)]="newPetType.petTypeDescription"
-                         pattern="^[a-zA-Z\\s]+$"
-                         required>
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="description"
+                    [(ngModel)]="newPetType.petTypeDescription"
+                    pattern="^[a-zA-Z\\s]+$"
+                    required
+                  />
                   <small class="error-message" *ngIf="addForm.description?.$error?.pattern">
                     Letters and spaces only
                   </small>
                 </div>
                 <div class="form-actions">
-                  <button type="button" class="btn-submit"
-                          (click)="addPetType()">Save</button>
-                  <button type="button" class="btn-cancel"
-                          (click)="toggleAddForm()">Cancel</button>
+                  <button type="button" class="btn-submit" (click)="addPetType()">Save</button>
+                  <button type="button" class="btn-cancel" (click)="toggleAddForm()">Cancel</button>
                 </div>
               </form>
             </div>
@@ -67,24 +67,44 @@ import { PetType } from '../../models/pet.model';
             <div class="filters-header">
               <div class="filters-title">Search & Filter</div>
               <div class="action-buttons">
-                <button class="btn-modern btn-search"
-                        (click)="searchPetTypesByPaginationAndFilters()">&#x1F50D; Search</button>
-                <button class="btn-modern btn-reset"
-                        (click)="clearInputAndResetDefaultData()">&#x21BB; Reset</button>
+                <button
+                  class="btn-modern btn-search"
+                  (click)="searchPetTypesByPaginationAndFilters()"
+                >
+                  &#x1F50D; Search
+                </button>
+                <button class="btn-modern btn-reset" (click)="clearInputAndResetDefaultData()">
+                  &#x21BB; Reset
+                </button>
               </div>
             </div>
 
             <div class="filters-grid">
               <div class="filter-group">
-                <input id="petTypeIdInput" type="text" class="filter-input" placeholder="Enter Pet Type ID...">
+                <input
+                  id="petTypeIdInput"
+                  type="text"
+                  class="filter-input"
+                  placeholder="Enter Pet Type ID..."
+                />
                 <label class="filter-label">Pet Type ID</label>
               </div>
               <div class="filter-group">
-                <input id="nameInput" type="text" class="filter-input" placeholder="Enter name...">
+                <input
+                  id="nameInput"
+                  type="text"
+                  class="filter-input"
+                  placeholder="Enter name..."
+                />
                 <label class="filter-label">Name</label>
               </div>
               <div class="filter-group d-none d-sm-flex">
-                <input id="descriptionInput" type="text" class="filter-input" placeholder="Enter description...">
+                <input
+                  id="descriptionInput"
+                  type="text"
+                  class="filter-input"
+                  placeholder="Enter description..."
+                />
                 <label class="filter-label">Description</label>
               </div>
               <div class="filter-group">
@@ -115,35 +135,54 @@ import { PetType } from '../../models/pet.model';
                 <tr *ngFor="let petType of petTypes">
                   <td>
                     <a class="link-modern" [routerLink]="['/pet-types', petType.petTypeId]">
-                      {{petType.petTypeId}}
+                      {{ petType.petTypeId }}
                     </a>
                   </td>
                   <td class="responsive-text">
-                    <span *ngIf="editingPetType !== petType.petTypeId">{{petType.name}}</span>
-                    <input *ngIf="editingPetType === petType.petTypeId && editForm"
-                           type="text"
-                           [(ngModel)]="editForm.name"
-                           class="form-control form-control-sm">
+                    <span *ngIf="editingPetType !== petType.petTypeId">{{ petType.name }}</span>
+                    <input
+                      *ngIf="editingPetType === petType.petTypeId && editForm"
+                      type="text"
+                      [(ngModel)]="editForm.name"
+                      class="form-control form-control-sm"
+                    />
                   </td>
                   <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">
-                    <span *ngIf="editingPetType !== petType.petTypeId">{{petType.petTypeDescription}}</span>
-                    <input *ngIf="editingPetType === petType.petTypeId && editForm"
-                           type="text"
-                           [(ngModel)]="editForm.petTypeDescription"
-                           class="form-control form-control-sm">
+                    <span *ngIf="editingPetType !== petType.petTypeId">{{
+                      petType.petTypeDescription
+                    }}</span>
+                    <input
+                      *ngIf="editingPetType === petType.petTypeId && editForm"
+                      type="text"
+                      [(ngModel)]="editForm.petTypeDescription"
+                      class="form-control form-control-sm"
+                    />
                   </td>
                   <td>
-                    <button *ngIf="editingPetType !== petType.petTypeId"
-                            class="btn-sm btn-primary-sm"
-                            (click)="editPetType(petType)">Update</button>
-                    <button *ngIf="editingPetType === petType.petTypeId"
-                            class="btn-sm btn-success-sm"
-                            (click)="savePetType(petType.petTypeId)">Save</button>
-                    <button *ngIf="editingPetType === petType.petTypeId"
-                            class="btn-sm btn-secondary-sm"
-                            (click)="cancelEdit()">Cancel</button>
-                    <button class="btn-sm btn-danger-sm"
-                            (click)="deletePetType(petType.petTypeId)">Delete</button>
+                    <button
+                      *ngIf="editingPetType !== petType.petTypeId"
+                      class="btn-sm btn-primary-sm"
+                      (click)="editPetType(petType)"
+                    >
+                      Update
+                    </button>
+                    <button
+                      *ngIf="editingPetType === petType.petTypeId"
+                      class="btn-sm btn-success-sm"
+                      (click)="savePetType(petType.petTypeId)"
+                    >
+                      Save
+                    </button>
+                    <button
+                      *ngIf="editingPetType === petType.petTypeId"
+                      class="btn-sm btn-secondary-sm"
+                      (click)="cancelEdit()"
+                    >
+                      Cancel
+                    </button>
+                    <button class="btn-sm btn-danger-sm" (click)="deletePetType(petType.petTypeId)">
+                      Delete
+                    </button>
                   </td>
                 </tr>
               </tbody>
@@ -160,7 +199,7 @@ import { PetType } from '../../models/pet.model';
                   </a>
                 </li>
                 <li class="page-item-modern">
-                  <a class="page-number-link-modern" disabled>Page {{currentPageOnSite}}</a>
+                  <a class="page-number-link-modern" disabled>Page {{ currentPageOnSite }}</a>
                 </li>
                 <li class="page-item-modern">
                   <a class="page-link-modern" aria-label="Next" (click)="goNextPage()">
@@ -174,7 +213,7 @@ import { PetType } from '../../models/pet.model';
       </div>
     </div>
   `,
-  styles: []
+  styles: [],
 })
 export class PetTypeListComponent implements OnInit {
   private petApi = inject(PetApiService);
@@ -206,7 +245,7 @@ export class PetTypeListComponent implements OnInit {
 
   loadDefaultData(): void {
     this.petApi.getAllPetTypes().subscribe({
-      next: (petTypes) => {
+      next: petTypes => {
         this.allPetTypes = petTypes;
         this.petTypes = petTypes;
         this.totalItems = this.allPetTypes.length;
@@ -214,8 +253,7 @@ export class PetTypeListComponent implements OnInit {
         this.applyPagination();
         this.updateCurrentPageOnSite();
       },
-      error: (_error) => {
-      }
+      error: () => {},
     });
   }
 
@@ -235,8 +273,10 @@ export class PetTypeListComponent implements OnInit {
   addPetType(): void {
     const lettersOnly = /^[a-zA-Z\s]+$/;
 
-    if (!lettersOnly.test(this.newPetType.name) ||
-        !lettersOnly.test(this.newPetType.petTypeDescription)) {
+    if (
+      !lettersOnly.test(this.newPetType.name) ||
+      !lettersOnly.test(this.newPetType.petTypeDescription)
+    ) {
       alert('Name and Description must contain letters and spaces only.');
       return;
     }
@@ -253,9 +293,9 @@ export class PetTypeListComponent implements OnInit {
         this.newPetType = { name: '', petTypeDescription: '' };
         this.loadDefaultData();
       },
-      error: (_error) => {
+      error: () => {
         alert('Failed to add pet type: ' + (_error.error?.message || 'Unknown error'));
-      }
+      },
     });
   }
 
@@ -263,7 +303,7 @@ export class PetTypeListComponent implements OnInit {
     this.editingPetType = petType.petTypeId;
     this.editForm = {
       name: petType.name,
-      petTypeDescription: petType.petTypeDescription || ''
+      petTypeDescription: petType.petTypeDescription || '',
     };
   }
 
@@ -274,9 +314,9 @@ export class PetTypeListComponent implements OnInit {
         this.loadDefaultData();
         this.cancelEdit();
       },
-      error: (_error) => {
+      error: () => {
         alert('Failed to update pet type: ' + (_error.error?.message || 'Unknown error'));
-      }
+      },
     });
   }
 
@@ -293,14 +333,14 @@ export class PetTypeListComponent implements OnInit {
           alert('Pet type deleted successfully!');
           this.loadDefaultData();
         },
-        error: (_error) => {
+        error: () => {
           alert('Failed to delete pet type: ' + (_error.error?.message || 'Unknown error'));
-        }
+        },
       });
     }
   }
 
-  searchPetTypesByPaginationAndFilters(_currentPage = 0, prevOrNextPressed = false): void {
+  searchPetTypesByPaginationAndFilters(prevOrNextPressed = false): void {
     const sizeInput = document.getElementById('sizeInput') as HTMLSelectElement;
     this.selectedSize = sizeInput?.value || '';
 
@@ -324,21 +364,22 @@ export class PetTypeListComponent implements OnInit {
     let filteredPetTypes = this.allPetTypes;
 
     if (this.petTypeId) {
-      filteredPetTypes = filteredPetTypes.filter(petType => 
-        petType.petTypeId && petType.petTypeId.toString().includes(this.petTypeId!)
+      filteredPetTypes = filteredPetTypes.filter(
+        petType => petType.petTypeId && petType.petTypeId.toString().includes(this.petTypeId!)
       );
     }
 
     if (this.name) {
-      filteredPetTypes = filteredPetTypes.filter(petType => 
-        petType.name && petType.name.toLowerCase().includes(this.name!.toLowerCase())
+      filteredPetTypes = filteredPetTypes.filter(
+        petType => petType.name && petType.name.toLowerCase().includes(this.name!.toLowerCase())
       );
     }
 
     if (this.description) {
-      filteredPetTypes = filteredPetTypes.filter(petType => 
-        petType.petTypeDescription &&
-        petType.petTypeDescription.toLowerCase().includes(this.description!.toLowerCase())
+      filteredPetTypes = filteredPetTypes.filter(
+        petType =>
+          petType.petTypeDescription &&
+          petType.petTypeDescription.toLowerCase().includes(this.description!.toLowerCase())
       );
     }
 

@@ -13,7 +13,8 @@ import { UserDetails } from '../../models/user.model';
       <h3>User Details for ID: {{ userId }}</h3>
       <p><strong>Username:</strong> {{ user ? user.username : 'N/A' }}</p>
       <p><strong>Email:</strong> {{ user ? user.email : 'N/A' }}</p>
-      <p><strong>Roles:</strong>
+      <p>
+        <strong>Roles:</strong>
         <span *ngFor="let role of user?.roles; let last = last">
           {{ role.name }}<span *ngIf="!last">, </span>
         </span>
@@ -21,20 +22,22 @@ import { UserDetails } from '../../models/user.model';
       <button class="btn btn-primary" (click)="goToAdminPanel()">Back</button>
     </div>
   `,
-  styles: [`
-    .user-details {
-      font-family: Arial, sans-serif;
-      color: #333;
-    }
+  styles: [
+    `
+      .user-details {
+        font-family: Arial, sans-serif;
+        color: #333;
+      }
 
-    .user-details h3 {
-      color: #007BFF;
-    }
+      .user-details h3 {
+        color: #007bff;
+      }
 
-    .user-details p {
-      margin-bottom: 10px;
-    }
-  `]
+      .user-details p {
+        margin-bottom: 10px;
+      }
+    `,
+  ],
 })
 export class UserDetailsComponent implements OnInit {
   private authApi = inject(AuthApiService);
@@ -53,11 +56,10 @@ export class UserDetailsComponent implements OnInit {
 
   loadUserDetails(): void {
     this.authApi.getUserDetails(this.userId).subscribe({
-      next: (user: any) => {
+      next: (user: Record<string, unknown>) => {
         this.user = user;
       },
-      error: (_error: any) => {
-      }
+      error: () => {},
     });
   }
 
@@ -65,4 +67,3 @@ export class UserDetailsComponent implements OnInit {
     this.router.navigate(['/admin-panel']);
   }
 }
-

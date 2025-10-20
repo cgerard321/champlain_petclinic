@@ -20,7 +20,7 @@ export enum VisitStatus {
   UPCOMING = 'UPCOMING',
   CONFIRMED = 'CONFIRMED',
   COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED'
+  CANCELLED = 'CANCELLED',
 }
 
 export interface VisitRequest {
@@ -68,4 +68,3 @@ export interface Vet {
 export interface Specialty {
   name: string;
 }
-

@@ -18,12 +18,12 @@ import { InventoryProduct, Inventory } from '../../models/inventory.model';
       }
 
       .table-striped tbody tr:hover {
-        background-color: #D8D8D8;
+        background-color: #d8d8d8;
       }
     </style>
 
     <h2>Inventory Products</h2>
-    <p *ngIf="inventory">{{inventory.inventoryCode}} - {{inventory.inventoryName}}</p>
+    <p *ngIf="inventory">{{ inventory.inventoryCode }} - {{ inventory.inventoryName }}</p>
 
     <table class="table table-striped">
       <thead>
@@ -41,24 +41,41 @@ import { InventoryProduct, Inventory } from '../../models/inventory.model';
         <tr>
           <td>
             <span>
-              <input type="text" [(ngModel)]="productName" (keyup.enter)="searchProduct()">
+              <input type="text" [(ngModel)]="productName" (keyup.enter)="searchProduct()" />
             </span>
           </td>
           <td></td>
           <td>
             <span>
-              <input type="number" min="0" [(ngModel)]="productQuantity" (keyup.enter)="searchProduct()">
+              <input
+                type="number"
+                min="0"
+                [(ngModel)]="productQuantity"
+                (keyup.enter)="searchProduct()"
+              />
             </span>
           </td>
           <td>
             <span>
-              <input type="number" step="0.01" min="0" [(ngModel)]="productPrice" (keyup.enter)="searchProduct()">
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                [(ngModel)]="productPrice"
+                (keyup.enter)="searchProduct()"
+              />
             </span>
           </td>
           <td></td>
           <td>
             <span>
-              <input type="number" step="0.01" min="0" [(ngModel)]="productSalePrice" (keyup.enter)="searchProduct()">
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                [(ngModel)]="productSalePrice"
+                (keyup.enter)="searchProduct()"
+              />
             </span>
           </td>
           <td></td>
@@ -68,7 +85,8 @@ import { InventoryProduct, Inventory } from '../../models/inventory.model';
                 <lord-icon
                   src="https://cdn.lordicon.com/zxvuvcnc.json"
                   trigger="hover"
-                  style="width:32px;height:32px">
+                  style="width:32px;height:32px"
+                >
                 </lord-icon>
               </a>
             </span>
@@ -79,7 +97,8 @@ import { InventoryProduct, Inventory } from '../../models/inventory.model';
                 <lord-icon
                   src="https://cdn.lordicon.com/fkdzyfle.json"
                   trigger="hover"
-                  style="width:32px;height:32px">
+                  style="width:32px;height:32px"
+                >
                 </lord-icon>
               </a>
             </span>
@@ -88,53 +107,76 @@ import { InventoryProduct, Inventory } from '../../models/inventory.model';
       </thead>
       <tbody>
         <tr *ngFor="let product of inventoryProductList">
-          <td><span>{{product.productName}}</span></td>
-          <td><span>{{product.productId}}</span></td>
-          <td><span>{{product.productQuantity}}</span></td>
-          <td><span>{{product.productPrice}}$</span></td>
-          <td><span>{{product.productDescription}}</span></td>
-          <td><span>{{product.productSalePrice}}$</span></td>
+          <td>
+            <span>{{ product.productName }}</span>
+          </td>
+          <td>
+            <span>{{ product.productId }}</span>
+          </td>
+          <td>
+            <span>{{ product.productQuantity }}</span>
+          </td>
+          <td>
+            <span>{{ product.productPrice }}$</span>
+          </td>
+          <td>
+            <span>{{ product.productDescription }}</span>
+          </td>
+          <td>
+            <span>{{ product.productSalePrice }}$</span>
+          </td>
 
           <td>
             <a
               class="btn btn-info"
               [routerLink]="['/inventories', inventoryId, 'products', product.productId]"
-              title="Details">
+              title="Details"
+            >
               <lord-icon
                 src="https://cdn.lordicon.com/jnzhohhs.json"
                 trigger="hover"
-                style="width:32px;height:32px">
+                style="width:32px;height:32px"
+              >
               </lord-icon>
             </a>
           </td>
           <td>
-            <a [routerLink]="['/inventories', inventoryId, 'products', product.productId, 'edit']" title="Edit">
+            <a
+              [routerLink]="['/inventories', inventoryId, 'products', product.productId, 'edit']"
+              title="Edit"
+            >
               <button class="add-bundle-button btn btn-warning">
                 <lord-icon
                   src="https://cdn.lordicon.com/wkvacbiw.json"
                   trigger="hover"
-                  style="width:32px;height:32px">
+                  style="width:32px;height:32px"
+                >
                 </lord-icon>
               </button>
             </a>
           </td>
 
           <td>
-            <a *ngIf="!product.isTemporarilyDeleted" 
-               class="btn btn-danger" 
-               href="javascript:void(0)" 
-               (click)="deleteProduct(product); $event.stopPropagation()" 
-               title="Delete">
+            <a
+              *ngIf="!product.isTemporarilyDeleted"
+              class="btn btn-danger"
+              href="javascript:void(0)"
+              (click)="deleteProduct(product); $event.stopPropagation()"
+              title="Delete"
+            >
               <lord-icon
                 src="https://cdn.lordicon.com/skkahier.json"
                 trigger="hover"
-                style="width:32px;height:32px">
+                style="width:32px;height:32px"
+              >
               </lord-icon>
             </a>
-            <a *ngIf="product.isTemporarilyDeleted"  
-               class="btn btn-info" 
-               href="javascript:void(0)" 
-               (click)="undoDelete(product); $event.stopPropagation()">
+            <a
+              *ngIf="product.isTemporarilyDeleted"
+              class="btn btn-info"
+              href="javascript:void(0)"
+              (click)="undoDelete(product); $event.stopPropagation()"
+            >
               Restore
             </a>
           </td>
@@ -153,7 +195,7 @@ import { InventoryProduct, Inventory } from '../../models/inventory.model';
             </a>
           </li>
           <li class="page-item">
-            <a class="page-link text-dark" disabled>Page-{{actualCurrentPageShown}}</a>
+            <a class="page-link text-dark" disabled>Page-{{ actualCurrentPageShown }}</a>
           </li>
           <li class="page-item">
             <a class="page-link text-dark" aria-label="Next" (click)="nextPage()">
@@ -164,7 +206,10 @@ import { InventoryProduct, Inventory } from '../../models/inventory.model';
       </nav>
     </div>
 
-    <div id="notification" style="display: none; position: fixed; bottom: 10px; right: 10px; background-color: #4CAF50; color: white; padding: 10px; border-radius: 5px;">
+    <div
+      id="notification"
+      style="display: none; position: fixed; bottom: 10px; right: 10px; background-color: #4CAF50; color: white; padding: 10px; border-radius: 5px;"
+    >
       Notification Text Here
     </div>
 
@@ -178,17 +223,19 @@ import { InventoryProduct, Inventory } from '../../models/inventory.model';
       <button class="delete-bundle-button btn btn-success">Delete All Products</button>
     </a>
   `,
-  styles: [`
-    .btn:hover {
-      transform: translateY(2px);
-      box-shadow: 0 0 rgba(0, 0, 0, 2);
-      border-bottom-width: 1px;
-    }
+  styles: [
+    `
+      .btn:hover {
+        transform: translateY(2px);
+        box-shadow: 0 0 rgba(0, 0, 0, 2);
+        border-bottom-width: 1px;
+      }
 
-    .table-striped tbody tr:hover {
-      background-color: #D8D8D8;
-    }
-  `]
+      .table-striped tbody tr:hover {
+        background-color: #d8d8d8;
+      }
+    `,
+  ],
 })
 export class InventoriesProductListComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -197,26 +244,26 @@ export class InventoriesProductListComponent implements OnInit {
   inventoryId: string = '';
   inventory: Inventory | null = null;
   inventoryProductList: InventoryProduct[] = [];
-  
+
   // Search parameters
   productName: string = '';
   productQuantity: string = '';
   productPrice: string = '';
   productSalePrice: string = '';
-  
+
   // Pagination
   currentPage: number = 0;
   pageSize: number = 15;
   actualCurrentPageShown: number = 1;
   totalItems: number = 0;
   totalPages: number = 0;
-  
+
   // Search state
   lastParams = {
     productName: '',
     productQuantity: '',
     productPrice: '',
-    productSalePrice: ''
+    productSalePrice: '',
   };
 
   ngOnInit(): void {
@@ -227,32 +274,32 @@ export class InventoriesProductListComponent implements OnInit {
 
   private loadInventory(): void {
     this.inventoryApi.getInventoryById(this.inventoryId).subscribe({
-      next: (inventory) => {
+      next: inventory => {
         this.inventory = inventory;
       },
-      error: () => {}
+      error: () => {},
     });
   }
 
   private fetchProductList(): void {
     this.inventoryApi.getInventoryProducts(this.inventoryId).subscribe({
-      next: (products) => {
+      next: products => {
         this.inventoryProductList = products.map(product => ({
           ...product,
           productPrice: parseFloat(product.productPrice.toFixed(2)),
-          productSalePrice: parseFloat((product.productSalePrice || 0).toFixed(2))
+          productSalePrice: parseFloat((product.productSalePrice || 0).toFixed(2)),
         }));
         this.loadTotalItem();
       },
       error: () => {
         this.inventoryProductList = [];
-      }
+      },
     });
   }
 
   searchProduct(): void {
-    const queryParams: any = {};
-    
+    const queryParams: Record<string, unknown> = {};
+
     if (this.productName && this.productName !== '') {
       queryParams.productName = this.productName;
       this.lastParams.productName = this.productName;
@@ -274,27 +321,27 @@ export class InventoriesProductListComponent implements OnInit {
     }
 
     this.inventoryApi.getInventoryProducts(this.inventoryId).subscribe({
-      next: (products) => {
+      next: products => {
         let filteredProducts = products;
-        
+
         // Apply filters
         if (queryParams.productName) {
-          filteredProducts = filteredProducts.filter(p => 
+          filteredProducts = filteredProducts.filter(p =>
             p.productName.toLowerCase().includes(queryParams.productName.toLowerCase())
           );
         }
         if (queryParams.productQuantity) {
-          filteredProducts = filteredProducts.filter(p => 
+          filteredProducts = filteredProducts.filter(p =>
             p.productQuantity.toString().includes(queryParams.productQuantity)
           );
         }
         if (queryParams.productPrice) {
-          filteredProducts = filteredProducts.filter(p => 
+          filteredProducts = filteredProducts.filter(p =>
             p.productPrice.toString().includes(queryParams.productPrice)
           );
         }
         if (queryParams.productSalePrice) {
-          filteredProducts = filteredProducts.filter(p => 
+          filteredProducts = filteredProducts.filter(p =>
             (p.productSalePrice || 0).toString().includes(queryParams.productSalePrice)
           );
         }
@@ -302,12 +349,12 @@ export class InventoriesProductListComponent implements OnInit {
         this.inventoryProductList = filteredProducts.map(product => ({
           ...product,
           productPrice: parseFloat(product.productPrice.toFixed(2)),
-          productSalePrice: parseFloat((product.productSalePrice || 0).toFixed(2))
+          productSalePrice: parseFloat((product.productSalePrice || 0).toFixed(2)),
         }));
-        
+
         this.loadTotalItem();
       },
-      error: (error) => {
+      error: error => {
         if (error.status === 404) {
           this.inventoryProductList = [];
           this.currentPage = 0;
@@ -315,7 +362,7 @@ export class InventoriesProductListComponent implements OnInit {
         } else {
           alert('An error occurred: ' + error.statusText);
         }
-      }
+      },
     });
   }
 
@@ -354,14 +401,14 @@ export class InventoriesProductListComponent implements OnInit {
 
     this.inventoryApi.deleteInventoryProduct(this.inventoryId, product.productId).subscribe({
       next: () => {
-        this.showNotification(product.productName + " has been deleted successfully!");
+        this.showNotification(product.productName + ' has been deleted successfully!');
         setTimeout(() => {
           location.reload();
         }, 1000);
       },
-      error: (error) => {
+      error: error => {
         alert(error.data?.errors || 'Data is inaccessible.');
-      }
+      },
     });
   }
 
@@ -369,7 +416,7 @@ export class InventoriesProductListComponent implements OnInit {
     const varIsConf = confirm('Are you sure you want to delete all products for this inventory?');
     if (varIsConf) {
       // Note: This would need a deleteAllProducts method in the API service
-      alert("Delete all products functionality would be implemented here");
+      alert('Delete all products functionality would be implemented here');
     }
   }
 
@@ -412,5 +459,3 @@ export class InventoriesProductListComponent implements OnInit {
     }
   }
 }
-
-

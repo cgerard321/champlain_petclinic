@@ -7,99 +7,88 @@ import {
   SignupRequest,
   TokenResponse,
   ForgotPasswordRequest,
-  ResetPasswordRequest
+  ResetPasswordRequest,
 } from '../models/user.model';
 import { ApiConfigService } from '../../../shared/api/api-config.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthApiService {
   private http = inject(HttpClient);
   private apiConfig = inject(ApiConfigService);
 
-  
   login(credentials: LoginRequest): Observable<TokenResponse> {
-    return this.http.post<TokenResponse>(this.apiConfig.getFullUrl('/users/login', false), credentials);
+    return this.http.post<TokenResponse>(
+      this.apiConfig.getFullUrl('/users/login', false),
+      credentials
+    );
   }
 
- 
-  signup(userData: SignupRequest): Observable<any> {
-    return this.http.post(this.apiConfig.getFullUrl('/users', false), userData); 
+  signup(userData: SignupRequest): Observable<unknown> {
+    return this.http.post(this.apiConfig.getFullUrl('/users', false), userData);
   }
 
-  
   logout(): Observable<void> {
     return this.http.post<void>(this.apiConfig.getFullUrl('/users/logout', false), {});
   }
 
-  
   forgotPassword(request: ForgotPasswordRequest): Observable<void> {
-    return this.http.post<void>(this.apiConfig.getFullUrl('/users/forgot_password', false), request);
+    return this.http.post<void>(
+      this.apiConfig.getFullUrl('/users/forgot_password', false),
+      request
+    );
   }
 
-  
   resetPassword(request: ResetPasswordRequest): Observable<void> {
     return this.http.post<void>(this.apiConfig.getFullUrl('/users/reset_password', false), request);
   }
 
- 
-  verifyEmail(token: string): Observable<any> {
-    return this.http.get<any>(this.apiConfig.getFullUrl(`/verification/${token}`, false));
+  verifyEmail(token: string): Observable<unknown> {
+    return this.http.get<unknown>(this.apiConfig.getFullUrl(`/verification/${token}`, false));
   }
 
-  
   getUserById(userId: string): Observable<User> {
     return this.http.get<User>(this.apiConfig.getFullUrl(`/users/${userId}`, false));
   }
 
-  
   updateUser(userId: string, userData: Partial<User>): Observable<User> {
     return this.http.put<User>(this.apiConfig.getFullUrl(`/users/${userId}`, false), userData);
   }
 
-  
   updateUserRole(userId: string, roles: string[]): Observable<User> {
     return this.http.patch<User>(this.apiConfig.getFullUrl(`/users/${userId}`, true), { roles });
   }
 
-  
   getAllUsers(): Observable<User[]> {
     return this.http.get<User[]>(this.apiConfig.getFullUrl('/users', true));
   }
 
-  
   deleteUser(userId: string): Observable<void> {
     return this.http.delete<void>(this.apiConfig.getFullUrl(`/users/${userId}`, false));
   }
 
-  
   getUserDetails(userId: string): Observable<User> {
     return this.getUserById(userId);
   }
 
- 
-  getAllRoles(): Observable<any[]> {
-    return this.http.get<any[]>(this.apiConfig.getFullUrl('/roles', true));
+  getAllRoles(): Observable<unknown[]> {
+    return this.http.get<unknown[]>(this.apiConfig.getFullUrl('/roles', true));
   }
 
-  
-  getRoleById(roleId: string): Observable<any> {
-    return this.http.get<any>(this.apiConfig.getFullUrl(`/roles/${roleId}`, true));
+  getRoleById(roleId: string): Observable<unknown> {
+    return this.http.get<unknown>(this.apiConfig.getFullUrl(`/roles/${roleId}`, true));
   }
 
-  
-  addRole(roleData: any): Observable<any> {
-    return this.http.post<any>(this.apiConfig.getFullUrl('/roles', true), roleData);
+  addRole(roleData: Record<string, unknown>): Observable<unknown> {
+    return this.http.post<unknown>(this.apiConfig.getFullUrl('/roles', true), roleData);
   }
 
-  
-  updateRole(roleId: string, roleData: any): Observable<any> {
-    return this.http.patch<any>(this.apiConfig.getFullUrl(`/roles/${roleId}`, true), roleData);
+  updateRole(roleId: string, roleData: Record<string, unknown>): Observable<unknown> {
+    return this.http.patch<unknown>(this.apiConfig.getFullUrl(`/roles/${roleId}`, true), roleData);
   }
 
-  createInventoryManager(managerData: any): Observable<any> {
+  createInventoryManager(managerData: Record<string, unknown>): Observable<unknown> {
     return this.http.post(this.apiConfig.getFullUrl('/users/inventoryManager', false), managerData);
   }
 }
-

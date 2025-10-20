@@ -14,7 +14,11 @@ import { SignupRequest } from '../../models/user.model';
       <div style="width: 400px;">
         <h2 class="text-center">Signup</h2>
 
-        <div class="alert alert-danger alert-dismissible text-center" role="alert" *ngFor="let error of errorMessages">
+        <div
+          class="alert alert-danger alert-dismissible text-center"
+          role="alert"
+          *ngFor="let error of errorMessages"
+        >
           <a class="close" aria-label="close" (click)="clearErrorMessages()">&times;</a>
           <strong>Error:</strong> {{ error }}
         </div>
@@ -22,115 +26,127 @@ import { SignupRequest } from '../../models/user.model';
         <form class="form-horizontal" #signupForm="ngForm" (ngSubmit)="signup()">
           <div class="form-group">
             <label for="firstName">First Name</label>
-            <input 
-              id="firstName" 
-              class="form-control" 
-              [(ngModel)]="signupData.firstName" 
-              name="firstName" 
-              [ngModelOptions]="{standalone: true}"
-              maxlength="50" 
-              pattern="^[\\x20-\\x7F]+$" 
-              required />
+            <input
+              id="firstName"
+              class="form-control"
+              [(ngModel)]="signupData.firstName"
+              name="firstName"
+              [ngModelOptions]="{ standalone: true }"
+              maxlength="50"
+              pattern="^[\\x20-\\x7F]+$"
+              required
+            />
             <span *ngIf="!signupData.firstName" class="help-block">First name is required.</span>
           </div>
 
           <div class="form-group">
             <label for="lastName">Last Name</label>
-            <input 
-              id="lastName" 
-              class="form-control" 
-              [(ngModel)]="signupData.lastName" 
-              name="lastName" 
-              [ngModelOptions]="{standalone: true}"
-              maxlength="50" 
-              pattern="^[\\x20-\\x7F]+$" 
-              required />
+            <input
+              id="lastName"
+              class="form-control"
+              [(ngModel)]="signupData.lastName"
+              name="lastName"
+              [ngModelOptions]="{ standalone: true }"
+              maxlength="50"
+              pattern="^[\\x20-\\x7F]+$"
+              required
+            />
             <span *ngIf="!signupData.lastName" class="help-block">Last name is required.</span>
           </div>
 
           <div class="form-group">
             <label for="address">Address</label>
-            <input 
-              id="address" 
-              class="form-control" 
-              [(ngModel)]="signupData.address" 
-              name="address" 
-              [ngModelOptions]="{standalone: true}"
-              maxlength="50" 
-              pattern="^[\\x20-\\x7F]+$" 
-              required />
+            <input
+              id="address"
+              class="form-control"
+              [(ngModel)]="signupData.address"
+              name="address"
+              [ngModelOptions]="{ standalone: true }"
+              maxlength="50"
+              pattern="^[\\x20-\\x7F]+$"
+              required
+            />
             <span *ngIf="!signupData.address" class="help-block">Address is required.</span>
           </div>
 
           <div class="form-group">
             <label for="city">City</label>
-            <input 
-              id="city" 
-              class="form-control" 
-              [(ngModel)]="signupData.city" 
-              name="city" 
-              [ngModelOptions]="{standalone: true}"
-              maxlength="50" 
-              pattern="^[\\x20-\\x7F]+$" 
-              required />
+            <input
+              id="city"
+              class="form-control"
+              [(ngModel)]="signupData.city"
+              name="city"
+              [ngModelOptions]="{ standalone: true }"
+              maxlength="50"
+              pattern="^[\\x20-\\x7F]+$"
+              required
+            />
             <span *ngIf="!signupData.city" class="help-block">City is required.</span>
           </div>
 
           <div class="form-group">
             <label for="province">Province</label>
-            <input 
-              id="province" 
-              class="form-control" 
-              [(ngModel)]="signupData.province" 
-              name="province" 
-              [ngModelOptions]="{standalone: true}"
-              maxlength="50" 
-              pattern="^[\\x20-\\x7F]+$" 
-              required />
+            <input
+              id="province"
+              class="form-control"
+              [(ngModel)]="signupData.province"
+              name="province"
+              [ngModelOptions]="{ standalone: true }"
+              maxlength="50"
+              pattern="^[\\x20-\\x7F]+$"
+              required
+            />
             <span *ngIf="!signupData.province" class="help-block">Province is required.</span>
           </div>
 
           <div class="form-group">
             <label for="telephone">Telephone</label>
-            <input 
-              id="telephone" 
-              class="form-control" 
-              [(ngModel)]="signupData.telephone" 
-              name="telephone" 
-              [ngModelOptions]="{standalone: true}"
-              maxlength="50" 
-              pattern="^[\\x20-\\x7F]+$" 
-              required />
+            <input
+              id="telephone"
+              class="form-control"
+              [(ngModel)]="signupData.telephone"
+              name="telephone"
+              [ngModelOptions]="{ standalone: true }"
+              maxlength="50"
+              pattern="^[\\x20-\\x7F]+$"
+              required
+            />
             <span *ngIf="!signupData.telephone" class="help-block">Telephone is required.</span>
           </div>
 
           <div class="form-group">
             <label for="username">Username</label>
-            <input 
-              id="username" 
-              class="form-control" 
-              [(ngModel)]="signupData.username" 
-              name="username" 
-              [ngModelOptions]="{standalone: true}"
-              maxlength="50" 
-              pattern="^[\\x20-\\x7F]+$" 
-              required />
+            <input
+              id="username"
+              class="form-control"
+              [(ngModel)]="signupData.username"
+              name="username"
+              [ngModelOptions]="{ standalone: true }"
+              maxlength="50"
+              pattern="^[\\x20-\\x7F]+$"
+              required
+            />
             <span *ngIf="!signupData.username" class="help-block">Username is required.</span>
           </div>
 
           <div class="form-group">
             <label for="password">Password</label>
             <div class="input-group">
-              <input 
-                id="password" 
-                class="form-control" 
-                [type]="showPassword ? 'text' : 'password'" 
-                [(ngModel)]="signupData.password" 
-                name="password" 
-                [ngModelOptions]="{standalone: true}"
+              <input
+                id="password"
+                class="form-control"
+                [type]="showPassword ? 'text' : 'password'"
+                [(ngModel)]="signupData.password"
+                name="password"
+                [ngModelOptions]="{ standalone: true }"
                 (ngModelChange)="updatePasswordStrength()"
-                required />
-              <span class="input-group-addon" (click)="togglePasswordVisibility()" style="cursor: pointer;">
+                required
+              />
+              <span
+                class="input-group-addon"
+                (click)="togglePasswordVisibility()"
+                style="cursor: pointer;"
+              >
                 <i [class]="showPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"></i>
               </span>
             </div>
@@ -142,14 +158,15 @@ import { SignupRequest } from '../../models/user.model';
 
           <div class="form-group">
             <label for="email">Email</label>
-            <input 
-              id="email" 
-              class="form-control" 
+            <input
+              id="email"
+              class="form-control"
               type="email"
-              [(ngModel)]="signupData.email" 
-              name="email" 
-              [ngModelOptions]="{standalone: true}"
-              required />
+              [(ngModel)]="signupData.email"
+              name="email"
+              [ngModelOptions]="{ standalone: true }"
+              required
+            />
             <span *ngIf="!signupData.email" class="help-block">Email is required.</span>
           </div>
 
@@ -158,7 +175,11 @@ import { SignupRequest } from '../../models/user.model';
           </div>
 
           <div class="form-group text-center">
-            <button class="btn btn-primary" type="submit" [disabled]="signupForm.invalid || isLoading">
+            <button
+              class="btn btn-primary"
+              type="submit"
+              [disabled]="signupForm.invalid || isLoading"
+            >
               Submit
             </button>
           </div>
@@ -166,50 +187,56 @@ import { SignupRequest } from '../../models/user.model';
       </div>
     </div>
   `,
-  styles: [`
-    .loader {
-      border: 8px solid #f3f3f3;
-      border-top: 8px solid #005d9a;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-    }
+  styles: [
+    `
+      .loader {
+        border: 8px solid #f3f3f3;
+        border-top: 8px solid #005d9a;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+      }
 
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
 
-    .form-group {
-      margin-bottom: 20px;
-    }
+      .form-group {
+        margin-bottom: 20px;
+      }
 
-    label {
-      font-weight: bold;
-    }
+      label {
+        font-weight: bold;
+      }
 
-    .help-block {
-      color: red;
-    }
+      .help-block {
+        color: red;
+      }
 
-    .password-strength {
-      font-weight: bold;
-      margin-top: 5px;
-    }
+      .password-strength {
+        font-weight: bold;
+        margin-top: 5px;
+      }
 
-    .strength-1 {
-      color: red;
-    }
+      .strength-1 {
+        color: red;
+      }
 
-    .strength-2 {
-      color: orange;
-    }
+      .strength-2 {
+        color: orange;
+      }
 
-    .strength-3 {
-      color: green;
-    }
-  `]
+      .strength-3 {
+        color: green;
+      }
+    `,
+  ],
 })
 export class SignupComponent {
   private authService = inject(AuthService);
@@ -231,7 +258,7 @@ export class SignupComponent {
     address: '',
     city: '',
     province: '',
-    telephone: ''
+    telephone: '',
   };
 
   errorMessages: string[] = [];
@@ -257,8 +284,8 @@ export class SignupComponent {
         address: this.signupData.address,
         city: this.signupData.city,
         province: this.signupData.province,
-        telephone: this.signupData.telephone
-      }
+        telephone: this.signupData.telephone,
+      },
     };
 
     this.authService.signup(requestData).subscribe({
@@ -267,11 +294,12 @@ export class SignupComponent {
         alert('Signup successful! Please check your email to verify your account.');
         this.router.navigate(['/login']);
       },
-      error: (error) => {
+      error: error => {
         this.isLoading = false;
-        const errorMsg = error.error?.message || error.error?.error || 'Signup failed. Please try again.';
+        const errorMsg =
+          error.error?.message || error.error?.error || 'Signup failed. Please try again.';
         this.errorMessages = errorMsg.split('\n');
-      }
+      },
     });
   }
 
@@ -301,13 +329,13 @@ export class SignupComponent {
   getStrengthText(strength: number): string {
     switch (strength) {
       case 1:
-        return "Weak";
+        return 'Weak';
       case 2:
-        return "Medium";
+        return 'Medium';
       case 3:
-        return "Strong";
+        return 'Strong';
       default:
-        return "";
+        return '';
     }
   }
 

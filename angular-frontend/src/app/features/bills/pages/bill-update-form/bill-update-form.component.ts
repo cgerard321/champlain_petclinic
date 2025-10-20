@@ -16,28 +16,53 @@ import { Bill, BillRequest } from '../../models/bill.model';
         <div class="form-group">
           <label class="col-sm-2 control-label">Customer ID</label>
           <div class="col-sm-6">
-            <input class="form-control" [(ngModel)]="bill.customerId" name="customerId" [disabled]="checked" required />
+            <input
+              class="form-control"
+              [(ngModel)]="bill.customerId"
+              name="customerId"
+              [disabled]="checked"
+              required
+            />
           </div>
         </div>
 
         <div class="form-group">
           <label class="col-sm-2 control-label">Vet ID</label>
           <div class="col-sm-6">
-            <input class="form-control" [(ngModel)]="bill.vetId" name="vetId" [disabled]="checked" required />
+            <input
+              class="form-control"
+              [(ngModel)]="bill.vetId"
+              name="vetId"
+              [disabled]="checked"
+              required
+            />
           </div>
         </div>
 
         <div class="form-group">
           <label class="col-sm-2 control-label">Visit Type</label>
           <div class="col-sm-6">
-            <input class="form-control" [(ngModel)]="bill.visitType" name="visitType" [disabled]="checked" required />
+            <input
+              class="form-control"
+              [(ngModel)]="bill.visitType"
+              name="visitType"
+              [disabled]="checked"
+              required
+            />
           </div>
         </div>
 
         <div class="form-group">
           <label class="control-label text-center" for="billStatus">Status</label>
           <div class="col-sm-6">
-            <select class="form-control" name="billStatus" id="billStatus" [(ngModel)]="bill.billStatus" required title="Please select a status">
+            <select
+              class="form-control"
+              name="billStatus"
+              id="billStatus"
+              [(ngModel)]="bill.billStatus"
+              required
+              title="Please select a status"
+            >
               <option value="PAID">Paid</option>
               <option value="UNPAID">Unpaid</option>
               <option value="OVERDUE">Overdue</option>
@@ -48,33 +73,55 @@ import { Bill, BillRequest } from '../../models/bill.model';
         <div class="form-group">
           <label class="col-sm-2 control-label">Due Date</label>
           <div class="col-sm-6">
-            <input class="form-control" [(ngModel)]="bill.dueDate" name="dueDate" type="date" [disabled]="checked" required />
+            <input
+              class="form-control"
+              [(ngModel)]="bill.dueDate"
+              name="dueDate"
+              type="date"
+              [disabled]="checked"
+              required
+            />
           </div>
         </div>
 
         <div class="form-group">
           <label class="col-sm-2 control-label">Amount</label>
           <div class="col-sm-6">
-            <input class="form-control" [(ngModel)]="bill.amount" name="amount" [disabled]="checked" required />
+            <input
+              class="form-control"
+              [(ngModel)]="bill.amount"
+              name="amount"
+              [disabled]="checked"
+              required
+            />
           </div>
         </div>
 
         <div class="form-group">
           <label class="col-sm-2 control-label">Date</label>
           <div class="col-sm-6">
-            <input class="form-control" [(ngModel)]="bill.date" name="date" type="date" [disabled]="checked" required />
+            <input
+              class="form-control"
+              [(ngModel)]="bill.date"
+              name="date"
+              type="date"
+              [disabled]="checked"
+              required
+            />
           </div>
         </div>
 
         <div class="form-group">
           <div class="col-sm-6">
-            <button class="btn btn-default" type="button" (click)="submitBillForm()">Update Bill</button>
+            <button class="btn btn-default" type="button" (click)="submitBillForm()">
+              Update Bill
+            </button>
           </div>
         </div>
       </div>
     </div>
   `,
-  styles: []
+  styles: [],
 })
 export class BillUpdateFormComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -89,7 +136,7 @@ export class BillUpdateFormComponent implements OnInit {
   ngOnInit(): void {
     this.billId = this.route.snapshot.paramMap.get('billId') || '';
     this.method = this.route.snapshot.paramMap.get('method') || '';
-    
+
     if (!this.billId) {
       this.bill = {} as Bill;
     } else {
@@ -99,10 +146,10 @@ export class BillUpdateFormComponent implements OnInit {
 
   loadBill(): void {
     this.billApi.getBillById(this.billId).subscribe({
-      next: (bill) => {
+      next: bill => {
         this.bill = bill;
       },
-      error: () => {}
+      error: () => {},
     });
   }
 
@@ -121,32 +168,48 @@ export class BillUpdateFormComponent implements OnInit {
           amount: this.bill.amount,
           billStatus: this.bill.billStatus,
           dueDate: this.bill.dueDate,
-          description: this.bill.description
+          description: this.bill.description,
         };
         this.billApi.updateBill(id, billRequest).subscribe({
           next: () => {
             this.router.navigate(['/bills']);
           },
-          error: (response: any) => {
+          error: (response: {
+            error?: { errors?: Array<{ field: string; defaultMessage: string }>; error?: string };
+          }) => {
             const error = response.error;
             error.errors = error.errors || [];
-            alert(error.error + "\r\n" + error.errors.map((e: any) => {
-              return e.field + ": " + e.defaultMessage;
-            }).join("\r\n"));
-          }
+            alert(
+              error.error +
+                '\r\n' +
+                error.errors
+                  .map((e: { field: string; defaultMessage: string }) => {
+                    return e.field + ': ' + e.defaultMessage;
+                  })
+                  .join('\r\n')
+            );
+          },
         });
       } else {
         this.billApi.deleteBill(id).subscribe({
           next: () => {
             this.router.navigate(['/bills']);
           },
-          error: (response: any) => {
+          error: (response: {
+            error?: { errors?: Array<{ field: string; defaultMessage: string }>; error?: string };
+          }) => {
             const error = response.error;
             error.errors = error.errors || [];
-            alert(error.error + "\r\n" + error.errors.map((e: any) => {
-              return e.field + ": " + e.defaultMessage;
-            }).join("\r\n"));
-          }
+            alert(
+              error.error +
+                '\r\n' +
+                error.errors
+                  .map((e: { field: string; defaultMessage: string }) => {
+                    return e.field + ': ' + e.defaultMessage;
+                  })
+                  .join('\r\n')
+            );
+          },
         });
       }
     } else {
@@ -158,21 +221,28 @@ export class BillUpdateFormComponent implements OnInit {
         amount: this.bill.amount,
         billStatus: this.bill.billStatus,
         dueDate: this.bill.dueDate,
-        description: this.bill.description
+        description: this.bill.description,
       };
       this.billApi.createBill(billRequest).subscribe({
         next: () => {
           this.router.navigate(['/bills']);
         },
-        error: (response: any) => {
+        error: (response: {
+          error?: { errors?: Array<{ field: string; defaultMessage: string }>; error?: string };
+        }) => {
           const error = response.error;
           error.errors = error.errors || [];
-          alert(error.error + "\r\n" + error.errors.map((e: any) => {
-            return e.field + ": " + e.defaultMessage;
-          }).join("\r\n"));
-        }
+          alert(
+            error.error +
+              '\r\n' +
+              error.errors
+                .map((e: { field: string; defaultMessage: string }) => {
+                  return e.field + ': ' + e.defaultMessage;
+                })
+                .join('\r\n')
+          );
+        },
       });
     }
   }
 }
-

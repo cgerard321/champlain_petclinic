@@ -16,26 +16,59 @@ import { BillRequest } from '../../models/bill.model';
         <div class="row">
           <div class="col-sm-6 form-group">
             <label class="control-label" for="owner">Owner</label>
-            <select class="form-control" name="owner" id="owner" [(ngModel)]="bill.customerId" required title="Please select an owner.">
-              <option *ngFor="let owner of owners; trackBy: trackByOwnerId" [value]="owner.ownerId">{{owner.firstName}} {{owner.lastName}}</option>
+            <select
+              class="form-control"
+              name="owner"
+              id="owner"
+              [(ngModel)]="bill.customerId"
+              required
+              title="Please select an owner."
+            >
+              <option *ngFor="let owner of owners; trackBy: trackByOwnerId" [value]="owner.ownerId">
+                {{ owner.firstName }} {{ owner.lastName }}
+              </option>
             </select>
           </div>
           <div class="col-sm-6 form-group">
             <label class="control-label" for="vetId">Veterinarian</label>
-            <select class="form-control" name="visitType" id="vetId" [(ngModel)]="bill.vetId" required title="Please select a veterinarian.">
-              <option *ngFor="let vet of vetList; trackBy: trackByVetId" [value]="vet.vetId">{{vet.firstName}} {{vet.lastName}}</option>
+            <select
+              class="form-control"
+              name="visitType"
+              id="vetId"
+              [(ngModel)]="bill.vetId"
+              required
+              title="Please select a veterinarian."
+            >
+              <option *ngFor="let vet of vetList; trackBy: trackByVetId" [value]="vet.vetId">
+                {{ vet.firstName }} {{ vet.lastName }}
+              </option>
             </select>
           </div>
         </div>
         <div class="row">
           <div class="col-sm-6 form-group">
             <label class="control-label text-center" for="date">Date</label>
-            <input class="form-control" id="date" [(ngModel)]="bill.date" name="date" type="date" required title="Please select a date."/>
+            <input
+              class="form-control"
+              id="date"
+              [(ngModel)]="bill.date"
+              name="date"
+              type="date"
+              required
+              title="Please select a date."
+            />
           </div>
 
           <div class="col-sm-6 form-group">
             <label class="control-label" for="visitType">Visit Type</label>
-            <select class="form-control" name="visitType" id="visitType" [(ngModel)]="bill.visitType" required title="Please select a visit type.">
+            <select
+              class="form-control"
+              name="visitType"
+              id="visitType"
+              [(ngModel)]="bill.visitType"
+              required
+              title="Please select a visit type."
+            >
               <option value="general">general</option>
               <option value="operation">operation</option>
               <option value="consultation">consultation</option>
@@ -50,12 +83,28 @@ import { BillRequest } from '../../models/bill.model';
           <div class="form-group col-sm-12">
             <label class="control-label" for="amount">Amount</label>
             <div class="bill">
-              <input class="form-control col-sm-4" [(ngModel)]="bill.amount" name="amount" id="amount" required data-type="currency" placeholder="0.00" title="Please enter the bill amount."/>
+              <input
+                class="form-control col-sm-4"
+                [(ngModel)]="bill.amount"
+                name="amount"
+                id="amount"
+                required
+                data-type="currency"
+                placeholder="0.00"
+                title="Please enter the bill amount."
+              />
             </div>
           </div>
           <div class="col-sm-6 form-group">
             <label class="control-label text-center" for="billStatus">Status</label>
-            <select class="form-control" name="billStatus" id="billStatus" [(ngModel)]="bill.billStatus" required title="Please select a status">
+            <select
+              class="form-control"
+              name="billStatus"
+              id="billStatus"
+              [(ngModel)]="bill.billStatus"
+              required
+              title="Please select a status"
+            >
               <option value="PAID">Paid</option>
               <option value="UNPAID">Unpaid</option>
               <option value="OVERDUE">Overdue</option>
@@ -63,18 +112,33 @@ import { BillRequest } from '../../models/bill.model';
           </div>
           <div class="col-sm-6 form-group">
             <label class="control-label text-center" for="date">Due Date</label>
-            <input class="form-control" id="dueDate" [(ngModel)]="bill.dueDate" name="dueDate" type="date" required title="Please select a due date."/>
+            <input
+              class="form-control"
+              id="dueDate"
+              [(ngModel)]="bill.dueDate"
+              name="dueDate"
+              type="date"
+              required
+              title="Please select a due date."
+            />
           </div>
         </div>
         <div class="form-group p-3">
           <div class="bill marg col-sm-12">
-            <button id="newBtn" class="w-100 btn btn-primary btn-lg" type="button" (click)="submitBillForm()">Submit</button>
+            <button
+              id="newBtn"
+              class="w-100 btn btn-primary btn-lg"
+              type="button"
+              (click)="submitBillForm()"
+            >
+              Submit
+            </button>
           </div>
         </div>
       </div>
     </div>
   `,
-  styles: []
+  styles: [],
 })
 export class BillFormComponent implements OnInit {
   private billApi = inject(BillApiService);
@@ -86,11 +150,11 @@ export class BillFormComponent implements OnInit {
     visitType: '',
     date: new Date().toISOString().split('T')[0],
     amount: 0,
-    billStatus: 'UNPAID' as any,
-    dueDate: new Date().toISOString().split('T')[0]
+    billStatus: 'UNPAID',
+    dueDate: new Date().toISOString().split('T')[0],
   };
 
-  owners: any[] = [
+  owners: Array<{ ownerId: string; firstName: string; lastName: string }> = [
     { ownerId: '1', firstName: 'George', lastName: 'Franklin' },
     { ownerId: '2', firstName: 'Betty', lastName: 'Davis' },
     { ownerId: '3', firstName: 'Eduardo', lastName: 'Rodriguez' },
@@ -100,28 +164,27 @@ export class BillFormComponent implements OnInit {
     { ownerId: '7', firstName: 'Jeff', lastName: 'Black' },
     { ownerId: '8', firstName: 'Maria', lastName: 'Escobito' },
     { ownerId: '9', firstName: 'David', lastName: 'Schroeder' },
-    { ownerId: '10', firstName: 'Carlos', lastName: 'Esteban' }
+    { ownerId: '10', firstName: 'Carlos', lastName: 'Esteban' },
   ];
 
-  vetList: any[] = [
+  vetList: Array<{ vetId: string; firstName: string; lastName: string }> = [
     { vetId: '1', firstName: 'James', lastName: 'Carter' },
     { vetId: '2', firstName: 'Helen', lastName: 'Leary' },
     { vetId: '3', firstName: 'Linda', lastName: 'Douglas' },
     { vetId: '4', firstName: 'Rafael', lastName: 'Ortega' },
     { vetId: '5', firstName: 'Henry', lastName: 'Stevens' },
-    { vetId: '6', firstName: 'Sharon', lastName: 'Jenkins' }
+    { vetId: '6', firstName: 'Sharon', lastName: 'Jenkins' },
   ];
 
   query: string = '';
 
-  ngOnInit(): void {
-  }
+  ngOnInit(): void {}
 
-  trackByOwnerId(_index: number, owner: any): string {
+  trackByOwnerId(_index: number, owner: { ownerId: string }): string {
     return owner.ownerId;
   }
 
-  trackByVetId(_index: number, vet: any): string {
+  trackByVetId(_index: number, vet: { vetId: string }): string {
     return vet.vetId;
   }
 
@@ -130,14 +193,19 @@ export class BillFormComponent implements OnInit {
       next: () => {
         this.router.navigate(['/bills']);
       },
-      error: (response) => {
+      error: response => {
         const error = response.error;
         error.errors = error.errors || [];
-        alert(error.error + "\r\n" + error.errors.map((e: any) => {
-          return e.field + ": " + e.defaultMessage;
-        }).join("\r\n"));
-      }
+        alert(
+          error.error +
+            '\r\n' +
+            error.errors
+              .map((e: { field: string; defaultMessage: string }) => {
+                return e.field + ': ' + e.defaultMessage;
+              })
+              .join('\r\n')
+        );
+      },
     });
   }
 }
-

@@ -10,8 +10,8 @@ import { Owner } from '../../models/owner.model';
   imports: [CommonModule],
   encapsulation: ViewEncapsulation.None,
   template: `
-    <link href="/css/customers/ownerdetail.css" rel="stylesheet" type="text/css"/>
-    <link href="/css/customers/owner.css" rel="stylesheet" type="text/css"/>
+    <link href="/css/customers/ownerdetail.css" rel="stylesheet" type="text/css" />
+    <link href="/css/customers/owner.css" rel="stylesheet" type="text/css" />
 
     <div class="dashboard-container">
       <div class="main-content">
@@ -35,45 +35,45 @@ import { Owner } from '../../models/owner.model';
 
               <div class="profile-section">
                 <div class="profile-avatar">
-                  <img src="../../images/default-user-icon.png" alt="Owner Avatar"/>
+                  <img src="../../images/default-user-icon.png" alt="Owner Avatar" />
                 </div>
-                <h3 class="profile-name">{{owner.firstName}} {{owner.lastName}}</h3>
+                <h3 class="profile-name">{{ owner.firstName }} {{ owner.lastName }}</h3>
               </div>
 
               <form class="owner-form">
                 <div class="form-grid">
                   <div class="form-group full-width">
-                    <input class="form-input" [value]="owner.ownerId" readonly disabled/>
+                    <input class="form-input" [value]="owner.ownerId" readonly disabled />
                     <label class="form-label">Owner ID</label>
                   </div>
 
                   <div class="form-group">
-                    <input class="form-input" [value]="owner.firstName" readonly disabled/>
+                    <input class="form-input" [value]="owner.firstName" readonly disabled />
                     <label class="form-label">First Name</label>
                   </div>
 
                   <div class="form-group">
-                    <input class="form-input" [value]="owner.lastName" readonly disabled/>
+                    <input class="form-input" [value]="owner.lastName" readonly disabled />
                     <label class="form-label">Last Name</label>
                   </div>
 
                   <div class="form-group">
-                    <input class="form-input" [value]="owner.address" readonly disabled/>
+                    <input class="form-input" [value]="owner.address" readonly disabled />
                     <label class="form-label">Address</label>
                   </div>
 
                   <div class="form-group">
-                    <input class="form-input" [value]="owner.city" readonly disabled/>
+                    <input class="form-input" [value]="owner.city" readonly disabled />
                     <label class="form-label">City</label>
                   </div>
 
                   <div class="form-group">
-                    <input class="form-input" [value]="owner.province" readonly disabled/>
+                    <input class="form-input" [value]="owner.province" readonly disabled />
                     <label class="form-label">Province</label>
                   </div>
 
                   <div class="form-group">
-                    <input class="form-input" [value]="owner.telephone" readonly disabled/>
+                    <input class="form-input" [value]="owner.telephone" readonly disabled />
                     <label class="form-label">Phone Number</label>
                   </div>
                 </div>
@@ -90,12 +90,12 @@ import { Owner } from '../../models/owner.model';
                 <div class="pets-list" *ngIf="owner.pets && owner.pets.length > 0">
                   <div *ngFor="let pet of owner.pets" class="pet-item">
                     <div class="pet-avatar">
-                      <img src="../../images/animaldefault.png" alt="Pet Avatar"/>
+                      <img src="../../images/animaldefault.png" alt="Pet Avatar" />
                     </div>
                     <div class="pet-info">
-                      <h4 class="pet-name">{{pet.name}}</h4>
-                      <p class="pet-type">{{getPetTypeName(pet.petTypeId)}}</p>
-                      <p class="pet-birthday">{{formatBirthday(pet.birthDate)}}</p>
+                      <h4 class="pet-name">{{ pet.name }}</h4>
+                      <p class="pet-type">{{ getPetTypeName(pet.petTypeId) }}</p>
+                      <p class="pet-birthday">{{ formatBirthday(pet.birthDate) }}</p>
                     </div>
                   </div>
                 </div>
@@ -111,7 +111,7 @@ import { Owner } from '../../models/owner.model';
       </div>
     </div>
   `,
-  styles: []
+  styles: [],
 })
 export class PetOwnerDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -131,11 +131,10 @@ export class PetOwnerDetailComponent implements OnInit {
 
   loadOwnerData(): void {
     this.ownerApi.getOwnerById(this.ownerId).subscribe({
-      next: (owner) => {
+      next: owner => {
         this.owner = owner;
       },
-      error: (_error) => {
-      }
+      error: () => {},
     });
   }
 
@@ -146,22 +145,22 @@ export class PetOwnerDetailComponent implements OnInit {
       '3': 'Lizard',
       '4': 'Snake',
       '5': 'Bird',
-      '6': 'Hamster'
+      '6': 'Hamster',
     };
     return petTypes[petTypeId] || 'Unknown';
   }
 
   formatBirthday(birthday: string): string {
     if (!birthday) return '';
-    
+
     const date = new Date(birthday);
     const timezoneOffset = date.getTimezoneOffset() * 60000;
     const adjustedDate = new Date(date.getTime() - timezoneOffset);
-    
+
     const year = adjustedDate.getFullYear();
     const month = (adjustedDate.getMonth() + 1).toString().padStart(2, '0');
     const day = adjustedDate.getDate().toString().padStart(2, '0');
-    
+
     return `${year} / ${month} / ${day}`;
   }
 }

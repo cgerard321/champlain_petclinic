@@ -11,27 +11,28 @@ import { UserDetails } from '../../models/user.model';
   imports: [CommonModule, FormsModule, RouterLink],
   template: `
     <h2>Update User Role</h2>
-    <form style="background-color: #f5f5f5; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);">
+    <form
+      style="background-color: #f5f5f5; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);"
+    >
       <div class="form-group">
         <label>Select Role:</label>
         <div *ngFor="let role of availableRoles" class="form-check">
-          <input 
-            type="checkbox" 
-            class="form-check-input" 
+          <input
+            type="checkbox"
+            class="form-check-input"
             [id]="role"
             [(ngModel)]="selectedRoles[role]"
             [name]="role"
-            [ngModelOptions]="{standalone: true}">
+            [ngModelOptions]="{ standalone: true }"
+          />
           <label class="form-check-label" [for]="role">{{ role }}</label>
         </div>
       </div>
-      <button type="button" class="btn btn-warning" (click)="updateRole()">
-        Update Roles
-      </button>
+      <button type="button" class="btn btn-warning" (click)="updateRole()">Update Roles</button>
       <a routerLink="/admin-panel" class="btn btn-secondary">Cancel</a>
     </form>
   `,
-  styles: []
+  styles: [],
 })
 export class RoleUpdateComponent implements OnInit {
   private authApi = inject(AuthApiService);
@@ -52,14 +53,13 @@ export class RoleUpdateComponent implements OnInit {
 
   loadUserDetails(): void {
     this.authApi.getUserDetails(this.userId).subscribe({
-      next: (user: any) => {
+      next: (user: { roles: Array<{ name: string }> }) => {
         this.user = user;
         this.availableRoles.forEach(role => {
-          this.selectedRoles[role] = user.roles.some((r: any) => r.name === role);
+          this.selectedRoles[role] = user.roles.some((r: { name: string }) => r.name === role);
         });
       },
-      error: (_error: any) => {
-      }
+      error: () => {},
     });
   }
 
@@ -72,20 +72,16 @@ export class RoleUpdateComponent implements OnInit {
     const rolesToAdd = selectedRoleNames.filter(role => !currentRoleNames.includes(role));
     const rolesToRemove = currentRoleNames.filter(role => !selectedRoleNames.includes(role));
 
-    const updates: Promise<any>[] = [];
+    const updates: Promise<unknown>[] = [];
 
     rolesToAdd.forEach(roleName => {
       const newRoles = [...currentRoleNames, roleName];
-      updates.push(
-        this.authApi.updateUserRole(this.userId, newRoles).toPromise()
-      );
+      updates.push(this.authApi.updateUserRole(this.userId, newRoles).toPromise());
     });
 
     rolesToRemove.forEach(roleName => {
       const newRoles = currentRoleNames.filter(role => role !== roleName);
-      updates.push(
-        this.authApi.updateUserRole(this.userId, newRoles).toPromise()
-      );
+      updates.push(this.authApi.updateUserRole(this.userId, newRoles).toPromise());
     });
 
     if (updates.length === 0) {
@@ -98,11 +94,11 @@ export class RoleUpdateComponent implements OnInit {
         alert('User roles updated successfully!');
         this.router.navigate(['/admin-panel']);
       },
-      (error) => {
-        const errorMsg = error.error?.message || error.error?.error || 'Failed to update user roles.';
+      error => {
+        const errorMsg =
+          error.error?.message || error.error?.error || 'Failed to update user roles.';
         alert('Failed to update roles. ' + errorMsg);
       }
     );
   }
 }
-
