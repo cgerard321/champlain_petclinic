@@ -108,26 +108,7 @@ angular.module('inventoriesList')
                         }
                     });
             }
-        };
-
-
-        $scope.deleteAllInventories = function () {
-            let varIsConf = confirm('Are you sure you want to clear all entries from the inventory?');
-            if (varIsConf) {
-                $http.delete('api/gateway/inventories')
-                    .then(function(response) {
-                        alert("All inventory entries have been cleared!");
-
-                        $http.get('api/gateway/inventories').then(function (resp) {
-                            self.inventoryList = [];
-                        });
-
-                    }, function(error) {
-                        alert(error.data.errors);
-                        console.log(error, 'Failed to clear inventory entries.');
-                    });
-            }
-        };
+        }
 
         $scope.fetchInventoryList = function() {
             $http.get('api/gateway/inventories').then(function (resp) {
