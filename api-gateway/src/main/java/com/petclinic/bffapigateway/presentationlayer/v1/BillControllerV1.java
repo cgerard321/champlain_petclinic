@@ -176,8 +176,8 @@ public class BillControllerV1 {
     public Flux<BillResponseDTO> getBillsByMonth(
             @RequestParam int year,
             @RequestParam int month) {
-        if (year < 0 || month < 1 || month > 12) {
-            throw new InvalidInputException("Invalid year or month: year=" + year + ", month=" + month);
+        if (year < 1 || year > 9999 || month < 1 || month > 12) {
+            throw new InvalidInputException("Invalid year or month: year=" + year + ", month=" + month + ". Year must be between 1 and 9999.");
         }
 
         return billServiceClient.getBillsByMonth(year, month);
