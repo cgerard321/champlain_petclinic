@@ -34,4 +34,5 @@ Mono<OwnerResponseDTO> deleteOwnerByOwnerId(String ownerId);
 
     Mono<OwnerResponseDTO> updateOwnerPhoto(String ownerId, FileRequestDTO photo);
 
+    Mono<OwnerResponseDTO> deleteOwnerPhoto(String ownerId);
 }
