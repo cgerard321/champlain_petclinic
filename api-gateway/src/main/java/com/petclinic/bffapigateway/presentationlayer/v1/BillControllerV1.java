@@ -8,7 +8,8 @@ import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
+import org.springframework.
+http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,6 +34,12 @@ public class BillControllerV1 {
         return billServiceClient.getAllBills();
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/admin", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> getAllBillsAdmin() {
+        return billServiceClient.getAllBills();
+    }
+
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
     @GetMapping(value = "/{billId}")
     public Mono<ResponseEntity<BillResponseDTO>> getBillById(final @PathVariable String billId)
@@ -52,7 +59,7 @@ public class BillControllerV1 {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/page", produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<BillResponseDTO> getAllBillsByPage(
             @RequestParam Optional<Integer> page,
             @RequestParam Optional<Integer> size,
@@ -170,6 +177,13 @@ public class BillControllerV1 {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/month", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> getBillsByMonth(
+            @RequestParam int year,
+            @RequestParam int month) {
+        return billServiceClient.getBillsByMonth(year, month);
+    }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @PatchMapping("/archive")
