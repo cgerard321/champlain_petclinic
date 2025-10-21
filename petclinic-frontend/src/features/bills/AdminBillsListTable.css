@@ -285,9 +285,6 @@
     margin-left: 0;
   }
 
-  .billField {
-    font-size: 13px;
-  }
 
   .billField strong { min-width: 0; }
   .billValue { white-space: normal; }
