@@ -186,9 +186,6 @@ public class MockServerConfigBillService {
         );
     }
 
-
-
-
     public void stopMockServer() {
         if(clientAndServer != null)
             this.clientAndServer.stop();
