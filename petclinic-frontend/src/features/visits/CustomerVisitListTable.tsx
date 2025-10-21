@@ -59,6 +59,13 @@ export default function CustomerVisitListTable(): JSX.Element {
   ): Promise<void> => {
     try {
       const blob = await downloadPrescription(visitId);
+
+      if (!(blob instanceof Blob) || blob.size === 0) {
+        setErrorDialogMessage('No prescription is associated with this visit.');
+        setShowErrorDialog(true);
+        return;
+      }
+
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -68,13 +75,12 @@ export default function CustomerVisitListTable(): JSX.Element {
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (e) {
-      if (axios.isAxiosError(e)) {
+      if (axios.isAxiosError(e) && e.response?.status === 404) {
         setErrorDialogMessage('No prescription is associated with this visit.');
         setShowErrorDialog(true);
         return;
       }
-      console.error(e);
-      setError('Failed to download prescription');
+      throw e;
     }
   };
 

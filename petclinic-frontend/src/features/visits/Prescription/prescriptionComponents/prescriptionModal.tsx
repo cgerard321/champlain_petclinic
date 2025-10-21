@@ -4,6 +4,7 @@ import { PrescriptionRequestDTO } from '../models/PrescriptionRequestDTO';
 import { MedicationDTO } from '../models/MedicationDTO';
 import { createPrescription } from '../api/createPrescription';
 import BasicModal from '@/shared/components/BasicModal';
+import axios from 'axios';
 import './PrescriptionForm.css';
 
 interface PrescriptionModalProps {
@@ -15,10 +16,6 @@ interface PrescriptionModalProps {
   ownerLastName: string;
   petName: string;
   onClose?: () => void;
-}
-
-interface ApiError {
-  message: string;
 }
 
 type PrescriptionType = {
@@ -139,14 +136,25 @@ const PrescriptionModal: React.FC<PrescriptionModalProps> = ({
       setSuccessMessage('Prescription created successfully!');
       setShowNotification(true);
 
-      // ✅ Call onClose after a short delay (so the user can see the success message)
       setTimeout(() => {
         setShowNotification(false);
-        if (onClose) onClose(); // ✅ use it here
+        onClose?.();
       }, 1000);
     } catch (error) {
-      const apiError = error as ApiError;
-      setErrorMessage(`Error creating prescription: ${apiError.message}`);
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        if (status === 400 || status === 422) {
+          setErrorMessage('Please fix the highlighted fields and try again.');
+        } else if (status === 409) {
+          setErrorMessage('A prescription already exists for this visit.');
+        } else if (status === 404) {
+          setErrorMessage('Visit not found.');
+        } else {
+          setErrorMessage('Failed to create prescription.');
+        }
+      } else {
+        setErrorMessage('Failed to create prescription.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -267,19 +275,9 @@ const PrescriptionModal: React.FC<PrescriptionModalProps> = ({
         />
       </form>
 
-      {/* Optional success notice */}
       {showNotification && <div className="notification">{successMessage}</div>}
 
-      {/* Cancel button to close and return to Edit modal */}
-      <div className="basic-modal-footer">
-        <button
-          type="button"
-          className="btn btn-secondary"
-          onClick={() => onClose?.()}
-        >
-          Cancel
-        </button>
-      </div>
+      <div className="basic-modal-footer"></div>
     </BasicModal>
   );
 };
