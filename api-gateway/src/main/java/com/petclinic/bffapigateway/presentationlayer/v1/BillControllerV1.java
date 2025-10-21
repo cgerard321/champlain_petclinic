@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.presentationlayer.v1;
 import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
+import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
@@ -175,6 +176,10 @@ public class BillControllerV1 {
     public Flux<BillResponseDTO> getBillsByMonth(
             @RequestParam int year,
             @RequestParam int month) {
+        if (year < 0 || month < 1 || month > 12) {
+            throw new InvalidInputException("Invalid year or month: year=" + year + ", month=" + month);
+        }
+
         return billServiceClient.getBillsByMonth(year, month);
     }
 

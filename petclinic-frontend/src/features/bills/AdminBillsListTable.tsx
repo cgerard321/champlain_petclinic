@@ -246,6 +246,12 @@ export default function AdminBillsListTable({
 
   const getFilteredBills = (): Bill[] => {
     const billsToFilter = filteredBills || billsList;
+
+    // Ensure we have a valid array to work with
+    if (!billsToFilter || !Array.isArray(billsToFilter)) {
+      return [];
+    }
+
     const filteredByArchiveStatus = showArchivedBills
       ? billsToFilter
       : billsToFilter.filter(bill => !bill.archive);

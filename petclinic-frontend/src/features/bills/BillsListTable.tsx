@@ -1,7 +1,7 @@
 import { useUser } from '@/context/UserContext';
 import { Bill } from '@/features/bills/models/Bill.ts';
 import axiosInstance from '@/shared/api/axiosInstance';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import './BillsListTable.css';
 import PaymentForm from './PaymentForm';
 import { Currency, convertCurrency } from './utils/convertCurrency';
@@ -19,6 +19,13 @@ export default function BillsListTable({
   const [bills, setBills] = useState<Bill[]>([]);
   const [filteredBills, setFilteredBills] = useState<Bill[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  // Ensure bills and filteredBills are always arrays
+  const safeBills = useMemo(() => (Array.isArray(bills) ? bills : []), [bills]);
+  const safeFilteredBills = useMemo(
+    () => (Array.isArray(filteredBills) ? filteredBills : []),
+    [filteredBills]
+  );
 
   // primary filters
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
@@ -60,6 +67,8 @@ export default function BillsListTable({
     } catch (err) {
       console.error('Error fetching bills:', err);
       setError('Failed to fetch bills');
+      // Ensure bills is always an array, never null
+      setBills([]);
     }
   }, [user?.userId]);
 
@@ -69,13 +78,17 @@ export default function BillsListTable({
 
   // Apply base status filter whenever bills or status changes
   useEffect(() => {
-    let base = bills.slice();
+    if (!safeBills || safeBills.length === 0) {
+      setFilteredBills([]);
+      return;
+    }
+    let base = safeBills.slice();
     if (selectedStatus !== 'all')
       base = base.filter(
         b => (b.billStatus || '').toLowerCase() === selectedStatus.toLowerCase()
       );
     setFilteredBills(base);
-  }, [bills, selectedStatus]);
+  }, [safeBills, selectedStatus]);
 
   const toggleSection = (section: 'status' | 'amount' | 'date'): void => {
     setActiveSection(prev => {
@@ -98,7 +111,11 @@ export default function BillsListTable({
 
   // amount filtering (client-side)
   const applyAmountFilter = (): void => {
-    let base = bills.slice();
+    if (!safeBills || safeBills.length === 0) {
+      setFilteredBills([]);
+      return;
+    }
+    let base = safeBills.slice();
     if (selectedStatus !== 'all')
       base = base.filter(
         b => (b.billStatus || '').toLowerCase() === selectedStatus.toLowerCase()
@@ -133,7 +150,11 @@ export default function BillsListTable({
 
   // date filtering with month/year and ±1 day expansion
   const applyDateFilter = (): void => {
-    let base = bills.slice();
+    if (!safeBills || safeBills.length === 0) {
+      setFilteredBills([]);
+      return;
+    }
+    let base = safeBills.slice();
     if (selectedStatus !== 'all')
       base = base.filter(
         b => (b.billStatus || '').toLowerCase() === selectedStatus.toLowerCase()
@@ -326,7 +347,7 @@ export default function BillsListTable({
                     setCustomMin('');
                     setCustomMax('');
                     setError(null);
-                    setFilteredBills(bills);
+                    setFilteredBills(safeBills.slice());
                   }}
                 >
                   Clear
@@ -438,7 +459,7 @@ export default function BillsListTable({
               </tr>
             </thead>
             <tbody>
-              {filteredBills.map(bill => (
+              {safeFilteredBills.map(bill => (
                 <tr key={bill.billId}>
                   <td>{bill.billId}</td>
                   <td>
