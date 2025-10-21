@@ -5,7 +5,6 @@ import { ProductModel } from './models/ProductModels/ProductModel';
 import './InventoriesListTable.module.css';
 import './InventoryProducts.css';
 import useSearchProducts from '@/features/inventories/hooks/useSearchProducts.ts';
-import deleteAllProductsFromInventory from './api/deleteAllProductsFromInventory';
 import createPdf from './api/createPdf';
 import ConfirmationModal from '@/features/inventories/ConfirmationModal.tsx';
 import { Status } from '@/features/inventories/models/ProductModels/Status.ts';
@@ -182,17 +181,6 @@ const InventoryProducts: React.FC = () => {
         setShowConfirmation(false);
         setProductToDelete(null);
       }
-    }
-  };
-
-  const handleDeleteAllProducts = async (): Promise<void> => {
-    try {
-      await deleteAllProductsFromInventory({ inventoryId: inventoryId! });
-      setProducts([]);
-      setFilteredProducts([]);
-      alert('All products deleted successfully.');
-    } catch (err) {
-      setError('Failed to delete all products.');
     }
   };
 
@@ -529,9 +517,6 @@ const InventoryProducts: React.FC = () => {
         onClick={() => navigate(`/inventories/${inventoryId}/products/add`)}
       >
         Add
-      </button>
-      <button className="btn btn-danger" onClick={handleDeleteAllProducts}>
-        Delete All Products
       </button>
       <ConfirmationModal
         show={showConfirmation}

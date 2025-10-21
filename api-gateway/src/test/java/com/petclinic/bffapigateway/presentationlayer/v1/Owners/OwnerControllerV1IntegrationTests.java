@@ -1,4 +1,4 @@
-package com.petclinic.bffapigateway.presentationlayer.v1.Owners;
+package com.petclinic.bffapigateway.presentationlayer.V1.Owners;
 
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
@@ -230,5 +230,4 @@ public class OwnerControllerV1IntegrationTests {
                 .exchange()
                 .expectStatus().isNotFound();
     }
-
 }

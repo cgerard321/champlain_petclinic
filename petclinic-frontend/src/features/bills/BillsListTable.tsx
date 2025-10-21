@@ -20,25 +20,22 @@ export default function BillsListTable({
   const [filteredBills, setFilteredBills] = useState<Bill[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  // Ensure bills and filteredBills are always arrays
+  // Ensure bills and filteredBills are always arrays to prevent null filter errors
   const safeBills = useMemo(() => (Array.isArray(bills) ? bills : []), [bills]);
   const safeFilteredBills = useMemo(
     () => (Array.isArray(filteredBills) ? filteredBills : []),
     [filteredBills]
   );
 
-  // primary filters
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [activeSection, setActiveSection] = useState<
     'status' | 'amount' | 'date' | null
   >(null);
 
-  // amount filter
   const [amountRangeOption, setAmountRangeOption] = useState<string>('none');
   const [customMin, setCustomMin] = useState<string>('');
   const [customMax, setCustomMax] = useState<string>('');
 
-  // date filter (month/year with Any)
   const [dateMode, setDateMode] = useState<'due' | 'visit'>('due');
   const [dateMonth, setDateMonth] = useState<number | 'any'>(
     new Date().getMonth() + 1
@@ -47,13 +44,13 @@ export default function BillsListTable({
     new Date().getFullYear()
   );
 
-  // payment form
   const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
   const [showPaymentForm, setShowPaymentForm] = useState<boolean>(false);
+  const [detailBill, setDetailBill] = useState<Bill | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
 
   const fetchBills = useCallback(async (): Promise<void> => {
     if (!user?.userId) return;
-
     try {
       const response = await axiosInstance.get(
         `/customers/${user.userId}/bills`,
@@ -64,11 +61,13 @@ export default function BillsListTable({
       else if (response.data && typeof response.data === 'object')
         billsData = [response.data];
       setBills(billsData);
+      setFilteredBills(billsData);
     } catch (err) {
       console.error('Error fetching bills:', err);
       setError('Failed to fetch bills');
       // Ensure bills is always an array, never null
       setBills([]);
+      setFilteredBills([]);
     }
   }, [user?.userId]);
 
@@ -76,32 +75,29 @@ export default function BillsListTable({
     void fetchBills();
   }, [fetchBills]);
 
-  // Apply base status filter whenever bills or status changes
   useEffect(() => {
-    if (!safeBills || safeBills.length === 0) {
-      setFilteredBills([]);
+    if (selectedStatus === 'all') {
+      setFilteredBills(safeBills);
       return;
     }
-    let base = safeBills.slice();
-    if (selectedStatus !== 'all')
-      base = base.filter(
+    setFilteredBills(
+      safeBills.filter(
         b => (b.billStatus || '').toLowerCase() === selectedStatus.toLowerCase()
-      );
-    setFilteredBills(base);
-  }, [safeBills, selectedStatus]);
+      )
+    );
+  }, [selectedStatus, safeBills]);
 
   const toggleSection = (section: 'status' | 'amount' | 'date'): void => {
     setActiveSection(prev => {
       const closing = prev === section;
       if (closing) {
-        // Reset all filters when the section is closed
         setSelectedStatus('all');
         setAmountRangeOption('none');
         setCustomMin('');
         setCustomMax('');
         setDateMonth(new Date().getMonth() + 1);
         setDateYear(new Date().getFullYear());
-        setFilteredBills(bills.slice());
+        setFilteredBills(safeBills.slice());
         setError(null);
         return null;
       }
@@ -109,13 +105,8 @@ export default function BillsListTable({
     });
   };
 
-  // amount filtering (client-side)
   const applyAmountFilter = (): void => {
-    if (!safeBills || safeBills.length === 0) {
-      setFilteredBills([]);
-      return;
-    }
-    let base = safeBills.slice();
+    let base = bills.slice();
     if (selectedStatus !== 'all')
       base = base.filter(
         b => (b.billStatus || '').toLowerCase() === selectedStatus.toLowerCase()
@@ -131,7 +122,7 @@ export default function BillsListTable({
         setError('Min and max must be numbers');
         return;
       }
-      base = base.filter(b => b.amount >= min && b.amount <= max);
+      base = base.filter(b => (b.amount ?? 0) >= min && (b.amount ?? 0) <= max);
       setFilteredBills(base);
       return;
     }
@@ -141,20 +132,15 @@ export default function BillsListTable({
         setError('Invalid amount option');
         return;
       }
-      base = base.filter(b => b.amount <= max);
+      base = base.filter(b => (b.amount ?? 0) <= max);
       setFilteredBills(base);
       return;
     }
     setFilteredBills(base);
   };
 
-  // date filtering with month/year and ±1 day expansion
   const applyDateFilter = (): void => {
-    if (!safeBills || safeBills.length === 0) {
-      setFilteredBills([]);
-      return;
-    }
-    let base = safeBills.slice();
+    let base = bills.slice();
     if (selectedStatus !== 'all')
       base = base.filter(
         b => (b.billStatus || '').toLowerCase() === selectedStatus.toLowerCase()
@@ -192,7 +178,6 @@ export default function BillsListTable({
       return;
     }
 
-    // both month and year specified
     const month = dateMonth as number;
     const year = dateYear as number;
     const firstOfMonth = new Date(year, month - 1, 1);
@@ -246,9 +231,11 @@ export default function BillsListTable({
   const handlePaymentSuccess = (): void => {
     setShowPaymentForm(false);
     if (selectedBill) {
-      setBills(prev =>
-        prev.map(b =>
-          b.billId === selectedBill.billId ? { ...b, billStatus: 'PAID' } : b
+      setBills(prevBills =>
+        prevBills.map(bill =>
+          bill.billId === selectedBill.billId
+            ? { ...bill, billStatus: 'PAID' }
+            : bill
         )
       );
       setSelectedBill(null);
@@ -264,6 +251,22 @@ export default function BillsListTable({
     setSelectedBill(null);
   };
 
+  const openDetails = (bill: Bill): void => {
+    setDetailBill(bill);
+    setShowDetailModal(true);
+  };
+
+  const closeDetails = (): void => {
+    setShowDetailModal(false);
+    setDetailBill(null);
+  };
+
+  const formatTotalDue = (bill: Bill): string => {
+    const amount = bill.taxedAmount ?? bill.amount ?? 0;
+    if (currency === 'CAD') return `CAD $${amount.toFixed(2)}`;
+    return `USD $${convertCurrency(amount, 'CAD', 'USD').toFixed(2)}`;
+  };
+
   return (
     <div>
       <div className="filter-button-row">
@@ -277,7 +280,7 @@ export default function BillsListTable({
           {activeSection === 'date' ? 'Close Date' : 'Filter by Date'}
         </button>
       </div>
-      {/* Currency selector (status filter moved to button section) */}
+
       <div
         className="filterContainer"
         style={{ display: 'flex', alignItems: 'center', gap: '16px' }}
@@ -315,9 +318,7 @@ export default function BillsListTable({
           <label>Amount:</label>
           <select
             value={amountRangeOption}
-            onChange={e => {
-              setAmountRangeOption(e.target.value);
-            }}
+            onChange={e => setAmountRangeOption(e.target.value)}
           >
             <option value="none">None</option>
             <option value="0-100">&lt; 100</option>
@@ -325,7 +326,7 @@ export default function BillsListTable({
             <option value="0-500">&lt; 500</option>
             <option value="custom">Custom</option>
           </select>
-          {amountRangeOption === 'custom' && (
+          {amountRangeOption === 'custom' ? (
             <div className="custom-amount-row">
               <input
                 type="number"
@@ -347,21 +348,20 @@ export default function BillsListTable({
                     setCustomMin('');
                     setCustomMax('');
                     setError(null);
-                    setFilteredBills(safeBills.slice());
+                    setFilteredBills(safeBills);
                   }}
                 >
                   Clear
                 </button>
               </div>
             </div>
-          )}
-          {amountRangeOption !== 'custom' && (
+          ) : (
             <div className="filter-actions">
               <button onClick={applyAmountFilter}>Apply</button>
               <button
                 onClick={() => {
                   setAmountRangeOption('none');
-                  setFilteredBills(bills);
+                  setFilteredBills(safeBills);
                 }}
               >
                 Clear
@@ -426,7 +426,7 @@ export default function BillsListTable({
               onClick={() => {
                 setDateMonth(new Date().getMonth() + 1);
                 setDateYear(new Date().getFullYear());
-                setFilteredBills(bills);
+                setFilteredBills(safeBills);
                 setError(null);
               }}
             >
@@ -437,109 +437,160 @@ export default function BillsListTable({
       )}
 
       {error ? (
-        <p className="error-text">{error}</p>
+        <p>{error}</p>
       ) : (
-        <div className="billsListTableContainer">
-          <table className="table table-striped">
-            <thead>
-              <tr>
-                <th>Bill ID</th>
-                <th>Owner Name</th>
-                <th>Visit Type</th>
-                <th>Vet Name</th>
-                <th>Date</th>
-                <th>Amount</th>
-                <th>Interest</th>
-                <th>Total Due</th>
-                <th>Status</th>
-                <th>Due Date</th>
-                <th>Time Remaining</th>
-                <th>Download PDF</th>
-                <th>Pay Bill</th>
-              </tr>
-            </thead>
-            <tbody>
-              {safeFilteredBills.map(bill => (
-                <tr key={bill.billId}>
-                  <td>{bill.billId}</td>
-                  <td>
-                    {bill.ownerFirstName} {bill.ownerLastName}
-                  </td>
-                  <td>{bill.visitType}</td>
-                  <td>
-                    {bill.vetFirstName} {bill.vetLastName}
-                  </td>
-                  <td>{bill.date}</td>
-                  <td>${bill.amount.toFixed(2)}</td>
-                  <td>${(bill.interest || 0).toFixed(2)}</td>
-                  <td>${bill.taxedAmount.toFixed(2)}</td>
-                  <td
-                    className={
-                      bill.billStatus === 'PAID'
-                        ? 'status-paid'
-                        : bill.billStatus === 'OVERDUE'
-                          ? 'status-overdue'
-                          : ''
-                    }
-                  >
-                    {bill.billStatus}
-                  </td>
-                  <td>
-                    {currency === 'CAD'
-                      ? `CAD $${bill.amount.toFixed(2)}`
-                      : `USD $${convertCurrency(bill.amount, 'CAD', 'USD').toFixed(2)}`}
-                  </td>
-                  <td>
-                    {currency === 'CAD'
-                      ? `CAD $${(bill.interest || 0).toFixed(2)}`
-                      : `USD $${convertCurrency(bill.interest || 0, 'CAD', 'USD').toFixed(2)}`}
-                  </td>
-                  <td>
-                    {currency === 'CAD'
-                      ? `CAD $${bill.taxedAmount.toFixed(2)}`
-                      : `USD $${convertCurrency(bill.taxedAmount, 'CAD', 'USD').toFixed(2)}`}
-                  </td>
-                  <td>
-                    {bill.billStatus === 'OVERDUE' ? (
-                      <span style={{ color: 'red' }}>Overdue</span>
-                    ) : bill.billStatus === 'PAID' ? (
-                      <span style={{ color: 'green' }}>{bill.billStatus}</span>
-                    ) : (
-                      bill.billStatus
-                    )}
-                  </td>
-                  <td>{bill.dueDate}</td>
-                  <td>
-                    {bill.billStatus === 'PAID' ? (
-                      <span className="time-paid">This bill is paid</span>
-                    ) : bill.timeRemaining === 0 ? (
-                      <span className="time-zero">
-                        0 days remaining to pay bill
+        <div className="billsListContainer">
+          {safeFilteredBills.length === 0 ? (
+            <p>No bills to display.</p>
+          ) : (
+            safeFilteredBills.map(bill => (
+              <div
+                key={bill.billId}
+                className="billCard"
+                data-bill-id={bill.billId}
+              >
+                <div className="billCardContent">
+                  <div className="billColumn leftColumn">
+                    <div className="billField vet">
+                      <strong>Vet:</strong>
+                      <span className="billValue">
+                        {bill.vetFirstName} {bill.vetLastName}
                       </span>
-                    ) : (
-                      `${bill.timeRemaining} days remaining to pay bill`
-                    )}
-                  </td>
-                  <td>
-                    <button
-                      onClick={() =>
-                        void handleDownloadPdf(user.userId, bill.billId)
-                      }
-                    >
-                      Download PDF
-                    </button>
-                  </td>
-                  <td>
-                    {bill.billStatus !== 'PAID' && (
-                      <button onClick={() => handlePayBillClick(bill)}>
-                        Pay Bill
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    </div>
+                    <div className="billField total">
+                      <strong>Total due:</strong>
+                      <span className="billValue">{formatTotalDue(bill)}</span>
+                    </div>
+                  </div>
+
+                  <div className="billColumn rightColumn">
+                    <div className="billField date">
+                      <strong>Appointment date:</strong>
+                      <span className="billValue">{bill.date}</span>
+                    </div>
+                    <div className="billField status">
+                      <strong>Status:</strong>
+                      <span
+                        className={
+                          bill.billStatus === 'OVERDUE'
+                            ? 'status--overdue billValue'
+                            : bill.billStatus === 'PAID'
+                              ? 'status--paid billValue'
+                              : 'billValue'
+                        }
+                      >
+                        {bill.billStatus === 'OVERDUE'
+                          ? 'Overdue'
+                          : bill.billStatus}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="billActions">
+                  <button
+                    className="detailsButton"
+                    onClick={() => openDetails(bill)}
+                  >
+                    Details
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
+      {showDetailModal && detailBill && (
+        <div className="modalOverlay">
+          <div className="modalContent">
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <h3>Bill Details</h3>
+              <button onClick={closeDetails}>Close</button>
+            </div>
+
+            <div style={{ marginTop: '12px' }}>
+              <p>
+                <strong>Bill ID:</strong> {detailBill.billId}
+              </p>
+              <p>
+                <strong>Owner:</strong> {detailBill.ownerFirstName}{' '}
+                {detailBill.ownerLastName}
+              </p>
+              <p>
+                <strong>Visit Type:</strong> {detailBill.visitType}
+              </p>
+              <p>
+                <strong>Vet:</strong> {detailBill.vetFirstName}{' '}
+                {detailBill.vetLastName}
+              </p>
+              <p>
+                <strong>Date:</strong> {detailBill.date}
+              </p>
+              <p>
+                <strong>Amount:</strong>{' '}
+                {currency === 'CAD'
+                  ? `CAD $${detailBill.amount.toFixed(2)}`
+                  : `USD $${convertCurrency(detailBill.amount, 'CAD', 'USD').toFixed(2)}`}
+              </p>
+              <p>
+                <strong>Interest:</strong>{' '}
+                {currency === 'CAD'
+                  ? `CAD $${(detailBill.interest || 0).toFixed(2)}`
+                  : `USD $${convertCurrency(detailBill.interest || 0, 'CAD', 'USD').toFixed(2)}`}
+              </p>
+              <p>
+                <strong>Total Due:</strong>{' '}
+                {currency === 'CAD'
+                  ? `CAD $${detailBill.taxedAmount.toFixed(2)}`
+                  : `USD $${convertCurrency(detailBill.taxedAmount, 'CAD', 'USD').toFixed(2)}`}
+              </p>
+              <p>
+                <strong>Status:</strong> {detailBill.billStatus}
+              </p>
+              <p>
+                <strong>Due Date:</strong> {detailBill.dueDate}
+              </p>
+              <p>
+                <strong>Time Remaining:</strong>{' '}
+                {detailBill.billStatus === 'PAID' ? (
+                  <span style={{ color: 'green' }}>This bill is paid</span>
+                ) : detailBill.timeRemaining === 0 ? (
+                  <span style={{ color: 'red' }}>
+                    0 days remaining to pay bill
+                  </span>
+                ) : (
+                  `${detailBill.timeRemaining} days remaining to pay bill`
+                )}
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+              <button
+                onClick={() =>
+                  handleDownloadPdf(user.userId, detailBill.billId)
+                }
+              >
+                Download PDF
+              </button>
+              {detailBill.billStatus !== 'PAID' && (
+                <button
+                  onClick={() => {
+                    handlePayBillClick(detailBill);
+                    closeDetails();
+                  }}
+                >
+                  Pay Bill
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       )}
 
