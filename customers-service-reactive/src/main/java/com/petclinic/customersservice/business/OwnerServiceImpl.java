@@ -187,6 +187,31 @@ public class OwnerServiceImpl implements OwnerService {
         }
     }
 
+    @Override
+    public Mono<OwnerResponseDTO> deleteOwnerPhoto(String ownerId) {
+        return ownerRepo.findOwnerByOwnerId(ownerId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Owner not found with id: " + ownerId)))
+                .flatMap(existingOwner -> {
+                    String photoId = existingOwner.getPhotoId();
+                    if (photoId != null && !photoId.isEmpty()) {
+
+                        existingOwner.setPhotoId(null);
+                        return ownerRepo.save(existingOwner)
+                                .flatMap(savedOwner ->
+
+                                        filesServiceClient.deleteFile(photoId)
+                                                .onErrorResume(e -> {
+                                                    log.error("Error deleting photo file {}: {}", photoId, e.getMessage());
+                                                    return Mono.empty();
+                                                })
+                                                .thenReturn(savedOwner)
+                                )
+                                .map(EntityDTOUtil::toOwnerResponseDTO);
+                    }
+
+                    return Mono.just(EntityDTOUtil.toOwnerResponseDTO(existingOwner));
+                });
+    }
 
 
 }
