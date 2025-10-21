@@ -358,5 +358,21 @@ public class CartControllerV1 {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<List<CartResponseDTO>>> getAllCartsAsList() {
+        return cartServiceClient
+                .getAllCarts()
+                .collectList()
+                .map(ResponseEntity::ok)
+                .onErrorResume(e -> mapCartError(
+                        e, ErrorOptions.builder("getAllCartsAsList").build()
+                ));
+    }
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<CartResponseDTO> getAllCartsStream() {
+        return cartServiceClient.getAllCarts();
+    }
 
 }
