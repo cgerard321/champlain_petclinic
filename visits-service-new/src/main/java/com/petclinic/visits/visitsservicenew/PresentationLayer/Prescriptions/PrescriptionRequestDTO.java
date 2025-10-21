@@ -1,6 +1,7 @@
 package com.petclinic.visits.visitsservicenew.PresentationLayer.Prescriptions;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,6 +10,7 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class PrescriptionRequestDTO {
     private String medication;
     private String dosage;

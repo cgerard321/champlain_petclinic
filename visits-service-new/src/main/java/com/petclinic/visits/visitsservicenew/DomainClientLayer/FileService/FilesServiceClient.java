@@ -67,29 +67,4 @@ public class FilesServiceClient {
                         response != null ? response.getFileId() : "null"))
                 .doOnError(error -> log.error("Error calling Files Service: {}", error.getMessage(), error));
     }
-
-    public Mono<FileResponseDTO> updateFile(String fileId, FileRequestDTO fileDetails) {
-        return webClientBuilder.build()
-                .put()
-                .uri(filesServiceUrl + "/{fileId}", fileId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(BodyInserters.fromValue(fileDetails))
-                .retrieve()
-                .onStatus(HttpStatus.NOT_FOUND::equals, resp -> rethrower.rethrow(resp, ex -> new NotFoundException(ex.get("message").toString())))
-                .onStatus(HttpStatus.UNPROCESSABLE_ENTITY::equals, resp -> rethrower.rethrow(resp, ex -> new UnprocessableEntityException(ex.get("message").toString())))
-                .onStatus(HttpStatus.BAD_REQUEST::equals, resp -> rethrower.rethrow(resp, ex -> new BadRequestException(ex.get("message").toString())))
-                .onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, resp -> rethrower.rethrow(resp, ex -> new RuntimeException(ex.get("message").toString())))
-                .bodyToMono(FileResponseDTO.class);
-    }
-
-    public Mono<Void> deleteFile(String fileId) {
-        return webClientBuilder.build()
-                .delete()
-                .uri(filesServiceUrl + "/{fileId}", fileId)
-                .retrieve()
-                .onStatus(HttpStatus.NOT_FOUND::equals, resp -> rethrower.rethrow(resp, ex -> new NotFoundException(ex.get("message").toString())))
-                .onStatus(HttpStatus.BAD_REQUEST::equals, resp -> rethrower.rethrow(resp, ex -> new BadRequestException(ex.get("message").toString())))
-                .onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, resp -> rethrower.rethrow(resp, ex -> new RuntimeException(ex.get("message").toString())))
-                .bodyToMono(Void.class);
-    }
 }

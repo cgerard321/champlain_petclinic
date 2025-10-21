@@ -276,6 +276,7 @@ public class VisitsControllerV1 {
             @RequestBody Mono<PrescriptionResponseDTO> prescriptionRequest) {
         return visitsServiceClient.createPrescription(visitId, prescriptionRequest)
                 .map(created -> ResponseEntity.status(HttpStatus.CREATED).body(created))
+                .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()))
                 .onErrorResume(ExistingPrescriptionNotFoundException.class,
                         e -> Mono.just(ResponseEntity.notFound().build()));
     }

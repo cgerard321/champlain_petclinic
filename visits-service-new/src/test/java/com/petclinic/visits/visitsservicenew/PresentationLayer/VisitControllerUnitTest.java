@@ -1,6 +1,7 @@
 package com.petclinic.visits.visitsservicenew.PresentationLayer;
 
 
+import com.petclinic.visits.visitsservicenew.BusinessLayer.Prescriptions.PrescriptionService;
 import com.petclinic.visits.visitsservicenew.BusinessLayer.Review.ReviewService;
 import com.petclinic.visits.visitsservicenew.BusinessLayer.VisitService;
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
@@ -9,6 +10,7 @@ import com.petclinic.visits.visitsservicenew.DomainClientLayer.SpecialtyDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.Workday;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.Prescriptions.PrescriptionResponseDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewResponseDTO;
 import org.junit.jupiter.api.Test;
@@ -22,6 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -49,6 +52,9 @@ class VisitControllerUnitTest {
 
     @Autowired
     private WebTestClient webTestClient;
+
+    @MockBean
+    private PrescriptionService prescriptionService;
 
 
 //    @MockBean
@@ -124,7 +130,7 @@ class VisitControllerUnitTest {
 
     @Test
     void getVisitByVisitId() {
-        when(visitService.getVisitByVisitId(anyString(), true)).thenReturn(Mono.just(visitResponseDTO));
+        when(visitService.getVisitByVisitId(anyString(), anyBoolean())).thenReturn(Mono.just(visitResponseDTO));
 
         webTestClient.get()
                 .uri("/visits/" + Visit_UUID_OK)
@@ -140,7 +146,7 @@ class VisitControllerUnitTest {
                 .jsonPath("$.practitionerId").isEqualTo(visitResponseDTO.getPractitionerId())
                 .jsonPath("$.status").isEqualTo("UPCOMING");
 
-        verify(visitService, times(1)).getVisitByVisitId(Visit_UUID_OK, true);
+        verify(visitService, times(1)).getVisitByVisitId(eq(Visit_UUID_OK), anyBoolean());
     }
 
     @Test
@@ -713,5 +719,8 @@ class VisitControllerUnitTest {
                 .exchange()
                 .expectStatus().is5xxServerError();
     }
+
+
+
 }
 

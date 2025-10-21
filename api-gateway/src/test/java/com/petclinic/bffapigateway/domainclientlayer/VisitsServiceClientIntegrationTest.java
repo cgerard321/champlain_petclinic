@@ -4,6 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.*;
+import com.petclinic.bffapigateway.dtos.Visits.Prescriptions.MedicationDTO;
+import com.petclinic.bffapigateway.dtos.Visits.Prescriptions.PrescriptionRequestDTO;
+import com.petclinic.bffapigateway.dtos.Visits.Prescriptions.PrescriptionResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewResponseDTO;
 import com.petclinic.bffapigateway.exceptions.BadRequestException;
@@ -28,13 +31,13 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @WebFluxTest(value = VisitsServiceClient.class, excludeFilters = @ComponentScan.Filter(type = FilterType.CUSTOM,
@@ -1182,5 +1185,93 @@ class VisitsServiceClientIntegrationTest {
                         && v.getLastName().equals("Doe"))
                 .verifyComplete();
     }
+
+    @Test
+    void createPrescription_ShouldSucceed_WhenValidRequest() throws Exception {
+        // Arrange
+        String visitId = "visit-presc-001";
+
+        PrescriptionResponseDTO prescriptionResponseDTO = PrescriptionResponseDTO.builder()
+                .prescriptionId(UUID.randomUUID().toString())
+                .date(LocalDate.now())
+                .vetFirstName("John")
+                .vetLastName("Smith")
+                .ownerFirstName("Sarah")
+                .ownerLastName("Miller")
+                .petName("Buddy")
+                .directions("Take twice daily after meals")
+                .medications(List.of(
+                        MedicationDTO.builder()
+                                .name("Amoxicillin")
+                                .dosage("250mg")
+                                .frequency("Twice daily")
+                                .build()
+                ))
+                .build();
+
+
+        MedicationDTO med1 = MedicationDTO.builder()
+                .name("Amoxicillin")
+                .dosage("250mg")
+                .frequency("Twice daily")
+                .build();
+
+        PrescriptionResponseDTO expectedResponse = PrescriptionResponseDTO.builder()
+                .prescriptionId("presc-001")
+                .date(LocalDate.now())
+                .vetFirstName("John")
+                .vetLastName("Doe")
+                .ownerFirstName("Sarah")
+                .ownerLastName("Miller")
+                .petName("Buddy")
+                .directions("Take twice daily after meals")
+                .medications(List.of(med1))
+                .build();
+
+        // Mock the successful server response
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(expectedResponse)));
+
+        // Act
+        Mono<PrescriptionResponseDTO> resultMono =
+                visitsServiceClient.createPrescription(visitId, Mono.just(prescriptionResponseDTO));
+
+        // Assert
+        StepVerifier.create(resultMono)
+                .expectNextMatches(resp ->
+                        resp.getPrescriptionId().equals("presc-001") &&
+                                resp.getVetFirstName().equals("John") &&
+                                resp.getOwnerFirstName().equals("Sarah") &&
+                                resp.getPetName().equals("Buddy") &&
+                                resp.getMedications() != null &&
+                                resp.getMedications().size() == 1 &&
+                                resp.getMedications().get(0).getName().equals("Amoxicillin"))
+                .verifyComplete();
+    }
+
+    @Test
+    void getPrescriptionPdf_ShouldReturnPdf_WhenValidVisitId() {
+        // Arrange
+        String visitId = "visit-presc-001";
+        byte[] pdfData = "PDF_CONTENT_EXAMPLE".getBytes();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_PDF_VALUE)
+                .setBody(new String(pdfData)));
+
+        // Act
+        Mono<byte[]> resultMono = visitsServiceClient.downloadPrescriptionPdf(visitId);
+
+        // Assert
+        StepVerifier.create(resultMono)
+                .expectNextMatches(bytes -> new String(bytes).equals("PDF_CONTENT_EXAMPLE"))
+                .verifyComplete();
+    }
+
+
+
 
 }

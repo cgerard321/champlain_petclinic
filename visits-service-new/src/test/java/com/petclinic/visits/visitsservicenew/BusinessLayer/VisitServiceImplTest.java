@@ -870,7 +870,7 @@ class VisitServiceImplTest {
     void getVisitByVisitId_withPrescription_callsFileService_andSetsDto() {
         Visit visit = mock(Visit.class);
         when(visit.getVisitId()).thenReturn("v1");
-        when(visit.getPrescriptionId()).thenReturn("p1");
+        when(visit.getPrescriptionFileId()).thenReturn("p1");
 
         VisitResponseDTO dto = new VisitResponseDTO();
         FileResponseDTO file = mock(FileResponseDTO.class);
@@ -890,7 +890,7 @@ class VisitServiceImplTest {
     void getVisitByVisitId_whenFileServiceErrors_returnsBaseDto() {
         Visit visit = mock(Visit.class);
         when(visit.getVisitId()).thenReturn("v2");
-        when(visit.getPrescriptionId()).thenReturn("p2");
+        when(visit.getPrescriptionFileId()).thenReturn("p2");
 
         VisitResponseDTO dto = new VisitResponseDTO();
 
@@ -910,7 +910,7 @@ class VisitServiceImplTest {
     void getVisitByVisitId_withNoPrescription_doesNotCallFileService() {
         Visit visit = mock(Visit.class);
         when(visit.getVisitId()).thenReturn("v3");
-        when(visit.getPrescriptionId()).thenReturn(null);
+        when(visit.getPrescriptionFileId()).thenReturn(null);
 
         VisitResponseDTO dto = new VisitResponseDTO();
 
