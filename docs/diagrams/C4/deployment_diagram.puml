@@ -219,7 +219,7 @@ System_Ext(smtp_srv, "smtp.gmail.com", "SMTP server", "Sends email (via Mailer S
       Rel_U(billing_svc, mailer_svc, "Send email request", "HTTP/REST", $tags="http")
 
       Rel(customers_svc, files_svc, "Store/Fetch profile pictures", "HTTP/REST", $tags="http")
-      Rel(visits_svc, files_svc, "Store/Fetch profile pictures", "HTTP/REST", $tags="http")
+      Rel(visits_svc, files_svc, "Store/Fetch prescription PDFs", "HTTP/REST", $tags="http")
 
       Rel_D(files_svc, minio_s3, "Store/Fetch objects", "S3 API (HTTPS)", $tags="s3")
 
