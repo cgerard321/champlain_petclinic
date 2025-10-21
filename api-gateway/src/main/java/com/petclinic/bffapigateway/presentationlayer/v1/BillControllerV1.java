@@ -58,7 +58,7 @@ public class BillControllerV1 {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "/page", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = {"", "/page"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<BillResponseDTO> getAllBillsByPage(
             @RequestParam Optional<Integer> page,
             @RequestParam Optional<Integer> size,
