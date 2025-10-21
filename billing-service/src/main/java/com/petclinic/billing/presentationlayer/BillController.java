@@ -48,11 +48,6 @@ public class BillController {
         return billService.getAllBills();
     }
 
-    @GetMapping(value = "/bills/admin", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getAllBillsAdmin() {
-        return billService.getAllBills();
-    }
-
     //to be changed
 //    @GetMapping("/bills-pagination")
 //    public Flux<BillResponseDTO> getAllBillsByPage(@RequestParam Optional<Integer> page,

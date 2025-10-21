@@ -33,12 +33,6 @@ public class BillControllerV1 {
         return billServiceClient.getAllBills();
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "/admin", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getAllBillsAdmin() {
-        return billServiceClient.getAllBills();
-    }
-
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
     @GetMapping(value = "/{billId}")
     public Mono<ResponseEntity<BillResponseDTO>> getBillById(final @PathVariable String billId)
