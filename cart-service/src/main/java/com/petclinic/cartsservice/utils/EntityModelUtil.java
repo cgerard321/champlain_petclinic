@@ -39,7 +39,11 @@ public class EntityModelUtil {
         cartResponseModel.setTotal(total);
         return cartResponseModel;
     }
-
+    public static CartResponseModel toCartResponseModel(Cart cart, List<CartProduct> products, String customerName) {
+        CartResponseModel model = toCartResponseModel(cart, products);
+        model.setCustomerName(customerName);
+        return model;
+    }
 
     public static Cart toCartEntity(CartRequestModel cartRequestModel) {
         return Cart.builder()
