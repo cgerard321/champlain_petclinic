@@ -228,10 +228,6 @@
     gap: 10px;
   }
 
-  .billColumn.leftColumn, .billColumn.rightColumn {
-    flex-basis: auto;
-    max-width: 100%;
-  }
 
   .billActions {
     margin-left: 0;
