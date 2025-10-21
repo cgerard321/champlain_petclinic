@@ -293,11 +293,6 @@
     flex-direction: column;
   }
 
-  .billColumn.leftColumn, .billColumn.rightColumn {
-    flex-basis: auto;
-    max-width: 50%;
-  }
-
   .billField {
     font-size: 13px;
   }
