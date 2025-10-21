@@ -112,4 +112,11 @@ public class OwnerController {
                 .map(ResponseEntity::ok)
                 .switchIfEmpty(ApplicationExceptions.ownerNotFound(ownerId));
     }
+
+    @DeleteMapping("/{ownerId}/photo")
+    public Mono<ResponseEntity<OwnerResponseDTO>> deleteOwnerPhoto(@PathVariable String ownerId) {
+        return ownerService.deleteOwnerPhoto(ownerId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 }

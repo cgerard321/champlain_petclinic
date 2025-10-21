@@ -376,5 +376,12 @@ public class CustomersServiceClient {
                 .retrieve()
                 .bodyToMono(OwnerResponseDTO.class);
     }
+    public Mono<OwnerResponseDTO> deleteOwnerPhoto(String ownerId) {
+        return webClientBuilder.build()
+                .delete()
+                .uri(customersServiceUrl + "/owners/" + ownerId + "/photo")
+                .retrieve()
+                .bodyToMono(OwnerResponseDTO.class);
+    }
 
 }

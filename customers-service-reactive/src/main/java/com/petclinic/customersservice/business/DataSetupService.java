@@ -74,7 +74,7 @@ public class DataSetupService implements CommandLineRunner {
         Owner o1 = new Owner("1", "f470653d-05c5-4c45-b7a0-7d70f003d2ac", "George", "Franklin",
                 "110 W. Liberty St.", "Madison", "Ontario", "6085551023", "3e5a214b-009d-4a25-9313-344676e6157d");
         Owner o2 = new Owner("2", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", "Betty", "Davis",
-                "638 Cardinal Ave.", "Sun Prairie", "Quebec", "6085551749", null);
+                "638 Cardinal Ave.", "Sun Prairie", "Quebec", "6085551749", "3e5a214b-009d-4a25-9313-344676e6157d");
         Owner o3 = new Owner("3", "3f59dca2-903e-495c-90c3-7f4d01f3a2aa", "Eduardo", "Rodriguez",
                 "2693 Commerce St.", "McFarland", "Ontario", "6085558763", null);
         Owner o4 = new Owner("4", "a6e0e5b0-5f60-45f0-8ac7-becd8b330486", "Harold", "Davis",

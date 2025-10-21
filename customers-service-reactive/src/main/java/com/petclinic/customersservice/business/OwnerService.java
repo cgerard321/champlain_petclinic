@@ -19,4 +19,5 @@ public interface OwnerService {
     Mono<OwnerResponseDTO> deleteOwnerByOwnerId(String ownerId);
     Mono<OwnerResponseDTO> updateOwner(Mono<OwnerRequestDTO> ownerRequestDTO, String ownerId);
     Mono<OwnerResponseDTO> updateOwnerPhoto(String ownerId, FileRequestDTO photo);
+    Mono<OwnerResponseDTO> deleteOwnerPhoto(String ownerId);
 }
