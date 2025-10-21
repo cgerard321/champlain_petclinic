@@ -347,37 +347,34 @@ export default function AdminBillsListTable({
     setActiveSection(activeSection === section ? null : section);
   };
 
-    const handleDownloadStaffPdf = async (billId: string): Promise<void> => {
-        try {
-            const response = await axiosInstance.get(
-                `/bills/${billId}/pdf?currency=${currency}`,
-                {
-                    responseType: 'blob',
-                    headers: { 'Content-Type': 'application/pdf' },
-                    useV2: true,
-                }
-            );
-
-            if (!response || response.status !== 200 || !response.data)
-                throw new Error('Failed to download staff PDF');
-
-            const blob = new Blob([response.data], { type: 'application/pdf' });
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `staff-bill-${billId}.pdf`);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-        } catch (error) {
-            console.error('Error downloading staff PDF:', error);
+  const handleDownloadStaffPdf = async (billId: string): Promise<void> => {
+    try {
+      const response = await axiosInstance.get(
+        `/bills/${billId}/pdf?currency=${currency}`,
+        {
+          responseType: 'blob',
+          headers: { 'Content-Type': 'application/pdf' },
+          useV2: true,
         }
-    };
+      );
 
+      if (!response || response.status !== 200 || !response.data)
+        throw new Error('Failed to download staff PDF');
 
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `staff-bill-${billId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error('Error downloading staff PDF:', error);
+    }
+  };
 
-
-    return (
+  return (
     <div>
       <div className="button-container">
         <button onClick={() => toggleSection('search')}>
@@ -694,8 +691,7 @@ export default function AdminBillsListTable({
                 <th>Status</th>
                 <th>Due Date</th>
                 <th>Interest Exempt</th>
-                  <th>Download PDF</th>
-
+                <th>Download PDF</th>
               </tr>
             </thead>
             <tbody>
@@ -731,15 +727,14 @@ export default function AdminBillsListTable({
                       variant="simple"
                     />
                   </td>
-                    <td>
-                        <button
-                            onClick={() => void handleDownloadStaffPdf(bill.billId)}
-                            className="downloadButton"
-                        >
-                            Download PDF
-                        </button>
-                    </td>
-
+                  <td>
+                    <button
+                      onClick={() => void handleDownloadStaffPdf(bill.billId)}
+                      className="downloadButton"
+                    >
+                      Download PDF
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
