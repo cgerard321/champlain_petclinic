@@ -379,6 +379,4 @@ public class CustomerBillsControllerIntegrationTest {
                 .expectStatus().isEqualTo(500); // INTERNAL_SERVER_ERROR
     }
 
-
-
 }
