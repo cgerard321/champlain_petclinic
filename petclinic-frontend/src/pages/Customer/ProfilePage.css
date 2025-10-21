@@ -446,30 +446,6 @@ h1 {
     transform: translateY(-2px);
 }
 
-.delete-confirmation-modal {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-}
-
-.delete-confirmation-modal h2 {
-    margin-bottom: 20px;
-    color: #333;
-}
-
-.delete-confirmation-modal .buttons {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 20px;
-}
-
 .modal-footer .delete-button {
     background-color: #e42a16; /* Same bright red as other delete buttons */
     color: white;
