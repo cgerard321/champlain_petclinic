@@ -9,6 +9,7 @@ import com.petclinic.cartsservice.utils.EntityModelUtil;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
 import com.petclinic.cartsservice.utils.exceptions.OutOfStockException;
+import com.petclinic.cartsservice.domainclientlayer.CustomerClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -28,17 +29,25 @@ import java.util.UUID;
 public class CartServiceImpl implements CartService {
     private final CartRepository cartRepository;
     private final ProductClient productClient;
+    private final CustomerClient customerClient;
 
-    public CartServiceImpl(CartRepository cartRepository, ProductClient productClient) {
+
+    public CartServiceImpl(CartRepository cartRepository, ProductClient productClient, CustomerClient customerClient ) {
         this.cartRepository = cartRepository;
         this.productClient = productClient;
+        this.customerClient = customerClient;
     }
     @Override
     public Flux<CartResponseModel> getAllCarts() {
         return cartRepository.findAll()
-                .map(cart -> {
-                    List<CartProduct> products = cart.getProducts();
-                    return EntityModelUtil.toCartResponseModel(cart, products);
+                .flatMap(cart -> {
+                    String cid = cart.getCustomerId();
+                    if (cid == null || cid.isBlank()) {
+                        return Mono.just(EntityModelUtil.toCartResponseModel(cart, cart.getProducts()));
+                    }
+                    return customerClient.getCustomerById(cid)
+                            .map(c -> EntityModelUtil.toCartResponseModel(cart, cart.getProducts(), c.getFullName()))
+                            .onErrorResume(e -> Mono.just(EntityModelUtil.toCartResponseModel(cart, cart.getProducts())));
                 });
     }
 
@@ -47,11 +56,15 @@ public class CartServiceImpl implements CartService {
         return cartRepository.findCartByCartId(cartId)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Cart id was not found: " + cartId))))
                 .flatMap(cart -> {
-                    List<CartProduct> products = cart.getProducts();
-                    return Mono.just(EntityModelUtil.toCartResponseModel(cart, products));
+                    String cid = cart.getCustomerId();
+                    if (cid == null || cid.isBlank()) {
+                        return Mono.just(EntityModelUtil.toCartResponseModel(cart, cart.getProducts()));
+                    }
+                    return customerClient.getCustomerById(cid)
+                            .map(c -> EntityModelUtil.toCartResponseModel(cart, cart.getProducts(), c.getFullName()))
+                            .onErrorResume(e -> Mono.just(EntityModelUtil.toCartResponseModel(cart, cart.getProducts())));
                 });
     }
-
 
     public Flux<CartResponseModel> clearCart(String cartId) {
         return cartRepository.findCartByCartId(cartId)
