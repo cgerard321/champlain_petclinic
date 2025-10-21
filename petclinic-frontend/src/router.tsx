@@ -34,6 +34,7 @@ import CustomerDetailsPage from '@/pages/Customer/CustomerDetailsPage.tsx';
 import UpdateCustomerPage from '@/pages/Customer/UpdateCustomerPage.tsx';
 import VisitDetails from './features/visits/components/VisitByVisitId';
 import CustomerVisits from '@/pages/Visit/CustomerVisits.tsx';
+import VisitsCalendar from '@/pages/Visit/VisitsCalendar.tsx';
 import UpdateOwnerPetPage from '@/pages/Customer/UpdateOwnerPetPage.tsx';
 import EditInventoryProducts from './features/inventories/EditInventoryProducts';
 import AddSupplyToInventory from './features/inventories/AddSupplyToInventory';
@@ -277,6 +278,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <AddingVisit />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.VisitsCalendar,
+        element: (
+          <ProtectedRoute>
+            <VisitsCalendar />
           </ProtectedRoute>
         ),
       },

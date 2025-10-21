@@ -152,6 +152,19 @@ export function NavBar(): JSX.Element {
                     Bills
                   </Nav.Link>
                 )}
+                {(IsAdmin() || IsVet()) && (
+                  <NavDropdown title="Visits" id="visits-dropdown">
+                    <NavDropdown.Item as={Link} to={AppRoutePaths.Visits}>
+                      List View
+                    </NavDropdown.Item>
+                    <NavDropdown.Item
+                      as={Link}
+                      to={AppRoutePaths.VisitsCalendar}
+                    >
+                      Calendar View
+                    </NavDropdown.Item>
+                  </NavDropdown>
+                )}
                 {hasStaffVisits && !showVetVisitsDropdown && (
                   <Nav.Link as={Link} to={AppRoutePaths.Visits}>
                     Visits

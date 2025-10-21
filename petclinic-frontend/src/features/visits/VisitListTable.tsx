@@ -17,10 +17,12 @@ import xcrossIcon from '@/assets/Icons/xcrossDark.svg';
 import pentosquareIcon from '@/assets/Icons/pentosquareLight.svg';
 import starIcon from '@/assets/Icons/starEmptyLight.svg';
 import AddingVisit from './components/AddingVisit';
+import calendarIcon from '@/assets/Icons/calendarLight.svg';
 
 import BasicModal from '@/shared/components/BasicModal';
 import VisitDetails from '@/features/visits/components/VisitDetails';
 import EditingVisit from './components/EditingVisit';
+import { AppRoutePaths } from '@/shared/models/path.routes';
 
 export default function VisitListTable(): JSX.Element {
   const isVet = IsVet();
@@ -224,6 +226,16 @@ export default function VisitListTable(): JSX.Element {
           >
             <img src={starIcon} />
             Reviews
+          </button>
+        </li>
+        <li>
+          <button
+            className="btn btn-primary"
+            onClick={() => navigate(AppRoutePaths.VisitsCalendar)}
+            title="Calendar View"
+          >
+            <img src={calendarIcon} />
+            Calendar View
           </button>
         </li>
         {renderSidebarItem('All')}
