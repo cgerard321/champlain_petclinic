@@ -285,10 +285,6 @@
     margin-left: 0;
   }
 
-  .billCardContent {
-    flex-direction: column;
-  }
-
   .billField {
     font-size: 13px;
   }
