@@ -746,13 +746,23 @@ const UserCart: React.FC = () => {
         quantity: i.quantity,
       }));
 
-      const invoiceSubtotal = invoiceItemsForFull.reduce(
-        (s, it) => s + it.productSalePrice * it.quantity,
+      // calculate money values in integer cents to avoid floating point errors
+      const invoiceSubtotalCents = invoiceItemsForFull.reduce(
+        (s, it) => s + Math.round(it.productSalePrice * 100) * it.quantity,
         0
       );
-      const invoiceTvq = invoiceSubtotal * 0.09975;
-      const invoiceTvc = invoiceSubtotal * 0.05;
-      const invoiceTotal = invoiceSubtotal + invoiceTvq + invoiceTvc - discount;
+      const invoiceSubtotal = invoiceSubtotalCents / 100;
+      const invoiceTvqCents = Math.round(invoiceSubtotalCents * 0.09975);
+      const invoiceTvcCents = Math.round(invoiceSubtotalCents * 0.05);
+      const invoiceTvq = invoiceTvqCents / 100;
+      const invoiceTvc = invoiceTvcCents / 100;
+      const discountCents = Math.round(discount * 100);
+      const invoiceTotal =
+        (invoiceSubtotalCents +
+          invoiceTvqCents +
+          invoiceTvcCents -
+          discountCents) /
+        100;
 
       const usedBilling = billing ?? billingInfo ?? null;
 
