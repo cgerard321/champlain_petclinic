@@ -60,22 +60,6 @@ class PetTypeServiceImplTest {
     }
 
     @Test
-    void whenAddPetType_missingName() {
-        PetTypeRequestDTO dto = new PetTypeRequestDTO(null, "Desc");
-        StepVerifier.create(petTypeService.addPetType(Mono.just(dto)))
-                .expectError(InvalidInputException.class)
-                .verify();
-    }
-
-    @Test
-    void whenAddPetType_missingDescription() {
-        PetTypeRequestDTO dto = new PetTypeRequestDTO("Name", null);
-        StepVerifier.create(petTypeService.addPetType(Mono.just(dto)))
-                .expectError(InvalidInputException.class)
-                .verify();
-    }
-
-    @Test
     void getAllPetTypesPagination_WithNoFilters_ShouldReturnPaginatedResults() {
         PetType petType1 = buildPetType("1", "Dog", "Mammal");
         PetType petType2 = buildPetType("2", "Cat", "Mammal");

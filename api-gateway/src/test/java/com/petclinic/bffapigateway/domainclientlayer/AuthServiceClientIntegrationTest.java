@@ -206,7 +206,6 @@ public class AuthServiceClientIntegrationTest {
                 .address("address")
                 .city("city")
                 .telephone("1234567890")
-                .pets(List.of())
                 .build();
 
         final MockResponse mockResponse = new MockResponse();
@@ -876,7 +875,6 @@ public class AuthServiceClientIntegrationTest {
                 .address("123 Main St")
                 .city("Anytown")
                 .telephone("555-1234")
-                .pets(List.of())
                 .build();
 
         String userJson = new ObjectMapper().writeValueAsString(userResponse);

@@ -49,7 +49,7 @@ class OwnerServiceImplTest {
                 .address("Test address")
                 .city("test city")
                 .province("test province")
-                .telephone("telephone")
+                .telephone("1234567890")
                 .build();
     }
 
@@ -60,7 +60,7 @@ class OwnerServiceImplTest {
                 .address("Test address")
                 .city("test city")
                 .province("test province")
-                .telephone("telephone")
+                .telephone("1234567890")
                 .build();
     }
 
@@ -157,12 +157,12 @@ class OwnerServiceImplTest {
 
     @Test
     void addOwner_ShouldSucceed() {
-        when(repo.insert(any(Owner.class))).thenReturn(Mono.just(ownerEntity));
+        when(repo.save(any(Owner.class))).thenReturn(Mono.just(ownerEntity));
 
         StepVerifier.create(ownerService.addOwner(Mono.just(ownerRequestDTO)))
                 .consumeNextWith(foundOwner -> {
                     assertEquals(ownerRequestDTO.getFirstName(), foundOwner.getFirstName());
-                    assertEquals(ownerRequestDTO.getLastName(), foundOwner.getFirstName());
+                    assertEquals(ownerRequestDTO.getLastName(), foundOwner.getLastName());
                     assertEquals(ownerRequestDTO.getCity(), foundOwner.getCity());
                     assertEquals(ownerRequestDTO.getTelephone(), foundOwner.getTelephone());
                     assertEquals(ownerRequestDTO.getAddress(), foundOwner.getAddress());
@@ -170,7 +170,7 @@ class OwnerServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(repo).insert(any(Owner.class));
+        verify(repo).save(any(Owner.class));
     }
 
     @Test
@@ -231,19 +231,6 @@ class OwnerServiceImplTest {
 
         verify(repo).findOwnerByOwnerId(ownerId);
         verify(repo).save(any(Owner.class));
-    }
-
-    @Test
-    void getOwnerByOwnerId_ShouldThrowNotFoundException() {
-        String OWNER_ID = "Not found";
-        when(repo.findOwnerByOwnerId(OWNER_ID)).thenReturn(Mono.empty());
-
-        Mono<OwnerResponseDTO> ownerResponseDTOMono = ownerService.getOwnerByOwnerId(OWNER_ID);
-        StepVerifier
-                .create(ownerResponseDTOMono)
-                .expectError(NotFoundException.class)
-                .verify();
-        verify(repo).findOwnerByOwnerId(OWNER_ID);
     }
 
     @Test

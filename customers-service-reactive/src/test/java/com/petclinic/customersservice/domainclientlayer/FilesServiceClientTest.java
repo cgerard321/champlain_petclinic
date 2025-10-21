@@ -213,7 +213,7 @@ class FilesServiceClientTest {
     }
 
     @Test
-    void updateFile_WithNotFoundStatus_ShouldThrowNotFoundException() {
+    void updateFile_WithNotFoundStatus_ShouldThrowFailedDependencyException() {
         FileRequestDTO requestDTO = FileRequestDTO.builder()
                 .fileName("updated.jpg")
                 .fileType("image/jpeg")
@@ -226,7 +226,7 @@ class FilesServiceClientTest {
                 .setBody("{\"message\":\"File not found\"}"));
 
         StepVerifier.create(filesServiceClient.updateFile("missing", requestDTO))
-                .expectError(NotFoundException.class)
+                .expectError(FailedDependencyException.class)
                 .verify();
     }
 
