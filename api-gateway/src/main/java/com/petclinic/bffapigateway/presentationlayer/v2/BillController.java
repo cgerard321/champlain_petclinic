@@ -133,6 +133,8 @@ public class BillController {
         return billService.setInterestExempt(billId, exempt)
                 .thenReturn(ResponseEntity.noContent().build());
     }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.VET})
     @GetMapping(value = "/{billId}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
     public Mono<ResponseEntity<byte[]>> downloadStaffBillPdf(
             @PathVariable String billId,
