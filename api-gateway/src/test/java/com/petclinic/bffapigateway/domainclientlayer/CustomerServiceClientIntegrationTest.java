@@ -38,14 +38,11 @@ public class CustomerServiceClientIntegrationTest {
 
     private ObjectMapper mapper;
 
-    final String test = "Test photo";
-    final byte[] testBytes = test.getBytes();
-    private final String OWNER_ID = "ownerId-123";
-    private final String PET_ID = "petId-123";
-    private final String PET_TYPE_ID = "petTypeId-123";
+    private final String OWNER_ID = "c5cfab77-68cd-4c46-adeb-97c12f029b2e";
+    private final String PET_ID = "e8ab4a03-c404-4f79-adc4-f377341c9c7b";
+    private final String PET_TYPE_ID = "eb2a88fa-296a-45c2-8947-37d61ae99e01";
 
     private final OwnerRequestDTO TEST_OWNER = OwnerRequestDTO.builder()
-            .ownerId("ownerId-123")
             .firstName("John")
             .lastName("Smith")
             .address("456 Elm")
@@ -62,7 +59,7 @@ public class CustomerServiceClientIntegrationTest {
 
 
     private final OwnerResponseDTO TEST_OWNER_RESPONSE = OwnerResponseDTO.builder()
-            .ownerId("ownerId-123")
+            .ownerId(OWNER_ID)
             .firstName("John")
             .lastName("Smith")
             .address("456 Elm")
@@ -73,19 +70,19 @@ public class CustomerServiceClientIntegrationTest {
             .build();
 
     private final PetTypeResponseDTO TEST_PETTYPE_RESPONSE = PetTypeResponseDTO.builder()
-            .petTypeId("petTypeId-123")
+            .petTypeId(PET_TYPE_ID)
             .name("Dog")
             .petTypeDescription("Mammal")
             .build();
-    PetType type = new PetType();
 
     Date date = new Date(20221010);
     private final PetResponseDTO TEST_PET = PetResponseDTO.builder()
-            .ownerId("ownerId-123")
-            .petId("petId-123")
+            .ownerId(OWNER_ID)
+            .petId(PET_ID)
             .name("Cat")
             .birthDate(date)
-            .petTypeId("5")
+            .petTypeId(PET_TYPE_ID)
+            .weight("5.0")
           //  .photoId("2")
             .isActive("true")
             .build();
@@ -116,9 +113,8 @@ public class CustomerServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(body));
 
-        final OwnerResponseDTO ownerResponseDTO = customersServiceClient.createOwner(TEST_OWNER).block();
+        final OwnerResponseDTO ownerResponseDTO = customersServiceClient.createOwner(Mono.just(TEST_OWNER)).block();
 
-        assertEquals(ownerResponseDTO.getOwnerId(),TEST_OWNER.getOwnerId());
         assertEquals(ownerResponseDTO.getFirstName(),TEST_OWNER.getFirstName());
         assertEquals(ownerResponseDTO.getLastName(),TEST_OWNER.getLastName());
         assertEquals(ownerResponseDTO.getAddress(),TEST_OWNER.getAddress());
@@ -131,15 +127,14 @@ public class CustomerServiceClientIntegrationTest {
 
     @Test
     void getOwnerByOwnerId() throws JsonProcessingException{
-        final String body = mapper.writeValueAsString(mapper.convertValue(TEST_OWNER, OwnerResponseDTO.class));
+        final String body = mapper.writeValueAsString(mapper.convertValue(TEST_OWNER_RESPONSE, OwnerResponseDTO.class));
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setBody(body));
 
-        final OwnerResponseDTO ownerResponseDTO = customersServiceClient.getOwner("ownerId-123").block();
+        final OwnerResponseDTO ownerResponseDTO = customersServiceClient.getOwner(OWNER_ID).block();
 
-        assertEquals(ownerResponseDTO.getOwnerId(),TEST_OWNER.getOwnerId());
-
+        assertEquals(ownerResponseDTO.getOwnerId(), OWNER_ID);
     }
 
     @Test
@@ -154,40 +149,28 @@ public class CustomerServiceClientIntegrationTest {
 
         final OwnerResponseDTO firstOwnerFromFlux = customersServiceClient.getAllOwners().blockFirst();
 
-        assertEquals(firstOwnerFromFlux.getOwnerId(), TEST_OWNER.getOwnerId());
+        assertEquals(firstOwnerFromFlux.getOwnerId(), OWNER_ID);
     }
 
     @Test
     void getOwnersByPagination() throws JsonProcessingException {
        OwnerResponseDTO TEST_OWNER1 = OwnerResponseDTO.builder()
-                .ownerId("ownerId-1")
+                .ownerId("c43d8638-1641-4b3c-87ae-3dda51a898de")
                .firstName("Test")
                .lastName("Test")
                .address("Test")
                .city("Test")
                .province("Test")
-               .telephone("Test")
-                //.imageId(1)
+               .telephone("1234567890")
                 .build();
         OwnerResponseDTO TEST_OWNER2 = OwnerResponseDTO.builder()
-                .ownerId("ownerId-2")
+                .ownerId("75b1701f-4d3d-4ba0-a8a1-3c3ab3ad67ac")
                 .firstName("Test")
                 .lastName("Test")
                 .address("Test")
                 .city("Test")
                 .province("Test")
-                .telephone("Test")
-                //.imageId(1)
-                .build();
-        OwnerResponseDTO TEST_OWNER3 = OwnerResponseDTO.builder()
-                .ownerId("ownerId-3")
-                .firstName("Test")
-                .lastName("Test")
-                .address("Test")
-                .city("Test")
-                .province("Test")
-                .telephone("Test")
-                //.imageId(1)
+                .telephone("1234567890")
                 .build();
 
         Flux<OwnerResponseDTO> owners = Flux.just(TEST_OWNER1,TEST_OWNER2);
@@ -212,18 +195,7 @@ public class CustomerServiceClientIntegrationTest {
 
     @Test
     void getAllOwnersByPaginationWithFiltersApplied() throws JsonProcessingException {
-        OwnerResponseDTO TEST_OWNER1 = OwnerResponseDTO.builder()
-                .ownerId("ownerId-1")
-                .firstName("FN1")
-                .lastName("LN1")
-                .address("Test")
-                .city("C1")
-                .province("Test")
-                .telephone("T1")
-                //.imageId(1)
-                .build();
-
-        Flux<OwnerResponseDTO> owners = Flux.just(TEST_OWNER1);
+        Flux<OwnerResponseDTO> owners = Flux.just(TEST_OWNER_RESPONSE);
 
         final String body = mapper.writeValueAsString(owners.collectList().block());
 
@@ -233,19 +205,14 @@ public class CustomerServiceClientIntegrationTest {
 
         Optional<Integer> page = Optional.of(0);
         Optional<Integer> size =  Optional.of(1);
-        String ownerId = "ownerId-1";
-        String firstName = "FN1";
-        String lastName = "LN1";
-        String city = "C1";
-        String phoneNumber = "T1";
-        final OwnerResponseDTO owner = customersServiceClient.getOwnersByPagination(page,size,ownerId,firstName,lastName,phoneNumber,city).blockFirst();
+        final OwnerResponseDTO owner = customersServiceClient.getOwnersByPagination(page,size,OWNER_ID,TEST_OWNER.getFirstName(),TEST_OWNER.getLastName(),TEST_OWNER.getTelephone(),TEST_OWNER.getCity()).blockFirst();
 
-        assertEquals(ownerId, owner.getOwnerId());
-        assertEquals(city, owner.getCity());
+        assertEquals(OWNER_ID, owner.getOwnerId());
+        assertEquals(TEST_OWNER.getCity(), owner.getCity());
     }
 
     @Test
-    void getTotalNumberOfOwners() throws Exception {
+    void getTotalNumberOfOwners() {
         // Simulate the expected total count
         long expectedCount = 0;
 
@@ -260,7 +227,7 @@ public class CustomerServiceClientIntegrationTest {
     }
 
     @Test
-    void getTotalNumberOfOwnersWithFilters() throws Exception {
+    void getTotalNumberOfOwnersWithFilters() {
         // Simulate the expected total count
         long expectedCount = 0;
 
@@ -275,7 +242,7 @@ public class CustomerServiceClientIntegrationTest {
     }
 
     @Test
-    void getTotalNumberOfOwnersWithFilters_UnknownValue_ShouldReturnZeroOwners() throws Exception {
+    void getTotalNumberOfOwnersWithFilters_UnknownValue_ShouldReturnZeroOwners() {
         // Simulate the expected total count
         long expectedCount = 0;
 
@@ -299,7 +266,6 @@ public class CustomerServiceClientIntegrationTest {
     @Test
     void testPatchPet() throws Exception {
         PetRequestDTO petRequestDTO = new PetRequestDTO(); // Create a request DTO
-        petRequestDTO.setPetId("petId-123");
         petRequestDTO.setIsActive("true"); // Set the isActive status
 
         PetResponseDTO updatedPetResponse = new PetResponseDTO(); // Create an expected response DTO
@@ -337,7 +303,7 @@ public class CustomerServiceClientIntegrationTest {
 
         // Verify that the deletePetById endpoint was hit with the correct pet id
         RecordedRequest request = server.takeRequest();
-        assertEquals("/pet/" + petId, request.getPath());
+        assertEquals("/pets/" + petId, request.getPath());
         assertEquals("DELETE", request.getMethod());
     }
 
@@ -446,7 +412,7 @@ public class CustomerServiceClientIntegrationTest {
                 .verifyComplete();
 
         RecordedRequest request = server.takeRequest();
-        assertEquals("/pet/" + petId, request.getPath());
+        assertEquals("/pets/" + petId, request.getPath());
         assertEquals("PUT", request.getMethod());
     }
     @Test
@@ -465,7 +431,7 @@ public class CustomerServiceClientIntegrationTest {
                 .verifyComplete();
 
         RecordedRequest request = server.takeRequest();
-        assertEquals("/pet", request.getPath());
+        assertEquals("/pets", request.getPath());
         assertEquals("POST", request.getMethod());
     }
 
@@ -486,7 +452,7 @@ public class CustomerServiceClientIntegrationTest {
                 .verifyComplete();
 
         RecordedRequest request = server.takeRequest();
-        assertEquals("/pet/owners/" + OWNER_ID + "/pets", request.getPath());
+        assertEquals("/pets/owners/" + OWNER_ID + "/pets", request.getPath());
         assertEquals("POST", request.getMethod());
     }
 
@@ -527,7 +493,7 @@ public class CustomerServiceClientIntegrationTest {
                 .verifyComplete();
 
         RecordedRequest request = server.takeRequest();
-        assertEquals("/pet/owner/" + OWNER_ID + "/pets", request.getPath()); //worse naming for an endpoint ever
+        assertEquals("/pets/owner/" + OWNER_ID + "/pets", request.getPath()); //worse naming for an endpoint ever
     }
 
     @Test
@@ -603,7 +569,7 @@ public class CustomerServiceClientIntegrationTest {
                 .verifyComplete();
 
         RecordedRequest request = server.takeRequest();
-         assertEquals("/owners/petTypes/pet-types-pagination?page=0&size=10&petTypeId=petTypeId-123&name=Dog", request.getPath());
+         assertEquals("/owners/petTypes/pet-types-pagination?page=0&size=10&petTypeId=eb2a88fa-296a-45c2-8947-37d61ae99e01&name=Dog", request.getPath());
     }
 
     @Test
@@ -639,7 +605,7 @@ public class CustomerServiceClientIntegrationTest {
                 .verifyComplete();
 
         RecordedRequest request = server.takeRequest();
-        assertEquals("/owners/petTypes/pet-types-filtered-count?petTypeId=petTypeId-123&name=Dog", request.getPath());
+        assertEquals("/owners/petTypes/pet-types-filtered-count?petTypeId=eb2a88fa-296a-45c2-8947-37d61ae99e01&name=Dog", request.getPath());
     }
 
     private void prepareResponse(Consumer<MockResponse> consumer) {
@@ -737,7 +703,7 @@ public class CustomerServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(mapper.writeValueAsString(responseDTO)));
 
-        Mono<OwnerResponseDTO> result = customersServiceClient.addOwner(Mono.just(requestDTO));
+        Mono<OwnerResponseDTO> result = customersServiceClient.createOwner(Mono.just(requestDTO));
 
         StepVerifier.create(result)
                 .expectNextMatches(r -> r.getOwnerId().equals("new-owner-id"))
@@ -786,7 +752,7 @@ public class CustomerServiceClientIntegrationTest {
                 .verifyComplete();
 
         RecordedRequest request = server.takeRequest();
-        assertEquals("/pet/" + PET_ID, request.getPath());
+        assertEquals("/pets/" + PET_ID, request.getPath());
         assertEquals("GET", request.getMethod());
     }
 
@@ -828,25 +794,17 @@ public class CustomerServiceClientIntegrationTest {
 
     @Test
     void whenGetPetTypes_thenReturnPetTypesList() throws Exception {
-        PetType petType1 = new PetType();
-        petType1.setId(1);
-        petType1.setName("Dog");
-
-        PetType petType2 = new PetType();
-        petType2.setId(2);
-        petType2.setName("Cat");
-
-        List<PetType> petTypes = List.of(petType1, petType2);
+        List<PetTypeResponseDTO> petTypes = List.of(TEST_PETTYPE_RESPONSE);
 
         server.enqueue(new MockResponse()
                 .setResponseCode(200)
                 .setHeader("Content-Type", "application/json")
                 .setBody(mapper.writeValueAsString(petTypes)));
 
-        Flux<PetType> result = customersServiceClient.getPetTypes();
+        Flux<PetTypeResponseDTO> result = customersServiceClient.getPetTypes();
 
         StepVerifier.create(result)
-                .expectNextCount(2)
+                .expectNextCount(1)
                 .verifyComplete();
 
         RecordedRequest request = server.takeRequest();

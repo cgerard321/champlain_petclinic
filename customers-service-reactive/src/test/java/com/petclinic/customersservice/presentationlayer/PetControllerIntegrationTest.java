@@ -17,6 +17,9 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 
 import static com.mongodb.assertions.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -36,22 +39,22 @@ class PetControllerIntegrationTest {
     private FilesServiceClient filesServiceClient;
 
     Pet petEntity = buildPet();
+    PetRequestDTO petRequestDTO = buildPetRequest();
     String PET_ID = petEntity.getPetId();
 
     private String validPetId;
 
     @Test
     void deletePetByPetId() {
-        repo.save(petEntity);
-        Publisher<Void> setup = repo.deleteById(petEntity.getId());
+        Publisher<Pet> setup = repo.save(petEntity);
         StepVerifier.create(setup)
-                .expectNextCount(0)
+                .expectNextCount(1)
                 .verifyComplete();
         client.delete()
-                .uri("/pets/" + petEntity.getId())
+                .uri("/pets/" + PET_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk().expectBody();
+                .expectStatus().isNoContent();
     }
 
     @Test
@@ -101,25 +104,7 @@ class PetControllerIntegrationTest {
         Publisher<Pet> setup = repo.deleteAll().thenMany(repo.save(petEntity));
         StepVerifier.create(setup).expectNextCount(1).verifyComplete();
         client.put().uri("/pets/" + PET_ID)
-                .body(Mono.just(petEntity), Pet.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange().expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.petId").isEqualTo(petEntity.getPetId())
-                .jsonPath("$.name").isEqualTo(petEntity.getName())
-                .jsonPath("$.petTypeId").isEqualTo(petEntity.getPetTypeId())
-                .jsonPath("$.ownerId").isEqualTo(petEntity.getOwnerId())
-                .jsonPath("$.photoId").isEqualTo(petEntity.getPhotoId())
-                .jsonPath("$.isActive").isEqualTo(petEntity.getIsActive());
-    }
-
-    @Test
-    void insertPet() {
-        Publisher<Void> setup = repo.deleteAll();
-        StepVerifier.create(setup).expectNextCount(0).verifyComplete();
-        client.post().uri("/pets")
-                .body(Mono.just(petEntity), Pet.class)
+                .body(Mono.just(petRequestDTO), PetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange().expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -130,18 +115,37 @@ class PetControllerIntegrationTest {
                 .jsonPath("$.ownerId").isEqualTo(petEntity.getOwnerId())
 //                .jsonPath("$.photoId").isEqualTo(petEntity.getPhotoId())
                 .jsonPath("$.isActive").isEqualTo(petEntity.getIsActive());
+    }
 
-
+    @Test
+    void insertPet() {
+        Publisher<Void> setup = repo.deleteAll();
+        StepVerifier.create(setup).expectNextCount(0).verifyComplete();
+        client.post().uri("/pets")
+                .body(Mono.just(petRequestDTO), PetRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange().expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.name").isEqualTo(petEntity.getName())
+                .jsonPath("$.petTypeId").isEqualTo(petEntity.getPetTypeId())
+                .jsonPath("$.ownerId").isEqualTo(petEntity.getOwnerId())
+                .jsonPath("$.weight").isEqualTo(petEntity.getWeight())
+//                .jsonPath("$.photoId").isEqualTo(petEntity.getPhotoId())
+                .jsonPath("$.isActive").isEqualTo(petEntity.getIsActive());
     }
 
     @Test
     void updatePetIsActive() {
         Publisher<Pet> setup = repo.deleteAll().thenMany(repo.save(petEntity));
         StepVerifier.create(setup).expectNextCount(1).verifyComplete();
-        client.patch().uri("/pets/" + PET_ID)
-                .body(Mono.just(petEntity), Pet.class)
+
+        client.patch()
+                .uri("/pets/" + PET_ID)
+                .body(Mono.just("true"), String.class)
                 .accept(MediaType.APPLICATION_JSON)
-                .exchange().expectStatus().isOk()
+                .exchange()
+                .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.isActive").isEqualTo(petEntity.getIsActive());
@@ -149,12 +153,25 @@ class PetControllerIntegrationTest {
 
     private Pet buildPet() {
         return Pet.builder()
-                .id("abc123")
-                .petId("abc12345")
+                .id("123")
+                .petId("de92af81-0135-4cd8-8cda-343f681728a3")
                 .name("leonardo")
-                .ownerId("111")
-                .petTypeId("111")
-                .photoId("111")
+                .birthDate(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()))
+                .ownerId("54c76b87-e598-4f26-ac63-dcb8a9571b08")
+                .petTypeId("f24969bc-0009-4f02-99c9-9db426d872f3")
+                .photoId("dd10e169-5d5c-4610-9d6e-62825a594795")
+                .weight("5.0")
+                .isActive("true")
+                .build();
+    }
+
+    private PetRequestDTO buildPetRequest() {
+        return PetRequestDTO.builder()
+                .name("leonardo")
+                .birthDate(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()))
+                .ownerId("54c76b87-e598-4f26-ac63-dcb8a9571b08")
+                .petTypeId("f24969bc-0009-4f02-99c9-9db426d872f3")
+                .weight("5.0")
                 .isActive("true")
                 .build();
     }

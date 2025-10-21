@@ -26,7 +26,7 @@ public class MockServerConfigCustomersService {
                         request()
                                 .withMethod("PUT")
                                 .withPath("/owners/" + "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
-                                .withBody(json("{\"ownerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"firstName\":\"Betty\",\"lastName\":\"Davis\",\"address\":\"638 Cardinal Ave.\",\"city\":\"Sun Prairie\",\"province\":\"Quebec\",\"telephone\":\"6085551749\"}"))
+                                .withBody(json("{\"firstName\":\"Betty\",\"lastName\":\"Davis\",\"address\":\"638 Cardinal Ave.\",\"city\":\"Sun Prairie\",\"province\":\"Quebec\",\"telephone\":\"6085551749\"}"))
                 )
                 .respond(
                         response()

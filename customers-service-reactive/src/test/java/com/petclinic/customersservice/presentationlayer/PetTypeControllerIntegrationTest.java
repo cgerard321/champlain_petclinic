@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
@@ -76,7 +77,7 @@ class PetTypeControllerIntegrationTest {
     void updatePetType() {
         PetType testPetType = PetType.builder()
                 .id("test-id-123")
-                .petTypeId("test-petTypeId-123")
+                .petTypeId("dec8163e-825a-43d3-8ee2-33efc2cf0d1c")
                 .name("Original Dog")
                 .petTypeDescription("Original Mammal")
                 .build();
@@ -102,7 +103,7 @@ class PetTypeControllerIntegrationTest {
     }
 
     @Test
-    void getOwnerByOwnerId() {
+    void getPetTypeByPetTypeId() {
         Publisher<PetType> setup = petTypeRepo.deleteAll().thenMany(petTypeRepo.save(petTypeEntity2));
         StepVerifier.create(setup).expectNextCount(1).verifyComplete();
         webTestClient.get().uri("/owners/petTypes/" + PUBLIC_PETTYPE_ID)
@@ -274,7 +275,7 @@ class PetTypeControllerIntegrationTest {
     private PetType buildPetType2() {
         return PetType.builder()
                 .id("10")
-                .petTypeId("petTypeId-1234")
+                .petTypeId("61a0d513-0aeb-4e8a-ab9e-8875fd7db9c0")
                 .name("Dog")
                 .petTypeDescription("Mammal")
                 .build();
@@ -300,12 +301,12 @@ class PetTypeControllerIntegrationTest {
 
 
     @Test
-    void deletePetType_WhenPetTypeNotFound_ShouldReturnNoContent() {
+    void deletePetType_WhenPetTypeNotFound_ShouldReturnUnprocessableEntity() {
         try {
             webTestClient.delete()
                     .uri("/owners/petTypes/non-existent-pet-type")
                     .exchange()
-                    .expectStatus().isNoContent();
+                    .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
         } catch (NotFoundException e) {
             fail("Unexpected NotFoundException: " + e.getMessage());
         } catch (InvalidInputException e) {
@@ -318,12 +319,12 @@ class PetTypeControllerIntegrationTest {
     }
 
     @Test
-    void deletePetType_WithInvalidIdFormat_ShouldReturnNoContent() {
+    void deletePetType_WithInvalidIdFormat_ShouldReturnUnprocessableEntity() {
         try {
             webTestClient.delete()
                     .uri("/owners/petTypes/invalid@id#format")
                     .exchange()
-                    .expectStatus().isNoContent();
+                    .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
         } catch (NotFoundException e) {
             fail("Unexpected NotFoundException: " + e.getMessage());
         } catch (InvalidInputException e) {
