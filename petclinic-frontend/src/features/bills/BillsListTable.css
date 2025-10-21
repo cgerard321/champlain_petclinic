@@ -237,10 +237,6 @@
     margin-left: 0;
   }
 
-  .billCardContent {
-    flex-direction: column;
-  }
-
   .billColumn.leftColumn, .billColumn.rightColumn {
     flex-basis: auto;
     max-width: 50%;
