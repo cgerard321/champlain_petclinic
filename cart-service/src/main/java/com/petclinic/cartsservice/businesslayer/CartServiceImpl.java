@@ -704,15 +704,17 @@ public class CartServiceImpl implements CartService {
         return cartRepository.findCartByCartId(cartId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
                 .flatMap(cart -> {
-                    if (promoPercent == null || promoPercent < 0 || promoPercent > 100) {
-                        return Mono.error(new InvalidInputException("promoPercent must be 0..100"));
+                    if (promoPercent == null || promoPercent <= 0) {
+                        cart.setPromoPercent(null);
+                        return cartRepository.save(cart);
+                    }
+                    if (promoPercent > 100) {
+                        return Mono.error(new InvalidInputException("promoPercent must be 1..100"));
                     }
                     cart.setPromoPercent(promoPercent);
                     return cartRepository.save(cart);
                 })
-
                 .map(saved -> EntityModelUtil.toCartResponseModel(saved, saved.getProducts()));
     }
-
 
 }

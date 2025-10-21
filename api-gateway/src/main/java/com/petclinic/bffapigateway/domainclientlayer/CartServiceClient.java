@@ -415,4 +415,15 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
                 .bodyToMono(CartResponseDTO.class);
     }
 
+    public Mono<CartResponseDTO> clearPromo(String cartId) {
+        return webClientBuilder.build()
+                .put()
+                .uri(uriBuilder -> uriBuilder
+                        .path(cartServiceUrl + "/{cartId}/promo")
+                        .queryParam("promoPercent", 0)
+                        .build(cartId))
+                .retrieve()
+                .bodyToMono(CartResponseDTO.class);
+    }
+
 }

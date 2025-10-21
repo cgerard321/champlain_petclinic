@@ -10,7 +10,8 @@ import { FaShoppingCart } from 'react-icons/fa';
 import ImageContainer from '@/features/products/components/ImageContainer';
 import axiosInstance from '@/shared/api/axiosInstance';
 import { formatPrice } from '../utils/formatPrice';
-import { applyPromo } from '@/shared/api/cart';
+import {applyPromo} from '@/shared/api/cart';
+// import {applyPromo, clearPromo} from '@/shared/api/cart';
 import {
   IsAdmin,
   IsInventoryManager,
@@ -75,13 +76,12 @@ const UserCart = (): JSX.Element => {
 
   const [wishlistUpdated, setWishlistUpdated] = useState(false);
   const [voucherCode, setVoucherCode] = useState<string>('');
-  const [discount, setDiscount] = useState<number>(0);
   const [voucherError, setVoucherError] = useState<string | null>(null);
 
   const [movingAll, setMovingAll] = useState<boolean>(false);
 
   const [promoPercent, setPromoPercent] = useState<number | null>(null);
-  const [promoInput, setPromoInput] = useState<string>(''); // input field value
+ // const [promoInput, setPromoInput] = useState<string>(''); // input field value
 
   // Recent purchases state
   const [recentPurchases, setRecentPurchases] = useState<
@@ -280,7 +280,7 @@ const UserCart = (): JSX.Element => {
   const tvq = discountedSubtotal * 0.09975;
   const tvc = discountedSubtotal * 0.05;
 
-  const effectiveDiscount = promoPercent != null ? promoDiscount : discount;
+  const effectiveDiscount = promoDiscount;
 
   const total = discountedSubtotal + tvq + tvc;
 
@@ -398,17 +398,45 @@ const UserCart = (): JSX.Element => {
   }, [cartId, fetchRecommendationPurchases]);
 
   const applyVoucherCode = async (): Promise<void> => {
+    if (!cartId) {
+      setVoucherError('Invalid cart ID');
+      return;
+    }
+    if (!voucherCode.trim()) {
+      setVoucherError('Please enter a promo code.');
+      return;
+    }
+
     try {
       const { data } = await axiosInstance.get(
-        `/promos/validate/${voucherCode}`,
-        // this API call is only in v2 for now
-        { useV2: true }
+          `/carts/promos/validate/${encodeURIComponent(voucherCode.trim())}`,
+          { useV2: false, handleLocally: true }
       );
-      setDiscount((subtotal * data.discount) / 100);
+
+      const percent: number = Number(data?.discount);
+      if (Number.isNaN(percent) || percent < 0 || percent > 100) {
+        setVoucherError('Received invalid discount from server.');
+        return;
+      }
+
+      const updated = await applyPromo(cartId, percent);
+
       setVoucherError(null);
-    } catch (err: unknown) {
-      console.error('Error validating voucher code:', err);
-      setVoucherError('Error validating voucher code.');
+      setNotificationMessage(
+          `Promo applied${updated?.promoPercent != null ? `: ${updated.promoPercent}%` : `: ${percent}%`}`
+      );
+
+      setPromoPercent(updated?.promoPercent ?? percent);
+
+      try {
+        const refreshed = await axiosInstance.get(`/carts/${cartId}`, { useV2: false });
+        if (typeof refreshed.data?.promoPercent === 'number') {
+          setPromoPercent(refreshed.data.promoPercent);
+        }
+      } catch { /* ignore */ }
+    } catch (err) {
+      console.error('Error validating promo code:', err);
+      setVoucherError('Promo code invalid or expired.');
     }
   };
 
@@ -492,6 +520,19 @@ const UserCart = (): JSX.Element => {
     },
     [cartItems, cartId, blockIfReadOnly]
   );
+
+  const onClearPromo = async (): Promise<void> => {
+    if (!cartId) return;
+    try {
+      await applyPromo(cartId, 0);
+      setPromoPercent(null);
+      setNotificationMessage('Promo removed.');
+    } catch {
+      setNotificationMessage('Failed to remove promo.');
+    }
+  };
+
+
 
   const deleteItem = useCallback(
     async (productId: string, indexToDelete: number): Promise<void> => {
@@ -840,7 +881,7 @@ const UserCart = (): JSX.Element => {
     recommendationPurchasesList.length === 0 ? ' recommendation-empty' : ''
   }`;
 
-  const onApplyPromo = async (): Promise<void> => {
+ /* const onApplyPromo = async (): Promise<void> => {
     if (!cartId) {
       setNotificationMessage('Invalid cart ID');
       return;
@@ -881,7 +922,7 @@ const UserCart = (): JSX.Element => {
         'Failed to apply promo.';
       setNotificationMessage(msg);
     }
-  };
+  };*/
 
   return (
     <div>
@@ -976,147 +1017,132 @@ const UserCart = (): JSX.Element => {
           </div>
 
           {!isStaff && (
-            <div className="Checkout-section">
-              <div className="voucher-code-section">
-                <input
-                  type="text"
-                  placeholder="Enter voucher code"
-                  value={voucherCode}
-                  onChange={e => {
-                    setVoucherCode(e.target.value);
-                    setVoucherError(null);
-                  }}
-                  className="voucher-input"
-                />
-                <button
-                  onClick={applyVoucherCode}
-                  className="apply-voucher-button cart-button cart-button--brand"
-                >
-                  Apply
-                </button>
-                {voucherError && (
-                  <div className="voucher-error">{voucherError}</div>
-                )}
-              </div>
-
-              <div className="voucher-code-section" style={{ marginTop: 12 }}>
-                <input
-                  type="number"
-                  min={0}
-                  max={100}
-                  placeholder="Promo % (0–100)"
-                  value={promoInput}
-                  onChange={e => setPromoInput(e.target.value)}
-                  className="voucher-input"
-                  aria-label="Promo percentage"
-                />
-                <button
-                  onClick={onApplyPromo} // uses the handler we added earlier
-                  className="apply-voucher-button cart-button cart-button--brand"
-                  aria-label="Apply promo percentage"
-                >
-                  Apply %
-                </button>
-
-                {/* Optional: show currently applied promo from backend */}
-                {promoPercent != null && (
-                  <div className="voucher-hint" style={{ marginTop: 6 }}>
-                    Current promo: {promoPercent}%
-                  </div>
-                )}
-              </div>
-
-              <div className="CartSummary">
-                <h3>Cart Summary</h3>
-                <p className="summary-item">
-                  Subtotal: {formatPrice(subtotal)}
-                </p>
-                <p className="summary-item">TVQ (9.975%): {formatPrice(tvq)}</p>
-                <p className="summary-item">TVC (5%): {formatPrice(tvc)}</p>
-                <p className="summary-item">
-                  Discount{promoPercent != null ? ` (${promoPercent}%)` : ''}:{' '}
-                  {formatPrice(effectiveDiscount)}
-                </p>
-                <p className="total-price summary-item">
-                  Total: {formatPrice(total)}
-                </p>
-              </div>
-
-              <button
-                className="checkout-btn cart-button cart-button--brand cart-button--block cart-button--disabled-muted"
-                onClick={handleCheckoutConfirmation}
-                disabled={cartItems.length === 0}
-              >
-                Checkout
-              </button>
-
-              {checkoutMessage && (
-                <div className="checkout-message">{checkoutMessage}</div>
-              )}
-
-              {invoices.length > 0 && (
-                <div className="invoices-section">
-                  <h2>Invoice</h2>
-                  <div className="invoice-summary">
-                    {billingInfo && (
-                      <div className="invoice-client-info">
-                        <h3>Client Information</h3>
-                        <p>
-                          <strong>Name:</strong> {billingInfo.fullName}
-                        </p>
-                        <p>
-                          <strong>Email:</strong> {billingInfo.email}
-                        </p>
-                        <p>
-                          <strong>Address:</strong> {billingInfo.address},{' '}
-                          {billingInfo.city}, {billingInfo.province},{' '}
-                          {billingInfo.postalCode}
-                        </p>
-                      </div>
-                    )}
-                    {checkoutDate && (
-                      <div className="invoice-date">
-                        <strong>Checkout Date/Time:</strong> {checkoutDate}
-                      </div>
-                    )}
-                    <h3>Items</h3>
-                    {invoices.map(inv => (
-                      <div key={inv.productId} className="invoice-card">
-                        <h4>{inv.productName}</h4>
-                        <p>Price: ${inv.productSalePrice.toFixed(2)}</p>
-                        <p>Quantity: {inv.quantity}</p>
-                        <p>
-                          Total: $
-                          {(inv.productSalePrice * inv.quantity).toFixed(2)}
-                        </p>
-                      </div>
-                    ))}
-                    <div className="invoice-taxes">
-                      {(() => {
-                        const invoiceSubtotal = invoices.reduce(
-                          (sum, inv) =>
-                            sum + inv.productSalePrice * inv.quantity,
-                          0
-                        );
-                        const invoiceTvq = invoiceSubtotal * 0.09975;
-                        const invoiceTvc = invoiceSubtotal * 0.05;
-                        const invoiceTotal =
-                          invoiceSubtotal + invoiceTvq + invoiceTvc - discount;
-                        return (
-                          <>
-                            <p>Subtotal: ${invoiceSubtotal.toFixed(2)}</p>
-                            <p>TVQ (9.975%): ${invoiceTvq.toFixed(2)}</p>
-                            <p>TVC (5%): ${invoiceTvc.toFixed(2)}</p>
-                            <p>Discount: -${discount.toFixed(2)}</p>
-                            <h3>Total: ${invoiceTotal.toFixed(2)}</h3>
-                          </>
-                        );
-                      })()}
-                    </div>
-                  </div>
+              <div className="Checkout-section">
+                <div className="voucher-code-section">
+                  <input
+                      type="text"
+                      placeholder="Enter voucher code"
+                      value={voucherCode}
+                      onChange={e => {
+                        setVoucherCode(e.target.value);
+                        setVoucherError(null);
+                      }}
+                      className="voucher-input"
+                  />
+                  <button
+                      onClick={applyVoucherCode}
+                      className="apply-voucher-button cart-button cart-button--brand"
+                  >
+                    Apply
+                  </button>
+                  {voucherError && (
+                      <div className="voucher-error">{voucherError}</div>
+                  )}
                 </div>
-              )}
-            </div>
+
+                <div className="voucher-code-section" style={{marginTop: 12}}>
+                  {promoPercent != null && (
+                      <div className="voucher-hint"
+                           style={{marginTop: 6, display: 'flex', gap: 8, alignItems: 'center'}}>
+                        <span>Current promo: {promoPercent}%</span>
+                        <button type="button" className="cart-button cart-button--outline" onClick={onClearPromo}>
+                          Clear
+                        </button>
+                      </div>
+                  )}
+                </div>
+
+                <div className="CartSummary">
+                  <h3>Cart Summary</h3>
+                  <p className="summary-item">Subtotal: {formatPrice(subtotal)}</p>
+                  <p className="summary-item">TVQ (9.975%): {formatPrice(tvq)}</p>
+                  <p className="summary-item">TVC (5%): {formatPrice(tvc)}</p>
+                  <p className="summary-item">
+                    Discount{promoPercent != null ? ` (${promoPercent}%)` : ''}:{' '}
+                    {formatPrice(effectiveDiscount)}
+                  </p>
+                  <p className="total-price summary-item">Total: {formatPrice(total)}</p>
+                </div>
+
+                <button
+                    className="checkout-btn cart-button cart-button--brand cart-button--block cart-button--disabled-muted"
+                    onClick={handleCheckoutConfirmation}
+                    disabled={cartItems.length === 0}
+                >
+                  Checkout
+                </button>
+
+                {checkoutMessage && (
+                    <div className="checkout-message">{checkoutMessage}</div>
+                )}
+
+                {invoices.length > 0 && (
+                    <div className="invoices-section">
+                      <h2>Invoice</h2>
+                      <div className="invoice-summary">
+                        {billingInfo && (
+                            <div className="invoice-client-info">
+                              <h3>Client Information</h3>
+                              <p>
+                                <strong>Name:</strong> {billingInfo.fullName}
+                              </p>
+                              <p>
+                                <strong>Email:</strong> {billingInfo.email}
+                              </p>
+                              <p>
+                                <strong>Address:</strong> {billingInfo.address},{' '}
+                                {billingInfo.city}, {billingInfo.province},{' '}
+                                {billingInfo.postalCode}
+                              </p>
+                            </div>
+                        )}
+                        {checkoutDate && (
+                            <div className="invoice-date">
+                              <strong>Checkout Date/Time:</strong> {checkoutDate}
+                            </div>
+                        )}
+                        <h3>Items</h3>
+                        {invoices.map(inv => (
+                            <div key={inv.productId} className="invoice-card">
+                              <h4>{inv.productName}</h4>
+                              <p>Price: ${inv.productSalePrice.toFixed(2)}</p>
+                              <p>Quantity: {inv.quantity}</p>
+                              <p>
+                                Total: $
+                                {(inv.productSalePrice * inv.quantity).toFixed(2)}
+                              </p>
+                            </div>
+                        ))}
+                        <div className="invoice-taxes">
+                          {(() => {
+                            const invoiceSubtotal = invoices.reduce(
+                                (sum, inv) => sum + inv.productSalePrice * inv.quantity,
+                                0
+                            );
+                            const invoiceDiscount =
+                                promoPercent != null ? (invoiceSubtotal * promoPercent) / 100 : 0;
+                            const invoiceTvq = (invoiceSubtotal - invoiceDiscount) * 0.09975;
+                            const invoiceTvc = (invoiceSubtotal - invoiceDiscount) * 0.05;
+                            const invoiceTotal = invoiceSubtotal - invoiceDiscount + invoiceTvq + invoiceTvc;
+
+                            return (
+                                <>
+                                  <p>Subtotal: ${invoiceSubtotal.toFixed(2)}</p>
+                                  <p>TVQ (9.975%): ${invoiceTvq.toFixed(2)}</p>
+                                  <p>TVC (5%): ${invoiceTvc.toFixed(2)}</p>
+                                  <p>
+                                    Discount{promoPercent != null ? ` (${promoPercent}%)` : ''}: -
+                                    ${invoiceDiscount.toFixed(2)}
+                                  </p>
+                                  <h3>Total: ${invoiceTotal.toFixed(2)}</h3>
+                                </>
+                            );
+                          })()}
+                        </div>
+                      </div>
+                    </div>
+                )}
+              </div>
           )}
         </div>
 
@@ -1125,9 +1151,9 @@ const UserCart = (): JSX.Element => {
           <h2>Recent Purchases</h2>
           <div className="recent-purchases-list cart-scroll-strip">
             {recentPurchasesList.length > 0 ? (
-              recentPurchasesList.map(item => (
-                <div
-                  key={item.productId}
+                recentPurchasesList.map(item => (
+                    <div
+                        key={item.productId}
                   className="recent-purchase-card cart-card"
                 >
                   <div className="recent-purchase-image-container">
