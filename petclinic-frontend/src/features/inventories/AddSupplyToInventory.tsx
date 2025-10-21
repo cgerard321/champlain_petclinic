@@ -50,8 +50,6 @@ const AddSupplyToInventory: React.FC<Props> = ({
 
     if (!(Number(product.productQuantity) > 0))
       err.productQuantity = 'Product quantity must be greater than 0';
-    else if (Number(product.productQuantity) > 100)
-      err.productQuantity = 'Product quantity cannot exceed 100';
 
     if (!(Number(product.productSalePrice) > 0))
       err.productSalePrice = 'Product sale price must be greater than 0';
