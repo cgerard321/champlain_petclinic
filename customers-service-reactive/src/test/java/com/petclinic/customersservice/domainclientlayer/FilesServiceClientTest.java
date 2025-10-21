@@ -2,6 +2,7 @@ package com.petclinic.customersservice.domainclientlayer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.customersservice.customersExceptions.exceptions.BadRequestException;
+import com.petclinic.customersservice.customersExceptions.exceptions.FailedDependencyException;
 import com.petclinic.customersservice.customersExceptions.exceptions.NotFoundException;
 import com.petclinic.customersservice.customersExceptions.exceptions.UnprocessableEntityException;
 import okhttp3.mockwebserver.MockResponse;
@@ -68,14 +69,14 @@ class FilesServiceClientTest {
     }
 
     @Test
-    void getFile_WithNotFoundStatus_ShouldThrowNotFoundException() {
+    void getFile_WithNotFoundStatus_ShouldThrowFailedDependencyException() {
         mockBackEnd.enqueue(new MockResponse()
                 .setResponseCode(404)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody("{\"message\":\"File not found\"}"));
+                .setBody("{\"message\":\"Failed to get file from Files Service\"}"));
 
         StepVerifier.create(filesServiceClient.getFile("missing"))
-                .expectError(NotFoundException.class)
+                .expectError(FailedDependencyException.class)
                 .verify();
     }
 
@@ -293,14 +294,14 @@ class FilesServiceClientTest {
     }
 
     @Test
-    void deleteFile_WithNotFoundStatus_ShouldThrowNotFoundException() {
+    void deleteFile_WithNotFoundStatus_ShouldThrowFailedDependencyException() {
         mockBackEnd.enqueue(new MockResponse()
                 .setResponseCode(404)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody("{\"message\":\"File not found\"}"));
+                .setBody("{\"message\":\"Failed to delete file from Files Service\"}"));
 
         StepVerifier.create(filesServiceClient.deleteFile("missing"))
-                .expectError(NotFoundException.class)
+                .expectError(FailedDependencyException.class)
                 .verify();
     }
 

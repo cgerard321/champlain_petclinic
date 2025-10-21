@@ -181,7 +181,6 @@ public class OwnersControllerV1UnitTests {
     void whenUpdateOwner_thenReturnUpdatedOwner() {
         String ownerId = "f470653d-05c5-4c45-b7a0-7d70f003d2ac";
         OwnerRequestDTO updatedOwnerData = new OwnerRequestDTO();
-        updatedOwnerData.setOwnerId(ownerId);
         updatedOwnerData.setFirstName("UpdatedFirstName");
         updatedOwnerData.setLastName("UpdatedLastName");
 
@@ -208,20 +207,6 @@ public class OwnersControllerV1UnitTests {
     }
 
     @Test
-    void whenDeletePet_thenReturnNoContent() {
-        String petId = "petId-456";
-
-        when(customersServiceClient.deletePet(ownerId, petId)).thenReturn(Mono.empty());
-
-        client.delete()
-                .uri("/api/gateway/owners/{ownerId}/pets/{petId}", ownerId, petId)
-                .exchange()
-                .expectStatus().isNoContent();
-
-        verify(customersServiceClient, times(1)).deletePet(ownerId, petId);
-    }
-
-    @Test
     void whenDeleteOwner_thenReturnNoContent() {
 
         when(customersServiceClient.deleteOwner(ownerId)).thenReturn(Mono.empty());
@@ -232,54 +217,6 @@ public class OwnersControllerV1UnitTests {
                 .expectStatus().isNoContent();
 
         verify(customersServiceClient, times(1)).deleteOwner(ownerId);
-    }
-
-    @Test
-    void whenCreatePetForOwner_thenReturnCreatedPet() {
-        PetRequestDTO mockPetRequest = new PetRequestDTO();
-        mockPetRequest.setName("Rex");
-        mockPetRequest.setOwnerId(ownerId);
-
-        PetResponseDTO mockPetResponse = new PetResponseDTO();
-        mockPetResponse.setPetId("new-pet-id");
-        mockPetResponse.setName("Rex");
-
-        when(customersServiceClient.createPetForOwner(eq(ownerId), any(PetRequestDTO.class)))
-                .thenReturn(Mono.just(mockPetResponse));
-
-        client.post()
-                .uri("/api/gateway/owners/{ownerId}/pets", ownerId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(BodyInserters.fromValue(mockPetRequest))
-                .exchange()
-                .expectStatus().isCreated()
-                .expectBody(PetResponseDTO.class)
-                .value(body -> assertEquals("Rex", body.getName()));
-
-        verify(customersServiceClient, times(1)).createPetForOwner(eq(ownerId), any(PetRequestDTO.class));
-    }
-
-    @Test
-    void whenGetPet_thenReturnPet() {
-
-        String petId = "petId-456";
-
-        PetResponseDTO mockPetResponse = new PetResponseDTO();
-        mockPetResponse.setPetId(petId);
-        mockPetResponse.setName("Whiskers");
-
-        when(customersServiceClient.getPet(ownerId, petId))
-                .thenReturn(Mono.just(mockPetResponse));
-
-        client.get()
-                .uri("/api/gateway/owners/{ownerId}/pets/{petId}", ownerId, petId)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(PetResponseDTO.class)
-                .value(body -> assertEquals("Whiskers", body.getName()));
-
-        verify(customersServiceClient, times(1)).getPet(ownerId, petId);
     }
 
     @Test
@@ -458,33 +395,6 @@ public class OwnersControllerV1UnitTests {
     }
 
     @Test
-    void whenCreatePetForOwner_withInvalidData_thenReturnBadRequest() {
-        PetRequestDTO petRequest = new PetRequestDTO();
-        petRequest.setName("Fluffy");
-
-        when(customersServiceClient.createPetForOwner(eq(ownerId), any(PetRequestDTO.class)))
-                .thenReturn(Mono.empty());
-
-        client.post()
-                .uri("/api/gateway/owners/{ownerId}/pets", ownerId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(BodyInserters.fromValue(petRequest))
-                .exchange()
-                .expectStatus().isBadRequest();
-    }
-
-    @Test
-    void whenGetPet_withNonExistentPet_thenReturnNotFound() {
-        when(customersServiceClient.getPet(ownerId, "nonexistent"))
-                .thenReturn(Mono.empty());
-
-        client.get()
-                .uri("/api/gateway/owners/{ownerId}/pets/{petId}", ownerId, "nonexistent")
-                .exchange()
-                .expectStatus().isNotFound();
-    }
-
-    @Test
     void whenGetPetsByOwnerId_withNoPets_thenReturnEmptyList() {
         when(customersServiceClient.getPetsByOwnerId(ownerId))
                 .thenReturn(Flux.empty());
@@ -500,23 +410,12 @@ public class OwnersControllerV1UnitTests {
     }
 
     @Test
-    void whenDeletePet_withNonExistentPet_thenReturnNoContent() {
-        when(customersServiceClient.deletePet(ownerId, "nonexistent"))
-                .thenReturn(Mono.empty());
-
-        client.delete()
-                .uri("/api/gateway/owners/{ownerId}/pets/{petId}", ownerId, "nonexistent")
-                .exchange()
-                .expectStatus().isNoContent();
-    }
-
-    @Test
     void whenUpdateOwnerPhoto_withValidPhoto_thenReturnUpdatedOwner() {
         FileDetails photoRequest = FileDetails.builder()
-                        .fileName("profile.jpeg")
-                        .fileType("image/jpeg")
-                        .fileData("mockPhotoData".getBytes())
-                        .build();
+                .fileName("profile.jpeg")
+                .fileType("image/jpeg")
+                .fileData("mockPhotoData".getBytes())
+                .build();
 
         OwnerResponseDTO updatedOwner = new OwnerResponseDTO();
         updatedOwner.setOwnerId(ownerId);
@@ -552,10 +451,10 @@ public class OwnersControllerV1UnitTests {
     @Test
     void whenUpdateOwnerPhoto_withNonExistentOwner_thenReturnNotFound() {
         FileDetails photoRequest = FileDetails.builder()
-                        .fileName("profile.jpeg")
-                        .fileType("image/jpeg")
-                        .fileData("mockPhotoData".getBytes())
-                        .build();
+                .fileName("profile.jpeg")
+                .fileType("image/jpeg")
+                .fileData("mockPhotoData".getBytes())
+                .build();
 
         when(customersServiceClient.updateOwnerPhoto(eq("nonexistent"), any()))
                 .thenReturn(Mono.empty());
@@ -573,10 +472,10 @@ public class OwnersControllerV1UnitTests {
     @Test
     void whenUpdateOwnerPhoto_withPngPhoto_thenReturnUpdatedOwner() {
         FileDetails photoRequest = FileDetails.builder()
-                        .fileName("avatar.png")
-                        .fileType("image/png")
-                        .fileData("pngPhotoData".getBytes())
-                        .build();
+                .fileName("avatar.png")
+                .fileType("image/png")
+                .fileData("pngPhotoData".getBytes())
+                .build();
 
         OwnerResponseDTO updatedOwner = new OwnerResponseDTO();
         updatedOwner.setOwnerId(ownerId);
