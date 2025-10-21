@@ -59,7 +59,6 @@ class PetControllerUnitTest {
 
         ownerResponseDTO = new OwnerResponseDTO();
         ownerResponseDTO.setOwnerId("owner123");
-        ownerResponseDTO.setPets(new ArrayList<>(List.of(petResponseDTO)));
     }
 
     @Test
