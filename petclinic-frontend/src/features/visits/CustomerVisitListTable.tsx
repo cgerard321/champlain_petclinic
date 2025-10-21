@@ -183,30 +183,19 @@ export default function CustomerVisitListTable(): JSX.Element {
       )}
 
       {showErrorDialog && (
-        <>
-          {(() => {
-            setTimeout(() => {
-              document.getElementById('error-modal-trigger')?.click();
-            }, 0);
-            return null;
-          })()}
-          <BasicModal
-            title="No Prescription Available"
-            confirmText="OK"
-            onConfirm={async () => {
-              setShowErrorDialog(false);
-              navigate(AppRoutePaths.CustomerVisits);
-            }}
-            showButton={
-              <button id="error-modal-trigger" style={{ display: 'none' }} />
-            }
-          >
-            <p className="basic-modal-body">
-              {errorDialogMessage ??
-                'An error occurred while downloading the prescription.'}
-            </p>
-          </BasicModal>
-        </>
+        <BasicModal
+          title="No Prescription Available"
+          confirmText="OK"
+          onConfirm={async () => {
+            setShowErrorDialog(false);
+            navigate(AppRoutePaths.CustomerVisits);
+          }}
+        >
+          <p className="basic-modal-body">
+            {errorDialogMessage ??
+              'An error occurred while downloading the prescription.'}
+          </p>
+        </BasicModal>
       )}
     </div>
   );
