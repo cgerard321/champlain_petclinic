@@ -410,7 +410,7 @@ public class BillServiceImplTest {
                 });
 
         // Act + Assert
-        StepVerifier.create(billService.createBill(Mono.just(billDTO)))
+        StepVerifier.create(billService.createBill(Mono.just(billDTO), false, "jwtToken"))
                 .expectNextMatches(response ->
                         response.getBillId() != null &&
                                 response.getBillId().length() == 10 &&
@@ -458,7 +458,7 @@ public class BillServiceImplTest {
                 .thenReturn(Mono.just(existingBill));
 
         // Act + Assert
-        StepVerifier.create(billService.createBill(Mono.just(billDTO)))
+        StepVerifier.create(billService.createBill(Mono.just(billDTO), false, "jwtToken"))
                 .expectErrorMatches(throwable ->
                         throwable instanceof RuntimeException &&
                                 throwable.getMessage().contains("Failed to generate unique Bill ID"))
@@ -534,7 +534,7 @@ public class BillServiceImplTest {
 
         when(repo.insert(any(Bill.class))).thenReturn(Mono.error(new RuntimeException("Invalid data")));
 
-        Mono<BillResponseDTO> returnedBill = billService.createBill(billRequestMono);
+        Mono<BillResponseDTO> returnedBill = billService.createBill(billRequestMono, false, "jwtToken");
 
         StepVerifier.create(returnedBill)
                 .expectError()
@@ -2170,28 +2170,27 @@ public void testGenerateBillPdf_BillNotFound() {
         billDTO.setCustomerId("owner-456");
         billDTO.setDueDate(LocalDate.now().plusDays(30));
 
-        // Mock VetClient response
         VetResponseDTO vetResponse = new VetResponseDTO();
         vetResponse.setFirstName("John");
         vetResponse.setLastName("Doe");
         Mockito.when(vetClient.getVetByVetId("vet-123"))
                 .thenReturn(Mono.just(vetResponse));
 
-        // Mock OwnerClient response
         OwnerResponseDTO ownerResponse = new OwnerResponseDTO();
         ownerResponse.setFirstName("Alice");
         ownerResponse.setLastName("Smith");
         Mockito.when(ownerClient.getOwnerByOwnerId("owner-456"))
                 .thenReturn(Mono.just(ownerResponse));
 
-        // Mock AuthServiceClient response
         UserDetails userDetails = new UserDetails();
         userDetails.setEmail("test@example.com");
         userDetails.setUsername("Alice Smith");
         Mockito.when(authClient.getUserById("owner-456", "jwtToken"))
                 .thenReturn(Mono.just(userDetails));
 
-        // Mock repository insert
+        Mockito.when(repo.findById(anyString()))
+                .thenReturn(Mono.empty());
+
         Bill billEntity = EntityDtoUtil.toBillEntity(billDTO);
         billEntity.setBillId("generated-id");
         billEntity.setVetFirstName("John");
@@ -2202,12 +2201,10 @@ public void testGenerateBillPdf_BillNotFound() {
         Mockito.when(repo.insert(Mockito.any(Bill.class)))
                 .thenReturn(Mono.just(billEntity));
 
-        // Mock MailService
         ArgumentCaptor<Mail> mailCaptor = ArgumentCaptor.forClass(Mail.class);
         Mockito.when(mailService.sendMail(mailCaptor.capture()))
                 .thenReturn("Message sent to test@example.com");
 
-        // Act + Assert
         StepVerifier.create(billService.createBill(Mono.just(billDTO), true, "jwtToken"))
                 .expectNextMatches(response ->
                         response.getBillId().equals("generated-id") &&
@@ -2218,7 +2215,6 @@ public void testGenerateBillPdf_BillNotFound() {
                 )
                 .verifyComplete();
 
-        // Verify email was sent
         Mail sentMail = mailCaptor.getValue();
         assertEquals("test@example.com", sentMail.getEmailSendTo());
         assertEquals("Pet Clinic - Payment Receipt", sentMail.getEmailTitle());
