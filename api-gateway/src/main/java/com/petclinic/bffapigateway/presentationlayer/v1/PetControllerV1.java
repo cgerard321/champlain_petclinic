@@ -77,4 +77,11 @@ public class PetControllerV1 {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.OWNER,Roles.ADMIN,Roles.VET})
+    @PatchMapping(value = "/{petId}/active", produces = "application/json")
+    public Mono<ResponseEntity<PetResponseDTO>> patchPet(@RequestParam String isActive, @PathVariable String petId) {
+        return customersServiceClient.patchPet(isActive, petId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
 }

@@ -265,9 +265,6 @@ public class CustomerServiceClientIntegrationTest {
 
     @Test
     void testPatchPet() throws Exception {
-        PetRequestDTO petRequestDTO = new PetRequestDTO(); // Create a request DTO
-        petRequestDTO.setIsActive("true"); // Set the isActive status
-
         PetResponseDTO updatedPetResponse = new PetResponseDTO(); // Create an expected response DTO
         updatedPetResponse.setPetId("petId-123");
         updatedPetResponse.setIsActive("true"); // Set the isActive status in the expected response
@@ -277,7 +274,7 @@ public class CustomerServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(mapper.writeValueAsString(updatedPetResponse))); // Use the expected response DTO
 
-        Mono<PetResponseDTO> responseMono = customersServiceClient.patchPet(petRequestDTO, "petId-123");
+        Mono<PetResponseDTO> responseMono = customersServiceClient.patchPet("true", "petId-123");
 
         PetResponseDTO responseDTO = responseMono.block(); // Blocking for simplicity
 

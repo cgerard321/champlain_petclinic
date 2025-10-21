@@ -281,35 +281,4 @@ class PetsControllerV1UnitTests {
 
         verify(customersServiceClient, never()).createPetForOwner(any(), any());
     }
-
-    @Test
-    void whenPatchPet_withInvalidJson_thenReturnBadRequest() {
-        String ownerId = "ownerId-1";
-        String petId = "petId-123";
-        String invalidJson = "{\"isActive\": }";
-
-        client.patch()
-                .uri("/api/gateway/owners/{ownerId}/pets/{petId}", ownerId, petId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(invalidJson)
-                .exchange()
-                .expectStatus().is4xxClientError();
-
-        verify(customersServiceClient, never()).patchPet(any(), any());
-    }
-
-    @Test
-    void whenPatchPet_withEmptyBody_thenReturnBadRequest() {
-        String ownerId = "ownerId-1";
-        String petId = "petId-123";
-
-        client.patch()
-                .uri("/api/gateway/owners/{ownerId}/pets/{petId}", ownerId, petId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().is4xxClientError();
-
-        verify(customersServiceClient, never()).patchPet(any(), any());
-    }
-
 }

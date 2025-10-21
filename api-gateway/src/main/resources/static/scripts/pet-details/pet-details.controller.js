@@ -48,11 +48,12 @@ function PetDetailsController($http, $state, $stateParams, $scope, $timeout, $q)
 
     // Toggle pet's active status
     vm.toggleActiveStatus = function (petId) {
-        return $http.get('api/gateway/pets/' + $stateParams.petId + '?_=' + new Date().getTime(), { headers: { 'Cache-Control': 'no-cache' } })
+        return $http.get('api/gateway/pets/' + $stateParams.petId + '?_=' + new Date().getTime(), {headers: { 'Cache-Control': 'no-cache' }})
             .then(function (resp) {
                 vm.pet = resp.data;
                 vm.pet.isActive = vm.pet.isActive === "true" ? "false" : "true";
-                return $http.patch('api/gateway/pet/' + $stateParams.petId, { isActive: vm.pet.isActive }, { headers: { 'Cache-Control': 'no-cache' } });
+
+                return $http.patch('api/gateway/pets/' + $stateParams.petId + "/active" + '?isActive=' + vm.pet.isActive, null, {headers: { 'Cache-Control': 'no-cache' }});
             })
             .then(function (resp) {
                 vm.pet = resp.data;

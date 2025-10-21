@@ -7,6 +7,8 @@ import com.petclinic.bffapigateway.dtos.Pets.*;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -16,6 +18,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 
+import java.net.URI;
 import java.util.Objects;
 
 import java.util.Optional;
@@ -211,10 +214,16 @@ public class CustomersServiceClient {
                         .bodyToMono(PetResponseDTO.class));
     }
 
-    public Mono<PetResponseDTO> patchPet(PetRequestDTO model, String petId) {
-        return webClientBuilder.build().patch()
-                .uri(customersServiceUrl + "/pets/{petId}", petId)
-                .body(just(model), PetRequestDTO.class)
+    public Mono<PetResponseDTO> patchPet(String isActive, String petId) {
+        URI uri = UriComponentsBuilder
+                .fromUriString(customersServiceUrl + "/pets/{petId}/active")
+                .queryParam("isActive", isActive)
+                .buildAndExpand(petId)
+                .toUri();
+
+        return webClientBuilder.build()
+                .patch()
+                .uri(uri)
                 .retrieve()
                 .bodyToMono(PetResponseDTO.class);
     }
