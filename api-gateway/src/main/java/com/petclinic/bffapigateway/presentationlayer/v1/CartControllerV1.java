@@ -375,4 +375,21 @@ public class CartControllerV1 {
         return cartServiceClient.getAllCarts();
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
+    @PutMapping("/{cartId}/promo")
+    public Mono<ResponseEntity<CartResponseDTO>> applyPromoToCart(
+            @PathVariable String cartId,
+            @RequestParam("promoPercent") Double promoPercent) {
+
+        return cartServiceClient.applyPromoToCart(cartId, promoPercent)
+                .map(ResponseEntity::ok)
+                .onErrorResume(e -> mapCartErrorWithMessage(
+                        e,
+                        ErrorOptions.builder("applyPromoToCart")
+                                .cartId(cartId)
+                                .includeBadRequestBodyMessage(true)
+                                .build()
+                ));
+    }
+
 }

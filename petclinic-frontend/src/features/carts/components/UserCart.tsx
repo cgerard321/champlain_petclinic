@@ -10,6 +10,7 @@ import { FaShoppingCart } from 'react-icons/fa';
 import ImageContainer from '@/features/products/components/ImageContainer';
 import axiosInstance from '@/shared/api/axiosInstance';
 import { formatPrice } from '../utils/formatPrice';
+import { applyPromo } from '@/shared/api/cart';
 import {
   IsAdmin,
   IsInventoryManager,
@@ -51,7 +52,6 @@ const UserCart = (): JSX.Element => {
 
   const { confirm, ConfirmModal } = useConfirmModal();
 
-  // state: cart + wishlist
   const [cartItems, setCartItems] = useState<ProductModel[]>([]);
   const [wishlistItems, setWishlistItems] = useState<ProductModel[]>([]);
 
@@ -79,6 +79,9 @@ const UserCart = (): JSX.Element => {
   const [voucherError, setVoucherError] = useState<string | null>(null);
 
   const [movingAll, setMovingAll] = useState<boolean>(false);
+
+  const [promoPercent, setPromoPercent] = useState<number | null>(null);
+  const [promoInput, setPromoInput] = useState<string>(''); // input field value
 
   // Recent purchases state
   const [recentPurchases, setRecentPurchases] = useState<
@@ -269,9 +272,17 @@ const UserCart = (): JSX.Element => {
     (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
     0
   );
-  const tvq = subtotal * 0.09975;
-  const tvc = subtotal * 0.05;
-  const total = subtotal - discount + tvq + tvc;
+
+  const promoDiscount =
+    promoPercent != null ? (subtotal * promoPercent) / 100 : 0;
+  const discountedSubtotal = Math.max(0, subtotal - promoDiscount);
+
+  const tvq = discountedSubtotal * 0.09975;
+  const tvc = discountedSubtotal * 0.05;
+
+  const effectiveDiscount = promoPercent != null ? promoDiscount : discount;
+
+  const total = discountedSubtotal + tvq + tvc;
 
   const updateCartItemCount = useCallback(() => {
     const count = cartItems.reduce(
@@ -328,6 +339,12 @@ const UserCart = (): JSX.Element => {
           })
         );
         setWishlistItems(enrichedWishlist);
+
+        if (typeof data.promoPercent === 'number') {
+          setPromoPercent(data.promoPercent);
+        } else {
+          setPromoPercent(null);
+        }
       } catch (err: unknown) {
         console.error(err);
         setError('Failed to fetch cart items');
@@ -823,6 +840,49 @@ const UserCart = (): JSX.Element => {
     recommendationPurchasesList.length === 0 ? ' recommendation-empty' : ''
   }`;
 
+  const onApplyPromo = async (): Promise<void> => {
+    if (!cartId) {
+      setNotificationMessage('Invalid cart ID');
+      return;
+    }
+
+    const pct = Number(promoInput);
+    if (Number.isNaN(pct)) {
+      setNotificationMessage('Enter a valid number for promo percent.');
+      return;
+    }
+    if (pct < 0 || pct > 100) {
+      setNotificationMessage('Promo percentage must be between 0 and 100.');
+      return;
+    }
+
+    try {
+      const data = await applyPromo(cartId, pct);
+      if (data) {
+        setPromoPercent(
+          typeof data.promoPercent === 'number' ? data.promoPercent : pct
+        );
+        setNotificationMessage(
+          `Promo applied: ${typeof data.promoPercent === 'number' ? data.promoPercent : pct}%`
+        );
+        const refreshed = await axiosInstance.get(`/carts/${cartId}`, {
+          useV2: false,
+        });
+        if (typeof refreshed.data?.promoPercent === 'number') {
+          setPromoPercent(refreshed.data.promoPercent);
+        }
+      } else {
+        setNotificationMessage('Promo applied.');
+      }
+    } catch (err: unknown) {
+      const msg =
+        (axios.isAxiosError(err) &&
+          (err.response?.data as { message?: string } | undefined)?.message) ||
+        'Failed to apply promo.';
+      setNotificationMessage(msg);
+    }
+  };
+
   return (
     <div>
       <NavBar />
@@ -939,6 +999,33 @@ const UserCart = (): JSX.Element => {
                 )}
               </div>
 
+              <div className="voucher-code-section" style={{ marginTop: 12 }}>
+                <input
+                  type="number"
+                  min={0}
+                  max={100}
+                  placeholder="Promo % (0–100)"
+                  value={promoInput}
+                  onChange={e => setPromoInput(e.target.value)}
+                  className="voucher-input"
+                  aria-label="Promo percentage"
+                />
+                <button
+                  onClick={onApplyPromo} // uses the handler we added earlier
+                  className="apply-voucher-button cart-button cart-button--brand"
+                  aria-label="Apply promo percentage"
+                >
+                  Apply %
+                </button>
+
+                {/* Optional: show currently applied promo from backend */}
+                {promoPercent != null && (
+                  <div className="voucher-hint" style={{ marginTop: 6 }}>
+                    Current promo: {promoPercent}%
+                  </div>
+                )}
+              </div>
+
               <div className="CartSummary">
                 <h3>Cart Summary</h3>
                 <p className="summary-item">
@@ -947,7 +1034,8 @@ const UserCart = (): JSX.Element => {
                 <p className="summary-item">TVQ (9.975%): {formatPrice(tvq)}</p>
                 <p className="summary-item">TVC (5%): {formatPrice(tvc)}</p>
                 <p className="summary-item">
-                  Discount: {formatPrice(discount)}
+                  Discount{promoPercent != null ? ` (${promoPercent}%)` : ''}:{' '}
+                  {formatPrice(effectiveDiscount)}
                 </p>
                 <p className="total-price summary-item">
                   Total: {formatPrice(total)}
