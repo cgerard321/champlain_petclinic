@@ -4,11 +4,8 @@ import com.petclinic.bffapigateway.dtos.Files.FileDetails;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.*;
-import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -19,12 +16,8 @@ import reactor.core.publisher.Mono;
 
 
 import java.net.URI;
-import java.util.Objects;
 
 import java.util.Optional;
-import java.util.UUID;
-
-import static reactor.core.publisher.Mono.just;
 
 @Slf4j
 @Component

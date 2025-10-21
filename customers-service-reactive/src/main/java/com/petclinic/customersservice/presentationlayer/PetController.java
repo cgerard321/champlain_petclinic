@@ -2,18 +2,14 @@ package com.petclinic.customersservice.presentationlayer;
 
 import com.petclinic.customersservice.business.PetService;
 import com.petclinic.customersservice.customersExceptions.ApplicationExceptions;
-import com.petclinic.customersservice.util.EntityDTOUtil;
 import com.petclinic.customersservice.util.Validator;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-@Slf4j
 @RestController
 @RequestMapping("/pets")
 public class PetController {
@@ -76,11 +72,8 @@ public class PetController {
                 .switchIfEmpty(ApplicationExceptions.petNotFound(petId));
     }
 
-    @PatchMapping("/{petId}/active")
-    public Mono<ResponseEntity<PetResponseDTO>> updatePetIsActive(@PathVariable String petId, @RequestParam String isActive) {
-        log.info("received request to update pet isActive: {}", isActive);
-
-
+    @PatchMapping("/{petId}")
+    public Mono<ResponseEntity<PetResponseDTO>> updatePetIsActive(@PathVariable String petId, @RequestBody String isActive) {
         return Mono.just(petId)
                 .filter(id -> id.length() == 36)
                 .switchIfEmpty(ApplicationExceptions.invalidPetId(petId))
