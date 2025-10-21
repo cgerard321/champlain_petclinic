@@ -3,7 +3,6 @@ package com.petclinic.bffapigateway.presentationlayer.v1;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
-import com.petclinic.bffapigateway.dtos.Visits.Prescriptions.PrescriptionRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Prescriptions.PrescriptionResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.TimeSlotDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
@@ -23,7 +22,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -289,9 +287,7 @@ public class VisitsControllerV1 {
             @PathVariable String visitId) {
 
         return visitsServiceClient.downloadPrescriptionPdf(visitId)
-                .map(pdfBytes -> {
-                    return new ResponseEntity<>(pdfBytes, HttpStatus.OK);
-                })
+                .map(pdfBytes -> new ResponseEntity<>(pdfBytes, HttpStatus.OK))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 

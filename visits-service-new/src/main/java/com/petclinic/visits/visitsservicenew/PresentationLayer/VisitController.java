@@ -1,9 +1,13 @@
 package com.petclinic.visits.visitsservicenew.PresentationLayer;
 
+import com.petclinic.visits.visitsservicenew.BusinessLayer.Prescriptions.PrescriptionService;
 import com.petclinic.visits.visitsservicenew.BusinessLayer.Review.ReviewService;
 import com.petclinic.visits.visitsservicenew.BusinessLayer.VisitService;
+import com.petclinic.visits.visitsservicenew.Exceptions.BadRequestException;
 import com.petclinic.visits.visitsservicenew.Exceptions.InvalidInputException;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
+import com.petclinic.visits.visitsservicenew.Exceptions.UnprocessableEntityException;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.Prescriptions.PrescriptionResponseDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewResponseDTO;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.io.ByteArrayInputStream;
 
 /**
  * Application Endpoint for Visit
@@ -30,6 +33,7 @@ public class VisitController {
      */
     private final VisitService visitService;
     private final ReviewService reviewService;
+    private final PrescriptionService prescriptionService;
 
     /**
      * Simple Get all Visits
@@ -282,6 +286,39 @@ public class VisitController {
                         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=visits.csv")
                         .contentType(MediaType.APPLICATION_OCTET_STREAM)
                         .body(csvData));
+    }
+
+    @PostMapping("/{visitId}/prescriptions")
+    public Mono<ResponseEntity<PrescriptionResponseDTO>> createPrescription(
+            @PathVariable String visitId,
+            @RequestBody PrescriptionResponseDTO dto) {
+
+        return prescriptionService.createPrescription(visitId, dto)
+                .map(ResponseEntity::ok)
+                .onErrorResume(NotFoundException.class, e ->
+                        Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).build()))
+                .onErrorResume(BadRequestException.class, e ->
+                        Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).build()))
+                .onErrorResume(InvalidInputException.class, e ->
+                        Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).build()))
+                .onErrorResume(UnprocessableEntityException.class, e ->
+                        Mono.just(ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build()))
+                .onErrorResume(Exception.class, e ->
+                        Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()));
+    }
+
+    @GetMapping(value = "/{visitId}/prescriptions/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    public Mono<ResponseEntity<byte[]>> downloadPdf(
+            @PathVariable String visitId) {
+
+        return prescriptionService.getPrescriptionPdf(visitId)
+                .map(pdf -> ResponseEntity.ok().body(pdf))
+                .onErrorResume(NotFoundException.class, e ->
+                        Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).build()))
+                .onErrorResume(UnprocessableEntityException.class, e ->
+                        Mono.just(ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build()))
+                .onErrorResume(Exception.class, e ->
+                        Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()));
     }
 
 
