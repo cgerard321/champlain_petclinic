@@ -75,6 +75,7 @@ export default function AdminBillsListTable({
     dueDate: '',
   });
   const [owners, setOwners] = useState<OwnerResponseModel[]>([]);
+  const [sendEmail, setSendEmail] = useState<boolean>(false);
   const [vets, setVets] = useState<VetResponseModel[]>([]);
 
   const fetchOwnersAndVets = useCallback(async (): Promise<void> => {
@@ -290,7 +291,7 @@ export default function AdminBillsListTable({
       billStatus: newBill.billStatus.toUpperCase(),
     };
     try {
-      await addBill(formattedBill);
+      await addBill(formattedBill, sendEmail);
       setActiveSection(null);
       getBillsList(currentPage, 10);
     } catch (err) {
@@ -574,6 +575,16 @@ export default function AdminBillsListTable({
                   setNewBill({ ...newBill, dueDate: e.target.value })
                 }
               />
+            </div>
+            <div>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={sendEmail}
+                  onChange={e => setSendEmail(e.target.checked)}
+                />
+                Send email notification
+              </label>
             </div>
             <button type="submit">Create Bill</button>
           </form>

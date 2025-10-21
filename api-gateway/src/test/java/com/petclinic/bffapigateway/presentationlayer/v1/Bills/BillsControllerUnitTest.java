@@ -318,7 +318,7 @@ public class BillsControllerUnitTest {
     }
 
     @Test
-    void createBill(){
+    void createBill() {
         BillResponseDTO billResponseDTO = new BillResponseDTO();
         billResponseDTO.setBillId("9");
         billResponseDTO.setDate(null);
@@ -329,20 +329,32 @@ public class BillsControllerUnitTest {
         billRequestDTO.setDate(null);
         billRequestDTO.setAmount(new BigDecimal("600"));
         billRequestDTO.setVisitType("Adoption");
-        when(billServiceClient.createBill(billRequestDTO))
+
+        when(billServiceClient.createBill(any(BillRequestDTO.class), eq(false), anyString()))
                 .thenReturn(Mono.just(billResponseDTO));
 
         client.post()
-                .uri("/api/gateway/bills")
+                .uri(uriBuilder -> uriBuilder.path("/api/gateway/bills")
+                        .queryParam("sendEmail", false)
+                        .build())
+                .cookie("Bearer", "jwtToken")
                 .body(Mono.just(billRequestDTO), BillRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody();
+                .expectBody(BillResponseDTO.class)
+                .value(response -> {
+                    assertEquals("9", response.getBillId());
+                    assertEquals(new BigDecimal("600"), response.getAmount());
+                    assertEquals("Adoption", response.getVisitType());
+                });
 
-        assertEquals(billResponseDTO.getBillId(),"9");
+        verify(billServiceClient, times(1))
+                .createBill(any(BillRequestDTO.class), eq(false), eq("jwtToken"));
     }
+
+
 
     @Test
     void putBillRequestNotFound(){

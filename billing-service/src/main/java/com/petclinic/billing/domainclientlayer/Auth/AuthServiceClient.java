@@ -28,17 +28,19 @@ public class AuthServiceClient {
         authServiceUrl = "http://" + authServiceHost + ":" + authServicePort;
     }
 
-    public Mono<UserDetails> getUserById(String jwtToken, String userId) {
+    public Mono<UserDetails> getUserById(String userId, String jwtToken) {
         return webClientBuilder.build()
                 .get()
                 .uri(authServiceUrl + "/users/{userId}", userId)
                 .cookie("Bearer", jwtToken)
                 .retrieve()
-                .onStatus(HttpStatus::is4xxClientError,
-                        n -> rethrower.rethrow(n,
+                .onStatus(HttpStatus::is4xxClientError, n ->
+                        rethrower.rethrow(n,
                                 x -> new GenericHttpException(x.get("message").toString(), NOT_FOUND))
                 )
                 .bodyToMono(UserDetails.class);
     }
+
+
 }
 

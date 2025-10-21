@@ -1,9 +1,12 @@
 import axiosInstance from '@/shared/api/axiosInstance';
 import { BillRequestModel } from '../models/BillRequestModel';
 
-export async function addBill(newBill: BillRequestModel): Promise<void> {
+export async function addBill(
+  newBill: BillRequestModel,
+  sendEmail: boolean
+): Promise<void> {
   try {
-    await axiosInstance.post('/bills', newBill, {
+    await axiosInstance.post(`/bills?sendEmail=${sendEmail}`, newBill, {
       headers: {
         'Content-Type': 'application/json',
       },

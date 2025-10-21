@@ -174,32 +174,39 @@ class BillControllerIntegrationTest {
     }
 
     @Test
-
     void createBill_ShouldReturnCreatedBillWithVetAndOwner() {
         // Arrange
-        BillRequestDTO billRequest = new BillRequestDTO();
-        billRequest.setBillStatus(BillStatus.PAID);
-        billRequest.setVetId("vet-1");
-        billRequest.setCustomerId("cust-1");
-        billRequest.setVisitType("Checkup");
-        billRequest.setAmount(new BigDecimal("100.00"));
-        billRequest.setDueDate(LocalDate.now().plusDays(10));
+        BillRequestDTO billRequest = BillRequestDTO.builder()
+                .billStatus(BillStatus.PAID)
+                .vetId("69f852ca-625b-11ee-8c99-0242ac120002")
+                .customerId("123e4567-e89b-12d3-a456-426614174000")
+                .visitType("Routine Check-up")
+                .amount(new BigDecimal("200.00"))
+                .date(LocalDate.now())
+                .dueDate(LocalDate.now().plusDays(15))
+                .build();
 
-        // Mock Vet + Owner service responses
-        VetResponseDTO vet = new VetResponseDTO();
-        vet.setFirstName("John");
-        vet.setLastName("Doe");
+        VetResponseDTO vet = VetResponseDTO.builder()
+                .firstName("John")
+                .lastName("Doe")
+                .build();
 
-        OwnerResponseDTO owner = new OwnerResponseDTO();
-        owner.setFirstName("Alice");
-        owner.setLastName("Smith");
+        OwnerResponseDTO owner = OwnerResponseDTO.builder()
+                .firstName("Vlad")
+                .lastName("Loghin")
+                .build();
 
-        when(vetClient.getVetByVetId("vet-1")).thenReturn(Mono.just(vet));
-        when(ownerClient.getOwnerByOwnerId("cust-1")).thenReturn(Mono.just(owner));
+        when(vetClient.getVetByVetId("69f852ca-625b-11ee-8c99-0242ac120002"))
+                .thenReturn(Mono.just(vet));
+        when(ownerClient.getOwnerByOwnerId("123e4567-e89b-12d3-a456-426614174000"))
+                .thenReturn(Mono.just(owner));
 
         // Act
         client.post()
-                .uri("/bills")
+                .uri(uriBuilder -> uriBuilder.path("/bills")
+                        .queryParam("sendEmail", false)
+                        .build())
+                .cookie("Bearer", "test-jwt-token")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(billRequest)
                 .exchange()
@@ -210,12 +217,11 @@ class BillControllerIntegrationTest {
                 .jsonPath("$.billId").isNotEmpty()
                 .jsonPath("$.vetFirstName").isEqualTo("John")
                 .jsonPath("$.vetLastName").isEqualTo("Doe")
-                .jsonPath("$.ownerFirstName").isEqualTo("Alice")
-                .jsonPath("$.ownerLastName").isEqualTo("Smith")
+                .jsonPath("$.ownerFirstName").isEqualTo("Vlad")
+                .jsonPath("$.ownerLastName").isEqualTo("Loghin")
                 .jsonPath("$.billStatus").isEqualTo("PAID")
-                .jsonPath("$.amount").isEqualTo(100.00);
+                .jsonPath("$.amount").isEqualTo(200.00);
     }
-
     @Test
     void updateBill() {
 
@@ -758,4 +764,6 @@ class BillControllerIntegrationTest {
                         .expectBody()
                         .jsonPath("$.interest").isEqualTo(expectedInterest);
 }
+
+
 }

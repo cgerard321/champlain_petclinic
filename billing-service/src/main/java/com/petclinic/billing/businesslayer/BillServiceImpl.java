@@ -203,13 +203,12 @@ public class BillServiceImpl implements BillService{
                 })
                 .flatMap(billResponse -> {
                     if (sendEmail) {
-                        // Fetch User Details for email
                         return authClient.getUserById(billResponse.getCustomerId(), jwtToken)
                                 .switchIfEmpty(Mono.error(new ResponseStatusException(
                                         HttpStatus.BAD_REQUEST, "Customer ID does not exist"
                                 )))
                                 .flatMap(userDetails -> {
-                                    Mail mail = generateReceiptEmail(userDetails, EntityDtoUtil.toBillResponseDto(billResponse), "USD");
+                                    Mail mail = generateReceiptEmail(userDetails, EntityDtoUtil.toBillResponseDto(billResponse), "CAD");
                                     mailService.sendMail(mail);
                                     return Mono.just(billResponse);
                                 });
@@ -366,36 +365,39 @@ public class BillServiceImpl implements BillService{
         String formattedInterest = PdfGenerator.formatCurrency(bill.getInterest(), currency);
         String formattedTotal = PdfGenerator.formatCurrency(bill.getAmount().add(bill.getInterest()), currency);
 
+        String emailBody = String.format(
+                "Dear %s,<br><br>" +
+                        "Please find below the details of your payment receipt:<br><br>" +
+                        "--------------------------------------------<br>" +
+                        "Bill ID: %s<br>" +
+                        "Date: %s<br>" +
+                        "Subtotal: %s<br>" +
+                        "Interest: %s<br>" +
+                        "Total Due: %s<br>" +
+                        "--------------------------------------------<br><br>" +
+                        "Thank you for choosing Pet Clinic.<br><br>" +
+                        "Best regards,<br>" +
+                        "Pet Clinic Team",
+                user.getUsername(),
+                bill.getBillId(),
+                bill.getDate(),
+                formattedAmount,
+                formattedInterest,
+                formattedTotal
+        );
+
         return new Mail(
                 user.getEmail(),
                 "Pet Clinic - Payment Receipt",
                 "default",
                 "Pet Clinic payment receipt",
+                emailBody,
                 "Pet Clinic Payment Receipt",
-                String.format(
-                        "Dear %s,\n\n" +
-                                "Please find below the details of your payment receipt:\n\n" +
-                                "--------------------------------------------\n" +
-                                "Bill ID: %s\n" +
-                                "Date: %s\n" +
-                                "Subtotal: %s\n" +
-                                "Interest: %s\n" +
-                                "Total Due: %s\n" +
-                                "--------------------------------------------\n\n" +
-                                "Thank you for choosing Pet Clinic.\n\n" +
-                                "Best regards,\n" +
-                                "Pet Clinic Team",
-                        user.getUsername(),
-                        bill.getBillId(),
-                        bill.getDate(),
-                        formattedAmount,
-                        formattedInterest,
-                        formattedTotal
-                ),
                 user.getEmail(),
                 user.getUsername()
         );
     }
+
 
 
 
@@ -475,7 +477,7 @@ public class BillServiceImpl implements BillService{
     @Override
     public Mono<BillResponseDTO> processPayment(String customerId, String billId, PaymentRequestDTO paymentRequestDTO, String jwtToken)
     {
-        return authClient.getUserById(jwtToken, customerId)
+        return authClient.getUserById(customerId, jwtToken)
                 .onErrorResume(e -> {
                     log.error("Failed to authenticate or fetch user for customerId: {}. Error: {}", customerId, e.getMessage(), e);
                     if (e instanceof ResponseStatusException) {

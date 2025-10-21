@@ -241,7 +241,7 @@ class BillServiceClientIntegrationTest {
                 .setBody(requestJson)
         );
 
-        Mono<BillResponseDTO> createdBillMono = billServiceClient.createBill(billRequest);
+        Mono<BillResponseDTO> createdBillMono = billServiceClient.createBill(billRequest, false, "jwtToken");
 
         StepVerifier.create(createdBillMono)
                 .expectNextMatches(createdBill -> {
@@ -490,7 +490,7 @@ class BillServiceClientIntegrationTest {
                 .setBody(requestJson)
         );
 
-        Mono<BillResponseDTO> createdBillMono = billServiceClient.createBill(invalidRequest);
+        Mono<BillResponseDTO> createdBillMono = billServiceClient.createBill(invalidRequest, false, "jwtToken");
 
         StepVerifier.create(createdBillMono)
                 .expectError(WebClientResponseException.BadRequest.class)
