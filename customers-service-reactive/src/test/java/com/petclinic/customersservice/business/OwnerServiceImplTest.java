@@ -461,7 +461,7 @@ class OwnerServiceImplTest {
         StepVerifier.create(result)
                 .consumeNextWith(response -> {
                     assertEquals(OWNER_ID, response.getOwnerId());
-                    assertNull(response.getPhotoId(), "PhotoId should be null in the response DTO");
+                    assertNull(response.getPhoto());
                 })
                 .verifyComplete();
 
@@ -484,7 +484,7 @@ class OwnerServiceImplTest {
         StepVerifier.create(result)
                 .consumeNextWith(response -> {
                     assertEquals(OWNER_ID, response.getOwnerId());
-                    assertNull(response.getPhotoId());
+                    assertNull(response.getPhoto());
                 })
                 .verifyComplete();
 
