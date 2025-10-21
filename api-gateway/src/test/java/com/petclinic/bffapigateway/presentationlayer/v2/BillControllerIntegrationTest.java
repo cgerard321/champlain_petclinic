@@ -44,7 +44,6 @@ public class BillControllerIntegrationTest {
         mockServerConfigBillService.registerPayBillEndpoint();
         mockServerConfigBillService.registerDownloadStaffBillPdfEndpoint();
 
-
         mockServerConfigAuthService = new MockServerConfigAuthService();
         mockServerConfigAuthService.registerValidateTokenForAdminEndpoint();
         mockServerConfigAuthService.registerValidateTokenForOwnerEndpoint();
