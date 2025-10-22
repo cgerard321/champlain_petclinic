@@ -575,10 +575,10 @@ class BillControllerIntegrationTest {
                         .queryParam("year", 2022)
                         .queryParam("month", 9)
                         .build())
-                .accept(MediaType.TEXT_EVENT_STREAM)
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBodyList(BillResponseDTO.class)
                 .hasSize(5);
     }

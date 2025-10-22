@@ -647,7 +647,7 @@ public class BillsControllerUnitTest {
 
         // Act & Assert
         webTestClient.get()
-                .uri(uriBuilder -> uriBuilder.path(baseBillURL + "/page")
+                .uri(uriBuilder -> uriBuilder.path(baseBillURL)
                         .queryParam("page", 0)
                         .queryParam("size", 10)
                         .build())

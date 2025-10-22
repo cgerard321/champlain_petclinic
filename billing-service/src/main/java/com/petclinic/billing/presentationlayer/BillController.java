@@ -193,7 +193,7 @@ public class BillController {
         return billService.deleteBillsByCustomerId(customerId);
     }
 
-    @GetMapping(value = "/bills/month", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping("/bills/month")
     public Flux<BillResponseDTO> getBillsByMonth(
             @RequestParam int year,
             @RequestParam int month) {
