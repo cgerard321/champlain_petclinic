@@ -408,7 +408,7 @@ public class VisitsServiceClient {
     public Mono<byte[]> downloadPrescriptionPdf(String visitId) {
         String url = UriComponentsBuilder
                 .fromHttpUrl(visitServiceUrl)
-                .path("/{visitId}/prescriptions/pdf")
+                .path("/{visitId}/prescription/pdf")
                 .buildAndExpand(visitId)
                 .toUriString();
 
@@ -422,7 +422,7 @@ public class VisitsServiceClient {
     public Mono<PrescriptionResponseDTO> createPrescription(String visitId, Mono<PrescriptionResponseDTO> request) {
         String url = UriComponentsBuilder
                 .fromHttpUrl(visitServiceUrl)
-                .path("/{visitId}/prescriptions")
+                .path("/{visitId}/prescription")
                 .buildAndExpand(visitId)
                 .toUriString();
 

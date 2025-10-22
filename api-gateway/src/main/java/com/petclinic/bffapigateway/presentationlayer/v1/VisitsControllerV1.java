@@ -271,7 +271,7 @@ public class VisitsControllerV1 {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
     @PostMapping(
-            value = "/{visitId}/prescriptions",
+            value = "/{visitId}/prescription",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<PrescriptionResponseDTO>> createPrescription(
@@ -286,7 +286,7 @@ public class VisitsControllerV1 {
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET, Roles.OWNER})
-    @GetMapping(value = "/{visitId}/prescriptions/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    @GetMapping(value = "/{visitId}/prescription/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
     public Mono<ResponseEntity<byte[]>> downloadPrescriptionPdf(
             @PathVariable String visitId) {
 

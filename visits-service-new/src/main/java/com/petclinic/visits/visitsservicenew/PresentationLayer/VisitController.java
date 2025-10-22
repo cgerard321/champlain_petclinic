@@ -288,7 +288,7 @@ public class VisitController {
                         .body(csvData));
     }
 
-    @PostMapping("/{visitId}/prescriptions")
+    @PostMapping("/{visitId}/prescription")
     public Mono<ResponseEntity<PrescriptionResponseDTO>> createPrescription(
             @PathVariable String visitId,
             @RequestBody PrescriptionResponseDTO dto) {
@@ -307,7 +307,7 @@ public class VisitController {
                         Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()));
     }
 
-    @GetMapping(value = "/{visitId}/prescriptions/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    @GetMapping(value = "/{visitId}/prescription/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
     public Mono<ResponseEntity<byte[]>> downloadPdf(
             @PathVariable String visitId) {
 

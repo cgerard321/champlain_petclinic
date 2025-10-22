@@ -1,12 +1,11 @@
 package com.petclinic.visits.visitsservicenew.DomainClientLayer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.visits.visitsservicenew.DomainClientLayer.Auth.Rethrower;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FileRequestDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FileResponseDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FilesServiceClient;
 import com.petclinic.visits.visitsservicenew.Exceptions.BadRequestException;
-import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
+import com.petclinic.visits.visitsservicenew.Exceptions.FailedDependencyException;
 import com.petclinic.visits.visitsservicenew.Exceptions.UnprocessableEntityException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -27,7 +26,6 @@ class FilesServiceClientTest {
     private static MockWebServer mockBackEnd;
     private FilesServiceClient filesServiceClient;
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final Rethrower rethrower = new Rethrower(objectMapper);
 
     @BeforeAll
     static void setup() throws IOException {
@@ -43,10 +41,6 @@ class FilesServiceClientTest {
                 "localhost",
                 String.valueOf(mockBackEnd.getPort())
         );
-        
-        Field rethrowerField = FilesServiceClient.class.getDeclaredField("rethrower");
-        rethrowerField.setAccessible(true);
-        rethrowerField.set(filesServiceClient, rethrower);
     }
 
     @AfterAll
@@ -77,14 +71,14 @@ class FilesServiceClientTest {
     }
 
     @Test
-    void getFile_WithNotFoundStatus_ShouldThrowNotFoundException() {
+    void getFile_WithNotFoundStatus_ShouldThrowFailedDependencyException() {
         mockBackEnd.enqueue(new MockResponse()
                 .setResponseCode(404)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody("{\"message\":\"File not found\"}"));
+                .setBody("{\"message\":\"Failed to get file from Files Service\"}"));
 
         StepVerifier.create(filesServiceClient.getFile("missing"))
-                .expectError(NotFoundException.class)
+                .expectError(FailedDependencyException.class)
                 .verify();
     }
 
