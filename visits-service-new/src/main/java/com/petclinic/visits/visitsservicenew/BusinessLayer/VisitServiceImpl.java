@@ -156,30 +156,28 @@ public class VisitServiceImpl implements VisitService {
 //                .flatMap(entityDtoUtil::toVisitResponseDTO);
 //    }
 
+
     @Override
     public Mono<VisitResponseDTO> getVisitByVisitId(String visitId, boolean includePrescription) {
         return repo.findByVisitId(visitId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Visit not found: " + visitId)))
                 .flatMap(visit -> entityDtoUtil.toVisitResponseDTO(visit)
                         .flatMap(dto -> {
-                            if (!includePrescription) {
-                                return Mono.just(dto);
-                            }
-
-                            // ✅ if includePrescription=true, fetch file info
-                            if (visit.getPrescriptionFileId() == null) {
+                            if (!includePrescription || visit.getPrescriptionFileId() == null) {
                                 return Mono.just(dto);
                             }
 
                             return filesServiceClient.getFile(visit.getPrescriptionFileId())
                                     .map(file -> {
-                                        dto.setPrescription(file);  // ✅ attach FileResponseDTO
+                                        dto.setPrescription(file);
                                         return dto;
                                     })
+                                    .onErrorResume(ex -> Mono.just(dto))
                                     .defaultIfEmpty(dto);
                         })
                 );
     }
+
 
 
 
@@ -370,7 +368,6 @@ public class VisitServiceImpl implements VisitService {
                                         updatedVisit.setStatus(existingVisit.getStatus());
                                     }
 
-                                    // ✅ Preserve created/immutable fields if needed
                                     if (updatedVisit.getVisitDate() == null) {
                                         updatedVisit.setVisitDate(existingVisit.getVisitDate());
                                     }

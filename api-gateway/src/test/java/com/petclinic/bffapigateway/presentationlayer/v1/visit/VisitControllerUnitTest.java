@@ -792,7 +792,7 @@ public class VisitControllerUnitTest {
 
     @Test
     void getVisitByVisitId_whenVisitExists_thenReturnVisitResponseDTO() {
-        when(visitsServiceClient.getVisitByVisitId("V001"))
+        when(visitsServiceClient.getVisitByVisitId("V001", false))
                 .thenReturn(Mono.just(visitResponseDTO1));
 
         webTestClient.get()
@@ -802,12 +802,12 @@ public class VisitControllerUnitTest {
                 .expectBody(VisitResponseDTO.class)
                 .isEqualTo(visitResponseDTO1);
 
-        verify(visitsServiceClient, times(1)).getVisitByVisitId("V001");
+        verify(visitsServiceClient, times(1)).getVisitByVisitId("V001", false);
     }
 
     @Test
     void getVisitByVisitId_whenVisitDoesNotExist_thenReturnNotFound() {
-        when(visitsServiceClient.getVisitByVisitId("INVALID"))
+        when(visitsServiceClient.getVisitByVisitId("INVALID", false))
                 .thenReturn(Mono.empty());
 
         webTestClient.get()
@@ -815,7 +815,7 @@ public class VisitControllerUnitTest {
                 .exchange()
                 .expectStatus().isNotFound();
 
-        verify(visitsServiceClient, times(1)).getVisitByVisitId("INVALID");
+        verify(visitsServiceClient, times(1)).getVisitByVisitId("INVALID", false);
     }
 
     @Test

@@ -39,8 +39,7 @@ import java.util.*;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
@@ -888,6 +887,7 @@ class VisitServiceImplTest {
 
     @Test
     void getVisitByVisitId_whenFileServiceErrors_returnsBaseDto() {
+        // Arrange
         Visit visit = mock(Visit.class);
         when(visit.getVisitId()).thenReturn("v2");
         when(visit.getPrescriptionFileId()).thenReturn("p2");
@@ -898,13 +898,21 @@ class VisitServiceImplTest {
         when(entityDtoUtil.toVisitResponseDTO(visit)).thenReturn(Mono.just(dto));
         when(filesServiceClient.getFile("p2")).thenReturn(Mono.error(new RuntimeException("file error")));
 
+        // Act & Assert
         StepVerifier.create(visitService.getVisitByVisitId("v2", true))
-                .expectNext(dto)
+                .expectNextMatches(result -> {
+                    assertSame(dto, result, "Expected the same DTO instance");
+                    assertNull(result.getPrescription(), "Prescription should not be set when file service fails");
+                    return true;
+                })
                 .verifyComplete();
 
+        // Verify interactions
+        verify(visitRepo, times(1)).findByVisitId("v2");
+        verify(entityDtoUtil, times(1)).toVisitResponseDTO(visit);
         verify(filesServiceClient, times(1)).getFile("p2");
-        assertNull(dto.getPrescription(), "Prescription should not be set when file service fails");
     }
+
 
     @Test
     void getVisitByVisitId_withNoPrescription_doesNotCallFileService() {
