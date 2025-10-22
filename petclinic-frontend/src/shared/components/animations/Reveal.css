@@ -1,7 +1,9 @@
 .reveal {
   opacity: 0;
   transform: translateY(12px);
-  transition: opacity 420ms ease-out, transform 420ms ease-out;
+  transition:
+    opacity 420ms ease-out,
+    transform 420ms ease-out;
   will-change: opacity, transform;
 }
 
@@ -11,7 +13,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .reveal, .reveal-visible {
+  .reveal,
+  .reveal-visible {
     transition: none !important;
     transform: none !important;
     opacity: 1 !important;

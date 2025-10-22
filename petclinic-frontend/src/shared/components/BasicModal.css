@@ -1,22 +1,22 @@
 .basic-modal > .modal-dialog {
-    display: flex;
-    justify-content: center;
+  display: flex;
+  justify-content: center;
 }
 
 .basic-modal-body {
-    width: 90%;
-    height: fit-content;
+  width: 90%;
+  height: fit-content;
 }
 
 .basic-modal-body > form > input {
-    width: 100%;
+  width: 100%;
 }
 
 .basic-modal-footer {
-    margin-top: auto;
-    display: flex;
+  margin-top: auto;
+  display: flex;
 }
 
 .modal-dialog {
-    align-items: center;
+  align-items: center;
 }

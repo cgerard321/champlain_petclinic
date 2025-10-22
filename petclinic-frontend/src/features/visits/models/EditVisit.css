@@ -1,11 +1,11 @@
 :root {
-    --base-clr: #ffffff;
-    --secondary-clr: #f5f5ff;
-    --hover-clr: #e1e5ef;
-    --active-clr: #d4d4e7;
-    --dark-clr: #212529;
-    --emergency-clr: #ff3c56;
-    --accent-clr: #5e63ff;
+  --base-clr: #ffffff;
+  --secondary-clr: #f5f5ff;
+  --hover-clr: #e1e5ef;
+  --active-clr: #d4d4e7;
+  --dark-clr: #212529;
+  --emergency-clr: #ff3c56;
+  --accent-clr: #5e63ff;
 }
 
 .profile-edit {
@@ -92,7 +92,6 @@
   font-style: italic;
 }
 
-
 .time-slot {
   padding: 10px 15px;
   border: 2px solid var(--accent-clr);
@@ -122,11 +121,11 @@
   background-color: var(--accent-clr);
   color: var(--base-clr);
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .time-slot:hover .slot-vet {
-  color: rgba(255,255,255,0.9);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .time-slot.selected {
@@ -137,9 +136,8 @@
 }
 
 .time-slot.selected .slot-vet {
-  color: rgba(255,255,255,0.95);
+  color: rgba(255, 255, 255, 0.95);
 }
-
 
 .assigned-vet-info {
   background-color: #d4edda;
@@ -219,12 +217,12 @@
   background-color: var(--hover-clr);
   border-radius: 34px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .switch-slider:before {
   position: absolute;
-  content: "";
+  content: '';
   height: 22px;
   width: 22px;
   left: 3px;
@@ -232,7 +230,7 @@
   background-color: var(--base-clr);
   border-radius: 50%;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .switch-input:checked + .switch-slider {
@@ -242,7 +240,7 @@
 
 .switch-input:checked + .switch-slider:before {
   transform: translateX(24px);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
 .switch-slider:hover {

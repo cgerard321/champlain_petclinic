@@ -222,7 +222,7 @@
 .search-and-filter {
   display: flex;
   align-items: center;
-  justify-content: space-between; 
+  justify-content: space-between;
   gap: 16px;
   margin: 30px 40px;
 }
@@ -230,7 +230,7 @@
 .search-wrapper {
   flex: 1;
   display: flex;
-  justify-content: center; 
+  justify-content: center;
 }
 
 .sort-button {
