@@ -21,7 +21,10 @@ export interface CartDetailsModel {
   message?: string | null;
 }
 
-export async function applyPromo(cartId: string, promoPercent: number) {
+export async function applyPromo(
+  cartId: string,
+  promoPercent: number
+): Promise<CartDetailsModel | null> {
   const res = await axiosInstance.put(`/carts/${cartId}/promo`, null, {
     params: { promoPercent },
     handleLocally: true,
@@ -30,7 +33,9 @@ export async function applyPromo(cartId: string, promoPercent: number) {
   return res.data as CartDetailsModel | null;
 }
 
-export async function clearPromo(cartId: string) {
+export async function clearPromo(
+  cartId: string
+): Promise<{ promoPercent?: number | null }> {
   const { data } = await axiosInstance.put(
     `/carts/${cartId}/promo/clear`,
     {},
