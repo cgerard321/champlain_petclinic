@@ -51,6 +51,11 @@ interface Invoice {
   quantity: number;
 }
 
+/**
+ * UserCart component displays the user's shopping cart, allowing them to view, update, and remove items,
+ * manage billing information, and proceed to checkout. It also handles displaying invoices and notifications,
+ * and interacts with the backend to fetch and update cart data.
+ */
 const UserCart: React.FC = () => {
   const navigate = useNavigate();
   const { cartId } = useParams<{ cartId?: string }>();
@@ -62,10 +67,10 @@ const UserCart: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [errorMessages, setErrorMessages] = useState<Record<number, string>>(
-    {}
+      {}
   );
   const [notificationMessage, setNotificationMessage] = useState<string | null>(
-    null
+      null
   );
 
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
@@ -73,7 +78,7 @@ const UserCart: React.FC = () => {
   const [lastInvoice, setLastInvoice] = useState<InvoiceFullType | null>(null);
   const [cartItemCount, setCartItemCount] = useState<number>(0);
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] =
-    useState<boolean>(false);
+      useState<boolean>(false);
   const [showBillingForm, setShowBillingForm] = useState<boolean>(false);
   const [billingInfo, setBillingInfo] = useState<BillingInfo | null>(null);
 
@@ -84,17 +89,17 @@ const UserCart: React.FC = () => {
   const [movingAll, setMovingAll] = useState<boolean>(false);
 
   const [promoPercent, setPromoPercent] = useState<number | null>(null);
- // const [promoInput, setPromoInput] = useState<string>(''); // input field value
+  // const [promoInput, setPromoInput] = useState<string>(''); // input field value
 
   // Recent purchases state
   const [recentPurchases, setRecentPurchases] = useState<
-    Array<{
-      productId: string;
-      productName: string;
-      productSalePrice: number;
-      imageId: string;
-      quantity: number;
-    }>
+      Array<{
+        productId: string;
+        productName: string;
+        productSalePrice: number;
+        imageId: string;
+        quantity: number;
+      }>
   >([]);
 
   // Quantity state for recent purchases
@@ -104,8 +109,8 @@ const UserCart: React.FC = () => {
 
   // Handle quantity change for recent purchases
   const handleRecentPurchaseQuantityChange = (
-    productId: string,
-    value: number
+      productId: string,
+      value: number
   ): void => {
     setRecentPurchaseQuantities(prev => ({
       ...prev,
@@ -128,16 +133,16 @@ const UserCart: React.FC = () => {
     try {
       // Concurrently add items to cart
       const addPromises = Array.from({ length: quantity }, () =>
-        axiosInstance.post(
-          `/carts/${cartId}/${item.productId}`,
-          {},
-          { useV2: false }
-        )
+          axiosInstance.post(
+              `/carts/${cartId}/${item.productId}`,
+              {},
+              { useV2: false }
+          )
       );
       await Promise.all(addPromises);
 
       setNotificationMessage(
-        `${item.productName} (x${quantity}) added to cart!`
+          `${item.productName} (x${quantity}) added to cart!`
       );
       notifyCartChanged();
 
@@ -147,43 +152,43 @@ const UserCart: React.FC = () => {
       });
       if (Array.isArray(data.products)) {
         const products: ProductModel[] = data.products.map(
-          (p: ProductAPIResponse) => ({
-            productId: p.productId,
-            imageId: p.imageId,
-            productName: p.productName,
-            productDescription: p.productDescription,
-            productSalePrice: p.productSalePrice,
-            averageRating: p.averageRating,
-            quantity: p.quantityInCart || 1,
-            productQuantity: p.productQuantity,
-          })
+            (p: ProductAPIResponse) => ({
+              productId: p.productId,
+              imageId: p.imageId,
+              productName: p.productName,
+              productDescription: p.productDescription,
+              productSalePrice: p.productSalePrice,
+              averageRating: p.averageRating,
+              quantity: p.quantityInCart || 1,
+              productQuantity: p.productQuantity,
+            })
         );
         setCartItems(products);
         const updatedCount = products.reduce(
-          (acc, p) => acc + (p.quantity || 0),
-          0
+            (acc, p) => acc + (p.quantity || 0),
+            0
         );
         setCartCountInLS(updatedCount);
       }
     } catch (err: unknown) {
       const msg =
-        (axios.isAxiosError(err) &&
-          (err.response?.data as { message?: string } | undefined)?.message) ||
-        `Failed to add ${item.productName} to cart.`;
+          (axios.isAxiosError(err) &&
+              (err.response?.data as { message?: string } | undefined)?.message) ||
+          `Failed to add ${item.productName} to cart.`;
       setNotificationMessage(msg);
     }
   };
 
   // Recommendation purchases state
   const [recommendationPurchases, setRecommendationPurchases] = useState<
-    Array<{
-      productId: string;
-      productName: string;
-      productSalePrice: number;
-      imageId: string;
-      quantity: number;
-      averageRating?: number;
-    }>
+      Array<{
+        productId: string;
+        productName: string;
+        productSalePrice: number;
+        imageId: string;
+        quantity: number;
+        averageRating?: number;
+      }>
   >([]);
 
   // Quantity state for recommendation purchases
@@ -196,8 +201,8 @@ const UserCart: React.FC = () => {
 
   // Handle quantity change for recommendation purchases
   const handleRecommendationPurchaseQuantityChange = (
-    productId: string,
-    value: number
+      productId: string,
+      value: number
   ): void => {
     setRecommendationPurchaseQuantities(prev => ({
       ...prev,
@@ -216,20 +221,20 @@ const UserCart: React.FC = () => {
     if (!cartId) return;
 
     const quantity = Math.max(
-      1,
-      recommendationPurchaseQuantities[item.productId] || 1
+        1,
+        recommendationPurchaseQuantities[item.productId] || 1
     );
 
     try {
       for (let i = 0; i < quantity; i += 1) {
         await axiosInstance.post(
-          `/carts/${cartId}/${item.productId}`,
-          {},
-          { useV2: false }
+            `/carts/${cartId}/${item.productId}`,
+            {},
+            { useV2: false }
         );
       }
       setNotificationMessage(
-        `${item.productName} (x${quantity}) added to cart!`
+          `${item.productName} (x${quantity}) added to cart!`
       );
       notifyCartChanged();
       // Fetch updated cart and update state
@@ -238,29 +243,29 @@ const UserCart: React.FC = () => {
       });
       if (Array.isArray(data.products)) {
         const products: ProductModel[] = data.products.map(
-          (p: ProductAPIResponse) => ({
-            productId: p.productId,
-            imageId: p.imageId,
-            productName: p.productName,
-            productDescription: p.productDescription,
-            productSalePrice: p.productSalePrice,
-            averageRating: p.averageRating,
-            quantity: p.quantityInCart || 1,
-            productQuantity: p.productQuantity,
-          })
+            (p: ProductAPIResponse) => ({
+              productId: p.productId,
+              imageId: p.imageId,
+              productName: p.productName,
+              productDescription: p.productDescription,
+              productSalePrice: p.productSalePrice,
+              averageRating: p.averageRating,
+              quantity: p.quantityInCart || 1,
+              productQuantity: p.productQuantity,
+            })
         );
         setCartItems(products);
         const updatedCount = products.reduce(
-          (acc, p) => acc + (p.quantity || 0),
-          0
+            (acc, p) => acc + (p.quantity || 0),
+            0
         );
         setCartCountInLS(updatedCount);
       }
     } catch (err: unknown) {
       const msg =
-        (axios.isAxiosError(err) &&
-          (err.response?.data as { message?: string } | undefined)?.message) ||
-        `Failed to add ${item.productName} to cart.`;
+          (axios.isAxiosError(err) &&
+              (err.response?.data as { message?: string } | undefined)?.message) ||
+          `Failed to add ${item.productName} to cart.`;
       setNotificationMessage(msg);
     }
   };
@@ -268,16 +273,16 @@ const UserCart: React.FC = () => {
   // rôles (read-only pour staff/admin)
   const isAdmin = IsAdmin();
   const isStaff =
-    isAdmin || IsInventoryManager() || IsVet() || IsReceptionist();
+      isAdmin || IsInventoryManager() || IsVet() || IsReceptionist();
 
   // derived totals
   const subtotal = cartItems.reduce(
-    (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
-    0
+      (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
+      0
   );
 
   const promoDiscount =
-    promoPercent != null ? (subtotal * promoPercent) / 100 : 0;
+      promoPercent != null ? (subtotal * promoPercent) / 100 : 0;
   const discountedSubtotal = Math.max(0, subtotal - promoDiscount);
 
   const tvq = discountedSubtotal * 0.09975;
@@ -289,8 +294,8 @@ const UserCart: React.FC = () => {
 
   const updateCartItemCount = useCallback(() => {
     const count = cartItems.reduce(
-      (acc, item) => acc + (item.quantity || 0),
-      0
+        (acc, item) => acc + (item.quantity || 0),
+        0
     );
     setCartItemCount(count);
   }, [cartItems]);
@@ -313,33 +318,33 @@ const UserCart: React.FC = () => {
         }
 
         const products: ProductModel[] = data.products.map(
-          (p: ProductAPIResponse) => ({
-            productId: p.productId,
-            imageId: p.imageId,
-            productName: p.productName,
-            productDescription: p.productDescription,
-            productSalePrice: p.productSalePrice,
-            averageRating: p.averageRating,
-            quantity: p.quantityInCart || 1,
-            productQuantity: p.productQuantity,
-          })
+            (p: ProductAPIResponse) => ({
+              productId: p.productId,
+              imageId: p.imageId,
+              productName: p.productName,
+              productDescription: p.productDescription,
+              productSalePrice: p.productSalePrice,
+              averageRating: p.averageRating,
+              quantity: p.quantityInCart || 1,
+              productQuantity: p.productQuantity,
+            })
         );
 
         setCartItems(products);
         setCartIdInLS(cartId);
         const countFromFetch = products.reduce(
-          (acc, p) => acc + (p.quantity || 0),
-          0
+            (acc, p) => acc + (p.quantity || 0),
+            0
         );
         setCartCountInLS(countFromFetch);
         const enrichedWishlist = await Promise.all(
-          (data.wishListProducts || []).map(async (item: ProductModel) => {
-            const fullProduct = await getProductByProductId(item.productId);
-            return {
-              ...fullProduct,
-              quantity: item.quantity ?? 1,
-            };
-          })
+            (data.wishListProducts || []).map(async (item: ProductModel) => {
+              const fullProduct = await getProductByProductId(item.productId);
+              return {
+                ...fullProduct,
+                quantity: item.quantity ?? 1,
+              };
+            })
         );
         setWishlistItems(enrichedWishlist);
 
@@ -370,8 +375,8 @@ const UserCart: React.FC = () => {
     const fetchRecentPurchases = async (): Promise<void> => {
       try {
         const { data } = await axiosInstance.get(
-          `/carts/${cartId}/recent-purchases`,
-          { useV2: false }
+            `/carts/${cartId}/recent-purchases`,
+            { useV2: false }
         );
         setRecentPurchases(data || []);
       } catch (err) {
@@ -387,8 +392,8 @@ const UserCart: React.FC = () => {
     if (!cartId) return;
     try {
       const { data } = await axiosInstance.get(
-        `/carts/${cartId}/recommendation-purchases`,
-        { useV2: false }
+          `/carts/${cartId}/recommendation-purchases`,
+          { useV2: false }
       );
       setRecommendationPurchases(data || []);
     } catch (err) {
@@ -446,7 +451,7 @@ const UserCart: React.FC = () => {
   const blockIfReadOnly = useCallback((): boolean => {
     if (isStaff) {
       setNotificationMessage(
-        'Read-only mode: staff/admin cannot modify carts.'
+          'Read-only mode: staff/admin cannot modify carts.'
       );
       return true;
     }
@@ -454,74 +459,74 @@ const UserCart: React.FC = () => {
   }, [isStaff, setNotificationMessage]);
 
   const changeItemQuantity = useCallback(
-    async (
-      event: React.ChangeEvent<HTMLInputElement>,
-      index: number
-    ): Promise<void> => {
-      if (blockIfReadOnly()) return;
+      async (
+          event: React.ChangeEvent<HTMLInputElement>,
+          index: number
+      ): Promise<void> => {
+        if (blockIfReadOnly()) return;
 
-      const newQuantity = Math.max(1, Number(event.target.value));
-      const item = cartItems[index];
-      const prevQty = item.quantity || 1;
-      if (newQuantity > item.productQuantity) {
-        setErrorMessages(prevErrors => ({
-          ...prevErrors,
-          [index]: `You cannot add more than ${item.productQuantity} items. Only ${item.productQuantity} items left in stock.`,
-        }));
-        return;
-      } else {
-        setErrorMessages(prevErrors => {
-          const rest = { ...prevErrors };
-          delete rest[index];
-          return rest;
-        });
-      }
-
-      try {
-        const { data } = await axiosInstance.put(
-          `/carts/${cartId}/products/${item.productId}`,
-          { quantity: newQuantity },
-          { useV2: false }
-        );
-
-        if (data && data.message) {
+        const newQuantity = Math.max(1, Number(event.target.value));
+        const item = cartItems[index];
+        const prevQty = item.quantity || 1;
+        if (newQuantity > item.productQuantity) {
           setErrorMessages(prevErrors => ({
             ...prevErrors,
-            [index]: data.message || 'Failed to update quantity',
+            [index]: `You cannot add more than ${item.productQuantity} items. Only ${item.productQuantity} items left in stock.`,
           }));
-
-          if (
-            typeof data.message === 'string' &&
-            data.message.includes('moved to your wishlist')
-          ) {
-            setCartItems(prevItems =>
-              prevItems.filter((_, idx) => idx !== index)
-            );
-            setWishlistItems(prevItems => [...prevItems, item]);
-            setNotificationMessage(data.message);
-            bumpCartCountInLS(-prevQty);
-            notifyCartChanged(); // left cart
-            return;
-          }
+          return;
         } else {
-          setCartItems(prev => {
-            const next = [...prev];
-            next[index] = { ...next[index], quantity: newQuantity };
-            return next;
+          setErrorMessages(prevErrors => {
+            const rest = { ...prevErrors };
+            delete rest[index];
+            return rest;
           });
-          setNotificationMessage('Item quantity updated successfully.');
-          bumpCartCountInLS(newQuantity - prevQty);
-          notifyCartChanged(); // qty changed
         }
-      } catch (err) {
-        console.error('Error updating quantity:', err);
-        setErrorMessages(prev => ({
-          ...prev,
-          [index]: 'Failed to update quantity',
-        }));
-      }
-    },
-    [cartItems, cartId, blockIfReadOnly]
+
+        try {
+          const { data } = await axiosInstance.put(
+              `/carts/${cartId}/products/${item.productId}`,
+              { quantity: newQuantity },
+              { useV2: false }
+          );
+
+          if (data && data.message) {
+            setErrorMessages(prevErrors => ({
+              ...prevErrors,
+              [index]: data.message || 'Failed to update quantity',
+            }));
+
+            if (
+                typeof data.message === 'string' &&
+                data.message.includes('moved to your wishlist')
+            ) {
+              setCartItems(prevItems =>
+                  prevItems.filter((_, idx) => idx !== index)
+              );
+              setWishlistItems(prevItems => [...prevItems, item]);
+              setNotificationMessage(data.message);
+              bumpCartCountInLS(-prevQty);
+              notifyCartChanged(); // left cart
+              return;
+            }
+          } else {
+            setCartItems(prev => {
+              const next = [...prev];
+              next[index] = { ...next[index], quantity: newQuantity };
+              return next;
+            });
+            setNotificationMessage('Item quantity updated successfully.');
+            bumpCartCountInLS(newQuantity - prevQty);
+            notifyCartChanged(); // qty changed
+          }
+        } catch (err) {
+          console.error('Error updating quantity:', err);
+          setErrorMessages(prev => ({
+            ...prev,
+            [index]: 'Failed to update quantity',
+          }));
+        }
+      },
+      [cartItems, cartId, blockIfReadOnly]
   );
 
   const onClearPromo = async (): Promise<void> => {
@@ -538,37 +543,37 @@ const UserCart: React.FC = () => {
 
 
   const deleteItem = useCallback(
-    async (productId: string, indexToDelete: number): Promise<void> => {
-      if (blockIfReadOnly()) return;
-      if (!cartId) return;
+      async (productId: string, indexToDelete: number): Promise<void> => {
+        if (blockIfReadOnly()) return;
+        if (!cartId) return;
 
-      const ok = await confirm({
-        title: 'Remove item',
-        message: 'Remove this item from your cart?',
-        confirmText: 'Remove',
-        cancelText: 'Cancel',
-        variant: 'danger',
-      });
-      if (!ok) return;
-
-      try {
-        await axiosInstance.delete(`/carts/${cartId}/${productId}`, {
-          useV2: false,
+        const ok = await confirm({
+          title: 'Remove item',
+          message: 'Remove this item from your cart?',
+          confirmText: 'Remove',
+          cancelText: 'Cancel',
+          variant: 'danger',
         });
+        if (!ok) return;
 
-        setCartItems(prev => {
-          const removedQty = prev[indexToDelete]?.quantity || 1;
-          setNotificationMessage('Item removed from cart.');
-          bumpCartCountInLS(-removedQty);
-          return prev.filter((_, idx) => idx !== indexToDelete);
-        });
-        notifyCartChanged(); // item removed
-      } catch (error) {
-        console.error('Error deleting item: ', error);
-        setNotificationMessage('Failed to delete item.');
-      }
-    },
-    [cartId, blockIfReadOnly, confirm]
+        try {
+          await axiosInstance.delete(`/carts/${cartId}/${productId}`, {
+            useV2: false,
+          });
+
+          setCartItems(prev => {
+            const removedQty = prev[indexToDelete]?.quantity || 1;
+            setNotificationMessage('Item removed from cart.');
+            bumpCartCountInLS(-removedQty);
+            return prev.filter((_, idx) => idx !== indexToDelete);
+          });
+          notifyCartChanged(); // item removed
+        } catch (error) {
+          console.error('Error deleting item: ', error);
+          setNotificationMessage('Failed to delete item.');
+        }
+      },
+      [cartId, blockIfReadOnly, confirm]
   );
 
   const clearCart = async (): Promise<void> => {
@@ -609,21 +614,21 @@ const UserCart: React.FC = () => {
       const productId = item.productId;
 
       const { data } = await axiosInstance.put(
-        `/carts/${cartId}/wishlist/${productId}/toWishList`,
-        {
-          productId: item.productId,
-          imageId: item.imageId,
-          productName: item.productName,
-          productSalePrice: item.productSalePrice,
-        },
-        { useV2: false }
+          `/carts/${cartId}/wishlist/${productId}/toWishList`,
+          {
+            productId: item.productId,
+            imageId: item.imageId,
+            productName: item.productName,
+            productSalePrice: item.productSalePrice,
+          },
+          { useV2: false }
       );
 
       if (data && data.message) {
         setNotificationMessage(data.message);
       } else {
         setNotificationMessage(
-          `${item.productName} has been added to your wishlist!`
+            `${item.productName} has been added to your wishlist!`
         );
       }
 
@@ -646,7 +651,7 @@ const UserCart: React.FC = () => {
 
     if (item.productQuantity <= 0) {
       setNotificationMessage(
-        `${item.productName} is out of stock and cannot be added to the cart.`
+          `${item.productName} is out of stock and cannot be added to the cart.`
       );
       return;
     }
@@ -654,27 +659,27 @@ const UserCart: React.FC = () => {
       const productId = item.productId;
 
       const { data } = await axiosInstance.put(
-        `/carts/${cartId}/wishlist/${productId}/toCart`,
-        {
-          productId: item.productId,
-          imageId: item.imageId,
-          productName: item.productName,
-          productSalePrice: item.productSalePrice,
-        },
-        { useV2: false }
+          `/carts/${cartId}/wishlist/${productId}/toCart`,
+          {
+            productId: item.productId,
+            imageId: item.imageId,
+            productName: item.productName,
+            productSalePrice: item.productSalePrice,
+          },
+          { useV2: false }
       );
 
       if (data && data.message) {
         setNotificationMessage(data.message);
       } else {
         setNotificationMessage(
-          `${item.productName} has been added to your cart!`
+            `${item.productName} has been added to your cart!`
         );
       }
 
       setCartItems(prevItems => [...prevItems, item]);
       setWishlistItems(prevItems =>
-        prevItems.filter(product => product.productId !== item.productId)
+          prevItems.filter(product => product.productId !== item.productId)
       );
       setWishlistUpdated(true);
 
@@ -705,12 +710,12 @@ const UserCart: React.FC = () => {
 
     try {
       await axiosInstance.delete(
-        `/carts/${cartId}/wishlist/${item.productId}`,
-        { useV2: false }
+          `/carts/${cartId}/wishlist/${item.productId}`,
+          { useV2: false }
       );
 
       setWishlistItems(prev =>
-        prev.filter(p => p.productId !== item.productId)
+          prev.filter(p => p.productId !== item.productId)
       );
     } catch (e) {
       console.error(e);
@@ -735,9 +740,9 @@ const UserCart: React.FC = () => {
 
     try {
       const res = await axiosInstance.post(
-        `/carts/${cartId}/wishlist/moveAll`,
-        {},
-        { useV2: false, validateStatus: () => true }
+          `/carts/${cartId}/wishlist/moveAll`,
+          {},
+          { useV2: false, validateStatus: () => true }
       );
 
       if (res.status >= 200 && res.status < 300) {
@@ -746,9 +751,9 @@ const UserCart: React.FC = () => {
         setNotificationMessage(null);
       } else {
         const msg =
-          (res.data &&
-            (res.data.message || res.data.error || res.data.title)) ||
-          `Move All failed (${res.status})`;
+            (res.data &&
+                (res.data.message || res.data.error || res.data.title)) ||
+            `Move All failed (${res.status})`;
         setNotificationMessage(msg);
       }
     } catch (e) {
@@ -782,9 +787,9 @@ const UserCart: React.FC = () => {
 
     try {
       await axiosInstance.post(
-        `/carts/${cartId}/checkout`,
-        {},
-        { useV2: false }
+          `/carts/${cartId}/checkout`,
+          {},
+          { useV2: false }
       );
 
       const invoiceItems: Invoice[] = cartItems.map(item => ({
@@ -802,21 +807,20 @@ const UserCart: React.FC = () => {
       }));
 
       const invoiceSubtotal = invoiceItemsForFull.reduce(
-        (s, it) => s + it.productSalePrice * it.quantity,
-        0
+          (s, it) => s + it.productSalePrice * it.quantity,
+          0
       );
-        const invoiceTvq = invoiceSubtotal * 0.09975;
-        const invoiceTvc = invoiceSubtotal * 0.05;
-        const invoiceTotal = invoiceSubtotal + invoiceTvq + invoiceTvc - effectiveDiscount;
+      const invoiceTvq = invoiceSubtotal * 0.09975;
+      const invoiceTvc = invoiceSubtotal * 0.05;
+      const invoiceTotal = invoiceSubtotal + invoiceTvq + invoiceTvc - effectiveDiscount;
 
-
-        const usedBilling = billing ?? billingInfo ?? null;
+      const usedBilling = billing ?? billingInfo ?? null;
 
       const newInvoice: InvoiceFullType = {
         invoiceId: `${Date.now()}`,
         userId: user?.userId || 'anonymous',
         billing: usedBilling
-          ? {
+            ? {
               fullName: usedBilling.fullName,
               email: usedBilling.email,
               address: usedBilling.address,
@@ -824,7 +828,7 @@ const UserCart: React.FC = () => {
               province: usedBilling.province,
               postalCode: usedBilling.postalCode,
             }
-          : null,
+            : null,
         date: new Date().toISOString(),
         items: invoiceItemsForFull,
         subtotal: invoiceSubtotal,
@@ -849,8 +853,8 @@ const UserCart: React.FC = () => {
       // Fetch recent purchases after checkout
       try {
         const { data } = await axiosInstance.get(
-          `/carts/${cartId}/recent-purchases`,
-          { useV2: false }
+            `/carts/${cartId}/recent-purchases`,
+            { useV2: false }
         );
         setRecentPurchases(data || []);
       } catch (err) {
@@ -862,10 +866,10 @@ const UserCart: React.FC = () => {
     } catch (error: unknown) {
       if (error && typeof error === 'object' && 'response' in error) {
         const errorData = (
-          error as { response?: { data?: { message?: string } } }
+            error as { response?: { data?: { message?: string } } }
         ).response?.data;
         setCheckoutMessage(
-          `Checkout failed: ${errorData?.message || 'Unexpected error'}`
+            `Checkout failed: ${errorData?.message || 'Unexpected error'}`
         );
       } else {
         setCheckoutMessage('Checkout failed: Unexpected error');
@@ -875,13 +879,13 @@ const UserCart: React.FC = () => {
 
   if (loading)
     return (
-      <div
-        className="cart-loading-overlay"
-        role="status"
-        aria-label="Loading cart items"
-      >
-        <span className="sr-only">Loading cart items...</span>
-      </div>
+        <div
+            className="cart-loading-overlay"
+            role="status"
+            aria-label="Loading cart items"
+        >
+          <span className="sr-only">Loading cart items...</span>
+        </div>
     );
   if (error) return <div className="error">{error}</div>;
 
@@ -911,11 +915,11 @@ const UserCart: React.FC = () => {
     return acc;
   }, {});
   const recommendationPurchasesList = Object.values(
-    uniqueRecommendationPurchases
+      uniqueRecommendationPurchases
   );
 
   const recommendationListClassName = `recommendation-purchases-list recent-purchases-list cart-scroll-strip${
-    recommendationPurchasesList.length === 0 ? ' recommendation-empty' : ''
+      recommendationPurchasesList.length === 0 ? ' recommendation-empty' : ''
   }`;
 
 
@@ -1014,7 +1018,6 @@ const UserCart: React.FC = () => {
 
             {!isStaff && (
                 <div className="Checkout-section">
-                  {/* Promo code input + Apply button */}
                   <div className="voucher-code-section">
                     <input
                         type="text"
@@ -1037,7 +1040,6 @@ const UserCart: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Current promo + Clear */}
                   <div className="voucher-code-section" style={{ marginTop: 12 }}>
                     {promoPercent != null && (
                         <div
@@ -1073,7 +1075,6 @@ const UserCart: React.FC = () => {
                     <p className="total-price summary-item">Total: {formatPrice(total)}</p>
                   </div>
 
-                  {/* Checkout */}
                   <button
                       className="checkout-btn cart-button cart-button--brand cart-button--block cart-button--disabled-muted"
                       onClick={handleCheckoutConfirmation}
@@ -1089,7 +1090,6 @@ const UserCart: React.FC = () => {
             )}
           </div>
 
-          {/* Recent Purchases Section - above Wishlist */}
           <div className="recent-purchases-section cart-panel cart-panel--padded">
             <h2>Recent Purchases</h2>
             <div className="recent-purchases-list cart-scroll-strip">
@@ -1180,7 +1180,6 @@ const UserCart: React.FC = () => {
               )}
             </div>
 
-            {/* Wishlist items */}
             <div className="Wishlist-items cart-scroll-strip">
               {wishlistItems.length > 0 ? (
                   wishlistItems.map(item => {
@@ -1225,7 +1224,6 @@ const UserCart: React.FC = () => {
             </div>
           </div>
 
-          {/* Recommendation Purchases Section */}
           <div className="recommendation-purchases-section cart-panel cart-panel--padded">
             <div className="recommendation-header">
               <h2>Your Recommendations</h2>
@@ -1307,7 +1305,6 @@ const UserCart: React.FC = () => {
             </div>
           </div>
 
-          {/* Billing Form Modal */}
           {showBillingForm && (
               <div className="modal-backdrop">
                 <div className="modal-content">
@@ -1345,5 +1342,6 @@ const UserCart: React.FC = () => {
         </div>
       </div>
   );
+
 };
 export default UserCart;
