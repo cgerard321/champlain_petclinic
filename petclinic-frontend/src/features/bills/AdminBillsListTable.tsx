@@ -8,7 +8,6 @@ import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseMod
 import { VetResponseModel } from '@/features/veterinarians/models/VetResponseModel';
 import useGetAllBillsPaginated from '@/features/bills/hooks/useGetAllBillsPaginated.ts';
 import './AdminBillsListTable.css';
-import { useNavigate } from 'react-router-dom';
 import { archiveBills } from './api/archiveBills';
 import { getAllPaidBills } from '@/features/bills/api/getAllPaidBills.tsx';
 import { getAllOverdueBills } from '@/features/bills/api/getAllOverdueBills.tsx';
@@ -21,6 +20,7 @@ import { getAllBillsByVisitType } from './api/getAllBillsByVisitType';
 import { getAllBills } from './api/getAllBills';
 import InterestExemptToggle from './components/InterestExemptToggle';
 import { Currency, convertCurrency } from './utils/convertCurrency';
+import axiosInstance from '@/shared/api/axiosInstance';
 
 interface AdminBillsListTableProps {
   currency: Currency;
@@ -41,7 +41,6 @@ export default function AdminBillsListTable({
   currency,
   setCurrency,
 }: AdminBillsListTableProps): JSX.Element {
-  const navigate = useNavigate();
   const [showArchivedBills, setShowArchivedBills] = useState(false);
   const [searchId, setSearchId] = useState('');
   const [searchedBill, setSearchedBill] = useState<Bill | null>(null);
@@ -76,6 +75,8 @@ export default function AdminBillsListTable({
   });
   const [owners, setOwners] = useState<OwnerResponseModel[]>([]);
   const [vets, setVets] = useState<VetResponseModel[]>([]);
+  const [detailBill, setDetailBill] = useState<Bill | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
 
   const fetchOwnersAndVets = useCallback(async (): Promise<void> => {
     try {
@@ -316,10 +317,6 @@ export default function AdminBillsListTable({
     }
   };
 
-  const handleEditClick = (): void => {
-    navigate(`/bills/admin/${searchId}/edit`);
-  };
-
   const handleGoBack = (): void => {
     setSearchedBill(null);
     setSearchId('');
@@ -346,19 +343,82 @@ export default function AdminBillsListTable({
     setActiveSection(activeSection === section ? null : section);
   };
 
+  const formatTotalDue = (bill: Bill): string => {
+    const amount = bill.taxedAmount ?? bill.amount ?? 0;
+    if (currency === 'CAD') return `CAD $${amount.toFixed(2)}`;
+    return `USD $${convertCurrency(amount, 'CAD', 'USD').toFixed(2)}`;
+  };
+
+  const openDetails = (bill: Bill): void => {
+    setDetailBill(bill);
+    setShowDetailModal(true);
+  };
+
+  const closeDetails = (): void => {
+    setShowDetailModal(false);
+    setDetailBill(null);
+  };
+
+  const handleDownloadStaffPdf = async (billId: string): Promise<void> => {
+    try {
+      const response = await axiosInstance.get(
+        `/bills/${billId}/pdf?currency=${currency}`,
+        {
+          responseType: 'blob',
+          headers: { Accept: 'application/pdf' },
+          useV2: true, // required so gateway uses the v2 API path
+        }
+      );
+
+      if (!response || response.status !== 200 || !response.data) {
+        throw new Error('Failed to download staff PDF');
+      }
+
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `staff-bill-${billId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading staff PDF:', error);
+      alert('Failed to generate the bill PDF. Please try again.');
+    }
+  };
+
   return (
     <div>
-      <div className="button-container">
-        <button onClick={() => toggleSection('search')}>
+      <div className="filter-button-row">
+        <button className="filter-btn" onClick={() => toggleSection('search')}>
           {activeSection === 'search' ? 'Close Search' : 'Search'}
         </button>
-        <button onClick={() => toggleSection('filter')}>
+        <button className="filter-btn" onClick={() => toggleSection('filter')}>
           {activeSection === 'filter' ? 'Close Filter' : 'Filter'}
         </button>
-        <button onClick={() => toggleSection('create')}>
+        <button className="filter-btn" onClick={() => toggleSection('create')}>
           {activeSection === 'create' ? 'Close Create' : 'Create'}
         </button>
-        <div className="archive-toggle">
+      </div>
+
+      <div
+        className="filterContainer"
+        style={{ display: 'flex', alignItems: 'center', gap: '16px' }}
+      >
+        <label htmlFor="currencyFilter">Currency:</label>
+        <select
+          id="currencyFilter"
+          value={currency}
+          onChange={e => setCurrency(e.target.value as Currency)}
+          style={{ width: '100px' }}
+        >
+          <option value="CAD">CAD</option>
+          <option value="USD">USD</option>
+        </select>
+
+        <div className="archive-toggle" style={{ marginLeft: '16px' }}>
           <label>
             <input
               type="checkbox"
@@ -371,7 +431,7 @@ export default function AdminBillsListTable({
       </div>
 
       {activeSection === 'search' && (
-        <div className="create-bill-form">
+        <div className="filter-section">
           <input
             type="text"
             placeholder="Customer ID"
@@ -390,7 +450,7 @@ export default function AdminBillsListTable({
       )}
 
       {activeSection === 'filter' && (
-        <div className="create-bill-form">
+        <div className="filter-section">
           <label htmlFor="billFilter">Status: </label>
           <select
             id="billFilter"
@@ -475,7 +535,7 @@ export default function AdminBillsListTable({
       )}
 
       {activeSection === 'create' && (
-        <div className="create-bill-form">
+        <div className="filter-section">
           <h3>Create New Bill</h3>
           {error && <p style={{ color: 'red' }}>{error}</p>}
           <form
@@ -581,133 +641,224 @@ export default function AdminBillsListTable({
       )}
 
       {searchedBill ? (
-        <div>
-          <h3>Searched Bill Details:</h3>
-          <p>
-            <strong>Bill ID:</strong> {searchedBill.billId}
-          </p>
-          <p>
-            <strong>Owner Name:</strong> {searchedBill.ownerFirstName}{' '}
-            {searchedBill.ownerLastName}
-          </p>
-          <p>
-            <strong>Visit Type:</strong> {searchedBill.visitType}
-          </p>
-          <p>
-            <strong>Vet Name:</strong> {searchedBill.vetFirstName}{' '}
-            {searchedBill.vetLastName}
-          </p>
-          <p>
-            <strong>Date:</strong> {searchedBill.date}
-          </p>
-          <p>
-            <strong>Amount:</strong> {searchedBill.amount}
-          </p>
-          <p>
-            <strong>Taxed Amount:</strong> {searchedBill.taxedAmount}
-          </p>
-          <p>
-            <strong>Status:</strong> {searchedBill.billStatus}
-          </p>
-          <p>
-            <strong>Due Date:</strong> {searchedBill.dueDate}
-          </p>
-          <button onClick={handleEditClick}>Edit Bill</button>
+        <div className="modalOverlay">
+          <div className="modalContent">
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <h3>Search Results - Bill Details</h3>
+              <button onClick={handleGoBack}>Close</button>
+            </div>
+
+            <div style={{ marginTop: '12px' }}>
+              <p>
+                <strong>Bill ID:</strong> {searchedBill.billId}
+              </p>
+              <p>
+                <strong>Customer ID:</strong> {searchedBill.customerId}
+              </p>
+              <p>
+                <strong>Owner Name:</strong> {searchedBill.ownerFirstName}{' '}
+                {searchedBill.ownerLastName}
+              </p>
+              <p>
+                <strong>Visit Type:</strong> {searchedBill.visitType}
+              </p>
+              <p>
+                <strong>Vet Name:</strong> {searchedBill.vetFirstName}{' '}
+                {searchedBill.vetLastName}
+              </p>
+              <p>
+                <strong>Date:</strong> {searchedBill.date}
+              </p>
+              <p>
+                <strong>Amount:</strong> {formatTotalDue(searchedBill)}
+              </p>
+              <p>
+                <strong>Status:</strong> {searchedBill.billStatus}
+              </p>
+              <p>
+                <strong>Due Date:</strong> {searchedBill.dueDate}
+              </p>
+              <div style={{ marginTop: '16px' }}>
+                <strong>Interest Exempt:</strong>{' '}
+                {searchedBill.interestExempt ? 'Yes' : 'No'}
+              </div>
+            </div>
+          </div>
         </div>
       ) : (
-        <div className="admin-bills-list-table-container">
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '16px',
-              marginBottom: '16px',
-            }}
-          >
-            <label htmlFor="statusFilter">Status:</label>
-            <select
-              id="statusFilter"
-              value={selectedFilter}
-              onChange={handleFilterChange}
-              style={{ width: '150px' }}
-            >
-              <option value="">All Bills</option>
-              <option value="unpaid">Unpaid</option>
-              <option value="paid">Paid</option>
-              <option value="overdue">Overdue</option>
-            </select>
-            <label htmlFor="currencyFilter" style={{ marginLeft: '8px' }}>
-              Currency:
-            </label>
-            <select
-              id="currencyFilter"
-              value={currency}
-              onChange={e => setCurrency(e.target.value as Currency)}
-              style={{ width: '100px' }}
-            >
-              <option value="CAD">CAD</option>
-              <option value="USD">USD</option>
-            </select>
-          </div>
-          <table className="table table-striped">
-            <thead>
-              <tr>
-                <th>Bill ID</th>
-                <th>Customer ID</th>
-                <th>Owner Name</th>
-                <th>Visit Type</th>
-                <th>Vet Name</th>
-                <th>Date</th>
-                <th>Amount</th>
-                <th>Taxed Amount</th>
-                <th>Status</th>
-                <th>Due Date</th>
-                <th>Interest Exempt</th>
-              </tr>
-            </thead>
-            <tbody>
-              {getFilteredBills().map((bill: Bill) => (
-                <tr key={bill.billId}>
-                  <td>{bill.billId}</td>
-                  <td>{bill.customerId}</td>
-                  <td>
-                    {bill.ownerFirstName} {bill.ownerLastName}
-                  </td>
-                  <td>{bill.visitType}</td>
-                  <td>
-                    {bill.vetFirstName} {bill.vetLastName}
-                  </td>
-                  <td>{bill.date}</td>
-                  <td>
-                    {currency === 'CAD'
-                      ? `CAD $${bill.amount.toFixed(2)}`
-                      : `USD $${convertCurrency(bill.amount, 'CAD', 'USD').toFixed(2)}`}
-                  </td>
-                  <td>
-                    {currency === 'CAD'
-                      ? `CAD $${bill.taxedAmount.toFixed(2)}`
-                      : `USD $${convertCurrency(bill.taxedAmount, 'CAD', 'USD').toFixed(2)}`}
-                  </td>
-                  <td>{bill.billStatus}</td>
-                  <td>{bill.dueDate}</td>
-                  <td>
-                    <InterestExemptToggle
-                      billId={bill.billId}
-                      isExempt={bill.interestExempt || false}
-                      onToggleComplete={() => getBillsList(currentPage, 10)}
-                      variant="simple"
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div>
+          {error ? (
+            <p>{error}</p>
+          ) : (
+            <div className="billsListContainer">
+              {getFilteredBills().length === 0 ? (
+                <p>No bills to display.</p>
+              ) : (
+                getFilteredBills().map(bill => (
+                  <div
+                    key={bill.billId}
+                    className="billCard"
+                    data-bill-id={bill.billId}
+                  >
+                    <div className="billCardContent">
+                      <div className="billColumn leftColumn">
+                        <div className="billField">
+                          <strong>Owner:</strong>
+                          <span className="billValue">
+                            {bill.ownerFirstName} {bill.ownerLastName}
+                          </span>
+                        </div>
+                        <div className="billField">
+                          <strong>Vet:</strong>
+                          <span className="billValue">
+                            {bill.vetFirstName} {bill.vetLastName}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="billColumn rightColumn">
+                        <div className="billField">
+                          <strong>Total:</strong>
+                          <span className="billValue">
+                            {formatTotalDue(bill)}
+                          </span>
+                        </div>
+                        <div className="billField status">
+                          <strong>Status:</strong>
+                          <span
+                            className={`billValue ${
+                              bill.billStatus?.toLowerCase() === 'overdue'
+                                ? 'status--overdue'
+                                : bill.billStatus?.toLowerCase() === 'paid'
+                                  ? 'status--paid'
+                                  : ''
+                            }`}
+                          >
+                            {bill.billStatus}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="billActions">
+                      <button
+                        className="detailsButton"
+                        onClick={() => openDetails(bill)}
+                      >
+                        Details
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
           <div className="pagination-controls">
             {currentPage > 0 && (
               <button onClick={handlePreviousPage}>Previous</button>
             )}
             <span> Page {currentPage + 1} </span>
             {hasMore && <button onClick={handleNextPage}>Next</button>}
+          </div>
+        </div>
+      )}
+
+      {showDetailModal && detailBill && (
+        <div className="modalOverlay">
+          <div className="modalContent">
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <h3>Bill Details</h3>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  className="detailsButton printButton"
+                  onClick={() => handleDownloadStaffPdf(detailBill.billId)}
+                >
+                  Print Bill (PDF)
+                </button>
+                <button onClick={closeDetails}>Close</button>
+              </div>
+            </div>
+
+            <div style={{ marginTop: '12px' }}>
+              <p>
+                <strong>Bill ID:</strong> {detailBill.billId}
+              </p>
+              <p>
+                <strong>Customer ID:</strong> {detailBill.customerId}
+              </p>
+              <p>
+                <strong>Owner Name:</strong> {detailBill.ownerFirstName}{' '}
+                {detailBill.ownerLastName}
+              </p>
+              <p>
+                <strong>Visit Type:</strong> {detailBill.visitType}
+              </p>
+              <p>
+                <strong>Vet Name:</strong> {detailBill.vetFirstName}{' '}
+                {detailBill.vetLastName}
+              </p>
+              <p>
+                <strong>Date:</strong> {detailBill.date}
+              </p>
+              <p>
+                <strong>Amount:</strong>{' '}
+                {currency === 'CAD'
+                  ? `CAD $${detailBill.amount.toFixed(2)}`
+                  : `USD $${convertCurrency(detailBill.amount, 'CAD', 'USD').toFixed(2)}`}
+              </p>
+              <p>
+                <strong>Taxed Amount:</strong>{' '}
+                {currency === 'CAD'
+                  ? `CAD $${detailBill.taxedAmount.toFixed(2)}`
+                  : `USD $${convertCurrency(detailBill.taxedAmount, 'CAD', 'USD').toFixed(2)}`}
+              </p>
+              <p>
+                <strong>Status:</strong>{' '}
+                <span
+                  className={
+                    detailBill.billStatus?.toLowerCase() === 'overdue'
+                      ? 'status--overdue'
+                      : detailBill.billStatus?.toLowerCase() === 'paid'
+                        ? 'status--paid'
+                        : ''
+                  }
+                >
+                  {detailBill.billStatus}
+                </span>
+              </p>
+              <p>
+                <strong>Due Date:</strong> {detailBill.dueDate}
+              </p>
+              <div style={{ marginTop: '16px' }}>
+                <strong>Interest Exempt:</strong>
+                <InterestExemptToggle
+                  billId={detailBill.billId}
+                  isExempt={detailBill.interestExempt || false}
+                  onToggleComplete={() => {
+                    getBillsList(currentPage, 10);
+                    // Update the detailBill state to reflect the change
+                    setDetailBill({
+                      ...detailBill,
+                      interestExempt: !detailBill.interestExempt,
+                    });
+                  }}
+                  variant="simple"
+                />
+              </div>
+            </div>
           </div>
         </div>
       )}
