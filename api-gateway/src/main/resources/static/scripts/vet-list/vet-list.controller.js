@@ -84,8 +84,9 @@ angular.module('vetList')
         };
 
         $scope.deleteVet = function (vetId) {
-            /* Temporarily disabling delete functionality for vets until Delete Functionality is changed to
-                only set them as Inactive
+            /*
+            Temporarily disabling delete functionality for vets until Delete Functionality is changed
+             to only set them as Inactive
 
             let varIsConf = confirm('Want to delete vet with vetId:' + vetId + '. Are you sure?');
             if (varIsConf) {
