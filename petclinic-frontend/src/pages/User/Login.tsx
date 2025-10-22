@@ -13,7 +13,7 @@ import './Login.css';
 import Slideshow from './Slideshow';
 import { Alert } from 'react-bootstrap';
 import { isAxiosError } from 'axios';
-
+import eyeDark from '@/assets/Icons/eyeDark.svg';
 const images = [
   doctorAndDoggy,
   anotherDoctorAndDoggy,
@@ -26,6 +26,16 @@ export default function Login(): JSX.Element {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const setUser = useSetUser();
   const navigate = useNavigate();
+  function togglePasswordVisibility(): void {
+    const passwordInput = document.getElementById(
+      'passwordInput'
+    ) as HTMLInputElement;
+    if (passwordInput.type === 'password') {
+      passwordInput.type = 'text';
+    } else {
+      passwordInput.type = 'password';
+    }
+  }
   const login = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
     setErrorMessage(null);
@@ -102,11 +112,21 @@ export default function Login(): JSX.Element {
           />
           <br />
           <label htmlFor="passwordInput"></label>
-          <input
-            type="password"
-            id="passwordInput"
-            placeholder="Enter your password"
-          />
+          <div className="input-wrapper">
+            <input
+              type="password"
+              id="passwordInput"
+              placeholder="Enter your password"
+            />
+            <button
+              className="toggle-password"
+              id="toggle-password"
+              onClick={togglePasswordVisibility}
+              type="button"
+            >
+              <img className="icon" src={eyeDark} title="showPassword" />
+            </button>
+          </div>
           <br />
           <button type="submit" className="login-button">
             Login
