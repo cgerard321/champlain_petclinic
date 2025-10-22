@@ -23,6 +23,7 @@ import reactor.core.publisher.Mono;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.UUID;
 import java.util.function.Predicate;
 
 @Service
@@ -190,19 +191,20 @@ public class BillServiceImpl implements BillService{
                     OwnerResponseDTO owner = tuple.getT2();
                     BillRequestDTO dto = tuple.getT3();
 
-                    // Map to Bill entity and ALWAYS set the names from ownerClient
+                    // Map to Bill entity and set names
                     Bill bill = EntityDtoUtil.toBillEntity(dto);
-                    bill.setBillId(EntityDtoUtil.generateUUIDString());
                     bill.setVetFirstName(vet.getFirstName());
                     bill.setVetLastName(vet.getLastName());
                     bill.setOwnerFirstName(owner.getFirstName());
                     bill.setOwnerLastName(owner.getLastName());
 
-                    // Save the bill
-                    return billRepository.insert(bill);
+                    // Generate unique short ID safely
+                    return generateUniqueBillId(bill, 1)
+                            .then(Mono.defer(() -> billRepository.insert(bill)));
                 })
                 .map(EntityDtoUtil::toBillResponseDto);
     }
+
 
     @Override
     public Mono<BillResponseDTO> updateBill(String billId, Mono<BillRequestDTO> billRequestDTO) {
@@ -488,6 +490,49 @@ public class BillServiceImpl implements BillService{
                 .map(EntityDtoUtil::toBillResponseDto);
     }
 
+    /**
+     * Generates a short, unique 10-character Bill ID.
+     * Retries up to 5 times if a collision is detected in the database.
+     * (Collisions are extremely rare but this adds a safety net.)
+     */
+    private Mono<Void> generateUniqueBillId(Bill bill, int attempt) {
+        if (attempt > 5) {
+            return Mono.error(new RuntimeException("Failed to generate unique Bill ID after 5 attempts"));
+        }
+        // Generate a 10-character ID based on UUID
+        String newId = UUID.randomUUID()
+                .toString()
+                .replace("-", "")
+                .substring(0, 10);
 
+        // Check if this ID already exists in the DB
+        return billRepository.findById(newId)
+                .flatMap(existing -> {
+                    log.warn("Collision detected for billId '{}', retrying (attempt {})", newId, attempt);
+                    return generateUniqueBillId(bill, attempt + 1);
+                })
+                .switchIfEmpty(Mono.defer(() -> {
+                    bill.setBillId(newId);
+                    log.debug("Assigned new unique Bill ID: {}", newId);
+                    return Mono.empty();
+                }));
+    }
+
+    @Override
+    public Mono<byte[]> generateStaffBillPdf(String billId, String currency) {
+        return billRepository.findByBillId(billId)
+                .switchIfEmpty(Mono.error(new RuntimeException("Bill not found for given ID")))
+                .map(EntityDtoUtil::toBillResponseDto)
+                .flatMap(bill -> {
+                    try {
+                        byte[] pdfBytes = PdfGenerator.generateBillPdf(bill, currency);
+                        log.info("Staff PDF generated for bill {}", billId);
+                        return Mono.just(pdfBytes);
+                    } catch (Exception e) {
+                        log.error("PDF generation failed for bill {}: {}", billId, e.getMessage(), e);
+                        return Mono.error(new RuntimeException("Error generating PDF", e));
+                    }
+                });
+    }
 
 }

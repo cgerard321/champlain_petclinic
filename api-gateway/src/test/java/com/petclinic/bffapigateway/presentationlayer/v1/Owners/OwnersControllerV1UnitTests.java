@@ -607,4 +607,35 @@ public class OwnersControllerV1UnitTests {
         verify(customersServiceClient, times(1)).updateOwnerPhoto(eq(ownerId), any());
     }
 
+    @Test
+    void whenDeleteOwnerPhoto_thenReturnOk() {
+        OwnerResponseDTO responseWithoutPhoto = new OwnerResponseDTO();
+        responseWithoutPhoto.setOwnerId(ownerId);
+        responseWithoutPhoto.setPhoto(null);
+
+        when(customersServiceClient.deleteOwnerPhoto(ownerId)).thenReturn(Mono.just(responseWithoutPhoto));
+
+        client.delete()
+                .uri("/api/gateway/owners/{ownerId}/photo", ownerId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(OwnerResponseDTO.class)
+                .value(body -> {
+                    assertEquals(ownerId, body.getOwnerId());
+                    assertNull(body.getPhoto());
+                });
+
+        verify(customersServiceClient, times(1)).deleteOwnerPhoto(ownerId);
+    }
+
+    @Test
+    void whenDeleteOwnerPhoto_withNonExistentOwner_thenReturnNotFound() {
+        when(customersServiceClient.deleteOwnerPhoto(ownerId)).thenReturn(Mono.empty());
+
+        client.delete()
+                .uri("/api/gateway/owners/{ownerId}/photo", ownerId)
+                .exchange()
+                .expectStatus().isNotFound();
+        verify(customersServiceClient, times(1)).deleteOwnerPhoto(ownerId);
+    }
 }

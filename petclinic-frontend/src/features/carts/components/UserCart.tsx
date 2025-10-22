@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import CartBillingForm, { BillingInfo } from './CartBillingForm';
+import InvoiceComponent, {
+  InvoiceFull as InvoiceFullType,
+  InvoiceItem as InvoiceItemType,
+} from './Invoice';
 import { useNavigate, useParams } from 'react-router-dom';
 import CartItem from './CartItem';
 import { ProductModel } from '../models/ProductModel';
@@ -17,6 +21,7 @@ import {
   IsInventoryManager,
   IsReceptionist,
   IsVet,
+  useUser,
 } from '@/context/UserContext';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import { getProductByProductId } from '@/features/products/api/getProductByProductId';
@@ -28,7 +33,6 @@ import {
 } from '../api/cartEvent';
 import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
 import axios from 'axios';
-
 interface ProductAPIResponse {
   productId: number;
   imageId: string;
@@ -47,10 +51,9 @@ interface Invoice {
   quantity: number;
 }
 
-const UserCart = (): JSX.Element => {
-  const { cartId } = useParams<{ cartId: string }>();
+const UserCart: React.FC = () => {
   const navigate = useNavigate();
-
+  const { cartId } = useParams<{ cartId?: string }>();
   const { confirm, ConfirmModal } = useConfirmModal();
 
   const [cartItems, setCartItems] = useState<ProductModel[]>([]);
@@ -66,13 +69,13 @@ const UserCart = (): JSX.Element => {
   );
 
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [showInvoiceModal, setShowInvoiceModal] = useState<boolean>(false);
+  const [lastInvoice, setLastInvoice] = useState<InvoiceFullType | null>(null);
   const [cartItemCount, setCartItemCount] = useState<number>(0);
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] =
     useState<boolean>(false);
   const [showBillingForm, setShowBillingForm] = useState<boolean>(false);
   const [billingInfo, setBillingInfo] = useState<BillingInfo | null>(null);
-  const [checkoutDate, setCheckoutDate] = useState<string | null>(null);
 
   const [wishlistUpdated, setWishlistUpdated] = useState(false);
   const [voucherCode, setVoucherCode] = useState<string>('');
@@ -756,13 +759,7 @@ const UserCart = (): JSX.Element => {
     }
   };
 
-  useEffect(() => {
-    const saved = localStorage.getItem('invoices');
-    if (saved) setInvoices(JSON.parse(saved));
-  }, []);
-  useEffect(() => {
-    localStorage.setItem('invoices', JSON.stringify(invoices));
-  }, [invoices]);
+  const { user } = useUser();
 
   const handleCheckoutConfirmation = (): void => {
     if (isStaff) {
@@ -775,7 +772,7 @@ const UserCart = (): JSX.Element => {
     setIsCheckoutModalOpen(false);
   };
 
-  const handleCheckout = async (): Promise<void> => {
+  const handleCheckout = async (billing?: BillingInfo): Promise<void> => {
     if (isStaff) return;
 
     if (!cartId) {
@@ -797,7 +794,47 @@ const UserCart = (): JSX.Element => {
         quantity: item.quantity || 1,
       }));
 
-      setInvoices(invoiceItems);
+      const invoiceItemsForFull: InvoiceItemType[] = invoiceItems.map(i => ({
+        productId: i.productId,
+        productName: i.productName,
+        productSalePrice: i.productSalePrice,
+        quantity: i.quantity,
+      }));
+
+      const invoiceSubtotal = invoiceItemsForFull.reduce(
+        (s, it) => s + it.productSalePrice * it.quantity,
+        0
+      );
+        const invoiceTvq = invoiceSubtotal * 0.09975;
+        const invoiceTvc = invoiceSubtotal * 0.05;
+        const invoiceTotal = invoiceSubtotal + invoiceTvq + invoiceTvc - effectiveDiscount;
+
+
+        const usedBilling = billing ?? billingInfo ?? null;
+
+      const newInvoice: InvoiceFullType = {
+        invoiceId: `${Date.now()}`,
+        userId: user?.userId || 'anonymous',
+        billing: usedBilling
+          ? {
+              fullName: usedBilling.fullName,
+              email: usedBilling.email,
+              address: usedBilling.address,
+              city: usedBilling.city,
+              province: usedBilling.province,
+              postalCode: usedBilling.postalCode,
+            }
+          : null,
+        date: new Date().toISOString(),
+        items: invoiceItemsForFull,
+        subtotal: invoiceSubtotal,
+        tvq: invoiceTvq,
+        tvc: invoiceTvc,
+        discount: effectiveDiscount,
+        total: invoiceTotal,
+      };
+      setLastInvoice(newInvoice);
+      setShowInvoiceModal(true);
       setCheckoutMessage('Checkout successful! Your order is being processed.');
       setCartItems([]);
       setCartItemCount(0);
@@ -884,475 +921,430 @@ const UserCart = (): JSX.Element => {
 
 
   return (
-    <div>
-      <NavBar />
-      <ConfirmModal />
-      <div className="UserCart-container">
-        {notificationMessage && (
-          <div className="notification-message">
-            {notificationMessage}
-            <button
-              className="close-notification"
-              onClick={() => setNotificationMessage(null)}
-              aria-label="Close notification"
-            >
-              &times;
-            </button>
-          </div>
-        )}
-
-        <div className="UserCart-checkout-flex">
-          <div className="UserCart">
-            <div
-              className="cart-header"
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
-            >
-              <div className="cart-badge-container">
-                <FaShoppingCart aria-label="Shopping Cart" />
-                {cartItemCount > 0 && (
-                  <span
-                    className="cart-badge"
-                    aria-label={`Cart has ${cartItemCount} items`}
-                  >
-                    {cartItemCount}
-                  </span>
-                )}
+      <div>
+        <NavBar />
+        <ConfirmModal />
+        <div className="UserCart-container">
+          {notificationMessage && (
+              <div className="notification-message">
+                {notificationMessage}
+                <button
+                    className="close-notification"
+                    onClick={() => setNotificationMessage(null)}
+                    aria-label="Close notification"
+                >
+                  &times;
+                </button>
               </div>
-              <button
-                className="continue-shopping-btn cart-button cart-button--outline"
-                onClick={() => navigate('/products')}
-                style={{ marginLeft: 'auto' }}
-              >
-                Continue Shopping
-              </button>
-            </div>
+          )}
 
-            <div className="cart-items-container">
-              {cartItems.length > 0 ? (
-                cartItems.map((item, index) => (
-                  <CartItem
-                    key={item.productId}
-                    item={item}
-                    index={index}
-                    changeItemQuantity={changeItemQuantity}
-                    deleteItem={deleteItem}
-                    errorMessage={errorMessages[index]}
-                    addToWishlist={addToWishlist}
-                    addToCart={() => {}}
-                    isInWishlist={false}
-                    showNotification={setNotificationMessage}
-                  />
-                ))
-              ) : (
-                <div className="empty-cart-visual">
-                  <span
+          <div className="UserCart-checkout-flex">
+            <div className="UserCart">
+              <div
+                  className="cart-header"
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+              >
+                <div className="cart-badge-container">
+                  <FaShoppingCart aria-label="Shopping Cart" />
+                  {cartItemCount > 0 && (
+                      <span
+                          className="cart-badge"
+                          aria-label={`Cart has ${cartItemCount} items`}
+                      >
+                  {cartItemCount}
+                </span>
+                  )}
+                </div>
+                <button
+                    className="continue-shopping-btn cart-button cart-button--outline"
+                    onClick={() => navigate('/products')}
+                    style={{ marginLeft: 'auto' }}
+                >
+                  Continue Shopping
+                </button>
+              </div>
+
+              <div className="cart-items-container">
+                {cartItems.length > 0 ? (
+                    cartItems.map((item, index) => (
+                        <CartItem
+                            key={item.productId}
+                            item={item}
+                            index={index}
+                            changeItemQuantity={changeItemQuantity}
+                            deleteItem={deleteItem}
+                            errorMessage={errorMessages[index]}
+                            addToWishlist={addToWishlist}
+                            addToCart={() => {}}
+                            isInWishlist={false}
+                            showNotification={setNotificationMessage}
+                        />
+                    ))
+                ) : (
+                    <div className="empty-cart-visual">
+                <span
                     className="empty-cart-icon"
                     role="img"
                     aria-label="empty-cart"
-                  >
-                    🛒
-                  </span>
-                  <div className="empty-cart-message">
-                    Looks like your cart is empty! Why not add something?
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="UserCart-buttons">
-              {cartItems.length > 0 && (
-                <button
-                  className="clear-cart-btn cart-button cart-button--danger"
-                  onClick={clearCart}
                 >
-                  Clear Cart
-                </button>
-              )}
-            </div>
-          </div>
-
-          {!isStaff && (
-              <div className="Checkout-section">
-                <div className="voucher-code-section">
-                  <input
-                      type="text"
-                      placeholder="Enter voucher code"
-                      value={voucherCode}
-                      onChange={e => {
-                        setVoucherCode(e.target.value);
-                        setVoucherError(null);
-                      }}
-                      className="voucher-input"
-                  />
-                  <button
-                      onClick={applyVoucherCode}
-                      className="apply-voucher-button cart-button cart-button--brand"
-                  >
-                    Apply
-                  </button>
-                  {voucherError && (
-                      <div className="voucher-error">{voucherError}</div>
-                  )}
-                </div>
-
-                <div className="voucher-code-section" style={{marginTop: 12}}>
-                  {promoPercent != null && (
-                      <div className="voucher-hint"
-                           style={{marginTop: 6, display: 'flex', gap: 8, alignItems: 'center'}}>
-                        <span>Current promo: {promoPercent}%</span>
-                        <button type="button" className="cart-button cart-button--outline" onClick={onClearPromo}>
-                          Clear
-                        </button>
+                  🛒
+                </span>
+                      <div className="empty-cart-message">
+                        Looks like your cart is empty! Why not add something?
                       </div>
+                    </div>
+                )}
+              </div>
+
+              <div className="UserCart-buttons">
+                {cartItems.length > 0 && (
+                    <button
+                        className="clear-cart-btn cart-button cart-button--danger"
+                        onClick={clearCart}
+                    >
+                      Clear Cart
+                    </button>
+                )}
+              </div>
+            </div>
+
+            {!isStaff && (
+                <div className="Checkout-section">
+                  {/* Promo code input + Apply button */}
+                  <div className="voucher-code-section">
+                    <input
+                        type="text"
+                        placeholder="Enter voucher code"
+                        value={voucherCode}
+                        onChange={e => {
+                          setVoucherCode(e.target.value);
+                          setVoucherError(null);
+                        }}
+                        className="voucher-input"
+                    />
+                    <button
+                        onClick={applyVoucherCode}
+                        className="apply-voucher-button cart-button cart-button--brand"
+                    >
+                      Apply
+                    </button>
+                    {voucherError && (
+                        <div className="voucher-error">{voucherError}</div>
+                    )}
+                  </div>
+
+                  {/* Current promo + Clear */}
+                  <div className="voucher-code-section" style={{ marginTop: 12 }}>
+                    {promoPercent != null && (
+                        <div
+                            className="voucher-hint"
+                            style={{
+                              marginTop: 6,
+                              display: 'flex',
+                              gap: 8,
+                              alignItems: 'center',
+                            }}
+                        >
+                          <span>Current promo: {promoPercent}%</span>
+                          <button
+                              type="button"
+                              className="cart-button cart-button--outline"
+                              onClick={onClearPromo}
+                          >
+                            Clear
+                          </button>
+                        </div>
+                    )}
+                  </div>
+
+                  <div className="CartSummary">
+                    <h3>Cart Summary</h3>
+                    <p className="summary-item">Subtotal: {formatPrice(subtotal)}</p>
+                    <p className="summary-item">TVQ (9.975%): {formatPrice(tvq)}</p>
+                    <p className="summary-item">TVC (5%): {formatPrice(tvc)}</p>
+                    <p className="summary-item">
+                      Discount{promoPercent != null ? ` (${promoPercent}%)` : ''}:{' '}
+                      {formatPrice(effectiveDiscount)}
+                    </p>
+                    <p className="total-price summary-item">Total: {formatPrice(total)}</p>
+                  </div>
+
+                  {/* Checkout */}
+                  <button
+                      className="checkout-btn cart-button cart-button--brand cart-button--block cart-button--disabled-muted"
+                      onClick={handleCheckoutConfirmation}
+                      disabled={cartItems.length === 0}
+                  >
+                    Checkout
+                  </button>
+
+                  {checkoutMessage && (
+                      <div className="checkout-message">{checkoutMessage}</div>
                   )}
                 </div>
+            )}
+          </div>
+          {/* ^ close .UserCart-checkout-flex */}
 
-                <div className="CartSummary">
-                  <h3>Cart Summary</h3>
-                  <p className="summary-item">Subtotal: {formatPrice(subtotal)}</p>
-                  <p className="summary-item">TVQ (9.975%): {formatPrice(tvq)}</p>
-                  <p className="summary-item">TVC (5%): {formatPrice(tvc)}</p>
-                  <p className="summary-item">
-                    Discount{promoPercent != null ? ` (${promoPercent}%)` : ''}:{' '}
-                    {formatPrice(effectiveDiscount)}
-                  </p>
-                  <p className="total-price summary-item">Total: {formatPrice(total)}</p>
-                </div>
-
-                <button
-                    className="checkout-btn cart-button cart-button--brand cart-button--block cart-button--disabled-muted"
-                    onClick={handleCheckoutConfirmation}
-                    disabled={cartItems.length === 0}
-                >
-                  Checkout
-                </button>
-
-                {checkoutMessage && (
-                    <div className="checkout-message">{checkoutMessage}</div>
-                )}
-
-                {invoices.length > 0 && (
-                    <div className="invoices-section">
-                      <h2>Invoice</h2>
-                      <div className="invoice-summary">
-                        {billingInfo && (
-                            <div className="invoice-client-info">
-                              <h3>Client Information</h3>
-                              <p>
-                                <strong>Name:</strong> {billingInfo.fullName}
-                              </p>
-                              <p>
-                                <strong>Email:</strong> {billingInfo.email}
-                              </p>
-                              <p>
-                                <strong>Address:</strong> {billingInfo.address},{' '}
-                                {billingInfo.city}, {billingInfo.province},{' '}
-                                {billingInfo.postalCode}
-                              </p>
-                            </div>
-                        )}
-                        {checkoutDate && (
-                            <div className="invoice-date">
-                              <strong>Checkout Date/Time:</strong> {checkoutDate}
-                            </div>
-                        )}
-                        <h3>Items</h3>
-                        {invoices.map(inv => (
-                            <div key={inv.productId} className="invoice-card">
-                              <h4>{inv.productName}</h4>
-                              <p>Price: ${inv.productSalePrice.toFixed(2)}</p>
-                              <p>Quantity: {inv.quantity}</p>
-                              <p>
-                                Total: $
-                                {(inv.productSalePrice * inv.quantity).toFixed(2)}
-                              </p>
-                            </div>
-                        ))}
-                        <div className="invoice-taxes">
-                          {(() => {
-                            const invoiceSubtotal = invoices.reduce(
-                                (sum, inv) => sum + inv.productSalePrice * inv.quantity,
-                                0
-                            );
-                            const invoiceDiscount =
-                                promoPercent != null ? (invoiceSubtotal * promoPercent) / 100 : 0;
-                            const invoiceTvq = (invoiceSubtotal - invoiceDiscount) * 0.09975;
-                            const invoiceTvc = (invoiceSubtotal - invoiceDiscount) * 0.05;
-                            const invoiceTotal = invoiceSubtotal - invoiceDiscount + invoiceTvq + invoiceTvc;
-
-                            return (
-                                <>
-                                  <p>Subtotal: ${invoiceSubtotal.toFixed(2)}</p>
-                                  <p>TVQ (9.975%): ${invoiceTvq.toFixed(2)}</p>
-                                  <p>TVC (5%): ${invoiceTvc.toFixed(2)}</p>
-                                  <p>
-                                    Discount{promoPercent != null ? ` (${promoPercent}%)` : ''}: -
-                                    ${invoiceDiscount.toFixed(2)}
-                                  </p>
-                                  <h3>Total: ${invoiceTotal.toFixed(2)}</h3>
-                                </>
-                            );
-                          })()}
+          {/* Recent Purchases Section - above Wishlist */}
+          <div className="recent-purchases-section cart-panel cart-panel--padded">
+            <h2>Recent Purchases</h2>
+            <div className="recent-purchases-list cart-scroll-strip">
+              {recentPurchasesList.length > 0 ? (
+                  recentPurchasesList.map(item => (
+                      <div
+                          key={item.productId}
+                          className="recent-purchase-card cart-card"
+                      >
+                        <div className="recent-purchase-image-container">
+                          <div className="recent-purchase-image">
+                            <ImageContainer imageId={item.imageId} />
+                          </div>
+                        </div>
+                        <div className="recent-purchase-name">{item.productName}</div>
+                        <div className="recent-purchase-price">
+                          ${item.productSalePrice.toFixed(2)}
+                        </div>
+                        <div className="recent-purchase-qty-row">
+                          <label
+                              htmlFor={`recent-qty-${item.productId}`}
+                              className="recent-purchase-qty-label"
+                          >
+                            Qty:
+                          </label>
+                          <input
+                              id={`recent-qty-${item.productId}`}
+                              type="number"
+                              min={1}
+                              value={recentPurchaseQuantities[item.productId] || 1}
+                              onChange={e =>
+                                  handleRecentPurchaseQuantityChange(
+                                      item.productId,
+                                      Number(e.target.value)
+                                  )
+                              }
+                              className="recent-purchase-qty-input"
+                          />
+                        </div>
+                        <button
+                            className="purchase-again-btn cart-button cart-button--brand"
+                            onClick={() => handlePurchaseAgain(item)}
+                        >
+                          Purchase Again
+                        </button>
+                        <div className="recent-purchase-total">
+                          Total: $
+                          {(
+                              item.productSalePrice *
+                              (recentPurchaseQuantities[item.productId] || 1)
+                          ).toFixed(2)}
                         </div>
                       </div>
+                  ))
+              ) : (
+                  <p>No recent purchases found.</p>
+              )}
+            </div>
+          </div>
+
+          {/* Wishlist */}
+          <div className="wishlist-section cart-panel cart-panel--padded">
+            {/* Header with Move All button */}
+            <div
+                className="wishlist-header"
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+            >
+              <h2 style={{ margin: 0 }}>Your Wishlist</h2>
+              {wishlistItems.length > 0 && (
+                  <button
+                      className="cart-button cart-button--accent"
+                      onClick={moveAllWishlistToCart}
+                      disabled={isStaff || movingAll}
+                      aria-busy={movingAll}
+                      aria-disabled={isStaff || movingAll}
+                      title={
+                        isStaff
+                            ? 'Read-only: staff/admin cannot move wishlist items'
+                            : 'Move all wishlist items to cart'
+                      }
+                  >
+                    {movingAll ? 'Moving…' : 'Move All to Cart'}
+                  </button>
+              )}
+            </div>
+
+            {/* Wishlist items */}
+            <div className="Wishlist-items cart-scroll-strip">
+              {wishlistItems.length > 0 ? (
+                  wishlistItems.map(item => {
+                    const isOutOfStock = item.productQuantity <= 0;
+                    return (
+                        <div key={item.productId} className="Wishlist-item cart-card">
+                          <div className="recent-purchase-image-container">
+                            <div className="recent-purchase-image">
+                              <ImageContainer imageId={item.imageId} />
+                            </div>
+                          </div>
+                          <div className="recent-purchase-name">
+                            {item.productName}
+                          </div>
+                          <div className="recent-purchase-price">
+                            {formatPrice(item.productSalePrice)}
+                          </div>
+                          <div className="Wishlist-item-actions">
+                            <button
+                                className="cart-button cart-button--accent cart-button--block cart-button--strike-disabled"
+                                onClick={() => addToCartFunction(item)}
+                                disabled={isStaff || isOutOfStock}
+                                aria-disabled={isStaff || isOutOfStock}
+                            >
+                              {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+                            </button>
+                            <button
+                                className="cart-button cart-button--danger cart-button--block cart-button--strike-disabled"
+                                onClick={() => removeFromWishlist(item)}
+                                disabled={isStaff}
+                                aria-disabled={isStaff}
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                    );
+                  })
+              ) : (
+                  <p>No products in the wishlist.</p>
+              )}
+            </div>
+          </div>
+
+          {/* Recommendation Purchases Section */}
+          <div className="recommendation-purchases-section cart-panel cart-panel--padded">
+            <div className="recommendation-header">
+              <h2>Your Recommendations</h2>
+              <div className="recommendation-subtitle recent-purchases-intro">
+                Based on your recent purchases
+              </div>
+            </div>
+            <div className={recommendationListClassName}>
+              {recommendationPurchasesList.length > 0 ? (
+                  recommendationPurchasesList.map(item => (
+                      <div
+                          key={item.productId}
+                          className="recommendation-purchase-card cart-card"
+                      >
+                        <div className="recent-purchase-image-container">
+                          <div className="recent-purchase-image">
+                            <ImageContainer imageId={item.imageId} />
+                          </div>
+                        </div>
+                        <div className="recommendation-product-name recent-purchase-name">
+                          {item.productName}
+                        </div>
+                        <div className="recommendation-product-price recent-purchase-price">
+                          ${formatPrice(item.productSalePrice)}
+                        </div>
+                        <div className="recommendation-qty-row recent-purchase-qty-row">
+                          <label
+                              htmlFor={`recommendation-qty-${item.productId}`}
+                              className="recommendation-qty-label recent-purchase-qty-label"
+                          >
+                            Qty:
+                          </label>
+                          <input
+                              id={`recommendation-qty-${item.productId}`}
+                              type="number"
+                              min={1}
+                              value={
+                                  recommendationPurchaseQuantities[item.productId] || 1
+                              }
+                              onChange={e =>
+                                  handleRecommendationPurchaseQuantityChange(
+                                      item.productId,
+                                      Number(e.target.value)
+                                  )
+                              }
+                              className="recommendation-qty-input recent-purchase-qty-input"
+                          />
+                        </div>
+                        <button
+                            className="purchase-again-btn cart-button cart-button--brand"
+                            onClick={() => handlePurchaseRecommendation(item)}
+                        >
+                          Purchase Again
+                        </button>
+                        <div className="recommendation-total recent-purchase-total">
+                          Total: $
+                          {(
+                              item.productSalePrice *
+                              (recommendationPurchaseQuantities[item.productId] || 1)
+                          ).toFixed(2)}
+                        </div>
+                      </div>
+                  ))
+              ) : (
+                  <div className="recommendation-empty-state">
+                    <div className="recommendation-empty-message">
+                      No recommendations available yet.
+                      <br />
+                      Add more products to your cart to get personalized suggestions!
                     </div>
-                )}
+                    <button
+                        className="cta-browse-products-btn cart-button cart-button--brand"
+                        onClick={() => navigate('/products')}
+                    >
+                      Browse Products
+                    </button>
+                  </div>
+              )}
+            </div>
+          </div>
+
+          {/* Billing Form Modal */}
+          {showBillingForm && (
+              <div className="modal-backdrop">
+                <div className="modal-content">
+                  <CartBillingForm
+                      isOpen={true}
+                      onClose={() => setShowBillingForm(false)}
+                      onSubmit={async billing => {
+                        setBillingInfo(billing);
+                        await handleCheckout(billing);
+                        setShowBillingForm(false);
+                      }}
+                  />
+                </div>
               </div>
           )}
-        </div>
 
-        {/* Recent Purchases Section - above Wishlist */}
-        <div className="recent-purchases-section cart-panel cart-panel--padded">
-          <h2>Recent Purchases</h2>
-          <div className="recent-purchases-list cart-scroll-strip">
-            {recentPurchasesList.length > 0 ? (
-                recentPurchasesList.map(item => (
-                    <div
-                        key={item.productId}
-                  className="recent-purchase-card cart-card"
-                >
-                  <div className="recent-purchase-image-container">
-                    <div className="recent-purchase-image">
-                      <ImageContainer imageId={item.imageId} />
-                    </div>
-                  </div>
-                  <div className="recent-purchase-name">{item.productName}</div>
-                  <div className="recent-purchase-price">
-                    ${item.productSalePrice.toFixed(2)}
-                  </div>
-                  <div className="recent-purchase-qty-row">
-                    <label
-                      htmlFor={`recent-qty-${item.productId}`}
-                      className="recent-purchase-qty-label"
-                    >
-                      Qty:
-                    </label>
-                    <input
-                      id={`recent-qty-${item.productId}`}
-                      type="number"
-                      min={1}
-                      value={recentPurchaseQuantities[item.productId] || 1}
-                      onChange={e =>
-                        handleRecentPurchaseQuantityChange(
-                          item.productId,
-                          Number(e.target.value)
-                        )
-                      }
-                      className="recent-purchase-qty-input"
-                    />
-                  </div>
-                  <button
-                    className="purchase-again-btn cart-button cart-button--brand"
-                    onClick={() => handlePurchaseAgain(item)}
-                  >
-                    Purchase Again
-                  </button>
-                  <div className="recent-purchase-total">
-                    Total: $
-                    {(
-                      item.productSalePrice *
-                      (recentPurchaseQuantities[item.productId] || 1)
-                    ).toFixed(2)}
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p>No recent purchases found.</p>
-            )}
-          </div>
-        </div>
-
-        {/* Wishlist */}
-        <div className="wishlist-section cart-panel cart-panel--padded">
-          {/* Header with Move All button */}
-          <div
-            className="wishlist-header"
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
-            <h2 style={{ margin: 0 }}>Your Wishlist</h2>
-            {wishlistItems.length > 0 && (
-              <button
-                className="cart-button cart-button--accent"
-                onClick={moveAllWishlistToCart}
-                disabled={isStaff || movingAll}
-                aria-busy={movingAll}
-                aria-disabled={isStaff || movingAll}
-                title={
-                  isStaff
-                    ? 'Read-only: staff/admin cannot move wishlist items'
-                    : 'Move all wishlist items to cart'
-                }
-              >
-                {movingAll ? 'Moving…' : 'Move All to Cart'}
-              </button>
-            )}
-          </div>
-
-          {/* Wishlist items */}
-          <div className="Wishlist-items cart-scroll-strip">
-            {wishlistItems.length > 0 ? (
-              wishlistItems.map(item => {
-                const isOutOfStock = item.productQuantity <= 0;
-                return (
-                  <div key={item.productId} className="Wishlist-item cart-card">
-                    <div className="recent-purchase-image-container">
-                      <div className="recent-purchase-image">
-                        <ImageContainer imageId={item.imageId} />
-                      </div>
-                    </div>
-                    <div className="recent-purchase-name">
-                      {item.productName}
-                    </div>
-                    <div className="recent-purchase-price">
-                      {formatPrice(item.productSalePrice)}
-                    </div>
-                    <div className="Wishlist-item-actions">
-                      <button
-                        className="cart-button cart-button--accent cart-button--block cart-button--strike-disabled"
-                        onClick={() => addToCartFunction(item)}
-                        disabled={isStaff || isOutOfStock}
-                        aria-disabled={isStaff || isOutOfStock}
-                      >
-                        {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
-                      </button>
-                      <button
-                        className="cart-button cart-button--danger cart-button--block cart-button--strike-disabled"
-                        onClick={() => removeFromWishlist(item)}
-                        disabled={isStaff}
-                        aria-disabled={isStaff}
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  </div>
-                );
-              })
-            ) : (
-              <p>No products in the wishlist.</p>
-            )}
-          </div>
-        </div>
-
-        {/* Recommendation Purchases Section */}
-        <div className="recommendation-purchases-section cart-panel cart-panel--padded">
-          <div className="recommendation-header">
-            <h2>Your Recommendations</h2>
-            <div className="recommendation-subtitle recent-purchases-intro">
-              Based on your recent purchases
-            </div>
-          </div>
-          <div className={recommendationListClassName}>
-            {recommendationPurchasesList.length > 0 ? (
-              recommendationPurchasesList.map(item => (
-                <div
-                  key={item.productId}
-                  className="recommendation-purchase-card cart-card"
-                >
-                  <div className="recent-purchase-image-container">
-                    <div className="recent-purchase-image">
-                      <ImageContainer imageId={item.imageId} />
-                    </div>
-                  </div>
-                  <div className="recommendation-product-name recent-purchase-name">
-                    {item.productName}
-                  </div>
-                  <div className="recommendation-product-price recent-purchase-price">
-                    ${formatPrice(item.productSalePrice)}
-                  </div>
-                  <div className="recommendation-qty-row recent-purchase-qty-row">
-                    <label
-                      htmlFor={`recommendation-qty-${item.productId}`}
-                      className="recommendation-qty-label recent-purchase-qty-label"
-                    >
-                      Qty:
-                    </label>
-                    <input
-                      id={`recommendation-qty-${item.productId}`}
-                      type="number"
-                      min={1}
-                      value={
-                        recommendationPurchaseQuantities[item.productId] || 1
-                      }
-                      onChange={e =>
-                        handleRecommendationPurchaseQuantityChange(
-                          item.productId,
-                          Number(e.target.value)
-                        )
-                      }
-                      className="recommendation-qty-input recent-purchase-qty-input"
-                    />
-                  </div>
-                  <button
-                    className="purchase-again-btn cart-button cart-button--brand"
-                    onClick={() => handlePurchaseRecommendation(item)}
-                  >
-                    Purchase Again
-                  </button>
-                  <div className="recommendation-total recent-purchase-total">
-                    Total: $
-                    {(
-                      item.productSalePrice *
-                      (recommendationPurchaseQuantities[item.productId] || 1)
-                    ).toFixed(2)}
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="recommendation-empty-state">
-                <div className="recommendation-empty-message">
-                  No recommendations available yet.
-                  <br />
-                  Add more products to your cart to get personalized
-                  suggestions!
-                </div>
-                <button
-                  className="cta-browse-products-btn cart-button cart-button--brand"
-                  onClick={() => navigate('/products')}
-                >
-                  Browse Products
-                </button>
+          {isCheckoutModalOpen && (
+              <div className="checkout-modal">
+                <h3>Confirm Checkout</h3>
+                <p>Are you sure you want to checkout?</p>
+                <button onClick={() => handleCheckout()}>Yes</button>
+                <button onClick={() => setIsCheckoutModalOpen(false)}>No</button>
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* Billing Form Modal */}
-        {showBillingForm && (
-          <div className="modal-backdrop">
-            <div className="modal-content">
-              <CartBillingForm
-                isOpen={true}
-                onClose={() => setShowBillingForm(false)}
-                onSubmit={async billing => {
-                  setBillingInfo(billing);
-                  setCheckoutDate(new Date().toLocaleString());
-                  await handleCheckout();
-                  setShowBillingForm(false);
-                }}
+          )}
+          {showInvoiceModal && lastInvoice && (
+              <InvoiceComponent
+                  invoices={[lastInvoice]}
+                  index={0}
+                  onIndexChange={() => {}}
+                  onClose={() => {
+                    setShowInvoiceModal(false);
+                  }}
               />
-            </div>
-          </div>
-        )}
-
-        {isCheckoutModalOpen && (
-          <div className="checkout-modal">
-            <h3>Confirm Checkout</h3>
-            <p>Are you sure you want to checkout?</p>
-            <button onClick={handleCheckout}>Yes</button>
-            <button onClick={() => setIsCheckoutModalOpen(false)}>No</button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
-    </div>
   );
 };
-
 export default UserCart;
