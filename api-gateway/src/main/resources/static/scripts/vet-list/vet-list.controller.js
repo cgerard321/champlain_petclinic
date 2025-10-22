@@ -73,8 +73,20 @@ angular.module('vetList')
             });
         }
 
+        $scope.isDeleteModalOpen = false;
+
+        $scope.openDeleteModal = function () {
+            $scope.isDeleteModalOpen = true;
+        };
+
+        $scope.closeDeleteModal = function () {
+            $scope.isDeleteModalOpen = false;
+        };
 
         $scope.deleteVet = function (vetId) {
+            /* Temporarily disabling delete functionality for vets until Delete Functionality is changed to
+                only set them as Inactive
+
             let varIsConf = confirm('Want to delete vet with vetId:' + vetId + '. Are you sure?');
             if (varIsConf) {
 
@@ -97,6 +109,8 @@ angular.module('vetList')
                     console.log(error, 'can not get data.');
                 }
             }
+            */
+            $scope.openDeleteModal();
         };
         $scope.refreshList = self.vetList;
 
