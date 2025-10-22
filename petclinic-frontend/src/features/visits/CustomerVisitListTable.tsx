@@ -172,7 +172,7 @@ export default function CustomerVisitListTable(): JSX.Element {
                         } catch {}
                       }}
                     >
-                      📄 Download Prescription
+                      Download Prescription
                     </button>
                   )}
                 </td>
