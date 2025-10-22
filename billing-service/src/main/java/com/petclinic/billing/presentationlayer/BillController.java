@@ -4,6 +4,7 @@ import com.petclinic.billing.businesslayer.BillService;
 import com.petclinic.billing.datalayer.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.MediaType;
@@ -225,5 +226,24 @@ public class BillController {
         return billService.archiveBill()
                 .then(Mono.just(ResponseEntity.noContent().build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping(value = "/bills/{billId}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    public Mono<ResponseEntity<byte[]>> downloadStaffBillPdf(
+            @PathVariable String billId,
+            @RequestParam(name = "currency", required = false, defaultValue = "CAD") String currency) {
+
+        return billService.generateStaffBillPdf(billId, currency)
+                .map(pdf -> {
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.setContentType(MediaType.APPLICATION_PDF);
+                    headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=staff-bill-" + billId + ".pdf");
+                    log.info("Staff PDF generated for bill {}", billId);
+                    return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
+                })
+                .onErrorResume(e -> {
+                    log.error("Error generating staff PDF for billId: {}, currency: {}, error: {}", billId, currency, e.getMessage(), e);
+                    return Mono.just(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
+                });
     }
 }
