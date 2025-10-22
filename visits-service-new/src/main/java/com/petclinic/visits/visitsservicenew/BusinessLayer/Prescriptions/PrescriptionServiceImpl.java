@@ -2,6 +2,7 @@ package com.petclinic.visits.visitsservicenew.BusinessLayer.Prescriptions;
 
 import com.itextpdf.text.DocumentException;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FileResponseDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FilesServiceClient;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FileRequestDTO;
 import com.petclinic.visits.visitsservicenew.Exceptions.InvalidInputException;

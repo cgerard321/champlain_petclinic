@@ -37,5 +37,5 @@ public class VisitResponseDTO {
     private LocalDateTime visitEndDate;
     @JsonProperty("isEmergency")
     private Boolean isEmergency;
-    private FileDetails prescriptionFile;
+    private FileDetails prescription;
 }

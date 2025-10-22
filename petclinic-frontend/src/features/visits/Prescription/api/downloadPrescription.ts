@@ -4,9 +4,9 @@ export const downloadPrescription = async (visitId: string): Promise<Blob> => {
   const response = await axiosInstance.get(
     `/visits/${visitId}/prescriptions/pdf`,
     {
-      responseType: 'blob',
+      responseType: 'arraybuffer',
       useV2: false,
     }
   );
-  return response.data;
+  return new Blob([response.data], { type: 'application/pdf' });
 };

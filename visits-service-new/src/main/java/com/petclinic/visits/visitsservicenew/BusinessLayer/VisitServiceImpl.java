@@ -159,27 +159,29 @@ public class VisitServiceImpl implements VisitService {
     @Override
     public Mono<VisitResponseDTO> getVisitByVisitId(String visitId, boolean includePrescription) {
         return repo.findByVisitId(visitId)
-                .switchIfEmpty(Mono.error(new NotFoundException("Visit with ID " + visitId + " not found")))
-                .flatMap(visit ->
-                        entityDtoUtil.toVisitResponseDTO(visit)
-                                .flatMap(dto -> {
-                                    String prescriptionFileId = visit.getPrescriptionFileId();
-                                    if (includePrescription && prescriptionFileId != null && !prescriptionFileId.isBlank()) {
-                                        return filesServiceClient.getFile(prescriptionFileId)
-                                                .map(file -> {
-                                                    dto.setPrescription(file); // expects FileResponseDTO
-                                                    return dto;
-                                                })
-                                                .onErrorResume(ex -> {
-                                                    log.warn("Could not retrieve prescription file {} for visit {}: {}", prescriptionFileId, visitId, ex.getMessage());
-                                                    return Mono.just(dto); // return visit without prescription file
-                                                });
-                                    }
-                                    return Mono.just(dto);
-                                })
-                )
-                .doOnError(ex -> log.error("Error retrieving visit {}: {}", visitId, ex.getMessage()));
+                .switchIfEmpty(Mono.error(new NotFoundException("Visit not found: " + visitId)))
+                .flatMap(visit -> entityDtoUtil.toVisitResponseDTO(visit)
+                        .flatMap(dto -> {
+                            if (!includePrescription) {
+                                return Mono.just(dto);
+                            }
+
+                            // ✅ if includePrescription=true, fetch file info
+                            if (visit.getPrescriptionFileId() == null) {
+                                return Mono.just(dto);
+                            }
+
+                            return filesServiceClient.getFile(visit.getPrescriptionFileId())
+                                    .map(file -> {
+                                        dto.setPrescription(file);  // ✅ attach FileResponseDTO
+                                        return dto;
+                                    })
+                                    .defaultIfEmpty(dto);
+                        })
+                );
     }
+
+
 
 
 
@@ -350,26 +352,35 @@ public class VisitServiceImpl implements VisitService {
      */
     @Override
     public Mono<VisitResponseDTO> updateVisit(String visitId, Mono<VisitRequestDTO> visitRequestDTOMono) {
-        //Find the visit by the ID
         return repo.findByVisitId(visitId)
-                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("No visit was found with visitId: " + visitId)))
+                .switchIfEmpty(Mono.error(new NotFoundException("No visit was found with visitId: " + visitId)))
+                .flatMap(existingVisit ->
+                        visitRequestDTOMono
+                                .flatMap(dto -> validatePetId(dto.getPetId())
+                                        .then(validateVetId(dto.getPractitionerId()))
+                                        .thenReturn(dto))
+                                .map(entityDtoUtil::toVisitEntity)
+                                .doOnNext(updatedVisit -> {
+                                    updatedVisit.setId(existingVisit.getId());
+                                    updatedVisit.setVisitId(existingVisit.getVisitId());
+
+                                    updatedVisit.setPrescriptionFileId(existingVisit.getPrescriptionFileId());
+
+                                    if (updatedVisit.getStatus() == null) {
+                                        updatedVisit.setStatus(existingVisit.getStatus());
+                                    }
+
+                                    // ✅ Preserve created/immutable fields if needed
+                                    if (updatedVisit.getVisitDate() == null) {
+                                        updatedVisit.setVisitDate(existingVisit.getVisitDate());
+                                    }
+                                })
                 )
-                //VisitEntity becomes a reference to the found Visit
-                //Removes nested Structure  ( Mono<Mono<(...)>> )
-                .flatMap(visitEntity -> visitRequestDTOMono
-                        //Validate Pet and Vet
-                        .flatMap(visitRequestDTO -> validatePetId(visitRequestDTO.getPetId())
-                                .then(validateVetId(visitRequestDTO.getPractitionerId()))
-                                .then(Mono.just(visitRequestDTO)))
-                        .map(entityDtoUtil::toVisitEntity)
-                        .doOnNext(visitEntityToUpdate -> {
-                            visitEntityToUpdate.setVisitId(visitEntity.getVisitId());
-                            visitEntityToUpdate.setId(visitEntity.getId());
-                        }))
-                //Save
                 .flatMap(repo::save)
                 .flatMap(entityDtoUtil::toVisitResponseDTO);
     }
+
+
 
     /**
      * Change the status of any saved Visits by their ID

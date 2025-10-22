@@ -15,7 +15,7 @@ app:
     host: localhost
     port: 8888
   files-service:
-    host: files-service
+    host: localhost
     port: 8000
 
 

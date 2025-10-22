@@ -112,10 +112,13 @@ public class VisitsServiceClient {
     }
 
 
-    public Mono<VisitResponseDTO> getVisitByVisitId(String visitId) {
+    public Mono<VisitResponseDTO> getVisitByVisitId(String visitId, boolean includePrescription) {
         return webClient
                 .get()
-                .uri("/{visitId}", visitId)
+                .uri(uriBuilder -> uriBuilder
+                        .path("/{visitId}")
+                        .queryParam("includePrescription", includePrescription)
+                        .build(visitId))
                 .retrieve()
                 .bodyToMono(VisitResponseDTO.class);
     }

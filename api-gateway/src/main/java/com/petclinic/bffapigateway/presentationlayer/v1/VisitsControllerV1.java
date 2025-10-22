@@ -53,8 +53,11 @@ public class VisitsControllerV1 {
 
     @SecuredEndpoint(allowedRoles = {Roles.ALL})
     @GetMapping(value = "/{visitId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<VisitResponseDTO>> getVisitByVisitId(@PathVariable String visitId) {
-        return visitsServiceClient.getVisitByVisitId(visitId)
+    public Mono<ResponseEntity<VisitResponseDTO>> getVisitByVisitId(
+            @PathVariable String visitId,
+            @RequestParam(required = false, defaultValue = "false") boolean includePrescription) {
+
+        return visitsServiceClient.getVisitByVisitId(visitId, includePrescription)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
