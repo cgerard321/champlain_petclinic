@@ -7,7 +7,7 @@ export const createPrescription = async (
   prescription: PrescriptionRequestDTO
 ): Promise<PrescriptionResponseDTO> => {
   const response = await axiosInstance.post<PrescriptionResponseDTO>(
-    `/visits/${visitId}/prescriptions`,
+    `/visits/${visitId}/prescription`,
     prescription,
     { useV2: false }
   );
