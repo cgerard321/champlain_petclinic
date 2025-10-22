@@ -8,11 +8,19 @@ import {
 import { InventoryRequestModel } from '@/features/inventories/models/InventoryModels/InventoryRequestModel.ts';
 import { InventoryType } from '@/features/inventories/models/InventoryType.ts';
 import { getAllInventoryTypes } from '@/features/inventories/api/getAllInventoryTypes.ts';
-import EditInventoryFormStyles from './EditInventoryForm.module.css';
 
+import styles from './InvProForm.module.css';
+
+type EditInventoryProps = {
+  open?: boolean;
+  onClose?: () => void;
+  inventoryIdProp?: string;
+  existingInventoryNames?: string[];
+};
 // interface ApiError {
 //   message: string;
 // }
+
 const MAX_IMAGE_BYTES = 160 * 1024;
 
 function base64ByteLength(b64: string): number {
@@ -89,8 +97,15 @@ function buildInventoryFieldErrorMessage(params: {
   return next;
 }
 
-const EditInventory: React.FC = (): JSX.Element => {
-  const { inventoryId } = useParams<{ inventoryId: string }>();
+const EditInventory: React.FC<EditInventoryProps> = ({
+  open = true,
+  onClose,
+  inventoryIdProp,
+  existingInventoryNames = [],
+}: EditInventoryProps): JSX.Element | null => {
+  const params = useParams<{ inventoryId: string }>();
+  const inventoryId = inventoryIdProp ?? params.inventoryId;
+
   const [inventory, setInventory] = useState<InventoryRequestModel>({
     inventoryName: '',
     inventoryType: '',
@@ -124,7 +139,62 @@ const EditInventory: React.FC = (): JSX.Element => {
 
   const navigate = useNavigate();
 
+  const handleCancel = React.useCallback((): void => {
+    if (originalInventoryRef.current) {
+      setInventory(originalInventoryRef.current);
+    }
+    onClose?.();
+    navigate('/inventories');
+  }, [onClose, navigate]);
+
   useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
+
+  useEffect(() => {
+    const root = document.getElementById('app-root');
+    if (!root) return;
+    root.setAttribute('inert', '');
+    return () => root.removeAttribute('inert');
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const onEsc = (e: KeyboardEvent): void => {
+      if (e.key === 'Escape' || e.key === 'Esc') {
+        e.preventDefault?.();
+        handleCancel();
+      }
+    };
+
+    document.addEventListener('keydown', onEsc);
+    return () => document.removeEventListener('keydown', onEsc);
+  }, [open, handleCancel]);
+
+  const overlayRef = useRef<HTMLDivElement | null>(null);
+
+  const handleOverlayKeyDown: React.KeyboardEventHandler<
+    HTMLDivElement
+  > = e => {
+    if (e.key === 'Escape' || e.key === 'Esc') {
+      e.preventDefault();
+      handleCancel();
+    }
+  };
+
+  useEffect(() => {
+    if (open) {
+      requestAnimationFrame(() => overlayRef.current?.focus());
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
     const fetchInventoryData = async (): Promise<void> => {
       if (!inventoryId) return;
 
@@ -162,6 +232,11 @@ const EditInventory: React.FC = (): JSX.Element => {
         inventoryImage: [response.inventoryImage],
         inventoryBackupImage: [response.inventoryBackupImage],
       });
+      setFieldErrors({});
+      setErrorMessage('');
+      setSuccessMessage('');
+      setShowNotification(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
     const fetchInventoryTypes = async (): Promise<void> => {
@@ -175,7 +250,7 @@ const EditInventory: React.FC = (): JSX.Element => {
     void (async () => {
       await Promise.all([fetchInventoryData(), fetchInventoryTypes()]);
     })();
-  }, [inventoryId]);
+  }, [inventoryId, open]);
 
   // Word-count helper
   const countWords = (s: string): number => {
@@ -255,14 +330,6 @@ const EditInventory: React.FC = (): JSX.Element => {
     }
   };
 
-  // Cancel handler: discard local edits and close form (navigate back)
-  const handleCancel = (): void => {
-    if (originalInventoryRef.current) {
-      setInventory(originalInventoryRef.current);
-    }
-    navigate('/inventories');
-  };
-
   const handleSubmit = async (
     event: FormEvent<HTMLFormElement>
   ): Promise<void> => {
@@ -288,6 +355,22 @@ const EditInventory: React.FC = (): JSX.Element => {
     }
     if (Object.keys(errorsBefore).length) {
       setFieldErrors(errorsBefore);
+      return;
+    }
+
+    const submitted = inventory.inventoryName.trim().toLowerCase();
+    const original = originalInventoryRef.current?.inventoryName
+      ?.trim()
+      .toLowerCase();
+    const nameClashes =
+      existingInventoryNames.some(n => n.trim().toLowerCase() === submitted) &&
+      submitted !== original;
+
+    if (nameClashes) {
+      setFieldErrors(prev => ({
+        ...prev,
+        inventoryName: 'An inventory with this name already exists.',
+      }));
       return;
     }
 
@@ -346,6 +429,7 @@ const EditInventory: React.FC = (): JSX.Element => {
       setSuccessMessage('Inventory updated successfully');
       setShowNotification(true);
       setTimeout(() => {
+        if (onClose) onClose();
         navigate('/inventories');
       }, 2000);
     } finally {
@@ -390,222 +474,244 @@ const EditInventory: React.FC = (): JSX.Element => {
       ? inventory.inventoryImage
       : '';
 
+  if (!open) return null;
+
+  const handleOverlayMouseDown: React.MouseEventHandler<HTMLDivElement> = e => {
+    if (e.target === e.currentTarget) handleCancel();
+  };
+
   return (
-    <div className="edit-inventory-form">
-      <h3 className="text-center">
-        Inventories &nbsp;
-        <small className="text-muted">Edit Form</small>
-      </h3>
-      {loading && <div className="loader">Loading...</div>}
-      <br />
-      <div className="container">
-        <form onSubmit={handleSubmit} className="text-center">
-          <div className="row">
-            <div className="col-4">
-              <div className="form-group">
-                <label>Inventory Name</label>
-                <input
-                  type="text"
-                  name="inventoryName"
-                  className={`form-control ${fieldErrors.inventoryName ? 'invalid animate' : ''}`}
-                  value={inventory.inventoryName}
-                  onChange={e =>
-                    handleFieldChange('inventoryName', e.target.value)
-                  }
-                  aria-invalid={!!fieldErrors.inventoryName}
-                  aria-describedby={
-                    fieldErrors.inventoryName ? 'err-inventoryName' : undefined
-                  }
-                />
-                {fieldErrors.inventoryName && (
-                  <span id="err-inventoryName" className="error">
-                    {fieldErrors.inventoryName}
-                  </span>
-                )}
-              </div>
-            </div>
-            <div className="col-4">
-              <div className="form-group">
-                <label>Inventory Type</label>
-                <select
-                  name="inventoryType"
-                  className={`form-control ${fieldErrors.inventoryType ? 'invalid animate' : ''}`}
-                  value={inventory.inventoryType}
-                  onChange={e =>
-                    handleFieldChange('inventoryType', e.target.value)
-                  }
-                  aria-invalid={!!fieldErrors.inventoryType}
-                  aria-describedby={
-                    fieldErrors.inventoryType ? 'err-inventoryType' : undefined
-                  }
-                  required
-                >
-                  <option value="" disabled>
-                    Select inventory type
-                  </option>
-                  {inventoryTypes.map(type => (
-                    <option key={type.typeId} value={type.type}>
-                      {type.type}
-                    </option>
-                  ))}
-                </select>
-                {fieldErrors.inventoryType && (
-                  <span id="err-inventoryType" className="error">
-                    {fieldErrors.inventoryType}
-                  </span>
-                )}
-              </div>
-            </div>
-            <div className="col-4">
-              <div className="form-group">
-                <label>Inventory Description</label>
-                <input
-                  type="text"
-                  name="inventoryDescription"
-                  className={`form-control ${fieldErrors.inventoryDescription ? 'invalid animate' : ''}`}
-                  placeholder="Inventory Description"
-                  value={inventory.inventoryDescription}
-                  onChange={e =>
-                    handleFieldChange('inventoryDescription', e.target.value)
-                  }
-                  aria-invalid={!!fieldErrors.inventoryDescription}
-                  aria-describedby={
-                    fieldErrors.inventoryDescription
-                      ? 'err-inventoryDescription'
-                      : undefined
-                  }
-                  required
-                />
-                {fieldErrors.inventoryDescription && (
-                  <span id="err-inventoryDescription" className="error">
-                    {fieldErrors.inventoryDescription}
-                  </span>
-                )}
-              </div>
-            </div>
-            <div className="col-4">
-              <div className="form-group">
-                <label>
-                  <div className={EditInventoryFormStyles.labelContainer}>
-                    Inventory Image
-                  </div>
-                </label>
-                <input
-                  type="text"
-                  name="inventoryImage"
-                  className={`form-control ${fieldErrors.inventoryImage ? 'invalid animate' : ''}`}
-                  placeholder="Inventory Image"
-                  value={inventory.inventoryImage}
-                  onChange={e =>
-                    handleFieldChange('inventoryImage', e.target.value)
-                  }
-                  aria-invalid={!!fieldErrors.inventoryImage}
-                  aria-describedby={
-                    fieldErrors.inventoryImage
-                      ? 'err-inventoryImage'
-                      : undefined
-                  }
-                />
-                {fieldErrors.inventoryImage && (
-                  <span id="err-inventoryImage" className="error">
-                    {fieldErrors.inventoryImage}
-                  </span>
-                )}
-              </div>
-            </div>
-            <div className="col-4">
-              <div className="form-group">
-                <div className={EditInventoryFormStyles.labelContainer}>
-                  <label>Inventory Backup Image</label>
-                </div>
-                <input
-                  type="text"
-                  name="inventoryBackupImage"
-                  className={`form-control ${fieldErrors.inventoryBackupImage ? 'invalid animate' : ''}`}
-                  placeholder="Inventory Backup Image"
-                  value={inventory.inventoryBackupImage}
-                  onChange={e =>
-                    handleFieldChange('inventoryBackupImage', e.target.value)
-                  }
-                  aria-invalid={!!fieldErrors.inventoryBackupImage}
-                  aria-describedby={
-                    fieldErrors.inventoryBackupImage
-                      ? 'err-inventoryBackupImage'
-                      : undefined
-                  }
-                />
-                {fieldErrors.inventoryBackupImage && (
-                  <span id="err-inventoryBackupImage" className="error">
-                    {fieldErrors.inventoryBackupImage}
-                  </span>
-                )}
-              </div>
-            </div>
-            <div className="col-4">
-              <div className="form-group">
-                <div className={EditInventoryFormStyles.labelContainer}>
-                  <label>Upload Image:</label>
-                </div>
-                <input
-                  type="file"
-                  name="uploadedImage"
-                  className={`form-control ${fieldErrors.uploadedImage ? 'invalid animate' : ''}`}
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  ref={fileInputRef}
-                  aria-invalid={!!fieldErrors.uploadedImage}
-                  aria-describedby={
-                    fieldErrors.uploadedImage ? 'err-uploadedImage' : undefined
-                  }
-                />
-                {fieldErrors.uploadedImage && (
-                  <span id="err-uploadedImage" className="error">
-                    {fieldErrors.uploadedImage}
-                  </span>
-                )}
-                {previewSrc && (
-                  <div style={{ marginTop: 8 }}>
-                    <img
-                      src={previewSrc}
-                      alt="Preview"
-                      style={{ maxWidth: 120, maxHeight: 120, borderRadius: 4 }}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
+    <div
+      ref={overlayRef}
+      className={styles.overlay}
+      role="dialog"
+      aria-modal="true"
+      tabIndex={-1}
+      onKeyDown={handleOverlayKeyDown}
+      onMouseDown={handleOverlayMouseDown}
+    >
+      {/* use the same container class as Add form */}
+      <div className={styles['form-container']}>
+        {showNotification && successMessage && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              background: '#28a745',
+              color: '#fff',
+              padding: '6px 10px',
+              borderRadius: 4,
+              fontSize: 12,
+            }}
+            role="status"
+            aria-live="polite"
+          >
+            {successMessage}
           </div>
-          <br />
-          <div className="row">
-            <button type="submit" className="btn btn-info">
-              Update
-            </button>
-            {/* Cancel button: discard edits and close form */}
-            <button
-              type="button"
-              className="btn btn-light"
-              onClick={handleCancel}
-            >
-              Cancel
-            </button>
-            {/* Undo button */}
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={handleUndo}
-            >
-              Undo
-            </button>
+        )}
+        <h2>Edit Inventory</h2>
+
+        {loading && (
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'rgba(255,255,255,0.6)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: 8,
+              zIndex: 1,
+            }}
+          >
+            <div className="loader">Loading...</div>
           </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          {/* Inventory Name */}
+          <div>
+            <label htmlFor="edit-inventoryName">Inventory Name:</label>
+            <input
+              id="edit-inventoryName"
+              type="text"
+              className={fieldErrors.inventoryName ? 'invalid animate' : ''}
+              value={inventory.inventoryName}
+              onChange={e => handleFieldChange('inventoryName', e.target.value)}
+              aria-invalid={!!fieldErrors.inventoryName}
+              aria-describedby={
+                fieldErrors.inventoryName ? 'err-inventoryName' : undefined
+              }
+            />
+            {fieldErrors.inventoryName && (
+              <div id="err-inventoryName" className="field-error">
+                {fieldErrors.inventoryName}
+              </div>
+            )}
+          </div>
+
+          {/* Inventory Type */}
+          <div>
+            <label htmlFor="edit-inventoryType">Inventory Type:</label>
+            <select
+              id="edit-inventoryType"
+              className={fieldErrors.inventoryType ? 'invalid animate' : ''}
+              value={inventory.inventoryType}
+              onChange={e => handleFieldChange('inventoryType', e.target.value)}
+              aria-invalid={!!fieldErrors.inventoryType}
+              aria-describedby={
+                fieldErrors.inventoryType ? 'err-inventoryType' : undefined
+              }
+              required
+            >
+              <option value="">Select Type</option>
+              {inventoryTypes.map(t => (
+                <option key={t.typeId} value={t.type}>
+                  {t.type}
+                </option>
+              ))}
+            </select>
+            {fieldErrors.inventoryType && (
+              <div id="err-inventoryType" className="field-error">
+                {fieldErrors.inventoryType}
+              </div>
+            )}
+          </div>
+
+          {/* Inventory Description */}
+          <div>
+            <label htmlFor="edit-inventoryDescription">
+              Inventory Description:
+            </label>
+            <input
+              id="edit-inventoryDescription"
+              type="text"
+              className={
+                fieldErrors.inventoryDescription ? 'invalid animate' : ''
+              }
+              value={inventory.inventoryDescription}
+              onChange={e =>
+                handleFieldChange('inventoryDescription', e.target.value)
+              }
+              aria-invalid={!!fieldErrors.inventoryDescription}
+              aria-describedby={
+                fieldErrors.inventoryDescription
+                  ? 'err-inventoryDescription'
+                  : undefined
+              }
+              required
+            />
+            {fieldErrors.inventoryDescription && (
+              <div id="err-inventoryDescription" className="field-error">
+                {fieldErrors.inventoryDescription}
+              </div>
+            )}
+          </div>
+
+          {/* Inventory Image */}
+          <div>
+            <label htmlFor="edit-inventoryImage">Inventory Image:</label>
+            <input
+              id="edit-inventoryImage"
+              type="text"
+              className={fieldErrors.inventoryImage ? 'invalid animate' : ''}
+              value={inventory.inventoryImage}
+              onChange={e =>
+                handleFieldChange('inventoryImage', e.target.value)
+              }
+              aria-invalid={!!fieldErrors.inventoryImage}
+              aria-describedby={
+                fieldErrors.inventoryImage ? 'err-inventoryImage' : undefined
+              }
+              placeholder="http(s)://…"
+            />
+            {fieldErrors.inventoryImage && (
+              <div id="err-inventoryImage" className="field-error">
+                {fieldErrors.inventoryImage}
+              </div>
+            )}
+          </div>
+
+          {/* Backup Image */}
+          <div>
+            <label htmlFor="edit-inventoryBackupImage">
+              Inventory Backup Image:
+            </label>
+            <input
+              id="edit-inventoryBackupImage"
+              type="text"
+              className={
+                fieldErrors.inventoryBackupImage ? 'invalid animate' : ''
+              }
+              value={inventory.inventoryBackupImage}
+              onChange={e =>
+                handleFieldChange('inventoryBackupImage', e.target.value)
+              }
+              aria-invalid={!!fieldErrors.inventoryBackupImage}
+              aria-describedby={
+                fieldErrors.inventoryBackupImage
+                  ? 'err-inventoryBackupImage'
+                  : undefined
+              }
+              placeholder="http(s)://…"
+            />
+            {fieldErrors.inventoryBackupImage && (
+              <div id="err-inventoryBackupImage" className="field-error">
+                {fieldErrors.inventoryBackupImage}
+              </div>
+            )}
+          </div>
+
+          {/* Upload Image */}
+          <div>
+            <label htmlFor="edit-uploadedImage">Upload Image:</label>
+            <input
+              id="edit-uploadedImage"
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              ref={fileInputRef}
+              className={fieldErrors.uploadedImage ? 'invalid animate' : ''}
+              aria-invalid={!!fieldErrors.uploadedImage}
+              aria-describedby={
+                fieldErrors.uploadedImage ? 'err-uploadedImage' : undefined
+              }
+            />
+            {fieldErrors.uploadedImage && (
+              <div id="err-uploadedImage" className="field-error">
+                {fieldErrors.uploadedImage}
+              </div>
+            )}
+          </div>
+
+          {/* Optional preview (same style as Add) */}
+          {previewSrc && (
+            <div style={{ marginTop: 8 }}>
+              <img
+                src={previewSrc}
+                alt="Preview"
+                style={{ maxWidth: '100%', borderRadius: 4 }}
+              />
+            </div>
+          )}
+
+          {/* Server error + actions */}
+          {errorMessage && (
+            <div className="field-error" style={{ marginTop: 8 }}>
+              {errorMessage}
+            </div>
+          )}
+
+          <button type="submit">Update</button>
+          <button type="button" className="cancel" onClick={handleCancel}>
+            Cancel
+          </button>
+          <button type="button" className="undo" onClick={handleUndo}>
+            Undo
+          </button>
         </form>
       </div>
-      {successMessage && <p className="success-message">{successMessage}</p>}
-      {errorMessage && <p className="error-message">{errorMessage}</p>}
-      {showNotification && (
-        <div className="notification">
-          <p>Inventory updated successfully</p>
-        </div>
-      )}
     </div>
   );
 };

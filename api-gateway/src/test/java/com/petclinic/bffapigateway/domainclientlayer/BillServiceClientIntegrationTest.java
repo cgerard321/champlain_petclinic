@@ -1134,4 +1134,53 @@ class BillServiceClientIntegrationTest {
         assertTrue(request.getPath().contains("/" + billId + "/exempt-interest"));
         assertTrue(request.getPath().contains("exempt=true"));
     }
+
+    @Test
+    void downloadStaffBillPdf_Positive_ReturnsBytes() throws Exception {
+        String billId = "staffBill-1";
+        byte[] pdf = fakePdf();
+
+        prepareResponse(r -> r
+                .setResponseCode(200)
+                .addHeader("Content-Type", MediaType.APPLICATION_PDF_VALUE)
+                .setBody(new Buffer().write(pdf))
+        );
+
+        Mono<byte[]> result = billServiceClient.downloadStaffBillPdf(billId, "CAD");
+
+        StepVerifier.create(result)
+                .assertNext(bytes -> {
+                    assertNotNull(bytes);
+                    assertArrayEquals(pdf, bytes);
+                })
+                .verifyComplete();
+
+        // Verify request
+        RecordedRequest req = server.takeRequest();
+        assertTrue(req.getPath().contains("/bills/" + billId + "/pdf"));
+        assertEquals("GET", req.getMethod());
+        String acceptHeader = req.getHeader("Accept");
+        assertNotNull(acceptHeader);
+        assertTrue(acceptHeader.contains("application/pdf"));
+    }
+
+    @Test
+    void downloadStaffBillPdf_Negative_NotFound() {
+        prepareResponse(r -> r
+                .setResponseCode(500)
+                .addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\":\"Bill not found\"}")
+        );
+
+        Mono<byte[]> result = billServiceClient.downloadStaffBillPdf("missingBill", "CAD");
+
+        StepVerifier.create(result)
+                .expectErrorSatisfies(ex -> {
+                    assertTrue(ex instanceof WebClientResponseException);
+                    WebClientResponseException w = (WebClientResponseException) ex;
+                    assertEquals(500, w.getRawStatusCode());
+                })
+                .verify();
+    }
+
 }
