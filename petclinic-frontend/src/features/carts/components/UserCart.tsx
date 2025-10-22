@@ -83,7 +83,6 @@ const UserCart: React.FC = () => {
   const [movingAll, setMovingAll] = useState<boolean>(false);
 
   const [promoPercent, setPromoPercent] = useState<number | null>(null);
-  // const [promoInput, setPromoInput] = useState<string>(''); // input field value
 
   // Recent purchases state
   const [recentPurchases, setRecentPurchases] = useState<
