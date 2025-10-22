@@ -186,10 +186,10 @@ function Invoice({
         jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' },
       };
 
-      const winWith = window as WindowWithHtml2Pdf;
-      if (winWith.html2pdf && typeof winWith.html2pdf === 'function') {
+      const win = window as WindowWithHtml2Pdf;
+      if (win.html2pdf && typeof win.html2pdf === 'function') {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const html2pdfFn = winWith.html2pdf as unknown as any;
+        const html2pdfFn = win.html2pdf as unknown as any;
         html2pdfFn().set(opt).from(el).save();
       }
       return;
