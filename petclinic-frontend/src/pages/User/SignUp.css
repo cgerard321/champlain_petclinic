@@ -21,14 +21,13 @@
 }
 
 .signup-user-form label {
-  margin-bottom: 15px;
   font-family: 'Arial', sans-serif;
   color: #555;
 }
 
 .signup-user-form input {
   padding: 10px;
-  margin-top: 5px;
+  margin-top: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
   font-family: 'Arial', sans-serif;
