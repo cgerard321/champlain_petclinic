@@ -7,7 +7,6 @@ import com.petclinic.visits.visitsservicenew.DomainClientLayer.*;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FileRequestDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FileResponseDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FilesServiceClient;
-import com.petclinic.visits.visitsservicenew.PresentationLayer.Prescriptions.MedicationDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Prescriptions.PrescriptionRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Prescriptions.PrescriptionResponseDTO;
 import com.petclinic.visits.visitsservicenew.Utils.EntityDtoUtil;
@@ -662,7 +661,7 @@ class VisitsControllerIntegrationTest {
 
         // Act & Assert
         webTestClient.post()
-                .uri("/visits/{visitId}/prescriptions", visitId)
+                .uri("/visits/{visitId}/prescription", visitId)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(prescriptionRequestDTO), PrescriptionRequestDTO.class)
@@ -697,7 +696,7 @@ class VisitsControllerIntegrationTest {
 
         // Act & Assert
         webTestClient.post()
-                .uri("/visits/{visitId}/prescriptions", invalidVisitId)
+                .uri("/visits/{visitId}/prescription", invalidVisitId)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(prescriptionRequestDTO), PrescriptionRequestDTO.class)
@@ -717,7 +716,7 @@ class VisitsControllerIntegrationTest {
 
         // Act & Assert
         webTestClient.get()
-                .uri("/visits/{visitId}/prescriptions/pdf", invalidVisitId)
+                .uri("/visits/{visitId}/prescription/pdf", invalidVisitId)
                 .accept(MediaType.APPLICATION_PDF)
                 .exchange()
                 .expectStatus().isNotFound();
@@ -751,7 +750,7 @@ class VisitsControllerIntegrationTest {
 
         // Act & Assert
         webTestClient.post()
-                .uri("/visits/{visitId}/prescriptions", visitId)
+                .uri("/visits/{visitId}/prescription", visitId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(req)
                 .exchange()
@@ -779,7 +778,7 @@ class VisitsControllerIntegrationTest {
 
         // Act & Assert
         webTestClient.post()
-                .uri("/visits/{visitId}/prescriptions", visitId)
+                .uri("/visits/{visitId}/prescription", visitId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(req)
                 .exchange()
@@ -811,7 +810,7 @@ class VisitsControllerIntegrationTest {
 
         // Act & Assert
         webTestClient.post()
-                .uri("/visits/{visitId}/prescriptions", visitId)
+                .uri("/visits/{visitId}/prescription", visitId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(req)
                 .exchange()
@@ -840,7 +839,7 @@ class VisitsControllerIntegrationTest {
 
         // Act & Assert
         webTestClient.post()
-                .uri("/visits/{visitId}/prescriptions", visitId)
+                .uri("/visits/{visitId}/prescription", visitId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(req)
                 .exchange()
@@ -864,7 +863,7 @@ class VisitsControllerIntegrationTest {
 
         // Act & Assert
         webTestClient.get()
-                .uri("/visits/{visitId}/prescriptions/pdf", visitId)
+                .uri("/visits/{visitId}/prescription/pdf", visitId)
                 .accept(MediaType.APPLICATION_PDF)
                 .exchange()
                 .expectStatus().isEqualTo(422);
@@ -885,7 +884,7 @@ class VisitsControllerIntegrationTest {
 
         // Act & Assert
         webTestClient.get()
-                .uri("/visits/{visitId}/prescriptions/pdf", visitId)
+                .uri("/visits/{visitId}/prescription/pdf", visitId)
                 .accept(MediaType.APPLICATION_PDF)
                 .exchange()
                 .expectStatus().isEqualTo(422);

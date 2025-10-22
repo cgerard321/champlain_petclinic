@@ -1112,7 +1112,7 @@ public class VisitControllerUnitTest {
 
         // Act & Assert
         webTestClient.post()
-                .uri(BASE_VISIT_URL + "/{visitId}/prescriptions", visitId)
+                .uri(BASE_VISIT_URL + "/{visitId}/prescription", visitId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestDTO)
                 .exchange()
@@ -1146,7 +1146,7 @@ public class VisitControllerUnitTest {
 
         // Act & Assert
         webTestClient.post()
-                .uri(BASE_VISIT_URL + "/{visitId}/prescriptions", visitId)
+                .uri(BASE_VISIT_URL + "/{visitId}/prescription", visitId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestDTO)
                 .exchange()
@@ -1168,7 +1168,7 @@ public class VisitControllerUnitTest {
 
         // Act & Assert
         webTestClient.get()
-                .uri(BASE_VISIT_URL + "/{visitId}/prescriptions/pdf", visitId)
+                .uri(BASE_VISIT_URL + "/{visitId}/prescription/pdf", visitId)
                 .accept(MediaType.APPLICATION_PDF)
                 .exchange()
                 .expectStatus().isOk()
