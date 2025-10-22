@@ -25,6 +25,11 @@ spring:
     embedded:
       version: 4.0.21
 
+  servlet:
+    multipart:
+      max-file-size: 1MB
+      max-request-size: 1MB
+
 ---
 # for test
 
@@ -67,6 +72,12 @@ spring:
     url: r2dbc:h2:mem:///images
     username: user
     password: pwd
+
+  servlet:
+    multipart:
+      max-file-size: 1MB
+      max-request-size: 1MB
+
 ---
 spring:
   config:
@@ -86,6 +97,12 @@ spring:
       username: root
       password: password
       authentication-database: admin
+
+  servlet:
+    multipart:
+      max-file-size: 1MB
+      max-request-size: 1MB
+
 management:
   endpoints:
     web:
