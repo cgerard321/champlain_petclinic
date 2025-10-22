@@ -1085,6 +1085,17 @@ const UserCart: React.FC = () => {
               {checkoutMessage && (
                 <div className="checkout-message">{checkoutMessage}</div>
               )}
+
+              {lastInvoice && (
+                <button
+                  className="view-receipt-btn cart-button cart-button--brand cart-button--block"
+                  onClick={() => setShowInvoiceModal(true)}
+                  style={{ marginTop: '1rem' }}
+                  aria-label="View your last receipt"
+                >
+                  View Receipt
+                </button>
+              )}
             </div>
           )}
         </div>
