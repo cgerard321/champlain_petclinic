@@ -881,48 +881,7 @@ const UserCart = (): JSX.Element => {
     recommendationPurchasesList.length === 0 ? ' recommendation-empty' : ''
   }`;
 
- /* const onApplyPromo = async (): Promise<void> => {
-    if (!cartId) {
-      setNotificationMessage('Invalid cart ID');
-      return;
-    }
 
-    const pct = Number(promoInput);
-    if (Number.isNaN(pct)) {
-      setNotificationMessage('Enter a valid number for promo percent.');
-      return;
-    }
-    if (pct < 0 || pct > 100) {
-      setNotificationMessage('Promo percentage must be between 0 and 100.');
-      return;
-    }
-
-    try {
-      const data = await applyPromo(cartId, pct);
-      if (data) {
-        setPromoPercent(
-          typeof data.promoPercent === 'number' ? data.promoPercent : pct
-        );
-        setNotificationMessage(
-          `Promo applied: ${typeof data.promoPercent === 'number' ? data.promoPercent : pct}%`
-        );
-        const refreshed = await axiosInstance.get(`/carts/${cartId}`, {
-          useV2: false,
-        });
-        if (typeof refreshed.data?.promoPercent === 'number') {
-          setPromoPercent(refreshed.data.promoPercent);
-        }
-      } else {
-        setNotificationMessage('Promo applied.');
-      }
-    } catch (err: unknown) {
-      const msg =
-        (axios.isAxiosError(err) &&
-          (err.response?.data as { message?: string } | undefined)?.message) ||
-        'Failed to apply promo.';
-      setNotificationMessage(msg);
-    }
-  };*/
 
   return (
     <div>
