@@ -513,6 +513,21 @@ public class BillServiceImpl implements BillService{
                 }));
     }
 
-
+    @Override
+    public Mono<byte[]> generateStaffBillPdf(String billId, String currency) {
+        return billRepository.findByBillId(billId)
+                .switchIfEmpty(Mono.error(new RuntimeException("Bill not found for given ID")))
+                .map(EntityDtoUtil::toBillResponseDto)
+                .flatMap(bill -> {
+                    try {
+                        byte[] pdfBytes = PdfGenerator.generateBillPdf(bill, currency);
+                        log.info("Staff PDF generated for bill {}", billId);
+                        return Mono.just(pdfBytes);
+                    } catch (Exception e) {
+                        log.error("PDF generation failed for bill {}: {}", billId, e.getMessage(), e);
+                        return Mono.error(new RuntimeException("Error generating PDF", e));
+                    }
+                });
+    }
 
 }

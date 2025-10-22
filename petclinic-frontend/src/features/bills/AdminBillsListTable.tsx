@@ -20,6 +20,7 @@ import { getAllBillsByVisitType } from './api/getAllBillsByVisitType';
 import { getAllBills } from './api/getAllBills';
 import InterestExemptToggle from './components/InterestExemptToggle';
 import { Currency, convertCurrency } from './utils/convertCurrency';
+import axiosInstance from '@/shared/api/axiosInstance';
 
 interface AdminBillsListTableProps {
   currency: Currency;
@@ -362,6 +363,36 @@ export default function AdminBillsListTable({
   const closeDetails = (): void => {
     setShowDetailModal(false);
     setDetailBill(null);
+  };
+
+  const handleDownloadStaffPdf = async (billId: string): Promise<void> => {
+    try {
+      const response = await axiosInstance.get(
+        `/bills/${billId}/pdf?currency=${currency}`,
+        {
+          responseType: 'blob',
+          headers: { Accept: 'application/pdf' },
+          useV2: true, // required so gateway uses the v2 API path
+        }
+      );
+
+      if (!response || response.status !== 200 || !response.data) {
+        throw new Error('Failed to download staff PDF');
+      }
+
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `staff-bill-${billId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading staff PDF:', error);
+      alert('Failed to generate the bill PDF. Please try again.');
+    }
   };
 
   return (
@@ -756,7 +787,15 @@ export default function AdminBillsListTable({
               }}
             >
               <h3>Bill Details</h3>
-              <button onClick={closeDetails}>Close</button>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  className="detailsButton printButton"
+                  onClick={() => handleDownloadStaffPdf(detailBill.billId)}
+                >
+                  Print Bill (PDF)
+                </button>
+                <button onClick={closeDetails}>Close</button>
+              </div>
             </div>
 
             <div style={{ marginTop: '12px' }}>
