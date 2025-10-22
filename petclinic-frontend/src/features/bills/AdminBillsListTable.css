@@ -15,14 +15,13 @@
 }
 
 .sidebar-title {
-  font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, 'Noto Sans',
-    sans-serif;
+  font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
   font-size: 2.2rem;
   font-weight: 700;
   color: #22223b;
   margin-bottom: 2.5rem;
   letter-spacing: 0.04em;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  text-shadow: 0 2px 8px rgba(0,0,0,0.04);
   text-align: left;
 }
 
@@ -43,10 +42,7 @@
   font-weight: 600;
   box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
   cursor: pointer;
-  transition:
-    background 0.2s,
-    box-shadow 0.2s,
-    transform 0.1s;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
   margin: 0 0.5rem;
   outline: none;
 }
@@ -155,18 +151,10 @@
   text-overflow: ellipsis;
 }
 
-.billField.vet strong {
-  min-width: 0;
-}
-.billField.date strong {
-  min-width: 0;
-}
-.billField.total strong {
-  min-width: 0;
-}
-.billField.status strong {
-  min-width: 0;
-}
+.billField.vet strong { min-width: 0; }
+.billField.date strong { min-width: 0; }
+.billField.total strong { min-width: 0; }
+.billField.status strong { min-width: 0; }
 
 .billActions {
   display: flex;
@@ -240,9 +228,7 @@
   cursor: pointer;
   min-width: 120px;
   text-align: center;
-  transition:
-    background-color 120ms ease,
-    box-shadow 120ms ease;
+  transition: background-color 120ms ease, box-shadow 120ms ease;
 }
 
 .filter-btn:hover {
@@ -294,16 +280,14 @@
     gap: 10px;
   }
 
+
   .billActions {
     margin-left: 0;
   }
 
-  .billField strong {
-    min-width: 0;
-  }
-  .billValue {
-    white-space: normal;
-  }
+
+  .billField strong { min-width: 0; }
+  .billValue { white-space: normal; }
 }
 
 .archive-toggle button {
@@ -311,13 +295,11 @@
   color: #fff;
   border: none;
   border-radius: 4px;
-  padding: 0rem 3rem;
+  padding: 0.0rem 3rem;
   cursor: pointer;
   font-weight: 600;
   margin-top: 0.5rem;
-  transition:
-    background 0.2s,
-    color 0.2s;
+  transition: background 0.2s, color 0.2s;
 }
 
 .archive-toggle button:hover {
@@ -389,3 +371,5 @@
   gap: 10px;
   margin-top: 10px;
 }
+
+

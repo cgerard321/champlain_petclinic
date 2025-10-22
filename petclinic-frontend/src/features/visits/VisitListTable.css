@@ -34,8 +34,7 @@
   cursor: pointer;
 }
 
-.icon svg,
-.icon {
+.icon svg, .icon{
   width: 28px;
   height: 28px;
   cursor: pointer;
@@ -244,9 +243,8 @@ ul > li:first-child {
   font-size: 16px;
 }
 
-#sidebar button svg,
-#sidebar button img {
-  width: 28px;
-  height: 28px;
-  fill: #ffffff;
+#sidebar button svg, #sidebar button img{
+    width:28px;
+    height:28px;
+    fill:#ffffff;
 }

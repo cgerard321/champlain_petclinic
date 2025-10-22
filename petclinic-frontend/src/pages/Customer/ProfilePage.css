@@ -11,7 +11,7 @@
   height: 96px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #e5e7eb;
+  border: 2px solid #e5e7eb; 
 }
 
 .customers-profile-card {
@@ -411,75 +411,75 @@ h1 {
 }
 
 .photo-buttons-container {
-  display: flex;
-  gap: 8px;
-  margin-top: 8px;
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
 }
 
 .photo-button {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.3s ease;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
 }
 
 .photo-button.change {
-  background-color: #007bff;
-  color: white;
+    background-color: #007bff;
+    color: white;
 }
 
 .photo-button.change:hover {
-  background-color: #0056b3;
-  transform: translateY(-2px);
+    background-color: #0056b3;
+    transform: translateY(-2px);
 }
 
 .photo-button.delete {
-  background-color: #e42a16;
-  color: white;
+    background-color: #e42a16;
+    color: white;
 }
 
 .photo-button.delete:hover {
-  background-color: #c82333;
-  transform: translateY(-2px);
+    background-color: #c82333;
+    transform: translateY(-2px);
 }
 
 .modal-footer .delete-button {
-  background-color: #e42a16; /* Same bright red as other delete buttons */
-  color: white;
-  border: none;
-  padding: 10px 24px;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition:
-    background-color 0.2s,
-    transform 0.1s;
+    background-color: #e42a16; /* Same bright red as other delete buttons */
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+            background-color 0.2s,
+            transform 0.1s;
 }
 
 .modal-footer .delete-button:hover {
-  background-color: #c82333;
-  transform: translateY(-1px);
+    background-color: #c82333;
+    transform: translateY(-1px);
 }
 
 .modal-footer .cancel-button {
-  background-color: #6b7280;
-  color: white;
-  border: none;
-  padding: 10px 24px;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition:
-    background-color 0.2s,
-    transform 0.1s;
+    background-color: #6b7280;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+            background-color 0.2s,
+            transform 0.1s;
 }
 
 .modal-footer .cancel-button:hover {
-  background-color: #4b5563;
-  transform: translateY(-1px);
+    background-color: #4b5563;
+    transform: translateY(-1px);
 }

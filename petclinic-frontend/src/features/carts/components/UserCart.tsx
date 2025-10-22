@@ -15,6 +15,7 @@ import ImageContainer from '@/features/products/components/ImageContainer';
 import axiosInstance from '@/shared/api/axiosInstance';
 import { formatPrice } from '../utils/formatPrice';
 import { applyPromo } from '@/shared/api/cart';
+// import {applyPromo, clearPromo} from '@/shared/api/cart';
 import {
   IsAdmin,
   IsInventoryManager,
@@ -50,6 +51,11 @@ interface Invoice {
   quantity: number;
 }
 
+/**
+ * UserCart component displays the user's shopping cart, allowing them to view, update, and remove items,
+ * manage billing information, and proceed to checkout. It also handles displaying invoices and notifications,
+ * and interacts with the backend to fetch and update cart data.
+ */
 const UserCart: React.FC = () => {
   const navigate = useNavigate();
   const { cartId } = useParams<{ cartId?: string }>();

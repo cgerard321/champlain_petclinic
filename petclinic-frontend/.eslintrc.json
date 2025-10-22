@@ -55,12 +55,7 @@
   },
   "overrides": [
     {
-      "files": [
-        "tests/**/*.spec.ts",
-        "tests/**/*.test.ts",
-        "e2e/**/*.spec.ts",
-        "e2e/**/*.test.ts"
-      ],
+      "files": ["tests/**/*.spec.ts", "tests/**/*.test.ts", "e2e/**/*.spec.ts", "e2e/**/*.test.ts"],
       "extends": ["plugin:playwright/recommended"],
       "rules": {
         // Playwright best practices
@@ -92,7 +87,7 @@
         "playwright/valid-expect": "error",
         "playwright/valid-expect-in-promise": "error",
         "playwright/valid-title": "error",
-
+        
         // Relax some TypeScript rules for tests
         "@typescript-eslint/explicit-function-return-type": "off",
         "no-console": "off"

@@ -11,9 +11,7 @@ test('test', async ({ page }) => {
   await expect(page.getByRole('link', { name: 'Inventories' })).toBeVisible();
   await page.getByRole('link', { name: 'Inventories' }).click();
   await page.getByText('Vaccines').click();
-  await expect(
-    page.getByRole('button', { name: 'Delete' }).first()
-  ).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Delete' }).first()).toBeVisible();
   await page.getByRole('button', { name: 'Delete' }).first().click();
   await expect(page.getByRole('button', { name: 'Confirm' })).toBeVisible();
   await page.getByRole('button', { name: 'Confirm' }).click();

@@ -104,9 +104,7 @@ test('Admin Edit Customer', async ({ page }) => {
   await page.locator('input[name="telephone"]').fill('5144203239');
   await page.getByRole('button', { name: 'Update' }).click();
   await expect(page.locator('h2')).toContainText('Success!');
-  await expect(page.getByRole('paragraph')).toContainText(
-    'Customer has been successfully updated.'
-  );
+  await expect(page.getByRole('paragraph')).toContainText('Customer has been successfully updated.');
   await page.getByRole('button', { name: 'Close' }).click();
   await expect(page.locator('#root')).toContainText('First Name: John');
   await expect(page.locator('#root')).toContainText('Last Name: Doe');
