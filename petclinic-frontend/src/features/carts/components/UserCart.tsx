@@ -1088,7 +1088,6 @@ const UserCart: React.FC = () => {
                 </div>
             )}
           </div>
-          {/* ^ close .UserCart-checkout-flex */}
 
           {/* Recent Purchases Section - above Wishlist */}
           <div className="recent-purchases-section cart-panel cart-panel--padded">
