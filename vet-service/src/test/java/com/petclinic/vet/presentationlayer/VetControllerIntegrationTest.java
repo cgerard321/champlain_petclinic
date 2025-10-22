@@ -111,7 +111,7 @@ class VetControllerIntegrationTest {
     //badge image
     ClassPathResource cpr = new ClassPathResource("images/full_food_bowl.png");
 
-    // could this help?
+
     @BeforeEach
     public void setup() {
         Mono<Void> clean = badgeRepository.deleteAll()
@@ -1491,43 +1491,8 @@ class VetControllerIntegrationTest {
                 .uri("/vets/" + VET_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isNoContent()
+                .expectStatus().isOk()
                 .expectBody();
-    }
-
-    @Test
-    void deleteVetById_ShouldDeleteAssociatedDataAndReturnNoContent() throws IOException{
-
-        Badge badge1 = buildBadge();
-        Photo photo1 = buildPhoto();
-
-        Publisher<Void> setup = vetRepository.deleteAll()
-                .thenMany(vetRepository.save(vet))
-                .thenMany(ratingRepository.save(rating1))
-                .thenMany(educationRepository.save(education1))
-                //.thenMany(badgeRepository.save(badge1))
-                //.thenMany(photoRepository.save(photo1))
-                .then();
-
-        StepVerifier.create(setup).verifyComplete();
-
-        client.delete()
-                .uri("/vets/" + VET_ID)
-                .exchange()
-                .expectStatus().isNoContent();
-
-        // Step 3: Check if the vet and associated data were deleted
-        Mono<Boolean> vetExists = vetRepository.existsById(VET_ID);
-        Mono<Boolean> ratingsExist = ratingRepository.existsById(VET_ID);
-        Mono<Boolean> educationsExist = educationRepository.existsById(VET_ID);
-        //Mono<Boolean> badgesExist = badgeRepository.existsById(Integer.valueOf(VET_ID));
-        //Mono<Boolean> photosExist = photoRepository.existsById(Integer.valueOf(VET_ID));
-
-        StepVerifier.create(vetExists).expectNext(false).verifyComplete();
-        StepVerifier.create(ratingsExist).expectNext(false).verifyComplete();
-        StepVerifier.create(educationsExist).expectNext(false).verifyComplete();
-        //StepVerifier.create(badgesExist).expectNext(false).verifyComplete();
-        //StepVerifier.create(photosExist).expectNext(false).verifyComplete();
     }
 
     @Test

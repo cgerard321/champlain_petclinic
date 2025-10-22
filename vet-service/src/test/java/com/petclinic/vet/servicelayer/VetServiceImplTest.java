@@ -73,6 +73,7 @@ class VetServiceImplTest {
                 .verifyComplete();
     }
 
+    // the assertions in the two tests below (create and update) are never actually being run. This may be outside the scope of my ticket, will discuss with team
     @Test
     void createVet() {
         vetService.addVet(Mono.just(vetRequestDTO))
@@ -85,6 +86,7 @@ class VetServiceImplTest {
                     assertEquals(vetDTO1.getWorkday(), vetRequestDTO.getWorkday());
                     assertEquals(vetDTO1.getPhoneNumber(), vetRequestDTO.getPhoneNumber());
                     assertEquals(vetDTO1.getSpecialties(), vetRequestDTO.getSpecialties());
+                    assertEquals("test1", "test2");
                     return vetDTO1;
                 });
     }
@@ -105,6 +107,7 @@ class VetServiceImplTest {
                     assertEquals(vetDTO1.getWorkday(), vetRequestDTO.getWorkday());
                     assertEquals(vetDTO1.getPhoneNumber(), vetRequestDTO.getPhoneNumber());
                     assertEquals(vetDTO1.getSpecialties(), vetRequestDTO.getSpecialties());
+                    assertEquals("test1", "test2");
                     return vetDTO1;
                 });
     }
@@ -212,13 +215,17 @@ class VetServiceImplTest {
 
     @Test
     void deleteVet() {
-        when(vetRepository.findVetByVetId(anyString())).thenReturn(Mono.just(vet));
-        when(vetRepository.delete(any())).thenReturn(Mono.empty());
 
-        Mono<Void> deletedVet=vetService.deleteVetByVetId(VET_ID);
+        vet.setActive(true);
+
+        when(vetRepository.findVetByVetId(anyString())).thenReturn(Mono.just(vet));
+        when(vetRepository.save(any())).thenReturn(Mono.just(vet));
+
+        Mono<VetResponseDTO> deletedVet=vetService.deleteVetByVetId(VET_ID);
 
         StepVerifier
                 .create(deletedVet)
+                .expectNextMatches(responseDTO -> !responseDTO.isActive())
                 .verifyComplete();
     }
 

@@ -564,14 +564,14 @@ class VetControllerUnitTest {
     @Test
     void deleteVet() {
         when(vetService.deleteVetByVetId(anyString()))
-                .thenReturn((Mono.empty()));
+                .thenReturn((Mono.just(vetResponseDTO)));
 
         client
                 .delete()
                 .uri("/vets/" + VET_ID)
                 .accept(APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isNoContent();
+                .expectStatus().isOk();
 
         Mockito.verify(vetService, times(1))
                 .deleteVetByVetId(VET_ID);
