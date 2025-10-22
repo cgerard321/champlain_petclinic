@@ -22,8 +22,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -43,6 +42,7 @@ public class BillControllerIntegrationTest {
         mockServerConfigBillService.registerCreateBillEndpoint();
         mockServerConfigBillService.registerUpdateBillEndpoint();
         mockServerConfigBillService.registerPayBillEndpoint();
+        mockServerConfigBillService.registerDownloadStaffBillPdfEndpoint();
 
         mockServerConfigAuthService = new MockServerConfigAuthService();
         mockServerConfigAuthService.registerValidateTokenForAdminEndpoint();
@@ -111,7 +111,8 @@ public class BillControllerIntegrationTest {
                     assertEquals(0, billRequestDTO.getAmount().compareTo(response.getAmount()));
                     assertEquals(billRequestDTO.getBillStatus(), response.getBillStatus());
                     assertEquals(billRequestDTO.getDueDate(), response.getDueDate());
-                    return true;})
+                    return true;
+                })
                 .verifyComplete();
     }
 
@@ -147,7 +148,7 @@ public class BillControllerIntegrationTest {
     }
 
     @Test
-    void whenUpdateBill_thenReturnUpdatedBill(){
+    void whenUpdateBill_thenReturnUpdatedBill() {
 
         BillRequestDTO updatedRequestDTO = BillRequestDTO.builder()
                 .customerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
@@ -162,7 +163,7 @@ public class BillControllerIntegrationTest {
         Mono<BillResponseDTO> result =
                 webTestClient
                         .put()
-                        .uri("/api/v2/gateway/bills/admin/{billId}","e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+                        .uri("/api/v2/gateway/bills/admin/{billId}", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
                         .cookie("Bearer", jwtTokenForValidAdmin)
                         .contentType(MediaType.APPLICATION_JSON)
                         .body(Mono.just(updatedRequestDTO), BillRequestDTO.class)
@@ -284,5 +285,34 @@ public class BillControllerIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isUnauthorized();
+    }
+
+
+    @Test
+    void testDownloadStaffBillPdf_ShouldReturnPdf() {
+        webTestClient.get()
+                .uri("/api/v2/gateway/bills/{billId}/pdf", "staffBill-1")
+                // ✅ simulate valid admin login
+                .cookie("Bearer", jwtTokenForValidAdmin)
+                .accept(MediaType.APPLICATION_PDF)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_PDF)
+                .expectBody(byte[].class)
+                .consumeWith(response -> {
+                    byte[] pdf = response.getResponseBody();
+                    assertNotNull(pdf);
+                    assertTrue(pdf.length > 0, "PDF bytes should not be empty");
+                });
+    }
+
+    @Test
+    void testDownloadStaffBillPdf_BillNotFound_ShouldReturn500() {
+        webTestClient.get()
+                .uri("/api/v2/gateway/bills/{billId}/pdf", "nonexistent-bill-id")
+                .cookie("Bearer", jwtTokenForValidAdmin)
+                .accept(MediaType.APPLICATION_PDF)
+                .exchange()
+                .expectStatus().isEqualTo(500);
     }
 }

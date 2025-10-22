@@ -28,15 +28,12 @@ import ServiceUnavailable from '@/pages/Error/ServiceUnavailable.tsx';
 import Forbidden from '@/pages/Error/Forbidden.tsx';
 import Unauthorized from '@/pages/Error/Unauthorized.tsx';
 import PageNotFound from '@/pages/Error/PageNotFound.tsx';
-import EditInventory from '@/features/inventories/EditInventory.tsx';
 import { ProtectedRoute } from './shared/components';
 import CustomerDetailsPage from '@/pages/Customer/CustomerDetailsPage.tsx';
 import UpdateCustomerPage from '@/pages/Customer/UpdateCustomerPage.tsx';
 import VisitDetails from './features/visits/components/VisitByVisitId';
 import CustomerVisits from '@/pages/Visit/CustomerVisits.tsx';
 import UpdateOwnerPetPage from '@/pages/Customer/UpdateOwnerPetPage.tsx';
-import EditInventoryProducts from './features/inventories/EditInventoryProducts';
-import AddSupplyToInventory from './features/inventories/AddSupplyToInventory';
 import AllUsers from '@/pages/Users/AllUsers.tsx';
 import ProductDetails from '@/features/products/components/ProductDetails';
 import AddPetPage from '@/pages/Customer/AddPetPage.tsx';
@@ -46,7 +43,6 @@ import PromoPage from '@/pages/Promos/PromoListPage.tsx';
 import AddPromoPage from '@/pages/Promos/AddPromoPage.tsx';
 import UpdatePromoPage from '@/pages/Promos/UpdatePromoPage.tsx';
 import LowStockProducts from '@/features/inventories/LowStockProducts.tsx';
-import MoveInventoryProducts from '@/features/inventories/MoveInventoryProducts.tsx';
 import ReviewsCustomer from '@/pages/Review/CustomerReviews.tsx';
 import AddReviewsCustomer from '@/pages/Review/CustomerAddReviewForm.tsx';
 import CustomerPromoPage from '@/pages/Promos/CustomerPromoPage.tsx';
@@ -61,39 +57,6 @@ import PrivacyPolicyPage from './pages/PrivacyPolicy/PrivacyPolicy';
 const router = createBrowserRouter([
   {
     children: [
-      {
-        path: AppRoutePaths.MoveInventoryProducts,
-        element: (
-          <ProtectedRoute>
-            <MoveInventoryProducts />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: AppRoutePaths.EditInventory,
-        element: (
-          <ProtectedRoute>
-            <EditInventory />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: AppRoutePaths.EditInventoryProducts,
-        element: (
-          <ProtectedRoute>
-            <EditInventoryProducts />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: AppRoutePaths.AddSupplyToInventory,
-        element: (
-          <ProtectedRoute>
-            <AddSupplyToInventory />
-          </ProtectedRoute>
-        ),
-      },
-
       {
         path: AppRoutePaths.LowStockProducts,
         element: (

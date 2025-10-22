@@ -25,7 +25,7 @@ public class PromoCodeController {
         this.promoCodeService = promoCodeService;
     }
 
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<PromoCodeResponseModel> getAllPromoCodes() {
         return promoCodeService.getAllPromoCodes();
     }
@@ -82,8 +82,7 @@ public class PromoCodeController {
 
     @GetMapping(value = "/actives", produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<PromoCodeResponseModel> getActivePromos() {
-        return promoCodeService.getActivePromos()
-                .doOnNext(promo -> log.debug("Active Promo: " + promo));
+        return promoCodeService.getActivePromos();
     }
 
 

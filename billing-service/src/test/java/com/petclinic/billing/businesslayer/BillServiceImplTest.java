@@ -2158,4 +2158,48 @@ public void testGenerateBillPdf_BillNotFound() {
                 )
                 .verify();
     }
+
+    @Test
+    public void testGenerateStaffBillPdf_Success() {
+        Bill mockBill = Bill.builder()
+                .billId("billId-2")
+                .customerId("customerId-2")
+                .ownerFirstName("Jane")
+                .ownerLastName("Smith")
+                .visitType("Surgery")
+                .vetId("vetId-2")
+                .amount(new BigDecimal(250.0))
+                .billStatus(BillStatus.PAID)
+                .date(LocalDate.now())
+                .dueDate(LocalDate.now().plusDays(10))
+                .build();
+
+        String billId = mockBill.getBillId();
+        String currency = "USD";
+
+        when(repo.findByBillId(billId)).thenReturn(Mono.just(mockBill));
+
+        Mono<byte[]> pdfBytesMono = billService.generateStaffBillPdf(billId, currency);
+
+        StepVerifier.create(pdfBytesMono)
+                .assertNext(pdfBytes -> {
+                    assertNotNull(pdfBytes);
+                    assertTrue(pdfBytes.length > 0);
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    public void testGenerateStaffBillPdf_BillNotFound() {
+        when(repo.findByBillId(anyString())).thenReturn(Mono.empty());
+
+        String currency = "USD";
+        Mono<byte[]> pdfMono = billService.generateStaffBillPdf("nonexistentBillId", currency);
+
+        StepVerifier.create(pdfMono)
+                .expectErrorMatches(throwable -> throwable instanceof RuntimeException &&
+                        throwable.getMessage().equals("Bill not found for given ID"))
+                .verify();
+    }
+
 }
