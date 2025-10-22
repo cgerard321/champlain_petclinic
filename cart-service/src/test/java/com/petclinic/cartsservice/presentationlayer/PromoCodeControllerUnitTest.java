@@ -213,7 +213,7 @@ public class PromoCodeControllerUnitTest {
         // Act & Assert
         webTestClient.get()
                 .uri("/api/v1/promos")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()  // Expect 200 OK
                 .expectBodyList(PromoCodeResponseModel.class)
@@ -229,7 +229,7 @@ public class PromoCodeControllerUnitTest {
         // Act & Assert
         webTestClient.get()
                 .uri("/api/v1/promos")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()  // Expect 200 OK
                 .expectBodyList(PromoCodeResponseModel.class)

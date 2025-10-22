@@ -77,8 +77,6 @@ public class CartControllerV1 {
 
     // Centralized error mapper (status-only). Success mapping stays at endpoints.
     private <T> Mono<ResponseEntity<T>> mapCartError(Throwable e, ErrorOptions o) {
-        log.error("{} error for cartId: {}, productId: {} - {}", o.context, o.cartId, o.productId, e.getMessage());
-
         if (e instanceof WebClientResponseException.UnprocessableEntity) {
             return Mono.just(ResponseEntity.unprocessableEntity().build());
         }
@@ -107,8 +105,6 @@ public class CartControllerV1 {
 
     // Variant that can include a CartResponseDTO error body message on 400 scenarios
     public Mono<ResponseEntity<CartResponseDTO>> mapCartErrorWithMessage(Throwable e, ErrorOptions o) {
-        log.error("{} error for cartId: {}, productId: {} - {}", o.context, o.cartId, o.productId, e.getMessage());
-
         if (e instanceof WebClientResponseException.UnprocessableEntity) {
             return Mono.just(ResponseEntity.unprocessableEntity().build());
         }
@@ -357,6 +353,22 @@ public class CartControllerV1 {
         return cartServiceClient.getRecommendationPurchases(cartId)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<List<CartResponseDTO>>> getAllCartsAsList() {
+        return cartServiceClient
+                .getAllCarts()
+                .collectList()
+                .map(ResponseEntity::ok)
+                .onErrorResume(e -> mapCartError(
+                        e, ErrorOptions.builder("getAllCartsAsList").build()
+                ));
+    }
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<CartResponseDTO> getAllCartsStream() {
+        return cartServiceClient.getAllCarts();
     }
 
 }
