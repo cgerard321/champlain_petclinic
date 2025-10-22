@@ -81,7 +81,7 @@ public class VisitsControllerV1 {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET, Roles.RECEPTIONIST})
     @PutMapping(value = "/{visitId}")
     public Mono<ResponseEntity<VisitResponseDTO>> updateVisitByVisitId(
             @PathVariable String visitId,
