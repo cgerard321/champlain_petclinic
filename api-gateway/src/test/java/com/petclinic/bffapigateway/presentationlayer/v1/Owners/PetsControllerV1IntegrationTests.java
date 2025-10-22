@@ -1,4 +1,4 @@
-package com.petclinic.bffapigateway.presentationlayer.V1.Owners;
+package com.petclinic.bffapigateway.presentationlayer.v1.Owners;
 
 import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
