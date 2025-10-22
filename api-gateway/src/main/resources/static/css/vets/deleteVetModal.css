@@ -1,0 +1,39 @@
+.delete-modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.delete-modal-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+}
+
+.delete-modal-header {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+}
+
+.delete-modal-body {
+    margin-bottom: 16px;
+}
+
+.delete-modal-button {
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    background: #007bff;
+    color: #fff;
+    cursor: pointer;
+}
