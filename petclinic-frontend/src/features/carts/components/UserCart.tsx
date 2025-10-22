@@ -15,7 +15,6 @@ import ImageContainer from '@/features/products/components/ImageContainer';
 import axiosInstance from '@/shared/api/axiosInstance';
 import { formatPrice } from '../utils/formatPrice';
 import { applyPromo } from '@/shared/api/cart';
-// import {applyPromo, clearPromo} from '@/shared/api/cart';
 import {
   IsAdmin,
   IsInventoryManager,
