@@ -832,14 +832,10 @@ const UserCart: React.FC = () => {
         (billing ?? billingInfo)?.province ||
         (hasProvince(user) ? user.province : undefined);
       const invoiceTaxLines = computeTaxes(invoiceSubtotal, usedProvince);
-      const invoiceTaxCents = invoiceTaxLines.reduce(
-        (s, t) =>
-          s +
-          Math.round(
-            (t.amount ?? Math.round(invoiceSubtotal * t.rate * 100) / 100) * 100
-          ),
-        0
-      );
+      const invoiceTaxCents = invoiceTaxLines.reduce((s, t) => {
+        const amount = t.amount ?? roundToCents(invoiceSubtotal * t.rate);
+        return s + Math.round(amount * 100);
+      }, 0);
       const discountCents = Math.round(effectiveDiscount * 100);
       const invoiceTotal =
         (invoiceSubtotalCents + invoiceTaxCents - discountCents) / 100;

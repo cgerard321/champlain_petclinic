@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import './Invoice.css';
-import { computeTaxes, TaxLine, formatTaxRate } from '../utils/taxUtils';
+import { computeTaxes, formatTaxRate, roundToCents } from '../utils/taxUtils';
 
 export interface InvoiceItem {
   productId: number;
@@ -151,11 +151,11 @@ function Invoice({
             try {
               const prov = inv.billing?.province;
               if (prov) {
-                const lines = computeTaxes(inv.subtotal, prov) as TaxLine[];
+                const lines = computeTaxes(inv.subtotal, prov);
                 return lines
                   .map(
                     l =>
-                      `<p><span>${l.name} (${formatTaxRate(l.rate)}%)</span><span>$${(l.amount ?? inv.subtotal * l.rate).toFixed(2)}</span></p>`
+                      `<p><span>${l.name} (${formatTaxRate(l.rate)}%)</span><span>$${(l.amount ?? roundToCents(inv.subtotal * l.rate)).toFixed(2)}</span></p>`
                   )
                   .join('');
               }
@@ -317,15 +317,21 @@ function Invoice({
               try {
                 const prov = inv.billing?.province;
                 if (prov) {
-                  const lines = computeTaxes(inv.subtotal, prov) as TaxLine[];
+                  const lines = computeTaxes(inv.subtotal, prov);
                   return (
                     <div>
-                      {lines.map((l, i) => (
-                        <p key={i}>
-                          {l.name} ({formatTaxRate(l.rate)}%): $
-                          {(l.amount ?? inv.subtotal * l.rate).toFixed(2)}
-                        </p>
-                      ))}
+                      {lines.map((l, i) => {
+                        const displayAmount = (
+                          (l.amount ??
+                            roundToCents(inv.subtotal * l.rate)) as number
+                        ).toFixed(2);
+                        return (
+                          <p key={i}>
+                            {l.name} ({formatTaxRate(l.rate)}%): $
+                            {displayAmount}
+                          </p>
+                        );
+                      })}
                     </div>
                   );
                 }
