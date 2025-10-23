@@ -95,7 +95,7 @@ public class AuthServiceClient {
                 .bodyToMono(UserDetails.class);
     }
 
-    //TODo username is unique so it should be a mono, not a flux
+    //TODO username is unique so it should be a mono, not a flux
     public Flux<UserDetails> getUsersByUsername(String jwtToken, String username) {
         return webClientBuilder
                 .baseUrl(authServiceUrl)

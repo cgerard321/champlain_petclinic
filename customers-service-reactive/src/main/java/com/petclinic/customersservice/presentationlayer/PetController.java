@@ -3,6 +3,7 @@ package com.petclinic.customersservice.presentationlayer;
 import com.petclinic.customersservice.business.PetService;
 import com.petclinic.customersservice.customersExceptions.ApplicationExceptions;
 import com.petclinic.customersservice.util.Validator;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @RestController
 @RequestMapping("/pets")
 public class PetController {
@@ -72,8 +74,10 @@ public class PetController {
                 .switchIfEmpty(ApplicationExceptions.petNotFound(petId));
     }
 
-    @PatchMapping("/{petId}")
-    public Mono<ResponseEntity<PetResponseDTO>> updatePetIsActive(@PathVariable String petId, @RequestBody String isActive) {
+    @PatchMapping("/{petId}/active")
+    public Mono<ResponseEntity<PetResponseDTO>> updatePetIsActive(@PathVariable String petId, @RequestParam String isActive) {
+        log.info("endpoint reached");
+
         return Mono.just(petId)
                 .filter(id -> id.length() == 36)
                 .switchIfEmpty(ApplicationExceptions.invalidPetId(petId))
@@ -87,12 +91,11 @@ public class PetController {
         return petService.getAllPets();
     }
 
-    //This endpoint call also probably be removed, the petRequestDTO already takes an ownerId
+    //This endpoint can also probably be removed, the petRequestDTO already takes an ownerId
     @PostMapping("/owners/{ownerId}/pets")
     public Mono<ResponseEntity<PetResponseDTO>> createPetForOwner(@PathVariable String ownerId, @RequestBody PetRequestDTO petRequest) {
         return petService.createPetForOwner(ownerId, Mono.just(petRequest))
                 .map(pet -> ResponseEntity.status(HttpStatus.CREATED).body(pet))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
-
 }

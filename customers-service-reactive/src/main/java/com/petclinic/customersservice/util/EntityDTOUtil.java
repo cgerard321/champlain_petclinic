@@ -59,7 +59,7 @@ public class EntityDTOUtil {
         pet.setName(petRequestDTO.getName());
         pet.setBirthDate(petRequestDTO.getBirthDate());
         pet.setWeight(petRequestDTO.getWeight());
-        pet.setIsActive("true");
+        pet.setIsActive(petRequestDTO.getIsActive() != null ? petRequestDTO.getIsActive() : "true");
         return pet;
     }
 
