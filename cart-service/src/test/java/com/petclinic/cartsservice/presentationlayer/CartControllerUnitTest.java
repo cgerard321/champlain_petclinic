@@ -253,30 +253,6 @@ class CartControllerUnitTest {
     }
 
     @Test
-    public void getCartItemCount_Success() {
-        // Use a valid cart ID
-        when(cartService.getCartItemCount(VALID_CART_ID)).thenReturn(Mono.just(3));
-
-        webTestClient.get().uri("/api/v1/carts/" + VALID_CART_ID + "/count")
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.itemCount").isEqualTo(3);
-    }
-
-    @Test
-    public void getCartItemCount_CartNotFound() {
-        // Arrange
-        when(cartService.getCartItemCount(NOT_FOUND_ID))
-                .thenReturn(Mono.error(new NotFoundException("Cart not found: " + NOT_FOUND_ID)));
-
-        // Act & Assert
-        webTestClient.get().uri("/api/v1/carts/" + NOT_FOUND_ID + "/count")
-                .exchange()
-                .expectStatus().isNotFound();
-    }
-
-    @Test
     public void whenDeleteCartByIdWithExistingId_thenReturnCartResponseModel(){
         // Arrange
         Cart cart = Cart.builder()

@@ -4,7 +4,6 @@ import com.petclinic.bffapigateway.dtos.Cart.*;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import org.assertj.core.condition.Not;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,11 +14,6 @@ import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import okhttp3.mockwebserver.MockResponse;
-import reactor.test.StepVerifier;
-import static org.assertj.core.api.Assertions.assertThat;
-import reactor.test.StepVerifier;
-import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -27,7 +21,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class CartServiceClientTest {
 
@@ -215,7 +209,7 @@ public class CartServiceClientTest {
                 .expectErrorSatisfies(throwable -> {
                     assert throwable instanceof WebClientResponseException;
                     WebClientResponseException exception = (WebClientResponseException) throwable;
-                    assertEquals(400, exception.getRawStatusCode()); // Assert that we got a 400 status
+                    assertEquals(400, exception.getStatusCode().value()); // Assert that we got a 400 status
                     assert exception.getResponseBodyAsString().contains("Only 10 items left in stock");
                 })
                 .verify();
@@ -274,7 +268,7 @@ public class CartServiceClientTest {
                 .expectErrorSatisfies(throwable -> {
                     assert throwable instanceof WebClientResponseException;
                     WebClientResponseException exception = (WebClientResponseException) throwable;
-                    assertEquals(404, exception.getRawStatusCode());
+                    assertEquals(404, exception.getStatusCode().value());
                     assert exception.getResponseBodyAsString().contains("Cart for customer id was not found");
                 })
                 .verify();
@@ -1267,83 +1261,7 @@ public class CartServiceClientTest {
     }
 
     @Test
-    void testGetCartItemCount_Success() {
-        String body = """
-        {"itemCount":5}
-        """;
-        prepareResponse(r -> r
-                .setHeader("Content-Type", "application/json")
-                .setResponseCode(200)
-                .setBody(body)
-        );
-
-        StepVerifier.create(mockCartServiceClient.getCartItemCount("cart-1"))
-                .expectNext(5)
-                .verifyComplete();
-    }
-
-    @Test
-    void testGetCartItemCount_MissingKey_DefaultZero() {
-        String body = "{}";
-        prepareResponse(r -> r
-                .setHeader("Content-Type", "application/json")
-                .setResponseCode(200)
-                .setBody(body)
-        );
-
-        StepVerifier.create(mockCartServiceClient.getCartItemCount("cart-1"))
-                .expectNext(0)
-                .verifyComplete();
-    }
-
-    @Test
-    void testGetCartItemCount_NotFound404() {
-        prepareResponse(r -> r
-                .setHeader("Content-Type", "application/json")
-                .setResponseCode(404)
-                .setBody("{\"message\":\"Cart not found\"}")
-        );
-
-        StepVerifier.create(mockCartServiceClient.getCartItemCount("missing"))
-                .expectErrorSatisfies(ex ->
-                        org.assertj.core.api.Assertions.assertThat(ex.getClass().getSimpleName().toLowerCase())
-                                .contains("notfound"))
-                .verify();
-    }
-
-    @Test
-    void testGetCartItemCount_InvalidInput400() {
-        prepareResponse(r -> r
-                .setHeader("Content-Type", "application/json")
-                .setResponseCode(400)
-                .setBody("{\"message\":\"bad id\"}")
-        );
-
-        StepVerifier.create(mockCartServiceClient.getCartItemCount("bad"))
-                .expectErrorSatisfies(ex ->
-                        org.assertj.core.api.Assertions.assertThat(ex.getClass().getSimpleName().toLowerCase())
-                                .contains("invalid"))
-                .verify();
-    }
-
-    @Test
-    void testGetCartItemCount_ServerError500() {
-        prepareResponse(r -> r
-                .setHeader("Content-Type", "application/json")
-                .setResponseCode(500)
-                .setBody("{\"message\":\"server\"}")
-        );
-
-        StepVerifier.create(mockCartServiceClient.getCartItemCount("cart-err"))
-                .expectErrorSatisfies(ex ->
-                        org.assertj.core.api.Assertions.assertThat(ex.getClass().getSimpleName())
-                                .containsIgnoringCase("IllegalArgument"))
-                .verify();
-    }
-
-    @Test
     void testCreateCart_BadRequest400() {
-        String request = "{\"customerId\":\"u-1\"}";
         prepareResponse(r -> r
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(400)
@@ -1429,7 +1347,11 @@ public class CartServiceClientTest {
                 .expectErrorSatisfies(ex -> {
                     org.assertj.core.api.Assertions.assertThat(ex)
                             .isInstanceOf(org.springframework.web.reactive.function.client.WebClientResponseException.class);
-                    org.assertj.core.api.Assertions.assertThat(((org.springframework.web.reactive.function.client.WebClientResponseException) ex).getRawStatusCode()).isEqualTo(404);
+                    org.assertj.core.api.Assertions.assertThat(
+                            ((org.springframework.web.reactive.function.client.WebClientResponseException) ex)
+                                    .getStatusCode()
+                                    .value())
+                            .isEqualTo(404);
                 })
                 .verify();
     }
@@ -1490,23 +1412,6 @@ public class CartServiceClientTest {
     void testGetRecentPurchases_Success() throws IOException {
         // Arrange
         String cartId = "test-cart-id";
-        List<CartProductResponseDTO> expectedProducts = List.of(
-                CartProductResponseDTO.builder()
-                        .productId("prod1")
-                        .productName("Product 1")
-                        .productSalePrice(10.0)
-                        .quantityInCart(2)
-                        .productQuantity(5)
-                        .build(),
-                CartProductResponseDTO.builder()
-                        .productId("prod2")
-                        .productName("Product 2")
-                        .productSalePrice(20.0)
-                        .quantityInCart(1)
-                        .productQuantity(3)
-                        .build()
-        );
-
         String responseBody = "[{\"productId\":\"prod1\",\"productName\":\"Product 1\",\"productSalePrice\":10.0,\"quantityInCart\":2,\"productQuantity\":5}," +
                 "{\"productId\":\"prod2\",\"productName\":\"Product 2\",\"productSalePrice\":20.0,\"quantityInCart\":1,\"productQuantity\":3}]";
 

@@ -16,9 +16,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/carts")
@@ -53,15 +51,6 @@ public class CartController {
                 .flatMap(cartService::clearCart);
     }
 
-
-    @GetMapping("/{cartId}/count")
-    public Mono<ResponseEntity<Map<String, Integer>>> getCartItemCount(@PathVariable String cartId) {
-        return Mono.just(cartId)
-                .filter(id -> id.length() == 36) // validate the cart id
-                .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
-                .flatMap(cartService::getCartItemCount)
-                .map(count -> ResponseEntity.ok(Collections.singletonMap("itemCount", count)));
-    }
 
     @DeleteMapping("/{cartId}")
     public Mono<ResponseEntity<CartResponseModel>> deleteCartByCartId(@PathVariable String cartId) {

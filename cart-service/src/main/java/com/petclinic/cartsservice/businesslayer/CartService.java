@@ -19,7 +19,6 @@ public interface CartService {
     Flux<CartResponseModel> getAllCarts();
     Flux<CartResponseModel> clearCart(String cartId);  // From feat/CART-CPC-1144_clear_cart_feature
 
-    Mono<Integer> getCartItemCount(String cartId);
     Mono<CartResponseModel> deleteCartByCartId(String cartId);
     Mono<CartResponseModel> removeProductFromCart(String cartId, String productId);
     Mono<CartResponseModel> addProductToCart(String cartId, String productId, int quantity);

@@ -211,19 +211,6 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public Mono<Integer> getCartItemCount(String cartId) {
-        return cartRepository.findCartByCartId(cartId)
-                .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
-                .map(cart -> {
-                    int count = 0;
-                    for (CartProduct product : cart.getProducts()) {
-                        count += product.getQuantityInCart();
-                    }
-                    return count;
-                });
-    }
-
-    @Override
     public Mono<CartResponseModel> assignCartToCustomer(String customerId, List<CartProduct> products) {
         //check if the customer already has a cart
         return cartRepository.findCartByCustomerId(customerId)

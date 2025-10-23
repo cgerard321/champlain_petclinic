@@ -20,8 +20,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.Collections;
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -147,19 +145,6 @@ public class CartControllerV1 {
                 .onErrorResume(e -> mapCartErrorWithMessage(e,
                         ErrorOptions.builder("createCart")
                                 .includeBadRequestBodyMessage(true)
-                                .build()
-                ));
-    }
-
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER, Roles.ADMIN})
-    @GetMapping("/{cartId}/count")
-    public Mono<ResponseEntity<Map<String, Integer>>> getCartItemCount(@PathVariable String cartId) {
-        return cartServiceClient.getCartItemCount(cartId)
-                .map(count -> ResponseEntity.ok(Collections.singletonMap("itemCount", count)))
-                .onErrorResume(e -> mapCartError(e,
-                        ErrorOptions.builder("getCartItemCount")
-                                .cartId(cartId)
-                                .invalidInputAsUnprocessable(true)
                                 .build()
                 ));
     }

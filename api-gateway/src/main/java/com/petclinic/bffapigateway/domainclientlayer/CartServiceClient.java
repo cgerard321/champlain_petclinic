@@ -19,7 +19,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 @Component
 @Slf4j
@@ -165,25 +164,6 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
                 .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Server error")))
                 .bodyToMono(Void.class)
                 .doOnError(e -> log.error("Failed to clear cart with id {}: {}", cartId, e.getMessage()));
-    }
-
-    public Mono<Integer> getCartItemCount(String cartId) {
-        return webClientBuilder.build()
-                .get()
-                .uri(cartServiceUrl + "/" + cartId + "/count")
-                .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, error -> {
-                    HttpStatusCode statusCode = error.statusCode();
-                    if (statusCode.equals(HttpStatus.NOT_FOUND)) {
-                        return Mono.error(new NotFoundException("Cart not found for cartId: " + cartId));
-                    } else if (statusCode.equals(HttpStatus.UNPROCESSABLE_ENTITY) || statusCode.equals(HttpStatus.BAD_REQUEST)) {
-                        return Mono.error(new InvalidInputException("Invalid cart id: " + cartId));
-                    }
-                    return Mono.error(new IllegalArgumentException("Client error"));
-                })
-                .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Server error")))
-                .bodyToMono(new ParameterizedTypeReference<Map<String, Integer>>() {})
-                .map(body -> body != null ? body.getOrDefault("itemCount", 0) : 0);
     }
 
     public Flux<PromoCodeResponseDTO> getAllPromoCodes() {

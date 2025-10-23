@@ -20,7 +20,7 @@ import {
 } from '@/features/carts/api/cartEvent';
 import {
   fetchCartIdByCustomerId,
-  fetchCartCountByCartId,
+  fetchCartDetailsByCartId,
 } from '@/features/carts/api/getCart';
 
 interface CartContextType {
@@ -100,9 +100,25 @@ export function CartProvider({
       }
     }
 
-    const count = await fetchCartCountByCartId(id);
-    setCartCount(count);
-    return { cartId: id, cartCount: count };
+    const cart = await fetchCartDetailsByCartId(id);
+    const count = Array.isArray(cart?.products)
+      ? cart.products.reduce((acc, product) => {
+          const quantity = Number(product?.quantityInCart);
+          if (Number.isFinite(quantity) && quantity > 0) {
+            return acc + Math.trunc(quantity);
+          }
+          return acc + 1;
+        }, 0)
+      : 0;
+    const fallbackCount =
+      count > 0
+        ? count
+        : Array.isArray(cart?.products)
+          ? cart.products.length
+          : 0;
+
+    setCartCount(fallbackCount);
+    return { cartId: id, cartCount: fallbackCount };
   }, [user?.userId, cartId, isOwner]);
 
   // When the user logs in, check if we already have cart data in localStorage.

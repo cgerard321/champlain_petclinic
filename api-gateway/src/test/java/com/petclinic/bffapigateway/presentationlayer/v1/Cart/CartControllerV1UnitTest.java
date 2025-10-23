@@ -145,45 +145,6 @@ public class CartControllerV1UnitTest {
         verify(cartServiceClient, times(1)).createCart(any(CartRequestDTO.class));
     }
 
-    // Tests for getCartItemCount endpoint
-    @Test
-    @DisplayName("GET /api/gateway/carts/{cartId}/count - Should return item count successfully")
-    void getCartItemCount_withValidId_shouldReturnCount() {
-        // Arrange
-        String cartId = "cart-123";
-        when(cartServiceClient.getCartItemCount(cartId))
-                .thenReturn(Mono.just(3));
-
-        // Act & Assert
-        webTestClient.get()
-                .uri(baseCartURL + "/" + cartId + "/count")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.itemCount").isEqualTo(3);
-
-        verify(cartServiceClient, times(1)).getCartItemCount(cartId);
-    }
-
-    @Test
-    @DisplayName("GET /api/gateway/carts/{cartId}/count - Should return 404 when cart not found")
-    void getCartItemCount_withNonExistingId_shouldReturnNotFound() {
-        // Arrange
-        String cartId = "missing-cart";
-        when(cartServiceClient.getCartItemCount(cartId))
-                .thenReturn(Mono.error(new NotFoundException("Cart not found")));
-
-        // Act & Assert
-        webTestClient.get()
-                .uri(baseCartURL + "/" + cartId + "/count")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound();
-
-        verify(cartServiceClient, times(1)).getCartItemCount(cartId);
-    }
-
     // Tests for getAllCarts endpoint
     @Test
     @DisplayName("GET /api/gateway/carts - Should return all carts successfully")

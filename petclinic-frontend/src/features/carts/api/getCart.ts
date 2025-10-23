@@ -1,6 +1,7 @@
 import axiosInstance from '@/shared/api/axiosInstance';
+import type { CartDetailsModel } from '@/shared/api/cart';
+
 export type CartIdResponse = { cartId: string };
-export type CartCountResponse = { itemCount: number };
 
 export async function fetchCartIdByCustomerId(
   userId: string
@@ -18,16 +19,17 @@ export async function fetchCartIdByCustomerId(
   }
 }
 
-export async function fetchCartCountByCartId(cartId: string): Promise<number> {
+export async function fetchCartDetailsByCartId(
+  cartId: string
+): Promise<CartDetailsModel | null> {
   try {
-    const { data } = await axiosInstance.get<CartCountResponse>(
-      `/carts/${cartId}/count`,
+    const { data } = await axiosInstance.get<CartDetailsModel>(
+      `/carts/${cartId}`,
       { useV2: false }
     );
-    const n = Number(data?.itemCount);
-    return Number.isFinite(n) && n >= 0 ? Math.trunc(n) : 0;
+    return data ?? null;
   } catch (error) {
-    console.error(`Error fetching cart count for ${cartId}`, error);
-    return 0;
+    console.error(`Error fetching cart for ${cartId}`, error);
+    return null;
   }
 }

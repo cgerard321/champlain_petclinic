@@ -7,9 +7,7 @@ import com.petclinic.cartsservice.domainclientlayer.CustomerClient;
 import com.petclinic.cartsservice.domainclientlayer.CustomerResponseModel;
 import com.petclinic.cartsservice.domainclientlayer.ProductClient;
 import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
-import com.petclinic.cartsservice.presentationlayer.CartRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
-import com.petclinic.cartsservice.utils.EntityModelUtil;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
 import com.petclinic.cartsservice.utils.exceptions.OutOfStockException;
@@ -23,13 +21,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
-import org.mockito.MockitoAnnotations;
-import static org.mockito.Mockito.lenient;
-
-
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,8 +28,9 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+
 
 @ExtendWith(MockitoExtension.class)
 class CartServiceUnitTest {
@@ -969,56 +961,6 @@ class CartServiceUnitTest {
                 .verify();
     }
 
-    @Test
-    void getCartItemCount_WithExistingCart_ReturnsItemCount() {
-        // Arrange: Mock the cart retrieval
-        when(cartRepository.findCartByCartId(cart1.getCartId())).thenReturn(Mono.just(cart1));
-
-        // Act & Assert: Verify that the total item count matches the products in the cart
-        StepVerifier.create(cartService.getCartItemCount(cart1.getCartId()))
-                .expectNext(2) // Product 1 and Product 2, each with quantity 1
-                .verifyComplete();
-
-        // Verify repository interaction
-        verify(cartRepository, times(1)).findCartByCartId(cart1.getCartId());
-    }
-
-    @Test
-    void getCartItemCount_CartNotFound_ThrowsNotFoundException() {
-        // Arrange: Mock an empty Mono for cart retrieval
-        when(cartRepository.findCartByCartId(nonExistentCartId)).thenReturn(Mono.empty());
-
-        // Act & Assert: Expect a NotFoundException
-        StepVerifier.create(cartService.getCartItemCount(nonExistentCartId))
-                .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
-                        throwable.getMessage().contains("Cart not found: " + nonExistentCartId))
-                .verify();
-
-        // Verify repository interaction
-        verify(cartRepository, times(1)).findCartByCartId(nonExistentCartId);
-    }
-
-    @Test
-    void getCartItemCount_WithEmptyCart_ReturnsZero() {
-        // Arrange: Create a cart with no products
-        Cart emptyCart = Cart.builder()
-                .cartId("emptyCartId")
-                .customerId("customerWithEmptyCart")
-                .products(Collections.emptyList()) // No products
-                .build();
-
-        // Mock the cart retrieval
-        when(cartRepository.findCartByCartId("emptyCartId")).thenReturn(Mono.just(emptyCart));
-
-        // Act & Assert: The item count should be 0
-        StepVerifier.create(cartService.getCartItemCount("emptyCartId"))
-                .expectNext(0) // No products, so count should be 0
-                .verifyComplete();
-
-        // Verify repository interaction
-        verify(cartRepository, times(1)).findCartByCartId("emptyCartId");
-    }
-
 
     @Test
     void addProductToCart_ProductAlreadyInWishlist_DoesNotAddAgain() {
@@ -1440,26 +1382,7 @@ class CartServiceUnitTest {
         verify(cartRepository, never()).save(any());
     }
 
-
-    //positif
-    @Test
-    void getCartItemCount_returnsSumOfQuantities() {
-
-        String cartId = "cart-ok";
-        CartProduct p1 = CartProduct.builder().productId("p1").quantityInCart(2).productSalePrice(1.0).build();
-        CartProduct p2 = CartProduct.builder().productId("p2").quantityInCart(3).productSalePrice(1.0).build();
-        Cart cart = Cart.builder()
-                .cartId(cartId)
-                .products(new ArrayList<>(List.of(p1, p2)))
-                .build();
-
-        when(cartRepository.findCartByCartId(anyString())).thenReturn(Mono.just(cart));
-
-        StepVerifier.create(cartService.getCartItemCount(cartId))
-                .expectNext(5)   // 2 + 3
-                .verifyComplete();
-    }
-    // negative
+        // negative
     @Test
     void deleteCartByCartId_notFound_throwsNotFound() {
 
