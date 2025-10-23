@@ -141,8 +141,10 @@ class PetControllerIntegrationTest {
         StepVerifier.create(setup).expectNextCount(1).verifyComplete();
 
         client.patch()
-                .uri("/pets/" + PET_ID)
-                .body(Mono.just("true"), String.class)
+                .uri(uriBuilder -> uriBuilder
+                        .path("/pets/{id}/active")
+                        .queryParam("isActive", true)
+                        .build(PET_ID))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
