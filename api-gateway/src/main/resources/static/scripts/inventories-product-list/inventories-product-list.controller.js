@@ -191,19 +191,19 @@ angular.module('inventoriesProductList')
             }
 
             if (minPrice !== undefined && minPrice !== null && minPrice !== '' && minPrice <= 0) {
-                alert('Min Price cannot be 0 or negative. Please enter a valid quantity.');
+                alert('Min Price cannot be 0 or negative. Please enter a valid min price.');
                 return;
             }
             if (maxPrice !== undefined && maxPrice !== null && maxPrice !== '' && maxPrice <= 0) {
-                alert('Max Price cannot be 0 or negative. Please enter a valid quantity.');
+                alert('Max Price cannot be 0 or negative. Please enter a valid max price.');
                 return;
             }
             if (minSalePrice !== undefined && minSalePrice !== null && minSalePrice !== '' && minSalePrice <= 0) {
-                alert('Min Sale Price cannot be 0 or negative. Please enter a valid quantity.');
+                alert('Min Sale Price cannot be 0 or negative. Please enter a valid min sale price.');
                 return;
             }
             if (maxSalePrice !== undefined && maxSalePrice !== null && maxSalePrice !== '' && maxSalePrice <= 0) {
-                alert('Max Sale Price cannot be 0 or negative. Please enter a valid quantity.');
+                alert('Max Sale Price cannot be 0 or negative. Please enter a valid max sale price.');
                 return;
             }
 
