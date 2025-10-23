@@ -190,6 +190,32 @@ angular.module('inventoriesProductList')
                 return;
             }
 
+            if (minPrice !== undefined && minPrice !== null && minPrice !== '' && minPrice <= 0) {
+                alert('Min Price cannot be 0 or negative. Please enter a valid quantity.');
+                return;
+            }
+            if (maxPrice !== undefined && maxPrice !== null && maxPrice !== '' && maxPrice <= 0) {
+                alert('Max Price cannot be 0 or negative. Please enter a valid quantity.');
+                return;
+            }
+            if (minSalePrice !== undefined && minSalePrice !== null && minSalePrice !== '' && minSalePrice <= 0) {
+                alert('Min Sale Price cannot be 0 or negative. Please enter a valid quantity.');
+                return;
+            }
+            if (maxSalePrice !== undefined && maxSalePrice !== null && maxSalePrice !== '' && maxSalePrice <= 0) {
+                alert('Max Sale Price cannot be 0 or negative. Please enter a valid quantity.');
+                return;
+            }
+
+            if (maxPrice < minPrice) {
+                alert('Max price must be larger than min price.');
+                return;
+            }
+            if (maxSalePrice < minSalePrice) {
+                alert('Max sale price must be larger than min price.');
+                return;
+            }
+
             var inventoryId = $stateParams.inventoryId;
             var queryString = '';
             resetDefaultValues()
