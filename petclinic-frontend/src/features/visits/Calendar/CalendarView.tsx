@@ -40,7 +40,6 @@ export default function CalendarView(): JSX.Element {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
 
-  // Fetch visits based on user role
   useEffect(() => {
     const fetchVisits = async (): Promise<void> => {
       setIsLoading(true);
@@ -50,13 +49,10 @@ export default function CalendarView(): JSX.Element {
         let fetchedVisits: Visit[] = [];
 
         if (isAdmin) {
-          // Admin sees all visits
           fetchedVisits = await getAllVisits();
         } else if (isVet && user?.userId) {
-          // Vet sees their own visits
           fetchedVisits = await getVisitsForPractitioner(user.userId);
         } else if (user?.userId) {
-          // Owner sees all visits
           fetchedVisits = await getAllVisits();
         }
 

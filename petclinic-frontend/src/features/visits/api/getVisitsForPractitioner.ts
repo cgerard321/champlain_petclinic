@@ -5,26 +5,35 @@ export async function getVisitsForPractitioner(
   practitionerId: string
 ): Promise<Visit[]> {
   try {
+    const cleanPractitionerId = practitionerId.trim();
+
     const response = await axiosInstance.get(
-      `/visits/practitioner/${practitionerId}`,
+      `/visits/vets/${cleanPractitionerId}/visits`,
       {
         responseType: 'text',
         useV2: false,
       }
     );
 
+    if (typeof response.data !== 'string') {
+      console.error('Expected string response, got:', typeof response.data);
+      return [];
+    }
+
     return response.data
       .split('data:')
-      .map((payload: string) => {
+      .map((payload: string): Visit | null => {
         try {
-          if (payload === '') return null;
-          return JSON.parse(payload);
+          const trimmed = payload.trim();
+          if (trimmed === '') return null;
+
+          return JSON.parse(trimmed) as Visit;
         } catch (err) {
           console.error("Can't parse JSON:", err);
           return null;
         }
       })
-      .filter((data: Visit | null) => data !== null);
+      .filter((data: Visit | null): data is Visit => data !== null);
   } catch (error) {
     console.error('Error fetching visits for practitioner:', error);
     throw error;

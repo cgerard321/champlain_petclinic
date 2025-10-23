@@ -530,29 +530,6 @@
   }
 }
 
-.latest-button {
-  padding: 8px 16px;
-  border: 1px solid #0d6efd;
-  background: white;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 500;
-  color: #0d6efd;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.latest-button:hover {
-  background: #0d6efd;
-  color: white;
-}
-
-.latest-button svg {
-  font-size: 14px;
-}
-
 .month-status-dots {
   display: flex;
   gap: 4px;
