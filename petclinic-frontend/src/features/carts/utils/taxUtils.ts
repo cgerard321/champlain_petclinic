@@ -71,8 +71,13 @@ export function computeTaxes(subtotal: number, province?: string): TaxLine[] {
   return lines.map(l => ({ ...l, amount: roundToCents(subtotal * l.rate) }));
 }
 
-function roundToCents(n: number): number {
+export function roundToCents(n: number): number {
   return Math.round(n * 100) / 100;
+}
+
+export function formatTaxRate(rate: number): string {
+  // show up to 3 decimal places but trim trailing .000
+  return (rate * 100).toFixed(3).replace(/\.000$/, '');
 }
 
 // Average combined tax rate across provinces/territories in our map.
@@ -82,5 +87,6 @@ export function averageCanadianCombinedTaxRate(): number {
   );
   if (rates.length === 0) return 0.13; // sensible default
   const sum = rates.reduce((s, r) => s + r, 0);
-  return sum / rates.length;
+  // round to 4 decimal places to avoid excessive floating precision downstream
+  return Math.round((sum / rates.length) * 10000) / 10000;
 }

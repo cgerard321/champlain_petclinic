@@ -22,7 +22,11 @@ import {
   IsVet,
   useUser,
 } from '@/context/UserContext';
-import { computeTaxes, TaxLine } from '../utils/taxUtils';
+import {
+  computeTaxes,
+  averageCanadianCombinedTaxRate,
+  roundToCents,
+} from '../utils/taxUtils';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import { getProductByProductId } from '@/features/products/api/getProductByProductId';
 import {
@@ -83,7 +87,7 @@ const UserCart: React.FC = () => {
   const [billingInfo, setBillingInfo] = useState<BillingInfo | null>(null);
   // When true, show only a single Estimated Taxes line (no GST/PST breakdown).
   // This is set after checkout to avoid showing the detailed breakdown immediately when the user adds a new item.
-  const [suppressTaxDetails, setSuppressTaxDetails] = useState<boolean>(false);
+  // Previously used to suppress detailed tax breakdown after checkout; now unused
 
   const [wishlistUpdated, setWishlistUpdated] = useState(false);
   const [voucherCode, setVoucherCode] = useState<string>('');
@@ -764,20 +768,11 @@ const UserCart: React.FC = () => {
 
   const { user } = useUser();
 
-  // Determine province and compute taxes after user is available
-  const billingProvinceFinal =
-    billingInfo?.province ||
-    (user as unknown as { province?: string })?.province;
-  const taxLines: TaxLine[] = computeTaxes(
-    discountedSubtotal,
-    billingProvinceFinal
-  );
-  const totalTax = taxLines.reduce(
-    (s, t) =>
-      s + (t.amount ?? Math.round(discountedSubtotal * t.rate * 100) / 100),
-    0
-  );
-  const total = discountedSubtotal + totalTax;
+  // For cart summary we always show a single estimated tax using the
+  // average Canadian combined tax rate to keep the summary snappy.
+  const avgRate = averageCanadianCombinedTaxRate();
+  const estimatedTax = roundToCents(discountedSubtotal * avgRate);
+  const total = discountedSubtotal + estimatedTax;
 
   const handleCheckoutConfirmation = (): void => {
     if (isStaff) {
@@ -786,8 +781,7 @@ const UserCart: React.FC = () => {
       });
       return;
     }
-    // Opening billing form implies the user wants to provide billing details -> show full tax details again
-    setSuppressTaxDetails(false);
+    // Opening billing form implies the user wants to provide billing details
     setShowBillingForm(true);
     setIsCheckoutModalOpen(false);
   };
@@ -862,17 +856,25 @@ const UserCart: React.FC = () => {
         date: new Date().toISOString(),
         items: invoiceItemsForFull,
         subtotal: invoiceSubtotal,
-        // legacy fields: keep first two tax lines (if present) for backward compatibility
-        tvq: invoiceTaxLines[0]?.amount ?? 0,
-        tvc: invoiceTaxLines[1]?.amount ?? 0,
+        // legacy fields: map by tax line name for backward compatibility
+        // Prefer mapping by explicit tax names where possible. Older code expects
+        // 'tvq' (provincial) and 'tvc' (federal). We map common names and fall
+        // back to sensible defaults. If HST (single combined tax) is present,
+        // assign it to 'tvc' to preserve a non-zero legacy field.
+        tvq:
+          invoiceTaxLines.find(t => ['QST', 'TVQ', 'PST'].includes(t.name))
+            ?.amount ?? 0,
+        tvc:
+          invoiceTaxLines.find(t => t.name === 'HST')?.amount ??
+          invoiceTaxLines.find(t => ['GST', 'TVC'].includes(t.name))?.amount ??
+          0,
         discount: effectiveDiscount,
         total: invoiceTotal,
       };
       setLastInvoice(newInvoice);
       setShowInvoiceModal(true);
       setCheckoutMessage('Checkout successful! Your order is being processed.');
-      // suppress detailed tax breakdown for the first item added after checkout (keeps summary compact)
-      setSuppressTaxDetails(true);
+      // keep cart summary showing average estimated tax
       setCartItems([]);
       setCartItemCount(0);
       setIsCheckoutModalOpen(false);
@@ -1107,33 +1109,11 @@ const UserCart: React.FC = () => {
                   <p className="summary-item">
                     Estimated Taxes: {formatPrice(0)}
                   </p>
-                ) : suppressTaxDetails ? (
-                  // After checkout, when user adds new items, show a single estimated taxes line (no breakdown)
-                  <p className="summary-item">
-                    Estimated Taxes: {formatPrice(totalTax)}
-                  </p>
-                ) : taxLines.length === 1 &&
-                  taxLines[0].name === 'Estimated Taxes' ? (
-                  <p className="summary-item">
-                    Estimated Taxes:{' '}
-                    {formatPrice(
-                      taxLines[0].amount ??
-                        discountedSubtotal * taxLines[0].rate
-                    )}
-                  </p>
                 ) : (
-                  <div className="summary-item">
-                    <strong>Estimated Taxes:</strong>
-                    <div style={{ marginLeft: 8 }}>
-                      {taxLines.map((t, i) => (
-                        <div key={i}>
-                          {t.name} (
-                          {(t.rate * 100).toFixed(3).replace(/\.000$/, '')}%):{' '}
-                          {formatPrice(t.amount ?? discountedSubtotal * t.rate)}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  // Always show a single estimated taxes line using the average rate
+                  <p className="summary-item">
+                    Estimated Taxes: {formatPrice(estimatedTax)}
+                  </p>
                 )}
                 <p className="summary-item">
                   Discount{promoPercent != null ? ` (${promoPercent}%)` : ''}:{' '}

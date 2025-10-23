@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import './Invoice.css';
-import { computeTaxes, TaxLine } from '../utils/taxUtils';
+import { computeTaxes, TaxLine, formatTaxRate } from '../utils/taxUtils';
 
 export interface InvoiceItem {
   productId: number;
@@ -155,17 +155,15 @@ function Invoice({
                 return lines
                   .map(
                     l =>
-                      `<p><span>${l.name} (${(l.rate * 100)
-                        .toFixed(3)
-                        .replace(
-                          /\.000$/,
-                          ''
-                        )}%)</span><span>$${(l.amount ?? inv.subtotal * l.rate).toFixed(2)}</span></p>`
+                      `<p><span>${l.name} (${formatTaxRate(l.rate)}%)</span><span>$${(l.amount ?? inv.subtotal * l.rate).toFixed(2)}</span></p>`
                   )
                   .join('');
               }
             } catch (e) {
-              /* ignore */
+              // Log tax computation errors to help debugging while falling back
+              // to legacy invoice fields.
+              // eslint-disable-next-line no-console
+              console.error('Tax calculation failed for printable invoice:', e);
             }
             // fallback to legacy fields
             return `<p><span>TVQ (9.975%)</span><span>$${inv.tvq.toFixed(2)}</span></p><p><span>TVC (5%)</span><span>$${inv.tvc.toFixed(2)}</span></p>`;
@@ -325,8 +323,7 @@ function Invoice({
                     <div>
                       {lines.map((l, i) => (
                         <p key={i}>
-                          {l.name} (
-                          {(l.rate * 100).toFixed(3).replace(/\.000$/, '')}%): $
+                          {l.name} ({formatTaxRate(l.rate)}%): $
                           {(l.amount ?? inv.subtotal * l.rate).toFixed(2)}
                         </p>
                       ))}
@@ -334,7 +331,9 @@ function Invoice({
                   );
                 }
               } catch (e) {
-                // ignore and fall back to legacy
+                // Log error to aid debugging and fall back to legacy fields
+                // eslint-disable-next-line no-console
+                console.error('Tax calculation failed for invoice modal:', e);
               }
 
               // fallback to legacy fields
