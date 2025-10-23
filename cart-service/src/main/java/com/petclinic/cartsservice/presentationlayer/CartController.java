@@ -64,7 +64,7 @@ public class CartController {
 
     }
 
-    @DeleteMapping("/{cartId}/{productId}")
+    @DeleteMapping("/{cartId}/products/{productId}")
     public Mono<ResponseEntity<CartResponseModel>> removeProductFromCart(@PathVariable String cartId, @PathVariable String productId) {
         return Mono.just(cartId)
                 .filter(id -> id.length() == 36)

@@ -557,7 +557,7 @@ const UserCart: React.FC = () => {
       if (!ok) return;
 
       try {
-        await axiosInstance.delete(`/carts/${cartId}/${productId}`, {
+        await axiosInstance.delete(`/carts/${cartId}/products/${productId}`, {
           useV2: false,
         });
 

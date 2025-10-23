@@ -506,7 +506,7 @@ class CartControllerUnitTest {
         // Act & Assert
         webTestClient
                 .delete()
-                .uri("/api/v1/carts/" + cartId + "/" + productIdToRemove)
+                .uri("/api/v1/carts/" + cartId + "/products/" + productIdToRemove)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -533,7 +533,7 @@ class CartControllerUnitTest {
         // Act & Assert
         webTestClient
                 .delete()
-                .uri("/api/v1/carts/" + nonExistentCartId + "/" + productIdToRemove)
+                .uri("/api/v1/carts/" + nonExistentCartId + "/products/" + productIdToRemove)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound();
@@ -553,7 +553,7 @@ class CartControllerUnitTest {
         // Act & Assert
         webTestClient
                 .delete()
-                .uri("/api/v1/carts/" + cartId + "/" + nonExistentProductId)
+                .uri("/api/v1/carts/" + cartId + "/products/" + nonExistentProductId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound();
@@ -570,7 +570,7 @@ class CartControllerUnitTest {
         // Act & Assert
         webTestClient
                 .delete()
-                .uri("/api/v1/carts/" + invalidCartId + "/" + productIdToRemove)
+                .uri("/api/v1/carts/" + invalidCartId + "/products/" + productIdToRemove)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(422)

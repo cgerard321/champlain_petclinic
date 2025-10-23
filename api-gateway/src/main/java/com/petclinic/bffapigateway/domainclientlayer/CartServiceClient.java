@@ -66,7 +66,7 @@ public Mono<CartResponseDTO> getCartByCartId(final String CartId) {
 public Mono<CartResponseDTO> removeProductFromCart(String cartId, String productId) {
     return webClientBuilder.build()
             .delete()
-            .uri(cartServiceUrl + "/" + cartId + "/" + productId)
+            .uri(cartServiceUrl + "/" + cartId + "/products/" + productId)
             .retrieve()
             .onStatus(HttpStatusCode::is4xxClientError, error -> {
                 HttpStatusCode statusCode = error.statusCode();

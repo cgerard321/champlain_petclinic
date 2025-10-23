@@ -305,7 +305,7 @@ public class CartControllerV1UnitTest {
 
     // Tests for removeProductFromCart endpoint
     @Test
-    @DisplayName("DELETE /api/gateway/carts/{cartId}/{productId} - Should remove product successfully")
+        @DisplayName("DELETE /api/gateway/carts/{cartId}/products/{productId} - Should remove product successfully")
     void removeProductFromCart_withValidIds_shouldRemoveProduct() {
         // Arrange
         String cartId = "cart-123";
@@ -316,7 +316,7 @@ public class CartControllerV1UnitTest {
 
         // Act & Assert
         webTestClient.delete()
-                .uri(baseCartURL + "/" + cartId + "/" + productId)
+                .uri(baseCartURL + "/" + cartId + "/products/" + productId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -327,7 +327,7 @@ public class CartControllerV1UnitTest {
     }
 
     @Test
-    @DisplayName("DELETE /api/gateway/carts/{cartId}/{productId} - Should return 404 when cart or product not found")
+        @DisplayName("DELETE /api/gateway/carts/{cartId}/products/{productId} - Should return 404 when cart or product not found")
     void removeProductFromCart_withNonExistingIds_shouldReturnNotFound() {
         // Arrange
         String cartId = "invalid-cart";
@@ -337,7 +337,7 @@ public class CartControllerV1UnitTest {
 
         // Act & Assert
         webTestClient.delete()
-                .uri(baseCartURL + "/" + cartId + "/" + productId)
+                .uri(baseCartURL + "/" + cartId + "/products/" + productId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound();
@@ -346,7 +346,7 @@ public class CartControllerV1UnitTest {
     }
 
     @Test
-    @DisplayName("DELETE /api/gateway/carts/{cartId}/{productId} - Should return 422 for invalid input")
+        @DisplayName("DELETE /api/gateway/carts/{cartId}/products/{productId} - Should return 422 for invalid input")
     void removeProductFromCart_withInvalidInput_shouldReturnUnprocessableEntity() {
         // Arrange
         String cartId = "cart-123";
@@ -356,7 +356,7 @@ public class CartControllerV1UnitTest {
 
         // Act & Assert
         webTestClient.delete()
-                .uri(baseCartURL + "/" + cartId + "/" + productId)
+                .uri(baseCartURL + "/" + cartId + "/products/" + productId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
