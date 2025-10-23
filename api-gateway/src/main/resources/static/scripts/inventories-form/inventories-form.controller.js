@@ -4,6 +4,7 @@ angular.module('inventoriesForm')
     .controller('InventoriesFormController', ["$http", '$state', '$stateParams', '$scope', function ($http, $state, $stateParams, $scope) {
         var self = this;
         console.log("State params: " + $stateParams)
+        $scope.saving = false;
         $scope.inventoryTypeFormSearch = ""; 
         $scope.inventoryTypeOptions = ["New Type"] //get all form the inventory type repository but dont remove the New Type
         $http.get("api/gateway/inventories/types").then(function (resp) {
@@ -20,9 +21,17 @@ angular.module('inventoriesForm')
 
 
         self.submitInventoryForm = function () {
+            if ($scope.inventoryForm && $scope.inventoryForm.$invalid) { 
+        angular.forEach($scope.inventoryForm.$error, function (fields) { 
+          (fields || []).forEach(function (f) { f.$setTouched(); });     
+        });                                                              
+        return;}                                                          
             var data;
+            $scope.saving = true;
             if ($scope.selectedOption === "New Type" && $scope.inventoryTypeFormSearch === "") {
-                alert("Search field cannot be empty when you want to add a new type")
+                alert("Search field cannot be empty when you want to add a new type");
+                $scope.saving = false;
+                return;
             }
             else if ($scope.selectedOption === "New Type") {
                 $scope.selectedOption = $scope.inventoryTypeFormSearch
@@ -39,7 +48,8 @@ angular.module('inventoriesForm')
                     .then(function (resp) {
                         console.log(resp)
                         $state.go('inventories');
-                    }, handleHttpError);
+                    }, handleHttpError)
+                    .finally(function () { $scope.saving = false; });
             }
             else {
                 data = {
@@ -51,7 +61,8 @@ angular.module('inventoriesForm')
                     .then(function (resp) {
                         console.log(resp)
                         $state.go('inventories');
-                    }, handleHttpError);
+                    }, handleHttpError)
+                    .finally(function () { $scope.saving = false; });
             }
         };
         $scope.updateOption = function() {

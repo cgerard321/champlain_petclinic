@@ -5,7 +5,7 @@ angular.module('inventoriesProductUpdateForm')
         var self = this;
         var product = {}
         var method = $stateParams.method;
-
+        $scope.saving = false;
         var inventoryId = InventoryService.getInventoryId();
         console.log("InventoryId: " + inventoryId);
         var productId = $stateParams.productId;
@@ -20,6 +20,12 @@ angular.module('inventoriesProductUpdateForm')
 
         self.submitProductUpdateForm = function () {
 
+            if ($scope.inventoryProductUpdateForm && $scope.inventoryProductUpdateForm.$invalid) {
+        angular.forEach($scope.inventoryProductUpdateForm.$error, function (fields) {       
+          (fields || []).forEach(function (f) { f.$setTouched(); });                        
+        });                                                                                  
+        return;                                                                             
+      }
             if (!inventoryId) {
                 console.error("Inventory ID is missing");
                 alert("Inventory ID is missing.");
@@ -38,12 +44,13 @@ angular.module('inventoriesProductUpdateForm')
                 productQuantity: self.product.productQuantity,
                 productSalePrice: self.product.productSalePrice
             }
-
+            $scope.saving = true;
             $http.put('/api/gateway/inventories/' + inventoryId + '/products/' + productId, data)
                 .then(function (response) {
                     console.log(response);
                     $state.go('inventoriesProduct', {inventoryId: inventoryId});
-                },handleHttpError);
+                },handleHttpError)
+                .finally(function () { $scope.saving = false; });
                 };
         function handleHttpError(response) {
             try { console.error('HTTP error:', response); } catch (e) {}

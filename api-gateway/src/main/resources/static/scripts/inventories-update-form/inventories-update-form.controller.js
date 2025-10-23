@@ -5,6 +5,7 @@ angular.module('inventoriesUpdateForm')
         var self = this;
         var inventoryId = $stateParams.inventoryId || "";
         var method = 'edit';
+        $scope.saving = false;
         $scope.inventoryTypeFormUpdateSearch = "";
         $scope.inventoryTypeUpdateOptions = ["New Type"];
         $http.get('/api/gateway/inventories/' + inventoryId).then(function (resp) {
@@ -26,10 +27,17 @@ angular.module('inventoriesUpdateForm')
         },handleHttpError);
 
         self.submitUpdateInventoryForm = function () {
+            if ($scope.inventoryUpdateForm && $scope.inventoryUpdateForm.$invalid) { 
+        angular.forEach($scope.inventoryUpdateForm.$error, function (fields) { 
+          (fields || []).forEach(function (f) { f.$setTouched(); });           
+        });                                                                     
+        return;                                                                
+      }
             var data;
 
             if ($scope.selectedUpdateOption === "New Type" && $scope.inventoryTypeFormUpdateSearch === "") {
                 alert("Search field cannot be empty when you want to add a new type");
+                $scope.saving = true;
             } else if ($scope.selectedUpdateOption === "New Type") {
                 $scope.selectedUpdateOption = $scope.inventoryTypeFormUpdateSearch;
                 data = {
@@ -53,7 +61,8 @@ angular.module('inventoriesUpdateForm')
                         if (!inventoryId) {
                             console.error("Inventory ID is missing");
                         }
-                    },handleHttpError);
+                    },handleHttpError)
+                    .finally(function () { $scope.saving = false; });
             }
             else {
                 data = {
@@ -66,13 +75,15 @@ angular.module('inventoriesUpdateForm')
                         .then(function (response) {
                             console.log(response);
                             $state.go('inventories');
-                        }, handleHttpError);
+                        }, handleHttpError)
+                        .finally(function () { $scope.saving = false; });
                 } else {
                     console.error("Invalid method:", method);
                 }
                 if (!inventoryId) {
                     console.error("Inventory ID is missing");
                 }
+                $scope.saving = false;
             }
         };
 

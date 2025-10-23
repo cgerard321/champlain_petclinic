@@ -4,8 +4,15 @@ angular.module('inventoriesProductForm')
     .controller('InventoriesProductFormController', ["$http", '$state', '$stateParams', '$scope', 'InventoryService', function ($http, $state , $scope,  $stateParams, InventoryService) {
         var self = this;
         var product = {}
+        $scope.saving = false;
         // post request to create a new product
         self.submitProductForm = function (product) {
+            if ($scope.productForm && $scope.productForm.$invalid) {
+        angular.forEach($scope.productForm.$error, function(fields){          
+          (fields || []).forEach(function(f){ f.$setTouched(); });             
+        });                                                                    
+        return;                                                                
+      }
             var data  = {
                 productName: self.product.productName,
                 productDescription: self.product.productDescription,
@@ -15,6 +22,7 @@ angular.module('inventoriesProductForm')
             }
             var inventoryId = $stateParams.inventoryId || InventoryService.getInventoryId();
             console.log("InventoryId: " + inventoryId);
+            $scope.saving = true;
             $http.post('/api/gateway/inventories/' + inventoryId + '/products', data
             )
                 .then(function (response) {
@@ -46,7 +54,8 @@ angular.module('inventoriesProductForm')
                     alert(fieldText ? (baseMsg + '\r\n' + fieldText) : baseMsg);
                     // ---------------------------------------------------
 
-                });
+                })
+                .finally(function(){ $scope.saving = false; });
         }
 
 
