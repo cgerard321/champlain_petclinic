@@ -339,14 +339,26 @@ const ProfilePage = (): JSX.Element => {
 
         try {
             const response = await axiosInstance.get(
-                `/pets/${user.userId}/pets/${petId}?includePhoto=true`,
-                { useV2: false }
+                `/pets/owners/${user.userId}/pets/${petId}`,
+                {
+                    useV2: false,
+                    params: { includePhoto: true }
+                }
             );
             const petData = response.data;
 
-            if (petData.photo && petData.photo.fileData) {
-                const base64Data = petData.photo.fileData;
-                const contentType = petData.photo.fileType || 'image/png';
+            console.log(`Full pet data for ${petName}:`, petData);
+            console.log(`Photo object for ${petName}:`, petData.photo);
+
+            if (petData.photo) {
+                console.log(`Photo keys for ${petName}:`, Object.keys(petData.photo));
+                console.log(`Photo data exists?`, !!petData.photo.data);
+                console.log(`Photo fileData exists?`, !!(petData.photo as any).fileData);
+            }
+
+            if (petData.photo && petData.photo.data) {
+                const base64Data = petData.photo.data;
+                const contentType = petData.photo.contentType || 'image/png';
                 const byteCharacters = atob(base64Data);
                 const byteNumbers = new Array(byteCharacters.length);
                 for (let i = 0; i < byteCharacters.length; i++) {

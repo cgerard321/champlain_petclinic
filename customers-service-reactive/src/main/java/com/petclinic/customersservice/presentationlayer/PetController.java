@@ -25,9 +25,13 @@ public class PetController {
         return petService.getPetById(petId, includePhoto);
     }
 
-    @GetMapping("/owner/{ownerId}/pets")
-    public Flux<PetResponseDTO> getPetsByOwnerId(@PathVariable String ownerId) {
-        return petService.getPetsByOwnerId(ownerId);
+    @GetMapping("/pet/{petId}")
+    public Mono<ResponseEntity<PetResponseDTO>> getPetByPetId(
+            @PathVariable String petId,
+            @RequestParam(required = false, defaultValue = "false") boolean includePhoto) {
+        return petService.getPetById(petId, includePhoto)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{petId}")

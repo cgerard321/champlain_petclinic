@@ -201,9 +201,12 @@ public class CustomersServiceClient {
                 .bodyToFlux(PetResponseDTO.class);
     }
 
-    public Mono<PetResponseDTO> getPetByPetId(String petId) {
+    public Mono<PetResponseDTO> getPetByPetId(String petId, boolean includePhoto) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(customersServiceUrl + "/pet/" + petId);
+        builder.queryParam("includePhoto", includePhoto);
+
         return webClientBuilder.build().get()
-                .uri(customersServiceUrl + "/pet/" + petId)
+                .uri(builder.build().toUri())
                 .retrieve()
                 .bodyToMono(PetResponseDTO.class);
     }

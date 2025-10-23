@@ -3,22 +3,19 @@ import { PetResponseModel } from '../models/PetResponseModel.ts';
 import { AxiosResponse } from 'axios';
 
 export const getPet = async (
-  petId: string,
-  ownerId?: string
+    petId: string,
+    ownerId?: string
 ):Promise<AxiosResponse<PetResponseModel>> => {
-  // MODIFIED: Define params to explicitly include the photo
-  const params = { useV2: false, includePhoto: true };
+    const params = { useV2: false, includePhoto: true };
 
-  if (ownerId) {
-    return await axiosInstance.get<PetResponseModel>(
-      `/pets/owners/${ownerId}/pets/${petId}`,
-      {
-        params,
-      }
-    );
-  } else {
-    return await axiosInstance.get<PetResponseModel>(`/pets/${petId}`, {
-      params,
-    });
-  }
+    if (ownerId) {
+        return await axiosInstance.get<PetResponseModel>(
+            `/pets/owners/${ownerId}/pets/${petId}`,
+            { params }
+        );
+    } else {
+        return await axiosInstance.get<PetResponseModel>(`/pets/${petId}`, {
+            params,
+        });
+    }
 };

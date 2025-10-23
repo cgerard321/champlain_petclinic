@@ -46,8 +46,9 @@ public class PetControllerV1 {
     @GetMapping("/owners/{ownerId}/pets/{petId}")
     public Mono<ResponseEntity<PetResponseDTO>> getPetForOwner(
             @PathVariable String ownerId,
-            @PathVariable String petId) {
-        return customersServiceClient.getPetByPetId(petId)
+            @PathVariable String petId,
+            @RequestParam(required = false, defaultValue = "false") boolean includePhoto) {
+        return customersServiceClient.getPetByPetId(petId, includePhoto)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
