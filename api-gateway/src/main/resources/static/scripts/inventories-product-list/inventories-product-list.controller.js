@@ -185,6 +185,11 @@ angular.module('inventoriesProductList')
         }
 
         $scope.searchProduct = function(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice) {
+            if (productQuantity !== undefined && productQuantity !== null && productQuantity !== '' && productQuantity <= 0) {
+                alert('Quantity cannot be 0 or negative. Please enter a valid quantity.');
+                return;
+            }
+
             var inventoryId = $stateParams.inventoryId;
             var queryString = '';
             resetDefaultValues()
@@ -252,11 +257,9 @@ angular.module('inventoriesProductList')
                 })
                 .catch(function(error) {
                     if (error.status === 404) {
-                        //alert('Product not found.');
                         self.inventoryProductList = [];
                         self.currentPage = 0;
                         updateActualCurrentPageShown();
-
                     } else {
                         alert('An error occurred: ' + error.statusText);
                     }
