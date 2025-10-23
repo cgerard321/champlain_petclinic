@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { exportVisitsCSV } from './api/exportVisitsCSV';
 import { getAllVisits } from './api/getAllVisits';
-import { IsVet } from '@/context/UserContext';
+import { IsVet, IsAdmin, IsReceptionist } from '@/context/UserContext';
 // import { AppRoutePaths } from '@/shared/models/path.routes';
 import { archiveVisit } from './api/archiveVisit';
 import { cancelVisit } from './api/cancelVisit';
@@ -24,6 +24,8 @@ import EditingVisit from './components/EditingVisit';
 
 export default function VisitListTable(): JSX.Element {
   const isVet = IsVet();
+  const isAdmin = IsAdmin();
+  const isReceptionist = IsReceptionist();
   // full list fetched from backend
   const [visits, setVisits] = useState<Visit[]>([]);
   // list currently shown in the UI (filtered by search term / tabs)
@@ -64,15 +66,22 @@ export default function VisitListTable(): JSX.Element {
   // This avoids refetching from the API and preserves the full list in `visits`.
   useEffect(() => {
     const term = searchTerm.trim().toLowerCase();
+
+    let baseList = visits;
+
+    if ((isVet || isAdmin || isReceptionist) && currentTab !== 'Cancelled') {
+      baseList = visits.filter(v => v.status !== 'CANCELLED');
+    }
+
     if (term.length > 0) {
-      const filtered = visits.filter(v =>
+      const filtered = baseList.filter(v =>
         (v.description || '').toLowerCase().includes(term)
       );
       setDisplayedVisits(sortVisits(filtered));
     } else {
-      setDisplayedVisits(sortVisits(visits));
+      setDisplayedVisits(sortVisits(baseList));
     }
-  }, [searchTerm, visits]);
+  }, [searchTerm, visits, currentTab, isVet, isAdmin, isReceptionist]);
 
   // Filter visits based on status
   // Derive the different lists from the displayed list so search / tabs compose
