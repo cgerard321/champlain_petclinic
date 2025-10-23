@@ -162,7 +162,6 @@ function Invoice({
             } catch (e) {
               // Log tax computation errors to help debugging while falling back
               // to legacy invoice fields.
-              // eslint-disable-next-line no-console
               console.error('Tax calculation failed for printable invoice:', e);
             }
             // fallback to legacy fields
@@ -332,7 +331,6 @@ function Invoice({
                 }
               } catch (e) {
                 // Log error to aid debugging and fall back to legacy fields
-                // eslint-disable-next-line no-console
                 console.error('Tax calculation failed for invoice modal:', e);
               }
 
