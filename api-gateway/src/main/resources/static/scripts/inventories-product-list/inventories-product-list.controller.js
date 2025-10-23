@@ -207,11 +207,19 @@ angular.module('inventoriesProductList')
                 return;
             }
 
-            if (maxPrice < minPrice) {
+            if (
+                minPrice !== undefined && minPrice !== null && minPrice !== '' &&
+                maxPrice !== undefined && maxPrice !== null && maxPrice !== '' &&
+                maxPrice < minPrice
+            ) {
                 alert('Max price must be larger than min price.');
                 return;
             }
-            if (maxSalePrice < minSalePrice) {
+            if (
+                minSalePrice !== undefined && minSalePrice !== null && minSalePrice !== '' &&
+                maxSalePrice !== undefined && maxSalePrice !== null && maxSalePrice !== '' &&
+                maxSalePrice < minSalePrice
+            ) {
                 alert('Max sale price must be larger than min price.');
                 return;
             }
