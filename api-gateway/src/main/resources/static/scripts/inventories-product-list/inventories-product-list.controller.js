@@ -212,7 +212,7 @@ angular.module('inventoriesProductList')
                 maxPrice !== undefined && maxPrice !== null && maxPrice !== '' &&
                 maxPrice < minPrice
             ) {
-                alert('Max price must be larger than min price.');
+                alert('Max sale price must be larger than min sale price.');
                 return;
             }
             if (
