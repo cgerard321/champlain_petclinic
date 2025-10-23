@@ -1,0 +1,31 @@
+import * as React from 'react';
+import './Sidebar.css';
+
+// Sidebar
+interface SidebarItemProps {
+  itemName: string;
+  emergency?: boolean;
+  currentTab: string;
+  onClick: (n: string) => void;
+}
+
+const SidebarItem: React.FC<SidebarItemProps> = ({
+  itemName,
+  emergency = false,
+  currentTab,
+  onClick,
+}): JSX.Element => (
+  <li>
+    <a
+      className={
+        (itemName == currentTab ? 'active' : '') +
+        (emergency == true ? 'emergency' : '')
+      }
+      onClick={() => onClick(itemName)}
+    >
+      <span>{itemName}</span>
+    </a>
+  </li>
+);
+
+export default SidebarItem;

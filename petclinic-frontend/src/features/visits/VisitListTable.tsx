@@ -10,6 +10,8 @@ import { IsVet } from '@/context/UserContext';
 import { archiveVisit } from './api/archiveVisit';
 import { cancelVisit } from './api/cancelVisit';
 
+import { Category } from './models/Category';
+
 import eyeIcon from '@/assets/Icons/eyeDark.svg';
 import pencilIcon from '@/assets/Icons/pencilDark.svg';
 import archiveIcon from '@/assets/Icons/archiveDark.svg';
@@ -21,6 +23,8 @@ import AddingVisit from './components/AddingVisit';
 import BasicModal from '@/shared/components/BasicModal';
 import VisitDetails from '@/features/visits/components/VisitDetails';
 import EditingVisit from './components/EditingVisit';
+import Sidebar from './components/Sidebar';
+import SidebarItem from './components/SidebarItem';
 
 export default function VisitListTable(): JSX.Element {
   const isVet = IsVet();
@@ -31,22 +35,7 @@ export default function VisitListTable(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState<string>(''); // Search term state
 
   //use sidebar to select which table is shown
-  const [currentTab, setCurrentTab] = useState<string | null>('All');
-
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const getVisits = async (): Promise<void> => {
-      try {
-        const fetchedVisits = await getAllVisits();
-        setVisits(fetchedVisits);
-        setDisplayedVisits(fetchedVisits);
-      } catch (error) {
-        console.error('Error fetching visits:', error);
-      }
-    };
-    getVisits();
-  }, []);
+  const [currentTab, setCurrentTab] = useState<string>('All');
 
   // Sort visits: emergency visits first, then by start date
   const sortVisits = (visitsList: Visit[]): Visit[] => {
@@ -59,20 +48,6 @@ export default function VisitListTable(): JSX.Element {
       return new Date(b.visitDate).getTime() - new Date(a.visitDate).getTime();
     });
   };
-
-  // Update the displayed list whenever the search term or the full visits list changes.
-  // This avoids refetching from the API and preserves the full list in `visits`.
-  useEffect(() => {
-    const term = searchTerm.trim().toLowerCase();
-    if (term.length > 0) {
-      const filtered = visits.filter(v =>
-        (v.description || '').toLowerCase().includes(term)
-      );
-      setDisplayedVisits(sortVisits(filtered));
-    } else {
-      setDisplayedVisits(sortVisits(visits));
-    }
-  }, [searchTerm, visits]);
 
   // Filter visits based on status
   // Derive the different lists from the displayed list so search / tabs compose
@@ -104,6 +79,45 @@ export default function VisitListTable(): JSX.Element {
       return visit.status === 'ARCHIVED';
     })
   );
+
+  const categories: Category[] = [
+    { name: 'All', list: displayedVisits },
+    { name: 'Emergencies', emergency: true, list: emergencyVisits },
+    { name: 'Confirmed', list: confirmedVisits },
+    { name: 'Upcoming', list: upcomingVisits },
+    { name: 'Completed', list: completedVisits },
+    { name: 'Cancelled', list: cancelledVisits },
+    { name: 'Archived', list: archivedVisits },
+  ];
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const getVisits = async (): Promise<void> => {
+      try {
+        const fetchedVisits = await getAllVisits();
+        setVisits(fetchedVisits);
+        setDisplayedVisits(fetchedVisits);
+      } catch (error) {
+        console.error('Error fetching visits:', error);
+      }
+    };
+    getVisits();
+  }, []);
+
+  // Update the displayed list whenever the search term or the full visits list changes.
+  // This avoids refetching from the API and preserves the full list in `visits`.
+  useEffect(() => {
+    const term = searchTerm.trim().toLowerCase();
+    if (term.length > 0) {
+      const filtered = visits.filter(v =>
+        (v.description || '').toLowerCase().includes(term)
+      );
+      setDisplayedVisits(sortVisits(filtered));
+    } else {
+      setDisplayedVisits(sortVisits(visits));
+    }
+  }, [searchTerm, visits]);
 
   // Handle archiving the visit
   const handleArchive = async (visitId: string): Promise<void> => {
@@ -175,67 +189,62 @@ export default function VisitListTable(): JSX.Element {
 
   // Sidebar
 
-  const renderSidebarItem = (
-    name: string,
-    emergency: boolean = false
-    // visitAmount: number
-  ): JSX.Element => (
-    <li>
-      <a
-        className={
-          (name == currentTab ? 'active' : '') + (emergency ? 'emergency' : '')
-        }
-        onClick={() => {
-          setCurrentTab(name);
-        }}
-      >
-        {/* {renderUnreadCircle(true)} */}
-        <span>{name}</span>
-        {/* {renderVisitNumber(visitAmount)} */}
-      </a>
-    </li>
-  );
+  // const renderSidebarItem = (
+  //   name: string,
+  //   emergency: boolean = false
+  //   // visitAmount: number
+  // ): JSX.Element => (
+  //   <li>
+  //     <a
+  //       className={
+  //         (name == currentTab ? 'active' : '') + (emergency ? 'emergency' : '')
+  //       }
+  //       onClick={() => {
+  //         setCurrentTab(name);
+  //       }}
+  //     >
+  //       <span>{name}</span>
+  //     </a>
+  //   </li>
+  // );
 
-  const renderSidebar = (title: string): JSX.Element => (
-    <aside id="sidebar">
-      <ul>
-        <li>
-          <h2>
-            {title} {/* <a>&#9776;</a> */}
-          </h2>
-          {/* <button id="toggle-btn"></button> */}
-        </li>
+  // const renderSidebar = (title: string): JSX.Element => (
+  //   <aside id="sidebar">
+  //     <ul>
+  //       <li>
+  //         <h2>{title}</h2>
+  //       </li>
 
-        <li>
-          <AddingVisit
-            showButton={
-              <button className="btn btn-primary" title="Create">
-                <img src={pentosquareIcon} />
-                Create
-              </button>
-            }
-          />
-        </li>
-        <li>
-          <button
-            className="btn btn-primary"
-            onClick={() => navigate('/reviews')}
-            title="Reviews"
-          >
-            <img src={starIcon} />
-            Reviews
-          </button>
-        </li>
-        {renderSidebarItem('All')}
-        {renderSidebarItem('Emergencies', true)}
-        {renderSidebarItem('Confirmed')}
-        {renderSidebarItem('Upcoming')}
-        {renderSidebarItem('Completed')}
-        {renderSidebarItem('Cancelled')}
-        {renderSidebarItem('Archived')}
-      </ul>
-    </aside>
-  );
+  //       <li>
+  //         <AddingVisit
+  //           showButton={
+  //             <button className="btn btn-primary" title="Create">
+  //               <img src={pentosquareIcon} />
+  //               Create
+  //             </button>
+  //           }
+  //         />
+  //       </li>
+  //       <li>
+  //         <button
+  //           className="btn btn-primary"
+  //           onClick={() => navigate('/reviews')}
+  //           title="Reviews"
+  //         >
+  //           <img src={starIcon} />
+  //           Reviews
+  //         </button>
+  //       </li>
+  //       {renderSidebarItem('All')}
+  //       {renderSidebarItem('Emergencies', true)}
+  //       {renderSidebarItem('Confirmed')}
+  //       {renderSidebarItem('Upcoming')}
+  //       {renderSidebarItem('Completed')}
+  //       {renderSidebarItem('Cancelled')}
+  //       {renderSidebarItem('Archived')}
+  //     </ul>
+  //   </aside>
+  // );
 
   // Unified table renderer for all visits
   const renderTable = (title: string, visits: Visit[]): JSX.Element =>
@@ -388,20 +397,53 @@ export default function VisitListTable(): JSX.Element {
             Download CSV
           </button>
         </div>
-        {renderTable('All', displayedVisits)}
-        {renderTable('Emergencies', emergencyVisits)}
-        {renderTable('Confirmed', confirmedVisits)}
-        {renderTable('Upcoming', upcomingVisits)}
-        {renderTable('Completed', completedVisits)}
-        {renderTable('Cancelled', cancelledVisits)}
-        {renderTable('Archived', archivedVisits)}
+        {categories.map(category => renderTable(category.name, category.list))}
       </div>
+    );
+  };
+
+  const renderSidebarItem = (
+    name: string,
+    emergency?: boolean
+  ): JSX.Element => {
+    return (
+      <SidebarItem
+        itemName={name}
+        currentTab={currentTab}
+        onClick={setCurrentTab}
+        emergency={emergency}
+      />
     );
   };
 
   return (
     <div className="visit-page-container">
-      {renderSidebar('Visits')} {renderVisitsTables()}
+      <Sidebar title="Visits">
+        <li>
+          <AddingVisit
+            showButton={
+              <button className="btn btn-primary" title="Create">
+                <img src={pentosquareIcon} />
+                Create
+              </button>
+            }
+          />
+        </li>
+        <li>
+          <button
+            className="btn btn-primary"
+            onClick={() => navigate('/reviews')}
+            title="Reviews"
+          >
+            <img src={starIcon} />
+            Reviews
+          </button>
+        </li>
+        {categories.map(category =>
+          renderSidebarItem(category.name, category.emergency)
+        )}
+      </Sidebar>
+      {renderVisitsTables()}
     </div>
   );
 }
