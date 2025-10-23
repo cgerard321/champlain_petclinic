@@ -96,4 +96,6 @@ public interface BillService {
 
     Flux<BillResponseDTO> getBillsByCustomerIdAndDateRange(String customerId, LocalDate startDate, LocalDate endDate);
 
+     Mono<byte[]> generateStaffBillPdf(String billId, String currency);
+
 }

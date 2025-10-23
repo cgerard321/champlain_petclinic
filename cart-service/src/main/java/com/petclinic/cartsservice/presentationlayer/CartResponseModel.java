@@ -18,6 +18,7 @@ public class CartResponseModel {
 
     private String cartId;
     private String customerId;
+    private String customerName;
 
     private List<CartProduct> products;
     private double subtotal;
@@ -29,6 +30,9 @@ public class CartResponseModel {
     private String message;
     private String paymentStatus;
     private String invoiceId;
+
+    private Double promoPercent;
+
 
     public CartResponseModel(String invoiceId, String cartId, List<CartProduct> products, double total) {
         this.invoiceId = invoiceId;
