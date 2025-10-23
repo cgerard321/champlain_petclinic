@@ -2,11 +2,7 @@ package com.petclinic.bffapigateway.presentationlayer.v1;
 
 
 import com.petclinic.bffapigateway.domainclientlayer.CartServiceClient;
-import com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO;
-import com.petclinic.bffapigateway.dtos.Cart.CartProductResponseDTO;
-import com.petclinic.bffapigateway.dtos.Cart.CartRequestDTO;
-import com.petclinic.bffapigateway.dtos.Cart.CartResponseDTO;
-import com.petclinic.bffapigateway.dtos.Cart.UpdateProductQuantityRequestDTO;
+import com.petclinic.bffapigateway.dtos.Cart.*;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
@@ -77,8 +73,6 @@ public class CartControllerV1 {
 
     // Centralized error mapper (status-only). Success mapping stays at endpoints.
     private <T> Mono<ResponseEntity<T>> mapCartError(Throwable e, ErrorOptions o) {
-        log.error("{} error for cartId: {}, productId: {} - {}", o.context, o.cartId, o.productId, e.getMessage());
-
         if (e instanceof WebClientResponseException.UnprocessableEntity) {
             return Mono.just(ResponseEntity.unprocessableEntity().build());
         }
@@ -107,8 +101,6 @@ public class CartControllerV1 {
 
     // Variant that can include a CartResponseDTO error body message on 400 scenarios
     public Mono<ResponseEntity<CartResponseDTO>> mapCartErrorWithMessage(Throwable e, ErrorOptions o) {
-        log.error("{} error for cartId: {}, productId: {} - {}", o.context, o.cartId, o.productId, e.getMessage());
-
         if (e instanceof WebClientResponseException.UnprocessableEntity) {
             return Mono.just(ResponseEntity.unprocessableEntity().build());
         }
@@ -358,5 +350,61 @@ public class CartControllerV1 {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<List<CartResponseDTO>>> getAllCartsAsList() {
+        return cartServiceClient
+                .getAllCarts()
+                .collectList()
+                .map(ResponseEntity::ok)
+                .onErrorResume(e -> mapCartError(
+                        e, ErrorOptions.builder("getAllCartsAsList").build()
+                ));
+    }
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<CartResponseDTO> getAllCartsStream() {
+        return cartServiceClient.getAllCarts();
+    }
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
+    @PutMapping("/{cartId}/promo")
+    public Mono<ResponseEntity<CartResponseDTO>> applyPromoToCart(
+            @PathVariable String cartId,
+            @RequestParam("promoPercent") Double promoPercent) {
+
+        return cartServiceClient.applyPromoToCart(cartId, promoPercent)
+                .map(ResponseEntity::ok)
+                .onErrorResume(e -> mapCartErrorWithMessage(
+                        e,
+                        ErrorOptions.builder("applyPromoToCart")
+                                .cartId(cartId)
+                                .includeBadRequestBodyMessage(true)
+                                .build()
+                ));
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.OWNER, Roles.ADMIN})
+    @GetMapping("/promos/validate/{promoCode}")
+    public Mono<ResponseEntity<PromoCodeResponseDTO>> validatePromo(
+            @PathVariable String promoCode) {
+        return cartServiceClient.validatePromoCode(promoCode)
+                .map(ResponseEntity::ok)
+                .onErrorResume(e -> mapCartError(
+                        e, ErrorOptions.builder("validatePromo").build()
+                ));
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
+    @PutMapping("/{cartId}/promo/clear")
+    public Mono<ResponseEntity<CartResponseDTO>> clearPromo(@PathVariable String cartId) {
+        return cartServiceClient.clearPromo(cartId)
+                .map(ResponseEntity::ok)
+                .onErrorResume(e -> mapCartErrorWithMessage(
+                        e, ErrorOptions.builder("clearPromo").cartId(cartId).build()
+                ));
+    }
+
 
 }

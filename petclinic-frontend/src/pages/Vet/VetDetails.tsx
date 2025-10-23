@@ -12,12 +12,7 @@ import UploadAlbumPhoto from '@/features/veterinarians/api/UploadAlbumPhoto';
 import { getAlbumsByVetId } from '@/features/veterinarians/api/getAlbumByVetId.ts';
 import { fetchVetPhoto } from '@/features/veterinarians/api/fetchPhoto';
 import { fetchVet } from '@/features/veterinarians/api/fetchVetDetails.ts';
-import {
-  IsInventoryManager,
-  IsOwner,
-  IsReceptionist,
-  useUser,
-} from '@/context/UserContext';
+import { IsOwner, IsVet, IsAdmin, useUser } from '@/context/UserContext';
 import { getOwner } from '@/features/customers/api/getOwner';
 import { deleteVetRating } from '@/features/veterinarians/api/deleteVetRating';
 import AddVetRatingModal from '@/pages/Vet/AddVetRatingModal';
@@ -104,9 +99,9 @@ const formatRatingDate = (rateDate?: string): string => {
 export default function VetDetails(): JSX.Element {
   const { vetId } = useParams<{ vetId: string }>();
   const { user } = useUser();
-  const isInventoryManager = IsInventoryManager();
   const isOwner = IsOwner();
-  const isReceptionist = IsReceptionist();
+  const isVet = IsVet();
+  const isAdmin = IsAdmin();
   const [vet, setVet] = useState<VetResponseType | null>(null);
   const [education, setEducation] = useState<EducationResponseType[] | null>(
     null
@@ -126,7 +121,7 @@ export default function VetDetails(): JSX.Element {
   // Confirm-delete modal state
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingPhotoId, setPendingPhotoId] = useState<number | null>(null);
-  const canManageVet = !isInventoryManager && !isReceptionist; // allow Vet and Owner/Admin
+  const canManageVet = isVet || isAdmin; // Only allow Vets and Admins to manage vet details
 
   const [selectedEducation, setSelectedEducation] =
     useState<EducationResponseType | null>(null);
@@ -560,25 +555,26 @@ export default function VetDetails(): JSX.Element {
                   <strong>Rate Date:</strong>{' '}
                   {formatRatingDate(rating.rateDate)}
                 </p>
-                {currentCustomerName &&
-                  rating.customerName === currentCustomerName && (
-                    <button
-                      onClick={handleRatingDeleted}
-                      className="delete-rating-button"
-                      style={{
-                        backgroundColor: '#dc3545',
-                        color: 'white',
-                        border: 'none',
-                        padding: '8px 16px',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        marginTop: '10px',
-                        fontSize: '14px',
-                      }}
-                    >
-                      Delete My Rating
-                    </button>
-                  )}
+                {(currentCustomerName &&
+                  rating.customerName === currentCustomerName) ||
+                isAdmin ? (
+                  <button
+                    onClick={handleRatingDeleted}
+                    className="delete-rating-button"
+                    style={{
+                      backgroundColor: '#dc3545',
+                      color: 'white',
+                      border: 'none',
+                      padding: '8px 16px',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      marginTop: '10px',
+                      fontSize: '14px',
+                    }}
+                  >
+                    {isAdmin ? 'Delete Rating' : 'Delete My Rating'}
+                  </button>
+                ) : null}
                 <hr />
               </div>
             ))
@@ -799,38 +795,30 @@ export default function VetDetails(): JSX.Element {
                   )}
                 </div>
               )}
-              {!isInventoryManager &&
-                !isOwner &&
-                !isReceptionist &&
-                selectedEducation &&
-                vetId && (
-                  <UpdateVetEducation
-                    vetId={vetId}
-                    education={selectedEducation}
-                    educationId={selectedEducation.educationId}
-                    onClose={() => setSelectedEducation(null)}
-                  />
-                )}
+              {(isVet || isAdmin) && selectedEducation && vetId && (
+                <UpdateVetEducation
+                  vetId={vetId}
+                  education={selectedEducation}
+                  educationId={selectedEducation.educationId}
+                  onClose={() => setSelectedEducation(null)}
+                />
+              )}
             </section>
 
             {/* Only show album photos section if:
                 1. There are photos to display, OR
-                2. User is admin (not inventory manager, owner, or receptionist) */}
-            {(albumPhotos.length > 0 ||
-              (!isInventoryManager && !isOwner && !isReceptionist)) && (
+                2. User is vet or admin */}
+            {(albumPhotos.length > 0 || isVet || isAdmin) && (
               <section className="album-photos">
                 <div className="d-flex justify-content-between align-items-center">
                   <h2>Album Photos</h2>
 
-                  {vetId &&
-                    !isInventoryManager &&
-                    !isOwner &&
-                    !isReceptionist && (
-                      <UploadAlbumPhoto
-                        vetId={vetId}
-                        onUploadComplete={loadAlbumPhotos}
-                      />
-                    )}
+                  {vetId && (isVet || isAdmin) && (
+                    <UploadAlbumPhoto
+                      vetId={vetId}
+                      onUploadComplete={loadAlbumPhotos}
+                    />
+                  )}
                 </div>
 
                 {albumPhotos.length > 0 ? (
@@ -850,7 +838,7 @@ export default function VetDetails(): JSX.Element {
                           alt={`Album Photo ${photo.id}`}
                           className="album-photo-thumbnail"
                         />
-                        {!isInventoryManager && !isOwner && !isReceptionist && (
+                        {(isVet || isAdmin) && (
                           <button
                             style={{
                               backgroundColor: '#f93142ff',
@@ -908,14 +896,16 @@ export default function VetDetails(): JSX.Element {
           >
             <h3 style={{ marginTop: 0 }}>Delete this photo?</h3>
             <p>
-              You’re about to delete <strong>photo #{pendingPhotoId}</strong>.
+              You&apos;re about to delete{' '}
+              <strong>photo #{pendingPhotoId}</strong>.
             </p>
             <p>
-              <strong>Vet ID:</strong> <code>{vetId}</code>
+              <strong>Vet:</strong>{' '}
+              {vet ? `${vet.firstName} ${vet.lastName}` : 'Loading...'}
             </p>
             <p style={{ fontSize: 13, opacity: 0.85 }}>
-              This can’t be undone. Make sure this is the correct veterinarian
-              profile.
+              This can&apos;t be undone. Make sure this is the correct
+              veterinarian profile.
             </p>
             <div
               style={{
@@ -933,7 +923,7 @@ export default function VetDetails(): JSX.Element {
                   border: '1px solid #ddd',
                 }}
               >
-                Undo
+                Cancel
               </button>
               <button
                 onClick={confirmDelete}
