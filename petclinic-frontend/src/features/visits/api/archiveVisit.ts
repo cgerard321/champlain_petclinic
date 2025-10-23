@@ -40,11 +40,8 @@ export async function archiveVisit(
 
     // Call the success callback with the updated visit
     onSuccess(updatedVisit);
-
-    alert('Visit archived successfully!');
   } catch (error) {
     console.error('Error archiving visit:', error);
-    alert('Error archiving visit.');
     throw error;
   }
 }

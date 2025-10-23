@@ -40,11 +40,8 @@ export async function cancelVisit(
 
     // Call the success callback with the updated visit
     onSuccess(updatedVisit);
-
-    alert('Visit cancelled successfully!');
   } catch (error) {
     console.error('Error canceling visit:', error);
-    alert('Error canceling visit.');
     throw error;
   }
 }

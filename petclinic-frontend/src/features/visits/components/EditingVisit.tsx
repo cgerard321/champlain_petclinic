@@ -1,13 +1,15 @@
 import * as React from 'react';
-import { FormEvent, useState, useEffect } from 'react';
+import { FormEvent, useState, useEffect, useRef } from 'react';
 import { VisitRequestModel } from '@/features/visits/models/VisitRequestModel';
 import { Status } from '@/features/visits/models/Status';
 import { VisitResponseModel } from '../models/VisitResponseModel';
 import { getVisit } from '../api/getVisit';
 import { updateVisit } from '../api/updateVisit';
 import { getAvailableVets, VetResponse } from '@/features/visits/api/getVets';
+import { /*useUser,*/ IsVet, IsAdmin } from '@/context/UserContext';
 
 import BasicModal from '@/shared/components/BasicModal';
+import PrescriptionModal from '@/features/visits/Prescription/prescriptionComponents/prescriptionModal';
 
 import './EditVisit.css';
 
@@ -28,6 +30,8 @@ type VisitType = {
   practitionerId: string;
   isEmergency: boolean;
   status: Status;
+  ownerFirstName?: string;
+  ownerLastName?: string;
 };
 
 const formatDate = (date: Date): string => {
@@ -56,6 +60,12 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
   const [showNotification, setShowNotification] = useState<boolean>(false);
 
   const [vets, setVets] = useState<VetResponse[]>([]);
+  const [showPrescriptionModal, setShowPrescriptionModal] =
+    useState<boolean>(false);
+  const prescriptionTriggerRef = useRef<HTMLButtonElement | null>(null);
+  //const { user } = useUser();
+  const isVet = IsVet();
+  const isAdmin = typeof IsAdmin === 'function' ? IsAdmin() : false;
 
   useEffect(() => {
     const fetchVisitData = async (): Promise<void> => {
@@ -106,7 +116,7 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
     const { name, value } = e.target;
     setVisit(prevVisit => ({
       ...prevVisit,
-      [name]: name === 'visitStartDate' ? new Date(value) : value, // Convert string to Date object for visitDate
+      [name]: name === 'visitStartDate' ? new Date(value) : value,
     }));
   };
 
@@ -132,8 +142,6 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
     setIsLoading(true);
     setErrorMessage('');
     setSuccessMessage('');
-    // setErrorMessage('');
-    // setSuccessMessage('');
 
     const formattedVisit: VisitRequestModel = {
       visitDate: visit.visitStartDate.toISOString(),
@@ -149,17 +157,12 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
         await updateVisit(visitId, formattedVisit);
         setSuccessMessage('Visit updated successfully!');
         setShowNotification(true);
-        setTimeout(() => setShowNotification(false), 3000); // Hide notification after 3 seconds
+        setTimeout(() => setShowNotification(false), 3000);
         setTimeout(() => {
           window.location.reload();
         }, 1000);
-        // setSuccessMessage('Visit updated successfully!');
-        // setShowNotification(true);
-        // setTimeout(() => setShowNotification(false), 3000); // Hide notification after 3 seconds
-        // navigate('/visits'); // Navigate to a different page or clear form
       }
     } catch (error) {
-      // Use type assertion or check error type
       const apiError = error as ApiError;
       setErrorMessage(`Error updating visit: ${apiError.message}`);
     } finally {
@@ -167,108 +170,155 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
     }
   };
 
+  const handlePrescriptionClick = (): void => {
+    setShowPrescriptionModal(true);
+    setTimeout(() => {
+      prescriptionTriggerRef.current?.click();
+    }, 0);
+  };
+
   return (
-    <BasicModal
-      title="Edit Visit"
-      showButton={showButton}
-      formId="modalform"
-      validate={validate}
-      confirmText={isLoading ? 'Updating...' : 'Update'}
-      errorMessage={errorMessage}
-    >
-      <form id="modalform" onSubmit={handleSubmit}>
-        <label>Pet Name:</label>
-        <input disabled={true} value={visit.petName}></input>
-        <br />
-        <label>
-          Description:{' '}
-          {errors.description && (
-            <span className="error">{errors.description}</span>
-          )}
-        </label>
-
-        <input
-          type="text"
-          name="description"
-          value={visit.description}
-          onChange={handleChange}
-          required
-        />
-
-        <br />
-        <div className="form-group">
-          <label htmlFor="practitionerId">Veterinarian Preference:</label>
-          <select
-            id="practitionerId"
-            name="practitionerId"
-            value={visit.practitionerId}
-            onChange={handleChange}
-          >
-            {vets.map(vet => (
-              <option key={vet.vetId} value={vet.vetId}>
-                Dr. {vet.firstName} {vet.lastName}
-                {vet.specialties &&
-                  vet.specialties.length > 0 &&
-                  ` (${vet.specialties.map(s => s.name).join(', ')})`}
-              </option>
-            ))}
-          </select>
-        </div>
-        <br />
-        <label>
-          Visit Date:{' '}
-          {errors.visitStartDate && (
-            <span className="error">{errors.visitStartDate}</span>
-          )}
-          Visit Date:{' '}
-          {errors.visitStartDate && <span className="error">Required</span>}
-        </label>
-
-        <input
-          type="datetime-local"
-          name="visitStartDate"
-          value={formatDate(visit.visitStartDate)}
-          onChange={handleChange}
-          required
-        />
-        <br />
-        <label>
-          Status:{' '}
-          {errors.status && <span className="error">{errors.status}</span>}
-        </label>
-
-        <select name="status" value={visit.status} onChange={handleChange}>
-          <option value="CONFIRMED">Confirmed</option>
-          <option value="UPCOMING">Upcoming</option>
-          <option value="COMPLETED">Completed</option>
-        </select>
-        <br />
-        <div className="form-group emergency-toggle-group">
-          <label htmlFor="isEmergency">
-            <span className="emergency-label-text">
-              <span>Emergency Visit</span>
-            </span>
-            <div className="switch-wrapper">
-              <input
-                type="checkbox"
-                id="isEmergency"
-                name="isEmergency"
-                checked={visit.isEmergency}
-                onChange={e =>
-                  setVisit(prev => ({
-                    ...prev,
-                    isEmergency: e.target.checked,
-                  }))
-                }
-                className="switch-input"
-              />
-              <span className="switch-slider"></span>
-            </div>
+    <>
+      <BasicModal
+        title="Edit Visit"
+        showButton={showButton}
+        formId="modalform"
+        validate={validate}
+        confirmText={isLoading ? 'Updating...' : 'Update'}
+        errorMessage={errorMessage}
+      >
+        <form id="modalform" onSubmit={handleSubmit}>
+          <label>Pet Name:</label>
+          <input disabled={true} value={visit.petName}></input>
+          <br />
+          <label>
+            Description:{' '}
+            {errors.description && (
+              <span className="error">{errors.description}</span>
+            )}
           </label>
-        </div>
-      </form>
-      {showNotification && <div className="notification">{successMessage}</div>}
-    </BasicModal>
+
+          <input
+            type="text"
+            name="description"
+            value={visit.description}
+            onChange={handleChange}
+            required
+          />
+
+          <br />
+          <div className="form-group">
+            <label htmlFor="practitionerId">Veterinarian Preference:</label>
+            <select
+              id="practitionerId"
+              name="practitionerId"
+              value={visit.practitionerId}
+              onChange={handleChange}
+            >
+              {vets.map(vet => (
+                <option key={vet.vetId} value={vet.vetId}>
+                  Dr. {vet.firstName} {vet.lastName}
+                  {vet.specialties &&
+                    vet.specialties.length > 0 &&
+                    ` (${vet.specialties.map(s => s.name).join(', ')})`}
+                </option>
+              ))}
+            </select>
+          </div>
+          <br />
+          <label>
+            Visit Date:{' '}
+            {errors.visitStartDate && (
+              <span className="error">{errors.visitStartDate}</span>
+            )}
+            Visit Date:{' '}
+            {errors.visitStartDate && <span className="error">Required</span>}
+          </label>
+
+          <input
+            type="datetime-local"
+            name="visitStartDate"
+            value={formatDate(visit.visitStartDate)}
+            onChange={handleChange}
+            required
+          />
+          <br />
+          <label>
+            Status:{' '}
+            {errors.status && <span className="error">{errors.status}</span>}
+          </label>
+
+          <select name="status" value={visit.status} onChange={handleChange}>
+            <option value="CONFIRMED">Confirmed</option>
+            <option value="UPCOMING">Upcoming</option>
+            <option value="COMPLETED">Completed</option>
+          </select>
+          <br />
+          <div className="form-group emergency-toggle-group">
+            <label htmlFor="isEmergency">
+              <span className="emergency-label-text">
+                <span>Emergency Visit</span>
+              </span>
+              <div className="switch-wrapper">
+                <input
+                  type="checkbox"
+                  id="isEmergency"
+                  name="isEmergency"
+                  checked={visit.isEmergency}
+                  onChange={e =>
+                    setVisit(prev => ({
+                      ...prev,
+                      isEmergency: e.target.checked,
+                    }))
+                  }
+                  className="switch-input"
+                />
+                <span className="switch-slider"></span>
+              </div>
+            </label>
+          </div>
+          <br />
+          {visit.status === 'COMPLETED' && (isVet || isAdmin) && (
+            <div>
+              <button
+                type="button"
+                onClick={handlePrescriptionClick}
+                className="button"
+              >
+                Create Prescription
+              </button>
+            </div>
+          )}
+        </form>
+        {showNotification && (
+          <div className="notification">{successMessage}</div>
+        )}
+      </BasicModal>
+
+      {showPrescriptionModal && (
+        <PrescriptionModal
+          showButton={
+            <button
+              ref={prescriptionTriggerRef}
+              style={{ display: 'none' }}
+              aria-hidden="true"
+              tabIndex={-1}
+            />
+          }
+          visitId={visitId}
+          vetFirstName={
+            vets.find(vet => vet.vetId === visit.practitionerId)?.firstName ||
+            ''
+          }
+          vetLastName={
+            vets.find(vet => vet.vetId === visit.practitionerId)?.lastName || ''
+          }
+          ownerFirstName={visit.ownerFirstName || ''}
+          ownerLastName={visit.ownerLastName || ''}
+          petName={visit.petName}
+        />
+      )}
+    </>
   );
 };
 

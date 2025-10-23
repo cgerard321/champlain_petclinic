@@ -32,6 +32,8 @@ export default function VisitListTable(): JSX.Element {
   const [displayedVisits, setDisplayedVisits] = useState<Visit[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>(''); // Search term state
 
+  const [successMessage, setSuccessMessage] = useState<string>('');
+  const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
   //use sidebar to select which table is shown
   const [currentTab, setCurrentTab] = useState<string | null>('All');
 
@@ -126,9 +128,14 @@ export default function VisitListTable(): JSX.Element {
           });
         });
       });
+
+      setSuccessMessage('Visit archived successfully!');
+      setShowSuccessMessage(true);
       setTimeout(() => {
+        setShowSuccessMessage(false);
+        setSuccessMessage('');
         window.location.reload();
-      }, 1000);
+      }, 3000);
     } catch (error) {
       return;
     }
@@ -147,9 +154,13 @@ export default function VisitListTable(): JSX.Element {
         });
       });
 
+      setSuccessMessage('Visit cancelled successfully!');
+      setShowSuccessMessage(true);
       setTimeout(() => {
+        setShowSuccessMessage(false);
+        setSuccessMessage('');
         window.location.reload();
-      }, 1000);
+      }, 3000);
     } catch (error) {
       return;
     }
@@ -160,25 +171,25 @@ export default function VisitListTable(): JSX.Element {
   // Buttons
   const renderCancelButton = (): JSX.Element => (
     <a>
-      <img className="icon" src={xcrossIcon} title="Cancel" />
+      <img className="icon-visits" src={xcrossIcon} title="Cancel" />
     </a>
   );
 
   const renderArchiveButton = (): JSX.Element => (
     <a>
-      <img className="icon" src={archiveIcon} title="Archive" />
+      <img className="icon-visits" src={archiveIcon} title="Archive" />
     </a>
   );
 
   const renderEditButton = (): JSX.Element => (
     <a>
-      <img className="icon" src={pencilIcon} title="Edit" />
+      <img className="icon-visits" src={pencilIcon} title="Edit" />
     </a>
   );
 
   const renderViewButton = (): JSX.Element => (
     <a>
-      <img className="icon" src={eyeIcon} title="View" />
+      <img className="icon-visits" src={eyeIcon} title="View" />
     </a>
   );
 
@@ -337,6 +348,15 @@ export default function VisitListTable(): JSX.Element {
                         This will set the status of this visit to Archived.
                       </div>
                       <div>Do you wish to proceed?</div>
+                      {showSuccessMessage && (
+                        <div
+                          className="visit-success-message"
+                          role="status"
+                          aria-live="polite"
+                        >
+                          {successMessage}
+                        </div>
+                      )}
                     </BasicModal>
                     // </a>
                   )}
@@ -362,6 +382,15 @@ export default function VisitListTable(): JSX.Element {
                           This will set the status of this visit to Canceled.
                         </div>
                         <div>Do you wish to proceed?</div>
+                        {showSuccessMessage && (
+                          <div
+                            className="visit-success-message"
+                            role="status"
+                            aria-live="polite"
+                          >
+                            {successMessage}
+                          </div>
+                        )}
                       </BasicModal>
                       // </a>
                     )}
