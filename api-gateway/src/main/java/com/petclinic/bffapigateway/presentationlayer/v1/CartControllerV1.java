@@ -2,11 +2,7 @@ package com.petclinic.bffapigateway.presentationlayer.v1;
 
 
 import com.petclinic.bffapigateway.domainclientlayer.CartServiceClient;
-import com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO;
-import com.petclinic.bffapigateway.dtos.Cart.CartProductResponseDTO;
-import com.petclinic.bffapigateway.dtos.Cart.CartRequestDTO;
-import com.petclinic.bffapigateway.dtos.Cart.CartResponseDTO;
-import com.petclinic.bffapigateway.dtos.Cart.UpdateProductQuantityRequestDTO;
+import com.petclinic.bffapigateway.dtos.Cart.*;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
@@ -370,5 +366,45 @@ public class CartControllerV1 {
     public Flux<CartResponseDTO> getAllCartsStream() {
         return cartServiceClient.getAllCarts();
     }
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
+    @PutMapping("/{cartId}/promo")
+    public Mono<ResponseEntity<CartResponseDTO>> applyPromoToCart(
+            @PathVariable String cartId,
+            @RequestParam("promoPercent") Double promoPercent) {
+
+        return cartServiceClient.applyPromoToCart(cartId, promoPercent)
+                .map(ResponseEntity::ok)
+                .onErrorResume(e -> mapCartErrorWithMessage(
+                        e,
+                        ErrorOptions.builder("applyPromoToCart")
+                                .cartId(cartId)
+                                .includeBadRequestBodyMessage(true)
+                                .build()
+                ));
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.OWNER, Roles.ADMIN})
+    @GetMapping("/promos/validate/{promoCode}")
+    public Mono<ResponseEntity<PromoCodeResponseDTO>> validatePromo(
+            @PathVariable String promoCode) {
+        return cartServiceClient.validatePromoCode(promoCode)
+                .map(ResponseEntity::ok)
+                .onErrorResume(e -> mapCartError(
+                        e, ErrorOptions.builder("validatePromo").build()
+                ));
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
+    @PutMapping("/{cartId}/promo/clear")
+    public Mono<ResponseEntity<CartResponseDTO>> clearPromo(@PathVariable String cartId) {
+        return cartServiceClient.clearPromo(cartId)
+                .map(ResponseEntity::ok)
+                .onErrorResume(e -> mapCartErrorWithMessage(
+                        e, ErrorOptions.builder("clearPromo").cartId(cartId).build()
+                ));
+    }
+
 
 }
