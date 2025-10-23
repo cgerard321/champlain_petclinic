@@ -15,7 +15,6 @@ import com.petclinic.vet.dataaccesslayer.badges.Badge;
 import com.petclinic.vet.dataaccesslayer.badges.BadgeRepository;
 import com.petclinic.vet.dataaccesslayer.badges.BadgeTitle;
 import com.petclinic.vet.dataaccesslayer.education.EducationRepository;
-import com.petclinic.vet.dataaccesslayer.photos.Photo;
 import com.petclinic.vet.dataaccesslayer.photos.PhotoRepository;
 import com.petclinic.vet.dataaccesslayer.ratings.RatingRepository;
 import com.petclinic.vet.dataaccesslayer.vets.Specialty;
@@ -67,10 +66,37 @@ public class VetServiceImpl implements VetService {
     public Mono<VetResponseDTO> addVet(Mono<VetRequestDTO> vetDTOMono) {
         return vetDTOMono
                 .flatMap(this::validateVetRequestDTO)
-                .flatMap(this::handleDefaultPhoto)
-                .map(EntityDtoUtil::vetRequestDtoToEntity)
-                .flatMap(this::assignBadgeAndSaveBadgeAndVet)
-                .map(EntityDtoUtil::vetEntityToResponseDTO);
+                .flatMap(vetRequest -> {
+                    Vet vetEntity = EntityDtoUtil.vetRequestDtoToEntity(vetRequest);
+                    
+                    Mono<FileResponseDTO> photoMono;
+                    if (vetRequest.getPhoto() != null && vetRequest.getPhoto().getFileData() != null) {
+                        photoMono = filesServiceClient.addFile(vetRequest.getPhoto());
+                    } else if (vetRequest.isPhotoDefault()) {
+                        FileRequestDTO defaultPhoto = FileRequestDTO.builder()
+                                .fileName("vet_default.jpg")
+                                .fileType("image/jpeg")
+                                .build();
+                        defaultPhoto.setFileDataFromBytes(loadImage("images/vet_default.jpg"));
+                        photoMono = filesServiceClient.addFile(defaultPhoto);
+                    } else {
+                        photoMono = Mono.empty();
+                    }
+                    
+                    return photoMono
+                            .defaultIfEmpty(null)
+                            .flatMap(photo -> {
+                                if (photo != null) {
+                                    vetEntity.setImageId(photo.getFileId());
+                                }
+                                return assignBadgeAndSaveBadgeAndVet(vetEntity)
+                                        .map(savedVet -> {
+                                            VetResponseDTO dto = EntityDtoUtil.vetEntityToResponseDTO(savedVet);
+                                            dto.setPhoto(photo);
+                                            return dto;
+                                        });
+                            });
+                });
     }
 
     @Override
@@ -169,17 +195,26 @@ public class VetServiceImpl implements VetService {
                 .flatMap(vet -> {
                     log.info("Deleting associated data for vetId: {}", vetId);
 
-                    //Mono<Void> deleteBadges = badgeRepository.deleteByVetId(vetId);
+                    Mono<Void> deletePhoto = Mono.justOrEmpty(vet.getImageId())
+                            .flatMap(filesServiceClient::deleteFileById)
+                            .onErrorResume(e -> {
+                                log.warn("Could not delete file for vet {}: {}", vetId, e.getMessage());
+                                return Mono.empty();
+                            });
 
-                    Mono<Void> deletePhotos = photoRepository.findByVetId(vetId)
+                    Mono<Void> deleteOldPhotos = photoRepository.findByVetId(vetId)
                             .flatMap(photoRepository::delete)
-                            .then();
+                            .then()
+                            .onErrorResume(e -> {
+                                log.warn("Could not delete old photo for vet {}: {}", vetId, e.getMessage());
+                                return Mono.empty();
+                            });
 
                     Mono<String> deleteRatings = ratingRepository.deleteByVetId(vetId);
 
                     Mono<String> deleteEducations = educationRepository.deleteByVetId(vetId);
 
-                    return Mono.when(deletePhotos, deleteRatings, deleteEducations)
+                    return Mono.when(deletePhoto, deleteOldPhotos, deleteRatings, deleteEducations)
                             .then(vetRepository.delete(vet))
                             .doOnSuccess(unused -> log.info("Successfully deleted vetId: {}", vetId))
                             .doOnError(error -> log.error("Error deleting vetId: {}", vetId, error));
@@ -210,20 +245,6 @@ public class VetServiceImpl implements VetService {
         if(requestDTO.getSpecialties()==null)
             return Mono.error(new InvalidInputException("invalid specialties"));
         return Mono.just(requestDTO);
-    }
-
-    private Mono<VetRequestDTO> handleDefaultPhoto(VetRequestDTO vet) {
-        if (vet.isPhotoDefault()) {
-            Photo photo = Photo.builder()
-                    .vetId(vet.getVetId())
-                    .filename("vet_default.jpg")
-                    .imgType("image/jpeg")
-                    .data(loadImage("images/vet_default.jpg"))
-                    .build();
-            return photoRepository.save(photo)
-                    .thenReturn(vet);
-        }
-        return Mono.just(vet);
     }
 
     private Mono<Vet> assignBadgeAndSaveBadgeAndVet(Vet vetEntity) {
