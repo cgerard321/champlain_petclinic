@@ -215,7 +215,7 @@ public class VisitServiceImpl implements VisitService {
                 .flatMap(entityDtoUtil::toVisitResponseDTO);
     }
 
-    // Helper class for adding visit that helps avoid id collisions when adding visits
+    // Helper method for adding visit that helps avoid id collisions when adding visits
     private Mono<Visit> saveVisitWithUniqueId(Visit entity) {
         return Mono.defer(() -> {
             entity.setVisitId(VisitIdGenerator.generateVisitId());
