@@ -18,6 +18,7 @@ ext {
     mapstructVersion = "1.5.5.Final"
 }
 dependencies {
+    implementation 'com.itextpdf:itextpdf:5.5.13.2'
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive',
             'org.springframework.boot:spring-boot-starter-webflux',
             'org.yaml:snakeyaml:2.2',

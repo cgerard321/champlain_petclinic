@@ -191,7 +191,7 @@ services:
       retries: 10
 
   postgres-vet:
-    image: postgres
+    image: postgres:17
     container_name: postgres-vet
     hostname: postgres
     environment:
