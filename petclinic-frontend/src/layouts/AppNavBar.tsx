@@ -157,7 +157,7 @@ export function NavBar(): JSX.Element {
                     Visits
                   </Nav.Link>
                 )}
-                {(IsAdmin() || IsVet()) && (
+                {(IsAdmin() || IsVet() || IsOwner()) && (
                   <NavDropdown title="Visits" id="visits-dropdown">
                     <NavDropdown.Item as={Link} to={AppRoutePaths.Visits}>
                       List View
@@ -170,7 +170,7 @@ export function NavBar(): JSX.Element {
                       Calendar View
                     </NavDropdown.Item>
 
-                    {showVetVisitsDropdown && (
+                    {showVetVisitsDropdown && IsVet() && (
                       <>
                         <NavDropdown.Divider />
                         <NavDropdown.Item

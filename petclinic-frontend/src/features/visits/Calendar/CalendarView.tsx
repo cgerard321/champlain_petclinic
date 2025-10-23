@@ -22,9 +22,10 @@ import {
 import { Visit } from '../models/Visit';
 import { getAllVisits } from '../api/getAllVisits';
 import { getVisitsForPractitioner } from '../api/getVisitsForPractitioner';
-import { useUser, IsAdmin, IsVet } from '@/context/UserContext';
+import { useUser, IsAdmin, IsVet, IsOwner } from '@/context/UserContext';
 import './CalendarView.css';
 import { FaChevronLeft, FaChevronRight, FaCalendarAlt } from 'react-icons/fa';
+import { getAllOwnerVisits } from '../api/getAllOwnerVisits';
 
 type ViewMode = 'year' | 'month' | 'week';
 
@@ -32,6 +33,7 @@ export default function CalendarView(): JSX.Element {
   const { user } = useUser();
   const isAdmin = IsAdmin();
   const isVet = IsVet();
+  const isOwner = IsOwner();
 
   const [visits, setVisits] = useState<Visit[]>([]);
   const [filteredVisits, setFilteredVisits] = useState<Visit[]>([]);
@@ -52,8 +54,8 @@ export default function CalendarView(): JSX.Element {
           fetchedVisits = await getAllVisits();
         } else if (isVet && user?.userId) {
           fetchedVisits = await getVisitsForPractitioner(user.userId);
-        } else if (user?.userId) {
-          fetchedVisits = await getAllVisits();
+        } else if (isOwner && user?.userId) {
+          fetchedVisits = await getAllOwnerVisits(user.userId);
         }
 
         setVisits(fetchedVisits);
@@ -66,7 +68,7 @@ export default function CalendarView(): JSX.Element {
     };
 
     fetchVisits();
-  }, [isAdmin, isVet, user?.userId]);
+  }, [isAdmin, isVet, isOwner, user?.userId]);
 
   useEffect(() => {
     if (!visits.length) {

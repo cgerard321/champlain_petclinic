@@ -155,11 +155,12 @@
 }
  
 .month-visit-count {
-  color: #666;
-  font-size: 14px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #0d6efd;
+  margin: 8px 0;
 }
  
-/* ========== MONTH VIEW ========== */
 .calendar-month-view {
   display: flex;
   flex-direction: column;
@@ -528,76 +529,4 @@
     padding: 6px 12px;
     font-size: 14px;
   }
-}
-
-.month-status-dots {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-  justify-content: center;
-  margin-top: 12px;
-  flex-wrap: wrap;
-}
-
-.status-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.status-dot.status-upcoming {
-  background-color: #ffc107;
-}
-
-.status-dot.status-confirmed {
-  background-color: #17a2b8;
-}
-
-.status-dot.status-completed {
-  background-color: #28a745;
-}
-
-.status-dot.status-cancelled {
-  background-color: #dc3545;
-}
-
-.status-dot.status-archived {
-  background-color: #6c757d;
-}
-
-.more-indicator {
-  font-size: 10px;
-  color: #666;
-  font-weight: 600;
-  margin-left: 2px;
-}
-
-.calendar-info {
-  background: #e7f3ff;
-  border: 1px solid #b3d9ff;
-  border-radius: 8px;
-  padding: 12px 20px;
-  margin-top: 20px;
-  text-align: center;
-}
-
-.calendar-info p {
-  margin: 0;
-  color: #004085;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.month-visit-count {
-  font-size: 24px;
-  font-weight: 700;
-  color: #0d6efd;
-  margin: 8px 0;
-}
-
-.year-month-cell:hover {
-  border-color: #0d6efd;
-  box-shadow: 0 6px 16px rgba(13, 110, 253, 0.25);
-  transform: translateY(-4px);
 }
