@@ -13,8 +13,10 @@ angular.module('inventoriesProductList')
         self.lastParams = {
             productName: '',
             productQuantity: '',
-            productPrice: '',
-            productSalePrice: ''
+            minPrice: '',
+            maxPrice: '',
+            minSalePrice: '',
+            maxSalePrice: ''
         }
         $scope.inventory = {};
 
@@ -167,18 +169,22 @@ angular.module('inventoriesProductList')
         $scope.clearQueries = function (){
             self.lastParams.productName = '';
             self.lastParams.productQuantity = '';
-            self.lastParams.productPrice = '';
-            self.lastParams.productSalePrice = '';
+            self.lastParams.minPrice = '';
+            self.lastParams.maxPrice = '';
+            self.lastParams.minSalePrice = '';
+            self.lastParams.maxSalePrice = '';
 
             // Clear the input fields
             $scope.productName = '';
             $scope.productQuantity = '';
-            $scope.productPrice = '';
-            $scope.productSalePrice = '';
-            $scope.searchProduct('', '', '', '');
+            $scope.minPrice = '';
+            $scope.maxPrice = '';
+            $scope.minSalePrice = '';
+            $scope.maxSalePrice = '';
+            $scope.searchProduct('', '', '', '', '', '');
         }
 
-        $scope.searchProduct = function(productName, productQuantity, productPrice, productSalePrice) {
+        $scope.searchProduct = function(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice) {
             var inventoryId = $stateParams.inventoryId;
             var queryString = '';
             resetDefaultValues()
@@ -196,20 +202,36 @@ angular.module('inventoriesProductList')
                 self.lastParams.productQuantity = productQuantity;
             }
 
-            if (productPrice && productPrice !== '') {
+            if (minPrice && minPrice !== '') {
                 if (queryString !== '') {
                     queryString += "&";
                 }
-                queryString += "productPrice=" + productPrice;
-                self.lastParams.productPrice = productPrice;
+                queryString += "minPrice=" + minPrice;
+                self.lastParams.minPrice = minPrice;
             }
 
-            if (productSalePrice && productSalePrice !== '') {
+            if (maxPrice && maxPrice !== '') {
                 if (queryString !== '') {
                     queryString += "&";
                 }
-                queryString += "productSalePrice=" + productSalePrice;
-                self.lastParams.productSalePrice = productSalePrice;
+                queryString += "maxPrice=" + maxPrice;
+                self.lastParams.maxPrice = maxPrice;
+            }
+
+            if (minSalePrice && minSalePrice !== '') {
+                if (queryString !== '') {
+                    queryString += "&";
+                }
+                queryString += "minSalePrice=" + minSalePrice;
+                self.lastParams.minSalePrice = minSalePrice;
+            }
+
+            if (maxSalePrice && maxSalePrice !== '') {
+                if (queryString !== '') {
+                    queryString += "&";
+                }
+                queryString += "maxSalePrice=" + maxSalePrice;
+                self.lastParams.maxSalePrice = maxSalePrice;
             }
 
             var apiUrl = "api/gateway/inventories/" + inventoryId + "/products";
@@ -225,7 +247,7 @@ angular.module('inventoriesProductList')
                         response.push(current);
                     });
                     self.inventoryProductList = response;
-                    loadTotalItem(productName, productPrice, productQuantity)
+                    loadTotalItem(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)
                     InventoryService.setInventoryId(inventoryId);
                 })
                 .catch(function(error) {
@@ -241,19 +263,23 @@ angular.module('inventoriesProductList')
                 });
         };
 
-        function fetchProductList(productName, productPrice, productQuantity, productSalePrice) {
-            if (productName || productPrice || productQuantity) {
+        function fetchProductList(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice) {
+            if (productName || productQuantity || minPrice || maxPrice || minSalePrice || maxSalePrice) {
                 self.lastParams.productName = productName;
-                self.lastParams.productPrice = productPrice;
                 self.lastParams.productQuantity = productQuantity;
-                self.lastParams.productSalePrice = productSalePrice;
-                self.searchProduct(productName, productPrice, productQuantity, productSalePrice)
+                self.lastParams.minPrice = minPrice;
+                self.lastParams.maxPrice = maxPrice;
+                self.lastParams.minSalePrice = minSalePrice;
+                self.lastParams.maxSalePrice = maxSalePrice;
+                self.searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)
             }
             else {
-                self.lastParams.productSalePrice = null;
                 self.lastParams.productName = null;
-                self.lastParams.productPrice = null;
                 self.lastParams.productQuantity = null;
+                self.lastParams.minPrice = null;
+                self.lastParams.maxPrice = null;
+                self.lastParams.minSalePrice = null;
+                self.lastParams.maxSalePrice = null;
                 let inventoryId = $stateParams.inventoryId;
                 let response = [];
                 $http.get('api/gateway/inventories/' + $stateParams.inventoryId + '/products-pagination?page=' + self.currentPage + '&size=' + self.pageSize).then(function (resp) {
@@ -264,7 +290,7 @@ angular.module('inventoriesProductList')
                     });
                     self.inventoryProductList = response;
                     inventoryId = $stateParams.inventoryId;
-                    loadTotalItem(productName, productPrice, productQuantity, productSalePrice)
+                    loadTotalItem(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)
                     InventoryService.setInventoryId(inventoryId);
                     if (resp.data.length === 0) {
                         // Handle if inventory is empty
@@ -281,7 +307,7 @@ angular.module('inventoriesProductList')
                 self.currentPage = currentPageInt.toString();
                 updateActualCurrentPageShown();
                 //refresh product list
-                fetchProductList(self.lastParams.productName, self.lastParams.productPrice, self.lastParams.productQuantity, self.lastParams.productSalePrice);
+                fetchProductList(self.lastParams.productName, self.lastParams.productQuantity, self.lastParams.minPrice, self.lastParams.maxPrice, self.lastParams.minSalePrice, self.lastParams.maxSalePrice);
             }
         }
 
@@ -293,7 +319,7 @@ angular.module('inventoriesProductList')
                 updateActualCurrentPageShown();
                 console.log("Called the previous page and the new current page " + self.currentPage)
                 // Refresh the owner's list with the new page size
-                fetchProductList(self.lastParams.productName, self.lastParams.productPrice, self.lastParams.productQuantity, self.lastParams.productSalePrice);
+                fetchProductList(self.lastParams.productName, self.lastParams.productQuantity, self.lastParams.minPrice, self.lastParams.maxPrice, self.lastParams.minSalePrice, self.lastParams.maxSalePrice);
             }
         }
         function resetDefaultValues() {
@@ -303,7 +329,10 @@ angular.module('inventoriesProductList')
             self.lastParams = {
                 productName: '',
                 productQuantity: '',
-                productPrice: ''
+                minPrice: '',
+                maxPrice: '',
+                minSalePrice: '',
+                maxSalePrice: ''
             }
 
         }
@@ -312,18 +341,11 @@ angular.module('inventoriesProductList')
             self.actualCurrentPageShown = parseInt(self.currentPage) + 1;
             console.log(self.currentPage);
         }
-        function loadTotalItem(productName, productPrice, productQuantity, productSalePrice) {
+        function loadTotalItem(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice) {
             var query = ''
             if (productName) {
                 if (query === ''){
                     query +='?productName='+productName
-                }
-            }
-            if (productPrice){
-                if (query === ''){
-                    query +='?productPrice='+productPrice
-                } else{
-                    query += '&productPrice='+productPrice
                 }
             }
             if (productQuantity){
@@ -333,11 +355,32 @@ angular.module('inventoriesProductList')
                     query += '&productQuantity='+productQuantity
                 }
             }
-            if (productSalePrice){
+            if (minPrice){
                 if (query === ''){
-                    query +='?productSalePrice='+productSalePrice
+                    query +='?minPrice='+minPrice
                 } else{
-                    query += '&productSalePrice='+productSalePrice
+                    query += '&minPrice='+minPrice
+                }
+            }
+            if (maxPrice){
+                if (query === ''){
+                    query +='?maxPrice='+maxPrice
+                } else{
+                    query += '&maxPrice='+maxPrice
+                }
+            }
+            if (minSalePrice){
+                if (query === ''){
+                    query +='?minSalePrice='+minSalePrice
+                } else{
+                    query += '&minSalePrice='+minSalePrice
+                }
+            }
+            if (maxSalePrice){
+                if (query === ''){
+                    query +='?maxSalePrice='+maxSalePrice
+                } else{
+                    query += '&maxSalePrice='+maxSalePrice
                 }
             }
             $http.get('api/gateway/inventories/' + $stateParams.inventoryId + '/products-count' + query)
