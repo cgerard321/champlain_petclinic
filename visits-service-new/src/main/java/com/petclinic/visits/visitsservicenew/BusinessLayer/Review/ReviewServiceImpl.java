@@ -43,10 +43,10 @@ public class ReviewServiceImpl implements ReviewService {
                         })
                                 .retryWhen(Retry.fixedDelay(3, Duration.ofMillis(100))
                                         .filter(e -> e instanceof DuplicateKeyException))
-                                .doOnError(e -> log.error("Failed to save review after retries: {}", e.getMessage()))
-                                .onErrorResume(DuplicateKeyException.class, e ->
-                                        Mono.error(new RuntimeException("Failed to generate unique review ID", e))
-                        )
+                                .onErrorResume(DuplicateKeyException.class, e -> {
+                                    log.error("Failed to save review after retries: {}", e.getMessage());
+                                    return Mono.error(new RuntimeException("Failed to generate unique review ID", e));
+                                })
                 )
                 .map(EntityDtoUtil::toReviewResponseDTO);
     }
