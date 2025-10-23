@@ -816,7 +816,7 @@ const UserCart: React.FC = () => {
       const invoiceTvcCents = Math.round(invoiceSubtotalCents * 0.05);
       const invoiceTvq = invoiceTvqCents / 100;
       const invoiceTvc = invoiceTvcCents / 100;
-      const discountCents = Math.round(discount * 100);
+      const discountCents = Math.round(effectiveDiscount * 100);
       const invoiceTotal =
         (invoiceSubtotalCents +
           invoiceTvqCents +
