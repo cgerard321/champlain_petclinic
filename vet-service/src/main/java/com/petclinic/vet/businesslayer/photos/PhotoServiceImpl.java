@@ -3,6 +3,8 @@ package com.petclinic.vet.businesslayer.photos;
 
 import com.petclinic.vet.dataaccesslayer.photos.Photo;
 import com.petclinic.vet.dataaccesslayer.photos.PhotoRepository;
+import com.petclinic.vet.dataaccesslayer.vets.VetRepository;
+import com.petclinic.vet.domainclientlayer.FilesServiceClient;
 import com.petclinic.vet.presentationlayer.photos.PhotoRequestDTO;
 import com.petclinic.vet.presentationlayer.photos.PhotoResponseDTO;
 import com.petclinic.vet.utils.EntityDtoUtil;
@@ -18,6 +20,7 @@ import reactor.core.publisher.Mono;
 
 
 import java.io.IOException;
+import java.util.Base64;
 
 
 
@@ -27,14 +30,34 @@ import java.io.IOException;
 @Slf4j
 public class PhotoServiceImpl implements PhotoService {
     private final PhotoRepository photoRepository;
+    private final VetRepository vetRepository;
+    private final FilesServiceClient filesServiceClient;
 
     @Override
     public Mono<PhotoResponseDTO> getPhotoByVetId(String vetId) {
-        return photoRepository.findByVetId(vetId)
-                .doOnSubscribe(subscription -> log.debug("Fetching photo for vetId: {}", vetId))
+        log.debug("Fetching photo for vetId: {}", vetId);
+        
+        return vetRepository.findVetByVetId(vetId)
+                .flatMap(vet -> {
+                    if (vet.getImageId() != null && !vet.getImageId().isEmpty()) {
+                        return filesServiceClient.getFileById(vet.getImageId())
+                                .map(fileResp -> {
+                                    PhotoResponseDTO photoDTO = new PhotoResponseDTO();
+                                    photoDTO.setVetId(vetId);
+                                    photoDTO.setFilename(fileResp.getFileName());
+                                    photoDTO.setImgType(fileResp.getFileType());
+                                    photoDTO.setResource(fileResp.getFileDataAsBytes());
+                                    photoDTO.setResourceBase64(fileResp.getFileData());
+                                    return photoDTO;
+                                })
+                                .doOnSuccess(photo -> log.info("Successfully fetched photo from Files Service for vetId: {}", vetId));
+                    } else {
+                        return photoRepository.findByVetId(vetId)
+                                .map(EntityDtoUtil::toPhotoResponseDTO)
+                                .doOnSuccess(photo -> log.info("Successfully fetched photo from old repository for vetId: {}", vetId));
+                    }
+                })
                 .switchIfEmpty(Mono.error(new NotFoundException("Photo for vet " + vetId + " does not exist.")))
-                .map(EntityDtoUtil::toPhotoResponseDTO)
-                .doOnSuccess(photo -> log.info("Successfully fetched photo for vetId: {}", vetId))
                 .doOnError(error -> log.error("Error fetching photo for vetId: {}", vetId, error));
     }
 

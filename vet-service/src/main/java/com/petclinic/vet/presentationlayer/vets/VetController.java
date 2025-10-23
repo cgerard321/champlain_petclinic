@@ -283,11 +283,20 @@ public class VetController {
 
     @PostMapping(value = "{vetId}/photos",
             consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<PhotoResponseDTO>> addPhotoByVetId(
+    public Mono<ResponseEntity<VetResponseDTO>> addPhotoByVetId(
             @PathVariable String vetId,
             @RequestBody Mono<PhotoRequestDTO> photoRequestDTO) {
-        return photoService.insertPhotoOfVet(vetId, photoRequestDTO)
-                .map(photo -> ResponseEntity.status(HttpStatus.CREATED).body(photo))
+        return photoRequestDTO
+                .map(photoReq -> {
+                    FileRequestDTO fileReq = FileRequestDTO.builder()
+                            .fileName(photoReq.getFilename())
+                            .fileType(photoReq.getImgType())
+                            .build();
+                    fileReq.setFileDataFromBytes(photoReq.getData());
+                    return fileReq;
+                })
+                .flatMap(fileReq -> vetService.updateVetPhoto(vetId, fileReq))
+                .map(vet -> ResponseEntity.status(HttpStatus.CREATED).body(vet))
                 .switchIfEmpty(Mono.just(ResponseEntity.badRequest().build()));
     }
 

@@ -21,7 +21,7 @@ public class FilesServiceClient {
 
     public FilesServiceClient(WebClient.Builder webClientBuilder, @Value("${app.files-service.host}") String filesServiceHost, @Value("${app.files-service.port}") String filesServicePort) {
         this.webClientBuilder = webClientBuilder;
-        this.filesServiceUrl = "http://" + filesServiceHost + ":" + filesServicePort + "/files";
+        this.filesServiceUrl = "http://" + filesServiceHost + ":" + filesServicePort + "/files/";
     }
 
     public Mono<FileResponseDTO> getFileById(String fileId) {
@@ -41,7 +41,7 @@ public class FilesServiceClient {
     public Mono<FileResponseDTO> addFile(FileRequestDTO fileRequest) {
         log.info("Sending file to Files Service URL: {}, fileName: {}, fileType: {}, fileData length: {}", 
                 filesServiceUrl, fileRequest.getFileName(), fileRequest.getFileType(), 
-                fileRequest.getFileData() != null ? fileRequest.getFileData().length : 0);
+                fileRequest.getFileData() != null ? fileRequest.getFileData().length() : 0);
         
         return webClientBuilder.build()
                 .post()

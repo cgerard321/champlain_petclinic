@@ -124,6 +124,7 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
+    restart: unless-stopped
 
   minio:
     image: minio/minio:RELEASE.2025-04-22T22-12-26Z
@@ -135,6 +136,8 @@ services:
       - "9101:9101"
     expose:
       - "9100:9100"
+    volumes:
+      - ./data/minio:/data
     restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9100/minio/health/live"]
@@ -154,6 +157,7 @@ services:
       - MYSQL_PASSWORD=pwd
     volumes:
       - ./data/mysql-files:/var/lib/mysql-files
+      - ./data/mysql-files-data:/var/lib/mysql
       - ./data/init.d:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-uuser", "-ppwd", "-h", "localhost"]
