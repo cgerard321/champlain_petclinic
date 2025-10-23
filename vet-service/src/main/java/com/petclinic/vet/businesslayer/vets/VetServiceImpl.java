@@ -132,8 +132,8 @@ public class VetServiceImpl implements VetService {
     }
     private Specialty specialtyDtoToEntity(SpecialtyDTO specialtyDTO) {
         return Specialty.builder()
-                .specialtyId(specialtyDTO.getSpecialtyId())  // Assuming you have an ID for the specialty
-                .name(specialtyDTO.getName())  // Assuming there's a name field in SpecialtyDTO
+                .specialtyId(EntityDtoUtil.generateSpecialtyId())  // Using the utility method for consistency
+                .name(specialtyDTO.getName())
                 .build();
     }
 
