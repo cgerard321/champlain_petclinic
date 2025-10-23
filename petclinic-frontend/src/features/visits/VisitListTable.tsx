@@ -234,7 +234,7 @@ export default function VisitListTable(): JSX.Element {
             onClick={() => navigate(AppRoutePaths.VisitsCalendar)}
             title="Calendar View"
           >
-            <img src={calendarIcon} />
+            <img src={calendarIcon} alt="Calendar" />
             Calendar View
           </button>
         </li>
