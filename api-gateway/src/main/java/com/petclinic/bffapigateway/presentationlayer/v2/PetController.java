@@ -80,6 +80,17 @@ public class PetController {
         return customersServiceClient.getPetsByOwnerId(ownerId);
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET, Roles.OWNER, Roles.RECEPTIONIST})
+    @GetMapping("/owners/{ownerId}/pets/{petId}")
+    public Mono<ResponseEntity<PetResponseDTO>> getPetForOwner(
+            @PathVariable String ownerId,
+            @PathVariable String petId,
+            @RequestParam(required = false, defaultValue = "false") boolean includePhoto) {
+        return customersServiceClient.getPetByPetId(petId, includePhoto)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
 //    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.OWNER, Roles.VET})
 //    @DeleteMapping(value = "/{petId}", produces = MediaType.APPLICATION_JSON_VALUE)
 //    public Mono<ResponseEntity<PetResponseDTO>> deletePet(

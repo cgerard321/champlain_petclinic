@@ -34,6 +34,11 @@ public class PetController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/owner/{ownerId}/pets")
+    public Flux<PetResponseDTO> getPetsByOwnerId(@PathVariable String ownerId) {
+        return petService.getPetsByOwnerId(ownerId);
+    }
+
     @DeleteMapping("/{petId}")
     public Mono<Void> deletePetByPetId(@PathVariable String petId) {
         return petService.deletePetByPetId(petId);

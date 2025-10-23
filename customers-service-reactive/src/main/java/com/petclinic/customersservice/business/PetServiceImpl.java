@@ -102,7 +102,7 @@ public class PetServiceImpl implements PetService {
     public Mono<PetResponseDTO> createPetForOwner(String ownerId, Mono<PetRequestDTO> petRequestDTO) {
         return petRequestDTO
                 .flatMap(requestDTO -> {
-                    return ownerService.getOwnerByOwnerId(ownerId)
+                    return ownerService.getOwnerByOwnerId(ownerId, false)
                             .switchIfEmpty(Mono.error(new NotFoundException("Owner not found with id: " + ownerId)))
                             .then(Mono.just(requestDTO));
                 })
