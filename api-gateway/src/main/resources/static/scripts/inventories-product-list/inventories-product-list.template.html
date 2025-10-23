@@ -28,54 +28,51 @@
     </tr>
     <tr>
         <td>
-            <span>
-                <input type="text" ng-model="productName" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, productPrice, productSalePrice)">
-            </span>
+        <span>
+            <input type="text" ng-model="productName" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)">
+        </span>
         </td>
         <td></td>
         <td>
-            <span>
-                <input type="number" min="0" ng-model="productQuantity" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, productPrice, productSalePrice)">
-            </span>
+        <span>
+            <input type="number" min="1" step="1" ng-model="productQuantity" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)">
+        </span>
         </td>
         <td>
-            <span>
-                <input type="number" step="0.01" min="0" ng-model="productPrice" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, productPrice, productSalePrice)">
-            </span>
-        </td>
-        <td></td>
-        <td>
-            <span>
-                <input type="number" step="0.01" min="0" ng-model="productSalePrice" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, productPrice, productSalePrice)">
-            </span>
+        <span>
+            Min: <input type="number" step="0.01" min="0" ng-model="minPrice" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)">
+            Max: <input type="number" step="0.01" min="0" ng-model="maxPrice" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)">
+        </span>
         </td>
         <td></td>
         <td>
-             <span>
-
-                <a class="btn btn-success" type="button" ng-click="clearQueries()" title="Clear">
-                    <lord-icon
-                            src="https://cdn.lordicon.com/zxvuvcnc.json"
-                            trigger="hover"
-                            style="width:32px;height:32px">
-                    </lord-icon>
-                </a>
-
-            </span>
-
+        <span>
+            Min: <input type="number" step="0.01" min="0" ng-model="minSalePrice" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)">
+            Max: <input type="number" step="0.01" min="0" ng-model="maxSalePrice" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)">
+        </span>
+        </td>
+        <td></td>
+        <td>
+         <span>
+            <a class="btn btn-success" type="button" ng-click="clearQueries()" title="Clear">
+                <lord-icon
+                        src="https://cdn.lordicon.com/zxvuvcnc.json"
+                        trigger="hover"
+                        style="width:32px;height:32px">
+                </lord-icon>
+            </a>
+        </span>
         </td>
         <td>
-            <span>
-
-                <a class="btn btn-success" type="button" ng-click="searchProduct(productName, productQuantity, productPrice, productSalePrice)" title="Search">
-                    <lord-icon
-                            src="https://cdn.lordicon.com/fkdzyfle.json"
-                            trigger="hover"
-                            style="width:32px;height:32px">
-                    </lord-icon>
-                </a>
-
-            </span>
+        <span>
+            <a class="btn btn-success" type="button" ng-click="searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)" title="Search">
+                <lord-icon
+                        src="https://cdn.lordicon.com/fkdzyfle.json"
+                        trigger="hover"
+                        style="width:32px;height:32px">
+                </lord-icon>
+            </a>
+        </span>
         </td>
     </tr>
 
