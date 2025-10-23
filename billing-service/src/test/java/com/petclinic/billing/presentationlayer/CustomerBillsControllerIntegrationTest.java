@@ -317,4 +317,66 @@ public class CustomerBillsControllerIntegrationTest {
                 .expectBody()
                 .jsonPath("$[0].customerId").isEqualTo(bill.getCustomerId());
     }
+
+    private Bill buildBill3() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2022, Calendar.SEPTEMBER, 25);
+        LocalDate date = calendar.getTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+        return Bill.builder()
+                .billId("staffBill-1")
+                .customerId("custId")
+                .ownerFirstName("John")
+                .ownerLastName("Doe")
+                .vetId("vetId")
+                .visitType("surgery")
+                .date(date)
+                .dueDate(date.plusDays(15))
+                .amount(new BigDecimal("150.00"))
+                .billStatus(BillStatus.UNPAID)
+                .archive(false)
+                .build();
+    }
+
+    @Test
+    void testDownloadStaffBillPdf() {
+
+        Bill bill = buildBill3();
+
+        // Clean DB, insert test bill
+        Mono<Void> setup = billRepository.deleteAll()
+                .then(billRepository.save(bill))
+                .then();
+
+        StepVerifier.create(setup)
+                .verifyComplete();
+
+        // Perform GET /api/staff/bills/{billId}/pdf
+        client.get()
+                .uri("/bills/{billId}/pdf", bill.getBillId())
+                .accept(MediaType.APPLICATION_PDF)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_PDF)
+                .expectBody(byte[].class)
+                .consumeWith(response -> {
+                    byte[] pdf = response.getResponseBody();
+                    assertNotNull(pdf);
+                    assertTrue(pdf.length > 0, "PDF bytes should not be empty");
+                });
+    }
+    @Test
+    void testDownloadStaffBillPdf_BillNotFound() {
+        // Clean DB to ensure no bills exist
+        Mono<Void> setup = billRepository.deleteAll().then();
+        StepVerifier.create(setup).verifyComplete();
+
+        // Request non-existing bill
+        client.get()
+                .uri("/bills/{billId}/pdf", "nonexistent-bill-id")
+                .accept(MediaType.APPLICATION_PDF)
+                .exchange()
+                .expectStatus().isEqualTo(500); // INTERNAL_SERVER_ERROR
+    }
+
 }
