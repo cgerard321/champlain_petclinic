@@ -35,20 +35,20 @@
         <td></td>
         <td>
         <span>
-            <input type="number" min="1" step="1" ng-model="productQuantity" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)">
+            <input type="number" min="1" step="1" ng-model="productQuantity" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)" title="Quantity must be greater than 0" oninvalid="this.setCustomValidity('Quantity cannot be 0 or negative')" oninput="this.setCustomValidity('')">
         </span>
         </td>
         <td>
         <span>
-            Min: <input type="number" step="0.01" min="0" ng-model="minPrice" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)">
-            Max: <input type="number" step="0.01" min="0" ng-model="maxPrice" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)">
+            Min: <input type="number" step="0.01" min="0" ng-model="minPrice" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)" title="Enter a valid number" oninvalid="this.setCustomValidity('Please enter a valid number for minimum price')" oninput="this.setCustomValidity('')">
+            Max: <input type="number" step="0.01" min="0" ng-model="maxPrice" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)" title="Enter a valid number" oninvalid="this.setCustomValidity('Please enter a valid number for maximum price')" oninput="this.setCustomValidity('')">
         </span>
         </td>
         <td></td>
         <td>
         <span>
-            Min: <input type="number" step="0.01" min="0" ng-model="minSalePrice" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)">
-            Max: <input type="number" step="0.01" min="0" ng-model="maxSalePrice" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)">
+            Min: <input type="number" step="0.01" min="0" ng-model="minSalePrice" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)" title="Enter a valid number" oninvalid="this.setCustomValidity('Please enter a valid number for minimum sale price')" oninput="this.setCustomValidity('')">
+            Max: <input type="number" step="0.01" min="0" ng-model="maxSalePrice" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)" title="Enter a valid number" oninvalid="this.setCustomValidity('Please enter a valid number for maximum sale price')" oninput="this.setCustomValidity('')">
         </span>
         </td>
         <td></td>
