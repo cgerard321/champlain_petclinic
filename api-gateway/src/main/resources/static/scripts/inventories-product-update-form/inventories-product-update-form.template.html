@@ -2,34 +2,34 @@
     <h2 class="titleProduct form" id="title">Update Product</h2>
 </div>
 <div class="p-3 formColor m-0">
-    <form id="inventoryProductUpdateForm" name="inventoryProductUpdateForm" class="form-horizontal" enctype="multipart/form-data" ng-submit="$ctrl.submitProductUpdateForm()" novalidate>
+    <form id="inventoryProductUpdateForm" name="inventoryProductUpdateForm" class="form-horizontal" enctype="multipart/form-data" ng-submit="inventoryProductUpdateForm.$valid && $ctrl.submitProductUpdateForm()" novalidate>
         <div class="row">
             <div class="col-sm-6 form-group">
                 <label class="control-label" for="item">Product</label>
-                <input class="form-control" id="item" ng-model="$ctrl.product.productName" name="productName" type="text" placeholder="Please enter product name." ng-required="true"/>
+                <input class="form-control" id="item" ng-model="$ctrl.product.productName" name="productName" type="text" placeholder="Please enter product name." required/>
                 <input type="hidden" ng-model="$ctrl.product.inventoryId" ng-value="inventoryId">
             </div>
         </div>
         <div class="col-sm-6 form-group">
             <label class="control-label" for="description">Description</label>
-            <input class="form-control col-sm-4" id="description" ng-model="$ctrl.product.productDescription" name="productDescription" type="text" placeholder="Please enter product description." ng-required="true"/>
+            <input class="form-control col-sm-4" id="description" ng-model="$ctrl.product.productDescription" name="productDescription" type="text" placeholder="Please enter product description." required/>
         </div>
         <div class="row">
             <div class="form-group col-sm-12">
                 <label class="control-label" for="price">Price</label>
-                <input class="form-control" id="price" ng-model="$ctrl.product.productPrice" name="productPrice" type="number" placeholder="Please enter a price" ng-required="true" min="0.01" step="0.01"/>
+                <input class="form-control" id="price" ng-model="$ctrl.product.productPrice" name="productPrice" type="number" placeholder="Please enter a price" required min="0.01" step="0.01"/>
             </div>
         </div>
         <div class="form-group p-3">
             <div class="bundle marg col-sm-12">
                 <label class="control-label" for="quantity">Quantity</label>
-                <input class="form-control" id="quantity" ng-model="$ctrl.product.productQuantity" name="productQuantity" type="number" required title="Please enter quantities." ng-required="true" min="0"/>
+                <input class="form-control" id="quantity" ng-model="$ctrl.product.productQuantity" name="productQuantity" type="number" required title="Please enter quantities." required min="1"/>
             </div>
         </div>
         <div class="form-group p-3">
             <div class="bundle marg col-sm-12">
                 <label class="control-label" for="salePrice">Sale Price</label>
-                <input class="form-control" id="salePrice" ng-model="$ctrl.product.productSalePrice" name="productSalePrice" type="number" required title="Please enter the sale price." ng-required="true" min="0" step="0.01"/>
+                <input class="form-control" id="salePrice" ng-model="$ctrl.product.productSalePrice" name="productSalePrice" type="number" required title="Please enter the sale price." required min="0" step="0.01"/>
             </div>
         </div>
         <div class="form-group formColor">
