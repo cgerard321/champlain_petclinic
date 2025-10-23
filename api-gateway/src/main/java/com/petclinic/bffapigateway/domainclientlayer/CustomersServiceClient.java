@@ -426,4 +426,14 @@ public class CustomersServiceClient {
                 .bodyToMono(OwnerResponseDTO.class);
     }
 
+    public Mono<PetResponseDTO> getPet(final String ownerId, final String petId, boolean includePhoto) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(customersServiceUrl + "/owners/" + ownerId + "/pets/" + petId);
+        builder.queryParam("includePhoto", includePhoto);
+
+        return webClientBuilder.build().get()
+                .uri(builder.build().toUri())
+                .retrieve()
+                .bodyToMono(PetResponseDTO.class);
+    }
+
 }

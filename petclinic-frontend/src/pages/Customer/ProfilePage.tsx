@@ -23,6 +23,7 @@ import { deleteOwnerPhoto } from '@/features/customers/api/deleteOwnerPhoto.ts';
 const ProfilePage = (): JSX.Element => {
   const [profilePicUrl, setProfilePicUrl] = useState<string>('');
   const { user } = useUser();
+  const [petImageUrls, setPetImageUrls] = useState<Record<string, string>>({});
   const [owner, setOwner] = useState<OwnerResponseModel | null>(null);
   const [userDetails, setUserDetails] = useState<UserDetailsModel | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -160,15 +161,35 @@ const ProfilePage = (): JSX.Element => {
               }
             }
           } else if (Array.isArray(petsResponse.data)) {
-            petsData = petsResponse.data;
+              petsData = petsResponse.data;
           }
 
-          if (isMounted) {
-            setOwner({
-              ...ownerData,
-              pets: petsData,
-            });
-          }
+            const newPetImageUrls: Record<string, string> = {};
+            for (const pet of petsData) {
+                const photoIdFromPet = (pet as any).photoId;
+
+                let petPhotoUrl: string;
+
+                if (photoIdFromPet && photoIdFromPet !== '1') {
+                    petPhotoUrl = await fetchPetPhotoUrl(
+                        pet.petId,
+                        photoIdFromPet,
+                        pet.name
+                    );
+                } else {
+                    petPhotoUrl = defaultProfile;
+                }
+
+                newPetImageUrls[pet.petId] = petPhotoUrl;
+            }
+
+            if (isMounted) {
+                setPetImageUrls(newPetImageUrls);
+                setOwner({
+                    ...ownerData,
+                    pets: petsData,
+                });
+            }
         } catch (petsError) {
           console.warn(
             'Error fetching pets, setting owner without pets:',
@@ -306,6 +327,43 @@ const ProfilePage = (): JSX.Element => {
       console.error('Error refreshing profile picture:', error);
     }
   };
+
+    const fetchPetPhotoUrl = async (
+        petId: string,
+        photoId: string,
+        petName: string
+    ): Promise<string> => {
+        if (!photoId || photoId === '1') {
+            return defaultProfile;
+        }
+
+        try {
+            const response = await axiosInstance.get(
+                `/pets/${user.userId}/pets/${petId}?includePhoto=true`,
+                { useV2: false }
+            );
+            const petData = response.data;
+
+            if (petData.photo && petData.photo.fileData) {
+                const base64Data = petData.photo.fileData;
+                const contentType = petData.photo.fileType || 'image/png';
+                const byteCharacters = atob(base64Data);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                const blob = new Blob([byteArray], { type: contentType });
+                return URL.createObjectURL(blob);
+            } else {
+                console.warn(`No photo data found for ${petName} (${petId}). Using default.`);
+                return defaultProfile;
+            }
+        } catch (error) {
+            console.error(`Error fetching photo for ${petName} (${petId}):`, error);
+            return defaultProfile;
+        }
+    };
 
   const handleEditPet = (petId: string): void => {
     setSelectedPetId(petId);
@@ -453,41 +511,49 @@ const ProfilePage = (): JSX.Element => {
               </button>
             </div>
             {owner.pets && owner.pets.length > 0 ? (
-              <div className="customers-pets-list">
-                {owner.pets.map((pet: PetResponseModel) => (
-                  <div key={pet.petId} className="customers-pet-card">
-                    <div className="customers-pet-info">
-                      <h4 className="customers-pet-name">{pet.name}</h4>
-                      <div className="customers-pet-details">
-                        <span className="customers-pet-detail">
-                          <strong>Type:</strong>{' '}
-                          {getPetTypeName(pet.petTypeId, petTypes)}
-                        </span>
-                        <span className="customers-pet-detail">
-                          <strong>Weight:</strong> {pet.weight}kg
-                        </span>
-                        <span className="customers-pet-detail">
-                          <strong>Age:</strong> {calculateAge(pet.birthDate)}{' '}
-                          years
-                        </span>
-                      </div>
-                      <div className="customers-pet-actions">
-                        <button
-                          className="customers-edit-pet-button"
-                          onClick={() => handleEditPet(pet.petId)}
-                        >
-                          Edit Pet
-                        </button>
-                        <button
-                          className="customers-delete-pet-button"
-                          onClick={() => handleDeletePet(pet.petId)}
-                        >
-                          Delete Pet
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                <div className="customers-pets-list">
+                    {owner.pets.map((pet: PetResponseModel) => (
+                        <div key={pet.petId} className="customers-pet-card">
+                            <div className="customers-pet-card-content">
+                                <img
+                                    src={petImageUrls[pet.petId] || defaultProfile}
+                                    alt={`${pet.name} profile`}
+                                    className="pet-profile-picture"
+                                />
+                                <div className="customers-pet-info">
+                                    <h4 className="customers-pet-name">{pet.name}</h4>
+                                    <div className="customers-pet-details">
+                                    <span className="customers-pet-detail">
+                                    <strong>Type:</strong>{' '}
+                              {getPetTypeName(pet.petTypeId, petTypes)}
+                                    </span>
+                                        <span className="customers-pet-detail">
+                                    <strong>Weight:</strong> {pet.weight}kg
+                                    </span>
+                                        <span className="customers-pet-detail">
+                                    <strong>Age:</strong> {calculateAge(pet.birthDate)}{' '}
+                                            years
+                                    </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="customers-pet-actions">
+                                <button
+                                    className="customers-edit-pet-button"
+                                    onClick={() => handleEditPet(pet.petId)}
+                                >
+                                    Edit Pet
+                                </button>
+                                <button
+                                    className="customers-delete-pet-button"
+                                    onClick={() => handleDeletePet(pet.petId)}
+                                >
+                                    Delete Pet
+                                </button>
+                            </div>
+                        </div>
+                    ))}
               </div>
             ) : (
               <div className="customers-no-pets">
