@@ -4,6 +4,11 @@ import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.*;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FileRequestDTO;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FileResponseDTO;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FilesServiceClient;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.Prescriptions.PrescriptionRequestDTO;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.Prescriptions.PrescriptionResponseDTO;
 import com.petclinic.visits.visitsservicenew.Utils.EntityDtoUtil;
 import okhttp3.mockwebserver.MockResponse;
 import org.junit.jupiter.api.AfterEach;
@@ -25,11 +30,14 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static com.mongodb.client.model.Filters.eq;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -52,6 +60,18 @@ class VisitsControllerIntegrationTest {
 
     @MockBean
     private PetsClient petsClient;
+
+    @MockBean
+    private FilesServiceClient filesServiceClient;
+
+    @BeforeEach
+    void setupMocks() {
+        FileResponseDTO mockFileResponse = new FileResponseDTO();
+        mockFileResponse.setFileId("mock-file-id");
+
+        when(filesServiceClient.addFile(any(FileRequestDTO.class)))
+                .thenReturn(Mono.just(mockFileResponse));
+    }
 
     @MockBean
     private EntityDtoUtil entityDtoUtil;
@@ -610,6 +630,268 @@ class VisitsControllerIntegrationTest {
                 .expectNextCount(0) // Still no visit should exist with this ID
                 .verifyComplete();
     }
+
+
+    @Test
+    void createPrescription_ShouldSucceed_WhenValidRequest() {
+        // Arrange
+        String visitId = "visit-presc-001";
+        Visit visit = Visit.builder()
+                .visitId(visitId)
+                .description("Visit for Buddy's ear infection")
+                .petId("pet-001")
+                .practitionerId("vet-001")
+                .status(Status.COMPLETED)
+                .visitDate(LocalDateTime.now())
+                .build();
+
+        visitRepo.save(visit).block();
+
+        PrescriptionRequestDTO prescriptionRequestDTO = PrescriptionRequestDTO.builder()
+                .medication("Amoxicillin")
+                .dosage("250mg")
+                .instructions("Take twice daily after meals")
+                .quantity(14)
+                .refills(1)
+                .prescribedBy("Dr. Smith")
+                .petId("pet-001")
+                .issueDate(LocalDate.now())
+                .expiresAt(LocalDate.now().plusDays(10))
+                .build();
+
+        // Act & Assert
+        webTestClient.post()
+                .uri("/visits/{visitId}/prescription", visitId)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(prescriptionRequestDTO), PrescriptionRequestDTO.class)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(PrescriptionResponseDTO.class)
+                .value(Assertions::assertNotNull)
+                .value(response -> assertNotNull(response.getPrescriptionId()));
+
+        // Verify the prescription was persisted correctly
+        StepVerifier.create(visitRepo.findByVisitId(visitId))
+                .expectNextMatches(v -> v.getVisitId().equals(visitId))
+                .verifyComplete();
+    }
+
+    @Test
+    void createPrescription_ShouldFail_WhenVisitNotFound() {
+        // Arrange
+        String invalidVisitId = "visit-does-not-exist";
+
+        PrescriptionRequestDTO prescriptionRequestDTO = PrescriptionRequestDTO.builder()
+                .medication("Ibuprofen")
+                .dosage("200mg")
+                .instructions("Take as needed for pain")
+                .quantity(10)
+                .refills(0)
+                .prescribedBy("Dr. Green")
+                .petId("pet-002")
+                .issueDate(LocalDate.now())
+                .expiresAt(LocalDate.now().plusDays(5))
+                .build();
+
+        // Act & Assert
+        webTestClient.post()
+                .uri("/visits/{visitId}/prescription", invalidVisitId)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(prescriptionRequestDTO), PrescriptionRequestDTO.class)
+                .exchange()
+                .expectStatus().isNotFound(); // Controller maps NotFoundException → 404
+
+        // Verify that no prescription-related data got persisted
+        StepVerifier.create(visitRepo.findByVisitId(invalidVisitId))
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+    @Test
+    void downloadPrescriptionPdf_ShouldReturn404_WhenVisitDoesNotExist() {
+        // Arrange
+        String invalidVisitId = "visit-missing-404";
+
+        // Act & Assert
+        webTestClient.get()
+                .uri("/visits/{visitId}/prescription/pdf", invalidVisitId)
+                .accept(MediaType.APPLICATION_PDF)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        // Verify repository is still empty (no visit created)
+        StepVerifier.create(visitRepo.findByVisitId(invalidVisitId))
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+    @Test
+    void createPrescription_ShouldReturn422_WhenPdfGenerationFails() {
+        // Arrange
+        String visitId = "visit-unproc-001";
+        visitRepo.save(Visit.builder()
+                .visitId(visitId)
+                .description("Visit with PDF error")
+                .status(Status.COMPLETED)
+                .build()).block();
+
+        PrescriptionRequestDTO req = PrescriptionRequestDTO.builder()
+                .medication("Cefalexin")
+                .dosage("250mg")
+                .instructions("Take with food")
+                .petId("pet-999")
+                .build();
+
+        // Mock PDF generator failure (simulate DocumentException)
+        when(filesServiceClient.addFile(any(FileRequestDTO.class)))
+                .thenThrow(new RuntimeException("Failed to generate prescription PDF"));
+
+        // Act & Assert
+        webTestClient.post()
+                .uri("/visits/{visitId}/prescription", visitId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(req)
+                .exchange()
+                .expectStatus().isEqualTo(422);
+    }
+
+    @Test
+    void createPrescription_ShouldReturn422_WhenFileServiceReturnsEmpty() {
+        // Arrange
+        String visitId = "visit-unproc-002";
+        visitRepo.save(Visit.builder()
+                .visitId(visitId)
+                .description("Visit for empty file service")
+                .status(Status.COMPLETED)
+                .build()).block();
+
+        PrescriptionRequestDTO req = PrescriptionRequestDTO.builder()
+                .medication("Paracetamol")
+                .dosage("500mg")
+                .instructions("After meals")
+                .petId("pet-123")
+                .build();
+
+        when(filesServiceClient.addFile(any(FileRequestDTO.class))).thenReturn(Mono.empty());
+
+        // Act & Assert
+        webTestClient.post()
+                .uri("/visits/{visitId}/prescription", visitId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(req)
+                .exchange()
+                .expectStatus().isEqualTo(422);
+    }
+
+    @Test
+    void createPrescription_ShouldReturn422_WhenFileServiceMissingFileId() {
+        // Arrange
+        String visitId = "visit-unproc-003";
+        visitRepo.save(Visit.builder()
+                .visitId(visitId)
+                .description("Visit missing fileId")
+                .status(Status.COMPLETED)
+                .build()).block();
+
+        FileResponseDTO badFileResponse = new FileResponseDTO();
+        badFileResponse.setFileId(null);
+        badFileResponse.setFileName("broken.pdf");
+        when(filesServiceClient.addFile(any(FileRequestDTO.class)))
+                .thenReturn(Mono.just(badFileResponse));
+
+        PrescriptionRequestDTO req = PrescriptionRequestDTO.builder()
+                .medication("Azithromycin")
+                .dosage("250mg")
+                .instructions("Once daily")
+                .petId("pet-123")
+                .build();
+
+        // Act & Assert
+        webTestClient.post()
+                .uri("/visits/{visitId}/prescription", visitId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(req)
+                .exchange()
+                .expectStatus().isEqualTo(422);
+    }
+
+    @Test
+    void createPrescription_ShouldReturn422_WhenFileUploadFails() {
+        // Arrange
+        String visitId = "visit-unproc-004";
+        visitRepo.save(Visit.builder()
+                .visitId(visitId)
+                .description("Visit file upload failure")
+                .status(Status.COMPLETED)
+                .build()).block();
+
+        PrescriptionRequestDTO req = PrescriptionRequestDTO.builder()
+                .medication("Metronidazole")
+                .dosage("250mg")
+                .instructions("Twice daily")
+                .petId("pet-500")
+                .build();
+
+        when(filesServiceClient.addFile(any(FileRequestDTO.class)))
+                .thenReturn(Mono.error(new RuntimeException("upload failure")));
+
+        // Act & Assert
+        webTestClient.post()
+                .uri("/visits/{visitId}/prescription", visitId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(req)
+                .exchange()
+                .expectStatus().isEqualTo(422);
+    }
+
+    @Test
+    void downloadPrescriptionPdf_ShouldReturn422_WhenFileDataEmpty() {
+        // Arrange
+        String visitId = "visit-unproc-005";
+        visitRepo.save(Visit.builder()
+                .visitId(visitId)
+                .prescriptionFileId("file-empty")
+                .status(Status.COMPLETED)
+                .build()).block();
+
+        FileResponseDTO badFile = new FileResponseDTO();
+        badFile.setFileId("file-empty");
+        badFile.setFileData(null);
+        when(filesServiceClient.getFile("file-empty")).thenReturn(Mono.just(badFile));
+
+        // Act & Assert
+        webTestClient.get()
+                .uri("/visits/{visitId}/prescription/pdf", visitId)
+                .accept(MediaType.APPLICATION_PDF)
+                .exchange()
+                .expectStatus().isEqualTo(422);
+    }
+
+    @Test
+    void downloadPrescriptionPdf_ShouldReturn422_WhenFileRetrievalFails() {
+        // Arrange
+        String visitId = "visit-unproc-006";
+        visitRepo.save(Visit.builder()
+                .visitId(visitId)
+                .prescriptionFileId("file-broken")
+                .status(Status.COMPLETED)
+                .build()).block();
+
+        when(filesServiceClient.getFile("file-broken"))
+                .thenReturn(Mono.error(new RuntimeException("File service downstream failure")));
+
+        // Act & Assert
+        webTestClient.get()
+                .uri("/visits/{visitId}/prescription/pdf", visitId)
+                .accept(MediaType.APPLICATION_PDF)
+                .exchange()
+                .expectStatus().isEqualTo(422);
+    }
+
+
+
 
     // @Test
     // void exportVisitsToCSV_ShouldReturnCSVWithVisits() {

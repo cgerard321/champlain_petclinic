@@ -476,4 +476,31 @@ public class BillServiceClient {
                 .bodyToFlux(BillResponseDTO.class)
                 .switchIfEmpty(Flux.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "No bills found in the specified date range")));
     }
+
+    public Mono<byte[]> downloadStaffBillPdf(String billId, String currency) {
+        // Default to CAD if null/blank
+        String cur = (currency == null || currency.isBlank()) ? "CAD" : currency;
+
+        // Build URL to billing-service endpoint
+        String url = UriComponentsBuilder
+                .fromHttpUrl(billServiceUrl)
+                .path("/{billId}/pdf")
+                .queryParam("currency", cur)
+                .buildAndExpand(billId)
+                .toUriString();
+
+        log.debug("→ Calling Billing Service Staff PDF endpoint: {}", url);
+
+        // Perform request using WebClient
+        return webClientBuilder.build()
+                .get()
+                .uri(url)
+                .accept(MediaType.APPLICATION_PDF)
+                .retrieve()
+                .bodyToMono(byte[].class)
+                .doOnSuccess(pdf -> log.info("Staff bill PDF retrieved for billId: {}", billId))
+                .doOnError(e -> log.error("Failed to retrieve staff PDF for billId: {}", billId, e));
+    }
+
+
 }
