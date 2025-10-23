@@ -87,6 +87,12 @@ spring:
       username: root
       password: password
       authentication-database: admin
+
+app:
+  files-service:
+    host: files-service
+    port: 8000
+
 management:
   endpoints:
     web:

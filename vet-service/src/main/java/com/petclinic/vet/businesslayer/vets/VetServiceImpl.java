@@ -21,6 +21,9 @@ import com.petclinic.vet.dataaccesslayer.ratings.RatingRepository;
 import com.petclinic.vet.dataaccesslayer.vets.Specialty;
 import com.petclinic.vet.dataaccesslayer.vets.Vet;
 import com.petclinic.vet.dataaccesslayer.vets.VetRepository;
+import com.petclinic.vet.domainclientlayer.FilesServiceClient;
+import com.petclinic.vet.presentationlayer.files.FileRequestDTO;
+import com.petclinic.vet.presentationlayer.files.FileResponseDTO;
 import com.petclinic.vet.presentationlayer.vets.VetRequestDTO;
 import com.petclinic.vet.presentationlayer.vets.VetResponseDTO;
 import com.petclinic.vet.presentationlayer.vets.SpecialtyDTO;
@@ -52,6 +55,7 @@ public class VetServiceImpl implements VetService {
     private final PhotoRepository photoRepository;
     private final RatingRepository ratingRepository;
     private final EducationRepository educationRepository;
+    private final FilesServiceClient filesServiceClient;
 
     @Override
     public Flux<VetResponseDTO> getAll() {
@@ -233,6 +237,60 @@ public class VetServiceImpl implements VetService {
         return badgeRepository.save(assignedBadge)
                 .zipWith(vetRepository.save(vetEntity))
                 .map(tuple -> tuple.getT2());
+    }
+
+    @Override
+    public Mono<VetResponseDTO> getVetByVetId(String vetId, boolean includePhoto) {
+        return vetRepository.findVetByVetId(vetId)
+                .switchIfEmpty(Mono.error(new NotFoundException("No vet with this vetId was found: " + vetId)))
+                .doOnNext(i -> log.debug("The vet entity is: " + i.toString()))
+                .flatMap(vet -> {
+                    VetResponseDTO dto = EntityDtoUtil.vetEntityToResponseDTO(vet);
+                    
+                    if (includePhoto && vet.getImageId() != null) {
+                        return filesServiceClient.getFileById(vet.getImageId())
+                                .map(fileDetails -> {
+                                    dto.setPhoto(fileDetails);
+                                    return dto;
+                                })
+                                .onErrorReturn(dto);
+                    } else {
+                        dto.setPhoto(null);
+                        return Mono.just(dto);
+                    }
+                })
+                .log();
+    }
+
+    @Override
+    public Mono<VetResponseDTO> updateVetPhoto(String vetId, FileRequestDTO photo) {
+        return vetRepository.findVetByVetId(vetId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Vet not found with id: " + vetId)))
+                .flatMap(existingVet -> {
+                    Mono<FileResponseDTO> fileOperation;
+
+                    if (existingVet.getImageId() != null && !existingVet.getImageId().isEmpty()) {
+                        fileOperation = filesServiceClient.updateFile(existingVet.getImageId(), photo)
+                                .onErrorResume(e -> {
+                                    log.warn("Photo file {} not found or error updating, creating new file instead: {}", 
+                                            existingVet.getImageId(), e.getMessage());
+                                    return filesServiceClient.addFile(photo);
+                                });
+                    } else {
+                        fileOperation = filesServiceClient.addFile(photo);
+                    }
+
+                    return fileOperation
+                            .flatMap(fileResp -> {
+                                existingVet.setImageId(fileResp.getFileId());
+                                return vetRepository.save(existingVet)
+                                        .map(savedVet -> {
+                                            VetResponseDTO dto = EntityDtoUtil.vetEntityToResponseDTO(savedVet);
+                                            dto.setPhoto(fileResp);
+                                            return dto;
+                                        });
+                            });
+                });
     }
 
 

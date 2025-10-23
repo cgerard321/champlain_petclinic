@@ -20,6 +20,7 @@ import com.petclinic.vet.businesslayer.ratings.RatingService;
 import com.petclinic.vet.businesslayer.vets.VetService;
 import com.petclinic.vet.dataaccesslayer.albums.Album;
 import com.petclinic.vet.presentationlayer.badges.BadgeResponseDTO;
+import com.petclinic.vet.presentationlayer.files.FileRequestDTO;
 import com.petclinic.vet.presentationlayer.photos.PhotoRequestDTO;
 import com.petclinic.vet.presentationlayer.photos.PhotoResponseDTO;
 import com.petclinic.vet.presentationlayer.education.EducationRequestDTO;
@@ -171,11 +172,11 @@ public class VetController {
 
 
     @GetMapping(value = "/{vetId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<VetResponseDTO>> getVetByVetId(@PathVariable String vetId) {
+    public Mono<ResponseEntity<VetResponseDTO>> getVetByVetId(@PathVariable String vetId, @RequestParam(required = false, defaultValue = "false") boolean includePhoto) {
         return Mono.just(vetId)
                 .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided vet id is invalid:" + vetId)))
-                .flatMap(vetService::getVetByVetId)
+                .flatMap(id -> vetService.getVetByVetId(id, includePhoto))
                 .map(ResponseEntity::ok);
     }
 
@@ -333,6 +334,14 @@ public class VetController {
         return photoService.updatePhotoByVetId(vetId, photoRequestDTO)
                 .map(photo -> ResponseEntity.ok().body(photo))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @PatchMapping("/{vetId}/photo")
+    public Mono<ResponseEntity<VetResponseDTO>> updateVetPhoto(@PathVariable String vetId, @RequestBody Mono<FileRequestDTO> photoMono) {
+        return photoMono
+                .flatMap(photo -> vetService.updateVetPhoto(vetId, photo))
+                .map(updatedVet -> ResponseEntity.ok().body(updatedVet))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
 
