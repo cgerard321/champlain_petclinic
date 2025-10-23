@@ -47,9 +47,10 @@ public class BillControllerV1 {
             consumes = "application/json",
             produces = "application/json")
     public Mono<ResponseEntity<BillResponseDTO>> createBill(@RequestBody BillRequestDTO model,
-                                                            @RequestParam(required = false) boolean sendEmail,
+                                                            @RequestParam(defaultValue = "false") boolean sendEmail,
+                                                            @RequestParam(required = false) String currency,
                                                             @CookieValue("Bearer") String jwtToken) {
-        return billServiceClient.createBill(model, sendEmail, jwtToken).map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
+        return billServiceClient.createBill(model, sendEmail, currency, jwtToken).map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 

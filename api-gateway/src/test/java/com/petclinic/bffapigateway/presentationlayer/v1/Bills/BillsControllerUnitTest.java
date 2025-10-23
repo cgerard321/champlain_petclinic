@@ -330,12 +330,13 @@ public class BillsControllerUnitTest {
         billRequestDTO.setAmount(new BigDecimal("600"));
         billRequestDTO.setVisitType("Adoption");
 
-        when(billServiceClient.createBill(any(BillRequestDTO.class), eq(false), anyString()))
+        when(billServiceClient.createBill(any(BillRequestDTO.class), eq(false), anyString(), anyString()))
                 .thenReturn(Mono.just(billResponseDTO));
 
         client.post()
                 .uri(uriBuilder -> uriBuilder.path("/api/gateway/bills")
                         .queryParam("sendEmail", false)
+                        .queryParam("currency", "USD")
                         .build())
                 .cookie("Bearer", "jwtToken")
                 .body(Mono.just(billRequestDTO), BillRequestDTO.class)
@@ -351,7 +352,7 @@ public class BillsControllerUnitTest {
                 });
 
         verify(billServiceClient, times(1))
-                .createBill(any(BillRequestDTO.class), eq(false), eq("jwtToken"));
+                .createBill(any(BillRequestDTO.class), eq(false), anyString(), eq("jwtToken"));
     }
 
 

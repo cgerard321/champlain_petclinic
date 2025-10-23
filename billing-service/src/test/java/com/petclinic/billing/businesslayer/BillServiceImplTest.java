@@ -358,7 +358,7 @@ public class BillServiceImplTest {
                 });
 
         // Act + Assert
-        StepVerifier.create(billService.createBill(Mono.just(billDTO), false, "jwtToken"))
+        StepVerifier.create(billService.createBill(Mono.just(billDTO), false, "jwtToken", "USD"))
                 .expectNextMatches(response ->
                         response.getBillId() != null &&
                                 response.getBillId().length() == 10 &&
@@ -410,7 +410,7 @@ public class BillServiceImplTest {
                 });
 
         // Act + Assert
-        StepVerifier.create(billService.createBill(Mono.just(billDTO), false, "jwtToken"))
+        StepVerifier.create(billService.createBill(Mono.just(billDTO), false, "jwtToken", "USD"))
                 .expectNextMatches(response ->
                         response.getBillId() != null &&
                                 response.getBillId().length() == 10 &&
@@ -458,7 +458,7 @@ public class BillServiceImplTest {
                 .thenReturn(Mono.just(existingBill));
 
         // Act + Assert
-        StepVerifier.create(billService.createBill(Mono.just(billDTO), false, "jwtToken"))
+        StepVerifier.create(billService.createBill(Mono.just(billDTO), false, "jwtToken", "USD"))
                 .expectErrorMatches(throwable ->
                         throwable instanceof RuntimeException &&
                                 throwable.getMessage().contains("Failed to generate unique Bill ID"))
@@ -478,7 +478,7 @@ public class BillServiceImplTest {
         billDTO.setDueDate(LocalDate.now().plusDays(30));
 
         // Act + Assert
-        StepVerifier.create(billService.createBill(Mono.just(billDTO), false, "jwtToken"))
+        StepVerifier.create(billService.createBill(Mono.just(billDTO), false, "jwtToken", "USD"))
                 .expectErrorSatisfies(throwable -> {
                     assertTrue(throwable instanceof ResponseStatusException);
                     ResponseStatusException ex = (ResponseStatusException) throwable;
@@ -497,7 +497,7 @@ public class BillServiceImplTest {
         billDTO.setDueDate(LocalDate.now().plusDays(30));
 
         // Act + Assert
-        StepVerifier.create(billService.createBill(Mono.just(billDTO), false, "jwtToken"))
+        StepVerifier.create(billService.createBill(Mono.just(billDTO), false, "jwtToken", "USD"))
                 .expectErrorSatisfies(throwable -> {
                     assertTrue(throwable instanceof ResponseStatusException);
                     ResponseStatusException ex = (ResponseStatusException) throwable;
@@ -516,7 +516,7 @@ public class BillServiceImplTest {
         billDTO.setDueDate(LocalDate.now().plusDays(30));
 
         // Act + Assert
-        StepVerifier.create(billService.createBill(Mono.just(billDTO), false, "jwtToken"))
+        StepVerifier.create(billService.createBill(Mono.just(billDTO), false, "jwtToken", "USD"))
                 .expectErrorSatisfies(throwable -> {
                     assertTrue(throwable instanceof ResponseStatusException);
                     ResponseStatusException ex = (ResponseStatusException) throwable;
@@ -534,7 +534,7 @@ public class BillServiceImplTest {
 
         when(repo.insert(any(Bill.class))).thenReturn(Mono.error(new RuntimeException("Invalid data")));
 
-        Mono<BillResponseDTO> returnedBill = billService.createBill(billRequestMono, false, "jwtToken");
+        Mono<BillResponseDTO> returnedBill = billService.createBill(billRequestMono, false, "jwtToken", "USD");
 
         StepVerifier.create(returnedBill)
                 .expectError()
@@ -2185,7 +2185,7 @@ public void testGenerateBillPdf_BillNotFound() {
         UserDetails userDetails = new UserDetails();
         userDetails.setEmail("test@example.com");
         userDetails.setUsername("Alice Smith");
-        Mockito.when(authClient.getUserById("owner-456", "jwtToken"))
+        Mockito.when(authClient.getUserById("jwtToken", "owner-456"))
                 .thenReturn(Mono.just(userDetails));
 
         Mockito.when(repo.findById(anyString()))
@@ -2205,7 +2205,7 @@ public void testGenerateBillPdf_BillNotFound() {
         Mockito.when(mailService.sendMail(mailCaptor.capture()))
                 .thenReturn("Message sent to test@example.com");
 
-        StepVerifier.create(billService.createBill(Mono.just(billDTO), true, "jwtToken"))
+        StepVerifier.create(billService.createBill(Mono.just(billDTO), true, "jwtToken", "USD"))
                 .expectNextMatches(response ->
                         response.getBillId().equals("generated-id") &&
                                 response.getVetFirstName().equals("John") &&

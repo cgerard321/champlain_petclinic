@@ -183,65 +183,65 @@ class UserControllerIntegrationTest {
                     assertEquals(error.getStatusCode(),404);
                     assertNotNull(error.getTimestamp());
                 });
-        }
+    }
 
 
 
-        @Test
-        void processResetPassword_ShouldSucceed(){
+    @Test
+    void processResetPassword_ShouldSucceed(){
 
-            when(resetPasswordTokenRepository.findResetPasswordTokenByToken(anyString())).thenReturn(new ResetPasswordToken(1L,"testToken"));
+        when(resetPasswordTokenRepository.findResetPasswordTokenByToken(anyString())).thenReturn(new ResetPasswordToken(1L,"testToken"));
 
-            UserResetPwdWithTokenRequestModel resetRequest = new UserResetPwdWithTokenRequestModel();
-            resetRequest.setToken("testToken");
-            resetRequest.setPassword("PnewPassword%%22");
+        UserResetPwdWithTokenRequestModel resetRequest = new UserResetPwdWithTokenRequestModel();
+        resetRequest.setToken("testToken");
+        resetRequest.setPassword("PnewPassword%%22");
 
-            webTestClient.post()
-                    .uri("/users/reset_password")
-                    .accept(MediaType.APPLICATION_JSON)
-                    .bodyValue(resetRequest)
-                    .exchange()
-                    .expectStatus().isOk();
-        }
+        webTestClient.post()
+                .uri("/users/reset_password")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(resetRequest)
+                .exchange()
+                .expectStatus().isOk();
+    }
 
-        @Test
-        void processResetPassword_ShouldFail(){
+    @Test
+    void processResetPassword_ShouldFail(){
 
-            when(resetPasswordTokenRepository.findResetPasswordTokenByToken(anyString())).thenReturn(null);
+        when(resetPasswordTokenRepository.findResetPasswordTokenByToken(anyString())).thenReturn(null);
 
-            UserResetPwdWithTokenRequestModel resetRequest = new UserResetPwdWithTokenRequestModel();
-            resetRequest.setToken("testToken");
-            resetRequest.setPassword("O##@22newPassword");
+        UserResetPwdWithTokenRequestModel resetRequest = new UserResetPwdWithTokenRequestModel();
+        resetRequest.setToken("testToken");
+        resetRequest.setPassword("O##@22newPassword");
 
-            webTestClient.post()
-                    .uri("/users/reset_password")
-                    .accept(MediaType.APPLICATION_JSON)
-                    .bodyValue(resetRequest)
-                    .exchange()
-                    .expectStatus().isUnauthorized();
-        }
+        webTestClient.post()
+                .uri("/users/reset_password")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(resetRequest)
+                .exchange()
+                .expectStatus().isUnauthorized();
+    }
 
-        @Test
-        void loginWithInvalidCredentials_ShouldReturnUnauthorized(){
+    @Test
+    void loginWithInvalidCredentials_ShouldReturnUnauthorized(){
 
-                UserIDLessUsernameLessDTO userDTO = UserIDLessUsernameLessDTO.builder()
-                        .email("admin@admin.com")
-                        .password("invalidPassword")
-                        .build();
+        UserIDLessUsernameLessDTO userDTO = UserIDLessUsernameLessDTO.builder()
+                .email("admin@admin.com")
+                .password("invalidPassword")
+                .build();
 
-                webTestClient.post()
-                        .uri("/users/login")
-                        .accept(MediaType.APPLICATION_JSON)
-                        .bodyValue(userDTO)
-                        .exchange()
-                        .expectStatus().isUnauthorized()
-                        .expectBody(HTTPErrorMessage.class)
-                        .value(error -> {
-                            assertEquals("Incorrect username or password for user: admin@admin.com",error.getMessage());
-                            assertEquals(401,error.getStatusCode());
-                            assertNotNull(error.getTimestamp());
-                        });
-        }
+        webTestClient.post()
+                .uri("/users/login")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(userDTO)
+                .exchange()
+                .expectStatus().isUnauthorized()
+                .expectBody(HTTPErrorMessage.class)
+                .value(error -> {
+                    assertEquals("Incorrect username or password for user: admin@admin.com",error.getMessage());
+                    assertEquals(401,error.getStatusCode());
+                    assertNotNull(error.getTimestamp());
+                });
+    }
 
 
     @Test
@@ -249,7 +249,7 @@ class UserControllerIntegrationTest {
 
         UserResetPwdRequestModel resetPwdRequestModel = UserResetPwdRequestModel.builder()
                 .email("admin@admin.com")
-                        .build();
+                .build();
 
         when(mailService.sendMail(any())).thenReturn("Your verification link: someFakeLink");
 
@@ -360,10 +360,10 @@ class UserControllerIntegrationTest {
                 .encodeToString(jwtService.generateToken(user).getBytes());
 
         webTestClient.get()
-                        .uri("/users/verification/"+base64Token)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .exchange()
-                        .expectStatus().isOk();
+                .uri("/users/verification/"+base64Token)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk();
 
         assertTrue(userRepo.findByEmail(userDTO.getEmail()).get().isVerified());
 
@@ -425,7 +425,7 @@ class UserControllerIntegrationTest {
                 .bodyValue(userDTO)
                 .exchange()
                 .expectStatus().isBadRequest();
-        }
+    }
 
     @Test
     void createUserWithInvalidDefaultRole_ShouldFail() {
@@ -489,7 +489,7 @@ class UserControllerIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo(String.format("User with e-mail %s already exists", userDTO.getEmail()));
-            userRepo.delete(existingUser);
+        userRepo.delete(existingUser);
 
     }
 
@@ -927,6 +927,3 @@ class UserControllerIntegrationTest {
     }
 
 }
-
-
-

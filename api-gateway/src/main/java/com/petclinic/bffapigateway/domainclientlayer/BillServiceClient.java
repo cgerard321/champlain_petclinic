@@ -208,12 +208,13 @@ public class BillServiceClient {
                 .switchIfEmpty(Flux.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "No bills found for visit type: " + visitType)));
     }
 
-    public Mono<BillResponseDTO> createBill(final BillRequestDTO model, boolean sendEmail, String jwtToken) {
+    public Mono<BillResponseDTO> createBill(final BillRequestDTO model, boolean sendEmail, String currency, String jwtToken) {
         return webClientBuilder
                 .baseUrl(billServiceUrl)
                 .build()
                 .post()
                 .uri(uriBuilder -> uriBuilder
+                        .queryParam("currency", currency)
                         .queryParam("sendEmail", sendEmail)
                         .build())
                 .cookie("Bearer", jwtToken)

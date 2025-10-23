@@ -10,6 +10,7 @@ import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
 import com.petclinic.billing.util.EntityDtoUtil;
+import com.petclinic.billing.util.FormatBillUtil;
 import com.petclinic.billing.util.InterestCalculationUtil;
 import com.petclinic.billing.util.PdfGenerator;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ import reactor.core.publisher.Mono;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.Currency;
 import java.util.UUID;
 import java.util.function.Predicate;
 
@@ -160,10 +162,9 @@ public class BillServiceImpl implements BillService{
 
 
     @Override
-    public Mono<BillResponseDTO> createBill(Mono<BillRequestDTO> billRequestDTO, boolean sendEmail, String jwtToken) {
+    public Mono<BillResponseDTO> createBill(Mono<BillRequestDTO> billRequestDTO, boolean sendEmail, String currency, String jwtToken) {
         return billRequestDTO
                 .flatMap(dto -> {
-                    // Validate required fields
                     if (dto.getBillStatus() == null) {
                         return Mono.error(new ResponseStatusException(
                                 HttpStatus.BAD_REQUEST, "Bill status is required"
@@ -204,12 +205,17 @@ public class BillServiceImpl implements BillService{
                 })
                 .flatMap(billResponse -> {
                     if (sendEmail) {
-                        return authClient.getUserById(billResponse.getCustomerId(), jwtToken)
+                        return authClient.getUserById(jwtToken, billResponse.getCustomerId())
                                 .switchIfEmpty(Mono.error(new ResponseStatusException(
                                         HttpStatus.BAD_REQUEST, "Customer ID does not exist"
                                 )))
                                 .flatMap(userDetails -> {
-                                    Mail mail = generateReceiptEmail(userDetails, EntityDtoUtil.toBillResponseDto(billResponse), "CAD");
+                                    if (currency == "USD" || currency.equals("USD")){
+                                        Mail mail = generateReceiptEmailUSD(userDetails, EntityDtoUtil.toBillResponseDto(billResponse), currency);
+                                        mailService.sendMail(mail);
+                                        return Mono.just(billResponse);
+                                    }
+                                    Mail mail = generateReceiptEmail(userDetails, EntityDtoUtil.toBillResponseDto(billResponse), currency);
                                     mailService.sendMail(mail);
                                     return Mono.just(billResponse);
                                 });
@@ -363,9 +369,9 @@ public class BillServiceImpl implements BillService{
     }
 
     private Mail generateReceiptEmail(UserDetails user, BillResponseDTO bill, String currency) {
-        String formattedAmount = PdfGenerator.formatCurrency(bill.getAmount(), currency);
-        String formattedInterest = PdfGenerator.formatCurrency(bill.getInterest(), currency);
-        String formattedTotal = PdfGenerator.formatCurrency(bill.getAmount().add(bill.getInterest()), currency);
+        String formattedAmount = FormatBillUtil.formatCurrency(bill.getAmount(), currency);
+        String formattedInterest = FormatBillUtil.formatCurrency(bill.getInterest(), currency);
+        String formattedTotal = FormatBillUtil.formatCurrency(bill.getAmount().add(bill.getInterest()), currency);
 
         String emailBody = String.format(
                 "Dear %s,<br><br>" +
@@ -400,7 +406,33 @@ public class BillServiceImpl implements BillService{
         );
     }
 
+    private Mail generateReceiptEmailUSD(UserDetails user, BillResponseDTO bill, String currency) {
+        BigDecimal convertedAmount = FormatBillUtil.convertFromCad(bill.getAmount(), currency);
+        BigDecimal convertedInterest = FormatBillUtil.convertFromCad(bill.getInterest(), currency);
+        BigDecimal convertedTotal = convertedAmount.add(convertedInterest);
 
+        BillResponseDTO convertedBill = BillResponseDTO.builder()
+                .billId(bill.getBillId())
+                .customerId(bill.getCustomerId())
+                .ownerFirstName(bill.getOwnerFirstName())
+                .ownerLastName(bill.getOwnerLastName())
+                .visitType(bill.getVisitType())
+                .vetId(bill.getVetId())
+                .vetFirstName(bill.getVetFirstName())
+                .vetLastName(bill.getVetLastName())
+                .date(bill.getDate())
+                .amount(convertedAmount)
+                .taxedAmount(convertedTotal)
+                .interest(convertedInterest)
+                .billStatus(bill.getBillStatus())
+                .dueDate(bill.getDueDate())
+                .timeRemaining(bill.getTimeRemaining())
+                .archive(bill.getArchive())
+                .interestExempt(bill.isInterestExempt())
+                .build();
+
+        return generateReceiptEmail(user, convertedBill, currency);
+    }
 
 
 
@@ -479,7 +511,7 @@ public class BillServiceImpl implements BillService{
     @Override
     public Mono<BillResponseDTO> processPayment(String customerId, String billId, PaymentRequestDTO paymentRequestDTO, String jwtToken)
     {
-        return authClient.getUserById(customerId, jwtToken)
+        return authClient.getUserById(jwtToken, customerId)
                 .onErrorResume(e -> {
                     log.error("Failed to authenticate or fetch user for customerId: {}. Error: {}", customerId, e.getMessage(), e);
                     if (e instanceof ResponseStatusException) {

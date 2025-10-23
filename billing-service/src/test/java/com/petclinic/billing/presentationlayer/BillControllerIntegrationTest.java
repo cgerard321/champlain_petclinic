@@ -205,6 +205,7 @@ class BillControllerIntegrationTest {
         client.post()
                 .uri(uriBuilder -> uriBuilder.path("/bills")
                         .queryParam("sendEmail", false)
+                        .queryParam("currency", "USD")
                         .build())
                 .cookie("Bearer", "test-jwt-token")
                 .contentType(MediaType.APPLICATION_JSON)

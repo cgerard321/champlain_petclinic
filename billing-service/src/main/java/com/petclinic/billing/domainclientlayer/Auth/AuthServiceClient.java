@@ -28,7 +28,7 @@ public class AuthServiceClient {
         authServiceUrl = "http://" + authServiceHost + ":" + authServicePort;
     }
 
-    public Mono<UserDetails> getUserById(String userId, String jwtToken) {
+    public Mono<UserDetails> getUserById(String jwtToken, String userId) {
         return webClientBuilder.build()
                 .get()
                 .uri(authServiceUrl + "/users/{userId}", userId)

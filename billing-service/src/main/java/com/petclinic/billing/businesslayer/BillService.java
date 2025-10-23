@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.time.LocalDate;
+import java.util.Currency;
+
 public interface BillService {
     Mono<BillResponseDTO> getBillByBillId(String billId);
 
@@ -45,7 +47,7 @@ public interface BillService {
 
     Flux<BillResponseDTO> getAllBillsByVisitType(String visitType);
 
-    Mono<BillResponseDTO> createBill(@RequestBody Mono<BillRequestDTO> model, boolean sendEmail, String JWTToken);
+    Mono<BillResponseDTO> createBill(@RequestBody Mono<BillRequestDTO> model, boolean sendEmail, String currency, String JWTToken);
 
     Mono<Void> deleteBill(@RequestParam(value = "billId", required = true) String billId);
 

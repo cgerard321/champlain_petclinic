@@ -12,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.math.BigDecimal;
+import java.util.Currency;
 import java.util.Optional;
 
 @RestController
@@ -26,14 +27,16 @@ public class BillController {
     // Create Bill //
     @PostMapping("/bills")
     public Mono<ResponseEntity<BillResponseDTO>> createBill(@RequestBody Mono<BillRequestDTO> billDTO,
-                                                            @RequestParam(required = false) boolean sendEmail,
-                                                            @CookieValue("Bearer") String jwtToken) {
+                                                            @RequestParam(defaultValue = "false") boolean sendEmail,
+                                                            @RequestParam String currency,
+                                                            @CookieValue("Bearer") String jwtToken
+                                                           ) {
         return billDTO
                 .flatMap(dto -> {
                     if (dto.getBillStatus() == null) {
                         return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bill status is required"));
                     }
-                    return billService.createBill(Mono.just(dto), sendEmail, jwtToken);
+                    return billService.createBill(Mono.just(dto), sendEmail, currency, jwtToken);
                 })
                 .map(bill -> ResponseEntity.status(HttpStatus.CREATED).body(bill));
     }
