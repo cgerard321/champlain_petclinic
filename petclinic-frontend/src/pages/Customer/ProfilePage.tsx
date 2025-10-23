@@ -347,12 +347,7 @@ const ProfilePage = (): JSX.Element => {
       );
       const petData = response.data;
 
-      console.log(`Full pet data for ${petName}:`, petData);
-      console.log(`Photo object for ${petName}:`, petData.photo);
-
       if (petData.photo) {
-        console.log(`Photo keys for ${petName}:`, Object.keys(petData.photo));
-        console.log(`Photo data exists?`, !!petData.photo.data);
         console.log(
           `Photo fileData exists?`,
           !!(petData.photo as any).fileData
