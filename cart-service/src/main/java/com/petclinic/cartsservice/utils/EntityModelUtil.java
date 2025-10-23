@@ -1,6 +1,5 @@
 package com.petclinic.cartsservice.utils;
 
-
 import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.dataaccesslayer.PromoCode;
@@ -23,22 +22,36 @@ import java.util.UUID;
 public class EntityModelUtil {
 
     public static CartResponseModel toCartResponseModel(Cart cart, List<CartProduct> products) {
-        double subtotal = 0;
-        for (CartProduct product : products) {
-            subtotal += product.getProductSalePrice() * product.getQuantityInCart();
-        }
-        double tvq = subtotal * 0.09975; // Example tax rate for Quebec
-        double tvc = subtotal * 0.05; // Example tax rate for Canada
-        double total = subtotal + tvq + tvc;
+        CartResponseModel resp = new CartResponseModel();
+        BeanUtils.copyProperties(cart, resp);
 
-        CartResponseModel cartResponseModel = new CartResponseModel();
-        BeanUtils.copyProperties(cart, cartResponseModel);
-        cartResponseModel.setSubtotal(subtotal);
-        cartResponseModel.setTvq(tvq);
-        cartResponseModel.setTvc(tvc);
-        cartResponseModel.setTotal(total);
-        return cartResponseModel;
+        double subtotal = 0.0;
+        for (CartProduct p : products) {
+            double price = p.getProductSalePrice() != null ? p.getProductSalePrice() : 0.0;
+            int qty = p.getQuantityInCart() != null ? p.getQuantityInCart() : 0;
+            subtotal += price * qty;
+        }
+        subtotal = round2(subtotal);
+
+        Double promo = resp.getPromoPercent();
+        double discountedSubtotal = subtotal;
+        if (promo != null && promo >= 0.0 && promo <= 100.0) {
+            discountedSubtotal = round2(subtotal * (1.0 - (promo / 100.0)));
+        }
+
+        double tvq = round2(discountedSubtotal * 0.09975); // QC
+        double tvc = round2(discountedSubtotal * 0.05);    // CA/GST
+        double total = round2(discountedSubtotal + tvq + tvc);
+
+        resp.setProducts(products);
+        resp.setSubtotal(subtotal);
+        resp.setTvq(tvq);
+        resp.setTvc(tvc);
+        resp.setTotal(total);
+
+        return resp;
     }
+
     public static CartResponseModel toCartResponseModel(Cart cart, List<CartProduct> products, String customerName) {
         CartResponseModel model = toCartResponseModel(cart, products);
         model.setCustomerName(customerName);
@@ -70,7 +83,6 @@ public class EntityModelUtil {
     public static String generateUUIDString() {
         return UUID.randomUUID().toString();
     }
-
 
     public static PromoCode mapPromoCode(PromoCode promoCode, PromoCodeRequestModel promoCodeRequestModel){
         if (StringUtils.hasText(promoCodeRequestModel.getName())){
@@ -114,5 +126,7 @@ public class EntityModelUtil {
     }
 
 
-
+    private static double round2(double v) {
+        return Math.round(v * 100.0) / 100.0;
+    }
 }

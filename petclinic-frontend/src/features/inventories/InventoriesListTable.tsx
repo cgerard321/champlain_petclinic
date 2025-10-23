@@ -13,6 +13,7 @@ import cardStylesInventory from './CardInventoryTeam.module.css';
 // import axios from 'axios';
 import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { toggleInventoryImportant } from './api/toggleInventoryImportant';
+import EditInventory from './EditInventory';
 
 export default function InventoriesListTable(): JSX.Element {
   const isHttpUrl = (url: string): boolean => {
@@ -32,6 +33,8 @@ export default function InventoriesListTable(): JSX.Element {
   const [inventoryTypeList, setInventoryTypeList] = useState<InventoryType[]>(
     []
   );
+  const [editOpen, setEditOpen] = useState(false);
+  const [editInventoryId, setEditInventoryId] = useState<string | null>(null);
   const [inventoryDescription, setInventoryDescription] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showAddInventoryForm, setShowAddInventoryForm] = useState(false);
@@ -738,9 +741,8 @@ export default function InventoriesListTable(): JSX.Element {
                             );
                             return;
                           }
-                          navigate(
-                            `/inventories/${inventory.inventoryId}/edit`
-                          );
+                          setEditInventoryId(inventory.inventoryId);
+                          setEditOpen(true);
                         }}
                         className="btn btn-warning"
                         disabled={isArchived}
@@ -843,6 +845,7 @@ export default function InventoriesListTable(): JSX.Element {
             showAddInventoryForm={showAddInventoryForm}
             handleInventoryClose={() => setShowAddInventoryForm(false)}
             refreshInventoryTypes={refreshInventoryTypes}
+            existingInventoryNames={inventoryList.map(i => i.inventoryName)}
           />
         )}
 
@@ -851,6 +854,7 @@ export default function InventoriesListTable(): JSX.Element {
             show={showAddTypeForm}
             handleClose={() => setShowAddTypeForm(false)}
             refreshInventoryTypes={refreshInventoryTypes}
+            existingTypeNames={inventoryTypeList.map(t => t.type)}
           />
         )}
 
@@ -861,6 +865,24 @@ export default function InventoriesListTable(): JSX.Element {
               onClick={() => setShowConfirmDialog(false)}
             ></div>
           </>
+        )}
+
+        {editOpen && editInventoryId && (
+          <EditInventory
+            open={editOpen}
+            inventoryIdProp={editInventoryId}
+            existingInventoryNames={inventoryList.map(i => i.inventoryName)}
+            onClose={() => {
+              setEditOpen(false);
+              setEditInventoryId(null);
+              getInventoryList(
+                inventoryName,
+                inventoryType,
+                inventoryDescription,
+                showImportantOnly
+              );
+            }}
+          />
         )}
       </div>
     </>
