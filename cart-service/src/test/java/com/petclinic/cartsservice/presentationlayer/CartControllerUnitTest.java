@@ -30,8 +30,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @WebFluxTest(controllers = CartController.class)
@@ -64,16 +62,6 @@ class CartControllerUnitTest {
             .quantityInCart(1)
             .averageRating(4.0)
             .build();
-
-    private final CartProduct product3 = CartProduct.builder()
-            .productId("132d3c5e-dcaa-4a4f-a35e-b8acc37c51c1")
-            .productName("Product3")
-            .productDescription("Description3")
-            .productSalePrice(300.0)
-            .quantityInCart(1)
-            .averageRating(3.5)
-            .build();
-
     private final List<CartProduct> products = new ArrayList<>(Arrays.asList(product1, product2));
 
     CartProduct wishListProduct1 = CartProduct.builder()
@@ -506,12 +494,6 @@ class CartControllerUnitTest {
         String productIdToRemove = "9a29fff7-564a-4cc9-8fe1-36f6ca9bc223";
 
         List<CartProduct> updatedProducts = new ArrayList<>(Arrays.asList(product2)); // Product1 removed
-
-        Cart cart = Cart.builder()
-                .cartId(cartId)
-                .products(updatedProducts)
-                .customerId("1")
-                .build();
 
         CartResponseModel updatedCartResponse = CartResponseModel.builder()
                 .cartId(cartId)
@@ -1078,28 +1060,23 @@ class CartControllerUnitTest {
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
     }
     @Test
-    void clearCart_success() {
+    void deleteAllItemsInCart_success() {
         String validCartId = "123456789012345678901234567890123456"; // 36 chars
-        CartResponseModel response = CartResponseModel.builder().cartId(validCartId).build();
-        Mockito.when(cartService.clearCart(validCartId))
-                .thenReturn(Flux.just(response));
+        Mockito.when(cartService.deleteAllItemsInCart(validCartId))
+                .thenReturn(Mono.empty());
 
         webTestClient.delete()
-                .uri("/api/v1/carts/" + validCartId + "/clear")
+                .uri("/api/v1/carts/" + validCartId + "/items")
                 .exchange()
-                .expectStatus().isOk()
-                .expectBodyList(CartResponseModel.class)
-                .value(list -> {
-                    assertFalse(list.isEmpty());
-                    assertEquals(validCartId, list.get(0).getCartId());
-                });
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
     }
 
     @Test
-    void clearCart_invalidCartId() {
+    void deleteAllItemsInCart_invalidCartId() {
         String invalidCartId = "short-id"; // Not 36 chars
         webTestClient.delete()
-                .uri("/api/v1/carts/" + invalidCartId + "/clear")
+                .uri("/api/v1/carts/" + invalidCartId + "/items")
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
     }

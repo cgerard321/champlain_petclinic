@@ -68,15 +68,12 @@ public class CartServiceImpl implements CartService {
                 });
     }
 
-    public Flux<CartResponseModel> clearCart(String cartId) {
+    public Mono<Void> deleteAllItemsInCart(String cartId) {
         return cartRepository.findCartByCartId(cartId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
-                .flatMapMany(cart -> {
-                    List<CartProduct> products = cart.getProducts();
+                .flatMap(cart -> {
                     cart.setProducts(Collections.emptyList());
-                    return cartRepository.save(cart)
-                            .thenMany(Flux.fromIterable(products))
-                            .map(product -> EntityModelUtil.toCartResponseModel(cart, List.of(product)));
+                    return cartRepository.save(cart).then();
                 });
     }
 

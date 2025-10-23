@@ -1080,15 +1080,15 @@ class CartServiceUnitTest {
         verifyNoMoreInteractions(cartRepository); // Ensure no save operation happens
     }
 
-    @Test
-    void clearCart_CartNotFound_ThrowsNotFoundException() {
+        @Test
+        void deleteAllItemsInCart_CartNotFound_ThrowsNotFoundException() {
         // Arrange: Mock the repository to return empty when the cart is not found
         String cartId = nonExistentCartId;
 
         when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.empty()); // Cart not found
 
         // Act: Attempt to clear a non-existent cart
-        Flux<CartResponseModel> result = cartService.clearCart(cartId);
+                Mono<Void> result = cartService.deleteAllItemsInCart(cartId);
 
         // Assert: Verify that a NotFoundException is thrown
         StepVerifier.create(result)
@@ -1103,7 +1103,7 @@ class CartServiceUnitTest {
 
 
     @Test
-    void clearCart_AlreadyEmptyCart_ReturnsNoProducts() {
+        void deleteAllItemsInCart_AlreadyEmptyCart_CompletesSuccessfully() {
         // Arrange: Create a cart that has no products
         Cart emptyCart = Cart.builder()
                 .cartId("emptyCartId")
@@ -1115,11 +1115,10 @@ class CartServiceUnitTest {
         when(cartRepository.save(any(Cart.class))).thenReturn(Mono.just(emptyCart)); // Mock saving the empty cart
 
         // Act: Attempt to clear the already empty cart
-        Flux<CartResponseModel> result = cartService.clearCart(emptyCart.getCartId());
+                Mono<Void> result = cartService.deleteAllItemsInCart(emptyCart.getCartId());
 
         // Assert: No products should be returned, and the cart remains empty
         StepVerifier.create(result)
-                .expectNextCount(0) // No products to return
                 .verifyComplete();
 
         // Verify repository interactions

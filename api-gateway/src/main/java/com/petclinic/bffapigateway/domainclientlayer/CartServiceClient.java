@@ -146,10 +146,10 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
 
 
 
-    public Mono<Void> clearCart(String cartId) {
+    public Mono<Void> deleteAllItemsInCart(String cartId) {
         return webClientBuilder.build()
                 .delete()
-                .uri(cartServiceUrl + "/" + cartId + "/clear")
+                .uri(cartServiceUrl + "/" + cartId + "/items")
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, error -> {
                     HttpStatusCode statusCode = error.statusCode();
@@ -163,7 +163,7 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
                 })
                 .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Server error")))
                 .bodyToMono(Void.class)
-                .doOnError(e -> log.error("Failed to clear cart with id {}: {}", cartId, e.getMessage()));
+                .doOnError(e -> log.error("Failed to delete items for cart {}: {}", cartId, e.getMessage()));
     }
 
     public Flux<PromoCodeResponseDTO> getAllPromoCodes() {

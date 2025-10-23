@@ -69,15 +69,15 @@ public class CartServiceClientTest {
     }
 
     @Test
-    void testClearCart_Success() {
+    void testDeleteAllItemsInCart_Success() {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
-                .setResponseCode(200)
+                .setResponseCode(204)
         );
 
-        Mono<Void> clearCartResponse = mockCartServiceClient.clearCart("98f7b33a-d62a-420a-a84a-05a27c85fc91");
+        Mono<Void> response = mockCartServiceClient.deleteAllItemsInCart("98f7b33a-d62a-420a-a84a-05a27c85fc91");
 
-        StepVerifier.create(clearCartResponse)
+        StepVerifier.create(response)
                 .verifyComplete();
     }
 
@@ -689,48 +689,48 @@ public class CartServiceClientTest {
                 .verify();
     }
 
-    @Test
-    void testClearCart_InvalidCartId() {
-        String cartId = "invalid-cart-id";
+                @Test
+                void testDeleteAllItemsInCart_InvalidCartId() {
+                        String cartId = "invalid-cart-id";
 
-        prepareResponse(response -> response
-                .setHeader("Content-Type", "application/json")
-                .setResponseCode(422) // Simulate a 422 Unprocessable Entity
-                .setBody("""
-                {
-                    "message": "Cart id is invalid: invalid-cart-id"
+                        prepareResponse(response -> response
+                                        .setHeader("Content-Type", "application/json")
+                                        .setResponseCode(422) // Simulate a 422 Unprocessable Entity
+                                        .setBody("""
+                                        {
+                                                "message": "Cart id is invalid: invalid-cart-id"
+                                        }
+                                        """)
+                        );
+
+                        Mono<Void> response = mockCartServiceClient.deleteAllItemsInCart(cartId);
+
+                        StepVerifier.create(response)
+                                        .expectErrorSatisfies(throwable -> {
+                                                assertThat(throwable).isInstanceOf(InvalidInputException.class);
+                                                assertThat(throwable.getMessage()).isEqualTo("Cart id is invalid: " + cartId);
+                                        })
+                                        .verify();
                 }
-                """)
-        );
 
-        Mono<Void> clearCartResponse = mockCartServiceClient.clearCart(cartId);
+                @Test
+                void testDeleteAllItemsInCart_GenericClientError() {
+                        String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
 
-        StepVerifier.create(clearCartResponse)
-                .expectErrorSatisfies(throwable -> {
-                    assertThat(throwable).isInstanceOf(InvalidInputException.class);
-                    assertThat(throwable.getMessage()).isEqualTo("Cart id is invalid: " + cartId);
-                })
-                .verify();
-    }
+                        prepareResponse(response -> response
+                                        .setHeader("Content-Type", "application/json")
+                                        .setResponseCode(400) // Simulate a generic 400 Bad Request
+                        );
 
-    @Test
-    void testClearCart_GenericClientError() {
-        String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
+                        Mono<Void> response = mockCartServiceClient.deleteAllItemsInCart(cartId);
 
-        prepareResponse(response -> response
-                .setHeader("Content-Type", "application/json")
-                .setResponseCode(400) // Simulate a generic 400 Bad Request
-        );
-
-        Mono<Void> clearCartResponse = mockCartServiceClient.clearCart(cartId);
-
-        StepVerifier.create(clearCartResponse)
-                .expectErrorSatisfies(throwable -> {
-                    assertThat(throwable).isInstanceOf(IllegalArgumentException.class);
-                    assertThat(throwable.getMessage()).isEqualTo("Client error");
-                })
-                .verify();
-    }
+                        StepVerifier.create(response)
+                                        .expectErrorSatisfies(throwable -> {
+                                                assertThat(throwable).isInstanceOf(IllegalArgumentException.class);
+                                                assertThat(throwable.getMessage()).isEqualTo("Client error");
+                                        })
+                                        .verify();
+                }
     @Test
     void testGetCartByCartId_Success() {
         String cartId = "c-200";
@@ -835,8 +835,8 @@ public class CartServiceClientTest {
                 .verify();
     }
 
-    @Test
-    void testClearCart_NoContent204() {
+        @Test
+        void testDeleteAllItemsInCart_NoContent204() {
         String cartId = "c-2";
 
         prepareResponse(r -> r
@@ -844,7 +844,7 @@ public class CartServiceClientTest {
                 .setResponseCode(204)
         );
 
-        StepVerifier.create(mockCartServiceClient.clearCart(cartId))
+                StepVerifier.create(mockCartServiceClient.deleteAllItemsInCart(cartId))
                 .verifyComplete();
     }
 
@@ -955,7 +955,7 @@ public class CartServiceClientTest {
 
 
     @Test
-    void testClearCart_Unprocessable422() {
+    void testDeleteAllItemsInCart_Unprocessable422() {
         String cartId = "bad";
         prepareResponse(r -> r
                 .setHeader("Content-Type", "application/json")
@@ -963,7 +963,7 @@ public class CartServiceClientTest {
                 .setBody("{\"message\":\"Cart id is invalid\"}")
         );
 
-        StepVerifier.create(mockCartServiceClient.clearCart(cartId))
+        StepVerifier.create(mockCartServiceClient.deleteAllItemsInCart(cartId))
                 .expectErrorSatisfies(ex ->
                         org.assertj.core.api.Assertions.assertThat(ex.getClass().getSimpleName().toLowerCase())
                                 .contains("invalid"))
@@ -1164,7 +1164,7 @@ public class CartServiceClientTest {
     }
 
     @Test
-    void testClearCart_ClientErrorElse_401() {
+    void testDeleteAllItemsInCart_ClientErrorElse_401() {
         String cartId = "c-err";
         prepareResponse(r -> r
                 .setHeader("Content-Type", "application/json")
@@ -1172,7 +1172,7 @@ public class CartServiceClientTest {
                 .setBody("{\"message\":\"unauthorized\"}")
         );
 
-        StepVerifier.create(mockCartServiceClient.clearCart(cartId))
+        StepVerifier.create(mockCartServiceClient.deleteAllItemsInCart(cartId))
                 .expectErrorSatisfies(ex ->
                         org.assertj.core.api.Assertions.assertThat(ex.getClass().getSimpleName())
                                 .containsIgnoringCase("IllegalArgument"))

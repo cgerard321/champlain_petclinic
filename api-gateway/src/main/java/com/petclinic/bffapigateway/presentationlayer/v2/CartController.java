@@ -18,7 +18,6 @@ import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -54,11 +53,13 @@ public class CartController {
     }
 
 
-    @DeleteMapping("/{cartId}/clear")
-    public Mono<ResponseEntity<String>> clearCart(@PathVariable String cartId) {
-        return cartServiceClient.clearCart(cartId)
-                .thenReturn(ResponseEntity.ok("Cart successfully cleared"))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    @DeleteMapping("/{cartId}/items")
+    public Mono<ResponseEntity<Void>> deleteAllItemsInCart(@PathVariable String cartId) {
+        return cartServiceClient.deleteAllItemsInCart(cartId)
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .onErrorResume(InvalidInputException.class, e -> Mono.just(ResponseEntity.unprocessableEntity().build()))
+                .onErrorResume(NotFoundException.class, e -> Mono.just(ResponseEntity.notFound().build()))
+                .onErrorResume(WebClientResponseException.class, ex -> Mono.just(ResponseEntity.status(ex.getStatusCode()).build()));
     }
 
     @DeleteMapping(value = "/{cartId}/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)

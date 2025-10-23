@@ -43,12 +43,13 @@ public class CartController {
         return cartService.getAllCarts();
     }
 
-    @DeleteMapping("/{cartId}/clear")
-    public Flux<CartResponseModel> clearCart(@PathVariable String cartId) {
-        return Flux.just(cartId)
+    @DeleteMapping("/{cartId}/items")
+    public Mono<ResponseEntity<Void>> deleteAllItemsInCart(@PathVariable String cartId) {
+        return Mono.just(cartId)
                 .filter(id -> id.length() == 36) // validate the cart id
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
-                .flatMap(cartService::clearCart);
+                .flatMap(validId -> cartService.deleteAllItemsInCart(validId)
+                        .thenReturn(ResponseEntity.noContent().build()));
     }
 
 

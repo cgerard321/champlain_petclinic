@@ -267,41 +267,40 @@ public class CartControllerV1UnitTest {
         verify(cartServiceClient, times(1)).deleteCartByCartId(cartId);
     }
 
-    // Tests for clearCart endpoint
+    // Tests for deleteAllItemsInCart endpoint
     @Test
-    @DisplayName("DELETE /api/gateway/carts/{cartId}/clear - Should clear cart successfully")
-    void clearCart_withValidId_shouldClearCart() {
+    @DisplayName("DELETE /api/gateway/carts/{cartId}/items - Should remove all items successfully")
+    void deleteAllItemsInCart_withValidId_shouldReturnNoContent() {
         // Arrange
         String cartId = "cart-123";
-        when(cartServiceClient.clearCart(cartId))
+        when(cartServiceClient.deleteAllItemsInCart(cartId))
                 .thenReturn(Mono.empty());
 
         // Act & Assert
         webTestClient.delete()
-                .uri(baseCartURL + "/" + cartId + "/clear")
+                .uri(baseCartURL + "/" + cartId + "/items")
                 .exchange()
-                .expectStatus().isOk()
-                .expectBody(String.class)
-                .isEqualTo("Cart successfully cleared");
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
 
-        verify(cartServiceClient, times(1)).clearCart(cartId);
+        verify(cartServiceClient, times(1)).deleteAllItemsInCart(cartId);
     }
 
     @Test
-    @DisplayName("DELETE /api/gateway/carts/{cartId}/clear - Should return 404 when cart not found")
-    void clearCart_withNonExistingId_shouldReturnNotFound() {
+    @DisplayName("DELETE /api/gateway/carts/{cartId}/items - Should return 404 when cart not found")
+    void deleteAllItemsInCart_withNonExistingId_shouldReturnNotFound() {
         // Arrange
         String cartId = "non-existent-cart";
-        when(cartServiceClient.clearCart(cartId))
+        when(cartServiceClient.deleteAllItemsInCart(cartId))
                 .thenReturn(Mono.error(new NotFoundException("Cart not found")));
 
         // Act & Assert
         webTestClient.delete()
-                .uri(baseCartURL + "/" + cartId + "/clear")
+                .uri(baseCartURL + "/" + cartId + "/items")
                 .exchange()
                 .expectStatus().isNotFound();
 
-        verify(cartServiceClient, times(1)).clearCart(cartId);
+        verify(cartServiceClient, times(1)).deleteAllItemsInCart(cartId);
     }
 
     // Tests for removeProductFromCart endpoint

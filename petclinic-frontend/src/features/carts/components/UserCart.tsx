@@ -595,7 +595,7 @@ const UserCart: React.FC = () => {
     if (!ok) return;
 
     try {
-      await axiosInstance.delete(`/carts/${cartId}/clear`, { useV2: false });
+      await axiosInstance.delete(`/carts/${cartId}/items`, { useV2: false });
       setCartItems([]);
       setCartItemCount(0);
       setCartCountInLS(0);

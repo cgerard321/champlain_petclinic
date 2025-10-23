@@ -3,7 +3,6 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 import com.petclinic.bffapigateway.domainclientlayer.CartServiceClient;
 import com.petclinic.bffapigateway.dtos.Cart.CartResponseDTO;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
-import org.junit.Ignore;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -17,7 +16,6 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-import org.springframework.http.HttpStatus;
 import org.mockito.Mockito;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
@@ -63,22 +61,21 @@ public class CartControllerUnitTest {
     @MockBean
     private CartServiceClient cartServiceClient;
 
-    @Test
-    void testClearCart_Success() {
-        // Arrange
-        when(cartServiceClient.clearCart("cartId123")).thenReturn(Mono.empty()); // Simulate a successful cart clear action
+        @Test
+        void testDeleteAllItemsInCart_Success() {
+                // Arrange
+                when(cartServiceClient.deleteAllItemsInCart("cartId123")).thenReturn(Mono.empty());
 
-        // Act
-        client.delete()
-                .uri("/api/v2/gateway/carts/cartId123/clear")
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(String.class)
-                .isEqualTo("Cart successfully cleared");
+                // Act
+                client.delete()
+                                .uri("/api/v2/gateway/carts/cartId123/items")
+                                .exchange()
+                                .expectStatus().isNoContent()
+                                .expectBody().isEmpty();
 
-        // Assert
-        verify(cartServiceClient, times(1)).clearCart("cartId123");
-    }
+                // Assert
+                verify(cartServiceClient, times(1)).deleteAllItemsInCart("cartId123");
+        }
 
     @Test
     void testGetCartByCustomerId_Success() {

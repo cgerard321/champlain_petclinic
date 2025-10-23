@@ -168,15 +168,15 @@ public class CartControllerV1 {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
-    @DeleteMapping("/{cartId}/clear")
-    public Mono<ResponseEntity<String>> clearCart(@PathVariable String cartId) {
-        return cartServiceClient.clearCart(cartId)
-                .thenReturn(ResponseEntity.ok("Cart successfully cleared"))
-                .onErrorResume(e -> mapCartError(e,
-                        ErrorOptions.builder("clearCart")
-                                .cartId(cartId)
-                                .build()
-                ));
+    @DeleteMapping("/{cartId}/items")
+    public Mono<ResponseEntity<Void>> deleteAllItemsInCart(@PathVariable String cartId) {
+    return cartServiceClient.deleteAllItemsInCart(cartId)
+        .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+        .onErrorResume(e -> this.<Void>mapCartError(e,
+            ErrorOptions.builder("deleteAllItemsInCart")
+                .cartId(cartId)
+                .build()
+        ));
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
