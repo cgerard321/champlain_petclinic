@@ -35,16 +35,7 @@ const SignUp: React.FC = (): JSX.Element => {
     owner,
   });
 
-  function togglePasswordVisibility(): void {
-    const passwordInput = document.getElementById(
-      'passwordInput'
-    ) as HTMLInputElement;
-    if (passwordInput.type === 'password') {
-      passwordInput.type = 'text';
-    } else {
-      passwordInput.type = 'password';
-    }
-  }
+  const [showPassword, setShowPassword] = useState(false);
 
   const validatePassword = (password: string): string | undefined => {
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
@@ -316,19 +307,19 @@ const SignUp: React.FC = (): JSX.Element => {
               <label>Password: </label>
               <div className="input-wrapper">
                 <input
-                  type="password"
-                  id="passwordInput"
-                  placeholder="Enter your password"
-                  value={userData.password}
-                  onChange={handleChange}
+                    type={showPassword ? 'text' : 'password'}
+                    name="password"
+                    value={userData.password}
+                    onChange={handleChange}
+                    className="password-container"
                 />
                 <button
                   className="toggle-password"
                   id="toggle-password"
-                  onClick={togglePasswordVisibility}
+                  onClick={() => setShowPassword(prev => !prev)}
                   type="button"
                 >
-                  <img className="icon" src={eyeDark} title="showPassword" />
+                  <img className="icon-eye" src={eyeDark} title="showPassword" />
                 </button>
               </div>
               {errorMessage.password && (
