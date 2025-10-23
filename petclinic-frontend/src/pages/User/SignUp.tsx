@@ -307,11 +307,11 @@ const SignUp: React.FC = (): JSX.Element => {
               <label>Password: </label>
               <div className="input-wrapper">
                 <input
-                    type={showPassword ? 'text' : 'password'}
-                    name="password"
-                    value={userData.password}
-                    onChange={handleChange}
-                    className="password-container"
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  value={userData.password}
+                  onChange={handleChange}
+                  className="password-container"
                 />
                 <button
                   className="toggle-password"
@@ -319,7 +319,11 @@ const SignUp: React.FC = (): JSX.Element => {
                   onClick={() => setShowPassword(prev => !prev)}
                   type="button"
                 >
-                  <img className="icon-eye" src={eyeDark} title="showPassword" />
+                  <img
+                    className="icon-eye"
+                    src={eyeDark}
+                    title="showPassword"
+                  />
                 </button>
               </div>
               {errorMessage.password && (
