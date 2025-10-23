@@ -14,6 +14,7 @@ import { FaShoppingCart } from 'react-icons/fa';
 import ImageContainer from '@/features/products/components/ImageContainer';
 import axiosInstance from '@/shared/api/axiosInstance';
 import { formatPrice } from '../utils/formatPrice';
+import { applyPromo } from '@/shared/api/cart';
 import {
   IsAdmin,
   IsInventoryManager,
@@ -58,6 +59,7 @@ const UserCart: React.FC = () => {
   const navigate = useNavigate();
   const { cartId } = useParams<{ cartId?: string }>();
   const { confirm, ConfirmModal } = useConfirmModal();
+
   const [cartItems, setCartItems] = useState<ProductModel[]>([]);
   const [wishlistItems, setWishlistItems] = useState<ProductModel[]>([]);
 
@@ -81,10 +83,11 @@ const UserCart: React.FC = () => {
 
   const [wishlistUpdated, setWishlistUpdated] = useState(false);
   const [voucherCode, setVoucherCode] = useState<string>('');
-  const [discount, setDiscount] = useState<number>(0);
   const [voucherError, setVoucherError] = useState<string | null>(null);
 
   const [movingAll, setMovingAll] = useState<boolean>(false);
+
+  const [promoPercent, setPromoPercent] = useState<number | null>(null);
 
   // Recent purchases state
   const [recentPurchases, setRecentPurchases] = useState<
@@ -275,9 +278,17 @@ const UserCart: React.FC = () => {
     (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
     0
   );
-  const tvq = subtotal * 0.09975;
-  const tvc = subtotal * 0.05;
-  const total = subtotal - discount + tvq + tvc;
+
+  const promoDiscount =
+    promoPercent != null ? (subtotal * promoPercent) / 100 : 0;
+  const discountedSubtotal = Math.max(0, subtotal - promoDiscount);
+
+  const tvq = discountedSubtotal * 0.09975;
+  const tvc = discountedSubtotal * 0.05;
+
+  const effectiveDiscount = promoDiscount;
+
+  const total = discountedSubtotal + tvq + tvc;
 
   const updateCartItemCount = useCallback(() => {
     const count = cartItems.reduce(
@@ -334,6 +345,12 @@ const UserCart: React.FC = () => {
           })
         );
         setWishlistItems(enrichedWishlist);
+
+        if (typeof data.promoPercent === 'number') {
+          setPromoPercent(data.promoPercent);
+        } else {
+          setPromoPercent(null);
+        }
       } catch (err: unknown) {
         console.error(err);
         setError('Failed to fetch cart items');
@@ -387,17 +404,49 @@ const UserCart: React.FC = () => {
   }, [cartId, fetchRecommendationPurchases]);
 
   const applyVoucherCode = async (): Promise<void> => {
+    if (!cartId) {
+      setVoucherError('Invalid cart ID');
+      return;
+    }
+    if (!voucherCode.trim()) {
+      setVoucherError('Please enter a promo code.');
+      return;
+    }
+
     try {
       const { data } = await axiosInstance.get(
-        `/promos/validate/${voucherCode}`,
-        // this API call is only in v2 for now
-        { useV2: true }
+        `/carts/promos/validate/${encodeURIComponent(voucherCode.trim())}`,
+        { useV2: false, handleLocally: true }
       );
-      setDiscount((subtotal * data.discount) / 100);
+
+      const percent: number = Number(data?.discount);
+      if (Number.isNaN(percent) || percent < 0 || percent > 100) {
+        setVoucherError('Received invalid discount from server.');
+        return;
+      }
+
+      const updated = await applyPromo(cartId, percent);
+
       setVoucherError(null);
-    } catch (err: unknown) {
-      console.error('Error validating voucher code:', err);
-      setVoucherError('Error validating voucher code.');
+      setNotificationMessage(
+        `Promo applied${updated?.promoPercent != null ? `: ${updated.promoPercent}%` : `: ${percent}%`}`
+      );
+
+      setPromoPercent(updated?.promoPercent ?? percent);
+
+      try {
+        const refreshed = await axiosInstance.get(`/carts/${cartId}`, {
+          useV2: false,
+        });
+        if (typeof refreshed.data?.promoPercent === 'number') {
+          setPromoPercent(refreshed.data.promoPercent);
+        }
+      } catch {
+        /* ignore */
+      }
+    } catch (err) {
+      console.error('Error validating promo code:', err);
+      setVoucherError('Promo code invalid or expired.');
     }
   };
 
@@ -481,6 +530,17 @@ const UserCart: React.FC = () => {
     },
     [cartItems, cartId, blockIfReadOnly]
   );
+
+  const onClearPromo = async (): Promise<void> => {
+    if (!cartId) return;
+    try {
+      await applyPromo(cartId, 0);
+      setPromoPercent(null);
+      setNotificationMessage('Promo removed.');
+    } catch {
+      setNotificationMessage('Failed to remove promo.');
+    }
+  };
 
   const deleteItem = useCallback(
     async (productId: string, indexToDelete: number): Promise<void> => {
@@ -752,7 +812,8 @@ const UserCart: React.FC = () => {
       );
       const invoiceTvq = invoiceSubtotal * 0.09975;
       const invoiceTvc = invoiceSubtotal * 0.05;
-      const invoiceTotal = invoiceSubtotal + invoiceTvq + invoiceTvc - discount;
+      const invoiceTotal =
+        invoiceSubtotal + invoiceTvq + invoiceTvc - effectiveDiscount;
 
       const usedBilling = billing ?? billingInfo ?? null;
 
@@ -774,7 +835,7 @@ const UserCart: React.FC = () => {
         subtotal: invoiceSubtotal,
         tvq: invoiceTvq,
         tvc: invoiceTvc,
-        discount,
+        discount: effectiveDiscount,
         total: invoiceTotal,
       };
       setLastInvoice(newInvoice);
@@ -978,6 +1039,29 @@ const UserCart: React.FC = () => {
                 )}
               </div>
 
+              <div className="voucher-code-section" style={{ marginTop: 12 }}>
+                {promoPercent != null && (
+                  <div
+                    className="voucher-hint"
+                    style={{
+                      marginTop: 6,
+                      display: 'flex',
+                      gap: 8,
+                      alignItems: 'center',
+                    }}
+                  >
+                    <span>Current promo: {promoPercent}%</span>
+                    <button
+                      type="button"
+                      className="cart-button cart-button--outline"
+                      onClick={onClearPromo}
+                    >
+                      Clear
+                    </button>
+                  </div>
+                )}
+              </div>
+
               <div className="CartSummary">
                 <h3>Cart Summary</h3>
                 <p className="summary-item">
@@ -986,7 +1070,8 @@ const UserCart: React.FC = () => {
                 <p className="summary-item">TVQ (9.975%): {formatPrice(tvq)}</p>
                 <p className="summary-item">TVC (5%): {formatPrice(tvc)}</p>
                 <p className="summary-item">
-                  Discount: {formatPrice(discount)}
+                  Discount{promoPercent != null ? ` (${promoPercent}%)` : ''}:{' '}
+                  {formatPrice(effectiveDiscount)}
                 </p>
                 <p className="total-price summary-item">
                   Total: {formatPrice(total)}
@@ -1008,10 +1093,9 @@ const UserCart: React.FC = () => {
               {lastInvoice && (
                 <button
                   className="view-receipt-btn cart-button cart-button--brand cart-button--block"
-                  onClick={() => {
-                    setShowInvoiceModal(true);
-                  }}
+                  onClick={() => setShowInvoiceModal(true)}
                   style={{ marginTop: '1rem' }}
+                  aria-label="View your last receipt"
                 >
                   View Receipt
                 </button>
@@ -1020,7 +1104,6 @@ const UserCart: React.FC = () => {
           )}
         </div>
 
-        {/* Recent Purchases Section - above Wishlist */}
         <div className="recent-purchases-section cart-panel cart-panel--padded">
           <h2>Recent Purchases</h2>
           <div className="recent-purchases-list cart-scroll-strip">
@@ -1111,7 +1194,6 @@ const UserCart: React.FC = () => {
             )}
           </div>
 
-          {/* Wishlist items */}
           <div className="Wishlist-items cart-scroll-strip">
             {wishlistItems.length > 0 ? (
               wishlistItems.map(item => {
@@ -1156,7 +1238,6 @@ const UserCart: React.FC = () => {
           </div>
         </div>
 
-        {/* Recommendation Purchases Section */}
         <div className="recommendation-purchases-section cart-panel cart-panel--padded">
           <div className="recommendation-header">
             <h2>Your Recommendations</h2>
@@ -1239,7 +1320,6 @@ const UserCart: React.FC = () => {
           </div>
         </div>
 
-        {/* Billing Form Modal */}
         {showBillingForm && (
           <div className="modal-backdrop">
             <div className="modal-content">
@@ -1278,5 +1358,4 @@ const UserCart: React.FC = () => {
     </div>
   );
 };
-
 export default UserCart;
