@@ -85,9 +85,6 @@ const UserCart: React.FC = () => {
     useState<boolean>(false);
   const [showBillingForm, setShowBillingForm] = useState<boolean>(false);
   const [billingInfo, setBillingInfo] = useState<BillingInfo | null>(null);
-  // When true, show only a single Estimated Taxes line (no GST/PST breakdown).
-  // This is set after checkout to avoid showing the detailed breakdown immediately when the user adds a new item.
-  // Previously used to suppress detailed tax breakdown after checkout; now unused
 
   const [wishlistUpdated, setWishlistUpdated] = useState(false);
   const [voucherCode, setVoucherCode] = useState<string>('');
@@ -822,9 +819,18 @@ const UserCart: React.FC = () => {
       );
       const invoiceSubtotal = invoiceSubtotalCents / 100;
       // determine province for invoice tax calculation
+      // Prefer billing/provided province, otherwise use user's province if available.
+      function hasProvince(obj: unknown): obj is { province?: string } {
+        if (typeof obj !== 'object' || obj === null) return false;
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore - narrow below
+        const val = (obj as { [k: string]: unknown })['province'];
+        return typeof val === 'string' || typeof val === 'undefined';
+      }
+
       const usedProvince =
         (billing ?? billingInfo)?.province ||
-        (user as unknown as { province?: string })?.province;
+        (hasProvince(user) ? user.province : undefined);
       const invoiceTaxLines = computeTaxes(invoiceSubtotal, usedProvince);
       const invoiceTaxCents = invoiceTaxLines.reduce(
         (s, t) =>
@@ -857,16 +863,16 @@ const UserCart: React.FC = () => {
         items: invoiceItemsForFull,
         subtotal: invoiceSubtotal,
         // legacy fields: map by tax line name for backward compatibility
-        // Prefer mapping by explicit tax names where possible. Older code expects
-        // 'tvq' (provincial) and 'tvc' (federal). We map common names and fall
-        // back to sensible defaults. If HST (single combined tax) is present,
-        // assign it to 'tvc' to preserve a non-zero legacy field.
+        // Older code expects 'tvq' (provincial) and 'tvc' (federal). Map common
+        // names from our tax lines. NOTE: PROVINCE_TAX_MAP uses 'PST' for QC
+        // (not 'QST'/'TVQ'), so check for 'PST' here.
         tvq:
-          invoiceTaxLines.find(t => ['QST', 'TVQ', 'PST'].includes(t.name))
-            ?.amount ?? 0,
+          invoiceTaxLines.find(t => ['PST', 'TVQ'].includes(t.name))?.amount ??
+          0,
+        // For tvc prefer HST (single combined) then GST
         tvc:
           invoiceTaxLines.find(t => t.name === 'HST')?.amount ??
-          invoiceTaxLines.find(t => ['GST', 'TVC'].includes(t.name))?.amount ??
+          invoiceTaxLines.find(t => t.name === 'GST')?.amount ??
           0,
         discount: effectiveDiscount,
         total: invoiceTotal,
