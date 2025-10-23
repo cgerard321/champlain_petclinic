@@ -122,12 +122,33 @@ export default function VetDetails(): JSX.Element {
   const [pendingPhotoId, setPendingPhotoId] = useState<number | null>(null);
   const canManageVet = isVet || isAdmin; // Only allow Vets and Admins to manage vet details
 
+  const [notification, setNotification] = useState<{
+    show: boolean;
+    message: string;
+    type: 'success' | 'error';
+  }>({
+    show: false,
+    message: '',
+    type: 'success',
+  });
+
   const [selectedEducation, setSelectedEducation] =
     useState<EducationResponseType | null>(null);
   const [ratings, setRatings] = useState<RatingResponseType[] | null>(null);
   const [selectedVet, setSelectedVet] = useState<VetRequestModel | null>(null);
   const [currentCustomerName, setCurrentCustomerName] = useState<string>('');
   const canSubmitReview = Boolean(user.userId) && isOwner;
+
+  const showNotification = (
+    message: string,
+    type: 'success' | 'error'
+  ): void => {
+    setNotification({ show: true, message, type });
+    setTimeout(() => {
+      setNotification({ show: false, message: '', type: 'success' });
+    }, 3000);
+  };
+
   const refreshVetDetails = useCallback(async (): Promise<void> => {
     try {
       if (!vetId)
@@ -429,7 +450,7 @@ export default function VetDetails(): JSX.Element {
 
     try {
       await addSpecialty(vetId!, specialtyDTO);
-      alert('Specialty added successfully!');
+      showNotification('Specialty added successfully!', 'success');
       setIsFormOpen(false); // Close form on success
       setSpecialtyName(''); // Clear fields
 
@@ -438,13 +459,15 @@ export default function VetDetails(): JSX.Element {
         setVet(updatedVetData);
       }
     } catch (error) {
-      setError('Failed to add specialty');
+      showNotification('Failed to add specialty', 'error');
+      console.error('Failed to add specialty:', error);
     }
   };
 
   const handleDeleteSpecialty = async (specialtyId: string): Promise<void> => {
     try {
       await deleteSpecialty(vetId!, specialtyId);
+      showNotification('Specialty deleted successfully!', 'success');
 
       // Refresh the vet data to get the updated specialties list
       if (vetId) {
@@ -453,7 +476,7 @@ export default function VetDetails(): JSX.Element {
       }
     } catch (error) {
       console.error('Failed to delete specialty:', error);
-      setError('Failed to delete specialty');
+      showNotification('Failed to delete specialty', 'error');
     }
   };
 
@@ -626,62 +649,80 @@ export default function VetDetails(): JSX.Element {
             <section className="specialties-info">
               <h2>Specialties</h2>
               {vet.specialties && vet.specialties.length > 0 ? (
-                <ul>
+                <div className="specialties-list">
                   {vet.specialties.map((specialty, index) => (
-                    <li key={index}>
-                      {specialty.name}
+                    <div key={index} className="specialty-item">
+                      <span className="specialty-name">{specialty.name}</span>
                       {canManageVet && (
                         <button
+                          className="btn-delete-specialty"
                           onClick={() =>
                             handleDeleteSpecialty(specialty.specialtyId)
                           }
+                          title="Delete this specialty"
                         >
                           Delete
                         </button>
                       )}
-                    </li>
+                    </div>
                   ))}
-                </ul>
+                </div>
               ) : (
-                <p>No specialties available</p>
+                <p className="no-specialties">No specialties available</p>
               )}
 
               {/* Button to open the form */}
               {canManageVet && (
-                <button onClick={() => setIsFormOpen(true)}>
-                  Add Specialty
+                <button
+                  className="btn-add-specialty"
+                  onClick={() => setIsFormOpen(true)}
+                >
+                  + Add Specialty
                 </button>
               )}
 
               {/* Conditionally render the form */}
               {isFormOpen && (
-                <div className="specialty-form-popup">
-                  <form
-                    onSubmit={e => {
-                      e.preventDefault();
-                      handleAddSpecialty();
-                    }}
+                <div
+                  className="specialty-form-overlay"
+                  onClick={() => setIsFormOpen(false)}
+                >
+                  <div
+                    className="specialty-form-popup"
+                    onClick={e => e.stopPropagation()}
                   >
-                    <div>
-                      <label htmlFor="specialtyName">Specialty Name:</label>
-                      <input
-                        type="text"
-                        id="specialtyName"
-                        value={specialtyName}
-                        onChange={e => setSpecialtyName(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <button type="submit">Submit</button>
-                      <button
-                        type="button"
-                        onClick={() => setIsFormOpen(false)}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </form>
+                    <h3>Add New Specialty</h3>
+                    <form
+                      onSubmit={e => {
+                        e.preventDefault();
+                        handleAddSpecialty();
+                      }}
+                    >
+                      <div className="form-group">
+                        <label htmlFor="specialtyName">Specialty Name:</label>
+                        <input
+                          type="text"
+                          id="specialtyName"
+                          value={specialtyName}
+                          onChange={e => setSpecialtyName(e.target.value)}
+                          placeholder="Enter specialty name"
+                          required
+                        />
+                      </div>
+                      <div className="form-buttons">
+                        <button type="submit" className="btn-submit">
+                          Add
+                        </button>
+                        <button
+                          type="button"
+                          className="btn-cancel"
+                          onClick={() => setIsFormOpen(false)}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  </div>
                 </div>
               )}
             </section>
@@ -916,6 +957,30 @@ export default function VetDetails(): JSX.Element {
                 Delete
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Notification Modal */}
+      {notification.show && (
+        <div className="notification-overlay">
+          <div className={`notification-modal ${notification.type}`}>
+            <div className="notification-icon">
+              {notification.type === 'success' ? '✓' : '✕'}
+            </div>
+            <div className="notification-content">
+              <h4>{notification.type === 'success' ? 'Success' : 'Error'}</h4>
+              <p>{notification.message}</p>
+            </div>
+            <button
+              className="notification-close"
+              onClick={() =>
+                setNotification({ show: false, message: '', type: 'success' })
+              }
+              aria-label="Close notification"
+            >
+              ✕
+            </button>
           </div>
         </div>
       )}
