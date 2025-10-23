@@ -9,7 +9,7 @@ import axios from 'axios';
 import { downloadPrescription } from '@/features/visits/Prescription/api/downloadPrescription';
 import './CustomerVisitListTable.css';
 import BasicModal from '@/shared/components/BasicModal';
-import '@/shared/components/BasicModal.css'; // use BasicModal CSS
+import '@/shared/components/BasicModal.css';
 
 export default function CustomerVisitListTable(): JSX.Element {
   const { user } = useUser();
@@ -30,12 +30,11 @@ export default function CustomerVisitListTable(): JSX.Element {
       try {
         let visitData;
         if (isVet) {
-          // Fetch vet's visits
           visitData = await getAllVetVisits(user.userId);
         } else {
-          // Fetch owner's visits
           visitData = await getAllOwnerVisits(user.userId);
         }
+
         if (Array.isArray(visitData)) {
           setVisits(visitData);
         } else {
@@ -80,9 +79,17 @@ export default function CustomerVisitListTable(): JSX.Element {
         setShowErrorDialog(true);
         return;
       }
-      throw e;
+      setErrorDialogMessage('An unexpected error occurred.');
+      setShowErrorDialog(true);
     }
   };
+
+  useEffect(() => {
+    if (showErrorDialog) {
+      const trigger = document.getElementById('error-modal-trigger');
+      trigger?.click();
+    }
+  }, [showErrorDialog]);
 
   return (
     <div>
@@ -183,30 +190,22 @@ export default function CustomerVisitListTable(): JSX.Element {
       )}
 
       {showErrorDialog && (
-        <>
-          {(() => {
-            setTimeout(() => {
-              document.getElementById('error-modal-trigger')?.click();
-            }, 0);
-            return null;
-          })()}
-          <BasicModal
-            title="No Prescription Available"
-            confirmText="OK"
-            onConfirm={async () => {
-              setShowErrorDialog(false);
-              navigate(AppRoutePaths.CustomerVisits);
-            }}
-            showButton={
-              <button id="error-modal-trigger" style={{ display: 'none' }} />
-            }
-          >
-            <p className="basic-modal-body">
-              {errorDialogMessage ??
-                'An error occurred while downloading the prescription.'}
-            </p>
-          </BasicModal>
-        </>
+        <BasicModal
+          title="No Prescription Available"
+          confirmText="OK"
+          onConfirm={async () => {
+            setShowErrorDialog(false);
+            navigate(AppRoutePaths.CustomerVisits);
+          }}
+          showButton={
+            <button id="error-modal-trigger" style={{ display: 'none' }} />
+          }
+        >
+          <p className="basic-modal-body">
+            {errorDialogMessage ??
+              'An error occurred while downloading the prescription.'}
+          </p>
+        </BasicModal>
       )}
     </div>
   );
