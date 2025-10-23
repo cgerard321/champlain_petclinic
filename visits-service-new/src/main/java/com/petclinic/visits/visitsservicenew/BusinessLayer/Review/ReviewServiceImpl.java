@@ -1,18 +1,19 @@
 package com.petclinic.visits.visitsservicenew.BusinessLayer.Review;
 
-import com.petclinic.visits.visitsservicenew.DataLayer.Review.Review;
+import org.springframework.dao.DuplicateKeyException;
 import com.petclinic.visits.visitsservicenew.DataLayer.Review.ReviewRepository;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewResponseDTO;
 import com.petclinic.visits.visitsservicenew.Utils.EntityDtoUtil;
+import com.petclinic.visits.visitsservicenew.Utils.VisitIdGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
+import java.time.Duration;
 
 @Service
 @Slf4j
@@ -29,15 +30,24 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
 
-
-
     @Override
     public Mono<ReviewResponseDTO> AddReview(Mono<ReviewRequestDTO> reviewRequestDTOMono) {
 
         return reviewRequestDTOMono
                 .map(EntityDtoUtil::toReviewEntity)
-                //.doOnNext(e-> e.setReviewId(EntityDtoUtil.generateReviewIdString()))
-                .flatMap(reviewRepository::save)
+                // Checking for collisions to avoid duplicate ids
+                .flatMap(entity ->
+                        Mono.defer(() -> {
+                            entity.setReviewId(VisitIdGenerator.generateReviewId());
+                            return reviewRepository.save(entity);
+                        })
+                                .retryWhen(Retry.fixedDelay(3, Duration.ofMillis(100))
+                                        .filter(e -> e instanceof DuplicateKeyException))
+                                .doOnError(e -> log.error("Failed to save review after retries: {}", e.getMessage()))
+                                .onErrorResume(DuplicateKeyException.class, e ->
+                                        Mono.error(new RuntimeException("Failed to generate unique review ID", e))
+                        )
+                )
                 .map(EntityDtoUtil::toReviewResponseDTO);
     }
 

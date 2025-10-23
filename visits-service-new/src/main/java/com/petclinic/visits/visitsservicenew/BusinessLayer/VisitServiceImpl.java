@@ -17,17 +17,21 @@ import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
 import com.petclinic.visits.visitsservicenew.Utils.EntityDtoUtil;
+import com.petclinic.visits.visitsservicenew.Utils.VisitIdGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Base64;
 
@@ -194,10 +198,8 @@ public class VisitServiceImpl implements VisitService {
 
                 //Converts Request DTO ( JSON ) into an entity
                 .map(entityDtoUtil::toVisitEntity)
-                //Creating a new ID for the visit
-                .doOnNext(x -> x.setVisitId(entityDtoUtil.generateVisitIdString()))
-//                .doOnNext(v -> System.out.println("Entity Date: " + v.getVisitDate())) // Debugging
-                //FLATENS THE MONO
+                //Creating a new ID for the visit while checking if for collisions
+                .flatMap(this::saveVisitWithUniqueId)
                 .flatMap(visit ->
                         repo.findByVisitDateAndPractitionerId(visit.getVisitDate(), visit.getPractitionerId()) // FindVisits method in repository
                                 .collectList()
@@ -211,6 +213,19 @@ public class VisitServiceImpl implements VisitService {
                                 })
                 )
                 .flatMap(entityDtoUtil::toVisitResponseDTO);
+    }
+
+    // Helper class for adding visit that helps avoid id collisions when adding visits
+    private Mono<Visit> saveVisitWithUniqueId(Visit entity) {
+        return Mono.defer(() -> {
+            entity.setVisitId(VisitIdGenerator.generateVisitId());
+            return repo.insert(entity);
+        })
+                .retryWhen(Retry.fixedDelay(3, Duration.ofMillis(100))
+                        .filter(e -> e instanceof DuplicateKeyException))
+                .doOnError(e -> log.error("Failed to generate unique ID after 3 attempts"))
+                .onErrorMap(DuplicateKeyException.class, e ->
+                        new RuntimeException("Failed to generate unique visit ID", e));
     }
 
     /**
