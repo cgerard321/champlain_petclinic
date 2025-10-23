@@ -190,5 +190,11 @@ public class ProductControllerV1 {
                 });
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @GetMapping(value = "/enums", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ProductEnumsResponseDTO> getProductEnumsValues() {
+        return productsServiceClient.getProductEnumsValues();
+    }
+
 
 }
