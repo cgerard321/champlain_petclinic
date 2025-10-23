@@ -1,6 +1,7 @@
 package com.petclinic.vet.presentationlayer.vets;
 
 import com.petclinic.vet.dataaccesslayer.vets.Workday;
+import com.petclinic.vet.presentationlayer.files.FileRequestDTO;
 import lombok.*;
 
 import java.util.Set;
@@ -24,5 +25,6 @@ public class VetRequestDTO {
     private boolean active;
     private Set<SpecialtyDTO> specialties;
     private boolean photoDefault;
+    private FileRequestDTO photo;
 
 }

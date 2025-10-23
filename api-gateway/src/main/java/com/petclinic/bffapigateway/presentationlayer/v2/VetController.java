@@ -9,6 +9,7 @@ import com.petclinic.bffapigateway.dtos.Auth.RegisterVet;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.*;
+import com.petclinic.bffapigateway.dtos.Files.FileRequestDTO;
 import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
@@ -114,13 +115,26 @@ public class VetController {
             @RequestHeader("Photo-Name") String photoName,
             @RequestBody Mono<byte[]> fileData) {
 
-        return fileData.flatMap(bytes -> 
-                vetsServiceClient.addPhotoToVetFromBytes(vetId, photoName, bytes)
-                        .map(res -> ResponseEntity.status(HttpStatus.CREATED)
-                                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                                .body(res))
-                        .defaultIfEmpty(ResponseEntity.badRequest().build())
-        );
+        return fileData.flatMap(bytes -> {
+            FileRequestDTO fileRequest = FileRequestDTO.builder()
+                    .fileName(photoName)
+                    .fileType(determineContentType(photoName))
+                    .fileData(bytes)
+                    .build();
+            
+            return vetsServiceClient.updateVetPhoto(vetId, fileRequest)
+                    .<ResponseEntity<Resource>>map(vetResponse -> {
+                        if (vetResponse.getPhoto() != null) {
+                            byte[] photoData = vetResponse.getPhoto().getFileData();
+                            return ResponseEntity.status(HttpStatus.CREATED)
+                                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                                    .body((Resource) new ByteArrayResource(photoData));
+                        } else {
+                            return ResponseEntity.<Resource>badRequest().build();
+                        }
+                    })
+                    .defaultIfEmpty(ResponseEntity.<Resource>badRequest().build());
+        });
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
@@ -130,11 +144,38 @@ public class VetController {
             @RequestPart("photoName") String photoName,
             @RequestPart("file") FilePart file) {
 
-        return vetsServiceClient.addPhotoToVet(vetId, photoName, file)
-                .map(res -> ResponseEntity.status(HttpStatus.CREATED)
-                        .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                        .body(res))
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
+        return file.content()
+                .map(dataBuffer -> {
+                    byte[] bytes = new byte[dataBuffer.readableByteCount()];
+                    dataBuffer.read(bytes);
+                    return bytes;
+                })
+                .reduce((byte[] a, byte[] b) -> {
+                    byte[] combined = new byte[a.length + b.length];
+                    System.arraycopy(a, 0, combined, 0, a.length);
+                    System.arraycopy(b, 0, combined, a.length, b.length);
+                    return combined;
+                })
+                .flatMap(bytes -> {
+                    FileRequestDTO fileRequest = FileRequestDTO.builder()
+                            .fileName(photoName)
+                            .fileType(determineContentType(photoName))
+                            .fileData(bytes)
+                            .build();
+
+                    return vetsServiceClient.updateVetPhoto(vetId, fileRequest)
+                            .<ResponseEntity<Resource>>map(vetResponse -> {
+                                if (vetResponse.getPhoto() != null) {
+                                    byte[] photoData = vetResponse.getPhoto().getFileData();
+                                    return ResponseEntity.status(HttpStatus.CREATED)
+                                            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                                            .body((Resource) new ByteArrayResource(photoData));
+                                } else {
+                                    return ResponseEntity.<Resource>badRequest().build();
+                                }
+                            })
+                            .defaultIfEmpty(ResponseEntity.<Resource>badRequest().build());
+                });
     }
     
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
@@ -266,5 +307,21 @@ public Mono<ResponseEntity<Album>> addAlbumPhotoMultipart(
             @PathVariable String educationId) {
         return vetsServiceClient.deleteEducation(vetId, educationId)
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()));
+    }
+
+    private String determineContentType(String filename) {
+        if (filename == null) {
+            return "image/jpeg";
+        }
+        String lowerCase = filename.toLowerCase();
+        if (lowerCase.endsWith(".png")) {
+            return "image/png";
+        } else if (lowerCase.endsWith(".gif")) {
+            return "image/gif";
+        } else if (lowerCase.endsWith(".webp")) {
+            return "image/webp";
+        } else {
+            return "image/jpeg"; // Default to JPEG
+        }
     }
 }

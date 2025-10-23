@@ -1,6 +1,7 @@
 package com.petclinic.vet.presentationlayer.vets;
 
 import com.petclinic.vet.dataaccesslayer.vets.Workday;
+import com.petclinic.vet.presentationlayer.files.FileResponseDTO;
 import lombok.*;
 
 import java.util.Set;
@@ -22,4 +23,5 @@ public class VetResponseDTO {
     private String workHoursJson;
     private boolean active;
     private Set<SpecialtyDTO> specialties;
+    private FileResponseDTO photo;
 }
