@@ -6,6 +6,7 @@ import { NavBar } from '@/layouts/AppNavBar.tsx';
 import axiosInstance from '@/shared/api/axiosInstance';
 import { isAxiosError } from 'axios';
 import './SignUp.css';
+import eyeDark from '@/assets/Icons/eyeDark.svg';
 
 const SignUp: React.FC = (): JSX.Element => {
   const characterLimit = 60;
@@ -34,7 +35,6 @@ const SignUp: React.FC = (): JSX.Element => {
     owner,
   });
 
-  // New state for password visibility
   const [showPassword, setShowPassword] = useState(false);
 
   const validatePassword = (password: string): string | undefined => {
@@ -305,20 +305,25 @@ const SignUp: React.FC = (): JSX.Element => {
               )}
               <br />
               <label>Password: </label>
-              <div className="password-container">
+              <div className="input-wrapper">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   name="password"
                   value={userData.password}
                   onChange={handleChange}
-                  className="password-input"
+                  className="password-container"
                 />
                 <button
-                  type="button"
+                  className="toggle-password"
+                  id="toggle-password"
                   onClick={() => setShowPassword(prev => !prev)}
-                  className="toggle-password-visibility"
+                  type="button"
                 >
-                  {showPassword ? 'Hide' : 'Show'}
+                  <img
+                    className="icon-eye"
+                    src={eyeDark}
+                    title="showPassword"
+                  />
                 </button>
               </div>
               {errorMessage.password && (

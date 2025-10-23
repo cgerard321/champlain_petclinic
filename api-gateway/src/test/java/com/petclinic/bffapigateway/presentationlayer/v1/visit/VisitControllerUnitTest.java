@@ -1,5 +1,10 @@
-package com.petclinic.bffapigateway.presentationlayer.v2.visit;
+package com.petclinic.bffapigateway.presentationlayer.v1.visit;
 
+import com.petclinic.bffapigateway.dtos.Visits.Prescriptions.MedicationDTO;
+import com.petclinic.bffapigateway.dtos.Visits.Prescriptions.PrescriptionResponseDTO;
+
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
@@ -30,12 +35,9 @@ import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.UUID;
 
 import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.jwtTokenForValidAdmin;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
@@ -790,7 +792,7 @@ public class VisitControllerUnitTest {
 
     @Test
     void getVisitByVisitId_whenVisitExists_thenReturnVisitResponseDTO() {
-        when(visitsServiceClient.getVisitByVisitId("V001"))
+        when(visitsServiceClient.getVisitByVisitId("V001", false))
                 .thenReturn(Mono.just(visitResponseDTO1));
 
         webTestClient.get()
@@ -800,12 +802,12 @@ public class VisitControllerUnitTest {
                 .expectBody(VisitResponseDTO.class)
                 .isEqualTo(visitResponseDTO1);
 
-        verify(visitsServiceClient, times(1)).getVisitByVisitId("V001");
+        verify(visitsServiceClient, times(1)).getVisitByVisitId("V001", false);
     }
 
     @Test
     void getVisitByVisitId_whenVisitDoesNotExist_thenReturnNotFound() {
-        when(visitsServiceClient.getVisitByVisitId("INVALID"))
+        when(visitsServiceClient.getVisitByVisitId("INVALID", false))
                 .thenReturn(Mono.empty());
 
         webTestClient.get()
@@ -813,7 +815,7 @@ public class VisitControllerUnitTest {
                 .exchange()
                 .expectStatus().isNotFound();
 
-        verify(visitsServiceClient, times(1)).getVisitByVisitId("INVALID");
+        verify(visitsServiceClient, times(1)).getVisitByVisitId("INVALID", false);
     }
 
     @Test
@@ -1071,6 +1073,115 @@ public class VisitControllerUnitTest {
         // Assert
         verify(visitsServiceClient, times(1)).getVeterinarianAvailability("invalid-vet");
     }
+
+    @Test
+    void createPrescription_ShouldReturnCreatedResponse() {
+        // Arrange
+        String visitId = "visit-123";
+
+        MedicationDTO medication = MedicationDTO.builder()
+                .name("Amoxicillin")
+                .dosage("250mg")
+                .frequency("Twice daily")
+                .build();
+
+        PrescriptionResponseDTO requestDTO = PrescriptionResponseDTO.builder()
+                .vetFirstName("John")
+                .vetLastName("Smith")
+                .ownerFirstName("Sarah")
+                .ownerLastName("Miller")
+                .petName("Buddy")
+                .directions("Take twice daily after meals")
+                .medications(List.of(medication))
+                .build();
+
+        PrescriptionResponseDTO responseDTO = PrescriptionResponseDTO.builder()
+                .prescriptionId("presc-001")
+                .date(LocalDate.now())
+                .vetFirstName("John")
+                .vetLastName("Smith")
+                .ownerFirstName("Sarah")
+                .ownerLastName("Miller")
+                .petName("Buddy")
+                .directions("Take twice daily after meals")
+                .medications(List.of(medication))
+                .build();
+
+        when(visitsServiceClient.createPrescription(eq(visitId), any(Mono.class)))
+                .thenReturn(Mono.just(responseDTO));
+
+        // Act & Assert
+        webTestClient.post()
+                .uri(BASE_VISIT_URL + "/{visitId}/prescription", visitId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(PrescriptionResponseDTO.class)
+                .value(resp -> {
+                    assertNotNull(resp);
+                    assertEquals("presc-001", resp.getPrescriptionId());
+                    assertEquals("Buddy", resp.getPetName());
+                    assertEquals("John", resp.getVetFirstName());
+                    assertEquals("Amoxicillin", resp.getMedications().get(0).getName());
+                });
+
+        verify(visitsServiceClient, times(1))
+                .createPrescription(eq(visitId), any(Mono.class));
+    }
+
+    @Test
+    void createPrescription_ShouldReturnNotFound_WhenExistingPrescriptionMissing() {
+        // Arrange
+        String visitId = "visit-404";
+        PrescriptionResponseDTO requestDTO = PrescriptionResponseDTO.builder()
+                .vetFirstName("John")
+                .vetLastName("Smith")
+                .petName("Buddy")
+                .directions("Take twice daily after meals")
+                .build();
+
+        when(visitsServiceClient.createPrescription(eq(visitId), any(Mono.class)))
+                .thenReturn(Mono.empty()); // simulate not found
+
+        // Act & Assert
+        webTestClient.post()
+                .uri(BASE_VISIT_URL + "/{visitId}/prescription", visitId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        verify(visitsServiceClient, times(1))
+                .createPrescription(eq(visitId), any(Mono.class));
+    }
+
+
+    @Test
+    void downloadPrescriptionPdf_ShouldReturnPdf_WhenValidVisitId() {
+        // Arrange
+        String visitId = "visit-789";
+        byte[] pdfBytes = "PDF_CONTENT".getBytes(StandardCharsets.UTF_8);
+
+        when(visitsServiceClient.downloadPrescriptionPdf(eq(visitId)))
+                .thenReturn(Mono.just(pdfBytes));
+
+        // Act & Assert
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/{visitId}/prescription/pdf", visitId)
+                .accept(MediaType.APPLICATION_PDF)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_PDF)
+                .expectBody(byte[].class)
+                .value(resp -> assertEquals("PDF_CONTENT", new String(resp)));
+
+        verify(visitsServiceClient, times(1))
+                .downloadPrescriptionPdf(eq(visitId));
+    }
+
+
+
 
 
 

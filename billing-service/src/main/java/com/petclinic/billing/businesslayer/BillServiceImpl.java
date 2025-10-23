@@ -490,11 +490,6 @@ public class BillServiceImpl implements BillService{
                 .map(EntityDtoUtil::toBillResponseDto);
     }
 
-    /**
-     * Generates a short, unique 10-character Bill ID.
-     * Retries up to 5 times if a collision is detected in the database.
-     * (Collisions are extremely rare but this adds a safety net.)
-     */
     private Mono<Void> generateUniqueBillId(Bill bill, int attempt) {
         if (attempt > 5) {
             return Mono.error(new RuntimeException("Failed to generate unique Bill ID after 5 attempts"));

@@ -31,6 +31,9 @@ public class CartResponseModel {
     private String paymentStatus;
     private String invoiceId;
 
+    private Double promoPercent;
+
+
     public CartResponseModel(String invoiceId, String cartId, List<CartProduct> products, double total) {
         this.invoiceId = invoiceId;
         this.cartId = cartId;

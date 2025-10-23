@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.presentationlayer.v1;
 import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
+import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
@@ -52,7 +53,8 @@ public class BillControllerV1 {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
+    // Backward compatibility: allow paginated bills to be fetched from both /page and /
+    @GetMapping(value = {"/page", ""}, produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<BillResponseDTO> getAllBillsByPage(
             @RequestParam Optional<Integer> page,
             @RequestParam Optional<Integer> size,
@@ -170,6 +172,17 @@ public class BillControllerV1 {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/month", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> getBillsByMonth(
+            @RequestParam int year,
+            @RequestParam int month) {
+        if (year < 1 || year > 9999 || month < 1 || month > 12) {
+            throw new InvalidInputException("Invalid year or month: year=" + year + ", month=" + month + ". Year must be between 1 and 9999.");
+        }
+
+        return billServiceClient.getBillsByMonth(year, month);
+    }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @PatchMapping("/archive")
