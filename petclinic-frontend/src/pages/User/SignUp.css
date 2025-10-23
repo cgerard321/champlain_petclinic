@@ -103,3 +103,28 @@ input[type='email'] {
 button {
   cursor: pointer;
 }
+
+.icon-eye {
+    position: absolute;
+    top: -10%;
+    right: 0;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+.input-wrapper  {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+
+}
+.toggle-password {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    border: transparent;
+    background: transparent;
+    cursor: pointer;
+}
