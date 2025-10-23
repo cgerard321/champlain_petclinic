@@ -1335,77 +1335,6 @@ class VetControllerIntegrationTest {
 
     }
 
-    /*
-    @Test
-    void createVet_withInvalidFirstName() {
-        Publisher<Void> setup = vetRepository.deleteAll();
-
-        StepVerifier
-                .create(setup)
-                .expectNextCount(0)
-                .verifyComplete();
-
-        VetRequestDTO newVet = VetRequestDTO.builder()
-                .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
-                .vetBillId("1")
-                .firstName("Clementineeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
-                .lastName("LeBlanc")
-                .email("skjfhf@gmail.com")
-                .phoneNumber("947-238-28479")
-                .resume("Just became a vet")
-                .workday(new HashSet<>())
-                .specialties(new HashSet<>())
-                .active(false)
-                .build();
-
-        client
-                .post()
-                .uri("/vets")
-                .body(Mono.just(newVet), VetRequestDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.message").isEqualTo("firstName length should be between 2 and 30 characters: "+newVet.getFirstName());
-    }*/
-
-    /*
-    @Test
-    void createVet_withInvalidLastName() {
-        Publisher<Void> setup = vetRepository.deleteAll();
-
-        StepVerifier
-                .create(setup)
-                .expectNextCount(0)
-                .verifyComplete();
-
-        String extensionNum="0987";
-        VetRequestDTO newVet = VetRequestDTO.builder()
-                .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
-                .vetBillId("1")
-                .firstName("Clementine")
-                .lastName("LeBlanccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc")
-                .email("skjfhf@gmail.com")
-                .phoneNumber("(514)-634-8276 #"+extensionNum)
-                .resume("Just became a vet")
-                .workday(new HashSet<>())
-                .specialties(new HashSet<>())
-                .active(false)
-                .build();
-
-        client
-                .post()
-                .uri("/vets")
-                .body(Mono.just(newVet), VetRequestDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.message").isEqualTo("lastName length should be between 2 and 30 characters: "+newVet.getLastName());
-    }*/
-
     @Test
     void createVet_withInvalidResume() {
         Publisher<Void> setup = vetRepository.deleteAll();
@@ -1603,61 +1532,6 @@ class VetControllerIntegrationTest {
                 });
     }
 
-//    @Test
-//    void addEducationToAVet_WithValidValues_shouldSucceed(){
-//        Publisher<Education> setup = educationRepository.deleteAll()
-//                .thenMany(educationRepository.save(education1));
-//
-//        StepVerifier
-//                .create(setup)
-//                .expectNextCount(1)
-//                .verifyComplete();
-//
-//        client.post()
-//                .uri("/vets/" + vet.getVetId() + "/educations")
-//                .accept(MediaType.APPLICATION_JSON)
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .bodyValue(education2)
-//                .exchange()
-//                .expectStatus().isCreated()
-//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-//                .expectBody(EducationResponseDTO.class)
-//                .value(dto -> {
-//                    assertNotNull(dto);
-//                    assertNotNull(dto.getEducationId());
-//                    assertThat(dto.getVetId()).isEqualTo(education2.getVetId());
-//                    assertThat(dto.getDegree()).isEqualTo(education2.getDegree());
-//                    assertThat(dto.getFieldOfStudy()).isEqualTo(education2.getFieldOfStudy());
-//                    assertThat(dto.getSchoolName()).isEqualTo(education2.getSchoolName());
-//                    assertThat(dto.getStartDate()).isEqualTo(education2.getStartDate());
-//                    assertThat(dto.getEndDate()).isEqualTo(education2.getEndDate());
-//                });
-//    }
-
-    //Spring Boot version incompatibility issue with postgresql r2dbc
-    /*@Test
-    void getPhotoByVetId() {
-        Publisher<Photo> setup = photoRepository.deleteAll()
-                .thenMany(photoRepository.save(buildPhoto()));
-        StepVerifier
-                .create(setup)
-                .expectNextCount(1)
-                .verifyComplete();
-
-        byte[] photo = {123, 23, 75, 34};
-        Resource resource = new ByteArrayResource(photo);
-
-        client.get()
-                .uri("/api/gateway/vets/{vetId}/photo", VET_ID)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.IMAGE_JPEG_VALUE)
-                .expectBody(Resource.class)
-                .consumeWith(response -> {
-                    assertEquals(resource, response.getResponseBody());
-                });
-    }*/
-
     @Test
     void getPhotoByVetId_NoExistingPhoto_ShouldReturnNotFound() {
         String emptyVetId = "1234567";
@@ -1670,34 +1544,6 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.path").isEqualTo("/api/gateway/vets/" + emptyVetId + "/photo");
     }
 
-    //Spring Boot version incompatibility issue with postgresql r2dbc
-    /*@Test
-    void getBadgeByVetId_shouldSucceed() throws IOException {
-        Badge badge=buildBadge();
-
-        Publisher<Badge> setup=badgeRepository.deleteAll()
-                .thenMany(badgeRepository.save(badge));
-
-        StepVerifier
-                .create(badgeRepository.deleteAll()
-                        .then(badgeRepository.save(badge)))
-                .expectNext(badge)  // Expect the saved badge
-                .verifyComplete();
-
-        client.get()
-                .uri("/api/gateway/vets/{vetId}/badge", VET_ID)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(BadgeResponseDTO.class)
-                .value(responseDTO -> {
-                    assertEquals(badge.getBadgeTitle(), responseDTO.getBadgeTitle());
-                    assertEquals(badge.getBadgeDate(), responseDTO.getBadgeDate());
-                    assertEquals(badge.getVetId(), responseDTO.getVetId());
-                    assertEquals(Base64.getEncoder().encodeToString(badge.getData()), responseDTO.getResourceBase64());
-                });
-    }*/
 
     @Test
     void getBadgeByInvalidVetId_shouldReturnNotFoundException(){

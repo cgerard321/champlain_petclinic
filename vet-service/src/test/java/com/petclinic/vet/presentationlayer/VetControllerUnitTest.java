@@ -811,28 +811,7 @@ class VetControllerUnitTest {
                 .getPhotoByVetId(VET_ID);
     }
 
-    // test add photo
- /*   @Test
-    void addPhotoByVetId() {
-        Photo photo = buildPhoto();
-        Resource photoResource = buildPhotoData(photo);
 
-        when(photoService.insertPhotoOfVet(anyString(), anyString(), any(Mono.class)))
-                .thenReturn(Mono.just(photoResource));
-
-        client.post()
-                .uri("/vets/{vetId}/photos/{photoName}", VET_ID, photo.getFilename())
-                .bodyValue(photoResource) // Use the Resource here
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isCreated()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody();
-
-        Mockito.verify(photoService, times(1))
-                .insertPhotoOfVet(anyString(), anyString(), any(Mono.class));
-    }
-*/
     @Test
     void updatePhotoByVetId() {
         PhotoRequestDTO photoRequest = PhotoRequestDTO.builder()
@@ -1133,40 +1112,6 @@ class VetControllerUnitTest {
                 .build();
     }
 
- /*   @Test
-    void addPhoto_ShouldReturnBadRequest_WhenRequestIsMalformed() throws IOException {
-        // Create MultiValueMap for multipart/form-data body
-        MultiValueMap<String, HttpEntity<?>> body = new LinkedMultiValueMap<>();
-
-        // Add an empty file (simulating malformed input)
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.IMAGE_JPEG);
-
-        // Create an HttpEntity representing a multipart file part with no content
-        HttpEntity<byte[]> emptyFilePart = new HttpEntity<>(null, headers);
-        body.add("file", emptyFilePart);
-
-        // Perform the POST request
-        client.post()
-                .uri("/vets/{vetId}/photos/{photoName}", VET_ID, PHOTO_NAME)
-                .contentType(MediaType.MULTIPART_FORM_DATA)
-                .body(BodyInserters.fromMultipartData(body)) // Proper multipart data insertion
-                .exchange()
-                .expectStatus().isBadRequest()   // Expect 400 Bad Request
-                .expectBody()
-                .consumeWith(response -> {
-                    // Optional: Check the error message in the response
-                    String responseBody = new String(response.getResponseBody());
-                    assertTrue(responseBody.contains("Bad Request"),
-                            "Expected 'bad request' error message");
-                });
-
-        // Ensure the service is not called due to invalid request
-        Mockito.verify(photoService, times(0))
-                .insertPhotoOfVet(anyString(), anyString(), any(Mono.class));
-    }
-
-*/
 
     @Test
     void whenGetAllAlbumsByVetId_thenReturnAlbums() {
