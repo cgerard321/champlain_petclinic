@@ -10,26 +10,26 @@
         ng-submit="inventoryProductUpdateForm.$valid && $ctrl.submitProductUpdateForm()"
         novalidate>
 
-    <!-- Product name (required) -->
-    <div class="row">
-      <div class="col-sm-6 form-group"
-           ng-class="{'has-error': inventoryProductUpdateForm.productName.$touched && inventoryProductUpdateForm.productName.$invalid}">
-        <label class="control-label" for="item">Product <span class="text-danger">*</span></label>
-        <input class="form-control"
-               id="item"
-               name="productName"
-               type="text"
-               ng-model="$ctrl.product.productName"
-               ng-trim="true"
-               required
-               placeholder="Please enter product name." />
-        <div class="help-block text-danger"
-             ng-if="inventoryProductUpdateForm.productName.$touched && inventoryProductUpdateForm.productName.$error.required">
-          Product name is required.
-        </div>
-        <input type="hidden" ng-model="$ctrl.product.inventoryId" ng-value="inventoryId">
-      </div>
-    </div>
+    <!-- Product name (required + unique) -->
+<div class="col-sm-6 form-group"
+     ng-class="{'has-error': inventoryProductUpdateForm.productName.$touched && inventoryProductUpdateForm.productName.$invalid}">
+  <label class="control-label" for="item">Product <span class="text-danger">*</span></label>
+  <input class="form-control"
+         id="item"
+         name="productName"
+         type="text"
+         ng-model="$ctrl.product.productName"
+         ng-change="$ctrl.onNameChange(inventoryProductUpdateForm.productName)"
+         ng-trim="true"
+         required
+         placeholder="Please enter product name." />
+  <div class="help-block text-danger" ng-if="inventoryProductUpdateForm.productName.$touched">
+    <span ng-if="inventoryProductUpdateForm.productName.$error.required">Product name is required.</span>
+    <span ng-if="inventoryProductUpdateForm.productName.$error.dupname">Product name cannot be duplicated.</span>
+  </div>
+  <input type="hidden" ng-model="$ctrl.product.inventoryId" ng-value="inventoryId">
+</div>
+
 
     <!-- Description (required) -->
     <div class="col-sm-6 form-group"

@@ -9,30 +9,58 @@ angular.module('inventoriesProductUpdateForm')
       $scope.saving = false;
 
       var inventoryId = InventoryService.getInventoryId();
-      var productId = $stateParams.productId;
+      var productId   = $stateParams.productId;
 
+      self._nameSet = new Set();        // all existing product names (lowercased)
+      self._originalNameLower = null;   // the original name of the product being edited
+
+
+      // Fetch current product
       $http.get('/api/gateway/inventories/' + inventoryId + '/products/' + productId)
-        .then(function (resp) { self.product = resp.data; }, handleHttpError);
+        .then(function (resp) {
+          self.product = resp.data || {};
+          self._originalNameLower = (self.product.productName || '').toString().trim().toLowerCase();
+        }, handleHttpError);
+
+      $http.get('/api/gateway/inventories/' + inventoryId + '/products')
+        .then(function (resp) {
+          var list = Array.isArray(resp.data) ? resp.data : [];
+          list.forEach(function (p) {
+            if (p && p.productName != null) {
+              self._nameSet.add(p.productName.toString().trim().toLowerCase());
+            }
+          });
+        }, function (err) {
+          try { console.warn('Could not prefetch product names for uniqueness check.', err); } catch(e){}
+        });
+
+      self.onNameChange = function (ngModelCtrl) {
+        if (!ngModelCtrl || !self.product) return;
+
+        var current = (self.product.productName || '').toString().trim().toLowerCase();
+
+        var isDuplicate = self._nameSet.has(current) && current !== self._originalNameLower;
+
+        ngModelCtrl.$setValidity('dupname', !isDuplicate);
+      };
 
       self.submitProductUpdateForm = function () {
-        // Block submit if form invalid; also reveal errors by touching fields
         if ($scope.inventoryProductUpdateForm && $scope.inventoryProductUpdateForm.$invalid) {
           angular.forEach($scope.inventoryProductUpdateForm.$error, function (fields) {
             (fields || []).forEach(function (f) { f.$setTouched(); });
           });
-          return; // <-- NO HTTP CALL
+          return;
         }
 
         if (!inventoryId) { alert("Inventory ID is missing."); return; }
-        if (!productId) { alert("Product ID is missing."); return; }
+        if (!productId)   { alert("Product ID is missing.");   return; }
 
-        // Payload is valid here (all client checks passed)
         var data = {
-          productName: (self.product.productName || '').trim(),
+          productName:        (self.product.productName || '').trim(),
           productDescription: (self.product.productDescription || '').trim(),
-          productPrice: parseFloat(self.product.productPrice),
-          productQuantity: parseInt(self.product.productQuantity, 10),
-          productSalePrice: parseFloat(self.product.productSalePrice)
+          productPrice:       parseFloat(self.product.productPrice),
+          productQuantity:    parseInt(self.product.productQuantity, 10),
+          productSalePrice:   parseFloat(self.product.productSalePrice)
         };
 
         $scope.saving = true;

@@ -1,40 +1,126 @@
 <div class="bColor text-center">
   <h2 class="titleProduct form" id="title">New Product</h2>
 </div>
+
 <div class="p-3 formColor m-0">
-  <form id="productForm" name="productForm" class="form-horizontal" enctype="multipart/form-data" ng-submit="productForm.$valid && $ctrl.submitProductForm()" novalidate>
+  <form id="productForm"
+        name="productForm"
+        class="form-horizontal"
+        enctype="multipart/form-data"
+        ng-submit="productForm.$valid && $ctrl.submitProductForm()"
+        novalidate>
+
+    <!-- Product name (required + unique in inventory) -->
     <div class="row">
-      <div class="col-sm-6 form-group">
-        <label class="control-label" for="item">Product</label>
-        <input class="form-control" id="item" ng-model="$ctrl.product.productName" name="productName" type="text" placeholder="Please enter product name." required />
+      <div class="col-sm-6 form-group"
+           ng-class="{'has-error': productForm.productName.$touched && productForm.productName.$invalid}">
+        <label class="control-label" for="item">Product <span class="text-danger">*</span></label>
+        <input class="form-control"
+               id="item"
+               name="productName"
+               type="text"
+               ng-model="$ctrl.product.productName"
+               ng-change="$ctrl.onNameChange(productForm.productName)"
+               ng-trim="true"
+               required
+               placeholder="Please enter product name." />
+        <div class="help-block text-danger" ng-if="productForm.productName.$touched">
+          <span ng-if="productForm.productName.$error.required">Product name is required.</span>
+          <span ng-if="productForm.productName.$error.dupname">Product name cannot be duplicated.</span>
+        </div>
         <input type="hidden" ng-model="$ctrl.product.inventoryId" ng-value="inventoryId">
       </div>
     </div>
-    <div class="col-sm-6 form-group">
-      <label class="control-label" for="description">Description</label>
-      <input class="form-control col-sm-4" id="description" ng-model="$ctrl.product.productDescription" name="productDescription" type="text" placeholder="Please enter product description." required />
+
+    <!-- Description (required) -->
+    <div class="col-sm-6 form-group"
+         ng-class="{'has-error': productForm.productDescription.$touched && productForm.productDescription.$invalid}">
+      <label class="control-label" for="description">Description <span class="text-danger">*</span></label>
+      <input class="form-control col-sm-4"
+             id="description"
+             name="productDescription"
+             type="text"
+             ng-model="$ctrl.product.productDescription"
+             ng-trim="true"
+             required
+             placeholder="Please enter product description." />
+      <div class="help-block text-danger" ng-if="productForm.productDescription.$touched && productForm.productDescription.$error.required">
+        Description is required.
+      </div>
     </div>
+
+    <!-- Price (> 0) -->
     <div class="row">
-      <div class="form-group col-sm-12">
-        <label class="control-label" for="price">Price</label>
-        <input class="form-control" id="price" step="0.01" min="0" ng-model="$ctrl.product.productPrice" name="productPrice" type="number" placeholder="Please enter a price" required/>
+      <div class="form-group col-sm-12"
+           ng-class="{'has-error': productForm.productPrice.$touched && productForm.productPrice.$invalid}">
+        <label class="control-label" for="price">Price <span class="text-danger">*</span></label>
+        <input class="form-control"
+               id="price"
+               name="productPrice"
+               type="number"
+               step="0.01"
+               min="0.01"
+               ng-model="$ctrl.product.productPrice"
+               required
+               placeholder="Please enter a price" />
+        <div class="help-block text-danger" ng-if="productForm.productPrice.$touched">
+          <span ng-if="productForm.productPrice.$error.required">Price is required.</span>
+          <span ng-if="productForm.productPrice.$error.min">Price must be greater than 0.</span>
+          <span ng-if="productForm.productPrice.$error.number">Price must be a number.</span>
+        </div>
       </div>
     </div>
-    <div class="form-group p-3">
+
+    <!-- Quantity (≥ 1) -->
+    <div class="form-group p-3"
+         ng-class="{'has-error': productForm.productQuantity.$touched && productForm.productQuantity.$invalid}">
       <div class="bundle marg col-sm-12">
-        <label class="control-label" for="quantity">Quantity</label>
-        <input class="form-control" id="quantity" min="0" ng-model="$ctrl.product.productQuantity" name="productQuantity" type="number" required title="Please enter quantities." required/>
+        <label class="control-label" for="quantity">Quantity <span class="text-danger">*</span></label>
+        <input class="form-control"
+               id="quantity"
+               name="productQuantity"
+               type="number"
+               step="1"
+               min="1"
+               ng-model="$ctrl.product.productQuantity"
+               required
+               title="Please enter quantities." />
+        <div class="help-block text-danger" ng-if="productForm.productQuantity.$touched">
+          <span ng-if="productForm.productQuantity.$error.required">Quantity is required.</span>
+          <span ng-if="productForm.productQuantity.$error.min">Quantity must be at least 1.</span>
+          <span ng-if="productForm.productQuantity.$error.number">Quantity must be a number.</span>
+        </div>
       </div>
     </div>
-    <div class="form-group p-3">
+
+    <!-- Sale Price (≥ 0) -->
+    <div class="form-group p-3"
+         ng-class="{'has-error': productForm.productSalePrice.$touched && productForm.productSalePrice.$invalid}">
       <div class="bundle marg col-sm-12">
-        <label class="control-label" for="salePrice">Sale Price</label>
-        <input class="form-control" id="salePrice" step="0.01" min="0" ng-model="$ctrl.product.productSalePrice" name="productSalePrice" type="number" required title="Please enter the sale price."  />
+        <label class="control-label" for="salePrice">Sale Price <span class="text-danger">*</span></label>
+        <input class="form-control"
+               id="salePrice"
+               name="productSalePrice"
+               type="number"
+               step="0.01"
+               min="0"
+               ng-model="$ctrl.product.productSalePrice"
+               required
+               title="Please enter the sale price." />
+        <div class="help-block text-danger" ng-if="productForm.productSalePrice.$touched">
+          <span ng-if="productForm.productSalePrice.$error.required">Sale price is required.</span>
+          <span ng-if="productForm.productSalePrice.$error.min">Sale price can’t be negative.</span>
+          <span ng-if="productForm.productSalePrice.$error.number">Sale price must be a number.</span>
+        </div>
       </div>
     </div>
+
     <div class="form-group formColor">
       <div class="owner marg col-sm-6">
-        <button id="newBtn" class="btn btn-default" type="submit" ng-disabled="productForm.$invalid || saving">Submit</button>
+        <button id="newBtn" class="btn btn-default" type="submit"
+                ng-disabled="productForm.$invalid || saving">
+          Submit
+        </button>
       </div>
     </div>
   </form>
