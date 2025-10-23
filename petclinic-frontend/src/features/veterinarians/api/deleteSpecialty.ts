@@ -6,7 +6,7 @@ export const deleteSpecialty = async (
 ): Promise<void> => {
   try {
     await axiosInstance.delete(`/vets/${vetId}/specialties/${specialtyId}`, {
-      useV2: false,
+      useV2: true,
     });
   } catch (error) {
     console.error('Failed to delete specialty:', error);

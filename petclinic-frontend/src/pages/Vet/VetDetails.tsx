@@ -433,15 +433,10 @@ export default function VetDetails(): JSX.Element {
       setIsFormOpen(false); // Close form on success
       setSpecialtyName(''); // Clear fields
 
-      // Update the vet data after adding the specialty
-      setVet(prevVet =>
-        prevVet
-          ? {
-              ...prevVet,
-              specialties: [...prevVet.specialties, specialtyDTO], // Update specialties locally
-            }
-          : null
-      );
+      if (vetId) {
+        const updatedVetData = await fetchVet(vetId);
+        setVet(updatedVetData);
+      }
     } catch (error) {
       setError('Failed to add specialty');
     }
@@ -451,18 +446,13 @@ export default function VetDetails(): JSX.Element {
     try {
       await deleteSpecialty(vetId!, specialtyId);
 
-      // Update the vet data after deleting the specialty
-      setVet(prevVet =>
-        prevVet
-          ? {
-              ...prevVet,
-              specialties: prevVet.specialties.filter(
-                specialty => specialty.specialtyId !== specialtyId
-              ),
-            }
-          : null
-      );
+      // Refresh the vet data to get the updated specialties list
+      if (vetId) {
+        const updatedVetData = await fetchVet(vetId);
+        setVet(updatedVetData);
+      }
     } catch (error) {
+      console.error('Failed to delete specialty:', error);
       setError('Failed to delete specialty');
     }
   };

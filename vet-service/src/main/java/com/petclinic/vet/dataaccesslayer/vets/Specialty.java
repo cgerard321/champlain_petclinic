@@ -20,7 +20,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Specialty {
-    private String specialtyId;  // Will store UUID
+    private String specialtyId; 
     private String name;
     
     public Specialty(String name) {
