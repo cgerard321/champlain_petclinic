@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import './Invoice.css';
+import { computeTaxes, TaxLine } from '../utils/taxUtils';
 
 export interface InvoiceItem {
   productId: number;
@@ -145,8 +146,30 @@ function Invoice({
 
         <div class="totals">
           <p><span>Subtotal</span><span>$${inv.subtotal.toFixed(2)}</span></p>
-          <p><span>TVQ (9.975%)</span><span>$${inv.tvq.toFixed(2)}</span></p>
-          <p><span>TVC (5%)</span><span>$${inv.tvc.toFixed(2)}</span></p>
+          ${(() => {
+            // compute tax lines if billing province available
+            try {
+              const prov = inv.billing?.province;
+              if (prov) {
+                const lines = computeTaxes(inv.subtotal, prov) as TaxLine[];
+                return lines
+                  .map(
+                    l =>
+                      `<p><span>${l.name} (${(l.rate * 100)
+                        .toFixed(3)
+                        .replace(
+                          /\.000$/,
+                          ''
+                        )}%)</span><span>$${(l.amount ?? inv.subtotal * l.rate).toFixed(2)}</span></p>`
+                  )
+                  .join('');
+              }
+            } catch (e) {
+              /* ignore */
+            }
+            // fallback to legacy fields
+            return `<p><span>TVQ (9.975%)</span><span>$${inv.tvq.toFixed(2)}</span></p><p><span>TVC (5%)</span><span>$${inv.tvc.toFixed(2)}</span></p>`;
+          })()}
           <p><span>Discount</span><span>-$${inv.discount.toFixed(2)}</span></p>
           <p class="total"><span>Total</span><span>$${inv.total.toFixed(2)}</span></p>
         </div>
@@ -292,8 +315,36 @@ function Invoice({
 
           <div className="invoice-taxes">
             <p>Subtotal: ${inv.subtotal.toFixed(2)}</p>
-            <p>TVQ (9.975%): ${inv.tvq.toFixed(2)}</p>
-            <p>TVC (5%): ${inv.tvc.toFixed(2)}</p>
+            {/* Render tax lines based on billing province when available */}
+            {(() => {
+              try {
+                const prov = inv.billing?.province;
+                if (prov) {
+                  const lines = computeTaxes(inv.subtotal, prov) as TaxLine[];
+                  return (
+                    <div>
+                      {lines.map((l, i) => (
+                        <p key={i}>
+                          {l.name} (
+                          {(l.rate * 100).toFixed(3).replace(/\.000$/, '')}%): $
+                          {(l.amount ?? inv.subtotal * l.rate).toFixed(2)}
+                        </p>
+                      ))}
+                    </div>
+                  );
+                }
+              } catch (e) {
+                // ignore and fall back to legacy
+              }
+
+              // fallback to legacy fields
+              return (
+                <>
+                  <p>TVQ (9.975%): ${inv.tvq.toFixed(2)}</p>
+                  <p>TVC (5%): ${inv.tvc.toFixed(2)}</p>
+                </>
+              );
+            })()}
             <p>Discount: -${inv.discount.toFixed(2)}</p>
             <h3>Total: ${inv.total.toFixed(2)}</h3>
           </div>

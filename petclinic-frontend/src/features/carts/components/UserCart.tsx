@@ -22,6 +22,7 @@ import {
   IsVet,
   useUser,
 } from '@/context/UserContext';
+import { computeTaxes, TaxLine } from '../utils/taxUtils';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import { getProductByProductId } from '@/features/products/api/getProductByProductId';
 import {
@@ -80,6 +81,9 @@ const UserCart: React.FC = () => {
     useState<boolean>(false);
   const [showBillingForm, setShowBillingForm] = useState<boolean>(false);
   const [billingInfo, setBillingInfo] = useState<BillingInfo | null>(null);
+  // When true, show only a single Estimated Taxes line (no GST/PST breakdown).
+  // This is set after checkout to avoid showing the detailed breakdown immediately when the user adds a new item.
+  const [suppressTaxDetails, setSuppressTaxDetails] = useState<boolean>(false);
 
   const [wishlistUpdated, setWishlistUpdated] = useState(false);
   const [voucherCode, setVoucherCode] = useState<string>('');
@@ -282,13 +286,7 @@ const UserCart: React.FC = () => {
   const promoDiscount =
     promoPercent != null ? (subtotal * promoPercent) / 100 : 0;
   const discountedSubtotal = Math.max(0, subtotal - promoDiscount);
-
-  const tvq = discountedSubtotal * 0.09975;
-  const tvc = discountedSubtotal * 0.05;
-
   const effectiveDiscount = promoDiscount;
-
-  const total = discountedSubtotal + tvq + tvc;
 
   const updateCartItemCount = useCallback(() => {
     const count = cartItems.reduce(
@@ -766,6 +764,21 @@ const UserCart: React.FC = () => {
 
   const { user } = useUser();
 
+  // Determine province and compute taxes after user is available
+  const billingProvinceFinal =
+    billingInfo?.province ||
+    (user as unknown as { province?: string })?.province;
+  const taxLines: TaxLine[] = computeTaxes(
+    discountedSubtotal,
+    billingProvinceFinal
+  );
+  const totalTax = taxLines.reduce(
+    (s, t) =>
+      s + (t.amount ?? Math.round(discountedSubtotal * t.rate * 100) / 100),
+    0
+  );
+  const total = discountedSubtotal + totalTax;
+
   const handleCheckoutConfirmation = (): void => {
     if (isStaff) {
       navigate(AppRoutePaths.Unauthorized, {
@@ -773,6 +786,8 @@ const UserCart: React.FC = () => {
       });
       return;
     }
+    // Opening billing form implies the user wants to provide billing details -> show full tax details again
+    setSuppressTaxDetails(false);
     setShowBillingForm(true);
     setIsCheckoutModalOpen(false);
   };
@@ -812,17 +827,22 @@ const UserCart: React.FC = () => {
         0
       );
       const invoiceSubtotal = invoiceSubtotalCents / 100;
-      const invoiceTvqCents = Math.round(invoiceSubtotalCents * 0.09975);
-      const invoiceTvcCents = Math.round(invoiceSubtotalCents * 0.05);
-      const invoiceTvq = invoiceTvqCents / 100;
-      const invoiceTvc = invoiceTvcCents / 100;
+      // determine province for invoice tax calculation
+      const usedProvince =
+        (billing ?? billingInfo)?.province ||
+        (user as unknown as { province?: string })?.province;
+      const invoiceTaxLines = computeTaxes(invoiceSubtotal, usedProvince);
+      const invoiceTaxCents = invoiceTaxLines.reduce(
+        (s, t) =>
+          s +
+          Math.round(
+            (t.amount ?? Math.round(invoiceSubtotal * t.rate * 100) / 100) * 100
+          ),
+        0
+      );
       const discountCents = Math.round(effectiveDiscount * 100);
       const invoiceTotal =
-        (invoiceSubtotalCents +
-          invoiceTvqCents +
-          invoiceTvcCents -
-          discountCents) /
-        100;
+        (invoiceSubtotalCents + invoiceTaxCents - discountCents) / 100;
 
       const usedBilling = billing ?? billingInfo ?? null;
 
@@ -842,14 +862,17 @@ const UserCart: React.FC = () => {
         date: new Date().toISOString(),
         items: invoiceItemsForFull,
         subtotal: invoiceSubtotal,
-        tvq: invoiceTvq,
-        tvc: invoiceTvc,
+        // legacy fields: keep first two tax lines (if present) for backward compatibility
+        tvq: invoiceTaxLines[0]?.amount ?? 0,
+        tvc: invoiceTaxLines[1]?.amount ?? 0,
         discount: effectiveDiscount,
         total: invoiceTotal,
       };
       setLastInvoice(newInvoice);
       setShowInvoiceModal(true);
       setCheckoutMessage('Checkout successful! Your order is being processed.');
+      // suppress detailed tax breakdown for the first item added after checkout (keeps summary compact)
+      setSuppressTaxDetails(true);
       setCartItems([]);
       setCartItemCount(0);
       setIsCheckoutModalOpen(false);
@@ -1076,8 +1099,42 @@ const UserCart: React.FC = () => {
                 <p className="summary-item">
                   Subtotal: {formatPrice(subtotal)}
                 </p>
-                <p className="summary-item">TVQ (9.975%): {formatPrice(tvq)}</p>
-                <p className="summary-item">TVC (5%): {formatPrice(tvc)}</p>
+                {/* Show estimated taxes (English names like PST, GST, HST).
+                    If subtotal is zero (e.g., after checkout) show a single $0.00 line and do not render breakdown.
+                    Otherwise, if there's exactly one Estimated Taxes line (unknown province), render a single line without percentage.
+                */}
+                {discountedSubtotal <= 0 ? (
+                  <p className="summary-item">
+                    Estimated Taxes: {formatPrice(0)}
+                  </p>
+                ) : suppressTaxDetails ? (
+                  // After checkout, when user adds new items, show a single estimated taxes line (no breakdown)
+                  <p className="summary-item">
+                    Estimated Taxes: {formatPrice(totalTax)}
+                  </p>
+                ) : taxLines.length === 1 &&
+                  taxLines[0].name === 'Estimated Taxes' ? (
+                  <p className="summary-item">
+                    Estimated Taxes:{' '}
+                    {formatPrice(
+                      taxLines[0].amount ??
+                        discountedSubtotal * taxLines[0].rate
+                    )}
+                  </p>
+                ) : (
+                  <div className="summary-item">
+                    <strong>Estimated Taxes:</strong>
+                    <div style={{ marginLeft: 8 }}>
+                      {taxLines.map((t, i) => (
+                        <div key={i}>
+                          {t.name} (
+                          {(t.rate * 100).toFixed(3).replace(/\.000$/, '')}%):{' '}
+                          {formatPrice(t.amount ?? discountedSubtotal * t.rate)}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <p className="summary-item">
                   Discount{promoPercent != null ? ` (${promoPercent}%)` : ''}:{' '}
                   {formatPrice(effectiveDiscount)}
