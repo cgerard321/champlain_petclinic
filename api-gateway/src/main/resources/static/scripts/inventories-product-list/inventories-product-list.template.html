@@ -35,7 +35,7 @@
         <td></td>
         <td>
         <span>
-            <input type="number" min="1" step="1" ng-model="productQuantity" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)" title="Quantity must be greater than 0" oninvalid="this.setCustomValidity('Quantity cannot be 0 or negative')" oninput="this.setCustomValidity('')">
+            <input type="number" min="0" step="1" ng-model="productQuantity" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)" title="Quantity must be greater than 0" oninvalid="this.setCustomValidity('Quantity cannot be 0 or negative')" oninput="this.setCustomValidity('')">
         </span>
         </td>
         <td>
