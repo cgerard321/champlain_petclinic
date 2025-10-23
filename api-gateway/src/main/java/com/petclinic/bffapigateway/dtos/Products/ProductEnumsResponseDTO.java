@@ -1,6 +1,8 @@
 package com.petclinic.bffapigateway.dtos.Products;
 
-import com.petclinic.bffapigateway.dtos.Products.*;
+import com.petclinic.bffapigateway.dtos.Products.ProductType;
+import com.petclinic.bffapigateway.dtos.Products.ProductStatus;
+import com.petclinic.bffapigateway.dtos.Products.DeliveryType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

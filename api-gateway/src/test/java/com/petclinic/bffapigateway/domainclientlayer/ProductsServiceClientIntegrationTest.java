@@ -610,7 +610,7 @@ class ProductsServiceClientIntegrationTest {
     }
 
     @Test
-    void wehnGetProductEnums_ThenReturnEnumsValues() throws JsonProcessingException{
+    void whenGetProductEnums_ThenReturnEnumsValues() throws JsonProcessingException{
         ProductEnumsResponseDTO responseDTO = new ProductEnumsResponseDTO(
                 List.of(ProductType.FOOD, ProductType.MEDICATION, ProductType.ACCESSORY, ProductType.EQUIPMENT),
                 List.of(ProductStatus.AVAILABLE, ProductStatus.PRE_ORDER, ProductStatus.OUT_OF_STOCK),
@@ -635,7 +635,7 @@ class ProductsServiceClientIntegrationTest {
                     ProductStatus.AVAILABLE,
                     ProductStatus.PRE_ORDER,
                     ProductStatus.OUT_OF_STOCK)) &&
-                    enums.getDeliveryType().equals(List.of(
+                enums.getDeliveryType().equals(List.of(
                     DeliveryType.DELIVERY,
                     DeliveryType.PICKUP, DeliveryType.DELIVERY_AND_PICKUP,
                     DeliveryType.NO_DELIVERY_OPTION))
