@@ -319,6 +319,8 @@ const SignUp: React.FC = (): JSX.Element => {
                   type="password"
                   id="passwordInput"
                   placeholder="Enter your password"
+                  value={userData.password}
+                  onChange={handleChange}
                 />
                 <button
                   className="toggle-password"
