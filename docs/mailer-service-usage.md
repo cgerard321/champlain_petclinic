@@ -169,7 +169,7 @@ app:
     port: 8080
   mailer-service:
     host: mailer-service
-    port: 8888
+    port: 8080
 ```
 
 For docker profile:
@@ -186,7 +186,7 @@ app:
     port: 8080
   mailer-service:
     host: mailer-service
-    port: 8888
+    port: 8080
 ```
 
 #### [↑](#backend-usage) 5. Add Rethrower Utility
