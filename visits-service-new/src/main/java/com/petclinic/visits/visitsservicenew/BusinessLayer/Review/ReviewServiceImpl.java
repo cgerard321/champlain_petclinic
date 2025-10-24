@@ -1,19 +1,15 @@
 package com.petclinic.visits.visitsservicenew.BusinessLayer.Review;
 
-import org.springframework.dao.DuplicateKeyException;
 import com.petclinic.visits.visitsservicenew.DataLayer.Review.ReviewRepository;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewResponseDTO;
 import com.petclinic.visits.visitsservicenew.Utils.EntityDtoUtil;
-import com.petclinic.visits.visitsservicenew.Utils.VisitIdGenerator;
+import com.petclinic.visits.visitsservicenew.Utils.IdGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.retry.Retry;
-
-import java.time.Duration;
 
 @Service
 @Slf4j
@@ -35,19 +31,11 @@ public class ReviewServiceImpl implements ReviewService {
 
         return reviewRequestDTOMono
                 .map(EntityDtoUtil::toReviewEntity)
-                // Checking for collisions to avoid duplicate ids
-                .flatMap(entity ->
-                        Mono.defer(() -> {
-                            entity.setReviewId(VisitIdGenerator.generateReviewId());
-                            return reviewRepository.save(entity);
-                        })
-                                .retryWhen(Retry.fixedDelay(3, Duration.ofMillis(100))
-                                        .filter(e -> e instanceof DuplicateKeyException))
-                                .onErrorResume(DuplicateKeyException.class, e -> {
-                                    log.error("Failed to save review after retries: {}", e.getMessage());
-                                    return Mono.error(new RuntimeException("Failed to generate unique review ID", e));
-                                })
-                )
+                // Setting id with the latest id prefix + 1
+                .flatMap(review -> {
+                    review.setReviewId(IdGenerator.generateReviewId());
+                    return reviewRepository.save(review);
+                })
                 .map(EntityDtoUtil::toReviewResponseDTO);
     }
 
