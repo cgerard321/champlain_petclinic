@@ -48,8 +48,8 @@ public class IdGenerator {
     }
 
     /**
-     * Generate a readable id using the pattern PREFIX-yyMMdd-seq, where seq resets each day.
-     * previousIdSuffix is the last stored suffix (0-based), so displayed seq = previousIdSuffix + 1.
+     * Generate a readable id using the pattern PREFIX-yyMM-ddSS, where SS is a zero-padded sequence number that resets each day.
+     * previousIdSuffix is the last stored suffix (0-based), so displayed SS = previousIdSuffix + 1.
      */
     public static String generateId(String prefix, int previousIdSuffix) {
 
