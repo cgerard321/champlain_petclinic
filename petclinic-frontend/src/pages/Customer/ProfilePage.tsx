@@ -166,22 +166,10 @@ const ProfilePage = (): JSX.Element => {
 
           const newPetImageUrls: Record<string, string> = {};
           for (const pet of petsData) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const photoIdFromPet = (pet as any).photoId;
-
-            let petPhotoUrl: string;
-
-            if (photoIdFromPet && photoIdFromPet !== '1') {
-              petPhotoUrl = await fetchPetPhotoUrl(
-                pet.petId,
-                photoIdFromPet,
-                pet.name
-              );
-            } else {
-              petPhotoUrl = defaultProfile;
-            }
-
-            newPetImageUrls[pet.petId] = petPhotoUrl;
+            newPetImageUrls[pet.petId] = await fetchPetPhotoUrl(
+              pet.petId,
+              pet.name
+            );
           }
 
           if (isMounted) {
@@ -216,7 +204,6 @@ const ProfilePage = (): JSX.Element => {
     return () => {
       isMounted = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user.userId]);
 
   const handleUpdateClick = (): void => {
@@ -332,21 +319,13 @@ const ProfilePage = (): JSX.Element => {
 
   const fetchPetPhotoUrl = async (
     petId: string,
-    photoId: string,
     petName: string
   ): Promise<string> => {
-    if (!photoId || photoId === '1') {
-      return defaultProfile;
-    }
-
     try {
-      const response = await axiosInstance.get(
-        `/pets/owners/${user.userId}/pets/${petId}`,
-        {
-          useV2: false,
-          params: { includePhoto: true },
-        }
-      );
+      const response = await axiosInstance.get(`/pets/${petId}`, {
+        useV2: false,
+        params: { includePhoto: true },
+      });
       const petData = response.data;
 
       if (
@@ -371,9 +350,6 @@ const ProfilePage = (): JSX.Element => {
         const blob = new Blob([byteArray], { type: contentType });
         return URL.createObjectURL(blob);
       } else {
-        console.warn(
-          `No photo data found for ${petName} (${petId}). Using default.`
-        );
         return defaultProfile;
       }
     } catch (error) {

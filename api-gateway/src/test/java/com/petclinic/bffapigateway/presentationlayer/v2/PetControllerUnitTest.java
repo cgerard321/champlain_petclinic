@@ -39,7 +39,6 @@ class PetControllerUnitTest {
 
         // Set up test data
         petRequestDTO = PetRequestDTO.builder()
-                .petId("pet123")
                 .ownerId("owner123")
                 .name("Fluffy")
                 .birthDate(new Date())
@@ -60,14 +59,13 @@ class PetControllerUnitTest {
 
         ownerResponseDTO = new OwnerResponseDTO();
         ownerResponseDTO.setOwnerId("owner123");
-        ownerResponseDTO.setPets(new ArrayList<>(List.of(petResponseDTO)));
     }
 
     @Test
     void testUpdatePet_Success() {
         // Mock service layer methods
         when(customersServiceClient.updatePet(any(Mono.class), eq("pet123"))).thenReturn(Mono.just(petResponseDTO));
-        when(customersServiceClient.getOwner("owner123")).thenReturn(Mono.just(ownerResponseDTO));
+        when(customersServiceClient.getOwner("owner123", false)).thenReturn(Mono.just(ownerResponseDTO));
         when(customersServiceClient.updateOwner(eq("owner123"), any(Mono.class))).thenReturn(Mono.empty());
 
         Mono<ResponseEntity<PetResponseDTO>> result = petController.updatePet(Mono.just(petRequestDTO), "pet123");
@@ -114,18 +112,6 @@ class PetControllerUnitTest {
     }
 
     @Test
-    void testGetPetsByOwnerId_Success() {
-        // Mock service layer method
-        when(customersServiceClient.getPetsByOwnerId("owner123")).thenReturn(Flux.just(petResponseDTO));
-
-        Flux<PetResponseDTO> result = petController.getPetsByOwnerId("owner123");
-
-        StepVerifier.create(result)
-                .expectNextMatches(pet -> pet.getPetId().equals("pet123"))
-                .verifyComplete();
-    }
-
-    @Test
     void whenAddPet_WithValidRequest_thenReturnCreatedPetResponseDTO() {
         PetRequestDTO newPetRequestDTO = PetRequestDTO.builder()
                 .name("Buddy")
@@ -143,7 +129,7 @@ class PetControllerUnitTest {
                 .build();
 
         when(customersServiceClient.addPet(any(Mono.class))).thenReturn(Mono.just(newPetResponseDTO));
-        when(customersServiceClient.getOwner(anyString())).thenReturn(Mono.just(ownerResponseDTO));
+        when(customersServiceClient.getOwner(anyString(), eq(false))).thenReturn(Mono.just(ownerResponseDTO));
         when(customersServiceClient.updateOwner(anyString(), any(Mono.class))).thenReturn(Mono.empty());
 
         Mono<ResponseEntity<PetResponseDTO>> result = petController.addPet(Mono.just(newPetRequestDTO));

@@ -11,7 +11,6 @@
     @NoArgsConstructor
     public class OwnerRequestDTO {
 
-        private String ownerId;
         private String firstName;
         private String lastName;
         private String address;
