@@ -174,7 +174,7 @@ services:
         condition: service_started
 
   billing-service:
-    <<: *springboot
+    # <<: *springboot
     build: billing-service
     hostname: billing
     environment:
