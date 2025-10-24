@@ -12,6 +12,7 @@ package com.petclinic.vet.dataaccesslayer.vets;
  */
 
 import lombok.*;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -19,7 +20,12 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Specialty {
-    private String specialtyId;
+    private String specialtyId; 
     private String name;
+    
+    public Specialty(String name) {
+        this.specialtyId = UUID.randomUUID().toString();
+        this.name = name;
+    }
 
 }

@@ -779,14 +779,14 @@ public class CustomerServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(mapper.writeValueAsString(TEST_PET)));
 
-        Mono<PetResponseDTO> result = customersServiceClient.getPetByPetId(PET_ID);
+        Mono<PetResponseDTO> result = customersServiceClient.getPetByPetId(PET_ID, false);
 
         StepVerifier.create(result)
                 .expectNextMatches(r -> r.getPetId().equals(PET_ID))
                 .verifyComplete();
 
         RecordedRequest request = server.takeRequest();
-        assertEquals("/pet/" + PET_ID, request.getPath());
+        assertEquals("/pet/" + PET_ID + "?includePhoto=false", request.getPath());
         assertEquals("GET", request.getMethod());
     }
 

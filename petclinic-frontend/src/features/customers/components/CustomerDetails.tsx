@@ -14,6 +14,7 @@ import { deleteOwner } from '../api/deleteOwner';
 import { IsVet } from '@/context/UserContext';
 import EditPetModal from './EditPetModal';
 import AddPetModal from './AddPetModal';
+import defaultPetPicture from '@/assets/Owners/defaultProfilePicture.png';
 
 const CustomerDetails: FC = () => {
   const { ownerId } = useParams<{ ownerId: string }>();
@@ -47,10 +48,11 @@ const CustomerDetails: FC = () => {
       const petsResponse = await axiosInstance.get(
         `/pets/owners/${ownerId}/pets`,
         {
-          useV2: true,
+          useV2: false,
+          params: { includePhoto: true },
         }
       );
-      setPets(petsResponse.data); // Set the pets state
+      setPets(petsResponse.data);
 
       const billsResponse = await axiosInstance.get(
         `/bills/customer/${ownerId}`,
@@ -176,7 +178,8 @@ const CustomerDetails: FC = () => {
       const petsResponse = await axiosInstance.get(
         `/pets/owners/${ownerId}/pets`,
         {
-          useV2: true,
+          useV2: false,
+          params: { includePhoto: true },
         }
       );
       setPets(petsResponse.data);
@@ -284,6 +287,15 @@ const CustomerDetails: FC = () => {
             <ul>
               {pets.map(pet => (
                 <li key={pet.petId} className="pet-item">
+                  <img
+                    src={
+                      pet.photo?.data
+                        ? `data:${pet.photo.contentType};base64,${pet.photo.data}`
+                        : defaultPetPicture
+                    }
+                    alt={`${pet.name}'s photo`}
+                    className="pet-photo-thumbnail"
+                  />
                   <div className="pet-details">
                     <div className="pet-info">
                       <span className="pet-id">Pet ID: {pet.petId}</span>
