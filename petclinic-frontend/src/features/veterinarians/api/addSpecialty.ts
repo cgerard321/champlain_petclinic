@@ -11,7 +11,7 @@ export const addSpecialty = async (
 ): Promise<void> => {
   try {
     await axiosInstance.post(`/vets/${vetId}/specialties`, specialty, {
-      useV2: false,
+      useV2: true,
     });
   } catch (error) {
     console.error('Failed to add specialty:', error);

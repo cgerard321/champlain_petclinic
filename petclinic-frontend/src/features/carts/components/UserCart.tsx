@@ -22,6 +22,11 @@ import {
   IsVet,
   useUser,
 } from '@/context/UserContext';
+import {
+  computeTaxes,
+  averageCanadianCombinedTaxRate,
+  roundToCents,
+} from '../utils/taxUtils';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import { getProductByProductId } from '@/features/products/api/getProductByProductId';
 import {
@@ -282,13 +287,7 @@ const UserCart: React.FC = () => {
   const promoDiscount =
     promoPercent != null ? (subtotal * promoPercent) / 100 : 0;
   const discountedSubtotal = Math.max(0, subtotal - promoDiscount);
-
-  const tvq = discountedSubtotal * 0.09975;
-  const tvc = discountedSubtotal * 0.05;
-
   const effectiveDiscount = promoDiscount;
-
-  const total = discountedSubtotal + tvq + tvc;
 
   const updateCartItemCount = useCallback(() => {
     const count = cartItems.reduce(
@@ -766,6 +765,12 @@ const UserCart: React.FC = () => {
 
   const { user } = useUser();
 
+  // For cart summary we always show a single estimated tax using the
+  // average Canadian combined tax rate to keep the summary snappy.
+  const avgRate = averageCanadianCombinedTaxRate();
+  const estimatedTax = roundToCents(discountedSubtotal * avgRate);
+  const total = discountedSubtotal + estimatedTax;
+
   const handleCheckoutConfirmation = (): void => {
     if (isStaff) {
       navigate(AppRoutePaths.Unauthorized, {
@@ -773,6 +778,7 @@ const UserCart: React.FC = () => {
       });
       return;
     }
+    // Opening billing form implies the user wants to provide billing details
     setShowBillingForm(true);
     setIsCheckoutModalOpen(false);
   };
@@ -812,17 +818,27 @@ const UserCart: React.FC = () => {
         0
       );
       const invoiceSubtotal = invoiceSubtotalCents / 100;
-      const invoiceTvqCents = Math.round(invoiceSubtotalCents * 0.09975);
-      const invoiceTvcCents = Math.round(invoiceSubtotalCents * 0.05);
-      const invoiceTvq = invoiceTvqCents / 100;
-      const invoiceTvc = invoiceTvcCents / 100;
+      // determine province for invoice tax calculation
+      // Prefer billing/provided province, otherwise use user's province if available.
+      function hasProvince(obj: unknown): obj is { province?: string } {
+        if (typeof obj !== 'object' || obj === null) return false;
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore - narrow below
+        const val = (obj as { [k: string]: unknown })['province'];
+        return typeof val === 'string' || typeof val === 'undefined';
+      }
+
+      const usedProvince =
+        (billing ?? billingInfo)?.province ||
+        (hasProvince(user) ? user.province : undefined);
+      const invoiceTaxLines = computeTaxes(invoiceSubtotal, usedProvince);
+      const invoiceTaxCents = invoiceTaxLines.reduce((s, t) => {
+        const amount = t.amount ?? roundToCents(invoiceSubtotal * t.rate);
+        return s + Math.round(amount * 100);
+      }, 0);
       const discountCents = Math.round(effectiveDiscount * 100);
       const invoiceTotal =
-        (invoiceSubtotalCents +
-          invoiceTvqCents +
-          invoiceTvcCents -
-          discountCents) /
-        100;
+        (invoiceSubtotalCents + invoiceTaxCents - discountCents) / 100;
 
       const usedBilling = billing ?? billingInfo ?? null;
 
@@ -842,14 +858,25 @@ const UserCart: React.FC = () => {
         date: new Date().toISOString(),
         items: invoiceItemsForFull,
         subtotal: invoiceSubtotal,
-        tvq: invoiceTvq,
-        tvc: invoiceTvc,
+        // legacy fields: map by tax line name for backward compatibility
+        // Older code expects 'tvq' (provincial) and 'tvc' (federal). Map common
+        // names from our tax lines. NOTE: PROVINCE_TAX_MAP uses 'PST' for QC
+        // (not 'QST'/'TVQ'), so check for 'PST' here.
+        tvq:
+          invoiceTaxLines.find(t => ['PST', 'TVQ'].includes(t.name))?.amount ??
+          0,
+        // For tvc prefer HST (single combined) then GST
+        tvc:
+          invoiceTaxLines.find(t => t.name === 'HST')?.amount ??
+          invoiceTaxLines.find(t => t.name === 'GST')?.amount ??
+          0,
         discount: effectiveDiscount,
         total: invoiceTotal,
       };
       setLastInvoice(newInvoice);
       setShowInvoiceModal(true);
       setCheckoutMessage('Checkout successful! Your order is being processed.');
+      // keep cart summary showing average estimated tax
       setCartItems([]);
       setCartItemCount(0);
       setIsCheckoutModalOpen(false);
@@ -1076,8 +1103,20 @@ const UserCart: React.FC = () => {
                 <p className="summary-item">
                   Subtotal: {formatPrice(subtotal)}
                 </p>
-                <p className="summary-item">TVQ (9.975%): {formatPrice(tvq)}</p>
-                <p className="summary-item">TVC (5%): {formatPrice(tvc)}</p>
+                {/* Show estimated taxes (English names like PST, GST, HST).
+                    If subtotal is zero (e.g., after checkout) show a single $0.00 line and do not render breakdown.
+                    Otherwise, if there's exactly one Estimated Taxes line (unknown province), render a single line without percentage.
+                */}
+                {discountedSubtotal <= 0 ? (
+                  <p className="summary-item">
+                    Estimated Taxes: {formatPrice(0)}
+                  </p>
+                ) : (
+                  // Always show a single estimated taxes line using the average rate
+                  <p className="summary-item">
+                    Estimated Taxes: {formatPrice(estimatedTax)}
+                  </p>
+                )}
                 <p className="summary-item">
                   Discount{promoPercent != null ? ` (${promoPercent}%)` : ''}:{' '}
                   {formatPrice(effectiveDiscount)}
