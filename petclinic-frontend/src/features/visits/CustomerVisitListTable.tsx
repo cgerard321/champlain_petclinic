@@ -191,7 +191,7 @@ export default function CustomerVisitListTable(): JSX.Element {
   };
 
   const renderTable = (title: string, visits: Visit[]): JSX.Element =>
-    currentTab == title ? (
+    currentTab === title ? (
       <div className="visit-table-section">
         {error ? (
           <p>{error}</p>
@@ -251,7 +251,6 @@ export default function CustomerVisitListTable(): JSX.Element {
                       visit.status
                     ) && (
                       <a
-                        type="button"
                         onClick={async ev => {
                           ev.preventDefault();
                           ev.stopPropagation();

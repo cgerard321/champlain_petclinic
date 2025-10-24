@@ -192,7 +192,7 @@ export default function VisitListTable(): JSX.Element {
 
   // Unified table renderer for all visits
   const renderTable = (title: string, visits: Visit[]): JSX.Element =>
-    currentTab == title ? (
+    currentTab === title ? (
       <div className="visit-table-section">
         {visits.length > 0 ? (
           <table>
