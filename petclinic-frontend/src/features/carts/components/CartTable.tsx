@@ -252,7 +252,7 @@ export default function CartListTable(): JSX.Element {
 
       const { data } = await axiosInstance.get<
         CartModel[] | string | Record<string, unknown>
-      >('/carts/list', {
+      >('/carts', {
         useV2: false,
         headers: { Accept: 'application/json' },
       });

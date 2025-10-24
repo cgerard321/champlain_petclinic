@@ -18,6 +18,7 @@ import reactor.test.StepVerifier;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -118,6 +119,26 @@ public class CartServiceClientTest {
 
         List<CartResponseDTO> carts = result.collectList().block();
         assertEquals(0, carts.size());
+    }
+
+    @Test
+    void testGetAllCartsWithQueryParams() throws InterruptedException {
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody("[]"));
+
+        Flux<CartResponseDTO> result = mockCartServiceClient.getAllCarts(Map.of(
+                "page", 2,
+                "size", 25,
+                "customerName", "Snow"
+        ));
+
+        result.collectList().block();
+
+        var recordedRequest = mockWebServer.takeRequest();
+        assertThat(recordedRequest.getRequestUrl().queryParameter("page")).isEqualTo("2");
+        assertThat(recordedRequest.getRequestUrl().queryParameter("size")).isEqualTo("25");
+        assertThat(recordedRequest.getRequestUrl().queryParameter("customerName")).isEqualTo("Snow");
     }
 
     @Test

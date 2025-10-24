@@ -9,16 +9,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.service.annotation.PutExchange;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.net.URI;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @Component
 @Slf4j
@@ -39,11 +39,37 @@ public class CartServiceClient {
     }
 
     public Flux<CartResponseDTO> getAllCarts() {
+        return getAllCarts(Collections.emptyMap());
+    }
+
+    public Flux<CartResponseDTO> getAllCarts(Map<String, ?> queryParams) {
+        URI uri = buildCartUri(queryParams);
         return webClientBuilder.build()
                 .get()
-                .uri(cartServiceUrl)
+                .uri(uri)
                 .retrieve()
                 .bodyToFlux(CartResponseDTO.class);
+    }
+
+    private URI buildCartUri(Map<String, ?> queryParams) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(cartServiceUrl);
+        if (queryParams != null) {
+            queryParams.forEach((key, value) -> {
+                if (value == null) {
+                    return;
+                }
+                if (value instanceof Iterable<?> iterable) {
+                    iterable.forEach(item -> {
+                        if (item != null) {
+                            builder.queryParam(key, item);
+                        }
+                    });
+                } else {
+                    builder.queryParam(key, value);
+                }
+            });
+        }
+        return builder.build(true).toUri();
     }
 
 public Mono<CartResponseDTO> getCartByCartId(final String CartId) {

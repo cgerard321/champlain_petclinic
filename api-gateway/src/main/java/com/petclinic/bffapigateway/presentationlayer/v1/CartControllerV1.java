@@ -19,7 +19,9 @@ import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -135,6 +137,16 @@ public class CartControllerV1 {
         return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
 
+    private Map<String, Object> buildCartQueryParams(Integer page, Integer size, String customerId, String customerName, Boolean assigned) {
+        Map<String, Object> params = new LinkedHashMap<>();
+        if (page != null) params.put("page", page);
+        if (size != null) params.put("size", size);
+        if (customerId != null && !customerId.isBlank()) params.put("customerId", customerId.trim());
+        if (customerName != null && !customerName.isBlank()) params.put("customerName", customerName.trim());
+        if (assigned != null) params.put("assigned", assigned);
+        return params;
+    }
+
     // --- Endpoints ---
 
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
@@ -150,9 +162,39 @@ public class CartControllerV1 {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<CartResponseDTO> getAllCarts() {
-        return cartServiceClient.getAllCarts();
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<List<CartResponseDTO>>> getAllCartsAsJson(
+        @RequestParam(value = "page", required = false) Integer page,
+        @RequestParam(value = "size", required = false) Integer size,
+        @RequestParam(value = "customerId", required = false) String customerId,
+        @RequestParam(value = "customerName", required = false) String customerName,
+        @RequestParam(value = "assigned", required = false) Boolean assigned
+    ) {
+    Map<String, Object> queryParams = buildCartQueryParams(page, size, customerId, customerName, assigned);
+
+    return cartServiceClient
+        .getAllCarts(queryParams)
+        .collectList()
+        .map(ResponseEntity::ok)
+        .onErrorResume(e -> mapCartError(
+            e,
+            ErrorOptions.builder("getAllCarts")
+                .invalidInputAsUnprocessable(true)
+                .build()
+        ));
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<CartResponseDTO> getAllCartsStream(
+        @RequestParam(value = "page", required = false) Integer page,
+        @RequestParam(value = "size", required = false) Integer size,
+        @RequestParam(value = "customerId", required = false) String customerId,
+        @RequestParam(value = "customerName", required = false) String customerName,
+        @RequestParam(value = "assigned", required = false) Boolean assigned
+    ) {
+    Map<String, Object> queryParams = buildCartQueryParams(page, size, customerId, customerName, assigned);
+    return cartServiceClient.getAllCarts(queryParams);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.OWNER, Roles.ADMIN})
@@ -329,23 +371,6 @@ public class CartControllerV1 {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<List<CartResponseDTO>>> getAllCartsAsList() {
-        return cartServiceClient
-                .getAllCarts()
-                .collectList()
-                .map(ResponseEntity::ok)
-                .onErrorResume(e -> mapCartError(
-                        e, ErrorOptions.builder("getAllCartsAsList").build()
-                ));
-    }
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<CartResponseDTO> getAllCartsStream() {
-        return cartServiceClient.getAllCarts();
-    }
-
 
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
     @PutMapping("/{cartId}/promo")

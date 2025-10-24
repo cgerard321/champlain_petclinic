@@ -7,6 +7,7 @@ import com.petclinic.bffapigateway.presentationlayer.v1.CartControllerV1;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -27,7 +28,10 @@ import reactor.test.StepVerifier;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
@@ -150,7 +154,7 @@ public class CartControllerV1UnitTest {
     @DisplayName("GET /api/gateway/carts - Should return all carts successfully")
     void getAllCarts_shouldReturnAllCarts() {
         // Arrange
-        when(cartServiceClient.getAllCarts())
+        when(cartServiceClient.getAllCarts(anyMap()))
                 .thenReturn(Flux.just(buildCartResponseDTO()));
 
         // Act & Assert
@@ -164,14 +168,14 @@ public class CartControllerV1UnitTest {
                 .hasSize(1)
                 .contains(buildCartResponseDTO());
 
-        verify(cartServiceClient, times(1)).getAllCarts();
+        verify(cartServiceClient, times(1)).getAllCarts(anyMap());
     }
 
     @Test
     @DisplayName("GET /api/gateway/carts - Should return empty list when no carts exist")
     void getAllCarts_shouldReturnEmptyList() {
         // Arrange
-        when(cartServiceClient.getAllCarts())
+        when(cartServiceClient.getAllCarts(anyMap()))
                 .thenReturn(Flux.empty());
 
         // Act & Assert
@@ -184,7 +188,41 @@ public class CartControllerV1UnitTest {
                 .expectBodyList(CartResponseDTO.class)
                 .hasSize(0);
 
-        verify(cartServiceClient, times(1)).getAllCarts();
+        verify(cartServiceClient, times(1)).getAllCarts(anyMap());
+    }
+
+    @Test
+    @DisplayName("GET /api/gateway/carts - JSON list should honour pagination parameters")
+    void getAllCartsAsJson_shouldReturnList() {
+        CartResponseDTO first = buildCartResponseDTO();
+        CartResponseDTO second = buildCartResponseDTO();
+        second.setCartId("cart-456");
+
+        when(cartServiceClient.getAllCarts(anyMap()))
+                .thenReturn(Flux.just(first, second));
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path(baseCartURL)
+                        .queryParam("page", 0)
+                        .queryParam("size", 5)
+                        .queryParam("customerName", "john")
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(CartResponseDTO.class)
+                .hasSize(2)
+                .contains(first, second);
+
+                @SuppressWarnings("unchecked")
+                ArgumentCaptor<Map<String, Object>> captor =
+                        ArgumentCaptor.forClass((Class<Map<String, Object>>) (Class<?>) Map.class);
+                verify(cartServiceClient).getAllCarts(captor.capture());
+                Map<String, Object> params = captor.getValue();
+                assertEquals(0, ((Number) params.get("page")).intValue());
+                assertEquals(5, ((Number) params.get("size")).intValue());
+                assertEquals("john", params.get("customerName"));
     }
 
     // Tests for getCartById endpoint

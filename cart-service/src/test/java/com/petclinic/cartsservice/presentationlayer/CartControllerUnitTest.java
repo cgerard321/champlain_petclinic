@@ -143,7 +143,7 @@ class CartControllerUnitTest {
                 .products(cart2.getProducts())
                 .build();
 
-        when(cartService.getAllCarts()).thenReturn(Flux.just(cartResponseModel1, cartResponseModel2));
+        when(cartService.getAllCarts(any())).thenReturn(Flux.just(cartResponseModel1, cartResponseModel2));
 
         // Act & Assert
         webTestClient
@@ -164,6 +164,37 @@ class CartControllerUnitTest {
                     assertEquals(cartResponseModel2.getProducts(), result.get(1).getProducts());
                 });
     }
+
+        @Test
+        void whenGetAllCartsAsJson_thenReturnListOfCarts() {
+                CartResponseModel cart1 = CartResponseModel.builder()
+                                .cartId("json-cart-1")
+                                .customerId("json-c1")
+                                .products(new ArrayList<>())
+                                .build();
+
+                CartResponseModel cart2 = CartResponseModel.builder()
+                                .cartId("json-cart-2")
+                                .customerId("json-c2")
+                                .products(new ArrayList<>())
+                                .build();
+
+                when(cartService.getAllCarts(any())).thenReturn(Flux.just(cart1, cart2));
+
+                webTestClient
+                                .get()
+                                .uri(uriBuilder -> uriBuilder.path("/api/v1/carts").queryParam("page", 0).queryParam("size", 10).build())
+                                .accept(MediaType.APPLICATION_JSON)
+                                .exchange()
+                                .expectStatus().isOk()
+                                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                                .expectBodyList(CartResponseModel.class)
+                                .value(carts -> {
+                                        assertEquals(2, carts.size());
+                                        assertEquals("json-cart-1", carts.get(0).getCartId());
+                                        assertEquals("json-cart-2", carts.get(1).getCartId());
+                                });
+        }
 
     @Test
     void whenGetAllCarts_streamsAndSupportsBackpressure() {
@@ -189,7 +220,7 @@ class CartControllerUnitTest {
         List<CartResponseModel> items = List.of(cart1, cart2, cart3);
         Flux<CartResponseModel> delayed = Flux.fromIterable(items).delayElements(Duration.ofMillis(50));
 
-        when(cartService.getAllCarts()).thenReturn(delayed);
+        when(cartService.getAllCarts(any())).thenReturn(delayed);
 
         // Act: request the endpoint and capture responseBody Flux
         Flux<CartResponseModel> responseFlux = webTestClient.get()

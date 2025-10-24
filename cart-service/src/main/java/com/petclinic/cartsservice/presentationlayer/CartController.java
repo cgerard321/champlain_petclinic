@@ -1,5 +1,6 @@
 package com.petclinic.cartsservice.presentationlayer;
 
+import com.petclinic.cartsservice.businesslayer.CartQueryCriteria;
 import com.petclinic.cartsservice.businesslayer.CartService;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.domainclientlayer.AddProductRequestModel;
@@ -16,6 +17,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
 import java.util.List;
 
 @RestController
@@ -38,9 +40,47 @@ public class CartController {
                 .map(ResponseEntity::ok);
     }
 
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<List<CartResponseModel>>> getAllCartsAsList(
+            @RequestParam(value = "page", required = false) Integer page,
+            @RequestParam(value = "size", required = false) Integer size,
+            @RequestParam(value = "customerId", required = false) String customerId,
+            @RequestParam(value = "customerName", required = false) String customerName,
+            @RequestParam(value = "assigned", required = false) Boolean assigned
+    ) {
+        CartQueryCriteria criteria = buildCriteria(page, size, customerId, customerName, assigned);
+        return cartService.getAllCarts(criteria)
+                .collectList()
+                .map(ResponseEntity::ok);
+    }
+
     @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<CartResponseModel> getAllCarts() {
-        return cartService.getAllCarts();
+    public Flux<CartResponseModel> getAllCartsStream(
+            @RequestParam(value = "page", required = false) Integer page,
+            @RequestParam(value = "size", required = false) Integer size,
+            @RequestParam(value = "customerId", required = false) String customerId,
+            @RequestParam(value = "customerName", required = false) String customerName,
+            @RequestParam(value = "assigned", required = false) Boolean assigned
+    ) {
+        CartQueryCriteria criteria = buildCriteria(page, size, customerId, customerName, assigned);
+        return cartService.getAllCarts(criteria);
+    }
+
+    private CartQueryCriteria buildCriteria(Integer page, Integer size, String customerId, String customerName, Boolean assigned) {
+        if (page != null && page < 0) {
+            throw new InvalidInputException("page must be greater than or equal to 0");
+        }
+        if (size != null && size <= 0) {
+            throw new InvalidInputException("size must be greater than 0");
+        }
+
+        return CartQueryCriteria.builder()
+                .page(page)
+                .size(size)
+                .customerId(customerId)
+                .customerName(customerName)
+                .assigned(assigned)
+                .build();
     }
 
     @DeleteMapping("/{cartId}/items")

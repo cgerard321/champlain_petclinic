@@ -11,9 +11,7 @@ import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
 import com.petclinic.cartsservice.utils.exceptions.OutOfStockException;
 import com.petclinic.cartsservice.domainclientlayer.CustomerClient;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.util.ArrayList;
@@ -39,18 +37,67 @@ public class CartServiceImpl implements CartService {
         this.productClient = productClient;
         this.customerClient = customerClient;
     }
+    private static final int DEFAULT_PAGE_SIZE = 50;
+    private static final int MAX_PAGE_SIZE = 200;
+
     @Override
     public Flux<CartResponseModel> getAllCarts() {
-        return cartRepository.findAll()
-                .flatMap(cart -> {
-                    String cid = cart.getCustomerId();
-                    if (cid == null || cid.isBlank()) {
-                        return Mono.just(EntityModelUtil.toCartResponseModel(cart, cart.getProducts()));
-                    }
-                    return customerClient.getCustomerById(cid)
-                            .map(c -> EntityModelUtil.toCartResponseModel(cart, cart.getProducts(), c.getFullName()))
-                            .onErrorResume(e -> Mono.just(EntityModelUtil.toCartResponseModel(cart, cart.getProducts())));
-                });
+        return getAllCarts(CartQueryCriteria.builder().build());
+    }
+
+    @Override
+    public Flux<CartResponseModel> getAllCarts(CartQueryCriteria criteria) {
+        CartQueryCriteria effectiveCriteria = criteria == null ? CartQueryCriteria.builder().build() : criteria;
+
+        int page = effectiveCriteria.resolvedPage();
+        int size = effectiveCriteria.resolvedSize(DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
+        String normalizedCustomerId = effectiveCriteria.normalizedCustomerId();
+        String normalizedCustomerName = effectiveCriteria.normalizedCustomerName();
+        Boolean assigned = effectiveCriteria.getAssigned();
+
+        Flux<Cart> cartsFlux = cartRepository.findAll();
+
+        if (normalizedCustomerId != null && !normalizedCustomerId.isBlank()) {
+            cartsFlux = cartsFlux.filter(cart -> normalizedCustomerId.equalsIgnoreCase(valueOrEmpty(cart.getCustomerId())));
+        }
+
+        if (assigned != null) {
+            if (assigned) {
+                cartsFlux = cartsFlux.filter(cart -> !valueOrEmpty(cart.getCustomerId()).isBlank());
+            } else {
+                cartsFlux = cartsFlux.filter(cart -> valueOrEmpty(cart.getCustomerId()).isBlank());
+            }
+        }
+
+        Flux<CartResponseModel> responseFlux = cartsFlux.flatMap(this::toCartResponseModelWithCustomer);
+
+        if (normalizedCustomerName != null && !normalizedCustomerName.isBlank()) {
+            String lowered = normalizedCustomerName.toLowerCase();
+            responseFlux = responseFlux.filter(model -> {
+                String candidate = valueOrEmpty(model.getCustomerName()).toLowerCase();
+                return !candidate.isBlank() && candidate.contains(lowered);
+            });
+        }
+
+        long itemsToSkip = (long) page * size;
+
+        return responseFlux
+                .skip(itemsToSkip)
+                .take(size);
+    }
+
+    private Mono<CartResponseModel> toCartResponseModelWithCustomer(Cart cart) {
+        String cid = cart.getCustomerId();
+        if (cid == null || cid.isBlank()) {
+            return Mono.just(EntityModelUtil.toCartResponseModel(cart, cart.getProducts()));
+        }
+        return customerClient.getCustomerById(cid)
+                .map(c -> EntityModelUtil.toCartResponseModel(cart, cart.getProducts(), c.getFullName()))
+                .onErrorResume(e -> Mono.just(EntityModelUtil.toCartResponseModel(cart, cart.getProducts())));
+    }
+
+    private String valueOrEmpty(String value) {
+        return value == null ? "" : value;
     }
 
     @Override
