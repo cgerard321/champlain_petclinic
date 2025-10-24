@@ -318,7 +318,7 @@ class VisitServiceImplTest {
         when(visitRepo.insert(visit1)).thenReturn(Mono.just(visit1));
         when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(visitResponseDTO));
 
-        // Using MockedStatic to stub the staic IdGenerator method
+        // Using MockedStatic to stub the static IdGenerator method
         try (MockedStatic<IdGenerator> mocked = mockStatic(IdGenerator.class)) {
             mocked.when(IdGenerator::generateVisitId).thenReturn("VIST-2510-2401");
             // Act
