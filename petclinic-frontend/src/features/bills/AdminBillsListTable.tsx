@@ -809,21 +809,19 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
           </div>
         )}
 
-        {searchedBill ? (
-          <div className="modalOverlay">
-            <div className="modalContent">
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
-                <h3>Search Results - Bill Details</h3>
-                <button className="modal-close-btn" onClick={handleGoBack}>
-                  Close
-                </button>
-              </div>
+      {searchedBill ? (
+        <div className="modalOverlay">
+          <div className="modalContent">
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <h3>Search Results - Bill Details</h3>
+              <button onClick={handleGoBack}>Close</button>
+            </div>
 
               <div style={{ marginTop: '12px' }}>
                 <p>
