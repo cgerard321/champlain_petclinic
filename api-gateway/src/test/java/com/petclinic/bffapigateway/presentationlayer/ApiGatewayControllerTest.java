@@ -2248,7 +2248,7 @@ class ApiGatewayControllerTest {
 
         final Login login = Login.builder()
                 .password("valid")
-                .email(user.getEmail())
+                .emailOrUsername(user.getEmail())
                 .build();
         when(authServiceClient.login(any()))
                 .thenReturn(
@@ -2280,7 +2280,7 @@ class ApiGatewayControllerTest {
 
         final Login login = Login.builder()
                 .password("valid")
-                .email(user.getEmail())
+                .emailOrUsername(user.getEmail())
                 .build();
         final String message = "I live in unending agony. I spent 6 hours and ended up with nothing";
         when(authServiceClient.login(any()))

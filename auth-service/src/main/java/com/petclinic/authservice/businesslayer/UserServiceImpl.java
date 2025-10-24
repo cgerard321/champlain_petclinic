@@ -196,8 +196,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public HashMap<String,Object> login(UserIDLessUsernameLessDTO login) throws IncorrectPasswordException {
         User loggedInUser;
-        User usernameLogin = getUserbyUsername(login.getEmail());
-        User emailLogin = getUserByEmail(login.getEmail());
+        //Create two variables to test if we can find by email or username
+        //If the methods dont find anything they return null
+        //The logged in user then becomes the one thats not null
+        User usernameLogin = getUserbyUsername(login.getEmailOrUsername());
+        User emailLogin = getUserByEmail(login.getEmailOrUsername());
         if (usernameLogin == null) {
             loggedInUser = emailLogin;
         }
@@ -219,7 +222,7 @@ public class UserServiceImpl implements UserService {
             authenticationManager
                     .authenticate(
                             new UsernamePasswordAuthenticationToken(
-                                    login.getEmail(), login.getPassword()
+                                    login.getEmailOrUsername(), login.getPassword()
                             )
                     );
 
@@ -244,7 +247,7 @@ public class UserServiceImpl implements UserService {
             }};
         }
         catch (BadCredentialsException e){
-            throw new IncorrectPasswordException("Incorrect username or password for user: " + login.getEmail());
+            throw new IncorrectPasswordException("Incorrect username or password for user: " + login.getEmailOrUsername());
         }
     }
 
