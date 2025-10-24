@@ -1,5 +1,34 @@
 @import url('@/shared/styles/Color.css');
 
+/* Sidebar */
+
+#sidebar {
+  height: 100vh;
+  width: 12vw;
+  min-width: 170px;
+  padding: 5px 1em;
+  padding-left: 0;
+  background-color: var(--secondary-clr);
+  box-shadow: inset 0 0 4px 0 rgba(0, 0, 0, 0.25);
+  position: sticky;
+  top: 0;
+  align-self: start;
+  overflow: hidden;
+  text-wrap: nowrap;
+}
+
+#sidebar > ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#sidebar > ul > li:first-child {
+  padding-left: 20px;
+  margin: 8px;
+}
+
+
 #sidebar li > a {
   flex-grow: 100;
   text-decoration: none;

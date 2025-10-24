@@ -1,6 +1,7 @@
+import './VisitListTable.css';
 import { useEffect, useState } from 'react';
 import { Visit } from './models/Visit';
-import './VisitListTable.css';
+
 import { useNavigate } from 'react-router-dom';
 
 import { exportVisitsCSV } from './api/exportVisitsCSV';
@@ -12,14 +13,16 @@ import { cancelVisit } from './api/cancelVisit';
 
 import { Category } from './models/Category';
 
-import eyeIcon from '@/assets/Icons/eyeDark.svg';
-import pencilIcon from '@/assets/Icons/pencilDark.svg';
-import archiveIcon from '@/assets/Icons/archiveDark.svg';
-import xcrossIcon from '@/assets/Icons/xcrossDark.svg';
-import pentosquareIcon from '@/assets/Icons/pentosquareLight.svg';
-import starIcon from '@/assets/Icons/starEmptyLight.svg';
 import AddingVisit from './components/AddingVisit';
 
+import {
+  ArchiveIcon,
+  EyeIcon,
+  PenIcon,
+  PenToSquareIcon,
+  StarEmptyIcon,
+  XCrossIcon,
+} from '@/shared/components/Icon';
 import BasicModal from '@/shared/components/BasicModal';
 import VisitDetails from '@/features/visits/components/VisitDetails';
 import EditingVisit from './components/EditingVisit';
@@ -109,14 +112,21 @@ export default function VisitListTable(): JSX.Element {
   // This avoids refetching from the API and preserves the full list in `visits`.
   useEffect(() => {
     const term = searchTerm.trim().toLowerCase();
-    if (term.length > 0) {
-      const filtered = visits.filter(v =>
-        (v.description || '').toLowerCase().includes(term)
-      );
-      setDisplayedVisits(sortVisits(filtered));
-    } else {
-      setDisplayedVisits(sortVisits(visits));
-    }
+
+    const handler = setTimeout(() => {
+      if (term.length > 0) {
+        const filtered = visits.filter(v =>
+          (v.description || '').toLowerCase().includes(term)
+        );
+        setDisplayedVisits(sortVisits(filtered));
+      } else {
+        setDisplayedVisits(sortVisits(visits));
+      }
+    }, 300);
+
+    return () => {
+      clearTimeout(handler);
+    };
   }, [searchTerm, visits]);
 
   // Handle archiving the visit
@@ -165,211 +175,132 @@ export default function VisitListTable(): JSX.Element {
   // Buttons
   const renderCancelButton = (): JSX.Element => (
     <a>
-      <img className="icon-visits" src={xcrossIcon} title="Cancel" />
+      <XCrossIcon title="Cancel" className="icon-visits" />
     </a>
   );
 
   const renderArchiveButton = (): JSX.Element => (
     <a>
-      <img className="icon-visits" src={archiveIcon} title="Archive" />
+      <ArchiveIcon title="Archive" className="icon-visits" />
     </a>
   );
 
   const renderEditButton = (): JSX.Element => (
     <a>
-      <img className="icon-visits" src={pencilIcon} title="Edit" />
+      <PenIcon title="Edit" className="icon-visits" />
     </a>
   );
 
   const renderViewButton = (): JSX.Element => (
     <a>
-      <img className="icon-visits" src={eyeIcon} title="View" />
+      <EyeIcon title="View" className="icon-visits" />
     </a>
   );
-
-  // Sidebar
-
-  // const renderSidebarItem = (
-  //   name: string,
-  //   emergency: boolean = false
-  //   // visitAmount: number
-  // ): JSX.Element => (
-  //   <li>
-  //     <a
-  //       className={
-  //         (name == currentTab ? 'active' : '') + (emergency ? 'emergency' : '')
-  //       }
-  //       onClick={() => {
-  //         setCurrentTab(name);
-  //       }}
-  //     >
-  //       <span>{name}</span>
-  //     </a>
-  //   </li>
-  // );
-
-  // const renderSidebar = (title: string): JSX.Element => (
-  //   <aside id="sidebar">
-  //     <ul>
-  //       <li>
-  //         <h2>{title}</h2>
-  //       </li>
-
-  //       <li>
-  //         <AddingVisit
-  //           showButton={
-  //             <button className="btn btn-primary" title="Create">
-  //               <img src={pentosquareIcon} />
-  //               Create
-  //             </button>
-  //           }
-  //         />
-  //       </li>
-  //       <li>
-  //         <button
-  //           className="btn btn-primary"
-  //           onClick={() => navigate('/reviews')}
-  //           title="Reviews"
-  //         >
-  //           <img src={starIcon} />
-  //           Reviews
-  //         </button>
-  //       </li>
-  //       {renderSidebarItem('All')}
-  //       {renderSidebarItem('Emergencies', true)}
-  //       {renderSidebarItem('Confirmed')}
-  //       {renderSidebarItem('Upcoming')}
-  //       {renderSidebarItem('Completed')}
-  //       {renderSidebarItem('Cancelled')}
-  //       {renderSidebarItem('Archived')}
-  //     </ul>
-  //   </aside>
-  // );
 
   // Unified table renderer for all visits
   const renderTable = (title: string, visits: Visit[]): JSX.Element =>
     currentTab == title ? (
       <div className="visit-table-section">
-        <table>
-          <thead>
-            <tr>
-              <th>Visit Id</th>
-              <th>Pet Name</th>
-              <th>Description</th>
-              <th>Veterinarian</th>
-              <th>Vet Email</th>
-              <th>Vet Phone Number</th>
-              <th>Start Date</th>
-              <th>End Date</th>
-              <th className="status-column">Status</th>
-              <th className="action-column"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {visits.map(visit => (
-              <tr
-                key={visit.visitId}
-                className={visit.isEmergency ? 'emergency-visit' : ''}
-              >
-                <td>{visit.visitId}</td>
-                <td>{visit.petName}</td>
-                <td>{visit.description}</td>
-                <td>
-                  {visit.vetFirstName} {visit.vetLastName}
-                </td>
-                <td>{visit.vetEmail}</td>
-                <td>{visit.vetPhoneNumber}</td>
-                <td>{new Date(visit.visitDate).toLocaleString()}</td>
-                <td>{new Date(visit.visitEndDate).toLocaleString()}</td>
-                <td
-                  className="status-column"
-                  style={{
-                    color:
-                      visit.status === 'CONFIRMED'
-                        ? 'green'
-                        : visit.status === 'UPCOMING'
-                          ? 'orange'
-                          : visit.status === 'CANCELLED'
-                            ? 'red'
-                            : visit.status === 'COMPLETED'
-                              ? 'blue'
-                              : visit.status === 'ARCHIVED'
-                                ? 'gray'
-                                : 'inherit',
-                    fontWeight: 'bold',
-                  }}
+        {visits.length > 0 ? (
+          <table>
+            <thead>
+              <tr>
+                <th>Visit Id</th>
+                <th>Pet Name</th>
+                <th>Description</th>
+                <th>Veterinarian</th>
+                <th>Vet Email</th>
+                <th>Vet Phone Number</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th className="status-column">Status</th>
+                <th className="action-column"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {visits.map(visit => (
+                <tr
+                  key={visit.visitId}
+                  className={visit.isEmergency ? 'emergency-visit' : ''}
                 >
-                  {visit.status}
-                </td>
-                <td className="action-column">
-                  {/* <a
-                      className="icon"
-                      onClick={() => navigate(`/visits/${visit.visitId}`)}
-                      title="View"
-                    >
-                      {renderViewButton()}
-                    </a> */}
-                  <BasicModal
-                    title="Visit Details"
-                    showButton={renderViewButton()}
+                  <td>{visit.visitId}</td>
+                  <td>{visit.petName}</td>
+                  <td>{visit.description}</td>
+                  <td>
+                    {visit.vetFirstName} {visit.vetLastName}
+                  </td>
+                  <td>{visit.vetEmail}</td>
+                  <td>{visit.vetPhoneNumber}</td>
+                  <td>{new Date(visit.visitDate).toLocaleString()}</td>
+                  <td>{new Date(visit.visitEndDate).toLocaleString()}</td>
+                  <td
+                    className="status-column"
+                    style={{
+                      color:
+                        visit.status === 'CONFIRMED'
+                          ? 'green'
+                          : visit.status === 'UPCOMING'
+                            ? 'orange'
+                            : visit.status === 'CANCELLED'
+                              ? 'red'
+                              : visit.status === 'COMPLETED'
+                                ? 'blue'
+                                : visit.status === 'ARCHIVED'
+                                  ? 'gray'
+                                  : 'inherit',
+                      fontWeight: 'bold',
+                    }}
                   >
-                    <VisitDetails visitId={visit.visitId} />
-                  </BasicModal>
-
-                  <EditingVisit
-                    showButton={renderEditButton()}
-                    visitId={visit.visitId}
-                  />
-                  {visit.status === 'COMPLETED' && !isVet && (
-                    // <a
-                    //   className="icon"
-                    //   onClick={() => handleArchive(visit.visitId)}
-                    //   title="Archive"
-                    // >
-                    //   {renderArchiveButton()}
-                    // </a>
+                    {visit.status}
+                  </td>
+                  <td className="action-column">
                     <BasicModal
-                      title="Archive Visit"
-                      showButton={renderArchiveButton()}
-                      onConfirm={() => handleArchive(visit.visitId)}
+                      title="Visit Details"
+                      showButton={renderViewButton()}
                     >
-                      <div>
-                        This will set the status of this visit to Archived.
-                      </div>
-                      <div>Do you wish to proceed?</div>
+                      <VisitDetails visitId={visit.visitId} />
                     </BasicModal>
-                    // </a>
-                  )}
 
-                  {visit.status !== 'CANCELLED' &&
-                    visit.status !== 'ARCHIVED' &&
-                    visit.status !== 'COMPLETED' &&
-                    !isVet && (
-                      // <a
-                      //   className="icon"
-                      //   onClick={() => handleCancel(visit.visitId)}
-                      //   title="Cancel"
-                      // >
-                      //   <img src={xcrossIcon} />
-                      // </a>
-                      // <a className="icon" title="Delete">
+                    <EditingVisit
+                      showButton={renderEditButton()}
+                      visitId={visit.visitId}
+                    />
+                    {visit.status === 'COMPLETED' && !isVet && (
                       <BasicModal
-                        title="Cancel Visit"
-                        showButton={renderCancelButton()}
-                        onConfirm={() => handleCancel(visit.visitId)}
+                        title="Archive Visit"
+                        showButton={renderArchiveButton()}
+                        onConfirm={() => handleArchive(visit.visitId)}
                       >
                         <div>
-                          This will set the status of this visit to Canceled.
+                          This will set the status of this visit to Archived.
                         </div>
                         <div>Do you wish to proceed?</div>
                       </BasicModal>
-                      // </a>
                     )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+
+                    {visit.status !== 'CANCELLED' &&
+                      visit.status !== 'ARCHIVED' &&
+                      visit.status !== 'COMPLETED' &&
+                      !isVet && (
+                        <BasicModal
+                          title="Cancel Visit"
+                          showButton={renderCancelButton()}
+                          onConfirm={() => handleCancel(visit.visitId)}
+                        >
+                          <div>
+                            This will set the status of this visit to Canceled.
+                          </div>
+                          <div>Do you wish to proceed?</div>
+                        </BasicModal>
+                      )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div>No visits here!</div>
+        )}
       </div>
     ) : (
       <></>
@@ -416,14 +347,14 @@ export default function VisitListTable(): JSX.Element {
     );
   };
 
-  return (
-    <div className="visit-page-container">
-      <Sidebar title="Visits">
+  const renderSidebar = (tit: string): JSX.Element => {
+    return (
+      <Sidebar title={tit}>
         <li>
           <AddingVisit
             showButton={
               <button className="btn btn-primary" title="Create">
-                <img src={pentosquareIcon} />
+                <PenToSquareIcon light={true} />
                 Create
               </button>
             }
@@ -435,7 +366,7 @@ export default function VisitListTable(): JSX.Element {
             onClick={() => navigate('/reviews')}
             title="Reviews"
           >
-            <img src={starIcon} />
+            <StarEmptyIcon light={true} />
             Reviews
           </button>
         </li>
@@ -443,6 +374,12 @@ export default function VisitListTable(): JSX.Element {
           renderSidebarItem(category.name, category.emergency)
         )}
       </Sidebar>
+    );
+  };
+
+  return (
+    <div className="visit-page-container">
+      {renderSidebar('Visits')}
       {renderVisitsTables()}
     </div>
   );

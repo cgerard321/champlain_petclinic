@@ -1,5 +1,4 @@
 import * as React from 'react';
-import './Sidebar.css';
 
 // Sidebar
 interface SidebarItemProps {
