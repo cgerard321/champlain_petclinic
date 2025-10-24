@@ -3,14 +3,11 @@ package com.petclinic.bffapigateway.presentationlayer;
 import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.Auth.*;
 import com.petclinic.bffapigateway.exceptions.InvalidCredentialsException;
-import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.Bills.PaymentRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.*;
 import com.petclinic.bffapigateway.dtos.Vets.*;
-import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
-import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewResponseDTO;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
@@ -284,6 +281,18 @@ public class BFFApiGatewayController {
             @PathVariable String vetId,
             @RequestBody Mono<SpecialtyDTO> specialties) {
         return vetsServiceClient.addSpecialtiesByVetId(vetId, specialties);
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @DeleteMapping(value = "vets/{vetId}/specialties/{specialtyId}")
+    public Mono<ResponseEntity<Void>> deleteSpecialtyByVetId(
+            @PathVariable String vetId,
+            @PathVariable String specialtyId) {
+        return vetsServiceClient.deleteSpecialtyBySpecialtyId(vetId, specialtyId)
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .onErrorResume(RuntimeException.class, e ->
+                        Mono.just(ResponseEntity.notFound().<Void>build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})

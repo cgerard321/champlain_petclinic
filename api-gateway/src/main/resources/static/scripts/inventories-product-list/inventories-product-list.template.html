@@ -28,54 +28,51 @@
     </tr>
     <tr>
         <td>
-            <span>
-                <input type="text" ng-model="productName" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, productPrice, productSalePrice)">
-            </span>
+        <span>
+            <input type="text" ng-model="productName" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)">
+        </span>
         </td>
         <td></td>
         <td>
-            <span>
-                <input type="number" min="0" ng-model="productQuantity" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, productPrice, productSalePrice)">
-            </span>
+        <span>
+            <input type="number" min="0" step="1" ng-model="productQuantity" aria-label="Product Quantity" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)" title="Quantity must be greater than 0" oninvalid="this.setCustomValidity('Quantity cannot be 0 or negative')" oninput="this.setCustomValidity('')">
+        </span>
         </td>
         <td>
-            <span>
-                <input type="number" step="0.01" min="0" ng-model="productPrice" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, productPrice, productSalePrice)">
-            </span>
-        </td>
-        <td></td>
-        <td>
-            <span>
-                <input type="number" step="0.01" min="0" ng-model="productSalePrice" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, productPrice, productSalePrice)">
-            </span>
+        <span>
+            Min: <input type="number" step="0.01" min="0" ng-model="minPrice" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)" title="Enter a valid number" oninvalid="this.setCustomValidity('Please enter a valid number for minimum price')" oninput="this.setCustomValidity('')">
+            Max: <input type="number" step="0.01" min="0" ng-model="maxPrice" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)" title="Enter a valid number" oninvalid="this.setCustomValidity('Please enter a valid number for maximum price')" oninput="this.setCustomValidity('')">
+        </span>
         </td>
         <td></td>
         <td>
-             <span>
-
-                <a class="btn btn-success" type="button" ng-click="clearQueries()" title="Clear">
-                    <lord-icon
-                            src="https://cdn.lordicon.com/zxvuvcnc.json"
-                            trigger="hover"
-                            style="width:32px;height:32px">
-                    </lord-icon>
-                </a>
-
-            </span>
-
+        <span>
+            Min: <input type="number" step="0.01" min="0" ng-model="minSalePrice" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)" title="Enter a valid number" oninvalid="this.setCustomValidity('Please enter a valid number for minimum sale price')" oninput="this.setCustomValidity('')">
+            Max: <input type="number" step="0.01" min="0" ng-model="maxSalePrice" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)" title="Enter a valid number" oninvalid="this.setCustomValidity('Please enter a valid number for maximum sale price')" oninput="this.setCustomValidity('')">
+        </span>
+        </td>
+        <td></td>
+        <td>
+         <span>
+            <a class="btn btn-success" type="button" ng-click="clearQueries()" title="Clear">
+                <lord-icon
+                        src="https://cdn.lordicon.com/zxvuvcnc.json"
+                        trigger="hover"
+                        style="width:32px;height:32px">
+                </lord-icon>
+            </a>
+        </span>
         </td>
         <td>
-            <span>
-
-                <a class="btn btn-success" type="button" ng-click="searchProduct(productName, productQuantity, productPrice, productSalePrice)" title="Search">
-                    <lord-icon
-                            src="https://cdn.lordicon.com/fkdzyfle.json"
-                            trigger="hover"
-                            style="width:32px;height:32px">
-                    </lord-icon>
-                </a>
-
-            </span>
+        <span>
+            <a class="btn btn-success" type="button" ng-click="searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)" title="Search">
+                <lord-icon
+                        src="https://cdn.lordicon.com/fkdzyfle.json"
+                        trigger="hover"
+                        style="width:32px;height:32px">
+                </lord-icon>
+            </a>
+        </span>
         </td>
     </tr>
 
@@ -161,7 +158,4 @@
 </a>
 <a ui-sref="inventories">
     <button class="btn btn-success">Inventory List</button>
-</a>
-<a ng-click="deleteAllProducts()">
-    <button class="delete-bundle-button btn btn-success">Delete All Products</button>
 </a>

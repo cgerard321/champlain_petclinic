@@ -1081,7 +1081,7 @@ public class InventoryControllerTest {
         Optional<Integer> page = Optional.of(0);
         Optional<Integer> size = Optional.of(2);
         Flux<ProductResponseDTO> resp = Flux.just(expectedResponse);
-        when(inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductFieldPagination("1", null,null,null, page, size))
+        when(inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductFieldPagination("1", null, null, null, null, null, null, page, size))
                 .thenReturn(resp);
         client.get()
                 .uri("/api/gateway/inventories/{inventoryId}/products-pagination?page={page}&size={size}","1", page.get(), size.get())
@@ -1102,6 +1102,30 @@ public class InventoryControllerTest {
     }
 
     @Test
+    void getProductsInInventory_withOnlyMinPrice_shouldSucceed() {
+        when(inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductsField(
+                "1", null, 50.00, null, null, null, null))
+                .thenReturn(Flux.just(buildProductDTO()));
+
+        client.get()
+                .uri("/api/gateway/inventories/1/products?minPrice=50.00")
+                .exchange()
+                .expectStatus().isOk();
+    }
+
+    @Test
+    void getProductsInInventory_withOnlyMaxPrice_shouldSucceed() {
+        when(inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductsField(
+                "1", null, null, 200.00, null, null, null))
+                .thenReturn(Flux.just(buildProductDTO()));
+
+        client.get()
+                .uri("/api/gateway/inventories/1/products?maxPrice=200.00")
+                .exchange()
+                .expectStatus().isOk();
+    }
+
+    @Test
     void getTotalNumberOfProductsWithRequestParams(){
         ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
                 .productId("1234")
@@ -1111,7 +1135,7 @@ public class InventoryControllerTest {
                 .productPrice(65.00)
                 .productQuantity(3)
                 .build();
-        when(inventoryServiceClient.getTotalNumberOfProductsWithRequestParams("1",null,null,null))
+        when(inventoryServiceClient.getTotalNumberOfProductsWithRequestParams("1", null, null, null, null, null, null))
                 .thenReturn(Flux.just(expectedResponse).count());
         client.get()
                 .uri("/api/gateway/inventories/{inventoryId}/products-count","1")

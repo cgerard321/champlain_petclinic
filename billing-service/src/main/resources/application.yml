@@ -1,3 +1,4 @@
+---
 server.port: 7004
 
 logging:
@@ -26,10 +27,10 @@ app:
     port: 8090
   auth-service:
     host: auth-service
-    port: 7005
+    port: 8080
   mailer-service:
     host: mailer-service
-    port: 8888
+    port: 8080
 ---
 spring:
   config:
@@ -66,10 +67,10 @@ app:
     port: 8080
   auth-service:
     host: auth-service
-    port: 7005
+    port: 8080
   mailer-service:
     host: mailer-service
-    port: 8888
+    port: 8080
 logging:
   level:
     root: INFO
@@ -117,4 +118,3 @@ server:
 #  #    initialization-mode: always
 #
 #spring.datasource.hikari.initializationFailTimeout: 60000
-

@@ -147,6 +147,16 @@
   transform: translateY(0);
 }
 
+.pet-photo-thumbnail {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 15px;
+  border: 1px solid #ddd;
+}
+
+
 .customer-details-buttons {
   display: flex;
   justify-content: center;

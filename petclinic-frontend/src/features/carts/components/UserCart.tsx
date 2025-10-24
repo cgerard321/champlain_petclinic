@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import CartBillingForm, { BillingInfo } from './CartBillingForm';
+import InvoiceComponent, {
+  InvoiceFull as InvoiceFullType,
+  InvoiceItem as InvoiceItemType,
+} from './Invoice';
 import { useNavigate, useParams } from 'react-router-dom';
 import CartItem from './CartItem';
 import { ProductModel } from '../models/ProductModel';
@@ -10,12 +14,19 @@ import { FaShoppingCart } from 'react-icons/fa';
 import ImageContainer from '@/features/products/components/ImageContainer';
 import axiosInstance from '@/shared/api/axiosInstance';
 import { formatPrice } from '../utils/formatPrice';
+import { applyPromo } from '@/shared/api/cart';
 import {
   IsAdmin,
   IsInventoryManager,
   IsReceptionist,
   IsVet,
+  useUser,
 } from '@/context/UserContext';
+import {
+  computeTaxes,
+  averageCanadianCombinedTaxRate,
+  roundToCents,
+} from '../utils/taxUtils';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import { getProductByProductId } from '@/features/products/api/getProductByProductId';
 import {
@@ -26,7 +37,6 @@ import {
 } from '../api/cartEvent';
 import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
 import axios from 'axios';
-
 interface ProductAPIResponse {
   productId: number;
   imageId: string;
@@ -45,13 +55,16 @@ interface Invoice {
   quantity: number;
 }
 
-const UserCart = (): JSX.Element => {
-  const { cartId } = useParams<{ cartId: string }>();
+/**
+ * UserCart component displays the user's shopping cart, allowing them to view, update, and remove items,
+ * manage billing information, and proceed to checkout. It also handles displaying invoices and notifications,
+ * and interacts with the backend to fetch and update cart data.
+ */
+const UserCart: React.FC = () => {
   const navigate = useNavigate();
-
+  const { cartId } = useParams<{ cartId?: string }>();
   const { confirm, ConfirmModal } = useConfirmModal();
 
-  // state: cart + wishlist
   const [cartItems, setCartItems] = useState<ProductModel[]>([]);
   const [wishlistItems, setWishlistItems] = useState<ProductModel[]>([]);
 
@@ -65,20 +78,21 @@ const UserCart = (): JSX.Element => {
   );
 
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [showInvoiceModal, setShowInvoiceModal] = useState<boolean>(false);
+  const [lastInvoice, setLastInvoice] = useState<InvoiceFullType | null>(null);
   const [cartItemCount, setCartItemCount] = useState<number>(0);
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] =
     useState<boolean>(false);
   const [showBillingForm, setShowBillingForm] = useState<boolean>(false);
   const [billingInfo, setBillingInfo] = useState<BillingInfo | null>(null);
-  const [checkoutDate, setCheckoutDate] = useState<string | null>(null);
 
   const [wishlistUpdated, setWishlistUpdated] = useState(false);
   const [voucherCode, setVoucherCode] = useState<string>('');
-  const [discount, setDiscount] = useState<number>(0);
   const [voucherError, setVoucherError] = useState<string | null>(null);
 
   const [movingAll, setMovingAll] = useState<boolean>(false);
+
+  const [promoPercent, setPromoPercent] = useState<number | null>(null);
 
   // Recent purchases state
   const [recentPurchases, setRecentPurchases] = useState<
@@ -269,9 +283,11 @@ const UserCart = (): JSX.Element => {
     (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
     0
   );
-  const tvq = subtotal * 0.09975;
-  const tvc = subtotal * 0.05;
-  const total = subtotal - discount + tvq + tvc;
+
+  const promoDiscount =
+    promoPercent != null ? (subtotal * promoPercent) / 100 : 0;
+  const discountedSubtotal = Math.max(0, subtotal - promoDiscount);
+  const effectiveDiscount = promoDiscount;
 
   const updateCartItemCount = useCallback(() => {
     const count = cartItems.reduce(
@@ -328,6 +344,12 @@ const UserCart = (): JSX.Element => {
           })
         );
         setWishlistItems(enrichedWishlist);
+
+        if (typeof data.promoPercent === 'number') {
+          setPromoPercent(data.promoPercent);
+        } else {
+          setPromoPercent(null);
+        }
       } catch (err: unknown) {
         console.error(err);
         setError('Failed to fetch cart items');
@@ -381,17 +403,49 @@ const UserCart = (): JSX.Element => {
   }, [cartId, fetchRecommendationPurchases]);
 
   const applyVoucherCode = async (): Promise<void> => {
+    if (!cartId) {
+      setVoucherError('Invalid cart ID');
+      return;
+    }
+    if (!voucherCode.trim()) {
+      setVoucherError('Please enter a promo code.');
+      return;
+    }
+
     try {
       const { data } = await axiosInstance.get(
-        `/promos/validate/${voucherCode}`,
-        // this API call is only in v2 for now
-        { useV2: true }
+        `/carts/promos/validate/${encodeURIComponent(voucherCode.trim())}`,
+        { useV2: false, handleLocally: true }
       );
-      setDiscount((subtotal * data.discount) / 100);
+
+      const percent: number = Number(data?.discount);
+      if (Number.isNaN(percent) || percent < 0 || percent > 100) {
+        setVoucherError('Received invalid discount from server.');
+        return;
+      }
+
+      const updated = await applyPromo(cartId, percent);
+
       setVoucherError(null);
-    } catch (err: unknown) {
-      console.error('Error validating voucher code:', err);
-      setVoucherError('Error validating voucher code.');
+      setNotificationMessage(
+        `Promo applied${updated?.promoPercent != null ? `: ${updated.promoPercent}%` : `: ${percent}%`}`
+      );
+
+      setPromoPercent(updated?.promoPercent ?? percent);
+
+      try {
+        const refreshed = await axiosInstance.get(`/carts/${cartId}`, {
+          useV2: false,
+        });
+        if (typeof refreshed.data?.promoPercent === 'number') {
+          setPromoPercent(refreshed.data.promoPercent);
+        }
+      } catch {
+        /* ignore */
+      }
+    } catch (err) {
+      console.error('Error validating promo code:', err);
+      setVoucherError('Promo code invalid or expired.');
     }
   };
 
@@ -475,6 +529,17 @@ const UserCart = (): JSX.Element => {
     },
     [cartItems, cartId, blockIfReadOnly]
   );
+
+  const onClearPromo = async (): Promise<void> => {
+    if (!cartId) return;
+    try {
+      await applyPromo(cartId, 0);
+      setPromoPercent(null);
+      setNotificationMessage('Promo removed.');
+    } catch {
+      setNotificationMessage('Failed to remove promo.');
+    }
+  };
 
   const deleteItem = useCallback(
     async (productId: string, indexToDelete: number): Promise<void> => {
@@ -698,13 +763,13 @@ const UserCart = (): JSX.Element => {
     }
   };
 
-  useEffect(() => {
-    const saved = localStorage.getItem('invoices');
-    if (saved) setInvoices(JSON.parse(saved));
-  }, []);
-  useEffect(() => {
-    localStorage.setItem('invoices', JSON.stringify(invoices));
-  }, [invoices]);
+  const { user } = useUser();
+
+  // For cart summary we always show a single estimated tax using the
+  // average Canadian combined tax rate to keep the summary snappy.
+  const avgRate = averageCanadianCombinedTaxRate();
+  const estimatedTax = roundToCents(discountedSubtotal * avgRate);
+  const total = discountedSubtotal + estimatedTax;
 
   const handleCheckoutConfirmation = (): void => {
     if (isStaff) {
@@ -713,11 +778,12 @@ const UserCart = (): JSX.Element => {
       });
       return;
     }
+    // Opening billing form implies the user wants to provide billing details
     setShowBillingForm(true);
     setIsCheckoutModalOpen(false);
   };
 
-  const handleCheckout = async (): Promise<void> => {
+  const handleCheckout = async (billing?: BillingInfo): Promise<void> => {
     if (isStaff) return;
 
     if (!cartId) {
@@ -739,8 +805,78 @@ const UserCart = (): JSX.Element => {
         quantity: item.quantity || 1,
       }));
 
-      setInvoices(invoiceItems);
+      const invoiceItemsForFull: InvoiceItemType[] = invoiceItems.map(i => ({
+        productId: i.productId,
+        productName: i.productName,
+        productSalePrice: i.productSalePrice,
+        quantity: i.quantity,
+      }));
+
+      // calculate money values in integer cents to avoid floating point errors
+      const invoiceSubtotalCents = invoiceItemsForFull.reduce(
+        (s, it) => s + Math.round(it.productSalePrice * 100) * it.quantity,
+        0
+      );
+      const invoiceSubtotal = invoiceSubtotalCents / 100;
+      // determine province for invoice tax calculation
+      // Prefer billing/provided province, otherwise use user's province if available.
+      function hasProvince(obj: unknown): obj is { province?: string } {
+        if (typeof obj !== 'object' || obj === null) return false;
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore - narrow below
+        const val = (obj as { [k: string]: unknown })['province'];
+        return typeof val === 'string' || typeof val === 'undefined';
+      }
+
+      const usedProvince =
+        (billing ?? billingInfo)?.province ||
+        (hasProvince(user) ? user.province : undefined);
+      const invoiceTaxLines = computeTaxes(invoiceSubtotal, usedProvince);
+      const invoiceTaxCents = invoiceTaxLines.reduce((s, t) => {
+        const amount = t.amount ?? roundToCents(invoiceSubtotal * t.rate);
+        return s + Math.round(amount * 100);
+      }, 0);
+      const discountCents = Math.round(effectiveDiscount * 100);
+      const invoiceTotal =
+        (invoiceSubtotalCents + invoiceTaxCents - discountCents) / 100;
+
+      const usedBilling = billing ?? billingInfo ?? null;
+
+      const newInvoice: InvoiceFullType = {
+        invoiceId: `${Date.now()}`,
+        userId: user?.userId || 'anonymous',
+        billing: usedBilling
+          ? {
+              fullName: usedBilling.fullName,
+              email: usedBilling.email,
+              address: usedBilling.address,
+              city: usedBilling.city,
+              province: usedBilling.province,
+              postalCode: usedBilling.postalCode,
+            }
+          : null,
+        date: new Date().toISOString(),
+        items: invoiceItemsForFull,
+        subtotal: invoiceSubtotal,
+        // legacy fields: map by tax line name for backward compatibility
+        // Older code expects 'tvq' (provincial) and 'tvc' (federal). Map common
+        // names from our tax lines. NOTE: PROVINCE_TAX_MAP uses 'PST' for QC
+        // (not 'QST'/'TVQ'), so check for 'PST' here.
+        tvq:
+          invoiceTaxLines.find(t => ['PST', 'TVQ'].includes(t.name))?.amount ??
+          0,
+        // For tvc prefer HST (single combined) then GST
+        tvc:
+          invoiceTaxLines.find(t => t.name === 'HST')?.amount ??
+          invoiceTaxLines.find(t => t.name === 'GST')?.amount ??
+          0,
+        discount: effectiveDiscount,
+        total: invoiceTotal,
+      };
+      setLastInvoice(newInvoice);
+      setShowInvoiceModal(true);
       setCheckoutMessage('Checkout successful! Your order is being processed.');
+      // keep cart summary showing average estimated tax
       setCartItems([]);
       setCartItemCount(0);
       setIsCheckoutModalOpen(false);
@@ -939,15 +1075,51 @@ const UserCart = (): JSX.Element => {
                 )}
               </div>
 
+              <div className="voucher-code-section" style={{ marginTop: 12 }}>
+                {promoPercent != null && (
+                  <div
+                    className="voucher-hint"
+                    style={{
+                      marginTop: 6,
+                      display: 'flex',
+                      gap: 8,
+                      alignItems: 'center',
+                    }}
+                  >
+                    <span>Current promo: {promoPercent}%</span>
+                    <button
+                      type="button"
+                      className="cart-button cart-button--outline"
+                      onClick={onClearPromo}
+                    >
+                      Clear
+                    </button>
+                  </div>
+                )}
+              </div>
+
               <div className="CartSummary">
                 <h3>Cart Summary</h3>
                 <p className="summary-item">
                   Subtotal: {formatPrice(subtotal)}
                 </p>
-                <p className="summary-item">TVQ (9.975%): {formatPrice(tvq)}</p>
-                <p className="summary-item">TVC (5%): {formatPrice(tvc)}</p>
+                {/* Show estimated taxes (English names like PST, GST, HST).
+                    If subtotal is zero (e.g., after checkout) show a single $0.00 line and do not render breakdown.
+                    Otherwise, if there's exactly one Estimated Taxes line (unknown province), render a single line without percentage.
+                */}
+                {discountedSubtotal <= 0 ? (
+                  <p className="summary-item">
+                    Estimated Taxes: {formatPrice(0)}
+                  </p>
+                ) : (
+                  // Always show a single estimated taxes line using the average rate
+                  <p className="summary-item">
+                    Estimated Taxes: {formatPrice(estimatedTax)}
+                  </p>
+                )}
                 <p className="summary-item">
-                  Discount: {formatPrice(discount)}
+                  Discount{promoPercent != null ? ` (${promoPercent}%)` : ''}:{' '}
+                  {formatPrice(effectiveDiscount)}
                 </p>
                 <p className="total-price summary-item">
                   Total: {formatPrice(total)}
@@ -966,73 +1138,20 @@ const UserCart = (): JSX.Element => {
                 <div className="checkout-message">{checkoutMessage}</div>
               )}
 
-              {invoices.length > 0 && (
-                <div className="invoices-section">
-                  <h2>Invoice</h2>
-                  <div className="invoice-summary">
-                    {billingInfo && (
-                      <div className="invoice-client-info">
-                        <h3>Client Information</h3>
-                        <p>
-                          <strong>Name:</strong> {billingInfo.fullName}
-                        </p>
-                        <p>
-                          <strong>Email:</strong> {billingInfo.email}
-                        </p>
-                        <p>
-                          <strong>Address:</strong> {billingInfo.address},{' '}
-                          {billingInfo.city}, {billingInfo.province},{' '}
-                          {billingInfo.postalCode}
-                        </p>
-                      </div>
-                    )}
-                    {checkoutDate && (
-                      <div className="invoice-date">
-                        <strong>Checkout Date/Time:</strong> {checkoutDate}
-                      </div>
-                    )}
-                    <h3>Items</h3>
-                    {invoices.map(inv => (
-                      <div key={inv.productId} className="invoice-card">
-                        <h4>{inv.productName}</h4>
-                        <p>Price: ${inv.productSalePrice.toFixed(2)}</p>
-                        <p>Quantity: {inv.quantity}</p>
-                        <p>
-                          Total: $
-                          {(inv.productSalePrice * inv.quantity).toFixed(2)}
-                        </p>
-                      </div>
-                    ))}
-                    <div className="invoice-taxes">
-                      {(() => {
-                        const invoiceSubtotal = invoices.reduce(
-                          (sum, inv) =>
-                            sum + inv.productSalePrice * inv.quantity,
-                          0
-                        );
-                        const invoiceTvq = invoiceSubtotal * 0.09975;
-                        const invoiceTvc = invoiceSubtotal * 0.05;
-                        const invoiceTotal =
-                          invoiceSubtotal + invoiceTvq + invoiceTvc - discount;
-                        return (
-                          <>
-                            <p>Subtotal: ${invoiceSubtotal.toFixed(2)}</p>
-                            <p>TVQ (9.975%): ${invoiceTvq.toFixed(2)}</p>
-                            <p>TVC (5%): ${invoiceTvc.toFixed(2)}</p>
-                            <p>Discount: -${discount.toFixed(2)}</p>
-                            <h3>Total: ${invoiceTotal.toFixed(2)}</h3>
-                          </>
-                        );
-                      })()}
-                    </div>
-                  </div>
-                </div>
+              {lastInvoice && (
+                <button
+                  className="view-receipt-btn cart-button cart-button--brand cart-button--block"
+                  onClick={() => setShowInvoiceModal(true)}
+                  style={{ marginTop: '1rem' }}
+                  aria-label="View your last receipt"
+                >
+                  View Receipt
+                </button>
               )}
             </div>
           )}
         </div>
 
-        {/* Recent Purchases Section - above Wishlist */}
         <div className="recent-purchases-section cart-panel cart-panel--padded">
           <h2>Recent Purchases</h2>
           <div className="recent-purchases-list cart-scroll-strip">
@@ -1123,7 +1242,6 @@ const UserCart = (): JSX.Element => {
             )}
           </div>
 
-          {/* Wishlist items */}
           <div className="Wishlist-items cart-scroll-strip">
             {wishlistItems.length > 0 ? (
               wishlistItems.map(item => {
@@ -1168,7 +1286,6 @@ const UserCart = (): JSX.Element => {
           </div>
         </div>
 
-        {/* Recommendation Purchases Section */}
         <div className="recommendation-purchases-section cart-panel cart-panel--padded">
           <div className="recommendation-header">
             <h2>Your Recommendations</h2>
@@ -1251,7 +1368,6 @@ const UserCart = (): JSX.Element => {
           </div>
         </div>
 
-        {/* Billing Form Modal */}
         {showBillingForm && (
           <div className="modal-backdrop">
             <div className="modal-content">
@@ -1260,8 +1376,7 @@ const UserCart = (): JSX.Element => {
                 onClose={() => setShowBillingForm(false)}
                 onSubmit={async billing => {
                   setBillingInfo(billing);
-                  setCheckoutDate(new Date().toLocaleString());
-                  await handleCheckout();
+                  await handleCheckout(billing);
                   setShowBillingForm(false);
                 }}
               />
@@ -1273,13 +1388,22 @@ const UserCart = (): JSX.Element => {
           <div className="checkout-modal">
             <h3>Confirm Checkout</h3>
             <p>Are you sure you want to checkout?</p>
-            <button onClick={handleCheckout}>Yes</button>
+            <button onClick={() => handleCheckout()}>Yes</button>
             <button onClick={() => setIsCheckoutModalOpen(false)}>No</button>
           </div>
+        )}
+        {showInvoiceModal && lastInvoice && (
+          <InvoiceComponent
+            invoices={[lastInvoice]}
+            index={0}
+            onIndexChange={() => {}}
+            onClose={() => {
+              setShowInvoiceModal(false);
+            }}
+          />
         )}
       </div>
     </div>
   );
 };
-
 export default UserCart;

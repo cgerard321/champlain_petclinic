@@ -1,18 +1,36 @@
 import * as React from 'react';
-import { FormEvent, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { FormEvent, useEffect, useRef, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { addSupplyToInventory } from '@/features/inventories/api/AddSupplyToInventory.ts';
 import { ProductRequestModel } from '@/features/inventories/models/InventoryModels/ProductRequestModel';
-import './AddSupplyToInventory.css';
+import styles from './InvProForm.module.css';
 
-const AddSupplyToInventory: React.FC = (): JSX.Element => {
-  const { inventoryId } = useParams<{ inventoryId: string }>();
+type Props = {
+  open: boolean;
+  onClose: () => void;
+  inventoryIdProp?: string;
+  onAdded?: () => void;
+  existingProductNames?: string[];
+};
+
+type ProductKeys = keyof ProductRequestModel;
+
+const AddSupplyToInventory: React.FC<Props> = ({
+  open,
+  onClose,
+  inventoryIdProp,
+  onAdded,
+  existingProductNames = [],
+}): JSX.Element | null => {
+  const routeId = useParams<{ inventoryId: string }>().inventoryId;
+  const inventoryId = inventoryIdProp ?? routeId;
+
   const [product, setProduct] = useState<ProductRequestModel>({
     productName: '',
     productDescription: '',
-    productPrice: 0,
-    productQuantity: 0,
-    productSalePrice: 0,
+    productPrice: '' as unknown as number,
+    productQuantity: '' as unknown as number,
+    productSalePrice: '' as unknown as number,
   });
   const [error, setError] = useState<{ [key: string]: string }>({});
   const [successMessage, setSuccessMessage] = useState<string>('');
@@ -20,14 +38,21 @@ const AddSupplyToInventory: React.FC = (): JSX.Element => {
   const [loading, setLoading] = useState<boolean>(false);
   const [showNotification, setShowNotification] = useState<boolean>(false);
 
-  const navigate = useNavigate();
-
   const validate = (): boolean => {
     const err: Record<string, string> = {};
     if (!product.productName?.trim())
       err.productName = 'Product name is required';
     if (!product.productDescription?.trim())
       err.productDescription = 'Product description is required';
+
+    if (!(Number(product.productPrice) > 0))
+      err.productPrice = 'Product price must be greater than 0';
+
+    if (!(Number(product.productQuantity) > 0))
+      err.productQuantity = 'Product quantity must be greater than 0';
+
+    if (!(Number(product.productSalePrice) > 0))
+      err.productSalePrice = 'Product sale price must be greater than 0';
 
     setError(err);
     return Object.keys(err).length === 0;
@@ -66,6 +91,19 @@ const AddSupplyToInventory: React.FC = (): JSX.Element => {
       return;
     }
 
+    const submitted = product.productName.trim().toLowerCase();
+    const nameClashes = existingProductNames.some(
+      n => n.trim().toLowerCase() === submitted
+    );
+    if (nameClashes) {
+      setError(prev => ({
+        ...prev,
+        productName: 'This product name is already in use.',
+      }));
+      setErrorMessage('');
+      return;
+    }
+
     setLoading(true);
     setErrorMessage('');
     setSuccessMessage('');
@@ -99,39 +137,128 @@ const AddSupplyToInventory: React.FC = (): JSX.Element => {
 
     setSuccessMessage('Supply added successfully');
     setShowNotification(true);
-    setTimeout(() => navigate(`/inventories/${inventoryId}/products`), 2000);
+    onAdded?.();
+    setTimeout(() => onClose?.(), 800);
   };
 
   // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    const { name, value, type } = e.target;
+    const { name, type, value } = e.target as HTMLInputElement & {
+      name: ProductKeys;
+    };
+
+    if (name === 'productQuantity') {
+      const digitsOnly = value.replace(/[^\d]/g, '');
+      setProduct(prev => ({
+        ...prev,
+        productQuantity:
+          digitsOnly === '' ? ('' as unknown as number) : Number(digitsOnly),
+      }));
+
+      const qty = Number(digitsOnly);
+      setError(prev => {
+        const next = { ...prev };
+        if (!Number.isFinite(qty) || qty <= 0) {
+          next.productQuantity = 'Product quantity must be greater than 0';
+        } else {
+          next.productQuantity = '';
+        }
+        return next;
+      });
+
+      if (errorMessage) setErrorMessage('');
+      return;
+    }
 
     setProduct(prev => ({
       ...prev,
       [name]:
         type === 'number'
           ? value === ''
-            ? ('' as unknown as number)
+            ? (undefined as unknown as number)
             : Number(value)
           : value,
     }));
+    setError(prev => {
+      const next = { ...prev };
+      if (name === 'productPrice') {
+        const n = Number(value);
+        next.productPrice =
+          !Number.isFinite(n) || n <= 0
+            ? 'Product price must be greater than 0'
+            : '';
+      } else if (name === 'productSalePrice') {
+        const n = Number(value);
+        next.productSalePrice =
+          !Number.isFinite(n) || n <= 0
+            ? 'Product sale price must be greater than 0'
+            : '';
+      } else if (name === 'productName') {
+        next.productName = value.trim() ? '' : 'Product name is required';
+      } else if (name === 'productDescription') {
+        next.productDescription = value.trim()
+          ? ''
+          : 'Product description is required';
+      }
+      return next;
+    });
 
     if (error[name]) setError(prev => ({ ...prev, [name]: '' }));
     if (errorMessage) setErrorMessage('');
   };
 
+  const overlayRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    requestAnimationFrame(() => overlayRef.current?.focus());
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
+
+  const handleEsc: React.KeyboardEventHandler<HTMLDivElement> = e => {
+    if (e.key === 'Escape' || e.key === 'Esc') onClose();
+  };
+
+  const handleBackdropClick: React.MouseEventHandler<HTMLDivElement> = e => {
+    if (e.target === e.currentTarget) onClose();
+  };
+
+  if (!open) return null;
   return (
-    <div className="add-supply-container">
-      <div className="add-supply-form-container">
-        <h1>Add Supply</h1>
-        {errorMessage && (
-          <p className="add-supply-error-message">{errorMessage}</p>
+    <div
+      ref={overlayRef}
+      className={styles.overlay}
+      role="dialog"
+      aria-modal="true"
+      tabIndex={-1}
+      onKeyDown={handleEsc}
+      onMouseDown={handleBackdropClick}
+    >
+      <div className={styles['form-container']}>
+        <h2>Add Supply</h2>
+
+        {loading && (
+          <div className="loading-overlay">
+            <div className="loader" />
+          </div>
         )}
+
+        {errorMessage && (
+          <div className="field-error" style={{ marginTop: 8 }}>
+            {errorMessage}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} noValidate>
-          <div className="add-supply-form-group">
-            <label>Product Name</label>
+          <div>
+            <label htmlFor="as-productName">Product Name</label>
             <input
-              className={`add-supply-input ${error.productName ? 'invalid animate' : ''}`}
+              id="as-productName"
+              className={error.productName ? 'invalid animate' : ''}
               type="text"
               name="productName"
               value={product.productName}
@@ -143,16 +270,17 @@ const AddSupplyToInventory: React.FC = (): JSX.Element => {
               required
             />
             {error.productName && (
-              <span id="err-productName" className="add-supply-error-text">
+              <div id="err-productName" className="field-error">
                 {error.productName}
-              </span>
+              </div>
             )}
           </div>
 
-          <div className="add-supply-form-group">
-            <label>Product Description</label>
+          <div>
+            <label htmlFor="as-productDescription">Product Description</label>
             <input
-              className={`add-supply-input ${error.productDescription ? 'invalid animate' : ''}`}
+              id="as-productDescription"
+              className={error.productDescription ? 'invalid animate' : ''}
               type="text"
               name="productDescription"
               value={product.productDescription}
@@ -164,19 +292,17 @@ const AddSupplyToInventory: React.FC = (): JSX.Element => {
               required
             />
             {error.productDescription && (
-              <span
-                id="err-productDescription"
-                className="add-supply-error-text"
-              >
+              <div id="err-productDescription" className="field-error">
                 {error.productDescription}
-              </span>
+              </div>
             )}
           </div>
 
-          <div className="add-supply-form-group">
-            <label>Product Price</label>
+          <div>
+            <label htmlFor="as-productPrice">Product Price</label>
             <input
-              className={`add-supply-input ${error.productPrice ? 'invalid animate' : ''}`}
+              id="as-productPrice"
+              className={error.productPrice ? 'invalid animate' : ''}
               type="number"
               name="productPrice"
               value={product.productPrice ?? ''}
@@ -191,18 +317,20 @@ const AddSupplyToInventory: React.FC = (): JSX.Element => {
               aria-describedby={
                 error.productPrice ? 'err-productPrice' : undefined
               }
+              required
             />
             {error.productPrice && (
-              <span id="err-productPrice" className="add-supply-error-text">
+              <div id="err-productPrice" className="field-error">
                 {error.productPrice}
-              </span>
+              </div>
             )}
           </div>
 
-          <div className="add-supply-form-group">
-            <label>Product Quantity</label>
+          <div>
+            <label htmlFor="as-productQuantity">Product Quantity</label>
             <input
-              className={`add-supply-input ${error.productQuantity ? 'invalid animate' : ''}`}
+              id="as-productQuantity"
+              className={error.productQuantity ? 'invalid animate' : ''}
               type="number"
               name="productQuantity"
               step={1}
@@ -221,16 +349,17 @@ const AddSupplyToInventory: React.FC = (): JSX.Element => {
               required
             />
             {error.productQuantity && (
-              <span id="err-productQuantity" className="add-supply-error-text">
+              <div id="err-productQuantity" className="field-error">
                 {error.productQuantity}
-              </span>
+              </div>
             )}
           </div>
 
-          <div className="add-supply-form-group">
-            <label>Product Sale Price</label>
+          <div>
+            <label htmlFor="as-productSalePrice">Product Sale Price</label>
             <input
-              className={`add-supply-input ${error.productSalePrice ? 'invalid animate' : ''}`}
+              id="as-productSalePrice"
+              className={error.productSalePrice ? 'invalid animate' : ''}
               type="number"
               name="productSalePrice"
               value={product.productSalePrice ?? ''}
@@ -248,22 +377,37 @@ const AddSupplyToInventory: React.FC = (): JSX.Element => {
               required
             />
             {error.productSalePrice && (
-              <span id="err-productSalePrice" className="add-supply-error-text">
+              <div id="err-productSalePrice" className="field-error">
                 {error.productSalePrice}
-              </span>
+              </div>
             )}
           </div>
 
-          <button
-            className="add-supply-submit-button"
-            type="submit"
-            disabled={loading || !canSubmit}
-          >
+          <button type="submit" disabled={loading || !canSubmit}>
             {loading ? 'Adding...' : 'Add Supply'}
           </button>
+          <button type="button" className="cancel" onClick={onClose}>
+            Cancel
+          </button>
         </form>
-        {showNotification && (
-          <p className="add-supply-success-message">{successMessage}</p>
+
+        {showNotification && successMessage && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              background: '#28a745',
+              color: '#fff',
+              padding: '6px 10px',
+              borderRadius: 4,
+              fontSize: 12,
+            }}
+            role="status"
+            aria-live="polite"
+          >
+            {successMessage}
+          </div>
         )}
       </div>
     </div>

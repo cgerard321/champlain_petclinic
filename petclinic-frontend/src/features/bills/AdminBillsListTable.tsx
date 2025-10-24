@@ -8,7 +8,6 @@ import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseMod
 import { VetResponseModel } from '@/features/veterinarians/models/VetResponseModel';
 import useGetAllBillsPaginated from '@/features/bills/hooks/useGetAllBillsPaginated.ts';
 import './AdminBillsListTable.css';
-import { useNavigate } from 'react-router-dom';
 import { archiveBills } from './api/archiveBills';
 import { getAllPaidBills } from '@/features/bills/api/getAllPaidBills.tsx';
 import { getAllOverdueBills } from '@/features/bills/api/getAllOverdueBills.tsx';
@@ -21,6 +20,7 @@ import { getAllBillsByVisitType } from './api/getAllBillsByVisitType';
 import { getAllBills } from './api/getAllBills';
 import InterestExemptToggle from './components/InterestExemptToggle';
 import { Currency, convertCurrency } from './utils/convertCurrency';
+import axiosInstance from '@/shared/api/axiosInstance';
 
 interface AdminBillsListTableProps {
   currency: Currency;
@@ -41,7 +41,6 @@ export default function AdminBillsListTable({
   currency,
   setCurrency,
 }: AdminBillsListTableProps): JSX.Element {
-  const navigate = useNavigate();
   const [showArchivedBills, setShowArchivedBills] = useState(false);
   const [searchId, setSearchId] = useState('');
   const [searchedBill, setSearchedBill] = useState<Bill | null>(null);
@@ -76,6 +75,9 @@ export default function AdminBillsListTable({
   });
   const [owners, setOwners] = useState<OwnerResponseModel[]>([]);
   const [vets, setVets] = useState<VetResponseModel[]>([]);
+  const [detailBill, setDetailBill] = useState<Bill | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
+  const [currencyOpen, setCurrencyOpen] = useState<boolean>(false);
 
   const fetchOwnersAndVets = useCallback(async (): Promise<void> => {
     try {
@@ -246,6 +248,10 @@ export default function AdminBillsListTable({
 
   const getFilteredBills = (): Bill[] => {
     const billsToFilter = filteredBills || billsList;
+    if (!billsToFilter || !Array.isArray(billsToFilter)) {
+      return [];
+    }
+
     const filteredByArchiveStatus = showArchivedBills
       ? billsToFilter
       : billsToFilter.filter(bill => !bill.archive);
@@ -316,10 +322,6 @@ export default function AdminBillsListTable({
     }
   };
 
-  const handleEditClick = (): void => {
-    navigate(`/bills/admin/${searchId}/edit`);
-  };
-
   const handleGoBack = (): void => {
     setSearchedBill(null);
     setSearchId('');
@@ -346,371 +348,670 @@ export default function AdminBillsListTable({
     setActiveSection(activeSection === section ? null : section);
   };
 
+  const formatTotalDue = (bill: Bill): string => {
+    const amount = bill.taxedAmount ?? bill.amount ?? 0;
+    if (currency === 'CAD') return `CAD $${amount.toFixed(2)}`;
+    return `USD $${convertCurrency(amount, 'CAD', 'USD').toFixed(2)}`;
+  };
+
+  const openDetails = (bill: Bill): void => {
+    setDetailBill(bill);
+    setShowDetailModal(true);
+  };
+
+  const closeDetails = (): void => {
+    setShowDetailModal(false);
+    setDetailBill(null);
+  };
+
+  const handleDownloadStaffPdf = async (billId: string): Promise<void> => {
+    try {
+      const response = await axiosInstance.get(
+        `/bills/${billId}/pdf?currency=${currency}`,
+        {
+          responseType: 'blob',
+          headers: { Accept: 'application/pdf' },
+          useV2: true,
+        }
+      );
+
+      if (!response || response.status !== 200 || !response.data) {
+        throw new Error('Failed to download staff PDF');
+      }
+
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `staff-bill-${billId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading staff PDF:', error);
+      alert('Failed to generate the bill PDF. Please try again.');
+    }
+  };
+
   return (
-    <div>
-      <div className="button-container">
-        <button onClick={() => toggleSection('search')}>
-          {activeSection === 'search' ? 'Close Search' : 'Search'}
-        </button>
-        <button onClick={() => toggleSection('filter')}>
-          {activeSection === 'filter' ? 'Close Filter' : 'Filter'}
-        </button>
-        <button onClick={() => toggleSection('create')}>
-          {activeSection === 'create' ? 'Close Create' : 'Create'}
-        </button>
-        <div className="archive-toggle">
-          <label>
-            <input
-              type="checkbox"
-              checked={showArchivedBills}
-              onChange={e => setShowArchivedBills(e.target.checked)}
-            />
-            Show Archived Bills
-          </label>
+    <div className="admin-bills-page" style={{ display: 'flex', gap: '18px' }}>
+      <aside className="modern-sidebar">
+        <div className="sidebar-title">Options</div>
+        <div className="sidebar-button-container">
+          <button onClick={() => toggleSection('search')}>
+            {activeSection === 'search' ? 'Close Search' : 'Search'}
+          </button>
+          <button onClick={() => toggleSection('filter')}>
+            {activeSection === 'filter' ? 'Close Filter' : 'Filter'}
+          </button>
+          <button onClick={() => toggleSection('create')}>
+            {activeSection === 'create' ? 'Close Create' : 'Create'}
+          </button>
+          <button
+            className={`archive-btn ${showArchivedBills ? 'active' : ''}`}
+            onClick={() => setShowArchivedBills(prev => !prev)}
+          >
+            {showArchivedBills ? 'Hide Archived' : 'Show Archived'}
+          </button>
         </div>
-      </div>
 
-      {activeSection === 'search' && (
-        <div className="create-bill-form">
-          <input
-            type="text"
-            placeholder="Customer ID"
-            value={filter.customerId}
-            onChange={e => setFilter({ ...filter, customerId: e.target.value })}
-          />
-          <input
-            type="text"
-            placeholder="Enter Bill ID"
-            value={searchId}
-            onChange={e => setSearchId(e.target.value)}
-          />
-          <button onClick={handleSearch}>Search</button>
-          {searchedBill && <button onClick={handleGoBack}>Go Back</button>}
-        </div>
-      )}
-
-      {activeSection === 'filter' && (
-        <div className="create-bill-form">
-          <label htmlFor="billFilter">Status: </label>
-          <select
-            id="billFilter"
-            value={selectedFilter}
-            onChange={handleFilterChange}
-          >
-            <option value="">All Bills</option>
-            <option value="unpaid">Unpaid</option>
-            <option value="paid">Paid</option>
-            <option value="overdue">Overdue</option>
-          </select>
-          <label htmlFor="yearFilter">Year: </label>
-          <input
-            type="number"
-            id="yearFilter"
-            value={filterYear}
-            onChange={e => setFilterYear(parseInt(e.target.value))}
-          />
-          <label htmlFor="monthFilter">Month: </label>
-          <select
-            id="monthFilter"
-            value={filterMonth}
-            onChange={e => setFilterMonth(parseInt(e.target.value))}
-          >
-            {Array.from({ length: 12 }, (_, i) => (
-              <option key={i + 1} value={i + 1}>
-                {new Date(0, i).toLocaleString('default', { month: 'long' })}
-              </option>
-            ))}
-          </select>
-          <label htmlFor="ownerNameFilter">Owner Name</label>
-          <select
-            id="ownerNameFilter"
-            value={selectedOwnerFilter}
-            onChange={handleOwnerNameChange}
-          >
-            <option value="">All Owners</option>
-            {owners.map(owner => (
-              <option
-                key={owner.ownerId}
-                value={`${owner.firstName} ${owner.lastName}`}
-              >
-                {owner.firstName} {owner.lastName}
-              </option>
-            ))}
-          </select>
-          <label htmlFor="vetNameFilter">Vet Name</label>
-          <select
-            id="vetNameFilter"
-            value={selectedVetFilter}
-            onChange={handleVetNameChange}
-          >
-            <option value="">All Vets</option>
-            {vets.map(vet => (
-              <option
-                key={vet.vetId}
-                value={`${vet.firstName} ${vet.lastName}`}
-              >
-                {vet.firstName} {vet.lastName}
-              </option>
-            ))}
-          </select>
-          <label htmlFor="visitTypeFilter">Visit Type</label>
-          <select
-            id="visitTypeFilter"
-            value={selectedVisitTypeFilter}
-            onChange={handleVisitTypeChange}
-          >
-            <option value="">All Visit Types</option>
-            <option value="Checkup">Check-Up</option>
-            <option value="Vaccine">Vaccine</option>
-            <option value="Surgery">Surgery</option>
-            <option value="Dental">Dental</option>
-            <option value="Regular">Regular</option>
-            <option value="Emergency">Emergency</option>
-          </select>
-          <div className="filter-buttons">
-            <button onClick={handleMonthFilter}>Filter</button>
-            <button onClick={clearMonthFilter}>Clear</button>
-          </div>
-        </div>
-      )}
-
-      {activeSection === 'create' && (
-        <div className="create-bill-form">
-          <h3>Create New Bill</h3>
-          {error && <p style={{ color: 'red' }}>{error}</p>}
-          <form
-            onSubmit={e => {
-              e.preventDefault();
-              handleCreateBill();
-            }}
-          >
-            <div>
-              <label>Customer</label>
-              <select
-                value={newBill.customerId}
-                onChange={e =>
-                  setNewBill({ ...newBill, customerId: e.target.value })
-                }
-              >
-                <option value="">Select Customer</option>
-                {owners.map(owner => (
-                  <option key={owner.ownerId} value={owner.ownerId}>
-                    {owner.firstName} {owner.lastName}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label>Vet</label>
-              <select
-                value={newBill.vetId}
-                onChange={e =>
-                  setNewBill({ ...newBill, vetId: e.target.value })
-                }
-              >
-                <option value="">Select Vet</option>
-                {vets.map(vet => (
-                  <option key={vet.vetId} value={vet.vetId}>
-                    {vet.firstName} {vet.lastName}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label>Visit Type</label>
-              <select
-                value={newBill.visitType}
-                onChange={e =>
-                  setNewBill({ ...newBill, visitType: e.target.value })
-                }
-              >
-                <option value="">Select Visit Type</option>
-                <option value="CHECKUP">Check-Up</option>
-                <option value="VACCINE">Vaccine</option>
-                <option value="SURGERY">Surgery</option>
-                <option value="DENTAL">Dental</option>
-              </select>
-            </div>
-            <div>
-              <label>Date</label>
-              <input
-                type="date"
-                value={newBill.date}
-                onChange={e => setNewBill({ ...newBill, date: e.target.value })}
-              />
-            </div>
-            <div>
-              <label>Amount ($)</label>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={newBill.amount}
-                onChange={e =>
-                  setNewBill({ ...newBill, amount: parseFloat(e.target.value) })
-                }
-              />
-            </div>
-            <div>
-              <label>Status</label>
-              <select
-                value={newBill.billStatus}
-                onChange={e =>
-                  setNewBill({ ...newBill, billStatus: e.target.value })
-                }
-              >
-                <option value="">Select Status</option>
-                <option value="PAID">PAID</option>
-                <option value="UNPAID">UNPAID</option>
-                <option value="OVERDUE">OVERDUE</option>
-              </select>
-            </div>
-            <div>
-              <label>Due Date</label>
-              <input
-                type="date"
-                value={newBill.dueDate}
-                onChange={e =>
-                  setNewBill({ ...newBill, dueDate: e.target.value })
-                }
-              />
-            </div>
-            <button type="submit">Create Bill</button>
-          </form>
-        </div>
-      )}
-
-      {searchedBill ? (
-        <div>
-          <h3>Searched Bill Details:</h3>
-          <p>
-            <strong>Bill ID:</strong> {searchedBill.billId}
-          </p>
-          <p>
-            <strong>Owner Name:</strong> {searchedBill.ownerFirstName}{' '}
-            {searchedBill.ownerLastName}
-          </p>
-          <p>
-            <strong>Visit Type:</strong> {searchedBill.visitType}
-          </p>
-          <p>
-            <strong>Vet Name:</strong> {searchedBill.vetFirstName}{' '}
-            {searchedBill.vetLastName}
-          </p>
-          <p>
-            <strong>Date:</strong> {searchedBill.date}
-          </p>
-          <p>
-            <strong>Amount:</strong> {searchedBill.amount}
-          </p>
-          <p>
-            <strong>Taxed Amount:</strong> {searchedBill.taxedAmount}
-          </p>
-          <p>
-            <strong>Status:</strong> {searchedBill.billStatus}
-          </p>
-          <p>
-            <strong>Due Date:</strong> {searchedBill.dueDate}
-          </p>
-          <button onClick={handleEditClick}>Edit Bill</button>
-        </div>
-      ) : (
-        <div className="admin-bills-list-table-container">
+        <div style={{ marginTop: '12px' }}>
           <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '16px',
-              marginBottom: '16px',
-            }}
+            className="currency-dropdown"
+            tabIndex={0}
+            onBlur={() => setCurrencyOpen(false)}
           >
-            <label htmlFor="statusFilter">Status:</label>
-            <select
-              id="statusFilter"
-              value={selectedFilter}
-              onChange={handleFilterChange}
-              style={{ width: '150px' }}
+            <button
+              type="button"
+              className="currency-btn"
+              aria-haspopup="true"
+              aria-expanded={currencyOpen}
+              aria-label="Select currency"
+              onClick={() => setCurrencyOpen((prev: boolean) => !prev)}
             >
-              <option value="">All Bills</option>
-              <option value="unpaid">Unpaid</option>
-              <option value="paid">Paid</option>
-              <option value="overdue">Overdue</option>
-            </select>
-            <label htmlFor="currencyFilter" style={{ marginLeft: '8px' }}>
-              Currency:
-            </label>
-            <select
-              id="currencyFilter"
-              value={currency}
-              onChange={e => setCurrency(e.target.value as Currency)}
-              style={{ width: '100px' }}
-            >
-              <option value="CAD">CAD</option>
-              <option value="USD">USD</option>
-            </select>
-          </div>
-          <table className="table table-striped">
-            <thead>
-              <tr>
-                <th>Bill ID</th>
-                <th>Customer ID</th>
-                <th>Owner Name</th>
-                <th>Visit Type</th>
-                <th>Vet Name</th>
-                <th>Date</th>
-                <th>Amount</th>
-                <th>Taxed Amount</th>
-                <th>Status</th>
-                <th>Due Date</th>
-                <th>Interest Exempt</th>
-              </tr>
-            </thead>
-            <tbody>
-              {getFilteredBills().map((bill: Bill) => (
-                <tr key={bill.billId}>
-                  <td>{bill.billId}</td>
-                  <td>{bill.customerId}</td>
-                  <td>
-                    {bill.ownerFirstName} {bill.ownerLastName}
-                  </td>
-                  <td>{bill.visitType}</td>
-                  <td>
-                    {bill.vetFirstName} {bill.vetLastName}
-                  </td>
-                  <td>{bill.date}</td>
-                  <td>
-                    {currency === 'CAD'
-                      ? `CAD $${bill.amount.toFixed(2)}`
-                      : `USD $${convertCurrency(bill.amount, 'CAD', 'USD').toFixed(2)}`}
-                  </td>
-                  <td>
-                    {currency === 'CAD'
-                      ? `CAD $${bill.taxedAmount.toFixed(2)}`
-                      : `USD $${convertCurrency(bill.taxedAmount, 'CAD', 'USD').toFixed(2)}`}
-                  </td>
-                  <td>{bill.billStatus}</td>
-                  <td>{bill.dueDate}</td>
-                  <td>
-                    <InterestExemptToggle
-                      billId={bill.billId}
-                      isExempt={bill.interestExempt || false}
-                      onToggleComplete={() => getBillsList(currentPage, 10)}
-                      variant="simple"
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <div className="pagination-controls">
-            {currentPage > 0 && (
-              <button onClick={handlePreviousPage}>Previous</button>
+              <span className="currency-label">
+                <span className="currency-prefix">Currency:</span>
+                <span className="currency-value">{currency}</span>
+              </span>
+              <span className="caret">▾</span>
+            </button>
+
+            {currencyOpen && (
+              <ul className="currency-menu" role="menu">
+                <li>
+                  <button
+                    type="button"
+                    onMouseDown={() => {
+                      setCurrency('CAD');
+                      setCurrencyOpen(false);
+                    }}
+                    role="menuitem"
+                  >
+                    CAD
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onMouseDown={() => {
+                      setCurrency('USD');
+                      setCurrencyOpen(false);
+                    }}
+                    role="menuitem"
+                  >
+                    USD
+                  </button>
+                </li>
+              </ul>
             )}
-            <span> Page {currentPage + 1} </span>
-            {hasMore && <button onClick={handleNextPage}>Next</button>}
           </div>
         </div>
-      )}
+      </aside>
+
+      <main style={{ flex: 1 }}>
+        {activeSection === 'search' && (
+          <div className="modalOverlay">
+            <div className="modalContent form-modal">
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <h3>Search Bills</h3>
+                <button
+                  className="modal-close-btn"
+                  onClick={() => toggleSection('search')}
+                >
+                  Close
+                </button>
+              </div>
+              <div style={{ marginTop: '12px' }}>
+                <div className="form-grid">
+                  <label htmlFor="customerIdSearch">Customer ID</label>
+                  <input
+                    id="customerIdSearch"
+                    type="text"
+                    placeholder="Customer ID"
+                    value={filter.customerId}
+                    onChange={e =>
+                      setFilter({ ...filter, customerId: e.target.value })
+                    }
+                  />
+
+                  <label htmlFor="billIdSearch">Bill ID</label>
+                  <input
+                    id="billIdSearch"
+                    type="text"
+                    placeholder="Enter Bill ID"
+                    value={searchId}
+                    onChange={e => setSearchId(e.target.value)}
+                  />
+
+                  <div className="form-actions">
+                    <button
+                      className="primary-modal-btn wide-btn"
+                      onClick={handleSearch}
+                    >
+                      Search
+                    </button>
+                    {searchedBill && (
+                      <button onClick={handleGoBack}>Go Back</button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeSection === 'filter' && (
+          <div className="modalOverlay">
+            <div className="modalContent form-modal">
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <h3>Filter Bills</h3>
+                <button
+                  className="modal-close-btn"
+                  onClick={() => toggleSection('filter')}
+                >
+                  Close
+                </button>
+              </div>
+              <div style={{ marginTop: '12px' }}>
+                <div className="form-grid">
+                  <label htmlFor="billFilter">Status</label>
+                  <select
+                    id="billFilter"
+                    value={selectedFilter}
+                    onChange={handleFilterChange}
+                  >
+                    <option value="">All Bills</option>
+                    <option value="unpaid">Unpaid</option>
+                    <option value="paid">Paid</option>
+                    <option value="overdue">Overdue</option>
+                  </select>
+
+                  <label htmlFor="yearFilter">Year</label>
+                  <input
+                    type="number"
+                    id="yearFilter"
+                    value={filterYear}
+                    onChange={e => setFilterYear(parseInt(e.target.value))}
+                  />
+
+                  <label htmlFor="monthFilter">Month</label>
+                  <select
+                    id="monthFilter"
+                    value={filterMonth}
+                    onChange={e => setFilterMonth(parseInt(e.target.value))}
+                  >
+                    {Array.from({ length: 12 }, (_, i) => (
+                      <option key={i + 1} value={i + 1}>
+                        {new Date(0, i).toLocaleString('default', {
+                          month: 'long',
+                        })}
+                      </option>
+                    ))}
+                  </select>
+
+                  <label htmlFor="ownerNameFilter">Owner Name</label>
+                  <select
+                    id="ownerNameFilter"
+                    value={selectedOwnerFilter}
+                    onChange={handleOwnerNameChange}
+                  >
+                    <option value="">All Owners</option>
+                    {owners.map(owner => (
+                      <option
+                        key={owner.ownerId}
+                        value={`${owner.firstName} ${owner.lastName}`}
+                      >
+                        {owner.firstName} {owner.lastName}
+                      </option>
+                    ))}
+                  </select>
+
+                  <label htmlFor="vetNameFilter">Vet Name</label>
+                  <select
+                    id="vetNameFilter"
+                    value={selectedVetFilter}
+                    onChange={handleVetNameChange}
+                  >
+                    <option value="">All Vets</option>
+                    {vets.map(vet => (
+                      <option
+                        key={vet.vetId}
+                        value={`${vet.firstName} ${vet.lastName}`}
+                      >
+                        {vet.firstName} {vet.lastName}
+                      </option>
+                    ))}
+                  </select>
+
+                  <label htmlFor="visitTypeFilter">Visit Type</label>
+                  <select
+                    id="visitTypeFilter"
+                    value={selectedVisitTypeFilter}
+                    onChange={handleVisitTypeChange}
+                  >
+                    <option value="">All Visit Types</option>
+                    <option value="Checkup">Check-Up</option>
+                    <option value="Vaccine">Vaccine</option>
+                    <option value="Surgery">Surgery</option>
+                    <option value="Dental">Dental</option>
+                    <option value="Regular">Regular</option>
+                    <option value="Emergency">Emergency</option>
+                  </select>
+
+                  <div className="form-actions">
+                    <button
+                      className="primary-modal-btn wide-btn"
+                      onClick={handleMonthFilter}
+                    >
+                      Filter
+                    </button>
+                    <button
+                      className="primary-modal-btn wide-btn"
+                      onClick={clearMonthFilter}
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeSection === 'create' && (
+          <div className="modalOverlay">
+            <div className="modalContent form-modal">
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <h3>Create New Bill</h3>
+                <button
+                  className="modal-close-btn"
+                  onClick={() => toggleSection('create')}
+                >
+                  Close
+                </button>
+              </div>
+              <div style={{ marginTop: '12px' }}>
+                {error && <p style={{ color: 'red' }}>{error}</p>}
+                <form
+                  onSubmit={e => {
+                    e.preventDefault();
+                    handleCreateBill();
+                  }}
+                >
+                  <div className="form-grid">
+                    <label htmlFor="newCustomer">Customer</label>
+                    <select
+                      id="newCustomer"
+                      value={newBill.customerId}
+                      onChange={e =>
+                        setNewBill({ ...newBill, customerId: e.target.value })
+                      }
+                    >
+                      <option value="">Select Customer</option>
+                      {owners.map(owner => (
+                        <option key={owner.ownerId} value={owner.ownerId}>
+                          {owner.firstName} {owner.lastName}
+                        </option>
+                      ))}
+                    </select>
+
+                    <label htmlFor="newVet">Vet</label>
+                    <select
+                      id="newVet"
+                      value={newBill.vetId}
+                      onChange={e =>
+                        setNewBill({ ...newBill, vetId: e.target.value })
+                      }
+                    >
+                      <option value="">Select Vet</option>
+                      {vets.map(vet => (
+                        <option key={vet.vetId} value={vet.vetId}>
+                          {vet.firstName} {vet.lastName}
+                        </option>
+                      ))}
+                    </select>
+
+                    <label htmlFor="newVisitType">Visit Type</label>
+                    <select
+                      id="newVisitType"
+                      value={newBill.visitType}
+                      onChange={e =>
+                        setNewBill({ ...newBill, visitType: e.target.value })
+                      }
+                    >
+                      <option value="">Select Visit Type</option>
+                      <option value="CHECKUP">Check-Up</option>
+                      <option value="VACCINE">Vaccine</option>
+                      <option value="SURGERY">Surgery</option>
+                      <option value="DENTAL">Dental</option>
+                    </select>
+
+                    <label htmlFor="newDate">Date</label>
+                    <input
+                      id="newDate"
+                      type="date"
+                      value={newBill.date}
+                      onChange={e =>
+                        setNewBill({ ...newBill, date: e.target.value })
+                      }
+                    />
+
+                    <label htmlFor="newAmount">Amount ($)</label>
+                    <input
+                      id="newAmount"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={newBill.amount}
+                      onChange={e =>
+                        setNewBill({
+                          ...newBill,
+                          amount: parseFloat(e.target.value),
+                        })
+                      }
+                    />
+
+                    <label htmlFor="newStatus">Status</label>
+                    <select
+                      id="newStatus"
+                      value={newBill.billStatus}
+                      onChange={e =>
+                        setNewBill({ ...newBill, billStatus: e.target.value })
+                      }
+                    >
+                      <option value="">Select Status</option>
+                      <option value="PAID">PAID</option>
+                      <option value="UNPAID">UNPAID</option>
+                      <option value="OVERDUE">OVERDUE</option>
+                    </select>
+
+                    <label htmlFor="newDueDate">Due Date</label>
+                    <input
+                      id="newDueDate"
+                      type="date"
+                      value={newBill.dueDate}
+                      onChange={e =>
+                        setNewBill({ ...newBill, dueDate: e.target.value })
+                      }
+                    />
+
+                    <div className="form-actions">
+                      <button type="submit" className="full-width-btn">
+                        Create Bill
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {searchedBill ? (
+          <div className="modalOverlay">
+            <div className="modalContent">
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <h3>Search Results - Bill Details</h3>
+                <button className="modal-close-btn" onClick={handleGoBack}>
+                  Close
+                </button>
+              </div>
+
+              <div style={{ marginTop: '12px' }}>
+                <p>
+                  <strong>Bill ID:</strong> {searchedBill.billId}
+                </p>
+                <p>
+                  <strong>Customer ID:</strong> {searchedBill.customerId}
+                </p>
+                <p>
+                  <strong>Owner Name:</strong> {searchedBill.ownerFirstName}{' '}
+                  {searchedBill.ownerLastName}
+                </p>
+                <p>
+                  <strong>Visit Type:</strong> {searchedBill.visitType}
+                </p>
+                <p>
+                  <strong>Vet Name:</strong> {searchedBill.vetFirstName}{' '}
+                  {searchedBill.vetLastName}
+                </p>
+                <p>
+                  <strong>Date:</strong> {searchedBill.date}
+                </p>
+                <p>
+                  <strong>Amount:</strong> {formatTotalDue(searchedBill)}
+                </p>
+                <p>
+                  <strong>Status:</strong> {searchedBill.billStatus}
+                </p>
+                <p>
+                  <strong>Due Date:</strong> {searchedBill.dueDate}
+                </p>
+                <div style={{ marginTop: '16px' }}>
+                  <strong>Interest Exempt:</strong>{' '}
+                  {searchedBill.interestExempt ? 'Yes' : 'No'}
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div>
+            {error ? (
+              <p>{error}</p>
+            ) : (
+              <div className="billsListContainer">
+                {getFilteredBills().length === 0 ? (
+                  <p>No bills to display.</p>
+                ) : (
+                  getFilteredBills().map(bill => (
+                    <div
+                      key={bill.billId}
+                      className="billCard"
+                      data-bill-id={bill.billId}
+                    >
+                      <div className="billCardContent">
+                        <div className="billColumn leftColumn">
+                          <div className="billField">
+                            <strong>Owner:</strong>
+                            <span className="billValue">
+                              {bill.ownerFirstName} {bill.ownerLastName}
+                            </span>
+                          </div>
+                          <div className="billField">
+                            <strong>Vet:</strong>
+                            <span className="billValue">
+                              {bill.vetFirstName} {bill.vetLastName}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="billColumn rightColumn">
+                          <div className="billField">
+                            <strong>Total:</strong>
+                            <span className="billValue">
+                              {formatTotalDue(bill)}
+                            </span>
+                          </div>
+                          <div className="billField status">
+                            <strong>Status:</strong>
+                            <span
+                              className={`billValue ${
+                                bill.billStatus?.toLowerCase() === 'overdue'
+                                  ? 'status--overdue'
+                                  : bill.billStatus?.toLowerCase() === 'paid'
+                                    ? 'status--paid'
+                                    : ''
+                              }`}
+                            >
+                              {bill.billStatus}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="billActions">
+                        <button
+                          className="detailsButton"
+                          onClick={() => openDetails(bill)}
+                        >
+                          Details
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+
+            <div className="pagination-controls">
+              {currentPage > 0 && (
+                <button onClick={handlePreviousPage}>Previous</button>
+              )}
+              <span> Page {currentPage + 1} </span>
+              {hasMore && <button onClick={handleNextPage}>Next</button>}
+            </div>
+          </div>
+        )}
+
+        {showDetailModal && detailBill && (
+          <div className="modalOverlay">
+            <div className="modalContent">
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <h3>Bill Details</h3>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    className="detailsButton printButton"
+                    onClick={() => handleDownloadStaffPdf(detailBill.billId)}
+                  >
+                    Print Bill (PDF)
+                  </button>
+                  <button className="modal-close-btn" onClick={closeDetails}>
+                    Close
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ marginTop: '12px' }}>
+                <p>
+                  <strong>Bill ID:</strong> {detailBill.billId}
+                </p>
+                <p>
+                  <strong>Customer ID:</strong> {detailBill.customerId}
+                </p>
+                <p>
+                  <strong>Owner Name:</strong> {detailBill.ownerFirstName}{' '}
+                  {detailBill.ownerLastName}
+                </p>
+                <p>
+                  <strong>Visit Type:</strong> {detailBill.visitType}
+                </p>
+                <p>
+                  <strong>Vet Name:</strong> {detailBill.vetFirstName}{' '}
+                  {detailBill.vetLastName}
+                </p>
+                <p>
+                  <strong>Date:</strong> {detailBill.date}
+                </p>
+                <p>
+                  <strong>Amount:</strong>{' '}
+                  {currency === 'CAD'
+                    ? `CAD $${detailBill.amount.toFixed(2)}`
+                    : `USD $${convertCurrency(detailBill.amount, 'CAD', 'USD').toFixed(2)}`}
+                </p>
+                <p>
+                  <strong>Taxed Amount:</strong>{' '}
+                  {currency === 'CAD'
+                    ? `CAD $${detailBill.taxedAmount.toFixed(2)}`
+                    : `USD $${convertCurrency(detailBill.taxedAmount, 'CAD', 'USD').toFixed(2)}`}
+                </p>
+                <p>
+                  <strong>Status:</strong>{' '}
+                  <span
+                    className={
+                      detailBill.billStatus?.toLowerCase() === 'overdue'
+                        ? 'status--overdue'
+                        : detailBill.billStatus?.toLowerCase() === 'paid'
+                          ? 'status--paid'
+                          : ''
+                    }
+                  >
+                    {detailBill.billStatus}
+                  </span>
+                </p>
+                <p>
+                  <strong>Due Date:</strong> {detailBill.dueDate}
+                </p>
+                <div style={{ marginTop: '16px' }}>
+                  <strong>Interest Exempt:</strong>
+                  <InterestExemptToggle
+                    billId={detailBill.billId}
+                    isExempt={detailBill.interestExempt || false}
+                    onToggleComplete={() => {
+                      getBillsList(currentPage, 10);
+                      setDetailBill({
+                        ...detailBill,
+                        interestExempt: !detailBill.interestExempt,
+                      });
+                    }}
+                    variant="simple"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
     </div>
   );
 }
