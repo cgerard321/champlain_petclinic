@@ -8,8 +8,9 @@ fn not_found(req: &Request<'_>) -> AppError {
 }
 #[catch(422)]
 fn unprocessable(req: &Request<'_>) -> AppError {
-    AppError::UnprocessableEntity(format!("Invalid request body for {}", req.uri().path()))
+    AppError::UnprocessableEntity(format!("Validation failed for request to {}", req.uri().path()))
 }
+
 #[catch(default)]
 fn default_catcher(status: Status, _req: &Request<'_>) -> AppError {
     match status.code {
