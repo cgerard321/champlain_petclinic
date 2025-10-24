@@ -217,7 +217,7 @@ class VetControllerIntegrationTest {
     }
 
     @Test
-    void whenDeleteVet_asAdmin_thenReturnNoContent() {
+    void whenDeleteVet_asAdmin_thenReturnDeactivatedVetResponseDTO() {
         String vetId = UUID.randomUUID().toString();
 
         mockServerConfigVetService.registerDeleteVetEndpoint();

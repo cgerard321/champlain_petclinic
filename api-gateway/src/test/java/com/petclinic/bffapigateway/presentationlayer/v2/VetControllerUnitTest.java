@@ -287,7 +287,7 @@ class VetControllerUnitTest {
     }
 
     @Test
-    void whenDeleteVet_withValidId_thenReturnNoContent() {
+    void whenDeleteVet_withValidId_thenReturnDeactivatedVetResponseDTO() {
         String vetId = "2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb";
 
         VetResponseDTO deactivatedVet = buildDeactivatedVetResponseDTO(vetId);
