@@ -1,5 +1,6 @@
 package com.petclinic.visits.visitsservicenew.BusinessLayer;
 
+import com.petclinic.visits.visitsservicenew.BusinessLayer.Prescriptions.PrescriptionService;
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
@@ -17,8 +18,10 @@ import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
 import com.petclinic.visits.visitsservicenew.Utils.EntityDtoUtil;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FilesServiceClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -27,9 +30,7 @@ import reactor.core.publisher.Mono;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.Base64;
 
 import static java.lang.String.format;
 
@@ -56,6 +57,9 @@ public class VisitServiceImpl implements VisitService {
     private final EntityDtoUtil entityDtoUtil;
     private final AuthServiceClient authServiceClient;
     private final MailService mailService;
+
+    private final PrescriptionService prescriptionService;
+    private final FilesServiceClient filesServiceClient;
 
     /**
      * Get all visits from the repo
@@ -141,16 +145,46 @@ public class VisitServiceImpl implements VisitService {
     /**
      * We get a single visit by its VisitId
      *
-     * @param visitId The visit ID we search with
+     * @param visitId             The visit ID we search with
      * @return Return a single visit with the corresponding ID
      */
+//    @Override
+//    public Mono<VisitResponseDTO> getVisitByVisitId(String visitId) {
+//        return repo.findByVisitId(visitId)
+//                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("No visit was found with visitId: " + visitId))))
+//                .doOnNext(visit -> log.debug("The visit entity is: " + visit.toString()))
+//                .flatMap(entityDtoUtil::toVisitResponseDTO);
+//    }
+
+
     @Override
-    public Mono<VisitResponseDTO> getVisitByVisitId(String visitId) {
+    public Mono<VisitResponseDTO> getVisitByVisitId(String visitId, boolean includePrescription) {
         return repo.findByVisitId(visitId)
-                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("No visit was found with visitId: " + visitId))))
-                .doOnNext(visit -> log.debug("The visit entity is: " + visit.toString()))
-                .flatMap(entityDtoUtil::toVisitResponseDTO);
+                .switchIfEmpty(Mono.error(new NotFoundException("Visit not found: " + visitId)))
+                .flatMap(visit -> entityDtoUtil.toVisitResponseDTO(visit)
+                        .flatMap(dto -> {
+                            if (!includePrescription || visit.getPrescriptionFileId() == null) {
+                                return Mono.just(dto);
+                            }
+
+                            return filesServiceClient.getFile(visit.getPrescriptionFileId())
+                                    .map(file -> {
+                                        dto.setPrescription(file);
+                                        return dto;
+                                    })
+                                    .onErrorResume(ex -> Mono.just(dto))
+                                    .defaultIfEmpty(dto);
+                        })
+                );
     }
+
+
+
+
+
+
+
+
 
     /**
      * Safe add visit. Need authentication to work and uses JwtToken
@@ -316,26 +350,34 @@ public class VisitServiceImpl implements VisitService {
      */
     @Override
     public Mono<VisitResponseDTO> updateVisit(String visitId, Mono<VisitRequestDTO> visitRequestDTOMono) {
-        //Find the visit by the ID
         return repo.findByVisitId(visitId)
-                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("No visit was found with visitId: " + visitId)))
+                .switchIfEmpty(Mono.error(new NotFoundException("No visit was found with visitId: " + visitId)))
+                .flatMap(existingVisit ->
+                        visitRequestDTOMono
+                                .flatMap(dto -> validatePetId(dto.getPetId())
+                                        .then(validateVetId(dto.getPractitionerId()))
+                                        .thenReturn(dto))
+                                .map(entityDtoUtil::toVisitEntity)
+                                .doOnNext(updatedVisit -> {
+                                    updatedVisit.setId(existingVisit.getId());
+                                    updatedVisit.setVisitId(existingVisit.getVisitId());
+
+                                    updatedVisit.setPrescriptionFileId(existingVisit.getPrescriptionFileId());
+
+                                    if (updatedVisit.getStatus() == null) {
+                                        updatedVisit.setStatus(existingVisit.getStatus());
+                                    }
+
+                                    if (updatedVisit.getVisitDate() == null) {
+                                        updatedVisit.setVisitDate(existingVisit.getVisitDate());
+                                    }
+                                })
                 )
-                //VisitEntity becomes a reference to the found Visit
-                //Removes nested Structure  ( Mono<Mono<(...)>> )
-                .flatMap(visitEntity -> visitRequestDTOMono
-                        //Validate Pet and Vet
-                        .flatMap(visitRequestDTO -> validatePetId(visitRequestDTO.getPetId())
-                                .then(validateVetId(visitRequestDTO.getPractitionerId()))
-                                .then(Mono.just(visitRequestDTO)))
-                        .map(entityDtoUtil::toVisitEntity)
-                        .doOnNext(visitEntityToUpdate -> {
-                            visitEntityToUpdate.setVisitId(visitEntity.getVisitId());
-                            visitEntityToUpdate.setId(visitEntity.getId());
-                        }))
-                //Save
                 .flatMap(repo::save)
                 .flatMap(entityDtoUtil::toVisitResponseDTO);
     }
+
+
 
     /**
      * Change the status of any saved Visits by their ID

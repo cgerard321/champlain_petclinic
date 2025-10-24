@@ -151,25 +151,25 @@ export default function VisitListTable(): JSX.Element {
   // Buttons
   const renderCancelButton = (): JSX.Element => (
     <a>
-      <img className="icon" src={xcrossIcon} title="Cancel" />
+      <img className="icon-visits" src={xcrossIcon} title="Cancel" />
     </a>
   );
 
   const renderArchiveButton = (): JSX.Element => (
     <a>
-      <img className="icon" src={archiveIcon} title="Archive" />
+      <img className="icon-visits" src={archiveIcon} title="Archive" />
     </a>
   );
 
   const renderEditButton = (): JSX.Element => (
     <a>
-      <img className="icon" src={pencilIcon} title="Edit" />
+      <img className="icon-visits" src={pencilIcon} title="Edit" />
     </a>
   );
 
   const renderViewButton = (): JSX.Element => (
     <a>
-      <img className="icon" src={eyeIcon} title="View" />
+      <img className="icon-visits" src={eyeIcon} title="View" />
     </a>
   );
 

@@ -1,9 +1,9 @@
-import { useEffect, useState, useCallback } from 'react';
-import { Bill } from '@/features/bills/models/Bill.ts';
 import { useUser } from '@/context/UserContext';
-import PaymentForm from './PaymentForm';
-import './BillsListTable.css';
+import { Bill } from '@/features/bills/models/Bill.ts';
 import axiosInstance from '@/shared/api/axiosInstance';
+import { useCallback, useEffect, useState, useMemo } from 'react';
+import './BillsListTable.css';
+import PaymentForm from './PaymentForm';
 import { Currency, convertCurrency } from './utils/convertCurrency';
 
 interface BillsListTableProps {
@@ -19,6 +19,13 @@ export default function BillsListTable({
   const [bills, setBills] = useState<Bill[]>([]);
   const [filteredBills, setFilteredBills] = useState<Bill[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  // Ensure bills and filteredBills are always arrays to prevent null filter errors
+  const safeBills = useMemo(() => (Array.isArray(bills) ? bills : []), [bills]);
+  const safeFilteredBills = useMemo(
+    () => (Array.isArray(filteredBills) ? filteredBills : []),
+    [filteredBills]
+  );
 
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [activeSection, setActiveSection] = useState<
@@ -58,6 +65,9 @@ export default function BillsListTable({
     } catch (err) {
       console.error('Error fetching bills:', err);
       setError('Failed to fetch bills');
+      // Ensure bills is always an array, never null
+      setBills([]);
+      setFilteredBills([]);
     }
   }, [user?.userId]);
 
@@ -67,15 +77,15 @@ export default function BillsListTable({
 
   useEffect(() => {
     if (selectedStatus === 'all') {
-      setFilteredBills(bills);
+      setFilteredBills(safeBills);
       return;
     }
     setFilteredBills(
-      bills.filter(
+      safeBills.filter(
         b => (b.billStatus || '').toLowerCase() === selectedStatus.toLowerCase()
       )
     );
-  }, [selectedStatus, bills]);
+  }, [selectedStatus, safeBills]);
 
   const toggleSection = (section: 'status' | 'amount' | 'date'): void => {
     setActiveSection(prev => {
@@ -87,7 +97,7 @@ export default function BillsListTable({
         setCustomMax('');
         setDateMonth(new Date().getMonth() + 1);
         setDateYear(new Date().getFullYear());
-        setFilteredBills(bills.slice());
+        setFilteredBills(safeBills.slice());
         setError(null);
         return null;
       }
@@ -338,7 +348,7 @@ export default function BillsListTable({
                     setCustomMin('');
                     setCustomMax('');
                     setError(null);
-                    setFilteredBills(bills);
+                    setFilteredBills(safeBills);
                   }}
                 >
                   Clear
@@ -351,7 +361,7 @@ export default function BillsListTable({
               <button
                 onClick={() => {
                   setAmountRangeOption('none');
-                  setFilteredBills(bills);
+                  setFilteredBills(safeBills);
                 }}
               >
                 Clear
@@ -416,7 +426,7 @@ export default function BillsListTable({
               onClick={() => {
                 setDateMonth(new Date().getMonth() + 1);
                 setDateYear(new Date().getFullYear());
-                setFilteredBills(bills);
+                setFilteredBills(safeBills);
                 setError(null);
               }}
             >
@@ -430,10 +440,10 @@ export default function BillsListTable({
         <p>{error}</p>
       ) : (
         <div className="billsListContainer">
-          {filteredBills.length === 0 ? (
+          {safeFilteredBills.length === 0 ? (
             <p>No bills to display.</p>
           ) : (
-            filteredBills.map(bill => (
+            safeFilteredBills.map(bill => (
               <div
                 key={bill.billId}
                 className="billCard"

@@ -20,11 +20,11 @@ public class PetController {
     private PetService petService;
 
     @GetMapping("/{petId}")
-    public Mono<ResponseEntity<PetResponseDTO>> getPetDTOByPetId(@PathVariable String petId) {
+    public Mono<ResponseEntity<PetResponseDTO>> getPetDTOByPetId(@PathVariable String petId, @RequestParam(required = false, defaultValue = "false") boolean includePhoto) {
         return Mono.just(petId)
                 .filter(id -> id.length() == 36)
                 .switchIfEmpty(ApplicationExceptions.invalidPetId(petId))
-                .flatMap(id -> petService.getPetById(id))
+                .flatMap(id -> petService.getPetById(id, includePhoto))
                 .map(ResponseEntity::ok)
                 .switchIfEmpty(ApplicationExceptions.petNotFound(petId));
     }

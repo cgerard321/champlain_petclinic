@@ -3,6 +3,7 @@ package com.petclinic.customersservice.business;
 import com.petclinic.customersservice.customersExceptions.exceptions.NotFoundException;
 import com.petclinic.customersservice.data.Pet;
 import com.petclinic.customersservice.data.PetRepo;
+import com.petclinic.customersservice.domainclientlayer.FilesServiceClient;
 import com.petclinic.customersservice.presentationlayer.PetRequestDTO;
 import com.petclinic.customersservice.presentationlayer.PetResponseDTO;
 import com.petclinic.customersservice.util.EntityDTOUtil;
@@ -21,6 +22,9 @@ public class PetServiceImpl implements PetService {
     @Autowired
     OwnerService ownerService;
 
+    @Autowired
+    FilesServiceClient filesServiceClient;
+
     @Override
     public Flux<PetResponseDTO> getAllPets() {
         return petRepo.findAll().map(EntityDTOUtil::toPetResponseDTO);
@@ -35,8 +39,25 @@ public class PetServiceImpl implements PetService {
     }
 
     @Override
-    public Mono<PetResponseDTO> getPetById(String Id) {
-        return petRepo.findPetByPetId(Id).map(EntityDTOUtil::toPetResponseDTO);
+    public Mono<PetResponseDTO> getPetById(String Id, boolean includePhoto) {
+        return petRepo.findPetByPetId(Id)
+           .flatMap(pet -> {
+             PetResponseDTO dto = EntityDTOUtil.toPetResponseDTO(pet);
+
+             if (includePhoto && pet.getPhotoId() != null && !pet.getPhotoId().isEmpty()) {
+        return filesServiceClient.getFile(pet.getPhotoId())
+           .map(fileResp -> {
+            dto.setPhoto(fileResp);
+        return dto;
+        })
+        .onErrorResume(err -> {
+           System.err.printf("Error fetching file %s for petId %s: %s%n",
+           pet.getPhotoId(), Id, err.getMessage());
+           return Mono.just(dto);
+           });
+        }
+        return Mono.just(dto);
+      });
     }
 
     @Override
@@ -87,7 +108,7 @@ public class PetServiceImpl implements PetService {
     public Mono<PetResponseDTO> createPetForOwner(String ownerId, Mono<PetRequestDTO> petRequestDTO) {
         return petRequestDTO
                 .flatMap(requestDTO -> {
-                    return ownerService.getOwnerByOwnerId(ownerId)
+                    return ownerService.getOwnerByOwnerId(ownerId, false)
                             .switchIfEmpty(Mono.error(new NotFoundException("Owner not found with id: " + ownerId)))
                             .then(Mono.just(requestDTO));
                 })
@@ -105,5 +126,4 @@ public class PetServiceImpl implements PetService {
                 .flatMap(petRepo::save)
                 .map(EntityDTOUtil::toPetResponseDTO);
     }
-
 }

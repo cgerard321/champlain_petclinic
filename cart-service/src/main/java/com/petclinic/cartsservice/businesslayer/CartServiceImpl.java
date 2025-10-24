@@ -11,7 +11,9 @@ import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
 import com.petclinic.cartsservice.utils.exceptions.OutOfStockException;
 import com.petclinic.cartsservice.domainclientlayer.CustomerClient;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.util.ArrayList;
@@ -691,4 +693,23 @@ public class CartServiceImpl implements CartService {
         return cartRepository.findCartByCartId(cartId)
                 .map(cart -> cart.getRecommendationPurchase() != null ? cart.getRecommendationPurchase() : List.of());
     }
+
+    @Override
+    public Mono<CartResponseModel> applyPromoToCart(String cartId, Double promoPercent) {
+        return cartRepository.findCartByCartId(cartId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
+                .flatMap(cart -> {
+                    if (promoPercent == null || promoPercent <= 0) {
+                        cart.setPromoPercent(null);
+                        return cartRepository.save(cart);
+                    }
+                    if (promoPercent > 100) {
+                        return Mono.error(new InvalidInputException("promoPercent must be 1..100"));
+                    }
+                    cart.setPromoPercent(promoPercent);
+                    return cartRepository.save(cart);
+                })
+                .map(saved -> EntityModelUtil.toCartResponseModel(saved, saved.getProducts()));
+    }
+
 }

@@ -1627,7 +1627,7 @@ class ApiGatewayControllerTest {
                 .status(Status.UPCOMING)
                 .visitEndDate(LocalDateTime.parse("2024-11-25 14:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .build();
-        when(visitsServiceClient.getVisitByVisitId(anyString())).thenReturn(Mono.just(visitResponseDTO));
+        when(visitsServiceClient.getVisitByVisitId(anyString(), anyBoolean())).thenReturn(Mono.just(visitResponseDTO));
 
         client.get()
                 .uri("/api/gateway/visits/" + visitResponseDTO.getVisitId())

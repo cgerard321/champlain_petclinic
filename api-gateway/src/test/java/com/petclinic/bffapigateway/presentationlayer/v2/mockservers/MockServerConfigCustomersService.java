@@ -103,7 +103,7 @@ public class MockServerConfigCustomersService {
                 + "\"city\":\"Sun Prairie\","
                 + "\"province\":\"Quebec\","
                 + "\"telephone\":\"6085551749\","
-                + "\"pets\":null"
+                + "\"pets\":[]"
                 + "}";
 
         mockServerClient_CustomersService
@@ -168,5 +168,23 @@ public class MockServerConfigCustomersService {
     public void stopMockServer() {
         if(clientAndServer != null)
             this.clientAndServer.stop();
+    }
+
+    public void registerUpdatePetEndpoint(String petId, String ownerId, String newName) {
+        String responseBody = String.format("{\"petId\":\"%s\",\"name\":\"%s\",\"birthDate\":\"2025-10-23T00:00:00.000+00:00\",\"petTypeId\":\"1\",\"isActive\":\"true\",\"weight\":\"5.0\",\"ownerId\":\"%s\"}",
+                petId, newName, ownerId);
+
+        mockServerClient_CustomersService
+                .when(
+                        request()
+                                .withMethod("PUT")
+                                .withPath("/pet/" + petId)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withBody(json(responseBody))
+                                .withHeader("Content-Type", "application/json")
+                );
     }
 }
