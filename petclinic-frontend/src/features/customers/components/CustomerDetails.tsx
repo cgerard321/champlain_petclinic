@@ -295,14 +295,6 @@ const CustomerDetails: FC = () => {
                     }
                     alt={`${pet.name}'s photo`}
                     className="pet-photo-thumbnail"
-                    style={{
-                      width: '60px',
-                      height: '60px',
-                      borderRadius: '50%',
-                      objectFit: 'cover',
-                      marginRight: '15px',
-                      border: '1px solid #ddd',
-                    }}
                   />
                   <div className="pet-details">
                     <div className="pet-info">
