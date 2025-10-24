@@ -28,7 +28,7 @@
 .sidebar-button-container {
   display: flex;
   flex-direction: column;
-  gap: 1.00rem; /* increased vertical spacing between buttons */
+  gap: 1.00rem;
 }
 
 .modern-sidebar button,
@@ -37,14 +37,14 @@
   color: #fff;
   border: none;
   border-radius: 8px;
-  padding: 0.75rem 12px; /* consistent padding */
+  padding: 0.75rem 12px; 
   font-size: 1.05rem;
   font-weight: 600;
   box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
   cursor: pointer;
   transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
-  margin: 0; /* handled by container gap */
-  width: 100%; /* full width buttons */
+  margin: 0; 
+  width: 100%;
   text-align: center;
   outline: none;
 }
@@ -57,23 +57,23 @@
 }
 
 :root {
-  /* global offset used to nudge bills/pagination left on wide screens */
+  
   --bills-offset: -130px;
 }
 
-/* Currency dropdown button (blue) */
+
 .currency-dropdown {
   position: relative;
   display: inline-block;
   width: 100%;
-  margin: 5px 0; /* small vertical gap between other sidebar buttons */
+  margin: 5px 0; 
 }
 
 .currency-btn {
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: center; /* center the currency label */
+  justify-content: center;
   background: linear-gradient(90deg, #1976d2 0%, #63a4ff 100%);
   color: #fff;
   border: none;
@@ -82,7 +82,7 @@
   font-weight: 600;
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
-  position: relative; /* for absolute caret positioning */
+  position: relative; 
 }
 
 .currency-label {
@@ -165,12 +165,12 @@
 .billsListContainer {
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* left-align the bill cards within the centered content area */
+  align-items: flex-start; 
   gap: 12px;
   padding-top: 12px;
   max-width: 100%;
   margin: 0 auto;
-  /* visual offset to nudge the cards left inside the centered content area */
+
   --bills-offset: -255px;
   transform: translateX(calc(var(--bills-offset) * -1));
 }
@@ -333,7 +333,6 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
-/* Unified form grid used by search, filter and create sections */
 .filter-section .form-grid,
 .modalContent.form-modal .form-grid,
 .form-grid {
@@ -376,7 +375,7 @@
   cursor: pointer;
 }
 
-/* Responsive: collapse grid to single column on narrow screens */
+
 @media (max-width: 640px) {
   .form-grid,
   .modalContent.form-modal .form-grid,
@@ -399,25 +398,25 @@
     gap: 8px;
   }
 
-  /* do not offset cards on small screens */
+
   .billsListContainer {
     transform: none;
     align-items: center;
   }
 
   .pagination-controls {
-    transform: none; /* keep pagination centered on small screens */
+    transform: none;
   }
 }
 
-/* Modal-specific: push modal form content to the left */
+
 .modalContent.form-modal {
   padding-left: 18px;
   padding-right: 18px;
 }
 
 .modalContent.form-modal .form-grid {
-  /* ensure items start at left */
+
   justify-items: start;
   grid-template-columns: 140px 1fr;
 }
@@ -431,11 +430,11 @@
   justify-content: flex-start;
 }
 
-/* Create modal: full-width submit button at bottom */
+
 .modalContent.form-modal .form-actions .full-width-btn {
-  width: 320px; /* reduced width */
+  width: 320px;
   max-width: 70%;
-  margin: 0; /* align to left inside modal */
+  margin: 0; 
   align-self: flex-start;
   display: block;
   padding: 12px 16px;
@@ -451,9 +450,9 @@
   background-color: #1585f5;
 }
 
-/* Modal header close button (red) */
+
 .modal-close-btn {
-  background-color: #d64545; /* red */
+  background-color: #d64545;
   color: #fff;
   border: none;
   padding: 6px 10px;
@@ -466,7 +465,7 @@
   background-color: #b53b3b;
 }
 
-/* Primary modal button (use same green as create modal) */
+
 .modalContent.form-modal .form-actions .primary-modal-btn {
   background-color: #1585f5;
   color: #fff;
@@ -477,9 +476,6 @@
   cursor: pointer;
 }
 
-/* hover color intentionally left unchanged for primary modal buttons */
-
-/* Make modal buttons hover behave same as the create modal's button */
 .modalContent.form-modal .form-actions button,
 .modalContent.form-modal .form-actions .primary-modal-btn,
 .modalContent.form-modal .form-actions .full-width-btn {
@@ -489,12 +485,12 @@
 .modalContent.form-modal .form-actions button:hover,
 .modalContent.form-modal .form-actions .primary-modal-btn:hover,
 .modalContent.form-modal .form-actions .full-width-btn:hover {
-  /* do not change background color on hover; keep only lift/shadow */
+
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   transform: translateY(-2px) scale(1.02);
 }
 
-/* wider button variant used for filter/search */
+
 .modalContent.form-modal .form-actions .wide-btn {
   width: 225px;
   min-width: 160px;
@@ -517,7 +513,7 @@
   .billCard {
     width: 100%;
     padding: 10px;
-     /* reduce top spacing on small screens and keep cards centered on narrow viewports */
+   
   
     margin-top: 5.25rem;
     align-items: center;
@@ -581,16 +577,16 @@
 
 .pagination-controls {
   display: flex;
-  justify-content: flex-start; /* align pagination to the left edge of the bills area */
+  justify-content: flex-start;
   align-items: center;
   margin-top: 20px;
-  max-width: 680px; /* align with .billCard width */
+  max-width: 680px;
   margin-left: auto;
   margin-right: auto;
   transform: translateX(calc(var(--bills-offset) * -1));
 }
 
-/* Make Previous/Next buttons blue to match site buttons */
+
 .pagination-controls button {
   background: linear-gradient(90deg, #1976d2 0%, #63a4ff 100%);
   color: #fff;
@@ -601,7 +597,7 @@
   font-weight: 600;
   box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
   transition: background 0.18s ease, box-shadow 0.12s ease, transform 0.08s ease;
-  margin: 0 14px; /* give breathing room from the page number */
+  margin: 0 14px;
 }
 
 .pagination-controls button:hover {
@@ -611,7 +607,7 @@
 }
 
 .pagination-controls span {
-  margin: 0 8px; /* space around the page number */
+  margin: 0 8px;
 }
 
 .pagination-button {

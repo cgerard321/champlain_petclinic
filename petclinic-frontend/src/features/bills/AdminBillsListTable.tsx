@@ -248,8 +248,6 @@ export default function AdminBillsListTable({
 
   const getFilteredBills = (): Bill[] => {
     const billsToFilter = filteredBills || billsList;
-
-    // Ensure we have a valid array to work with
     if (!billsToFilter || !Array.isArray(billsToFilter)) {
       return [];
     }
@@ -373,7 +371,7 @@ export default function AdminBillsListTable({
         {
           responseType: 'blob',
           headers: { Accept: 'application/pdf' },
-          useV2: true, // required so gateway uses the v2 API path
+          useV2: true,
         }
       );
 
@@ -1001,7 +999,6 @@ export default function AdminBillsListTable({
                     isExempt={detailBill.interestExempt || false}
                     onToggleComplete={() => {
                       getBillsList(currentPage, 10);
-                      // Update the detailBill state to reflect the change
                       setDetailBill({
                         ...detailBill,
                         interestExempt: !detailBill.interestExempt,
