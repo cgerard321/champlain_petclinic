@@ -1,8 +1,5 @@
 use std::path::PathBuf;
 
-use crate::business_layer::file_service_service::{fetch_buckets, fetch_files, upload_file};
-use crate::data_layer::bucket_info::BucketInfo;
-use crate::data_layer::file_info::FileInfo;
 use crate::handlers::global_exception_handler::{ApiError, ApiResult};
 
 use rocket::data::ToByteUnit;
@@ -10,6 +7,9 @@ use rocket::http::Status;
 use rocket::response::status::Custom;
 use rocket::serde::json::Json;
 use rocket::{Data, get, post};
+use crate::file_service_subdomain::business_layer::file_service_service::{fetch_buckets, fetch_files, upload_file};
+use crate::file_service_subdomain::data_layer::bucket_info::BucketInfo;
+use crate::file_service_subdomain::data_layer::file_info::FileInfo;
 
 #[get("/buckets")]
 pub(crate) async fn read_buckets() -> ApiResult<Json<Vec<BucketInfo>>> {

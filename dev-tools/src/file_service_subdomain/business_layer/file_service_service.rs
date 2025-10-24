@@ -1,7 +1,7 @@
-use crate::data_layer::bucket_info::BucketInfo;
-use crate::data_layer::file_info::FileInfo;
+use crate::file_service_subdomain::data_layer::bucket_info::BucketInfo;
+use crate::file_service_subdomain::data_layer::file_info::FileInfo;
 use crate::handlers::global_exception_handler::{ApiError, ApiResult};
-use crate::domain_client_layer::minio_client_service::{get_buckets, get_files, post_file};
+use crate::file_service_subdomain::domain_client_layer::minio_client_service::{get_buckets, get_files, post_file};
 
 use crate::rocket::futures::StreamExt;
 use std::path::PathBuf;

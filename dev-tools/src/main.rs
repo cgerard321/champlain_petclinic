@@ -1,14 +1,9 @@
-mod business_layer;
-mod data_layer;
-mod domain_client_layer;
-mod handlers;
-mod presentation_layer;
-mod utils;
-
 #[macro_use]
 extern crate rocket;
+mod handlers;
+mod file_service_subdomain;
 
-use crate::presentation_layer::file_service_controller::{add_file, read_buckets, read_files};
+use crate::file_service_subdomain::presentation_layer::file_service_controller::{add_file, read_buckets, read_files};
 
 #[launch]
 fn rocket() -> _ {

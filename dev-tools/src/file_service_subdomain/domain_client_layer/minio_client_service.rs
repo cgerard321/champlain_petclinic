@@ -1,4 +1,4 @@
-use crate::data_layer::bucket_info::BucketInfo;
+use crate::file_service_subdomain::data_layer::bucket_info::BucketInfo;
 use crate::handlers::global_exception_handler::{ApiError, ApiResult};
 
 use minio::s3::Client;
