@@ -258,7 +258,7 @@ public class VisitServiceImpl implements VisitService {
                 .retryWhen(
                         Retry.fixedDelay(3, Duration.ofMillis(100))
                                 .filter(e -> e instanceof DuplicateKeyException)
-                                .doBeforeRetry(retrySignal -> log.warn("DuplicateKeyException encountered when generating unique ID, retry attempt {}", retrySignal.totalRetries() + 1))
+                                .doBeforeRetry(retrySignal -> log.warn("DuplicateKeyException encountered when generating unique ID for visitId {}, retry attempt {}", entity.getVisitId(), retrySignal.totalRetries() + 1))
                 )
                 .onErrorMap(DuplicateKeyException.class, e ->
                         new RuntimeException("Failed to generate unique visit ID", e));
