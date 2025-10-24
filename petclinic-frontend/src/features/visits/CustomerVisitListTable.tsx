@@ -15,7 +15,6 @@ import SidebarItem from './components/SidebarItem';
 import Sidebar from './components/Sidebar';
 import {
   DownloadIcon,
-  PenIcon,
   PenToSquareIcon,
   StarEmptyIcon,
   StarFullIcon,
