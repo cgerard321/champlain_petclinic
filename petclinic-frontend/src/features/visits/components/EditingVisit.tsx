@@ -10,6 +10,7 @@ import { /*useUser,*/ IsVet, IsAdmin } from '@/context/UserContext';
 
 import BasicModal from '@/shared/components/BasicModal';
 import PrescriptionModal from '@/features/visits/Prescription/prescriptionComponents/prescriptionModal';
+import CreateBillModal from './CreateBillModal';
 
 import './EditVisit.css';
 
@@ -62,7 +63,10 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
   const [vets, setVets] = useState<VetResponse[]>([]);
   const [showPrescriptionModal, setShowPrescriptionModal] =
     useState<boolean>(false);
+  const [showCreateBillModal, setShowCreateBillModal] =
+    useState<boolean>(false);
   const prescriptionTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const createBillTriggerRef = useRef<HTMLButtonElement | null>(null);
   //const { user } = useUser();
   const isVet = IsVet();
   const isAdmin = typeof IsAdmin === 'function' ? IsAdmin() : false;
@@ -177,6 +181,14 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
     }, 0);
   };
 
+  const handleCreateBillClick = (): void => {
+    // open the modal via the hidden trigger to avoid nested form submission
+    setShowCreateBillModal(true);
+    setTimeout(() => {
+      createBillTriggerRef.current?.click();
+    }, 0);
+  };
+
   return (
     <>
       <BasicModal
@@ -279,13 +291,21 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
           </div>
           <br />
           {visit.status === 'COMPLETED' && (isVet || isAdmin) && (
-            <div>
+            <div style={{ display: 'flex', gap: '8px' }}>
               <button
                 type="button"
                 onClick={handlePrescriptionClick}
                 className="button"
               >
                 Create Prescription
+              </button>
+
+              <button
+                type="button"
+                onClick={handleCreateBillClick}
+                className="button"
+              >
+                Create Bill
               </button>
             </div>
           )}
@@ -294,6 +314,33 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
           <div className="notification">{successMessage}</div>
         )}
       </BasicModal>
+
+      <CreateBillModal
+        showButton={
+          <button
+            ref={createBillTriggerRef}
+            style={{ display: 'none' }}
+            aria-hidden="true"
+            tabIndex={-1}
+            type="button"
+          />
+        }
+        visitId={visitId}
+        vetId={visit.practitionerId}
+        vetFirstName={
+          vets.find(v => v.vetId === visit.practitionerId)?.firstName || ''
+        }
+        vetLastName={
+          vets.find(v => v.vetId === visit.practitionerId)?.lastName || ''
+        }
+        ownerFirstName={visit.ownerFirstName || ''}
+        ownerLastName={visit.ownerLastName || ''}
+        visitDate={
+          visit.visitStartDate instanceof Date
+            ? visit.visitStartDate.toISOString()
+            : visit.visitStartDate
+        }
+      />
 
       {showPrescriptionModal && (
         <PrescriptionModal
