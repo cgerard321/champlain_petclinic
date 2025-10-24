@@ -138,3 +138,87 @@
   border: 2px solid #5de2e7; /* Highlight border color */
   box-shadow: 0 0 10px rgba(255, 204, 0, 0.7); /* Optional shadow for effect */
 }
+/* === Carousel (cards) — FADE VERSION === */
+.carousel {
+  position: relative;
+  width: 100%;
+  margin: 0 auto 24px;
+  overflow: hidden;
+}
+
+/* stack slides on top of each other */
+.carouselViewport {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  /* pick a safe min-height so the stack doesn't collapse */
+  min-height: 520px; /* 480px card + padding/gaps; tweak if needed */
+}
+
+.carouselTrack {
+  position: relative; /* container for absolutely positioned slides */
+}
+
+/* Each slide fades in/out */
+.carouselSlide {
+  position: absolute;
+  inset: 0;                 /* top/right/bottom/left: 0 */
+  opacity: 0;
+  transform: scale(0.985);  /* tiny scale for a softer fade */
+  transition: opacity 260ms ease, transform 260ms ease;
+  pointer-events: none;     /* avoid clicking hidden slides */
+}
+
+.carouselSlideActive {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+/* Grid of cards inside each slide — 4 per page on desktop */
+.slideGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+  align-items: stretch; /* make all card slots equal height */
+}
+
+/* Responsive grid adjustments */
+@media (max-width: 1199px) {
+  .slideGrid { grid-template-columns: repeat(3, minmax(0,1fr)); }
+}
+@media (max-width: 991px) {
+  .slideGrid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+@media (max-width: 575px) {
+  .slideGrid { grid-template-columns: 1fr; }
+}
+
+/* Freeze button that matches the big blue square look next to Next */
+.freezeBtnSquare {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px; /* similar footprint to your arrow btns */
+  height: 40px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0;
+  /* inherits .btn.btn-primary styles from Bootstrap */
+}
+
+/* (Optional) give a little gap between Next and Freeze */
+.pager .freezeBtnSquare {
+  margin-left: 8px;
+}
+/* smaller square freeze/resume button that still looks like a primary button */
+.freezeBtnTiny {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;      /* a bit smaller than the arrow buttons */
+  height: 36px;
+  padding: 0;       /* icon-only */
+  line-height: 1;
+  border-radius: 10px;
+}

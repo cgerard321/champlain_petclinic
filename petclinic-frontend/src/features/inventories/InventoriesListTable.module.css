@@ -296,3 +296,17 @@ transition: transform 220ms cubic-bezier(.2,.7,.2,1);
 .inventoryTable :global(thead tr:nth-of-type(2) td:nth-child(3) select) {
   transform: translateY(3px);     /* tiny vertical nudge */
 }
+/* stack: small freeze button above, then the row with arrows */
+.pagerStack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;   /* center everything horizontally */
+  gap: 10px;             /* space between freeze and row */
+}
+
+/* row with the two arrows and the page number */
+.pagerRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
