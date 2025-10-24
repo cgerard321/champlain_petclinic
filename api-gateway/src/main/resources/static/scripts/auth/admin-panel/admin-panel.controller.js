@@ -71,8 +71,7 @@ angular.module('adminPanel')
 
             $http.patch('api/gateway/users/' + self.editingUser.userId, payload, {
                 headers: {
-                    'Authorization': 'Bearer ' + authProvider.getUser().token,
-                    'Content-Type': 'application/json'
+                    'Authorization': 'Bearer ' + authProvider.getUser().token
                 }
             })
             .then(function(response) {
