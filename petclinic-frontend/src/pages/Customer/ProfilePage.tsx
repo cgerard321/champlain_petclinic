@@ -166,6 +166,7 @@ const ProfilePage = (): JSX.Element => {
 
           const newPetImageUrls: Record<string, string> = {};
           for (const pet of petsData) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const photoIdFromPet = (pet as any).photoId;
 
             let petPhotoUrl: string;
@@ -215,6 +216,7 @@ const ProfilePage = (): JSX.Element => {
     return () => {
       isMounted = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user.userId]);
 
   const handleUpdateClick = (): void => {
@@ -347,21 +349,17 @@ const ProfilePage = (): JSX.Element => {
       );
       const petData = response.data;
 
-      if (petData.photo) {
-        console.log(
-          `Photo fileData exists?`,
-          !!(petData.photo as any).fileData
-        );
-      }
-
       if (
         petData.photo &&
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (petData.photo.data || (petData.photo as any).fileData)
       ) {
         const base64Data =
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           petData.photo.data || (petData.photo as any).fileData;
         const contentType =
           petData.photo.contentType ||
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (petData.photo as any).fileType ||
           'image/png';
         const byteCharacters = atob(base64Data);

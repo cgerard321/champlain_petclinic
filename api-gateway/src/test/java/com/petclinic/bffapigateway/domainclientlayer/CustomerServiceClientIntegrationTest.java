@@ -786,7 +786,7 @@ public class CustomerServiceClientIntegrationTest {
                 .verifyComplete();
 
         RecordedRequest request = server.takeRequest();
-        assertEquals("/pet/" + PET_ID, request.getPath());
+        assertEquals("/pet/" + PET_ID + "?includePhoto=false", request.getPath());
         assertEquals("GET", request.getMethod());
     }
 

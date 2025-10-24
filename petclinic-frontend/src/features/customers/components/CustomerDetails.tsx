@@ -16,7 +16,6 @@ import EditPetModal from './EditPetModal';
 import AddPetModal from './AddPetModal';
 import defaultPetPicture from '@/assets/Owners/defaultProfilePicture.png';
 
-
 const CustomerDetails: FC = () => {
   const { ownerId } = useParams<{ ownerId: string }>();
   const navigate = useNavigate();
@@ -53,7 +52,7 @@ const CustomerDetails: FC = () => {
           params: { includePhoto: true },
         }
       );
-      setPets(petsResponse.data); 
+      setPets(petsResponse.data);
 
       const billsResponse = await axiosInstance.get(
         `/bills/customer/${ownerId}`,
@@ -288,23 +287,23 @@ const CustomerDetails: FC = () => {
             <ul>
               {pets.map(pet => (
                 <li key={pet.petId} className="pet-item">
-                  <img 
-                        src={
-                            pet.photo?.data
-                                ? `data:${pet.photo.contentType};base64,${pet.photo.data}`
-                                : defaultPetPicture
-                        }
-                        alt={`${pet.name}'s photo`}
-                        className="pet-photo-thumbnail" 
-                        style={{
-                            width: '60px',
-                            height: '60px',
-                            borderRadius: '50%',
-                            objectFit: 'cover',
-                            marginRight: '15px',
-                            border: '1px solid #ddd',
-                        }}
-                    />
+                  <img
+                    src={
+                      pet.photo?.data
+                        ? `data:${pet.photo.contentType};base64,${pet.photo.data}`
+                        : defaultPetPicture
+                    }
+                    alt={`${pet.name}'s photo`}
+                    className="pet-photo-thumbnail"
+                    style={{
+                      width: '60px',
+                      height: '60px',
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                      marginRight: '15px',
+                      border: '1px solid #ddd',
+                    }}
+                  />
                   <div className="pet-details">
                     <div className="pet-info">
                       <span className="pet-id">Pet ID: {pet.petId}</span>

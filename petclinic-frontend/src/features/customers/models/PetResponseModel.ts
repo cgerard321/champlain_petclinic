@@ -14,5 +14,5 @@ export interface FileResponseModel {
   filename: string;
   contentType: string;
   size: number;
-  data: string; 
+  data: string;
 }
