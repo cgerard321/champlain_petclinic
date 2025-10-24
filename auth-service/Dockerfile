@@ -9,6 +9,14 @@ RUN ls -l build/libs && mv build/libs/*.jar build/libs/application.jar
 
 FROM openjdk:17-alpine
 
+ENV JAVA_TOOL_OPTIONS=" \
+    -XX:+UseG1GC \
+    -XX:MaxRAMPercentage=75.0 \
+    -XX:+UseStringDeduplication \
+    -XX:MaxMetaspaceSize=256m \
+    -Xss512k \
+    "
+
 RUN apk add --no-cache curl
 
 ARG JAR_FILE=build/libs/*.jar
