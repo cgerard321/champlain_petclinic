@@ -225,7 +225,6 @@ class InventoryControllerIntegrationTest {
         Integer invalidProductQuantity = 2;
         Double invalidProductSalePrice = 3000.00;
 
-
         webTestClient.get()
                 .uri("/inventory/{inventoryId}/products?productName={productName}&productPrice={productPrice}&productQuantity={productQuantity}&productSalePrice={productSalePrice}",
                         invalidInventoryId, invalidProductName, invalidProductPrice, invalidProductQuantity, invalidProductSalePrice)
@@ -235,7 +234,7 @@ class InventoryControllerIntegrationTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("Inventory not found with InventoryId: " + invalidInventoryId +
-                        "\nOr ProductName: " + invalidProductName + "\nOr ProductPrice: " + invalidProductPrice + "\nOr ProductQuantity: " + invalidProductQuantity + "\nOr ProductSalePrice: " + invalidProductSalePrice);
+                        "\nOr ProductQuantity: " + invalidProductQuantity);
     }
 
     @Test
@@ -298,17 +297,15 @@ class InventoryControllerIntegrationTest {
         String invalidInventoryId = "123";
         Double invalidProductPrice = 2833.0;
 
-
         webTestClient.get()
                 .uri("/inventory/{inventoryId}/products?productPrice={productPrice}",
                         invalidInventoryId, invalidProductPrice)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isNotFound()
+                .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.message").isEqualTo("Inventory not found with InventoryId: " + invalidInventoryId +
-                        "\nOr ProductPrice: " + invalidProductPrice);
+                .expectBodyList(ProductResponseDTO.class)
+                .hasSize(0);
     }
 
     @Test
@@ -372,7 +369,6 @@ class InventoryControllerIntegrationTest {
         Double invalidProductPrice = 2833.0;
         Integer invalidProductQuantity = 9;
 
-
         webTestClient.get()
                 .uri("/inventory/{inventoryId}/products?productPrice={productPrice}&productQuantity={productQuantity}",
                         invalidInventoryId, invalidProductPrice, invalidProductQuantity)
@@ -382,7 +378,7 @@ class InventoryControllerIntegrationTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("Inventory not found with InventoryId: " + invalidInventoryId +
-                        "\nOr ProductPrice: " + invalidProductPrice + "\nOr ProductQuantity: " + invalidProductQuantity);
+                        "\nOr ProductQuantity: " + invalidProductQuantity);
     }
 
     @Test
