@@ -20,6 +20,18 @@ My students: I'll provide this to you.
 ## Docker Profile (for running with docker-compose with ALL SERVICES)
 Must be used prior to issuing a PR and in Sprint Reviews.
 ```
+docker-compose --profile fe build
+docker-compose --profile fe up -d
+docker-compose logs -f
+
+or
+
+docker-compose --profile fe up --build
+```
+
+## Docker Profile (for running with docker-compose with all services but NO FRONTEND)
+This can be used during development to avoid having to rebuild everything whenever you make a change to the frontend.
+```
 docker-compose build
 docker-compose up -d
 docker-compose logs -f
@@ -27,18 +39,6 @@ docker-compose logs -f
 or
 
 docker-compose up --build
-```
-
-## Docker Profile (for running with docker-compose with all services but NO FRONTEND)
-This can be used during development to avoid having to rebuild everything whenever you make a change to the frontend.
-```
-docker-compose -f docker-compose_no_FE.yml build
-docker-compose -f docker-compose_no_FE.yml up -d
-docker-compose logs -f
-
-or
-
-docker-compose -f docker-compose_no_FE.yml up --build
 ```
 ## Bring up Frontend
 React frontend:
