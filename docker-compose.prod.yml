@@ -7,9 +7,9 @@ x-healthchecks:
   springboot: &springboot
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost:8080/actuator/health || curl -fsS http://localhost:8080/health"]
-      interval: 10s
-      timeout: 3s
-      retries: 10
+      interval: 30s
+      timeout: 10s
+      retries: 3
       start_period: 40s
 
   react-node: &react_node
@@ -17,15 +17,15 @@ x-healthchecks:
       test: ["CMD-SHELL", "curl -fsS http://localhost:3000/ || true"]
       interval: 10s
       timeout: 3s
-      retries: 10
+      retries: 3
       start_period: 15s
 
   dbgate: &dbgate_hc
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:8030/"]
+      test: ["CMD-SHELL", "curl -fsS http://localhost:3000/health"]
       interval: 10s
       timeout: 3s
-      retries: 10
+      retries: 3
       start_period: 10s
 
   mysql: &mysql
@@ -33,7 +33,7 @@ x-healthchecks:
       test: ["CMD", "mysqladmin", "ping", "-uuser", "-ppwd", "-h", "localhost"]
       interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 5
       start_period: 30s
 
   postgres: &postgres
@@ -41,7 +41,7 @@ x-healthchecks:
       test: ["CMD-SHELL", "pg_isready -U user -d images -h localhost"]
       interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 5
       start_period: 30s
 
   mongo: &mongo
