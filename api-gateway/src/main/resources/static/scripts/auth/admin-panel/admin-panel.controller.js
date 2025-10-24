@@ -41,8 +41,58 @@ angular.module('adminPanel')
         };
 
         self.showModal = false;
+        self.showEditModal = false;
         self.userToDelete = null;
-        
+        self.editingUser = null;
+        self.selectedRole = '';
+
+        // Open edit modal
+        self.openEditModal = function(user) {
+            self.editingUser = user;
+            // Set the selected role from the user's roles
+            if (user.roles && user.roles.length > 0) {
+                self.selectedRole = user.roles[0].name.replace('ROLE_', '');
+            } else {
+                self.selectedRole = '';
+            }
+            self.showEditModal = true;
+        };
+
+        // Close edit modal
+        self.closeEditModal = function() {
+            self.showEditModal = false;
+            self.editingUser = null;
+            self.selectedRole = '';
+        };
+
+        // Update user role
+        self.updateRole = function() {
+            if (!self.editingUser || !self.selectedRole) return;
+            
+            var payload = {
+                roles: [self.selectedRole]
+            };
+
+            $http.patch('api/gateway/users/' + self.editingUser.userId, payload, {
+                headers: {
+                    'Authorization': 'Bearer ' + authProvider.getUser().token,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(function(response) {
+                // Update the user in the local array
+                var index = self.users.findIndex(u => u.userId === self.editingUser.userId);
+                if (index !== -1) {
+                    self.users[index].roles = [{ name: 'ROLE_' + self.selectedRole }];
+                }
+                self.closeEditModal();
+                alert('User role updated successfully');
+            })
+            .catch(function(error) {
+                console.error('Error updating user role:', error);
+                alert('Failed to update user role. Please try again.');
+            });
+        };
 
         self.showDeleteModal = function(userId) {
             self.userToDelete = userId;
