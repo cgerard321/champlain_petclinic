@@ -1,18 +1,28 @@
 import * as React from 'react';
-import { FormEvent, useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
 import {
   getAllInventories,
   updateProductInventoryId,
 } from '@/features/inventories/api/moveInventoryProduct.ts';
+import styles from './InvProForm.module.css';
 
 type InventoryLite = { inventoryId: string; inventoryName: string };
 
-export default function MoveInventoryProducts(): JSX.Element {
-  const { inventoryId, productId } = useParams<{
-    inventoryId: string;
-    productId: string;
-  }>();
+type Props = {
+  open: boolean;
+  onClose: () => void;
+  inventoryIdProp: string;
+  productIdProp: string;
+  onMoved?: (newInventoryId: string) => void;
+};
+
+const MoveInventoryProducts: React.FC<Props> = ({
+  open,
+  onClose,
+  inventoryIdProp,
+  productIdProp,
+  onMoved,
+}) => {
   const [inventories, setInventories] = useState<InventoryLite[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -21,13 +31,17 @@ export default function MoveInventoryProducts(): JSX.Element {
   const [showNotification, setShowNotification] = useState<boolean>(false);
   const [newInventoryId, setNewInventoryId] = useState<string>('');
 
-  const navigate = useNavigate();
+  const overlayRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const fetchInventories = async (): Promise<void> => {
+    if (!open) return;
+    const run = async (): Promise<void> => {
       setLoading(true);
-      const res = await getAllInventories(); // ApiResponse<InventoryResponseModel[]>
-      if (res.errorMessage) setFetchError(res.errorMessage);
+      setFetchError(null);
+      const res = await getAllInventories();
+      if (res.errorMessage) {
+        setFetchError(res.errorMessage);
+      }
       const list =
         res.data?.map(i => ({
           inventoryId: i.inventoryId,
@@ -35,39 +49,32 @@ export default function MoveInventoryProducts(): JSX.Element {
         })) ?? [];
       setInventories(list);
       setLoading(false);
+      requestAnimationFrame(() => overlayRef.current?.focus());
     };
+    void run();
+  }, [open]);
 
-    fetchInventories();
-  }, []);
-
-  const handleSubmit = async (
-    event: FormEvent<HTMLFormElement>
-  ): Promise<void> => {
+  const handleSubmit: React.FormEventHandler<HTMLFormElement> = async event => {
     event.preventDefault();
+    setErrorMessage('');
+    setSuccessMessage('');
+    setShowNotification(false);
 
     if (!newInventoryId) {
       setErrorMessage('Please select a destination inventory.');
       return;
     }
-    if (inventoryId && newInventoryId === inventoryId) {
+    if (newInventoryId === inventoryIdProp) {
       setErrorMessage(
         'Please choose a different inventory than the current one.'
       );
       return;
     }
-    if (!productId || !inventoryId) {
-      setErrorMessage('Missing product or inventory id.');
-      return;
-    }
 
     setLoading(true);
-    setErrorMessage('');
-    setSuccessMessage('');
-    setShowNotification(false);
-
     const res = await updateProductInventoryId(
-      inventoryId,
-      productId,
+      inventoryIdProp,
+      productIdProp,
       newInventoryId
     );
     setLoading(false);
@@ -79,100 +86,124 @@ export default function MoveInventoryProducts(): JSX.Element {
 
     setSuccessMessage('Product moved successfully');
     setShowNotification(true);
-    setTimeout(() => {
-      navigate(`/inventories/${newInventoryId}/products`);
-    }, 2000);
+    onMoved?.(newInventoryId);
+    setTimeout(() => onClose(), 800);
   };
 
   const handleNewInventoryChange = (
     event: React.ChangeEvent<HTMLSelectElement>
   ): void => {
     setNewInventoryId(event.target.value);
-
     if (errorMessage) setErrorMessage('');
   };
 
+  const handleEsc: React.KeyboardEventHandler<HTMLDivElement> = e => {
+    if (e.key === 'Escape' || e.key === 'Esc') onClose();
+  };
+  const onBackdrop: React.MouseEventHandler<HTMLDivElement> = e => {
+    if (e.target === e.currentTarget) onClose();
+  };
+
+  if (!open) return null;
+
   const filteredInventories = inventories.filter(
-    inventory => inventory.inventoryId !== inventoryId
+    inv => inv.inventoryId !== inventoryIdProp
   );
 
   return (
     <div
-      className="card d-flex justify-content-center align-items-center"
-      style={{
-        width: '500px',
-        height: '350px',
-        backgroundColor: 'lightgray',
-        margin: '0 auto',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-      }}
+      ref={overlayRef}
+      className={styles.overlay}
+      role="dialog"
+      aria-modal="true"
+      tabIndex={-1}
+      onKeyDown={handleEsc}
+      onMouseDown={onBackdrop}
     >
-      <h2>Move Product to New Inventory</h2>
-      <br />
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="newInventorySelect">Select New Inventory</label>
-          <select
-            className="form-control"
-            id="newInventorySelect"
-            value={newInventoryId}
-            onChange={handleNewInventoryChange}
-            disabled={loading}
-          >
-            <option value="">Select inventory</option>
-            {filteredInventories.map(inventory => (
-              <option key={inventory.inventoryId} value={inventory.inventoryId}>
-                {inventory.inventoryName}
-              </option>
-            ))}
-          </select>
-          {filteredInventories.length === 0 && !loading && (
-            <small style={{ color: '#444' }}>
-              No other inventories available.
-            </small>
-          )}
-        </div>
-        <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
-          <button
-            type="submit"
-            disabled={!newInventoryId || loading}
-            style={{
-              width: '100px',
-              backgroundColor: '#333',
-              color: 'white',
-            }}
-          >
-            {loading ? 'Moving...' : 'Move'}
-          </button>
+      <div className={styles['form-container']}>
+        <h2>Move Product to New Inventory</h2>
 
-          <button
-            type="button"
-            onClick={() => navigate(`/inventories/${inventoryId}/products`)}
+        {loading && (
+          <div className="loading-overlay">
+            <div className="loader" />
+          </div>
+        )}
+
+        {fetchError && (
+          <div className="field-error" style={{ marginTop: 8 }}>
+            {fetchError}
+          </div>
+        )}
+        {errorMessage && (
+          <div className="field-error" style={{ marginTop: 8 }}>
+            {errorMessage}
+          </div>
+        )}
+        {showNotification && successMessage && (
+          <div
             style={{
-              width: '100px',
-              backgroundColor: '#ff0000ff',
-              color: 'white',
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              background: '#28a745',
+              color: '#fff',
+              padding: '6px 10px',
+              borderRadius: 4,
+              fontSize: 12,
             }}
+            role="status"
+            aria-live="polite"
           >
-            Cancel
-          </button>
-        </div>
-      </form>
-      <div>
-        {loading && <p>Loading...</p>}
-        {fetchError && <p style={{ color: 'red' }}>{fetchError}</p>}{' '}
-        {/* Error message directly */}
-        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-        {showNotification ? (
-          <div className="notification">
-            {successMessage && (
-              <p style={{ color: 'white' }}>{successMessage}</p>
+            {successMessage}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          <div>
+            <label htmlFor="move-newInventorySelect">
+              Select New Inventory
+            </label>
+            <select
+              id="move-newInventorySelect"
+              className="form-control"
+              value={newInventoryId}
+              onChange={handleNewInventoryChange}
+              disabled={loading}
+            >
+              <option value="">Select inventory</option>
+              {filteredInventories.map(inv => (
+                <option key={inv.inventoryId} value={inv.inventoryId}>
+                  {inv.inventoryName}
+                </option>
+              ))}
+            </select>
+            {filteredInventories.length === 0 && !loading && (
+              <small style={{ color: '#444' }}>
+                No other inventories available.
+              </small>
             )}
           </div>
-        ) : null}
+
+          <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
+            <button
+              type="submit"
+              disabled={!newInventoryId || loading}
+              style={{ width: 100 }}
+            >
+              {loading ? 'Moving…' : 'Move'}
+            </button>
+            <button
+              type="button"
+              className="cancel"
+              onClick={onClose}
+              style={{ width: 100 }}
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
-}
+};
+export default MoveInventoryProducts;

@@ -12,6 +12,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
@@ -356,5 +358,36 @@ class OwnerControllerIntegrationTest {
                                 owner.getCity().equals("New City")
                 )
                 .verifyComplete();
+    }
+
+    @Test
+    void whenDeleteOwnerPhoto_withValidId_ShouldReturnOkAndRemovePhotoId() {
+        String TEST_OWNER_ID = "delete-photo-id-789";
+        String TEST_PHOTO_ID = "photo-to-delete-456";
+
+        Owner ownerWithPhoto = buildOwner3("TestOwner", TEST_OWNER_ID);
+        ownerWithPhoto.setPhotoId(TEST_PHOTO_ID);
+
+        Publisher<Owner> setup = repo.deleteAll().then(repo.save(ownerWithPhoto));
+        StepVerifier.create(setup).expectNextCount(1).verifyComplete();
+
+        when(filesServiceClient.deleteFile(TEST_PHOTO_ID)).thenReturn(Mono.empty());
+
+        client.delete().uri("/owners/" + TEST_OWNER_ID + "/photo")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.ownerId").isEqualTo(TEST_OWNER_ID)
+                .jsonPath("$.photoId").doesNotExist()
+                .jsonPath("$.photo").doesNotExist();
+
+        Mono<Owner> checkOwner = repo.findOwnerByOwnerId(TEST_OWNER_ID);
+        StepVerifier.create(checkOwner)
+                .expectNextMatches(owner -> owner.getPhotoId() == null)
+                .verifyComplete();
+
+        verify(filesServiceClient).deleteFile(TEST_PHOTO_ID);
     }
 }

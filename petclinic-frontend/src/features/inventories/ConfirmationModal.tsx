@@ -1,5 +1,5 @@
 import * as React from 'react';
-import './ConfirmationModal.css';
+import styles from './InvProForm.module.css';
 
 interface ConfirmationModalProps {
   show: boolean;
@@ -17,14 +17,23 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   if (!show) return null;
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
+    <div className={styles.overlay}>
+      <div className={styles['form-container']}>
+        <h2>Delete this product?</h2>
         <p>{message}</p>
-        <div className="modal-actions">
-          <button className="btn btn-danger" onClick={onConfirm}>
-            Confirm
+        <div className={styles['modal-actions']}>
+          <button
+            className={`${styles.btn} ${styles['btn-danger']}`}
+            onClick={onConfirm}
+            style={{ backgroundColor: 'red', color: 'white' }}
+          >
+            Delete
           </button>
-          <button className="btn btn-secondary" onClick={onCancel}>
+          <button
+            className={`${styles.btn} ${styles['btn-secondary']}`}
+            onClick={onCancel}
+            style={{ backgroundColor: 'black', color: 'white' }}
+          >
             Cancel
           </button>
         </div>

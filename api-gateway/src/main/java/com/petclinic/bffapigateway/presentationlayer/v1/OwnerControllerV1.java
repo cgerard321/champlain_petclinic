@@ -145,4 +145,12 @@ public class OwnerControllerV1 {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN, Roles.RECEPTIONIST})
+    @DeleteMapping("/{ownerId}/photo")
+    public Mono<ResponseEntity<OwnerResponseDTO>> deleteOwnerPhoto(@PathVariable String ownerId) {
+        return customersServiceClient.deleteOwnerPhoto(ownerId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
 }
