@@ -132,19 +132,24 @@ public class VetServiceImpl implements VetService {
     }
     private Specialty specialtyDtoToEntity(SpecialtyDTO specialtyDTO) {
         return Specialty.builder()
-                .specialtyId(specialtyDTO.getSpecialtyId())  // Assuming you have an ID for the specialty
-                .name(specialtyDTO.getName())  // Assuming there's a name field in SpecialtyDTO
+                .specialtyId(EntityDtoUtil.generateSpecialtyId())  // Using the utility method for consistency
+                .name(specialtyDTO.getName())
                 .build();
     }
 
     @Override
-    public Mono<Void> deleteSpecialtiesBySpecialtyId(String vetId, String specialtyId) {
+    public Mono<Void> deleteSpecialtyBySpecialtyId(String vetId, String specialtyId) {
         return vetRepository.findVetByVetId(vetId)
                 .switchIfEmpty(Mono.error(new NotFoundException("No vet found with vetId: " + vetId)))
                 .flatMap(vet -> {
                     Set<Specialty> specialties = vet.getSpecialties().stream()
                             .filter(specialty -> !specialty.getSpecialtyId().equals(specialtyId))
                             .collect(Collectors.toSet());
+                    
+                    if (specialties.size() == vet.getSpecialties().size()) {
+                        return Mono.error(new NotFoundException("No specialty found with specialtyId: " + specialtyId));
+                    }
+                    
                     vet.setSpecialties(specialties);
                     return vetRepository.save(vet);
                 })
