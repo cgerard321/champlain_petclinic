@@ -1,22 +1,23 @@
-use crate::file_service_subdomain::data_layer::bucket_info::BucketInfo;
-use crate::file_service_subdomain::data_layer::file_info::FileInfo;
-use crate::handlers::global_exception_handler::{ApiError, ApiResult};
-use crate::file_service_subdomain::domain_client_layer::minio_client_service::{get_buckets, get_files, post_file};
-
+use crate::file_service::bucket::BucketInfo;
+use crate::file_service::file::FileInfo;
+use crate::file_service::minio_client::{get_buckets, get_files, post_file};
+use crate::file_service::store::MinioStore;
+use crate::http::prelude::{AppError, AppResult};
 use crate::rocket::futures::StreamExt;
+use rocket::State;
 use std::path::PathBuf;
 
-pub async fn fetch_buckets() -> ApiResult<Vec<BucketInfo>> {
-    get_buckets().await
+pub async fn fetch_buckets(store: &State<MinioStore>) -> AppResult<Vec<BucketInfo>> {
+    get_buckets(store).await
 }
 
-pub async fn fetch_files(bucket: &str) -> ApiResult<Vec<FileInfo>> {
-    let mut stream = get_files(bucket).await?; 
+pub async fn fetch_files(bucket: &str, store: &State<MinioStore>) -> AppResult<Vec<FileInfo>> {
+    let mut stream = get_files(bucket, store).await?;
 
     let mut files = Vec::new();
 
     while let Some(result) = stream.next().await {
-        let page = result.map_err(ApiError::from)?;
+        let page = result.map_err(AppError::from)?;
 
         for item in page.contents {
             if item.is_prefix || item.is_delete_marker {
@@ -44,14 +45,15 @@ pub async fn upload_file(
     extension: &str,
     prefix: PathBuf,
     bytes: Vec<u8>,
-) -> ApiResult<FileInfo> {
+    store: &State<MinioStore>,
+) -> AppResult<FileInfo> {
     let file_len = bytes.len();
 
     if file_len == 0 {
-        return Err(ApiError::BadRequest("Empty file".into()));
+        return Err(AppError::BadRequest("Empty file".into()));
     }
 
-    let resp = post_file(bucket, extension, prefix, bytes).await?;
+    let resp = post_file(bucket, extension, prefix, bytes, store).await?;
 
     Ok(FileInfo {
         name: resp.object,

@@ -1,13 +1,24 @@
 #[macro_use]
 extern crate rocket;
-mod handlers;
-mod file_service_subdomain;
+mod file_service;
+mod http;
+mod shared;
 
-use crate::file_service_subdomain::presentation_layer::file_service_controller::{add_file, read_buckets, read_files};
+use crate::file_service::api::{add_file, read_buckets, read_files};
+use crate::file_service::store::MinioStore;
+use crate::http::prelude::register_catchers;
 
 #[launch]
 fn rocket() -> _ {
+    let store = MinioStore::from_env()
+        .map_err(|e| {
+            eprintln!("Fatal MinIO init error: {e}");
+            e
+        })
+        .expect("MinIO config must be valid at startup");
+
     rocket::build()
+        .manage(store)
         .mount("/api/v1", routes![read_files, read_buckets, add_file])
-        .register("/", handlers::global_exception_handler::register())
+        .register("/", register_catchers())
 }
