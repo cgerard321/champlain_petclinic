@@ -1,14 +1,14 @@
 #[macro_use]
 extern crate rocket;
-mod minio_service;
 mod http;
+mod minio_service;
 
 use crate::http::routes;
 
 mod core;
 
-use crate::minio_service::store::MinioStore;
 use crate::http::prelude::register_catchers;
+use crate::minio_service::store::MinioStore;
 
 #[launch]
 fn rocket() -> _ {

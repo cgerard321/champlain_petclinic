@@ -1,8 +1,8 @@
+use crate::http::prelude::{AppError, AppResult};
 use crate::minio_service::bucket::BucketInfo;
 use crate::minio_service::file::FileInfo;
 use crate::minio_service::minio_client::{get_buckets, get_files, post_file};
 use crate::minio_service::store::MinioStore;
-use crate::http::prelude::{AppError, AppResult};
 use crate::rocket::futures::StreamExt;
 use rocket::data::ToByteUnit;
 use rocket::{Data, State};
