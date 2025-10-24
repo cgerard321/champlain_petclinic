@@ -23,7 +23,7 @@ x-healthchecks:
 
   dbgate: &dbgate_hc
     healthcheck:
-      test: [ "CMD-SHELL", "curl -fsS -u CPC_Admin:${DBGATE_PASSWORD} http://localhost:3000/ || exit 1" ]
+      test: ["CMD-SHELL", "curl -fsS -u CPC_Admin:${DBGATE_PASSWORD} http://localhost:3000/ || exit 1"]
       interval: 10s
       timeout: 10s
       retries: 3
