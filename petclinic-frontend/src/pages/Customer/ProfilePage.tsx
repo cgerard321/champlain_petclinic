@@ -166,14 +166,10 @@ const ProfilePage = (): JSX.Element => {
 
           const newPetImageUrls: Record<string, string> = {};
           for (const pet of petsData) {
-            let petPhotoUrl: string;
-
-              petPhotoUrl = await fetchPetPhotoUrl(
-                  pet.petId,
-                  pet.name
-              );
-
-            newPetImageUrls[pet.petId] = petPhotoUrl;
+            newPetImageUrls[pet.petId] = await fetchPetPhotoUrl(
+              pet.petId,
+              pet.name
+            );
           }
 
           if (isMounted) {
@@ -327,13 +323,10 @@ const ProfilePage = (): JSX.Element => {
     petName: string
   ): Promise<string> => {
     try {
-      const response = await axiosInstance.get(
-        `/pets/${petId}`,
-        {
-          useV2: false,
-          params: { includePhoto: true },
-        }
-      );
+      const response = await axiosInstance.get(`/pets/${petId}`, {
+        useV2: false,
+        params: { includePhoto: true },
+      });
       const petData = response.data;
 
       if (
