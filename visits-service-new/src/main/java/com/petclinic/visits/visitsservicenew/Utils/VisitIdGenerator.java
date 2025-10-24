@@ -16,8 +16,8 @@ public class VisitIdGenerator {
     }
 
     static String generateId(String prefix) {
-        int part1 = ThreadLocalRandom.current().nextInt(0, 10_000);
-        int part2 = ThreadLocalRandom.current().nextInt(0, 10_000);
-        return prefix + String.format("%04d-%04d", part1, part2);
+        long timestamp = System.currentTimeMillis();
+        int randomPart = ThreadLocalRandom.current().nextInt(0, 10_000);
+        return prefix + timestamp + String.format("-%04d", randomPart);
     }
 }
