@@ -48,7 +48,7 @@ export default function InventoriesListTable(): JSX.Element {
     [key: string]: number;
   }>({});
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-  // const [isActionsMenuVisible, setActionsMenu] = useState(false);
+  const [isActionsMenuVisible, setActionsMenu] = useState(false);
 
   const [showImportantOnly, setShowImportantOnly] = useState(false);
 
@@ -393,13 +393,34 @@ export default function InventoriesListTable(): JSX.Element {
     <>
       <div className={inventoryStyles.menuSection}>
         <div className={inventoryStyles.menuContainer}>
-          <div className={inventoryStyles.actionsMenu}>
+          <button
+            id={inventoryStyles.menuIcon}
+            aria-label="Toggle actions menu"
+            onClick={() => setActionsMenu(v => !v)} // <- use your setter
+          >
+            <svg
+              className={inventoryStyles.hamburgerSvg}
+              viewBox="0 0 24 24"
+              width="50"
+              height="50"
+              aria-hidden="true"
+            >
+              <rect x="3" y="6" width="18" height="2" rx="1"></rect>
+              <rect x="3" y="11" width="18" height="2" rx="1"></rect>
+              <rect x="3" y="16" width="18" height="2" rx="1"></rect>
+            </svg>
+          </button>
+
+          <div
+            className={inventoryStyles.actionsMenu}
+            data-open={isActionsMenuVisible ? 'true' : 'false'} // <- reads the state
+          >
             {/* Add Inventory Button*/}
             <button
               className={`add-inventory-button btn btn-success ${inventoryStyles.btnSm}`}
               onClick={() => setShowAddInventoryForm(true)}
             >
-              Add Inventory
+              +
             </button>
 
             {/* Add Inventory Type Button*/}
@@ -436,7 +457,7 @@ export default function InventoriesListTable(): JSX.Element {
                 }
               }}
             >
-              Check Low Stock for All Inventories
+              Check Low Stock
             </button>
 
             {/* Archive Selected Inventory */}
@@ -472,9 +493,9 @@ export default function InventoriesListTable(): JSX.Element {
           <thead>
             <tr>
               <th style={{ width: '5%' }}></th>
-              <th style={{ width: '20%', textAlign: 'center' }}>Name</th>
-              <th style={{ width: '15%', textAlign: 'center' }}>Type</th>
-              <th style={{ width: '25%', textAlign: 'center' }}>Description</th>
+              <th style={{ width: '20%', textAlign: 'left' }}>Name</th>
+              <th style={{ width: '15%', textAlign: 'left' }}>Type</th>
+              <th style={{ width: '25%', textAlign: 'left' }}>Description</th>
               <th style={{ width: '10%', textAlign: 'center' }}>Important</th>
               <th style={{ width: '10%', textAlign: 'center' }}>Clear</th>
               <th style={{ width: '15%', textAlign: 'center' }}>Status</th>
