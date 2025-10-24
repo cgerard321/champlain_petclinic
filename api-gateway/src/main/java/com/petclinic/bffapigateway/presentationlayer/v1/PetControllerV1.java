@@ -24,13 +24,12 @@ public class PetControllerV1 {
     private final CustomersServiceClient customersServiceClient;
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET, Roles.OWNER,Roles.RECEPTIONIST})
-    @GetMapping("/{ownerId}/pets/{petId}")
+    @GetMapping("/{petId}")
     public Mono<ResponseEntity<PetResponseDTO>> getPetByPetId(
-            @PathVariable String ownerId,
             @PathVariable String petId,
             @RequestParam(required = false, defaultValue = "false") boolean includePhoto) {
 
-        return customersServiceClient.getPet(ownerId, petId, includePhoto)
+        return customersServiceClient.getPetByPetId(petId, includePhoto)
                 .map(p -> ResponseEntity.ok(p))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
