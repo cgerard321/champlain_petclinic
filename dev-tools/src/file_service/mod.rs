@@ -1,8 +1,7 @@
-pub mod api;
-mod bucket;
+pub mod bucket;
 mod config;
 mod error;
-mod file;
+pub mod file;
 mod minio_client;
-mod service;
+pub mod service;
 pub mod store;

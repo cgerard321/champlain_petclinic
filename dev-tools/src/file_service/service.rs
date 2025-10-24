@@ -4,7 +4,8 @@ use crate::file_service::minio_client::{get_buckets, get_files, post_file};
 use crate::file_service::store::MinioStore;
 use crate::http::prelude::{AppError, AppResult};
 use crate::rocket::futures::StreamExt;
-use rocket::State;
+use rocket::data::ToByteUnit;
+use rocket::{Data, State};
 use std::path::PathBuf;
 
 pub async fn fetch_buckets(store: &State<MinioStore>) -> AppResult<Vec<BucketInfo>> {
@@ -42,11 +43,22 @@ pub async fn fetch_files(bucket: &str, store: &State<MinioStore>) -> AppResult<V
 
 pub async fn upload_file(
     bucket: &str,
-    extension: &str,
     prefix: PathBuf,
-    bytes: Vec<u8>,
+    data: Data<'_>,
     store: &State<MinioStore>,
 ) -> AppResult<FileInfo> {
+    let limit = crate::file_service::config::MAX_FILE_SIZE_MB.mebibytes();
+    let bytes = data
+        .open(limit)
+        .into_bytes()
+        .await
+        .map_err(|e| AppError::BadRequest(format!("read body: {e}")))?
+        .into_inner();
+
+    let extension = infer::get(&bytes)
+        .map(|k| k.extension())
+        .unwrap_or(crate::file_service::config::DEFAULT_FILE_TYPE);
+
     let file_len = bytes.len();
 
     if file_len == 0 {

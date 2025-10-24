@@ -1,4 +1,4 @@
-use crate::shared::error::AppError;
+use crate::core::error::AppError;
 use rocket::http::{ContentType, Status};
 use rocket::response::{Responder, Response};
 use rocket::serde::{Serialize, json::to_string};

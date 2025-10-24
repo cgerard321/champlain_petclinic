@@ -18,7 +18,6 @@ pub enum AppError {
 
 pub type AppResult<T> = Result<T, AppError>;
 
-// Example generic conversions you want globally:
 impl From<std::env::VarError> for AppError {
     fn from(_: std::env::VarError) -> Self {
         AppError::Internal
