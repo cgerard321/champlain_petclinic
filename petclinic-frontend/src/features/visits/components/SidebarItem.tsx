@@ -16,10 +16,12 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
 }): JSX.Element => (
   <li>
     <a
-      className={
-        (itemName == currentTab ? 'active' : '') +
-        (emergency == true ? 'emergency' : '')
-      }
+      className={[
+        itemName == currentTab ? 'active' : '',
+        emergency == true ? 'emergency' : '',
+      ]
+        .filter(Boolean)
+        .join('-')}
       onClick={() => onClick(itemName)}
     >
       <span>{itemName}</span>

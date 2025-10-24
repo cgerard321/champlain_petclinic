@@ -56,8 +56,8 @@
   color: var(--emergency-clr);
 }
 
-#sidebar .activeemergency,
-#sidebar .activeemergency:hover {
+#sidebar .active-emergency,
+#sidebar .active-emergency:hover {
   color: var(--base-clr);
   background-color: var(--emergency-clr);
   font-weight: bold;
