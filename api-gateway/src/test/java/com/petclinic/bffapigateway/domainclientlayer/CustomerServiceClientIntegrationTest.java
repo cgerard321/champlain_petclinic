@@ -509,7 +509,7 @@ public class CustomerServiceClientIntegrationTest {
                 .verifyComplete();
 
         RecordedRequest request = server.takeRequest();
-        assertEquals("/pet", request.getPath());
+        assertEquals("/pets", request.getPath());
     }
 
     @Test
