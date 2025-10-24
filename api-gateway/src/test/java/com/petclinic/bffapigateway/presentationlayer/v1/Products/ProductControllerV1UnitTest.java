@@ -19,6 +19,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import java.util.List;
 
 import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -694,5 +695,26 @@ public void whenGetAllProductBundles_thenReturnBundles() {
         verify(productsServiceClient, times(1)).requestCount(productResponseDTO1.getProductId());
     }
 
+    @Test
+    public void whenGetProductEnums_thenReturnProductEnums() {
+        ProductEnumsResponseDTO enumsResponseDTO = new ProductEnumsResponseDTO(
+                List.of(ProductType.FOOD, ProductType.MEDICATION, ProductType.ACCESSORY, ProductType.EQUIPMENT),
+                List.of(ProductStatus.AVAILABLE, ProductStatus.PRE_ORDER, ProductStatus.OUT_OF_STOCK),
+                List.of(DeliveryType.DELIVERY, DeliveryType.PICKUP, DeliveryType.DELIVERY_AND_PICKUP, DeliveryType.NO_DELIVERY_OPTION)
+        );
+        when(productsServiceClient.getProductEnumsValues()).thenReturn(Mono.just(enumsResponseDTO));
+        webTestClient.get().uri(baseProductsURL + "/enums")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ProductEnumsResponseDTO.class)
+                .value(response -> {
+                    assertNotNull(response);
+                    assertEquals(enumsResponseDTO.getProductType(), response.getProductType());
+                    assertEquals(enumsResponseDTO.getProductStatus(), response.getProductStatus());
+                    assertEquals(enumsResponseDTO.getDeliveryType(), response.getDeliveryType());
+                });
 
+        verify(productsServiceClient).getProductEnumsValues();
+    }
 }

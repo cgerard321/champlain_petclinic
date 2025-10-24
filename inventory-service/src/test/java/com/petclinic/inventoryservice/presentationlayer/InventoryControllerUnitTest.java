@@ -266,7 +266,7 @@ class InventoryControllerUnitTest {
 
     @Test
     void getProductsInInventory_withValidId_shouldSucceed() {
-        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), null, null, null, null))
+        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), null, null, null, null, null, null))
                 .thenReturn(Flux.fromIterable(productResponseDTOS));
 
         webTestClient.get()
@@ -284,12 +284,12 @@ class InventoryControllerUnitTest {
 
     @Test
     void getProductsInInventory_withValidId_andValidProductName_andValidProductPrice_andValidProductQuantity_andValidProductSalePrice_shouldSucceed() {
-        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), "Benzodiazepines", 100.00, 10, 200.00))
+        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), "Benzodiazepines", 100.00, 100.00, 10, 15.99, 15.99))
                 .thenReturn(Flux.fromIterable(productResponseDTOS));
 
         webTestClient.get()
-                .uri("/inventory/{inventoryId}/products?productName={productName}&productPrice={productPrice}&productQuantity={productQuantity}&productSalePrice={productSalePrice}",
-                        productResponseDTOS.get(1).getInventoryId(), "Benzodiazepines", 100.00, 10, 200.00)
+                .uri("/inventory/{inventoryId}/products?productName={productName}&minPrice={minPrice}&maxPrice={maxPrice}&productQuantity={productQuantity}&minSalePrice={minSalePrice}&maxSalePrice={maxSalePrice}",
+                        productResponseDTOS.get(1).getInventoryId(), "Benzodiazepines", 100.00, 100.00, 10, 15.99, 15.99)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -303,12 +303,12 @@ class InventoryControllerUnitTest {
 
     @Test
     void getProductsInInventory_withValidId_andValidProductName_andValidProductPrice_shouldSucceed() {
-        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), "Benzodiazepines", 100.00, null, null))
+        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), "Benzodiazepines", 100.00, 100.00, null, null, null))
                 .thenReturn(Flux.fromIterable(productResponseDTOS));
 
         webTestClient.get()
-                .uri("/inventory/{inventoryId}/products?productName={productName}&productPrice={productPrice}",
-                        productResponseDTOS.get(1).getInventoryId(), "Benzodiazepines", 100.00)
+                .uri("/inventory/{inventoryId}/products?productName={productName}&minPrice={minPrice}&maxPrice={maxPrice}",
+                        productResponseDTOS.get(1).getInventoryId(), "Benzodiazepines", 100.00, 100.00)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -322,7 +322,7 @@ class InventoryControllerUnitTest {
 
     @Test
     void getProductsInInventory_withValidId_andValidProductName_shouldSucceed() {
-        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), "Benzodiazepines", null, null, null))
+        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), "Benzodiazepines", null, null, null, null, null))
                 .thenReturn(Flux.fromIterable(productResponseDTOS));
 
         webTestClient.get()
@@ -341,12 +341,12 @@ class InventoryControllerUnitTest {
 
     @Test
     void getProductsInInventory_withValidId_andValidProductPrice_andValidProductQuantity_shouldSucceed() {
-        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), null, 100.00, 10, null))
+        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), null, 100.00, 100.00, 10, null, null))
                 .thenReturn(Flux.fromIterable(productResponseDTOS));
 
         webTestClient.get()
-                .uri("/inventory/{inventoryId}/products?productPrice={productPrice}&productQuantity={productQuantity}",
-                        productResponseDTOS.get(1).getInventoryId(), 100.00, 10)
+                .uri("/inventory/{inventoryId}/products?minPrice={minPrice}&maxPrice={maxPrice}&productQuantity={productQuantity}",
+                        productResponseDTOS.get(1).getInventoryId(), 100.00, 100.00, 10)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -360,7 +360,7 @@ class InventoryControllerUnitTest {
 
     @Test
     void getProductsInInventory_withValidId_andValidProductQuantity_shouldSucceed() {
-        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), null, null, 10, null))
+        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), null, null, null, 10, null, null))
                 .thenReturn(Flux.fromIterable(productResponseDTOS));
 
         webTestClient.get()
@@ -379,12 +379,12 @@ class InventoryControllerUnitTest {
 
     @Test
     void getProductsInInventory_withValidId_andValidProductPrice_shouldSucceed() {
-        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), null, 100.00, null, null))
+        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), null, 100.00, 100.00, null, null, null))
                 .thenReturn(Flux.fromIterable(productResponseDTOS));
 
         webTestClient.get()
-                .uri("/inventory/{inventoryId}/products?productPrice={productPrice}",
-                        productResponseDTOS.get(1).getInventoryId(), 100.00)
+                .uri("/inventory/{inventoryId}/products?minPrice={minPrice}&maxPrice={maxPrice}",
+                        productResponseDTOS.get(1).getInventoryId(), 100.00, 100.00)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -398,12 +398,12 @@ class InventoryControllerUnitTest {
 
     @Test
     void getProductsInInventory_withValidId_andValidProductSalePrice_shouldSucceed() {
-        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), null, null, null, 200.00))
+        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), null, null, null, null, 15.99, 15.99))
                 .thenReturn(Flux.fromIterable(productResponseDTOS));
 
         webTestClient.get()
-                .uri("/inventory/{inventoryId}/products?productSalePrice={productSalePrice}",
-                        productResponseDTOS.get(1).getInventoryId(), 200.00)
+                .uri("/inventory/{inventoryId}/products?minSalePrice={minSalePrice}&maxSalePrice={maxSalePrice}",
+                        productResponseDTOS.get(1).getInventoryId(), 15.99, 15.99)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -1053,6 +1053,8 @@ class InventoryControllerUnitTest {
                 anyString(),
                 Mockito.isNull(),
                 Mockito.isNull(),
+                Mockito.isNull(),
+                Mockito.isNull(),
                 Mockito.isNull()
         )).thenReturn(Flux.fromIterable(productResponseDTOS));
 
@@ -1073,6 +1075,8 @@ class InventoryControllerUnitTest {
         String inventoryId = "1";
         Mockito.when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(
                 anyString(),
+                Mockito.isNull(),
+                Mockito.isNull(),
                 Mockito.isNull(),
                 Mockito.isNull(),
                 Mockito.isNull(),
