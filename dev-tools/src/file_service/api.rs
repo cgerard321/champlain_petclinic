@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 use crate::file_service::bucket::BucketInfo;
+use crate::file_service::config::{DEFAULT_FILE_TYPE, MAX_FILE_SIZE_MB};
 use crate::file_service::file::FileInfo;
 use crate::file_service::service::{fetch_buckets, fetch_files, upload_file};
 use crate::file_service::store::MinioStore;
@@ -10,7 +11,6 @@ use rocket::http::Status;
 use rocket::response::status::Custom;
 use rocket::serde::json::Json;
 use rocket::{Data, State, get, post};
-use crate::file_service::config::{DEFAULT_FILE_TYPE, MAX_FILE_SIZE_MB};
 
 #[get("/buckets")]
 pub(crate) async fn read_buckets(store: &State<MinioStore>) -> AppResult<Json<Vec<BucketInfo>>> {
@@ -40,7 +40,9 @@ pub(crate) async fn add_file(
         .map_err(|e| AppError::BadRequest(format!("read body: {e}")))?
         .into_inner();
 
-    let extension = infer::get(&bytes).map(|k| k.extension()).unwrap_or(DEFAULT_FILE_TYPE);
+    let extension = infer::get(&bytes)
+        .map(|k| k.extension())
+        .unwrap_or(DEFAULT_FILE_TYPE);
 
     let file_info = upload_file(bucket, extension, prefix, bytes, store).await?;
 
