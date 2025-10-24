@@ -2274,7 +2274,7 @@ public void testGenerateBillPdf_BillNotFound() {
         billService = new BillServiceImpl(repo, vetClient, ownerClient, authClient,mailService);
 
         // Act & Assert
-        StepVerifier.create(billService.createBill(Mono.just(billDTO), true, "jwtToken", "USD"))
+        StepVerifier.create(billService.createBill(Mono.just(billDTO), true, "USD", "jwtToken"))
                 .expectNextMatches(response ->
                         response.getBillId().equals("generated-id") &&
                                 response.getVetFirstName().equals("John") &&
