@@ -159,6 +159,33 @@ public class MockServerConfigBillService {
                 );
     }
 
+    public void registerDownloadStaffBillPdfEndpoint() {
+        mockServerClient_BillService
+                .when(
+                request()
+                        .withMethod("GET")
+                        .withPath("/bills/staffBill-1/pdf")
+        ).respond(
+                response()
+                        .withStatusCode(200)
+                        .withHeader("Content-Type", "application/pdf")
+                        .withBody("Fake Staff PDF Content".getBytes())
+        );
+
+        // Optional: simulate "not found" case
+        mockServerClient_BillService
+                .when(
+                request()
+                        .withMethod("GET")
+                        .withPath("/bills/nonexistent-bill-id/pdf")
+        ).respond(
+                response()
+                        .withStatusCode(500)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{\"error\": \"Bill not found\"}")
+        );
+    }
+
     public void stopMockServer() {
         if(clientAndServer != null)
             this.clientAndServer.stop();

@@ -37,7 +37,7 @@ jobs:
         run: cd mailer-service && go test -v ./...; cd -
 
       - name: Build
-        run: cd files-service && go build -v -o app; cd -
+        run: cd files-service && go build -v -o app ./cmd/files; cd -
 
       - name: Test files-service
         run: cd files-service && go test -v ./...; cd -

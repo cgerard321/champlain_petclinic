@@ -1,27 +1,20 @@
 import { useEffect, useState } from 'react';
 import { InventoryType } from '@/features/inventories/models/InventoryType.ts';
 import addInventoryType from '@/features/inventories/api/addInventoryType.ts';
-import './AddInventoryType.css';
+import styles from './InvProForm.module.css';
 
 interface AddInventoryTypeProps {
   show: boolean;
   handleClose: () => void;
   refreshInventoryTypes: () => void;
-}
-
-//helper
-function mapServerMessageToFieldErrors(msg: string): string | null {
-  const m = msg.toLowerCase();
-  if (m.includes('already exists') || m.includes('duplicate')) {
-    return 'This inventory type already exists.';
-  }
-  return null;
+  existingTypeNames?: string[];
 }
 
 export default function AddInventoryType({
   show,
   handleClose,
   refreshInventoryTypes,
+  existingTypeNames,
 }: AddInventoryTypeProps): React.ReactElement | null {
   const [type, setType] = useState('');
   const [fieldError, setFieldError] = useState<string>('');
@@ -49,14 +42,23 @@ export default function AddInventoryType({
       setFieldError('Type name must be between 3 and 50 characters.');
       return;
     }
+
+    if (
+      existingTypeNames?.some(
+        n => n.trim().toLowerCase() === trimmed.toLowerCase()
+      )
+    ) {
+      setFieldError('This inventory type already exists.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     const payload: Omit<InventoryType, 'typeId'> = { type: trimmed };
     const { errorMessage } = await addInventoryType(payload);
 
     if (errorMessage) {
-      const mapped = mapServerMessageToFieldErrors(errorMessage);
-      setFieldError(mapped ?? errorMessage);
+      setFieldError(errorMessage);
       setIsSubmitting(false);
       return;
     }
@@ -69,8 +71,8 @@ export default function AddInventoryType({
   if (!show) return null; // Return null when `show` is false
 
   return (
-    <div className="overlay">
-      <div className="form-container">
+    <div className={styles.overlay}>
+      <div className={styles['form-container']}>
         <h2>Add Inventory Type</h2>
         <form onSubmit={handleSubmit}>
           <div>
@@ -78,6 +80,7 @@ export default function AddInventoryType({
             <input
               type="text"
               id="type"
+              className={fieldError ? 'invalid animate' : ''}
               value={type}
               onChange={e => {
                 setType(e.target.value);
@@ -88,11 +91,7 @@ export default function AddInventoryType({
               aria-describedby={fieldError ? 'type-error' : undefined}
             />
             {fieldError && (
-              <div
-                id="type-error"
-                className="field-error"
-                style={{ color: 'red', marginTop: 6 }}
-              >
+              <div id="type-error" className="field-error">
                 {fieldError}
               </div>
             )}

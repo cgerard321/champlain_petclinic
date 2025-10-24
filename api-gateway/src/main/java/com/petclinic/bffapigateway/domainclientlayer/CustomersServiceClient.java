@@ -201,9 +201,12 @@ public class CustomersServiceClient {
                 .bodyToFlux(PetResponseDTO.class);
     }
 
-    public Mono<PetResponseDTO> getPetByPetId(String petId) {
+    public Mono<PetResponseDTO> getPetByPetId(String petId, boolean includePhoto) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(customersServiceUrl + "/pet/" + petId);
+        builder.queryParam("includePhoto", includePhoto);
+
         return webClientBuilder.build().get()
-                .uri(customersServiceUrl + "/pet/" + petId)
+                .uri(builder.build().toUri())
                 .retrieve()
                 .bodyToMono(PetResponseDTO.class);
     }
@@ -417,6 +420,23 @@ public class CustomersServiceClient {
                 .body(photoMono, FileDetails.class)
                 .retrieve()
                 .bodyToMono(OwnerResponseDTO.class);
+    }
+    public Mono<OwnerResponseDTO> deleteOwnerPhoto(String ownerId) {
+        return webClientBuilder.build()
+                .delete()
+                .uri(customersServiceUrl + "/owners/" + ownerId + "/photo")
+                .retrieve()
+                .bodyToMono(OwnerResponseDTO.class);
+    }
+
+    public Mono<PetResponseDTO> getPet(final String ownerId, final String petId, boolean includePhoto) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(customersServiceUrl + "/owners/" + ownerId + "/pets/" + petId);
+        builder.queryParam("includePhoto", includePhoto);
+
+        return webClientBuilder.build().get()
+                .uri(builder.build().toUri())
+                .retrieve()
+                .bodyToMono(PetResponseDTO.class);
     }
 
 }

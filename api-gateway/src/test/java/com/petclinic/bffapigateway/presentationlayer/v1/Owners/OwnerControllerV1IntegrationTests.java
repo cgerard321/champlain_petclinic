@@ -230,5 +230,4 @@ public class OwnerControllerV1IntegrationTests {
                 .exchange()
                 .expectStatus().isNotFound();
     }
-
 }

@@ -51,7 +51,6 @@ spring:
     activate:
       on-profile: docker
 
-
 server.port: 8080
 
 server:
@@ -103,7 +102,6 @@ spring:
   config:
     activate:
       on-profile: prod
-
 
 server.port: 8080
 
