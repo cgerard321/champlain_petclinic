@@ -22,6 +22,9 @@ import pentosquareL from '@/assets/Icons/pentosquareLight.svg';
 import starEmptyD from '@/assets/Icons/starEmptyDark.svg';
 import starEmptyL from '@/assets/Icons/starEmptyLight.svg';
 
+import starFullD from '@/assets/Icons/starFullDark.svg';
+import starFullL from '@/assets/Icons/starFullLight.svg';
+
 import trashD from '@/assets/Icons/trashDark.svg';
 import trashL from '@/assets/Icons/trashLight.svg';
 
@@ -70,6 +73,14 @@ export const StarEmptyIcon: React.FC<IconProps> = ({
   className,
 }) => {
   return renderIcon(light ? starEmptyL : starEmptyD, title, className);
+};
+
+export const StarFullIcon: React.FC<IconProps> = ({
+  title,
+  light,
+  className,
+}) => {
+  return renderIcon(light ? starFullL : starFullD, title, className);
 };
 
 export const PenToSquareIcon: React.FC<IconProps> = ({

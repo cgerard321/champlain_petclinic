@@ -18,6 +18,7 @@ import {
   PenIcon,
   PenToSquareIcon,
   StarEmptyIcon,
+  StarFullIcon,
 } from '@/shared/components/Icon';
 import { Category } from './models/Category';
 
@@ -350,7 +351,7 @@ export default function CustomerVisitListTable(): JSX.Element {
             onClick={() => navigate(AppRoutePaths.CustomerAddReview)}
             title="Write a Review"
           >
-            <PenIcon light={true} />
+            <StarFullIcon light={true} />
             Write Review
           </button>
         </li>
