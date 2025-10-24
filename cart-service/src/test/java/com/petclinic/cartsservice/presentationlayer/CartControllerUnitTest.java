@@ -3,7 +3,7 @@ package com.petclinic.cartsservice.presentationlayer;
 import com.petclinic.cartsservice.businesslayer.CartService;
 import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
-import com.petclinic.cartsservice.domainclientlayer.AddProductRequestModel;
+import com.petclinic.cartsservice.domainclientlayer.CartItemRequestModel;
 
 import com.petclinic.cartsservice.domainclientlayer.UpdateProductQuantityRequestModel;
 import com.petclinic.cartsservice.utils.EntityModelUtil;
@@ -322,12 +322,12 @@ class CartControllerUnitTest {
     void whenAddProductToCart_Success() {
         // Arrange
         String cartId = VALID_CART_ID;
-        AddProductRequestModel requestModel = new AddProductRequestModel("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223", 2);
+        CartItemRequestModel requestModel = new CartItemRequestModel("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223", 2);
         CartResponseModel expectedResponse = new CartResponseModel();
         expectedResponse.setCartId(cartId);
         expectedResponse.setProducts(List.of(product1));
 
-        when(cartService.addProductToCart(anyString(), anyString(), anyInt())).thenReturn(Mono.just(expectedResponse));
+        when(cartService.addProductToCart(anyString(), any(CartItemRequestModel.class))).thenReturn(Mono.just(expectedResponse));
 
         // Act & Assert
         webTestClient.post()
@@ -336,7 +336,8 @@ class CartControllerUnitTest {
                 .bodyValue(requestModel)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
+                .expectHeader().value("Location", location -> assertEquals("/api/v1/carts/" + cartId + "/items/" + requestModel.getProductId(), location))
                 .expectBody(CartResponseModel.class)
                 .value(response -> {
                     assertEquals(cartId, response.getCartId());
@@ -344,7 +345,7 @@ class CartControllerUnitTest {
                     assertEquals(product1.getProductId(), response.getProducts().get(0).getProductId());
                 });
 
-        verify(cartService, times(1)).addProductToCart(anyString(), anyString(), anyInt());
+        verify(cartService, times(1)).addProductToCart(anyString(), any(CartItemRequestModel.class));
     }
 
     @Test
@@ -385,9 +386,9 @@ class CartControllerUnitTest {
     void whenAddProductToCart_OutOfStock_ThrowsBadRequest() {
         // Arrange
         String cartId = VALID_CART_ID;
-        AddProductRequestModel requestModel = new AddProductRequestModel("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223", 20);
+        CartItemRequestModel requestModel = new CartItemRequestModel("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223", 20);
 
-        when(cartService.addProductToCart(anyString(), anyString(), anyInt()))
+        when(cartService.addProductToCart(anyString(), any(CartItemRequestModel.class)))
                 .thenReturn(Mono.error(new OutOfStockException("Only 5 items left in stock.")));
 
         // Act & Assert
@@ -400,16 +401,16 @@ class CartControllerUnitTest {
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("Only 5 items left in stock.");
 
-        verify(cartService, times(1)).addProductToCart(anyString(), anyString(), anyInt());
+        verify(cartService, times(1)).addProductToCart(anyString(), any(CartItemRequestModel.class));
     }
 
     @Test
     void whenAddProductToCart_InvalidQuantity_ThrowsBadRequest() {
         // Arrange
         String cartId = VALID_CART_ID;
-        AddProductRequestModel requestModel = new AddProductRequestModel("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223", -1);
+        CartItemRequestModel requestModel = new CartItemRequestModel("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223", -1);
 
-        when(cartService.addProductToCart(anyString(), anyString(), anyInt()))
+        when(cartService.addProductToCart(anyString(), any(CartItemRequestModel.class)))
                 .thenReturn(Mono.error(new InvalidInputException("Quantity must be greater than zero.")));
 
         // Act & Assert
@@ -422,7 +423,7 @@ class CartControllerUnitTest {
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("Quantity must be greater than zero.");
 
-        verify(cartService, times(1)).addProductToCart(anyString(), anyString(), anyInt());
+        verify(cartService, times(1)).addProductToCart(anyString(), any(CartItemRequestModel.class));
     }
 
     @Test

@@ -1,12 +1,8 @@
 package com.petclinic.cartsservice.businesslayer;
 
-import com.petclinic.cartsservice.dataaccesslayer.Cart;
-import com.petclinic.cartsservice.dataaccesslayer.CartRepository;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
-import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
-import com.petclinic.cartsservice.presentationlayer.CartRequestModel;
+import com.petclinic.cartsservice.domainclientlayer.CartItemRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
-import org.springframework.beans.factory.annotation.Autowired;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -22,7 +18,7 @@ public interface CartService {
 
     Mono<CartResponseModel> deleteCartByCartId(String cartId);
     Mono<CartResponseModel> removeProductFromCart(String cartId, String productId);
-    Mono<CartResponseModel> addProductToCart(String cartId, String productId, int quantity);
+    Mono<CartResponseModel> addProductToCart(String cartId, CartItemRequestModel cartItemRequestModel);
     Mono<CartResponseModel> updateProductQuantityInCart(String cartId, String productId, int quantity);
 
     Mono<CartResponseModel> checkoutCart(String cartId);

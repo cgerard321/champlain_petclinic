@@ -1,18 +1,13 @@
 package com.petclinic.cartsservice.domainclientlayer;
 
+@Deprecated(forRemoval = true)
+public class AddProductRequestModel extends CartItemRequestModel {
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+    public AddProductRequestModel() {
+        super();
+    }
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class AddProductRequestModel {
-
-    private String productId;
-    private int quantity;
-
+    public AddProductRequestModel(String productId, Integer quantity) {
+        super(productId, quantity);
+    }
 }

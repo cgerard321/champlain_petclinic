@@ -1,17 +1,13 @@
 package com.petclinic.bffapigateway.dtos.Cart;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+@Deprecated(forRemoval = true)
+public class AddProductRequestDTO extends CartItemRequestDTO {
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+    public AddProductRequestDTO() {
+        super();
+    }
 
-public class AddProductRequestDTO {
-    private String productId;
-    private int quantity;
-
+    public AddProductRequestDTO(String productId, Integer quantity) {
+        super(productId, quantity);
+    }
 }

@@ -7,6 +7,7 @@ import com.petclinic.cartsservice.domainclientlayer.CustomerClient;
 import com.petclinic.cartsservice.domainclientlayer.CustomerResponseModel;
 import com.petclinic.cartsservice.domainclientlayer.ProductClient;
 import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
+import com.petclinic.cartsservice.domainclientlayer.CartItemRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
@@ -352,6 +353,7 @@ class CartServiceUnitTest {
         String cartId = cart1.getCartId();
         String productId = product3.getProductId();
         int quantityToAdd = 2;
+        CartItemRequestModel request = new CartItemRequestModel(productId, quantityToAdd);
 
         when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart1));
         when(productClient.getProductByProductId(productId)).thenReturn(Mono.just(ProductResponseModel.builder()
@@ -363,7 +365,7 @@ class CartServiceUnitTest {
                 .build()));
         when(cartRepository.save(any(Cart.class))).thenReturn(Mono.just(cart1));
 
-        Mono<CartResponseModel> result = cartService.addProductToCart(cartId, productId, quantityToAdd);
+        Mono<CartResponseModel> result = cartService.addProductToCart(cartId, request);
 
         StepVerifier.create(result)
                 .expectNextMatches(cartResponseModel -> cartResponseModel.getProducts().stream()
@@ -379,6 +381,7 @@ class CartServiceUnitTest {
         String cartId = cart1.getCartId();
         String productId = product1.getProductId();
         int quantityToAdd = 3;
+        CartItemRequestModel request = new CartItemRequestModel(productId, quantityToAdd);
 
         when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart1));
         when(productClient.getProductByProductId(productId)).thenReturn(Mono.just(ProductResponseModel.builder()
@@ -388,7 +391,7 @@ class CartServiceUnitTest {
                 .build()));
         when(cartRepository.save(any(Cart.class))).thenReturn(Mono.just(cart1));
 
-        Mono<CartResponseModel> result = cartService.addProductToCart(cartId, productId, quantityToAdd);
+        Mono<CartResponseModel> result = cartService.addProductToCart(cartId, request);
 
         StepVerifier.create(result)
                 .expectNextMatches(cartResponseModel -> cartResponseModel.getProducts().stream()
@@ -404,6 +407,7 @@ class CartServiceUnitTest {
         String cartId = cart1.getCartId();
         String productId = product1.getProductId();
         int quantityToAdd = 11; // exceeding stock of 10
+        CartItemRequestModel request = new CartItemRequestModel(productId, quantityToAdd);
 
         when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart1));
         when(productClient.getProductByProductId(productId)).thenReturn(Mono.just(ProductResponseModel.builder()
@@ -412,7 +416,7 @@ class CartServiceUnitTest {
                 .productQuantity(10) // Only 10 in stock
                 .build()));
 
-        Mono<CartResponseModel> result = cartService.addProductToCart(cartId, productId, quantityToAdd);
+        Mono<CartResponseModel> result = cartService.addProductToCart(cartId, request);
 
         StepVerifier.create(result)
                 .expectErrorMatches(throwable -> throwable instanceof OutOfStockException &&
@@ -421,10 +425,11 @@ class CartServiceUnitTest {
     }
 
     @Test
-    void addProductToCart_QuantityLessThanOrEqualToZero_ThrowsInvalidInputException() {
+    void addProductToCart_QuantityLessThanOrEqualToZero_DefaultsToOne() {
         String cartId = cart1.getCartId();
         String productId = product1.getProductId();
         int quantityToAdd = 0; // Invalid quantity
+        CartItemRequestModel request = new CartItemRequestModel(productId, quantityToAdd);
 
         when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart1));
         when(productClient.getProductByProductId(productId)).thenReturn(Mono.just(ProductResponseModel.builder()
@@ -432,12 +437,14 @@ class CartServiceUnitTest {
                 .productQuantity(10)
                 .build()));
 
-        Mono<CartResponseModel> result = cartService.addProductToCart(cartId, productId, quantityToAdd);
+        Mono<CartResponseModel> result = cartService.addProductToCart(cartId, request);
 
         StepVerifier.create(result)
-                .expectErrorMatches(throwable -> throwable instanceof InvalidInputException &&
-                        throwable.getMessage().contains("Quantity must be greater than zero"))
-                .verify();
+                .expectNextMatches(cartResponse -> cartResponse.getProducts().stream()
+                        .anyMatch(product -> product.getProductId().equals(productId) && product.getQuantityInCart() == 2))
+                .verifyComplete();
+
+        product1.setQuantityInCart(1); // reset mutated state for subsequent tests
     }
 
     @Test
@@ -445,10 +452,11 @@ class CartServiceUnitTest {
         String cartId = nonExistentCartId;
         String productId = product1.getProductId();
         int quantityToAdd = 1;
+        CartItemRequestModel request = new CartItemRequestModel(productId, quantityToAdd);
 
         when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.empty());
 
-        Mono<CartResponseModel> result = cartService.addProductToCart(cartId, productId, quantityToAdd);
+        Mono<CartResponseModel> result = cartService.addProductToCart(cartId, request);
 
         StepVerifier.create(result)
                 .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
@@ -980,7 +988,7 @@ class CartServiceUnitTest {
         when(cartRepository.save(any(Cart.class))).thenReturn(Mono.just(cart1));  // Mock the save method to return the saved cart
 
         // Act: Attempt to add the product again
-        Mono<CartResponseModel> result = cartService.addProductToCart(cartId, productId, 1);
+        Mono<CartResponseModel> result = cartService.addProductToCart(cartId, new CartItemRequestModel(productId, 1));
 
         // Assert: Ensure it is not added again to the wishlist
         StepVerifier.create(result)
@@ -1013,7 +1021,7 @@ class CartServiceUnitTest {
         when(cartRepository.save(any(Cart.class))).thenReturn(Mono.just(cartWithNullWishlist));  // Mock the save method to return the saved cart
 
         // Act: Add out-of-stock product
-        Mono<CartResponseModel> result = cartService.addProductToCart(cart1.getCartId(), productId, 1);
+        Mono<CartResponseModel> result = cartService.addProductToCart(cart1.getCartId(), new CartItemRequestModel(productId, 1));
 
         // Assert: Verify the product is added to the newly initialized wishlist
         StepVerifier.create(result)
@@ -1042,7 +1050,7 @@ class CartServiceUnitTest {
                 .build()));
 
         // Act: Try to add more products than available
-        Mono<CartResponseModel> result = cartService.addProductToCart(cartId, productId, quantityToAdd);
+        Mono<CartResponseModel> result = cartService.addProductToCart(cartId, new CartItemRequestModel(productId, quantityToAdd));
 
         // Assert: Expect OutOfStockException
         StepVerifier.create(result)
@@ -1067,7 +1075,7 @@ class CartServiceUnitTest {
                 .build()));
 
         // Act: Try to add more products than the total stock in the cart
-        Mono<CartResponseModel> result = cartService.addProductToCart(cartId, productId, quantityToAdd);
+        Mono<CartResponseModel> result = cartService.addProductToCart(cartId, new CartItemRequestModel(productId, quantityToAdd));
 
         // Assert: Expect OutOfStockException to be thrown
         StepVerifier.create(result)

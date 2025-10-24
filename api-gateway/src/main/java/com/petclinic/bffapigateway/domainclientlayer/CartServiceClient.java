@@ -276,11 +276,19 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
                 .bodyToMono(Void.class);
     }
 
-    public Mono<CartResponseDTO> addProductToCart(String cartId, AddProductRequestDTO requestDTO) {
-        return webClientBuilder.build()
-                .post()
-                .uri(cartServiceUrl + "/" + cartId + "/products")
-                .body(Mono.just(requestDTO), AddProductRequestDTO.class)
+    public Mono<CartResponseDTO> addProductToCart(String cartId, CartItemRequestDTO requestDTO) {
+    CartItemRequestDTO payload = requestDTO == null
+        ? new CartItemRequestDTO(null, 1)
+        : new CartItemRequestDTO(requestDTO.getProductId(), requestDTO.resolveQuantity());
+
+    if (payload.getProductId() != null) {
+        payload.setProductId(payload.getProductId().trim());
+    }
+
+    return webClientBuilder.build()
+        .post()
+        .uri(cartServiceUrl + "/" + cartId + "/products")
+        .bodyValue(payload)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .onStatus(status -> status.value() == 400, clientResponse -> clientResponse.bodyToMono(CartResponseDTO.class)
@@ -371,10 +379,10 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
     }
 
     public Mono<CartResponseDTO> addProductToCartFromProducts(String cartId, String productId) {
-        return webClientBuilder.build()
-                .post()
-                .uri(cartServiceUrl + "/" + cartId + "/" + productId)
-                .body(Mono.just(new AddProductRequestDTO(productId, 1)), AddProductRequestDTO.class)
+    return webClientBuilder.build()
+        .post()
+        .uri(cartServiceUrl + "/" + cartId + "/" + productId)
+        .bodyValue(new CartItemRequestDTO(productId, 1))
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> clientResponse.bodyToMono(CartResponseDTO.class)

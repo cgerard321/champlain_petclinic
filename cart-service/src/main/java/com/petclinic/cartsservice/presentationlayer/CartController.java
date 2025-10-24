@@ -3,7 +3,7 @@ package com.petclinic.cartsservice.presentationlayer;
 import com.petclinic.cartsservice.businesslayer.CartQueryCriteria;
 import com.petclinic.cartsservice.businesslayer.CartService;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
-import com.petclinic.cartsservice.domainclientlayer.AddProductRequestModel;
+import com.petclinic.cartsservice.domainclientlayer.CartItemRequestModel;
 import com.petclinic.cartsservice.domainclientlayer.UpdateProductQuantityRequestModel;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
@@ -18,6 +18,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -124,9 +125,19 @@ public class CartController {
     }
 
     @PostMapping("/{cartId}/products")
-    public Mono<ResponseEntity<CartResponseModel>> addProductToCart(@PathVariable String cartId, @RequestBody AddProductRequestModel requestModel) {
-        return cartService.addProductToCart(cartId, requestModel.getProductId(), requestModel.getQuantity())
-                .map(ResponseEntity::ok)
+    public Mono<ResponseEntity<CartResponseModel>> addProductToCart(@PathVariable String cartId, @RequestBody CartItemRequestModel requestModel) {
+        final String requestedProductId = (requestModel != null && requestModel.getProductId() != null)
+                ? requestModel.getProductId().trim()
+                : null;
+
+        return cartService.addProductToCart(cartId, requestModel)
+                .map(cartResponse -> {
+                    if (requestedProductId != null && !requestedProductId.isBlank()) {
+                        return ResponseEntity.created(URI.create(String.format("/api/v1/carts/%s/items/%s", cartId, requestedProductId)))
+                                .body(cartResponse);
+                    }
+                    return ResponseEntity.status(HttpStatus.CREATED).body(cartResponse);
+                })
                 .onErrorResume(e -> {
                     if (e instanceof OutOfStockException || e instanceof InvalidInputException) {
                         CartResponseModel errorResponse = new CartResponseModel();

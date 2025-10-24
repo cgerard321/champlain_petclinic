@@ -3,6 +3,7 @@ package com.petclinic.cartsservice.businesslayer;
 import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.CartRepository;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
+import com.petclinic.cartsservice.domainclientlayer.CartItemRequestModel;
 import com.petclinic.cartsservice.domainclientlayer.ProductClient;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
 import com.petclinic.cartsservice.utils.EntityModelUtil;
@@ -296,11 +297,23 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public Mono<CartResponseModel> addProductToCart(String cartId, String productId, int quantity) {
+    public Mono<CartResponseModel> addProductToCart(String cartId, CartItemRequestModel cartItemRequestModel) {
+        if (cartItemRequestModel == null || cartItemRequestModel.getProductId() == null || cartItemRequestModel.getProductId().trim().isEmpty()) {
+            return Mono.error(new InvalidInputException("Product ID must be provided."));
+        }
+
+        final String productId = cartItemRequestModel.getProductId().trim();
+        final int quantity = cartItemRequestModel.resolveQuantity();
+
         // Fetch the latest cart and product information
         return cartRepository.findCartByCartId(cartId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
-                .flatMap(cart -> productClient.getProductByProductId(productId)
+                .flatMap(cart -> {
+                    if (cart.getProducts() == null) {
+                        cart.setProducts(new ArrayList<>());
+                    }
+
+                    return productClient.getProductByProductId(productId)
                         .flatMap(product -> {
                             // Validate if the requested quantity is greater than zero
                             if (quantity <= 0) {
@@ -381,8 +394,8 @@ public class CartServiceImpl implements CartService {
                                 return cartRepository.save(cart)
                                         .map(savedCart -> EntityModelUtil.toCartResponseModel(savedCart, savedCart.getProducts()));
                             }
-                        })
-                );
+            });
+        });
     }
 
 

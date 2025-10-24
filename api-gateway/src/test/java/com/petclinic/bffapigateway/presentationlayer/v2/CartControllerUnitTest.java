@@ -229,9 +229,10 @@ public class CartControllerUnitTest {
 
         client.post()
                 .uri("/api/v2/gateway/carts/{cartId}/products", cartId)
-                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO())
+                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.CartItemRequestDTO("p-1", 2))
                 .exchange()
-                .expectStatus().isOk();
+                .expectStatus().isCreated()
+                .expectHeader().valueEquals("Location", "/api/v1/carts/" + cartId + "/items/p-1");
 
         verify(cartServiceClient).addProductToCart(eq(cartId), any());
     }
@@ -244,7 +245,7 @@ public class CartControllerUnitTest {
 
         client.post()
                 .uri("/api/v2/gateway/carts/{cartId}/products", cartId)
-                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO())
+                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.CartItemRequestDTO())
                 .exchange()
                 .expectStatus().isBadRequest()
                 .expectBody(CartResponseDTO.class)
@@ -259,7 +260,7 @@ public class CartControllerUnitTest {
 
         client.post()
                 .uri("/api/v2/gateway/carts/{cartId}/products", cartId)
-                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO())
+                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.CartItemRequestDTO())
                 .exchange()
                 .expectStatus().isNotFound();
     }
@@ -524,7 +525,7 @@ public class CartControllerUnitTest {
 
         client.post()
                 .uri("/api/v2/gateway/carts/{cartId}/products", "c-10")
-                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO())
+                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.CartItemRequestDTO())
                 .exchange()
                 .expectStatus().isEqualTo(409);
     }
@@ -631,7 +632,7 @@ public class CartControllerUnitTest {
 
         client.post()
                 .uri("/api/v2/gateway/carts/{cartId}/products", "c-10")
-                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO())
+                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.CartItemRequestDTO())
                 .exchange()
                 .expectStatus().is5xxServerError();
     }
@@ -645,7 +646,7 @@ public class CartControllerUnitTest {
 
         client.post()
                 .uri("/api/v2/gateway/carts/{cartId}/products", "c-10")
-                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO())
+                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.CartItemRequestDTO())
                 .exchange()
                 .expectStatus().isBadRequest();
     }
@@ -692,7 +693,7 @@ public class CartControllerUnitTest {
 
         client.post()
                 .uri("/api/v2/gateway/carts/{cartId}/products", cartId)
-                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO())
+                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.CartItemRequestDTO())
                 .exchange()
                 .expectStatus().isBadRequest()
                 .expectBody(CartResponseDTO.class)
@@ -709,7 +710,7 @@ public class CartControllerUnitTest {
 
         client.post()
                 .uri("/api/v2/gateway/carts/{cartId}/products", cartId)
-                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO())
+                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.CartItemRequestDTO())
                 .exchange()
                 .expectStatus().isNotFound();
     }
@@ -721,7 +722,7 @@ public class CartControllerUnitTest {
 
         client.post()
                 .uri("/api/v2/gateway/carts/{cartId}/products", cartId)
-                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO())
+                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.CartItemRequestDTO())
                 .exchange()
                 .expectStatus().isEqualTo(409);
     }
@@ -733,7 +734,7 @@ public class CartControllerUnitTest {
 
         client.post()
                 .uri("/api/v2/gateway/carts/{cartId}/products", cartId)
-                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO())
+                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.CartItemRequestDTO())
                 .exchange()
                 .expectStatus().is5xxServerError();
     }

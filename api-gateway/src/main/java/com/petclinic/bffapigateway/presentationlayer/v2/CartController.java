@@ -17,6 +17,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import java.net.URI;
 
 
 @RestController
@@ -72,9 +73,19 @@ public class CartController {
     @PostMapping("/{cartId}/products")
     public Mono<ResponseEntity<CartResponseDTO>> addProductToCart(
             @PathVariable String cartId,
-            @RequestBody AddProductRequestDTO requestDTO) {
+            @RequestBody CartItemRequestDTO requestDTO) {
+        final String requestedProductId = requestDTO != null && requestDTO.getProductId() != null
+                ? requestDTO.getProductId().trim()
+                : null;
+
         return cartServiceClient.addProductToCart(cartId, requestDTO)
-                .map(ResponseEntity::ok)
+                .map(cartResponseDTO -> {
+                    if (requestedProductId != null && !requestedProductId.isBlank()) {
+                        return ResponseEntity.created(URI.create(String.format("/api/v1/carts/%s/items/%s", cartId, requestedProductId)))
+                                .body(cartResponseDTO);
+                    }
+                    return ResponseEntity.status(HttpStatus.CREATED).body(cartResponseDTO);
+                })
                 .onErrorResume(e -> {
                     if (e instanceof InvalidInputException || e instanceof WebClientResponseException.BadRequest) {
                         CartResponseDTO errorResponse = new CartResponseDTO();

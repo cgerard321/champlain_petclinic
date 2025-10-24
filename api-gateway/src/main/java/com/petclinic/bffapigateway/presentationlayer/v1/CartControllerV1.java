@@ -19,6 +19,7 @@ import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -238,16 +239,26 @@ public class CartControllerV1 {
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
     @PostMapping("/{cartId}/products")
     public Mono<ResponseEntity<CartResponseDTO>> addProductToCart(
-            @PathVariable String cartId,
-            @RequestBody AddProductRequestDTO requestDTO) {
-        return cartServiceClient.addProductToCart(cartId, requestDTO)
-                .map(ResponseEntity::ok)
-                .onErrorResume(e -> mapCartErrorWithMessage(e,
-                        ErrorOptions.builder("addProductToCart")
-                                .cartId(cartId)
-                                .includeBadRequestBodyMessage(true)
-                                .build()
-                ));
+        @PathVariable String cartId,
+        @RequestBody CartItemRequestDTO requestDTO) {
+    final String requestedProductId = requestDTO != null && requestDTO.getProductId() != null
+        ? requestDTO.getProductId().trim()
+        : null;
+
+    return cartServiceClient.addProductToCart(cartId, requestDTO)
+        .map(cartResponse -> {
+            if (requestedProductId != null && !requestedProductId.isBlank()) {
+            return ResponseEntity.created(URI.create(String.format("/api/v1/carts/%s/items/%s", cartId, requestedProductId)))
+                .body(cartResponse);
+            }
+            return ResponseEntity.status(HttpStatus.CREATED).body(cartResponse);
+        })
+        .onErrorResume(e -> mapCartErrorWithMessage(e,
+            ErrorOptions.builder("addProductToCart")
+                .cartId(cartId)
+                .includeBadRequestBodyMessage(true)
+                .build()
+        ));
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})

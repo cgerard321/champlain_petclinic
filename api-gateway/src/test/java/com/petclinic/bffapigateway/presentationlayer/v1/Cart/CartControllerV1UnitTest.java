@@ -88,11 +88,8 @@ public class CartControllerV1UnitTest {
                 .build();
     }
 
-    private AddProductRequestDTO buildAddProductRequestDTO() {
-        return AddProductRequestDTO.builder()
-                .productId("product-789")
-                .quantity(2)
-                .build();
+        private CartItemRequestDTO buildCartItemRequestDTO() {
+                return new CartItemRequestDTO("product-789", 2);
     }
 
     private UpdateProductQuantityRequestDTO buildUpdateQuantityRequestDTO() {
@@ -408,7 +405,7 @@ public class CartControllerV1UnitTest {
     void addProductToCart_withValidRequest_shouldAddProduct() {
         // Arrange
         String cartId = "cart-123";
-        AddProductRequestDTO requestDTO = buildAddProductRequestDTO();
+        CartItemRequestDTO requestDTO = buildCartItemRequestDTO();
         CartResponseDTO updatedCart = buildCartResponseDTO();
         when(cartServiceClient.addProductToCart(cartId, requestDTO))
                 .thenReturn(Mono.just(updatedCart));
@@ -419,7 +416,8 @@ public class CartControllerV1UnitTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestDTO)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
+                .expectHeader().valueEquals("Location", "/api/v1/carts/" + cartId + "/items/" + requestDTO.getProductId())
                 .expectBody(CartResponseDTO.class)
                 .isEqualTo(updatedCart);
 
@@ -431,7 +429,7 @@ public class CartControllerV1UnitTest {
     void addProductToCart_withInvalidInput_shouldReturnBadRequest() {
         // Arrange
         String cartId = "cart-123";
-        AddProductRequestDTO requestDTO = buildAddProductRequestDTO();
+        CartItemRequestDTO requestDTO = buildCartItemRequestDTO();
         when(cartServiceClient.addProductToCart(cartId, requestDTO))
                 .thenReturn(Mono.error(new InvalidInputException("Invalid product quantity")));
 
@@ -451,7 +449,7 @@ public class CartControllerV1UnitTest {
     void addProductToCart_withNonExistingCartId_shouldReturnNotFound() {
         // Arrange
         String cartId = "invalid-cart";
-        AddProductRequestDTO requestDTO = buildAddProductRequestDTO();
+        CartItemRequestDTO requestDTO = buildCartItemRequestDTO();
         when(cartServiceClient.addProductToCart(cartId, requestDTO))
                 .thenReturn(Mono.error(new NotFoundException("Cart not found")));
 
