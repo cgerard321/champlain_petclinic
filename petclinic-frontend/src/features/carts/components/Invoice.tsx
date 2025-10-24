@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import './Invoice.css';
+import { computeTaxes, formatTaxRate, roundToCents } from '../utils/taxUtils';
 
 export interface InvoiceItem {
   productId: number;
@@ -145,8 +146,27 @@ function Invoice({
 
         <div class="totals">
           <p><span>Subtotal</span><span>$${inv.subtotal.toFixed(2)}</span></p>
-          <p><span>TVQ (9.975%)</span><span>$${inv.tvq.toFixed(2)}</span></p>
-          <p><span>TVC (5%)</span><span>$${inv.tvc.toFixed(2)}</span></p>
+          ${(() => {
+            // compute tax lines if billing province available
+            try {
+              const prov = inv.billing?.province;
+              if (prov) {
+                const lines = computeTaxes(inv.subtotal, prov);
+                return lines
+                  .map(
+                    l =>
+                      `<p><span>${l.name} (${formatTaxRate(l.rate)}%)</span><span>$${(l.amount ?? roundToCents(inv.subtotal * l.rate)).toFixed(2)}</span></p>`
+                  )
+                  .join('');
+              }
+            } catch (e) {
+              // Log tax computation errors to help debugging while falling back
+              // to legacy invoice fields.
+              console.error('Tax calculation failed for printable invoice:', e);
+            }
+            // fallback to legacy fields
+            return `<p><span>TVQ (9.975%)</span><span>$${inv.tvq.toFixed(2)}</span></p><p><span>TVC (5%)</span><span>$${inv.tvc.toFixed(2)}</span></p>`;
+          })()}
           <p><span>Discount</span><span>-$${inv.discount.toFixed(2)}</span></p>
           <p class="total"><span>Total</span><span>$${inv.total.toFixed(2)}</span></p>
         </div>
@@ -292,8 +312,42 @@ function Invoice({
 
           <div className="invoice-taxes">
             <p>Subtotal: ${inv.subtotal.toFixed(2)}</p>
-            <p>TVQ (9.975%): ${inv.tvq.toFixed(2)}</p>
-            <p>TVC (5%): ${inv.tvc.toFixed(2)}</p>
+            {/* Render tax lines based on billing province when available */}
+            {(() => {
+              try {
+                const prov = inv.billing?.province;
+                if (prov) {
+                  const lines = computeTaxes(inv.subtotal, prov);
+                  return (
+                    <div>
+                      {lines.map((l, i) => {
+                        const displayAmount = (
+                          (l.amount ??
+                            roundToCents(inv.subtotal * l.rate)) as number
+                        ).toFixed(2);
+                        return (
+                          <p key={i}>
+                            {l.name} ({formatTaxRate(l.rate)}%): $
+                            {displayAmount}
+                          </p>
+                        );
+                      })}
+                    </div>
+                  );
+                }
+              } catch (e) {
+                // Log error to aid debugging and fall back to legacy fields
+                console.error('Tax calculation failed for invoice modal:', e);
+              }
+
+              // fallback to legacy fields
+              return (
+                <>
+                  <p>TVQ (9.975%): ${inv.tvq.toFixed(2)}</p>
+                  <p>TVC (5%): ${inv.tvc.toFixed(2)}</p>
+                </>
+              );
+            })()}
             <p>Discount: -${inv.discount.toFixed(2)}</p>
             <h3>Total: ${inv.total.toFixed(2)}</h3>
           </div>
