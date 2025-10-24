@@ -22,7 +22,7 @@ x-healthchecks:
 
   dbgate: &dbgate_hc
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:3000/"]
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8030/"]
       interval: 10s
       timeout: 3s
       retries: 10

@@ -6,7 +6,7 @@ RUN gradle bootJar --no-daemon
 RUN ls -l build/libs && mv build/libs/*.jar build/libs/application.jar
 
 
-FROM openjdk:17-alpine
+FROM openjdk:17
 ARG JAR_FILE=build/libs/*.jar
 COPY --from=builder /usr/src/app/${JAR_FILE} app.jar
 #RUN apk --no-cache add curl
