@@ -133,29 +133,94 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-
     @Override
     public Mail generateVerificationMail(User user) {
         final String base64Token = Base64.getEncoder()
                 .withoutPadding()
                 .encodeToString(jwtService.generateToken(user).getBytes(StandardCharsets.UTF_8));
 
-        // Remove dangling . in case of empty sub
-//        String niceSub = gatewaySubdomain.length() > 0 ? gatewaySubdomain + "." : "";
+        String verificationLink = format("%s/verification/%s", gatewayOrigin, base64Token);
+        String currentYear = String.valueOf(java.time.Year.now().getValue());
 
-        String formatedLink = format("<a class=\"email-button\" href=\"%s/verification/%s\">Verify Email</a>", gatewayOrigin, base64Token);
+        String primaryColor = "#4A90E2";
+        String secondaryColor = "#F5F7FA";
+        String textColor = "#2C3E50";
+        String lightText = "#7F8C8D";
+
+        String htmlContent = "<!DOCTYPE html>" +
+                "<html>" +
+                "<head>" +
+                "    <meta name='viewport' content='width=device-width, initial-scale=1.0'>" +
+                "    <style>" +
+                "        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');" +
+                "    </style>" +
+                "</head>" +
+                "<body style='margin: 0; padding: 0; font-family: 'Poppins', Arial, sans-serif; background-color: #f4f4f4; color: " + textColor + ";'>" +
+                "    <div style='max-width: 600px; margin: 0 auto; background: #ffffff;'>" +
+                "        <!-- Header -->" +
+                "        <div style='background: " + primaryColor + "; padding: 30px 0; text-align: center; color: white;'>" +
+                "            <h1 style='margin: 0; font-size: 24px; font-weight: 600;'>Pet Clinic</h1>" +
+                "            <p style='margin: 5px 0 0; opacity: 0.9;'>Account Verification</p>" +
+                "        </div>" +
+                "        " +
+                "        <!-- Main Content -->" +
+                "        <div style='padding: 40px;'>" +
+                "            <h1 style='color: " + primaryColor + "; margin-top: 0;'>Verify Your Email</h1>" +
+                "            <p>Hello <strong>" + user.getUsername() + "</strong>,</p>" +
+                "            <p>Welcome to Pet Clinic! We're thrilled to have you on board. To get started, please verify your email address by clicking the button below:</p>" +
+                "            " +
+                "            <!-- Verification Button -->" +
+                "            <div style='margin: 40px 0; text-align: center;'>" +
+                "                <a href='" + verificationLink + "' style='background: " + primaryColor + "; color: white; padding: 14px 28px; text-decoration: none; border-radius: 50px; font-weight: 600; font-size: 16px; display: inline-block; box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);'>" +
+                "                    Verify Email Address" +
+                "                </a>" +
+                "            </div>" +
+                "            " +
+                "            <!-- Secondary Verification -->" +
+                "            <div style='background: " + secondaryColor + "; padding: 20px; border-radius: 8px; margin: 30px 0;'>" +
+                "                <p style='margin-top: 0;'><strong>Having trouble with the button?</strong></p>" +
+                "                <p style='margin-bottom: 0;'>Copy and paste this link into your browser:</p>" +
+                "                <p style='word-break: break-all; color: " + primaryColor + "; font-family: monospace;'>" + verificationLink + "</p>" +
+                "            </div>" +
+                "            " +
+                "            <!-- Additional Information -->" +
+                "            <div style='border-top: 1px solid #eee; padding-top: 20px; margin-top: 30px;'>" +
+                "                <p style='font-size: 14px; color: " + lightText + ";'>If you didn't create an account with Pet Clinic, you can safely ignore this email.</p>" +
+                "            </div>" +
+                "        </div>" +
+                "        " +
+                "        <!-- Footer -->" +
+                "        <div style='background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: " + lightText + "; border-top: 1px solid #eee;'>" +
+                "            <p>© " + java.time.Year.now().getValue() + " Pet Clinic. All rights reserved.</p>" +
+                "            <p style='margin-bottom: 0;'>This is an automated message, please do not reply.</p>" +
+                "        </div>" +
+                "    </div>" +
+                "</body>" +
+                "</html>";
+`
+        String plainText = "VERIFY YOUR PET CLINIC ACCOUNT\n\n" +
+                "Hello " + user.getUsername() + ",\n\n" +
+                "Welcome to Pet Clinic! We're excited to have you on board.\n\n" +
+                "To complete your registration, please verify your email by clicking the link below:\n\n" +
+                verificationLink + "\n\n" +
+                "If the link doesn't work, copy and paste the URL into your web browser.\n\n" +
+                "If you didn't create an account with Pet Clinic, you can safely ignore this email.\n\n" +
+                "Best regards,\n" +
+                "The Pet Clinic Team\n\n" +
+                "© " + java.time.Year.now().getValue() + " Pet Clinic. All rights reserved.";
 
         return new Mail(
-                user.getEmail(), "Verification Email", "Default", "Pet clinic - Verification Email",
-                "Thank you for Signing Up with us.\n" +
-                        "We have received a request to create an account for Pet Clinic from this email.\n\n" +
-                        "Click on the following button to verify your identity: " + formatedLink + "\n\n\n" +
-                        "If you do not wish to create an account, please disregard this email.",
-                "Thank you for choosing Pet Clinic.", user.getUsername(), "ChamplainPetClinic@gmail.com");
-
-
-
+                user.getEmail(),
+                "🔐 Verify Your Pet Clinic Account",
+                "text/html",
+                "Pet Clinic - Verify Your Email",
+                htmlContent,
+                plainText,
+                user.getUsername(),
+                "noreply@petclinic.com"
+        );
     }
+
 
     @Override
     public UserPasswordLessDTO verifyEmailFromToken(String token) {
@@ -356,10 +421,8 @@ public class UserServiceImpl implements UserService {
                         + "Follow the on-screen instructions to create a new password for your account."
                         + "If you did not request this password reset, please disregard this email. Your account security is important to us, and no changes will be made without your verification.",
                 "Thank you for choosing Pet Clinic.", "", "ChamplainPetClinic@gmail.com");
-
         mailService.sendMail(newMail);
     }
-
 
     @Override
     public User getUserByEmail(String email) throws NotFoundException {
