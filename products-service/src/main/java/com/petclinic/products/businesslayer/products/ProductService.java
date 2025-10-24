@@ -4,6 +4,7 @@ import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductType;
 import com.petclinic.products.presentationlayer.products.ProductRequestModel;
 import com.petclinic.products.presentationlayer.products.ProductResponseModel;
+import com.petclinic.products.presentationlayer.products.ProductEnumsResponseModel;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -22,5 +23,6 @@ public interface ProductService {
     Mono<Void> changeProductQuantity(String productId, Integer productQuantity);
     Flux<ProductResponseModel> getProductsByType(String productType);
     List<Product> getProductsByType(ProductType productType);
+    Mono<ProductEnumsResponseModel> getProductsEnumValues();
 
 }
