@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter;
 @Slf4j
 public class IdGenerator {
 
-    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyMMdd");
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyMM-dd");
     private static final int SUFFIX_WIDTH = 2;
 
     private static int latestVisitIdSuffix = 0;
@@ -20,34 +20,36 @@ public class IdGenerator {
     private static String reviewPrefix = "REVIEW";
 
     public static String generateVisitId() {
-        int suffix;
         String today = LocalDate.now().format(DATE_FORMAT);
-        // Reset the suffix if day changed since last visit
-        if (!latestVisitDate.equals(today)) {
-            suffix = 0;
+
+        // Initialize / reset if first call of the day
+        if (latestVisitDate == null || !latestVisitDate.equals(today)) {
             latestVisitDate = today;
-        } else {
-            suffix = latestVisitIdSuffix;
+            latestVisitIdSuffix = 0;
         }
-        return generateId(visitPrefix, suffix);
+
+        String id = generateId(visitPrefix, latestVisitIdSuffix);
+        latestVisitIdSuffix++; // advance suffix for next generated id
+        return id;
     }
 
     public static String generateReviewId() {
-        int suffix;
         String today = LocalDate.now().format(DATE_FORMAT);
-        // Reset the suffix if day changed since last review
-        if (!latestReviewDate.equals(today)) {
-            suffix = 0;
+
+        // Initialize / reset if first call of the day
+        if (latestReviewDate == null || !latestReviewDate.equals(today)) {
             latestReviewDate = today;
-        } else {
-            suffix = latestReviewIdSuffix;
+            latestReviewIdSuffix = 0;
         }
-        return generateId(reviewPrefix, suffix);
+
+        String id = generateId(reviewPrefix, latestReviewIdSuffix);
+        latestReviewIdSuffix++; // advance suffix for next generated id
+        return id;
     }
 
     /**
      * Generate a readable id using the pattern PREFIX-yyMMdd-seq, where seq resets each day.
-     * If previousId is null or malformed, sequence starts at 1.
+     * previousIdSuffix is the last stored suffix (0-based), so displayed seq = previousIdSuffix + 1.
      */
     public static String generateId(String prefix, int previousIdSuffix) {
 
@@ -55,7 +57,9 @@ public class IdGenerator {
 
         String paddedSuffix = String.format("%0" + SUFFIX_WIDTH + "d", previousIdSuffix + 1);
 
-        return String.format("%s-%s-%s", prefix, datePart, paddedSuffix);
+        // This will format it in the format VIST-2510-2401
+        // The 2 first are year, next 2 are month, next 2 is the day and last 2 is an increment
+        return String.format("%s-%s%s", prefix, datePart, paddedSuffix);
     }
 
 }
