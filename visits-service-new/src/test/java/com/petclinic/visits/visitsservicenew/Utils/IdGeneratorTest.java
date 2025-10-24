@@ -1,7 +1,5 @@
 package com.petclinic.visits.visitsservicenew.Utils;
 
-import com.petclinic.visits.visitsservicenew.DomainClientLayer.PetsClient;
-import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetsClient;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
