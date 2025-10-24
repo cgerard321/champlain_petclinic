@@ -31,7 +31,7 @@ public class ReviewServiceImpl implements ReviewService {
 
         return reviewRequestDTOMono
                 .map(EntityDtoUtil::toReviewEntity)
-                // Setting id with the latest id prefix + 1
+                // Generate new ID with current date and incremented sequence
                 .flatMap(review -> {
                     review.setReviewId(IdGenerator.generateReviewId());
                     return reviewRepository.save(review);
