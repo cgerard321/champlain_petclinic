@@ -13,12 +13,7 @@ import BasicModal from '@/shared/components/BasicModal';
 import '@/shared/components/BasicModal.css';
 import SidebarItem from './components/SidebarItem';
 import Sidebar from './components/Sidebar';
-import {
-  DownloadIcon,
-  PenToSquareIcon,
-  StarEmptyIcon,
-  StarFullIcon,
-} from '@/shared/components/Icon';
+import SvgIcon from '@/shared/components/SvgIcon';
 import { Category } from './models/Category';
 
 export default function CustomerVisitListTable(): JSX.Element {
@@ -270,10 +265,7 @@ export default function CustomerVisitListTable(): JSX.Element {
                           } catch {}
                         }}
                       >
-                        <DownloadIcon
-                          className="icon-visits"
-                          title="Download Prescription"
-                        />
+                        <SvgIcon id="download" className="icon-visits" />
                       </a>
                     )}
                   </td>
@@ -330,7 +322,7 @@ export default function CustomerVisitListTable(): JSX.Element {
             onClick={() => navigate(AppRoutePaths.OwnerBookAppointment)}
             title="Create"
           >
-            <PenToSquareIcon light={true} />
+            <SvgIcon id="pen-to-square" />
             Create
           </button>
         </li>
@@ -340,7 +332,7 @@ export default function CustomerVisitListTable(): JSX.Element {
             onClick={() => navigate(AppRoutePaths.CustomerReviews)}
             title="Reviews"
           >
-            <StarEmptyIcon light={true} />
+            <SvgIcon id="star-empty" />
             Reviews
           </button>
         </li>
@@ -350,7 +342,7 @@ export default function CustomerVisitListTable(): JSX.Element {
             onClick={() => navigate(AppRoutePaths.CustomerAddReview)}
             title="Write a Review"
           >
-            <StarFullIcon light={true} />
+            <SvgIcon id="star-full" />
             Write Review
           </button>
         </li>

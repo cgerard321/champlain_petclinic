@@ -17,8 +17,8 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
   <li>
     <a
       className={[
-        itemName == currentTab ? 'active' : '',
-        emergency == true ? 'emergency' : '',
+        itemName === currentTab ? 'active' : '',
+        emergency ? 'emergency' : '',
       ]
         .filter(Boolean)
         .join('-')}

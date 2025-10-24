@@ -15,19 +15,12 @@ import { Category } from './models/Category';
 
 import AddingVisit from './components/AddingVisit';
 
-import {
-  ArchiveIcon,
-  EyeIcon,
-  PenIcon,
-  PenToSquareIcon,
-  StarEmptyIcon,
-  XCrossIcon,
-} from '@/shared/components/Icon';
 import BasicModal from '@/shared/components/BasicModal';
 import VisitDetails from '@/features/visits/components/VisitDetails';
 import EditingVisit from './components/EditingVisit';
 import Sidebar from './components/Sidebar';
 import SidebarItem from './components/SidebarItem';
+import SvgIcon from '@/shared/components/SvgIcon';
 
 export default function VisitListTable(): JSX.Element {
   const isVet = IsVet();
@@ -174,26 +167,26 @@ export default function VisitListTable(): JSX.Element {
 
   // Buttons
   const renderCancelButton = (): JSX.Element => (
-    <a>
-      <XCrossIcon title="Cancel" className="icon-visits" />
+    <a title="Cancel">
+      <SvgIcon id="xcross" className="icon-visits" />
     </a>
   );
 
   const renderArchiveButton = (): JSX.Element => (
-    <a>
-      <ArchiveIcon title="Archive" className="icon-visits" />
+    <a title="Archive">
+      <SvgIcon id="archive" className="icon-visits" />
     </a>
   );
 
   const renderEditButton = (): JSX.Element => (
-    <a>
-      <PenIcon title="Edit" className="icon-visits" />
+    <a title="Edit">
+      <SvgIcon id="pencil" className="icon-visits" />
     </a>
   );
 
   const renderViewButton = (): JSX.Element => (
-    <a>
-      <EyeIcon title="View" className="icon-visits" />
+    <a title="View">
+      <SvgIcon id="eye" className="icon-visits" />
     </a>
   );
 
@@ -354,7 +347,7 @@ export default function VisitListTable(): JSX.Element {
           <AddingVisit
             showButton={
               <button className="btn btn-primary" title="Create">
-                <PenToSquareIcon light={true} />
+                <SvgIcon id="pen-to-square" />
                 Create
               </button>
             }
@@ -366,7 +359,7 @@ export default function VisitListTable(): JSX.Element {
             onClick={() => navigate('/reviews')}
             title="Reviews"
           >
-            <StarEmptyIcon light={true} />
+            <SvgIcon id="star-empty" />
             Reviews
           </button>
         </li>
