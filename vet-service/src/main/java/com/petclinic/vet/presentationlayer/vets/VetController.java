@@ -354,10 +354,10 @@ public class VetController {
     }
 
     @DeleteMapping("{vetId}/specialties/{specialtyId}")
-    public Mono<ResponseEntity<Void>> deleteSpecialtiesBySpecialtyId(
+    public Mono<ResponseEntity<Void>> deleteSpecialtyBySpecialtyId(
             @PathVariable String vetId,
             @PathVariable String specialtyId) {
-        return vetService.deleteSpecialtiesBySpecialtyId(vetId, specialtyId)
+        return vetService.deleteSpecialtyBySpecialtyId(vetId, specialtyId)
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }

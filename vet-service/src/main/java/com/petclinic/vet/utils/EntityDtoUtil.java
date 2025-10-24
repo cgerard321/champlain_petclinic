@@ -77,6 +77,11 @@ public class EntityDtoUtil {
         return UUID.randomUUID().toString();
     }
 
+    public static String generateSpecialtyId() {
+        return UUID.randomUUID().toString();
+    }
+
+
     public static Photo toPhotoEntity(String vetId, String photoName, Resource resource) {
         Photo photo = new Photo();
         photo.setFilename(photoName);
