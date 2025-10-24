@@ -404,7 +404,7 @@ public class BillServiceImplTest {
                 .email("alice.smith@example.com")
                 .roles(Set.of()) // Assuming roles are empty for this test
                 .build();
-        Mockito.when(authClient.getUserById("JWTToken", "owner-456"))
+        Mockito.when(authClient.getUserById("owner-456", "JWTToken"))
                 .thenReturn(Mono.just(userDetails));
 
         // Mock a collision once, then success
