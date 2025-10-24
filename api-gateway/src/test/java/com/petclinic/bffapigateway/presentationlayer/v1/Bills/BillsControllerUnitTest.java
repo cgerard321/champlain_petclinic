@@ -318,30 +318,55 @@ public class BillsControllerUnitTest {
     }
 
     @Test
-    void createBill(){
+    void createBill() {
+        // Arrange
         BillResponseDTO billResponseDTO = new BillResponseDTO();
         billResponseDTO.setBillId("9");
-        billResponseDTO.setDate(null);
-        billResponseDTO.setAmount(new BigDecimal("600"));
+        billResponseDTO.setCustomerId("12345");
+        billResponseDTO.setVetId("67890");
         billResponseDTO.setVisitType("Adoption");
+        billResponseDTO.setDate(LocalDate.of(2025, 10, 24));
+        billResponseDTO.setAmount(new BigDecimal("600"));
+        billResponseDTO.setBillStatus(BillStatus.PAID);
+        billResponseDTO.setDueDate(LocalDate.of(2025, 11, 01));
 
         BillRequestDTO billRequestDTO = new BillRequestDTO();
-        billRequestDTO.setDate(null);
-        billRequestDTO.setAmount(new BigDecimal("600"));
+        billRequestDTO.setCustomerId("12345");
+        billRequestDTO.setVetId("67890");
         billRequestDTO.setVisitType("Adoption");
-        when(billServiceClient.createBill(billRequestDTO))
+        billRequestDTO.setDate(LocalDate.of(2025, 10, 24));
+        billRequestDTO.setAmount(new BigDecimal("600"));
+        billRequestDTO.setBillStatus(BillStatus.PAID);
+        billRequestDTO.setDueDate(LocalDate.of(2025, 11, 01));
+
+        when(billServiceClient.createBill(billRequestDTO, false, "CAD", "JWTToken"))
                 .thenReturn(Mono.just(billResponseDTO));
 
+        // Act & Assert
         client.post()
-                .uri("/api/gateway/bills")
+                .uri(uriBuilder -> uriBuilder
+                        .path("/api/gateway/bills")
+                        .queryParam("sendEmail", false)
+                        .queryParam("currency", "CAD")
+                        .build())
+                .cookie("Bearer", "JWTToken") // Add the required cookie
                 .body(Mono.just(billRequestDTO), BillRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody();
+                .expectBody()
+                .jsonPath("$.billId").isEqualTo("9")
+                .jsonPath("$.customerId").isEqualTo("12345")
+                .jsonPath("$.vetId").isEqualTo("67890")
+                .jsonPath("$.visitType").isEqualTo("Adoption")
+                .jsonPath("$.date").isEqualTo("2025-10-24")
+                .jsonPath("$.amount").isEqualTo(600)
+                .jsonPath("$.billStatus").isEqualTo("PAID")
+                .jsonPath("$.dueDate").isEqualTo("2025-11-01");
 
-        assertEquals(billResponseDTO.getBillId(),"9");
+        assertEquals(billResponseDTO.getBillId(), "9");
+
     }
 
     @Test

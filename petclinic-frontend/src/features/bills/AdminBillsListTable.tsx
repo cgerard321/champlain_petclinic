@@ -76,6 +76,8 @@ export default function AdminBillsListTable({
   const [owners, setOwners] = useState<OwnerResponseModel[]>([]);
   const [vets, setVets] = useState<VetResponseModel[]>([]);
   const [detailBill, setDetailBill] = useState<Bill | null>(null);
+  const [sendEmail, setSendEmail] = useState<boolean>(false);
+  const [billCurrency, setBillCurrency] = useState<Currency>('CAD');
   const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
 
   const fetchOwnersAndVets = useCallback(async (): Promise<void> => {
@@ -297,7 +299,7 @@ export default function AdminBillsListTable({
       billStatus: newBill.billStatus.toUpperCase(),
     };
     try {
-      await addBill(formattedBill);
+      await addBill(formattedBill, sendEmail, billCurrency);
       setActiveSection(null);
       getBillsList(currentPage, 10);
     } catch (err) {
@@ -640,6 +642,30 @@ export default function AdminBillsListTable({
                   setNewBill({ ...newBill, dueDate: e.target.value })
                 }
               />
+            </div>
+            <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+              <div>
+                <label htmlFor="sendEmail">Send Email Notification</label>
+                <select
+                  id="sendEmail"
+                  value={sendEmail ? 'true' : 'false'}
+                  onChange={e => setSendEmail(e.target.value === 'true')}
+                >
+                  <option value="true">Yes</option>
+                  <option value="false">No</option>
+                </select>
+              </div>
+              <div>
+                <label htmlFor="billCurrency">Bill Currency for Email:</label>
+                <select
+                  id="billCurrency"
+                  value={billCurrency}
+                  onChange={e => setBillCurrency(e.target.value as Currency)}
+                >
+                  <option value="CAD">CAD</option>
+                  <option value="USD">USD</option>
+                </select>
+              </div>
             </div>
             <button type="submit">Create Bill</button>
           </form>
