@@ -6,7 +6,21 @@ Back to [Main page](../README.md)
 * [General Rules](#general-rules)
 * [Backend Usage](#backend-usage)
     * [Backend Setup](#backend-setup)
+        * [1. Add Required Dependencies](#1-add-required-dependencies)
+        * [2. Add the Mail DTO](#2-add-the-mail-dto)
+        * [3. Create the Mailer Service Client](#3-create-the-mailer-service-client)
+        * [4. Add Service Configurations](#4-add-service-configurations-to-applicationyml)
+        * [5. Add Rethrower Utility](#5-add-rethrower-utility)
+        * [6. Create the Auth Service Client](#6-create-the-auth-service-client)
+        * [7. Add GenericHttpException](#7-add-generichttpexception)
+        * [8. Add Role and UserDetails DTOs](#8-add-role-and-userdetails-dtos)
     * [Send Email](#send-email)
+    * [Understanding Rethrower and Role Components](#understanding-rethrower-and-role-components)
+        * [Rethrower Utility](#rethrower-utility)
+        * [Role DTO](#role-dto)
+        * [Simplified Implementation](#simplified-implementation-alternative)
+* [API Documentation](#api-documentation)
+* [Environment Variables](#environment-variables-required)
 <!-- TOC -->
 
 ## General Rules
@@ -36,7 +50,7 @@ Back to [Main page](../README.md)
 
 These are the steps that need to be followed to integrate your service with the **Mailer Service**.
 
-#### 1. Add Required Dependencies
+#### [↑](#backend-usage) 1. Add Required Dependencies
 
 WebClient is included in Spring WebFlux, which should already be in your service dependencies:
 
@@ -44,7 +58,7 @@ WebClient is included in Spring WebFlux, which should already be in your service
 implementation 'org.springframework.boot:spring-boot-starter-webflux'
 ```
 
-#### 2. Add the Mail DTO
+#### [↑](#backend-usage) 2. Add the Mail DTO
 
 You will need to create the Mail DTO in your service with the following structure:
 
@@ -102,7 +116,7 @@ public class Mail {
 - `correspondantName`: Name of the correspondent
 - `senderName`: Display name for the sender
 
-#### 3. Create the Mailer Service Client
+#### [↑](#backend-usage) 3. Create the Mailer Service Client
 
 Create a WebClient-based client following the same pattern as AuthServiceClient:
 
@@ -143,12 +157,16 @@ public class MailServiceClient {
 }
 ```
 
-#### 4. Add Host and Port to application.yml
+#### [↑](#backend-usage) 4. Add Service Configurations to application.yml
 
-Add the mailer service configuration in the application.yml of your service:
+Add both the auth service and mailer service configurations in your application.yml file. This ensures all necessary service endpoints are properly configured in one place.
 
+For default profile:
 ```yaml
 app:
+  auth-service:
+    host: auth-service
+    port: 8080
   mailer-service:
     host: mailer-service
     port: 8888
@@ -163,19 +181,61 @@ spring:
       on-profile: docker
 
 app:
+  auth-service:
+    host: auth-service
+    port: 8080
   mailer-service:
     host: mailer-service
     port: 8888
 ```
 
-#### 5. Create the Auth Service Client
+#### [↑](#backend-usage) 5. Add Rethrower Utility
 
-You need the AuthServiceClient to retrieve user details (including email) before sending emails:
+Create a Rethrower utility class to handle error responses from the Auth Service:
+
+```java
+// Rethrower.java
+package com.petclinic.yourservice.domainclientlayer.Auth;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.ClientResponse;
+import reactor.core.publisher.Mono;
+
+import java.util.Map;
+import java.util.function.Function;
+
+@RequiredArgsConstructor
+@Component
+public class Rethrower {
+    private final ObjectMapper objectMapper;
+    
+    public Mono<? extends Throwable> rethrow(ClientResponse clientResponse, 
+                                           Function<Map, ? extends Throwable> exceptionProvider) {
+        return clientResponse.createException().flatMap(n -> {
+            try {
+                final Map map = objectMapper.readValue(n.getResponseBodyAsString(), Map.class);
+                return Mono.error(exceptionProvider.apply(map));
+            } catch (JsonProcessingException e) {
+                return Mono.error(e);
+            }
+        });
+    }
+}
+```
+
+#### [↑](#backend-usage) 6. Create the Auth Service Client
+
+You need the AuthServiceClient to retrieve user details (including email) before sending emails. This implementation includes proper error handling with the Rethrower:
 
 ```java
 package com.petclinic.yourservice.domainclientlayer.Auth;
 
+import com.petclinic.yourservice.exceptions.GenericHttpException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -189,13 +249,16 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 public class AuthServiceClient {
     private final WebClient.Builder webClientBuilder;
     private final String authServiceUrl;
+    
+    @Autowired
+    private Rethrower rethrower;
 
     public AuthServiceClient(
             WebClient.Builder webClientBuilder,
             @Value("${app.auth-service.host}") String authServiceHost,
             @Value("${app.auth-service.port}") String authServicePort) {
         this.webClientBuilder = webClientBuilder;
-        authServiceUrl = "http://" + authServiceHost + ":" + authServicePort;
+        this.authServiceUrl = "http://" + authServiceHost + ":" + authServicePort;
     }
 
     public Mono<UserDetails> getUserById(String jwtToken, String userId) {
@@ -205,22 +268,62 @@ public class AuthServiceClient {
                 .cookie("Bearer", jwtToken)
                 .retrieve()
                 .onStatus(HttpStatus::is4xxClientError,
-                        response -> response.bodyToMono(String.class)
-                                .flatMap(errorBody -> {
-                                    log.error("Auth service error: {}", errorBody);
-                                    return Mono.error(new RuntimeException("User not found: " + userId));
-                                })
+                        response -> rethrower.rethrow(response,
+                                x -> new GenericHttpException(x.get("message").toString(), NOT_FOUND))
                 )
-                .bodyToMono(UserDetails.class);
+                .bodyToMono(UserDetails.class)
+                .doOnError(error -> log.error("Error fetching user {}: {}", userId, error.getMessage()));
     }
 }
 ```
 
-#### 6. Add UserDetails DTO
+#### [↑](#backend-usage) 7. Add GenericHttpException
 
-You will need the UserDetails DTO from the Auth Service:
+Create a custom exception class for handling HTTP errors:
 
 ```java
+// GenericHttpException.java
+package com.petclinic.yourservice.exceptions;
+
+import org.springframework.http.HttpStatus;
+
+public class GenericHttpException extends RuntimeException {
+    private final HttpStatus status;
+
+    public GenericHttpException(String message, HttpStatus status) {
+        super(message);
+        this.status = status;
+    }
+
+    public HttpStatus getStatus() {
+        return status;
+    }
+}
+```
+
+#### 6. Add Role and UserDetails DTOs
+
+You will need both the Role and UserDetails DTOs from the Auth Service:
+
+```java
+// Role.java
+package com.petclinic.yourservice.domainclientlayer.Auth;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder(toBuilder = true)
+public class Role {
+    private int id;
+    private String name;
+}
+
+// UserDetails.java
 package com.petclinic.yourservice.domainclientlayer.Auth;
 
 import lombok.AllArgsConstructor;
@@ -242,38 +345,7 @@ public class UserDetails {
 }
 ```
 
-#### 7. Add Auth Service Configuration to application.yml
-
-Add the auth service configuration in the application.yml:
-
-```yaml
-app:
-  auth-service:
-    host: auth-service
-    port: 7005
-  mailer-service:
-    host: mailer-service
-    port: 8888
-```
-
-For docker profile:
-```yaml
----
-spring:
-  config:
-    activate:
-      on-profile: docker
-
-app:
-  auth-service:
-    host: auth-service
-    port: 7005
-  mailer-service:
-    host: mailer-service
-    port: 8888
-```
-
-#### 8. Update Service Implementation
+#### 7. Update Service Implementation
 
 Add the following dependencies to your service implementation:
 
@@ -362,6 +434,51 @@ private Mail generateConfirmationEmail(UserDetails user) {
 3. **Private Helper Method**: Create a private method (e.g., `generateConfirmationEmail`) to build the Mail object
 4. **Error Handling**: Use appropriate error handling for authentication failures
 5. **Non-Blocking**: Email sending should not block the main business logic
+
+## Understanding Rethrower and Role Components
+
+Jump to: [Back to Top](#mailer-service-usage-standards)
+
+### [↑](#backend-usage) Rethrower Utility
+- The `Rethrower` utility is included for consistency with the billing service's implementation.
+- It's primarily used by `AuthServiceClient` to handle and transform error responses from the Auth Service.
+- While the billing service uses this pattern, you can simplify your implementation if you don't need the same level of error handling.
+
+#### [↑](#rethrower-utility) When to Use the Full Implementation
+Consider using the full implementation with `Rethrower` if you:
+1. Need to parse error responses in a specific format
+2. Want to maintain consistency with the billing service's error handling
+3. Plan to add more complex error handling in the future
+
+### [↑](#backend-usage) Role DTO
+- The `Role` class is included for completeness as part of the `UserDetails` DTO.
+- The billing service doesn't use the `roles` field in its current implementation.
+- You can safely omit the `roles` field if your service doesn't need role-based functionality.
+
+### [↑](#backend-usage) Simplified Implementation (Alternative)
+If you don't need the full error handling capabilities, you can simplify the `AuthServiceClient`:
+
+```java
+public Mono<UserDetails> getUserById(String jwtToken, String userId) {
+    return webClientBuilder.build()
+            .get()
+            .uri(authServiceUrl + "/users/{userId}", userId)
+            .cookie("Bearer", jwtToken)
+            .retrieve()
+            .onStatus(HttpStatus::is4xxClientError,
+                response -> response.bodyToMono(String.class)
+                    .flatMap(error -> Mono.error(new GenericHttpException(error, NOT_FOUND)))
+            )
+            .bodyToMono(UserDetails.class)
+            .doOnError(error -> log.error("Error fetching user {}: {}", userId, error.getMessage()));
+}
+```
+
+### When to Simplify
+You can use the simplified version if you:
+1. Only need basic error handling
+2. Don't require parsing of error response bodies
+3. Want to reduce dependencies and complexity
 6. **Logging**: Log errors but don't fail the entire operation if email sending fails
 
 #### Email Content Best Practices:
@@ -439,7 +556,7 @@ The Mailer Service is built with Go and uses:
 - **Health Check**: Available via `/metrics` endpoint
 - **Documentation**: Available via `/swagger/*any` endpoint
 
-### Environment Variables Required
+### [↑](#mailer-service-usage-standards) Environment Variables Required
 The Mailer Service requires the following environment variables:
 - `SMTP_SERVER`: SMTP server hostname
 - `SMTP_USER`: SMTP username
