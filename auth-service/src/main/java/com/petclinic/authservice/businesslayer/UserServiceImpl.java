@@ -197,7 +197,6 @@ public class UserServiceImpl implements UserService {
                 "    </div>" +
                 "</body>" +
                 "</html>";
-`
         String plainText = "VERIFY YOUR PET CLINIC ACCOUNT\n\n" +
                 "Hello " + user.getUsername() + ",\n\n" +
                 "Welcome to Pet Clinic! We're excited to have you on board.\n\n" +
