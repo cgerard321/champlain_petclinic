@@ -215,8 +215,8 @@ public class CartServiceClientTest {
                 .verify();
     }
 
-    @Test
-    void testGetCartByCustomerId_Success() {
+        @Test
+        void testGetCartByCustomerId_Success() throws InterruptedException {
         String customerId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
         String responseBody = """
             {
@@ -246,10 +246,12 @@ public class CartServiceClientTest {
                     assertEquals(1, cartResponseDTO.getProducts().get(0).getQuantityInCart());
                 })
                 .verifyComplete();
+
+                assertEquals("/api/v1/customers/" + customerId + "/cart", mockWebServer.takeRequest().getPath());
     }
 
-    @Test
-    void testGetCartByCustomerId_NotFound() {
+        @Test
+        void testGetCartByCustomerId_NotFound() throws InterruptedException {
         String customerId = "non-existent-cart-id";
         String responseBody = """
             {
@@ -272,6 +274,8 @@ public class CartServiceClientTest {
                     assert exception.getResponseBodyAsString().contains("Cart for customer id was not found");
                 })
                 .verify();
+
+                assertEquals("/api/v1/customers/" + customerId + "/cart", mockWebServer.takeRequest().getPath());
     }
 
     /*

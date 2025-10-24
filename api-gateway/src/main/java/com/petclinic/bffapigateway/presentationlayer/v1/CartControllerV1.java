@@ -228,12 +228,6 @@ public class CartControllerV1 {
         return mapToOkOrNotFound(cartServiceClient.checkoutCart(cartId));
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER, Roles.ADMIN})
-    @GetMapping("/customer/{customerId}")
-    public Mono<ResponseEntity<CartResponseDTO>> getCartByCustomerId(@PathVariable String customerId) {
-        return mapToOkOrNotFound(cartServiceClient.getCartByCustomerId(customerId));
-    }
-
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
     @PutMapping("/{cartId}/wishlist/{productId}/toCart")
     public Mono<ResponseEntity<CartResponseDTO>> moveProductFromWishListToCart(@PathVariable String cartId, @PathVariable String productId) {

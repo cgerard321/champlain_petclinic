@@ -512,46 +512,6 @@ public class CartControllerV1UnitTest {
         verify(cartServiceClient, times(1)).checkoutCart(cartId);
     }
 
-    // Tests for getCartByCustomerId endpoint
-    @Test
-    @DisplayName("GET /api/gateway/carts/customer/{customerId} - Should return cart by customer ID")
-    void getCartByCustomerId_withValidId_shouldReturnCart() {
-        // Arrange
-        String customerId = "customer-456";
-        CartResponseDTO cart = buildCartResponseDTO();
-        when(cartServiceClient.getCartByCustomerId(customerId))
-                .thenReturn(Mono.just(cart));
-
-        // Act & Assert
-        webTestClient.get()
-                .uri(baseCartURL + "/customer/" + customerId)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(CartResponseDTO.class)
-                .isEqualTo(cart);
-
-        verify(cartServiceClient, times(1)).getCartByCustomerId(customerId);
-    }
-
-    @Test
-    @DisplayName("GET /api/gateway/carts/customer/{customerId} - Should return 404 when customer has no cart")
-    void getCartByCustomerId_withNonExistingId_shouldReturnNotFound() {
-        // Arrange
-        String customerId = "non-existent-customer";
-        when(cartServiceClient.getCartByCustomerId(customerId))
-                .thenReturn(Mono.empty());
-
-        // Act & Assert
-        webTestClient.get()
-                .uri(baseCartURL + "/customer/" + customerId)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound();
-
-        verify(cartServiceClient, times(1)).getCartByCustomerId(customerId);
-    }
-
     // Tests for wishlist operations
     @Test
     @DisplayName("PUT /api/gateway/carts/{cartId}/wishlist/{productId}/toCart - Should move product from wishlist to cart")

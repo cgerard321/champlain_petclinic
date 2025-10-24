@@ -121,16 +121,6 @@ public class CartController {
                 .onErrorResume(InvalidInputException.class, e -> Mono.just(ResponseEntity.badRequest().body(null)));
     }
 
-    @GetMapping(value = "/customer/{customerId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<CartResponseModel>> getCartByCustomerId(@PathVariable String customerId) {
-        return Mono.just(customerId)
-                .filter(id -> id.length() == 36)
-                .switchIfEmpty(Mono.error(new InvalidInputException("Provided customer id is invalid: " + customerId)))
-                .flatMap(cartService::findCartByCustomerId)
-                .map(ResponseEntity::ok);
-    }
-
-
     /**
      * Move product to wishlist.
      * Moves a specified product from the cart to the wishlist.

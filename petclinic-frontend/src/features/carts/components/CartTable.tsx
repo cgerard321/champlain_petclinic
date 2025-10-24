@@ -167,7 +167,7 @@ export default function CartListTable(): JSX.Element {
   const removeLine = useCallback(async (cartId: string, productId: string) => {
     try {
       setActionLoadingId(productId);
-      await axiosInstance.delete(`/carts/${cartId}/${productId}`, {
+      await axiosInstance.delete(`/carts/${cartId}/products/${productId}`, {
         useV2: false,
       });
 

@@ -7,9 +7,9 @@ export async function fetchCartIdByCustomerId(
   userId: string
 ): Promise<string | null> {
   try {
-    // was http://localhost:8080/api/v2/gateway/carts/customer/${userId}
+    // RESTful location: http://localhost:8080/api/gateway/customers/{customerId}/cart
     const { data } = await axiosInstance.get<CartIdResponse>(
-      `/carts/customer/${userId}`,
+      `/customers/${userId}/cart`,
       { useV2: false }
     );
     return data?.cartId ?? null;

@@ -4,7 +4,6 @@ import com.petclinic.cartsservice.MockServerConfigProductService;
 import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.CartRepository;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
-import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
 import org.junit.jupiter.api.*;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -132,6 +131,37 @@ class CartControllerIntegrationTest {
     }
 
 
+
+    @Test
+    void whenGetCartByCustomerId_thenReturnCart() {
+        String customerId = cart1.getCustomerId();
+
+        webTestClient.get()
+                .uri("/api/v1/customers/{customerId}/cart", customerId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(CartResponseModel.class)
+                .consumeWith(response -> {
+                    CartResponseModel body = response.getResponseBody();
+                    assertNotNull(body);
+                    assertEquals(customerId, body.getCustomerId());
+                });
+    }
+
+    @Test
+    void whenGetCartByInvalidCustomerId_thenReturnBadRequest() {
+        String invalidCustomerId = "invalid-id";
+
+        webTestClient.get()
+                .uri("/api/v1/customers/{customerId}/cart", invalidCustomerId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(String.class)
+                .consumeWith(response -> assertNotNull(response.getResponseBody()));
+    }
 
     @Test
     public void testMoveProductFromWishListToCart_ValidProduct_MovesProduct() {

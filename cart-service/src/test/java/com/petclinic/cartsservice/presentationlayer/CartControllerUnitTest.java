@@ -444,50 +444,6 @@ class CartControllerUnitTest {
     }
 
     @Test
-    void whenGetCartByValidCustomerId_thenReturnCartResponseModel() {
-        //arrange
-        String validCustomerId = "123e4567-e89b-12d3-a456-426614174000";
-        CartResponseModel cartResponseModel = CartResponseModel.builder()
-                .customerId(validCustomerId)
-                .cartId("cart123")
-                .build();
-
-        when(cartService.findCartByCustomerId(validCustomerId)).thenReturn(Mono.just(cartResponseModel));
-
-        //act & assert
-        webTestClient
-                .get()
-                .uri("/api/v1/carts/customer/" + validCustomerId)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(CartResponseModel.class)
-                .value(result -> {
-                    assertEquals(validCustomerId, result.getCustomerId());
-                    assertEquals("cart123", result.getCartId());
-                });
-    }
-
-    @Test
-    void whenGetCartByNonExistingCustomerId_thenReturnNotFound() {
-        //arrange
-        String nonExistingCustomerId = "123e4567-e89b-12d3-a456-426614174999";
-        when(cartService.findCartByCustomerId(nonExistingCustomerId))
-                .thenReturn(Mono.error(new NotFoundException("Cart not found for customer id: " + nonExistingCustomerId)));
-
-        //act & assert
-        webTestClient
-                .get()
-                .uri("/api/v1/carts/customer/" + nonExistingCustomerId)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound()
-                .expectBody()
-                .jsonPath("$.message").isEqualTo("Cart not found for customer id: " + nonExistingCustomerId);
-    }
-
-    @Test
     public void whenRemoveProductFromCart_withValidCartIdAndProductId_thenReturnUpdatedCart() {
         // Arrange
         String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";

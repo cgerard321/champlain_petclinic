@@ -27,13 +27,15 @@ public class CartServiceClient {
     private final WebClient.Builder webClientBuilder;
     private final String cartServiceUrl;
     private final String promoCodeServiceUrl;
+    private final String customerCartServiceUrl;
 
     public CartServiceClient(WebClient.Builder webClientBuilder,
                              @Value("${app.cart-service.host}") String CartServiceHost,
                              @Value("${app.cart-service.port}") String CartServicePort) {
         this.webClientBuilder = webClientBuilder;
-        cartServiceUrl = "http://" + CartServiceHost + ":" + CartServicePort + "/api/v1/carts";
-        promoCodeServiceUrl = "http://" + CartServiceHost + ":" + CartServicePort + "/api/v1/promos";
+    cartServiceUrl = "http://" + CartServiceHost + ":" + CartServicePort + "/api/v1/carts";
+    customerCartServiceUrl = "http://" + CartServiceHost + ":" + CartServicePort + "/api/v1/customers";
+    promoCodeServiceUrl = "http://" + CartServiceHost + ":" + CartServicePort + "/api/v1/promos";
     }
 
     public Flux<CartResponseDTO> getAllCarts() {
@@ -289,7 +291,7 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
     public Mono<CartResponseDTO> getCartByCustomerId(final String customerId) {
         return webClientBuilder.build()
                 .get()
-                .uri(cartServiceUrl + "/customer/" + customerId)
+                .uri(customerCartServiceUrl + "/" + customerId + "/cart")
                 .retrieve()
                 .bodyToMono(CartResponseDTO.class);
     }
