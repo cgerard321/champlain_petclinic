@@ -5,3 +5,6 @@ mod file;
 mod minio_client;
 mod service;
 pub mod store;
+mod config;
+
+
