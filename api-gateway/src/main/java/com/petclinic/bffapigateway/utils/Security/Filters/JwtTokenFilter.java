@@ -68,10 +68,8 @@ public class JwtTokenFilter implements WebFilter {
         AUTH_WHITELIST.put("/images/**", "/images/**");
         AUTH_WHITELIST.put("/images/*", "/images/*");
 
-        AUTH_WHITELIST.put("/actuator", "/actuator");
-        AUTH_WHITELIST.put("/actuator/**", "/actuator/**");
+        AUTH_WHITELIST.put("/actuator/health", "/actuator/health");
         AUTH_WHITELIST.put("/health", "/health");
-        AUTH_WHITELIST.put("/health/**", "/health/**");
     }
 
     @SuppressWarnings("NullableProblems")
