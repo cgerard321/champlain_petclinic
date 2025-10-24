@@ -40,6 +40,7 @@ or
 
 docker-compose up --build
 ```
+To learn more about how docker profiles are used in general, I strongly encourage a short read on how docker profiles function [here](https://docs.docker.com/compose/how-tos/profiles/).
 ## Bring up Frontend
 React frontend:
 ```
