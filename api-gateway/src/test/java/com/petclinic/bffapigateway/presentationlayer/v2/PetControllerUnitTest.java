@@ -92,9 +92,9 @@ class PetControllerUnitTest {
     @Test
     void testGetPetByPetId_Success() {
         // Mock service layer method
-        when(customersServiceClient.getPetByPetId("pet123")).thenReturn(Mono.just(petResponseDTO));
+        when(customersServiceClient.getPetByPetId("pet123", false)).thenReturn(Mono.just(petResponseDTO));
 
-        Mono<ResponseEntity<PetResponseDTO>> result = petController.getPetByPetId("pet123");
+        Mono<ResponseEntity<PetResponseDTO>> result = petController.getPetForOwner("Owner123","pet123", false);
 
         StepVerifier.create(result)
                 .expectNextMatches(response -> response.getStatusCode() == HttpStatus.OK && response.getBody().getPetId().equals("pet123"))
@@ -104,9 +104,9 @@ class PetControllerUnitTest {
     @Test
     void testGetPetByPetId_NotFound() {
         // Mock service layer method for not found scenario
-        when(customersServiceClient.getPetByPetId("pet123")).thenReturn(Mono.empty());
+        when(customersServiceClient.getPetByPetId("pet123", false)).thenReturn(Mono.empty());
 
-        Mono<ResponseEntity<PetResponseDTO>> result = petController.getPetByPetId("pet123");
+        Mono<ResponseEntity<PetResponseDTO>> result = petController.getPetForOwner("Owner123","pet123", false);
 
         StepVerifier.create(result)
                 .expectNextMatches(response -> response.getStatusCode() == HttpStatus.NOT_FOUND)
