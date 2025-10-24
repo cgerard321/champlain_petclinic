@@ -55,7 +55,7 @@ public class DataSetupService implements CommandLineRunner {
                 .subscribe();
 
 
-        Pet p1 = new Pet("c3eecf3a-d732-46d6-9e51-ab03314f3c4d", "0e4d8481-b611-4e52-baed-af16caa8bf8a", "f470653d-05c5-4c45-b7a0-7d70f003d2ac", "Leo", new SimpleDateFormat("yyyyMMdd").parse("2010-05-20"), "1", "1", "false", "3.7");
+        Pet p1 = new Pet("c3eecf3a-d732-46d6-9e51-ab03314f3c4d", "0e4d8481-b611-4e52-baed-af16caa8bf8a", "f470653d-05c5-4c45-b7a0-7d70f003d2ac", "Leo", new SimpleDateFormat("yyyyMMdd").parse("2010-05-20"), "1", "3e5a214b-009d-4a25-9313-344676e6157d", "false", "3.7");
         Pet p2 = new Pet("180143e7-547d-46c2-82fd-7c84547e126c", "ecb109cd-57ea-4b85-b51e-99751fd1c349", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", "Basil", new SimpleDateFormat("yyyyMMdd").parse("2002-08-06"), "6", "1", "true", "0.20");
         Pet p3 = new Pet("6566cc34-21f7-4f71-9388-c70c95b01636", "53163352-8398-4513-bdff-b7715c056d1d", "3f59dca2-903e-495c-90c3-7f4d01f3a2aa", "Rosy", new SimpleDateFormat("yyyyMMdd").parse("2001-04-17"), "2", "1", "false", "5.2");
         Pet p4 = new Pet("daa049e0-b6ec-4465-a20e-6bd4be11606e", "7056652d-f2fd-4873-a480-5d2e86bed641", "3f59dca2-903e-495c-90c3-7f4d01f3a2aa", "Jewel", new SimpleDateFormat("yyyyMMdd").parse("2000-03-07"), "2", "1", "true", "3.8");

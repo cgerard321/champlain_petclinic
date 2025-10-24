@@ -148,5 +148,11 @@ public class ProductController {
                 .then(Mono.just(ResponseEntity.noContent().build()));
     }
 
+    @GetMapping(value = "/enums")
+    public Mono<ResponseEntity<ProductEnumsResponseModel>> getProductsEnumValues(){
+        return productService.getProductsEnumValues()
+                .map(ResponseEntity::ok);
+    }
+
 
 }
