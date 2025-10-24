@@ -238,8 +238,6 @@ services:
     <<: *mysql
     image: mysql:5.7
     platform: linux/amd64
-    ports:
-      - "3310:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=rootpwd
       - MYSQL_DATABASE=auth-db
@@ -254,8 +252,6 @@ services:
     <<: *mysql
     image: mysql:5.7
     platform: linux/amd64
-    ports:
-      - "3311:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=rootpwd
       - MYSQL_DATABASE=files-db
@@ -273,8 +269,6 @@ services:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=pwd
       - POSTGRES_DB=images
-    ports:
-      - "5432:5432"
     volumes:
       - postgres-vet-data:/var/lib/postgresql/data
     restart: unless-stopped
@@ -286,8 +280,6 @@ services:
     <<: *mongo
     image: mongo
     container_name: mongo-vet
-    ports:
-      - "27017:27017"
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=password
@@ -300,8 +292,6 @@ services:
     <<: *mongo
     image: mongo
     container_name: mongo-billing
-    ports:
-      - "27018:27017"
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=password
@@ -314,8 +304,6 @@ services:
     <<: *mongo
     image: mongo
     container_name: mongo-visits
-    ports:
-      - "27015:27017"
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=password
@@ -328,8 +316,6 @@ services:
     <<: *mongo
     image: mongo
     container_name: mongo-customers
-    ports:
-      - "27019:27017"
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=password
@@ -342,8 +328,6 @@ services:
     <<: *mongo
     image: mongo
     container_name: mongo-inventory
-    ports:
-      - "27020:27017"
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=password
@@ -356,8 +340,6 @@ services:
     <<: *mongo
     image: mongo
     container_name: mongo-products
-    ports:
-      - "27021:27017"
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=password
@@ -370,8 +352,6 @@ services:
     <<: *mongo
     image: mongo
     container_name: mongo-carts
-    ports:
-      - "27022:27017"
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=password
