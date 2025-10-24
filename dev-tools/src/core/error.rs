@@ -18,7 +18,7 @@ pub enum AppError {
     #[error("Unprocessable entity: {0}")]
     UnprocessableEntity(String),
     #[error("Dependency failed")]
-    Dependency, // generic “upstream” failure
+    FailedDependency, // generic “upstream” failure
     #[error("Internal error")]
     Internal,
 }
@@ -31,7 +31,7 @@ impl AppError {
             AppError::Forbidden => Status::Forbidden,
             AppError::NotFound(_) => Status::NotFound,
             AppError::UnprocessableEntity(_) => Status::UnprocessableEntity,
-            AppError::Dependency => Status::FailedDependency,
+            AppError::FailedDependency => Status::FailedDependency,
             AppError::Internal => Status::InternalServerError,
         }
     }
@@ -41,7 +41,7 @@ impl AppError {
             AppError::Forbidden => "forbidden",
             AppError::NotFound(_) => "not_found",
             AppError::UnprocessableEntity(_) => "unprocessable_entity",
-            AppError::Dependency => "dependency_failed",
+            AppError::FailedDependency => "dependency_failed",
             AppError::Internal => "internal_error",
         }
     }
@@ -52,7 +52,7 @@ impl AppError {
                 m.clone()
             }
             AppError::Forbidden => "You don't have access to this resource".into(),
-            AppError::Dependency => "A dependent service failed".into(),
+            AppError::FailedDependency => "A dependent service failed".into(),
             AppError::Internal => "An unexpected error occurred".into(),
         }
     }
