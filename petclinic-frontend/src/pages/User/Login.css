@@ -50,9 +50,9 @@ input[type='password'] {
   font-size: 14px;
 }
 
-.icon {
+.icon-eye {
   position: absolute;
-  top: -15px;
+  top: -10%;
   right: 0;
   border: none;
   background-color: transparent;

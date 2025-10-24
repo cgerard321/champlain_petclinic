@@ -124,7 +124,7 @@ export default function Login(): JSX.Element {
               onClick={togglePasswordVisibility}
               type="button"
             >
-              <img className="icon" src={eyeDark} title="showPassword" />
+              <img className="icon-eye" src={eyeDark} title="showPassword" />
             </button>
           </div>
           <br />
