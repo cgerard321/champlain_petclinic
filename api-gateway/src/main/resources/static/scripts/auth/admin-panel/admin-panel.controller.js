@@ -1,6 +1,6 @@
 'use strict';
 angular.module('adminPanel')
-    .controller('AdminPanelController', ['$http', '$scope', "authProvider", "$window", function ($http, $scope, authProvider, $window) {
+    .controller('AdminPanelController', ['$http', '$scope', 'authProvider', '$window', function ($http, $scope, authProvider, $window) {
 
         var self = this;
         self.users = []
@@ -40,20 +40,58 @@ angular.module('adminPanel')
             }
         };
 
+        self.showModal = false;
+        self.userToDelete = null;
+        
 
-        $scope.removeUser = function (userid) {
-            $http.delete('api/gateway/users/' + userid, {
-                headers: {'Authorization': "Bearer " + authProvider.getUser().token}})
-                .then(function () {
-                    $http.get('api/gateway/users', {
-                        headers: {'Authorization': "Bearer " + authProvider.getUser().token}})
-                        .then(function (resp) {
-                            self.users = resp.data;
-                            alert("User has been deleted successfully.");
-                            $window.location.reload();
-                        });
-                });
+        self.showDeleteModal = function(userId) {
+            self.userToDelete = userId;
+            self.showModal = true;
         };
+        
+
+        self.confirmDelete = function() {
+            if (!self.userToDelete) return;
+            
+            $http.delete('api/gateway/users/' + self.userToDelete, {
+                headers: {'Authorization': 'Bearer ' + authProvider.getUser().token}
+            })
+            .then(function() {
+                return $http.get('api/gateway/users', {
+                    headers: {'Authorization': 'Bearer ' + authProvider.getUser().token}
+                });
+            })
+            .then(function(resp) {
+                self.users = resp.data;
+                self.showModal = false;
+                self.userToDelete = null;
+                alert('User has been deleted successfully.');
+            })
+            .catch(function(error) {
+                console.error('Error deleting user:', error);
+                alert('Failed to delete user. Please try again.');
+            });
+        };
+        
+
+        self.cancelDelete = function() {
+            self.showModal = false;
+            self.userToDelete = null;
+        };
+        
+
+        $scope.removeUser = function(userId) {
+            self.showDeleteModal(userId);
+        };
+        
+
+        $scope.$watch('$ctrl.showModal', function(newVal) {
+            if (newVal) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = 'auto';
+            }
+        });
 
 
     }
