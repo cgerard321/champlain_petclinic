@@ -7,38 +7,13 @@ export async function archiveVisit(
   onSuccess: (updatedVisit: Visit) => void
 ): Promise<void> {
   try {
-    // Fetch existing visit so we can include required fields (like visitDate)
-    const existingResponse = await axiosInstance.get<VisitResponseModel>(
-      `/visits/${visitId}`,
-      {
-        useV2: false,
-      }
+    const putResponse = await axiosInstance.patch<VisitResponseModel>(
+      `/visits/${visitId}/status/ARCHIVED`,
+      {},
+      { useV2: false }
     );
-    const existing = existingResponse.data;
+    const updatedVisit = putResponse.data;
 
-    const requestBody = {
-      visitDate: existing.visitDate,
-      description: existing.description,
-      petId: existing.petId,
-      practitionerId: existing.practitionerId,
-      isEmergency: existing.isEmergency,
-      status: 'ARCHIVED',
-    };
-
-    await axiosInstance.put(`/visits/${visitId}`, requestBody, {
-      useV2: false,
-    });
-
-    // Fetch the updated visit data from the backend
-    const updatedVisitResponse = await axiosInstance.get<VisitResponseModel>(
-      `/visits/${visitId}`,
-      {
-        useV2: false,
-      }
-    );
-    const updatedVisit = updatedVisitResponse.data;
-
-    // Call the success callback with the updated visit
     onSuccess(updatedVisit);
   } catch (error) {
     console.error('Error archiving visit:', error);

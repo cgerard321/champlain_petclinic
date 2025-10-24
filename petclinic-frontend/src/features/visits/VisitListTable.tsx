@@ -26,6 +26,7 @@ export default function VisitListTable(): JSX.Element {
   const isVet = IsVet();
   const isAdmin = IsAdmin();
   const isReceptionist = IsReceptionist();
+  const isStaffMember = isVet || isAdmin || isReceptionist;
   // full list fetched from backend
   const [visits, setVisits] = useState<Visit[]>([]);
   // list currently shown in the UI (filtered by search term / tabs)
@@ -71,7 +72,7 @@ export default function VisitListTable(): JSX.Element {
 
     let baseList = visits;
 
-    if ((isVet || isAdmin || isReceptionist) && currentTab !== 'Cancelled') {
+    if (isStaffMember && currentTab !== 'Cancelled') {
       baseList = visits.filter(v => v.status !== 'CANCELLED');
     }
 
@@ -83,7 +84,7 @@ export default function VisitListTable(): JSX.Element {
     } else {
       setDisplayedVisits(sortVisits(baseList));
     }
-  }, [searchTerm, visits, currentTab, isVet, isAdmin, isReceptionist]);
+  }, [searchTerm, visits, currentTab, isStaffMember]);
 
   // Filter visits based on status
   // Derive the different lists from the displayed list so search / tabs compose
