@@ -24,10 +24,14 @@ public class PetControllerV1 {
     private final CustomersServiceClient customersServiceClient;
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET, Roles.OWNER,Roles.RECEPTIONIST})
-    @GetMapping("/{petId}")
-    public Mono<ResponseEntity<PetResponseDTO>> getPetByPetId(@PathVariable String petId) {
-        return customersServiceClient.getPetByPetId(petId)
-                .map(ResponseEntity::ok)
+    @GetMapping("/{ownerId}/pets/{petId}")
+    public Mono<ResponseEntity<PetResponseDTO>> getPetByPetId(
+            @PathVariable String ownerId,
+            @PathVariable String petId,
+            @RequestParam(required = false, defaultValue = "false") boolean includePhoto) {
+
+        return customersServiceClient.getPet(ownerId, petId, includePhoto)
+                .map(p -> ResponseEntity.ok(p))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
@@ -42,8 +46,9 @@ public class PetControllerV1 {
     @GetMapping("/owners/{ownerId}/pets/{petId}")
     public Mono<ResponseEntity<PetResponseDTO>> getPetForOwner(
             @PathVariable String ownerId,
-            @PathVariable String petId) {
-        return customersServiceClient.getPetByPetId(petId)
+            @PathVariable String petId,
+            @RequestParam(required = false, defaultValue = "false") boolean includePhoto) {
+        return customersServiceClient.getPetByPetId(petId, includePhoto)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
