@@ -73,6 +73,7 @@ out/
 .env
 cover.html
 app
+data/
 
 # Ignore swagger docs for mailer
 mailer-service/docs

@@ -19,9 +19,19 @@ public class PetController {
     private PetService petService;
 
     @GetMapping("/{petId}")
-    public Mono<PetResponseDTO> getPetDTOByPetId(@PathVariable String petId) {
-        return petService.getPetById(petId)
-                .map(EntityDTOUtil::toPetResponseDTO);
+    public Mono<PetResponseDTO> getPet(
+            @PathVariable String petId,
+            @RequestParam(required = false, defaultValue = "false") boolean includePhoto) {
+        return petService.getPetById(petId, includePhoto);
+    }
+
+    @GetMapping("/pet/{petId}")
+    public Mono<ResponseEntity<PetResponseDTO>> getPetByPetId(
+            @PathVariable String petId,
+            @RequestParam(required = false, defaultValue = "false") boolean includePhoto) {
+        return petService.getPetById(petId, includePhoto)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/owner/{ownerId}/pets")

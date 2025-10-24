@@ -147,30 +147,42 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     }
 
     @Override
-    public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductsField(String inventoryId, String productName, Double productPrice, Integer productQuantity, Double productSalePrice) {
+    public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductsField(String inventoryId, String productName, Double minPrice, Double maxPrice, Integer productQuantity, Double minSalePrice, Double maxSalePrice) {
 
-        if (productName != null && productPrice != null && productQuantity != null && productSalePrice != null) {
-            return productRepository
-                    .findAllProductsByInventoryIdAndProductNameAndProductPriceAndProductQuantityAndProductSalePrice(inventoryId,
-                            productName, productPrice, productQuantity, productSalePrice)
-                    .map(EntityDTOUtil::toProductResponseDTO)
-                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
-                            "\nOr ProductName: " + productName + "\nOr ProductPrice: " + productPrice + "\nOr ProductQuantity: " + productQuantity + "\nOr ProductSalePrice: " + productSalePrice)));
+        Double effectiveMinPrice = minPrice != null ? minPrice : 0.0;
+        Double effectiveMaxPrice = maxPrice != null ? maxPrice : Double.MAX_VALUE;
+        Double effectiveMinSalePrice = minSalePrice != null ? minSalePrice : 0.0;
+        Double effectiveMaxSalePrice = maxSalePrice != null ? maxSalePrice : Double.MAX_VALUE;
+
+        if (minPrice != null || maxPrice != null) {
+            Flux<Product> result = productRepository.findAllProductsByInventoryIdAndProductPriceBetween(inventoryId, effectiveMinPrice, effectiveMaxPrice);
+            if (minSalePrice != null || maxSalePrice != null) {
+                result = result.filter(p -> p.getProductSalePrice() >= effectiveMinSalePrice && p.getProductSalePrice() <= effectiveMaxSalePrice);
+            }
+            if (productQuantity != null) {
+                result = result.filter(p -> p.getProductQuantity().equals(productQuantity));
+            }
+            if (productName != null) {
+                String escapedName = Pattern.quote(productName);
+                String regexPattern = "(?i)^" + escapedName + ".*";
+                result = result.filter(p -> p.getProductName().matches(regexPattern));
+            }
+            return result.map(EntityDTOUtil::toProductResponseDTO).switchIfEmpty(Mono.error(new NotFoundException("No products found in price range")));
         }
-        if (productPrice != null && productQuantity != null) {
-            return productRepository
-                    .findAllProductsByInventoryIdAndProductPriceAndProductQuantity(inventoryId, productPrice, productQuantity)
-                    .map(EntityDTOUtil::toProductResponseDTO)
-                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
-                            "\nOr ProductPrice: " + productPrice + "\nOr ProductQuantity: " + productQuantity)));
+
+        if (minSalePrice != null || maxSalePrice != null) {
+            Flux<Product> result = productRepository.findAllProductsByInventoryIdAndProductSalePriceBetween(inventoryId, effectiveMinSalePrice, effectiveMaxSalePrice);
+            if (productQuantity != null) {
+                result = result.filter(p -> p.getProductQuantity().equals(productQuantity));
+            }
+            if (productName != null) {
+                String escapedName = Pattern.quote(productName);
+                String regexPattern = "(?i)^" + escapedName + ".*";
+                result = result.filter(p -> p.getProductName().matches(regexPattern));
+            }
+            return result.map(EntityDTOUtil::toProductResponseDTO).switchIfEmpty(Mono.error(new NotFoundException("No products found in sale price range")));
         }
-        if (productPrice != null) {
-            return productRepository
-                    .findAllProductsByInventoryIdAndProductPrice(inventoryId, productPrice)
-                    .map(EntityDTOUtil::toProductResponseDTO)
-                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
-                            "\nOr ProductPrice: " + productPrice)));
-        }
+
         if (productQuantity != null) {
             return productRepository
                     .findAllProductsByInventoryIdAndProductQuantity(inventoryId, productQuantity)
@@ -178,14 +190,6 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                     .map(EntityDTOUtil::toProductResponseDTO)
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
                             "\nOr ProductQuantity: " + productQuantity)));
-        }
-        if (productSalePrice != null) {
-            return productRepository
-                    .findAllProductsByInventoryIdAndProductSalePrice(inventoryId, productSalePrice)
-
-                    .map(EntityDTOUtil::toProductResponseDTO)
-                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
-                            "\nOr ProductSalePrice: " + productSalePrice)));
         }
 
 
@@ -216,36 +220,48 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     }
 
     @Override
-    public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductsFieldsPagination(String inventoryId, String productName, Double productPrice, Integer productQuantity, Pageable pageable) {
+    public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductsFieldsPagination(String inventoryId, String productName, Double minPrice, Double maxPrice, Integer productQuantity, Double minSalePrice, Double maxSalePrice, Pageable pageable) {
 
-        if (productName != null && productPrice != null && productQuantity != null) {
-            return productRepository
-                    .findAllProductsByInventoryIdAndProductNameAndProductPriceAndProductQuantity(inventoryId,
-                            productName, productPrice, productQuantity)
-                    .map(EntityDTOUtil::toProductResponseDTO)
+        Double effectiveMinPrice = minPrice != null ? minPrice : 0.0;
+        Double effectiveMaxPrice = maxPrice != null ? maxPrice : Double.MAX_VALUE;
+        Double effectiveMinSalePrice = minSalePrice != null ? minSalePrice : 0.0;
+        Double effectiveMaxSalePrice = maxSalePrice != null ? maxSalePrice : Double.MAX_VALUE;
+
+        if (minPrice != null || maxPrice != null) {
+            Flux<Product> result = productRepository.findAllProductsByInventoryIdAndProductPriceBetween(inventoryId, effectiveMinPrice, effectiveMaxPrice);
+            if (minSalePrice != null || maxSalePrice != null) {
+                result = result.filter(p -> p.getProductSalePrice() >= effectiveMinSalePrice && p.getProductSalePrice() <= effectiveMaxSalePrice);
+            }
+            if (productQuantity != null) {
+                result = result.filter(p -> p.getProductQuantity().equals(productQuantity));
+            }
+            if (productName != null) {
+                String escapedName = Pattern.quote(productName);
+                String regexPattern = "(?i)^" + escapedName + ".*";
+                result = result.filter(p -> p.getProductName().matches(regexPattern));
+            }
+            return result.map(EntityDTOUtil::toProductResponseDTO)
                     .skip((long) pageable.getPageNumber() * pageable.getPageSize())
                     .take(pageable.getPageSize())
-                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
-                            "\nOr ProductName: " + productName + "\nOr ProductPrice: " + productPrice + "\nOr ProductQuantity: " + productQuantity)));
+                    .switchIfEmpty(Mono.error(new NotFoundException("No products found in price range")));
         }
-        if (productPrice != null && productQuantity != null) {
-            return productRepository
-                    .findAllProductsByInventoryIdAndProductPriceAndProductQuantity(inventoryId, productPrice, productQuantity)
-                    .map(EntityDTOUtil::toProductResponseDTO)
+
+        if (minSalePrice != null || maxSalePrice != null) {
+            Flux<Product> result = productRepository.findAllProductsByInventoryIdAndProductSalePriceBetween(inventoryId, effectiveMinSalePrice, effectiveMaxSalePrice);
+            if (productQuantity != null) {
+                result = result.filter(p -> p.getProductQuantity().equals(productQuantity));
+            }
+            if (productName != null) {
+                String escapedName = Pattern.quote(productName);
+                String regexPattern = "(?i)^" + escapedName + ".*";
+                result = result.filter(p -> p.getProductName().matches(regexPattern));
+            }
+            return result.map(EntityDTOUtil::toProductResponseDTO)
                     .skip((long) pageable.getPageNumber() * pageable.getPageSize())
                     .take(pageable.getPageSize())
-                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
-                            "\nOr ProductPrice: " + productPrice + "\nOr ProductQuantity: " + productQuantity)));
+                    .switchIfEmpty(Mono.error(new NotFoundException("No products found in sale price range")));
         }
-        if (productPrice != null) {
-            return productRepository
-                    .findAllProductsByInventoryIdAndProductPrice(inventoryId, productPrice)
-                    .map(EntityDTOUtil::toProductResponseDTO)
-                    .skip((long) pageable.getPageNumber() * pageable.getPageSize())
-                    .take(pageable.getPageSize())
-                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
-                            "\nOr ProductPrice: " + productPrice)));
-        }
+
         if (productQuantity != null) {
             return productRepository
                     .findAllProductsByInventoryIdAndProductQuantity(inventoryId, productQuantity)

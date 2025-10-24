@@ -75,54 +75,57 @@ public class PetController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
-    @GetMapping(value = "/{petId}")
-    public Mono<ResponseEntity<PetResponseDTO>> getPetByPetId(@PathVariable String petId) {
-        return customersServiceClient.getPetByPetId(petId)
-                .map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
     @GetMapping("/owners/{ownerId}/pets")
     public Flux<PetResponseDTO> getPetsByOwnerId(@PathVariable String ownerId) {
         return customersServiceClient.getPetsByOwnerId(ownerId);
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.OWNER, Roles.VET})
-    @DeleteMapping(value = "/{petId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<PetResponseDTO>> deletePet(
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET, Roles.OWNER, Roles.RECEPTIONIST})
+    @GetMapping("/owners/{ownerId}/pets/{petId}")
+    public Mono<ResponseEntity<PetResponseDTO>> getPetForOwner(
+            @PathVariable String ownerId,
             @PathVariable String petId,
-            @CookieValue("Bearer") String jwtToken) {
-
-        return Mono.just(petId)
-                .filter(id -> id.length() == 36)
-                .switchIfEmpty(Mono.error(new InvalidInputException("Provided pet id is invalid: " + petId)))
-                .flatMap(validPetId -> {
-                    // First get the pet to check ownership
-                    return customersServiceClient.getPetByPetId(validPetId)
-                            .flatMap(pet -> {
-                                // Validate token and get user info
-                                return authServiceClient.validateToken(jwtToken)
-                                        .flatMap(tokenResponse -> {
-                                            String userId = tokenResponse.getBody().getUserId();
-                                            List<String> roles = tokenResponse.getBody().getRoles();
-
-                                            // Check if user has ADMIN or VET role (bypass ownership check)
-                                            boolean isAdminOrVet = roles.contains("ADMIN") || roles.contains("VET");
-
-                                            if (isAdminOrVet || pet.getOwnerId().equals(userId)) {
-                                                // User is authorized to delete this pet
-                                                return customersServiceClient.deletePetByPetIdV2(validPetId);
-                                            } else {
-                                                // User is not authorized to delete this pet
-                                                return Mono.error(new ForbiddenAccessException("You are not allowed to delete this pet"));
-                                            }
-                                        });
-                            });
-                })
+            @RequestParam(required = false, defaultValue = "false") boolean includePhoto) {
+        return customersServiceClient.getPetByPetId(petId, includePhoto)
                 .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
+//    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.OWNER, Roles.VET})
+//    @DeleteMapping(value = "/{petId}", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public Mono<ResponseEntity<PetResponseDTO>> deletePet(
+//            @PathVariable String petId,
+//            @CookieValue("Bearer") String jwtToken) {
+//
+//        return Mono.just(petId)
+//                .filter(id -> id.length() == 36)
+//                .switchIfEmpty(Mono.error(new InvalidInputException("Provided pet id is invalid: " + petId)))
+//                .flatMap(validPetId -> {
+//                    // First get the pet to check ownership
+//                    return customersServiceClient.getPetByPetId(validPetId)
+//                            .flatMap(pet -> {
+//                                // Validate token and get user info
+//                                return authServiceClient.validateToken(jwtToken)
+//                                        .flatMap(tokenResponse -> {
+//                                            String userId = tokenResponse.getBody().getUserId();
+//                                            List<String> roles = tokenResponse.getBody().getRoles();
+//
+//                                            // Check if user has ADMIN or VET role (bypass ownership check)
+//                                            boolean isAdminOrVet = roles.contains("ADMIN") || roles.contains("VET");
+//
+//                                            if (isAdminOrVet || pet.getOwnerId().equals(userId)) {
+//                                                // User is authorized to delete this pet
+//                                                return customersServiceClient.deletePetByPetIdV2(validPetId);
+//                                            } else {
+//                                                // User is not authorized to delete this pet
+//                                                return Mono.error(new ForbiddenAccessException("You are not allowed to delete this pet"));
+//                                            }
+//                                        });
+//                            });
+//                })
+//                .map(ResponseEntity::ok)
+//                .defaultIfEmpty(ResponseEntity.badRequest().build());
+//    }
 
 
 }

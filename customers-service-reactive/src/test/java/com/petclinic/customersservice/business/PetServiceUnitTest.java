@@ -76,7 +76,7 @@ public class PetServiceUnitTest {
         Pet savedPet = buildPetFromRequest(petRequest, ownerId);
         OwnerResponseDTO ownerResponse = buildOwnerResponseDTO();
 
-        when(ownerService.getOwnerByOwnerId(ownerId)).thenReturn(Mono.just(ownerResponse));
+        when(ownerService.getOwnerByOwnerId(ownerId, false)).thenReturn(Mono.just(ownerResponse));
         when(repo.save(any(Pet.class))).thenReturn(Mono.just(savedPet));
 
         Mono<PetResponseDTO> result = petService.createPetForOwner(ownerId, Mono.just(petRequest));
@@ -98,7 +98,7 @@ public class PetServiceUnitTest {
         String nonExistingOwnerId = "non-existent-owner-id";
         PetRequestDTO petRequest = buildPetRequestDTO();
 
-        when(ownerService.getOwnerByOwnerId(nonExistingOwnerId)).thenReturn(Mono.empty());
+        when(ownerService.getOwnerByOwnerId(nonExistingOwnerId,false)).thenReturn(Mono.empty());
 
         Mono<PetResponseDTO> result = petService.createPetForOwner(nonExistingOwnerId, Mono.just(petRequest));
 
