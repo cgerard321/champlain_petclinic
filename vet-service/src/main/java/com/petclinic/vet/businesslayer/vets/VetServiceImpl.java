@@ -138,13 +138,18 @@ public class VetServiceImpl implements VetService {
     }
 
     @Override
-    public Mono<Void> deleteSpecialtiesBySpecialtyId(String vetId, String specialtyId) {
+    public Mono<Void> deleteSpecialtyBySpecialtyId(String vetId, String specialtyId) {
         return vetRepository.findVetByVetId(vetId)
                 .switchIfEmpty(Mono.error(new NotFoundException("No vet found with vetId: " + vetId)))
                 .flatMap(vet -> {
                     Set<Specialty> specialties = vet.getSpecialties().stream()
                             .filter(specialty -> !specialty.getSpecialtyId().equals(specialtyId))
                             .collect(Collectors.toSet());
+                    
+                    if (specialties.size() == vet.getSpecialties().size()) {
+                        return Mono.error(new NotFoundException("No specialty found with specialtyId: " + specialtyId));
+                    }
+                    
                     vet.setSpecialties(specialties);
                     return vetRepository.save(vet);
                 })
