@@ -432,7 +432,10 @@ export default function AdminBillsListTable({
               aria-label="Select currency"
               onClick={() => setCurrencyOpen((prev: boolean) => !prev)}
             >
-              <span className="currency-label">{currency}</span>
+              <span className="currency-label">
+                <span className="currency-prefix">Currency:</span>
+                <span className="currency-value">{currency}</span>
+              </span>
               <span className="caret">▾</span>
             </button>
 

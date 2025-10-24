@@ -56,6 +56,11 @@
   transform: translateY(-2px) scale(1.03);
 }
 
+:root {
+  /* global offset used to nudge bills/pagination left on wide screens */
+  --bills-offset: -130px;
+}
+
 /* Currency dropdown button (blue) */
 .currency-dropdown {
   position: relative;
@@ -84,6 +89,15 @@
   display: inline-block;
   text-align: center;
   width: 100%;
+}
+
+.currency-prefix {
+  font-weight: 600;
+  margin-right: 6px;
+}
+
+.currency-value {
+  font-weight: 500;
 }
 
 .currency-btn .caret {
@@ -151,11 +165,14 @@
 .billsListContainer {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start; /* left-align the bill cards within the centered content area */
   gap: 12px;
   padding-top: 12px;
   max-width: 100%;
   margin: 0 auto;
+  /* visual offset to nudge the cards left inside the centered content area */
+  --bills-offset: -255px;
+  transform: translateX(calc(var(--bills-offset) * -1));
 }
 
 .billCard {
@@ -381,6 +398,16 @@
     flex-direction: row;
     gap: 8px;
   }
+
+  /* do not offset cards on small screens */
+  .billsListContainer {
+    transform: none;
+    align-items: center;
+  }
+
+  .pagination-controls {
+    transform: none; /* keep pagination centered on small screens */
+  }
 }
 
 /* Modal-specific: push modal form content to the left */
@@ -490,11 +517,17 @@
   .billCard {
     width: 100%;
     padding: 10px;
+     /* reduce top spacing on small screens and keep cards centered on narrow viewports */
+  
+    margin-top: 5.25rem;
+    align-items: center;
   }
 
   .billField {
     min-width: 100%;
   }
+
+  
 
   .filter-button-row {
     flex-direction: column;
@@ -548,9 +581,37 @@
 
 .pagination-controls {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start; /* align pagination to the left edge of the bills area */
   align-items: center;
   margin-top: 20px;
+  max-width: 680px; /* align with .billCard width */
+  margin-left: auto;
+  margin-right: auto;
+  transform: translateX(calc(var(--bills-offset) * -1));
+}
+
+/* Make Previous/Next buttons blue to match site buttons */
+.pagination-controls button {
+  background: linear-gradient(90deg, #1976d2 0%, #63a4ff 100%);
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
+  transition: background 0.18s ease, box-shadow 0.12s ease, transform 0.08s ease;
+  margin: 0 14px; /* give breathing room from the page number */
+}
+
+.pagination-controls button:hover {
+  background: linear-gradient(90deg, #115293 0%, #1976d2 100%);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 14px rgba(25, 118, 210, 0.12);
+}
+
+.pagination-controls span {
+  margin: 0 8px; /* space around the page number */
 }
 
 .pagination-button {
