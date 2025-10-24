@@ -219,7 +219,7 @@ public class VisitServiceImpl implements VisitService {
 
                 //Converts Request DTO ( JSON ) into an entity
                 .map(entityDtoUtil::toVisitEntity)
-                // Setting id with the latest id prefix + 1
+                // Generate new ID with current date and incremented sequence
                 .flatMap(visit -> {
                     visit.setVisitId(IdGenerator.generateVisitId());
                     return repo.findByVisitDateAndPractitionerId(visit.getVisitDate(), visit.getPractitionerId()) // FindVisits method in repository
