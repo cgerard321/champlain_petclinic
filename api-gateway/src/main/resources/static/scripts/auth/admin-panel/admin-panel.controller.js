@@ -46,10 +46,8 @@ angular.module('adminPanel')
         self.editingUser = null;
         self.selectedRole = '';
 
-        // Open edit modal
         self.openEditModal = function(user) {
             self.editingUser = user;
-            // Set the selected role from the user's roles
             if (user.roles && user.roles.length > 0) {
                 self.selectedRole = user.roles[0].name.replace('ROLE_', '');
             } else {
@@ -58,14 +56,12 @@ angular.module('adminPanel')
             self.showEditModal = true;
         };
 
-        // Close edit modal
         self.closeEditModal = function() {
             self.showEditModal = false;
             self.editingUser = null;
             self.selectedRole = '';
         };
 
-        // Update user role
         self.updateRole = function() {
             if (!self.editingUser || !self.selectedRole) return;
             
@@ -80,7 +76,6 @@ angular.module('adminPanel')
                 }
             })
             .then(function(response) {
-                // Update the user in the local array
                 var index = self.users.findIndex(u => u.userId === self.editingUser.userId);
                 if (index !== -1) {
                     self.users[index].roles = [{ name: 'ROLE_' + self.selectedRole }];
