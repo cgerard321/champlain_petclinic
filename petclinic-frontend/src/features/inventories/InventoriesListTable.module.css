@@ -310,3 +310,32 @@ transition: transform 220ms cubic-bezier(.2,.7,.2,1);
   align-items: center;
   gap: 16px;
 }
+/* Freeze/Resume button inside the filter row header cell */
+.freezeHeaderBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: #ffffff;
+  color: #1e63ff;                 /* SVG uses currentColor */
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0;
+  line-height: 1;
+  box-shadow: 0 6px 18px rgba(0,0,0,.06);
+  transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+}
+.freezeHeaderBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(0,0,0,.12);
+  background: #f9fafb;
+}
+.freezeHeaderBtn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(0,0,0,.10);
+}
+.freezeHeaderBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(30,99,255,.25);
+}

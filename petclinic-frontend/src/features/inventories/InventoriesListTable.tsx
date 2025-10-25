@@ -1,4 +1,4 @@
-import { useState, useEffect, JSX, useRef } from 'react';
+import { useState, useEffect, JSX, useRef, type ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Inventory } from '@/features/inventories/models/Inventory.ts';
 import { InventoryType } from '@/features/inventories/models/InventoryType.ts';
@@ -14,6 +14,38 @@ import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { toggleInventoryImportant } from './api/toggleInventoryImportant';
 import EditInventory from './EditInventory';
 
+/** Minimal fade-in wrapper */
+function Reveal({
+  children,
+  durationMs = 400,
+  delayMs = 0,
+  y = 8,
+}: {
+  children: ReactNode;
+  durationMs?: number;
+  delayMs?: number;
+  y?: number;
+}): JSX.Element {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setReady(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+  return (
+    <div
+      style={{
+        opacity: ready ? 1 : 0,
+        transform: ready ? 'translateY(0)' : `translateY(${y}px)`,
+        transition: `opacity ${durationMs}ms ease, transform ${durationMs}ms ease`,
+        transitionDelay: `${delayMs}ms`,
+        willChange: 'opacity, transform',
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
 export default function InventoriesListTable(): JSX.Element {
   const isHttpUrl = (url: string): boolean => {
     try {
@@ -22,36 +54,22 @@ export default function InventoriesListTable(): JSX.Element {
     } catch {
       return false;
     }
-  }; // helper
-
-  // ---- Carousel helpers/state ----
-  const chunk = <T,>(arr: T[], size: number): T[][] =>
-    Array.from({ length: Math.ceil(arr.length / size) }, (_, i) =>
-      arr.slice(i * size, i * size + size)
-    );
-
-  // Always show exactly 4 cards per slide
-  const CARDS_PER_PAGE = 4;
+  }; //helper
 
   const [selectedInventories, setSelectedInventories] = useState<Inventory[]>(
     []
   );
-  const [inventoryName, setInventoryName] = useState<string>('');
-  const [inventoryType, setInventoryType] = useState<string>('');
+  const [inventoryName, setInventoryName] = useState('');
+  const [inventoryType, setInventoryType] = useState('');
   const [inventoryTypeList, setInventoryTypeList] = useState<InventoryType[]>(
     []
   );
-
-  const [currentSlide, setCurrentSlide] = useState<number>(0);
-  const [isFrozen, setIsFrozen] = useState<boolean>(false);
-
-  const [editOpen, setEditOpen] = useState<boolean>(false);
+  const [editOpen, setEditOpen] = useState(false);
   const [editInventoryId, setEditInventoryId] = useState<string | null>(null);
-  const [inventoryDescription, setInventoryDescription] = useState<string>('');
-  const [showConfirmDialog, setShowConfirmDialog] = useState<boolean>(false);
-  const [showAddInventoryForm, setShowAddInventoryForm] =
-    useState<boolean>(false);
-  const [showAddTypeForm, setShowAddTypeForm] = useState<boolean>(false);
+  const [inventoryDescription, setInventoryDescription] = useState('');
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showAddInventoryForm, setShowAddInventoryForm] = useState(false);
+  const [showAddTypeForm, setShowAddTypeForm] = useState(false);
   const navigate = useNavigate();
   const lowStockProductsByInventory = useRef<{
     [inventoryName: string]: ProductModel[];
@@ -61,9 +79,9 @@ export default function InventoriesListTable(): JSX.Element {
     [key: string]: number;
   }>({});
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-  const [isActionsMenuVisible, setActionsMenu] = useState<boolean>(false);
+  const [isActionsMenuVisible, setActionsMenu] = useState(false);
 
-  const [showImportantOnly, setShowImportantOnly] = useState<boolean>(false);
+  const [showImportantOnly, setShowImportantOnly] = useState(false);
 
   // viewMode controls which inventories to show: 'active' | 'archived' | 'all'
   const [viewMode, setViewMode] = useState<'active' | 'archived' | 'all'>(
@@ -112,7 +130,9 @@ export default function InventoriesListTable(): JSX.Element {
     inventoryList,
     setInventoryList,
     currentPage,
+    realPage,
     getInventoryList,
+    setCurrentPage,
     updateFilters,
   } = useSearchInventories();
 
@@ -201,6 +221,17 @@ export default function InventoriesListTable(): JSX.Element {
     });
   };
 
+  const pageBefore = (): void => {
+    if (currentPage > 0) {
+      setCurrentPage(prevPage => prevPage - 1);
+    }
+  };
+  const pageAfter = (): void => {
+    if (inventoryList.length > 0) {
+      setCurrentPage(prevPage => prevPage + 1);
+    }
+  };
+
   const deleteInventoryHandler = async (
     inventoryToDelete: Inventory
   ): Promise<void> => {
@@ -269,7 +300,6 @@ export default function InventoriesListTable(): JSX.Element {
       );
       const data = response.data;
       if (data && data.length > 0) {
-        // Update the ref directly
         lowStockProductsByInventory.current = {
           ...lowStockProductsByInventory.current,
           [inventory.inventoryName]: data,
@@ -389,641 +419,540 @@ export default function InventoriesListTable(): JSX.Element {
     return true;
   });
 
-  // Build slides from displayed items (4 per slide)
-  const slides = chunk(displayedInventories, CARDS_PER_PAGE);
-
-  // Clamp currentSlide if data changes
-  useEffect(() => {
-    if (currentSlide >= slides.length) {
-      setCurrentSlide(Math.max(0, slides.length - 1));
-    }
-  }, [slides.length, currentSlide]);
-
-  // Auto-advance every 4s when not frozen
-  useEffect(() => {
-    if (isFrozen || slides.length <= 1) return;
-    const id = window.setInterval(() => {
-      setCurrentSlide(s => (s + 1) % slides.length);
-    }, 4000);
-    return () => window.clearInterval(id);
-  }, [isFrozen, slides.length]);
-
   return (
-    <>
-      <div className={inventoryStyles.menuSection}>
-        <div className={inventoryStyles.menuContainer}>
-          <button
-            id={inventoryStyles.menuIcon}
-            aria-label="Toggle actions menu"
-            onClick={() => setActionsMenu(v => !v)}
-          >
-            <svg
-              className={inventoryStyles.hamburgerSvg}
-              viewBox="0 0 24 24"
-              width="50"
-              height="50"
-              aria-hidden="true"
-            >
-              <rect x="3" y="6" width="18" height="2" rx="1"></rect>
-              <rect x="3" y="11" width="18" height="2" rx="1"></rect>
-              <rect x="3" y="16" width="18" height="2" rx="1"></rect>
-            </svg>
-          </button>
-
-          <div
-            className={inventoryStyles.actionsMenu}
-            data-open={isActionsMenuVisible ? 'true' : 'false'}
-          >
-            {/* Add Inventory Button*/}
+    <Reveal>
+      <>
+        <div className={inventoryStyles.menuSection}>
+          <div className={inventoryStyles.menuContainer}>
             <button
-              className={`add-inventory-button btn btn-success ${inventoryStyles.btnSm}`}
-              onClick={() => setShowAddInventoryForm(true)}
+              id={inventoryStyles.menuIcon}
+              aria-label="Toggle actions menu"
+              onClick={() => setActionsMenu(v => !v)}
             >
-              Add Inventory
+              <svg
+                className={inventoryStyles.hamburgerSvg}
+                viewBox="0 0 24 24"
+                width="50"
+                height="50"
+                aria-hidden="true"
+              >
+                <rect x="3" y="6" width="18" height="2" rx="1"></rect>
+                <rect x="3" y="11" width="18" height="2" rx="1"></rect>
+                <rect x="3" y="16" width="18" height="2" rx="1"></rect>
+              </svg>
             </button>
 
-            {/* Add Inventory Type Button*/}
-            <button
-              className={`add-inventorytype-button btn btn-primary ${inventoryStyles.btnSm}`}
-              onClick={() => setShowAddTypeForm(true)}
+            <div
+              className={inventoryStyles.actionsMenu}
+              data-open={isActionsMenuVisible ? 'true' : 'false'}
             >
-              Add InventoryType
-            </button>
+              {/* Add Inventory */}
+              <button
+                className={`add-inventory-button btn btn-success ${inventoryStyles.btnSm}`}
+                onClick={() => setShowAddInventoryForm(true)}
+              >
+                +
+              </button>
 
-            {/* Check Low Stock Button*/}
-            <button
-              className={`low-stock-button btn btn-warning ${inventoryStyles.btnSm}`}
-              onClick={async (): Promise<void> => {
-                if (inventoryList.length > 0) {
-                  lowStockProductsByInventory.current = {};
-                  try {
-                    for (const inventory of inventoryList) {
-                      await getAllLowStockProducts(inventory);
+              {/* Add Inventory Type */}
+              <button
+                className={`add-inventorytype-button btn btn-primary ${inventoryStyles.btnSm}`}
+                onClick={() => setShowAddTypeForm(true)}
+              >
+                Add InventoryType
+              </button>
+
+              {/* Check Low Stock */}
+              <button
+                className={`low-stock-button btn btn-warning ${inventoryStyles.btnSm}`}
+                onClick={async () => {
+                  if (inventoryList.length > 0) {
+                    lowStockProductsByInventory.current = {};
+                    try {
+                      for (const inventory of inventoryList) {
+                        await getAllLowStockProducts(inventory);
+                      }
+                      navigate('/products/lowstock', {
+                        state: {
+                          lowStockProducts: lowStockProductsByInventory.current,
+                        },
+                      });
+                    } catch (error) {
+                      console.error(
+                        'Error fetching low stock products:',
+                        error
+                      );
                     }
-                    navigate('/products/lowstock', {
-                      state: {
-                        lowStockProducts: lowStockProductsByInventory.current,
-                      },
-                    });
-                  } catch (error) {
-                    console.error('Error fetching low stock products:', error);
+                  } else {
+                    console.error('No inventories found');
                   }
-                } else {
-                  console.error('No inventories found');
+                }}
+              >
+                Check Low Stock
+              </button>
+
+              {/* Archive Selected */}
+              <button
+                className={`btn btn-secondary ${inventoryStyles.btnSm}`}
+                onClick={archiveSelectedInventories}
+                disabled={selectedInventories.length === 0}
+                title={
+                  selectedInventories.length === 0
+                    ? 'Select one or more inventories first'
+                    : 'Archive selected inventories'
                 }
-              }}
-            >
-              Check Low Stock
-            </button>
+              >
+                Archive Selected Inventory
+              </button>
 
-            {/* Archive Selected Inventory */}
-            <button
-              className={`btn btn-secondary ${inventoryStyles.btnSm}`}
-              onClick={archiveSelectedInventories}
-              disabled={selectedInventories.length === 0}
-              title={
-                selectedInventories.length === 0
-                  ? 'Select one or more inventories first'
-                  : 'Archive selected inventories'
-              }
-            >
-              Archive Selected Inventory
-            </button>
-
-            {/* Delete All Inventories Button*/}
-            <button
-              className={`btn btn-danger ${inventoryStyles.btnSm}`}
-              onClick={deleteSelectedInventories}
-              disabled={selectedInventories.length === 0}
-            >
-              Delete Selected Inventories
-            </button>
+              {/* Delete Selected */}
+              <button
+                className={`btn btn-danger ${inventoryStyles.btnSm}`}
+                onClick={deleteSelectedInventories}
+                disabled={selectedInventories.length === 0}
+              >
+                Delete Selected Inventories
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div>
-        <table
-          className={`table table-striped ${inventoryStyles.inventoryTable} ${inventoryStyles.fixedTable} ${inventoryStyles.cleanTable}`}
-        >
-          <thead>
-            <tr>
-              <th style={{ width: '5%' }}></th>
-              <th style={{ width: '20%', textAlign: 'left' }}>Name</th>
-              <th style={{ width: '15%', textAlign: 'left' }}>Type</th>
-              <th style={{ width: '25%', textAlign: 'left' }}>Description</th>
-              <th style={{ width: '10%', textAlign: 'center' }}>Important</th>
-              <th style={{ width: '10%', textAlign: 'center' }}>Clear</th>
-              <th style={{ width: '15%', textAlign: 'center' }}>Status</th>
-            </tr>
-            <tr>
-              <td></td>
-              <td>
-                <input
-                  type="text"
-                  value={inventoryName}
-                  onChange={e => handleInventoryNameChange(e.target.value)}
-                />
-              </td>
-              <td>
-                <select
-                  className="form-control col-sm-4"
-                  value={inventoryType}
-                  onChange={e => handleInventoryTypeChange(e.target.value)}
-                >
-                  <option value="">None</option>
-                  {inventoryTypeList.map(type => (
-                    <option key={type.type} value={type.type}>
-                      {type.type}
-                    </option>
-                  ))}
-                </select>
-              </td>
-              <td>
-                <input
-                  type="text"
-                  value={inventoryDescription}
-                  onChange={e =>
-                    handleInventoryDescriptionChange(e.target.value)
-                  }
-                />
-              </td>
-              <td className="text-center align-middle">
-                <div className="form-check d-inline-flex align-items-center justify-content-center m-0">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    checked={showImportantOnly}
-                    onChange={e => {
-                      const value = e.target.checked;
-                      setShowImportantOnly(value);
-                      updateFilters({
-                        inventoryName,
-                        inventoryType,
-                        inventoryDescription,
-                        importantOnly: value,
-                      });
-                    }}
-                  />
-                </div>
-              </td>
-              <td>
-                <button
-                  className="btn btn-primary"
-                  onClick={clearQueries}
-                  title="Clear"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="32"
-                    height="32"
-                    fill="white"
-                    className="bi bi-x-circle"
-                    viewBox="0 0 16 16"
-                  >
-                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
-                    <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708" />
-                  </svg>
-                </button>
-              </td>
-
-              {/*viewMode selector for Active / Archived / All */}
-              <td>
-                <select
-                  className="form-control"
-                  value={viewMode}
-                  onChange={e =>
-                    setViewMode(e.target.value as 'active' | 'archived' | 'all')
-                  }
-                  title="View: Active / Archived / All"
-                >
-                  <option value="active">Active</option>
-                  <option value="archived">Archived</option>
-                  <option value="all">All</option>
-                </select>
-              </td>
-
-              <td></td>
-            </tr>
-          </thead>
-        </table>
-
-        {inventoryList.length === 0 &&
-          (inventoryName !== '' ||
-            inventoryType !== '' ||
-            inventoryDescription !== '') && (
-            <div className="text-center p-4">
-              <div className="alert alert-info">
-                <h5>No inventory found</h5>
-                <p>No inventories match your current search criteria.</p>
-              </div>
-            </div>
-          )}
-
-        {/* //Cards start here — CAROUSEL (fade) */}
-        <div className={cardStylesInventory.carousel}>
-          <div
-            className={cardStylesInventory.carouselViewport}
-            aria-roledescription="carousel"
+        <div>
+          <table
+            className={`table table-striped ${inventoryStyles.inventoryTable} ${inventoryStyles.fixedTable} ${inventoryStyles.cleanTable}`}
           >
-            <div
-              className={cardStylesInventory.carouselTrack} // fade stack (no translateX)
-              role="group"
-              aria-label={`Slide ${currentSlide + 1} of ${Math.max(
-                1,
-                slides.length
-              )}`}
-            >
-              {(slides.length ? slides : [[]]).map((page, pageIdx) => (
-                <div
-                  key={`slide-${pageIdx}`}
-                  className={
-                    pageIdx === currentSlide
-                      ? `${cardStylesInventory.carouselSlide} ${cardStylesInventory.carouselSlideActive}`
-                      : cardStylesInventory.carouselSlide
-                  }
-                  aria-label={`Inventory page ${pageIdx + 1}`}
+            <thead>
+              <tr>
+                <th style={{ width: '5%' }}></th>
+                <th style={{ width: '20%', textAlign: 'left' }}>Name</th>
+                <th style={{ width: '15%', textAlign: 'left' }}>Type</th>
+                <th style={{ width: '25%', textAlign: 'left' }}>Description</th>
+                <th style={{ width: '10%', textAlign: 'center' }}>Important</th>
+                <th style={{ width: '10%', textAlign: 'center' }}>Clear</th>
+                <th style={{ width: '15%', textAlign: 'center' }}>Status</th>
+              </tr>
+              <tr>
+                <td></td>
+                <td>
+                  <input
+                    type="text"
+                    value={inventoryName}
+                    onChange={e => handleInventoryNameChange(e.target.value)}
+                  />
+                </td>
+                <td>
+                  <select
+                    className="form-control col-sm-4"
+                    value={inventoryType}
+                    onChange={e => handleInventoryTypeChange(e.target.value)}
+                  >
+                    <option value="">None</option>
+                    {inventoryTypeList.map(type => (
+                      <option key={type.type} value={type.type}>
+                        {type.type}
+                      </option>
+                    ))}
+                  </select>
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    value={inventoryDescription}
+                    onChange={e =>
+                      handleInventoryDescriptionChange(e.target.value)
+                    }
+                  />
+                </td>
+                <td className="text-center align-middle">
+                  <div className="form-check d-inline-flex align-items-center justify-content-center m-0">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      checked={showImportantOnly}
+                      onChange={e => {
+                        const value = e.target.checked;
+                        setShowImportantOnly(value);
+                        updateFilters({
+                          inventoryName,
+                          inventoryType,
+                          inventoryDescription,
+                          importantOnly: value,
+                        });
+                      }}
+                    />
+                  </div>
+                </td>
+                <td>
+                  <button
+                    className="btn btn-primary"
+                    onClick={clearQueries}
+                    title="Clear"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="32"
+                      height="32"
+                      fill="white"
+                      className="bi bi-x-circle"
+                      viewBox="0 0 16 16"
+                    >
+                      <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                      <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708" />
+                    </svg>
+                  </button>
+                </td>
+
+                {/* View Mode */}
+                <td>
+                  <select
+                    className="form-control"
+                    value={viewMode}
+                    onChange={e =>
+                      setViewMode(
+                        e.target.value as 'active' | 'archived' | 'all'
+                      )
+                    }
+                    title="View: Active / Archived / All"
+                  >
+                    <option value="active">Active</option>
+                    <option value="archived">Archived</option>
+                    <option value="all">All</option>
+                  </select>
+                </td>
+
+                <td></td>
+              </tr>
+            </thead>
+          </table>
+
+          {inventoryList.length === 0 &&
+            (inventoryName !== '' ||
+              inventoryType !== '' ||
+              inventoryDescription !== '') && (
+              <div className="text-center p-4">
+                <div className="alert alert-info">
+                  <h5>No inventory found</h5>
+                  <p>No inventories match your current search criteria.</p>
+                </div>
+              </div>
+            )}
+
+          {/* Cards */}
+          <div className={cardStylesInventory.cardContainerCustom}>
+            {displayedInventories.map((inventory, idx) => {
+              const isArchived = Boolean(archivedMap[inventory.inventoryId]);
+              return (
+                <Reveal
+                  key={`${currentPage}-${inventory.inventoryId}`}
+                  delayMs={idx * 40}
+                  y={6}
                 >
-                  <div className={cardStylesInventory.slideGrid}>
-                    {page.map(inventory => {
-                      const isArchived = Boolean(
-                        archivedMap[inventory.inventoryId]
-                      );
-                      return (
-                        <div
-                          className={`
-                            ${cardStylesInventory.card}
-                            ${
-                              inventory.inventoryId === lastConsultedInventoryId
-                                ? cardStylesInventory.highlightedCard
-                                : ''
-                            }
-                          `}
-                          key={inventory.inventoryId}
-                          onClick={() => handleCardClick(inventory.inventoryId)}
-                          onMouseLeave={() => setOpenMenuId(null)}
-                          style={{
-                            cursor: 'pointer',
-                            opacity: isArchived ? 0.6 : 1,
-                          }}
-                        >
-                          <div className={cardStylesInventory.imageContainer}>
-                            {(() => {
-                              const uploaded = inventory.imageUploaded
-                                ? inventory.imageUploaded instanceof Uint8Array
-                                  ? `data:image/*;base64,${arrayBufferToBase64(
-                                      inventory.imageUploaded
-                                    )}`
-                                  : `data:image/*;base64,${inventory.imageUploaded}`
-                                : '';
-                              const url = isHttpUrl(inventory.inventoryImage)
-                                ? inventory.inventoryImage
-                                : '';
-                              const fallback = isHttpUrl(
-                                inventory.inventoryBackupImage
-                              )
-                                ? inventory.inventoryBackupImage
-                                : '';
-                              const src = url || uploaded;
-                              return (
-                                <img
-                                  src={src || fallback}
-                                  alt={inventory.inventoryName}
-                                  className={cardStylesInventory.cardImage}
-                                  onError={e => {
-                                    const img = e.currentTarget;
-                                    if (fallback && img.src !== fallback) {
-                                      img.src = fallback;
-                                    } else {
-                                      img.style.display = 'none';
-                                    }
-                                  }}
-                                />
-                              );
-                            })()}
-                          </div>
+                  <div
+                    className={`
+                      ${cardStylesInventory.card} 
+                      ${
+                        inventory.inventoryId === lastConsultedInventoryId
+                          ? cardStylesInventory.highlightedCard
+                          : ''
+                      }`}
+                    onClick={() => handleCardClick(inventory.inventoryId)}
+                    onMouseLeave={() => setOpenMenuId(null)}
+                    style={{ cursor: 'pointer', opacity: isArchived ? 0.6 : 1 }}
+                  >
+                    <div className={cardStylesInventory.imageContainer}>
+                      {(() => {
+                        const uploaded = inventory.imageUploaded
+                          ? inventory.imageUploaded instanceof Uint8Array
+                            ? `data:image/*;base64,${arrayBufferToBase64(inventory.imageUploaded)}`
+                            : `data:image/*;base64,${inventory.imageUploaded}`
+                          : '';
 
-                          <div
-                            className={cardStylesInventory.inventoryNameSection}
-                          >
-                            <p id={cardStylesInventory.inventoryNameText}>
-                              {inventory.inventoryName}
-                              <svg
-                                onClick={e =>
-                                  handleToggleImportant(e, inventory)
-                                }
-                                style={{
-                                  marginLeft: '10px',
-                                  cursor: 'pointer',
-                                  fill: inventory.important
-                                    ? '#FFD700'
-                                    : '#D3D3D3',
-                                }}
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="20"
-                                height="20"
-                                viewBox="0 0 16 16"
-                              >
-                                <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z" />
-                              </svg>
-                              {isArchived && (
-                                <span
-                                  style={{
-                                    marginLeft: '8px',
-                                    fontSize: '0.75rem',
-                                    color: '#fff',
-                                    background: '#6c757d',
-                                    padding: '2px 6px',
-                                    borderRadius: '4px',
-                                  }}
-                                >
-                                  Archived
-                                </span>
-                              )}
-                            </p>
-                            <div id={cardStylesInventory.iconSection}>
-                              <p id={cardStylesInventory.productQuantityNumber}>
-                                {productQuantities[inventory.inventoryId] !==
-                                undefined
-                                  ? productQuantities[inventory.inventoryId]
-                                  : 'Loading...'}{' '}
-                              </p>
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="16"
-                                height="16"
-                                fill="currentColor"
-                                className={`bi bi-box-fill ${cardStylesInventory.iconCustomized}`}
-                                viewBox="0 0 16 16"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M15.528 2.973a.75.75 0 0 1 .472.696v8.662a.75.75 0 0 1-.472.696l-7.25 2.9a.75.75 0 0 1-.557 0l-7.25-2.9A.75.75 0 0 1 0 12.331V3.669a.75.75 0 0 1 .471-.696L7.443.184l.004-.001.274-.11a.75.75 0 0 1 .558 0l.274.11.004.001zm-1.374.527L8 5.962 1.846 3.5 1 3.839v.4l6.5 2.6v7.922l.5.2.5-.2V6.84l6.5-2.6v-.4l-.846-.339Z"
-                                />
-                              </svg>
-                            </div>
-                          </div>
+                        const url = isHttpUrl(inventory.inventoryImage)
+                          ? inventory.inventoryImage
+                          : '';
+                        const fallback = isHttpUrl(
+                          inventory.inventoryBackupImage
+                        )
+                          ? inventory.inventoryBackupImage
+                          : '';
 
-                          <div id={cardStylesInventory.cardTypeSection}>
-                            <p>Type: {inventory.inventoryType}</p>
-                          </div>
-                          <div id={cardStylesInventory.cardDescriptionSection}>
-                            <p>{inventory.inventoryDescription}</p>
-                          </div>
+                        const src = url || uploaded;
 
-                          <div className={cardStylesInventory.checkboxSection}>
-                            <svg
-                              id={cardStylesInventory.cardMenu}
-                              onClick={e =>
-                                handleMenuClick(e, inventory.inventoryId)
+                        return (
+                          <img
+                            src={src || fallback}
+                            alt={inventory.inventoryName}
+                            className={cardStylesInventory.cardImage}
+                            onError={e => {
+                              const img = e.currentTarget;
+                              if (fallback && img.src !== fallback) {
+                                img.src = fallback;
+                              } else {
+                                img.style.display = 'none';
                               }
+                            }}
+                          />
+                        );
+                      })()}
+                    </div>
+
+                    <div className={cardStylesInventory.inventoryNameSection}>
+                      <p id={cardStylesInventory.inventoryNameText}>
+                        {inventory.inventoryName}
+                        <svg
+                          onClick={e => handleToggleImportant(e, inventory)}
+                          style={{
+                            marginLeft: '10px',
+                            cursor: 'pointer',
+                            fill: inventory.important ? '#FFD700' : '#D3D3D3',
+                          }}
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="20"
+                          height="20"
+                          viewBox="0 0 16 16"
+                        >
+                          <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z" />
+                        </svg>
+
+                        {isArchived && (
+                          <span
+                            style={{
+                              marginLeft: '8px',
+                              fontSize: '0.75rem',
+                              color: '#fff',
+                              background: '#6c757d',
+                              padding: '2px 6px',
+                              borderRadius: '4px',
+                            }}
+                          >
+                            Archived
+                          </span>
+                        )}
+                      </p>
+                      <div id={cardStylesInventory.iconSection}>
+                        <p id={cardStylesInventory.productQuantityNumber}>
+                          {productQuantities[inventory.inventoryId] !==
+                          undefined
+                            ? productQuantities[inventory.inventoryId]
+                            : 'Loading...'}{' '}
+                        </p>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          fill="currentColor"
+                          className={`bi bi-box-fill ${cardStylesInventory.iconCustomized}`}
+                          viewBox="0 0 16 16"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M15.528 2.973a.75.75 0 0 1 .472.696v8.662a.75.75 0 0 1-.472.696l-7.25 2.9a.75.75 0 0 1-.557 0l-7.25-2.9A.75.75 0 0 1 0 12.331V3.669a.75.75 0 0 1 .471-.696L7.443.184l.004-.001.274-.11a.75.75 0 0 1 .558 0l.274.11.004.001zm-1.374.527L8 5.962 1.846 3.5 1 3.839v.4l6.5 2.6v7.922l.5.2.5-.2V6.84l6.5-2.6v-.4l-.846-.339Z"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+
+                    <div id={cardStylesInventory.cardTypeSection}>
+                      <p>Type: {inventory.inventoryType}</p>
+                    </div>
+                    <div id={cardStylesInventory.cardDescriptionSection}>
+                      <p>{inventory.inventoryDescription}</p>
+                    </div>
+
+                    <div className={cardStylesInventory.checkboxSection}>
+                      <svg
+                        id={cardStylesInventory.cardMenu}
+                        onClick={e => handleMenuClick(e, inventory.inventoryId)}
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        fill="currentColor"
+                        className="bi bi-pencil-square"
+                        viewBox="0 0 16 16"
+                      >
+                        <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
+                        <path
+                          fillRule="evenodd"
+                          d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"
+                        />
+                      </svg>
+
+                      {openMenuId === inventory.inventoryId && (
+                        <div className={cardStylesInventory.popupMenuDiv}>
+                          <button
+                            onClick={e => {
+                              e.stopPropagation();
+                              toggleArchiveStatus(e, inventory);
+                            }}
+                            className="btn btn-secondary"
+                            title={
+                              isArchived
+                                ? 'Unarchive inventory'
+                                : 'Archive inventory'
+                            }
+                          >
+                            {isArchived ? 'Unarchive' : 'Archive'}
+                          </button>
+
+                          <button
+                            onClick={e => {
+                              e.stopPropagation();
+                              if (isArchived) {
+                                alert(
+                                  'This inventory is archived and cannot be edited.'
+                                );
+                                return;
+                              }
+                              setEditInventoryId(inventory.inventoryId);
+                              setEditOpen(true);
+                            }}
+                            className="btn btn-warning"
+                            disabled={isArchived}
+                          >
+                            Edit
+                          </button>
+
+                          <button
+                            className="btn btn-danger"
+                            onClick={e => {
+                              e.stopPropagation();
+                              if (isArchived) {
+                                alert(
+                                  'This inventory is archived and cannot be deleted.'
+                                );
+                                return;
+                              }
+                              deleteInventoryHandler(inventory);
+                            }}
+                            title="Delete"
+                            disabled={isArchived}
+                          >
+                            <svg
                               xmlns="http://www.w3.org/2000/svg"
-                              width="16"
-                              height="16"
+                              width="32"
+                              height="32"
                               fill="currentColor"
-                              className="bi bi-pencil-square"
+                              className="bi bi-trash"
                               viewBox="0 0 16 16"
                             >
-                              <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
-                              <path
-                                fillRule="evenodd"
-                                d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"
-                              />
+                              <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
+                              <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
                             </svg>
-                            {openMenuId === inventory.inventoryId && (
-                              <div className={cardStylesInventory.popupMenuDiv}>
-                                <button
-                                  onClick={e => {
-                                    e.stopPropagation();
-                                    toggleArchiveStatus(e, inventory);
-                                  }}
-                                  className="btn btn-secondary"
-                                  title={
-                                    isArchived
-                                      ? 'Unarchive inventory'
-                                      : 'Archive inventory'
-                                  }
-                                >
-                                  {isArchived ? 'Unarchive' : 'Archive'}
-                                </button>
-                                <button
-                                  onClick={e => {
-                                    e.stopPropagation();
-                                    if (isArchived) {
-                                      alert(
-                                        'This inventory is archived and cannot be edited.'
-                                      );
-                                      return;
-                                    }
-                                    setEditInventoryId(inventory.inventoryId);
-                                    setEditOpen(true);
-                                  }}
-                                  className="btn btn-warning"
-                                  disabled={isArchived}
-                                >
-                                  Edit
-                                </button>
-                                <button
-                                  className="btn btn-danger"
-                                  onClick={e => {
-                                    e.stopPropagation();
-                                    if (isArchived) {
-                                      alert(
-                                        'This inventory is archived and cannot be deleted.'
-                                      );
-                                      return;
-                                    }
-                                    deleteInventoryHandler(inventory);
-                                  }}
-                                  title="Delete"
-                                  disabled={isArchived}
-                                >
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="32"
-                                    height="32"
-                                    fill="currentColor"
-                                    className="bi bi-trash"
-                                    viewBox="0 0 16 16"
-                                  >
-                                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
-                                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
-                                  </svg>
-                                </button>
-                              </div>
-                            )}
-                            <input
-                              id={cardStylesInventory.checkboxCard}
-                              type="checkbox"
-                              checked={selectedInventories.some(
-                                selectedInventory =>
-                                  selectedInventory.inventoryId ===
-                                  inventory.inventoryId
-                              )}
-                              onChange={e =>
-                                handleInventorySelection(e, inventory)
-                              }
-                              onClick={e => e.stopPropagation()}
-                              disabled={isArchived}
-                            />
-                          </div>
+                          </button>
                         </div>
-                      );
-                    })}
+                      )}
+
+                      <input
+                        id={cardStylesInventory.checkboxCard}
+                        type="checkbox"
+                        checked={selectedInventories.some(
+                          selectedInventory =>
+                            selectedInventory.inventoryId ===
+                            inventory.inventoryId
+                        )}
+                        onChange={e => handleInventorySelection(e, inventory)}
+                        onClick={e => e.stopPropagation()}
+                        disabled={isArchived}
+                      />
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                </Reveal>
+              );
+            })}
           </div>
-        </div>
 
-        {/* Outside pager that controls the carousel only */}
-        <div
-          className="d-flex justify-content-center"
-          style={{ marginBottom: '100px' }}
-        >
           <div
-            className={`${inventoryStyles.pager} ${inventoryStyles.pagerStack}`}
+            className="d-flex justify-content-center"
+            style={{ marginBottom: '100px' }}
           >
-            {/* Freeze/Resume (small button above) */}
-            <button
-              type="button"
-              className={`btn btn-primary ${cardStylesInventory.freezeBtnTiny}`}
-              onClick={() => setIsFrozen(f => !f)}
-              aria-label={
-                isFrozen ? 'Resume auto-advance' : 'Pause auto-advance'
-              }
-              title={isFrozen ? 'Resume' : 'Freeze'}
-              disabled={slides.length <= 1}
-            >
-              {isFrozen ? (
-                /* Play icon */
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="14"
-                  height="14"
-                  viewBox="0 0 16 16"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path d="M11.596 8.697l-6.363 3.692A.75.75 0 0 1 4 11.743V4.257a.75.75 0 0 1 1.233-.646l6.363 3.692a.75.75 0 0 1 0 1.294z" />
-                </svg>
-              ) : (
-                /* Pause icon */
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="14"
-                  height="14"
-                  viewBox="0 0 16 16"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path d="M5.5 3A1.5 1.5 0 0 0 4 4.5v7A1.5 1.5 0 0 0 5.5 13h.5A1.5 1.5 0 0 0 7.5 11.5v-7A1.5 1.5 0 0 0 6 3zM10 3a1.5 1.5 0 0 0-1.5 1.5v7A1.5 1.5 0 0 0 10 13h.5A1.5 1.5 0 0 0 12 11.5v-7A1.5 1.5 0 0 0 10.5 3z" />
-                </svg>
-              )}
-            </button>
-
-            {/* Row: Prev  [page]  Next */}
-            <div className={inventoryStyles.pagerRow}>
+            <div className={inventoryStyles.pager}>
               <button
                 className="btn btn-primary"
-                onClick={() => {
-                  setIsFrozen(true);
-                  setCurrentSlide(s =>
-                    slides.length ? (s - 1 + slides.length) % slides.length : 0
-                  );
-                }}
-                disabled={slides.length <= 1}
-                aria-label="Previous slide"
+                onClick={pageBefore}
+                disabled={currentPage === 0}
+                aria-label="Previous page"
               >
                 &lt;
               </button>
 
-              <span className={inventoryStyles.pageNumber}>
-                {slides.length === 0 ? 0 : currentSlide + 1}
-              </span>
+              <span className={inventoryStyles.pageNumber}>{realPage}</span>
 
               <button
                 className="btn btn-primary"
-                onClick={() => {
-                  setIsFrozen(true);
-                  setCurrentSlide(s =>
-                    slides.length ? (s + 1) % slides.length : 0
-                  );
-                }}
-                disabled={slides.length <= 1}
-                aria-label="Next slide"
+                onClick={pageAfter}
+                disabled={inventoryList.length === 0}
+                aria-label="Next page"
               >
                 &gt;
               </button>
             </div>
           </div>
-        </div>
 
-        <div id="loadingObject" style={{ display: 'none' }}>
-          Loading...
-        </div>
-        <div
-          id="notification"
-          style={{
-            display: 'none',
-            position: 'fixed',
-            bottom: '10px',
-            right: '10px',
-            backgroundColor: '#4CAF50',
-            color: 'white',
-            padding: '10px',
-            borderRadius: '5px',
-          }}
-        >
-          Notification Text Here
-        </div>
-
-        {showAddInventoryForm && (
-          <AddInventory
-            showAddInventoryForm={showAddInventoryForm}
-            handleInventoryClose={() => setShowAddInventoryForm(false)}
-            refreshInventoryTypes={refreshInventoryTypes}
-            existingInventoryNames={inventoryList.map(i => i.inventoryName)}
-          />
-        )}
-
-        {showAddTypeForm && (
-          <AddInventoryType
-            show={showAddTypeForm}
-            handleClose={() => setShowAddTypeForm(false)}
-            refreshInventoryTypes={refreshInventoryTypes}
-            existingTypeNames={inventoryTypeList.map(t => t.type)}
-          />
-        )}
-
-        {showConfirmDialog && (
-          <>
-            <div
-              className={inventoryStyles.overlay}
-              onClick={() => setShowConfirmDialog(false)}
-            ></div>
-          </>
-        )}
-
-        {editOpen && editInventoryId && (
-          <EditInventory
-            open={editOpen}
-            inventoryIdProp={editInventoryId}
-            existingInventoryNames={inventoryList.map(i => i.inventoryName)}
-            onClose={() => {
-              setEditOpen(false);
-              setEditInventoryId(null);
-              getInventoryList(
-                inventoryName,
-                inventoryType,
-                inventoryDescription,
-                showImportantOnly
-              );
+          <div id="loadingObject" style={{ display: 'none' }}>
+            Loading...
+          </div>
+          <div
+            id="notification"
+            style={{
+              display: 'none',
+              position: 'fixed',
+              bottom: '10px',
+              right: '10px',
+              backgroundColor: '#4CAF50',
+              color: 'white',
+              padding: '10px',
+              borderRadius: '5px',
             }}
-          />
-        )}
-      </div>
-    </>
+          >
+            Notification Text Here
+          </div>
+
+          {showAddInventoryForm && (
+            <AddInventory
+              showAddInventoryForm={showAddInventoryForm}
+              handleInventoryClose={() => setShowAddInventoryForm(false)}
+              refreshInventoryTypes={refreshInventoryTypes}
+              existingInventoryNames={inventoryList.map(i => i.inventoryName)}
+            />
+          )}
+
+          {showAddTypeForm && (
+            <AddInventoryType
+              show={showAddTypeForm}
+              handleClose={() => setShowAddTypeForm(false)}
+              refreshInventoryTypes={refreshInventoryTypes}
+              existingTypeNames={inventoryTypeList.map(t => t.type)}
+            />
+          )}
+
+          {showConfirmDialog && (
+            <>
+              <div
+                className={inventoryStyles.overlay}
+                onClick={() => setShowConfirmDialog(false)}
+              ></div>
+            </>
+          )}
+
+          {editOpen && editInventoryId && (
+            <EditInventory
+              open={editOpen}
+              inventoryIdProp={editInventoryId}
+              existingInventoryNames={inventoryList.map(i => i.inventoryName)}
+              onClose={() => {
+                setEditOpen(false);
+                setEditInventoryId(null);
+                getInventoryList(
+                  inventoryName,
+                  inventoryType,
+                  inventoryDescription,
+                  showImportantOnly
+                );
+              }}
+            />
+          )}
+        </div>
+      </>
+    </Reveal>
   );
 }
