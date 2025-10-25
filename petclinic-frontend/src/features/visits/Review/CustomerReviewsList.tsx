@@ -104,6 +104,13 @@ const CustomerReviewsList: React.FC = (): JSX.Element => {
       >
         Return to visits
       </button>
+      <button
+        className="btn btn-primary"
+        onClick={() => navigate(AppRoutePaths.CustomerAddReview)}
+        title="Write Review"
+      >
+        Add Review
+      </button>
     </div>
   );
 };
