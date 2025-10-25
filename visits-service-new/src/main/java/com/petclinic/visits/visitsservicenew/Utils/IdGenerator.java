@@ -48,7 +48,8 @@ public class IdGenerator {
                     width.set(MINIMAL_SUFFIX_LENGTH);
                 }
 
-                int nextSuffix = suffix.getAndIncrement();
+                // Start sequences at 1 for each day
+                int nextSuffix = suffix.incrementAndGet();
 
                 // Grow width if needed based on next suffix
                 int requiredWidth = calculateRequiredWidth(nextSuffix);
