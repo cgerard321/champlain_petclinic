@@ -1,0 +1,18 @@
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #f8f9fa;
+}
+
+h1 {
+  color: #007bff;
+  margin-bottom: 1rem;
+}
+
+p {
+  color: #6c757d;
+  font-size: 1.2rem;
+}
