@@ -1,0 +1,1 @@
+pub const DEFAULT_SESSIONS_AGE_HR: u8 = 24;

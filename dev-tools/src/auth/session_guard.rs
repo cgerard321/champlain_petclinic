@@ -13,7 +13,14 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
 
     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         let jar = req.cookies();
-        let db = req.guard::<&State<Db>>().await.unwrap();
+
+        let db: &State<Db> = match req.guard::<&State<Db>>().await {
+            Outcome::Success(db) => db,
+            Outcome::Forward(_) => return Outcome::Error((Status::InternalServerError, ())),
+            Outcome::Error((_, _)) => {
+                return Outcome::Error((Status::InternalServerError, ()));
+            }
+        };
 
         let Some(cookie) = jar.get_private("sid") else {
             return Outcome::Error((Status::Unauthorized, ()));
@@ -31,7 +38,6 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
         }
     }
 }
-
 
 pub struct AuthenticatedUser {
     pub user_id: Uuid,
