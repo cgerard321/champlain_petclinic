@@ -27,7 +27,7 @@ public class IdGeneratorTest {
         assertNotNull(id1);
 
         String[] parts1 = id1.split("-");
-        assertEquals(3, parts1.length, "id should contain two hyphens");
+        assertEquals(3, parts1.length, "id should have three parts separated by hyphens");
         assertEquals("VIST", parts1[0], "prefix should be VIST");
         assertTrue(parts1[1].matches("\\d{4}"), "yyMM part should be 4 digits");
         assertTrue(parts1[2].matches("\\d{4}"), "dd+seq part should be 4 digits");
