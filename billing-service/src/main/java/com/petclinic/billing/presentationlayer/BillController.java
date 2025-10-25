@@ -22,9 +22,6 @@ import java.util.Optional;
 public class BillController {
     private final BillService billService;
     
-    @Value("${spring.profiles.active:}")
-    private String activeProfiles;
-
     BillController(BillService billService) {
         this.billService = billService;
     }
