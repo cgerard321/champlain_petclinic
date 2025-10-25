@@ -2,6 +2,7 @@ package com.petclinic.customersservice.presentationlayer;
 
 import com.petclinic.customersservice.business.PetService;
 import com.petclinic.customersservice.customersExceptions.ApplicationExceptions;
+import com.petclinic.customersservice.domainclientlayer.FileRequestDTO;
 import com.petclinic.customersservice.util.Validator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,16 +100,21 @@ public class PetController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-    // TODO: This PATCH endpoint currently only handles deletion (empty body).
-    // Update pet photo ticket for eric: Accept FileRequestDTO body to handle photo updates.
-    // When body is present -> update photo, when body is null/empty -> delete photo.
-
     @PatchMapping("/{petId}/photo")
-    public Mono<ResponseEntity<PetResponseDTO>> deletePetPhoto(@PathVariable String petId) {
+    public Mono<ResponseEntity<PetResponseDTO>> deletePetPhoto(@PathVariable String petId, @RequestBody(required = false) Mono<FileRequestDTO> photoMono) {
         return Mono.just(petId)
                 .filter(id -> id.length() == 36)
                 .switchIfEmpty(ApplicationExceptions.invalidPetId(petId))
-                .flatMap(id -> petService.deletePetPhoto(id))
+                .flatMap(id -> 
+                    photoMono.flatMap(photo -> {
+                        if (photo == null || photo.getFileData() == null || photo.getFileData().length == 0) {
+                            return petService.deletePetPhoto(id);
+                        }
+                        // For eric ticket implementation for pet photo updates 
+                        return Mono.error(new UnsupportedOperationException("Photo update not yet implemented"));
+                    })
+                    .switchIfEmpty(petService.deletePetPhoto(id)) 
+                )
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
