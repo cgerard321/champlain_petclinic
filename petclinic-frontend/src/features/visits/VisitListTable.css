@@ -248,3 +248,14 @@ ul > li:first-child {
     height:28px;
     fill:#ffffff;
 }
+
+.visit-success-message {
+  color: #0a8a00; /* green */
+  background: rgba(10,138,0,0.06);
+  border: 1px solid rgba(10,138,0,0.12);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-weight: 600;
+  margin: 12px 0;
+  display: inline-block;
+}
