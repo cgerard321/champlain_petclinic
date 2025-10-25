@@ -80,7 +80,7 @@ services:
     volumes:
       - ./petclinic-frontend/src:/app/src
 
-  # Employee front-end 
+  # Employee front-end
   employeeFrontend:
     <<: *angular_node
     image: employee-frontend

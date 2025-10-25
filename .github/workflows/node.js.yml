@@ -29,7 +29,7 @@ jobs:
           cache-dependency-path: |
             petclinic-frontend/package-lock.json
             employee-frontend/package-lock.json
-      
+
       # React Frontend (Pet Clinic)
       - name: Install React frontend dependencies
         run: npm install
@@ -40,7 +40,7 @@ jobs:
       - name: Run React frontend build
         run: npm run build
         working-directory: ./petclinic-frontend
-      
+
       # Angular Frontend (Employee Portal)
       - name: Install Angular frontend dependencies
         run: npm install
