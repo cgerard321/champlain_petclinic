@@ -19,6 +19,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.mockito.Mockito;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
+import org.webjars.NotFoundException;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
@@ -171,12 +172,12 @@ public class CartControllerUnitTest {
     @Test
     void testDeleteCartByCartId_Success() {
         String cartId = "c-2";
-        when(cartServiceClient.deleteCartByCartId(cartId)).thenReturn(Mono.just(new CartResponseDTO()));
+        when(cartServiceClient.deleteCartByCartId(cartId)).thenReturn(Mono.empty());
 
         client.delete()
                 .uri("/api/v2/gateway/carts/{cartId}", cartId)
                 .exchange()
-                .expectStatus().isOk();
+                .expectStatus().isNoContent();
 
         verify(cartServiceClient).deleteCartByCartId(cartId);
     }
@@ -184,7 +185,7 @@ public class CartControllerUnitTest {
     @Test
     void testDeleteCartByCartId_NotFound() {
         String cartId = "missing";
-        when(cartServiceClient.deleteCartByCartId(cartId)).thenReturn(Mono.empty());
+                when(cartServiceClient.deleteCartByCartId(cartId)).thenReturn(Mono.error(new NotFoundException("missing")));
 
         client.delete()
                 .uri("/api/v2/gateway/carts/{cartId}", cartId)
@@ -198,12 +199,12 @@ public class CartControllerUnitTest {
     void testRemoveProductFromCart_Success() {
         String cartId = "c-3", productId = "p-9";
         when(cartServiceClient.removeProductFromCart(cartId, productId))
-                .thenReturn(Mono.just(new CartResponseDTO()));
+                .thenReturn(Mono.empty());
 
         client.delete()
-                .uri("/api/v2/gateway/carts/{cartId}/{productId}", cartId, productId)
+                .uri("/api/v2/gateway/carts/{cartId}/products/{productId}", cartId, productId)
                 .exchange()
-                .expectStatus().isOk();
+                .expectStatus().isNoContent();
 
         verify(cartServiceClient).removeProductFromCart(cartId, productId);
     }
@@ -211,10 +212,11 @@ public class CartControllerUnitTest {
     @Test
     void testRemoveProductFromCart_NotFound() {
         String cartId = "c-3", productId = "p-missing";
-        when(cartServiceClient.removeProductFromCart(cartId, productId)).thenReturn(Mono.empty());
+        when(cartServiceClient.removeProductFromCart(cartId, productId))
+                .thenReturn(Mono.error(new NotFoundException("missing")));
 
         client.delete()
-                .uri("/api/v2/gateway/carts/{cartId}/{productId}", cartId, productId)
+                .uri("/api/v2/gateway/carts/{cartId}/products/{productId}", cartId, productId)
                 .exchange()
                 .expectStatus().isNotFound();
 
@@ -330,16 +332,38 @@ public class CartControllerUnitTest {
     }
 
     @Test
+    void testRemoveProductFromWishlist_Success() {
+        String cartId = "c-1", productId = "p-1";
+        when(cartServiceClient.removeProductFromWishlist(cartId, productId)).thenReturn(Mono.empty());
+
+        client.delete()
+                .uri("/api/v2/gateway/carts/{cartId}/wishlist/{productId}", cartId, productId)
+                .exchange()
+                .expectStatus().isNoContent();
+    }
+
+    @Test
     void testRemoveProductFromWishlist_422() {
         String cartId = "c-1", productId = "p-1";
         when(cartServiceClient.removeProductFromWishlist(cartId, productId))
-                .thenReturn(Mono.error(new org.springframework.web.server.ResponseStatusException(
-                        org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY, "bad")));
+                .thenReturn(Mono.error(new InvalidInputException("bad")));
 
         client.delete()
                 .uri("/api/v2/gateway/carts/{cartId}/wishlist/{productId}", cartId, productId)
                 .exchange()
                 .expectStatus().isEqualTo(422);
+    }
+
+    @Test
+    void testRemoveProductFromWishlist_NotFound() {
+        String cartId = "c-1", productId = "p-nf";
+        when(cartServiceClient.removeProductFromWishlist(cartId, productId))
+                .thenReturn(Mono.error(new NotFoundException("missing")));
+
+        client.delete()
+                .uri("/api/v2/gateway/carts/{cartId}/wishlist/{productId}", cartId, productId)
+                .exchange()
+                .expectStatus().isNotFound();
     }
 
     @Test
@@ -557,14 +581,14 @@ public class CartControllerUnitTest {
     }
 
     @Test
-    void testRemoveProductFromWishlist_NotFound_DefaultIfEmpty_Branch() {
+    void testRemoveProductFromWishlist_NoContent_OnEmptyCompletion() {
         when(cartServiceClient.removeProductFromWishlist("c-1", "p-5"))
                 .thenReturn(Mono.empty());
 
         client.delete()
                 .uri("/api/v2/gateway/carts/{cartId}/wishlist/{productId}", "c-1", "p-5")
                 .exchange()
-                .expectStatus().isNotFound();
+                .expectStatus().isNoContent();
     }
 
     @Test

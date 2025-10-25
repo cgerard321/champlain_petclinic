@@ -293,10 +293,8 @@ class CartControllerUnitTest {
                 .uri("/api/v1/carts/" + cart.getCartId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(CartResponseModel.class)
-                .isEqualTo(cartResponseModel);
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
 
         verify(cartService, times(1)).deleteCartByCartId(cartResponseModel.getCartId());
     }
@@ -497,14 +495,8 @@ class CartControllerUnitTest {
                 .uri("/api/v1/carts/" + cartId + "/products/" + productIdToRemove)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(CartResponseModel.class)
-                .value(result -> {
-                    assertEquals(cartId, result.getCartId());
-                    assertEquals(1, result.getProducts().size()); // Only one product should remain
-                    assertEquals(product2.getProductId(), result.getProducts().get(0).getProductId());
-                });
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
 
         verify(cartService, times(1)).removeProductFromCart(cartId, productIdToRemove);
     }

@@ -91,7 +91,7 @@ public Mono<CartResponseDTO> getCartByCartId(final String CartId) {
             .bodyToMono(CartResponseDTO.class);
 }
 
-public Mono<CartResponseDTO> removeProductFromCart(String cartId, String productId) {
+public Mono<Void> removeProductFromCart(String cartId, String productId) {
     return webClientBuilder.build()
             .delete()
             .uri(cartServiceUrl + "/" + cartId + "/products/" + productId)
@@ -107,26 +107,28 @@ public Mono<CartResponseDTO> removeProductFromCart(String cartId, String product
                 return Mono.error(new IllegalArgumentException("Client error"));
             })
             .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Server error")))
-            .bodyToMono(CartResponseDTO.class);
+            .toBodilessEntity()
+            .then();
 }
 
-public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
+public Mono<Void> deleteCartByCartId(String cartId) {
     return webClientBuilder.build()
             .delete()
-            .uri(cartServiceUrl + "/" + CardId)
+            .uri(cartServiceUrl + "/" + cartId)
             .retrieve()
             .onStatus(HttpStatusCode::is4xxClientError, error -> {
                 HttpStatusCode statusCode = error.statusCode();
                 if (statusCode.equals(HttpStatus.NOT_FOUND)) {
-                    return Mono.error(new NotFoundException("Cart not found for CartId: " + CardId));
+                    return Mono.error(new NotFoundException("Cart not found for CartId: " + cartId));
                 }
                 else if (statusCode.equals(HttpStatus.UNPROCESSABLE_ENTITY)) {
-                    return Mono.error(new InvalidInputException("Cart is invalid for cart id: " + CardId));
+                    return Mono.error(new InvalidInputException("Cart is invalid for cart id: " + cartId));
                 }
                 return Mono.error(new IllegalArgumentException("Client error"));
             })
             .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Server error")))
-            .bodyToMono(CartResponseDTO.class);
+            .toBodilessEntity()
+            .then();
 }
 
     public Mono<CartResponseDTO> createCart(CartRequestDTO cartRequestDTO) {
@@ -149,28 +151,29 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
     }
 
     //method that helps to delete products from wishlist
-    public Mono<CartResponseDTO> removeProductFromWishlist(String cartId, String productId) {
+    public Mono<Void> removeProductFromWishlist(String cartId, String productId) {
         return webClientBuilder.build()
-                .delete()
-                .uri(cartServiceUrl + "/" + cartId + "/wishlist/" + productId)
-                .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, error -> {
-                    HttpStatusCode statusCode = error.statusCode();
-                    if (statusCode.equals(HttpStatus.NOT_FOUND)) {
-                        return Mono.error(new NotFoundException(
-                                "Wishlist item not found for cartId: " + cartId + " and productId: " + productId));
-                    } else if (statusCode.equals(HttpStatus.UNPROCESSABLE_ENTITY)) {
-                        return Mono.error(new InvalidInputException(
-                                "Invalid input for cartId: " + cartId + " or productId: " + productId));
-                    }
-                    return Mono.error(new IllegalArgumentException("Client error"));
-                })
-                .onStatus(HttpStatusCode::is5xxServerError,
-                        error -> Mono.error(new IllegalArgumentException("Server error")))
-                .bodyToMono(CartResponseDTO.class)
-                .doOnSuccess(res -> log.info("Removed product {} from wishlist in cart {}", productId, cartId))
-                .doOnError(e -> log.error("Error removing product {} from wishlist in cart {}: {}", productId, cartId, e.getMessage()));
-    }
+            .delete()
+            .uri(cartServiceUrl + "/" + cartId + "/wishlist/" + productId)
+            .retrieve()
+            .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                HttpStatusCode statusCode = error.statusCode();
+                if (statusCode.equals(HttpStatus.NOT_FOUND)) {
+                return Mono.error(new NotFoundException(
+                    "Wishlist item not found for cartId: " + cartId + " and productId: " + productId));
+                } else if (statusCode.equals(HttpStatus.UNPROCESSABLE_ENTITY)) {
+                return Mono.error(new InvalidInputException(
+                    "Invalid input for cartId: " + cartId + " or productId: " + productId));
+                }
+                return Mono.error(new IllegalArgumentException("Client error"));
+            })
+            .onStatus(HttpStatusCode::is5xxServerError,
+                error -> Mono.error(new IllegalArgumentException("Server error")))
+            .toBodilessEntity()
+            .doOnSuccess(res -> log.info("Removed product {} from wishlist in cart {}", productId, cartId))
+            .doOnError(e -> log.error("Error removing product {} from wishlist in cart {}: {}", productId, cartId, e.getMessage()))
+            .then();
+        }
 
 
 

@@ -47,10 +47,13 @@ public class CartController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @DeleteMapping(value = "/{cartId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<CartResponseDTO>> deleteCartByCartId(@PathVariable String cartId){
+    public Mono<ResponseEntity<Void>> deleteCartByCartId(@PathVariable String cartId){
         return cartServiceClient.deleteCartByCartId(cartId)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+                .thenReturn(ResponseEntity.noContent().<Void>build())
+                .onErrorResume(InvalidInputException.class, e -> Mono.just(ResponseEntity.unprocessableEntity().build()))
+                .onErrorResume(NotFoundException.class, e -> Mono.just(ResponseEntity.notFound().build()))
+        .onErrorResume(WebClientResponseException.class, ex -> Mono.just(ResponseEntity.status(ex.getStatusCode()).build()))
+        .onErrorResume(IllegalArgumentException.class, ex -> Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()));
     }
 
 
@@ -63,11 +66,14 @@ public class CartController {
                 .onErrorResume(WebClientResponseException.class, ex -> Mono.just(ResponseEntity.status(ex.getStatusCode()).build()));
     }
 
-    @DeleteMapping(value = "/{cartId}/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<CartResponseDTO>> removeProductFromCart(@PathVariable String cartId, @PathVariable String productId){
+    @DeleteMapping(value = "/{cartId}/products/{productId}")
+    public Mono<ResponseEntity<Void>> removeProductFromCart(@PathVariable String cartId, @PathVariable String productId){
         return cartServiceClient.removeProductFromCart(cartId, productId)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .onErrorResume(InvalidInputException.class, e -> Mono.just(ResponseEntity.unprocessableEntity().build()))
+                .onErrorResume(NotFoundException.class, e -> Mono.just(ResponseEntity.notFound().build()))
+                .onErrorResume(WebClientResponseException.class, ex -> Mono.just(ResponseEntity.status(ex.getStatusCode()).build()))
+                .onErrorResume(IllegalArgumentException.class, ex -> Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()));
 }
 
     @PostMapping("/{cartId}/products")
@@ -202,28 +208,23 @@ public class CartController {
                 });
     }
 
-
-
     @DeleteMapping("/{cartId}/wishlist/{productId}")
-    public Mono<ResponseEntity<CartResponseDTO>> removeProductFromWishlist(
+    public Mono<ResponseEntity<Void>> removeProductFromWishlist(
             @PathVariable String cartId,
             @PathVariable String productId) {
 
         return cartServiceClient.removeProductFromWishlist(cartId, productId)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build())
-                .onErrorResume(e -> {
-                    if (e instanceof WebClientResponseException.UnprocessableEntity) {
-                        log.error("Invalid input for cartId: {} or productId: {} - {}", cartId, productId, e.getMessage());
-                        return Mono.just(ResponseEntity.unprocessableEntity().build());
-                    } else if (e instanceof WebClientResponseException.NotFound) {
-                        log.error("Wishlist item not found for cartId: {} and productId: {} - {}", cartId, productId, e.getMessage());
-                        return Mono.just(ResponseEntity.notFound().build());
-                    } else {
-                        log.error("Unexpected error while removing wishlist item: {}", e.getMessage());
-                        return Mono.error(e);
-                    }
-                });
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .onErrorResume(InvalidInputException.class, e -> {
+                    log.error("Invalid input for cartId: {} or productId: {} - {}", cartId, productId, e.getMessage());
+                    return Mono.just(ResponseEntity.unprocessableEntity().build());
+                })
+                .onErrorResume(NotFoundException.class, e -> {
+                    log.error("Wishlist item not found for cartId: {} and productId: {} - {}", cartId, productId, e.getMessage());
+                    return Mono.just(ResponseEntity.notFound().build());
+                })
+                .onErrorResume(WebClientResponseException.class, ex -> Mono.just(ResponseEntity.status(ex.getStatusCode()).build()))
+                .onErrorResume(IllegalArgumentException.class, ex -> Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()));
     }
 
 

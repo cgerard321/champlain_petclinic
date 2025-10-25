@@ -206,8 +206,12 @@ public class CartControllerV1 {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @DeleteMapping(value = "/{cartId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<CartResponseDTO>> deleteCartByCartId(@PathVariable String cartId){
-        return mapToOkOrNotFound(cartServiceClient.deleteCartByCartId(cartId));
+    public Mono<ResponseEntity<Void>> deleteCartByCartId(@PathVariable String cartId){
+    return cartServiceClient.deleteCartByCartId(cartId)
+        .thenReturn(ResponseEntity.noContent().<Void>build())
+        .onErrorResume(e -> this.<Void>mapCartError(e,
+            ErrorOptions.builder("deleteCartByCartId").cartId(cartId).build()
+        ));
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
@@ -224,16 +228,15 @@ public class CartControllerV1 {
 
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
     @DeleteMapping(value = "/{cartId}/products/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<CartResponseDTO>> removeProductFromCart(@PathVariable String cartId, @PathVariable String productId){
-        return cartServiceClient.removeProductFromCart(cartId, productId)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build())
-                .onErrorResume(e -> mapCartError(e,
-                        ErrorOptions.builder("removeProductFromCart")
-                                .cartId(cartId)
-                                .productId(productId)
-                                .build()
-                ));
+    public Mono<ResponseEntity<Void>> removeProductFromCart(@PathVariable String cartId, @PathVariable String productId){
+    return cartServiceClient.removeProductFromCart(cartId, productId)
+        .thenReturn(ResponseEntity.noContent().<Void>build())
+        .onErrorResume(e -> this.<Void>mapCartError(e,
+            ErrorOptions.builder("removeProductFromCart")
+                .cartId(cartId)
+                .productId(productId)
+                .build()
+        ));
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
@@ -325,18 +328,17 @@ public class CartControllerV1 {
 
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
     @DeleteMapping("/{cartId}/wishlist/{productId}")
-    public Mono<ResponseEntity<CartResponseDTO>> removeProductFromWishlist(
-            @PathVariable String cartId,
-            @PathVariable String productId) {
-        return cartServiceClient.removeProductFromWishlist(cartId, productId)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build())
-                .onErrorResume(e -> mapCartError(e,
-                        ErrorOptions.builder("removeProductFromWishlist")
-                                .cartId(cartId)
-                                .productId(productId)
-                                .build()
-                ));
+    public Mono<ResponseEntity<Void>> removeProductFromWishlist(
+        @PathVariable String cartId,
+        @PathVariable String productId) {
+    return cartServiceClient.removeProductFromWishlist(cartId, productId)
+        .thenReturn(ResponseEntity.noContent().<Void>build())
+        .onErrorResume(e -> this.<Void>mapCartError(e,
+            ErrorOptions.builder("removeProductFromWishlist")
+                .cartId(cartId)
+                .productId(productId)
+                .build()
+        ));
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})

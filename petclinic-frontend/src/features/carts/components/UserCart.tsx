@@ -560,6 +560,7 @@ const UserCart: React.FC = () => {
         await axiosInstance.delete(`/carts/${cartId}/products/${productId}`, {
           useV2: false,
         });
+        // Expect a 204 response here; any errors are handled below.
 
         setCartItems(prev => {
           const removedQty = prev[indexToDelete]?.quantity || 1;

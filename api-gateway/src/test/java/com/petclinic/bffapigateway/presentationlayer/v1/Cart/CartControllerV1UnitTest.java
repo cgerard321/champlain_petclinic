@@ -268,18 +268,16 @@ public class CartControllerV1UnitTest {
     void deleteCartByCartId_withValidId_shouldDeleteCart() {
         // Arrange
         String cartId = "cart-123";
-        CartResponseDTO deletedCart = buildCartResponseDTO();
         when(cartServiceClient.deleteCartByCartId(cartId))
-                .thenReturn(Mono.just(deletedCart));
+                                .thenReturn(Mono.empty());
 
         // Act & Assert
         webTestClient.delete()
                 .uri(baseCartURL + "/" + cartId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
-                .expectBody(CartResponseDTO.class)
-                .isEqualTo(deletedCart);
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
 
         verify(cartServiceClient, times(1)).deleteCartByCartId(cartId);
     }
@@ -290,7 +288,7 @@ public class CartControllerV1UnitTest {
         // Arrange
         String cartId = "non-existent-cart";
         when(cartServiceClient.deleteCartByCartId(cartId))
-                .thenReturn(Mono.empty());
+                                .thenReturn(Mono.error(new NotFoundException("Cart not found")));
 
         // Act & Assert
         webTestClient.delete()
@@ -345,18 +343,16 @@ public class CartControllerV1UnitTest {
         // Arrange
         String cartId = "cart-123";
         String productId = "product-789";
-        CartResponseDTO updatedCart = buildCartResponseDTO();
         when(cartServiceClient.removeProductFromCart(cartId, productId))
-                .thenReturn(Mono.just(updatedCart));
+                                .thenReturn(Mono.empty());
 
         // Act & Assert
         webTestClient.delete()
                 .uri(baseCartURL + "/" + cartId + "/products/" + productId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
-                .expectBody(CartResponseDTO.class)
-                .isEqualTo(updatedCart);
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
 
         verify(cartServiceClient, times(1)).removeProductFromCart(cartId, productId);
     }
@@ -619,17 +615,15 @@ public class CartControllerV1UnitTest {
         // Arrange
         String cartId = "cart-123";
         String productId = "product-789";
-        CartResponseDTO updatedCart = buildCartResponseDTO();
         when(cartServiceClient.removeProductFromWishlist(cartId, productId))
-                .thenReturn(Mono.just(updatedCart));
+                .thenReturn(Mono.empty());
 
         // Act & Assert
         webTestClient.delete()
                 .uri(baseCartURL + "/" + cartId + "/wishlist/" + productId)
                 .exchange()
-                .expectStatus().isOk()
-                .expectBody(CartResponseDTO.class)
-                .isEqualTo(updatedCart);
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
 
         verify(cartServiceClient, times(1)).removeProductFromWishlist(cartId, productId);
     }
@@ -664,7 +658,7 @@ public class CartControllerV1UnitTest {
 
         // Act & Assert
         webTestClient.delete()
-                .uri(baseCartURL + "/" + cartId + "/" + productId)
+                .uri(baseCartURL + "/" + cartId + "/products/" + productId)
                 .exchange()
                 .expectStatus().isBadRequest();
 
@@ -682,7 +676,7 @@ public class CartControllerV1UnitTest {
 
         // Act & Assert
         webTestClient.delete()
-                .uri(baseCartURL + "/" + cartId + "/" + productId)
+                .uri(baseCartURL + "/" + cartId + "/products/" + productId)
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.CONFLICT);
 
@@ -700,7 +694,7 @@ public class CartControllerV1UnitTest {
 
         // Act & Assert
         webTestClient.delete()
-                .uri(baseCartURL + "/" + cartId + "/" + productId)
+                .uri(baseCartURL + "/" + cartId + "/products/" + productId)
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
 

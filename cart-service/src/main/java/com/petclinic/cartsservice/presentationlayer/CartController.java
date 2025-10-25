@@ -95,23 +95,23 @@ public class CartController {
 
 
     @DeleteMapping("/{cartId}")
-    public Mono<ResponseEntity<CartResponseModel>> deleteCartByCartId(@PathVariable String cartId) {
+    public Mono<ResponseEntity<Void>> deleteCartByCartId(@PathVariable String cartId) {
         return Mono.just(cartId)
                 .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
                 .flatMap(cartService::deleteCartByCartId)
-                .map(ResponseEntity::ok)
+                .map(r -> ResponseEntity.noContent().<Void>build())
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
 
     }
 
     @DeleteMapping("/{cartId}/products/{productId}")
-    public Mono<ResponseEntity<CartResponseModel>> removeProductFromCart(@PathVariable String cartId, @PathVariable String productId) {
+    public Mono<ResponseEntity<Void>> removeProductFromCart(@PathVariable String cartId, @PathVariable String productId) {
         return Mono.just(cartId)
                 .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
                 .flatMap(validId -> cartService.removeProductFromCart(validId, productId))
-                .map(ResponseEntity::ok)
+                .map(r -> ResponseEntity.noContent().<Void>build())
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
@@ -273,7 +273,7 @@ public class CartController {
                         .switchIfEmpty(Mono.error(new InvalidInputException("Provided product id is invalid: " + productId)))
                         .flatMap(validProductId -> cartService.removeProductFromWishlist(validCartId, validProductId))
                 )
-                .map(ResponseEntity::ok)
+                .map(r -> ResponseEntity.noContent().<CartResponseModel>build())
                 .onErrorResume(e -> {
                     if (e instanceof InvalidInputException) {
                         CartResponseModel errorResponse = new CartResponseModel();
