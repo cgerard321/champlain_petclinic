@@ -324,10 +324,10 @@ export default function AdminBillsListTable({
       setError(null); // Clear any previous errors on success
     } catch (err: unknown) {
       console.error('Error creating bill:', err);
-      
+
       // Extract detailed error message from the response
       let errorMessage = 'Failed to create bill. Please try again.';
-      
+
       // Type guard for axios error
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosErr = err as { response?: { data?: unknown } };
@@ -351,7 +351,7 @@ export default function AdminBillsListTable({
         const genericErr = err as { message: string };
         errorMessage = genericErr.message;
       }
-      
+
       setError(errorMessage);
     }
   };
