@@ -29,13 +29,14 @@ interface CartContextType {
   setCartId: (id: string | null) => void;
   setCartCount: (count: number) => void;
   refreshFromAPI: () => Promise<{ cartId: string | null; cartCount: number }>;
+  syncAfterAddToCart: () => Promise<void>;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({
-  children,
-}: {
+                               children,
+                             }: {
   children: ReactNode;
 }): JSX.Element {
   const { user } = useUser();
@@ -55,8 +56,8 @@ export function CartProvider({
   }, [user?.roles]);
 
   const isOwner = useMemo(
-    () => roleList.some(role => role?.name === 'OWNER'),
-    [roleList]
+      () => roleList.some(role => role?.name === 'OWNER'),
+      [roleList]
   );
 
   const setCartId = (id: string | null): void => {
@@ -105,6 +106,19 @@ export function CartProvider({
     return { cartId: id, cartCount: count };
   }, [user?.userId, cartId, isOwner]);
 
+  // Force sync after "Add to Cart" to prevent UI mismatch
+  const syncAfterAddToCart = useCallback(async () => {
+    try {
+      const id = cartId || (await fetchCartIdByCustomerId(user?.userId));
+      if (!id) return;
+      setCartId(id);
+      const count = await fetchCartCountByCartId(id);
+      setCartCount(count);
+    } catch (err) {
+      console.error('Failed to sync cart after add:', err);
+    }
+  }, [user?.userId, cartId]);
+
   // When the user logs in, check if we already have cart data in localStorage.
   // If not, fetch it from the API to keep the cart state in sync.
   useEffect(() => {
@@ -152,29 +166,30 @@ export function CartProvider({
     };
     //same-tab
     window.addEventListener(
-      CART_CHANGED as unknown as string,
-      syncFromLocalStorage as EventListener
+        CART_CHANGED as unknown as string,
+        syncFromLocalStorage as EventListener
     );
     //cross-tab
     window.addEventListener('storage', onStorage);
     return () => {
       window.removeEventListener(
-        CART_CHANGED as unknown as string,
-        syncFromLocalStorage as EventListener
+          CART_CHANGED as unknown as string,
+          syncFromLocalStorage as EventListener
       );
       window.removeEventListener('storage', onStorage);
     };
   }, [isOwner]);
 
   const value = useMemo<CartContextType>(
-    () => ({
-      cartId,
-      cartCount,
-      setCartId,
-      setCartCount,
-      refreshFromAPI,
-    }),
-    [cartId, cartCount, refreshFromAPI]
+      () => ({
+        cartId,
+        cartCount,
+        setCartId,
+        setCartCount,
+        refreshFromAPI,
+        syncAfterAddToCart,
+      }),
+      [cartId, cartCount, refreshFromAPI, syncAfterAddToCart]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
