@@ -703,7 +703,6 @@ export default function AdminBillsListTable({
                 value={newBill.date}
                 min={new Date().toISOString().split('T')[0]}
                 onChange={e => handleDateChange(e.target.value)}
-                placeholder="Auto-filled to today"
               />
             </div>
             <div>
@@ -747,7 +746,6 @@ export default function AdminBillsListTable({
                 onChange={e =>
                   setNewBill({ ...newBill, dueDate: e.target.value })
                 }
-                placeholder="Auto-calculated (45 days after bill date)"
               />
             </div>
             <button type="submit">Create Bill</button>
