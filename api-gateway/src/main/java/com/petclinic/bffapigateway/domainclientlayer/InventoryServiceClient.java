@@ -332,7 +332,7 @@ public class InventoryServiceClient {
     public Flux<InventoryTypeResponseDTO> getAllInventoryTypes(){
         return webClient.get()
                 .uri(inventoryServiceUrl + "/type")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
                 .onStatus(status -> status.value() == 404,
                         resp -> rethrower.rethrow(
@@ -471,7 +471,7 @@ public class InventoryServiceClient {
     public Flux<InventoryResponseDTO> getAllInventories() {
         return webClient.get()
                 .uri(inventoryServiceUrl)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
                 .onStatus(status -> status.value() == 404,
                         resp -> rethrower.rethrow(resp,

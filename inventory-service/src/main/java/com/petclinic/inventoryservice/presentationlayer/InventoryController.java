@@ -57,7 +57,7 @@ public class InventoryController {
         return productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, minPrice, maxPrice, productQuantity, minSalePrice, maxSalePrice);
     }
 
-    @GetMapping("/{inventoryId}/products-pagination")
+    @GetMapping(value = "/{inventoryId}/products-pagination")
     public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductFieldPagination(@PathVariable String inventoryId,
                                                                                                  @RequestParam(required = false) String productName,
                                                                                                  @RequestParam(required = false) Double minPrice,
@@ -162,7 +162,7 @@ public Flux<InventoryResponseDTO> searchInventories(
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/type")
+    @GetMapping(value = "/type", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<InventoryTypeResponseDTO> getAllInventoryTypes(){
     return productInventoryService.getAllInventoryTypes();
     }
@@ -256,7 +256,7 @@ public Flux<InventoryResponseDTO> searchInventories(
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/all")
+    @GetMapping(value = "/all", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<InventoryResponseDTO> getAllInventories() {
         return productInventoryService.getAllInventories();
     }
