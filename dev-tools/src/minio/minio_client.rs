@@ -2,9 +2,9 @@ use minio::s3::error::Error as MinioError;
 use minio::s3::response::{ListObjectsResponse, PutObjectResponse};
 use minio::s3::segmented_bytes::SegmentedBytes;
 use minio::s3::types::{S3Api, ToStream};
-use rocket::State;
 use rocket::futures::Stream;
 use rocket::http::hyper::body::Bytes;
+use rocket::State;
 
 use crate::http::prelude::{AppError, AppResult};
 use crate::minio::bucket::BucketInfo;
