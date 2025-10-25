@@ -70,6 +70,9 @@ out/
 
 # End of https://www.toptal.com/developers/gitignore/api/go
 
+### Rust ###
+/debug/
+/target/
 .env
 cover.html
 app
