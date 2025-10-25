@@ -438,7 +438,7 @@ const ProfilePage = (): JSX.Element => {
     if (!confirmed) return;
 
     try {
-      await deletePetPhoto(user.userId, petId);
+      await deletePetPhoto(petId);
 
       setPetImageUrls(prev => ({
         ...prev,

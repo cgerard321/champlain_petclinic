@@ -99,7 +99,7 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
     if (!confirmed) return;
 
     try {
-      await deletePetPhoto(ownerId, pet.petId);
+      await deletePetPhoto(pet.petId);
       setPetPhotoUrl(defaultProfile);
 
       // Update pet data to reflect photo deletion
