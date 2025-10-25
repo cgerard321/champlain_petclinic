@@ -32,6 +32,8 @@ export default [
         require: 'readonly',
         exports: 'readonly',
         window: 'readonly',
+        requestAnimationFrame: 'readonly',
+        setTimeout: 'readonly',
       },
     },
     plugins: {

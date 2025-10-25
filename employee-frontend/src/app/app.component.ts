@@ -34,13 +34,13 @@ export class AppComponent implements OnInit {
         this.progressValue = Math.round(easeOutCubic * targetValue);
 
         if (progress < 1) {
-          window.requestAnimationFrame(updateProgress);
+          requestAnimationFrame(updateProgress);
         }
       };
 
-      window.requestAnimationFrame(updateProgress);
+      requestAnimationFrame(updateProgress);
     };
 
-    window.setTimeout(animateProgress, 500);
+    setTimeout(animateProgress, 500);
   }
 }
