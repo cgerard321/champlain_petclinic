@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { InventoryType } from '@/features/inventories/models/InventoryType.ts';
 import addInventoryType from '@/features/inventories/api/addInventoryType.ts';
 import styles from './InvProForm.module.css';
+import { createPortal } from 'react-dom';
 
 interface AddInventoryTypeProps {
   show: boolean;
@@ -70,7 +71,7 @@ export default function AddInventoryType({
 
   if (!show) return null; // Return null when `show` is false
 
-  return (
+  return createPortal(
     <div className={styles.overlay}>
       <div className={styles['form-container']}>
         <h2>Add Inventory Type</h2>
@@ -104,6 +105,7 @@ export default function AddInventoryType({
           </button>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
