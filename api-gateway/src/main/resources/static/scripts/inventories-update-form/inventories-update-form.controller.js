@@ -46,15 +46,56 @@ angular.module('inventoriesUpdateForm')
       if ($scope.checkNameUpdate) $scope.checkNameUpdate();
     }, handleHttpError);
 
-    $scope.inventoryTypeFormUpdateSearch = "";
-    $scope.inventoryTypeUpdateOptions = ["New Type"];
-    $http.get("/api/gateway/inventories/types").then(function (typesResp) {
-      (typesResp.data || []).forEach(function (t) {
-        if (t && t.type) $scope.inventoryTypeUpdateOptions.push(t.type);
-      });
-      typesLoaded = true;
-      syncSelectedType();
-    }, handleHttpError);
+      $scope.inventoryTypeFormUpdateSearch = "";
+      $scope.inventoryTypeUpdateOptions = ["New Type"];
+
+      (function initTypesUpdateSSE() {
+          var es = new EventSource('/api/gateway/inventories/types');
+          var seen = new Set();
+          var idleTimer = null;
+          var IDLE_MS = 1000;
+
+          function bumpIdle() {
+              if (idleTimer) clearTimeout(idleTimer);
+              idleTimer = setTimeout(function () {
+                  try { es.close(); } catch (_) {}
+              }, IDLE_MS);
+          }
+
+          function addType(t) {
+              if (!t) return;
+              var label = (typeof t === 'string') ? t : (t.type || t.inventoryType);
+              if (!label || seen.has(label)) return;
+              seen.add(label);
+              $scope.$evalAsync(function () {
+                  $scope.inventoryTypeUpdateOptions.push(label);
+                  // once the list is ready at least once, allow sync with the loaded inventory
+                  if (!typesLoaded) {
+                      typesLoaded = true;
+                      syncSelectedType();
+                  }
+              });
+          }
+
+          es.onmessage = function (e) {
+              if (!e.data || e.data === 'heartbeat' || e.data === ':') { bumpIdle(); return; }
+              try {
+                  var payload = JSON.parse(e.data);
+                  if (Array.isArray(payload)) payload.forEach(addType);
+                  else addType(payload);
+              } catch (_e) {
+                  addType(e.data);
+              }
+              bumpIdle();
+          };
+
+          es.onerror = function () {};
+
+          $scope.$on('$destroy', function () {
+              if (idleTimer) clearTimeout(idleTimer);
+              try { es.close(); } catch (_) {}
+          });
+      })();
 
     $scope.checkNameUpdate = function () {
       if (!$scope.inventoryUpdateForm || !$scope.inventoryUpdateForm.inventoryName) return;
