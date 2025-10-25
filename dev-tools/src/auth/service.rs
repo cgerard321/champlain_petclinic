@@ -42,7 +42,7 @@ pub async fn authenticate(db: &State<Db>, email: &str, password: &str) -> Result
         .await
         .map_err(|e| map_sqlx_err(e, "Session"))?;
 
-    println!("Created session {session_id} for user {}", row.email);
+    println!("Created session {session_id} for user {}", row.id);
 
     Ok(session_id)
 }
