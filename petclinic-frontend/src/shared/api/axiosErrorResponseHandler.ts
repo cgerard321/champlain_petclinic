@@ -1,6 +1,5 @@
 import { AxiosError } from 'axios';
 import axiosInstance from "@/shared/api/axiosInstance.ts";
-import {redirect} from "react-router-dom";
 
 // Map status codes to their respective error pages
 const errorPageRedirects: Record<number, string> = {
@@ -23,7 +22,6 @@ export default function axiosErrorResponseHandler(
     );
         axiosInstance.post('/users/logout', {});
         localStorage.clear();
-        redirect('/home');
 
   }
 
