@@ -47,6 +47,7 @@ pub async fn delete_session(db: &Db, sid: Uuid) -> sqlx::Result<()> {
     Ok(())
 }
 
+#[allow(dead_code)]
 // TODO : Add a cron(or similar still unsure) job to delete expired sessions
 pub async fn delete_expired_sessions(db: &Db) -> sqlx::Result<u64> {
     let res = sqlx::query("DELETE FROM sessions WHERE expires_at < NOW()")

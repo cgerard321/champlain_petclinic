@@ -17,6 +17,8 @@ pub enum AppError {
     Forbidden,
     #[error("Not found: {0}")]
     NotFound(String),
+    #[error("Conflict")]
+    Conflict,
     #[error("Unprocessable entity: {0}")]
     UnprocessableEntity(String),
     #[error("Dependency failed")]
@@ -33,6 +35,7 @@ impl AppError {
             AppError::Unauthorized => Status::Unauthorized,
             AppError::Forbidden => Status::Forbidden,
             AppError::NotFound(_) => Status::NotFound,
+            AppError::Conflict => Status::Conflict,
             AppError::UnprocessableEntity(_) => Status::UnprocessableEntity,
             AppError::FailedDependency => Status::FailedDependency,
             AppError::Internal => Status::InternalServerError,
@@ -44,6 +47,7 @@ impl AppError {
             AppError::Unauthorized => "unauthorized",
             AppError::Forbidden => "forbidden",
             AppError::NotFound(_) => "not_found",
+            AppError::Conflict => "conflict",
             AppError::UnprocessableEntity(_) => "unprocessable_entity",
             AppError::FailedDependency => "dependency_failed",
             AppError::Internal => "internal_error",
@@ -57,6 +61,7 @@ impl AppError {
             }
             AppError::Unauthorized => "You are not authorized to access this resource".into(),
             AppError::Forbidden => "You don't have access to this resource".into(),
+            AppError::Conflict => "Request caused a duplication or conflict error".into(),
             AppError::FailedDependency => "A dependent service failed".into(),
             AppError::Internal => "An unexpected error occurred".into(),
         }

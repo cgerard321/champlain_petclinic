@@ -32,11 +32,17 @@ pub async fn get_user_auth_by_email(db: &Db, email: &str) -> sqlx::Result<FullUs
     .fetch_one(&db.0)
     .await?;
 
+    let id_str: String = row.try_get("id")?;
+    let id = Uuid::parse_str(&id_str).map_err(|_| sqlx::Error::ColumnDecode {
+        index: "id".into(),
+        source: Box::new(std::fmt::Error),
+    })?;
+
     Ok(FullUser {
-        id: Uuid::parse_str(row.get::<String, _>(0).as_str()).unwrap(),
-        email: row.get(1),
-        display_name: row.get(2),
-        is_active: row.get(3),
-        pass_hash: row.get(4),
+        id,
+        email: row.try_get("email")?,
+        display_name: row.try_get("display_name")?,
+        is_active: row.try_get("is_active")?,
+        pass_hash: row.try_get("pass_hash")?,
     })
 }

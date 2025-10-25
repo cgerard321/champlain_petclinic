@@ -2,6 +2,7 @@ use crate::auth::repo as session_repo;
 use crate::core::config::DEFAULT_SESSIONS_AGE_HR;
 use crate::core::error::{AppError, AppResult};
 use crate::db::database::Db;
+use crate::db::error::map_sqlx_err;
 use crate::users::service as user_service;
 use crate::utils::auth::get_pepper;
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
@@ -39,7 +40,7 @@ pub async fn authenticate(db: &State<Db>, email: &str, password: &str) -> Result
 
     session_repo::insert_session(db, session_id, row.id, expires_at)
         .await
-        .map_err(|_e| AppError::Internal)?;
+        .map_err(|e| map_sqlx_err(e, "Session"))?;
 
     println!("Created session {session_id} for user {}", row.email);
 
@@ -49,5 +50,5 @@ pub async fn authenticate(db: &State<Db>, email: &str, password: &str) -> Result
 pub async fn remove_session(db: &State<Db>, cookie_id: Uuid) -> AppResult<()> {
     session_repo::delete_session(db, cookie_id)
         .await
-        .map_err(|_e| AppError::Internal)
+        .map_err(|e| map_sqlx_err(e, "Session"))
 }
