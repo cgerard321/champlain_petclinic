@@ -17,12 +17,12 @@ import xcrossIcon from '@/assets/Icons/xcrossDark.svg';
 import pentosquareIcon from '@/assets/Icons/pentosquareLight.svg';
 import starIcon from '@/assets/Icons/starEmptyLight.svg';
 import AddingVisit from './components/AddingVisit';
+import calendarIcon from '@/assets/Icons/calendarLight.svg';
 
 import BasicModal from '@/shared/components/BasicModal';
 import VisitDetails from '@/features/visits/components/VisitDetails';
 import EditingVisit from './components/EditingVisit';
 import { AppRoutePaths } from '@/shared/models/path.routes';
-import { FaCalendarAlt } from 'react-icons/fa';
 
 export default function VisitListTable(): JSX.Element {
   const isVet = IsVet();
@@ -234,7 +234,7 @@ export default function VisitListTable(): JSX.Element {
             onClick={() => navigate(AppRoutePaths.VisitsCalendar)}
             title="Calendar View"
           >
-            <FaCalendarAlt className="me-2" />
+            <img src={calendarIcon} alt="Calendar" />
             Calendar View
           </button>
         </li>
