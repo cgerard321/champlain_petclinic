@@ -9,58 +9,52 @@ import { ProductType } from '@/features/products/api/ProductTypeEnum';
 
 export default function Products(): JSX.Element {
   const [searchQuery, setSearchQuery] = useState<string>('');
-
-  // filters
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [minPrice, setMinPrice] = useState<number | undefined>();
-  const [maxPrice, setMaxPrice] = useState<number | undefined>();
-  const [ratingSort, setRatingSort] = useState<string>('default');
-  const [minStars, setMinStars] = useState<number>(0);
-  const [maxStars, setMaxStars] = useState<number>(5);
-  const [deliveryType, setDeliveryType] = useState<string>('');
-  const [productType, setProductType] = useState<string>('');
   const [validationMessage, setValidationMessage] = useState<string>('');
+  const [showSortOptions, setShowSortOptions] = useState(false);
+  const [sortCriteria, setSortCriteria] = useState('default');
+
+  const defaultFilters = useMemo(
+    () => ({
+      minPrice: undefined,
+      maxPrice: undefined,
+      ratingSort: 'default',
+      minStars: 0,
+      maxStars: 5,
+      deliveryType: '',
+      productType: '',
+    }),
+    []
+  );
+
+  const [tempFilters, setTempFilters] = useState(defaultFilters);
+
+  const [appliedFilters, setAppliedFilters] = useState(defaultFilters);
 
   const toggleSidebar = (): void => setIsSidebarOpen(!isSidebarOpen);
   const handleOverlayClick = (): void => setIsSidebarOpen(false);
-  const [showSortOptions, setShowSortOptions] = useState(false);
-  const [sortCriteria, setSortCriteria] = useState('default');
+
   const handleSort = (criteria: string): void => {
     setSortCriteria(criteria);
     setShowSortOptions(false);
   };
 
+  const updateTempFilter = (key: string, value: unknown): void => {
+    setTempFilters(prev => ({ ...prev, [key]: value }));
+  };
+
+  const applyFilters = (): void => {
+    setAppliedFilters(tempFilters);
+    setIsSidebarOpen(false);
+  };
+
   const clearFilters = (): void => {
-    setMinPrice(undefined);
-    setMaxPrice(undefined);
-    setRatingSort('default');
-    setMinStars(0);
-    setMaxStars(5);
-    setDeliveryType('');
-    setProductType('');
+    setTempFilters(defaultFilters);
+    setAppliedFilters(defaultFilters);
     setValidationMessage('');
   };
 
-  const filters = useMemo(
-    () => ({
-      minPrice,
-      maxPrice,
-      ratingSort,
-      minStars,
-      maxStars,
-      deliveryType,
-      productType,
-    }),
-    [
-      minPrice,
-      maxPrice,
-      ratingSort,
-      minStars,
-      maxStars,
-      deliveryType,
-      productType,
-    ]
-  );
+  const filters = useMemo(() => appliedFilters, [appliedFilters]);
 
   return (
     <div>
@@ -87,7 +81,7 @@ export default function Products(): JSX.Element {
           aria-expanded={isSidebarOpen}
           aria-controls="products-sidebar"
         >
-          {isSidebarOpen ? '☰ Filters' : '☰ Filters'}
+          {'☰ Filters'}
         </button>
 
         <div className="search-wrapper">
@@ -150,9 +144,12 @@ export default function Products(): JSX.Element {
               Min Price:
               <input
                 type="number"
-                value={minPrice ?? ''}
+                value={tempFilters.minPrice ?? ''}
                 onChange={e =>
-                  setMinPrice(e.target.value ? +e.target.value : undefined)
+                  updateTempFilter(
+                    'minPrice',
+                    e.target.value ? +e.target.value : undefined
+                  )
                 }
               />
             </label>
@@ -161,9 +158,12 @@ export default function Products(): JSX.Element {
               Max Price:
               <input
                 type="number"
-                value={maxPrice ?? ''}
+                value={tempFilters.maxPrice ?? ''}
                 onChange={e =>
-                  setMaxPrice(e.target.value ? +e.target.value : undefined)
+                  updateTempFilter(
+                    'maxPrice',
+                    e.target.value ? +e.target.value : undefined
+                  )
                 }
               />
             </label>
@@ -171,8 +171,8 @@ export default function Products(): JSX.Element {
             <label>
               Item Type:
               <select
-                value={productType}
-                onChange={e => setProductType(e.target.value)}
+                value={tempFilters.productType}
+                onChange={e => updateTempFilter('productType', e.target.value)}
               >
                 <option value="">All Item Types</option>
                 {Object.values(ProductType).map(type => (
@@ -186,8 +186,8 @@ export default function Products(): JSX.Element {
             <label>
               Delivery Type:
               <select
-                value={deliveryType}
-                onChange={e => setDeliveryType(e.target.value)}
+                value={tempFilters.deliveryType}
+                onChange={e => updateTempFilter('deliveryType', e.target.value)}
               >
                 <option value="">All Delivery Types</option>
                 <option value="DELIVERY">Delivery</option>
@@ -200,18 +200,18 @@ export default function Products(): JSX.Element {
             <div className="star-rating-container">
               <h2>Filter by Star Rating</h2>
               <StarRating
-                currentRating={minStars}
+                currentRating={tempFilters.minStars}
                 viewOnly={false}
-                updateRating={setMinStars}
+                updateRating={value => updateTempFilter('minStars', value)}
               />
               <StarRating
-                currentRating={maxStars}
+                currentRating={tempFilters.maxStars}
                 viewOnly={false}
-                updateRating={setMaxStars}
+                updateRating={value => updateTempFilter('maxStars', value)}
               />
             </div>
 
-            <button onClick={toggleSidebar}>Apply</button>
+            <button onClick={applyFilters}>Apply</button>
             <button onClick={clearFilters}>Clear</button>
             {validationMessage && (
               <span style={{ color: 'red' }}>{validationMessage}</span>
