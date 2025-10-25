@@ -24,7 +24,7 @@ AddElementTag("storage-mongo", $shape=RoundedBoxShape(), $bgColor="#00684A",$bor
 AddElementTag("storage-postgres", $shape=RoundedBoxShape(), $bgColor="#336791",$borderColor="Black", $fontColor="white", $legendText="PostGres Database")
 
 AddElementTag("framework-react", $shape=RoundedBoxShape(), $bgColor="#61DBFB", $fontColor="white", $legendText="React Single-Page Application")
-AddElementTag("framework-angular", $shape=RoundedBoxShape(), $bgColor="#b52e31", $fontColor="white", $legendText="Angular 20 Employee Portal")
+AddElementTag("framework-angular", $shape=RoundedBoxShape(), $bgColor="#b52e31", $fontColor="white", $legendText="Angular Single-Page Application")
 
 AddElementTag("webApp", $bgColor="#e34f26", $fontColor="white", $legendText="Web Application")
 

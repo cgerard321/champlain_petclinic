@@ -5,37 +5,37 @@
 
     <div class="features-grid">
       <div class="feature-card">
-        <i class="bi bi-people-fill"></i>
+        <mat-icon class="feature-icon">people</mat-icon>
         <h3>Customer Management</h3>
         <p>Manage pet owners, pets, and customer information</p>
       </div>
 
       <div class="feature-card">
-        <i class="bi bi-calendar-check"></i>
+        <mat-icon class="feature-icon">event_available</mat-icon>
         <h3>Appointment Booking</h3>
         <p>Schedule and manage veterinary appointments</p>
       </div>
 
       <div class="feature-card">
-        <i class="bi bi-shield-check"></i>
+        <mat-icon class="feature-icon">verified_user</mat-icon>
         <h3>Veterinarian Portal</h3>
         <p>Manage vet availability and specializations</p>
       </div>
 
       <div class="feature-card">
-        <i class="bi bi-box-seam"></i>
+        <mat-icon class="feature-icon">inventory</mat-icon>
         <h3>Inventory Management</h3>
         <p>Track medical supplies, medications, and equipment</p>
       </div>
 
       <div class="feature-card">
-        <i class="bi bi-receipt"></i>
+        <mat-icon class="feature-icon">receipt</mat-icon>
         <h3>Billing System</h3>
         <p>Process payments, generate invoices, and manage bills</p>
       </div>
 
       <div class="feature-card">
-        <i class="bi bi-cart"></i>
+        <mat-icon class="feature-icon">shopping_cart</mat-icon>
         <h3>Product Store</h3>
         <p>Manage online store products and customer carts</p>
       </div>
@@ -54,10 +54,12 @@
     <div class="role-info">
       <h4>Available for:</h4>
       <div class="roles">
-        <span class="role-badge">Receptionist</span>
-        <span class="role-badge">Veterinarian</span>
-        <span class="role-badge">Inventory Manager</span>
-        <span class="role-badge">Administrator</span>
+        <mat-chip-listbox>
+          <mat-chip>Receptionist</mat-chip>
+          <mat-chip>Veterinarian</mat-chip>
+          <mat-chip>Inventory Manager</mat-chip>
+          <mat-chip>Administrator</mat-chip>
+        </mat-chip-listbox>
       </div>
     </div>
 
@@ -66,7 +68,9 @@
         New Angular 20 Employee Portal - Will Soon Replace Legacy AngularJS App
       </p>
       <div class="progress-bar">
-        <div class="progress-fill"></div>
+        <div class="custom-progress-bar">
+          <div class="progress-fill" [style.width.%]="progressValue"></div>
+        </div>
       </div>
       <p class="migration-note">Modern Angular 20 with Vite - Coming Soon</p>
     </div>
