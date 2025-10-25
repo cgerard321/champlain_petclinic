@@ -87,7 +87,7 @@ export default function Products(): JSX.Element {
           aria-expanded={isSidebarOpen}
           aria-controls="products-sidebar"
         >
-          {isSidebarOpen ? '☰ Filters' : '☰ Filters'}
+          {'☰ Filters'}
         </button>
 
         <div className="search-wrapper">
