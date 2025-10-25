@@ -3,7 +3,6 @@ use minio::s3::error::{Error as MinioError, ErrorCode};
 
 impl From<MinioError> for AppError {
     fn from(e: MinioError) -> Self {
-        dbg!(&e);
         match e {
             MinioError::S3Error(se) => match se.code {
                 ErrorCode::NoSuchBucket => {

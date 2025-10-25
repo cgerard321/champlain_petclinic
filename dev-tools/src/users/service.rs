@@ -21,7 +21,7 @@ fn hash_password(plain: &str, pepper: &str) -> AppResult<String> {
 }
 
 pub async fn insert_user(db: &State<Db>, nu: NewUser) -> AppResult<User> {
-    let pep = get_pepper();
+    let pep = get_pepper()?;
     let id = Uuid::new_v4();
     let pass_hash = hash_password(&nu.password, &pep)?;
 

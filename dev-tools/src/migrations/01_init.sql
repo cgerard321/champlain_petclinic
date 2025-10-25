@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS users
 ) NOT NULL UNIQUE,
     pass_hash VARBINARY
 (
-    128
+    255
 ) NOT NULL,
     display_name VARCHAR
 (
