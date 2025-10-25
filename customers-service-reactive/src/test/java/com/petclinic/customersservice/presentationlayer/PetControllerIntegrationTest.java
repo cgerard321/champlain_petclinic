@@ -5,7 +5,12 @@ import com.petclinic.customersservice.customersExceptions.exceptions.NotFoundExc
 import com.petclinic.customersservice.data.Pet;
 import com.petclinic.customersservice.data.PetRepo;
 import com.petclinic.customersservice.domainclientlayer.FilesServiceClient;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Mono;
+
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -43,6 +48,11 @@ class PetControllerIntegrationTest {
     String PET_ID = petEntity.getPetId();
 
     private String validPetId;
+
+    @BeforeEach
+    void setUp() {
+        when(filesServiceClient.deleteFile(anyString())).thenReturn(Mono.empty());
+    }
 
     @Test
     void deletePetByPetId() {
@@ -151,6 +161,45 @@ class PetControllerIntegrationTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.isActive").isEqualTo(petEntity.getIsActive());
+    }
+
+    @Test
+    void deletePetPhoto_WithExistingPet_ShouldReturnOk() {
+        Publisher<Pet> setup = repo.deleteAll().thenMany(repo.save(petEntity));
+        StepVerifier.create(setup).expectNextCount(1).verifyComplete();
+
+        client.patch()
+                .uri("/pets/{petId}/photo", PET_ID)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.petId").isEqualTo(petEntity.getPetId())
+                .jsonPath("$.name").isEqualTo(petEntity.getName())
+                .jsonPath("$.photo").isEmpty();
+    }
+
+    @Test
+    void deletePetPhoto_WithNonExistentPet_ShouldReturnNotFound() {
+        String nonExistentPetId = "00000000-0000-0000-0000-000000000000";
+        
+        client.patch()
+                .uri("/pets/{petId}/photo", nonExistentPetId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void deletePetPhoto_WithInvalidPetId_ShouldReturnUnprocessableEntity() {
+        String invalidPetId = "invalid-id";
+        
+        client.patch()
+                .uri("/pets/{petId}/photo", invalidPetId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(422);
     }
 
     private Pet buildPet() {
