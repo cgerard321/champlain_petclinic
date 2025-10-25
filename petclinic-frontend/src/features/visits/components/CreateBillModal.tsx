@@ -145,7 +145,7 @@ export default function CreateBillModal({
     try {
       const payload: BillRequestModel = {
         ...form,
-        billStatus: form.billStatus ? form.billStatus.toUpperCase() : 'UNPAID',
+        billStatus: form.billStatus ? form.billStatus : 'UNPAID',
       };
       await addBill(payload);
       onCreated?.();
