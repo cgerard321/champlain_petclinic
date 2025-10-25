@@ -19,6 +19,8 @@ import { getPetTypeName } from '@/features/customers/utils/petTypeMapping';
 import { deletePet } from '@/features/customers/api/deletePet';
 import defaultProfile from '@/assets/Owners/defaultProfilePicture.png';
 import { deleteOwnerPhoto } from '@/features/customers/api/deleteOwnerPhoto.ts';
+import { deletePetPhoto } from '@/features/customers/api/deletePetPhoto';
+import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
 
 const ProfilePage = (): JSX.Element => {
   const [profilePicUrl, setProfilePicUrl] = useState<string>('');
@@ -36,6 +38,7 @@ const ProfilePage = (): JSX.Element => {
   const navigate = useNavigate();
   const [isDeletePhotoModalOpen, setIsDeletePhotoModalOpen] =
     useState<boolean>(false);
+  const { confirm, ConfirmModal } = useConfirmModal();
   useEffect(() => {
     const fetchPetTypes = async (): Promise<void> => {
       try {
@@ -419,6 +422,41 @@ const ProfilePage = (): JSX.Element => {
     fetchOwnerData();
   };
 
+  const handleDeletePetPhoto = async (petId: string): Promise<void> => {
+    if (!user.userId) return;
+
+    const confirmed = await confirm({
+      title: 'Delete Pet Photo',
+      message:
+        "Are you sure you want to delete this pet's photo? This action cannot be undone.",
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      variant: 'danger',
+      destructive: true,
+    });
+
+    if (!confirmed) return;
+
+    try {
+      await deletePetPhoto(petId);
+
+      setPetImageUrls(prev => ({
+        ...prev,
+        [petId]: defaultProfile,
+      }));
+
+      if (owner) {
+        const updatedPets = owner.pets.map(pet =>
+          pet.petId === petId ? { ...pet, photo: undefined } : pet
+        );
+        setOwner({ ...owner, pets: updatedPets });
+      }
+    } catch (error) {
+      console.error('Error deleting pet photo:', error);
+      setError('Failed to delete pet photo. Please try again.');
+    }
+  };
+
   if (error) {
     return <p>{error}</p>;
   }
@@ -538,6 +576,16 @@ const ProfilePage = (): JSX.Element => {
                       >
                         Edit Pet
                       </button>
+                      {petImageUrls[pet.petId] &&
+                        petImageUrls[pet.petId] !== defaultProfile &&
+                        (pet.photo || petImageUrls[pet.petId]) && (
+                          <button
+                            className="customers-delete-photo-button"
+                            onClick={() => handleDeletePetPhoto(pet.petId)}
+                          >
+                            Delete Photo
+                          </button>
+                        )}
                       <button
                         className="customers-delete-pet-button"
                         onClick={() => handleDeletePet(pet.petId)}
@@ -619,6 +667,7 @@ const ProfilePage = (): JSX.Element => {
           </div>
         </div>
       )}
+      <ConfirmModal />
     </div>
   );
 };
