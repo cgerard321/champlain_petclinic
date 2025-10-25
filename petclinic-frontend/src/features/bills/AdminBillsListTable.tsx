@@ -108,25 +108,46 @@ export default function AdminBillsListTable({
   }, []);
 
   const validateForm = (): boolean => {
-    if (
-      !newBill.customerId ||
-      !newBill.vetId ||
-      !newBill.date ||
-      newBill.amount <= 0 ||
-      !newBill.billStatus ||
-      !newBill.dueDate
-    ) {
-      setError(
-        'All fields are required and the amount must be greater than zero.'
-      );
+    // Required fields that user must fill
+    if (!newBill.customerId) {
+      setError('Please select a customer.');
       return false;
     }
+    if (!newBill.vetId) {
+      setError('Please select a vet.');
+      return false;
+    }
+    if (!newBill.visitType) {
+      setError('Please select a visit type.');
+      return false;
+    }
+    if (newBill.amount <= 0) {
+      setError('Amount must be greater than zero.');
+      return false;
+    }
+
+    // Auto-filled fields should be populated by now, but let's verify
+    if (!newBill.date) {
+      setError('Date is required.');
+      return false;
+    }
+    if (!newBill.billStatus) {
+      setError('Status is required.');
+      return false;
+    }
+    if (!newBill.dueDate) {
+      setError('Due date is required.');
+      return false;
+    }
+
+    // Business logic validation
     const billDate = new Date(newBill.date);
     const dueDate = new Date(newBill.dueDate);
     if (billDate > dueDate) {
       setError('The bill date cannot be after the due date.');
       return false;
     }
+
     setError(null);
     return true;
   };
@@ -300,9 +321,38 @@ export default function AdminBillsListTable({
       await addBill(formattedBill);
       setActiveSection(null);
       getBillsList(currentPage, 10);
-    } catch (err) {
+      setError(null); // Clear any previous errors on success
+    } catch (err: unknown) {
       console.error('Error creating bill:', err);
-      setError('Failed to create bill. Please try again.');
+      
+      // Extract detailed error message from the response
+      let errorMessage = 'Failed to create bill. Please try again.';
+      
+      // Type guard for axios error
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosErr = err as { response?: { data?: unknown } };
+        if (axiosErr.response?.data) {
+          const responseData = axiosErr.response.data;
+          if (typeof responseData === 'string') {
+            // Handle plain text error responses
+            errorMessage = responseData;
+          } else if (responseData && typeof responseData === 'object') {
+            // Handle structured error responses
+            const structuredData = responseData as Record<string, unknown>;
+            if (typeof structuredData.message === 'string') {
+              errorMessage = structuredData.message;
+            } else if (typeof structuredData.reason === 'string') {
+              errorMessage = structuredData.reason;
+            }
+          }
+        }
+      } else if (err && typeof err === 'object' && 'message' in err) {
+        // Handle network/other errors
+        const genericErr = err as { message: string };
+        errorMessage = genericErr.message;
+      }
+      
+      setError(errorMessage);
     }
   };
 
@@ -332,6 +382,42 @@ export default function AdminBillsListTable({
   useEffect(() => {
     fetchOwnersAndVets();
   }, [fetchOwnersAndVets]);
+
+  // Auto-fill logic for better UX
+  useEffect(() => {
+    // Reset and auto-fill when modal opens
+    if (activeSection === 'create') {
+      const today = new Date().toISOString().split('T')[0];
+      const dueDate = new Date();
+      dueDate.setDate(dueDate.getDate() + 45);
+      const dueDateString = dueDate.toISOString().split('T')[0];
+
+      setNewBill({
+        customerId: '',
+        vetId: '',
+        date: today,
+        amount: 0,
+        visitType: '',
+        billStatus: 'UNPAID',
+        dueDate: dueDateString,
+      });
+      setError(null); // Clear any previous errors
+    }
+  }, [activeSection]);
+
+  // Update due date when bill date changes
+  const handleDateChange = (selectedDate: string): void => {
+    const billDate = new Date(selectedDate);
+    const dueDate = new Date(billDate);
+    dueDate.setDate(billDate.getDate() + 45);
+    const dueDateString = dueDate.toISOString().split('T')[0];
+
+    setNewBill(prev => ({
+      ...prev,
+      date: selectedDate,
+      dueDate: dueDateString,
+    }));
+  };
 
   const handlePreviousPage = (): void => {
     if (currentPage > 0) {
@@ -543,7 +629,20 @@ export default function AdminBillsListTable({
       {activeSection === 'create' && (
         <div className="filter-section">
           <h3>Create New Bill</h3>
-          {error && <p style={{ color: 'red' }}>{error}</p>}
+          {error && (
+            <div
+              style={{
+                backgroundColor: '#fee',
+                border: '1px solid #fcc',
+                borderRadius: '4px',
+                padding: '8px 12px',
+                marginBottom: '16px',
+                color: '#c33',
+              }}
+            >
+              <strong>Error:</strong> {error}
+            </div>
+          )}
           <form
             onSubmit={e => {
               e.preventDefault();
@@ -602,7 +701,9 @@ export default function AdminBillsListTable({
               <input
                 type="date"
                 value={newBill.date}
-                onChange={e => setNewBill({ ...newBill, date: e.target.value })}
+                min={new Date().toISOString().split('T')[0]}
+                onChange={e => handleDateChange(e.target.value)}
+                placeholder="Auto-filled to today"
               />
             </div>
             <div>
@@ -611,10 +712,18 @@ export default function AdminBillsListTable({
                 type="number"
                 min="0"
                 step="0.01"
-                value={newBill.amount}
+                value={newBill.amount === 0 ? '' : newBill.amount}
                 onChange={e =>
-                  setNewBill({ ...newBill, amount: parseFloat(e.target.value) })
+                  setNewBill({
+                    ...newBill,
+                    amount:
+                      e.target.value === ''
+                        ? 0
+                        : parseFloat(e.target.value) || 0,
+                  })
                 }
+                placeholder="Enter bill amount"
+                required
               />
             </div>
             <div>
@@ -628,7 +737,6 @@ export default function AdminBillsListTable({
                 <option value="">Select Status</option>
                 <option value="PAID">PAID</option>
                 <option value="UNPAID">UNPAID</option>
-                <option value="OVERDUE">OVERDUE</option>
               </select>
             </div>
             <div>
@@ -639,6 +747,7 @@ export default function AdminBillsListTable({
                 onChange={e =>
                   setNewBill({ ...newBill, dueDate: e.target.value })
                 }
+                placeholder="Auto-calculated (45 days after bill date)"
               />
             </div>
             <button type="submit">Create Bill</button>
