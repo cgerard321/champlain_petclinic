@@ -20,7 +20,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.never;
 
 @ExtendWith(SpringExtension.class)
 @WebFluxTest(controllers = PetController.class)
@@ -85,6 +84,37 @@ public class PetControllerUnitTest {
                 .expectStatus().isNotFound();
 
         verify(petService).createPetForOwner(anyString(), any(Mono.class));
+    }
+
+    @Test
+    void deletePetPhoto_ShouldReturnOk() {
+        PetResponseDTO petResponseDTO = buildPetResponseDTO();
+        String petId = "0e4d8481-b611-4e52-baed-af16caa8bf8a";
+        
+        when(petService.deletePetPhoto(petId)).thenReturn(Mono.just(petResponseDTO));
+
+        webTestClient.patch()
+                .uri("/pets/{petId}/photo", petId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(PetResponseDTO.class)
+                .isEqualTo(petResponseDTO);
+
+        verify(petService).deletePetPhoto(petId);
+    }
+
+    @Test
+    void deletePetPhoto_WithNonExistentPet_ShouldReturnNotFound() {
+        String petId = "00000000-0000-0000-0000-000000000000";
+        
+        when(petService.deletePetPhoto(petId)).thenReturn(Mono.empty());
+
+        webTestClient.patch()
+                .uri("/pets/{petId}/photo", petId)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        verify(petService).deletePetPhoto(petId);
     }
 
     private Pet buildPet() {

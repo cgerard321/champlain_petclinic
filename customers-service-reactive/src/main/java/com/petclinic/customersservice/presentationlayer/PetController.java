@@ -2,6 +2,7 @@ package com.petclinic.customersservice.presentationlayer;
 
 import com.petclinic.customersservice.business.PetService;
 import com.petclinic.customersservice.customersExceptions.ApplicationExceptions;
+import com.petclinic.customersservice.domainclientlayer.FileRequestDTO;
 import com.petclinic.customersservice.util.Validator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,5 +98,24 @@ public class PetController {
         return petService.createPetForOwner(ownerId, Mono.just(petRequest))
                 .map(pet -> ResponseEntity.status(HttpStatus.CREATED).body(pet))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @PatchMapping("/{petId}/photo")
+    public Mono<ResponseEntity<PetResponseDTO>> deletePetPhoto(@PathVariable String petId, @RequestBody(required = false) Mono<FileRequestDTO> photoMono) {
+        return Mono.just(petId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(ApplicationExceptions.invalidPetId(petId))
+                .flatMap(id -> 
+                    photoMono.flatMap(photo -> {
+                        if (photo == null || photo.getFileData() == null || photo.getFileData().length == 0) {
+                            return petService.deletePetPhoto(id);
+                        }
+                        // For eric ticket implementation for pet photo updates 
+                        return Mono.error(new UnsupportedOperationException("Photo update not yet implemented"));
+                    })
+                    .switchIfEmpty(petService.deletePetPhoto(id)) 
+                )
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 }
