@@ -71,7 +71,9 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
         setLoadingPets(true);
         const petsData = await getAllPets();
 
-        setPets(petsData);
+        // Filter only active pets
+        const activePets = petsData.filter(pet => pet.isActive === 'true');
+        setPets(activePets);
       } catch (error) {
         console.error('Error fetching pets:', error);
         setErrorMessage('Failed to load pets. Please try again.');
