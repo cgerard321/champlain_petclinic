@@ -63,8 +63,6 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
   const [vets, setVets] = useState<VetResponse[]>([]);
   const [showPrescriptionModal, setShowPrescriptionModal] =
     useState<boolean>(false);
-  const [showCreateBillModal, setShowCreateBillModal] =
-    useState<boolean>(false);
   const prescriptionTriggerRef = useRef<HTMLButtonElement | null>(null);
   const createBillTriggerRef = useRef<HTMLButtonElement | null>(null);
   //const { user } = useUser();
@@ -182,11 +180,7 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
   };
 
   const handleCreateBillClick = (): void => {
-    // open the modal via the hidden trigger to avoid nested form submission
-    setShowCreateBillModal(true);
-    setTimeout(() => {
-      createBillTriggerRef.current?.click();
-    }, 0);
+    createBillTriggerRef.current?.click();
   };
 
   return (
