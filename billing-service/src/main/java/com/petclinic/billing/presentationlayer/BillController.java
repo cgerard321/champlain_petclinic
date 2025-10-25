@@ -34,7 +34,6 @@ public class BillController {
     public Mono<ResponseEntity<BillResponseDTO>> createBill(@RequestBody Mono<BillRequestDTO> billDTO) {
         return billDTO
                 .flatMap(dto -> {
-                    // Required field validation
                     if (dto.getCustomerId() == null || dto.getCustomerId().trim().isEmpty()) {
                         return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer ID is required"));
                     }
@@ -43,7 +42,6 @@ public class BillController {
                         return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vet ID is required"));
                     }
                     
-                    // Amount validation
                     if (dto.getAmount() == null) {
                         return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bill amount is required"));
                     }
@@ -52,25 +50,21 @@ public class BillController {
                         return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bill amount must be greater than zero"));
                     }
                     
-                    // Auto-set bill status to UNPAID if not provided
                     if (dto.getBillStatus() == null) {
                         dto.setBillStatus(BillStatus.UNPAID);
                         log.debug("Auto-set bill status to UNPAID");
                     }
                     
-                    // Auto-set created date to today if not provided
                     if (dto.getDate() == null) {
                         dto.setDate(LocalDate.now());
                         log.debug("Auto-set bill date to today: {}", dto.getDate());
                     }
                     
-                    // Prevent bills from being created with past dates
                     if (dto.getDate().isBefore(LocalDate.now())) {
                         return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, 
                             "Bill date cannot be in the past. Please use today's date or a future date."));
                     }
                     
-                    // Gentle due date suggestion for pet clinic (45 days - flexible for pet owners)
                     if (dto.getDueDate() == null) {
                         dto.setDueDate(dto.getDate().plusDays(45));
                         log.debug("Auto-suggested due date (45 days): {}", dto.getDueDate());
@@ -98,16 +92,6 @@ public class BillController {
         return billService.getAllBills();
     }
 
-    //to be changed
-//    @GetMapping("/bills-pagination")
-//    public Flux<BillResponseDTO> getAllBillsByPage(@RequestParam Optional<Integer> page,
-//                                                   @RequestParam Optional<Integer> size,
-//                                                   ) {
-//        return SERVICE.getAllBillsByPage(
-//                PageRequest.of(page.orElse(0),size.orElse(5)));
-//    }
-//
-    //to be changed
     @GetMapping("/bills/bills-count")
     public Mono<ResponseEntity<Long>> getTotalNumberOfBills() {
         return billService.getAllBills().count()

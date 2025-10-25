@@ -55,7 +55,6 @@ public class BillControllerV1 {
             consumes = "application/json",
             produces = "application/json")
     public Mono<ResponseEntity<BillResponseDTO>> createBill(@RequestBody BillRequestDTO model) {
-        // Required field validation
         if (model.getCustomerId() == null || model.getCustomerId().trim().isEmpty()) {
             return Mono.just(ResponseEntity.badRequest().build());
         }
@@ -64,36 +63,30 @@ public class BillControllerV1 {
             return Mono.just(ResponseEntity.badRequest().build());
         }
         
-        // Amount validation
         if (model.getAmount() == null || model.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
             return Mono.just(ResponseEntity.badRequest().build());
         }
         
-        // Auto-set bill status to UNPAID if not provided
         if (model.getBillStatus() == null) {
             model.setBillStatus(BillStatus.UNPAID);
             log.debug("Auto-set bill status to UNPAID");
         }
         
-        // Auto-set created date to today if not provided
         if (model.getDate() == null) {
             model.setDate(LocalDate.now());
             log.debug("Auto-set bill date to today: {}", model.getDate());
         }
         
-        // Prevent bills from being created with past dates
         if (model.getDate().isBefore(LocalDate.now())) {
             log.error("Attempted to create bill with past date: {}", model.getDate());
             return Mono.just(ResponseEntity.badRequest().build());
         }
         
-        // Prevent manual creation of OVERDUE bills - status is automatically managed by system
         if (model.getBillStatus() == BillStatus.OVERDUE) {
             log.error("Attempted to create bill with OVERDUE status - not allowed for manual creation");
             return Mono.just(ResponseEntity.badRequest().build());
         }
         
-        // Gentle due date suggestion for pet clinic (45 days - flexible for pet owners)
         if (model.getDueDate() == null) {
             model.setDueDate(model.getDate().plusDays(45));
             log.debug("Auto-suggested due date (45 days): {}", model.getDueDate());
