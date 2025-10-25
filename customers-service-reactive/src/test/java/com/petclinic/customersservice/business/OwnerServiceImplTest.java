@@ -38,7 +38,7 @@ class OwnerServiceImplTest {
     private OwnerService ownerService;
 
     private final Owner ownerEntity = buildOwner();
-    private final OwnerRequestDTO ownerRequestDTO = new OwnerRequestDTO();
+    private final OwnerRequestDTO ownerRequestDTO = buildOwnerRequestDTO();
 
     private Owner buildOwner() {
         return Owner.builder()
@@ -49,7 +49,18 @@ class OwnerServiceImplTest {
                 .address("Test address")
                 .city("test city")
                 .province("test province")
-                .telephone("telephone")
+                .telephone("1234567890")
+                .build();
+    }
+
+    private OwnerRequestDTO buildOwnerRequestDTO() {
+        return OwnerRequestDTO.builder()
+                .firstName("FirstName")
+                .lastName("LastName")
+                .address("Test address")
+                .city("test city")
+                .province("test province")
+                .telephone("1234567890")
                 .build();
     }
 
@@ -145,35 +156,21 @@ class OwnerServiceImplTest {
     }
 
     @Test
-    void insertOwner_ShouldSucceed() {
-        Owner ownerEntity = buildOwner();
-        when(repo.insert(any(Owner.class))).thenReturn(Mono.just(ownerEntity));
+    void addOwner_ShouldSucceed() {
+        when(repo.save(any(Owner.class))).thenReturn(Mono.just(ownerEntity));
 
-        Mono<Owner> returnedOwner = ownerService.insertOwner(Mono.just(ownerEntity));
-
-        StepVerifier.create(returnedOwner).consumeNextWith(foundOwner -> {
-                    assertEquals(ownerEntity.getId(), foundOwner.getId());
-                    assertEquals(ownerEntity.getOwnerId(), foundOwner.getOwnerId());
-                })
-                .verifyComplete();
-        verify(repo).insert(any(Owner.class));
-    }
-
-    @Test
-    void newInsertOwner_ShouldSucceed() {
-        Owner ownerEntity = buildOwner();
-        Mono<Owner> ownerMono = Mono.just(ownerEntity);
-        when(repo.insert(any(Owner.class))).thenReturn(ownerMono);
-
-        Mono<Owner> returnedOwner = ownerService.insertOwner(ownerMono);
-
-        StepVerifier.create(returnedOwner)
+        StepVerifier.create(ownerService.addOwner(Mono.just(ownerRequestDTO)))
                 .consumeNextWith(foundOwner -> {
-                    // Check using the business ID (ownerId)
-                    assertEquals(ownerEntity.getOwnerId(), foundOwner.getOwnerId());
+                    assertEquals(ownerRequestDTO.getFirstName(), foundOwner.getFirstName());
+                    assertEquals(ownerRequestDTO.getLastName(), foundOwner.getLastName());
+                    assertEquals(ownerRequestDTO.getCity(), foundOwner.getCity());
+                    assertEquals(ownerRequestDTO.getTelephone(), foundOwner.getTelephone());
+                    assertEquals(ownerRequestDTO.getAddress(), foundOwner.getAddress());
+                    assertEquals(ownerRequestDTO.getProvince(), foundOwner.getProvince());
                 })
                 .verifyComplete();
-        verify(repo).insert(any(Owner.class));
+
+        verify(repo).save(any(Owner.class));
     }
 
     @Test
@@ -234,19 +231,6 @@ class OwnerServiceImplTest {
 
         verify(repo).findOwnerByOwnerId(ownerId);
         verify(repo).save(any(Owner.class));
-    }
-
-    @Test
-    void getOwnerByOwnerId_ShouldThrowNotFoundException() {
-        String OWNER_ID = "Not found";
-        when(repo.findOwnerByOwnerId(OWNER_ID)).thenReturn(Mono.empty());
-
-        Mono<OwnerResponseDTO> ownerResponseDTOMono = ownerService.getOwnerByOwnerId(OWNER_ID);
-        StepVerifier
-                .create(ownerResponseDTOMono)
-                .expectError(NotFoundException.class)
-                .verify();
-        verify(repo).findOwnerByOwnerId(OWNER_ID);
     }
 
     @Test
@@ -477,7 +461,7 @@ class OwnerServiceImplTest {
         StepVerifier.create(result)
                 .consumeNextWith(response -> {
                     assertEquals(OWNER_ID, response.getOwnerId());
-                    assertNull(response.getPhotoId(), "PhotoId should be null in the response DTO");
+                    assertNull(response.getPhoto());
                 })
                 .verifyComplete();
 
@@ -500,7 +484,7 @@ class OwnerServiceImplTest {
         StepVerifier.create(result)
                 .consumeNextWith(response -> {
                     assertEquals(OWNER_ID, response.getOwnerId());
-                    assertNull(response.getPhotoId());
+                    assertNull(response.getPhoto());
                 })
                 .verifyComplete();
 

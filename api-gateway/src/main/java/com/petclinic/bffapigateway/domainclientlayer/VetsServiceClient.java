@@ -721,7 +721,7 @@ public class VetsServiceClient {
                 .bodyToMono(VetResponseDTO.class);
     }
 
-    public Mono<Void> deleteSpecialtiesByVetId(String vetId, String specialtyId) {
+    public Mono<Void> deleteSpecialtyBySpecialtyId(String vetId, String specialtyId) {
         return webClientBuilder
                 .build()
                 .delete()

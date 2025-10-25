@@ -26,7 +26,7 @@ public class MockServerConfigCustomersService {
                         request()
                                 .withMethod("PUT")
                                 .withPath("/owners/" + "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
-                                .withBody(json("{\"ownerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"firstName\":\"Betty\",\"lastName\":\"Davis\",\"address\":\"638 Cardinal Ave.\",\"city\":\"Sun Prairie\",\"province\":\"Quebec\",\"telephone\":\"6085551749\"}"))
+                                .withBody(json("{\"firstName\":\"Betty\",\"lastName\":\"Davis\",\"address\":\"638 Cardinal Ave.\",\"city\":\"Sun Prairie\",\"province\":\"Quebec\",\"telephone\":\"6085551749\"}"))
                 )
                 .respond(
                         response()
@@ -125,7 +125,7 @@ public class MockServerConfigCustomersService {
                 .when(
                         request()
                                 .withMethod("PUT")
-                                .withPath("/api/v2/gateway/pet/123")
+                                .withPath("/api/v2/gateway/pets/123")
                                 .withBody(json("{\"petId\":\"123\",\"name\":\"Buddy\",\"birthDate\":\"2020-01-01\",\"petTypeId\":\"1\",\"isActive\":\"true\",\"weight\":\"10\"}"))
                 )
                 .respond(
@@ -140,7 +140,7 @@ public class MockServerConfigCustomersService {
                 .when(
                         request()
                                 .withMethod("DELETE")
-                                .withPath("/pet/53163352-8398-4513-bdff-b7715c056d1d/v2")
+                                .withPath("/pets/53163352-8398-4513-bdff-b7715c056d1d/v2")
                 )
                 .respond(
                         response()
@@ -155,7 +155,7 @@ public class MockServerConfigCustomersService {
                 .when(
                         request()
                                 .withMethod("GET")
-                                .withPath("/pet/53163352-8398-4513-bdff-b7715c056d1d")
+                                .withPath("/pets/53163352-8398-4513-bdff-b7715c056d1d")
                 )
                 .respond(
                         response()

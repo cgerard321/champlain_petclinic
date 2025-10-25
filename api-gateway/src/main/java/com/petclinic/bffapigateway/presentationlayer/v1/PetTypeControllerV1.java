@@ -1,7 +1,6 @@
 package com.petclinic.bffapigateway.presentationlayer.v1;
 
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
-import com.petclinic.bffapigateway.dtos.Pets.PetType;
 import com.petclinic.bffapigateway.dtos.Pets.PetTypeRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetTypeResponseDTO;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
@@ -33,10 +32,9 @@ public class PetTypeControllerV1 {
     }
 
     @GetMapping(value = "", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<PetType> getPetTypes(){
+    public Flux<PetTypeResponseDTO> getPetTypes(){
         return customersServiceClient.getPetTypes();
     }
-
 
     @SecuredEndpoint(allowedRoles = {Roles.ALL})
     @GetMapping(value = "/{petTypeId}")

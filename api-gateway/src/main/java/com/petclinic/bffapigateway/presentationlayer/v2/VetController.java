@@ -155,10 +155,10 @@ public class VetController {
     }
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})    
     @DeleteMapping(value = "{vetId}/specialties/{specialtyId}")
-    public Mono<ResponseEntity<Void>> deleteSpecialtiesByVetId(
+    public Mono<ResponseEntity<Void>> deleteSpecialtyByVetId(
             @PathVariable String vetId,
             @PathVariable String specialtyId) {
-        return vetsServiceClient.deleteSpecialtiesByVetId(vetId, specialtyId)
+        return vetsServiceClient.deleteSpecialtyBySpecialtyId(vetId, specialtyId)
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .onErrorResume(RuntimeException.class, e ->
                     Mono.just(ResponseEntity.notFound().<Void>build()))
