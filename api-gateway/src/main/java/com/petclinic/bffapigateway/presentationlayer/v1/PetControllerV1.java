@@ -96,7 +96,7 @@ public class PetControllerV1 {
             @PathVariable String petId,
             @RequestBody Mono<FileDetails> photoMono) {
         return customersServiceClient.addPetPhoto(petId, photoMono)
-                .map(ResponseEntity::ok)
+                .map(petResponseDTO -> ResponseEntity.status(org.springframework.http.HttpStatus.CREATED).body(petResponseDTO))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
