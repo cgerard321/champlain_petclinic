@@ -14,11 +14,11 @@ pub async fn insert_session(
         "INSERT INTO sessions (id, user_id, expires_at)
          VALUES (?, ?, ?)",
     )
-    .bind(session_id.to_string())
-    .bind(user_id.to_string())
-    .bind(expires_at)
-    .execute(&db.0)
-    .await?;
+        .bind(session_id.to_string())
+        .bind(user_id.to_string())
+        .bind(expires_at)
+        .execute(&db.0)
+        .await?;
     Ok(())
 }
 
@@ -27,9 +27,9 @@ pub async fn find_session_by_id(db: &Db, sid: Uuid) -> sqlx::Result<Session> {
         "SELECT id, user_id, created_at, expires_at
          FROM sessions WHERE id = ?",
     )
-    .bind(sid.to_string())
-    .fetch_one(&db.0)
-    .await?;
+        .bind(sid.to_string())
+        .fetch_one(&db.0)
+        .await?;
 
     let id_str: String = r.try_get("id")?;
     let user_id_str: String = r.try_get("user_id")?;
