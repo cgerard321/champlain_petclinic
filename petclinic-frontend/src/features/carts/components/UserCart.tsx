@@ -354,7 +354,7 @@ const UserCart: React.FC = () => {
     };
 
     fetchCartItems();
-  }, [cartId, wishlistUpdated]);
+  }, [cartId, wishlistUpdated, syncAfterAddToCart]);
 
   useEffect(() => {
     updateCartItemCount();

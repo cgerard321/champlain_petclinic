@@ -35,8 +35,8 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({
-                               children,
-                             }: {
+  children,
+}: {
   children: ReactNode;
 }): JSX.Element {
   const { user } = useUser();
@@ -56,8 +56,8 @@ export function CartProvider({
   }, [user?.roles]);
 
   const isOwner = useMemo(
-      () => roleList.some(role => role?.name === 'OWNER'),
-      [roleList]
+    () => roleList.some(role => role?.name === 'OWNER'),
+    [roleList]
   );
 
   const setCartId = (id: string | null): void => {
@@ -166,30 +166,30 @@ export function CartProvider({
     };
     //same-tab
     window.addEventListener(
-        CART_CHANGED as unknown as string,
-        syncFromLocalStorage as EventListener
+      CART_CHANGED as unknown as string,
+      syncFromLocalStorage as EventListener
     );
     //cross-tab
     window.addEventListener('storage', onStorage);
     return () => {
       window.removeEventListener(
-          CART_CHANGED as unknown as string,
-          syncFromLocalStorage as EventListener
+        CART_CHANGED as unknown as string,
+        syncFromLocalStorage as EventListener
       );
       window.removeEventListener('storage', onStorage);
     };
   }, [isOwner]);
 
   const value = useMemo<CartContextType>(
-      () => ({
-        cartId,
-        cartCount,
-        setCartId,
-        setCartCount,
-        refreshFromAPI,
-        syncAfterAddToCart,
-      }),
-      [cartId, cartCount, refreshFromAPI, syncAfterAddToCart]
+    () => ({
+      cartId,
+      cartCount,
+      setCartId,
+      setCartCount,
+      refreshFromAPI,
+      syncAfterAddToCart,
+    }),
+    [cartId, cartCount, refreshFromAPI, syncAfterAddToCart]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
