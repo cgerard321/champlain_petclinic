@@ -99,6 +99,10 @@ public class PetController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
+    // TODO: This PATCH endpoint currently only handles deletion (empty body).
+    // Update pet photo ticket for eric: Accept FileRequestDTO body to handle photo updates.
+    // When body is present -> update photo, when body is null/empty -> delete photo.
+
     @PatchMapping("/{petId}/photo")
     public Mono<ResponseEntity<PetResponseDTO>> deletePetPhoto(@PathVariable String petId) {
         return Mono.just(petId)

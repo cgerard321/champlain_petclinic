@@ -72,11 +72,12 @@ public class PetServiceImpl implements PetService {
     @Override
     public Mono<PetResponseDTO> updatePetByPetId(String petId, Mono<PetRequestDTO> petMono) {
         return petRepo.findPetByPetId(petId)
-                .flatMap(pet -> petMono
+                .flatMap(existingPet -> petMono
                         .map(EntityDTOUtil::toPet)
-                        .doOnNext(p -> {
-                            p.setId(pet.getId());
-                            p.setPetId(pet.getPetId());
+                        .doOnNext(updatedPet -> {
+                            updatedPet.setId(existingPet.getId());
+                            updatedPet.setPetId(existingPet.getPetId());
+                            updatedPet.setPhotoId(existingPet.getPhotoId()); 
                         })
                 )
                 .flatMap(petRepo::save)
