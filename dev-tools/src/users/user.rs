@@ -1,10 +1,6 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-pub struct AuthenticatedUser {
-    pub user_id: Uuid,
-}
-
 #[derive(Debug, Serialize)]
 pub struct User {
     pub id: Uuid,
