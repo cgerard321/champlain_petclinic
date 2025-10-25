@@ -28,7 +28,7 @@ pub async fn get_buckets(store: &State<MinioStore>) -> AppResult<Vec<BucketInfo>
 pub async fn get_files(
     bucket: &str,
     store: &State<MinioStore>,
-) -> AppResult<Box<dyn Stream<Item = Result<ListObjectsResponse, MinioError>> + Unpin + Send>> {
+) -> AppResult<Box<dyn Stream<Item=Result<ListObjectsResponse, MinioError>> + Unpin + Send>> {
     let stream = store
         .client()
         .list_objects(bucket)

@@ -15,12 +15,12 @@ pub async fn insert_user_hashed(
         "INSERT INTO users (id, email, pass_hash, display_name)
          VALUES ((?), ?, ?, ?)",
     )
-    .bind(id.to_string())
-    .bind(email)
-    .bind(pass_hash)
-    .bind(display_name)
-    .execute(&db.0)
-    .await?;
+        .bind(id.to_string())
+        .bind(email)
+        .bind(pass_hash)
+        .bind(display_name)
+        .execute(&db.0)
+        .await?;
     Ok(())
 }
 
@@ -29,9 +29,9 @@ pub async fn get_user_auth_by_email(db: &Db, email: &str) -> sqlx::Result<FullUs
         "SELECT id, email, display_name, is_active, pass_hash
          FROM users WHERE email = ?",
     )
-    .bind(email)
-    .fetch_one(&db.0)
-    .await?;
+        .bind(email)
+        .fetch_one(&db.0)
+        .await?;
 
     let id_str = row.try_get("id")?;
 
