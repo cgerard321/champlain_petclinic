@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { exportVisitsCSV } from './api/exportVisitsCSV';
 import { getAllVisits } from './api/getAllVisits';
-import { IsVet } from '@/context/UserContext';
+import { IsVet, IsAdmin, IsReceptionist } from '@/context/UserContext';
 // import { AppRoutePaths } from '@/shared/models/path.routes';
 import { archiveVisit } from './api/archiveVisit';
 import { cancelVisit } from './api/cancelVisit';
@@ -24,12 +24,17 @@ import SvgIcon from '@/shared/components/SvgIcon';
 
 export default function VisitListTable(): JSX.Element {
   const isVet = IsVet();
+  const isAdmin = IsAdmin();
+  const isReceptionist = IsReceptionist();
+  const isStaffMember = isVet || isAdmin || isReceptionist;
   // full list fetched from backend
   const [visits, setVisits] = useState<Visit[]>([]);
   // list currently shown in the UI (filtered by search term / tabs)
   const [displayedVisits, setDisplayedVisits] = useState<Visit[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>(''); // Search term state
 
+  const [successMessage, setSuccessMessage] = useState<string>('');
+  const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
   //use sidebar to select which table is shown
   const [currentTab, setCurrentTab] = useState<string>('All');
 
@@ -44,6 +49,27 @@ export default function VisitListTable(): JSX.Element {
       return new Date(b.visitDate).getTime() - new Date(a.visitDate).getTime();
     });
   };
+
+  // Update the displayed list whenever the search term or the full visits list changes.
+  // This avoids refetching from the API and preserves the full list in `visits`.
+  useEffect(() => {
+    const term = searchTerm.trim().toLowerCase();
+
+    let baseList = visits;
+
+    if (isStaffMember && currentTab !== 'Cancelled') {
+      baseList = visits.filter(v => v.status !== 'CANCELLED');
+    }
+
+    if (term.length > 0) {
+      const filtered = baseList.filter(v =>
+        (v.description || '').toLowerCase().includes(term)
+      );
+      setDisplayedVisits(sortVisits(filtered));
+    } else {
+      setDisplayedVisits(sortVisits(baseList));
+    }
+  }, [searchTerm, visits, currentTab, isStaffMember]);
 
   // Filter visits based on status
   // Derive the different lists from the displayed list so search / tabs compose
@@ -134,9 +160,14 @@ export default function VisitListTable(): JSX.Element {
           });
         });
       });
+
+      setSuccessMessage('Visit archived successfully!');
+      setShowSuccessMessage(true);
       setTimeout(() => {
+        setShowSuccessMessage(false);
+        setSuccessMessage('');
         window.location.reload();
-      }, 1000);
+      }, 3000);
     } catch (error) {
       return;
     }
@@ -155,9 +186,13 @@ export default function VisitListTable(): JSX.Element {
         });
       });
 
+      setSuccessMessage('Visit cancelled successfully!');
+      setShowSuccessMessage(true);
       setTimeout(() => {
+        setShowSuccessMessage(false);
+        setSuccessMessage('');
         window.location.reload();
-      }, 1000);
+      }, 3000);
     } catch (error) {
       return;
     }
@@ -251,7 +286,19 @@ export default function VisitListTable(): JSX.Element {
                       title="Visit Details"
                       showButton={renderViewButton()}
                     >
-                      <VisitDetails visitId={visit.visitId} />
+                      <div>
+                        This will set the status of this visit to Archived.
+                      </div>
+                      <div>Do you wish to proceed?</div>
+                      {showSuccessMessage && (
+                        <div
+                          className="visit-success-message"
+                          role="status"
+                          aria-live="polite"
+                        >
+                          {successMessage}
+                        </div>
+                      )}
                     </BasicModal>
 
                     <EditingVisit
@@ -268,6 +315,15 @@ export default function VisitListTable(): JSX.Element {
                           This will set the status of this visit to Archived.
                         </div>
                         <div>Do you wish to proceed?</div>
+                        {showSuccessMessage && (
+                          <div
+                            className="visit-success-message"
+                            role="status"
+                            aria-live="polite"
+                          >
+                            {successMessage}
+                          </div>
+                        )}
                       </BasicModal>
                     )}
 
