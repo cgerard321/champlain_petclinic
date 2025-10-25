@@ -30,7 +30,6 @@ export function NavBar(): JSX.Element {
   const [navbarOpen, setNavbarOpen] = useState(false);
   const [cartLoading, setCartLoading] = useState(false);
 
-  const hasStaffVisits = isAdmin || isVet || isReceptionist;
   const showVetVisitsDropdown = isVet;
 
   const logoutUser = (): void => {
@@ -142,7 +141,7 @@ export function NavBar(): JSX.Element {
                       Bills
                     </Nav.Link>
                   )}
-                {!hasStaffVisits && (
+                {isOwner && (
                   <Nav.Link as={Link} to={AppRoutePaths.CustomerVisits}>
                     Visits
                   </Nav.Link>
@@ -152,7 +151,7 @@ export function NavBar(): JSX.Element {
                     Bills
                   </Nav.Link>
                 )}
-                {hasStaffVisits && !showVetVisitsDropdown && (
+                {!isOwner && !showVetVisitsDropdown && (
                   <Nav.Link as={Link} to={AppRoutePaths.Visits}>
                     Visits
                   </Nav.Link>
