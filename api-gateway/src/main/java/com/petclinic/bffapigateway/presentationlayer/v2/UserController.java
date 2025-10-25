@@ -50,7 +50,7 @@ public class UserController {
             consumes = "application/json",
             produces = "application/json")
     public Mono<ResponseEntity<OwnerResponseDTO>> createUserUsingV2Endpoint(@RequestBody @Valid Mono<Register> model) {
-        return authServiceClient.createUserUsingV2Endpoint(model).map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
+        return authServiceClient.createUser(model).map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 

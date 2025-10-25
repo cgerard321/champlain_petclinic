@@ -68,7 +68,7 @@ class OwnerControllerIntegrationTest {
                 .address("123 Main St")
                 .city("Anytown")
                 .province("CA")
-                .telephone("555-555-5555")
+                .telephone("5555555555")
                 .build();
     }
 
@@ -315,7 +315,7 @@ class OwnerControllerIntegrationTest {
     @Test
     void updateOwnerByOwnerId() {
         // Setup a unique owner for this test
-        String testOwnerId = "update-test-id-123";
+        String testOwnerId = "1b747de5-f242-4182-ae92-2b6937b982a2";
         Owner existingOwner = buildOwner3("OldFirst", testOwnerId);
         existingOwner.setId("1");
 
@@ -330,7 +330,7 @@ class OwnerControllerIntegrationTest {
         updateDTO.setAddress("New Address");
         updateDTO.setCity("New City");
         updateDTO.setProvince("New Province");
-        updateDTO.setTelephone("999-999-9999");
+        updateDTO.setTelephone("9999999999");
         // photoId is left null
 
         // 3. Make the PUT request

@@ -1,9 +1,11 @@
 package com.petclinic.customersservice.presentationlayer;
 
 import com.petclinic.customersservice.business.OwnerService;
+import com.petclinic.customersservice.customersExceptions.ApplicationExceptions;
 import com.petclinic.customersservice.customersExceptions.exceptions.InvalidInputException;
 import com.petclinic.customersservice.data.Owner;
 import com.petclinic.customersservice.domainclientlayer.FileRequestDTO;
+import com.petclinic.customersservice.util.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -69,9 +71,11 @@ public class OwnerController {
     }
 
     @PostMapping()
-    public Mono<Owner> insertOwner(@RequestBody Mono<Owner> ownerMono) {
-        log.info("OwnerController.insertOwner");
-        return ownerService.insertOwner(ownerMono);
+    public Mono<ResponseEntity<OwnerResponseDTO>> addOwner(@RequestBody Mono<OwnerRequestDTO> ownerMono) {
+        return ownerMono
+                .transform(Validator.validateOwner())
+                .as(ownerService::addOwner)
+                .map(ownerResponseDTO -> ResponseEntity.status(HttpStatus.CREATED).body(ownerResponseDTO));
     }
 
     @DeleteMapping(value = "/{ownerId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -85,23 +89,28 @@ public class OwnerController {
     }
 
     @PutMapping("/{ownerId}")
-    public Mono<ResponseEntity<OwnerResponseDTO>> updateOwner(
-            @RequestBody Mono<OwnerRequestDTO> ownerRequestDTO,
-            @PathVariable String ownerId) {
-
-        return ownerService.updateOwner(ownerRequestDTO, ownerId)
-                .map(updatedOwner -> ResponseEntity.ok().body(updatedOwner))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    public Mono<ResponseEntity<OwnerResponseDTO>> updateOwner(@RequestBody Mono<OwnerRequestDTO> ownerRequestDTO, @PathVariable String ownerId) {
+        return Mono.just(ownerId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(ApplicationExceptions.invalidOwnerId(ownerId))
+                .thenReturn(ownerRequestDTO.transform(Validator.validateOwner()))
+                .flatMap(request -> ownerService.updateOwner(request, ownerId))
+                .map(ResponseEntity::ok)
+                .switchIfEmpty(ApplicationExceptions.ownerNotFound(ownerId));
     }
 
     @PatchMapping("/{ownerId}/photo")
-    public Mono<ResponseEntity<OwnerResponseDTO>> updateOwnerPhoto(
-            @PathVariable String ownerId,
-            @RequestBody Mono<FileRequestDTO> photoMono) {
-        return photoMono
-                .flatMap(photo -> ownerService.updateOwnerPhoto(ownerId, photo))
-                .map(updatedOwner -> ResponseEntity.ok().body(updatedOwner))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    public Mono<ResponseEntity<OwnerResponseDTO>> updateOwnerPhoto(@PathVariable String ownerId, @RequestBody Mono<FileRequestDTO> photoMono) {
+        return Mono.just(ownerId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(ApplicationExceptions.invalidOwnerId(ownerId))
+                .flatMap(validId ->
+                        photoMono.flatMap(photo ->
+                                ownerService.updateOwnerPhoto(validId, photo)
+                        )
+                )
+                .map(ResponseEntity::ok)
+                .switchIfEmpty(ApplicationExceptions.ownerNotFound(ownerId));
     }
 
     @DeleteMapping("/{ownerId}/photo")
