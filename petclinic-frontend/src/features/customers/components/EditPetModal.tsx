@@ -291,7 +291,7 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
               <input
                 type="checkbox"
                 name="isActive"
-                checked={Boolean(pet.isActive)}
+                checked={String(pet.isActive) === 'true'}
                 onChange={handleChange}
                 disabled={isSubmitting}
               />
