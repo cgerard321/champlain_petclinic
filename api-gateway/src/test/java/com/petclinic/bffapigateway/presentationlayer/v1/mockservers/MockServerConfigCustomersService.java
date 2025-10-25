@@ -258,7 +258,7 @@ public class MockServerConfigCustomersService {
                 .when(
                         request()
                                 .withMethod("GET")
-                                .withPath("/pet/" + petId)
+                                .withPath("/pets/" + petId)
                 )
                 .respond(
                         response()
@@ -272,7 +272,7 @@ public class MockServerConfigCustomersService {
                 .when(
                         request()
                                 .withMethod("PUT")
-                                .withPath("/pet/" + petId)
+                                .withPath("/pets/" + petId)
                 )
                 .respond(
                         response()
@@ -288,7 +288,7 @@ public class MockServerConfigCustomersService {
                 .when(
                         request()
                                 .withMethod("GET")
-                                .withPath("/pet/" + petId)
+                                .withPath("/pets/" + petId)
                 )
                 .respond(
                         response()

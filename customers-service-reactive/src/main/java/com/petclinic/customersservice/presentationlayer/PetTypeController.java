@@ -1,8 +1,10 @@
 package com.petclinic.customersservice.presentationlayer;
 
 import com.petclinic.customersservice.business.PetTypeService;
+import com.petclinic.customersservice.customersExceptions.ApplicationExceptions;
 import com.petclinic.customersservice.data.PetType;
 import com.petclinic.customersservice.util.EntityDTOUtil;
+import com.petclinic.customersservice.util.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,37 +33,42 @@ public class PetTypeController {
 
     @PostMapping
     public Mono<ResponseEntity<PetTypeResponseDTO>> addPetType(@RequestBody Mono<PetTypeRequestDTO> petTypeRequestDTOMono){
-        
-        return petTypeService.addPetType(petTypeRequestDTOMono)
-                .map(createdPetType ->
-                        ResponseEntity.status(HttpStatus.CREATED).body(createdPetType))
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
+        return petTypeRequestDTOMono
+                .transform(Validator.validatePetType())
+                .as(petTypeService::addPetType)
+                .map(response -> ResponseEntity.status(HttpStatus.CREATED).body(response));
     }
 
     @PutMapping("/{petTypeId}")
-    public Mono<ResponseEntity<PetTypeResponseDTO>> updatePetType(
-            @RequestBody Mono<PetTypeRequestDTO> petTypeRequestDTO,
-            @PathVariable String petTypeId) {
-
-        return petTypeService.updatePetType(petTypeRequestDTO, petTypeId)
-                .map(updatedPetType -> ResponseEntity.ok().body(updatedPetType))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    public Mono<ResponseEntity<PetTypeResponseDTO>> updatePetType(@RequestBody Mono<PetTypeRequestDTO> petTypeRequestDTO, @PathVariable String petTypeId) {
+        return Mono.just(petTypeId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(ApplicationExceptions.invalidPetTypeId(petTypeId))
+                .thenReturn(petTypeRequestDTO.transform(Validator.validatePetType()))
+                .flatMap(request -> petTypeService.updatePetType(request, petTypeId))
+                .map(ResponseEntity::ok)
+                .switchIfEmpty(ApplicationExceptions.petTypeNotFound(petTypeId));
     }
 
 
     @GetMapping("/{petTypeId}")
     public Mono<ResponseEntity<PetTypeResponseDTO>> getPetTypeByPetTypeId(@PathVariable String petTypeId) {
-        return petTypeService.getPetTypeByPetTypeId(petTypeId)
-                .map(petTypeResponseDTO -> ResponseEntity.status(HttpStatus.OK).body(petTypeResponseDTO))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+        return Mono.just(petTypeId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(ApplicationExceptions.invalidPetTypeId(petTypeId))
+                .flatMap(petTypeService::getPetTypeByPetTypeId)
+                .map(ResponseEntity::ok)
+                .switchIfEmpty(ApplicationExceptions.petTypeNotFound(petTypeId));
     }
 
 
     @DeleteMapping("/{petTypeId}")
-    public Mono<ResponseEntity<Object>> DeletePetTypeByPetTypeId(@PathVariable String petTypeId) {
-        return petTypeService.deletePetTypeByPetTypeId(petTypeId)
-                .then(Mono.just(ResponseEntity.noContent().build()))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    public Mono<ResponseEntity<Void>> DeletePetTypeByPetTypeId(@PathVariable String petTypeId) {
+        return Mono.just(petTypeId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(ApplicationExceptions.invalidPetTypeId(petTypeId))
+                .flatMap(id -> petTypeService.deletePetTypeByPetTypeId(id).thenReturn(ResponseEntity.noContent().<Void>build()))
+                .switchIfEmpty(ApplicationExceptions.petTypeNotFound(petTypeId));
     }
 
     @GetMapping("/pet-types-count")
@@ -90,9 +97,4 @@ public class PetTypeController {
 
         return petTypeService.getTotalNumberOfPetTypesWithFilters(petTypeId, name, description);
     }
-
-
-
-
-
 }

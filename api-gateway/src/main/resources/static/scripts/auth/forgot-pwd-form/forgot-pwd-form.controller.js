@@ -1,36 +1,45 @@
 'use strict';
 
 angular.module('forgotPwdForm')
-    .controller('forgotPwdFormController', ["$http", '$location', "$scope", function ($http, $location, $scope) {
+    .controller('forgotPwdFormController', [
+        '$http', '$scope', '$location',
+        function ($http, $scope, $location) {
 
-        $scope.isLoading = false;
-        let loaderDiv = document.getElementById("loaderDiv");
-        loaderDiv.style.display = "none";
+            var vm = this;
+            vm.loading = false;
 
+            $scope.clearErrorMessages = function (i) {
+                if (Array.isArray($scope.errorMessages)) {
+                    if (typeof i === 'number') $scope.errorMessages.splice(i, 1);
+                    else $scope.errorMessages = [];
+                } else {
+                    $scope.errorMessages = [];
+                }
+            };
 
-        this.forgotPwdPost = () => {
-            console.log("forgotPwdPost");
-            loaderDiv.style.display = "block";
-            console.log($scope.isLoading)
-            $http.post("/api/gateway/users/forgot_password", {
-                email: $scope.forgotPwdPost.email,
-                url: "http://localhost:8080/#!/reset_password/"
-            })
+            vm.forgotPwdPost = function () {
+                vm.loading = true;
+                $scope.errorMessages = [];
 
-                .then(response => {
-                    alert("Email was sent !");
-                    $location.path("/welcome");
+                return $http.post('/api/gateway/users/forgot_password', {
+                    email: $scope.forgotPwdPost && $scope.forgotPwdPost.email
                 })
-                .catch(error => {
-                    console.log(error);
-                    alert("Email was not sent !, please try again!\n" + error.data.message)
-                })
-                .finally(()=> {
-                    loaderDiv.style.display = "none";
-                    }
-                )
+                    .then(function () {
+                        alert('We sent you a reset link.');
+                        $location.path('/login');
+                    })
+                    .catch(function (err) {
+                        var msg = (err && err.data && (err.data.message || err.data.email)) || 'Request failed. Please try again.';
+                        $scope.errorMessages = String(msg).split('\n');
+                    })
+                    .finally(function () { vm.loading = false; });
+            };
 
-        };
+            vm.goLogin = function () { $location.path('/login'); };
 
-        this.keypress = ({ originalEvent: { key } }) => key === 'Enter' && this.add();
-    }]);
+            vm.keypress = function (e) {
+                var key = (e && e.originalEvent && e.originalEvent.key) || (e && e.key);
+                if (key === 'Enter') vm.forgotPwdPost();
+            };
+        }
+    ]);

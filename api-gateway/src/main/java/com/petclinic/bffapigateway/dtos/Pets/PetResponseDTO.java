@@ -23,11 +23,8 @@ public class PetResponseDTO {
     private String name;
     private Date birthDate;
     private String petTypeId;
-    private String photoId;
     private String isActive;
     private String weight;
     private FileDetails photo;
-    //private final List<VisitDetails> visits = new ArrayList<>();
-
 }
 

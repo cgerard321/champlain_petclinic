@@ -14,7 +14,7 @@ import { deleteOwner } from '../api/deleteOwner';
 import { IsVet } from '@/context/UserContext';
 import EditPetModal from './EditPetModal';
 import AddPetModal from './AddPetModal';
-import defaultPetPicture from '@/assets/Owners/defaultProfilePicture.png';
+import defaultProfile from '@/assets/Owners/defaultProfilePicture.png';
 
 const CustomerDetails: FC = () => {
   const { ownerId } = useParams<{ ownerId: string }>();
@@ -25,6 +25,7 @@ const CustomerDetails: FC = () => {
   const [owner, setOwner] = useState<OwnerResponseModel | null>(null);
   const [userDetails, setUserDetails] = useState<UserDetailsModel | null>(null);
   const [pets, setPets] = useState<PetResponseModel[]>([]);
+  const [petImageUrls, setPetImageUrls] = useState<Record<string, string>>({});
   const [petTypes, setPetTypes] = useState<PetTypeModel[]>([]);
   const [bills, setBills] = useState<Bill[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -45,14 +46,38 @@ const CustomerDetails: FC = () => {
       setIsDisabled(userResponse.data.disabled);
 
       // Fetch pets by owner ID
-      const petsResponse = await axiosInstance.get(
-        `/pets/owners/${ownerId}/pets`,
-        {
-          useV2: false,
-          params: { includePhoto: true },
+      const petsResponse = await axiosInstance.get(`/owners/${ownerId}/pets`, {
+        useV2: false,
+      });
+
+      let petsData: PetResponseModel[] = [];
+      if (typeof petsResponse.data === 'string') {
+        const pieces = petsResponse.data.split('\n').filter(Boolean);
+        for (const piece of pieces) {
+          if (piece.startsWith('data:')) {
+            const petData = piece.slice(5).trim();
+            try {
+              const pet: PetResponseModel = JSON.parse(petData);
+              petsData.push(pet);
+            } catch (parseError) {
+              console.error('Error parsing pet data:', parseError);
+            }
+          }
         }
-      );
-      setPets(petsResponse.data);
+      } else if (Array.isArray(petsResponse.data)) {
+        petsData = petsResponse.data;
+      }
+
+      const newPetImageUrls: Record<string, string> = {};
+      for (const pet of petsData) {
+        newPetImageUrls[pet.petId] = await fetchPetPhotoUrl(
+          pet.petId,
+          pet.name
+        );
+      }
+
+      setPetImageUrls(newPetImageUrls);
+      setPets(petsData);
 
       const billsResponse = await axiosInstance.get(
         `/bills/customer/${ownerId}`,
@@ -100,6 +125,47 @@ const CustomerDetails: FC = () => {
 
   const handleBackClick = (): void => {
     navigate('/customers');
+  };
+
+  const fetchPetPhotoUrl = async (
+    petId: string,
+    petName: string
+  ): Promise<string> => {
+    try {
+      const response = await axiosInstance.get(`/pets/${petId}`, {
+        useV2: false,
+        params: { includePhoto: true },
+      });
+      const petData = response.data;
+
+      if (
+        petData.photo &&
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (petData.photo.data || (petData.photo as any).fileData)
+      ) {
+        const base64Data =
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          petData.photo.data || (petData.photo as any).fileData;
+        const contentType =
+          petData.photo.contentType ||
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (petData.photo as any).fileType ||
+          'image/png';
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: contentType });
+        return URL.createObjectURL(blob);
+      } else {
+        return defaultProfile;
+      }
+    } catch (error) {
+      console.error(`Error fetching photo for ${petName} (${petId}):`, error);
+      return defaultProfile;
+    }
   };
 
   const handleDelete = async (ownerId: string): Promise<void> => {
@@ -175,14 +241,38 @@ const CustomerDetails: FC = () => {
       });
       setIsDisabled(userResponse.data.disabled);
 
-      const petsResponse = await axiosInstance.get(
-        `/pets/owners/${ownerId}/pets`,
-        {
-          useV2: false,
-          params: { includePhoto: true },
+      const petsResponse = await axiosInstance.get(`/owners/${ownerId}/pets`, {
+        useV2: false,
+      });
+
+      let petsData: PetResponseModel[] = [];
+      if (typeof petsResponse.data === 'string') {
+        const pieces = petsResponse.data.split('\n').filter(Boolean);
+        for (const piece of pieces) {
+          if (piece.startsWith('data:')) {
+            const petData = piece.slice(5).trim();
+            try {
+              const pet: PetResponseModel = JSON.parse(petData);
+              petsData.push(pet);
+            } catch (parseError) {
+              console.error('Error parsing pet data:', parseError);
+            }
+          }
         }
-      );
-      setPets(petsResponse.data);
+      } else if (Array.isArray(petsResponse.data)) {
+        petsData = petsResponse.data;
+      }
+
+      const newPetImageUrls: Record<string, string> = {};
+      for (const pet of petsData) {
+        newPetImageUrls[pet.petId] = await fetchPetPhotoUrl(
+          pet.petId,
+          pet.name
+        );
+      }
+
+      setPetImageUrls(newPetImageUrls);
+      setPets(petsData);
 
       const billsResponse = await axiosInstance.get(
         `/bills/customer/${ownerId}`,
@@ -288,13 +378,9 @@ const CustomerDetails: FC = () => {
               {pets.map(pet => (
                 <li key={pet.petId} className="pet-item">
                   <img
-                    src={
-                      pet.photo?.data
-                        ? `data:${pet.photo.contentType};base64,${pet.photo.data}`
-                        : defaultPetPicture
-                    }
-                    alt={`${pet.name}'s photo`}
-                    className="pet-photo-thumbnail"
+                    src={petImageUrls[pet.petId] || defaultProfile}
+                    alt={`${pet.name} profile`}
+                    className="pet-profile-picture"
                   />
                   <div className="pet-details">
                     <div className="pet-info">
