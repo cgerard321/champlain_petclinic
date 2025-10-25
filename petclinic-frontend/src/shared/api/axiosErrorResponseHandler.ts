@@ -1,6 +1,5 @@
 import { AxiosError } from 'axios';
 import axiosInstance from "@/shared/api/axiosInstance.ts";
-import {UserResponseModel} from "@/shared/models/UserResponseModel.ts";
 import {redirect} from "react-router-dom";
 
 // Map status codes to their respective error pages
@@ -22,24 +21,10 @@ export default function axiosErrorResponseHandler(
     console.error(
       'Unauthorized access. Trying to retrieve access to the server.'
     );
-    try {
-        axiosInstance.post<UserResponseModel>(
-            '/users/login',
-            {
-                email: localStorage.getItem('email'),
-                password: localStorage.getItem('password'),
-            },
-            {
-                useV2: false,
-                handleLocally: true,
-            }
-        );
-    }
-    catch (error) {
         axiosInstance.post('/users/logout', {});
         localStorage.clear();
         redirect('/home');
-    }
+
   }
 
   const redirectPath = errorPageRedirects[statusCode];
