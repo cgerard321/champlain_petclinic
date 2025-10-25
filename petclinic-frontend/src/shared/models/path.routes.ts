@@ -62,4 +62,5 @@ export enum AppRoutePaths {
   AllRoles = '/roles',
   OwnerBookAppointment = '/owner/book-appointment',
   VisitsCalendar = '/visits/calendar',
+  CustomerVisitsCalendar = '/customer/visits/calendar',
 }

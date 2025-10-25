@@ -20,19 +20,15 @@ import {
   subWeeks,
 } from 'date-fns';
 import { Visit } from '../models/Visit';
-import { getAllVisits } from '../api/getAllVisits';
-import { getVisitsForPractitioner } from '../api/getVisitsForPractitioner';
-import { useUser, IsAdmin, IsVet, IsReceptionist } from '@/context/UserContext';
+import { getAllOwnerVisits } from '../api/getAllOwnerVisits';
+import { useUser } from '@/context/UserContext';
 import './CalendarView.css';
 import { FaChevronLeft, FaChevronRight, FaCalendarAlt } from 'react-icons/fa';
 
 type ViewMode = 'year' | 'month' | 'week';
 
-export default function CalendarView(): JSX.Element {
+export default function CustomerCalendarView(): JSX.Element {
   const { user } = useUser();
-  const isAdmin = IsAdmin();
-  const isVet = IsVet();
-  const isReceptionist = IsReceptionist();
 
   const [visits, setVisits] = useState<Visit[]>([]);
   const [filteredVisits, setFilteredVisits] = useState<Visit[]>([]);
@@ -43,29 +39,28 @@ export default function CalendarView(): JSX.Element {
 
   useEffect(() => {
     const fetchVisits = async (): Promise<void> => {
+      if (!user?.userId) {
+        setError('User not found. Please log in.');
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(true);
       setError('');
 
       try {
-        let fetchedVisits: Visit[] = [];
-
-        if (isAdmin || isReceptionist) {
-          fetchedVisits = await getAllVisits();
-        } else if (isVet && user?.userId) {
-          fetchedVisits = await getVisitsForPractitioner(user.userId);
-        }
-
+        const fetchedVisits = await getAllOwnerVisits(user.userId);
         setVisits(fetchedVisits);
       } catch (err) {
         console.error('Error fetching visits:', err);
-        setError('Failed to load visits. Please try again.');
+        setError('Failed to load your visits. Please try again.');
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchVisits();
-  }, [isAdmin, isVet, isReceptionist, user?.userId]);
+  }, [user?.userId]);
 
   useEffect(() => {
     if (!visits.length) {
@@ -144,7 +139,7 @@ export default function CalendarView(): JSX.Element {
     });
 
     return (
-      <div className="calendar-year-view">
+      <div className="customer-calendar-year-view">
         <div className="year-grid">
           {months.map((month, index) => {
             const monthVisits = filteredVisits.filter(visit =>
@@ -187,7 +182,7 @@ export default function CalendarView(): JSX.Element {
     }
 
     return (
-      <div className="calendar-month-view">
+      <div className="customer-calendar-month-view">
         <div className="calendar-weekdays">
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
             <div key={day} className="calendar-weekday">
@@ -195,6 +190,7 @@ export default function CalendarView(): JSX.Element {
             </div>
           ))}
         </div>
+
         <div className="calendar-days-grid">
           {weeks.map((week, weekIndex) => (
             <div key={weekIndex} className="calendar-week-row">
@@ -209,6 +205,7 @@ export default function CalendarView(): JSX.Element {
                     className={`calendar-day-cell ${!isCurrentMonth ? 'other-month' : ''} ${isTodayDate ? 'today' : ''}`}
                   >
                     <div className="day-number">{format(day, 'd')}</div>
+
                     <div className="day-visits">
                       {dayVisits.slice(0, 3).map((visit, idx) => (
                         <div
@@ -222,6 +219,7 @@ export default function CalendarView(): JSX.Element {
                           <span className="visit-pet">{visit.petName}</span>
                         </div>
                       ))}
+
                       {dayVisits.length > 3 && (
                         <div className="visit-item-more">
                           +{dayVisits.length - 3} more
@@ -244,7 +242,7 @@ export default function CalendarView(): JSX.Element {
     const days = eachDayOfInterval({ start: weekStart, end: weekEnd });
 
     return (
-      <div className="calendar-week-view">
+      <div className="customer-calendar-week-view">
         <div className="week-grid">
           {days.map((day, index) => {
             const dayVisits = getVisitsForDate(day);
@@ -255,10 +253,12 @@ export default function CalendarView(): JSX.Element {
                 key={index}
                 className={`week-day-column ${isTodayDate ? 'today' : ''}`}
               >
+                {/* Day header */}
                 <div className="week-day-header">
                   <div className="week-day-name">{format(day, 'EEE')}</div>
                   <div className="week-day-number">{format(day, 'd')}</div>
                 </div>
+
                 <div className="week-day-visits">
                   {dayVisits.length > 0 ? (
                     dayVisits.map((visit, idx) => (
@@ -274,7 +274,7 @@ export default function CalendarView(): JSX.Element {
                             {visit.petName || 'Unknown Pet'}
                           </div>
                           <div className="visit-vet">
-                            {visit.vetFirstName} {visit.vetLastName}
+                            Dr. {visit.vetFirstName} {visit.vetLastName}
                           </div>
                           <div className="visit-description">
                             {visit.description}
@@ -283,7 +283,7 @@ export default function CalendarView(): JSX.Element {
                       </div>
                     ))
                   ) : (
-                    <div className="no-visits">No visits scheduled</div>
+                    <div className="no-visits">No appointments</div>
                   )}
                 </div>
               </div>
@@ -309,16 +309,16 @@ export default function CalendarView(): JSX.Element {
 
   if (isLoading) {
     return (
-      <div className="calendar-loading">
+      <div className="customer-calendar-loading">
         <div className="spinner"></div>
-        <p>Loading visits...</p>
+        <p>Loading your appointments...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="calendar-error">
+      <div className="customer-calendar-error">
         <p>{error}</p>
         <button onClick={(): void => window.location.reload()}>Retry</button>
       </div>
@@ -326,11 +326,11 @@ export default function CalendarView(): JSX.Element {
   }
 
   return (
-    <div className="calendar-view-container">
-      <div className="calendar-header">
+    <div className="customer-calendar-view-container">
+      <div className="customer-calendar-header">
         <div className="calendar-title">
           <FaCalendarAlt />
-          <h2>Visits Calendar</h2>
+          <h2>My Appointments</h2>
         </div>
 
         <div className="calendar-controls">
@@ -373,13 +373,13 @@ export default function CalendarView(): JSX.Element {
         </div>
       </div>
 
-      <div className="calendar-content">
+      <div className="customer-calendar-content">
         {viewMode === 'year' && renderYearView()}
         {viewMode === 'month' && renderMonthView()}
         {viewMode === 'week' && renderWeekView()}
       </div>
 
-      <div className="calendar-legend">
+      <div className="customer-calendar-legend">
         <div className="legend-item">
           <span className="legend-dot status-upcoming"></span>
           <span>Upcoming</span>

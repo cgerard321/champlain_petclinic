@@ -54,6 +54,7 @@ import OwnerBookAppointment from '@/pages/Visit/OwnerBookAppointment.tsx';
 import FAQ from './pages/FAQ/FAQ';
 import ContactPage from './pages/Contact/Contact';
 import PrivacyPolicyPage from './pages/PrivacyPolicy/PrivacyPolicy';
+import CustomerVisitsCalendar from '@/pages/Visit/CustomerVisitsCalendar.tsx';
 
 const router = createBrowserRouter([
   {
@@ -231,7 +232,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.Visits,
         element: (
-          <ProtectedRoute roles={['ADMIN', 'VET']}>
+          <ProtectedRoute roles={['ADMIN', 'VET', 'RECEPTIONIST']}>
             <Visits />
           </ProtectedRoute>
         ),
@@ -247,8 +248,16 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.VisitsCalendar,
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute roles={['ADMIN', 'VET', 'RECEPTIONIST']}>
             <VisitsCalendar />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.CustomerVisitsCalendar,
+        element: (
+          <ProtectedRoute roles={['OWNER']}>
+            <CustomerVisitsCalendar />
           </ProtectedRoute>
         ),
       },

@@ -142,23 +142,34 @@ export function NavBar(): JSX.Element {
                       Bills
                     </Nav.Link>
                   )}
-                {!hasStaffVisits && (
-                  <Nav.Link as={Link} to={AppRoutePaths.CustomerVisits}>
-                    Visits
-                  </Nav.Link>
+                {isOwner && !hasStaffVisits && (
+                  <NavDropdown title="My Visits" id="owner-visits-dropdown">
+                    <NavDropdown.Item
+                      as={Link}
+                      to={AppRoutePaths.CustomerVisits}
+                    >
+                      List View
+                    </NavDropdown.Item>
+                    <NavDropdown.Item
+                      as={Link}
+                      to={AppRoutePaths.CustomerVisitsCalendar}
+                    >
+                      Calendar View
+                    </NavDropdown.Item>
+                  </NavDropdown>
                 )}
                 {isAdmin && (
                   <Nav.Link as={Link} to={AppRoutePaths.AdminBills}>
                     Bills
                   </Nav.Link>
                 )}
-                {hasStaffVisits && !IsAdmin() && !IsVet() && (
+                {isReceptionist && (
                   <Nav.Link as={Link} to={AppRoutePaths.Visits}>
                     Visits
                   </Nav.Link>
                 )}
-                {(IsAdmin() || IsVet() || IsOwner()) && (
-                  <NavDropdown title="Visits" id="visits-dropdown">
+                {(isAdmin || isVet) && (
+                  <NavDropdown title="Visits" id="staff-visits-dropdown">
                     <NavDropdown.Item as={Link} to={AppRoutePaths.Visits}>
                       List View
                     </NavDropdown.Item>
@@ -170,7 +181,7 @@ export function NavBar(): JSX.Element {
                       Calendar View
                     </NavDropdown.Item>
 
-                    {showVetVisitsDropdown && IsVet() && (
+                    {showVetVisitsDropdown && (
                       <>
                         <NavDropdown.Divider />
                         <NavDropdown.Item
