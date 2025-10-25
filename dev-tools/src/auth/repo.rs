@@ -9,16 +9,14 @@ pub async fn insert_session(
     session_id: Uuid,
     user_id: Uuid,
     expires_at: NaiveDateTime,
-    ip: Option<&str>,
 ) -> sqlx::Result<()> {
     sqlx::query(
-        "INSERT INTO sessions (id, user_id, expires_at, ip)
-         VALUES (?, ?, ?, ?, ?)",
+        "INSERT INTO sessions (id, user_id, expires_at)
+         VALUES (?, ?, ?)",
     )
     .bind(session_id.to_string())
     .bind(user_id.to_string())
     .bind(expires_at)
-    .bind(ip)
     .execute(&db.0)
     .await?;
     Ok(())
@@ -26,7 +24,7 @@ pub async fn insert_session(
 
 pub async fn find_session_by_id(db: &Db, sid: Uuid) -> sqlx::Result<Option<Session>> {
     let row = sqlx::query(
-        "SELECT id, user_id, created_at, expires_at, user_agent, ip
+        "SELECT id, user_id, created_at, expires_at
          FROM sessions WHERE id = ?",
     )
     .bind(sid.to_string())

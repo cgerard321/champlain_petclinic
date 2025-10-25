@@ -15,3 +15,4 @@ rand_core = "0.9.3"
 sqlx = { version = "0.8.6", features = ["mysql", "runtime-tokio-rustls", "chrono"] }
 argon2 = { version = "0.5", features = ["std", "password-hash"] }
 chrono = "0.4.42"
+time = "0.3.44"

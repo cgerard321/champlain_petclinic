@@ -1,10 +1,12 @@
 use crate::auth::service;
 use crate::db::database::Db;
-use crate::users::user::{LoginReq};
+use crate::users::user::LoginReq;
 use rocket::http::{Cookie, CookieJar, SameSite};
 use rocket::serde::json::Json;
 use rocket::{http::Status, post, State};
+use time::Duration as TDuration;
 use uuid::Uuid;
+use crate::core::config::DEFAULT_SESSIONS_AGE_HR;
 
 #[post("/login", data = "<req>")]
 pub async fn login(
@@ -14,13 +16,13 @@ pub async fn login(
 ) -> Result<Status, Status> {
     let session_id = service::authenticate(db, &req.email, &req.password)
         .await
-        .map(Json)
         .map_err(|e| e.status());
 
     let mut cookie = Cookie::build(("sid", session_id?.to_string()))
         .http_only(true)
         .same_site(SameSite::Lax)
         .path("/")
+        .max_age(TDuration::hours(DEFAULT_SESSIONS_AGE_HR as i64))
         .build();
 
     // in production, add .set_secure(true) for HTTPS
