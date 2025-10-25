@@ -1,0 +1,17 @@
+---
+# version: '3.8'
+
+services:
+  employee-frontend:
+    image: employee-frontend
+    container_name: employee-frontend
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - BUILD_MODE=development
+    ports:
+      - '4200:4200'
+    volumes:
+      - ./src:/app/src
+
