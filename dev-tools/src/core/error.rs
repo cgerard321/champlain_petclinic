@@ -1,7 +1,7 @@
 use rocket::http::{ContentType, Status};
 use rocket::response::Responder;
-use rocket::serde::Serialize;
 use rocket::serde::json::to_string;
+use rocket::serde::Serialize;
 use rocket::{Request, Response};
 use std::io::Cursor;
 use thiserror::Error;
@@ -22,7 +22,7 @@ pub enum AppError {
     #[error("Dependency failed")]
     FailedDependency,
     #[error("Internal error")]
-    Internal
+    Internal,
 }
 
 // The JSON error response
@@ -54,8 +54,8 @@ impl AppError {
         match self {
             AppError::BadRequest(m) | AppError::NotFound(m) | AppError::UnprocessableEntity(m) => {
                 m.clone()
-            },
-            AppError::Unauthorized => "You are not authorized to access this resource".into(),           
+            }
+            AppError::Unauthorized => "You are not authorized to access this resource".into(),
             AppError::Forbidden => "You don't have access to this resource".into(),
             AppError::FailedDependency => "A dependent service failed".into(),
             AppError::Internal => "An unexpected error occurred".into(),

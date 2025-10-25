@@ -1,12 +1,12 @@
+use crate::auth::repo::find_session_by_id;
+use crate::db::database::Db;
+use crate::users::user::AuthenticatedUser;
 use rocket::{
     http::Status,
     request::{FromRequest, Outcome, Request},
     State,
 };
 use uuid::Uuid;
-use crate::auth::repo::find_session_by_id;
-use crate::db::database::Db;
-use crate::users::user::AuthenticatedUser;
 
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for AuthenticatedUser {
@@ -24,7 +24,7 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
             return Outcome::Error((Status::Unauthorized, ()));
         };
 
-        match find_session_by_id(&db, sid).await {
+        match find_session_by_id(db, sid).await {
             Ok(Some(session)) => Outcome::Success(AuthenticatedUser {
                 user_id: session.user_id,
             }),
