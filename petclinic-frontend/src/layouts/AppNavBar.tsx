@@ -31,7 +31,7 @@ export function NavBar(): JSX.Element {
   const [cartLoading, setCartLoading] = useState(false);
 
   const hasStaffVisits = isAdmin || isVet || isReceptionist;
-  const showVetVisitsDropdown = isVet;
+  // const showVetVisitsDropdown = isVet;
 
   const logoutUser = (): void => {
     // Client-side logout only. Keep API calls out of navbar
@@ -143,7 +143,7 @@ export function NavBar(): JSX.Element {
                     </Nav.Link>
                   )}
                 {isOwner && !hasStaffVisits && (
-                  <NavDropdown title="My Visits" id="owner-visits-dropdown">
+                  <NavDropdown title="Visits" id="owner-visits-dropdown">
                     <NavDropdown.Item
                       as={Link}
                       to={AppRoutePaths.CustomerVisits}
@@ -163,13 +163,21 @@ export function NavBar(): JSX.Element {
                     Bills
                   </Nav.Link>
                 )}
-                {isReceptionist && (
-                  <Nav.Link as={Link} to={AppRoutePaths.Visits}>
-                    Visits
-                  </Nav.Link>
-                )}
-                {(isAdmin || isVet) && (
+                {(isAdmin || isReceptionist) && (
                   <NavDropdown title="Visits" id="staff-visits-dropdown">
+                    <NavDropdown.Item as={Link} to={AppRoutePaths.Visits}>
+                      List View
+                    </NavDropdown.Item>
+                    <NavDropdown.Item
+                      as={Link}
+                      to={AppRoutePaths.VisitsCalendar}
+                    >
+                      Calendar View
+                    </NavDropdown.Item>
+                  </NavDropdown>
+                )}
+                {isVet && (
+                  <NavDropdown title="Visits" id="vet-visits-dropdown">
                     <NavDropdown.Item as={Link} to={AppRoutePaths.Visits}>
                       List View
                     </NavDropdown.Item>
@@ -180,18 +188,13 @@ export function NavBar(): JSX.Element {
                     >
                       Calendar View
                     </NavDropdown.Item>
-
-                    {showVetVisitsDropdown && (
-                      <>
-                        <NavDropdown.Divider />
-                        <NavDropdown.Item
-                          as={Link}
-                          to={AppRoutePaths.CustomerVisits}
-                        >
-                          My Schedule
-                        </NavDropdown.Item>
-                      </>
-                    )}
+                    <NavDropdown.Divider />
+                    <NavDropdown.Item
+                      as={Link}
+                      to={AppRoutePaths.VisitsCalendar}
+                    >
+                      My Schedule
+                    </NavDropdown.Item>
                   </NavDropdown>
                 )}
                 {(isInventoryManager || isAdmin) && (
