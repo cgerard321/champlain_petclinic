@@ -3,6 +3,7 @@ package com.petclinic.billing.presentationlayer;
 import com.petclinic.billing.businesslayer.BillService;
 import com.petclinic.billing.datalayer.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -13,12 +14,16 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Optional;
 
 @RestController
 @Slf4j
 public class BillController {
     private final BillService billService;
+    
+    @Value("${spring.profiles.active:}")
+    private String activeProfiles;
 
     BillController(BillService billService) {
         this.billService = billService;
@@ -29,8 +34,52 @@ public class BillController {
     public Mono<ResponseEntity<BillResponseDTO>> createBill(@RequestBody Mono<BillRequestDTO> billDTO) {
         return billDTO
                 .flatMap(dto -> {
+                    // Required field validation
+                    if (dto.getCustomerId() == null || dto.getCustomerId().trim().isEmpty()) {
+                        return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer ID is required"));
+                    }
+                    
+                    if (dto.getVetId() == null || dto.getVetId().trim().isEmpty()) {
+                        return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vet ID is required"));
+                    }
+                    
+                    // Amount validation
+                    if (dto.getAmount() == null) {
+                        return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bill amount is required"));
+                    }
+                    
+                    if (dto.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+                        return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bill amount must be greater than zero"));
+                    }
+                    
+                    // Auto-set bill status to UNPAID if not provided
                     if (dto.getBillStatus() == null) {
-                        return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bill status is required"));
+                        dto.setBillStatus(BillStatus.UNPAID);
+                        log.debug("Auto-set bill status to UNPAID");
+                    }
+                    
+                    // Auto-set created date to today if not provided
+                    if (dto.getDate() == null) {
+                        dto.setDate(LocalDate.now());
+                        log.debug("Auto-set bill date to today: {}", dto.getDate());
+                    }
+                    
+                    // Prevent bills from being created with past dates
+                    if (dto.getDate().isBefore(LocalDate.now())) {
+                        return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                            "Bill date cannot be in the past. Please use today's date or a future date."));
+                    }
+                    
+                    // Gentle due date suggestion for pet clinic (45 days - flexible for pet owners)
+                    if (dto.getDueDate() == null) {
+                        dto.setDueDate(dto.getDate().plusDays(45));
+                        log.debug("Auto-suggested due date (45 days): {}", dto.getDueDate());
+                    }
+                    
+                    // Prevent manual creation of OVERDUE bills - status is automatically managed by system
+                    if (dto.getBillStatus() == BillStatus.OVERDUE) {
+                        return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                            "Cannot create bill with OVERDUE status. Use PAID or UNPAID instead. OVERDUE status is automatically set based on due date."));
                     }
                     return billService.createBill(Mono.just(dto));
                 })

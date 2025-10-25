@@ -69,6 +69,9 @@ public interface BillService {
     // Method to fetch bills by month
     Flux<BillResponseDTO> getBillsByMonth(int year, int month);
 
+    // Method to check and update bills that are past due date from UNPAID to OVERDUE
+    Mono<Void> updateOverdueBills();
+
 
 ///////////////// Used by both BillController and CustomerBillsController /////////////////////
 
