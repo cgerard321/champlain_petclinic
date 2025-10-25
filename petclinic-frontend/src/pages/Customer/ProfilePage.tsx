@@ -501,7 +501,7 @@ const ProfilePage = (): JSX.Element => {
           <div className="customers-profile-card shadow-lg p-5 mb-5 bg-white rounded">
             <div
                 className="customers-profile-header"
-                style={{ display: 'flex,', alignItems: 'center', gap: '1rem' }}
+                style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}
             >
               <div
                   style={{
