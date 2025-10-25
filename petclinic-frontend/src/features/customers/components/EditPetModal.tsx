@@ -4,9 +4,13 @@ import { getPet } from '../api/getPet';
 import { updatePet } from '../api/updatePet';
 import { deletePet } from '../api/deletePet';
 import { getPetTypes } from '../api/getPetTypes';
+import { deletePetPhoto } from '../api/deletePetPhoto';
 import { PetResponseModel } from '../models/PetResponseModel';
 import { PetRequestModel } from '../models/PetRequestModel';
 import { PetTypeModel } from '../models/PetTypeModel';
+import defaultProfile from '@/assets/Owners/defaultProfilePicture.png';
+import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
+import axiosInstance from '@/shared/api/axiosInstance';
 import './customers.css';
 
 interface EditPetModalProps {
@@ -35,6 +39,78 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
   const [notFound, setNotFound] = useState<boolean>(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [petPhotoUrl, setPetPhotoUrl] = useState<string>('');
+  const { confirm, ConfirmModal } = useConfirmModal();
+
+  const fetchPetPhotoUrl = async (
+    petId: string,
+    petName: string
+  ): Promise<string> => {
+    try {
+      const response = await axiosInstance.get(`/pets/${petId}`, {
+        useV2: false,
+        params: { includePhoto: true },
+      });
+      const petData = response.data;
+
+      if (
+        petData.photo &&
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (petData.photo.data || (petData.photo as any).fileData)
+      ) {
+        const base64Data =
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          petData.photo.data || (petData.photo as any).fileData;
+        const contentType =
+          petData.photo.contentType ||
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (petData.photo as any).fileType ||
+          'image/png';
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: contentType });
+        return URL.createObjectURL(blob);
+      } else {
+        return defaultProfile;
+      }
+    } catch (error) {
+      console.error(`Error fetching photo for ${petName} (${petId}):`, error);
+      return defaultProfile;
+    }
+  };
+
+  const handleDeletePetPhoto = async (): Promise<void> => {
+    if (!pet) return;
+
+    const confirmed = await confirm({
+      title: 'Delete Pet Photo',
+      message:
+        "Are you sure you want to delete this pet's photo? This action cannot be undone.",
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      variant: 'danger',
+      destructive: true,
+    });
+
+    if (!confirmed) return;
+
+    try {
+      await deletePetPhoto(ownerId, pet.petId);
+      setPetPhotoUrl(defaultProfile);
+
+      // Update pet data to reflect photo deletion
+      setPet(prev => (prev ? { ...prev, photo: undefined } : null));
+
+      setSuccessMessage('Pet photo deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting pet photo:', error);
+      setErrors({ submit: 'Failed to delete pet photo. Please try again.' });
+    }
+  };
 
   useEffect(() => {
     const fetchPetData = async (): Promise<void> => {
@@ -53,6 +129,9 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
               ? new Date(petData.birthDate).toISOString().split('T')[0]
               : ''
           );
+
+          const photoUrl = await fetchPetPhotoUrl(petId, petData.name);
+          setPetPhotoUrl(photoUrl);
         } catch (err) {
           const error = err as { response?: { status: number } };
           if (error.response && error.response.status === 404) {
@@ -249,6 +328,26 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
           </button>
         </div>
 
+        <div className="pet-photo-section">
+          <div className="pet-photo-container">
+            <img
+              src={petPhotoUrl || defaultProfile}
+              alt={`${pet.name} profile`}
+              className="pet-photo"
+            />
+            {petPhotoUrl && petPhotoUrl !== defaultProfile && pet.photo && (
+              <button
+                type="button"
+                onClick={handleDeletePetPhoto}
+                className="delete-photo-button"
+                disabled={isSubmitting}
+              >
+                Delete Photo
+              </button>
+            )}
+          </div>
+        </div>
+
         <form onSubmit={handleSubmit} className="customer-add-pet-form">
           <div className="form-group">
             <label>Pet Name *</label>
@@ -397,6 +496,7 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
             </div>
           </div>
         )}
+        <ConfirmModal />
       </div>
     </div>
   );
