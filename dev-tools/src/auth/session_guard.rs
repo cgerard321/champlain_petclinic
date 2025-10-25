@@ -1,6 +1,5 @@
 use crate::auth::repo::find_session_by_id;
 use crate::db::database::Db;
-use crate::users::user::AuthenticatedUser;
 use rocket::{
     http::Status,
     request::{FromRequest, Outcome, Request},
@@ -31,4 +30,9 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
             _ => Outcome::Error((Status::Unauthorized, ())),
         }
     }
+}
+
+
+pub struct AuthenticatedUser {
+    pub user_id: Uuid,
 }

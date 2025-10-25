@@ -1,6 +1,6 @@
+use crate::auth::session_guard::AuthenticatedUser;
 use crate::core::error::AppResult;
 use crate::minio::store::MinioStore;
-use crate::users::user::AuthenticatedUser;
 use rocket::serde::json::Json;
 use rocket::State;
 

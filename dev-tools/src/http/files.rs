@@ -1,8 +1,8 @@
+use crate::auth::session_guard::AuthenticatedUser;
 use crate::core::error::AppResult;
 use crate::minio::file::FileInfo;
 use crate::minio::service;
 use crate::minio::store::MinioStore;
-use crate::users::user::AuthenticatedUser;
 use rocket::http::Status;
 use rocket::response::status::Custom;
 use rocket::serde::json::Json;
