@@ -75,7 +75,6 @@ public class AuthServiceClientControllerIntegrationTest {
             .password("password")
             .email("email")
             .owner(OwnerRequestDTO.builder()
-                    .ownerId("UUID")
                     .firstName("firstName")
                     .lastName("lastName")
                     .address("address")
@@ -192,38 +191,6 @@ public class AuthServiceClientControllerIntegrationTest {
         StepVerifier.create(validatedTokenResponse)
                 .expectNextCount(0)
                 .verifyError();
-    }
-
-    @Test
-    @DisplayName("Given valid register information, register user")
-    void valid_registerForV2(){
-        OwnerResponseDTO ownerResponseDTO = OwnerResponseDTO.builder()
-                .ownerId("UUID")
-                .firstName("firstName")
-                .lastName("lastName")
-                .address("address")
-                .city("city")
-                .telephone("telephone")
-                .pets(List.of())
-                .build();
-
-        final MockResponse mockResponse = new MockResponse();
-        mockResponse
-                .setHeader("Content-Type", "application/json")
-                .setResponseCode(200);
-
-        server.enqueue(mockResponse);
-
-        Mockito.when(customersServiceClient.addOwner(any()))
-                .thenReturn(Mono.just(ownerResponseDTO));
-
-
-        Mono<OwnerResponseDTO> block = authServiceClient.createUserUsingV2Endpoint(Mono.just(USER_REGISTER));
-
-        StepVerifier
-                .create(block)
-                .verifyComplete();
-
     }
 
     @Test

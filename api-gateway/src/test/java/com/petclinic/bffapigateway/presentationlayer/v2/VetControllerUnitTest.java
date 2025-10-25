@@ -341,11 +341,11 @@ class VetControllerUnitTest {
     }
 
     @Test
-    void whenDeleteSpecialtiesByVetId_thenReturnNoContent() {
+    void whenDeleteSpecialtyByVetId_thenReturnNoContent() {
         String vetId = "2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb";
         String specialtyId = "cardiology";
 
-        when(vetsServiceClient.deleteSpecialtiesByVetId(vetId, specialtyId))
+        when(vetsServiceClient.deleteSpecialtyBySpecialtyId(vetId, specialtyId))
                 .thenReturn(Mono.empty());
 
         webTestClient.delete()
@@ -353,15 +353,15 @@ class VetControllerUnitTest {
                 .exchange()
                 .expectStatus().isNoContent();
 
-        verify(vetsServiceClient, times(1)).deleteSpecialtiesByVetId(vetId, specialtyId);
+        verify(vetsServiceClient, times(1)).deleteSpecialtyBySpecialtyId(vetId, specialtyId);
     }
 
     @Test
-    void whenDeleteSpecialtiesByVetId_withNotFound_thenReturnNotFound() {
+    void whenDeleteSpecialtyByVetId_withNotFound_thenReturnNotFound() {
         String vetId = "2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb";
         String specialtyId = "invalid-specialty";
 
-        when(vetsServiceClient.deleteSpecialtiesByVetId(vetId, specialtyId))
+        when(vetsServiceClient.deleteSpecialtyBySpecialtyId(vetId, specialtyId))
                 .thenReturn(Mono.error(new RuntimeException("Not found")));
 
         webTestClient.delete()
@@ -369,7 +369,7 @@ class VetControllerUnitTest {
                 .exchange()
                 .expectStatus().isNotFound();
 
-        verify(vetsServiceClient, times(1)).deleteSpecialtiesByVetId(vetId, specialtyId);
+        verify(vetsServiceClient, times(1)).deleteSpecialtyBySpecialtyId(vetId, specialtyId);
     }
 
     @Test
