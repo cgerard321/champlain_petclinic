@@ -374,18 +374,20 @@ public class CartControllerV1 {
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
     @PutMapping("/{cartId}/promo")
     public Mono<ResponseEntity<CartResponseDTO>> applyPromoToCart(
-            @PathVariable String cartId,
-            @RequestParam("promoPercent") Double promoPercent) {
+        @PathVariable String cartId,
+        @RequestBody(required = false) ApplyPromoRequestDTO promoRequest) {
 
-        return cartServiceClient.applyPromoToCart(cartId, promoPercent)
-                .map(ResponseEntity::ok)
-                .onErrorResume(e -> mapCartErrorWithMessage(
-                        e,
-                        ErrorOptions.builder("applyPromoToCart")
-                                .cartId(cartId)
-                                .includeBadRequestBodyMessage(true)
-                                .build()
-                ));
+    Double promoPercent = promoRequest != null ? promoRequest.getPromoPercent() : null;
+
+    return cartServiceClient.applyPromoToCart(cartId, promoPercent)
+        .map(ResponseEntity::ok)
+        .onErrorResume(e -> mapCartErrorWithMessage(
+            e,
+            ErrorOptions.builder("applyPromoToCart")
+                .cartId(cartId)
+                .includeBadRequestBodyMessage(true)
+                .build()
+        ));
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.OWNER, Roles.ADMIN})
@@ -400,13 +402,13 @@ public class CartControllerV1 {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
-    @PutMapping("/{cartId}/promo/clear")
-    public Mono<ResponseEntity<CartResponseDTO>> clearPromo(@PathVariable String cartId) {
-        return cartServiceClient.clearPromo(cartId)
-                .map(ResponseEntity::ok)
-                .onErrorResume(e -> mapCartErrorWithMessage(
-                        e, ErrorOptions.builder("clearPromo").cartId(cartId).build()
-                ));
+    @DeleteMapping("/{cartId}/promo")
+    public Mono<ResponseEntity<Void>> clearPromo(@PathVariable String cartId) {
+    return cartServiceClient.clearPromo(cartId)
+        .thenReturn(ResponseEntity.noContent().<Void>build())
+        .onErrorResume(e -> this.<Void>mapCartError(
+            e, ErrorOptions.builder("clearPromo").cartId(cartId).build()
+        ));
     }
 
 

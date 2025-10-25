@@ -414,22 +414,28 @@ public Mono<Void> deleteCartByCartId(String cartId) {
                 .bodyToMono(new ParameterizedTypeReference<List<CartProductResponseDTO>>() {});
     }
     public Mono<CartResponseDTO> applyPromoToCart(String cartId, Double promoPercent) {
+        if (promoPercent == null) {
+            return Mono.error(new InvalidInputException("promoPercent must be provided"));
+        }
+
+        ApplyPromoRequestDTO payload = new ApplyPromoRequestDTO(promoPercent);
+
         return webClientBuilder.build()
                 .put()
-                .uri(cartServiceUrl + "/{cartId}/promo?promoPercent={promoPercent}", cartId, promoPercent)
+                .uri(cartServiceUrl + "/{cartId}/promo", cartId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
                 .retrieve()
                 .bodyToMono(CartResponseDTO.class);
     }
 
-    public Mono<CartResponseDTO> clearPromo(String cartId) {
+    public Mono<Void> clearPromo(String cartId) {
         return webClientBuilder.build()
-                .put()
-                .uri(uriBuilder -> uriBuilder
-                        .path(cartServiceUrl + "/{cartId}/promo")
-                        .queryParam("promoPercent", 0)
-                        .build(cartId))
+                .delete()
+                .uri(cartServiceUrl + "/{cartId}/promo", cartId)
                 .retrieve()
-                .bodyToMono(CartResponseDTO.class);
+                .toBodilessEntity()
+                .then();
     }
 
 }

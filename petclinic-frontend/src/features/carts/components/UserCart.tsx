@@ -14,7 +14,7 @@ import { FaShoppingCart } from 'react-icons/fa';
 import ImageContainer from '@/features/products/components/ImageContainer';
 import axiosInstance from '@/shared/api/axiosInstance';
 import { formatPrice } from '../utils/formatPrice';
-import { applyPromo } from '@/shared/api/cart';
+import { applyPromo, clearPromo } from '@/shared/api/cart';
 import {
   IsAdmin,
   IsInventoryManager,
@@ -544,7 +544,7 @@ const UserCart: React.FC = () => {
   const onClearPromo = async (): Promise<void> => {
     if (!cartId) return;
     try {
-      await applyPromo(cartId, 0);
+      await clearPromo(cartId);
       setPromoPercent(null);
       setNotificationMessage('Promo removed.');
     } catch {

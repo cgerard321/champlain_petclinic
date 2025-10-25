@@ -345,10 +345,21 @@ public class CartController {
     }
 
     @PutMapping("/{cartId}/promo")
-    public Mono<CartResponseModel> applyPromoToCart(
+    public Mono<ResponseEntity<CartResponseModel>> applyPromoToCart(
             @PathVariable String cartId,
-            @RequestParam("promoPercent") Double promoPercent) {
-        return cartService.applyPromoToCart(cartId, promoPercent);
+            @RequestBody(required = false) CartPromoRequestModel promoRequest) {
+        if (promoRequest == null || promoRequest.getPromoPercent() == null) {
+            return Mono.error(new InvalidInputException("promoPercent must be provided"));
+        }
+
+        return cartService.applyPromoToCart(cartId, promoRequest.getPromoPercent())
+                .map(ResponseEntity::ok);
+    }
+
+    @DeleteMapping("/{cartId}/promo")
+    public Mono<ResponseEntity<Void>> clearPromoFromCart(@PathVariable String cartId) {
+        return cartService.applyPromoToCart(cartId, null)
+                .thenReturn(ResponseEntity.noContent().build());
     }
 
 }
