@@ -3,6 +3,8 @@ package com.petclinic.customersservice.presentationlayer;
 import com.petclinic.customersservice.business.PetService;
 import com.petclinic.customersservice.customersExceptions.exceptions.NotFoundException;
 import com.petclinic.customersservice.data.Pet;
+import com.petclinic.customersservice.domainclientlayer.FileRequestDTO;
+import com.petclinic.customersservice.domainclientlayer.FileResponseDTO;
 import com.petclinic.customersservice.util.EntityDTOUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +16,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -90,7 +93,7 @@ public class PetControllerUnitTest {
     void deletePetPhoto_ShouldReturnOk() {
         PetResponseDTO petResponseDTO = buildPetResponseDTO();
         String petId = "0e4d8481-b611-4e52-baed-af16caa8bf8a";
-        
+
         when(petService.deletePetPhoto(petId)).thenReturn(Mono.just(petResponseDTO));
 
         webTestClient.patch()
@@ -106,7 +109,7 @@ public class PetControllerUnitTest {
     @Test
     void deletePetPhoto_WithNonExistentPet_ShouldReturnNotFound() {
         String petId = "00000000-0000-0000-0000-000000000000";
-        
+
         when(petService.deletePetPhoto(petId)).thenReturn(Mono.empty());
 
         webTestClient.patch()
@@ -115,6 +118,50 @@ public class PetControllerUnitTest {
                 .expectStatus().isNotFound();
 
         verify(petService).deletePetPhoto(petId);
+    }
+
+    @Test
+    void addPetPhoto_WithValidPet_ShouldReturnCreated() {
+        String petId = "de92af81-0135-4cd8-8cda-343f681728a3";
+        byte[] imageData = "fake-image".getBytes(StandardCharsets.UTF_8);
+        FileRequestDTO fileRequest = new FileRequestDTO("photo.png", "image/png", imageData);
+        FileResponseDTO fileResponse = new FileResponseDTO("photo-xyz", "photo.png", "image/png", imageData);
+        PetResponseDTO expectedPet = buildPetResponseDTO();
+        expectedPet.setPhoto(fileResponse);
+
+        when(petService.addPetPhoto(anyString(), any(FileRequestDTO.class))).thenReturn(Mono.just(expectedPet));
+
+        webTestClient.patch()
+                .uri("/pets/{petId}/photos", petId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(fileRequest)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.petId").isEqualTo("generated-pet-id")
+                .jsonPath("$.photo.fileId").isEqualTo("photo-xyz")
+                .jsonPath("$.photo.fileName").isEqualTo("photo.png")
+                .jsonPath("$.photo.fileType").isEqualTo("image/png");
+    }
+
+    @Test
+    void addPetPhoto_WithNonExistentPet_ShouldReturnNotFound() {
+        String nonExistentPetId = "99999999-9999-9999-9999-999999999999";
+        byte[] imageData = "fake-image".getBytes(StandardCharsets.UTF_8);
+        FileRequestDTO fileRequest = new FileRequestDTO("photo.png", "image/png", imageData);
+
+        when(petService.addPetPhoto(anyString(), any(FileRequestDTO.class)))
+                .thenReturn(Mono.error(new NotFoundException("Pet not found with id: " + nonExistentPetId)));
+
+        webTestClient.patch()
+                .uri("/pets/{petId}/photos", nonExistentPetId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(fileRequest)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        verify(petService).addPetPhoto(anyString(), any(FileRequestDTO.class));
     }
 
     private Pet buildPet() {
