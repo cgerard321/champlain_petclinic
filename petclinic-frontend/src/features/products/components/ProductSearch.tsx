@@ -49,7 +49,7 @@ export default function ProductSearch({
   const handleCloseModal = (): void => setSelectedProduct(null);
 
   return (
-    <div className="product-search">
+    <div className="product-search" style={{ marginBottom: 10 }}>
       <input
         type="text"
         value={searchQuery}

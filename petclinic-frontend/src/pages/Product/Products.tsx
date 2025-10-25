@@ -1,7 +1,7 @@
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import ProductsList from '@/features/products/ProductsList.tsx';
 import './Products.css';
-import TrendingList from '@/features/products/TrendingList';
+import TrendingList from '@/features/products/TrendingList.tsx';
 import { useState, useMemo } from 'react';
 import ProductSearch from '@/features/products/components/ProductSearch';
 import StarRating from '@/features/products/components/StarRating';
@@ -81,16 +81,14 @@ export default function Products(): JSX.Element {
       </header>
 
       <div className="search-and-filter">
-        {!isSidebarOpen && (
-          <button
-            className="toggle-sidebar-button"
-            onClick={toggleSidebar}
-            aria-expanded={isSidebarOpen}
-            aria-controls="sidebar"
-          >
-            &#9776; Filters
-          </button>
-        )}
+        <button
+          className="toggle-sidebar-button"
+          onClick={toggleSidebar}
+          aria-expanded={isSidebarOpen}
+          aria-controls="products-sidebar"
+        >
+          {isSidebarOpen ? '☰ Filters' : '☰ Filters'}
+        </button>
 
         <div className="search-wrapper">
           <ProductSearch
@@ -137,7 +135,7 @@ export default function Products(): JSX.Element {
       )}
 
       {isSidebarOpen && (
-        <div className={`sidebar ${isSidebarOpen ? 'open' : ''}`} id="sidebar">
+        <div className={`products-sidebar${isSidebarOpen ? ' open' : ''}`}>
           <button
             className="close-button"
             onClick={toggleSidebar}
@@ -232,14 +230,7 @@ export default function Products(): JSX.Element {
       <div className="block">
         <hr />
       </div>
-
-      {!searchQuery && (
-        <div className="trending-list-container-gold">
-          <h2 className="section-header">Trending</h2>
-          <TrendingList />
-        </div>
-      )}
-
+      <TrendingList />
       <div className="block">
         <hr />
       </div>
