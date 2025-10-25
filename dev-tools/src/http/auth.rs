@@ -1,9 +1,9 @@
 use crate::auth::service;
 use crate::db::database::Db;
-use crate::users::user::{LoginReq, User};
+use crate::users::user::{LoginReq};
 use rocket::http::{Cookie, CookieJar, SameSite};
 use rocket::serde::json::Json;
-use rocket::{http::Status, post, Request, State};
+use rocket::{http::Status, post, State};
 use uuid::Uuid;
 
 #[post("/login", data = "<req>")]
@@ -36,7 +36,7 @@ pub async fn login(
 #[post("/logout")]
 pub async fn logout(jar: &CookieJar<'_>, db: &State<Db>) -> Result<Status, Status> {
     if let Some(cookie) = jar.get_private("sid") {
-        let _ = service::remove_session(&*db, Uuid::parse_str(cookie.value()).unwrap()).await;
+        let _ = service::remove_session(db, Uuid::parse_str(cookie.value()).unwrap()).await;
         jar.remove_private(Cookie::from("sid"));
     }
 

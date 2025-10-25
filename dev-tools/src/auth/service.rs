@@ -20,7 +20,7 @@ fn verify_password(stored_hash_bytes: &[u8], candidate: &str, pepper: &str) -> A
 
 pub async fn authenticate(db: &State<Db>, email: &str, password: &str) -> Result<Uuid, AppError> {
     let pep = get_pepper();
-    let row = user_service::get_user_for_login(&*db, email)
+    let row = user_service::get_user_for_login(db, email)
         .await
         .map_err(|_| AppError::Unauthorized)?;
 
@@ -35,9 +35,9 @@ pub async fn authenticate(db: &State<Db>, email: &str, password: &str) -> Result
     let session_id = Uuid::new_v4();
     let expires_at: NaiveDateTime = (Utc::now() + Duration::days(1)).naive_utc();
 
-    session_repo::insert_session(&*db, session_id, row.id, expires_at, None)
+    session_repo::insert_session(db, session_id, row.id, expires_at, None)
         .await
-        .map_err(|e| AppError::Internal)?;
+        .map_err(|_e| AppError::Internal)?;
 
     println!("Created session {session_id} for user {}", row.email);
 
@@ -45,7 +45,7 @@ pub async fn authenticate(db: &State<Db>, email: &str, password: &str) -> Result
 }
 
 pub async fn remove_session(db: &State<Db>, cookie_id: Uuid) -> AppResult<()> {
-    Ok(session_repo::delete_session(&*db, cookie_id)
+    session_repo::delete_session(db, cookie_id)
         .await
-        .map_err(|_e| AppError::Internal)?)
+        .map_err(|_e| AppError::Internal)
 }

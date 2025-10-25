@@ -1,7 +1,7 @@
 use crate::db::database::Db;
+use crate::users::user::FullUser;
 use sqlx::Row;
 use uuid::Uuid;
-use crate::users::user::FullUser;
 
 pub async fn insert_user_hashed(
     db: &Db,

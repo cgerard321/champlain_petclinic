@@ -1,8 +1,8 @@
+use crate::auth::session::Session;
 use crate::db::database::Db;
 use chrono::NaiveDateTime;
 use sqlx::Row;
 use uuid::Uuid;
-use crate::auth::session::Session;
 
 pub async fn insert_session(
     db: &Db,
@@ -15,23 +15,23 @@ pub async fn insert_session(
         "INSERT INTO sessions (id, user_id, expires_at, ip)
          VALUES (?, ?, ?, ?, ?)",
     )
-        .bind(session_id.to_string())
-        .bind(user_id.to_string())
-        .bind(expires_at)
-        .bind(ip)
-        .execute(&db.0)
-        .await?;
+    .bind(session_id.to_string())
+    .bind(user_id.to_string())
+    .bind(expires_at)
+    .bind(ip)
+    .execute(&db.0)
+    .await?;
     Ok(())
 }
 
 pub async fn find_session_by_id(db: &Db, sid: Uuid) -> sqlx::Result<Option<Session>> {
     let row = sqlx::query(
         "SELECT id, user_id, created_at, expires_at, user_agent, ip
-         FROM sessions WHERE id = ?"
+         FROM sessions WHERE id = ?",
     )
-        .bind(sid.to_string())
-        .fetch_optional(&db.0)
-        .await?;
+    .bind(sid.to_string())
+    .fetch_optional(&db.0)
+    .await?;
 
     Ok(row.map(|r| Session {
         id: Uuid::parse_str(r.get::<String, _>(0).as_str()).unwrap(),
@@ -49,6 +49,7 @@ pub async fn delete_session(db: &Db, sid: Uuid) -> sqlx::Result<()> {
     Ok(())
 }
 
+// TODO : Add a cron(or similar still unsure) job to delete expired sessions
 pub async fn delete_expired_sessions(db: &Db) -> sqlx::Result<u64> {
     let res = sqlx::query("DELETE FROM sessions WHERE expires_at < NOW()")
         .execute(&db.0)
