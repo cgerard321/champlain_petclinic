@@ -13,6 +13,7 @@ import { getAllProductBundles } from './api/getAllProductBundles';
 import { ProductBundleModel } from './models/ProductModels/ProductBundleModel';
 import ProductBundle from './components/ProductBundle';
 //import ProductSearch from './components/ProductSearch';
+import Reveal from '@/shared/components/animations/Reveal';
 
 interface ProductsListProps {
   searchQuery: string;
@@ -127,56 +128,72 @@ const ProductList = function Productlist({
   };
 
   const RecentlyViewedProducts = (): JSX.Element => (
-    <div className="recently-viewed-container">
-      <h2 className="section-header">Recently Seen</h2>
-      <div className="recently-viewed-flex">
-        {recentlyClickedProducts.length > 0 ? (
-          recentlyClickedProducts
-            .filter(p => !p.isUnlisted)
-            .map(p => <Product key={p.productId} product={p} />)
-        ) : (
-          <p>No Recently Seen Items.</p>
-        )}
+    <Reveal delay={80}>
+      <div className="products-section-container ">
+        <h2 className="section-title category-title">Recently Seen</h2>
+        <div className="recently-viewed-flex">
+          {recentlyClickedProducts.length > 0 ? (
+            recentlyClickedProducts
+              .filter(p => !p.isUnlisted)
+              .map((p, i) => (
+                <Reveal key={p.productId} delay={i * 60 + 120}>
+                  <Product product={p} />
+                </Reveal>
+              ))
+          ) : (
+            <p>No Recently Seen Items.</p>
+          )}
+        </div>
       </div>
-    </div>
+    </Reveal>
   );
 
   return (
     <div className="product-list-container">
       <div className="main-content">
         {view === 'catalog' && (
-          <div className="list-container">
-            {/*<h2 className="section-header">Catalog</h2>*/}
-            <div className="grid">
+          <Reveal delay={80}>
+            <div className="products-section-container ">
+              <h2 className="section-title category-title">Catalog</h2>
               {isLoading ? (
                 <p>Loading items...</p>
               ) : filteredList.length > 0 ? (
-                filteredList.map(p => (
-                  <div key={p.productId} onClick={() => handleProductClick(p)}>
-                    <Product product={p} />
-                  </div>
-                ))
+                <div className="grid">
+                  {filteredList.map((p, i) => (
+                    <Reveal key={p.productId} delay={i * 60 + 120}>
+                      <div onClick={() => handleProductClick(p)}>
+                        <Product product={p} />
+                      </div>
+                    </Reveal>
+                  ))}
+                </div>
               ) : (
-                <p>No items found.</p>
+                <p style={{ textAlign: 'center', margin: '40px 0' }}>
+                  No items found.
+                </p>
               )}
             </div>
-          </div>
+          </Reveal>
         )}
 
         {view === 'extras' && (
           <>
-            <div className="list-container">
-              <h2 className="section-header">Bundles</h2>
-              <div className="grid product-bundles-grid">
-                {bundleList.length > 0 ? (
-                  bundleList.map(b => (
-                    <ProductBundle key={b.bundleId} bundle={b} />
-                  ))
-                ) : (
-                  <p>No Bundles Available</p>
-                )}
+            <Reveal delay={80}>
+              <div className="products-section-container ">
+                <h2 className="section-title">Bundles</h2>
+                <div className="grid product-bundles-grid">
+                  {bundleList.length > 0 ? (
+                    bundleList.map((b, i) => (
+                      <Reveal key={b.bundleId} delay={i * 60 + 120}>
+                        <ProductBundle bundle={b} />
+                      </Reveal>
+                    ))
+                  ) : (
+                    <p>No Bundles Available</p>
+                  )}
+                </div>
               </div>
-            </div>
+            </Reveal>
             <div>
               <hr />
             </div>

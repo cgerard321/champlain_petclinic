@@ -1,6 +1,5 @@
 package com.petclinic.products.businesslayer.ratings;
 
-import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.presentationlayer.ratings.RatingRequestModel;
 import com.petclinic.products.presentationlayer.ratings.RatingResponseModel;
 import reactor.core.publisher.Flux;
