@@ -21,7 +21,7 @@ public class PetsClient {
     public PetsClient(@Value("${app.customers-service-reactive.host}") String petsServiceHost,
                       @Value("${app.customers-service-reactive.port}") String petsServicePort){
 
-        petClientServiceBaseURL = "http://" + petsServiceHost + ":" + petsServicePort + "/pet";
+        petClientServiceBaseURL = "http://" + petsServiceHost + ":" + petsServicePort + "/pets";
 
         this.webClient = WebClient.builder()
                 .baseUrl(petClientServiceBaseURL)

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Inventory } from './models/Inventory';
 import { getAllInventoryTypes } from '@/features/inventories/api/getAllInventoryTypes.ts';
 import addInventory from '@/features/inventories/api/addInventory.ts';
@@ -19,6 +20,17 @@ const isHttpUrl = (url: string): boolean => {
     return false;
   }
 };
+
+// Ensure we have a stable modal root (outside any page-level wrappers like Reveal)
+function getModalRoot(): HTMLElement {
+  let el = document.getElementById('modal-root');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'modal-root';
+    document.body.appendChild(el);
+  }
+  return el;
+}
 
 //Helper
 function mapServerMessageToFieldErrors(
@@ -129,20 +141,24 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
     fetchInventoryTypes();
   }, []);
 
+  // Lock body scroll when modal is open
   useEffect(() => {
+    if (!showAddInventoryForm) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
       document.body.style.overflow = prev;
     };
-  }, []);
+  }, [showAddInventoryForm]);
 
+  // Inert the app root while modal is open (accessibility)
   useEffect(() => {
+    if (!showAddInventoryForm) return;
     const root = document.getElementById('app-root');
     if (!root) return;
     root.setAttribute('inert', '');
     return () => root.removeAttribute('inert');
-  }, []);
+  }, [showAddInventoryForm]);
 
   // When form opens, initialize history baseline with current values
   useEffect(() => {
@@ -160,16 +176,14 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showAddInventoryForm]);
 
-  // helper: count words in a string (0 for empty/whitespace-only)
   const countWords = (s: string): number => {
     const trimmed = s.trim();
     if (trimmed === '') return 0;
     return trimmed.split(/\s+/).filter(Boolean).length;
   };
 
-  // helper: push a normalized snapshot for a field
   const pushSnapshot = (field: TextFieldKey, rawValue: string): void => {
-    const normalized = rawValue.trim(); // trim trailing spaces
+    const normalized = rawValue.trim();
     setHistory(prev => {
       const fieldHist = prev[field] ?? [''];
       const lastRecorded = fieldHist[fieldHist.length - 1] ?? '';
@@ -187,7 +201,6 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
     });
   };
 
-  // Save snapshot for field only when the *word count* changed
   const handleFieldChange = (
     field: TextFieldKey,
     setter: React.Dispatch<React.SetStateAction<string>>,
@@ -205,12 +218,10 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
       pushSnapshot(field, value);
     }
 
-    setFieldErrors(prev => ({ ...prev, [field]: undefined })); // clear error on change
-
+    setFieldErrors(prev => ({ ...prev, [field]: undefined }));
     setter(value);
   };
 
-  // Undo handler
   const handleUndo = (): void => {
     const order = [...lastEditedFields];
 
@@ -259,7 +270,6 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
     }
   };
 
-  // Handling form submission
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     setFormError('');
@@ -369,11 +379,14 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
     return window.btoa(binary);
   }
 
-  return (
+  // ----- PORTAL RENDER -----
+  return createPortal(
     <div className={styles.overlay}>
       <div className={styles['form-container']}>
         <h2>Add Inventory</h2>
         <form onSubmit={handleSubmit}>
+          {/* ... form fields unchanged ... */}
+          {/* Inventory Name */}
           <div>
             <label htmlFor="inventoryName">Inventory Name:</label>
             <input
@@ -402,6 +415,7 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
             )}
           </div>
 
+          {/* Inventory Type */}
           <div>
             <label htmlFor="inventoryType">Inventory Type:</label>
             <select
@@ -436,6 +450,7 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
             )}
           </div>
 
+          {/* Description */}
           <div>
             <label htmlFor="inventoryDescription">Inventory Description:</label>
             <input
@@ -470,6 +485,7 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
             )}
           </div>
 
+          {/* Image URL */}
           <div>
             <label htmlFor="inventoryImage">Inventory Image:</label>
             <input
@@ -497,6 +513,7 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
             )}
           </div>
 
+          {/* Backup Image URL */}
           <div>
             <label htmlFor="inventoryBackupImage">
               Inventory Backup Image:
@@ -532,6 +549,7 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
             )}
           </div>
 
+          {/* Upload */}
           <div>
             <label htmlFor="imageUpload">Upload Image:</label>
             <input
@@ -551,6 +569,7 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
               </div>
             )}
           </div>
+
           {formError && (
             <div
               className="field-error"
@@ -569,13 +588,13 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
             Cancel
           </button>
 
-          {/* Undo button */}
           <button type="button" className="undo" onClick={handleUndo}>
             Undo
           </button>
         </form>
       </div>
-    </div>
+    </div>,
+    getModalRoot()
   );
 };
 

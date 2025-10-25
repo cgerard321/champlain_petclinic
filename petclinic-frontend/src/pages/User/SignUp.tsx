@@ -6,7 +6,7 @@ import { NavBar } from '@/layouts/AppNavBar.tsx';
 import axiosInstance from '@/shared/api/axiosInstance';
 import { isAxiosError } from 'axios';
 import './SignUp.css';
-import eyeDark from '@/assets/Icons/eyeDark.svg';
+import SvgIcon from '@/shared/components/SvgIcon';
 
 const SignUp: React.FC = (): JSX.Element => {
   const characterLimit = 60;
@@ -318,12 +318,9 @@ const SignUp: React.FC = (): JSX.Element => {
                   id="toggle-password"
                   onClick={() => setShowPassword(prev => !prev)}
                   type="button"
+                  title="Show Password"
                 >
-                  <img
-                    className="icon-eye"
-                    src={eyeDark}
-                    title="showPassword"
-                  />
+                  <SvgIcon id="eye" />
                 </button>
               </div>
               {errorMessage.password && (
