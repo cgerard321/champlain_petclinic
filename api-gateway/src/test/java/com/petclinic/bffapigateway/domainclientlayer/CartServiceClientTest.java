@@ -1102,27 +1102,6 @@ public class CartServiceClientTest {
                 .verify();
     }
 
-
-    @Test
-    void testAddProductToCartFromProducts_BadRequest400_WithMessage() {
-        String cartId = "c-7";
-        String productId = "p-77";
-
-        // Mirrors code: 400 -> bodyToMono(CartResponseDTO) -> if message != null throw InvalidInput(message)
-        prepareResponse(r -> r
-                .setHeader("Content-Type", "application/json")
-                .setResponseCode(400)
-                .setBody("{\"message\":\"Cannot add from products page\"}")
-        );
-
-        StepVerifier.create(mockCartServiceClient.addProductToCartFromProducts(cartId, productId))
-                .expectErrorSatisfies(ex ->
-                        org.assertj.core.api.Assertions.assertThat(ex.getMessage())
-                                .contains("Cannot add from products page"))
-                .verify();
-    }
-
-
     @Test
     void testValidatePromoCode_BadRequest400() {
         prepareResponse(r -> r
@@ -1232,24 +1211,6 @@ public class CartServiceClientTest {
                 .expectErrorSatisfies(ex ->
                         org.assertj.core.api.Assertions.assertThat(ex.getClass().getSimpleName())
                                 .containsIgnoringCase("IllegalArgument"))
-                .verify();
-    }
-
-
-    @Test
-    void testAddProductToCartFromProducts_BadRequest400_NoMessage() {
-        String cartId = "c-7";
-        String productId = "p-77";
-        prepareResponse(r -> r
-                .setHeader("Content-Type", "application/json")
-                .setResponseCode(400)
-                .setBody("{}")
-        );
-
-        StepVerifier.create(mockCartServiceClient.addProductToCartFromProducts(cartId, productId))
-                .expectErrorSatisfies(ex ->
-                        org.assertj.core.api.Assertions.assertThat(ex.getMessage())
-                                .contains("Invalid input"))
                 .verify();
     }
 

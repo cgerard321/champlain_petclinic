@@ -461,64 +461,6 @@ public class CartControllerUnitTest {
     }
 
     @Test
-    void testAddProductToCartFromProducts_Success() {
-        when(cartServiceClient.addProductToCartFromProducts("c-1", "p-7"))
-                .thenReturn(Mono.just(new CartResponseDTO()));
-
-        client.post()
-                .uri("/api/v2/gateway/carts/{cartId}/{productId}", "c-1", "p-7")
-                .exchange()
-                .expectStatus().isOk();
-    }
-
-    @Test
-    void testAddProductToCartFromProducts_400_InvalidInput() {
-        when(cartServiceClient.addProductToCartFromProducts("c-1", "p-7"))
-                .thenReturn(Mono.error(new InvalidInputException("bad qty")));
-
-        client.post()
-                .uri("/api/v2/gateway/carts/{cartId}/{productId}", "c-1", "p-7")
-                .exchange()
-                .expectStatus().isBadRequest();
-    }
-
-
-    @Test
-    void testAddProductToCartFromProducts_409_ConflictPropagated() {
-        when(cartServiceClient.addProductToCartFromProducts("c-1", "p-7"))
-                .thenReturn(Mono.error(mockWithStatus(org.springframework.http.HttpStatus.CONFLICT)));
-
-        client.post()
-                .uri("/api/v2/gateway/carts/{cartId}/{productId}", "c-1", "p-7")
-                .exchange()
-                .expectStatus().isEqualTo(409);
-    }
-
-    @Test
-    void testAddProductToCartFromProducts_400_BadRequestFromWebClient() {
-        var ex = Mockito.mock(org.springframework.web.reactive.function.client.WebClientResponseException.BadRequest.class);
-        when(ex.getStatusCode()).thenReturn(org.springframework.http.HttpStatus.BAD_REQUEST);
-
-        when(cartServiceClient.addProductToCartFromProducts("c-1", "p-7"))
-                .thenReturn(Mono.error(ex));
-
-        client.post()
-                .uri("/api/v2/gateway/carts/{cartId}/{productId}", "c-1", "p-7")
-                .exchange()
-                .expectStatus().isBadRequest();
-    }
-
-    @Test
-    void testAddProductToCartFromProducts_5xx_Unexpected() {
-        when(cartServiceClient.addProductToCartFromProducts("c-1", "p-7"))
-                .thenReturn(Mono.error(new RuntimeException("boom")));
-
-        client.post()
-                .uri("/api/v2/gateway/carts/{cartId}/{productId}", "c-1", "p-7")
-                .exchange()
-                .expectStatus().is5xxServerError();
-    }
-    @Test
     void testAddProductToCart_409_ConflictPropagated() {
         when(cartServiceClient.addProductToCart(eq("c-10"), any()))
                 .thenReturn(Mono.error(mockWithStatus(org.springframework.http.HttpStatus.CONFLICT)));

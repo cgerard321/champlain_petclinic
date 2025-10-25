@@ -277,18 +277,18 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
     }
 
     public Mono<CartResponseDTO> addProductToCart(String cartId, CartItemRequestDTO requestDTO) {
-    CartItemRequestDTO payload = requestDTO == null
-        ? new CartItemRequestDTO(null, 1)
-        : new CartItemRequestDTO(requestDTO.getProductId(), requestDTO.resolveQuantity());
+        CartItemRequestDTO payload = requestDTO == null
+            ? new CartItemRequestDTO(null, 1)
+            : new CartItemRequestDTO(requestDTO.getProductId(), requestDTO.resolveQuantity());
 
-    if (payload.getProductId() != null) {
-        payload.setProductId(payload.getProductId().trim());
-    }
+        if (payload.getProductId() != null) {
+            payload.setProductId(payload.getProductId().trim());
+        }
 
-    return webClientBuilder.build()
-        .post()
-        .uri(cartServiceUrl + "/" + cartId + "/products")
-        .bodyValue(payload)
+        return webClientBuilder.build()
+                .post()
+                .uri(cartServiceUrl + "/" + cartId + "/products")
+                .bodyValue(payload)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .onStatus(status -> status.value() == 400, clientResponse -> clientResponse.bodyToMono(CartResponseDTO.class)
@@ -378,24 +378,6 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
                 .bodyToMono(PromoCodeResponseDTO.class);
     }
 
-    public Mono<CartResponseDTO> addProductToCartFromProducts(String cartId, String productId) {
-    return webClientBuilder.build()
-        .post()
-        .uri(cartServiceUrl + "/" + cartId + "/" + productId)
-        .bodyValue(new CartItemRequestDTO(productId, 1))
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> clientResponse.bodyToMono(CartResponseDTO.class)
-                        .flatMap(cartResponseDTO -> {
-                            if (cartResponseDTO.getMessage() != null) {
-                                return Mono.error(new InvalidInputException(cartResponseDTO.getMessage()));
-                            } else {
-                                return Mono.error(new InvalidInputException("Invalid input"));
-                            }
-                        }))
-                .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Server error")))
-                .bodyToMono(CartResponseDTO.class);
-    }
     // move all Wishlist items into cart
     public Mono<CartResponseDTO> moveAllWishlistToCart(String cartId) {
         return webClientBuilder.build()

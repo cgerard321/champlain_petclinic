@@ -129,15 +129,14 @@ const UserCart: React.FC = () => {
     const quantity = Math.max(1, recentPurchaseQuantities[item.productId] || 1);
 
     try {
-      // Concurrently add items to cart
-      const addPromises = Array.from({ length: quantity }, () =>
-        axiosInstance.post(
-          `/carts/${cartId}/${item.productId}`,
-          {},
-          { useV2: false }
-        )
+      await axiosInstance.post(
+        `/carts/${cartId}/products`,
+        {
+          productId: item.productId,
+          quantity,
+        },
+        { useV2: false }
       );
-      await Promise.all(addPromises);
 
       setNotificationMessage(
         `${item.productName} (x${quantity}) added to cart!`
@@ -224,13 +223,14 @@ const UserCart: React.FC = () => {
     );
 
     try {
-      for (let i = 0; i < quantity; i += 1) {
-        await axiosInstance.post(
-          `/carts/${cartId}/${item.productId}`,
-          {},
-          { useV2: false }
-        );
-      }
+      await axiosInstance.post(
+        `/carts/${cartId}/products`,
+        {
+          productId: item.productId,
+          quantity,
+        },
+        { useV2: false }
+      );
       setNotificationMessage(
         `${item.productName} (x${quantity}) added to cart!`
       );

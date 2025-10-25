@@ -1141,7 +1141,9 @@ class CartServiceUnitTest {
 
         when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.empty());
 
-        cartService.addProductToCartFromProducts(cartId, productId)
+        CartItemRequestModel request = new CartItemRequestModel(productId, 1);
+
+        cartService.addProductToCart(cartId, request)
                 .as(StepVerifier::create)
                 .expectErrorMatches(throwable ->
                         throwable instanceof NotFoundException &&
@@ -1153,10 +1155,11 @@ class CartServiceUnitTest {
 
     // positive path
     @Test
-    void addProductToCartFromProducts_addNewProduct() {
+    void addProductToCart_addNewProduct() {
         // Arrange
         String cartId = cart1.getCartId();
         String productId = product3.getProductId();
+        CartItemRequestModel request = new CartItemRequestModel(productId, 1);
 
         when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart1));
         when(productClient.getProductByProductId(productId)).thenReturn(
@@ -1169,7 +1172,7 @@ class CartServiceUnitTest {
         );
         when(cartRepository.save(any(Cart.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
 
-        StepVerifier.create(cartService.addProductToCartFromProducts(cartId, productId))
+        StepVerifier.create(cartService.addProductToCart(cartId, request))
                 .expectNextMatches(res ->
                         res.getProducts().stream()
                                 .anyMatch(p -> p.getProductId().equals(productId) && p.getQuantityInCart() == 1)
@@ -1179,10 +1182,11 @@ class CartServiceUnitTest {
 
     // positive path
     @Test
-    void addProductToCartFromProducts_existingProduct_plusOne() {
+    void addProductToCart_existingProduct_plusOne() {
         // Arrange
         String cartId = cart1.getCartId();
         String productId = product1.getProductId();
+        CartItemRequestModel request = new CartItemRequestModel(productId, 1);
 
         when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart1));
         when(productClient.getProductByProductId(productId)).thenReturn(
@@ -1195,7 +1199,7 @@ class CartServiceUnitTest {
         when(cartRepository.save(any(Cart.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
 
         // Act + Assert
-        StepVerifier.create(cartService.addProductToCartFromProducts(cartId, productId))
+        StepVerifier.create(cartService.addProductToCart(cartId, request))
                 .expectNextMatches(res ->
                         res.getProducts().stream()
                                 .anyMatch(p -> p.getProductId().equals(productId) && p.getQuantityInCart() == 2)
@@ -1205,10 +1209,11 @@ class CartServiceUnitTest {
 
     // positive path
     @Test
-    void addProductToCartFromProducts_outOfStock_goesToWishlist() {
+    void addProductToCart_outOfStock_goesToWishlist() {
         // Arrange
         String cartId = cart1.getCartId();
         String productId = "out-stock-1";
+        CartItemRequestModel request = new CartItemRequestModel(productId, 1);
 
         Cart emptyLists = Cart.builder()
                 .cartId(cartId)
@@ -1229,7 +1234,7 @@ class CartServiceUnitTest {
         when(cartRepository.save(any(Cart.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
 
         // Act + Assert
-        StepVerifier.create(cartService.addProductToCartFromProducts(cartId, productId))
+        StepVerifier.create(cartService.addProductToCart(cartId, request))
                 .expectNextMatches(res ->
                         res.getMessage() != null &&
                                 res.getWishListProducts() != null &&
@@ -1240,10 +1245,11 @@ class CartServiceUnitTest {
 
     // negative path
     @Test
-    void addProductToCartFromProducts_exceedsStock() {
+    void addProductToCart_exceedsStock() {
         // Arrange
         String cartId = "cart-xx";
         String productId = "p-1";
+        CartItemRequestModel request = new CartItemRequestModel(productId, 1);
 
         CartProduct already = CartProduct.builder()
                 .productId(productId).quantityInCart(1).productSalePrice(3.0).build();
@@ -1263,7 +1269,7 @@ class CartServiceUnitTest {
                         .build())
         );
 
-        StepVerifier.create(cartService.addProductToCartFromProducts(cartId, productId))
+        StepVerifier.create(cartService.addProductToCart(cartId, request))
                 .expectError(OutOfStockException.class)
                 .verify();
 

@@ -68,7 +68,7 @@ export default function Product({
   const handleBackToList = (): void => setSelectedProduct(null);
 
   const handleAddToCart = async (): Promise<void> => {
-    const isSuccess = await addToCart(currentProduct.productId);
+    const isSuccess = await addToCart(currentProduct.productId, 1);
     if (isSuccess) {
       setSuccessMessageCart('Product added to cart successfully!');
       setTimeout(() => setSuccessMessageCart(null), 3000);

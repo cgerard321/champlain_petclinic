@@ -10,7 +10,7 @@ import {
 import type { Role } from '@/shared/models/Role';
 
 type UseAddToCartReturnType = {
-  addToCart: (productId: string) => Promise<boolean>;
+  addToCart: (productId: string, quantity?: number) => Promise<boolean>;
 };
 
 type CreateCartResponse = {
@@ -48,9 +48,25 @@ export function useAddToCart(): UseAddToCartReturnType {
     }
   };
 
-  const addToCart = async (productId: string): Promise<boolean> => {
+  const addToCart = async (
+    productId: string,
+    requestedQuantity?: number
+  ): Promise<boolean> => {
     // pas connecté → on ne tente rien
     if (!user?.userId) return false;
+
+    const normalizedProductId = productId?.trim();
+    if (!normalizedProductId) return false;
+
+    const coercedQuantity =
+      typeof requestedQuantity === 'number'
+        ? requestedQuantity
+        : Number.parseInt(String(requestedQuantity ?? ''), 10);
+
+    const quantity =
+      Number.isFinite(coercedQuantity) && coercedQuantity > 0
+        ? Math.floor(coercedQuantity)
+        : 1;
 
     // ---- Rôles utilisateur (simple et lisible) ----
     const roleNames = new Set<string>();
@@ -76,14 +92,17 @@ export function useAddToCart(): UseAddToCartReturnType {
       const cartId = await getOrCreateCartId(user.userId);
 
       await axiosInstance.post(
-        `/carts/${encodeURIComponent(cartId)}/${encodeURIComponent(String(productId))}`,
-        undefined,
+        `/carts/${encodeURIComponent(cartId)}/products`,
+        {
+          productId: normalizedProductId,
+          quantity,
+        },
         { useV2: false }
       );
 
       //keep navbar offline, persist id + bump count locally
       setCartIdInLS(cartId);
-      bumpCartCountInLS(1);
+      bumpCartCountInLS(quantity);
       notifyCartChanged();
 
       return true;

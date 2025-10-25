@@ -652,46 +652,6 @@ public class CartControllerV1UnitTest {
         verify(cartServiceClient, times(1)).removeProductFromWishlist(cartId, productId);
     }
 
-    // Tests for addProductToCartFromProducts endpoint
-    @Test
-    @DisplayName("POST /api/gateway/carts/{cartId}/{productId} - Should add product from products view")
-    void addProductToCartFromProducts_withValidIds_shouldAddProduct() {
-        // Arrange
-        String cartId = "cart-123";
-        String productId = "product-789";
-        CartResponseDTO updatedCart = buildCartResponseDTO();
-        when(cartServiceClient.addProductToCartFromProducts(cartId, productId))
-                .thenReturn(Mono.just(updatedCart));
-
-        // Act & Assert
-        webTestClient.post()
-                .uri(baseCartURL + "/" + cartId + "/" + productId)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(CartResponseDTO.class)
-                .isEqualTo(updatedCart);
-
-        verify(cartServiceClient, times(1)).addProductToCartFromProducts(cartId, productId);
-    }
-
-    @Test
-    @DisplayName("POST /api/gateway/carts/{cartId}/{productId} - Should return 400 for invalid input")
-    void addProductToCartFromProducts_withInvalidInput_shouldReturnBadRequest() {
-        // Arrange
-        String cartId = "cart-123";
-        String productId = "product-789";
-        when(cartServiceClient.addProductToCartFromProducts(cartId, productId))
-                .thenReturn(Mono.error(new InvalidInputException("Product out of stock")));
-
-        // Act & Assert
-        webTestClient.post()
-                .uri(baseCartURL + "/" + cartId + "/" + productId)
-                .exchange()
-                .expectStatus().isBadRequest();
-
-        verify(cartServiceClient, times(1)).addProductToCartFromProducts(cartId, productId);
-    }
-
     // Additional error handling tests
     @Test
     @DisplayName("Should handle WebClientResponseException.BadRequest")

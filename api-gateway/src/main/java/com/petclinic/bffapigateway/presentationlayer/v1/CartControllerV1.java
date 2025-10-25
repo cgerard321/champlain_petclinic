@@ -340,22 +340,6 @@ public class CartControllerV1 {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
-    @PostMapping("/{cartId}/{productId}")
-    public Mono<ResponseEntity<CartResponseDTO>> addProductToCartFromProducts(
-            @PathVariable String cartId,
-            @PathVariable String productId) {
-        return cartServiceClient.addProductToCartFromProducts(cartId, productId)
-                .map(ResponseEntity::ok)
-                .onErrorResume(e -> mapCartErrorWithMessage(e,
-                        ErrorOptions.builder("addProductToCartFromProducts")
-                                .cartId(cartId)
-                                .productId(productId)
-                                .includeBadRequestBodyMessage(true)
-                                .build()
-                ));
-    }
-
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
     @PostMapping("/{cartId}/wishlist/moveAll")
     public Mono<ResponseEntity<CartResponseDTO>> moveAllWishlistToCart(
             @PathVariable String cartId) {
