@@ -38,7 +38,7 @@ class OwnerServiceImplTest {
     private OwnerService ownerService;
 
     private final Owner ownerEntity = buildOwner();
-    private final OwnerRequestDTO ownerRequestDTO = new OwnerRequestDTO();
+    private final OwnerRequestDTO ownerRequestDTO = buildOwnerRequestDTO();
 
     private Owner buildOwner() {
         return Owner.builder()
@@ -49,7 +49,18 @@ class OwnerServiceImplTest {
                 .address("Test address")
                 .city("test city")
                 .province("test province")
-                .telephone("telephone")
+                .telephone("1234567890")
+                .build();
+    }
+
+    private OwnerRequestDTO buildOwnerRequestDTO() {
+        return OwnerRequestDTO.builder()
+                .firstName("FirstName")
+                .lastName("LastName")
+                .address("Test address")
+                .city("test city")
+                .province("test province")
+                .telephone("1234567890")
                 .build();
     }
 
@@ -145,35 +156,21 @@ class OwnerServiceImplTest {
     }
 
     @Test
-    void insertOwner_ShouldSucceed() {
-        Owner ownerEntity = buildOwner();
-        when(repo.insert(any(Owner.class))).thenReturn(Mono.just(ownerEntity));
+    void addOwner_ShouldSucceed() {
+        when(repo.save(any(Owner.class))).thenReturn(Mono.just(ownerEntity));
 
-        Mono<Owner> returnedOwner = ownerService.insertOwner(Mono.just(ownerEntity));
-
-        StepVerifier.create(returnedOwner).consumeNextWith(foundOwner -> {
-                    assertEquals(ownerEntity.getId(), foundOwner.getId());
-                    assertEquals(ownerEntity.getOwnerId(), foundOwner.getOwnerId());
-                })
-                .verifyComplete();
-        verify(repo).insert(any(Owner.class));
-    }
-
-    @Test
-    void newInsertOwner_ShouldSucceed() {
-        Owner ownerEntity = buildOwner();
-        Mono<Owner> ownerMono = Mono.just(ownerEntity);
-        when(repo.insert(any(Owner.class))).thenReturn(ownerMono);
-
-        Mono<Owner> returnedOwner = ownerService.insertOwner(ownerMono);
-
-        StepVerifier.create(returnedOwner)
+        StepVerifier.create(ownerService.addOwner(Mono.just(ownerRequestDTO)))
                 .consumeNextWith(foundOwner -> {
-                    // Check using the business ID (ownerId)
-                    assertEquals(ownerEntity.getOwnerId(), foundOwner.getOwnerId());
+                    assertEquals(ownerRequestDTO.getFirstName(), foundOwner.getFirstName());
+                    assertEquals(ownerRequestDTO.getLastName(), foundOwner.getLastName());
+                    assertEquals(ownerRequestDTO.getCity(), foundOwner.getCity());
+                    assertEquals(ownerRequestDTO.getTelephone(), foundOwner.getTelephone());
+                    assertEquals(ownerRequestDTO.getAddress(), foundOwner.getAddress());
+                    assertEquals(ownerRequestDTO.getProvince(), foundOwner.getProvince());
                 })
                 .verifyComplete();
-        verify(repo).insert(any(Owner.class));
+
+        verify(repo).save(any(Owner.class));
     }
 
     @Test
@@ -234,19 +231,6 @@ class OwnerServiceImplTest {
 
         verify(repo).findOwnerByOwnerId(ownerId);
         verify(repo).save(any(Owner.class));
-    }
-
-    @Test
-    void getOwnerByOwnerId_ShouldThrowNotFoundException() {
-        String OWNER_ID = "Not found";
-        when(repo.findOwnerByOwnerId(OWNER_ID)).thenReturn(Mono.empty());
-
-        Mono<OwnerResponseDTO> ownerResponseDTOMono = ownerService.getOwnerByOwnerId(OWNER_ID);
-        StepVerifier
-                .create(ownerResponseDTOMono)
-                .expectError(NotFoundException.class)
-                .verify();
-        verify(repo).findOwnerByOwnerId(OWNER_ID);
     }
 
     @Test
@@ -455,5 +439,75 @@ class OwnerServiceImplTest {
         verify(filesServiceClient, never()).getFile(anyString());
     }
 
+    @Test
+    void whenDeleteOwnerPhoto_withPhotoId_thenDeleteFile() {
+        String OWNER_ID = "ownerId-123";
+        String PHOTO_ID = "photo-999";
+        Owner existingOwnerWithPhoto = buildOwner();
+        existingOwnerWithPhoto.setOwnerId(OWNER_ID);
+        existingOwnerWithPhoto.setPhotoId(PHOTO_ID);
+
+        Owner savedOwnerWithoutPhoto = buildOwner();
+        savedOwnerWithoutPhoto.setOwnerId(OWNER_ID);
+        savedOwnerWithoutPhoto.setPhotoId(null);
+
+        when(repo.findOwnerByOwnerId(OWNER_ID)).thenReturn(Mono.just(existingOwnerWithPhoto));
+        when(repo.save(argThat(owner -> owner.getPhotoId() == null)))
+                .thenReturn(Mono.just(savedOwnerWithoutPhoto));
+        when(filesServiceClient.deleteFile(PHOTO_ID)).thenReturn(Mono.empty());
+
+        Mono<OwnerResponseDTO> result = ownerService.deleteOwnerPhoto(OWNER_ID);
+
+        StepVerifier.create(result)
+                .consumeNextWith(response -> {
+                    assertEquals(OWNER_ID, response.getOwnerId());
+                    assertNull(response.getPhoto());
+                })
+                .verifyComplete();
+
+        verify(repo).findOwnerByOwnerId(OWNER_ID);
+        verify(repo).save(argThat(owner -> owner.getPhotoId() == null));
+        verify(filesServiceClient).deleteFile(PHOTO_ID);
+    }
+
+    @Test
+    void whenDeleteOwnerPhoto_WhenNoPhotoExists_ShouldSucceed_() {
+        String OWNER_ID = "ownerId-123";
+        Owner existingOwnerWithoutPhoto = buildOwner();
+        existingOwnerWithoutPhoto.setOwnerId(OWNER_ID);
+        existingOwnerWithoutPhoto.setPhotoId(null);
+
+        when(repo.findOwnerByOwnerId(OWNER_ID)).thenReturn(Mono.just(existingOwnerWithoutPhoto));
+
+        Mono<OwnerResponseDTO> result = ownerService.deleteOwnerPhoto(OWNER_ID);
+
+        StepVerifier.create(result)
+                .consumeNextWith(response -> {
+                    assertEquals(OWNER_ID, response.getOwnerId());
+                    assertNull(response.getPhoto());
+                })
+                .verifyComplete();
+
+        verify(repo).findOwnerByOwnerId(OWNER_ID);
+        verify(repo, never()).save(any(Owner.class));
+        verify(filesServiceClient, never()).deleteFile(anyString());
+    }
+
+    @Test
+    void deleteOwnerPhoto_ShouldThrowNotFoundException_WhenOwnerNotFound() {
+        String NON_EXISTENT_ID = "non-existent-id";
+        when(repo.findOwnerByOwnerId(NON_EXISTENT_ID)).thenReturn(Mono.empty());
+
+        Mono<OwnerResponseDTO> result = ownerService.deleteOwnerPhoto(NON_EXISTENT_ID);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
+                        throwable.getMessage().contains("Owner not found"))
+                .verify();
+
+        verify(repo).findOwnerByOwnerId(NON_EXISTENT_ID);
+        verify(repo, never()).save(any(Owner.class));
+        verify(filesServiceClient, never()).deleteFile(anyString());
+    }
 
 }

@@ -3,11 +3,8 @@ package com.petclinic.visits.visitsservicenew.BusinessLayer;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.web.bind.annotation.RequestParam;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.io.ByteArrayInputStream;
 
 /**
  * Simple interface for all the request controller. Implemented in VisitServiceImpl
@@ -22,7 +19,7 @@ public interface VisitService {
     Flux<VisitResponseDTO> getVisitsForPractitioner(String vetId);
 
     //Flux<VisitResponseDTO> getVisitsByPractitionerIdAndMonth(int practitionerId, int month);
-    Mono<VisitResponseDTO> getVisitByVisitId(String visitId);
+    Mono<VisitResponseDTO> getVisitByVisitId(String visitId, boolean includePrescription);
 
     Mono<VisitResponseDTO> addVisit(Mono<VisitRequestDTO> visitRequestDTOMono);
 

@@ -92,10 +92,10 @@ public class DataSetupService implements CommandLineRunner {
             return;
         }
 
-        Specialty s1 = new Specialty("100001", "radiology");
-        Specialty s2 = new Specialty("100002", "surgery");
-        Specialty s3 = new Specialty("100003", "dentistry");
-        Specialty s4 = new Specialty("100004", "general");
+        Specialty s1 = new Specialty(EntityDtoUtil.generateSpecialtyId(), "radiology");
+        Specialty s2 = new Specialty(EntityDtoUtil.generateSpecialtyId(), "surgery");
+        Specialty s3 = new Specialty(EntityDtoUtil.generateSpecialtyId(), "dentistry");
+        Specialty s4 = new Specialty(EntityDtoUtil.generateSpecialtyId(), "general");
 
         Set<Workday> workdays1 = EnumSet.of(Workday.Monday, Workday.Tuesday, Workday.Friday);
         Set<Workday> workdays2 = EnumSet.of(Workday.Wednesday, Workday.Thursday);

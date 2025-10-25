@@ -9,7 +9,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.service.annotation.PutExchange;
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -404,4 +407,23 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<List<CartProductResponseDTO>>() {});
     }
+    public Mono<CartResponseDTO> applyPromoToCart(String cartId, Double promoPercent) {
+        return webClientBuilder.build()
+                .put()
+                .uri(cartServiceUrl + "/{cartId}/promo?promoPercent={promoPercent}", cartId, promoPercent)
+                .retrieve()
+                .bodyToMono(CartResponseDTO.class);
+    }
+
+    public Mono<CartResponseDTO> clearPromo(String cartId) {
+        return webClientBuilder.build()
+                .put()
+                .uri(uriBuilder -> uriBuilder
+                        .path(cartServiceUrl + "/{cartId}/promo")
+                        .queryParam("promoPercent", 0)
+                        .build(cartId))
+                .retrieve()
+                .bodyToMono(CartResponseDTO.class);
+    }
+
 }

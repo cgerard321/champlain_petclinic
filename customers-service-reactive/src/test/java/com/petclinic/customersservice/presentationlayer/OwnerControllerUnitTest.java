@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.doReturn;
@@ -28,7 +29,7 @@ public class OwnerControllerUnitTest {
     @InjectMocks
     private OwnerController ownerController;
 
-    private final String TEST_OWNER_ID = "ownerId-123";
+    private final String TEST_OWNER_ID = "f9b46d32-0951-420b-afe6-22a738d97d9b";
     private Owner mockOwner;
 
     @BeforeEach
@@ -38,7 +39,7 @@ public class OwnerControllerUnitTest {
         mockOwner = new Owner();
         mockOwner.setOwnerId(TEST_OWNER_ID);
         mockOwner.setFirstName("John");
-        mockOwner.setPhotoId("photo-123");
+        mockOwner.setPhotoId("11aef324-15b4-409d-8078-86d22e38cde4");
     }
 
     @Test
@@ -147,6 +148,44 @@ public class OwnerControllerUnitTest {
             })
             .verifyComplete();
         verify(ownerService, times(1)).updateOwnerPhoto(org.mockito.ArgumentMatchers.eq(TEST_OWNER_ID), org.mockito.ArgumentMatchers.any(com.petclinic.customersservice.domainclientlayer.FileRequestDTO.class));
+    }
+
+    @Test
+    void whenDeleteOwnerPhoto_thenReturnOk() {
+        OwnerResponseDTO mockResponse = new OwnerResponseDTO();
+        mockResponse.setOwnerId(TEST_OWNER_ID);
+        mockResponse.setFirstName("John");
+
+        doReturn(Mono.just(mockResponse)).when(ownerService).deleteOwnerPhoto(TEST_OWNER_ID);
+
+        Mono<ResponseEntity<OwnerResponseDTO>> result = ownerController.deleteOwnerPhoto(TEST_OWNER_ID);
+
+        StepVerifier.create(result)
+                .consumeNextWith(response -> {
+                    assertEquals(HttpStatus.OK, response.getStatusCode());
+                    assertNotNull(response.getBody());
+                    assertEquals(TEST_OWNER_ID, response.getBody().getOwnerId());
+                    // Verify the photo is gone
+                    assertNull(response.getBody().getPhoto());
+                })
+                .verifyComplete();
+
+        verify(ownerService, times(1)).deleteOwnerPhoto(TEST_OWNER_ID);
+    }
+
+    @Test
+    void whenDeleteOwnerPhoto_ShouldReturnNotFound_ifOwnerNotFound() {
+        doReturn(Mono.empty()).when(ownerService).deleteOwnerPhoto(TEST_OWNER_ID);
+
+        Mono<ResponseEntity<OwnerResponseDTO>> result = ownerController.deleteOwnerPhoto(TEST_OWNER_ID);
+
+        StepVerifier.create(result)
+                .consumeNextWith(response -> {
+                    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+                })
+                .verifyComplete();
+
+        verify(ownerService, times(1)).deleteOwnerPhoto(TEST_OWNER_ID);
     }
 }
 

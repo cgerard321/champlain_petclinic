@@ -9,15 +9,6 @@ angular.module('inventoriesList', ['ui.router'])
                 template: '<inventories-list></inventories-list>'
             })
 
-
-            //delete all inventory
-            .state('deleteAllInventories', {
-                parent: 'app',
-                url: '/inventories',
-                template: '<inventory-delete-confirm></inventory-delete-confirm>'
-
-            })
-
             .state('deleteInventory', {
                 parent: 'app',
                 url: '/inventories/:inventoryId',

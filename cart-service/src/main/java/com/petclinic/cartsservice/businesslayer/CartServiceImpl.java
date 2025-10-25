@@ -9,8 +9,11 @@ import com.petclinic.cartsservice.utils.EntityModelUtil;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
 import com.petclinic.cartsservice.utils.exceptions.OutOfStockException;
+import com.petclinic.cartsservice.domainclientlayer.CustomerClient;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.util.ArrayList;
@@ -28,17 +31,25 @@ import java.util.UUID;
 public class CartServiceImpl implements CartService {
     private final CartRepository cartRepository;
     private final ProductClient productClient;
+    private final CustomerClient customerClient;
 
-    public CartServiceImpl(CartRepository cartRepository, ProductClient productClient) {
+
+    public CartServiceImpl(CartRepository cartRepository, ProductClient productClient, CustomerClient customerClient ) {
         this.cartRepository = cartRepository;
         this.productClient = productClient;
+        this.customerClient = customerClient;
     }
     @Override
     public Flux<CartResponseModel> getAllCarts() {
         return cartRepository.findAll()
-                .map(cart -> {
-                    List<CartProduct> products = cart.getProducts();
-                    return EntityModelUtil.toCartResponseModel(cart, products);
+                .flatMap(cart -> {
+                    String cid = cart.getCustomerId();
+                    if (cid == null || cid.isBlank()) {
+                        return Mono.just(EntityModelUtil.toCartResponseModel(cart, cart.getProducts()));
+                    }
+                    return customerClient.getCustomerById(cid)
+                            .map(c -> EntityModelUtil.toCartResponseModel(cart, cart.getProducts(), c.getFullName()))
+                            .onErrorResume(e -> Mono.just(EntityModelUtil.toCartResponseModel(cart, cart.getProducts())));
                 });
     }
 
@@ -46,13 +57,16 @@ public class CartServiceImpl implements CartService {
     public Mono<CartResponseModel> getCartByCartId(String cartId) {
         return cartRepository.findCartByCartId(cartId)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Cart id was not found: " + cartId))))
-                .doOnNext(e -> log.debug("The cart response entity is: " + e.toString()))
                 .flatMap(cart -> {
-                    List<CartProduct> products = cart.getProducts();
-                    return Mono.just(EntityModelUtil.toCartResponseModel(cart, products));
+                    String cid = cart.getCustomerId();
+                    if (cid == null || cid.isBlank()) {
+                        return Mono.just(EntityModelUtil.toCartResponseModel(cart, cart.getProducts()));
+                    }
+                    return customerClient.getCustomerById(cid)
+                            .map(c -> EntityModelUtil.toCartResponseModel(cart, cart.getProducts(), c.getFullName()))
+                            .onErrorResume(e -> Mono.just(EntityModelUtil.toCartResponseModel(cart, cart.getProducts())));
                 });
     }
-
 
     public Flux<CartResponseModel> clearCart(String cartId) {
         return cartRepository.findCartByCartId(cartId)
@@ -141,9 +155,6 @@ public class CartServiceImpl implements CartService {
                     String invoiceId = UUID.randomUUID().toString();
                     List<CartProduct> products = cart.getProducts();
                     double total = calculateTotal(products);
-
-                    // Log the invoice data (optional)
-                    log.info("Generated Invoice: ID: {}, Cart ID: {}, Total: {}", invoiceId, cartId, total);
 
                     // --- Recent Purchases Logic ---
                     List<CartProduct> updatedRecentPurchases = cart.getRecentPurchases() != null
@@ -390,7 +401,6 @@ public class CartServiceImpl implements CartService {
         }
         return cartRepository.findCartByCustomerId(customerId)
                 .switchIfEmpty(Mono.defer(() -> createNewCartForCustomer(customerId)))
-                .doOnNext(cart -> log.debug("The cart for customer id {} is: {}", customerId, cart.toString()))
                 .flatMap(cart -> {
                     List<CartProduct> products = cart.getProducts();
                     return Mono.just(EntityModelUtil.toCartResponseModel(cart, products));
@@ -683,4 +693,23 @@ public class CartServiceImpl implements CartService {
         return cartRepository.findCartByCartId(cartId)
                 .map(cart -> cart.getRecommendationPurchase() != null ? cart.getRecommendationPurchase() : List.of());
     }
+
+    @Override
+    public Mono<CartResponseModel> applyPromoToCart(String cartId, Double promoPercent) {
+        return cartRepository.findCartByCartId(cartId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
+                .flatMap(cart -> {
+                    if (promoPercent == null || promoPercent <= 0) {
+                        cart.setPromoPercent(null);
+                        return cartRepository.save(cart);
+                    }
+                    if (promoPercent > 100) {
+                        return Mono.error(new InvalidInputException("promoPercent must be 1..100"));
+                    }
+                    cart.setPromoPercent(promoPercent);
+                    return cartRepository.save(cart);
+                })
+                .map(saved -> EntityModelUtil.toCartResponseModel(saved, saved.getProducts()));
+    }
+
 }

@@ -9,6 +9,7 @@ import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.datalayer.ratings.RatingRepository;
 import com.petclinic.products.presentationlayer.products.ProductRequestModel;
 import com.petclinic.products.presentationlayer.products.ProductResponseModel;
+import com.petclinic.products.presentationlayer.products.ProductEnumsResponseModel;
 import com.petclinic.products.utils.EntityModelUtil;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
 import lombok.extern.slf4j.Slf4j;
@@ -279,6 +280,17 @@ public class ProductServiceImpl implements ProductService {
                     return productRepository.save(existingProduct);
                 })
                 .then();
+    }
+
+    @Override
+    public Mono<ProductEnumsResponseModel> getProductsEnumValues(){
+        ProductEnumsResponseModel response = ProductEnumsResponseModel.builder()
+                .productStatus(Arrays.asList(ProductStatus.values()))
+                .productType(Arrays.asList(ProductType.values()))
+                .deliveryType(Arrays.asList(DeliveryType.values()))
+                .build();
+
+        return Mono.just(response);
     }
 
 

@@ -1,27 +1,32 @@
 package com.petclinic.customersservice.presentationlayer;
 
 import com.petclinic.customersservice.business.PetService;
-import com.petclinic.customersservice.data.Pet;
-import com.petclinic.customersservice.util.EntityDTOUtil;
+import com.petclinic.customersservice.customersExceptions.ApplicationExceptions;
+import com.petclinic.customersservice.util.Validator;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @RestController
-@RequestMapping("/pet")
+@RequestMapping("/pets")
 public class PetController {
 
     @Autowired
     private PetService petService;
 
     @GetMapping("/{petId}")
-    public Mono<PetResponseDTO> getPetDTOByPetId(@PathVariable String petId) {
-        return petService.getPetById(petId)
-                .map(EntityDTOUtil::toPetResponseDTO);
+    public Mono<ResponseEntity<PetResponseDTO>> getPetDTOByPetId(@PathVariable String petId, @RequestParam(required = false, defaultValue = "false") boolean includePhoto) {
+        return Mono.just(petId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(ApplicationExceptions.invalidPetId(petId))
+                .flatMap(id -> petService.getPetById(id, includePhoto))
+                .map(ResponseEntity::ok)
+                .switchIfEmpty(ApplicationExceptions.petNotFound(petId));
     }
 
     @GetMapping("/owner/{ownerId}/pets")
@@ -30,52 +35,67 @@ public class PetController {
     }
 
     @DeleteMapping("/{petId}")
-    public Mono<Void> deletePetByPetId(@PathVariable String petId) {
-        return petService.deletePetByPetId(petId);
-    }
-
-    @DeleteMapping("/{petId}/v2")
-    public Mono<PetResponseDTO> deletePetByPetIdV2(@PathVariable String petId) {
-        return petService.deletePetByPetIdV2(petId);
+    public Mono<ResponseEntity<Void>> deletePetByPetId(@PathVariable String petId) {
+        return Mono.just(petId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(ApplicationExceptions.invalidPetId(petId))
+                .flatMap(id -> petService.deletePetByPetId(id).thenReturn(ResponseEntity.noContent().<Void>build()))
+                .switchIfEmpty(ApplicationExceptions.petNotFound(petId));
     }
 
     @PostMapping
-    public Mono<PetResponseDTO> insertPet(@RequestBody Mono<Pet> petMono) {
-        return petService.insertPet(petMono).map(EntityDTOUtil::toPetResponseDTO);
+    public Mono<ResponseEntity<PetResponseDTO>> addPet(@RequestBody Mono<PetRequestDTO> petMono) {
+        return petMono
+                .transform(Validator.validatePet())
+                .as(petService::addPet)
+                .map(petResponseDTO -> ResponseEntity.status(HttpStatus.CREATED).body(petResponseDTO));
+    }
+
+
+    //this endpoint could probably be removed
+    @DeleteMapping("/{petId}/v2")
+    public Mono<ResponseEntity<PetResponseDTO>> deletePetByPetIdV2(@PathVariable String petId) {
+        return Mono.just(petId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(ApplicationExceptions.invalidPetId(petId))
+                .flatMap(id -> petService.deletePetByPetIdV2(id))
+                .map(ResponseEntity::ok)
+                .switchIfEmpty(ApplicationExceptions.petNotFound(petId));
     }
 
     @PutMapping("/{petId}")
-    public Mono<ResponseEntity<Pet>> updatePetByPetId(@PathVariable String petId, @RequestBody Mono<Pet> petMono) {
-        return petService.updatePetByPetId(petId, petMono)
+    public Mono<ResponseEntity<PetResponseDTO>> updatePetByPetId(@PathVariable String petId, @RequestBody Mono<PetRequestDTO> petMono) {
+        return Mono.just(petId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(ApplicationExceptions.invalidPetId(petId))
+                .thenReturn(petMono.transform(Validator.validatePet()))
+                .flatMap(request -> petService.updatePetByPetId(petId, request))
                 .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+                .switchIfEmpty(ApplicationExceptions.petNotFound(petId));
     }
 
-    @PatchMapping("/{petId}")
-    public Mono<ResponseEntity<PetResponseDTO>> updatePetIsActive(@PathVariable String petId, @RequestBody PetRequestDTO petRequestDTO) {
-        try {
-            return petService.updatePetIsActive(petId, petRequestDTO.getIsActive())
-                    .map(EntityDTOUtil::toPetResponseDTO)
-                    .map(ResponseEntity::ok)
-                    .defaultIfEmpty(ResponseEntity.notFound().build());
-        } catch (Exception ex) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "Error updating pet status", ex);
-        }
+    @PatchMapping("/{petId}/active")
+    public Mono<ResponseEntity<PetResponseDTO>> updatePetIsActive(@PathVariable String petId, @RequestParam String isActive) {
+        log.info("endpoint reached");
+
+        return Mono.just(petId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(ApplicationExceptions.invalidPetId(petId))
+                .flatMap(id ->  petService.updatePetIsActive(id, isActive))
+                .map(ResponseEntity::ok)
+                .switchIfEmpty(ApplicationExceptions.petNotFound(petId));
     }
 
     @GetMapping()
     public Flux<PetResponseDTO> getAllPets() {
-        return petService.getAllPets().map(EntityDTOUtil::toPetResponseDTO);
+        return petService.getAllPets();
     }
 
+    //This endpoint can also probably be removed, the petRequestDTO already takes an ownerId
     @PostMapping("/owners/{ownerId}/pets")
-    public Mono<ResponseEntity<PetResponseDTO>> createPetForOwner(
-            @PathVariable String ownerId,
-            @RequestBody PetRequestDTO petRequest) {
+    public Mono<ResponseEntity<PetResponseDTO>> createPetForOwner(@PathVariable String ownerId, @RequestBody PetRequestDTO petRequest) {
         return petService.createPetForOwner(ownerId, Mono.just(petRequest))
                 .map(pet -> ResponseEntity.status(HttpStatus.CREATED).body(pet))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
-
 }

@@ -1,15 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 // import axios from 'axios'; wrong axios
 import { ProductModel } from './models/ProductModels/ProductModel';
 import './InventoriesListTable.module.css';
 import './InventoryProducts.css';
 import useSearchProducts from '@/features/inventories/hooks/useSearchProducts.ts';
-import deleteAllProductsFromInventory from './api/deleteAllProductsFromInventory';
 import createPdf from './api/createPdf';
 import ConfirmationModal from '@/features/inventories/ConfirmationModal.tsx';
 import { Status } from '@/features/inventories/models/ProductModels/Status.ts';
 import axiosInstance from '@/shared/api/axiosInstance';
+import AddSupplyToInventory from '@/features/inventories/AddSupplyToInventory';
+import EditInventoryProducts from '@/features/inventories/EditInventoryProducts';
+import MoveInventoryProducts from '@/features/inventories/MoveInventoryProducts';
 
 const MAX_QTY = 100;
 
@@ -67,6 +69,11 @@ const InventoryProducts: React.FC = () => {
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editProductId, setEditProductId] = useState<string | null>(null);
+  const [moveOpen, setMoveOpen] = useState(false);
+  const [moveProductId, setMoveProductId] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const handleCreatePdf = async (): Promise<void> => {
@@ -135,34 +142,32 @@ const InventoryProducts: React.FC = () => {
     }
   }, []);
 
-  useEffect(() => {
-    const fetchProducts = async (): Promise<void> => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await axiosInstance.get<ProductModel[]>(
-          `/inventories/${inventoryId}/products/search`,
-          { useV2: false }
+  const loadProducts = useCallback(async (): Promise<void> => {
+    if (!inventoryId) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await axiosInstance.get<ProductModel[]>(
+        `/inventories/${inventoryId}/products/search`,
+        { useV2: false }
+      );
+      const data = Array.isArray(res.data) ? res.data : [];
+      data.forEach(p => {
+        p.productMargin = parseFloat(
+          (p.productSalePrice - p.productPrice).toFixed(2)
         );
-        const data = Array.isArray(response.data) ? response.data : [];
-        // Calculate profit margin for each product
-        data.forEach(product => {
-          product.productMargin = parseFloat(
-            (product.productSalePrice - product.productPrice).toFixed(2)
-          );
-        });
-        setProducts(data);
-        setProductList(data);
-        setFilteredProducts(data);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (inventoryId) {
-      fetchProducts().catch(err => console.error(err));
+      });
+      setProducts(data);
+      setProductList(data);
+      setFilteredProducts(data);
+    } finally {
+      setLoading(false);
     }
   }, [inventoryId, setProductList]);
+
+  useEffect(() => {
+    void loadProducts();
+  }, [loadProducts]);
 
   const deleteProduct = async (): Promise<void> => {
     if (productToDelete) {
@@ -182,17 +187,6 @@ const InventoryProducts: React.FC = () => {
         setShowConfirmation(false);
         setProductToDelete(null);
       }
-    }
-  };
-
-  const handleDeleteAllProducts = async (): Promise<void> => {
-    try {
-      await deleteAllProductsFromInventory({ inventoryId: inventoryId! });
-      setProducts([]);
-      setFilteredProducts([]);
-      alert('All products deleted successfully.');
-    } catch (err) {
-      setError('Failed to delete all products.');
     }
   };
 
@@ -457,7 +451,8 @@ const InventoryProducts: React.FC = () => {
                     <button
                       onClick={e => {
                         e.stopPropagation();
-                        navigate(`${product.productId}/edit`);
+                        setEditProductId(product.productId);
+                        setEditOpen(true);
                       }}
                       className="btn btn-warning btn-sm"
                     >
@@ -505,7 +500,8 @@ const InventoryProducts: React.FC = () => {
                     <button
                       onClick={e => {
                         e.stopPropagation();
-                        navigate(`${product.productId}`);
+                        setMoveProductId(product.productId);
+                        setMoveOpen(true);
                       }}
                       className="btn btn-info btn-sm"
                     >
@@ -524,14 +520,8 @@ const InventoryProducts: React.FC = () => {
           )}
         </tbody>
       </table>
-      <button
-        className="btn btn-add"
-        onClick={() => navigate(`/inventories/${inventoryId}/products/add`)}
-      >
+      <button className="btn btn-add" onClick={() => setAddOpen(true)}>
         Add
-      </button>
-      <button className="btn btn-danger" onClick={handleDeleteAllProducts}>
-        Delete All Products
       </button>
       <ConfirmationModal
         show={showConfirmation}
@@ -539,6 +529,54 @@ const InventoryProducts: React.FC = () => {
         onConfirm={deleteProduct}
         onCancel={cancelDelete}
       />
+      {addOpen && (
+        <AddSupplyToInventory
+          open={addOpen}
+          onClose={() => setAddOpen(false)}
+          inventoryIdProp={inventoryId}
+          existingProductNames={products.map(p => p.productName)}
+          onAdded={() => {
+            setAddOpen(false);
+            void loadProducts(); // refresh table after add
+          }}
+        />
+      )}
+
+      {editOpen && (
+        <EditInventoryProducts
+          open={editOpen}
+          onClose={() => {
+            setEditOpen(false);
+            setEditProductId(null);
+          }}
+          inventoryIdProp={inventoryId}
+          productIdProp={editProductId ?? undefined}
+          existingProductNames={products
+            .filter(p => p.productId !== editProductId)
+            .map(p => p.productName)}
+          onUpdated={() => {
+            setEditOpen(false);
+            setEditProductId(null);
+            void loadProducts(); // refresh table after update
+          }}
+        />
+      )}
+      {moveOpen && moveProductId && (
+        <MoveInventoryProducts
+          open={moveOpen}
+          onClose={() => {
+            setMoveOpen(false);
+            setMoveProductId(null);
+          }}
+          inventoryIdProp={inventoryId!}
+          productIdProp={moveProductId}
+          onMoved={() => {
+            setMoveOpen(false);
+            setMoveProductId(null);
+            void loadProducts();
+          }}
+        />
+      )}
     </div>
   );
 };

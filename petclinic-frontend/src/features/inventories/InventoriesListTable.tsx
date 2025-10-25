@@ -4,7 +4,6 @@ import { Inventory } from '@/features/inventories/models/Inventory.ts';
 import { InventoryType } from '@/features/inventories/models/InventoryType.ts';
 import useSearchInventories from '@/features/inventories/hooks/useSearchInventories.ts';
 import { getAllInventoryTypes } from '@/features/inventories/api/getAllInventoryTypes.ts';
-import deleteAllInventories from '@/features/inventories/api/deleteAllInventories.ts';
 import deleteInventory from '@/features/inventories/api/deleteInventory.ts';
 import AddInventory from '@/features/inventories/AddInventoryForm.tsx';
 import AddInventoryType from '@/features/inventories/AddInventoryType.tsx';
@@ -14,6 +13,7 @@ import cardStylesInventory from './CardInventoryTeam.module.css';
 // import axios from 'axios';
 import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { toggleInventoryImportant } from './api/toggleInventoryImportant';
+import EditInventory from './EditInventory';
 
 export default function InventoriesListTable(): JSX.Element {
   const isHttpUrl = (url: string): boolean => {
@@ -33,6 +33,8 @@ export default function InventoriesListTable(): JSX.Element {
   const [inventoryTypeList, setInventoryTypeList] = useState<InventoryType[]>(
     []
   );
+  const [editOpen, setEditOpen] = useState(false);
+  const [editInventoryId, setEditInventoryId] = useState<string | null>(null);
   const [inventoryDescription, setInventoryDescription] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showAddInventoryForm, setShowAddInventoryForm] = useState(false);
@@ -213,20 +215,6 @@ export default function InventoriesListTable(): JSX.Element {
       const msg =
         error instanceof Error ? error.message : 'Failed to delete inventory.';
       alert(msg);
-    }
-  };
-
-  const handleDeleteAllInventories = (confirm: boolean): void => {
-    if (confirm) {
-      setInventoryList([]);
-      deleteAllInventories();
-      setShowConfirmDialog(false);
-    } else {
-      if (showConfirmDialog) {
-        setShowConfirmDialog(false);
-        return;
-      }
-      setShowConfirmDialog(true);
     }
   };
 
@@ -753,9 +741,8 @@ export default function InventoriesListTable(): JSX.Element {
                             );
                             return;
                           }
-                          navigate(
-                            `/inventories/${inventory.inventoryId}/edit`
-                          );
+                          setEditInventoryId(inventory.inventoryId);
+                          setEditOpen(true);
                         }}
                         className="btn btn-warning"
                         disabled={isArchived}
@@ -858,6 +845,7 @@ export default function InventoriesListTable(): JSX.Element {
             showAddInventoryForm={showAddInventoryForm}
             handleInventoryClose={() => setShowAddInventoryForm(false)}
             refreshInventoryTypes={refreshInventoryTypes}
+            existingInventoryNames={inventoryList.map(i => i.inventoryName)}
           />
         )}
 
@@ -866,6 +854,7 @@ export default function InventoriesListTable(): JSX.Element {
             show={showAddTypeForm}
             handleClose={() => setShowAddTypeForm(false)}
             refreshInventoryTypes={refreshInventoryTypes}
+            existingTypeNames={inventoryTypeList.map(t => t.type)}
           />
         )}
 
@@ -875,22 +864,25 @@ export default function InventoriesListTable(): JSX.Element {
               className={inventoryStyles.overlay}
               onClick={() => setShowConfirmDialog(false)}
             ></div>
-            <div className={inventoryStyles.confirmDialog}>
-              <p>Are you sure you want to delete all inventories?</p>
-              <button
-                className={'btn-danger mx-1'}
-                onClick={() => handleDeleteAllInventories(true)}
-              >
-                Yes
-              </button>
-              <button
-                className={'btn-warning mx-1'}
-                onClick={() => setShowConfirmDialog(false)}
-              >
-                No
-              </button>
-            </div>
           </>
+        )}
+
+        {editOpen && editInventoryId && (
+          <EditInventory
+            open={editOpen}
+            inventoryIdProp={editInventoryId}
+            existingInventoryNames={inventoryList.map(i => i.inventoryName)}
+            onClose={() => {
+              setEditOpen(false);
+              setEditInventoryId(null);
+              getInventoryList(
+                inventoryName,
+                inventoryType,
+                inventoryDescription,
+                showImportantOnly
+              );
+            }}
+          />
         )}
       </div>
     </>

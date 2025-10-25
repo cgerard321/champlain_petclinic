@@ -22,7 +22,8 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-
+import reactor.test.StepVerifierOptions;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -160,10 +161,10 @@ class CartControllerUnitTest {
         webTestClient
                 .get()
                 .uri("/api/v1/carts")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON_VALUE)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(CartResponseModel.class)
                 .value(result -> {
                     assertEquals(2, result.size());
@@ -174,6 +175,51 @@ class CartControllerUnitTest {
                     assertEquals(cartResponseModel2.getCustomerId(), result.get(1).getCustomerId());
                     assertEquals(cartResponseModel2.getProducts(), result.get(1).getProducts());
                 });
+    }
+
+    @Test
+    void whenGetAllCarts_streamsAndSupportsBackpressure() {
+        // Arrange: create a Flux that emits 3 items with some delay
+        CartResponseModel cart1 = CartResponseModel.builder()
+                .cartId("stream-cart-1")
+                .customerId("c1")
+                .products(new ArrayList<>())
+                .build();
+
+        CartResponseModel cart2 = CartResponseModel.builder()
+                .cartId("stream-cart-2")
+                .customerId("c2")
+                .products(new ArrayList<>())
+                .build();
+
+        CartResponseModel cart3 = CartResponseModel.builder()
+                .cartId("stream-cart-3")
+                .customerId("c3")
+                .products(new ArrayList<>())
+                .build();
+
+        List<CartResponseModel> items = List.of(cart1, cart2, cart3);
+        Flux<CartResponseModel> delayed = Flux.fromIterable(items).delayElements(Duration.ofMillis(50));
+
+        when(cartService.getAllCarts()).thenReturn(delayed);
+
+        // Act: request the endpoint and capture responseBody Flux
+        Flux<CartResponseModel> responseFlux = webTestClient.get()
+                .uri("/api/v1/carts")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .returnResult(CartResponseModel.class)
+                .getResponseBody();
+
+        // Assert: verify backpressure - subscribe without initial request, then request 1, then 2 more.
+        StepVerifier.create(responseFlux, StepVerifierOptions.create().initialRequest(0))
+                .thenRequest(1)
+                .expectNextMatches(r -> r.getCartId().equals(items.get(0).getCartId()))
+                .thenRequest(2)
+                .expectNextCount(2)
+                .thenCancel()
+                .verify();
     }
 
     @Test

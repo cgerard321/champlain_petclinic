@@ -609,7 +609,39 @@ class ProductsServiceClientIntegrationTest {
                 .verifyComplete();
     }
 
+    @Test
+    void whenGetProductEnums_ThenReturnEnumsValues() throws JsonProcessingException{
+        ProductEnumsResponseDTO responseDTO = new ProductEnumsResponseDTO(
+                List.of(ProductType.FOOD, ProductType.MEDICATION, ProductType.ACCESSORY, ProductType.EQUIPMENT),
+                List.of(ProductStatus.AVAILABLE, ProductStatus.PRE_ORDER, ProductStatus.OUT_OF_STOCK),
+                List.of(DeliveryType.DELIVERY, DeliveryType.PICKUP, DeliveryType.DELIVERY_AND_PICKUP, DeliveryType.NO_DELIVERY_OPTION)
+        );
 
+        mockWebServer.enqueue(new MockResponse()
+                .setBody(objectMapper.writeValueAsString(responseDTO))
+                .addHeader("Content-Type", "application/json")
+        );
+
+        Mono<ProductEnumsResponseDTO> enumsMono = productsServiceClient.getProductEnumsValues();
+
+        StepVerifier.create(enumsMono)
+            .expectNextMatches(enums ->
+                enums.getProductType().equals(List.of(
+                    ProductType.FOOD,
+                    ProductType.MEDICATION,
+                    ProductType.ACCESSORY,
+                    ProductType.EQUIPMENT)) &&
+                enums.getProductStatus().equals(List.of(
+                    ProductStatus.AVAILABLE,
+                    ProductStatus.PRE_ORDER,
+                    ProductStatus.OUT_OF_STOCK)) &&
+                enums.getDeliveryType().equals(List.of(
+                    DeliveryType.DELIVERY,
+                    DeliveryType.PICKUP, DeliveryType.DELIVERY_AND_PICKUP,
+                    DeliveryType.NO_DELIVERY_OPTION))
+    )
+    .verifyComplete();
+    }
 
 
 }
