@@ -1,5 +1,8 @@
 use crate::core::error::AppResult;
-use crate::minio_service::store::MinioStore;
+use crate::minio::file::FileInfo;
+use crate::minio::service;
+use crate::minio::store::MinioStore;
+use crate::users::user::AuthenticatedUser;
 use rocket::http::Status;
 use rocket::response::status::Custom;
 use rocket::serde::json::Json;
@@ -10,10 +13,9 @@ use std::path::PathBuf;
 pub(crate) async fn read_files(
     bucket: &str,
     store: &State<MinioStore>,
-) -> AppResult<Json<Vec<crate::minio_service::file::FileInfo>>> {
-    Ok(Json(
-        crate::minio_service::service::fetch_files(bucket, store).await?,
-    ))
+    _user: AuthenticatedUser,
+) -> AppResult<Json<Vec<FileInfo>>> {
+    Ok(Json(service::fetch_files(bucket, store).await?))
 }
 
 #[post("/buckets/<bucket>/files/<prefix..>", data = "<data>")]
@@ -22,8 +24,9 @@ pub(crate) async fn add_file(
     prefix: PathBuf,
     data: Data<'_>,
     store: &State<MinioStore>,
-) -> AppResult<Custom<Json<crate::minio_service::file::FileInfo>>> {
-    let file_info = crate::minio_service::service::upload_file(bucket, prefix, data, store).await?;
+    _user: AuthenticatedUser,
+) -> AppResult<Custom<Json<FileInfo>>> {
+    let file_info = service::upload_file(bucket, prefix, data, store).await?;
 
     Ok(Custom(Status::Created, Json(file_info)))
 }

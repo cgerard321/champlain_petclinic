@@ -19,6 +19,7 @@ fn unprocessable(req: &Request<'_>) -> AppError {
 fn default_catcher(status: Status, _req: &Request<'_>) -> AppError {
     match StatusCode::from_u16(status.code).unwrap() {
         StatusCode::BAD_REQUEST => AppError::BadRequest("Bad request".into()),
+        StatusCode::UNAUTHORIZED => AppError::Unauthorized,       
         StatusCode::FORBIDDEN => AppError::Forbidden,
         StatusCode::NOT_FOUND => AppError::NotFound("Resource not found".into()),
         StatusCode::UNPROCESSABLE_ENTITY => {
