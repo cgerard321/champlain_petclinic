@@ -451,7 +451,7 @@ export default function InventoriesListTable(): JSX.Element {
                 className={`add-inventory-button btn btn-success ${inventoryStyles.btnSm}`}
                 onClick={() => setShowAddInventoryForm(true)}
               >
-                +
+                Add Inventory
               </button>
 
               {/* Add Inventory Type */}
