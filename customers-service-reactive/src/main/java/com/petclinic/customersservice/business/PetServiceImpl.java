@@ -26,14 +26,16 @@ public class PetServiceImpl implements PetService {
     FilesServiceClient filesServiceClient;
 
     @Override
-    public Mono<Pet> insertPet(Mono<Pet> petMono) {
-        return petMono
-                .flatMap(petRepo::insert);
+    public Flux<PetResponseDTO> getAllPets() {
+        return petRepo.findAll().map(EntityDTOUtil::toPetResponseDTO);
     }
 
     @Override
-    public Flux<Pet> getAllPets() {
-        return petRepo.findAll();
+    public Mono<PetResponseDTO> addPet(Mono<PetRequestDTO> petMono) {
+        return petMono
+                .map(EntityDTOUtil::toPet)
+                .flatMap(petRepo::save)
+                .map(EntityDTOUtil::toPetResponseDTO);
     }
 
     @Override
@@ -66,22 +68,26 @@ public class PetServiceImpl implements PetService {
     }
 
     @Override
-    public Mono<Pet> updatePetByPetId(String petId, Mono<Pet> petMono) {
+    public Mono<PetResponseDTO> updatePetByPetId(String petId, Mono<PetRequestDTO> petMono) {
         return petRepo.findPetByPetId(petId)
-                .flatMap(p -> petMono
-                        .doOnNext(e -> e.setId(p.getId()))
-                        .doOnNext(e -> e.setOwnerId(p.getOwnerId()))
-                        .doOnNext(e -> e.setPhotoId(p.getPhotoId()))
+                .flatMap(pet -> petMono
+                        .map(EntityDTOUtil::toPet)
+                        .doOnNext(p -> {
+                            p.setId(pet.getId());
+                            p.setPetId(pet.getPetId());
+                        })
                 )
-                .flatMap(petRepo::save);
+                .flatMap(petRepo::save)
+                .map(EntityDTOUtil::toPetResponseDTO);
     }
     @Override
-    public Mono<Pet> updatePetIsActive(String petId, String isActive) {
+    public Mono<PetResponseDTO> updatePetIsActive(String petId, String isActive) {
         return petRepo.findPetByPetId(petId)
                 .flatMap(p -> {
                     p.setIsActive(isActive);
                     return petRepo.save(p);
-                });
+                })
+                .map(EntityDTOUtil::toPetResponseDTO);
     }
     @Override
     public Mono<Void> deletePetByPetId(String petId) {
