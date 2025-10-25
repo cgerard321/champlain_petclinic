@@ -20,30 +20,27 @@ export class AppComponent implements OnInit {
   title = 'employee-frontend';
   progressValue = 0;
 
-  ngOnInit() {
-    // Animate progress bar from 0 to 75 over 3 seconds
-    const animateProgress = () => {
+  ngOnInit(): void {
+    const animateProgress = (): void => {
       const startTime = Date.now();
-      const duration = 3000; // 3 seconds
+      const duration = 3000; 
       const targetValue = 75;
 
-      const updateProgress = () => {
+      const updateProgress = (): void => {
         const elapsed = Date.now() - startTime;
         const progress = Math.min(elapsed / duration, 1);
         
-        // Use easeOutCubic for smooth animation
         const easeOutCubic = 1 - Math.pow(1 - progress, 3);
         this.progressValue = Math.round(easeOutCubic * targetValue);
 
         if (progress < 1) {
-          requestAnimationFrame(updateProgress);
+          window.requestAnimationFrame(updateProgress);
         }
       };
 
-      requestAnimationFrame(updateProgress);
+      window.requestAnimationFrame(updateProgress);
     };
 
-    // Start animation after a short delay
-    setTimeout(animateProgress, 500);
+    window.setTimeout(animateProgress, 500);
   }
 }
