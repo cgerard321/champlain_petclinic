@@ -55,6 +55,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
 
 @WebFluxTest(controllers=VetController.class)
 @ContextConfiguration(classes = {VetController.class, GlobalControllerExceptionHandler.class})
@@ -140,10 +141,10 @@ class VetControllerUnitTest {
 
         client.get()
                 .uri("/vets/" + VET_ID + "/ratings")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(RatingResponseDTO.class)
                 .value(ratingList -> {
                     assertEquals(2, ratingList.size());
@@ -317,10 +318,10 @@ class VetControllerUnitTest {
 
         client.get()
                 .uri("/vets/topVets")
-                .accept(APPLICATION_JSON)
+                .accept(TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(TEXT_EVENT_STREAM)
                 .expectBodyList(VetAverageRatingDTO.class)
                 .value(vetDTOs -> {
                     assertEquals(3, vetDTOs.size());
@@ -346,10 +347,10 @@ class VetControllerUnitTest {
                 .thenReturn(Flux.just(ratingDateResponseDTO,ratingDateResponseDTO2));
         client.get()
                 .uri("/vets/"+VET_ID+"/ratings/date?year={year}",exisingYearDate)
-                .accept(APPLICATION_JSON)
+                .accept(TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(TEXT_EVENT_STREAM)
                 .expectBodyList(RatingResponseDTO.class)
                 .value(ratingDTOs ->{
                             assertEquals(2, ratingDTOs.size());
@@ -388,18 +389,22 @@ class VetControllerUnitTest {
         client
                 .get()
                 .uri("/vets")
-                .accept(APPLICATION_JSON)
+                .accept(TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$[0].vetId").isEqualTo(vetResponseDTO.getVetId())
-                .jsonPath("$[0].resume").isEqualTo(vetResponseDTO.getResume())
-                .jsonPath("$[0].lastName").isEqualTo(vetResponseDTO.getLastName())
-                .jsonPath("$[0].firstName").isEqualTo(vetResponseDTO.getFirstName())
-                .jsonPath("$[0].email").isEqualTo(vetResponseDTO.getEmail())
-                .jsonPath("$[0].active").isEqualTo(vetResponseDTO.isActive())
-                .jsonPath("$[0].workHoursJson").isEqualTo(vetResponseDTO.getWorkHoursJson());
+                .expectHeader().contentTypeCompatibleWith(TEXT_EVENT_STREAM)
+                .expectBodyList(VetResponseDTO.class)
+                .value(list -> {
+                    assertEquals(1, list.size());
+                    VetResponseDTO returnedVet = list.get(0);
+                    assertEquals(vetResponseDTO.getVetId(), returnedVet.getVetId());
+                    assertEquals(vetResponseDTO.getResume(), returnedVet.getResume());
+                    assertEquals(vetResponseDTO.getLastName(), returnedVet.getLastName());
+                    assertEquals(vetResponseDTO.getFirstName(), returnedVet.getFirstName());
+                    assertEquals(vetResponseDTO.getEmail(), returnedVet.getEmail());
+                    assertEquals(vetResponseDTO.isActive(), returnedVet.isActive());
+                    assertEquals(vetResponseDTO.getWorkHoursJson(), returnedVet.getWorkHoursJson());
+                });
 
         Mockito.verify(vetService, times(1))
                 .getAll();
