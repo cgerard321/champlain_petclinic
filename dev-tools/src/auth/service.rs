@@ -21,7 +21,7 @@ fn verify_password(stored_hash_bytes: &[u8], candidate: &str, pepper: &str) -> A
 }
 
 pub async fn authenticate(db: &State<Db>, email: &str, password: &str) -> Result<Uuid, AppError> {
-    let pep = get_pepper();
+    let pep = get_pepper()?;
     let row = user_service::get_user_for_login(db, email)
         .await
         .map_err(|_| AppError::Unauthorized)?;
