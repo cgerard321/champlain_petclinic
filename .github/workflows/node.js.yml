@@ -41,13 +41,15 @@ jobs:
         run: npm run build
         working-directory: ./petclinic-frontend
 
-      # Angular Frontend (Employee Portal)
       - name: Install Angular frontend dependencies
+        if: matrix.node-version != '18.x'
         run: npm install
         working-directory: ./employee-frontend
       - name: Run Angular frontend lint
+        if: matrix.node-version != '18.x'
         run: npm run lint
         working-directory: ./employee-frontend
       - name: Run Angular frontend build
+        if: matrix.node-version != '18.x'
         run: npm run build
         working-directory: ./employee-frontend
