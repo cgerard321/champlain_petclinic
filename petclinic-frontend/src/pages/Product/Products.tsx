@@ -129,7 +129,7 @@ export default function Products(): JSX.Element {
       )}
 
       {isSidebarOpen && (
-        <div className={`products-sidebar${isSidebarOpen ? ' open' : ''}`}>
+        <div className={`products-sidebar ${isSidebarOpen ? 'open' : ''}`}>
           <button
             className="close-button"
             onClick={toggleSidebar}

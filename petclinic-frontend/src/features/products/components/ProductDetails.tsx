@@ -94,7 +94,7 @@ export default function ProductDetails(): JSX.Element {
   const getDeliveryTypeLabel = (deliveryType: string): string => {
     if (deliveryType === 'DELIVERY') return 'Standard Delivery';
     if (deliveryType === 'PICKUP') return 'Pickup';
-    if (deliveryType === 'DELIVERY_AND_PICKUP') return 'Delivery  Pickup';
+    if (deliveryType === 'DELIVERY_AND_PICKUP') return 'Delivery & Pickup';
     if (deliveryType === 'NO_DELIVERY_OPTION') return 'No delivery option';
     return 'Unknown Delivery Type';
   };
