@@ -62,7 +62,7 @@ public class InventoryControllerV1 {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER})
-    @GetMapping(value = "/types")
+    @GetMapping(value = "/types", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<InventoryTypeResponseDTO> getAllInventoryTypes(){
         return inventoryServiceClient.getAllInventoryTypes();
     }
@@ -284,7 +284,7 @@ public class InventoryControllerV1 {
                 });
     }
 
-    @GetMapping("/all")
+    @GetMapping(value = "/all", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<InventoryResponseDTO> getAllInventories() {
         return inventoryServiceClient.getAllInventories();
     }
