@@ -98,4 +98,14 @@ public class PetController {
                 .map(pet -> ResponseEntity.status(HttpStatus.CREATED).body(pet))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+
+    @PatchMapping("/{petId}/photo")
+    public Mono<ResponseEntity<PetResponseDTO>> deletePetPhoto(@PathVariable String petId) {
+        return Mono.just(petId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(ApplicationExceptions.invalidPetId(petId))
+                .flatMap(id -> petService.deletePetPhoto(id))
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 }
