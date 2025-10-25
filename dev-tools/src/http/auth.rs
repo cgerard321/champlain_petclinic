@@ -38,7 +38,13 @@ pub async fn login(
 #[post("/logout")]
 pub async fn logout(jar: &CookieJar<'_>, db: &State<Db>) -> Result<Status, Status> {
     if let Some(cookie) = jar.get_private("sid") {
-        let _ = service::remove_session(db, Uuid::parse_str(cookie.value()).unwrap()).await;
+        if let Ok(session_id) = Uuid::parse_str(cookie.value())
+            && let Err(_e) = service::remove_session(db, session_id).await
+        {
+            jar.remove_private(Cookie::from("sid"));
+            return Err(Status::InternalServerError);
+        }
+
         jar.remove_private(Cookie::from("sid"));
     }
 
