@@ -1,4 +1,5 @@
 use crate::auth::service;
+use crate::core::config::DEFAULT_SESSIONS_AGE_HR;
 use crate::db::database::Db;
 use crate::users::user::LoginReq;
 use rocket::http::{Cookie, CookieJar, SameSite};
@@ -6,7 +7,6 @@ use rocket::serde::json::Json;
 use rocket::{http::Status, post, State};
 use time::Duration as TDuration;
 use uuid::Uuid;
-use crate::core::config::DEFAULT_SESSIONS_AGE_HR;
 
 #[post("/login", data = "<req>")]
 pub async fn login(

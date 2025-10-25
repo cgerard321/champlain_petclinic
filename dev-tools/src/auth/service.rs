@@ -1,4 +1,5 @@
 use crate::auth::repo as session_repo;
+use crate::core::config::DEFAULT_SESSIONS_AGE_HR;
 use crate::core::error::{AppError, AppResult};
 use crate::db::database::Db;
 use crate::users::service as user_service;
@@ -7,7 +8,6 @@ use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use chrono::{Duration, NaiveDateTime, Utc};
 use rocket::State;
 use uuid::Uuid;
-use crate::core::config::DEFAULT_SESSIONS_AGE_HR;
 
 fn verify_password(stored_hash_bytes: &[u8], candidate: &str, pepper: &str) -> AppResult<bool> {
     let stored = std::str::from_utf8(stored_hash_bytes)
@@ -34,7 +34,8 @@ pub async fn authenticate(db: &State<Db>, email: &str, password: &str) -> Result
     }
 
     let session_id = Uuid::new_v4();
-    let expires_at: NaiveDateTime = (Utc::now() + Duration::hours(DEFAULT_SESSIONS_AGE_HR as i64)).naive_utc();
+    let expires_at: NaiveDateTime =
+        (Utc::now() + Duration::hours(DEFAULT_SESSIONS_AGE_HR as i64)).naive_utc();
 
     session_repo::insert_session(db, session_id, row.id, expires_at)
         .await

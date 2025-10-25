@@ -1,7 +1,7 @@
 use crate::http::prelude::{AppError, AppResult};
-use minio::s3::Client;
 use minio::s3::creds::StaticProvider;
 use minio::s3::http::BaseUrl;
+use minio::s3::Client;
 use std::env;
 
 pub struct MinioStore {
