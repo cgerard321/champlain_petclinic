@@ -6,20 +6,8 @@ Back to [Main page](../README.md)
 * [General Rules](#general-rules)
 * [Backend Usage](#backend-usage)
     * [Backend Setup](#backend-setup)
-        * [1. Add Required Dependencies](#1-add-required-dependencies)
-        * [2. Add the Mail DTO](#2-add-the-mail-dto)
-        * [3. Create the Mailer Service Client](#3-create-the-mailer-service-client)
-        * [4. Add Service Configurations](#4-add-service-configurations-to-applicationyml)
-        * [5. Add Rethrower Utility](#5-add-rethrower-utility)
-        * [6. Create the Auth Service Client](#6-create-the-auth-service-client)
-        * [7. Add GenericHttpException](#7-add-generichttpexception)
-        * [8. Add Role and UserDetails DTOs](#8-add-role-and-userdetails-dtos)
     * [Send Email](#send-email)
     * [Understanding Rethrower and Role Components](#understanding-rethrower-and-role-components)
-        * [Rethrower Utility](#rethrower-utility)
-        * [Role DTO](#role-dto)
-        * [Simplified Implementation](#simplified-implementation-alternative)
-* [API Documentation](#api-documentation)
 * [Environment Variables](#environment-variables-required)
 <!-- TOC -->
 
@@ -50,7 +38,7 @@ Back to [Main page](../README.md)
 
 These are the steps that need to be followed to integrate your service with the **Mailer Service**.
 
-#### [↑](#backend-usage) 1. Add Required Dependencies
+#### 1. Add Required Dependencies
 
 WebClient is included in Spring WebFlux, which should already be in your service dependencies:
 
@@ -58,7 +46,7 @@ WebClient is included in Spring WebFlux, which should already be in your service
 implementation 'org.springframework.boot:spring-boot-starter-webflux'
 ```
 
-#### [↑](#backend-usage) 2. Add the Mail DTO
+#### 2. Add the Mail DTO
 
 You will need to create the Mail DTO in your service with the following structure:
 
@@ -116,9 +104,9 @@ public class Mail {
 - `correspondantName`: Name of the correspondent
 - `senderName`: Display name for the sender
 
-#### [↑](#backend-usage) 3. Create the Mailer Service Client
+#### 3. Create the Mailer Service Client
 
-Create a WebClient-based client following the same pattern as AuthServiceClient:
+Create a WebClient-based client:
 
 ```java
 package com.petclinic.yourservice.domainclientlayer.Mailing;
@@ -157,7 +145,7 @@ public class MailServiceClient {
 }
 ```
 
-#### [↑](#backend-usage) 4. Add Service Configurations to application.yml
+#### 4. Add Service Configurations to application.yml
 
 Add both the auth service and mailer service configurations in your application.yml file. This ensures all necessary service endpoints are properly configured in one place.
 
@@ -189,7 +177,7 @@ app:
     port: 8080
 ```
 
-#### [↑](#backend-usage) 5. Add Rethrower Utility
+#### 5. Add Rethrower Utility
 
 Create a Rethrower utility class to handle error responses from the Auth Service:
 
@@ -226,7 +214,7 @@ public class Rethrower {
 }
 ```
 
-#### [↑](#backend-usage) 6. Create the Auth Service Client
+#### 6. Create the Auth Service Client
 
 You need the AuthServiceClient to retrieve user details (including email) before sending emails. This implementation includes proper error handling with the Rethrower:
 
@@ -277,7 +265,7 @@ public class AuthServiceClient {
 }
 ```
 
-#### [↑](#backend-usage) 7. Add GenericHttpException
+#### 7. Add GenericHttpException
 
 Create a custom exception class for handling HTTP errors:
 
@@ -381,25 +369,12 @@ public Mono<BillResponseDTO> processPayment(String customerId, String billId,
                                  "Authentication failed or user not found"));
             })
             .flatMap(user -> {
-                // Validate payment details
-                if (paymentRequestDTO.getCardNumber() == null || 
-                    paymentRequestDTO.getCardNumber().length() != 16 ||
-                    paymentRequestDTO.getCvv() == null || 
-                    paymentRequestDTO.getCvv().length() != 3 ||
-                    paymentRequestDTO.getExpirationDate() == null || 
-                    paymentRequestDTO.getExpirationDate().length() != 5) {
-                    return Mono.error(new InvalidPaymentException("Invalid payment details"));
+                        // ... Billing Code
                 }
 
                 // Find and process the bill
-                return billRepository.findByCustomerIdAndBillId(customerId, billId)
-                        .switchIfEmpty(Mono.error(new ResponseStatusException(
-                                      HttpStatus.NOT_FOUND, "Bill not found")))
-                        .flatMap(bill -> {
-                            // Update bill status
-                            BigDecimal interestAtPayment = InterestCalculationUtil.calculateInterest(bill);
-                            bill.setInterest(interestAtPayment);
-                            bill.setBillStatus(BillStatus.PAID);
+                return billRepository.findByCustomerIdAndBillId(customerId, billId){
+                            // ... Billing code
 
                             // Generate and send confirmation email (fire and forget)
                             mailServiceClient.sendMail(generateConfirmationEmail(user))
@@ -412,6 +387,7 @@ public Mono<BillResponseDTO> processPayment(String customerId, String billId,
             });
 }
 
+// Private helper method
 private Mail generateConfirmationEmail(UserDetails user) {
     return new Mail(
             user.getEmail(), 
@@ -437,49 +413,21 @@ private Mail generateConfirmationEmail(UserDetails user) {
 
 ## Understanding Rethrower and Role Components
 
-Jump to: [Back to Top](#mailer-service-usage-standards)
-
-### [↑](#backend-usage) Rethrower Utility
+### Rethrower Utility
 - The `Rethrower` utility is included for consistency with the billing service's implementation.
 - It's primarily used by `AuthServiceClient` to handle and transform error responses from the Auth Service.
 - While the billing service uses this pattern, you can simplify your implementation if you don't need the same level of error handling.
 
-#### [↑](#rethrower-utility) When to Use the Full Implementation
+#### When to Use the Full Implementation
 Consider using the full implementation with `Rethrower` if you:
 1. Need to parse error responses in a specific format
 2. Want to maintain consistency with the billing service's error handling
 3. Plan to add more complex error handling in the future
 
-### [↑](#backend-usage) Role DTO
+### Role DTO
 - The `Role` class is included for completeness as part of the `UserDetails` DTO.
 - The billing service doesn't use the `roles` field in its current implementation.
 - You can safely omit the `roles` field if your service doesn't need role-based functionality.
-
-### [↑](#backend-usage) Simplified Implementation (Alternative)
-If you don't need the full error handling capabilities, you can simplify the `AuthServiceClient`:
-
-```java
-public Mono<UserDetails> getUserById(String jwtToken, String userId) {
-    return webClientBuilder.build()
-            .get()
-            .uri(authServiceUrl + "/users/{userId}", userId)
-            .cookie("Bearer", jwtToken)
-            .retrieve()
-            .onStatus(HttpStatus::is4xxClientError,
-                response -> response.bodyToMono(String.class)
-                    .flatMap(error -> Mono.error(new GenericHttpException(error, NOT_FOUND)))
-            )
-            .bodyToMono(UserDetails.class)
-            .doOnError(error -> log.error("Error fetching user {}: {}", userId, error.getMessage()));
-}
-```
-
-### When to Simplify
-You can use the simplified version if you:
-1. Only need basic error handling
-2. Don't require parsing of error response bodies
-3. Want to reduce dependencies and complexity
-6. **Logging**: Log errors but don't fail the entire operation if email sending fails
 
 #### Email Content Best Practices:
 
@@ -526,7 +474,7 @@ return Mono.when(sendEmail).thenReturn(saveBill).flatMap(m -> m);
 
 ### Endpoint
 - **URL**: `POST /mail`
-- **Port**: `8888` (default)
+- **Port**: `8080` (default)
 - **Content-Type**: `application/json`
 
 ### Request Body Structure
@@ -539,7 +487,7 @@ return Mono.when(sendEmail).thenReturn(saveBill).flatMap(m -> m);
   "Body": "Email body content",
   "Footer": "Email footer",
   "CorrespondantName": "John Doe",
-  "SenderName": "Pet Clinic"
+  "SenderName": "email@senderemail.com"
 }
 ```
 
@@ -552,11 +500,9 @@ return Mono.when(sendEmail).thenReturn(saveBill).flatMap(m -> m);
 The Mailer Service is built with Go and uses:
 - **Framework**: Gin
 - **SMTP Library**: gopkg.in/mail.v2
-- **Port**: 8888
-- **Health Check**: Available via `/metrics` endpoint
-- **Documentation**: Available via `/swagger/*any` endpoint
+- **Port**: 8080
 
-### [↑](#mailer-service-usage-standards) Environment Variables Required
+### Environment Variables Required
 The Mailer Service requires the following environment variables:
 - `SMTP_SERVER`: SMTP server hostname
 - `SMTP_USER`: SMTP username
