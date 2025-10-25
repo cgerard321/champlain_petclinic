@@ -1,13 +1,13 @@
 use crate::core::error::AppResult;
-use crate::minio_service::store::MinioStore;
-use rocket::State;
+use crate::minio::store::MinioStore;
 use rocket::serde::json::Json;
+use rocket::State;
+use crate::users::user::AuthenticatedUser;
 
 #[get("/buckets")]
 pub(crate) async fn read_buckets(
     store: &State<MinioStore>,
-) -> AppResult<Json<Vec<crate::minio_service::bucket::BucketInfo>>> {
-    Ok(Json(
-        crate::minio_service::service::fetch_buckets(store).await?,
-    ))
+    _user: AuthenticatedUser
+) -> AppResult<Json<Vec<crate::minio::bucket::BucketInfo>>> {
+    Ok(Json(crate::minio::service::fetch_buckets(store).await?))
 }

@@ -7,8 +7,8 @@ use rocket::futures::Stream;
 use rocket::http::hyper::body::Bytes;
 
 use crate::http::prelude::{AppError, AppResult};
-use crate::minio_service::bucket::BucketInfo;
-use crate::minio_service::store::MinioStore;
+use crate::minio::bucket::BucketInfo;
+use crate::minio::store::MinioStore;
 use std::path::{Component, Path, PathBuf};
 use uuid::Uuid;
 
