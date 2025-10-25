@@ -19,20 +19,35 @@ jobs:
         node-version: [18.x, 20.x, 22.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
-        steps:
-          - uses: actions/checkout@v4
-          - name: Use Node.js ${{ matrix.node-version }}
-            uses: actions/setup-node@v4
-            with:
-              node-version: ${{ matrix.node-version }}
-              cache: 'npm'
-              cache-dependency-path: petclinic-frontend/package-lock.json
-          - name: Install dependencies
-            run: npm install
-            working-directory: ./petclinic-frontend
-          - name: Run npm lint to ensure frontend code is linted
-            run: npm run lint
-            working-directory: ./petclinic-frontend
-          - name: Run build to ensure no build errors
-            run: npm run build
-            working-directory: ./petclinic-frontend
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: |
+            petclinic-frontend/package-lock.json
+            employee-frontend/package-lock.json
+      
+      # React Frontend (Pet Clinic)
+      - name: Install React frontend dependencies
+        run: npm install
+        working-directory: ./petclinic-frontend
+      - name: Run React frontend lint
+        run: npm run lint
+        working-directory: ./petclinic-frontend
+      - name: Run React frontend build
+        run: npm run build
+        working-directory: ./petclinic-frontend
+      
+      # Angular Frontend (Employee Portal)
+      - name: Install Angular frontend dependencies
+        run: npm install
+        working-directory: ./employee-frontend
+      - name: Run Angular frontend lint
+        run: npm run lint
+        working-directory: ./employee-frontend
+      - name: Run Angular frontend build
+        run: npm run build
+        working-directory: ./employee-frontend

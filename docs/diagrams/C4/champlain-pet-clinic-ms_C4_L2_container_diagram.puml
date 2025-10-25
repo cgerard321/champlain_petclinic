@@ -24,7 +24,7 @@ AddElementTag("storage-mongo", $shape=RoundedBoxShape(), $bgColor="#00684A",$bor
 AddElementTag("storage-postgres", $shape=RoundedBoxShape(), $bgColor="#336791",$borderColor="Black", $fontColor="white", $legendText="PostGres Database")
 
 AddElementTag("framework-react", $shape=RoundedBoxShape(), $bgColor="#61DBFB", $fontColor="white", $legendText="React Single-Page Application")
-AddElementTag("framework-angular", $shape=RoundedBoxShape(), $bgColor="#b52e31", $fontColor="white", $legendText=Angular Single-Page Application")
+AddElementTag("framework-angular", $shape=RoundedBoxShape(), $bgColor="#b52e31", $fontColor="white", $legendText="Angular 20 Employee Portal")
 
 AddElementTag("webApp", $bgColor="#e34f26", $fontColor="white", $legendText="Web Application")
 
@@ -60,6 +60,7 @@ together {
     together {
         Container(employee_app, "Employee Web Application", "HTML, CSS", "Delivers the static Employee-focused content and angular single page application.", $sprite="html5", $tags = "webApp")
         Container(angular_spa, "Angular Single-Page Application", "JavaScript, Angular", "Provides all the Champlain Pet Clinic functionality to employees via their web browser.", $sprite="angular", $tags = "framework-angular")
+        Container(angular20_spa, "New Angular Single-Page Application", "TypeScript, Angular", "Provides all the Champlain Pet Clinic functionality to employees via their web browser.", $sprite="angular", $tags = "framework-angular")
     }
 }
 
@@ -96,13 +97,19 @@ Rel(inventoryManager, employee_app, "Visits petclinic-backend.benmusicgeek.synol
 Rel(veterinarian, employee_app, "Visits petclinic-backend.benmusicgeek.synology.me/#! using", "HTTPS")
 Rel_R(client_app, react_spa, "Delivers to the customer's web browser")
 Rel_R(employee_app, angular_spa, "Delivers to an employee's web browser")
+Rel_R(employee_app, angular20_spa, "Delivers modern Angular 20 portal to employee's web browser")
 Rel(admin, angular_spa, "views admin_panel and employee specific functionality")
+Rel(admin, angular20_spa, "views modern admin panel with Champlain College branding")
 Rel(receptionist, angular_spa, "assists customers with appointment booking")
+Rel(receptionist, angular20_spa, "uses modern Angular 20 interface for customer assistance")
 Rel(veterinarian, angular_spa, "manages their availability")
+Rel(veterinarian, angular20_spa, "manages availability with modern Angular 20 interface")
 Rel(inventoryManager, angular_spa, "manages medical inventory")
+Rel(inventoryManager, angular20_spa, "manages inventory with modern Angular 20 interface")
 Rel(customer, react_spa, "views online store, veterinarian and appointment booking functionality")
 Rel(react_spa, api_gateway, "Makes API calls to", "JSON/REST/HTTPS")
 Rel(angular_spa, api_gateway, "Makes API calls to", "JSON/REST/HTTPS")
+Rel(angular20_spa, api_gateway, "Makes API calls to", "JSON/REST/HTTPS")
 
 
 Rel(customers_service, files_service, "Makes API calls to", "JSON/REST/HTTPS")

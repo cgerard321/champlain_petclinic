@@ -4,9 +4,7 @@ import angular from '@analogjs/vite-plugin-angular';
 
 export default defineConfig(() => {
   return {
-    plugins: [
-      angular()
-    ],
+    plugins: [angular()],
     resolve: {
       alias: {
         '@/': new URL('./src/', import.meta.url).pathname,

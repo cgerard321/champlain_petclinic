@@ -46,10 +46,7 @@ export default [
       'import/prefer-default-export': 'off',
       'no-console': ['error', { allow: ['warn', 'error'] }],
       'no-unused-vars': 'error',
-      '@typescript-eslint/explicit-function-return-type': [
-        'error',
-        { allowExpressions: true },
-      ],
+      '@typescript-eslint/explicit-function-return-type': ['error', { allowExpressions: true }],
       '@typescript-eslint/naming-convention': [
         'error',
         {
