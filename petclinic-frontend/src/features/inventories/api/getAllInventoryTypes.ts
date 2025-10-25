@@ -9,9 +9,6 @@ export async function getAllInventoryTypes(): Promise<
     const response = await axiosInstance.get('/inventories/types', {
       useV2: false,
       responseType: 'text',
-      headers: {
-        Accept: 'text/event-stream',
-      },
     });
     const raw = String(response.data ?? '');
 
