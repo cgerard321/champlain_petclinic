@@ -1,12 +1,14 @@
 package com.petclinic.visits.visitsservicenew.Utils;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class IdGenerator {
 
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyMM-dd");
+    // Use a region-based ZoneId to get correct DST behavior and align with other services
+    private static final ZoneId TIMEZONE = ZoneId.of("America/Montreal");
 
     private static final String VISIT_PREFIX = "VIST";
     private static final String REVIEW_PREFIX = "REVIEW";
@@ -28,8 +30,9 @@ public class IdGenerator {
 
     private static final class IdState {
         private final String prefix;
-        private final AtomicInteger suffix = new AtomicInteger(0);
-        private final AtomicInteger width = new AtomicInteger(MINIMAL_SUFFIX_LENGTH);
+        // Start from 1 and use postfix increment when emitting IDs
+        private int suffix = 1;
+        private int width = MINIMAL_SUFFIX_LENGTH;
         private volatile String latestDate;
         // This is to avoid race condition
         private final Object lock = new Object();
@@ -39,25 +42,27 @@ public class IdGenerator {
         }
 
         private String nextId() {
-            String today = LocalDate.now().format(DATE_FORMAT);
             synchronized (lock) {
+                // Setting a specific timezone to ensure consistent id generation
+                String today = LocalDate.now(TIMEZONE).format(DATE_FORMAT);
+
                 // Reset counter when date changes
                 if (latestDate == null || !latestDate.equals(today)) {
                     latestDate = today;
-                    suffix.set(0);
-                    width.set(MINIMAL_SUFFIX_LENGTH);
+                    suffix = 1; // restart sequence at 1 for a new day
+                    width = MINIMAL_SUFFIX_LENGTH;
                 }
 
-                // Start sequences at 1 for each day
-                int nextSuffix = suffix.incrementAndGet();
+                // Get current suffix then increment for next call
+                int nextSuffix = suffix++;
 
                 // Grow width if needed based on next suffix
                 int requiredWidth = calculateRequiredWidth(nextSuffix);
-                if (requiredWidth > width.get()) {
-                    width.set(requiredWidth);
+                if (requiredWidth > width) {
+                    width = requiredWidth;
                 }
 
-                return format(prefix, today, nextSuffix, width.get());
+                return format(prefix, today, nextSuffix, width);
             }
         }
     }
