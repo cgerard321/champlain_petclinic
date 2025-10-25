@@ -398,18 +398,18 @@ public Mono<Void> deleteCartByCartId(String cartId) {
                     return resp.createException().flatMap(Mono::error);
                 });
     }
-    public Mono<List<CartProductResponseDTO>> getRecentPurchases(String cartId) {
+    public Mono<List<CartProductResponseDTO>> getRecentPurchasesByCustomerId(String customerId) {
         return webClientBuilder.build()
                 .get()
-                .uri(cartServiceUrl + "/{cartId}/recent-purchases", cartId)
+                .uri(customerCartServiceUrl + "/{customerId}/cart/recent-purchases", customerId)
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<List<CartProductResponseDTO>>() {});
     }
 
-    public Mono<List<CartProductResponseDTO>> getRecommendationPurchases(String cartId) {
+    public Mono<List<CartProductResponseDTO>> getRecommendationPurchasesByCustomerId(String customerId) {
         return webClientBuilder.build()
                 .get()
-                .uri(cartServiceUrl + "/{cartId}/recommendation-purchases", cartId)
+                .uri(customerCartServiceUrl + "/{customerId}/cart/recommendation-purchases", customerId)
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<List<CartProductResponseDTO>>() {});
     }

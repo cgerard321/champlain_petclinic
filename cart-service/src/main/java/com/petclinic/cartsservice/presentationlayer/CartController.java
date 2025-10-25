@@ -2,7 +2,6 @@ package com.petclinic.cartsservice.presentationlayer;
 
 import com.petclinic.cartsservice.businesslayer.CartQueryCriteria;
 import com.petclinic.cartsservice.businesslayer.CartService;
-import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.domainclientlayer.CartItemRequestModel;
 import com.petclinic.cartsservice.domainclientlayer.UpdateProductQuantityRequestModel;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
@@ -345,20 +344,6 @@ public class CartController {
                 });
     }
 
-
-    @GetMapping("/{cartId}/recent-purchases")
-    public Mono<ResponseEntity<List<CartProduct>>> getRecentPurchases(@PathVariable String cartId) {
-        return cartService.getRecentPurchases(cartId)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-
-    @GetMapping("/{cartId}/recommendation-purchases")
-    public Mono<ResponseEntity<List<CartProduct>>> getRecommendationPurchases(@PathVariable String cartId) {
-        return cartService.getRecommendationPurchases(cartId)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
     @PutMapping("/{cartId}/promo")
     public Mono<CartResponseModel> applyPromoToCart(
             @PathVariable String cartId,

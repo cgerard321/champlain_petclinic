@@ -251,7 +251,7 @@ public class CartControllerV1 {
     return cartServiceClient.addProductToCart(cartId, requestDTO)
         .map(cartResponse -> {
             if (requestedProductId != null && !requestedProductId.isBlank()) {
-            return ResponseEntity.created(URI.create(String.format("/api/v1/carts/%s/products/%s", cartId, requestedProductId)))
+            return ResponseEntity.created(URI.create(String.format("/api/gateway/carts/%s/products/%s", cartId, requestedProductId)))
                 .body(cartResponse);
             }
             return ResponseEntity.status(HttpStatus.CREATED).body(cartResponse);
@@ -371,20 +371,6 @@ public class CartControllerV1 {
                                 .build()
                 ));
     }
-    @GetMapping("/{cartId}/recent-purchases")
-    public Mono<ResponseEntity<List<CartProductResponseDTO>>> getRecentPurchases(@PathVariable String cartId) {
-        return cartServiceClient.getRecentPurchases(cartId)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-
-    @GetMapping("/{cartId}/recommendation-purchases")
-    public Mono<ResponseEntity<List<CartProductResponseDTO>>> getRecommendationPurchases(@PathVariable String cartId) {
-        return cartServiceClient.getRecommendationPurchases(cartId)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
     @PutMapping("/{cartId}/promo")
     public Mono<ResponseEntity<CartResponseDTO>> applyPromoToCart(

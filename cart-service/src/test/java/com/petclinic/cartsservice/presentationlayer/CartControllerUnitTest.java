@@ -17,7 +17,6 @@ import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -837,43 +836,6 @@ class CartControllerUnitTest {
         verify(cartService, never()).moveProductFromCartToWishlist(anyString(), anyString());
     }
 
-    @Test
-    void testGetRecentPurchases_Found() {
-        // Arrange
-        CartService cartService = Mockito.mock(CartService.class);
-        CartController controller = new CartController(cartService);
-
-        String cartId = "cart123";
-        List<CartProduct> products = List.of(
-                CartProduct.builder().productId("prod1").build()
-        );
-        Mockito.when(cartService.getRecentPurchases(cartId)).thenReturn(Mono.just(products));
-
-        Mono<ResponseEntity<List<CartProduct>>> result = controller.getRecentPurchases(cartId);
-
-        StepVerifier.create(result)
-                .expectNextMatches(response -> response.getStatusCode().is2xxSuccessful()
-                        && response.getBody() != null
-                        && response.getBody().size() == 1
-                        && "prod1".equals(response.getBody().get(0).getProductId()))
-                .verifyComplete();
-    }
-    @Test
-    void testGetRecentPurchases_NotFound() {
-        CartService cartService = Mockito.mock(CartService.class);
-        CartController controller = new CartController(cartService);
-
-        String cartId = "missing-cart";
-        Mockito.when(cartService.getRecentPurchases(cartId)).thenReturn(Mono.empty());
-
-        Mono<ResponseEntity<List<CartProduct>>> result = controller.getRecentPurchases(cartId);
-
-        // Assert
-        StepVerifier.create(result)
-                .expectNextMatches(response -> response.getStatusCode().is4xxClientError()
-                        && response.getBody() == null)
-                .verifyComplete();
-    }
     // --- moveAllWishlistToCart endpoint ---
 
     @Test
@@ -1001,45 +963,4 @@ class CartControllerUnitTest {
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
-    @Test
-    void testGetRecommendationPurchases_ReturnsOk() {
-        // Arrange
-        CartService cartService = Mockito.mock(CartService.class);
-        CartController controller = new CartController(cartService);
-
-        String cartId = "test-cart-id";
-        List<CartProduct> recommendations = List.of(CartProduct.builder().productId("prod1").build());
-
-        Mockito.when(cartService.getRecommendationPurchases(cartId)).thenReturn(Mono.just(recommendations));
-
-        // Act
-        Mono<ResponseEntity<List<CartProduct>>> result = controller.getRecommendationPurchases(cartId);
-
-        // Assert
-        StepVerifier.create(result)
-                .expectNextMatches(response -> response.getStatusCode().is2xxSuccessful()
-                        && response.getBody() != null
-                        && response.getBody().size() == 1
-                        && "prod1".equals(response.getBody().get(0).getProductId()))
-                .verifyComplete();
-    }
-
-    @Test
-    void testGetRecommendationPurchases_ReturnsNotFound() {
-        // Arrange
-        CartService cartService = Mockito.mock(CartService.class);
-        CartController controller = new CartController(cartService);
-
-        String cartId = "missing-cart-id";
-        Mockito.when(cartService.getRecommendationPurchases(cartId)).thenReturn(Mono.empty());
-
-        // Act
-        Mono<ResponseEntity<List<CartProduct>>> result = controller.getRecommendationPurchases(cartId);
-
-        // Assert
-        StepVerifier.create(result)
-                .expectNextMatches(response -> response.getStatusCode().is4xxClientError()
-                        && response.getBody() == null)
-                .verifyComplete();
-    }
 }

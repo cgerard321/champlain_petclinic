@@ -59,6 +59,8 @@ const UserCart: React.FC = () => {
   const navigate = useNavigate();
   const { cartId } = useParams<{ cartId?: string }>();
   const { confirm, ConfirmModal } = useConfirmModal();
+  const { user } = useUser();
+  const customerId = user?.userId ?? null;
 
   const [cartItems, setCartItems] = useState<ProductModel[]>([]);
   const [wishlistItems, setWishlistItems] = useState<ProductModel[]>([]);
@@ -369,11 +371,15 @@ const UserCart: React.FC = () => {
 
   // Fetch recent purchases
   useEffect(() => {
-    if (!cartId) return;
+    if (!customerId) {
+      setRecentPurchases([]);
+      return;
+    }
+
     const fetchRecentPurchases = async (): Promise<void> => {
       try {
         const { data } = await axiosInstance.get(
-          `/carts/${cartId}/recent-purchases`,
+          `/customers/${customerId}/cart/recent-purchases`,
           { useV2: false }
         );
         setRecentPurchases(data || []);
@@ -381,27 +387,31 @@ const UserCart: React.FC = () => {
         setRecentPurchases([]);
       }
     };
+
     fetchRecentPurchases();
-  }, [cartId]);
+  }, [customerId]);
 
   // Fetch recommendation purchases
   // Reusable function to fetch recommendation purchases
   const fetchRecommendationPurchases = useCallback(async (): Promise<void> => {
-    if (!cartId) return;
+    if (!customerId) {
+      setRecommendationPurchases([]);
+      return;
+    }
     try {
       const { data } = await axiosInstance.get(
-        `/carts/${cartId}/recommendation-purchases`,
+        `/customers/${customerId}/cart/recommendation-purchases`,
         { useV2: false }
       );
       setRecommendationPurchases(data || []);
     } catch (err) {
       setRecommendationPurchases([]);
     }
-  }, [cartId]);
+  }, [customerId]);
 
   useEffect(() => {
     fetchRecommendationPurchases();
-  }, [cartId, fetchRecommendationPurchases]);
+  }, [fetchRecommendationPurchases]);
 
   const applyVoucherCode = async (): Promise<void> => {
     if (!cartId) {
@@ -765,8 +775,6 @@ const UserCart: React.FC = () => {
     }
   };
 
-  const { user } = useUser();
-
   const handleCheckoutConfirmation = (): void => {
     if (isStaff) {
       navigate(AppRoutePaths.Unauthorized, {
@@ -862,14 +870,16 @@ const UserCart: React.FC = () => {
       notifyCartChanged();
 
       // Fetch recent purchases after checkout
-      try {
-        const { data } = await axiosInstance.get(
-          `/carts/${cartId}/recent-purchases`,
-          { useV2: false }
-        );
-        setRecentPurchases(data || []);
-      } catch (err) {
-        // Optionally handle error, but don't block checkout
+      if (customerId) {
+        try {
+          const { data } = await axiosInstance.get(
+            `/customers/${customerId}/cart/recent-purchases`,
+            { useV2: false }
+          );
+          setRecentPurchases(data || []);
+        } catch (err) {
+          // Optionally handle error, but don't block checkout
+        }
       }
 
       // Fetch recommendation purchases after checkout

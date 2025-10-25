@@ -1,6 +1,7 @@
 package com.petclinic.bffapigateway.presentationlayer.v1.Cart;
 
 import com.petclinic.bffapigateway.domainclientlayer.CartServiceClient;
+import com.petclinic.bffapigateway.dtos.Cart.CartProductResponseDTO;
 import com.petclinic.bffapigateway.dtos.Cart.CartResponseDTO;
 import com.petclinic.bffapigateway.presentationlayer.v1.CustomerCartController;
 import org.junit.jupiter.api.DisplayName;
@@ -14,6 +15,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
@@ -68,5 +71,41 @@ class CustomerCartControllerUnitTest {
                 .expectStatus().isNotFound();
 
         verify(cartServiceClient, times(1)).getCartByCustomerId(customerId);
+    }
+
+    @Test
+    @DisplayName("GET /api/gateway/customers/{customerId}/cart/recent-purchases - returns items")
+    void getRecentPurchasesForCustomer_returnsList() {
+        String customerId = "customer-recent";
+        List<CartProductResponseDTO> items = List.of(CartProductResponseDTO.builder().productId("prod-1").build());
+
+        when(cartServiceClient.getRecentPurchasesByCustomerId(customerId)).thenReturn(Mono.just(items));
+
+        webTestClient.get()
+                .uri(BASE_URL + "/{customerId}/cart/recent-purchases", customerId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(CartProductResponseDTO.class)
+                .isEqualTo(items);
+
+        verify(cartServiceClient, times(1)).getRecentPurchasesByCustomerId(customerId);
+    }
+
+    @Test
+    @DisplayName("GET /api/gateway/customers/{customerId}/cart/recommendation-purchases - returns items")
+    void getRecommendationPurchasesForCustomer_returnsList() {
+        String customerId = "customer-rec";
+        List<CartProductResponseDTO> items = List.of(CartProductResponseDTO.builder().productId("prod-2").build());
+
+        when(cartServiceClient.getRecommendationPurchasesByCustomerId(customerId)).thenReturn(Mono.just(items));
+
+        webTestClient.get()
+                .uri(BASE_URL + "/{customerId}/cart/recommendation-purchases", customerId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(CartProductResponseDTO.class)
+                .isEqualTo(items);
+
+        verify(cartServiceClient, times(1)).getRecommendationPurchasesByCustomerId(customerId);
     }
 }

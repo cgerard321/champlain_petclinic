@@ -1,6 +1,7 @@
 package com.petclinic.cartsservice.presentationlayer;
 
 import com.petclinic.cartsservice.businesslayer.CartService;
+import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -74,5 +77,39 @@ class CustomerCartControllerUnitTest {
                 .expectStatus().isBadRequest()
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("Provided customer id is invalid: " + invalidCustomerId);
+    }
+
+    @Test
+    void whenGetRecentPurchases_thenReturnList() {
+        String customerId = "123e4567-e89b-12d3-a456-426614174001";
+        List<CartProduct> items = List.of(CartProduct.builder().productId("prod1").build());
+
+        when(cartService.getRecentPurchasesByCustomerId(customerId)).thenReturn(Mono.just(items));
+
+        webTestClient
+                .get()
+                .uri("/api/v1/customers/{customerId}/cart/recent-purchases", customerId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(CartProduct.class)
+                .value(result -> assertEquals(1, result.size()));
+    }
+
+    @Test
+    void whenGetRecommendationPurchases_thenReturnList() {
+        String customerId = "123e4567-e89b-12d3-a456-426614174002";
+        List<CartProduct> items = List.of(CartProduct.builder().productId("prod2").build());
+
+        when(cartService.getRecommendationPurchasesByCustomerId(customerId)).thenReturn(Mono.just(items));
+
+        webTestClient
+                .get()
+                .uri("/api/v1/customers/{customerId}/cart/recommendation-purchases", customerId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(CartProduct.class)
+                .value(result -> assertEquals(1, result.size()));
     }
 }

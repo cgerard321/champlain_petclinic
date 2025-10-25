@@ -1,6 +1,7 @@
 package com.petclinic.bffapigateway.presentationlayer.v1;
 
 import com.petclinic.bffapigateway.domainclientlayer.CartServiceClient;
+import com.petclinic.bffapigateway.dtos.Cart.CartProductResponseDTO;
 import com.petclinic.bffapigateway.dtos.Cart.CartResponseDTO;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/gateway/customers")
@@ -30,5 +33,17 @@ public class CustomerCartController {
     @GetMapping("/{customerId}/cart")
     public Mono<ResponseEntity<CartResponseDTO>> getCartForCustomer(@PathVariable String customerId) {
         return mapToOkOrNotFound(cartServiceClient.getCartByCustomerId(customerId));
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.OWNER, Roles.ADMIN})
+    @GetMapping("/{customerId}/cart/recent-purchases")
+    public Mono<ResponseEntity<List<CartProductResponseDTO>>> getRecentPurchasesForCustomer(@PathVariable String customerId) {
+        return mapToOkOrNotFound(cartServiceClient.getRecentPurchasesByCustomerId(customerId));
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.OWNER, Roles.ADMIN})
+    @GetMapping("/{customerId}/cart/recommendation-purchases")
+    public Mono<ResponseEntity<List<CartProductResponseDTO>>> getRecommendationPurchasesForCustomer(@PathVariable String customerId) {
+        return mapToOkOrNotFound(cartServiceClient.getRecommendationPurchasesByCustomerId(customerId));
     }
 }

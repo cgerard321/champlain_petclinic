@@ -1395,9 +1395,9 @@ public class CartServiceClientTest {
                 .verify();
     }
     @Test
-    void testGetRecentPurchases_Success() throws IOException {
+        void testGetRecentPurchases_Success() throws IOException {
         // Arrange
-        String cartId = "test-cart-id";
+                String customerId = "test-customer-id";
         String responseBody = "[{\"productId\":\"prod1\",\"productName\":\"Product 1\",\"productSalePrice\":10.0,\"quantityInCart\":2,\"productQuantity\":5}," +
                 "{\"productId\":\"prod2\",\"productName\":\"Product 2\",\"productSalePrice\":20.0,\"quantityInCart\":1,\"productQuantity\":3}]";
 
@@ -1412,7 +1412,7 @@ public class CartServiceClientTest {
         );
 
         // Act
-        Mono<List<CartProductResponseDTO>> resultMono = client.getRecentPurchases(cartId);
+        Mono<List<CartProductResponseDTO>> resultMono = client.getRecentPurchasesByCustomerId(customerId);
 
         // Assert
         StepVerifier.create(resultMono)
@@ -1425,7 +1425,7 @@ public class CartServiceClientTest {
                 .verifyComplete();
     }
     @Test
-    void testGetRecommendationPurchases_ReturnsProducts() {
+        void testGetRecommendationPurchases_ReturnsProducts() {
         String host = "localhost";
         String port = String.valueOf(mockWebServer.getPort());
         WebClient.Builder webClientBuilder = WebClient.builder();
@@ -1437,14 +1437,14 @@ public class CartServiceClientTest {
 
         CartServiceClient client = new CartServiceClient(webClientBuilder, host, port);
 
-        Mono<List<CartProductResponseDTO>> result = client.getRecommendationPurchases("test-cart-id");
+                Mono<List<CartProductResponseDTO>> result = client.getRecommendationPurchasesByCustomerId("test-customer-id");
 
         StepVerifier.create(result)
                 .expectNextMatches(list -> list.size() == 1 && "prod1".equals(list.get(0).getProductId()))
                 .verifyComplete();
     }
     @Test
-    void testGetRecommendationPurchases_ReturnsEmpty() {
+        void testGetRecommendationPurchases_ReturnsEmpty() {
         String host = "localhost";
         String port = String.valueOf(mockWebServer.getPort());
         WebClient.Builder webClientBuilder = WebClient.builder();
@@ -1456,7 +1456,7 @@ public class CartServiceClientTest {
 
         CartServiceClient client = new CartServiceClient(webClientBuilder, host, port);
 
-        Mono<List<CartProductResponseDTO>> result = client.getRecommendationPurchases("empty-cart-id");
+        Mono<List<CartProductResponseDTO>> result = client.getRecommendationPurchasesByCustomerId("empty-customer-id");
 
         StepVerifier.create(result)
                 .expectNextMatches(List::isEmpty)

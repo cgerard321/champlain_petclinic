@@ -632,15 +632,27 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public Mono<List<CartProduct>> getRecentPurchases(String cartId) {
-        return cartRepository.findCartByCartId(cartId)
-                .map(cart -> cart.getRecentPurchases() != null ? cart.getRecentPurchases() : List.of());
+    public Mono<List<CartProduct>> getRecentPurchasesByCustomerId(String customerId) {
+        final String normalizedCustomerId = customerId == null ? null : customerId.trim();
+        if (normalizedCustomerId == null || normalizedCustomerId.isEmpty()) {
+            return Mono.error(new InvalidInputException("customerId must not be null or empty"));
+        }
+
+    return cartRepository.findCartByCustomerId(normalizedCustomerId)
+        .map(cart -> cart.getRecentPurchases() != null ? cart.getRecentPurchases() : List.<CartProduct>of())
+        .switchIfEmpty(Mono.just(List.<CartProduct>of()));
     }
 
     @Override
-    public Mono<List<CartProduct>> getRecommendationPurchases(String cartId) {
-        return cartRepository.findCartByCartId(cartId)
-                .map(cart -> cart.getRecommendationPurchase() != null ? cart.getRecommendationPurchase() : List.of());
+    public Mono<List<CartProduct>> getRecommendationPurchasesByCustomerId(String customerId) {
+        final String normalizedCustomerId = customerId == null ? null : customerId.trim();
+        if (normalizedCustomerId == null || normalizedCustomerId.isEmpty()) {
+            return Mono.error(new InvalidInputException("customerId must not be null or empty"));
+        }
+
+    return cartRepository.findCartByCustomerId(normalizedCustomerId)
+        .map(cart -> cart.getRecommendationPurchase() != null ? cart.getRecommendationPurchase() : List.<CartProduct>of())
+        .switchIfEmpty(Mono.just(List.<CartProduct>of()));
     }
 
     @Override

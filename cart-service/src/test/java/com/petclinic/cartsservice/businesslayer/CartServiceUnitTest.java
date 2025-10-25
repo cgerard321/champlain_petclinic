@@ -1418,16 +1418,16 @@ class CartServiceUnitTest {
         CartRepository cartRepository = Mockito.mock(CartRepository.class);
         CartServiceImpl service = new CartServiceImpl(cartRepository, null, customerClient);
 
-        String cartId = "cart123";
+        String customerId = "customer-123";
         List<CartProduct> recentPurchases = List.of(
                 CartProduct.builder().productId("prod1").build(),
                 CartProduct.builder().productId("prod2").build()
         );
-        Cart cart = Cart.builder().cartId(cartId).recentPurchases(recentPurchases).build();
+        Cart cart = Cart.builder().cartId("cart123").customerId(customerId).recentPurchases(recentPurchases).build();
 
-        Mockito.when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
+        Mockito.when(cartRepository.findCartByCustomerId(customerId)).thenReturn(Mono.just(cart));
 
-        StepVerifier.create(service.getRecentPurchases(cartId))
+        StepVerifier.create(service.getRecentPurchasesByCustomerId(customerId))
                 .expectNextMatches(list -> list.size() == 2 && "prod1".equals(list.get(0).getProductId()))
                 .verifyComplete();
     }
@@ -1437,12 +1437,12 @@ class CartServiceUnitTest {
         CartRepository cartRepository = Mockito.mock(CartRepository.class);
         CartServiceImpl service = new CartServiceImpl(cartRepository, null, customerClient);
 
-        String cartId = "cart456";
-        Cart cart = Cart.builder().cartId(cartId).recentPurchases(null).build();
+        String customerId = "customer-456";
+        Cart cart = Cart.builder().cartId("cart456").customerId(customerId).recentPurchases(null).build();
 
-        Mockito.when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
+        Mockito.when(cartRepository.findCartByCustomerId(customerId)).thenReturn(Mono.just(cart));
 
-        StepVerifier.create(service.getRecentPurchases(cartId))
+        StepVerifier.create(service.getRecentPurchasesByCustomerId(customerId))
                 .expectNextMatches(List::isEmpty)
                 .verifyComplete();
     }
@@ -1605,41 +1605,41 @@ class CartServiceUnitTest {
     }
 
     @Test
-    void testGetRecommendationPurchases_ReturnsRecommendations() {
-        CartRepository cartRepository = Mockito.mock(CartRepository.class);
-        ProductClient productClient = Mockito.mock(ProductClient.class);
-        CartServiceImpl service = new CartServiceImpl(cartRepository, productClient, customerClient);
+        void testGetRecommendationPurchases_ReturnsRecommendations() {
+                CartRepository cartRepository = Mockito.mock(CartRepository.class);
+                ProductClient productClient = Mockito.mock(ProductClient.class);
+                CartServiceImpl service = new CartServiceImpl(cartRepository, productClient, customerClient);
 
-        String cartId = "test-cart-id";
-        List<CartProduct> recommendations = List.of(CartProduct.builder().productId("prod1").build());
-        Cart cart = Mockito.mock(Cart.class);
+                String customerId = "customer-rec";
+                List<CartProduct> recommendations = List.of(CartProduct.builder().productId("prod1").build());
+                Cart cart = Mockito.mock(Cart.class);
 
-        Mockito.when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
-        Mockito.when(cart.getRecommendationPurchase()).thenReturn(recommendations);
+                Mockito.when(cartRepository.findCartByCustomerId(customerId)).thenReturn(Mono.just(cart));
+                Mockito.when(cart.getRecommendationPurchase()).thenReturn(recommendations);
 
-        Mono<List<CartProduct>> result = service.getRecommendationPurchases(cartId);
+                Mono<List<CartProduct>> result = service.getRecommendationPurchasesByCustomerId(customerId);
 
-        StepVerifier.create(result)
-                .expectNextMatches(list -> list.size() == 1 && "prod1".equals(list.get(0).getProductId()))
-                .verifyComplete();
+                StepVerifier.create(result)
+                                .expectNextMatches(list -> list.size() == 1 && "prod1".equals(list.get(0).getProductId()))
+                                .verifyComplete();
     }
 
     @Test
-    void testGetRecommendationPurchases_ReturnsEmptyList() {
-        CartRepository cartRepository = Mockito.mock(CartRepository.class);
-        ProductClient productClient = Mockito.mock(ProductClient.class);
-        CartServiceImpl service = new CartServiceImpl(cartRepository, productClient, customerClient);
+        void testGetRecommendationPurchases_ReturnsEmptyList() {
+                CartRepository cartRepository = Mockito.mock(CartRepository.class);
+                ProductClient productClient = Mockito.mock(ProductClient.class);
+                CartServiceImpl service = new CartServiceImpl(cartRepository, productClient, customerClient);
 
-        String cartId = "empty-cart-id";
-        Cart cart = Mockito.mock(Cart.class);
+                String customerId = "customer-empty";
+                Cart cart = Mockito.mock(Cart.class);
 
-        Mockito.when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
-        Mockito.when(cart.getRecommendationPurchase()).thenReturn(null);
+                Mockito.when(cartRepository.findCartByCustomerId(customerId)).thenReturn(Mono.just(cart));
+                Mockito.when(cart.getRecommendationPurchase()).thenReturn(null);
 
-        Mono<List<CartProduct>> result = service.getRecommendationPurchases(cartId);
+                Mono<List<CartProduct>> result = service.getRecommendationPurchasesByCustomerId(customerId);
 
-        StepVerifier.create(result)
-                .expectNextMatches(List::isEmpty)
-                .verifyComplete();
+                StepVerifier.create(result)
+                                .expectNextMatches(List::isEmpty)
+                                .verifyComplete();
     }
 }
