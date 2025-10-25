@@ -141,7 +141,8 @@ public class OwnerControllerV1 {
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET,Roles.RECEPTIONIST})
     @DeleteMapping("/{ownerId}/pets/{petId}")
     public Mono<ResponseEntity<PetResponseDTO>> deletePet(@PathVariable String ownerId, @PathVariable String petId){
-        return customersServiceClient.deletePet(ownerId,petId).then(Mono.just(ResponseEntity.noContent().<PetResponseDTO>build()))
+        return customersServiceClient.deletePet(ownerId,petId)
+                .map(pet -> ResponseEntity.noContent().<PetResponseDTO>build())
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
@@ -149,6 +150,16 @@ public class OwnerControllerV1 {
     @DeleteMapping("/{ownerId}/photo")
     public Mono<ResponseEntity<OwnerResponseDTO>> deleteOwnerPhoto(@PathVariable String ownerId) {
         return customersServiceClient.deleteOwnerPhoto(ownerId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN, Roles.VET})
+    @PatchMapping("/{ownerId}/pets/{petId}/photo")
+    public Mono<ResponseEntity<PetResponseDTO>> deletePetPhotoForOwner(
+            @PathVariable String ownerId,
+            @PathVariable String petId) {
+        return customersServiceClient.deletePetPhoto(petId)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
