@@ -7,6 +7,7 @@ import com.petclinic.customersservice.domainclientlayer.FilesServiceClient;
 import com.petclinic.customersservice.presentationlayer.PetRequestDTO;
 import com.petclinic.customersservice.presentationlayer.PetResponseDTO;
 import com.petclinic.customersservice.util.EntityDTOUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -14,6 +15,7 @@ import reactor.core.publisher.Mono;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class PetServiceImpl implements PetService {
 
     @Autowired
@@ -70,11 +72,12 @@ public class PetServiceImpl implements PetService {
     @Override
     public Mono<PetResponseDTO> updatePetByPetId(String petId, Mono<PetRequestDTO> petMono) {
         return petRepo.findPetByPetId(petId)
-                .flatMap(pet -> petMono
+                .flatMap(existingPet -> petMono
                         .map(EntityDTOUtil::toPet)
-                        .doOnNext(p -> {
-                            p.setId(pet.getId());
-                            p.setPetId(pet.getPetId());
+                        .doOnNext(updatedPet -> {
+                            updatedPet.setId(existingPet.getId());
+                            updatedPet.setPetId(existingPet.getPetId());
+                            updatedPet.setPhotoId(existingPet.getPhotoId()); 
                         })
                 )
                 .flatMap(petRepo::save)
@@ -92,15 +95,27 @@ public class PetServiceImpl implements PetService {
     @Override
     public Mono<Void> deletePetByPetId(String petId) {
         return petRepo.findPetByPetId(petId)
-                .flatMap(petRepo::delete);
+                .flatMap(found -> {
+                    Mono<Void> deletePhotoMono = Mono.justOrEmpty(found.getPhotoId())
+                            .flatMap(filesServiceClient::deleteFile);
+                    Mono<Void> deletePetMono = petRepo.delete(found);
+                    
+                    return Mono.when(deletePetMono, deletePhotoMono);
+                });
     }
 
     @Override
     public Mono<PetResponseDTO> deletePetByPetIdV2(String petId) {
         return petRepo.findPetByPetId(petId)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Pet id not found: " + petId))))
-                .flatMap(found -> petRepo.delete(found)
-                        .then(Mono.just(found)))
+                .flatMap(found -> {
+                    Mono<Void> deletePhotoMono = Mono.justOrEmpty(found.getPhotoId())
+                            .flatMap(filesServiceClient::deleteFile);
+                    Mono<Void> deletePetMono = petRepo.delete(found);
+                    
+                    return Mono.when(deletePetMono, deletePhotoMono)
+                            .thenReturn(found);
+                })
                 .map(EntityDTOUtil::toPetResponseDTO);
     }
 
@@ -125,5 +140,28 @@ public class PetServiceImpl implements PetService {
                 })
                 .flatMap(petRepo::save)
                 .map(EntityDTOUtil::toPetResponseDTO);
+    }
+
+    @Override
+    public Mono<PetResponseDTO> deletePetPhoto(String petId) {
+        return petRepo.findPetByPetId(petId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Pet not found with id: " + petId)))
+                .flatMap(existingPet -> {
+                    String photoId = existingPet.getPhotoId();
+                    if (photoId != null && !photoId.isEmpty()) {
+                        existingPet.setPhotoId(null);
+                        return petRepo.save(existingPet)
+                                .flatMap(savedPet ->
+                                        filesServiceClient.deleteFile(photoId)
+                                                .onErrorResume(e -> {
+                                                    log.error("Error deleting photo file {}: {}", photoId, e.getMessage());
+                                                    return Mono.empty();
+                                                })
+                                                .thenReturn(savedPet)
+                                )
+                                .map(EntityDTOUtil::toPetResponseDTO);
+                    }
+                    return Mono.just(EntityDTOUtil.toPetResponseDTO(existingPet));
+                });
     }
 }
