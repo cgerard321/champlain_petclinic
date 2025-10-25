@@ -1,17 +1,17 @@
 package com.petclinic.visits.visitsservicenew.Utils;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 public class IdGeneratorTest {
+    private static final ZoneId TIMEZONE = ZoneId.of("America/Montreal");
 
     @Test
     public void testGenerateVisitIdDateAndIncrement() {
@@ -19,9 +19,9 @@ public class IdGeneratorTest {
         DateTimeFormatter monthFormatter = DateTimeFormatter.ofPattern("MM");
         DateTimeFormatter dayFormatter = DateTimeFormatter.ofPattern("dd");
 
-        String expectedYear = LocalDate.now().format(yearFormatter);
-        String expectedMonth = LocalDate.now().format(monthFormatter);
-        String expectedDay = LocalDate.now().format(dayFormatter);
+        String expectedYear = LocalDate.now(TIMEZONE).format(yearFormatter);
+        String expectedMonth = LocalDate.now(TIMEZONE).format(monthFormatter);
+        String expectedDay = LocalDate.now(TIMEZONE).format(dayFormatter);
 
         String id1 = IdGenerator.generateVisitId();
         assertNotNull(id1);
@@ -62,9 +62,9 @@ public class IdGeneratorTest {
         DateTimeFormatter monthFormatter = DateTimeFormatter.ofPattern("MM");
         DateTimeFormatter dayFormatter = DateTimeFormatter.ofPattern("dd");
 
-        String expectedYear = LocalDate.now().format(yearFormatter);
-        String expectedMonth = LocalDate.now().format(monthFormatter);
-        String expectedDay = LocalDate.now().format(dayFormatter);
+        String expectedYear = LocalDate.now(TIMEZONE).format(yearFormatter);
+        String expectedMonth = LocalDate.now(TIMEZONE).format(monthFormatter);
+        String expectedDay = LocalDate.now(TIMEZONE).format(dayFormatter);
 
         String id1 = IdGenerator.generateReviewId();
         assertNotNull(id1);
