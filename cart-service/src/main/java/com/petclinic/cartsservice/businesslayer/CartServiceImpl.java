@@ -88,13 +88,14 @@ public class CartServiceImpl implements CartService {
     }
 
     private Mono<CartResponseModel> toCartResponseModelWithCustomer(Cart cart) {
+        List<CartProduct> safeProducts = cart.getProducts() == null ? Collections.emptyList() : cart.getProducts();
         String cid = cart.getCustomerId();
         if (cid == null || cid.isBlank()) {
-            return Mono.just(EntityModelUtil.toCartResponseModel(cart, cart.getProducts()));
+            return Mono.just(EntityModelUtil.toCartResponseModel(cart, safeProducts));
         }
         return customerClient.getCustomerById(cid)
-                .map(c -> EntityModelUtil.toCartResponseModel(cart, cart.getProducts(), c.getFullName()))
-                .onErrorResume(e -> Mono.just(EntityModelUtil.toCartResponseModel(cart, cart.getProducts())));
+                .map(c -> EntityModelUtil.toCartResponseModel(cart, safeProducts, c.getFullName()))
+                .onErrorResume(e -> Mono.just(EntityModelUtil.toCartResponseModel(cart, safeProducts)));
     }
 
     private String valueOrEmpty(String value) {
@@ -256,44 +257,31 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public Mono<CartResponseModel> assignCartToCustomer(String customerId, List<CartProduct> products) {
-        //check if the customer already has a cart
-        return cartRepository.findCartByCustomerId(customerId)
-                .defaultIfEmpty(new Cart())
-                .flatMap(cart -> {
-                    //set the customerId if it's a new cart
-                    if (cart.getCustomerId() == null) {
-                        cart.setCustomerId(customerId);
-                        cart.setCartId(UUID.randomUUID().toString()); // Generate a new cart ID
-                    }
+    public Mono<CartResponseModel> assignCartToCustomer(String customerId) {
+        final String normalizedCustomerId = customerId == null ? null : customerId.trim();
+        if (normalizedCustomerId == null || normalizedCustomerId.isBlank()) {
+            return Mono.error(new InvalidInputException("Customer ID must be provided."));
+        }
 
-                    //add or update products in the cart
-                    List<CartProduct> updatedProducts = cart.getProducts() != null ? cart.getProducts() : new ArrayList<>();
+        return cartRepository.findCartByCustomerId(normalizedCustomerId)
+                .flatMap(this::toCartResponseModelWithCustomer)
+                .switchIfEmpty(Mono.defer(() -> {
+                    Cart newCart = Cart.builder()
+                            .cartId(UUID.randomUUID().toString())
+                            .customerId(normalizedCustomerId)
+                            .products(new ArrayList<>())
+                            .wishListProducts(new ArrayList<>())
+                            .recentPurchases(new ArrayList<>())
+                            .recommendationPurchase(new ArrayList<>())
+                            .subtotal(0.0)
+                            .tvq(0.0)
+                            .tvc(0.0)
+                            .total(0.0)
+                            .build();
 
-                    for (CartProduct newProduct : products) {
-                        boolean productExists = false;
-
-                        //update quantity if product already exists in the cart
-                        for (CartProduct existingProduct : updatedProducts) {
-                            if (existingProduct.getProductId().equals(newProduct.getProductId())) {
-                                existingProduct.setQuantityInCart(existingProduct.getQuantityInCart() + newProduct.getQuantityInCart());
-                                productExists = true;
-                                break;
-                            }
-                        }
-
-                        //if the product is not in the cart, add it
-                        if (!productExists) {
-                            updatedProducts.add(newProduct);
-                        }
-                    }
-
-                    cart.setProducts(updatedProducts);
-
-                    //save the cart to the repository
-                    return cartRepository.save(cart)
-                            .map(savedCart -> EntityModelUtil.toCartResponseModel(savedCart, savedCart.getProducts()));
-                });
+                    return cartRepository.save(newCart)
+                            .flatMap(this::toCartResponseModelWithCustomer);
+                }));
     }
 
     @Override

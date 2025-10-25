@@ -23,7 +23,7 @@ public interface CartService {
 
     Mono<CartResponseModel> checkoutCart(String cartId);
 
-    Mono<CartResponseModel> assignCartToCustomer(String customerId, List<CartProduct> products);
+    Mono<CartResponseModel> assignCartToCustomer(String customerId);
 
     Mono<CartResponseModel>  findCartByCustomerId(String customerId);
 

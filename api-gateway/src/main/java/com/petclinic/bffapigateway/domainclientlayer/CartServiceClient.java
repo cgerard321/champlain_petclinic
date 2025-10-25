@@ -180,7 +180,7 @@ public Mono<Void> deleteCartByCartId(String cartId) {
     public Mono<Void> deleteAllItemsInCart(String cartId) {
         return webClientBuilder.build()
                 .delete()
-                .uri(cartServiceUrl + "/" + cartId + "/items")
+                .uri(cartServiceUrl + "/" + cartId + "/products")
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, error -> {
                     HttpStatusCode statusCode = error.statusCode();
@@ -261,22 +261,27 @@ public Mono<Void> deleteCartByCartId(String cartId) {
     }
 
     public Mono<Void> assignCartToUser(String customerId) {
+        CartRequestDTO payload = CartRequestDTO.builder()
+                .customerId(customerId)
+                .build();
+
         return webClientBuilder.build().post()
-                .uri(cartServiceUrl + "/" + customerId + "/assign")
-                .bodyValue(Collections.emptyList())  // Pass an empty list of CartProduct
+                .uri(cartServiceUrl)
+                .bodyValue(payload)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, error -> {
                     HttpStatusCode statusCode = error.statusCode();
                     if (statusCode.equals(HttpStatus.NOT_FOUND)) {
                         return Mono.error(new NotFoundException("Customer not found for customerId: " + customerId));
                     }
-                    else if (statusCode.equals(HttpStatus.UNPROCESSABLE_ENTITY)) {
+                    else if (statusCode.equals(HttpStatus.UNPROCESSABLE_ENTITY) || statusCode.equals(HttpStatus.BAD_REQUEST)) {
                         return Mono.error(new InvalidInputException("Invalid input for customerId: " + customerId));
                     }
                     return Mono.error(new IllegalArgumentException("Client error"));
                 })
                 .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Server error")))
-                .bodyToMono(Void.class);
+                .bodyToMono(CartResponseDTO.class)
+                .then();
     }
 
     public Mono<CartResponseDTO> addProductToCart(String cartId, CartItemRequestDTO requestDTO) {
@@ -308,9 +313,9 @@ public Mono<Void> deleteCartByCartId(String cartId) {
 
     public Mono<CartResponseDTO> updateProductQuantityInCart(String cartId, String productId, UpdateProductQuantityRequestDTO requestDTO) {
         return webClientBuilder.build()
-                .put()
+                .patch()
                 .uri(cartServiceUrl + "/" + cartId + "/products/" + productId)
-                .body(Mono.just(requestDTO), UpdateProductQuantityRequestDTO.class)
+                .bodyValue(requestDTO)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(CartResponseDTO.class);

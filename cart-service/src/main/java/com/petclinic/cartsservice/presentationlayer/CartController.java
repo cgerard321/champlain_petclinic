@@ -84,13 +84,13 @@ public class CartController {
                 .build();
     }
 
-    @DeleteMapping("/{cartId}/items")
-    public Mono<ResponseEntity<Void>> deleteAllItemsInCart(@PathVariable String cartId) {
+    @DeleteMapping("/{cartId}/products")
+    public Mono<ResponseEntity<Void>> deleteAllProductsInCart(@PathVariable String cartId) {
         return Mono.just(cartId)
                 .filter(id -> id.length() == 36) // validate the cart id
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
-                .flatMap(validId -> cartService.deleteAllItemsInCart(validId)
-                        .thenReturn(ResponseEntity.noContent().build()));
+        .flatMap(validId -> cartService.deleteAllItemsInCart(validId)
+            .thenReturn(ResponseEntity.noContent().build()));
     }
 
 
@@ -100,8 +100,7 @@ public class CartController {
                 .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
                 .flatMap(cartService::deleteCartByCartId)
-                .map(r -> ResponseEntity.noContent().<Void>build())
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
+        .map(r -> ResponseEntity.noContent().<Void>build());
 
     }
 
@@ -111,17 +110,25 @@ public class CartController {
                 .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
                 .flatMap(validId -> cartService.removeProductFromCart(validId, productId))
-                .map(r -> ResponseEntity.noContent().<Void>build())
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
+        .map(r -> ResponseEntity.noContent().<Void>build());
     }
 
-    @PostMapping("/{customerId}/assign")
-    public Mono<ResponseEntity<CartResponseModel>> assignCartToCustomer(
-            @PathVariable String customerId,
-            @RequestBody List<CartProduct> products) {
-        return cartService.assignCartToCustomer(customerId, products)
-                .map(cart -> ResponseEntity.status(HttpStatus.CREATED).body(cart))
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    @PostMapping
+    public Mono<ResponseEntity<CartResponseModel>> createCart(@RequestBody CartRequestModel requestModel) {
+        if (requestModel == null || requestModel.getCustomerId() == null || requestModel.getCustomerId().isBlank()) {
+            return Mono.error(new InvalidInputException("customerId must be provided"));
+        }
+
+        final String normalizedCustomerId = requestModel.getCustomerId().trim();
+
+        return cartService.assignCartToCustomer(normalizedCustomerId)
+                .map(cart -> {
+                    String cartId = cart.getCartId();
+                    URI location = cartId != null && !cartId.isBlank()
+                            ? URI.create(String.format("/api/v1/carts/%s", cartId))
+                            : URI.create("/api/v1/carts");
+                    return ResponseEntity.created(location).body(cart);
+                });
     }
 
     @PostMapping("/{cartId}/products")
@@ -133,7 +140,7 @@ public class CartController {
         return cartService.addProductToCart(cartId, requestModel)
                 .map(cartResponse -> {
                     if (requestedProductId != null && !requestedProductId.isBlank()) {
-                        return ResponseEntity.created(URI.create(String.format("/api/v1/carts/%s/items/%s", cartId, requestedProductId)))
+            return ResponseEntity.created(URI.create(String.format("/api/v1/carts/%s/products/%s", cartId, requestedProductId)))
                                 .body(cartResponse);
                     }
                     return ResponseEntity.status(HttpStatus.CREATED).body(cartResponse);
@@ -149,19 +156,39 @@ public class CartController {
                 });
     }
 
-    @PutMapping("/{cartId}/products/{productId}")
-    public Mono<ResponseEntity<CartResponseModel>> updateProductQuantityInCart(@PathVariable String cartId, @PathVariable String productId, @RequestBody UpdateProductQuantityRequestModel requestModel) {
+    private Mono<ResponseEntity<CartResponseModel>> handleProductQuantityUpdate(String cartId, String productId, UpdateProductQuantityRequestModel requestModel) {
+        if (requestModel == null) {
+            return Mono.error(new InvalidInputException("Quantity must be provided."));
+        }
+
         return cartService.updateProductQuantityInCart(cartId, productId, requestModel.getQuantity())
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> {
-                    if (e instanceof OutOfStockException || e instanceof InvalidInputException || e instanceof NotFoundException) {
+                    if (e instanceof OutOfStockException || e instanceof InvalidInputException) {
                         CartResponseModel errorResponse = new CartResponseModel();
                         errorResponse.setMessage(e.getMessage());
                         return Mono.just(ResponseEntity.badRequest().body(errorResponse));
+                    } else if (e instanceof NotFoundException) {
+                        return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
                     } else {
                         return Mono.error(e);
                     }
                 });
+    }
+
+    @PatchMapping("/{cartId}/products/{productId}")
+    public Mono<ResponseEntity<CartResponseModel>> patchProductQuantityInCart(@PathVariable String cartId,
+                                                                              @PathVariable String productId,
+                                                                              @RequestBody UpdateProductQuantityRequestModel requestModel) {
+        return handleProductQuantityUpdate(cartId, productId, requestModel);
+    }
+
+    @Deprecated
+    @PutMapping("/{cartId}/products/{productId}")
+    public Mono<ResponseEntity<CartResponseModel>> updateProductQuantityInCart(@PathVariable String cartId,
+                                                                               @PathVariable String productId,
+                                                                               @RequestBody UpdateProductQuantityRequestModel requestModel) {
+        return handleProductQuantityUpdate(cartId, productId, requestModel);
     }
 
     @PostMapping("/{cartId}/checkout")

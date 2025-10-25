@@ -1317,54 +1317,59 @@ class CartServiceUnitTest {
                 .verify();
     }
 
-    // positive path
     @Test
-    void assignCartToCustomer_newCart_addsProduct() {
+    void assignCartToCustomer_newCustomer_createsCart() {
         String customerId = "cust-A";
-        CartProduct toAdd = CartProduct.builder()
-                .productId("PX")
-                .quantityInCart(2)
-                .productSalePrice(1.0)
+
+        Cart savedCart = Cart.builder()
+                .cartId("generated-cart-id")
+                .customerId(customerId)
+                .products(new ArrayList<>())
+                .wishListProducts(new ArrayList<>())
+                .recentPurchases(new ArrayList<>())
+                .recommendationPurchase(new ArrayList<>())
                 .build();
 
         when(cartRepository.findCartByCustomerId(customerId)).thenReturn(Mono.empty());
-        when(cartRepository.save(any(Cart.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
+        when(cartRepository.save(any(Cart.class))).thenReturn(Mono.just(savedCart));
 
-
-        StepVerifier.create(cartService.assignCartToCustomer(customerId, List.of(toAdd)))
+        StepVerifier.create(cartService.assignCartToCustomer(customerId))
                 .expectNextMatches(res ->
                         res.getCustomerId().equals(customerId) &&
-                                res.getCartId() != null &&
-                                res.getProducts().stream().anyMatch(p -> p.getProductId().equals("PX") && p.getQuantityInCart() == 2)
-                )
+                                "generated-cart-id".equals(res.getCartId()) &&
+                                res.getProducts() != null &&
+                                res.getProducts().isEmpty())
                 .verifyComplete();
+
+        verify(cartRepository).save(any(Cart.class));
     }
 
-    // positive path
     @Test
-    void assignCartToCustomer_existingCart_increment() {
+    void assignCartToCustomer_existingCart_returnsExisting() {
         String customerId = "cust-B";
-
-        CartProduct existing = CartProduct.builder()
-                .productId("PY").quantityInCart(1).productSalePrice(2.0).build();
 
         Cart existingCart = Cart.builder()
                 .cartId("cart-1")
                 .customerId(customerId)
-                .products(new ArrayList<>(List.of(existing)))
+                .products(new ArrayList<>())
                 .build();
 
-        CartProduct incoming = CartProduct.builder()
-                .productId("PY").quantityInCart(3).productSalePrice(2.0).build();
-
         when(cartRepository.findCartByCustomerId(customerId)).thenReturn(Mono.just(existingCart));
-        when(cartRepository.save(any(Cart.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
 
-        StepVerifier.create(cartService.assignCartToCustomer(customerId, List.of(incoming)))
-                .expectNextMatches(res ->
-                        res.getProducts().stream().anyMatch(p -> p.getProductId().equals("PY") && p.getQuantityInCart() == 4)
-                )
+        StepVerifier.create(cartService.assignCartToCustomer(customerId))
+                .expectNextMatches(res -> "cart-1".equals(res.getCartId()))
                 .verifyComplete();
+
+        verify(cartRepository, never()).save(any(Cart.class));
+    }
+
+    @Test
+    void assignCartToCustomer_missingCustomerId_throwsInvalidInput() {
+        StepVerifier.create(cartService.assignCartToCustomer("   "))
+                .expectError(InvalidInputException.class)
+                .verify();
+
+        verify(cartRepository, never()).save(any(Cart.class));
     }
 
     // negative

@@ -57,7 +57,7 @@ public class CartController {
     }
 
 
-    @DeleteMapping("/{cartId}/items")
+    @DeleteMapping("/{cartId}/products")
     public Mono<ResponseEntity<Void>> deleteAllItemsInCart(@PathVariable String cartId) {
         return cartServiceClient.deleteAllItemsInCart(cartId)
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))
@@ -87,7 +87,7 @@ public class CartController {
         return cartServiceClient.addProductToCart(cartId, requestDTO)
                 .map(cartResponseDTO -> {
                     if (requestedProductId != null && !requestedProductId.isBlank()) {
-                        return ResponseEntity.created(URI.create(String.format("/api/v1/carts/%s/items/%s", cartId, requestedProductId)))
+            return ResponseEntity.created(URI.create(String.format("/api/v1/carts/%s/products/%s", cartId, requestedProductId)))
                                 .body(cartResponseDTO);
                     }
                     return ResponseEntity.status(HttpStatus.CREATED).body(cartResponseDTO);
@@ -108,22 +108,35 @@ public class CartController {
                 });
     }
 
-
-    @PutMapping("/{cartId}/products/{productId}")
-    public Mono<ResponseEntity<CartResponseDTO>> updateProductQuantityInCart(@PathVariable String cartId, @PathVariable String productId, @RequestBody UpdateProductQuantityRequestDTO requestDTO) {
+    private Mono<ResponseEntity<CartResponseDTO>> handleQuantityUpdate(String cartId,
+                                                                        String productId,
+                                                                        UpdateProductQuantityRequestDTO requestDTO) {
         return cartServiceClient.updateProductQuantityInCart(cartId, productId, requestDTO)
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> {
                     if (e instanceof WebClientResponseException.UnprocessableEntity) {
                         return Mono.just(ResponseEntity.unprocessableEntity().build());
-                    }
-                    else if (e instanceof WebClientResponseException.NotFound) {
+                    } else if (e instanceof WebClientResponseException.NotFound) {
                         return Mono.just(ResponseEntity.notFound().build());
-                    }
-                    else {
+                    } else {
                         return Mono.error(e);
                     }
                 });
+    }
+
+    @PatchMapping("/{cartId}/products/{productId}")
+    public Mono<ResponseEntity<CartResponseDTO>> patchProductQuantityInCart(@PathVariable String cartId,
+                                                                             @PathVariable String productId,
+                                                                             @RequestBody UpdateProductQuantityRequestDTO requestDTO) {
+        return handleQuantityUpdate(cartId, productId, requestDTO);
+    }
+
+    @Deprecated
+    @PutMapping("/{cartId}/products/{productId}")
+    public Mono<ResponseEntity<CartResponseDTO>> updateProductQuantityInCart(@PathVariable String cartId,
+                                                                              @PathVariable String productId,
+                                                                              @RequestBody UpdateProductQuantityRequestDTO requestDTO) {
+        return handleQuantityUpdate(cartId, productId, requestDTO);
     }
 
     //admin restriction at check out

@@ -335,7 +335,7 @@ class CartControllerUnitTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isCreated()
-                .expectHeader().value("Location", location -> assertEquals("/api/v1/carts/" + cartId + "/items/" + requestModel.getProductId(), location))
+                .expectHeader().value("Location", location -> assertEquals("/api/v1/carts/" + cartId + "/products/" + requestModel.getProductId(), location))
                 .expectBody(CartResponseModel.class)
                 .value(response -> {
                     assertEquals(cartId, response.getCartId());
@@ -948,41 +948,42 @@ class CartControllerUnitTest {
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
     }
     @Test
-    void deleteAllItemsInCart_success() {
+    void deleteAllProductsInCart_success() {
         String validCartId = "123456789012345678901234567890123456"; // 36 chars
         Mockito.when(cartService.deleteAllItemsInCart(validCartId))
                 .thenReturn(Mono.empty());
 
         webTestClient.delete()
-                .uri("/api/v1/carts/" + validCartId + "/items")
+                .uri("/api/v1/carts/" + validCartId + "/products")
                 .exchange()
                 .expectStatus().isNoContent()
                 .expectBody().isEmpty();
     }
 
     @Test
-    void deleteAllItemsInCart_invalidCartId() {
+    void deleteAllProductsInCart_invalidCartId() {
         String invalidCartId = "short-id"; // Not 36 chars
         webTestClient.delete()
-                .uri("/api/v1/carts/" + invalidCartId + "/items")
+                .uri("/api/v1/carts/" + invalidCartId + "/products")
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
     @Test
-    void assignCartToCustomer_success() {
+    void createCart_success() {
         String customerId = "customer123";
-        List<CartProduct> products = List.of(
-                CartProduct.builder().productId("prod1").build(),
-                CartProduct.builder().productId("prod2").build()
-        );
-        CartResponseModel response = CartResponseModel.builder().customerId(customerId).products(products).build();
-        Mockito.when(cartService.assignCartToCustomer(customerId, products))
+        CartRequestModel request = CartRequestModel.builder().customerId(customerId).build();
+        CartResponseModel response = CartResponseModel.builder()
+                .customerId(customerId)
+                .cartId("generated-cart-id")
+                .build();
+
+        Mockito.when(cartService.assignCartToCustomer(customerId))
                 .thenReturn(Mono.just(response));
 
         webTestClient.post()
-                .uri("/api/v1/carts/" + customerId + "/assign")
-                .bodyValue(products)
+                .uri("/api/v1/carts")
+                .bodyValue(request)
                 .exchange()
                 .expectStatus().isCreated()
                 .expectBody(CartResponseModel.class)
@@ -990,17 +991,14 @@ class CartControllerUnitTest {
     }
 
     @Test
-    void assignCartToCustomer_emptyResult() {
-        String customerId = "customer123";
-        List<CartProduct> products = List.of();
-        Mockito.when(cartService.assignCartToCustomer(customerId, products))
-                .thenReturn(Mono.empty());
+    void createCart_missingCustomerId_returns422() {
+        CartRequestModel request = CartRequestModel.builder().build();
 
         webTestClient.post()
-                .uri("/api/v1/carts/" + customerId + "/assign")
-                .bodyValue(products)
+                .uri("/api/v1/carts")
+                .bodyValue(request)
                 .exchange()
-                .expectStatus().isBadRequest();
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
     @Test

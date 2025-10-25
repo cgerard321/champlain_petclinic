@@ -215,7 +215,7 @@ public class CartControllerV1 {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
-    @DeleteMapping("/{cartId}/items")
+    @DeleteMapping("/{cartId}/products")
     public Mono<ResponseEntity<Void>> deleteAllItemsInCart(@PathVariable String cartId) {
     return cartServiceClient.deleteAllItemsInCart(cartId)
         .then(Mono.just(ResponseEntity.noContent().<Void>build()))
@@ -251,7 +251,7 @@ public class CartControllerV1 {
     return cartServiceClient.addProductToCart(cartId, requestDTO)
         .map(cartResponse -> {
             if (requestedProductId != null && !requestedProductId.isBlank()) {
-            return ResponseEntity.created(URI.create(String.format("/api/v1/carts/%s/items/%s", cartId, requestedProductId)))
+            return ResponseEntity.created(URI.create(String.format("/api/v1/carts/%s/products/%s", cartId, requestedProductId)))
                 .body(cartResponse);
             }
             return ResponseEntity.status(HttpStatus.CREATED).body(cartResponse);
@@ -264,18 +264,34 @@ public class CartControllerV1 {
         ));
     }
 
+    private Mono<ResponseEntity<CartResponseDTO>> handleQuantityUpdate(String cartId,
+                                    String productId,
+                                    UpdateProductQuantityRequestDTO requestDTO) {
+    return cartServiceClient.updateProductQuantityInCart(cartId, productId, requestDTO)
+        .map(ResponseEntity::ok)
+        .onErrorResume(e -> mapCartError(e,
+            ErrorOptions.builder("updateProductQuantityInCart")
+                .cartId(cartId)
+                .productId(productId)
+                .build()
+        ));
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
+    @PatchMapping("/{cartId}/products/{productId}")
+    public Mono<ResponseEntity<CartResponseDTO>> patchProductQuantityInCart(@PathVariable String cartId,
+                                        @PathVariable String productId,
+                                        @RequestBody UpdateProductQuantityRequestDTO requestDTO) {
+    return handleQuantityUpdate(cartId, productId, requestDTO);
+    }
+
+    @Deprecated
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
     @PutMapping("/{cartId}/products/{productId}")
-    public Mono<ResponseEntity<CartResponseDTO>> updateProductQuantityInCart(@PathVariable String cartId, @PathVariable String productId, @RequestBody UpdateProductQuantityRequestDTO requestDTO) {
-        return cartServiceClient.updateProductQuantityInCart(cartId, productId, requestDTO)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build())
-                .onErrorResume(e -> mapCartError(e,
-                        ErrorOptions.builder("updateProductQuantityInCart")
-                                .cartId(cartId)
-                                .productId(productId)
-                                .build()
-                ));
+    public Mono<ResponseEntity<CartResponseDTO>> updateProductQuantityInCart(@PathVariable String cartId,
+                                         @PathVariable String productId,
+                                         @RequestBody UpdateProductQuantityRequestDTO requestDTO) {
+    return handleQuantityUpdate(cartId, productId, requestDTO);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})

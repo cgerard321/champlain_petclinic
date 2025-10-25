@@ -485,7 +485,7 @@ const UserCart: React.FC = () => {
       }
 
       try {
-        const { data } = await axiosInstance.put(
+        const { data } = await axiosInstance.patch(
           `/carts/${cartId}/products/${item.productId}`,
           { quantity: newQuantity },
           { useV2: false }
@@ -596,7 +596,7 @@ const UserCart: React.FC = () => {
     if (!ok) return;
 
     try {
-      await axiosInstance.delete(`/carts/${cartId}/items`, { useV2: false });
+      await axiosInstance.delete(`/carts/${cartId}/products`, { useV2: false });
       setCartItems([]);
       setCartItemCount(0);
       setCartCountInLS(0);

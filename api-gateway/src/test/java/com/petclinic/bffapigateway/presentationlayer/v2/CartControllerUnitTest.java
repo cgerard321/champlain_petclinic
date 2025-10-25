@@ -68,8 +68,8 @@ public class CartControllerUnitTest {
                 when(cartServiceClient.deleteAllItemsInCart("cartId123")).thenReturn(Mono.empty());
 
                 // Act
-                client.delete()
-                                .uri("/api/v2/gateway/carts/cartId123/items")
+                        client.delete()
+                                .uri("/api/v2/gateway/carts/cartId123/products")
                                 .exchange()
                                 .expectStatus().isNoContent()
                                 .expectBody().isEmpty();
@@ -234,7 +234,7 @@ public class CartControllerUnitTest {
                 .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.CartItemRequestDTO("p-1", 2))
                 .exchange()
                 .expectStatus().isCreated()
-                .expectHeader().valueEquals("Location", "/api/v1/carts/" + cartId + "/items/p-1");
+                .expectHeader().valueEquals("Location", "/api/v1/carts/" + cartId + "/products/p-1");
 
         verify(cartServiceClient).addProductToCart(eq(cartId), any());
     }

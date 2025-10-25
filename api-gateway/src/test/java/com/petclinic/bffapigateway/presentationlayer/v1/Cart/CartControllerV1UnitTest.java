@@ -302,7 +302,7 @@ public class CartControllerV1UnitTest {
 
     // Tests for deleteAllItemsInCart endpoint
     @Test
-    @DisplayName("DELETE /api/gateway/carts/{cartId}/items - Should remove all items successfully")
+    @DisplayName("DELETE /api/gateway/carts/{cartId}/products - Should remove all products successfully")
     void deleteAllItemsInCart_withValidId_shouldReturnNoContent() {
         // Arrange
         String cartId = "cart-123";
@@ -311,7 +311,7 @@ public class CartControllerV1UnitTest {
 
         // Act & Assert
         webTestClient.delete()
-                .uri(baseCartURL + "/" + cartId + "/items")
+                .uri(baseCartURL + "/" + cartId + "/products")
                 .exchange()
                 .expectStatus().isNoContent()
                 .expectBody().isEmpty();
@@ -320,7 +320,7 @@ public class CartControllerV1UnitTest {
     }
 
     @Test
-    @DisplayName("DELETE /api/gateway/carts/{cartId}/items - Should return 404 when cart not found")
+    @DisplayName("DELETE /api/gateway/carts/{cartId}/products - Should return 404 when cart not found")
     void deleteAllItemsInCart_withNonExistingId_shouldReturnNotFound() {
         // Arrange
         String cartId = "non-existent-cart";
@@ -329,7 +329,7 @@ public class CartControllerV1UnitTest {
 
         // Act & Assert
         webTestClient.delete()
-                .uri(baseCartURL + "/" + cartId + "/items")
+                .uri(baseCartURL + "/" + cartId + "/products")
                 .exchange()
                 .expectStatus().isNotFound();
 
@@ -413,7 +413,7 @@ public class CartControllerV1UnitTest {
                 .bodyValue(requestDTO)
                 .exchange()
                 .expectStatus().isCreated()
-                .expectHeader().valueEquals("Location", "/api/v1/carts/" + cartId + "/items/" + requestDTO.getProductId())
+                .expectHeader().valueEquals("Location", "/api/v1/carts/" + cartId + "/products/" + requestDTO.getProductId())
                 .expectBody(CartResponseDTO.class)
                 .isEqualTo(updatedCart);
 
