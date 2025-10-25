@@ -6,6 +6,7 @@
   padding-bottom: 90px;
 }*/
 
+/* Remove border from .card so it doesn't affect other usages */
 .card {
   background-color: #fff;
   border: 1px solid #ddd;
@@ -18,11 +19,16 @@
   height: 100%;
   align-items: flex-start;
   text-align: left;
+  transition:
+    transform 0.16s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.16s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.16s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .card:hover {
-  box-shadow: 0 4px 10px rga(0, 0, 0, 0.15);
-  transform: translateY(-3px);
+  transform: translateY(-2px) scale(1.01); 
+  box-shadow: 0 10px 28px rgba(2, 6, 23, 0.12);
+  border-color: #e6eefb;
 }
 
 .card img,
@@ -38,7 +44,7 @@
   font-size: 1.2rem;
   margin: 8px 0;
   font-weight: bold;
-  color: #222;
+  color: #000000;
 }
 
 .card p {
@@ -51,23 +57,93 @@
 }
 
 .card button {
-  background-color: #777;
-  color: white;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  background-color: #2563eb; /* primary blue */
+  color: #fff;
+  border: none;
+  border-radius: 999px;
   cursor: pointer;
-  margin: auto;
+  font-size: 1rem;
+  font-weight: 600;
+  width: 170px;
+  height: 44px;
+  margin: 10px auto 0 auto;
   display: block;
-  font-size: 0.9rem;
-  width: 125px;
-  height: 37px;
-  margin-top: auto;
-  border-radius: 20px;
+  transition:
+    background 0.18s,
+    box-shadow 0.18s,
+    transform 0.18s;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
 }
 
 .card button:hover {
-  background-color: #222;
-  border-color: #bbb;
+  background-color: #174ea6;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.15);
+  transform: translateY(-2px);
+}
+
+.card button.add-to-wishlist-btn {
+  background-color: #22c55e; /* secondary green */
+  color: #fff;
+  margin-top: 10px;
+}
+
+.card button.add-to-wishlist-btn:hover {
+  background-color: #15803d;
+}
+
+.card .wishlist-heart-btn {
+  position: absolute;
+  top: -5px;
+  right: 0px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  width: auto;
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #e11d48;
+  font-size: 1.4rem;
+  cursor: pointer;
+  box-shadow: none;
+  transition: color 0.18s;
+  z-index: 2;
+}
+.card .wishlist-heart-btn:hover {
+  background: transparent;
+  box-shadow: none;
+  color: #e11d48;
+}
+
+.card button.add-to-cart-btn {
+  background-color: #2466f3;
+  color: #fff;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  width: 120px;
+  height: 36px;
+  margin: 10px 0 0 0;
+  display: block;
+  transition:
+    background 0.18s,
+    box-shadow 0.18s,
+    transform 0.18s;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
+}
+.card button.add-to-cart-btn:hover {
+  background-color: #2b75eb;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.15);
+  transform: translateY(-2px);
+}
+
+.add-to-cart-btn.disabled,
+.add-to-wishlist-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  text-decoration: line-through;
 }
 
 .deliveryType-container {
@@ -91,11 +167,3 @@
   color: #000;
   text-decoration: underline;
 }
-
-.add-to-cart-btn.disabled,
-.add-to-wishlist-btn.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  text-decoration: line-through;
-}
-
