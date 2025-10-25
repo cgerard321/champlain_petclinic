@@ -33,6 +33,7 @@ export default function VisitListTable(): JSX.Element {
   const [displayedVisits, setDisplayedVisits] = useState<Visit[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>(''); // Search term state
 
+  const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
   //use sidebar to select which table is shown
@@ -120,8 +121,12 @@ export default function VisitListTable(): JSX.Element {
         const fetchedVisits = await getAllVisits();
         setVisits(fetchedVisits);
         setDisplayedVisits(fetchedVisits);
-      } catch (error) {
-        console.error('Error fetching visits:', error);
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(`Failed to fetch visits: ${err.message}`);
+        } else {
+          setError('Failed to fetch visits');
+        }
       }
     };
     getVisits();
@@ -286,19 +291,7 @@ export default function VisitListTable(): JSX.Element {
                       title="Visit Details"
                       showButton={renderViewButton()}
                     >
-                      <div>
-                        This will set the status of this visit to Archived.
-                      </div>
-                      <div>Do you wish to proceed?</div>
-                      {showSuccessMessage && (
-                        <div
-                          className="visit-success-message"
-                          role="status"
-                          aria-live="polite"
-                        >
-                          {successMessage}
-                        </div>
-                      )}
+                      <VisitDetails visitId={visit.visitId} />
                     </BasicModal>
 
                     <EditingVisit
@@ -429,7 +422,7 @@ export default function VisitListTable(): JSX.Element {
   return (
     <div className="visit-page-container">
       {renderSidebar('Visits')}
-      {renderVisitsTables()}
+      {error ? <p>{error}</p> : <>{renderVisitsTables()}</>}
     </div>
   );
 }

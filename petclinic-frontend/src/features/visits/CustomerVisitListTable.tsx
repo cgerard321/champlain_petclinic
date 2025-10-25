@@ -335,16 +335,6 @@ export default function CustomerVisitListTable(): JSX.Element {
             Reviews
           </button>
         </li>
-        <li>
-          <button
-            className="btn btn-primary"
-            onClick={() => navigate(AppRoutePaths.CustomerAddReview)}
-            title="Write a Review"
-          >
-            <SvgIcon id="star-full" />
-            Write Review
-          </button>
-        </li>
         {categories.map(category =>
           renderSidebarItem(category.name, category.emergency)
         )}
