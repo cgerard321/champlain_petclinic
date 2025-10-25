@@ -1,5 +1,6 @@
 package com.petclinic.bffapigateway.dtos.Pets;
 
+import com.petclinic.bffapigateway.dtos.Files.FileDetails;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,11 +23,8 @@ public class PetResponseDTO {
     private String name;
     private Date birthDate;
     private String petTypeId;
-    //private String photoId;
     private String isActive;
     private String weight;
-
-    //private final List<VisitDetails> visits = new ArrayList<>();
-
+    private FileDetails photo;
 }
 

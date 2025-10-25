@@ -47,31 +47,38 @@ public class InventoryController {
     public Flux<ProductResponseDTO>
     getProductsInInventoryByInventoryIdAndProductField(@PathVariable String inventoryId,
                                                        @RequestParam(required = false) String productName,
-                                                       @RequestParam(required = false) Double productPrice,
+                                                       @RequestParam(required = false) Double minPrice,
+                                                       @RequestParam(required = false) Double maxPrice,
                                                        @RequestParam(required = false) Integer productQuantity,
-                                                       @RequestParam(required = false) Double productSalePrice
+                                                       @RequestParam(required = false) Double minSalePrice,
+                                                       @RequestParam(required = false) Double maxSalePrice
 
     ){
-        return productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, productPrice, productQuantity, productSalePrice);
+        return productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, minPrice, maxPrice, productQuantity, minSalePrice, maxSalePrice);
     }
 
     @GetMapping("/{inventoryId}/products-pagination")
     public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductFieldPagination(@PathVariable String inventoryId,
                                                                                                  @RequestParam(required = false) String productName,
-                                                                                                 @RequestParam(required = false) Double productPrice,
+                                                                                                 @RequestParam(required = false) Double minPrice,
+                                                                                                 @RequestParam(required = false) Double maxPrice,
                                                                                                  @RequestParam(required = false) Integer productQuantity,
+                                                                                                 @RequestParam(required = false) Double minSalePrice,
+                                                                                                 @RequestParam(required = false) Double maxSalePrice,
                                                                                                  @RequestParam Optional<Integer> page,
                                                                                                  @RequestParam Optional<Integer> size){
-        return productInventoryService.getProductsInInventoryByInventoryIdAndProductsFieldsPagination(inventoryId, productName, productPrice, productQuantity, PageRequest.of(page.orElse(0),size.orElse(5)));
+        return productInventoryService.getProductsInInventoryByInventoryIdAndProductsFieldsPagination(inventoryId, productName, minPrice, maxPrice, productQuantity, minSalePrice, maxSalePrice, PageRequest.of(page.orElse(0),size.orElse(5)));
     }
 
     @GetMapping("/{inventoryId}/products-count")
     public Mono<ResponseEntity<Long>> getTotalNumberOfProductsWithRequestParams(@PathVariable String inventoryId,
                                                                                @RequestParam(required = false) String productName,
-                                                                               @RequestParam(required = false) Double productPrice,
+                                                                               @RequestParam(required = false) Double minPrice,
+                                                                               @RequestParam(required = false) Double maxPrice,
                                                                                @RequestParam(required = false) Integer productQuantity,
-                                                                                @RequestParam(required = false) Double productSalePrice){
-        return productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, productPrice, productQuantity, productSalePrice).count()
+                                                                                @RequestParam(required = false) Double minSalePrice,
+                                                                                @RequestParam(required = false) Double maxSalePrice){
+        return productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, minPrice, maxPrice, productQuantity, minSalePrice, maxSalePrice).count()
                 .map(response -> ResponseEntity.status(HttpStatus.OK).body(response));
     }
 

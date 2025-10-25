@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RatingResponseModel {
-    Byte rating;
-    String review;
+    private Byte rating;
+    private String review;
 }

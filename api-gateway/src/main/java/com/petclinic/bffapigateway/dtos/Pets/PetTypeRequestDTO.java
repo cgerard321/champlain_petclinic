@@ -14,5 +14,4 @@ public class PetTypeRequestDTO {
 
     private String name;
     private String petTypeDescription;
-
 }

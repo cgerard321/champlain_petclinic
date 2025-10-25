@@ -39,7 +39,6 @@ class PetControllerUnitTest {
 
         // Set up test data
         petRequestDTO = PetRequestDTO.builder()
-                .petId("pet123")
                 .ownerId("owner123")
                 .name("Fluffy")
                 .birthDate(new Date())
@@ -60,14 +59,13 @@ class PetControllerUnitTest {
 
         ownerResponseDTO = new OwnerResponseDTO();
         ownerResponseDTO.setOwnerId("owner123");
-        ownerResponseDTO.setPets(new ArrayList<>(List.of(petResponseDTO)));
     }
 
     @Test
     void testUpdatePet_Success() {
         // Mock service layer methods
         when(customersServiceClient.updatePet(any(Mono.class), eq("pet123"))).thenReturn(Mono.just(petResponseDTO));
-        when(customersServiceClient.getOwner("owner123")).thenReturn(Mono.just(ownerResponseDTO));
+        when(customersServiceClient.getOwner("owner123", false)).thenReturn(Mono.just(ownerResponseDTO));
         when(customersServiceClient.updateOwner(eq("owner123"), any(Mono.class))).thenReturn(Mono.empty());
 
         Mono<ResponseEntity<PetResponseDTO>> result = petController.updatePet(Mono.just(petRequestDTO), "pet123");
@@ -92,9 +90,9 @@ class PetControllerUnitTest {
     @Test
     void testGetPetByPetId_Success() {
         // Mock service layer method
-        when(customersServiceClient.getPetByPetId("pet123")).thenReturn(Mono.just(petResponseDTO));
+        when(customersServiceClient.getPetByPetId("pet123", false)).thenReturn(Mono.just(petResponseDTO));
 
-        Mono<ResponseEntity<PetResponseDTO>> result = petController.getPetByPetId("pet123");
+        Mono<ResponseEntity<PetResponseDTO>> result = petController.getPetForOwner("Owner123","pet123", false);
 
         StepVerifier.create(result)
                 .expectNextMatches(response -> response.getStatusCode() == HttpStatus.OK && response.getBody().getPetId().equals("pet123"))
@@ -104,24 +102,12 @@ class PetControllerUnitTest {
     @Test
     void testGetPetByPetId_NotFound() {
         // Mock service layer method for not found scenario
-        when(customersServiceClient.getPetByPetId("pet123")).thenReturn(Mono.empty());
+        when(customersServiceClient.getPetByPetId("pet123", false)).thenReturn(Mono.empty());
 
-        Mono<ResponseEntity<PetResponseDTO>> result = petController.getPetByPetId("pet123");
+        Mono<ResponseEntity<PetResponseDTO>> result = petController.getPetForOwner("Owner123","pet123", false);
 
         StepVerifier.create(result)
                 .expectNextMatches(response -> response.getStatusCode() == HttpStatus.NOT_FOUND)
-                .verifyComplete();
-    }
-
-    @Test
-    void testGetPetsByOwnerId_Success() {
-        // Mock service layer method
-        when(customersServiceClient.getPetsByOwnerId("owner123")).thenReturn(Flux.just(petResponseDTO));
-
-        Flux<PetResponseDTO> result = petController.getPetsByOwnerId("owner123");
-
-        StepVerifier.create(result)
-                .expectNextMatches(pet -> pet.getPetId().equals("pet123"))
                 .verifyComplete();
     }
 
@@ -143,7 +129,7 @@ class PetControllerUnitTest {
                 .build();
 
         when(customersServiceClient.addPet(any(Mono.class))).thenReturn(Mono.just(newPetResponseDTO));
-        when(customersServiceClient.getOwner(anyString())).thenReturn(Mono.just(ownerResponseDTO));
+        when(customersServiceClient.getOwner(anyString(), eq(false))).thenReturn(Mono.just(ownerResponseDTO));
         when(customersServiceClient.updateOwner(anyString(), any(Mono.class))).thenReturn(Mono.empty());
 
         Mono<ResponseEntity<PetResponseDTO>> result = petController.addPet(Mono.just(newPetRequestDTO));
