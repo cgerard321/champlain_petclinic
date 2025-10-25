@@ -30,8 +30,11 @@ public class OwnerServiceImpl implements OwnerService {
 
     // insertOwner has been updated, now sets a UUID for ownerId rather than leave null
     @Override
-    public Mono<Owner> insertOwner(Mono<Owner> ownerMono) {
-        return ownerMono.flatMap(ownerRepo::insert);
+    public Mono<OwnerResponseDTO> addOwner(Mono<OwnerRequestDTO> ownerMono) {
+        return ownerMono
+                .map(EntityDTOUtil::toOwner)
+                .flatMap(ownerRepo::save)
+                .map(EntityDTOUtil::toOwnerResponseDTO);
     }
 
 
@@ -39,14 +42,12 @@ public class OwnerServiceImpl implements OwnerService {
     @Override
     public Mono<OwnerResponseDTO> getOwnerByOwnerId(String ownerId) {
         return ownerRepo.findOwnerByOwnerId(ownerId)
-                .switchIfEmpty(Mono.error(new NotFoundException("Owner not found with id : " + ownerId)))
                 .map(EntityDTOUtil::toOwnerResponseDTO);
     }
 
     @Override
     public Mono<OwnerResponseDTO> getOwnerByOwnerId(String ownerId, boolean includePhoto) {
         return ownerRepo.findOwnerByOwnerId(ownerId)
-                .switchIfEmpty(Mono.error(new NotFoundException("Owner not found with id : " + ownerId)))
                 .flatMap(owner -> {
                     OwnerResponseDTO dto = EntityDTOUtil.toOwnerResponseDTO(owner);
                     if (includePhoto && owner.getPhotoId() != null && !owner.getPhotoId().isEmpty()) {
@@ -67,12 +68,6 @@ public class OwnerServiceImpl implements OwnerService {
     }
 
     @Override
-    public Mono<Owner> getOwnerEntityByOwnerId(String ownerId) {
-        return ownerRepo.findOwnerByOwnerId(ownerId)
-                .switchIfEmpty(Mono.error(new NotFoundException("Owner not found with id : " + ownerId)));
-    }
-
-    @Override
     public Mono<Void> deleteOwner(String ownerId) {
         return ownerRepo.deleteById(ownerId);
     }
@@ -89,20 +84,17 @@ public class OwnerServiceImpl implements OwnerService {
 
     @Override
     public Mono<OwnerResponseDTO> updateOwner(Mono<OwnerRequestDTO> ownerRequestDTO, String ownerId) {
-
-            return ownerRepo.findOwnerByOwnerId(ownerId)
-                    .flatMap(existingOwner -> ownerRequestDTO.map(requestDTO -> {
-                        existingOwner.setFirstName(requestDTO.getFirstName());
-                        existingOwner.setLastName(requestDTO.getLastName());
-                        existingOwner.setAddress(requestDTO.getAddress());
-                        existingOwner.setCity(requestDTO.getCity());
-                        existingOwner.setProvince(requestDTO.getProvince());
-                        existingOwner.setTelephone(requestDTO.getTelephone());
-                        return existingOwner;
-                    } ))
-                    .flatMap(ownerRepo::save)
-                    .map(EntityDTOUtil::toOwnerResponseDTO);
-        }
+        return ownerRepo.findOwnerByOwnerId(ownerId)
+                .flatMap(owner -> ownerRequestDTO
+                        .map(EntityDTOUtil::toOwner)
+                        .doOnNext(o -> {
+                            o.setId(owner.getId());
+                            o.setOwnerId(ownerId);
+                        })
+                )
+                .flatMap(ownerRepo::save)
+                .map(EntityDTOUtil::toOwnerResponseDTO);
+    }
 
     @Override
     public Mono<OwnerResponseDTO> updateOwnerPhoto(String ownerId, FileRequestDTO photo) {

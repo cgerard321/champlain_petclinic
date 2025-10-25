@@ -3,10 +3,10 @@
 Champlain Final Project 1 420-N52-LA Pet Clinic repo
 
 - [Champlain Pet Clinic](#champlain-pet-clinic)
-  - [Source](#source)
-  - [Getting Started](#getting-started)
-  - [Questions or Issues?](#questions-or-issues)
-  - [Development Notes](#development-notes)
+    - [Source](#source)
+    - [Getting Started](#getting-started)
+    - [Questions or Issues?](#questions-or-issues)
+    - [Development Notes](#development-notes)
 - [Pull Request Guidelines](docs/pull-requests.md)
 - [Git Guidelines](docs/git-tips.md)
 - [React Coding Standards](docs/react-coding-standards.md)
