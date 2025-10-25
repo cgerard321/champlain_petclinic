@@ -31,10 +31,11 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
         };
 
         match find_session_by_id(db, sid).await {
-            Ok(Some(session)) => Outcome::Success(AuthenticatedUser {
+            Ok(session) => Outcome::Success(AuthenticatedUser {
                 user_id: session.user_id,
             }),
-            _ => Outcome::Error((Status::Unauthorized, ())),
+            Err(sqlx::Error::RowNotFound) => Outcome::Error((Status::Unauthorized, ())),
+            Err(_) => Outcome::Error((Status::InternalServerError, ())),
         }
     }
 }

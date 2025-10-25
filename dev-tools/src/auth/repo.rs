@@ -22,21 +22,29 @@ pub async fn insert_session(
     Ok(())
 }
 
-pub async fn find_session_by_id(db: &Db, sid: Uuid) -> sqlx::Result<Option<Session>> {
-    let row = sqlx::query(
+pub async fn find_session_by_id(db: &Db, sid: Uuid) -> sqlx::Result<Session> {
+    let r = sqlx::query(
         "SELECT id, user_id, created_at, expires_at
          FROM sessions WHERE id = ?",
     )
     .bind(sid.to_string())
-    .fetch_optional(&db.0)
+    .fetch_one(&db.0)
     .await?;
 
-    Ok(row.map(|r| Session {
-        id: Uuid::parse_str(r.get::<String, _>(0).as_str()).unwrap(),
-        user_id: Uuid::parse_str(r.get::<String, _>(1).as_str()).unwrap(),
-        created_at: r.get(2),
-        expires_at: r.get(3),
-    }))
+    let id_str: String = r.try_get("id")?;
+    let user_id_str: String = r.try_get("user_id")?;
+
+    let id = Uuid::parse_str(&id_str)
+        .map_err(|e| sqlx::Error::Protocol(format!("invalid UUID in sessions.id: {e}")))?;
+    let user_id = Uuid::parse_str(&user_id_str)
+        .map_err(|e| sqlx::Error::Protocol(format!("invalid UUID in sessions.user_id: {e}")))?;
+
+    Ok(Session {
+        id,
+        user_id,
+        created_at: r.try_get("created_at")?,
+        expires_at: r.try_get("expires_at")?,
+    })
 }
 
 pub async fn delete_session(db: &Db, sid: Uuid) -> sqlx::Result<()> {

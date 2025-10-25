@@ -1,5 +1,6 @@
 use crate::db::database::Db;
 use crate::users::user::FullUser;
+use crate::utils::db::safe_string_to_uuid;
 use sqlx::Row;
 use uuid::Uuid;
 
@@ -32,11 +33,9 @@ pub async fn get_user_auth_by_email(db: &Db, email: &str) -> sqlx::Result<FullUs
     .fetch_one(&db.0)
     .await?;
 
-    let id_str: String = row.try_get("id")?;
-    let id = Uuid::parse_str(&id_str).map_err(|_| sqlx::Error::ColumnDecode {
-        index: "id".into(),
-        source: Box::new(std::fmt::Error),
-    })?;
+    let id_str = row.try_get("id")?;
+
+    let id = safe_string_to_uuid(id_str).map_err(|_| sqlx::Error::Decode("Invalid UUID".into()))?;
 
     Ok(FullUser {
         id,
