@@ -1,184 +1,208 @@
-<!--        * Created by IntelliJ IDEA.-->
-<!--        * User: @JordanAlbayrak-->
-<!--        * Date: 22/09/21-->
-<!--        * Ticket: feat(AUTH-CPC-102)_signup_user-->
-<div style="display: flex; justify-content: center;">
-    <div style="width: 400px;">
-        <h2 class="text-center">Signup</h2>
+<div class="auth-shell">
+    <div class="auth-card">
+        <h1 class="auth-title">Create an account</h1>
+        <p class="auth-subtitle">Join PetClinic and get started</p>
 
-        <div class="alert alert-danger alert-dismissible text-center" role="alert" ng-repeat="error in errorMessages">
-            <a class="close" data-dismiss="alert" aria-label="close" ng-click="clearErrorMessages()">&times;</a>
+        <div class="auth-alert" ng-repeat="error in errorMessages" role="alert">
+            <button type="button" class="auth-alert__close" ng-click="clearErrorMessages($index)" aria-label="Dismiss error">&times;</button>
             <strong>Error:</strong> {{ error }}
         </div>
 
-        <form class="form-horizontal" ng-submit="$ctrl.add()" style="max-width: 100%;">
-            <div class="form-group">
-                <label for="firstName">First Name</label>
-                <input id="firstName" class="form-control" ng-model="signup.firstName" name="firstName" ng-disabled="$ctrl.checked" maxlength="50" pattern="^[\x20-\x7F]+$" required />
-                <span ng-show="ownerForm.firstName.$error.required" class="help-block">First name is required.</span>
-            </div>
-
-            <div class="form-group">
-                <label for="lastName">Last Name</label>
-                <input id="lastName" class="form-control" ng-model="signup.lastName" name="lastName" ng-disabled="$ctrl.checked" maxlength="50" pattern="^[\x20-\x7F]+$" required />
-                <span ng-show="ownerForm.lastName.$error.required" class="help-block">Last name is required.</span>
-            </div>
-
-            <div class="form-group">
-                <label for="address">Address</label>
-                <input id="address" class="form-control" ng-model="signup.address" name="address" ng-disabled="$ctrl.checked" maxlength="50" pattern="^[\x20-\x7F]+$" required />
-                <span ng-show="ownerForm.address.$error.required" class="help-block">Address is required.</span>
-            </div>
-
-            <div class="form-group">
-                <label for="city">City</label>
-                <input id="city" class="form-control" ng-model="signup.city" name="city" ng-disabled="$ctrl.checked" maxlength="50" pattern="^[\x20-\x7F]+$" required />
-                <span ng-show="ownerForm.city.$error.required" class="help-block">City is required.</span>
-            </div>
-
-            <div class="form-group">
-                <label for="province">Province</label>
-                <input id="province" class="form-control" ng-model="signup.province" name="province" ng-disabled="$ctrl.checked" maxlength="50" pattern="^[\x20-\x7F]+$" required />
-                <span ng-show="ownerForm.province.$error.required" class="help-block">Province is required.</span>
-            </div>
-
-            <div class="form-group">
-                <label for="telephone">Telephone</label>
-                <input id="telephone" class="form-control" ng-model="signup.telephone" name="telephone" ng-disabled="$ctrl.checked" maxlength="50" pattern="^[\x20-\x7F]+$" required />
-                <span ng-show="ownerForm.telephone.$error.required" class="help-block">Telephone is required.</span>
-            </div>
-
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input id="username" class="form-control" ng-model="signup.username" name="username" maxlength="50" pattern="^[\x20-\x7F]+$" required />
-                <span ng-show="signupForm.username.$error.required" class="help-block">Username is required.</span>
-            </div>
-
-            <div class="form-group">
-                <label for="password">Password</label>
-                <div class="input-group">
-                    <input id="password" class="form-control" type="password" ng-model="signup.password" name="password" required />
-                    <span class="input-group-addon" id="eye" onclick="viewPwd()" style="cursor: pointer;">
-                        <i class="bi bi-eye-slash"></i>
-                        <script>
-                        function viewPwd(){
-                            const x = document.getElementsByName("password")[0];
-                            if (x.getAttribute("type") === "password"){
-                                x.setAttribute("type", "text");
-                            } else {
-                                x.setAttribute("type", "password");
-                            }
-                        }
-                        </script>
-                    </span>
+        <form name="signupForm" ng-submit="$ctrl.add()" novalidate>
+            <div class="form-grid">
+                <div class="field">
+                    <label for="firstName" class="field__label">First Name</label>
+                    <input id="firstName" name="firstName" class="field__input" ng-model="signup.firstName" required />
                 </div>
-                <span ng-show="signupForm.password.$error.required" class="help-block">Password is required.</span>
-                <div id="password-strength" class="password-strength"></div>
+                <div class="field">
+                    <label for="lastName" class="field__label">Last Name</label>
+                    <input id="lastName" name="lastName" class="field__input" ng-model="signup.lastName" required />
+                </div>
+
+                <div class="field span-2">
+                    <label for="address" class="field__label">Address</label>
+                    <input id="address" name="address" class="field__input" ng-model="signup.address" required />
+                </div>
+
+                <div class="field">
+                    <label for="city" class="field__label">City</label>
+                    <input id="city" name="city" class="field__input" ng-model="signup.city" required />
+                </div>
+                <div class="field">
+                    <label for="province" class="field__label">Province</label>
+                    <input id="province" name="province" class="field__input" ng-model="signup.province" required />
+                </div>
+
+                <div class="field span-2">
+                    <label for="telephone" class="field__label">Telephone</label>
+                    <input id="telephone" name="telephone" class="field__input" ng-model="signup.telephone" required />
+                </div>
+
+                <div class="field span-2">
+                    <label for="email" class="field__label">Email</label>
+                    <input id="email" name="email" class="field__input" ng-model="signup.email" required />
+                </div>
+
+                <div class="field">
+                    <label for="username" class="field__label">Username</label>
+                    <input id="username" name="username" class="field__input" ng-model="signup.username" required />
+                </div>
+
+                <div class="field">
+                    <label for="password" class="field__label">Password</label>
+                    <div class="field__input-wrap">
+                        <input
+                                id="password"
+                                name="password"
+                                ng-attr-type="{{$ctrl.showPassword ? 'text' : 'password'}}"
+                                class="field__input field__input--with-btn"
+                                ng-model="signup.password"
+                                required
+                        />
+                        <button type="button" class="field__btn" ng-click="$ctrl.togglePassword()">
+                            <span ng-if="!$ctrl.showPassword">Show</span>
+                            <span ng-if="$ctrl.showPassword">Hide</span>
+                        </button>
+                    </div>
+                    <div class="password-strength" ng-class="$ctrl.pwStrength.class">
+                        {{$ctrl.pwStrength.text}}
+                    </div>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input id="email" class="form-control" ng-model="signup.email" name="email" required />
-                <span ng-show="signupForm.email.$error.required" class="help-block">Email is required.</span>
-            </div>
+            <button class="btn-primary" type="submit" ng-disabled="signupForm.$invalid || $ctrl.loading">
+                <span ng-if="!$ctrl.loading">Create Account</span>
+                <span ng-if="$ctrl.loading">Creating…</span>
+            </button>
 
-            <div style="padding-left: 42%">
-                <div id="loaderDiv" class="loader m-2"></div>
-            </div>
-
-            <div class="form-group text-center">
-                <button class="btn btn-primary" type="submit">Submit</button>
+            <div class="auth-secondary">
+                <a class="link" ui-sref="login">Already have an account?</a>
             </div>
         </form>
-
     </div>
 </div>
 
-<script>
-
-    const passwordInput = document.getElementById("password");
-    const passwordStrength = document.getElementById("password-strength");
-
-    passwordInput.addEventListener("input", updatePasswordStrength);
-
-    function updatePasswordStrength() {
-        const password = passwordInput.value;
-        const strength = calculatePasswordStrength(password);
-        const strengthText = getStrengthText(strength);
-
-        passwordStrength.textContent = strengthText;
-        passwordStrength.className = `password-strength strength-${strength}`;
-    }
-
-    function calculatePasswordStrength(password) {
-
-        const pattern = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=*!()_.<>,{}])(?=\S+$).{8,}$/;
-
-        if (pattern.test(password)) {
-            return 3;
-        } else if (password.length >= 8) {
-            return 2;
-        } else {
-            return 1;
-        }
-    }
-
-    function getStrengthText(strength) {
-        switch (strength) {
-            case 1:
-                return "Weak";
-            case 2:
-                return "Medium";
-            case 3:
-                return "Strong";
-            default:
-                return "";
-        }
-    }
-
-</script>
-
 <style>
-    .loader {
-        border: 8px solid #f3f3f3;
-        border-top: 8px solid #005d9a;
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        animation: spin 1s linear infinite;
+    .auth-shell {
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        background:
+                radial-gradient(900px 500px at 10% -20%, rgba(17,24,39,0.02), transparent 60%),
+                radial-gradient(700px 400px at 110% 110%, rgba(17,24,39,0.03), transparent 60%),
+                linear-gradient(180deg, #f6f7fb 0%, #ffffff 100%);
+        color: #111827;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, Inter, sans-serif;
     }
 
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+    .auth-card {
+        width: 100%;
+        max-width: 760px;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 28px;
+        box-shadow: 0 10px 20px rgba(17, 24, 39, 0.06), 0 2px 6px rgba(17, 24, 39, 0.04);
     }
 
-    .form-group {
-        margin-bottom: 20px;
+    .auth-title { margin: 0 0 6px; font-size: 1.6rem; font-weight: 700; color: #0f172a; }
+    .auth-subtitle { margin: 0 0 22px; color: #6b7280; }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px 20px;
+        margin-bottom: 18px;
+    }
+    @media (min-width: 768px) {
+        .form-grid { grid-template-columns: 1fr 1fr; }
+        .span-2 { grid-column: 1 / span 2; }
     }
 
-    label {
-        font-weight: bold;
+    .field { display: flex; flex-direction: column; }
+    .field__label { margin-bottom: 6px; font-weight: 600; color: #111827; }
+    .field__input {
+        height: 52px;
+        font-size: 16px;
+        background: #fff;
+        color: #111827;
+        border: 1px solid #d1d5db;
+        border-radius: 12px;
+        padding: 0 14px;
+        outline: none;
+        transition: border-color .15s, box-shadow .15s;
+    }
+    .field__input::placeholder { color: #9ca3af; }
+    .field__input:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99,102,241,.22);
     }
 
-    .help-block {
-        color: red;
+    .field__input-wrap {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+    .field__input--with-btn {
+        flex: 1;
+        padding-right: 100px;
+        box-sizing: border-box;
+    }
+    .field__btn {
+        position: absolute;
+        right: 8px;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 0 14px;
+        height: 36px;
+        background: #f3f4f6;
+        color: #374151;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        transition: background .15s, color .15s, border-color .15s;
+    }
+    .field__btn:hover {
+        background: #e5e7eb;
+        color: #111827;
     }
 
-    .password-strength {
-        font-weight: bold;
-        margin-top: 5px;
+    .password-strength { margin-top: 6px; font-weight: 600; }
+    .strength-1 { color: #dc2626; }
+    .strength-2 { color: #f59e0b; }
+    .strength-3 { color: #16a34a; }
+
+    .auth-alert {
+        position: relative;
+        background: #fee2e2;
+        border: 1px solid #fecaca;
+        color: #991b1b;
+        border-radius: 12px;
+        padding: 12px 40px 12px 12px;
+        margin-bottom: 12px;
+    }
+    .auth-alert__close {
+        position: absolute; right: 8px; top: 6px;
+        background: transparent; border: 0;
+        color: #991b1b; font-size: 20px; cursor: pointer;
     }
 
-    .strength-1 {
-        color: red;
+    .btn-primary {
+        width: 100%; height: 52px;
+        border: 0; border-radius: 12px; font-weight: 700;
+        background: linear-gradient(90deg, #6366f1, #8b5cf6);
+        color: #fff; cursor: pointer;
+        transition: opacity .15s, transform .06s;
     }
+    .btn-primary:hover { opacity: .95; }
+    .btn-primary:active { transform: translateY(1px); }
+    .btn-primary[disabled] { opacity: .6; cursor: not-allowed; }
 
-    .strength-2 {
-        color: orange;
-    }
-
-    .strength-3 {
-        color: green;
-    }
+    .auth-secondary { display: flex; justify-content: flex-end; margin-top: 10px; }
+    .link { color: #2563eb; text-decoration: none; font-weight: 600; }
+    .link:hover { text-decoration: underline; }
 </style>

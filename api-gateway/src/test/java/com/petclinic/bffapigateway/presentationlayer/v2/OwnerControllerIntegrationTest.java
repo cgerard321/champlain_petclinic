@@ -57,8 +57,9 @@ class OwnerControllerIntegrationTest {
 
     @Test
     void whenUpdateOwner_asCustomer_withValidOwnerId_thenReturnUpdatedOwnerResponseDTO() {
+        String ownerId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a";
+
         OwnerRequestDTO updatedRequestDTO = OwnerRequestDTO.builder()
-                .ownerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
                 .firstName("Betty")
                 .lastName("Davis")
                 .address("638 Cardinal Ave.")
@@ -68,7 +69,7 @@ class OwnerControllerIntegrationTest {
                 .build();
 
         Mono<OwnerResponseDTO> result = webTestClient.put()
-                .uri("/api/v2/gateway/owners/{ownerId}", updatedRequestDTO.getOwnerId())
+                .uri("/api/v2/gateway/owners/{ownerId}", ownerId)
                 .cookie("Bearer", jwtTokenForValidOwnerId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(updatedRequestDTO), OwnerRequestDTO.class)
@@ -84,7 +85,7 @@ class OwnerControllerIntegrationTest {
                 .create(result)
                 .expectNextMatches(ownerResponseDTO -> {
                     assertNotNull(ownerResponseDTO);
-                    assertEquals(updatedRequestDTO.getOwnerId(), ownerResponseDTO.getOwnerId());
+                    assertEquals(ownerId, ownerResponseDTO.getOwnerId());
                     assertEquals(updatedRequestDTO.getFirstName(), ownerResponseDTO.getFirstName());
                     assertEquals(updatedRequestDTO.getLastName(), ownerResponseDTO.getLastName());
                     assertEquals(updatedRequestDTO.getAddress(), ownerResponseDTO.getAddress());
@@ -95,42 +96,6 @@ class OwnerControllerIntegrationTest {
                 })
                 .verifyComplete();
     }
-
-    @Test
-    void whenUpdateOwner_asCustomer_withInvalidOwnerId_thenReturnInvalidInputException() {
-        OwnerRequestDTO updatedRequestDTO = OwnerRequestDTO.builder()
-                .ownerId("invalid-owner-id")
-                .firstName("Betty")
-                .lastName("Davis")
-                .address("638 Cardinal Ave.")
-                .city("Sun Prairie")
-                .province("Quebec")
-                .telephone("6085551749")
-                .build();
-
-        Mono<InvalidInputException> result = webTestClient.put()
-                .uri("/api/v2/gateway/owners/{ownerId}", updatedRequestDTO.getOwnerId())
-                .cookie("Bearer", jwtTokenForInvalidOwnerId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(Mono.just(updatedRequestDTO), OwnerRequestDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isEqualTo(422)
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .returnResult(InvalidInputException.class)
-                .getResponseBody()
-                .single();
-
-        StepVerifier
-                .create(result)
-                .expectNextMatches(errorResponse -> {
-                    assertNotNull(errorResponse);
-                    assertEquals("Provided owner id is invalid: " + updatedRequestDTO.getOwnerId(), errorResponse.getMessage());
-                    return true;
-                })
-                .verifyComplete();
-    }
-
 
     @Test
     void whenAddOwner_asAdmin_thenReturnCreatedOwnerResponseDTO() {

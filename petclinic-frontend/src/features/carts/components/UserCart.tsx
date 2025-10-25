@@ -5,6 +5,7 @@ import InvoiceComponent, {
   InvoiceItem as InvoiceItemType,
 } from './Invoice';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useCart } from '@/context/CartContext';
 import CartItem from './CartItem';
 import { ProductModel } from '../models/ProductModel';
 import './cart-shared.css';
@@ -63,6 +64,7 @@ interface Invoice {
 const UserCart: React.FC = () => {
   const navigate = useNavigate();
   const { cartId } = useParams<{ cartId?: string }>();
+  const { syncAfterAddToCart } = useCart();
   const { confirm, ConfirmModal } = useConfirmModal();
 
   const [cartItems, setCartItems] = useState<ProductModel[]>([]);
@@ -258,11 +260,7 @@ const UserCart: React.FC = () => {
           })
         );
         setCartItems(products);
-        const updatedCount = products.reduce(
-          (acc, p) => acc + (p.quantity || 0),
-          0
-        );
-        setCartCountInLS(updatedCount);
+        await syncAfterAddToCart();
       }
     } catch (err: unknown) {
       const msg =
@@ -329,11 +327,7 @@ const UserCart: React.FC = () => {
 
         setCartItems(products);
         setCartIdInLS(cartId);
-        const countFromFetch = products.reduce(
-          (acc, p) => acc + (p.quantity || 0),
-          0
-        );
-        setCartCountInLS(countFromFetch);
+        await syncAfterAddToCart();
         const enrichedWishlist = await Promise.all(
           (data.wishListProducts || []).map(async (item: ProductModel) => {
             const fullProduct = await getProductByProductId(item.productId);
@@ -360,7 +354,7 @@ const UserCart: React.FC = () => {
     };
 
     fetchCartItems();
-  }, [cartId, wishlistUpdated]);
+  }, [cartId, wishlistUpdated, syncAfterAddToCart]);
 
   useEffect(() => {
     updateCartItemCount();

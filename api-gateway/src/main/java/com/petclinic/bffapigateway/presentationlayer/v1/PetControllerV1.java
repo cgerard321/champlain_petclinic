@@ -24,13 +24,12 @@ public class PetControllerV1 {
     private final CustomersServiceClient customersServiceClient;
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET, Roles.OWNER,Roles.RECEPTIONIST})
-    @GetMapping("/{ownerId}/pets/{petId}")
+    @GetMapping("/{petId}")
     public Mono<ResponseEntity<PetResponseDTO>> getPetByPetId(
-            @PathVariable String ownerId,
             @PathVariable String petId,
             @RequestParam(required = false, defaultValue = "false") boolean includePhoto) {
 
-        return customersServiceClient.getPet(ownerId, petId, includePhoto)
+        return customersServiceClient.getPetByPetId(petId, includePhoto)
                 .map(p -> ResponseEntity.ok(p))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
@@ -82,4 +81,19 @@ public class PetControllerV1 {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.OWNER,Roles.ADMIN,Roles.VET})
+    @PatchMapping(value = "/{petId}/active", produces = "application/json")
+    public Mono<ResponseEntity<PetResponseDTO>> patchPet(@RequestParam String isActive, @PathVariable String petId) {
+        return customersServiceClient.patchPet(isActive, petId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET, Roles.OWNER})
+    @PatchMapping("/{petId}/photo")
+    public Mono<ResponseEntity<PetResponseDTO>> deletePetPhoto(@PathVariable String petId) {
+        return customersServiceClient.deletePetPhoto(petId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 }

@@ -20,7 +20,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.never;
 
 @ExtendWith(SpringExtension.class)
 @WebFluxTest(controllers = PetController.class)
@@ -40,7 +39,7 @@ public class PetControllerUnitTest {
         when(petService.deletePetByPetIdV2(pet.getPetId())).thenReturn(Mono.just(petResponseDTO));
 
         webTestClient.delete()
-                .uri("/pet/{petId}/v2", pet.getPetId())
+                .uri("/pets/{petId}/v2", pet.getPetId())
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(PetResponseDTO.class)
@@ -58,7 +57,7 @@ public class PetControllerUnitTest {
         when(petService.createPetForOwner(anyString(), any(Mono.class))).thenReturn(Mono.just(expectedResponse));
 
         webTestClient.post()
-                .uri("/pet/owners/{ownerId}/pets", ownerId)
+                .uri("/pets/owners/{ownerId}/pets", ownerId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(petRequest)
                 .exchange()
@@ -78,7 +77,7 @@ public class PetControllerUnitTest {
                 .thenReturn(Mono.error(new NotFoundException("Owner not found with id: " + invalidOwnerId)));
 
         webTestClient.post()
-                .uri("/pet/owners/{ownerId}/pets", invalidOwnerId)
+                .uri("/pets/owners/{ownerId}/pets", invalidOwnerId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(petRequest)
                 .exchange()
@@ -87,11 +86,42 @@ public class PetControllerUnitTest {
         verify(petService).createPetForOwner(anyString(), any(Mono.class));
     }
 
+    @Test
+    void deletePetPhoto_ShouldReturnOk() {
+        PetResponseDTO petResponseDTO = buildPetResponseDTO();
+        String petId = "0e4d8481-b611-4e52-baed-af16caa8bf8a";
+        
+        when(petService.deletePetPhoto(petId)).thenReturn(Mono.just(petResponseDTO));
+
+        webTestClient.patch()
+                .uri("/pets/{petId}/photo", petId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(PetResponseDTO.class)
+                .isEqualTo(petResponseDTO);
+
+        verify(petService).deletePetPhoto(petId);
+    }
+
+    @Test
+    void deletePetPhoto_WithNonExistentPet_ShouldReturnNotFound() {
+        String petId = "00000000-0000-0000-0000-000000000000";
+        
+        when(petService.deletePetPhoto(petId)).thenReturn(Mono.empty());
+
+        webTestClient.patch()
+                .uri("/pets/{petId}/photo", petId)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        verify(petService).deletePetPhoto(petId);
+    }
+
     private Pet buildPet() {
         return Pet.builder()
-                .petId("a-very-valid-pet-id")
+                .petId("c947af59-c389-416e-86d8-7f6132476590")
                 .name("Cookie")
-                .ownerId("a-very-valid-owner-id")
+                .ownerId("a0ebbe09-e555-4256-aa1a-525b32c37a31")
                 .petTypeId("1")
                 .birthDate(new Date())
                 .isActive("true")

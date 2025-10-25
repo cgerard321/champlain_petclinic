@@ -5,6 +5,7 @@ import { getPetTypes } from '../api/getPetTypes';
 import { PetRequestModel } from '../models/PetRequestModel';
 import { PetResponseModel } from '../models/PetResponseModel';
 import { PetTypeModel } from '../models/PetTypeModel';
+import defaultProfile from '@/assets/Owners/defaultProfilePicture.png';
 import './customers.css';
 
 interface AddPetModalProps {
@@ -34,6 +35,7 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [petTypes, setPetTypes] = useState<PetTypeModel[]>([]);
   const [isLoadingPetTypes, setIsLoadingPetTypes] = useState(true);
+  const [petPhotoUrl, setPetPhotoUrl] = useState<string>(defaultProfile);
 
   useEffect(() => {
     const fetchPetTypes = async (): Promise<void> => {
@@ -125,6 +127,7 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
     setIsDateInputFocused(false);
     setErrors({});
     setIsSubmitting(false);
+    setPetPhotoUrl(defaultProfile);
     onClose();
   };
 
@@ -139,6 +142,19 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
           <button className="customer-modal-close" onClick={handleClose}>
             &times;
           </button>
+        </div>
+
+        <div className="pet-photo-section">
+          <div className="pet-photo-container">
+            <img
+              src={petPhotoUrl}
+              alt="New pet profile"
+              className="pet-photo"
+            />
+            <p className="pet-photo-note">
+              Default photo will be assigned based on pet type
+            </p>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="add-pet-form">
