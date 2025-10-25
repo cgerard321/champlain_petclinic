@@ -231,7 +231,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.Visits,
         element: (
-          <ProtectedRoute roles={['ADMIN', 'VET']}>
+          <ProtectedRoute roles={['ADMIN', 'VET', 'RECEPTIONIST']}>
             <Visits />
           </ProtectedRoute>
         ),

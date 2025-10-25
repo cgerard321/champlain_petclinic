@@ -6,6 +6,7 @@ import com.petclinic.customersservice.data.PetRepo;
 import com.petclinic.customersservice.presentationlayer.PetRequestDTO;
 import com.petclinic.customersservice.presentationlayer.PetResponseDTO;
 import com.petclinic.customersservice.presentationlayer.OwnerResponseDTO;
+import com.petclinic.customersservice.domainclientlayer.FilesServiceClient;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -29,6 +30,9 @@ public class PetServiceUnitTest {
 
     @Mock
     private OwnerService ownerService;
+
+    @Mock
+    private FilesServiceClient filesServiceClient;
 
     @InjectMocks
     private PetServiceImpl petService;

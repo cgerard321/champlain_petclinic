@@ -16,4 +16,5 @@ public interface PetService {
     Mono<PetResponseDTO> updatePetIsActive(String petId, String isActive);
     Flux<PetResponseDTO> getAllPets();
     Mono<PetResponseDTO> createPetForOwner(String ownerId, Mono<PetRequestDTO> petRequestDTO);
+    Mono<PetResponseDTO> deletePetPhoto(String petId);
 }

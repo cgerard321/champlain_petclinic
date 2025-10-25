@@ -88,4 +88,12 @@ public class PetControllerV1 {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET, Roles.OWNER})
+    @PatchMapping("/{petId}/photo")
+    public Mono<ResponseEntity<PetResponseDTO>> deletePetPhoto(@PathVariable String petId) {
+        return customersServiceClient.deletePetPhoto(petId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 }
