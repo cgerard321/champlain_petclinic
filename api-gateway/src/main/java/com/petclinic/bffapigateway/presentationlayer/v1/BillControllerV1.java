@@ -30,8 +30,6 @@ public class BillControllerV1 {
 
     private final BillServiceClient billServiceClient;
     
-    @Value("${spring.profiles.active:}")
-    private String activeProfiles;
 
     // Define endpoints to interact with the BillServiceClient here
 
