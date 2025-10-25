@@ -30,7 +30,7 @@ public class IdGenerator {
         private final String prefix;
         private final AtomicInteger suffix = new AtomicInteger(0);
         private final AtomicInteger width = new AtomicInteger(MINIMAL_SUFFIX_LENGTH);
-        private volatile String latestDate;
+        private String latestDate;
         // This is to avoid race condition
         private final Object lock = new Object();
 
