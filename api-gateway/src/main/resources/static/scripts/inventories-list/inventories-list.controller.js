@@ -8,25 +8,131 @@ angular.module('inventoriesList')
       self.currentPage = $stateParams.page = 0;
       self.listSize = $stateParams.size = 10;
       self.realPage = parseInt(self.currentPage) + 1;
+
+      self.inventoryList = [];
+      $scope.inventoryTypeOptions = [];
+
       var numberOfPage;
       var name;
       var code;
       var type;
       var desc;
 
+
+
       getInventoryList();
-      $http.get('api/gateway/inventories').then(function (resp) {
-        self.inventoryList = resp.data;
-        console.log("Resp data: " + resp.data);
-        console.log("inventory list: " + self.inventoryList);
-      });
+
       $scope.inventoryTypeOptions = [];
-      //custom types handler
-      $http.get("api/gateway/inventories/types").then(function (resp) {
-        resp.data.forEach(function (type) {
-          $scope.inventoryTypeOptions.push(type.type);
+
+      (function initTypesSSE () {
+        if ($scope.inventoryTypeOptions.length) return;
+
+        var es = new EventSource('api/gateway/inventories/types');
+        var seen = new Set();
+        var idleTimer = null;
+        var IDLE_MS = 1000;
+        var reconnects = 0;
+        var MAX_RECONNECTS = 2;
+
+        function bumpIdle() {
+          if (idleTimer) clearTimeout(idleTimer);
+          idleTimer = setTimeout(function () {
+            try { es.close(); } catch (e) {}
+          }, IDLE_MS);
+        }
+
+        function addType(t) {
+          if (!t) return;
+          var label = (typeof t === 'string') ? t : (t.type || t.inventoryType);
+          if (!label || seen.has(label)) return;
+          seen.add(label);
+          $scope.$evalAsync(function () { $scope.inventoryTypeOptions.push(label); });
+        }
+
+        es.onopen = function () { reconnects = 0; };
+
+        es.onmessage = function (e) {
+          if (!e.data || e.data === 'heartbeat' || e.data === ':') { bumpIdle(); return; }
+          try {
+            var payload = JSON.parse(e.data);
+            if (Array.isArray(payload)) payload.forEach(addType);
+            else addType(payload);
+          } catch (_e) {
+            addType(e.data);
+          }
+          bumpIdle();
+        };
+
+        es.onerror = function () {
+          if (es.readyState !== EventSource.OPEN) {
+            reconnects += 1;
+            if (reconnects > MAX_RECONNECTS) {
+              try { es.close(); } catch (e) {}
+            }
+          }
+        };
+
+        $scope.$on('$destroy', function () {
+          if (idleTimer) clearTimeout(idleTimer);
+          try { es.close(); } catch (e) {}
         });
-      });
+      })();
+
+      (function initInventoriesSSE () {
+        var esInv = new EventSource('api/gateway/inventories');
+        var idleTimer = null;
+        var INV_IDLE_MS = 2000;
+        var reconnects = 0;
+        var MAX_RECONNECTS = 2;
+
+        function bumpIdle() {
+          if (idleTimer) clearTimeout(idleTimer);
+          idleTimer = setTimeout(function () {
+            try { esInv.close(); } catch (e) {}
+          }, INV_IDLE_MS);
+        }
+
+        function upsertById(list, item, idKey) {
+          if (!item || !list || !Array.isArray(list)) return;
+          var idx = list.findIndex(function (x) { return x[idKey] === item[idKey]; });
+          if (idx >= 0) list[idx] = item; else list.unshift(item);
+        }
+
+        esInv.onopen = function () { reconnects = 0; };
+
+        esInv.onmessage = function (e) {
+          if (!e.data || e.data === 'heartbeat' || e.data === ':') { bumpIdle(); return; }
+          try {
+            var payload = JSON.parse(e.data);
+            $scope.$evalAsync(function () {
+              if (!Array.isArray(self.inventoryList)) self.inventoryList = [];
+
+              if (Array.isArray(payload)) {
+                payload.forEach(function (it) { upsertById(self.inventoryList, it, 'inventoryId'); });
+              } else {
+                upsertById(self.inventoryList, payload, 'inventoryId');
+              }
+            });
+          } catch (_e) {
+          }
+          bumpIdle();
+        };
+
+
+        esInv.onerror = function () {
+          if (esInv.readyState !== EventSource.OPEN) {
+            reconnects += 1;
+            if (reconnects > MAX_RECONNECTS) {
+              try { esInv.close(); } catch (e) {}
+            }
+          }
+        };
+
+        $scope.$on('$destroy', function () {
+          if (idleTimer) clearTimeout(idleTimer);
+          try { esInv.close(); } catch (e) {}
+        });
+      })();
 
       //clear inventory queries
       $scope.clearQueries = function (){

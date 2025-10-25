@@ -952,7 +952,7 @@ public class InventoryControllerTest {
         // Act
         client.get()
                 .uri(baseInventoryURL + "/all")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(InventoryResponseDTO.class)
