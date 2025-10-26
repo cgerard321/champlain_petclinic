@@ -1,4 +1,5 @@
 import { AxiosError } from 'axios';
+import axiosInstance from "@/shared/api/axiosInstance.ts";
 
 // Map status codes to their respective error pages
 const errorPageRedirects: Record<number, string> = {
@@ -17,10 +18,11 @@ export default function axiosErrorResponseHandler(
   // Specific handling for 401 Unauthorized
   if (statusCode === 401) {
     console.error(
-      'Unauthorized access. Clearing credentials and redirecting to home.'
+      'Unauthorized access. Trying to retrieve access to the server.'
     );
-    localStorage.clear();
-    return;
+        axiosInstance.post('/users/logout', {});
+        localStorage.clear();
+
   }
 
   const redirectPath = errorPageRedirects[statusCode];
