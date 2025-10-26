@@ -1,10 +1,11 @@
 import axiosInstance from '@/shared/api/axiosInstance.ts';
-import { VisitResponseModel } from '../models/VisitResponseModel';
+import { Visit } from '@/features/visits/models/Visit.ts';
 
-export async function getAllVisits(): Promise<VisitResponseModel[]> {
+export async function getVisitsForPet(petId: string): Promise<Visit[]> {
   try {
-    const response = await axiosInstance.get('/visits', {
-      responseType: 'stream',
+    const cleanPetId = petId.trim();
+    const response = await axiosInstance.get(`/visits/pets/${cleanPetId}`, {
+      responseType: 'text',
       useV2: false,
     });
 
@@ -15,23 +16,20 @@ export async function getAllVisits(): Promise<VisitResponseModel[]> {
 
     return response.data
       .split('data:')
-      .map((payload: string): VisitResponseModel | null => {
+      .map((payload: string): Visit | null => {
         try {
           const trimmed = payload.trim();
           if (trimmed === '') return null;
 
-          return JSON.parse(trimmed) as VisitResponseModel;
+          return JSON.parse(trimmed) as Visit;
         } catch (err) {
           console.error("Can't parse JSON:", err);
           return null;
         }
       })
-      .filter(
-        (data: VisitResponseModel | null): data is VisitResponseModel =>
-          data !== null
-      );
+      .filter((data: Visit | null): data is Visit => data !== null);
   } catch (error) {
-    console.error('Error fetching visits:', error);
+    console.error('Error fetching visits for pet:', error);
     throw error;
   }
 }
