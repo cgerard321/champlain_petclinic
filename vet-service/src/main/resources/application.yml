@@ -95,7 +95,7 @@ spring:
       username: root
       password: password
       authentication-database: admin
-      
+
   # set to 2MB as only file transfers are images which dont need much memory
   codec:
     max-in-memory-size: 2MB
