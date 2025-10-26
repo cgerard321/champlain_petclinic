@@ -17,12 +17,20 @@ export default function axiosErrorResponseHandler(
 ): void {
   // Specific handling for 401 Unauthorized
   if (statusCode === 401) {
-    console.error(
-      'Unauthorized access. Trying to retrieve access to the server.'
-    );
-        axiosInstance.post('/users/logout', {});
-        localStorage.clear();
+      const wasLoggedIn = localStorage.getItem('user') !== null;
 
+      if (wasLoggedIn) {
+          console.error('Session expired. Logging out and redirecting to unauthorized page.');
+
+          axiosInstance.post('/users/logout', {}).catch(() => {
+          });
+
+          localStorage.clear();
+
+          sessionStorage.setItem('sessionExpired', 'true');
+      } else {
+          console.error('Unauthorized access detected.');
+      }
   }
 
   const redirectPath = errorPageRedirects[statusCode];
