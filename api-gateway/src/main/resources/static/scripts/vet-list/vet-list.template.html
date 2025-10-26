@@ -60,8 +60,33 @@
     </tr>
 
 
-
-
+    <div
+            ng-if="isDeleteModalOpen"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Delete disabled"
+            ng-click="closeDeleteModal()"
+            class="delete-modal-backdrop"
+    >
+        <div
+                ng-click="$event.stopPropagation()"
+                class="delete-modal-content"
+        >
+            <h3 class="delete-modal-header">Function temporarily disabled</h3>
+            <p class="delete-modal-body">
+                The delete vet feature is temporarily disabled. It will be
+                re-enabled later.
+            </p>
+            <div>
+                <button
+                        ng-click="closeDeleteModal()"
+                        class="delete-modal-button"
+                >
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
 
 
     <div class="modal m{{vet.vetId}} modalOff" ng-repeat="vet in $ctrl.vetList" >
