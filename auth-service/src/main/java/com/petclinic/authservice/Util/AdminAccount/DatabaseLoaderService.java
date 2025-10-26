@@ -175,14 +175,6 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 .verified(true)
                 .build();
 
-        User ownerEmail = User.builder()
-                .username("UserEmail")
-                .userIdentifier(new UserIdentifier("123e4567-e89b-12d3-a456-426614174000"))
-                .roles(owners)
-                .email("blade.loghin@gmail.com")
-                .password(passwordEncoder.encode("pwd"))
-                .verified(true)
-                .build();
 
 
         User vet1 = User.builder()
@@ -252,6 +244,6 @@ public class DatabaseLoaderService implements CommandLineRunner {
 
         userRepo.saveAll(List.of(vet1, vet2, vet3, vet4, vet5, vet6, vet7));
 
-        userRepo.saveAll(List.of(owner1, owner2, owner3, owner4, owner5, owner6, owner7, owner8, owner9, owner10, ownerEmail));
+        userRepo.saveAll(List.of(owner1, owner2, owner3, owner4, owner5, owner6, owner7, owner8, owner9, owner10));
     }
 }

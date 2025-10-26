@@ -90,19 +90,9 @@ public class DataSetupService implements CommandLineRunner {
                 "2749 Blackhawk Trail", "Madison", "Quebec", "6085559435", null);
         Owner o10 = new Owner("10", "7c0d42c2-0c2d-41ce-bd9c-6ca67478956f", "Carlos", "Esteban",
                 "2335 Independence La.", "Waunakee", "Ontario", "6085555487", null);
-        Owner newOwner = new Owner(
-                "11", // or any unique string ID if you use numeric/string IDs internally
-                "123e4567-e89b-12d3-a456-426614174000", // same UUID as your bill request
-                "Vlad", // first name
-                "Loghin", // last name
-                "3765 place Nogent", // address
-                "Brossard", // city
-                "Quebec", // province
-                "5149123354", // phone number
-                null
-        );
 
-        Flux.just(o1, o2, o3, o4, o5, o6, o7, o8, o9, o10, newOwner)
+
+        Flux.just(o1, o2, o3, o4, o5, o6, o7, o8, o9, o10)
                 .flatMap(ownerRepository::insert)
                 .log()
                 .subscribe();
