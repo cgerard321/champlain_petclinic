@@ -28,7 +28,7 @@ public class BillController {
     @PostMapping("/bills")
     public Mono<ResponseEntity<BillResponseDTO>> createBill(@RequestBody Mono<BillRequestDTO> billDTO,
                                                             @RequestParam(defaultValue = "false") boolean sendEmail,
-                                                            @RequestParam String currency,
+                                                            @RequestParam(required = false) String currency,
                                                             @CookieValue("Bearer") String jwtToken
     ) {
         return billDTO
