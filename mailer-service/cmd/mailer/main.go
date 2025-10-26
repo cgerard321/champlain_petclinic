@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -13,6 +14,13 @@ import (
 	"mailer-service/internal/util"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+)
+
+const (
+	MAX_RETRIES = 3
+	RETRY_DELAY = 5 * time.Second
+	EMAIL_QUEUE_CAPACITY = 100 //buffer size
+	NUM_WORKERS = 5 
 )
 
 // @title Mailer Service API
@@ -37,14 +45,24 @@ func main() {
 		InsecureSkipVerify: true,
 	})
 
-	svc := mailsvc.NewService(dialer, user)
+	emailJobChannel := make(chan mailsvc.EmailJob, EMAIL_QUEUE_CAPACITY)
+	svc := mailsvc.NewService(dialer, user, emailJobChannel)
 
 	h := handlers.NewMailHandler(svc)
 	g := r.Group("/mail")
 	g.Use(middleware.UnmarshalMail())
 	g.POST("", h.Post)
 
-	log.Printf("Mailer Service using %s:587 as %s", host, user)
+	log.Printf("Mailer Service using %s:587", host)
+
+	for i := 0; i < NUM_WORKERS; i++ {
+		go func(workerID int) {
+			log.Printf("Worker %d started", workerID)
+			for job := range emailJobChannel {
+				svc.ProcessEmailJob(job)
+			}
+		}(i)
+	}
 
 	if err := r.Run(); err != nil {
 		log.Fatal(err)
