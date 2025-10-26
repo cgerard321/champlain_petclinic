@@ -43,7 +43,7 @@ public class OwnerControllerV1 {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET,Roles.RECEPTIONIST})
-    @GetMapping(value = "/owners-pagination")
+    @GetMapping(value = "/owners-pagination", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<OwnerResponseDTO> getOwnersByPagination(@RequestParam Optional<Integer> page,
                                                         @RequestParam Optional<Integer> size,
                                                         @RequestParam(required = false) String ownerId,
