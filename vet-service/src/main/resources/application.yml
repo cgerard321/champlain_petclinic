@@ -25,12 +25,8 @@ spring:
     embedded:
       version: 4.0.21
 
-  servlet:
-    multipart:
-      max-file-size: 2MB
-      max-request-size: 2MB
   codec:
-    max-in-memory-size: 16MB
+    max-in-memory-size: 2MB
 
 ---
 # for test
@@ -75,13 +71,8 @@ spring:
     username: user
     password: pwd
 
-  servlet:
-    multipart:
-      max-file-size: 2MB
-      max-request-size: 2MB
-
   codec:
-    max-in-memory-size: 16MB
+    max-in-memory-size: 2MB
 
 ---
 spring:
@@ -103,13 +94,8 @@ spring:
       password: password
       authentication-database: admin
 
-  servlet:
-    multipart:
-      max-file-size: 2MB
-      max-request-size: 2MB
-
   codec:
-    max-in-memory-size: 16MB
+    max-in-memory-size: 2MB
 
 management:
   endpoints:

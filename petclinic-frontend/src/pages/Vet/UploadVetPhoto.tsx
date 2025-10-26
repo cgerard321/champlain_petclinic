@@ -51,7 +51,8 @@ const UploadVetPhoto: React.FC<UploadVetPhotoProps> = ({ vets }) => {
         window.location.reload();
       }, 1000);
     } catch (error) {
-      console.error('Error uploading photo:', error);
+      const message = (error as Error)?.message ?? 'Error uploading photo';
+      console.error('Error uploading photo:', message);
     }
   };
 
