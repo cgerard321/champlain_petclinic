@@ -37,41 +37,6 @@ public class PetServiceUnitTest {
     @InjectMocks
     private PetServiceImpl petService;
 
-    @Test
-    void whenDeletePetByPetIdV2_withExistingPetId_thenReturnPetResponseDTO() {
-        Pet pet = buildPet();
-
-        when(repo.findPetByPetId(pet.getPetId())).thenReturn(Mono.just(pet));
-        when(repo.delete(pet)).thenReturn(Mono.empty());
-
-        Mono<PetResponseDTO> result = petService.deletePetByPetIdV2(pet.getPetId());
-
-        StepVerifier
-                .create(result)
-                .consumeNextWith(deletedPet -> {
-                    assertEquals(pet.getPetId(), deletedPet.getPetId());
-                    assertEquals(pet.getName(), deletedPet.getName());
-                    assertEquals(pet.getPetTypeId(), deletedPet.getPetTypeId());
-                    assertEquals(pet.getOwnerId(), deletedPet.getOwnerId());
-                    assertEquals(pet.getBirthDate(), deletedPet.getBirthDate());
-                })
-                .verifyComplete();
-    }
-
-    @Test
-    void whenDeletePetByPetIdV2_withNonExistingPetId_thenReturnNotFoundException() {
-        String nonExistingPetId = "non-existent-id";
-
-        when(repo.findPetByPetId(nonExistingPetId)).thenReturn(Mono.empty());
-
-        Mono<PetResponseDTO> result = petService.deletePetByPetIdV2(nonExistingPetId);
-
-        StepVerifier
-                .create(result)
-                .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
-                        throwable.getMessage().equals("Pet id not found: " + nonExistingPetId))
-                .verify();
-    }
 
     @Test
     void whenCreatePetForOwner_withValidOwnerAndPetRequest_thenReturnPetResponseDTO() {

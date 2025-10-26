@@ -25,7 +25,7 @@ angular.module('loginForm')
                 $scope.errorMessages = [];
 
                 return $http.post('/api/gateway/users/login', {
-                    email: $scope.login && $scope.login.email,
+                    emailOrUsername: $scope.login && $scope.login.email,
                     password: $scope.login && $scope.login.password,
                 })
                     .then(function (res) {

@@ -1960,6 +1960,7 @@ class ApiGatewayControllerTest {
                 .build();
     }
 
+
     private VetResponseDTO buildVetResponseDTO() {
         return VetResponseDTO.builder()
                 .vetId("181faeb5-c024-425c-9f08-663600008f06")
