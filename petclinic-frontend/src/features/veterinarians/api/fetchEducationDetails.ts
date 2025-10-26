@@ -14,13 +14,25 @@ export const fetchEducationDetails = async (
   vetId: string
 ): Promise<EducationResponseType[]> => {
   try {
-    const response = await axiosInstance.get<EducationResponseType[]>(
+    const response = await axiosInstance.get<string>(
       `/vets/${vetId}/educations`,
-      { useV2: false }
+      {
+        responseType: 'text',
+        useV2: false,
+      }
     );
-    return response.data ?? [];
+    return response.data
+      .split('data:')
+      .map((payLoad: string) => {
+        try {
+          if (payLoad === '') return null;
+          return JSON.parse(payLoad);
+        } catch (err) {
+          return null;
+        }
+      })
+      .filter((data?: JSON) => data !== null);
   } catch (error) {
-    console.error('Failed to fetch education details:', error);
-    throw new Error('Failed to fetch education details');
+    return [];
   }
 };

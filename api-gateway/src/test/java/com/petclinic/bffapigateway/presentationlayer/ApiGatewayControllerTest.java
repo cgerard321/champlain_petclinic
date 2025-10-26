@@ -139,15 +139,17 @@ class ApiGatewayControllerTest {
         client
                 .get()
                 .uri("/api/gateway/vets/topVets")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-//                .jsonPath("$[0].firstName").isEqualTo(vetAverageRatingDTO.getFirstName())
-//                .jsonPath("$[0].lastName").isEqualTo(vetAverageRatingDTO.getLastName())
-                .jsonPath("$[0].vetId").isEqualTo(vetAverageRatingDTO.getVetId())
-                .jsonPath("$[0].averageRating").isEqualTo(vetAverageRatingDTO.getAverageRating());
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectBodyList(VetAverageRatingDTO.class)
+                .value(list -> {
+                    assertEquals(1, list.size());
+                    VetAverageRatingDTO returnedVet = list.get(0);
+                    assertEquals(vetAverageRatingDTO.getVetId(), returnedVet.getVetId());
+                    assertEquals(vetAverageRatingDTO.getAverageRating(), returnedVet.getAverageRating(), 0.0001);
+                });
     }
     @Test
     void deleteVetRating() {
@@ -237,11 +239,20 @@ class ApiGatewayControllerTest {
         client
                 .get()
                 .uri("/api/gateway/vets/"+VET_ID+"/ratings/date?year="+queryParams.get("year"))
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$[0].date").isEqualTo("2023");
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectBodyList(RatingResponseDTO.class)
+                .value(list -> {
+                    assertEquals(2, list.size());
+                    RatingResponseDTO r1 = list.get(0);
+                    RatingResponseDTO r2 = list.get(1);
+                    assertEquals("2023", r1.getDate());
+                    assertEquals("2022", r2.getDate());
+                    assertNotNull(r1.getRatingId());
+                    assertNotNull(r2.getRatingId());
+                });
     }
 
     @Test
