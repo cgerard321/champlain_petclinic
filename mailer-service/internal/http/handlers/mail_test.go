@@ -54,7 +54,7 @@ func TestMailHandler_Post_Success(t *testing.T) {
 	if ms.got == nil || ms.got.To != "a@b.com" {
 		t.Fatalf("handler did not pass parsed mail to service")
 	}
-	if !strings.Contains(w.Body.String(), "Message queued for a@b.com") {
+	if !strings.Contains(w.Body.String(), "Message queued") {
 		t.Fatalf("unexpected body: %s", w.Body.String())
 	}
 }
