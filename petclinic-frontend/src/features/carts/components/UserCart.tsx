@@ -492,6 +492,7 @@ const UserCart: React.FC = () => {
       index: number
     ): Promise<void> => {
       if (blockIfReadOnly()) return;
+      if (!ensureCartId()) return;
 
       const newQuantity = Math.max(1, Number(event.target.value));
       const item = cartItems[index];
@@ -556,7 +557,7 @@ const UserCart: React.FC = () => {
         }));
       }
     },
-    [cartItems, cartId, blockIfReadOnly]
+    [cartItems, cartId, blockIfReadOnly, ensureCartId]
   );
 
   const onClearPromo = async (): Promise<void> => {
@@ -672,6 +673,7 @@ const UserCart: React.FC = () => {
 
   const addToCartFunction = async (item: ProductModel): Promise<void> => {
     if (blockIfReadOnly()) return;
+    if (!ensureCartId()) return;
 
     if (item.productQuantity <= 0) {
       setNotificationMessage(
