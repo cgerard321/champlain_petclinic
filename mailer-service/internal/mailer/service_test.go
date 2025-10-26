@@ -6,6 +6,7 @@ import (
 	"net"
 	"strings"
 	"testing"
+	"time"
 
 	pkg "mailer-service/pkg/mailer"
 )
@@ -84,7 +85,15 @@ func TestService_Send_SendsMessage(t *testing.T) {
 		Password:           "",
 		InsecureSkipVerify: true,
 	})
-	s := NewService(d, "from@example.com")
+
+	emailJobChannel := make(chan EmailJob, 1)
+	s := NewService(d, "from@example.com", emailJobChannel)
+
+	go func() {
+		for job := range emailJobChannel {
+			s.ProcessEmailJob(job)
+		}
+	}()
 
 	err := s.Send(&pkg.Mail{
 		To:         "rcpt@example.com",
@@ -95,6 +104,9 @@ func TestService_Send_SendsMessage(t *testing.T) {
 	if err != nil {
 		t.Fatalf("send failed: %v", err)
 	}
+
+	time.Sleep(100 * time.Millisecond) 
+
 }
 
 func unreachablePort(t *testing.T) int {
@@ -123,7 +135,15 @@ func TestService_Send_EmptySenderName_UsesPlainFrom(t *testing.T) {
 	d := NewDialer(Config{
 		Host: host, Port: port, InsecureSkipVerify: true,
 	})
-	s := NewService(d, "from@example.com")
+
+	emailJobChannel := make(chan EmailJob, 1)
+	s := NewService(d, "from@example.com", emailJobChannel)
+
+	go func() {
+		for job := range emailJobChannel {
+			s.ProcessEmailJob(job)
+		}
+	}()
 
 	err := s.Send(&pkg.Mail{
 		To:      "rcpt@example.com",
@@ -133,6 +153,7 @@ func TestService_Send_EmptySenderName_UsesPlainFrom(t *testing.T) {
 	if err != nil {
 		t.Fatalf("send failed: %v", err)
 	}
+	time.Sleep(100 * time.Millisecond)
 }
 
 func TestService_Send_DialError_Propagates(t *testing.T) {
@@ -140,16 +161,27 @@ func TestService_Send_DialError_Propagates(t *testing.T) {
 	d := NewDialer(Config{
 		Host: "127.0.0.1", Port: badPort, InsecureSkipVerify: true,
 	})
-	s := NewService(d, "from@example.com")
+
+	emailJobChannel := make(chan EmailJob, 1)
+	s := NewService(d, "from@example.com", emailJobChannel)
+
+	go func() {
+		for job := range emailJobChannel {
+			s.ProcessEmailJob(job)
+		}
+	}()
 
 	err := s.Send(&pkg.Mail{
 		To:      "rcpt@example.com",
 		Subject: "x",
 		Body:    "<p>x</p>",
 	})
-	if err == nil {
-		t.Fatalf("expected error dialing unreachable SMTP server")
+	if err != nil {
+		t.Fatalf("send should not return an error immediately: %v", err)
 	}
+
+
+	time.Sleep(RETRY_DELAY * (MAX_RETRIES + 1)) // wait for all retries + initial attempt
 }
 
 func TestService_Send_MinimalSubjectAndHTML(t *testing.T) {
@@ -163,7 +195,15 @@ func TestService_Send_MinimalSubjectAndHTML(t *testing.T) {
 	d := NewDialer(Config{
 		Host: host, Port: port, InsecureSkipVerify: true,
 	})
-	s := NewService(d, "from@example.com")
+
+	emailJobChannel := make(chan EmailJob, 1)
+	s := NewService(d, "from@example.com", emailJobChannel)
+
+	go func() {
+		for job := range emailJobChannel {
+			s.ProcessEmailJob(job)
+		}
+	}()
 
 	if err := s.Send(&pkg.Mail{
 		To:      "mini@example.com",
@@ -172,4 +212,5 @@ func TestService_Send_MinimalSubjectAndHTML(t *testing.T) {
 	}); err != nil {
 		t.Fatalf("send failed: %v", err)
 	}
+	time.Sleep(100 * time.Millisecond)
 }
