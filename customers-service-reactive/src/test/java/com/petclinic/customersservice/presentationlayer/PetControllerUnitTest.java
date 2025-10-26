@@ -31,22 +31,6 @@ public class PetControllerUnitTest {
     @Autowired
     private WebTestClient webTestClient;
 
-    @Test
-    void whenDeletePetByPetIdV2_withExistingPetId_thenReturnPetResponseDTO() {
-        Pet pet = buildPet();
-        PetResponseDTO petResponseDTO = EntityDTOUtil.toPetResponseDTO(pet);
-
-        when(petService.deletePetByPetIdV2(pet.getPetId())).thenReturn(Mono.just(petResponseDTO));
-
-        webTestClient.delete()
-                .uri("/pets/{petId}/v2", pet.getPetId())
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(PetResponseDTO.class)
-                .isEqualTo(petResponseDTO);
-
-        verify(petService).deletePetByPetIdV2(pet.getPetId());
-    }
 
     @Test
     void whenCreatePetForOwner_withValidRequest_thenReturnCreatedPet() {

@@ -39,11 +39,16 @@ const CustomerDetails: FC = () => {
       const ownerResponse = await getOwner(ownerId!);
       setOwner(ownerResponse.data);
 
-      const userResponse = await axiosInstance.get(`/users/${ownerId}`, {
-        useV2: false,
-      });
-      setUserDetails(userResponse.data);
-      setIsDisabled(userResponse.data.disabled);
+      try {
+        const userResponse = await axiosInstance.get(`/users/${ownerId}`, {
+          useV2: false,
+        });
+        setUserDetails(userResponse.data);
+        setIsDisabled(userResponse.data.disabled);
+      } catch (error) {
+        setUserDetails(null);
+        setIsDisabled(false);
+      }
 
       // Fetch pets by owner ID
       const petsResponse = await axiosInstance.get(`/owners/${ownerId}/pets`, {
@@ -236,10 +241,14 @@ const CustomerDetails: FC = () => {
       const ownerResponse = await getOwner(ownerId);
       setOwner(ownerResponse.data);
 
-      const userResponse = await axiosInstance.get(`/users/${ownerId}`, {
-        useV2: true,
-      });
-      setIsDisabled(userResponse.data.disabled);
+      try {
+        const userResponse = await axiosInstance.get(`/users/${ownerId}`, {
+          useV2: false,
+        });
+        setIsDisabled(userResponse.data.disabled);
+      } catch (error) {
+        setIsDisabled(false);
+      }
 
       const petsResponse = await axiosInstance.get(`/owners/${ownerId}/pets`, {
         useV2: false,
@@ -459,12 +468,14 @@ const CustomerDetails: FC = () => {
             Delete Owner
           </button>
         )}
-        <button
-          className={`btn ${isDisabled ? 'btn-success' : 'btn-warning'}`}
-          onClick={handleDisableEnable}
-        >
-          {isDisabled ? 'Enable Account' : 'Disable Account'}
-        </button>
+        {userDetails && (
+          <button
+            className={`btn ${isDisabled ? 'btn-success' : 'btn-warning'}`}
+            onClick={handleDisableEnable}
+          >
+            {isDisabled ? 'Enable Account' : 'Disable Account'}
+          </button>
+        )}
       </div>
 
       <AddPetModal
