@@ -51,7 +51,7 @@ const UploadVetPhoto: React.FC<UploadVetPhotoProps> = ({ vets }) => {
         window.location.reload();
       }, 1000);
     } catch (error) {
-      const message = (error as Error)?.message ?? 'Error uploading photo';
+      const message = (error as Error)?.message ?? 'Error uploading photo. Please ensure the file is under 2MB.';
       console.error('Error uploading photo:', message);
     }
   };
