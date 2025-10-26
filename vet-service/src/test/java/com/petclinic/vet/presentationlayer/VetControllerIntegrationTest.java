@@ -10,6 +10,7 @@ import com.petclinic.vet.dataaccesslayer.photos.PhotoRepository;
 import com.petclinic.vet.dataaccesslayer.ratings.PredefinedDescription;
 import com.petclinic.vet.dataaccesslayer.ratings.Rating;
 import com.petclinic.vet.dataaccesslayer.ratings.RatingRepository;
+import com.petclinic.vet.dataaccesslayer.vets.Specialty;
 import com.petclinic.vet.dataaccesslayer.vets.Vet;
 import com.petclinic.vet.dataaccesslayer.vets.VetRepository;
 import com.petclinic.vet.presentationlayer.vets.SpecialtyDTO;
@@ -2005,6 +2006,13 @@ class VetControllerIntegrationTest {
     @Test
     void deleteSpecialtyFromVet_WithValidVetIdAndSpecialtyId_ShouldSucceed() {
         Vet vet = buildVet("1234");
+        
+        // First, add a specialty to the vet
+        Specialty specialty = Specialty.builder()
+                .specialtyId("specialty123")
+                .name("Cardiology")
+                .build();
+        vet.getSpecialties().add(specialty);
 
         Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet));
         StepVerifier.create(setup)

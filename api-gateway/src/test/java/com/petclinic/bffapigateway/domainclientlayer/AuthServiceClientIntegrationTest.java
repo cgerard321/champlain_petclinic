@@ -13,6 +13,7 @@ import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Rethrower;
 import com.petclinic.bffapigateway.utils.Security.Variables.SecurityConst;
 import com.petclinic.bffapigateway.utils.Utility;
+import org.mockito.ArgumentMatchers;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import lombok.RequiredArgsConstructor;
@@ -90,7 +91,6 @@ public class AuthServiceClientIntegrationTest {
             .password("password")
             .email("email")
             .owner(OwnerRequestDTO.builder()
-                    .ownerId("UUID")
                     .firstName("firstName")
                     .lastName("lastName")
                     .address("address")
@@ -199,14 +199,13 @@ public class AuthServiceClientIntegrationTest {
     @DisplayName("Given valid register information, register user")
     void valid_register(){
         OwnerResponseDTO ownerResponseDTO = OwnerResponseDTO.builder()
-                        .ownerId("UUID")
-                        .firstName("firstName")
-                        .lastName("lastName")
-                        .address("address")
-                        .city("city")
-                        .telephone("telephone")
-                        .pets(List.of())
-                        .build();
+                .ownerId("e6196574-8213-44c3-b642-e374a7e79a53")
+                .firstName("firstName")
+                .lastName("lastName")
+                .address("address")
+                .city("city")
+                .telephone("1234567890")
+                .build();
 
         final MockResponse mockResponse = new MockResponse();
         mockResponse
@@ -215,16 +214,15 @@ public class AuthServiceClientIntegrationTest {
 
         server.enqueue(mockResponse);
 
-        Mockito.when(customersServiceClient.createOwner(any()))
+        when(customersServiceClient.createOwner(any(Mono.class)))
                 .thenReturn(Mono.just(ownerResponseDTO));
 
 
         Mono<OwnerResponseDTO> block = authServiceClient.createUser(Mono.just(USER_REGISTER));
 
-        StepVerifier
-                .create(block)
+        StepVerifier.create(block)
+                .expectNext(ownerResponseDTO)
                 .verifyComplete();
-
     }
 
     @Test
@@ -286,7 +284,7 @@ public class AuthServiceClientIntegrationTest {
         StepVerifier.create(Mono.just(validatedTokenResponse))
                 .expectNextCount(1)
                 .verifyComplete();
-        }
+    }
 
     @Test
     @DisplayName("Should logout a user")
@@ -876,12 +874,11 @@ public class AuthServiceClientIntegrationTest {
                 .address("123 Main St")
                 .city("Anytown")
                 .telephone("555-1234")
-                .pets(List.of())
                 .build();
 
         String userJson = new ObjectMapper().writeValueAsString(userResponse);
-
         final MockResponse mockResponse = new MockResponse();
+
         mockResponse
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(200)
@@ -889,50 +886,10 @@ public class AuthServiceClientIntegrationTest {
 
         server.enqueue(mockResponse);
 
-        when(customersServiceClient.createOwner(any(OwnerRequestDTO.class))).thenReturn(Mono.just(ownerResponse));
+        when(customersServiceClient.createOwner(any(Mono.class))).thenReturn(Mono.just(ownerResponse));
         when(customersServiceClient.deleteOwner(any())).thenReturn(Mono.empty());
 
         Mono<OwnerResponseDTO> result = authServiceClient.createUser(Mono.just(USER_REGISTER));
-
-        StepVerifier.create(result)
-                .expectNextMatches(owner -> owner.getOwnerId().equals("user123"))
-                .verifyComplete();
-    }
-
-    @Test
-    @DisplayName("Should create user using V2 endpoint with cart assignment")
-    void shouldCreateUserUsingV2EndpointWithCartAssignment() throws Exception {
-        UserPasswordLessDTO userResponse = UserPasswordLessDTO.builder()
-                .userId("user123")
-                .email("user@example.com")
-                .username("testuser")
-                .build();
-
-        OwnerResponseDTO ownerResponse = OwnerResponseDTO.builder()
-                .ownerId("user123")
-                .firstName("John")
-                .lastName("Doe")
-                .address("123 Main St")
-                .city("Anytown")
-                .telephone("555-1234")
-                .pets(List.of())
-                .build();
-
-        String userJson = new ObjectMapper().writeValueAsString(userResponse);
-
-        final MockResponse mockResponse = new MockResponse();
-        mockResponse
-                .setHeader("Content-Type", "application/json")
-                .setResponseCode(200)
-                .setBody(userJson);
-
-        server.enqueue(mockResponse);
-
-        when(customersServiceClient.addOwner(any(Mono.class))).thenReturn(Mono.just(ownerResponse));
-        when(customersServiceClient.deleteOwner(any())).thenReturn(Mono.empty());
-        when(cartServiceClient.assignCartToUser(any())).thenReturn(Mono.empty());
-
-        Mono<OwnerResponseDTO> result = authServiceClient.createUserUsingV2Endpoint(Mono.just(USER_REGISTER));
 
         StepVerifier.create(result)
                 .expectNextMatches(owner -> owner.getOwnerId().equals("user123"))
@@ -1012,6 +969,8 @@ public class AuthServiceClientIntegrationTest {
         when(rethrower.rethrow(any(ClientResponse.class), any())).thenThrow(new GenericHttpException("Invalid registration data", HttpStatus.BAD_REQUEST));
 
         Mono<OwnerResponseDTO> result = authServiceClient.createUser(Mono.just(USER_REGISTER));
+        when(customersServiceClient.createOwner(any(Mono.class)))
+                .thenReturn(Mono.error(new GenericHttpException("Invalid registration data", HttpStatus.BAD_REQUEST)));
 
         StepVerifier.create(result)
                 .verifyError(GenericHttpException.class);
@@ -1036,7 +995,7 @@ public class AuthServiceClientIntegrationTest {
 
         server.enqueue(mockResponse);
 
-        when(customersServiceClient.createOwner(any(OwnerRequestDTO.class))).thenReturn(Mono.error(new RuntimeException("Service error")));
+        when(customersServiceClient.createOwner(any(Mono.class))).thenReturn(Mono.error(new RuntimeException("Service error")));
         when(customersServiceClient.deleteOwner(any())).thenReturn(Mono.empty());
 
         Mono<OwnerResponseDTO> result = authServiceClient.createUser(Mono.just(USER_REGISTER));
@@ -1096,34 +1055,6 @@ public class AuthServiceClientIntegrationTest {
         when(vetsServiceClient.deleteVet(any())).thenReturn(Mono.empty());
 
         Mono<VetResponseDTO> result = authServiceClient.addVetUser(Mono.just(REGISTER_VETERINARIAN));
-
-        StepVerifier.create(result)
-                .verifyError(RuntimeException.class);
-    }
-
-    @Test
-    @DisplayName("Should handle error cleanup in createUserUsingV2Endpoint")
-    void shouldHandleErrorCleanupInCreateUserUsingV2Endpoint() throws Exception {
-        UserPasswordLessDTO userResponse = UserPasswordLessDTO.builder()
-                .userId("user123")
-                .email("user@example.com")
-                .username("testuser")
-                .build();
-
-        String userJson = new ObjectMapper().writeValueAsString(userResponse);
-
-        final MockResponse mockResponse = new MockResponse();
-        mockResponse
-                .setHeader("Content-Type", "application/json")
-                .setResponseCode(200)
-                .setBody(userJson);
-
-        server.enqueue(mockResponse);
-
-        when(customersServiceClient.addOwner(any(Mono.class))).thenReturn(Mono.error(new RuntimeException("Service error")));
-        when(customersServiceClient.deleteOwner(any())).thenReturn(Mono.empty());
-
-        Mono<OwnerResponseDTO> result = authServiceClient.createUserUsingV2Endpoint(Mono.just(USER_REGISTER));
 
         StepVerifier.create(result)
                 .verifyError(RuntimeException.class);
@@ -1425,26 +1356,6 @@ public class AuthServiceClientIntegrationTest {
                 .verifyComplete();
     }
 
-
-    @Test
-    @DisplayName("Should handle 4xx error in createUserUsingV2Endpoint")
-    void shouldHandle4xxErrorInCreateUserUsingV2Endpoint() throws Exception {
-        final MockResponse mockResponse = new MockResponse();
-        mockResponse
-                .setHeader("Content-Type", "application/json")
-                .setResponseCode(400)
-                .setBody("{\"message\": \"Invalid registration data\"}");
-
-        server.enqueue(mockResponse);
-
-        when(rethrower.rethrow(any(ClientResponse.class), any())).thenThrow(new GenericHttpException("Invalid registration data", HttpStatus.BAD_REQUEST));
-
-        Mono<OwnerResponseDTO> result = authServiceClient.createUserUsingV2Endpoint(Mono.just(USER_REGISTER));
-
-        StepVerifier.create(result)
-                .verifyError(GenericHttpException.class);
-    }
-
     @Test
     @DisplayName("Should handle 4xx error in createVetUser")
     void shouldHandle4xxErrorInCreateVetUser() throws Exception {
@@ -1641,54 +1552,6 @@ public class AuthServiceClientIntegrationTest {
         });
 
         Mono<UserDetails> result = authServiceClient.getUserById(jwtToken, userId);
-
-        StepVerifier.create(result)
-                .verifyError(GenericHttpException.class);
-    }
-
-    @Test
-    @DisplayName("Should handle 4xx error in createUser with proper lambda execution")
-    void shouldHandle4xxErrorInCreateUserWithLambdaExecution() throws Exception {
-        final MockResponse mockResponse = new MockResponse();
-        mockResponse
-                .setHeader("Content-Type", "application/json")
-                .setResponseCode(400)
-                .setBody("{\"message\": \"Invalid registration data\"}");
-
-        server.enqueue(mockResponse);
-
-        when(rethrower.rethrow(any(ClientResponse.class), any())).thenAnswer(invocation -> {
-            ClientResponse response = invocation.getArgument(0);
-            Function<Map, ? extends Throwable> lambda = invocation.getArgument(1);
-            Map<String, Object> errorMap = Map.of("message", "Invalid registration data");
-            return Mono.error(lambda.apply(errorMap));
-        });
-
-        Mono<OwnerResponseDTO> result = authServiceClient.createUser(Mono.just(USER_REGISTER));
-
-        StepVerifier.create(result)
-                .verifyError(GenericHttpException.class);
-    }
-
-    @Test
-    @DisplayName("Should handle 4xx error in createUserUsingV2Endpoint with proper lambda execution")
-    void shouldHandle4xxErrorInCreateUserUsingV2EndpointWithLambdaExecution() throws Exception {
-        final MockResponse mockResponse = new MockResponse();
-        mockResponse
-                .setHeader("Content-Type", "application/json")
-                .setResponseCode(400)
-                .setBody("{\"message\": \"Invalid registration data\"}");
-
-        server.enqueue(mockResponse);
-
-        when(rethrower.rethrow(any(ClientResponse.class), any())).thenAnswer(invocation -> {
-            ClientResponse response = invocation.getArgument(0);
-            Function<Map, ? extends Throwable> lambda = invocation.getArgument(1);
-            Map<String, Object> errorMap = Map.of("message", "Invalid registration data");
-            return Mono.error(lambda.apply(errorMap));
-        });
-
-        Mono<OwnerResponseDTO> result = authServiceClient.createUserUsingV2Endpoint(Mono.just(USER_REGISTER));
 
         StepVerifier.create(result)
                 .verifyError(GenericHttpException.class);

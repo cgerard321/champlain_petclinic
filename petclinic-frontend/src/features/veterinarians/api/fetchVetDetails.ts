@@ -19,7 +19,7 @@ export const fetchVet = async (vetId: string): Promise<VetResponseType> => {
     const response = await axiosInstance.get<VetResponseType>(
       `/vets/${vetId}`,
       {
-        useV2: false,
+        useV2: true,
       }
     );
     return response.data;

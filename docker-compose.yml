@@ -15,9 +15,17 @@ x-healthchecks:
       retries: 10
       start_period: 15s
 
+  angular-node: &angular_node
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:4200/ || true"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 15s
+
   nginx: &nginx
     healthcheck:
-      test: [ "CMD-SHELL", "nc -z localhost 80" ]
+      test: ["CMD-SHELL", "nc -z localhost 80"]
       interval: 10s
       timeout: 3s
       retries: 10
@@ -71,6 +79,22 @@ services:
       - "3000:3000"
     volumes:
       - ./petclinic-frontend/src:/app/src
+
+  # Employee front-end
+  employeeFrontend:
+    <<: *angular_node
+    image: employee-frontend
+    container_name: employee-frontend
+    profiles: ["fe-employee"]
+    build:
+      context: ./employee-frontend
+      dockerfile: Dockerfile
+      args:
+        - BUILD_MODE=development
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./employee-frontend/src:/app/src
 
   # Reverse proxy
   janus:

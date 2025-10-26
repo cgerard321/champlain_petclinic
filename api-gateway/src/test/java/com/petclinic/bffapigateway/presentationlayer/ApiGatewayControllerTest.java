@@ -5,21 +5,16 @@ import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.Auth.*;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.Bills.PaymentRequestDTO;
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
-import com.petclinic.bffapigateway.dtos.Inventory.ProductResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.*;
 import com.petclinic.bffapigateway.dtos.Visits.Status;
 import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
-import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter;
-import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -182,7 +177,7 @@ class ApiGatewayControllerTest {
                         .roles(List.of("OWNER"))
                         .token("bearer-token")
                         .build())));
-        when(customersServiceClient.getOwner("userId123"))
+        when(customersServiceClient.getOwner("userId123", false))
                 .thenReturn(Mono.just(OwnerResponseDTO.builder()
                         .firstName("Test")
                         .lastName("Customer")
@@ -213,7 +208,7 @@ class ApiGatewayControllerTest {
                 .acceptCharset(StandardCharsets.UTF_8)
                 .exchange()
                 .expectStatus().isEqualTo(UNPROCESSABLE_ENTITY);
-                //  .expectHeader().contentType(MediaType.APPLICATION_JSON)
+        //  .expectHeader().contentType(MediaType.APPLICATION_JSON)
     }
 
     @Test
@@ -288,7 +283,7 @@ class ApiGatewayControllerTest {
                 .jsonPath("$").isEqualTo("1");
     }
 
-   @Test
+    @Test
     void addRatingToAVet_withRateDescriptionAndPredefinedDesc_ShouldSetRateDescriptionToPredefinedDesc() {
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
                 .vetId(VET_ID)
@@ -707,46 +702,6 @@ class ApiGatewayControllerTest {
     }
 
     @Test
-    void createVet() {
-
-        RegisterVet registerVet = RegisterVet.builder()
-                .userId(VET_ID)
-                .username("vet")
-                .email("vet@email.com")
-                .password("pwd")
-                .vet(vetRequestDTO).build();
-
-
-        Role role = Role.builder()
-                .id(1)
-                .name(Roles.ADMIN.name())
-                .build();
-
-        UserDetails userDetails = UserDetails.builder()
-                .userId(VET_ID)
-                .username("vet")
-                .email("email@vet.com")
-                .roles(Set.of(role))
-                .build();
-
-        Mono<RegisterVet> dto = Mono.just(registerVet);
-
-        when(authServiceClient.createVetUser(any(Mono.class)))
-                .thenReturn((Mono.just(vetResponseDTO)));
-
-        client
-                .post()
-                .uri("/api/gateway/users/vets")
-                .body(dto, RegisterVet.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isCreated()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody();
-
-    }
-
-    @Test
     void updateVet() {
         when(vetsServiceClient.updateVet(anyString(), any(Mono.class)))
                 .thenReturn(Mono.just(vetResponseDTO2));
@@ -1013,126 +968,6 @@ class ApiGatewayControllerTest {
 //                .jsonPath("$.pets[0].visits[0].description").isEqualTo("First visit");
 //    }
 
-//    @Test
-//    void getUserDetails() {
-//        UserDetails user = new UserDetails();
-//        user.setId(1);
-//        user.setUsername("roger675");
-//        user.setPassword("secretnooneknows");
-//        user.setEmail("RogerBrown@gmail.com");
-//
-//        when(authServiceClient.getUser(1))
-//                .thenReturn(Mono.just(user));
-//
-//        client.get()
-//
-//                .uri("/api/gateway/users/1")
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectBody()
-//                .jsonPath("$.username").isEqualTo("roger675")
-//                .jsonPath("$.password").isEqualTo("secretnooneknows")
-//                .jsonPath("$.email").isEqualTo("RogerBrown@gmail.com");
-//
-//        assertEquals(user.getId(), 1);
-//    }
-//
-
-        @Test
-    void createUserInventoryManager_ShouldSucceed(){
-        String uuid = UUID.randomUUID().toString();
-        Role role = Role.builder()
-                .name(Roles.INVENTORY_MANAGER.name())
-                .build();
-        UserPasswordLessDTO userResponse = UserPasswordLessDTO
-                .builder()
-                .userId(uuid)
-                .email("email@email.com")
-                .roles(Set.of(role))
-                .build();
-
-        when(authServiceClient.createInventoryMangerUser(any()))
-                .thenReturn(Mono.just(userResponse));
-
-        RegisterInventoryManager register = RegisterInventoryManager.builder()
-                .userId(uuid)
-                .username("Johnny123")
-                .password("Password22##")
-                .email("email@email.com")
-                .build();
-
-        client.post()
-                .uri("/api/gateway/users/inventoryManager")
-                .body(Mono.just(register), RegisterInventoryManager.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isCreated()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(UserPasswordLessDTO.class)
-                .value(dto->{
-                    assertEquals(dto.getUserId(),userResponse.getUserId());
-                    assertEquals(dto.getEmail(),userResponse.getEmail());
-                    assertEquals(dto.getRoles(),userResponse.getRoles());
-                });
-    }
-
-    @Test
-    void createUser(){
-        String uuid = UUID.randomUUID().toString();
-        OwnerRequestDTO owner = OwnerRequestDTO
-                .builder()
-                .ownerId(uuid)
-                .firstName("John")
-                .lastName("Johnny")
-                .address("111 John St")
-                .city("Johnston")
-                .province("Quebec")
-                .telephone("51451545144")
-                .build();
-
-
-        OwnerResponseDTO owner_response = OwnerResponseDTO
-                .builder()
-                .ownerId(uuid)
-                .firstName("John")
-                .lastName("Johnny")
-                .address("111 John St")
-                .city("Johnston")
-                .province("Quebec")
-                .telephone("51451545144")
-                .build();
-
-
-
-        when(authServiceClient.createUser(any()))
-                .thenReturn(Mono.just(owner_response));
-
-        Register register = Register.builder()
-                .username("Johnny123")
-                .password("Password22##")
-                .email("email@email.com")
-                .owner(owner)
-                .build();
-
-        client.post()
-                .uri("/api/gateway/users")
-                .body(Mono.just(register), UserDetails.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isCreated()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(OwnerResponseDTO.class)
-                .value(dto->{
-                    assertNotNull(dto.getOwnerId());
-                    assertEquals(dto.getFirstName(),owner.getFirstName());
-                    assertEquals(dto.getLastName(),owner.getLastName());
-                    assertEquals(dto.getAddress(),owner.getAddress());
-                    assertEquals(dto.getCity(),owner.getCity());
-                    assertEquals(dto.getProvince(),owner.getProvince());
-                    assertEquals(dto.getTelephone(),owner.getTelephone());
-                });
-
-    }
     /*@Test
     void getOwnerDetails_withAvailableVisitsService() {
         OwnerResponseDTO owner = new OwnerResponseDTO();
@@ -1164,57 +999,6 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.pets[0].name").isEqualTo("Garfield")
                 .jsonPath("$.pets[0].visits[0].description").isEqualTo("First visit");
     }*/
-//
-//    @Test
-//    void getUserDetails() {
-//        UserDetails user = new UserDetails();
-//        user.setId(1);
-//        user.setUsername("roger675");
-//        user.setPassword("secretnooneknows");
-//        user.setEmail("RogerBrown@gmail.com");
-//
-//        when(authServiceClient.getUser(1))
-//                .thenReturn(Mono.just(user));
-//
-//        client.get()
-//
-//                .uri("/api/gateway/users/1")
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectBody()
-//                .jsonPath("$.username").isEqualTo("roger675")
-//                .jsonPath("$.password").isEqualTo("secretnooneknows")
-//                .jsonPath("$.email").isEqualTo("RogerBrown@gmail.com");
-//
-//        assertEquals(user.getId(), 1);
-//    }
-//
-//    @Test
-//    void createUser(){
-//        UserDetails user = new UserDetails();
-//        user.setId(1);
-//        user.setUsername("Johnny123");
-//        user.setPassword("password");
-//        user.setEmail("email@email.com");
-//        when(authServiceClient.createUser(argThat(
-//                n -> user.getEmail().equals(n.getEmail())
-//        ))).thenReturn(Mono.just(user));
-//
-//        client.post()
-//                .uri("/api/gateway/users")
-//                .body(Mono.just(user), UserDetails.class)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-//                .expectBody();
-//
-//        assertEquals(user.getId(), 1);
-//        assertEquals(user.getUsername(), "Johnny123");
-//        assertEquals(user.getPassword(), "password");
-//        assertEquals(user.getEmail(), "email@email.com");
-//
-//    }
     //private static final int BILL_ID = 1;
 
     @Test
@@ -2396,6 +2180,7 @@ class ApiGatewayControllerTest {
                 .active(false)
                 .build();
     }
+
     private VetResponseDTO buildVetResponseDTO2() {
         return VetResponseDTO.builder()
                 .vetId("181faeb5-c024-425c-9f08-663600008f06")
@@ -2414,6 +2199,7 @@ class ApiGatewayControllerTest {
                 .active(true)
                 .build();
     }
+
     private VetRequestDTO buildVetRequestDTO() {
         return VetRequestDTO.builder()
                 .vetId("181faeb5-c024-425c-9f08-663600008f06")
@@ -2427,6 +2213,7 @@ class ApiGatewayControllerTest {
                 .active(false)
                 .build();
     }
+
     private VetRequestDTO buildVetRequestDTO2() {
         return VetRequestDTO.builder()
                 .vetId("181faeb5-c024-425c-9f08-663600008f06")
@@ -2457,233 +2244,13 @@ class ApiGatewayControllerTest {
                 .date("2022")
                 .build();
     }
-private VetAverageRatingDTO buildVetAverageRatingDTO(){
+
+    private VetAverageRatingDTO buildVetAverageRatingDTO(){
         return VetAverageRatingDTO.builder()
                 .vetId("678910")
                 .averageRating(2.0)
                 .build();
-}
-    @Test
-    void sendForgottenEmail_ShouldSucceed(){
-        final UserEmailRequestDTO dto = UserEmailRequestDTO.builder()
-                .email("email")
-                .build();
-
-        ServerHttpRequest request = MockServerHttpRequest.post("http://localhost:8080").build();
-
-
-
-        when(authServiceClient.sendForgottenEmail(Mono.just(dto)))
-                .thenReturn(Mono.just(ResponseEntity.ok().build()));
-
-
-        client.post()
-                .uri("/api/gateway/users/forgot_password")
-                .body(Mono.just(dto), UserEmailRequestDTO.class)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody();
-
-        verify(authServiceClient, times(1)).sendForgottenEmail(any());
     }
-
-
-    @Test
-    void sendForgottenEmail_ShouldFail(){
-        final UserEmailRequestDTO dto = UserEmailRequestDTO.builder()
-                .email("email")
-                .build();
-
-        ServerHttpRequest request = MockServerHttpRequest.post("http://localhost:8080").build();
-
-        when(authServiceClient.sendForgottenEmail(any()))
-                .thenThrow(new GenericHttpException("error",BAD_REQUEST));
-
-
-
-        client.post()
-                .uri("/api/gateway/users/forgot_password")
-                .body(Mono.just(dto), UserEmailRequestDTO.class)
-                .exchange()
-                .expectStatus().isBadRequest()
-                .expectBody();
-
-        verify(authServiceClient, times(1)).sendForgottenEmail(any());
-        }
-
-
-        @Test
-        void processResetPassword_ShouldSucceed(){
-            final UserPasswordAndTokenRequestModel dto = UserPasswordAndTokenRequestModel.builder()
-                    .password("password")
-                    .token("Valid token")
-                    .build();
-
-
-            when(authServiceClient.changePassword(any()))
-                    .thenReturn(Mono.just(ResponseEntity.ok().build()));
-
-
-            client.post()
-                    .uri("/api/gateway/users/reset_password")
-                    .body(Mono.just(dto), UserPasswordAndTokenRequestModel.class)
-                    .exchange()
-                    .expectStatus().isOk()
-                    .expectBody();
-
-            verify(authServiceClient, times(1)).changePassword(any());
-        }
-
-    @Test
-    void createUser_withValidModel_shouldSucceed() {
-        // Define a valid Register model here
-        OwnerRequestDTO ownerRequestDTO = OwnerRequestDTO.builder()
-                .ownerId("1")
-                .firstName("Ric")
-                .lastName("Danon")
-                .build();
-
-        OwnerResponseDTO ownerResponseDTO = OwnerResponseDTO.builder()
-                .ownerId("1")
-                .firstName("Ric")
-                .lastName("Danon")
-                .build();
-
-        Register validUser = Register.builder()
-                .email("richard200danon@gmail.com")
-                .password("pwd%jfjfjDkkkk8")
-                .username("Ric")
-                .owner(ownerRequestDTO)
-                .build();
-
-        UserPasswordLessDTO userLess = UserPasswordLessDTO.builder()
-                .username(validUser.getUsername())
-                .email(validUser.getEmail())
-                .build();
-
-        when(authServiceClient.createUser(any()))
-                .thenReturn(Mono.just(ownerResponseDTO));
-
-        client.post()
-                .uri("/api/gateway/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(validUser)
-                .exchange()
-                .expectStatus().isCreated()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(OwnerResponseDTO.class)
-                .value(dto ->{
-                    assertNotNull(dto);
-                    assertEquals(ownerRequestDTO.getFirstName(),dto.getFirstName());
-                    assertEquals(ownerRequestDTO.getLastName(),dto.getLastName());
-                    assertEquals(ownerRequestDTO.getOwnerId(),dto.getOwnerId());
-                });
-    }
-
-
-    @Test
-    void getAllUsers_ShouldReturn2(){
-        UserDetails user1 = UserDetails.builder()
-                .username("user1")
-                .userId("jkbjbhjbllb")
-                .email("email1")
-                .build();
-
-        UserDetails user2 = UserDetails.builder()
-                        .username("user2")
-                        .email("email2")
-                        .userId("hhvhvhvhuvul")
-                        .build();
-        String validToken = "IamValidTrustMe";
-
-        when(authServiceClient.getUsers(validToken))
-                .thenReturn(Flux.just(user1,user2));
-
-        client.get()
-                .uri("/api/gateway/users")
-                .cookie("Bearer",validToken)
-                .exchange()
-                .expectBodyList(UserDetails.class)
-                .hasSize(2);
-    }
-
-    @Test
-    public void getAllUsers_NoUsername_ShouldReturnAllUsers() {
-        UserDetails user1 = UserDetails.builder()
-                .userId("userId1")
-                .username("username1")
-                .email("email1")
-                .build();
-
-        UserDetails user2 = UserDetails.builder()
-                .userId("userId2")
-                .username("username2")
-                .email("email2")
-                .build();
-
-        when(authServiceClient.getUsers(anyString()))
-                .thenReturn(Flux.just(user1, user2));
-
-        client.get()
-                .uri("/api/gateway/users")
-                .cookie("Bearer", "validToken")
-                .exchange()
-                .expectStatus().isOk()
-                .expectBodyList(UserDetails.class)
-                .hasSize(2);
-    }
-
-    @Test
-    public void getAllUsers_WithUsername_ShouldReturnUsersWithSpecificUsername() {
-        UserDetails user = UserDetails.builder()
-                .userId("userId")
-                .username("specificUsername")
-                .email("email")
-                .build();
-
-        UserDetails user2 = UserDetails.builder()
-                .userId("userId2")
-                .username("specificUsername2")
-                .email("email2")
-                .build();
-
-        when(authServiceClient.getUsersByUsername(anyString(), anyString()))
-                .thenReturn(Flux.just(user));
-
-        client.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/api/gateway/users")
-                        .queryParam("username", "specificUsername")
-                        .build())
-                .cookie("Bearer", "validToken")
-                .exchange()
-                .expectStatus().isOk()
-                .expectBodyList(UserDetails.class)
-                .hasSize(1);
-    }
-
-
-    @Test
-    void deleteUserById_ValidUserId_ShouldDeleteUser() {
-        UserDetails userDetails = UserDetails.builder()
-                .userId("validUserId")
-                .username("validUsername")
-                .email("validEmail")
-                .build();
-
-        when(authServiceClient.deleteUser(anyString(), anyString()))
-                .thenReturn(Mono.empty());
-
-        client.delete()
-                .uri("/api/gateway/users/validUserId")
-                .cookie("Bearer", "validToken")
-                .exchange()
-                .expectStatus().isNoContent();
-    }
-
-
-
-
 
     private EducationResponseDTO buildEducation(){
         return EducationResponseDTO.builder()
@@ -2696,6 +2263,7 @@ private VetAverageRatingDTO buildVetAverageRatingDTO(){
                 .endDate("2014")
                 .build();
     }
+
     @Test
     void addPhotoByVetId_LambdaBytes_201Created() {
         String vetId = "vet123";
@@ -2763,4 +2331,7 @@ private VetAverageRatingDTO buildVetAverageRatingDTO(){
 
         verify(vetsServiceClient).addSpecialtiesByVetId(eq(vetId), any(Mono.class));
     }
+    /**
+     * End of Visits Methods
+     * **/
 }
