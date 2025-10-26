@@ -306,7 +306,6 @@ export default function BillsListTable({
             onChange={e => setSelectedStatus(e.target.value)}
           >
             <option value="all">All</option>
-            <option value="overdue">Overdue</option>
             <option value="paid">Paid</option>
             <option value="unpaid">Unpaid</option>
           </select>
