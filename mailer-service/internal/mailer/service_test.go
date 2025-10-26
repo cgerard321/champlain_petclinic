@@ -89,7 +89,6 @@ func TestService_Send_SendsMessage(t *testing.T) {
 	emailJobChannel := make(chan EmailJob, 1)
 	s := NewService(d, "from@example.com", emailJobChannel)
 
-	// Start a goroutine to process email jobs from the channel
 	go func() {
 		for job := range emailJobChannel {
 			s.ProcessEmailJob(job)
@@ -106,13 +105,7 @@ func TestService_Send_SendsMessage(t *testing.T) {
 		t.Fatalf("send failed: %v", err)
 	}
 
-	// To verify the email was sent, we would typically need a mechanism
-	// in startFakeSMTP to signal when an email is received.
-	// For now, we'll assume it's processed given the channel and worker setup.
-	// A more robust test would wait for a signal from the fake SMTP server.
-
-	// Add a small delay to allow the worker to process the email
-	time.Sleep(100 * time.Millisecond) // Adjust as necessary
+	time.Sleep(100 * time.Millisecond) 
 
 }
 
@@ -187,8 +180,8 @@ func TestService_Send_DialError_Propagates(t *testing.T) {
 		t.Fatalf("send should not return an error immediately: %v", err)
 	}
 
-	// Allow time for retries and eventual failure
-	time.Sleep(RETRY_DELAY * (MAX_RETRIES + 1)) // Wait for all retries + initial attempt
+
+	time.Sleep(RETRY_DELAY * (MAX_RETRIES + 1)) // wait for all retries + initial attempt
 }
 
 func TestService_Send_MinimalSubjectAndHTML(t *testing.T) {
