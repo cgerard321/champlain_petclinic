@@ -23,7 +23,7 @@ angular.module('productBundleList')
 
             // --- toast helpers ---
             $scope.toast = { visible: false, title: '', lines: [], actions: [] };
-            let toastTimer = null;
+            var toastTimer = null;
 
             function toastShow({ title = '', lines = [], actions = [], autoHideMs = 0 }) {
                 if (toastTimer) { clearTimeout(toastTimer); toastTimer = null; }
