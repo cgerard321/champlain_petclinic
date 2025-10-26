@@ -168,7 +168,7 @@ public Flux<InventoryResponseDTO> searchInventories(
     }
 
   
-    @GetMapping("/{inventoryId}/products/lowstock")
+    @GetMapping(value = "/{inventoryId}/products/lowstock", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ProductResponseDTO> getLowStockProducts(@PathVariable String inventoryId, @RequestParam Optional<Integer> threshold) {
         int stockThreshold = threshold.orElse(20);
         return productInventoryService.getLowStockProducts(inventoryId, stockThreshold);
