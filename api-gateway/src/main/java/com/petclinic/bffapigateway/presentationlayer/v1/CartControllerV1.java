@@ -364,8 +364,11 @@ public class CartControllerV1 {
         @RequestBody(required = false) WishlistTransferRequestDTO request) {
 
     List<String> productIds = request != null ? request.normalizedProductIds() : List.of();
+    WishlistTransferDirectionDTO direction = request != null
+        ? request.resolvedDirection()
+        : WishlistTransferDirectionDTO.defaultDirection();
 
-    return cartServiceClient.createWishlistTransfer(cartId, productIds)
+    return cartServiceClient.createWishlistTransfer(cartId, productIds, direction)
         .map(ResponseEntity::ok)
         .defaultIfEmpty(ResponseEntity.notFound().build())
         .onErrorResume(e -> mapCartError(e,

@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 public class WishlistTransferRequestDTO {
 
     private List<String> productIds;
+    private WishlistTransferDirectionDTO direction;
 
     public List<String> normalizedProductIds() {
         if (productIds == null || productIds.isEmpty()) {
@@ -26,5 +27,9 @@ public class WishlistTransferRequestDTO {
                 .filter(id -> !id.isEmpty())
                 .distinct()
                 .collect(Collectors.toList());
+    }
+
+    public WishlistTransferDirectionDTO resolvedDirection() {
+        return direction == null ? WishlistTransferDirectionDTO.defaultDirection() : direction;
     }
 }

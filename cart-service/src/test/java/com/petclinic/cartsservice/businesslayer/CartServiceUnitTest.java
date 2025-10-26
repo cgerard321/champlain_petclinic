@@ -9,6 +9,7 @@ import com.petclinic.cartsservice.domainclientlayer.ProductClient;
 import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
 import com.petclinic.cartsservice.domainclientlayer.CartItemRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
+import com.petclinic.cartsservice.presentationlayer.WishlistTransferDirection;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
 import com.petclinic.cartsservice.utils.exceptions.OutOfStockException;
@@ -1446,18 +1447,18 @@ class CartServiceUnitTest {
                 .expectNextMatches(List::isEmpty)
                 .verifyComplete();
     }
-    @Test
-        void testTransferWishlistToCart_CartNotFound() {
+        @Test
+        void testTransferWishlist_ToCart_CartNotFound() {
         String cartId = "missing";
         when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.empty());
 
-                StepVerifier.create(cartService.transferWishlistToCart(cartId, List.of()))
+                StepVerifier.create(cartService.transferWishlist(cartId, List.of(), WishlistTransferDirection.TO_CART))
                 .expectErrorMatches(e -> e instanceof NotFoundException &&
                         e.getMessage().contains("Cart not found"))
                 .verify();
     }
         @Test
-        void testTransferWishlistToCart_EmptyWishlist() {
+        void testTransferWishlist_ToCart_EmptyWishlist() {
         String cartId = "cart-1";
         Cart cart = new Cart();
         cart.setCartId(cartId);
@@ -1466,7 +1467,7 @@ class CartServiceUnitTest {
 
         when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
 
-                StepVerifier.create(cartService.transferWishlistToCart(cartId, List.of()))
+                StepVerifier.create(cartService.transferWishlist(cartId, List.of(), WishlistTransferDirection.TO_CART))
                 .assertNext(resp -> {
                     assertEquals("No items in wishlist to move.", resp.getMessage());
                     assertTrue(resp.getProducts().isEmpty());
@@ -1474,7 +1475,7 @@ class CartServiceUnitTest {
                 .verifyComplete();
     }
         @Test
-        void testTransferWishlistToCart_ItemsMoved() {
+        void testTransferWishlist_ToCart_ItemsMoved() {
         String cartId = "cart-2";
         CartProduct wishItem = CartProduct.builder()
                 .productId("prod-1")
@@ -1495,7 +1496,7 @@ class CartServiceUnitTest {
         when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
         when(cartRepository.save(any())).thenReturn(Mono.just(savedCart));
 
-                StepVerifier.create(cartService.transferWishlistToCart(cartId, List.of()))
+                StepVerifier.create(cartService.transferWishlist(cartId, List.of(), WishlistTransferDirection.TO_CART))
                 .assertNext(resp -> {
                                         assertEquals("Moved 2 item(s) from wishlist to cart.", resp.getMessage());
                     assertEquals(1, resp.getProducts().size());
@@ -1505,7 +1506,7 @@ class CartServiceUnitTest {
                 .verifyComplete();
     }
         @Test
-        void testTransferWishlistToCart_MergeQuantities() {
+        void testTransferWishlist_ToCart_MergeQuantities() {
         String cartId = "cart-3";
         CartProduct wishItem = CartProduct.builder()
                 .productId("prod-1")
@@ -1538,7 +1539,7 @@ class CartServiceUnitTest {
         when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
         when(cartRepository.save(any())).thenReturn(Mono.just(savedCart));
 
-                StepVerifier.create(cartService.transferWishlistToCart(cartId, List.of()))
+                StepVerifier.create(cartService.transferWishlist(cartId, List.of(), WishlistTransferDirection.TO_CART))
                 .assertNext(resp -> {
                                         assertEquals("Moved 2 item(s) from wishlist to cart.", resp.getMessage());
                     assertEquals(1, resp.getProducts().size());
@@ -1546,6 +1547,51 @@ class CartServiceUnitTest {
                 })
                 .verifyComplete();
     }
+
+        @Test
+        void testTransferWishlist_ToWishlist_NoCartItems() {
+                String cartId = "cart-4";
+                Cart cart = new Cart();
+                cart.setCartId(cartId);
+                cart.setProducts(Collections.emptyList());
+                cart.setWishListProducts(new ArrayList<>());
+
+                when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
+
+                StepVerifier.create(cartService.transferWishlist(cartId, List.of(), WishlistTransferDirection.TO_WISHLIST))
+                                .assertNext(resp -> assertEquals("No items in cart to move.", resp.getMessage()))
+                                .verifyComplete();
+        }
+
+        @Test
+        void testTransferWishlist_ToWishlist_ItemsMoved() {
+                String cartId = "cart-5";
+                CartProduct cartItem = CartProduct.builder()
+                                .productId("prod-2")
+                                .productName("Widget")
+                                .quantityInCart(3)
+                                .productSalePrice(5.0)
+                                .build();
+                Cart cart = new Cart();
+                cart.setCartId(cartId);
+                cart.setProducts(new ArrayList<>(List.of(cartItem)));
+                cart.setWishListProducts(new ArrayList<>());
+
+                Cart savedCart = new Cart();
+                savedCart.setCartId(cartId);
+                savedCart.setProducts(new ArrayList<>());
+                savedCart.setWishListProducts(new ArrayList<>(List.of(cartItem)));
+
+                when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
+                when(cartRepository.save(any())).thenReturn(Mono.just(savedCart));
+
+                StepVerifier.create(cartService.transferWishlist(cartId, List.of(), WishlistTransferDirection.TO_WISHLIST))
+                                .assertNext(resp -> {
+                                        assertEquals("Moved 3 item(s) from cart to wishlist.", resp.getMessage());
+                                        assertTrue(resp.getProducts().isEmpty());
+                                })
+                                .verifyComplete();
+        }
     @Test
     void checkoutCart_CartNotFound_ThrowsNotFoundException() {
         String cartId = "missing";

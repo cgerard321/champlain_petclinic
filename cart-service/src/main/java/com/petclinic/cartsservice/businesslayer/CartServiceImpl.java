@@ -6,6 +6,7 @@ import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.domainclientlayer.CartItemRequestModel;
 import com.petclinic.cartsservice.domainclientlayer.ProductClient;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
+import com.petclinic.cartsservice.presentationlayer.WishlistTransferDirection;
 import com.petclinic.cartsservice.utils.EntityModelUtil;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
@@ -559,113 +560,202 @@ public class CartServiceImpl implements CartService {
                 );
     }
 
-    // move wishlist items into cart
+    // transfer wishlist/cart items based on direction
     @Override
-    public Mono<CartResponseModel> transferWishlistToCart(String cartId, List<String> productIds) {
-    final List<String> normalizedIds = productIds == null ? List.of() : productIds.stream()
-        .filter(Objects::nonNull)
-        .map(String::trim)
-        .filter(id -> !id.isEmpty())
-        .distinct()
-        .collect(Collectors.toList());
+    public Mono<CartResponseModel> transferWishlist(String cartId, List<String> productIds, WishlistTransferDirection direction) {
+        final List<String> normalizedIds = productIds == null ? List.of() : productIds.stream()
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .filter(id -> !id.isEmpty())
+                .distinct()
+                .collect(Collectors.toList());
+
+        final WishlistTransferDirection effectiveDirection = direction == null
+                ? WishlistTransferDirection.defaultDirection()
+                : direction;
 
         return cartRepository.findCartByCartId(cartId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
                 .flatMap(cart -> {
-                    List<CartProduct> wishlist = cart.getWishListProducts();
-                    if (wishlist == null || wishlist.isEmpty()) {
-                        CartResponseModel resp = EntityModelUtil.toCartResponseModel(cart, cart.getProducts());
-                        resp.setMessage("No items in wishlist to move.");
-                        return Mono.just(resp);
+                    if (effectiveDirection == WishlistTransferDirection.TO_CART) {
+                        return moveWishlistToCart(cart, normalizedIds);
                     }
+                    return moveCartToWishlist(cart, normalizedIds);
+                });
+    }
 
-                    final boolean moveAll = normalizedIds.isEmpty();
-                    final List<CartProduct> wishlistSnapshot = new ArrayList<>(wishlist);
-                    final List<CartProduct> remainingWishlist = new ArrayList<>();
-                    final List<CartProduct> selectedForTransfer = new ArrayList<>();
+    private Mono<CartResponseModel> moveWishlistToCart(Cart cart, List<String> normalizedIds) {
+        List<CartProduct> wishlist = cart.getWishListProducts();
+        if (wishlist == null || wishlist.isEmpty()) {
+            CartResponseModel resp = EntityModelUtil.toCartResponseModel(cart, cart.getProducts());
+            resp.setMessage("No items in wishlist to move.");
+            return Mono.just(resp);
+        }
 
-                    final Set<String> targetIds = moveAll ? Collections.emptySet() : new LinkedHashSet<>(normalizedIds);
+        final boolean moveAll = normalizedIds.isEmpty();
+        final List<CartProduct> wishlistSnapshot = new ArrayList<>(wishlist);
+        final List<CartProduct> remainingWishlist = new ArrayList<>();
+        final List<CartProduct> selectedForTransfer = new ArrayList<>();
 
-                    for (CartProduct item : wishlistSnapshot) {
-                        String pid = item.getProductId();
-                        boolean shouldMove = moveAll || (pid != null && targetIds.contains(pid));
-                        if (shouldMove) {
-                            selectedForTransfer.add(item);
-                        } else {
-                            remainingWishlist.add(item);
-                        }
-                    }
+        final Set<String> targetIds = moveAll ? Collections.emptySet() : new LinkedHashSet<>(normalizedIds);
 
-                    if (selectedForTransfer.isEmpty()) {
-                        return Mono.error(new NotFoundException("No wishlist items matched the requested product IDs."));
-                    }
+        for (CartProduct item : wishlistSnapshot) {
+            String pid = item.getProductId();
+            boolean shouldMove = moveAll || (pid != null && targetIds.contains(pid));
+            if (shouldMove) {
+                selectedForTransfer.add(item);
+            } else {
+                remainingWishlist.add(item);
+            }
+        }
 
-                    final List<CartProduct> cartLines = new ArrayList<>(cart.getProducts() != null ? cart.getProducts() : new ArrayList<>());
-                    Map<String, Integer> wishQtyById = new HashMap<>();
-                    Map<String, CartProduct> exemplarById = new HashMap<>();
+        if (selectedForTransfer.isEmpty()) {
+            return Mono.error(new NotFoundException("No wishlist items matched the requested product IDs."));
+        }
 
-                    for (CartProduct w : selectedForTransfer) {
-                        String pid = w.getProductId();
-                        if (pid == null || pid.isBlank()) {
-                            continue;
-                        }
+        final List<CartProduct> cartLines = new ArrayList<>(cart.getProducts() != null ? cart.getProducts() : new ArrayList<>());
+        Map<String, Integer> wishQtyById = new HashMap<>();
+        Map<String, CartProduct> exemplarById = new HashMap<>();
 
-                        int qty = (w.getQuantityInCart() == null || w.getQuantityInCart() <= 0) ? 1 : w.getQuantityInCart();
-                        wishQtyById.merge(pid, qty, Integer::sum);
-                        exemplarById.putIfAbsent(pid, w);
-                    }
+        for (CartProduct w : selectedForTransfer) {
+            String pid = w.getProductId();
+            if (pid == null || pid.isBlank()) {
+                continue;
+            }
 
-                    if (wishQtyById.isEmpty()) {
-                        CartResponseModel resp = EntityModelUtil.toCartResponseModel(cart, cart.getProducts());
-                        resp.setMessage("No items in wishlist to move.");
-                        return Mono.just(resp);
-                    }
+            int qty = (w.getQuantityInCart() == null || w.getQuantityInCart() <= 0) ? 1 : w.getQuantityInCart();
+            wishQtyById.merge(pid, qty, Integer::sum);
+            exemplarById.putIfAbsent(pid, w);
+        }
 
-                    int moved = 0;
-                    for (Map.Entry<String, Integer> entry : wishQtyById.entrySet()) {
-                        String pid = entry.getKey();
-                        int qtyToMove = entry.getValue();
-                        CartProduct sample = exemplarById.get(pid);
-                        if (sample == null) {
-                            continue;
-                        }
+        if (wishQtyById.isEmpty()) {
+            CartResponseModel resp = EntityModelUtil.toCartResponseModel(cart, cart.getProducts());
+            resp.setMessage("No items in wishlist to move.");
+            return Mono.just(resp);
+        }
 
-                        Optional<CartProduct> existingOpt = cartLines.stream()
-                                .filter(p -> Objects.equals(p.getProductId(), pid))
-                                .findFirst();
+        int moved = 0;
+        for (Map.Entry<String, Integer> entry : wishQtyById.entrySet()) {
+            String pid = entry.getKey();
+            int qtyToMove = entry.getValue();
+            CartProduct sample = exemplarById.get(pid);
+            if (sample == null) {
+                continue;
+            }
 
-                        if (existingOpt.isPresent()) {
-                            CartProduct existing = existingOpt.get();
-                            int base = existing.getQuantityInCart() == null ? 0 : existing.getQuantityInCart();
-                            existing.setQuantityInCart(base + qtyToMove);
-                            if (sample.getProductQuantity() != null) {
-                                existing.setProductQuantity(sample.getProductQuantity());
-                            }
-                        } else {
-                            cartLines.add(CartProduct.builder()
-                                    .productId(sample.getProductId())
-                                    .imageId(sample.getImageId())
-                                    .productName(sample.getProductName())
-                                    .productDescription(sample.getProductDescription())
-                                    .productSalePrice(sample.getProductSalePrice())
-                                    .averageRating(sample.getAverageRating())
-                                    .quantityInCart(qtyToMove)
-                                    .productQuantity(sample.getProductQuantity())
-                                    .build());
-                        }
-                        moved += qtyToMove;
-                    }
+            Optional<CartProduct> existingOpt = cartLines.stream()
+                    .filter(p -> Objects.equals(p.getProductId(), pid))
+                    .findFirst();
 
-                    cart.setProducts(cartLines);
-                    cart.setWishListProducts(remainingWishlist);
+            if (existingOpt.isPresent()) {
+                CartProduct existing = existingOpt.get();
+                int base = existing.getQuantityInCart() == null ? 0 : existing.getQuantityInCart();
+                existing.setQuantityInCart(base + qtyToMove);
+                if (sample.getProductQuantity() != null) {
+                    existing.setProductQuantity(sample.getProductQuantity());
+                }
+            } else {
+                cartLines.add(CartProduct.builder()
+                        .productId(sample.getProductId())
+                        .imageId(sample.getImageId())
+                        .productName(sample.getProductName())
+                        .productDescription(sample.getProductDescription())
+                        .productSalePrice(sample.getProductSalePrice())
+                        .averageRating(sample.getAverageRating())
+                        .quantityInCart(qtyToMove)
+                        .productQuantity(sample.getProductQuantity())
+                        .build());
+            }
+            moved += qtyToMove;
+        }
 
-                    final int movedFinal = moved;
-                    return cartRepository.save(cart)
-                            .map(saved -> {
-                                CartResponseModel resp = EntityModelUtil.toCartResponseModel(saved, saved.getProducts());
-                                resp.setMessage("Moved " + movedFinal + " item(s) from wishlist to cart.");
-                                return resp;
-                            });
+        cart.setProducts(cartLines);
+        cart.setWishListProducts(remainingWishlist);
+
+        final int movedFinal = moved;
+        return cartRepository.save(cart)
+                .map(saved -> {
+                    CartResponseModel resp = EntityModelUtil.toCartResponseModel(saved, saved.getProducts());
+                    resp.setMessage("Moved " + movedFinal + " item(s) from wishlist to cart.");
+                    return resp;
+                });
+    }
+
+    private Mono<CartResponseModel> moveCartToWishlist(Cart cart, List<String> normalizedIds) {
+        List<CartProduct> cartLines = cart.getProducts() != null ? new ArrayList<>(cart.getProducts()) : new ArrayList<>();
+        if (cartLines.isEmpty()) {
+            CartResponseModel resp = EntityModelUtil.toCartResponseModel(cart, cartLines);
+            resp.setMessage("No items in cart to move.");
+            return Mono.just(resp);
+        }
+
+        final boolean moveAll = normalizedIds.isEmpty();
+        final List<CartProduct> remainingCart = new ArrayList<>();
+        final List<CartProduct> selectedForWishlist = new ArrayList<>();
+
+        final Set<String> targetIds = moveAll ? Collections.emptySet() : new LinkedHashSet<>(normalizedIds);
+
+        for (CartProduct item : cartLines) {
+            String pid = item.getProductId();
+            boolean shouldMove = moveAll || (pid != null && targetIds.contains(pid));
+            if (shouldMove) {
+                selectedForWishlist.add(item);
+            } else {
+                remainingCart.add(item);
+            }
+        }
+
+        if (selectedForWishlist.isEmpty()) {
+            return Mono.error(new NotFoundException("No cart items matched the requested product IDs."));
+        }
+
+        List<CartProduct> wishlist = cart.getWishListProducts() != null ? new ArrayList<>(cart.getWishListProducts()) : new ArrayList<>();
+        Map<String, CartProduct> wishlistById = new HashMap<>();
+        for (CartProduct w : wishlist) {
+            if (w.getProductId() != null) {
+                wishlistById.put(w.getProductId(), w);
+            }
+        }
+
+        int moved = 0;
+        for (CartProduct selected : selectedForWishlist) {
+            String pid = selected.getProductId();
+            if (pid == null || pid.isBlank()) {
+                continue;
+            }
+
+            CartProduct existing = wishlistById.get(pid);
+            int qty = selected.getQuantityInCart() == null || selected.getQuantityInCart() <= 0 ? 1 : selected.getQuantityInCart();
+            if (existing != null) {
+                int base = existing.getQuantityInCart() == null ? 0 : existing.getQuantityInCart();
+                existing.setQuantityInCart(base + qty);
+                existing.setProductQuantity(selected.getProductQuantity());
+            } else {
+                CartProduct copy = CartProduct.builder()
+                        .productId(selected.getProductId())
+                        .imageId(selected.getImageId())
+                        .productName(selected.getProductName())
+                        .productDescription(selected.getProductDescription())
+                        .productSalePrice(selected.getProductSalePrice())
+                        .averageRating(selected.getAverageRating())
+                        .quantityInCart(qty)
+                        .productQuantity(selected.getProductQuantity())
+                        .build();
+                wishlist.add(copy);
+                wishlistById.put(pid, copy);
+            }
+            moved += qty;
+        }
+
+        cart.setProducts(remainingCart);
+        cart.setWishListProducts(wishlist);
+
+        final int movedFinal = moved;
+        return cartRepository.save(cart)
+                .map(saved -> {
+                    CartResponseModel resp = EntityModelUtil.toCartResponseModel(saved, saved.getProducts());
+                    resp.setMessage("Moved " + movedFinal + " item(s) from cart to wishlist.");
+                    return resp;
                 });
     }
 

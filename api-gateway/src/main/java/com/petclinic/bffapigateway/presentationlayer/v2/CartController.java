@@ -248,9 +248,12 @@ public class CartController {
     public Mono<ResponseEntity<CartResponseDTO>> createWishlistTransfer(
             @PathVariable String cartId,
             @RequestBody(required = false) WishlistTransferRequestDTO request) {
-        List<String> productIds = request != null ? request.normalizedProductIds() : List.of();
+    List<String> productIds = request != null ? request.normalizedProductIds() : List.of();
+    WishlistTransferDirectionDTO direction = request != null
+        ? request.resolvedDirection()
+        : WishlistTransferDirectionDTO.defaultDirection();
 
-        return cartServiceClient.createWishlistTransfer(cartId, productIds)
+    return cartServiceClient.createWishlistTransfer(cartId, productIds, direction)
                 .map(ResponseEntity::ok)
                 .onErrorResume(ex -> {
                     if (ex instanceof org.springframework.web.reactive.function.client.WebClientResponseException.NotFound) {

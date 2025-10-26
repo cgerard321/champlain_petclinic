@@ -3,6 +3,7 @@ package com.petclinic.cartsservice.businesslayer;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.domainclientlayer.CartItemRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
+import com.petclinic.cartsservice.presentationlayer.WishlistTransferDirection;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -35,7 +36,7 @@ public interface CartService {
     // add this new method to the interface
     Mono<CartResponseModel> removeProductFromWishlist(String cartId, String productId);
 
-    Mono<CartResponseModel> transferWishlistToCart(String cartId, List<String> productIds);
+    Mono<CartResponseModel> transferWishlist(String cartId, List<String> productIds, WishlistTransferDirection direction);
 
     Mono<List<CartProduct>> getRecentPurchasesByCustomerId(String customerId);
 

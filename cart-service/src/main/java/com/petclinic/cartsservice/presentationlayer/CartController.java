@@ -319,14 +319,17 @@ public class CartController {
     public Mono<ResponseEntity<CartResponseModel>> createWishlistTransfer(
             @PathVariable String cartId,
             @RequestBody(required = false) WishlistTransferRequestModel transferRequest) {
-        List<String> productIds = transferRequest != null
-                ? transferRequest.normalizedProductIds()
-                : List.of();
+    List<String> productIds = transferRequest != null
+        ? transferRequest.normalizedProductIds()
+        : List.of();
+    WishlistTransferDirection direction = transferRequest != null
+        ? transferRequest.resolvedDirection()
+        : WishlistTransferDirection.defaultDirection();
 
         return Mono.just(cartId)
                 .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
-                .flatMap(validId -> cartService.transferWishlistToCart(validId, productIds))
+        .flatMap(validId -> cartService.transferWishlist(validId, productIds, direction))
                 .map(ResponseEntity::ok)
                 .onErrorResume(InvalidInputException.class, e -> {
                     CartResponseModel resp = new CartResponseModel();

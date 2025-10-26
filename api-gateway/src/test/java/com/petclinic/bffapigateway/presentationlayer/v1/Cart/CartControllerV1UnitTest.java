@@ -708,19 +708,19 @@ public class CartControllerV1UnitTest {
         // Arrange
         String cartId = "cart-123";
         CartResponseDTO updatedCart = buildCartResponseDTO();
-        when(cartServiceClient.createWishlistTransfer(eq(cartId), anyList()))
+        when(cartServiceClient.createWishlistTransfer(eq(cartId), anyList(), eq(WishlistTransferDirectionDTO.TO_CART)))
                 .thenReturn(Mono.just(updatedCart));
 
         // Act & Assert
         webTestClient.post()
                 .uri(baseCartURL + "/" + cartId + "/wishlist-transfers")
-                .bodyValue(new WishlistTransferRequestDTO(null))
+                .bodyValue(new WishlistTransferRequestDTO(null, WishlistTransferDirectionDTO.TO_CART))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(CartResponseDTO.class)
                 .isEqualTo(updatedCart);
 
-        verify(cartServiceClient, times(1)).createWishlistTransfer(eq(cartId), anyList());
+        verify(cartServiceClient, times(1)).createWishlistTransfer(eq(cartId), anyList(), eq(WishlistTransferDirectionDTO.TO_CART));
     }
 
     @Test
@@ -728,17 +728,17 @@ public class CartControllerV1UnitTest {
     void createWishlistTransfer_withNonExistingCartId_shouldReturnNotFound() {
         // Arrange
         String cartId = "non-existent-cart";
-        when(cartServiceClient.createWishlistTransfer(eq(cartId), anyList()))
+        when(cartServiceClient.createWishlistTransfer(eq(cartId), anyList(), eq(WishlistTransferDirectionDTO.TO_CART)))
                 .thenReturn(Mono.empty());
 
         // Act & Assert
         webTestClient.post()
                 .uri(baseCartURL + "/" + cartId + "/wishlist-transfers")
-                .bodyValue(new WishlistTransferRequestDTO(null))
+                .bodyValue(new WishlistTransferRequestDTO(null, WishlistTransferDirectionDTO.TO_CART))
                 .exchange()
                 .expectStatus().isNotFound();
 
-        verify(cartServiceClient, times(1)).createWishlistTransfer(eq(cartId), anyList());
+        verify(cartServiceClient, times(1)).createWishlistTransfer(eq(cartId), anyList(), eq(WishlistTransferDirectionDTO.TO_CART));
     }
 
     // Focused error mapping tests for wishlist/cart endpoints
@@ -802,17 +802,17 @@ public class CartControllerV1UnitTest {
     void createWishlistTransfer_withConflict_shouldReturnConflict() {
         // Arrange
         String cartId = "cart-123";
-        when(cartServiceClient.createWishlistTransfer(eq(cartId), anyList()))
+        when(cartServiceClient.createWishlistTransfer(eq(cartId), anyList(), eq(WishlistTransferDirectionDTO.TO_CART)))
                 .thenReturn(Mono.error(WebClientResponseException.create(409, "Conflict", null, null, null)));
 
         // Act & Assert
         webTestClient.post()
                 .uri(baseCartURL + "/" + cartId + "/wishlist-transfers")
-                .bodyValue(new WishlistTransferRequestDTO(null))
+                .bodyValue(new WishlistTransferRequestDTO(null, WishlistTransferDirectionDTO.TO_CART))
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.CONFLICT);
 
-        verify(cartServiceClient, times(1)).createWishlistTransfer(eq(cartId), anyList());
+        verify(cartServiceClient, times(1)).createWishlistTransfer(eq(cartId), anyList(), eq(WishlistTransferDirectionDTO.TO_CART));
     }
     @Test
     void testUnprocessableEntity() {

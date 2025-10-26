@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 import com.petclinic.bffapigateway.domainclientlayer.CartServiceClient;
 import com.petclinic.bffapigateway.dtos.Cart.CartResponseDTO;
 import com.petclinic.bffapigateway.dtos.Cart.WishlistTransferRequestDTO;
+import com.petclinic.bffapigateway.dtos.Cart.WishlistTransferDirectionDTO;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -709,11 +710,11 @@ public class CartControllerUnitTest {
         void testCreateWishlistTransfer_NotFound() {
                 String cartId = "cart-3";
                 WebClientResponseException ex = WebClientResponseException.create(404, "Not Found", null, null, null);
-                when(cartServiceClient.createWishlistTransfer(eq(cartId), anyList())).thenReturn(Mono.error(ex));
+                when(cartServiceClient.createWishlistTransfer(eq(cartId), anyList(), eq(WishlistTransferDirectionDTO.TO_CART))).thenReturn(Mono.error(ex));
 
                 client.post()
                                 .uri("/api/v2/gateway/carts/{cartId}/wishlist-transfers", cartId)
-                                .bodyValue(new WishlistTransferRequestDTO(null))
+                                .bodyValue(new WishlistTransferRequestDTO(null, WishlistTransferDirectionDTO.TO_CART))
                                 .exchange()
                                 .expectStatus().isNotFound()
                                 .expectBody(CartResponseDTO.class)
@@ -724,11 +725,11 @@ public class CartControllerUnitTest {
         void testCreateWishlistTransfer_UnprocessableEntity() {
                 String cartId = "cart-3";
                 WebClientResponseException ex = WebClientResponseException.create(422, "Unprocessable Entity", null, null, null);
-                when(cartServiceClient.createWishlistTransfer(eq(cartId), anyList())).thenReturn(Mono.error(ex));
+                when(cartServiceClient.createWishlistTransfer(eq(cartId), anyList(), eq(WishlistTransferDirectionDTO.TO_CART))).thenReturn(Mono.error(ex));
 
                 client.post()
                                 .uri("/api/v2/gateway/carts/{cartId}/wishlist-transfers", cartId)
-                                .bodyValue(new WishlistTransferRequestDTO(null))
+                                .bodyValue(new WishlistTransferRequestDTO(null, WishlistTransferDirectionDTO.TO_CART))
                                 .exchange()
                                 .expectStatus().isEqualTo(422)
                                 .expectBody(CartResponseDTO.class)
@@ -738,11 +739,11 @@ public class CartControllerUnitTest {
         @Test
         void testCreateWishlistTransfer_UnexpectedError() {
                 String cartId = "cart-3";
-                when(cartServiceClient.createWishlistTransfer(eq(cartId), anyList())).thenReturn(Mono.error(new RuntimeException("boom")));
+                when(cartServiceClient.createWishlistTransfer(eq(cartId), anyList(), eq(WishlistTransferDirectionDTO.TO_CART))).thenReturn(Mono.error(new RuntimeException("boom")));
 
                 client.post()
                                 .uri("/api/v2/gateway/carts/{cartId}/wishlist-transfers", cartId)
-                                .bodyValue(new WishlistTransferRequestDTO(null))
+                                .bodyValue(new WishlistTransferRequestDTO(null, WishlistTransferDirectionDTO.TO_CART))
                                 .exchange()
                                 .expectStatus().is5xxServerError()
                                 .expectBody(CartResponseDTO.class)

@@ -624,14 +624,15 @@ const UserCart: React.FC = () => {
     try {
       const productId = item.productId;
 
-      const { data } = await axiosInstance.put(
-        `/carts/${cartId}/wishlist/${productId}/toWishList`,
-        {
-          productId: item.productId,
-          imageId: item.imageId,
-          productName: item.productName,
-          productSalePrice: item.productSalePrice,
-        },
+      const normalizedId = productId?.trim();
+      const payload = {
+        productIds: normalizedId ? [normalizedId] : [],
+        direction: 'TO_WISHLIST',
+      };
+
+      const { data } = await axiosInstance.post(
+        `/carts/${cartId}/wishlist-transfers`,
+        payload,
         { useV2: false }
       );
 
@@ -669,14 +670,15 @@ const UserCart: React.FC = () => {
     try {
       const productId = item.productId;
 
-      const { data } = await axiosInstance.put(
-        `/carts/${cartId}/wishlist/${productId}/toCart`,
-        {
-          productId: item.productId,
-          imageId: item.imageId,
-          productName: item.productName,
-          productSalePrice: item.productSalePrice,
-        },
+      const normalizedId = productId?.trim();
+      const payload = {
+        productIds: normalizedId ? [normalizedId] : [],
+        direction: 'TO_CART',
+      };
+
+      const { data } = await axiosInstance.post(
+        `/carts/${cartId}/wishlist-transfers`,
+        payload,
         { useV2: false }
       );
 
@@ -754,6 +756,7 @@ const UserCart: React.FC = () => {
         productIds: wishlistItems
           .map(item => item.productId)
           .filter((id): id is string => Boolean(id && id.trim())),
+        direction: 'TO_CART' as const,
       };
 
       const res = await axiosInstance.post(

@@ -1316,7 +1316,7 @@ public class CartServiceClientTest {
                 .setBody(body)
         );
 
-                StepVerifier.create(mockCartServiceClient.createWishlistTransfer("c-x", List.of()))
+                StepVerifier.create(mockCartServiceClient.createWishlistTransfer("c-x", List.of(), WishlistTransferDirectionDTO.TO_CART))
                 .assertNext(resp -> { assertThat(resp).isNotNull(); })
                 .verifyComplete();
     }
@@ -1329,7 +1329,7 @@ public class CartServiceClientTest {
                 .setBody("{\"message\":\"wishlist empty\"}")
         );
 
-                StepVerifier.create(mockCartServiceClient.createWishlistTransfer("missing", List.of()))
+                StepVerifier.create(mockCartServiceClient.createWishlistTransfer("missing", List.of(), WishlistTransferDirectionDTO.TO_CART))
                 .expectErrorSatisfies(ex -> {
                     org.assertj.core.api.Assertions.assertThat(ex)
                             .isInstanceOf(org.springframework.web.reactive.function.client.WebClientResponseException.class);

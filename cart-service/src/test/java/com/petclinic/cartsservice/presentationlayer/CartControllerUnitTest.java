@@ -841,12 +841,12 @@ class CartControllerUnitTest {
     void createWishlistTransfer_success() {
         String validCartId = "123456789012345678901234567890123456"; // 36 chars
         CartResponseModel response = CartResponseModel.builder().cartId(validCartId).build();
-        Mockito.when(cartService.transferWishlistToCart(Mockito.eq(validCartId), Mockito.anyList()))
+        Mockito.when(cartService.transferWishlist(Mockito.eq(validCartId), Mockito.anyList(), Mockito.eq(WishlistTransferDirection.TO_CART)))
                 .thenReturn(Mono.just(response));
 
         webTestClient.post()
                 .uri("/api/v1/carts/" + validCartId + "/wishlist-transfers")
-                .bodyValue(new WishlistTransferRequestModel(null))
+                .bodyValue(new WishlistTransferRequestModel(null, WishlistTransferDirection.TO_CART))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(CartResponseModel.class)
@@ -856,11 +856,12 @@ class CartControllerUnitTest {
     @Test
     void createWishlistTransfer_invalidInput() {
         String validCartId = "cart123456789012345678901234567890123456";
-        Mockito.when(cartService.transferWishlistToCart(Mockito.eq(validCartId), Mockito.anyList()))
+        Mockito.when(cartService.transferWishlist(Mockito.eq(validCartId), Mockito.anyList(), Mockito.eq(WishlistTransferDirection.TO_CART)))
                 .thenReturn(Mono.error(new InvalidInputException("Invalid input")));
 
         webTestClient.post()
                 .uri("/api/v1/carts/" + validCartId + "/wishlist-transfers")
+                .bodyValue(new WishlistTransferRequestModel(null, WishlistTransferDirection.TO_CART))
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
     }
@@ -868,11 +869,12 @@ class CartControllerUnitTest {
     @Test
     void createWishlistTransfer_unexpectedError() {
         String validCartId = "123456789012345678901234567890123456"; // 36 chars
-        Mockito.when(cartService.transferWishlistToCart(Mockito.eq(validCartId), Mockito.anyList()))
+        Mockito.when(cartService.transferWishlist(Mockito.eq(validCartId), Mockito.anyList(), Mockito.eq(WishlistTransferDirection.TO_CART)))
                 .thenReturn(Mono.error(new RuntimeException("Unexpected")));
 
         webTestClient.post()
                 .uri("/api/v1/carts/" + validCartId + "/wishlist-transfers")
+                .bodyValue(new WishlistTransferRequestModel(null, WishlistTransferDirection.TO_CART))
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -880,11 +882,12 @@ class CartControllerUnitTest {
     @Test
     void createWishlistTransfer_notFound() {
         String validCartId = "123456789012345678901234567890123456";
-        Mockito.when(cartService.transferWishlistToCart(Mockito.eq(validCartId), Mockito.anyList()))
+        Mockito.when(cartService.transferWishlist(Mockito.eq(validCartId), Mockito.anyList(), Mockito.eq(WishlistTransferDirection.TO_CART)))
                 .thenReturn(Mono.error(new NotFoundException("Not found")));
 
         webTestClient.post()
                 .uri("/api/v1/carts/" + validCartId + "/wishlist-transfers")
+                .bodyValue(new WishlistTransferRequestModel(null, WishlistTransferDirection.TO_CART))
                 .exchange()
                 .expectStatus().isNotFound();
     }
@@ -894,6 +897,7 @@ class CartControllerUnitTest {
         String invalidCartId = "short-id";
         webTestClient.post()
                 .uri("/api/v1/carts/" + invalidCartId + "/wishlist-transfers")
+                .bodyValue(new WishlistTransferRequestModel(null, WishlistTransferDirection.TO_CART))
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
     }
