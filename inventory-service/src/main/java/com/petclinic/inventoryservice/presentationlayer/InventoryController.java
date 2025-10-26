@@ -90,7 +90,7 @@ public class InventoryController {
     }
 
 
-@GetMapping()
+@GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 public Flux<InventoryResponseDTO> searchInventories(
         @RequestParam Optional<Integer> page, @RequestParam Optional<Integer> size,
         @RequestParam(name = "inventoryCode", required = false) String inventoryCode,

@@ -30,21 +30,78 @@ angular.module('inventoriesUpdateForm')
       }
     }
 
-    $http.get('/api/gateway/inventories/' + inventoryId).then(function (resp) {
-      self.inventory = resp.data || {};
-      self.originalName = (self.inventory.inventoryName || '').toLowerCase().trim();
-      inventoryLoaded = true;
-      syncSelectedType();
+    var esNamesUpdate = null;
 
-      return $http.get('/api/gateway/inventories');
-    }).then(function (listResp) {
-      (listResp.data || []).forEach(function (inv) {
-        if (inv && inv.inventoryName) {
-          $scope.existingInventoryNames.add(inv.inventoryName.toLowerCase().trim());
-        }
-      });
-      if ($scope.checkNameUpdate) $scope.checkNameUpdate();
-    }, handleHttpError);
+      $http.get('/api/gateway/inventories/' + inventoryId).then(function (resp) {
+          self.inventory = resp.data || {};
+          self.originalName = (self.inventory.inventoryName || '').toLowerCase().trim();
+          inventoryLoaded = true;
+          syncSelectedType();
+
+          startNamesSSE_Update();
+      }, handleHttpError);
+
+      // stream all inventories and fill the Set of names
+      function startNamesSSE_Update () {
+          if (esNamesUpdate) {
+              try {
+                  esNamesUpdate.close();
+              } catch (_) {
+              }
+          }
+          esNamesUpdate = new EventSource('/api/gateway/inventories');
+
+          var idleTimer = null;
+          var IDLE_MS = 1000;
+          var initialFired = false;
+
+          function bumpIdle() {
+              if (idleTimer) clearTimeout(idleTimer);
+              idleTimer = setTimeout(function () {
+                  try {
+                      esNamesUpdate.close();
+                  } catch (_) {
+                  }
+              }, IDLE_MS);
+          }
+
+          function addInv(inv) {
+              if (!inv || !inv.inventoryName) return;
+              $scope.existingInventoryNames.add(inv.inventoryName.toLowerCase().trim());
+          }
+
+          esNamesUpdate.onmessage = function (e) {
+              if (!e.data || e.data === 'heartbeat' || e.data === ':') {
+                  bumpIdle();
+                  return;
+              }
+              try {
+                  var payload = JSON.parse(e.data);
+                  if (Array.isArray(payload)) payload.forEach(addInv);
+                  else addInv(payload);
+              } catch (_) {
+                  // ignore non-JSON
+              }
+              if (!initialFired) {
+                  initialFired = true;
+                  if ($scope.checkNameUpdate) $scope.checkNameUpdate();
+              }
+              bumpIdle();
+          };
+
+          esNamesUpdate.onerror = function () {
+              // let browser handle reconnects; we also auto-close on idle
+          };
+
+          $scope.$on('$destroy', function () {
+              if (idleTimer) clearTimeout(idleTimer);
+              try {
+                  esNamesUpdate.close();
+              } catch (_) {
+              }
+          });
+      }
+
 
       $scope.inventoryTypeFormUpdateSearch = "";
       $scope.inventoryTypeUpdateOptions = ["New Type"];
