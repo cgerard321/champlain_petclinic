@@ -1,6 +1,7 @@
 use crate::adapters::output::mysql::auth_repo;
 use crate::adapters::output::mysql::users_repo::get_user_auth_by_email;
 use crate::bootstrap::Db;
+use crate::core::config::SESSION_EXPIRATION_HR;
 use crate::core::error::{AppError, AppResult};
 use crate::core::utils::auth::get_pepper;
 use crate::domain::models::session::Session;
@@ -24,7 +25,8 @@ pub async fn authenticate(db: &State<Db>, email: &str, password: &str) -> AppRes
     }
 
     let session_id = Uuid::new_v4();
-    let expires_at: NaiveDateTime = (Utc::now() + Duration::days(1)).naive_utc();
+    let expires_at: NaiveDateTime =
+        (Utc::now() + Duration::hours(SESSION_EXPIRATION_HR)).naive_utc();
 
     let new_session = auth_repo::insert_session(db, session_id, row.id, expires_at)
         .await
