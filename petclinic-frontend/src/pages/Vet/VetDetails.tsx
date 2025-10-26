@@ -109,7 +109,7 @@ export default function VetDetails(): JSX.Element {
   const [photo, setPhoto] = useState<string | null>(null);
   const [isDefaultPhoto, setIsDefaultPhoto] = useState(false);
   const [albumPhotos, setAlbumPhotos] = useState<AlbumPhotoType[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false); // To handle form visibility
   const [specialtyName, setSpecialtyName] = useState('');
