@@ -12,7 +12,6 @@ import { VisitRequestModel } from '@/features/visits/models/VisitRequestModel';
 import BasicModal from '@/shared/components/BasicModal';
 import { getAllPets } from '@/features/visits/api/getAllPets';
 import { PetResponseModel } from '@/features/customers/models/PetResponseModel';
-import { useUser } from '@/context/UserContext';
 
 interface ApiError {
   message: string;
@@ -64,22 +63,13 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [showNotification, setShowNotification] = useState<boolean>(false);
-  const { user } = useUser();
 
   //Fetch pets
   useEffect(() => {
     const fetchPets = async (): Promise<void> => {
       try {
         setLoadingPets(true);
-        const isOwner = Array.from(user.roles).some(
-          role => role.name === 'OWNER'
-        );
-        let petsData;
-        if (isOwner) {
-          petsData = await getAllPets(user.userId);
-        } else {
-          petsData = await getAllPets();
-        }
+        const petsData = await getAllPets();
 
         setPets(petsData);
       } catch (error) {
@@ -91,8 +81,8 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
     };
 
     fetchPets();
-  }, [user]);
-  // Fetch vets
+  }, []);
+  //fetch vets
   useEffect(() => {
     const fetchVets = async (): Promise<void> => {
       try {

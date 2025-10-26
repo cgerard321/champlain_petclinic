@@ -1,17 +1,13 @@
 import axiosInstance from '@/shared/api/axiosInstance';
 import { PetResponseModel } from '@/features/customers/models/PetResponseModel';
 
-export const getAllPets = async (
-  ownerId?: string
-): Promise<PetResponseModel[]> => {
+export const getAllPets = async (): Promise<PetResponseModel[]> => {
   try {
-    const endpoint = ownerId ? `/owners/${ownerId}/pets` : '/pets';
-
-    const response = await axiosInstance.get(endpoint, {
+    const response = await axiosInstance.get('/pets', {
       useV2: false,
-      responseType: 'text',
     });
 
+    // Handle SSE (Server-Sent Events) stream format
     if (typeof response.data === 'string') {
       const pieces = response.data.split('\n').filter(Boolean);
       const pets: PetResponseModel[] = [];
