@@ -26,6 +26,7 @@ pub struct LoginReq {
     pub password: String,
 }
 
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct FullUser {
     pub id: Uuid,

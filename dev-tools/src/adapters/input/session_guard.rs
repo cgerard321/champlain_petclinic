@@ -25,7 +25,7 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
             return Outcome::Error((Status::Unauthorized, ()));
         };
 
-        match find_session_by_id(&db, sid).await {
+        match find_session_by_id(db, sid).await {
             Ok(session) => Outcome::Success(AuthenticatedUser {
                 user_id: session.user_id,
             }),
