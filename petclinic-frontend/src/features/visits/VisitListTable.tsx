@@ -14,10 +14,13 @@ import { cancelVisit } from './api/cancelVisit';
 import { Category } from './models/Category';
 
 import AddingVisit from './components/AddingVisit';
+import calendarIcon from '@/assets/Icons/calendarLight.svg';
 
 import BasicModal from '@/shared/components/BasicModal';
 import VisitDetails from '@/features/visits/components/VisitDetails';
 import EditingVisit from './components/EditingVisit';
+
+import { AppRoutePaths } from '@/shared/models/path.routes';
 import Sidebar from './components/Sidebar';
 import SidebarItem from './components/SidebarItem';
 import SvgIcon from '@/shared/components/SvgIcon';
@@ -410,6 +413,16 @@ export default function VisitListTable(): JSX.Element {
           >
             <SvgIcon id="star-empty" />
             Reviews
+          </button>
+        </li>
+        <li>
+          <button
+            className="btn btn-primary"
+            onClick={() => navigate(AppRoutePaths.VisitsCalendar)}
+            title="Calendar View"
+          >
+            <SvgIcon id="calendar" />
+            Calendar View
           </button>
         </li>
         {categories.map(category =>
