@@ -12,6 +12,7 @@ import axiosInstance from '@/shared/api/axiosInstance';
 import AddSupplyToInventory from '@/features/inventories/AddSupplyToInventory';
 import EditInventoryProducts from '@/features/inventories/EditInventoryProducts';
 import MoveInventoryProducts from '@/features/inventories/MoveInventoryProducts';
+import { searchProducts } from './api/searchProducts';
 
 const MAX_QTY = 100;
 
@@ -146,20 +147,27 @@ const InventoryProducts: React.FC = () => {
     if (!inventoryId) return;
     setLoading(true);
     setError(null);
+
     try {
-      const res = await axiosInstance.get<ProductModel[]>(
-        `/inventories/${inventoryId}/products/search`,
-        { useV2: false }
-      );
-      const data = Array.isArray(res.data) ? res.data : [];
-      data.forEach(p => {
-        p.productMargin = parseFloat(
-          (p.productSalePrice - p.productPrice).toFixed(2)
-        );
-      });
-      setProducts(data);
-      setProductList(data);
-      setFilteredProducts(data);
+      const result = await searchProducts(inventoryId);
+
+      if (result.errorMessage) {
+        setError(result.errorMessage);
+        setProducts([]);
+        setProductList([]);
+        setFilteredProducts([]);
+      } else {
+        const data = result.data ?? [];
+        setProducts(data);
+        setProductList(data);
+        setFilteredProducts(data);
+      }
+    } catch (err) {
+      console.error('Failed to load products:', err);
+      setError('Failed to load products. Please try again.');
+      setProducts([]);
+      setProductList([]);
+      setFilteredProducts([]);
     } finally {
       setLoading(false);
     }
@@ -315,13 +323,13 @@ const InventoryProducts: React.FC = () => {
   }, [productList, productStatus]);
 
   if (loading) return <p>Loading supplies...</p>;
-  if (error) return <p>{error}</p>;
 
   return (
     <div className="inventory-supplies">
       <h2 className="inventory-title">
         Supplies in Inventory: <span>{inventoryName}</span>
       </h2>
+      {error && <p style={{ color: 'red', marginBottom: '1rem' }}>{error}</p>}
       <button
         className="btn btn-secondary"
         onClick={() =>
@@ -513,7 +521,7 @@ const InventoryProducts: React.FC = () => {
             ))
           ) : (
             <tr>
-              <td colSpan={7} style={{ textAlign: 'center' }}>
+              <td colSpan={9} style={{ textAlign: 'center' }}>
                 No products available.
               </td>
             </tr>

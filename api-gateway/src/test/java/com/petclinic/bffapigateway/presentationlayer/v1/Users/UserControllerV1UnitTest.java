@@ -293,7 +293,7 @@ class UserControllerV1UnitTest {
 
         final Login login = Login.builder()
                 .password("valid")
-                .email(USER_DETAILS_1.getEmail())
+                .emailOrUsername(USER_DETAILS_1.getEmail())
                 .build();
 
         when(authServiceClient.login(any()))
@@ -318,7 +318,7 @@ class UserControllerV1UnitTest {
     void login_invalid() throws Exception {
         final Login login = Login.builder()
                 .password("valid")
-                .email(USER_DETAILS_1.getEmail())
+                .emailOrUsername(USER_DETAILS_1.getEmail())
                 .build();
         final String message = "I live in unending agony. I spent 6 hours and ended up with nothing";
         when(authServiceClient.login(any()))
