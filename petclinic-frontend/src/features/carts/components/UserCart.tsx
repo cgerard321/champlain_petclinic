@@ -104,13 +104,13 @@ const UserCart: React.FC = () => {
   };
 
   // Helper: used by actions that require cartId — sets visible error and returns false when missing.
-  const ensureCartId = (): boolean => {
+  const ensureCartId = useCallback((): boolean => {
     if (!cartId) {
       setError('Invalid cart ID');
       return false;
     }
     return true;
-  };
+  }, [cartId, setError]);
 
   // Recent purchases state
   const [recentPurchases, setRecentPurchases] = useState<
@@ -593,7 +593,7 @@ const UserCart: React.FC = () => {
         setNotificationMessage(msg);
       }
     },
-    [cartId, blockIfReadOnly, confirm]
+    [cartId, blockIfReadOnly, confirm, ensureCartId]
   );
 
   const clearCart = async (): Promise<void> => {
