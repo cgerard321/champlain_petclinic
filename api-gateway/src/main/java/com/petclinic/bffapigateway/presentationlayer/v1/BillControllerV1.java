@@ -169,13 +169,13 @@ public class BillControllerV1 {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "/vet/{vetFirstName}/{vetLastName}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "/{vetFirstName}/{vetLastName}/vet", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getAllBillsByVetName(@PathVariable String vetFirstName, @PathVariable String vetLastName) {
         return billServiceClient.getBillsByVetName(vetFirstName, vetLastName);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "/visitType/{visitType}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "/{visitType}/visitType", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getAllBillsByVisitType(@PathVariable String visitType) {
         return billServiceClient.getBillsByVisitType(visitType);
     }
@@ -208,7 +208,7 @@ public class BillControllerV1 {
     }
 
     @IsUserSpecific(idToMatch = {"vetId"}, bypassRoles = {Roles.ADMIN})
-    @DeleteMapping(value = "/vets/{vetId}")
+    @DeleteMapping(value = "/{vetId}/vets")
     public Mono<ResponseEntity<Void>> deleteBillsByVetId(final @PathVariable String vetId){
         return billServiceClient.deleteBillsByVetId(vetId).then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());

@@ -149,17 +149,17 @@ public class BillController {
                 vetFirstName, vetLastName);
     }
 
-    @GetMapping(value = "/bills/owner/{ownerFirstName}/{ownerLastName}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "/bills/{ownerFirstName}/{ownerLastName}/owner", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getAllBillsByOwnerName(@PathVariable String ownerFirstName, @PathVariable String ownerLastName) {
         return billService.getAllBillsByOwnerName(ownerFirstName, ownerLastName);
     }
 
-    @GetMapping(value = "/bills/vet/{vetFirstName}/{vetLastName}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "/bills/{vetFirstName}/{vetLastName}/vet", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getAllBillsByVetName(@PathVariable String vetFirstName, @PathVariable String vetLastName) {
         return billService.getAllBillsByVetName(vetFirstName, vetLastName);
     }
 
-    @GetMapping(value = "/bills/visitType/{visitType}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "/bills/{visitType}/visitType", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getAllBillsByVisitType(@PathVariable String visitType) {
         return billService.getAllBillsByVisitType(visitType);
     }
@@ -211,13 +211,13 @@ public class BillController {
         return billService.deleteBill(billId);
     }
 
-    @DeleteMapping(value = "/bills/vet/{vetId}")
+    @DeleteMapping(value = "/bills/{vetId}/vet")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public Flux<Void> deleteBillsByVetId(@PathVariable("vetId") String vetId) {
         return billService.deleteBillsByVetId(vetId);
     }
 
-    @DeleteMapping(value = "/bills/customer/{customerId}")
+    @DeleteMapping(value = "/bills/{customerId}/customer")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public Flux<Void> deleteBillsByCustomerId(@PathVariable("customerId") String customerId) {
         return billService.deleteBillsByCustomerId(customerId);

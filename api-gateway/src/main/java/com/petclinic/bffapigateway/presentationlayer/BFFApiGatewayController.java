@@ -106,13 +106,13 @@ public class BFFApiGatewayController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "bills/owner/{ownerFirstName}/{ownerLastName}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "bills/{ownerFirstName}/{ownerLastName}/owner", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getAllBillsByOwnerName(@PathVariable String ownerFirstName, @PathVariable String ownerLastName) {
         return billServiceClient.getBillsByOwnerName(ownerFirstName, ownerLastName);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @DeleteMapping(value = "bills/customer/{customerId}")
+    @DeleteMapping(value = "bills/{customerId}/customer")
     public Mono<ResponseEntity<Void>> deleteBillsByCustomerId(final @PathVariable String customerId){
         return billServiceClient.deleteBillsByCustomerId(customerId).then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
