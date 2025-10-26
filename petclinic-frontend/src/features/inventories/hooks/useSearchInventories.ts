@@ -11,9 +11,10 @@ interface useSearchInventoriesResponseModel {
     inventoryName: string,
     inventoryType: string,
     inventoryDescription: string,
-    importantOnly?: boolean
+    importantOnly?: boolean,
+    page?: number
   ) => void;
-  setCurrentPage: (currentPage: (prevPage: number) => number) => void;
+  setCurrentPage: (value: number | ((prevPage: number) => number)) => void;
   isLoading: boolean;
   updateFilters: (filters: {
     inventoryName?: string;
@@ -34,6 +35,7 @@ interface useSearchInventoriesResponseModel {
 export default function useSearchInventories(): useSearchInventoriesResponseModel {
   const [inventoryList, setInventoryList] = useState<Inventory[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(0);
+  const currentPageRef = useRef<number>(currentPage);
   const [realPage, setRealPage] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
@@ -45,31 +47,44 @@ export default function useSearchInventories(): useSearchInventoriesResponseMode
   });
   const listSize: number = 10;
 
-  const getInventoryList = async (
-    inventoryName: string,
-    inventoryType: string,
-    inventoryDescription: string,
-    importantOnly: boolean = false
-  ): Promise<void> => {
-    setIsLoading(true);
-    setErrorMessage('');
-    const res = await searchInventories(
-      currentPage,
-      listSize,
-      inventoryName,
-      inventoryType,
-      inventoryDescription,
-      importantOnly
-    );
-    if (res.errorMessage) {
-      setInventoryList([]);
-      setErrorMessage(res.errorMessage);
-    } else {
-      setInventoryList(res.data ?? []);
-      setRealPage(currentPage + 1);
-    }
-    setIsLoading(false);
-  };
+  const getInventoryList = useCallback(
+    async (
+      inventoryName: string,
+      inventoryType: string,
+      inventoryDescription: string,
+      importantOnly: boolean = false,
+      page?: number
+    ): Promise<void> => {
+      setIsLoading(true);
+      setErrorMessage('');
+      // Use the ref to avoid recreating this callback when `currentPage` state changes.
+      const pageToFetch =
+        typeof page === 'number' ? page : currentPageRef.current;
+      const res = await searchInventories(
+        pageToFetch,
+        listSize,
+        inventoryName,
+        inventoryType,
+        inventoryDescription,
+        importantOnly
+      );
+      if (res.errorMessage) {
+        setInventoryList([]);
+        setErrorMessage(res.errorMessage);
+      } else {
+        setInventoryList(res.data ?? []);
+        setRealPage(pageToFetch + 1);
+        setCurrentPage(() => pageToFetch);
+      }
+      setIsLoading(false);
+    },
+    [listSize]
+  );
+
+  // keep ref in sync with state; this avoids recreating getInventoryList when the page changes
+  useEffect(() => {
+    currentPageRef.current = currentPage;
+  }, [currentPage]);
 
   const updateFilters = useCallback(
     (newFilters: {
@@ -98,75 +113,19 @@ export default function useSearchInventories(): useSearchInventoriesResponseMode
       window.clearTimeout(debounceRef.current);
     }
 
-    const fetchAllPages = async (runId: number): Promise<boolean | null> => {
-      setIsLoading(true);
-      setErrorMessage('');
-      const aggregated: Inventory[] = [];
-      const seen = new Set<string>();
-      let page = 0;
-      // Safety cap to avoid infinite loops if the backend misbehaves.
-      const MAX_PAGES = 100;
-      while (page < MAX_PAGES) {
-        const res = await searchInventories(
-          page,
-          listSize,
-          filters.inventoryName || undefined,
-          filters.inventoryType || undefined,
-          filters.inventoryDescription || undefined,
-          filters.importantOnly
-        );
-
-        // if a newer run started, abort processing this one
-        if (runId !== runIdRef.current) return null;
-
-        if (res.errorMessage) {
-          setInventoryList([]);
-          setRealPage(1);
-          setCurrentPage(() => 0);
-          setIsLoading(false);
-          setErrorMessage(res.errorMessage);
-          return null;
-        }
-
-        const data = res.data ?? [];
-        // Append unique by inventoryId using a Set for O(n) deduplication
-        for (const item of data) {
-          if (!seen.has(item.inventoryId)) {
-            seen.add(item.inventoryId);
-            aggregated.push(item);
-          }
-        }
-
-        if (data.length < listSize) break;
-        page += 1;
-        if (page >= MAX_PAGES) {
-          // Warning in case of unexpected infinite loop
-          console.warn(
-            `Reached MAX_PAGES (${MAX_PAGES}) while aggregating inventories; stopping to avoid an infinite loop.`
-          );
-          break;
-        }
-      }
-
-      // double-check still current
-      if (runId !== runIdRef.current) return null;
-
-      // Server-side filtering already applied in the paged requests.
-      // Use the aggregated results directly to avoid double-filtering
-      // and extra CPU/network work. If we later find normalization gaps
-      // we can add a lightweight normalization step here.
-      setInventoryList(aggregated);
-      setRealPage(1);
-      setCurrentPage(() => 0);
-      setIsLoading(false);
-      return true;
-    };
-
     debounceRef.current = window.setTimeout(async () => {
-      // start a new run and capture its id
+      // start a new run id (used only to invalidate overlapping calls)
       runIdRef.current += 1;
-      const myRun = runIdRef.current;
-      await fetchAllPages(myRun);
+
+      // Fetch only the first page for new filters instead of aggregating all pages.
+      // This preserves the paged UI expectation and avoids duplicating page data.
+      await getInventoryList(
+        filters.inventoryName || '',
+        filters.inventoryType || '',
+        filters.inventoryDescription || '',
+        filters.importantOnly ?? false,
+        0
+      );
     }, 300);
 
     return () => {
@@ -176,7 +135,7 @@ export default function useSearchInventories(): useSearchInventoriesResponseMode
         window.clearTimeout(debounceRef.current);
       }
     };
-  }, [filters, listSize]);
+  }, [filters, listSize, getInventoryList]);
 
   return {
     inventoryList,
