@@ -1,8 +1,8 @@
 use crate::application::ports::output::user_repo_port::DynUsersRepo;
+use crate::application::usecases::users::utils::hash_password;
 use crate::core::error::{AppError, AppResult};
 use crate::core::utils::auth::get_pepper;
 use crate::domain::models::user::{NewUser, User};
-use crate::domain::usecases::users::utils::hash_password;
 use rocket::State;
 use uuid::Uuid;
 

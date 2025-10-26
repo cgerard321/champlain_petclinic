@@ -1,9 +1,9 @@
 use crate::application::ports::output::auth_repo_port::DynAuthRepo;
 use crate::application::ports::output::user_repo_port::DynUsersRepo;
+use crate::application::usecases::auth::authenticate::authenticate;
+use crate::application::usecases::auth::logout::remove_session;
 use crate::core::error::{AppError, AppResult};
 use crate::domain::models::user::LoginReq;
-use crate::domain::usecases::auth::authenticate::authenticate;
-use crate::domain::usecases::auth::logout::remove_session;
 use rocket::http::{Cookie, CookieJar, SameSite};
 use rocket::serde::json::Json;
 use rocket::{http::Status, post, State};

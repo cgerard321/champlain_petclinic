@@ -1,7 +1,7 @@
 use crate::application::ports::output::user_repo_port::DynUsersRepo;
+use crate::application::usecases::users::create_user::create_user;
 use crate::core::error::AppResult;
 use crate::domain::models::user::{AuthenticatedUser, NewUser, User};
-use crate::domain::usecases::users::create_user::create_user;
 use rocket::serde::json::Json;
 use rocket::{post, State};
 
