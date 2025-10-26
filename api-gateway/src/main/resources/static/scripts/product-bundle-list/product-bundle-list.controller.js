@@ -6,7 +6,7 @@ angular.module('productBundleList')
         function ($http, $scope, $stateParams, $window, $uibModal, $interval) {
 
             var self = this;
-            const pageSize = 15;
+            var pageSize = 15;
             self.currentPage = $stateParams.page || 0;
             self.pageSize = $stateParams.size || pageSize;
             self.actualCurrentPageShown = parseInt(self.currentPage) + 1;
