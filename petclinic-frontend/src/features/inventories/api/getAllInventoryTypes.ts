@@ -6,13 +6,35 @@ export async function getAllInventoryTypes(): Promise<
   ApiResponse<InventoryType[]>
 > {
   try {
-    const response = await axiosInstance.get<InventoryType[]>(
-      '/inventories/types',
-      {
-        useV2: false,
-      }
-    );
-    return { data: response.data, errorMessage: null };
+    const response = await axiosInstance.get('/inventories/types', {
+      useV2: false,
+      responseType: 'text',
+    });
+    const raw = String(response.data ?? '');
+
+    const items: InventoryType[] = raw
+      .split(/\r?\n\r?\n/)
+      .map(block => {
+        const dataLines = block
+          .split(/\r?\n/)
+          .filter(line => line.startsWith('data:'))
+          .map(line => line.slice(5).trim());
+
+        if (dataLines.length === 0) return null;
+
+        const jsonText = dataLines.join('\n').trim();
+        if (!jsonText || jsonText === '__END__') return null; // optional sentinel support
+
+        try {
+          return JSON.parse(jsonText) as InventoryType;
+        } catch (e) {
+          console.error("Can't parse JSON from SSE event:", e, jsonText);
+          return null;
+        }
+      })
+      .filter((x): x is InventoryType => x !== null);
+
+    return { data: items, errorMessage: null };
   } catch (error: unknown) {
     const maybeMsg = (error as { response?: { data?: { message?: unknown } } })
       .response?.data?.message;

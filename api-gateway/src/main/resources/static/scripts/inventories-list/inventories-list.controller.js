@@ -8,25 +8,138 @@ angular.module('inventoriesList')
       self.currentPage = $stateParams.page = 0;
       self.listSize = $stateParams.size = 10;
       self.realPage = parseInt(self.currentPage) + 1;
+
+      self.inventoryList = [];
+      $scope.inventoryTypeOptions = [];
+
       var numberOfPage;
       var name;
       var code;
       var type;
       var desc;
 
+      var esSearch = null;
+
+
+
       getInventoryList();
-      $http.get('api/gateway/inventories').then(function (resp) {
-        self.inventoryList = resp.data;
-        console.log("Resp data: " + resp.data);
-        console.log("inventory list: " + self.inventoryList);
-      });
+
       $scope.inventoryTypeOptions = [];
-      //custom types handler
-      $http.get("api/gateway/inventories/types").then(function (resp) {
-        resp.data.forEach(function (type) {
-          $scope.inventoryTypeOptions.push(type.type);
+
+      (function initTypesSSE () {
+        if ($scope.inventoryTypeOptions.length) return;
+
+        var es = new EventSource('api/gateway/inventories/types');
+        var seen = new Set();
+        var idleTimer = null;
+        var IDLE_MS = 1000;
+        var reconnects = 0;
+        var MAX_RECONNECTS = 2;
+
+        function bumpIdle() {
+          if (idleTimer) clearTimeout(idleTimer);
+          idleTimer = setTimeout(function () {
+            try { es.close(); } catch (e) {}
+          }, IDLE_MS);
+        }
+
+        function addType(t) {
+          if (!t) return;
+          var label = (typeof t === 'string') ? t : (t.type || t.inventoryType);
+          if (!label || seen.has(label)) return;
+          seen.add(label);
+          $scope.$evalAsync(function () { $scope.inventoryTypeOptions.push(label); });
+        }
+
+        es.onopen = function () { reconnects = 0; };
+
+        es.onmessage = function (e) {
+          if (!e.data || e.data === 'heartbeat' || e.data === ':') { bumpIdle(); return; }
+          try {
+            var payload = JSON.parse(e.data);
+            if (Array.isArray(payload)) payload.forEach(addType);
+            else addType(payload);
+          } catch (_e) {
+            addType(e.data);
+          }
+          bumpIdle();
+        };
+
+        es.onerror = function () {
+          if (es.readyState !== EventSource.OPEN) {
+            reconnects += 1;
+            if (reconnects > MAX_RECONNECTS) {
+              try { es.close(); } catch (e) {}
+            }
+          }
+        };
+
+        $scope.$on('$destroy', function () {
+          if (idleTimer) clearTimeout(idleTimer);
+          try { es.close(); } catch (e) {}
         });
+      })();
+
+      (function initInventoriesSSE () {
+        var esInv = new EventSource('api/gateway/inventories');
+        var idleTimer = null;
+        var INV_IDLE_MS = 2000;
+        var reconnects = 0;
+        var MAX_RECONNECTS = 2;
+
+        function bumpIdle() {
+          if (idleTimer) clearTimeout(idleTimer);
+          idleTimer = setTimeout(function () {
+            try { esInv.close(); } catch (e) {}
+          }, INV_IDLE_MS);
+        }
+
+        function upsertById(list, item, idKey) {
+          if (!item || !list || !Array.isArray(list)) return;
+          var idx = list.findIndex(function (x) { return x[idKey] === item[idKey]; });
+          if (idx >= 0) list[idx] = item; else list.unshift(item);
+        }
+
+        esInv.onopen = function () { reconnects = 0; };
+
+        esInv.onmessage = function (e) {
+          if (!e.data || e.data === 'heartbeat' || e.data === ':') { bumpIdle(); return; }
+          try {
+            var payload = JSON.parse(e.data);
+            $scope.$evalAsync(function () {
+              if (!Array.isArray(self.inventoryList)) self.inventoryList = [];
+
+              if (Array.isArray(payload)) {
+                payload.forEach(function (it) { upsertById(self.inventoryList, it, 'inventoryId'); });
+              } else {
+                upsertById(self.inventoryList, payload, 'inventoryId');
+              }
+            });
+          } catch (_e) {
+          }
+          bumpIdle();
+        };
+
+
+        esInv.onerror = function () {
+          if (esInv.readyState !== EventSource.OPEN) {
+            reconnects += 1;
+            if (reconnects > MAX_RECONNECTS) {
+              try { esInv.close(); } catch (e) {}
+            }
+          }
+        };
+
+        $scope.$on('$destroy', function () {
+          if (idleTimer) clearTimeout(idleTimer);
+          try { esInv.close(); } catch (e) {}
+        });
+      })();
+
+      $scope.$on('$destroy', function () {
+        try { if (esSearch) esSearch.close(); } catch (e) {}
       });
+
 
       //clear inventory queries
       $scope.clearQueries = function (){
@@ -42,74 +155,170 @@ angular.module('inventoriesList')
         getInventoryList(inventoryCode, inventoryName, inventoryType, inventoryDescription);
       };
 
-      function getInventoryList(inventoryCode, inventoryName, inventoryType, inventoryDescription){
+      function getInventoryList(inventoryCode, inventoryName, inventoryType, inventoryDescription) {
         $state.transitionTo('inventories', {page: self.currentPage, size: self.listSize}, {notify: false});
+        var prevCode = code || '';
+        var prevName = name || '';
+        var prevType = type || '';
+        var prevDesc = desc || '';
+
+        // Build the next filters from args (use locals first)
+        var nextCode = '';
+        var nextName = '';
+        var nextType = '';
+        var nextDesc = '';
         var queryString = '';
-        name = "";
-        code = "";
-        type = "";
-        desc = "";
 
         if (inventoryCode != null && inventoryCode !== '') {
-          code = inventoryCode.toUpperCase();
-          queryString += "inventoryCode=" + code;
+          nextCode = (inventoryCode || '').toUpperCase();
+          queryString += "inventoryCode=" + encodeURIComponent(nextCode);
         }
         if (inventoryName != null && inventoryName !== '') {
-          name = inventoryName;
+          nextName = inventoryName;
           if (queryString !== '') queryString += "&";
-          queryString += "inventoryName=" + inventoryName;
+          queryString += "inventoryName=" + encodeURIComponent(nextName);
         }
         if (inventoryType) {
+          nextType = inventoryType;
           if (queryString !== '') queryString += "&";
-          type = inventoryType;
-          queryString += "inventoryType=" + inventoryType;
+          queryString += "inventoryType=" + encodeURIComponent(nextType);
         }
         if (inventoryDescription) {
+          nextDesc = inventoryDescription;
           if (queryString !== '') queryString += "&";
-          desc = inventoryDescription;
-          queryString += "inventoryDescription=" + inventoryDescription;
+          queryString += "inventoryDescription=" + encodeURIComponent(nextDesc);
         }
 
-        if (queryString !== '') {
+        // Decide if filters actually changed (only then reset to page 0)
+        var isFilterChange =
+            (nextCode || '') !== prevCode ||
+            (nextName || '') !== prevName ||
+            (nextType || '') !== prevType ||
+            (nextDesc || '') !== prevDesc;
+
+        if (isFilterChange) {
           self.currentPage = 0;
-          self.realPage = parseInt(self.currentPage) + 1;
-
-          $http.get("api/gateway/inventories?page=" + self.currentPage + "&size=" + self.listSize + "&" + queryString)
-            .then(function(resp) {
-              numberOfPage = Math.ceil(resp.data.length / 10);
-              self.inventoryList = resp.data;
-              arr = resp.data;
-            })
-            .catch(function(error) {
-              if (error.status === 404) {
-                alert('inventory not found.');
-              } else {
-                alert('An error occurred: ' + error.statusText);
-              }
-            });
-        } else {
-          $http.get("api/gateway/inventories?page=" + self.currentPage + "&size=" + self.listSize)
-            .then(function(resp) {
-              numberOfPage = Math.ceil(resp.data.length / 10);
-              self.inventoryList = resp.data;
-              arr = resp.data;
-            })
-            .catch(function(error) {
-              if (error.status === 404) {
-                alert('inventory not found.');
-              } else {
-                alert('An error occurred: ' + error.statusText);
-              }
-            });
+          self.realPage = 1;
         }
-      }
 
-      $scope.fetchInventoryList = function() {
-        $http.get('api/gateway/inventories').then(function (resp) {
-          self.inventoryList = resp.data;
-          arr = resp.data;
-        });
-      };
+        // Now update the globals to the new filter values
+        code = nextCode;
+        name = nextName;
+        type = nextType;
+        desc = nextDesc;
+
+        var base = "api/gateway/inventories?page=" + self.currentPage + "&size=" + self.listSize;
+        var url  = (queryString !== '') ? (base + "&" + queryString) : base;
+
+
+        try {
+          if (esSearch) esSearch.close();
+        } catch (e) {
+        }
+        esSearch = new EventSource(url);
+
+        var order = [];                            // array of ids in desired order
+        var byId = Object.create(null);           // id -> item
+        var hasId = Object.prototype.hasOwnProperty;
+
+        var idleTimer = null;
+        var INV_IDLE_MS = 2000;
+        var reconnects = 0;
+        var MAX_RECONNECTS = 2;
+
+        function bumpIdle() {
+          if (idleTimer) clearTimeout(idleTimer);
+          idleTimer = setTimeout(function () {
+            try {
+              if (esSearch) esSearch.close();
+            } catch (e) {
+            }
+          }, INV_IDLE_MS);
+        }
+
+        function ensureInOrder(id) {
+          if (!hasId.call(byId, id)) {
+            order.push(id);                        // append new ids at the end
+          }
+        }
+
+        esSearch.onopen = function () {
+          reconnects = 0;
+        };
+
+        esSearch.onmessage = function (e) {
+          if (!e.data || e.data === 'heartbeat' || e.data === ':') {
+            bumpIdle();
+            return;
+          }
+          try {
+            var payload = JSON.parse(e.data);
+
+            if (Array.isArray(payload)) {
+              // First array from server defines the canonical order for this page
+              if (order.length === 0) {
+                for (var i = 0; i < payload.length; i++) {
+                  var it = payload[i];
+                  if (!it) continue;
+                  var id = it.inventoryId;
+                  if (id == null) continue;
+                  if (!hasId.call(byId, id)) order.push(id);
+                  byId[id] = it;
+                }
+              } else {
+                // Subsequent arrays (rare) – update items but keep the existing order
+                for (var j = 0; j < payload.length; j++) {
+                  var it2 = payload[j];
+                  if (!it2) continue;
+                  var id2 = it2.inventoryId;
+                  if (id2 == null) continue;
+                  ensureInOrder(id2);
+                  byId[id2] = it2;
+                }
+              }
+            } else {
+              // Single item upsert – update value, keep order (append if new)
+              var one = payload;
+              if (one && one.inventoryId != null) {
+                ensureInOrder(one.inventoryId);
+                byId[one.inventoryId] = one;
+              }
+            }
+
+            // Rebuild list in stable order
+            var tmp = [];
+            for (var k = 0; k < order.length; k++) {
+              var oid = order[k];
+              if (hasId.call(byId, oid)) tmp.push(byId[oid]);
+            }
+
+            $scope.$evalAsync(function () {
+              numberOfPage = Math.ceil(tmp.length / 10);
+              self.inventoryList = tmp;
+              try {
+                arr = tmp;
+              } catch (e) {
+              }
+            });
+          } catch (_e) {
+            // ignore malformed chunks
+          }
+          bumpIdle();
+        };
+
+        esSearch.onerror = function () {
+          if (esSearch.readyState !== EventSource.OPEN) {
+            reconnects += 1;
+            if (reconnects > MAX_RECONNECTS) {
+              try {
+                esSearch.close();
+              } catch (e) {
+              }
+              alert('An error occurred: failed to stream inventories.');
+            }
+          }
+        };
+      }
 
       // ---- helpers (local-only; prevent logout on wrong creds) ----
       function getCurrentEmail() {
@@ -300,7 +509,7 @@ angular.module('inventoriesList')
         if (self.currentPage - 1 >= 0){
           self.currentPage = (parseInt(self.currentPage) - 1).toString();
           self.realPage = parseInt(self.currentPage) + 1;
-          getInventoryList(name, type, desc);
+          getInventoryList(code, name, type, desc);
         }
       };
 
@@ -308,7 +517,7 @@ angular.module('inventoriesList')
         if (self.currentPage + 1 <= numberOfPage) {
           self.currentPage = (parseInt(self.currentPage) + 1).toString();
           self.realPage = parseInt(self.currentPage) + 1;
-          getInventoryList(name, type, desc);
+          getInventoryList(code, name, type, desc);
         }
       };
 
