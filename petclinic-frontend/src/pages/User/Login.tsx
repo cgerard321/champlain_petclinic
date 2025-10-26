@@ -51,7 +51,7 @@ export default function Login(): JSX.Element {
       const response = await axiosInstance.post<UserResponseModel>(
         '/users/login',
         {
-          email: formElements.emailInput.value,
+          emailOrUsername: formElements.emailInput.value,
           password: formElements.passwordInput.value,
         },
         {
