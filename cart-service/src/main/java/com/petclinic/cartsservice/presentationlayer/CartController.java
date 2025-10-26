@@ -314,13 +314,19 @@ public class CartController {
                     }
                 });
     }
-    //Move all wishlist items to cart
-    @PostMapping(value = "/{cartId}/wishlist/moveAll", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<CartResponseModel>> moveAllWishlistToCart(@PathVariable String cartId) {
+    //Create wishlist transfer resource
+    @PostMapping(value = "/{cartId}/wishlist-transfers", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<CartResponseModel>> createWishlistTransfer(
+            @PathVariable String cartId,
+            @RequestBody(required = false) WishlistTransferRequestModel transferRequest) {
+        List<String> productIds = transferRequest != null
+                ? transferRequest.normalizedProductIds()
+                : List.of();
+
         return Mono.just(cartId)
                 .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
-                .flatMap(validId -> cartService.moveAllWishlistToCart(validId))
+                .flatMap(validId -> cartService.transferWishlistToCart(validId, productIds))
                 .map(ResponseEntity::ok)
                 .onErrorResume(InvalidInputException.class, e -> {
                     CartResponseModel resp = new CartResponseModel();
@@ -331,11 +337,6 @@ public class CartController {
                     CartResponseModel resp = new CartResponseModel();
                     resp.setMessage(e.getMessage());
                     return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).body(resp));
-                })
-                .onErrorResume(OutOfStockException.class, e -> {
-                    CartResponseModel resp = new CartResponseModel();
-                    resp.setMessage(e.getMessage());
-                    return Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp));
                 })
                 .onErrorResume(Throwable.class, e -> {
                     CartResponseModel resp = new CartResponseModel();

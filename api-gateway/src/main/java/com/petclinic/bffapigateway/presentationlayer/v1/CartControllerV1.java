@@ -358,18 +358,21 @@ public class CartControllerV1 {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
-    @PostMapping("/{cartId}/wishlist/moveAll")
-    public Mono<ResponseEntity<CartResponseDTO>> moveAllWishlistToCart(
-            @PathVariable String cartId) {
+    @PostMapping("/{cartId}/wishlist-transfers")
+    public Mono<ResponseEntity<CartResponseDTO>> createWishlistTransfer(
+        @PathVariable String cartId,
+        @RequestBody(required = false) WishlistTransferRequestDTO request) {
 
-        return cartServiceClient.moveAllWishlistToCart(cartId)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build())
-                .onErrorResume(e -> mapCartError(e,
-                        ErrorOptions.builder("moveAllWishlistToCart")
-                                .cartId(cartId)
-                                .build()
-                ));
+    List<String> productIds = request != null ? request.normalizedProductIds() : List.of();
+
+    return cartServiceClient.createWishlistTransfer(cartId, productIds)
+        .map(ResponseEntity::ok)
+        .defaultIfEmpty(ResponseEntity.notFound().build())
+        .onErrorResume(e -> mapCartError(e,
+            ErrorOptions.builder("createWishlistTransfer")
+                .cartId(cartId)
+                .build()
+        ));
     }
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
     @PutMapping("/{cartId}/promo")

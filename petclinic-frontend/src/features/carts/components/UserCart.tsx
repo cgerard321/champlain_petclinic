@@ -750,9 +750,15 @@ const UserCart: React.FC = () => {
     setNotificationMessage(null);
 
     try {
+      const payload = {
+        productIds: wishlistItems
+          .map(item => item.productId)
+          .filter((id): id is string => Boolean(id && id.trim())),
+      };
+
       const res = await axiosInstance.post(
-        `/carts/${cartId}/wishlist/moveAll`,
-        {},
+        `/carts/${cartId}/wishlist-transfers`,
+        payload,
         { useV2: false, validateStatus: () => true }
       );
 

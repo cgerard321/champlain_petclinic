@@ -1306,7 +1306,7 @@ public class CartServiceClientTest {
     }
 
     @Test
-    void testMoveAllWishlistToCart_Success() {
+        void testCreateWishlistTransfer_Success() {
         String body = """
       {"cartId":"c-x","customerId":"u-x","products":[]}
     """;
@@ -1316,20 +1316,20 @@ public class CartServiceClientTest {
                 .setBody(body)
         );
 
-        StepVerifier.create(mockCartServiceClient.moveAllWishlistToCart("c-x"))
+                StepVerifier.create(mockCartServiceClient.createWishlistTransfer("c-x", List.of()))
                 .assertNext(resp -> { assertThat(resp).isNotNull(); })
                 .verifyComplete();
     }
 
     @Test
-    void testMoveAllWishlistToCart_NotFound404() {
+        void testCreateWishlistTransfer_NotFound404() {
         prepareResponse(r -> r
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(404)
                 .setBody("{\"message\":\"wishlist empty\"}")
         );
 
-        StepVerifier.create(mockCartServiceClient.moveAllWishlistToCart("missing"))
+                StepVerifier.create(mockCartServiceClient.createWishlistTransfer("missing", List.of()))
                 .expectErrorSatisfies(ex -> {
                     org.assertj.core.api.Assertions.assertThat(ex)
                             .isInstanceOf(org.springframework.web.reactive.function.client.WebClientResponseException.class);

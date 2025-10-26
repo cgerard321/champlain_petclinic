@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.*;
 
@@ -700,42 +701,44 @@ public class CartControllerV1UnitTest {
         verify(cartServiceClient, times(1)).removeProductFromCart(cartId, productId);
     }
 
-    // New tests for moveAllWishlistToCart endpoint
+    // New tests for wishlist transfer endpoint
     @Test
-    @DisplayName("POST /api/gateway/carts/{cartId}/wishlist/moveAll - Should move all wishlist items to cart successfully")
-    void moveAllWishlistToCart_withValidId_shouldReturnUpdatedCart() {
+    @DisplayName("POST /api/gateway/carts/{cartId}/wishlist-transfers - Should move wishlist items to cart successfully")
+    void createWishlistTransfer_withValidId_shouldReturnUpdatedCart() {
         // Arrange
         String cartId = "cart-123";
         CartResponseDTO updatedCart = buildCartResponseDTO();
-        when(cartServiceClient.moveAllWishlistToCart(cartId))
+        when(cartServiceClient.createWishlistTransfer(eq(cartId), anyList()))
                 .thenReturn(Mono.just(updatedCart));
 
         // Act & Assert
         webTestClient.post()
-                .uri(baseCartURL + "/" + cartId + "/wishlist/moveAll")
+                .uri(baseCartURL + "/" + cartId + "/wishlist-transfers")
+                .bodyValue(new WishlistTransferRequestDTO(null))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(CartResponseDTO.class)
                 .isEqualTo(updatedCart);
 
-        verify(cartServiceClient, times(1)).moveAllWishlistToCart(cartId);
+        verify(cartServiceClient, times(1)).createWishlistTransfer(eq(cartId), anyList());
     }
 
     @Test
-    @DisplayName("POST /api/gateway/carts/{cartId}/wishlist/moveAll - Should return 404 when cart not found")
-    void moveAllWishlistToCart_withNonExistingCartId_shouldReturnNotFound() {
+    @DisplayName("POST /api/gateway/carts/{cartId}/wishlist-transfers - Should return 404 when cart not found")
+    void createWishlistTransfer_withNonExistingCartId_shouldReturnNotFound() {
         // Arrange
         String cartId = "non-existent-cart";
-        when(cartServiceClient.moveAllWishlistToCart(cartId))
+        when(cartServiceClient.createWishlistTransfer(eq(cartId), anyList()))
                 .thenReturn(Mono.empty());
 
         // Act & Assert
         webTestClient.post()
-                .uri(baseCartURL + "/" + cartId + "/wishlist/moveAll")
+                .uri(baseCartURL + "/" + cartId + "/wishlist-transfers")
+                .bodyValue(new WishlistTransferRequestDTO(null))
                 .exchange()
                 .expectStatus().isNotFound();
 
-        verify(cartServiceClient, times(1)).moveAllWishlistToCart(cartId);
+        verify(cartServiceClient, times(1)).createWishlistTransfer(eq(cartId), anyList());
     }
 
     // Focused error mapping tests for wishlist/cart endpoints
@@ -795,20 +798,21 @@ public class CartControllerV1UnitTest {
     }
 
     @Test
-    @DisplayName("POST /api/gateway/carts/{cartId}/wishlist/moveAll - Should pass through custom 409 status")
-    void moveAllWishlistToCart_withConflict_shouldReturnConflict() {
+    @DisplayName("POST /api/gateway/carts/{cartId}/wishlist-transfers - Should pass through custom 409 status")
+    void createWishlistTransfer_withConflict_shouldReturnConflict() {
         // Arrange
         String cartId = "cart-123";
-        when(cartServiceClient.moveAllWishlistToCart(cartId))
+        when(cartServiceClient.createWishlistTransfer(eq(cartId), anyList()))
                 .thenReturn(Mono.error(WebClientResponseException.create(409, "Conflict", null, null, null)));
 
         // Act & Assert
         webTestClient.post()
-                .uri(baseCartURL + "/" + cartId + "/wishlist/moveAll")
+                .uri(baseCartURL + "/" + cartId + "/wishlist-transfers")
+                .bodyValue(new WishlistTransferRequestDTO(null))
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.CONFLICT);
 
-        verify(cartServiceClient, times(1)).moveAllWishlistToCart(cartId);
+        verify(cartServiceClient, times(1)).createWishlistTransfer(eq(cartId), anyList());
     }
     @Test
     void testUnprocessableEntity() {

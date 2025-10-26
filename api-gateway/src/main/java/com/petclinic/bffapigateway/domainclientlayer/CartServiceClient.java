@@ -386,17 +386,23 @@ public Mono<Void> deleteCartByCartId(String cartId) {
                 .bodyToMono(PromoCodeResponseDTO.class);
     }
 
-    // move all Wishlist items into cart
-    public Mono<CartResponseDTO> moveAllWishlistToCart(String cartId) {
-        return webClientBuilder.build()
-                .post()
-                .uri(cartServiceUrl + "/" + cartId + "/wishlist/moveAll")
-                .exchangeToMono(resp -> {
-                    if (resp.statusCode().is2xxSuccessful()) {
-                        return resp.bodyToMono(CartResponseDTO.class);
-                    }
-                    return resp.createException().flatMap(Mono::error);
-                });
+    // create wishlist transfer resource
+    public Mono<CartResponseDTO> createWishlistTransfer(String cartId, List<String> productIds) {
+        WebClient client = webClientBuilder.build();
+        WebClient.RequestBodySpec requestSpec = client.post()
+                .uri(cartServiceUrl + "/" + cartId + "/wishlist-transfers");
+
+        WebClient.ResponseSpec responseSpec;
+        if (productIds != null && !productIds.isEmpty()) {
+            Map<String, Object> payload = Map.of("productIds", productIds);
+            responseSpec = requestSpec.bodyValue(payload).retrieve();
+        } else {
+            responseSpec = requestSpec.retrieve();
+        }
+
+        return responseSpec.onStatus(status -> !status.is2xxSuccessful(), clientResponse ->
+                        clientResponse.createException().flatMap(Mono::error))
+                .bodyToMono(CartResponseDTO.class);
     }
     public Mono<List<CartProductResponseDTO>> getRecentPurchasesByCustomerId(String customerId) {
         return webClientBuilder.build()

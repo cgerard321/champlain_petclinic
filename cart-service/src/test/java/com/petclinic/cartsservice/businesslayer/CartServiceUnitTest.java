@@ -1447,17 +1447,17 @@ class CartServiceUnitTest {
                 .verifyComplete();
     }
     @Test
-    void testMoveAllWishlistToCart_CartNotFound() {
+        void testTransferWishlistToCart_CartNotFound() {
         String cartId = "missing";
         when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.empty());
 
-        StepVerifier.create(cartService.moveAllWishlistToCart(cartId))
+                StepVerifier.create(cartService.transferWishlistToCart(cartId, List.of()))
                 .expectErrorMatches(e -> e instanceof NotFoundException &&
                         e.getMessage().contains("Cart not found"))
                 .verify();
     }
-    @Test
-    void testMoveAllWishlistToCart_EmptyWishlist() {
+        @Test
+        void testTransferWishlistToCart_EmptyWishlist() {
         String cartId = "cart-1";
         Cart cart = new Cart();
         cart.setCartId(cartId);
@@ -1466,15 +1466,15 @@ class CartServiceUnitTest {
 
         when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
 
-        StepVerifier.create(cartService.moveAllWishlistToCart(cartId))
+                StepVerifier.create(cartService.transferWishlistToCart(cartId, List.of()))
                 .assertNext(resp -> {
                     assertEquals("No items in wishlist to move.", resp.getMessage());
                     assertTrue(resp.getProducts().isEmpty());
                 })
                 .verifyComplete();
     }
-    @Test
-    void testMoveAllWishlistToCart_ItemsMoved() {
+        @Test
+        void testTransferWishlistToCart_ItemsMoved() {
         String cartId = "cart-2";
         CartProduct wishItem = CartProduct.builder()
                 .productId("prod-1")
@@ -1495,17 +1495,17 @@ class CartServiceUnitTest {
         when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
         when(cartRepository.save(any())).thenReturn(Mono.just(savedCart));
 
-        StepVerifier.create(cartService.moveAllWishlistToCart(cartId))
+                StepVerifier.create(cartService.transferWishlistToCart(cartId, List.of()))
                 .assertNext(resp -> {
-                    assertEquals("Moved 2 item(s) to cart.", resp.getMessage());
+                                        assertEquals("Moved 2 item(s) from wishlist to cart.", resp.getMessage());
                     assertEquals(1, resp.getProducts().size());
                     assertEquals("prod-1", resp.getProducts().get(0).getProductId());
                     assertEquals(2, resp.getProducts().get(0).getQuantityInCart());
                 })
                 .verifyComplete();
     }
-    @Test
-    void testMoveAllWishlistToCart_MergeQuantities() {
+        @Test
+        void testTransferWishlistToCart_MergeQuantities() {
         String cartId = "cart-3";
         CartProduct wishItem = CartProduct.builder()
                 .productId("prod-1")
@@ -1538,9 +1538,9 @@ class CartServiceUnitTest {
         when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
         when(cartRepository.save(any())).thenReturn(Mono.just(savedCart));
 
-        StepVerifier.create(cartService.moveAllWishlistToCart(cartId))
+                StepVerifier.create(cartService.transferWishlistToCart(cartId, List.of()))
                 .assertNext(resp -> {
-                    assertEquals("Moved 2 item(s) to cart.", resp.getMessage());
+                                        assertEquals("Moved 2 item(s) from wishlist to cart.", resp.getMessage());
                     assertEquals(1, resp.getProducts().size());
                     assertEquals(5, resp.getProducts().get(0).getQuantityInCart());
                 })

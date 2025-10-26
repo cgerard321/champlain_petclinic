@@ -18,6 +18,7 @@ import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.net.URI;
+import java.util.List;
 
 
 @RestController
@@ -242,9 +243,14 @@ public class CartController {
 
 
     // move all Wishlist items into cart
-    @PostMapping(value = "/{cartId}/wishlist/moveAll", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<CartResponseDTO>> moveAllWishlistToCart(@PathVariable String cartId) {
-        return cartServiceClient.moveAllWishlistToCart(cartId)
+    // create wishlist transfer resource
+    @PostMapping(value = "/{cartId}/wishlist-transfers", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<CartResponseDTO>> createWishlistTransfer(
+            @PathVariable String cartId,
+            @RequestBody(required = false) WishlistTransferRequestDTO request) {
+        List<String> productIds = request != null ? request.normalizedProductIds() : List.of();
+
+        return cartServiceClient.createWishlistTransfer(cartId, productIds)
                 .map(ResponseEntity::ok)
                 .onErrorResume(ex -> {
                     if (ex instanceof org.springframework.web.reactive.function.client.WebClientResponseException.NotFound) {
@@ -266,7 +272,7 @@ public class CartController {
                         dto.setMessage(msg);
                         return Mono.just(ResponseEntity.status(wce.getStatusCode()).body(dto));
                     }
-                    log.error("moveAllWishlistToCart unexpected error for cartId {}: {}", cartId, ex.getMessage(), ex);
+                    log.error("createWishlistTransfer unexpected error for cartId {}: {}", cartId, ex.getMessage(), ex);
                     CartResponseDTO dto = new CartResponseDTO();
                     dto.setMessage("Unexpected error");
                     return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(dto));

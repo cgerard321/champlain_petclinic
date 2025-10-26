@@ -35,7 +35,7 @@ public interface CartService {
     // add this new method to the interface
     Mono<CartResponseModel> removeProductFromWishlist(String cartId, String productId);
 
-    Mono<CartResponseModel> moveAllWishlistToCart(String cartId);
+    Mono<CartResponseModel> transferWishlistToCart(String cartId, List<String> productIds);
 
     Mono<List<CartProduct>> getRecentPurchasesByCustomerId(String customerId);
 

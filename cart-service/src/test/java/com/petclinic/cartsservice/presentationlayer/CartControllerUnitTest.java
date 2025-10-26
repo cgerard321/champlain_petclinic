@@ -4,7 +4,6 @@ import com.petclinic.cartsservice.businesslayer.CartService;
 import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.domainclientlayer.CartItemRequestModel;
-
 import com.petclinic.cartsservice.domainclientlayer.UpdateProductQuantityRequestModel;
 import com.petclinic.cartsservice.utils.EntityModelUtil;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
@@ -836,17 +835,18 @@ class CartControllerUnitTest {
         verify(cartService, never()).moveProductFromCartToWishlist(anyString(), anyString());
     }
 
-    // --- moveAllWishlistToCart endpoint ---
+    // --- wishlist transfer endpoint ---
 
     @Test
-    void moveAllWishlistToCart_success() {
+    void createWishlistTransfer_success() {
         String validCartId = "123456789012345678901234567890123456"; // 36 chars
         CartResponseModel response = CartResponseModel.builder().cartId(validCartId).build();
-        Mockito.when(cartService.moveAllWishlistToCart(validCartId))
+        Mockito.when(cartService.transferWishlistToCart(Mockito.eq(validCartId), Mockito.anyList()))
                 .thenReturn(Mono.just(response));
 
         webTestClient.post()
-                .uri("/api/v1/carts/" + validCartId + "/wishlist/moveAll")
+                .uri("/api/v1/carts/" + validCartId + "/wishlist-transfers")
+                .bodyValue(new WishlistTransferRequestModel(null))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(CartResponseModel.class)
@@ -854,58 +854,46 @@ class CartControllerUnitTest {
     }
 
     @Test
-    void moveAllWishlistToCart_invalidInput() {
+    void createWishlistTransfer_invalidInput() {
         String validCartId = "cart123456789012345678901234567890123456";
-        Mockito.when(cartService.moveAllWishlistToCart(validCartId))
+        Mockito.when(cartService.transferWishlistToCart(Mockito.eq(validCartId), Mockito.anyList()))
                 .thenReturn(Mono.error(new InvalidInputException("Invalid input")));
 
         webTestClient.post()
-                .uri("/api/v1/carts/" + validCartId + "/wishlist/moveAll")
+                .uri("/api/v1/carts/" + validCartId + "/wishlist-transfers")
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
     @Test
-    void moveAllWishlistToCart_outOfStock() {
+    void createWishlistTransfer_unexpectedError() {
         String validCartId = "123456789012345678901234567890123456"; // 36 chars
-        Mockito.when(cartService.moveAllWishlistToCart(validCartId))
-                .thenReturn(Mono.error(new OutOfStockException("Out of stock")));
-
-        webTestClient.post()
-                .uri("/api/v1/carts/" + validCartId + "/wishlist/moveAll")
-                .exchange()
-                .expectStatus().isBadRequest();
-    }
-
-    @Test
-    void moveAllWishlistToCart_unexpectedError() {
-        String validCartId = "123456789012345678901234567890123456"; // 36 chars
-        Mockito.when(cartService.moveAllWishlistToCart(validCartId))
+        Mockito.when(cartService.transferWishlistToCart(Mockito.eq(validCartId), Mockito.anyList()))
                 .thenReturn(Mono.error(new RuntimeException("Unexpected")));
 
         webTestClient.post()
-                .uri("/api/v1/carts/" + validCartId + "/wishlist/moveAll")
+                .uri("/api/v1/carts/" + validCartId + "/wishlist-transfers")
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Test
-    void moveAllWishlistToCart_notFound() {
+    void createWishlistTransfer_notFound() {
         String validCartId = "123456789012345678901234567890123456";
-        Mockito.when(cartService.moveAllWishlistToCart(validCartId))
+        Mockito.when(cartService.transferWishlistToCart(Mockito.eq(validCartId), Mockito.anyList()))
                 .thenReturn(Mono.error(new NotFoundException("Not found")));
 
         webTestClient.post()
-                .uri("/api/v1/carts/" + validCartId + "/wishlist/moveAll")
+                .uri("/api/v1/carts/" + validCartId + "/wishlist-transfers")
                 .exchange()
                 .expectStatus().isNotFound();
     }
 
     @Test
-    void moveAllWishlistToCart_invalidCartId() {
+    void createWishlistTransfer_invalidCartId() {
         String invalidCartId = "short-id";
         webTestClient.post()
-                .uri("/api/v1/carts/" + invalidCartId + "/wishlist/moveAll")
+                .uri("/api/v1/carts/" + invalidCartId + "/wishlist-transfers")
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
     }

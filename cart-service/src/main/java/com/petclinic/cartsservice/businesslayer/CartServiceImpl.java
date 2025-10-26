@@ -16,13 +16,16 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Collections;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -556,9 +559,16 @@ public class CartServiceImpl implements CartService {
                 );
     }
 
-    // move whole wishlist into cart
+    // move wishlist items into cart
     @Override
-    public Mono<CartResponseModel> moveAllWishlistToCart(String cartId) {
+    public Mono<CartResponseModel> transferWishlistToCart(String cartId, List<String> productIds) {
+    final List<String> normalizedIds = productIds == null ? List.of() : productIds.stream()
+        .filter(Objects::nonNull)
+        .map(String::trim)
+        .filter(id -> !id.isEmpty())
+        .distinct()
+        .collect(Collectors.toList());
+
         return cartRepository.findCartByCartId(cartId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
                 .flatMap(cart -> {
@@ -569,28 +579,56 @@ public class CartServiceImpl implements CartService {
                         return Mono.just(resp);
                     }
 
-                    final List<CartProduct> wl = new ArrayList<>(wishlist);
-                    final List<CartProduct> cartLines =
-                            new ArrayList<>(cart.getProducts() != null ? cart.getProducts() : new ArrayList<>());
+                    final boolean moveAll = normalizedIds.isEmpty();
+                    final List<CartProduct> wishlistSnapshot = new ArrayList<>(wishlist);
+                    final List<CartProduct> remainingWishlist = new ArrayList<>();
+                    final List<CartProduct> selectedForTransfer = new ArrayList<>();
 
+                    final Set<String> targetIds = moveAll ? Collections.emptySet() : new LinkedHashSet<>(normalizedIds);
+
+                    for (CartProduct item : wishlistSnapshot) {
+                        String pid = item.getProductId();
+                        boolean shouldMove = moveAll || (pid != null && targetIds.contains(pid));
+                        if (shouldMove) {
+                            selectedForTransfer.add(item);
+                        } else {
+                            remainingWishlist.add(item);
+                        }
+                    }
+
+                    if (selectedForTransfer.isEmpty()) {
+                        return Mono.error(new NotFoundException("No wishlist items matched the requested product IDs."));
+                    }
+
+                    final List<CartProduct> cartLines = new ArrayList<>(cart.getProducts() != null ? cart.getProducts() : new ArrayList<>());
                     Map<String, Integer> wishQtyById = new HashMap<>();
                     Map<String, CartProduct> exemplarById = new HashMap<>();
 
-                    for (CartProduct w : wl) {
+                    for (CartProduct w : selectedForTransfer) {
                         String pid = w.getProductId();
-                        if (pid == null || pid.isBlank()) continue;
+                        if (pid == null || pid.isBlank()) {
+                            continue;
+                        }
 
                         int qty = (w.getQuantityInCart() == null || w.getQuantityInCart() <= 0) ? 1 : w.getQuantityInCart();
-                        wishQtyById.merge(pid, Integer.valueOf(qty), (a, b) -> a + b);
+                        wishQtyById.merge(pid, qty, Integer::sum);
                         exemplarById.putIfAbsent(pid, w);
                     }
 
+                    if (wishQtyById.isEmpty()) {
+                        CartResponseModel resp = EntityModelUtil.toCartResponseModel(cart, cart.getProducts());
+                        resp.setMessage("No items in wishlist to move.");
+                        return Mono.just(resp);
+                    }
+
                     int moved = 0;
-                    for (Map.Entry<String, Integer> e : wishQtyById.entrySet()) {
-                        String pid = e.getKey();
-                        int qtyToMove = e.getValue();
+                    for (Map.Entry<String, Integer> entry : wishQtyById.entrySet()) {
+                        String pid = entry.getKey();
+                        int qtyToMove = entry.getValue();
                         CartProduct sample = exemplarById.get(pid);
-                        if (sample == null) continue;
+                        if (sample == null) {
+                            continue;
+                        }
 
                         Optional<CartProduct> existingOpt = cartLines.stream()
                                 .filter(p -> Objects.equals(p.getProductId(), pid))
@@ -619,13 +657,13 @@ public class CartServiceImpl implements CartService {
                     }
 
                     cart.setProducts(cartLines);
-                    cart.setWishListProducts(new ArrayList<>());
+                    cart.setWishListProducts(remainingWishlist);
 
                     final int movedFinal = moved;
                     return cartRepository.save(cart)
                             .map(saved -> {
                                 CartResponseModel resp = EntityModelUtil.toCartResponseModel(saved, saved.getProducts());
-                                resp.setMessage("Moved " + movedFinal + " item(s) to cart.");
+                                resp.setMessage("Moved " + movedFinal + " item(s) from wishlist to cart.");
                                 return resp;
                             });
                 });
