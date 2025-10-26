@@ -22,7 +22,7 @@ const DeleteVet: React.FC<DeleteVetProps> = ({ vetId, onVetDeleted }) => {
   };
   return (
     <button onClick={handleDelete} className="btn btn-danger">
-      Delete
+      Deactivate
     </button>
   );
 };
