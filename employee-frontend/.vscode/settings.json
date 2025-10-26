@@ -1,0 +1,26 @@
+{
+  "editor.formatOnSave": true,
+  "prettier.configPath": "./.prettierrc.json",
+  "window.zoomLevel": -1,
+  "files.autoSave": "afterDelay",
+  "workbench.iconTheme": "material-icon-theme",
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "files.autoSaveWorkspaceFilesOnly": true,
+  "github.copilot.preferredAccount": "nimar",
+  "notebook.formatOnSave.enabled": true,
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ]
+}
