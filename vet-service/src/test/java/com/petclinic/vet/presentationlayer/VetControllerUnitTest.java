@@ -407,7 +407,7 @@ class VetControllerUnitTest {
 
     @Test
     void getVetByVetId() {
-        when(vetService.getVetByVetId(anyString()))
+        when(vetService.getVetByVetId(anyString(), anyBoolean()))
                 .thenReturn(Mono.just(vetResponseDTO));
 
         client
@@ -429,7 +429,7 @@ class VetControllerUnitTest {
 
 
         Mockito.verify(vetService, times(1))
-                .getVetByVetId(VET_ID);
+                .getVetByVetId(VET_ID, false);
     }
 
     @Test
@@ -987,6 +987,7 @@ class VetControllerUnitTest {
                         "        }")
                 .specialties(new HashSet<>())
                 .active(false)
+                .photo(null)
                 .build();
     }
     private VetResponseDTO buildVetResponseDTO2() {
@@ -1006,6 +1007,7 @@ class VetControllerUnitTest {
                         "        }")
                 .specialties(new HashSet<>())
                 .active(true)
+                .photo(null)
                 .build();
     }
 

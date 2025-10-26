@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: vet-service
+
+app:
+  files-service:
+    host: localhost
+    port: 8000

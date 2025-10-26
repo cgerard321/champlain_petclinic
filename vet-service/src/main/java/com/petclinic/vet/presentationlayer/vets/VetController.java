@@ -375,7 +375,7 @@ public class VetController {
     public Mono<ResponseEntity<Void>> deleteSpecialtyBySpecialtyId(
             @PathVariable String vetId,
             @PathVariable String specialtyId) {
-        return vetService.deleteSpecialtyBySpecialtyId(vetId, specialtyId)
+        return vetService.deleteSpecialtiesBySpecialtyId(vetId, specialtyId)
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
