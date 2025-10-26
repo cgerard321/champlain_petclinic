@@ -2,6 +2,10 @@
 
 Modern Angular 20 frontend for Champlain Pet Clinic employees.
 
+## Production Access
+
+**Live Application**: [https://petclinic-backend.benmusicgeek.synology.me/employee/](https://petclinic-backend.benmusicgeek.synology.me/employee/)
+
 ## Quick Start
 
 ```bash
@@ -29,7 +33,7 @@ src/app/
 │   ├── guards/     # Route guards
 │   ├── interceptors/ # HTTP interceptors
 │   └── services/   # Core services
-├── features/       # Feature components 
+├── features/       # Feature components
 ├── shared/         # Shared components
 │   ├── api/        # API services
 │   └── components/ # Reusable components
@@ -44,12 +48,13 @@ src/app/
 ## Angular Material
 
 ### What's Already Set Up
+
 - **Material Theme** - Indigo-pink theme imported
 - **Animations** - Enabled in main.ts
 - **Material Icons** - Google Fonts loaded
 
-
 ### Using Material Components
+
 ```typescript
 // Import the module you need
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
@@ -64,6 +69,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 ```
 
 ### Adding New Material Components
+
 ```typescript
 // 1. Import the module
 import { MatButtonModule } from '@angular/material/button';
@@ -75,6 +81,7 @@ import { MatButtonModule } from '@angular/material/button';
 ```
 
 ### App-Wide Styling
+
 ```scss
 // src/style.css - Global styles
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
@@ -85,7 +92,8 @@ body {
   padding: 0;
 }
 
-html, body {
+html,
+body {
   height: 100%;
 }
 ```
@@ -100,7 +108,8 @@ html, body {
 ```
 
 ### More Information
-- [Angular Material Documentation](https://material.angular.dev/) 
+
+- [Angular Material Documentation](https://material.angular.dev/)
 
 ## Development
 
@@ -127,6 +136,7 @@ html, body {
 This is the setup for the new Angular 20 employee frontend. Each team should be responsible for migrating their own components from the old Angular application to respect all the configuration of the new employee frontend:
 
 ### Team Responsibilities
+
 - **Each team** - Responsible for their own component migration
 - **Follow standards** - Use this Angular 20 setup as the standard
 - **Material Design** - Convert Bootstrap components to Angular Material
@@ -135,6 +145,7 @@ This is the setup for the new Angular 20 employee frontend. Each team should be 
 - **Documentation** - Update component documentation
 
 ### Migration Checklist for Each Team
+
 1. **Audit components** - Identify components to migrate
 2. **Update imports** - Convert to standalone components
 3. **Material conversion** - Replace Bootstrap with Material components
