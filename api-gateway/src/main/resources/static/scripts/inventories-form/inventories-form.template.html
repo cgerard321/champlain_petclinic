@@ -36,7 +36,7 @@
                        ng-model="$ctrl.inventory.inventoryName"
                        name="inventoryName" type="text"
                        required ng-change="checkNameAdd()"
-                       title="Please select a type of inventory.">
+                       title="Enter the inventory name.">
                 <div class="help-block text-danger"
                      ng-if="inventoryForm.inventoryName.$touched && inventoryForm.inventoryName.$error.required">
                     Inventory name is required.
