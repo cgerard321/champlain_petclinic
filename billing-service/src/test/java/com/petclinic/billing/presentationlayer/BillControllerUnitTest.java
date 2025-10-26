@@ -20,6 +20,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.time.LocalDate;
 import java.time.Month;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -439,12 +440,31 @@ class BillControllerUnitTest {
                 .dueDate(LocalDate.now().plusDays(10))
                 .build();
 
+        // Mock successful bill creation - billStatus will be auto-filled to UNPAID
+        BillResponseDTO mockResponse = BillResponseDTO.builder()
+                .billId("mock-bill-id")
+                .customerId("C001")
+                .visitType("Checkup")
+                .vetId("V100")
+                .date(LocalDate.now())
+                .amount(new BigDecimal(100.0))
+                .billStatus(BillStatus.UNPAID)
+                .dueDate(LocalDate.now().plusDays(10))
+                .build();
+
+        when(billService.createBill(any(Mono.class))).thenReturn(Mono.just(mockResponse));
+
+        // The new logic auto-fills null billStatus with UNPAID, so the request should succeed
         client.post()
                 .uri("/bills")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(invalidBill)
                 .exchange()
-                .expectStatus().isBadRequest();  // only check 400
+                .expectStatus().isCreated()  // expect 201 CREATED instead of 400 BAD_REQUEST
+                .expectBody(BillResponseDTO.class)
+                .value(response -> {
+                    assertThat(response.getBillStatus()).isEqualTo(BillStatus.UNPAID); // verify auto-fill worked
+                });
     }
 
     @Test
