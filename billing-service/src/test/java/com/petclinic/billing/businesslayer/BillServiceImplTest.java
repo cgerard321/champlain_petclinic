@@ -2248,7 +2248,7 @@ public void testGenerateBillPdf_BillNotFound() {
                 .userId("owner-456")
                 .build();
 
-        when(authClient.getUserById(anyString(), eq("owner-456")))
+        when(authClient.getUserById(eq("owner-456"), anyString()))
                 .thenReturn(Mono.just(userDetails));
 
         // Mock repository findById and insert
