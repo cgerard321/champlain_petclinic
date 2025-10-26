@@ -1,0 +1,13 @@
+services:
+  dev-tools:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        pkg: dev-tools
+    ports:
+      - "4242:8080"
+    environment:
+      - MINIO_URL=petclinic-bucket.benmusicgeek.synology.me
+    env_file:
+      - ../mailer.env

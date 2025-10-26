@@ -2,9 +2,9 @@ package com.petclinic.customersservice.domainclientlayer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.customersservice.customersExceptions.exceptions.BadRequestException;
+import com.petclinic.customersservice.customersExceptions.exceptions.FailedDependencyException;
 import com.petclinic.customersservice.customersExceptions.exceptions.NotFoundException;
 import com.petclinic.customersservice.customersExceptions.exceptions.UnprocessableEntityException;
-import com.petclinic.customersservice.util.Rethrower;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
@@ -24,7 +24,6 @@ class FilesServiceClientTest {
     private static MockWebServer mockBackEnd;
     private FilesServiceClient filesServiceClient;
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final Rethrower rethrower = new Rethrower(objectMapper);
 
     @BeforeAll
     static void setup() throws IOException {
@@ -40,10 +39,6 @@ class FilesServiceClientTest {
                 "localhost",
                 String.valueOf(mockBackEnd.getPort())
         );
-        
-        Field rethrowerField = FilesServiceClient.class.getDeclaredField("rethrower");
-        rethrowerField.setAccessible(true);
-        rethrowerField.set(filesServiceClient, rethrower);
     }
 
     @AfterAll
@@ -74,14 +69,14 @@ class FilesServiceClientTest {
     }
 
     @Test
-    void getFile_WithNotFoundStatus_ShouldThrowNotFoundException() {
+    void getFile_WithNotFoundStatus_ShouldThrowFailedDependencyException() {
         mockBackEnd.enqueue(new MockResponse()
                 .setResponseCode(404)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody("{\"message\":\"File not found\"}"));
+                .setBody("{\"message\":\"Failed to get file from Files Service\"}"));
 
         StepVerifier.create(filesServiceClient.getFile("missing"))
-                .expectError(NotFoundException.class)
+                .expectError(FailedDependencyException.class)
                 .verify();
     }
 
@@ -218,7 +213,7 @@ class FilesServiceClientTest {
     }
 
     @Test
-    void updateFile_WithNotFoundStatus_ShouldThrowNotFoundException() {
+    void updateFile_WithNotFoundStatus_ShouldThrowFailedDependencyException() {
         FileRequestDTO requestDTO = FileRequestDTO.builder()
                 .fileName("updated.jpg")
                 .fileType("image/jpeg")
@@ -231,7 +226,7 @@ class FilesServiceClientTest {
                 .setBody("{\"message\":\"File not found\"}"));
 
         StepVerifier.create(filesServiceClient.updateFile("missing", requestDTO))
-                .expectError(NotFoundException.class)
+                .expectError(FailedDependencyException.class)
                 .verify();
     }
 
@@ -299,14 +294,14 @@ class FilesServiceClientTest {
     }
 
     @Test
-    void deleteFile_WithNotFoundStatus_ShouldThrowNotFoundException() {
+    void deleteFile_WithNotFoundStatus_ShouldThrowFailedDependencyException() {
         mockBackEnd.enqueue(new MockResponse()
                 .setResponseCode(404)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody("{\"message\":\"File not found\"}"));
+                .setBody("{\"message\":\"Failed to delete file from Files Service\"}"));
 
         StepVerifier.create(filesServiceClient.deleteFile("missing"))
-                .expectError(NotFoundException.class)
+                .expectError(FailedDependencyException.class)
                 .verify();
     }
 
