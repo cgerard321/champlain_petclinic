@@ -157,12 +157,96 @@ public class MockServerConfigAuthService {
                                 .withMethod("PATCH")
                                 .withPath("/users/e6248486-d3df-47a5-b2e0-84d31c47533a")
                                 .withCookie("Bearer", jwtTokenForValidAdmin)
-                                .withBody(json("{\"roles\":[\"OWNER\", \"ADMIN\"]}"))
+                                .withBody(json("{\"roles\":[\"OWNER\",\"ADMIN\"]}"))
                 )
                 .respond(
                         response()
                                 .withStatusCode(200)
-                                .withBody(json("{\"userId\":\"e6248486-d3df-47a5-b2e0-84d31c47533a\",\"username\":\"Admin\",\"email\":\"admin@admin.com\",\"roles\":[{\"id\":1,\"name\":\"ADMIN\"}, {\"id\":2,\"name\":\"OWNER\"}],\"verified\":true,\"disabled\":false}"))
+                                .withBody(json("{\"id\":1,\"username\":\"Admin\",\"password\":null,\"email\":\"admin@admin.com\",\"verified\":true,\"roles\":[{\"id\":1,\"name\":\"ADMIN\"},{\"id\":2,\"name\":\"OWNER\"}]}"))
+                );
+    }
+
+    public void registerCreateUserEndpoint() {
+        mockServerClient_AuthService
+                .when(
+                        request()
+                                .withMethod("POST")
+                                .withPath("/users")
+                                .withBody(json("{\"userId\":null,\"email\":\"test@example.com\",\"username\":\"testuser\",\"defaultRole\":\"OWNER\",\"password\":\"password123\",\"owner\":{\"firstName\":\"testuser\",\"lastName\":\"\",\"address\":\"\",\"city\":\"\",\"province\":\"\",\"telephone\":\"\"}}"))
+                )
+                .respond(
+                        response()
+                                .withStatusCode(201)
+                                .withHeader("Content-Type", "application/json")
+                                .withBody(json("{\"ownerId\":\"new-user-id\",\"firstName\":\"testuser\",\"lastName\":\"\",\"address\":\"\",\"city\":\"\",\"province\":\"\",\"telephone\":\"\",\"pets\":null}"))
+                );
+    }
+
+    public void registerGetUserByIdEndpoint() {
+        mockServerClient_AuthService
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/users/e6248486-d3df-47a5-b2e0-84d31c47533a")
+                                .withCookie("Bearer", jwtTokenForValidAdmin)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withBody(json("{\"userId\":\"e6248486-d3df-47a5-b2e0-84d31c47533a\",\"username\":\"Admin\",\"email\":\"admin@admin.com\",\"roles\":[{\"id\":1,\"name\":\"ADMIN\"}],\"verified\":true,\"disabled\":false}"))
+                );
+
+        mockServerClient_AuthService
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/users/non-existent-user-id")
+                                .withCookie("Bearer", jwtTokenForValidAdmin)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(404)
+                                .withBody("")
+                );
+
+        mockServerClient_AuthService
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/users/error-user-id")
+                                .withCookie("Bearer", jwtTokenForValidAdmin)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(500)
+                );
+    }
+
+    public void registerUpdateUsernameEndpoint() {
+        mockServerClient_AuthService
+                .when(
+                        request()
+                                .withMethod("PATCH")
+                                .withPath("/users/e6248486-d3df-47a5-b2e0-84d31c47533a/username")
+                                .withCookie("Bearer", jwtTokenForValidAdmin)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withHeader("Content-Type", "application/json")
+                                .withBody("\"newusername\"")
+                );
+
+        mockServerClient_AuthService
+                .when(
+                        request()
+                                .withMethod("PATCH")
+                                .withPath("/users/non-existent-user-id/username")
+                                .withCookie("Bearer", jwtTokenForValidAdmin)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(404)
                 );
     }
 
