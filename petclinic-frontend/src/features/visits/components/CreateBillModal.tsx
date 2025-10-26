@@ -135,8 +135,13 @@ export default function CreateBillModal({
 
   const handleVisitTypeChange = (value: string): void => {
     const upper = value.toUpperCase();
-    const base = basePrices[upper] ?? 0;
-    setForm(prev => ({ ...prev, visitType: upper, amount: base }));
+    if (basePrices.hasOwnProperty(upper)) {
+      setForm(prev => ({ ...prev, visitType: upper, amount: basePrices[upper] }));
+      setError(null);
+    } else {
+      setForm(prev => ({ ...prev, visitType: upper, amount: 0 }));
+      setError('Unrecognized visit type. Please select a valid visit type.');
+    }
   };
 
   const handleSubmit = async (): Promise<void> => {
