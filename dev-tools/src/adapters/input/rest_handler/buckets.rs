@@ -1,4 +1,3 @@
-use crate::adapters::output::minio::store::MinioStore;
 use crate::application::ports::output::file_storage_port::DynFileStorage;
 use crate::application::usecases::files::fetch_buckets::fetch_buckets;
 use crate::core::error::AppResult;

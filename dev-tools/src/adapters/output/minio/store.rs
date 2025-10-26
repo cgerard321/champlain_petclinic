@@ -70,7 +70,7 @@ impl FileStoragePort for MinioStore {
             for obj in tmp_files.contents {
                 files.push(FileInfo {
                     name: obj.name,
-                    size: obj.size.unwrap_or(0) as u64,
+                    size: obj.size.unwrap_or(0),
                     last_modified: obj.last_modified.map(|dt| dt.to_string()),
                     etag: obj.etag,
                     is_latest: false,

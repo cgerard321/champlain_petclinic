@@ -66,6 +66,7 @@ impl AuthRepoPort for MySqlAuthRepo {
         Ok(())
     }
 
+    #[allow(dead_code)]
     async fn delete_expired_sessions(&self) -> AppResult<u64> {
         let res = sqlx::query("DELETE FROM sessions WHERE expires_at < NOW()")
             .execute(&*self.pool)

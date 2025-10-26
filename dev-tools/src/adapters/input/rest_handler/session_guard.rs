@@ -14,7 +14,11 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
 
     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         let jar = req.cookies();
-        let db = req.guard::<&State<DynAuthRepo>>().await.unwrap();
+        let db = match req.guard::<&State<DynAuthRepo>>().await {
+            Outcome::Success(state) => state,
+            Outcome::Error(f) => return Outcome::Error(f),
+            Outcome::Forward(_) => return Outcome::Error((Status::InternalServerError, ())),
+        };
 
         let Some(cookie) = jar.get_private("sid") else {
             return Outcome::Error((Status::Unauthorized, ()));

@@ -26,7 +26,7 @@ pub async fn upload_file(
         name: resp.name,
         size: file_len as u64,
         last_modified: None,
-        etag: Option::from(resp.etag),
+        etag: resp.etag,
         is_latest: true,
         version_id: resp.version_id,
     })

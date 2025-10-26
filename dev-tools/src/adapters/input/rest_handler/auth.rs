@@ -41,11 +41,12 @@ pub async fn login(
 
     Ok(Status::NoContent)
 }
-
 #[post("/logout")]
 pub async fn logout(jar: &CookieJar<'_>, db: &State<DynAuthRepo>) -> AppResult<Status> {
     if let Some(cookie) = jar.get_private("sid") {
-        let _ = remove_session(db, Uuid::parse_str(cookie.value()).unwrap()).await;
+        if let Ok(session_id) = Uuid::parse_str(cookie.value()) {
+            let _ = remove_session(db, session_id).await;
+        }
         jar.remove_private(Cookie::from("sid"));
     }
 

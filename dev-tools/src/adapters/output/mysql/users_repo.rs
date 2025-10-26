@@ -5,7 +5,7 @@ use uuid::Uuid;
 use crate::adapters::output::mysql::error::map_sqlx_err;
 use crate::application::ports::output::user_repo_port::UsersRepoPort;
 use crate::core::error::{AppError, AppResult};
-use crate::domain::models::user::{FullUser, User};
+use crate::domain::models::user::FullUser;
 
 pub struct MySqlUsersRepo {
     pool: Arc<Pool<MySql>>,
@@ -56,7 +56,6 @@ impl UsersRepoPort for MySqlUsersRepo {
         .await
         .map_err(|e| map_sqlx_err(e, "User lookup"))?;
 
-        // Avoid unwraps: map all extraction errors to AppError
         let id_str: String = row.try_get("id").map_err(|_| AppError::Internal)?;
         let id = Uuid::parse_str(&id_str).map_err(|_| AppError::Internal)?;
 
@@ -73,35 +72,6 @@ impl UsersRepoPort for MySqlUsersRepo {
             display_name,
             is_active,
             pass_hash,
-        })
-    }
-
-    async fn find_by_id(&self, id: Uuid) -> AppResult<User> {
-        let row = sqlx::query(
-            r#"
-            SELECT id, email, display_name, is_active
-            FROM users
-            WHERE id = ?
-            "#,
-        )
-        .bind(id.to_string())
-        .fetch_one(&*self.pool)
-        .await
-        .map_err(|e| map_sqlx_err(e, "User by id"))?;
-
-        let id_str: String = row.try_get("id").map_err(|_| AppError::Internal)?;
-        let id = Uuid::parse_str(&id_str).map_err(|_| AppError::Internal)?;
-        let email: String = row.try_get("email").map_err(|_| AppError::Internal)?;
-        let display_name: String = row
-            .try_get("display_name")
-            .map_err(|_| AppError::Internal)?;
-        let is_active: bool = row.try_get("is_active").map_err(|_| AppError::Internal)?;
-
-        Ok(User {
-            id,
-            email,
-            display_name,
-            is_active,
         })
     }
 }

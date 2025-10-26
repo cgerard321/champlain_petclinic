@@ -17,7 +17,7 @@ fn unprocessable(req: &Request<'_>) -> AppError {
 
 #[catch(default)]
 fn default_catcher(status: Status, _req: &Request<'_>) -> AppError {
-    match StatusCode::from_u16(status.code).unwrap() {
+    match StatusCode::from_u16(status.code).unwrap_or(StatusCode::INTERNAL_SERVER_ERROR) {
         StatusCode::BAD_REQUEST => AppError::BadRequest("Bad request".into()),
         StatusCode::UNAUTHORIZED => AppError::Unauthorized,
         StatusCode::FORBIDDEN => AppError::Forbidden,
