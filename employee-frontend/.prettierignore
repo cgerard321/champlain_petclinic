@@ -1,0 +1,6 @@
+node_modules/
+coverage/
+dist/
+reports/
+docs/**/*.mdx
+src/**/*.mdx
