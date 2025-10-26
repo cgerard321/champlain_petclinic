@@ -6,6 +6,7 @@ import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.Auth.AuthServiceClient;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.Auth.UserDetails;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FilesServiceClient;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.Mailing.Mail;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.Mailing.MailService;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.PetResponseDTO;
@@ -18,10 +19,9 @@ import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
 import com.petclinic.visits.visitsservicenew.Utils.EntityDtoUtil;
-import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FilesServiceClient;
+import com.petclinic.visits.visitsservicenew.Utils.IdGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -145,7 +145,7 @@ public class VisitServiceImpl implements VisitService {
     /**
      * We get a single visit by its VisitId
      *
-     * @param visitId             The visit ID we search with
+     * @param visitId The visit ID we search with
      * @return Return a single visit with the corresponding ID
      */
 //    @Override
@@ -155,8 +155,6 @@ public class VisitServiceImpl implements VisitService {
 //                .doOnNext(visit -> log.debug("The visit entity is: " + visit.toString()))
 //                .flatMap(entityDtoUtil::toVisitResponseDTO);
 //    }
-
-
     @Override
     public Mono<VisitResponseDTO> getVisitByVisitId(String visitId, boolean includePrescription) {
         return repo.findByVisitId(visitId)
@@ -177,13 +175,6 @@ public class VisitServiceImpl implements VisitService {
                         })
                 );
     }
-
-
-
-
-
-
-
 
 
     /**
@@ -228,24 +219,23 @@ public class VisitServiceImpl implements VisitService {
 
                 //Converts Request DTO ( JSON ) into an entity
                 .map(entityDtoUtil::toVisitEntity)
-                //Creating a new ID for the visit
-                .doOnNext(x -> x.setVisitId(entityDtoUtil.generateVisitIdString()))
-//                .doOnNext(v -> System.out.println("Entity Date: " + v.getVisitDate())) // Debugging
-                //FLATENS THE MONO
-                .flatMap(visit ->
-                        repo.findByVisitDateAndPractitionerId(visit.getVisitDate(), visit.getPractitionerId()) // FindVisits method in repository
-                                .collectList()
-                                .flatMap(existingVisits -> {
-                                    if (existingVisits.isEmpty()) {// If there are no existing visits
-                                        return repo.insert(visit); // Insert the visit
-                                    } else {
-                                        //return exception if a visits already exists at the specific day and time for a specific practitioner
-                                        return Mono.error(new DuplicateTimeException("A visit with the same time and practitioner already exists."));
-                                    }
-                                })
-                )
+                // Generate new ID with current date and incremented sequence
+                .flatMap(visit -> {
+                    visit.setVisitId(IdGenerator.generateVisitId());
+                    return repo.findByVisitDateAndPractitionerId(visit.getVisitDate(), visit.getPractitionerId()) // FindVisits method in repository
+                            .collectList()
+                            .flatMap(existingVisits -> {
+                                if (existingVisits.isEmpty()) {// If there are no existing visits
+                                    return repo.insert(visit); // Insert the visit
+                                } else {
+                                    //return exception if a visits already exists at the specific day and time for a specific practitioner
+                                    return Mono.error(new DuplicateTimeException("A visit with the same time and practitioner already exists."));
+                                }
+                            });
+                })
                 .flatMap(entityDtoUtil::toVisitResponseDTO);
     }
+
 
     /**
      * Delete a visit with the visit ID.
@@ -299,35 +289,35 @@ public class VisitServiceImpl implements VisitService {
 
     @Override
     public Mono<InputStreamResource> exportVisitsToCSV() {
-            return repo.findAll()
-                    .collectList()
-                    .map(visits -> {
-                        // Create a ByteArrayOutputStream to store CSV data
-                        ByteArrayOutputStream out = new ByteArrayOutputStream();
-                        PrintWriter writer = new PrintWriter(out);
+        return repo.findAll()
+                .collectList()
+                .map(visits -> {
+                    // Create a ByteArrayOutputStream to store CSV data
+                    ByteArrayOutputStream out = new ByteArrayOutputStream();
+                    PrintWriter writer = new PrintWriter(out);
 
-                        // Write CSV header
-                        writer.println("VisitId,Description,VisitDate,PetId,PractitionerId,Status");
+                    // Write CSV header
+                    writer.println("VisitId,Description,VisitDate,PetId,PractitionerId,Status");
 
-                        // Write rows for each visit
-                        visits.forEach(visit -> {
-                            writer.println(String.join(",",
-                                    visit.getVisitId(),
-                                    "\"" + visit.getDescription().replace("\"", "\"\"") + "\"", // Escape quotes for CSV
-                                    visit.getVisitDate().toString(),
-                                    visit.getPetId(),
-                                    visit.getPractitionerId(),
-                                    visit.getStatus().toString()
-                            ));
-                        });
-
-                        writer.flush(); // Ensure all data is written
-                        writer.close(); // Close writer to release resources
-
-                        // Convert ByteArrayOutputStream to InputStreamResource
-                        return new InputStreamResource(new ByteArrayInputStream(out.toByteArray()));
+                    // Write rows for each visit
+                    visits.forEach(visit -> {
+                        writer.println(String.join(",",
+                                visit.getVisitId(),
+                                "\"" + visit.getDescription().replace("\"", "\"\"") + "\"", // Escape quotes for CSV
+                                visit.getVisitDate().toString(),
+                                visit.getPetId(),
+                                visit.getPractitionerId(),
+                                visit.getStatus().toString()
+                        ));
                     });
-        }
+
+                    writer.flush(); // Ensure all data is written
+                    writer.close(); // Close writer to release resources
+
+                    // Convert ByteArrayOutputStream to InputStreamResource
+                    return new InputStreamResource(new ByteArrayInputStream(out.toByteArray()));
+                });
+    }
 
 
 //    @Override
@@ -376,7 +366,6 @@ public class VisitServiceImpl implements VisitService {
                 .flatMap(repo::save)
                 .flatMap(entityDtoUtil::toVisitResponseDTO);
     }
-
 
 
     /**
@@ -484,7 +473,7 @@ public class VisitServiceImpl implements VisitService {
         return new Mail(
                 user.getEmail(), "PetClinic Visit request", "Default", "PetClinic Visit request",
                 "Dear " + user.getUsername() + ",\n" +
-                        "We have received a request to schedule a visit for your pet with id: "+ petName +" on the following date and time: "+ visitDate.toString() +"." +"\n"+
+                        "We have received a request to schedule a visit for your pet with id: " + petName + " on the following date and time: " + visitDate.toString() + "." + "\n" +
                         "If you do not wish to create an account, please disregard this email.",
                 "Thank you for choosing Pet Clinic.", user.getUsername(), "ChamplainPetClinic@gmail.com");
         //Old way of doing it with old Mail entity in case of need to revert

@@ -1,4 +1,59 @@
 /* This is a universal CSS, that works for all files, instead of having indivudual files for each one. Easier to work with, less space*/
+
+.pet-photo-section {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+}
+
+.pet-photo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.pet-photo {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.delete-photo-button {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.delete-photo-button:hover:not(:disabled) {
+  background: #c82333;
+}
+
+.delete-photo-button:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.pet-photo-note {
+  font-size: 0.875rem;
+  color: #6c757d;
+  text-align: center;
+  margin: 0;
+  font-style: italic;
+}
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -174,15 +229,16 @@
   position: relative;
   background: #ffffff;
   border-radius: 16px;
-  padding: 40px 60px;
+  padding: 30px 40px;
   width: 90%;
-  max-width: 700px;
-  min-height: 300px;
+  max-width: 600px;
+  max-height: 85vh;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 20px;
   text-align: left;
+  overflow: hidden;
 }
 
 /* Modal header with x button */
@@ -217,11 +273,57 @@
   color: #1f2937;
 }
 
-/* Update form */
-.customer-add-pet-form {
+.modal-form {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.modal-form::-webkit-scrollbar {
+  display: none;
+}
+
+.hidden-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.hidden-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollable-content {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.customer-add-pet-form,
+.add-pet-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.customer-add-pet-form::-webkit-scrollbar,
+.add-pet-form::-webkit-scrollbar {
+  display: none;
 }
 
 .customer-add-pet-form .form-group {
@@ -283,13 +385,16 @@
   font-size: 0.8rem;
 }
 
-/* Buttons inside of the form modal */
+.modal-form .form-actions,
 .customer-modal-content .form-actions,
-.customer-add-pet-form .form-actions {
+.customer-add-pet-form .form-actions,
+.add-pet-form .form-actions {
   display: flex;
   justify-content: flex-end;
   gap: 16px;
   margin-top: 24px;
+  flex-shrink: 0;
+  padding-top: 16px;
 }
 
 .customer-modal-content .primary-button,
