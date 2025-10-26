@@ -11,7 +11,7 @@ import lombok.*;
 public class UserIDLessUsernameLessDTO {
 
 
-    private String email;
+    private String emailOrUsername;
 
     private String password;
 }
