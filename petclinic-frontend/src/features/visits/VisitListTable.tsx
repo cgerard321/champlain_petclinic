@@ -401,7 +401,7 @@ export default function VisitListTable(): JSX.Element {
             title="Calendar View"
           >
             <FaCalendarAlt className="me-2" />
-            Calendar View
+            Calendar
           </button>
         </li>
         {categories.map(category =>

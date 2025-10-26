@@ -10,7 +10,6 @@ import { downloadPrescription } from '@/features/visits/Prescription/api/downloa
 import './CustomerVisitListTable.css';
 import BasicModal from '@/shared/components/BasicModal';
 import '@/shared/components/BasicModal.css';
-//import { FaCalendarAlt } from 'react-icons/fa';
 
 export default function CustomerVisitListTable(): JSX.Element {
   const { user } = useUser();
