@@ -102,6 +102,7 @@ export default function useSearchInventories(): useSearchInventoriesResponseMode
       setIsLoading(true);
       setErrorMessage('');
       const aggregated: Inventory[] = [];
+      const seen = new Set<string>();
       let page = 0;
       // Safety cap to avoid infinite loops if the backend misbehaves.
       const MAX_PAGES = 100;
@@ -128,9 +129,10 @@ export default function useSearchInventories(): useSearchInventoriesResponseMode
         }
 
         const data = res.data ?? [];
-        // Append unique by inventoryId
+        // Append unique by inventoryId using a Set for O(n) deduplication
         for (const item of data) {
-          if (!aggregated.some(a => a.inventoryId === item.inventoryId)) {
+          if (!seen.has(item.inventoryId)) {
+            seen.add(item.inventoryId);
             aggregated.push(item);
           }
         }
@@ -149,32 +151,11 @@ export default function useSearchInventories(): useSearchInventoriesResponseMode
       // double-check still current
       if (runId !== runIdRef.current) return null;
 
-      // apply client-side filters as an extra safety (server-side already
-      // received the filters but some fields may be normalized differently)
-      const filtered = aggregated.filter(item => {
-        const nameMatch =
-          !filters.inventoryName ||
-          item.inventoryName
-            .toLowerCase()
-            .includes(filters.inventoryName.toLowerCase());
-
-        const typeMatch =
-          !filters.inventoryType ||
-          item.inventoryType === filters.inventoryType;
-
-        const descMatch =
-          !filters.inventoryDescription ||
-          (item.inventoryDescription || '')
-            .toLowerCase()
-            .includes(filters.inventoryDescription.toLowerCase());
-
-        const importantMatch =
-          !filters.importantOnly || item.important === true;
-
-        return nameMatch && typeMatch && descMatch && importantMatch;
-      });
-
-      setInventoryList(filtered);
+      // Server-side filtering already applied in the paged requests.
+      // Use the aggregated results directly to avoid double-filtering
+      // and extra CPU/network work. If we later find normalization gaps
+      // we can add a lightweight normalization step here.
+      setInventoryList(aggregated);
       setRealPage(1);
       setCurrentPage(() => 0);
       setIsLoading(false);
