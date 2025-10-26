@@ -186,14 +186,17 @@ public class VetController {
 
     @GetMapping(
             value = "/active",
-            produces = MediaType.APPLICATION_JSON_VALUE
+            produces = MediaType.TEXT_EVENT_STREAM_VALUE
     )
     public Flux<VetResponseDTO> getActiveVets() {
         return vetService.getVetByIsActive(true);
     }
 
 
-    @GetMapping("/inactive")
+    @GetMapping(
+            value = "/inactive",
+            produces = MediaType.TEXT_EVENT_STREAM_VALUE
+    )
     public Flux<VetResponseDTO> getInactiveVets() {
         return vetService.getVetByIsActive(false);
     }
@@ -227,7 +230,7 @@ public class VetController {
     //Education
     @GetMapping(
             value = "{vetId}/educations",
-            produces = MediaType.APPLICATION_JSON_VALUE
+            produces = MediaType.TEXT_EVENT_STREAM_VALUE
     )
     public Flux<EducationResponseDTO> getAllEducationsByVetId(@PathVariable String vetId) {
         return educationService.getAllEducationsByVetId(EntityDtoUtil.verifyId(vetId));
@@ -365,7 +368,7 @@ public class VetController {
 
     @GetMapping(
             value = "{vetId}/albums",
-            produces = MediaType.APPLICATION_JSON_VALUE
+            produces = MediaType.TEXT_EVENT_STREAM_VALUE
     )
     public Flux<Album> getAllAlbumsByVetId(@PathVariable String vetId) {
         return albumService.getAllAlbumsByVetId(vetId)

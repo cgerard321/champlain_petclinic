@@ -500,7 +500,8 @@ public class BFFApiGatewayController {
 
     @GetMapping(
             value = "/vets/inactive",
-            produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+            produces = MediaType.TEXT_EVENT_STREAM_VALUE
+    )
     public Flux<VetResponseDTO> getInactiveVets() {
         return vetsServiceClient.getInactiveVets();
     }
