@@ -2257,7 +2257,7 @@ public void testGenerateBillPdf_BillNotFound() {
                 .username("Alice Smith")
                 .userId("owner-456")
                 .build();
-        when(authClient.getUserById(eq("jwtToken"), eq("owner-456"))) // ✅ swapped params here
+        when(authClient.getUserById(eq("jwtToken"), eq("owner-456")))
                 .thenReturn(Mono.just(userDetails));
 
         // Mock repo behavior
@@ -2270,11 +2270,8 @@ public void testGenerateBillPdf_BillNotFound() {
         billEntity.setAmount(new BigDecimal("100.00"));
         billEntity.setInterest(BigDecimal.ZERO);
 
-        // ✅ Prevent NPE inside generateUniqueBillId()
         when(repo.findById(anyString())).thenReturn(Mono.empty());
-        // ✅ Prevent findAllBillsByBillStatus() from returning null
         when(repo.findAllBillsByBillStatus(any())).thenReturn(Flux.empty());
-        // ✅ Regular insert mock
         when(repo.insert(any(Bill.class))).thenReturn(Mono.just(billEntity));
 
         // Mock mail sending
