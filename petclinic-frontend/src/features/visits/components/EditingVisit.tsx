@@ -13,7 +13,6 @@ import { VisitResponseModel } from '../models/VisitResponseModel';
 import { getVisit } from '../api/getVisit';
 import { updateVisit } from '../api/updateVisit';
 import { getAvailableVets, VetResponse } from '@/features/visits/api/getVets';
-import { /*useUser,*/ IsVet, IsAdmin } from '@/context/UserContext';
 
 import BasicModal from '@/shared/components/BasicModal';
 import PrescriptionModal from '@/features/visits/Prescription/prescriptionComponents/prescriptionModal';
@@ -28,6 +27,11 @@ interface EditingVisitProps {
 
 interface ApiError {
   message: string;
+}
+
+export interface EditingVisitHandle {
+  openCreateBill: () => void;
+  openPrescription: () => void;
 }
 
 type VisitType = {
