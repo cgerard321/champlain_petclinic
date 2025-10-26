@@ -17,7 +17,6 @@ public interface BillService {
 
     Flux<BillResponseDTO> getAllBills();
 
-    //to be changed
     Flux<BillResponseDTO> getAllBillsByPage(Pageable pageable,
                                             String billId,
                                             String customerId,
@@ -28,7 +27,6 @@ public interface BillService {
                                             String vetFirstName,
                                             String vetLastName);
 
-    //to be changed
     Mono<Long> getNumberOfBillsWithFilters(String billId,
                                            String customerId,
                                            String ownerFirstName,
@@ -68,6 +66,9 @@ public interface BillService {
 
     // Method to fetch bills by month
     Flux<BillResponseDTO> getBillsByMonth(int year, int month);
+
+    // Method to check and update bills that are past due date from UNPAID to OVERDUE
+    Mono<Void> updateOverdueBills();
 
 
 ///////////////// Used by both BillController and CustomerBillsController /////////////////////
