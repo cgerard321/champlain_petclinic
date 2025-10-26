@@ -405,21 +405,18 @@ public class BillServiceImplTest {
                 .userId("owner-456")
                 .username("alice.smith")
                 .email("alice.smith@example.com")
-                .roles(Set.of()) // Assuming roles are empty for this test
+                .roles(Set.of())
                 .build();
         Mockito.when(authClient.getUserById("owner-456", "JWTToken"))
                 .thenReturn(Mono.just(userDetails));
 
-        // Mock a collision once, then success
         Bill existingBill = new Bill();
         existingBill.setBillId("duplicateID");
 
-        // First call -> collision, Second call -> no collision
         Mockito.when(repo.findById(Mockito.anyString()))
-                .thenReturn(Mono.just(existingBill)) // 1st attempt (collision)
-                .thenReturn(Mono.empty());            // 2nd attempt (unique)
+                .thenReturn(Mono.just(existingBill))
+                .thenReturn(Mono.empty());
 
-        // Mock repository insert (returns whatever Bill is passed in)
         Mockito.when(repo.insert(Mockito.any(Bill.class)))
                 .thenAnswer(invocation -> {
                     Bill inserted = invocation.getArgument(0);
@@ -438,7 +435,6 @@ public class BillServiceImplTest {
                 )
                 .verifyComplete();
 
-        // Verify that findById() was called twice (1 collision + 1 success)
         Mockito.verify(repo, Mockito.times(2)).findById(Mockito.anyString());
         Mockito.verify(repo, Mockito.times(1)).insert(Mockito.any(Bill.class));
     }
@@ -466,11 +462,9 @@ public class BillServiceImplTest {
         Mockito.when(ownerClient.getOwnerByOwnerId("owner-456"))
                 .thenReturn(Mono.just(ownerResponse));
 
-        // Always simulate a collision (never returns empty)
         Bill existingBill = new Bill();
         existingBill.setBillId("duplicateID");
 
-        // findById() will always return an existing bill — simulating permanent collision
         Mockito.when(repo.findById(Mockito.anyString()))
                 .thenReturn(Mono.just(existingBill));
 
@@ -481,7 +475,6 @@ public class BillServiceImplTest {
                                 throwable.getMessage().contains("Failed to generate unique Bill ID"))
                 .verify();
 
-        // Verify findById() was called multiple times (up to retry limit)
         Mockito.verify(repo, Mockito.atLeast(5)).findById(Mockito.anyString());
         Mockito.verify(repo, Mockito.never()).insert(Mockito.any(Bill.class));
     }
