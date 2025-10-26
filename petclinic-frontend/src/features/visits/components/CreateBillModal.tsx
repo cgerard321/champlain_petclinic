@@ -6,6 +6,10 @@ import { getAllOwners } from '@/features/customers/api/getAllOwners';
 import { getAllVets } from '@/features/veterinarians/api/getAllVets';
 import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseModel';
 import { VetResponseModel } from '@/features/veterinarians/models/VetResponseModel';
+import {
+  Currency,
+  convertCurrency,
+} from '@/features/bills/utils/convertCurrency';
 
 interface CreateBillModalProps {
   showButton: JSX.Element;
@@ -53,6 +57,10 @@ export default function CreateBillModal({
     billStatus: 'UNPAID',
     dueDate: '',
   });
+
+  // add these states
+  const [sendEmail, setSendEmail] = useState<boolean>(false);
+  const [currency, setCurrency] = useState<Currency>('CAD');
 
   useEffect(() => {
     const fetch = async (): Promise<void> => {
@@ -156,7 +164,7 @@ export default function CreateBillModal({
         ...form,
         billStatus: form.billStatus ? form.billStatus : 'UNPAID',
       };
-      await addBill(payload, false, 'CAD');
+      await addBill(payload, sendEmail, currency);
       onCreated?.();
       setError(null);
       setIsSubmitting(false);
@@ -164,6 +172,11 @@ export default function CreateBillModal({
       setError('Failed to create bill. Please try again.');
       setIsSubmitting(false);
     }
+  };
+
+  const formatAmount = (amount: number): string => {
+    if (currency === 'CAD') return `CAD $${amount.toFixed(2)}`;
+    return `USD $${convertCurrency(amount, 'CAD', 'USD').toFixed(2)}`;
   };
 
   return (
@@ -281,6 +294,36 @@ export default function CreateBillModal({
             value={form.dueDate}
             onChange={e => setForm({ ...form, dueDate: e.target.value })}
           />
+        </div>
+
+        <div className="form-group">
+          <label>Send Email Notification</label>
+          <select
+            value={sendEmail ? 'true' : 'false'}
+            onChange={e => setSendEmail(e.target.value === 'true')}
+            className="form-control"
+          >
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+
+        <div className="form-group">
+          <label>Bill Currency</label>
+          <select
+            value={currency}
+            onChange={e => setCurrency(e.target.value as Currency)}
+            className="form-control"
+          >
+            <option value="CAD">CAD</option>
+            <option value="USD">USD</option>
+          </select>
+        </div>
+
+        {/* formatted preview like AdminBillsListTable */}
+        <div className="form-group">
+          <label>Preview Amount</label>
+          <p>{formatAmount(form.amount)}</p>
         </div>
       </form>
     </BasicModal>
