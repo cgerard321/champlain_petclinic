@@ -96,6 +96,22 @@ const UserCart: React.FC = () => {
 
   const [promoPercent, setPromoPercent] = useState<number | null>(null);
 
+  // Helper: map 404 -> friendly message, otherwise use getErrorMessage with default.
+  const apiErrorMessage = (err: unknown, defaultMessage: string): string => {
+    const status = (err as { response?: { status?: number } }).response?.status;
+    if (status === 404) return 'Cart not found';
+    return getErrorMessage(err, { defaultMessage });
+  };
+
+  // Helper: used by actions that require cartId — sets visible error and returns false when missing.
+  const ensureCartId = (): boolean => {
+    if (!cartId) {
+      setError('Invalid cart ID');
+      return false;
+    }
+    return true;
+  };
+
   // Recent purchases state
   const [recentPurchases, setRecentPurchases] = useState<
     Array<{
@@ -131,12 +147,11 @@ const UserCart: React.FC = () => {
     imageId: string;
     quantity: number;
   }): Promise<void> => {
-    if (!cartId) return;
+    if (!ensureCartId()) return;
 
     const quantity = Math.max(1, recentPurchaseQuantities[item.productId] || 1);
 
     try {
-      // Concurrently add items to cart
       const addPromises = Array.from({ length: quantity }, () =>
         axiosInstance.post(
           `/carts/${cartId}/${item.productId}`,
@@ -151,7 +166,6 @@ const UserCart: React.FC = () => {
       );
       notifyCartChanged();
 
-      // Fetch updated cart and update state
       const { data } = await axiosInstance.get(`/carts/${cartId}`, {
         useV2: false,
       });
@@ -176,9 +190,10 @@ const UserCart: React.FC = () => {
         setCartCountInLS(updatedCount);
       }
     } catch (err: unknown) {
-      const msg = getErrorMessage(err, {
-        defaultMessage: `Failed to add ${item.productName} to cart.`,
-      });
+      const msg = apiErrorMessage(
+        err,
+        `Failed to add ${item.productName} to cart.`
+      );
       setNotificationMessage(msg);
     }
   };
@@ -222,7 +237,7 @@ const UserCart: React.FC = () => {
     imageId: string;
     quantity: number;
   }): Promise<void> => {
-    if (!cartId) return;
+    if (!ensureCartId()) return;
 
     const quantity = Math.max(
       1,
@@ -241,7 +256,7 @@ const UserCart: React.FC = () => {
         `${item.productName} (x${quantity}) added to cart!`
       );
       notifyCartChanged();
-      // Fetch updated cart and update state
+
       const { data } = await axiosInstance.get(`/carts/${cartId}`, {
         useV2: false,
       });
@@ -262,9 +277,10 @@ const UserCart: React.FC = () => {
         await syncAfterAddToCart();
       }
     } catch (err: unknown) {
-      const msg = getErrorMessage(err, {
-        defaultMessage: `Failed to add ${item.productName} to cart.`,
-      });
+      const msg = apiErrorMessage(
+        err,
+        `Failed to add ${item.productName} to cart.`
+      );
       setNotificationMessage(msg);
     }
   };
@@ -343,8 +359,9 @@ const UserCart: React.FC = () => {
           setPromoPercent(null);
         }
       } catch (err: unknown) {
-        console.error(err);
-        setError('Failed to fetch cart items');
+        // Map 404 -> "Cart not found", otherwise use getErrorMessage
+        const msg = apiErrorMessage(err, 'Failed to fetch cart items');
+        setError(msg);
       } finally {
         setLoading(false);
         if (wishlistUpdated) setWishlistUpdated(false);
@@ -436,10 +453,18 @@ const UserCart: React.FC = () => {
         /* ignore */
       }
     } catch (err: unknown) {
-      const msg = getErrorMessage(err, {
-        defaultMessage: 'Promo code invalid or expired.',
-      });
-      setVoucherError(msg);
+      // Narrow error shape without using `any`
+      type ErrorWithResponse = { response?: { status?: number } };
+      const status = (err as ErrorWithResponse).response?.status;
+
+      if (status === 400) {
+        setVoucherError('Promo code invalid or expired.');
+      } else {
+        const msg = getErrorMessage(err, {
+          defaultMessage: 'Promo code invalid or expired.',
+        });
+        setVoucherError(msg);
+      }
     }
   };
 
@@ -540,7 +565,7 @@ const UserCart: React.FC = () => {
   const deleteItem = useCallback(
     async (productId: string, indexToDelete: number): Promise<void> => {
       if (blockIfReadOnly()) return;
-      if (!cartId) return;
+      if (!ensureCartId()) return;
 
       const ok = await confirm({
         title: 'Remove item',
@@ -564,9 +589,7 @@ const UserCart: React.FC = () => {
         });
         notifyCartChanged(); // item removed
       } catch (error: unknown) {
-        const msg = getErrorMessage(error, {
-          defaultMessage: 'Failed to delete item.',
-        });
+        const msg = apiErrorMessage(error, 'Failed to delete item.');
         setNotificationMessage(msg);
       }
     },
@@ -576,9 +599,7 @@ const UserCart: React.FC = () => {
   const clearCart = async (): Promise<void> => {
     if (blockIfReadOnly()) return;
 
-    if (!cartId) {
-      setNotificationMessage('Invalid cart ID');
-
+    if (!ensureCartId()) {
       return;
     }
 
@@ -599,15 +620,14 @@ const UserCart: React.FC = () => {
       notifyCartChanged();
       setNotificationMessage('Cart has been cleared.');
     } catch (error: unknown) {
-      const msg = getErrorMessage(error, {
-        defaultMessage: 'Failed to clear cart.',
-      });
+      const msg = apiErrorMessage(error, 'Failed to clear cart.');
       setNotificationMessage(msg);
     }
   };
 
   const addToWishlist = async (item: ProductModel): Promise<void> => {
     if (blockIfReadOnly()) return;
+    if (!ensureCartId()) return;
 
     try {
       const productId = item.productId;
@@ -634,15 +654,10 @@ const UserCart: React.FC = () => {
       setWishlistItems(prevItems => [...prevItems, item]);
       setWishlistUpdated(true);
 
-      // Decrement LS count since item left the cart
       bumpCartCountInLS(-(item.quantity || 1));
-
-      //notify navbar (item moved out of cart)
       notifyCartChanged();
     } catch (error: unknown) {
-      const msg = getErrorMessage(error, {
-        defaultMessage: 'Failed to add item to wishlist.',
-      });
+      const msg = apiErrorMessage(error, 'Failed to add item to wishlist.');
       setNotificationMessage(msg);
     }
   };
@@ -699,7 +714,7 @@ const UserCart: React.FC = () => {
 
   const removeFromWishlist = async (item: ProductModel): Promise<void> => {
     if (blockIfReadOnly()) return;
-    if (!cartId) return;
+    if (!ensureCartId()) return;
 
     const ok = await confirm({
       title: 'Remove from wishlist',
@@ -721,9 +736,7 @@ const UserCart: React.FC = () => {
         prev.filter(p => p.productId !== item.productId)
       );
     } catch (e: unknown) {
-      const msg = getErrorMessage(e, {
-        defaultMessage: 'Could not remove item from wishlist.',
-      });
+      const msg = apiErrorMessage(e, 'Could not remove item from wishlist.');
       setNotificationMessage(msg);
     }
   };
@@ -762,10 +775,13 @@ const UserCart: React.FC = () => {
         setNotificationMessage(msg);
       }
     } catch (e: unknown) {
-      const msg = getErrorMessage(e, {
-        defaultMessage: 'Unexpected error while moving wishlist items.',
-      });
+      const msg = apiErrorMessage(
+        e,
+        'Unexpected error while moving wishlist items.'
+      );
       setNotificationMessage(msg);
+    } finally {
+      setMovingAll(false);
     }
   };
 
