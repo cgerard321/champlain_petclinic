@@ -49,6 +49,7 @@ Person(admin, "Admin", "An employee of the Champlain Pet Clinic responsible for 
 Person(customer, "Customer", "A customer of the Champlain Pet Clinic.")
 
 Container_Ext(minio, "Bucket Storage", "Minio", "Stores uploaded files externally")
+Container_Ext(dbgate, "DBGate", "Web admin", "Unified DB admin over MySQL/Postgres/Mongo instances.")
 
 System_Boundary(c1, "Champlain Pet Clinic System"){
 
@@ -145,6 +146,16 @@ Rel(visits_service, auth_service, "Makes API calls to", "JSON/REST/HTTPS", $tags
 Rel(visits_service, customers_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="orange-line")
 Rel(visits_service, vets_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="orange-line")
 
+Rel(dbgate, auth_db, "MySQL Driver", "Admin access")
+Rel(dbgate, files_db, "MySQL Driver", "Admin access")
+Rel(dbgate, vets_images_db, "Postgres Driver", "Admin access")
+Rel(dbgate, vets_vets_db, "Mongo Driver", "Admin access")
+Rel(dbgate, billing_db, "Mongo Driver", "Admin access")
+Rel(dbgate, visits_db, "Mongo Driver", "Admin access")
+Rel(dbgate, customers_db, "Mongo Driver", "Admin access")
+Rel(dbgate, inventory_db, "Mongo Driver", "Admin access")
+Rel(dbgate, products_db, "Mongo Driver", "Admin access")
+Rel(dbgate, cart_db, "Mongo Driver", "Admin access")
 
 SHOW_LEGEND()
 
