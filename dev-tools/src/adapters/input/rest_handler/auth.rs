@@ -13,8 +13,7 @@ use uuid::Uuid;
 pub async fn login(db: &State<Db>, req: Json<LoginReq>, jar: &CookieJar<'_>) -> AppResult<Status> {
     let new_session = authenticate(db, &req.email, &req.password)
         .await
-        .map(Json)
-        .map_err(|e| AppError::from(e))?;
+        .map(Json)?;
 
     let expires_offset =
         OffsetDateTime::from_unix_timestamp(new_session.expires_at.and_utc().timestamp())
