@@ -217,17 +217,17 @@
              ng-click="$state.go('inventoriesProductList', { inventoryId: inventory.inventoryId })">
 
             <div class="card-head">
-                <div class="code">{{ ::inventory.inventoryCode }}</div>
+                <div class="code">{{ inventory.inventoryCode }}</div>
                 <div class="name">
                     <a ui-sref="inventoriesProduct({ inventoryId: inventory.inventoryId })" style="text-decoration:none;">
-                        {{ ::inventory.inventoryName }}
+                        {{ inventory.inventoryName }}
                     </a>
                 </div>
             </div>
 
-            <div class="kv"><span class="k">Type</span><span class="v">{{ ::inventory.inventoryType || '—' }}</span></div>
-            <div class="kv"><span class="k">Desc</span><span class="v">{{ ::inventory.inventoryDescription || '—' }}</span></div>
-            <div class="kv" ng-if="inventory.recentUpdateMessage"><span class="k">Update</span><span class="v">{{ ::inventory.recentUpdateMessage }}</span></div>
+            <div class="kv"><span class="k">Type</span><span class="v">{{ inventory.inventoryType || '—' }}</span></div>
+            <div class="kv"><span class="k">Desc</span><span class="v">{{ inventory.inventoryDescription || '—' }}</span></div>
+            <div class="kv" ng-if="inventory.recentUpdateMessage"><span class="k">Update</span><span class="v">{{ inventory.recentUpdateMessage }}</span></div>
 
             <div class="card-actions" ng-click="$event.stopPropagation()">
                 <a class="btn btn-warning btn-sm"
