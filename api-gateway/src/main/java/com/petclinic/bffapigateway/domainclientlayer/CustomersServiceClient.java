@@ -387,6 +387,14 @@ public class CustomersServiceClient {
                 .bodyToMono(OwnerResponseDTO.class);
     }
 
+    public Mono<PetResponseDTO> deletePetPhoto(String petId) {
+        return webClientBuilder.build()
+                .patch()
+                .uri(customersServiceUrl + "/pets/" + petId + "/photo")
+                .retrieve()
+                .bodyToMono(PetResponseDTO.class);
+    }
+
     public Mono<PetResponseDTO> getPet(final String ownerId, final String petId, boolean includePhoto) {
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(customersServiceUrl + "/owners/" + ownerId + "/pets/" + petId);
         builder.queryParam("includePhoto", includePhoto);
