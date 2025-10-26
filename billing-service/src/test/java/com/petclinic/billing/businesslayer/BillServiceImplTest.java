@@ -10,6 +10,7 @@ import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
 import com.petclinic.billing.util.EntityDtoUtil;
+import com.petclinic.billing.util.FormatBillUtil;
 import com.petclinic.billing.util.InterestCalculationUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -2234,34 +2235,32 @@ public void testGenerateBillPdf_BillNotFound() {
         billDTO.setBillStatus(BillStatus.PAID);
         billDTO.setVetId("vet-123");
         billDTO.setCustomerId("owner-456");
+        billDTO.setAmount(new BigDecimal("100.00")); // required field per controller
+        billDTO.setDate(LocalDate.now());
         billDTO.setDueDate(LocalDate.now().plusDays(30));
 
-        // Mock VetClient response
+        // Mock vet info
         VetResponseDTO vetResponse = new VetResponseDTO();
         vetResponse.setFirstName("John");
         vetResponse.setLastName("Doe");
         when(vetClient.getVetByVetId("vet-123")).thenReturn(Mono.just(vetResponse));
 
-        // Mock OwnerClient response
+        // Mock owner info
         OwnerResponseDTO ownerResponse = new OwnerResponseDTO();
         ownerResponse.setFirstName("Alice");
         ownerResponse.setLastName("Smith");
         when(ownerClient.getOwnerByOwnerId("owner-456")).thenReturn(Mono.just(ownerResponse));
 
-        // ✅ FIX: Mock AuthServiceClient properly
-        // The key bug was that authServiceClient was returning null instead of a Mono.
+        // Mock user details (correct order for parameters)
         UserDetails userDetails = UserDetails.builder()
                 .email("test@example.com")
                 .username("Alice Smith")
                 .userId("owner-456")
                 .build();
-
-        when(authClient.getUserById(eq("owner-456"), anyString()))
+        when(authClient.getUserById(eq("jwtToken"), eq("owner-456"))) // ✅ swapped params here
                 .thenReturn(Mono.just(userDetails));
 
-        // Mock repository findById and insert
-        when(repo.findById(anyString())).thenReturn(Mono.empty());
-
+        // Mock repo behavior
         Bill billEntity = EntityDtoUtil.toBillEntity(billDTO);
         billEntity.setBillId("generated-id");
         billEntity.setVetFirstName("John");
@@ -2269,20 +2268,24 @@ public void testGenerateBillPdf_BillNotFound() {
         billEntity.setOwnerFirstName("Alice");
         billEntity.setOwnerLastName("Smith");
         billEntity.setAmount(new BigDecimal("100.00"));
+        billEntity.setInterest(BigDecimal.ZERO);
 
+        // ✅ Prevent NPE inside generateUniqueBillId()
+        when(repo.findById(anyString())).thenReturn(Mono.empty());
+        // ✅ Prevent findAllBillsByBillStatus() from returning null
+        when(repo.findAllBillsByBillStatus(any())).thenReturn(Flux.empty());
+        // ✅ Regular insert mock
         when(repo.insert(any(Bill.class))).thenReturn(Mono.just(billEntity));
 
-        // Mock MailService behavior
+        // Mock mail sending
         ArgumentCaptor<Mail> mailCaptor = ArgumentCaptor.forClass(Mail.class);
         when(mailService.sendMail(mailCaptor.capture()))
                 .thenReturn("Message sent to test@example.com");
 
-        // ✅ FIX: Ensure the tested instance uses your mocks
-        // If you're not using @InjectMocks, you must inject manually:
-        billService = new BillServiceImpl(repo, vetClient, ownerClient, authClient,mailService);
+        billService = new BillServiceImpl(repo, vetClient, ownerClient, authClient, mailService);
 
-        // Act & Assert
-        StepVerifier.create(billService.createBill(Mono.just(billDTO), true, "USD", "jwtToken"))
+        // Act
+        StepVerifier.create(billService.createBill(Mono.just(billDTO), true, "CAD", "jwtToken"))
                 .expectNextMatches(response ->
                         response.getBillId().equals("generated-id") &&
                                 response.getVetFirstName().equals("John") &&
@@ -2292,10 +2295,36 @@ public void testGenerateBillPdf_BillNotFound() {
                 )
                 .verifyComplete();
 
-        // Verify the sent email details
+        // Assert
         Mail sentMail = mailCaptor.getValue();
         assertEquals("test@example.com", sentMail.getEmailSendTo());
         assertEquals("Pet Clinic - Payment Receipt", sentMail.getEmailTitle());
+
+        // ✅ Dynamic expected email body
+        String expectedBody = String.format(
+                "Dear %s,<br><br>" +
+                        "Please find below the details of your payment receipt:<br><br>" +
+                        "--------------------------------------------<br>" +
+                        "Bill ID: %s<br>" +
+                        "Date: %s<br>" +
+                        "Subtotal: %s<br>" +
+                        "Interest: %s<br>" +
+                        "Total Due: %s<br>" +
+                        "--------------------------------------------<br><br>" +
+                        "Thank you for choosing Pet Clinic.<br><br>" +
+                        "Best regards,<br>" +
+                        "Pet Clinic Team",
+                userDetails.getUsername(),
+                billEntity.getBillId(),
+                billEntity.getDate(),
+                FormatBillUtil.formatCurrency(billEntity.getAmount(), "CAD"),
+                FormatBillUtil.formatCurrency(billEntity.getInterest(), "CAD"),
+                FormatBillUtil.formatCurrency(
+                        billEntity.getAmount().add(billEntity.getInterest()), "CAD"
+                )
+        );
+
+        assertEquals(expectedBody, sentMail.getBody(), "Email body should match the formatted receipt layout");
     }
 
 }

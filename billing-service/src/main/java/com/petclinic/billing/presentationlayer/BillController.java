@@ -26,11 +26,10 @@ public class BillController {
         this.billService = billService;
     }
 
-    // Create Bill //
     @PostMapping("/bills")
     public Mono<ResponseEntity<BillResponseDTO>> createBill(@RequestBody Mono<BillRequestDTO> billDTO,
                                                             @RequestParam(defaultValue = "false") boolean sendEmail,
-                                                            @RequestParam(required = false) String currency,
+                                                            @RequestParam(defaultValue = "CAD", required = false) String currency,
                                                             @CookieValue("Bearer") String jwtToken
     ) {
         return billDTO
@@ -71,7 +70,6 @@ public class BillController {
                         log.debug("Auto-suggested due date (45 days): {}", dto.getDueDate());
                     }
                     
-                    // Prevent manual creation of OVERDUE bills - status is automatically managed by system
                     if (dto.getBillStatus() == BillStatus.OVERDUE) {
                         return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, 
                             "Cannot create bill with OVERDUE status. Use PAID or UNPAID instead. OVERDUE status is automatically set based on due date."));

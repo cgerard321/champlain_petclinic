@@ -325,19 +325,19 @@ public class BillsControllerUnitTest {
         billResponseDTO.setCustomerId("12345");
         billResponseDTO.setVetId("67890");
         billResponseDTO.setVisitType("Adoption");
-        billResponseDTO.setDate(LocalDate.of(2025, 10, 24));
+        billResponseDTO.setDate(LocalDate.now().plusDays(1)); // Updated to a future date
         billResponseDTO.setAmount(new BigDecimal("600"));
         billResponseDTO.setBillStatus(BillStatus.PAID);
-        billResponseDTO.setDueDate(LocalDate.of(2025, 11, 01));
+        billResponseDTO.setDueDate(LocalDate.now().plusDays(30)); // Ensure dueDate is also valid
 
         BillRequestDTO billRequestDTO = new BillRequestDTO();
         billRequestDTO.setCustomerId("12345");
         billRequestDTO.setVetId("67890");
         billRequestDTO.setVisitType("Adoption");
-        billRequestDTO.setDate(LocalDate.of(2025, 10, 24));
+        billRequestDTO.setDate(LocalDate.now().plusDays(1)); // Updated to a future date
         billRequestDTO.setAmount(new BigDecimal("600"));
         billRequestDTO.setBillStatus(BillStatus.PAID);
-        billRequestDTO.setDueDate(LocalDate.of(2025, 11, 01));
+        billRequestDTO.setDueDate(LocalDate.now().plusDays(30)); // Ensure dueDate is also valid
 
         when(billServiceClient.createBill(billRequestDTO, false, "CAD", "JWTToken"))
                 .thenReturn(Mono.just(billResponseDTO));
@@ -349,7 +349,7 @@ public class BillsControllerUnitTest {
                         .queryParam("sendEmail", false)
                         .queryParam("currency", "CAD")
                         .build())
-                .cookie("Bearer", "JWTToken") // Add the required cookie
+                .cookie("Bearer", "JWTToken") // Ensure the token is valid
                 .body(Mono.just(billRequestDTO), BillRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -360,13 +360,12 @@ public class BillsControllerUnitTest {
                 .jsonPath("$.customerId").isEqualTo("12345")
                 .jsonPath("$.vetId").isEqualTo("67890")
                 .jsonPath("$.visitType").isEqualTo("Adoption")
-                .jsonPath("$.date").isEqualTo("2025-10-24")
+                .jsonPath("$.date").isEqualTo(LocalDate.now().plusDays(1).toString()) // Match updated date
                 .jsonPath("$.amount").isEqualTo(600)
                 .jsonPath("$.billStatus").isEqualTo("PAID")
-                .jsonPath("$.dueDate").isEqualTo("2025-11-01");
+                .jsonPath("$.dueDate").isEqualTo(LocalDate.now().plusDays(30).toString()); // Match updated dueDate
 
         assertEquals(billResponseDTO.getBillId(), "9");
-
     }
 
     @Test

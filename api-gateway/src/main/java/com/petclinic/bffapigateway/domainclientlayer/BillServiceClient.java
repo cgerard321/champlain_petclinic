@@ -214,8 +214,8 @@ public class BillServiceClient {
                 .build()
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .queryParam("currency", currency)
                         .queryParam("sendEmail", sendEmail)
+                        .queryParam("currency", currency)
                         .build())
                 .cookie("Bearer", jwtToken)
                 .bodyValue(model)
