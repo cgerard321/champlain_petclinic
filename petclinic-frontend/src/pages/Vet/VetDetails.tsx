@@ -196,7 +196,7 @@ export default function VetDetails(): JSX.Element {
     resume: vet.resume,
     workday: vet.workday
       .map(mapToWorkdayEnum)
-      .filter((day): day is Workday => day != null),
+      .filter((day): day is Workday => day !== undefined),
     workHoursJson: vet.workHoursJson,
     active: vet.active,
     specialties: vet.specialties,
