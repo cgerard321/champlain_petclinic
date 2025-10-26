@@ -1,3 +1,4 @@
-pub mod fetch_bucket_files;
-pub mod fetch_buckets;
-pub mod upload_file;
+mod fetch_bucket_files;
+mod fetch_buckets;
+pub mod service;
+mod upload_file;

@@ -1,6 +1,4 @@
-use crate::application::ports::output::file_storage_port::DynFileStorage;
-use crate::application::usecases::files::fetch_bucket_files::fetch_files;
-use crate::application::usecases::files::upload_file::upload_file;
+use crate::application::ports::input::files_port::DynFilesPort;
 use crate::core::config;
 use crate::core::error::{AppError, AppResult};
 use crate::domain::models::file::FileInfo;
@@ -15,10 +13,10 @@ use std::path::PathBuf;
 #[get("/buckets/<bucket>/files")]
 pub(crate) async fn read_files(
     bucket: &str,
-    store: &State<DynFileStorage>,
+    uc: &State<DynFilesPort>,
     _user: AuthenticatedUser,
 ) -> AppResult<Json<Vec<FileInfo>>> {
-    Ok(Json(fetch_files(bucket, store).await?))
+    Ok(Json(uc.list_files(bucket).await?))
 }
 
 #[post("/buckets/<bucket>/files/<prefix..>", data = "<data>")]
@@ -26,7 +24,7 @@ pub(crate) async fn add_file(
     bucket: &str,
     prefix: PathBuf,
     data: Data<'_>,
-    store: &State<DynFileStorage>,
+    uc: &State<DynFilesPort>,
     _user: AuthenticatedUser,
 ) -> AppResult<Custom<Json<FileInfo>>> {
     let limit = config::MAX_FILE_SIZE_MB.mebibytes();
@@ -37,7 +35,7 @@ pub(crate) async fn add_file(
         .map_err(|e| AppError::BadRequest(format!("read body: {e}")))?
         .into_inner();
 
-    let file_info = upload_file(bucket, prefix, bytes, store).await?;
+    let file_info = uc.upload(bucket, prefix, bytes).await?;
 
     Ok(Custom(Status::Created, Json(file_info)))
 }

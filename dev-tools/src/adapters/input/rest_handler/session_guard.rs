@@ -1,4 +1,4 @@
-use crate::application::ports::output::auth_repo_port::DynAuthRepo;
+use crate::application::ports::input::auth_port::DynAuthPort;
 use crate::core::error::AppError;
 use crate::domain::models::user::AuthenticatedUser;
 use rocket::{
@@ -14,7 +14,7 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
 
     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         let jar = req.cookies();
-        let db = match req.guard::<&State<DynAuthRepo>>().await {
+        let uc = match req.guard::<&State<DynAuthPort>>().await {
             Outcome::Success(state) => state,
             Outcome::Error(f) => return Outcome::Error(f),
             Outcome::Forward(_) => return Outcome::Error((Status::InternalServerError, ())),
@@ -28,10 +28,8 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
             return Outcome::Error((Status::Unauthorized, ()));
         };
 
-        match db.find_session_by_id(sid).await {
-            Ok(session) => Outcome::Success(AuthenticatedUser {
-                user_id: session.user_id,
-            }),
+        match uc.validate_session(sid).await {
+            Ok(user_id) => Outcome::Success(AuthenticatedUser { user_id }),
             Err(AppError::NotFound(_)) | Err(AppError::Unauthorized) => {
                 Outcome::Error((Status::Unauthorized, ()))
             }

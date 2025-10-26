@@ -5,10 +5,10 @@ use crate::domain::models::file::FileInfo;
 use std::path::PathBuf;
 
 pub async fn upload_file(
+    store: &DynFileStorage,
     bucket: &str,
     prefix: PathBuf,
     bytes: Vec<u8>,
-    store: &DynFileStorage,
 ) -> AppResult<FileInfo> {
     let extension = infer::get(&bytes)
         .map(|k| k.extension())

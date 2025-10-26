@@ -32,13 +32,13 @@ impl UsersRepoPort for MySqlUsersRepo {
             VALUES (?, ?, ?, ?)
             "#,
         )
-            .bind(id.to_string())
-            .bind(email)
-            .bind(pass_hash)
-            .bind(display_name)
-            .execute(&*self.pool)
-            .await
-            .map_err(|e| map_sqlx_err(e, "User insert"))?;
+        .bind(id.to_string())
+        .bind(email)
+        .bind(pass_hash)
+        .bind(display_name)
+        .execute(&*self.pool)
+        .await
+        .map_err(|e| map_sqlx_err(e, "User insert"))?;
 
         Ok(())
     }
@@ -51,10 +51,10 @@ impl UsersRepoPort for MySqlUsersRepo {
             WHERE email = ?
             "#,
         )
-            .bind(email)
-            .fetch_one(&*self.pool)
-            .await
-            .map_err(|e| map_sqlx_err(e, "User lookup"))?;
+        .bind(email)
+        .fetch_one(&*self.pool)
+        .await
+        .map_err(|e| map_sqlx_err(e, "User lookup"))?;
 
         let id_str: String = row.try_get("id").map_err(|_| AppError::Internal)?;
         let id = Uuid::parse_str(&id_str).map_err(|_| AppError::Internal)?;

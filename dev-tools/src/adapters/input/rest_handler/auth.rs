@@ -1,7 +1,4 @@
-use crate::application::ports::output::auth_repo_port::DynAuthRepo;
-use crate::application::ports::output::user_repo_port::DynUsersRepo;
-use crate::application::usecases::auth::authenticate::authenticate;
-use crate::application::usecases::auth::logout::remove_session;
+use crate::application::ports::input::auth_port::DynAuthPort;
 use crate::core::error::{AppError, AppResult};
 use crate::domain::models::user::LoginReq;
 use rocket::http::{Cookie, CookieJar, SameSite};
@@ -12,14 +9,11 @@ use uuid::Uuid;
 
 #[post("/login", data = "<req>")]
 pub async fn login(
-    auth_db: &State<DynAuthRepo>,
-    user_db: &State<DynUsersRepo>,
+    uc: &State<DynAuthPort>,
     req: Json<LoginReq>,
     jar: &CookieJar<'_>,
 ) -> AppResult<Status> {
-    let new_session = authenticate(auth_db, user_db, &req.email, &req.password)
-        .await
-        .map(Json)?;
+    let new_session = uc.authenticate(&req.email, &req.password).await.map(Json)?;
 
     let expires_offset =
         OffsetDateTime::from_unix_timestamp(new_session.expires_at.and_utc().timestamp())
@@ -42,10 +36,10 @@ pub async fn login(
     Ok(Status::NoContent)
 }
 #[post("/logout")]
-pub async fn logout(jar: &CookieJar<'_>, db: &State<DynAuthRepo>) -> AppResult<Status> {
+pub async fn logout(jar: &CookieJar<'_>, uc: &State<DynAuthPort>) -> AppResult<Status> {
     if let Some(cookie) = jar.get_private("sid") {
         if let Ok(session_id) = Uuid::parse_str(cookie.value()) {
-            let _ = remove_session(db, session_id).await;
+            let _ = uc.logout(session_id).await;
         }
         jar.remove_private(Cookie::from("sid"));
     }

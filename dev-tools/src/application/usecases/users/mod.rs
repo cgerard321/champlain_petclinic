@@ -1,2 +1,3 @@
-pub mod create_user;
+mod create_user;
+pub mod service;
 mod utils;
