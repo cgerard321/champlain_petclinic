@@ -69,7 +69,10 @@ const parseWorkHours = (
         if (Array.isArray(slots) && slots.length > 0) {
           const normalizedSlots = slots
             .map(slot => {
-              const [, start, end] = slot.split('_');
+              // slot format is expected to be "prefix_start_end"
+              const parts = slot.split('_');
+              const start = parts[1];
+              const end = parts[2];
               const startHour = start ? parseInt(start, 10) : NaN;
               const endHour = end ? parseInt(end, 10) : startHour + 1;
               if (Number.isNaN(startHour) || Number.isNaN(endHour)) {
