@@ -437,7 +437,7 @@ public class InventoryControllerTest {
         // Act
         client.get()
                 .uri(baseInventoryURL + "/" + inventoryId + "/products/search?productName=product1&productDescription=productone&status=AVAILABLE")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(ProductResponseDTO.class)
@@ -463,7 +463,7 @@ public class InventoryControllerTest {
         // Act
         client.get()
                 .uri(baseInventoryURL + "/" + invalidInventoryId + "/products/search?productName=product1&productDescription=productone&status=AVAILABLE")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isNoContent();
 
@@ -486,7 +486,7 @@ public class InventoryControllerTest {
         // Act
         client.get()
                 .uri(baseInventoryURL + "/" + inventoryId + "/products/search?productName=invalid&productDescription=invalid&status=AVAILABLE")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isNoContent();
 
@@ -508,7 +508,7 @@ public class InventoryControllerTest {
         // Act
         client.get()
                 .uri(baseInventoryURL + "/" + inventoryId + "/products/search?productName=invalid&productDescription=invalid")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isNoContent();
 
@@ -538,7 +538,7 @@ public class InventoryControllerTest {
         // Act
         client.get()
                 .uri(baseInventoryURL + "/" + inventoryId + "/products/search?productName=product1&productDescription=productone&status=AVAILABLE")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(ProductResponseDTO.class)
@@ -1467,13 +1467,16 @@ public class InventoryControllerTest {
 
         client.get()
                 .uri("/api/gateway/inventories/{inventoryName}/products/by-name", inventoryName)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$[0].productId").isEqualTo(product1.getProductId())
-                .jsonPath("$[1].productId").isEqualTo(product2.getProductId());
-
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectBodyList(ProductResponseDTO.class)
+                .hasSize(2)
+                .value(list -> {
+                    assertEquals(product1.getProductId(), list.get(0).getProductId());
+                    assertEquals(product2.getProductId(), list.get(1).getProductId());
+                });
         verify(inventoryServiceClient, times(1)).getProductsByInventoryName(inventoryName);
     }
 
@@ -1486,7 +1489,7 @@ public class InventoryControllerTest {
 
         client.get()
                 .uri("/api/gateway/inventories/{inventoryName}/products/by-name", inventoryName)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isNotFound();
 
