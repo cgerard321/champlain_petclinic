@@ -103,7 +103,9 @@ export default function useSearchInventories(): useSearchInventoriesResponseMode
       setErrorMessage('');
       const aggregated: Inventory[] = [];
       let page = 0;
-      while (true) {
+      // Safety cap to avoid infinite loops if the backend misbehaves.
+      const MAX_PAGES = 100;
+      while (page < MAX_PAGES) {
         const res = await searchInventories(
           page,
           listSize,
@@ -135,6 +137,13 @@ export default function useSearchInventories(): useSearchInventoriesResponseMode
 
         if (data.length < listSize) break;
         page += 1;
+        if (page >= MAX_PAGES) {
+          // Warning in case of unexpected infinite loop
+          console.warn(
+            `Reached MAX_PAGES (${MAX_PAGES}) while aggregating inventories; stopping to avoid an infinite loop.`
+          );
+          break;
+        }
       }
 
       // double-check still current
