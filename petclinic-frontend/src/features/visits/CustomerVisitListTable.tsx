@@ -1,4 +1,3 @@
-import './VisitListTable.css';
 import { useEffect, useState } from 'react';
 import { useUser, IsVet } from '@/context/UserContext';
 import { Visit } from '@/features/visits/models/Visit.ts';
@@ -11,10 +10,6 @@ import { downloadPrescription } from '@/features/visits/Prescription/api/downloa
 import './CustomerVisitListTable.css';
 import BasicModal from '@/shared/components/BasicModal';
 import '@/shared/components/BasicModal.css';
-import SidebarItem from './components/SidebarItem';
-import Sidebar from './components/Sidebar';
-import SvgIcon from '@/shared/components/SvgIcon';
-import { Category } from './models/Category';
 
 export default function CustomerVisitListTable(): JSX.Element {
   const { user } = useUser();
@@ -25,10 +20,6 @@ export default function CustomerVisitListTable(): JSX.Element {
   const [errorDialogMessage, setErrorDialogMessage] = useState<string | null>(
     null
   );
-  const [displayedVisits, setDisplayedVisits] = useState<Visit[]>([]);
-  const [searchTerm, setSearchTerm] = useState<string>(''); // Search term state
-  //use sidebar to select which table is shown
-  const [currentTab, setCurrentTab] = useState<string>('All');
 
   const navigate = useNavigate();
 
@@ -113,6 +104,11 @@ export default function CustomerVisitListTable(): JSX.Element {
         const list = normalizeVisits(visitData);
         setVisits(list);
         setDisplayedVisits(list);
+        if (Array.isArray(visitData)) {
+          setVisits(visitData);
+        } else {
+          console.error('Fetched data is not an array', visitData);
+        }
       } catch (err) {
         if (err instanceof Error) {
           setError(`Failed to fetch visits: ${err.message}`);
@@ -164,199 +160,122 @@ export default function CustomerVisitListTable(): JSX.Element {
     }
   }, [showErrorDialog]);
 
-  useEffect(() => {
-    const term = searchTerm.trim().toLowerCase();
-
-    const handler = setTimeout(() => {
-      if (term.length > 0) {
-        const filtered = visits.filter(v =>
-          (v.description || '').toLowerCase().includes(term)
-        );
-        setDisplayedVisits(sortVisits(filtered));
-      } else {
-        setDisplayedVisits(sortVisits(visits));
-      }
-    }, 300);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [searchTerm, visits]);
-
-  const renderVisitsTables = (): JSX.Element => {
-    return (
-      <div className="page-container">
-        <div className="visit-actions">
-          <div className="search-bar">
-            <input
-              type="text"
-              placeholder="Search by description"
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)} // Update the search term when input changes
-            />
-          </div>
-        </div>
-        {categories.map(category => renderTable(category.name, category.list))}
-      </div>
-    );
-  };
-
-  const renderTable = (title: string, visits: Visit[]): JSX.Element =>
-    currentTab === title ? (
-      <div className="visit-table-section">
-        {error ? (
-          <p>{error}</p>
-        ) : visits.length > 0 ? (
-          <table>
-            <thead>
-              <tr>
-                <th>Visit Id</th>
-                <th>Pet Name</th>
-                <th>Description</th>
-                <th>Veterinarian</th>
-                <th>Vet Email</th>
-                <th>Vet Phone Number</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th>Status</th>
-                <th>Download Prescription</th>
-              </tr>
-            </thead>
-            <tbody>
-              {visits.map(visit => (
-                <tr
-                  key={visit.visitId}
-                  className={visit.isEmergency ? 'emergency-visit' : ''}
-                >
-                  <td>{visit.visitId}</td>
-                  <td>{visit.petName}</td>
-                  <td>{visit.description}</td>
-                  <td>
-                    {visit.vetFirstName} {visit.vetLastName}
-                  </td>
-                  <td>{visit.vetEmail}</td>
-                  <td>{visit.vetPhoneNumber}</td>
-                  <td>{new Date(visit.visitDate).toLocaleString()}</td>
-                  <td>{new Date(visit.visitEndDate).toLocaleString()}</td>
-                  <td
-                    style={{
-                      color:
-                        visit.status === 'CONFIRMED'
-                          ? 'green'
-                          : visit.status === 'UPCOMING'
-                            ? 'orange'
-                            : visit.status === 'CANCELLED'
-                              ? 'red'
-                              : visit.status === 'COMPLETED'
-                                ? 'blue'
-                                : visit.status === 'ARCHIVED'
-                                  ? 'gray'
-                                  : 'inherit',
-                      fontWeight: 'bold',
-                    }}
-                  >
-                    {visit.status}
-                  </td>
-                  <td className="action-column">
-                    {['CONFIRMED', 'UPCOMING', 'COMPLETED'].includes(
-                      visit.status
-                    ) && (
-                      <a
-                        onClick={async ev => {
-                          ev.preventDefault();
-                          ev.stopPropagation();
-
-                          try {
-                            await handleDownloadPrescription(
-                              visit.visitId,
-                              visit.prescriptionFile?.fileName ||
-                                `prescription-${visit.visitId}.pdf`
-                            );
-                          } catch {}
-                        }}
-                      >
-                        <SvgIcon id="download" className="icon-visits" />
-                      </a>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <div>No visits here!</div>
-        )}
-        {showErrorDialog && (
-          <BasicModal
-            title="No Prescription Available"
-            confirmText="OK"
-            onConfirm={async () => {
-              setShowErrorDialog(false);
-              navigate(AppRoutePaths.CustomerVisits);
-            }}
-            showButton={
-              <button id="error-modal-trigger" style={{ display: 'none' }} />
-            }
-          >
-            <p className="basic-modal-body">
-              {errorDialogMessage ??
-                'An error occurred while downloading the prescription.'}
-            </p>
-          </BasicModal>
-        )}
-      </div>
-    ) : (
-      <></>
-    );
-
-  const renderSidebarItem = (
-    name: string,
-    emergency?: boolean
-  ): JSX.Element => {
-    return (
-      <SidebarItem
-        itemName={name}
-        currentTab={currentTab}
-        onClick={setCurrentTab}
-        emergency={emergency}
-      />
-    );
-  };
-
-  const renderSidebar = (tit: string): JSX.Element => {
-    return (
-      <Sidebar title={tit}>
-        <li>
-          <button
-            className="btn btn-primary"
-            onClick={() => navigate(AppRoutePaths.OwnerBookAppointment)}
-            title="Create"
-          >
-            <SvgIcon id="pen-to-square" />
-            Create
-          </button>
-        </li>
-        <li>
-          <button
-            className="btn btn-primary"
-            onClick={() => navigate(AppRoutePaths.CustomerReviews)}
-            title="Reviews"
-          >
-            <SvgIcon id="star-empty" />
-            Reviews
-          </button>
-        </li>
-        {categories.map(category =>
-          renderSidebarItem(category.name, category.emergency)
-        )}
-      </Sidebar>
-    );
-  };
-
   return (
-    <div className="visit-page-container">
-      {renderSidebar('My visits')}
-      {error ? <p>{error}</p> : <>{renderVisitsTables()}</>}
+    <div>
+      <div className="visit-actions">
+        <button
+          className="btn btn-warning"
+          onClick={() => navigate(AppRoutePaths.CustomerAddReview)}
+          title="Leave a Review"
+        >
+          Leave a Review
+        </button>
+        <button
+          className="btn btn-dark"
+          onClick={() => navigate(AppRoutePaths.CustomerReviews)}
+          title="View Reviews"
+        >
+          View Reviews
+        </button>
+        <button
+          className="btn btn-warning"
+          onClick={() => navigate(AppRoutePaths.OwnerBookAppointment)}
+          title="Schedule a Visit"
+        >
+          Schedule a Visit
+        </button>
+      </div>
+
+      {error ? (
+        <p>{error}</p>
+      ) : (
+        <table className="table table-striped">
+          <thead>
+            <tr>
+              <th>Visit ID</th>
+              <th>Pet Name</th>
+              <th>Visit Date</th>
+              <th>Visit Description</th>
+              <th>Vet Name</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {visits.map(visit => (
+              <tr key={visit.visitId}>
+                <td>{visit.visitId}</td>
+                <td>{visit.petName}</td>
+                <td>{visit.visitDate}</td>
+                <td>{visit.description}</td>
+                <td>{`${visit.vetFirstName} ${visit.vetLastName}`}</td>
+                <td
+                  style={{
+                    color:
+                      visit.status === 'CONFIRMED'
+                        ? 'green'
+                        : visit.status === 'UPCOMING'
+                          ? 'orange'
+                          : visit.status === 'CANCELLED'
+                            ? 'red'
+                            : visit.status === 'COMPLETED'
+                              ? 'blue'
+                              : visit.status === 'ARCHIVED'
+                                ? 'gray'
+                                : 'inherit',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  {visit.status}
+                </td>
+                <td>
+                  {['CONFIRMED', 'UPCOMING', 'COMPLETED'].includes(
+                    visit.status
+                  ) && (
+                    <button
+                      type="button"
+                      className="btn btn-primary btn-sm"
+                      onClick={async ev => {
+                        ev.preventDefault();
+                        ev.stopPropagation();
+
+                        try {
+                          await handleDownloadPrescription(
+                            visit.visitId,
+                            visit.prescriptionFile?.fileName ||
+                              `prescription-${visit.visitId}.pdf`
+                          );
+                        } catch {}
+                      }}
+                    >
+                      Download Prescription
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      {showErrorDialog && (
+        <BasicModal
+          title="No Prescription Available"
+          confirmText="OK"
+          onConfirm={async () => {
+            setShowErrorDialog(false);
+            navigate(AppRoutePaths.CustomerVisits);
+          }}
+          showButton={
+            <button id="error-modal-trigger" style={{ display: 'none' }} />
+          }
+        >
+          <p className="basic-modal-body">
+            {errorDialogMessage ??
+              'An error occurred while downloading the prescription.'}
+          </p>
+        </BasicModal>
+      )}
     </div>
   );
 }

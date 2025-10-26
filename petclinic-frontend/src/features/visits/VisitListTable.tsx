@@ -7,7 +7,6 @@ import { useNavigate } from 'react-router-dom';
 import { exportVisitsCSV } from './api/exportVisitsCSV';
 import { getAllVisits } from './api/getAllVisits';
 import { IsVet, IsAdmin, IsReceptionist } from '@/context/UserContext';
-// import { AppRoutePaths } from '@/shared/models/path.routes';
 import { archiveVisit } from './api/archiveVisit';
 import { cancelVisit } from './api/cancelVisit';
 
@@ -18,9 +17,12 @@ import AddingVisit from './components/AddingVisit';
 import BasicModal from '@/shared/components/BasicModal';
 import VisitDetails from '@/features/visits/components/VisitDetails';
 import EditingVisit from './components/EditingVisit';
+
+import { AppRoutePaths } from '@/shared/models/path.routes';
 import Sidebar from './components/Sidebar';
 import SidebarItem from './components/SidebarItem';
 import SvgIcon from '@/shared/components/SvgIcon';
+import { FaCalendarAlt } from 'react-icons/fa';
 
 export default function VisitListTable(): JSX.Element {
   const isVet = IsVet();
@@ -36,7 +38,6 @@ export default function VisitListTable(): JSX.Element {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
-  //use sidebar to select which table is shown
   const [currentTab, setCurrentTab] = useState<string>('All');
 
   // helper to normalize API responses to an array of visits
@@ -53,17 +54,12 @@ export default function VisitListTable(): JSX.Element {
   // Sort visits: emergency visits first, then by start date
   const sortVisits = (visitsList: Visit[]): Visit[] => {
     return [...visitsList].sort((a, b) => {
-      // Emergency visits come first
       if (a.isEmergency && !b.isEmergency) return -1;
       if (!a.isEmergency && b.isEmergency) return 1;
 
-      // Within the same emergency status, sort by start date (most recent first)
       return new Date(b.visitDate).getTime() - new Date(a.visitDate).getTime();
     });
   };
-
-  // Update the displayed list whenever the search term or the full visits list changes.
-  // This avoids refetching from the API and preserves the full list in `visits`.
   useEffect(() => {
     const term = searchTerm.trim().toLowerCase();
 
@@ -83,8 +79,6 @@ export default function VisitListTable(): JSX.Element {
     }
   }, [searchTerm, visits, currentTab, isStaffMember]);
 
-  // Filter visits based on status
-  // Derive the different lists from the displayed list so search / tabs compose
   const emergencyVisits = sortVisits(
     displayedVisits.filter(visit => visit.isEmergency)
   );
@@ -144,8 +138,6 @@ export default function VisitListTable(): JSX.Element {
     getVisits();
   }, []);
 
-  // Update the displayed list whenever the search term or the full visits list changes.
-  // This avoids refetching from the API and preserves the full list in `visits`.
   useEffect(() => {
     const term = searchTerm.trim().toLowerCase();
 
@@ -165,11 +157,9 @@ export default function VisitListTable(): JSX.Element {
     };
   }, [searchTerm, visits]);
 
-  // Handle archiving the visit
   const handleArchive = async (visitId: string): Promise<void> => {
     try {
       await archiveVisit(visitId, updatedVisit => {
-        // This should probably be removed once the visit list will be reactive
         setVisits(prev => {
           return prev.map(visit => {
             if (visit.visitId === visitId) return updatedVisit;
@@ -193,8 +183,6 @@ export default function VisitListTable(): JSX.Element {
   const handleCancel = async (visitId: string): Promise<void> => {
     try {
       await cancelVisit(visitId, updatedVisit => {
-        // Update the full visits list; the displayed list will update automatically
-        // via the search effect above.
         setVisits(prev => {
           return prev.map(visit => {
             if (visit.visitId === visitId) return updatedVisit;
@@ -215,9 +203,6 @@ export default function VisitListTable(): JSX.Element {
     }
   };
 
-  // RENDERING
-
-  // Buttons
   const renderCancelButton = (): JSX.Element => (
     <a title="Cancel">
       <SvgIcon id="xcross" className="icon-visits" />
@@ -364,13 +349,12 @@ export default function VisitListTable(): JSX.Element {
     return (
       <div className="page-container">
         <div className="visit-action-bar">
-          {/* Search bar for filtering visits */}
           <div className="search-bar">
             <input
               type="text"
               placeholder="Search by description"
               value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)} // Update the search term when input changes
+              onChange={e => setSearchTerm(e.target.value)}
             />
           </div>
 
@@ -401,9 +385,9 @@ export default function VisitListTable(): JSX.Element {
     );
   };
 
-  const renderSidebar = (tit: string): JSX.Element => {
+  const renderSidebar = (title: string): JSX.Element => {
     return (
-      <Sidebar title={tit}>
+      <Sidebar title={title}>
         <li>
           <AddingVisit
             showButton={
@@ -422,6 +406,16 @@ export default function VisitListTable(): JSX.Element {
           >
             <SvgIcon id="star-empty" />
             Reviews
+          </button>
+        </li>
+        <li>
+          <button
+            className="btn btn-primary"
+            onClick={() => navigate(AppRoutePaths.VisitsCalendar)}
+            title="Calendar View"
+          >
+            <FaCalendarAlt className="me-2" />
+            Calendar
           </button>
         </li>
         {categories.map(category =>
