@@ -172,3 +172,28 @@ main {
   margin: 12px 0;
   display: inline-block;
 }
+
+/* Grid for action icons — displays 2 columns so 4 icons become 2x2 */
+.action-icons-grid {
+  display: grid;
+  grid-template-columns: repeat(2, max-content);
+  gap: 6px;
+  align-items: center;
+  justify-content: end; /* keep icons aligned to the right side of the cell */
+}
+
+/* Ensure each icon anchor/button centers its svg and doesn't stretch */
+.action-icons-grid .icon-button,
+.action-icons-grid .icon-visits-anchor,
+.action-icons-grid > * {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+
+/* Optional: tighten spacing of svg icons */
+.action-icons-grid .icon-visits {
+  width: 20px;
+  height: 20px;
+}
