@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.net.URI;
@@ -198,83 +197,20 @@ public class CartController {
                 .onErrorResume(InvalidInputException.class, e -> Mono.just(ResponseEntity.badRequest().body(null)));
     }
 
-    /**
-     * Move product to wishlist.
-     * Moves a specified product from the cart to the wishlist.
-     */
-    @PutMapping("/{cartId}/wishlist/{productId}/toWishList")
-    public Mono<ResponseEntity<CartResponseModel>> moveProductFromCartToWishlist(@PathVariable String cartId, @PathVariable String productId) {
+    @PostMapping("/{cartId}/wishlist")
+    public Mono<ResponseEntity<CartResponseModel>> addProductToWishlist(
+            @PathVariable String cartId,
+            @RequestBody WishlistItemRequestModel requestModel) {
         return Mono.just(cartId)
                 .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
-                .flatMap(validCartId -> Mono.just(productId)
-                        .filter(id -> id.length() == 36)
-                        .switchIfEmpty(Mono.error(new InvalidInputException("Provided product id is invalid: " + productId)))
-                        .flatMap(validProductId -> cartService.moveProductFromCartToWishlist(validCartId, validProductId))
-                )
-                .map(ResponseEntity::ok)
+                .flatMap(validCartId -> cartService.addProductToWishlist(validCartId, requestModel))
+                .map(response -> ResponseEntity.status(HttpStatus.CREATED).body(response))
                 .onErrorResume(e -> {
                     if (e instanceof InvalidInputException) {
                         CartResponseModel errorResponse = new CartResponseModel();
                         errorResponse.setMessage(e.getMessage());
-                        return Mono.just(ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errorResponse));
-                    } else if (e instanceof NotFoundException) {
-                        CartResponseModel errorResponse = new CartResponseModel();
-                        errorResponse.setMessage(e.getMessage());
-                        return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse));
-                    } else {
-                        return Mono.error(e); // Let other exceptions propagate
-                    }
-                });
-    }
-
-    /**
-     * Move product from wishlist to cart.
-     * Moves a specified product from the wishlist to the cart.
-     */
-    @PutMapping("/{cartId}/wishlist/{productId}/toCart")
-    public Mono<ResponseEntity<CartResponseModel>> moveProductFromWishListToCart(@PathVariable String cartId, @PathVariable String productId) {
-        return Mono.just(cartId)
-                .filter(id -> id.length() == 36)
-                .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
-                .flatMap(validCartId -> Mono.just(productId)
-                        .filter(id -> id.length() == 36)
-                        .switchIfEmpty(Mono.error(new InvalidInputException("Provided product id is invalid: " + productId)))
-                        .flatMap(validProductId -> cartService.moveProductFromWishListToCart(validCartId, validProductId))
-                )
-                .map(ResponseEntity::ok)
-                .onErrorResume(e -> {
-                    if (e instanceof InvalidInputException) {
-                        CartResponseModel errorResponse = new CartResponseModel();
-                        errorResponse.setMessage(e.getMessage());
-                        return Mono.just(ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errorResponse));
-                    } else if (e instanceof NotFoundException) {
-                        CartResponseModel errorResponse = new CartResponseModel();
-                        errorResponse.setMessage(e.getMessage());
-                        return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse));
-                    } else {
-
-                        return Mono.error(e);
-                    }
-                });
-    }
-
-    @PostMapping("/{cartId}/products/{productId}/quantity/{quantity}")
-    public Mono<ResponseEntity<CartResponseModel>> addProductToWishList(@PathVariable String cartId, @PathVariable String productId, @PathVariable int quantity) {
-        return Mono.just(cartId)
-                .filter(id -> id.length() == 36)
-                .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
-                .flatMap(validCartId -> Mono.just(productId)
-                        .filter(id -> id.length() == 36)
-                        .switchIfEmpty(Mono.error(new InvalidInputException("Provided product id is invalid: " + productId)))
-                        .flatMap(validProductId -> cartService.addProductToWishList(validCartId, validProductId, quantity))
-                )
-                .map(ResponseEntity::ok)
-                .onErrorResume(e -> {
-                    if (e instanceof InvalidInputException) {
-                        CartResponseModel errorResponse = new CartResponseModel();
-                        errorResponse.setMessage(e.getMessage());
-                        return Mono.just(ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errorResponse));
+                        return Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse));
                     } else if (e instanceof NotFoundException) {
                         CartResponseModel errorResponse = new CartResponseModel();
                         errorResponse.setMessage(e.getMessage());

@@ -10,6 +10,7 @@ import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
 import com.petclinic.cartsservice.utils.exceptions.OutOfStockException;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -558,121 +559,38 @@ class CartControllerUnitTest {
         verify(cartService, times(0)).removeProductFromCart(anyString(), anyString()); // cartService should not be called
     }
 
-    @Test
-    void whenMoveProductFromCartToWishlist_thenSuccess() {
-        // Arrange
-        String cartId = VALID_CART_ID; // Use a valid cart ID
-        String productId = product1.getProductId(); // Use an existing product ID
-        when(cartService.moveProductFromCartToWishlist(cartId, productId)).thenReturn(Mono.empty());
-
-        // Act
-        webTestClient.put() // Change to PUT to match the controller's request type
-                .uri("/api/v1/carts/" + cartId + "/wishlist/" + productId + "/toWishList") // Updated URI to match the controller
-                .exchange()
-                .expectStatus().isOk(); // Expect an OK response
-
-        // Assert
-        verify(cartService, times(1)).moveProductFromCartToWishlist(cartId, productId); // Verify that the service method was called once
-    }
-
-    @Test
-    void whenMoveProductFromWishListToCart_thenSuccess() {
-        // Arrange
-        String cartId = VALID_CART_ID; // Use a valid cart ID
-        String productId = wishListProduct1.getProductId(); // Use a valid product ID
-        when(cartService.moveProductFromWishListToCart(cartId, productId))
-                .thenReturn(Mono.just(new CartResponseModel())); // Mock a successful response
-
-        // Act
-        webTestClient.put()
-                .uri("/api/v1/carts/" + cartId + "/wishlist/" + productId + "/toCart")
-                .exchange()
-                .expectStatus().isOk() // Expect 200 OK
-                .expectBody(CartResponseModel.class) // Expect a response body
-                .consumeWith(response -> {
-                    CartResponseModel body = response.getResponseBody();
-                    assertThat(body).isNotNull(); // Ensure response body is not null
-                });
-
-        // Assert
-        verify(cartService, times(1)).moveProductFromWishListToCart(cartId, productId);
-    }
-
-
-    @Test
-    void whenMoveProductFromWishListToCart_thenInvalidInput() {
-        // Arrange
-        String invalidCartId = "invalidCartId"; // An invalid cart ID
-        String invalidProductId = "invalidProductId"; // An invalid product ID
-
-        // No need to mock the service method as we're testing the controller's response to invalid inputs.
-
-        // Act & Assert
-        webTestClient.put()
-                .uri("/api/v1/carts/" + invalidCartId + "/wishlist/" + invalidProductId + "/toCart")
-                .exchange()
-                .expectStatus().isEqualTo(422) // Expect 422 for invalid input
-                .expectBody(CartResponseModel.class) // Expect a response body
-                .consumeWith(response -> {
-                    CartResponseModel body = response.getResponseBody();
-                    assertThat(body).isNotNull(); // Ensure response body is not null
-                    assertThat(body.getMessage()).isEqualTo("Provided cart id is invalid: " + invalidCartId); // Check error message
-                });
-
-        // Verify that the service method was not called since the IDs are invalid
-        verify(cartService, never()).moveProductFromWishListToCart(invalidCartId, invalidProductId);
-    }
-
-    @Test
-    void whenMoveProductFromWishListToCart_thenProductNotFoundInWishlist() {
-        // Arrange
-        String cartId = VALID_CART_ID; // Use a valid cart ID
-        String productId = wishListProduct1.getProductId(); // Use a valid product ID
-        when(cartService.moveProductFromWishListToCart(cartId, productId))
-                .thenReturn(Mono.error(new NotFoundException("Product not found in wishlist")));
-
-        // Act
-        webTestClient.put()
-                .uri("/api/v1/carts/" + cartId + "/wishlist/" + productId + "/toCart")
-                .exchange()
-                .expectStatus().isNotFound()
-                .expectBody(CartResponseModel.class)
-                .consumeWith(response -> {
-                    CartResponseModel body = response.getResponseBody();
-                    assertThat(body).isNotNull();
-                    assertThat(body.getMessage()).isEqualTo("Product not found in wishlist");
-                });
-
-        // Assert
-        verify(cartService, times(1)).moveProductFromWishListToCart(cartId, productId);
-    }
-
-    @Test
-    void whenAddProductToWishList_thenProductIsNotAlreadyInWishList_thenSuccess() {
+                @Test
+                void whenAddProductToWishlist_thenProductIsNotAlreadyInWishlist_thenSuccess() {
         Cart updatedCart = Cart.builder()
                 .cartId(VALID_CART_ID)
                 .wishListProducts(Arrays.asList(wishListProduct1))
                 .products(new ArrayList<>())
                 .build();
 
-        when(cartService.addProductToWishList(VALID_CART_ID, wishListProduct1.getProductId(), 2))
-                .thenReturn(Mono.just(EntityModelUtil.toCartResponseModel(updatedCart, updatedCart.getProducts())));
+                WishlistItemRequestModel request = new WishlistItemRequestModel(wishListProduct1.getProductId(), 2);
 
-        webTestClient.post()
-                .uri("/api/v1/carts/" + VALID_CART_ID + "/products/" + wishListProduct1.getProductId() + "/quantity/2")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(Cart.class)
-                .value(responseCart -> {
-                    assertThat(responseCart.getWishListProducts()).hasSize(1);
-                    CartProduct addedProduct = responseCart.getWishListProducts().get(0);
-                    assertEquals(wishListProduct1.getProductId(), addedProduct.getProductId());
-                    assertEquals(wishListProduct1.getProductName(), addedProduct.getProductName());
-                    assertEquals(2, addedProduct.getQuantityInCart());
-                });
+                when(cartService.addProductToWishlist(eq(VALID_CART_ID), any(WishlistItemRequestModel.class)))
+                                .thenReturn(Mono.just(EntityModelUtil.toCartResponseModel(updatedCart, updatedCart.getProducts())));
 
-        verify(cartService, times(1)).addProductToWishList(VALID_CART_ID, wishListProduct1.getProductId(), 2);
+                webTestClient.post()
+                                .uri("/api/v1/carts/" + VALID_CART_ID + "/wishlist")
+                                .accept(MediaType.APPLICATION_JSON)
+                                .bodyValue(request)
+                                .exchange()
+                                .expectStatus().isCreated()
+                                .expectBody(Cart.class)
+                                .value(responseCart -> {
+                                        assertThat(responseCart.getWishListProducts()).hasSize(1);
+                                        CartProduct addedProduct = responseCart.getWishListProducts().get(0);
+                                        assertEquals(wishListProduct1.getProductId(), addedProduct.getProductId());
+                                        assertEquals(wishListProduct1.getProductName(), addedProduct.getProductName());
+                                        assertEquals(2, addedProduct.getQuantityInCart());
+                                });
+
+                ArgumentCaptor<WishlistItemRequestModel> requestCaptor = ArgumentCaptor.forClass(WishlistItemRequestModel.class);
+                verify(cartService, times(1)).addProductToWishlist(eq(VALID_CART_ID), requestCaptor.capture());
+                assertThat(requestCaptor.getValue().getProductId()).isEqualTo(wishListProduct1.getProductId());
+                assertThat(requestCaptor.getValue().getQuantity()).isEqualTo(2);
     }
     @Test
     void whenAddProductToWishlist_thenProductNotFound() {
@@ -681,13 +599,14 @@ class CartControllerUnitTest {
         String productId = NOT_FOUND_ID;
         int quantity = 2;
 
-        when(cartService.addProductToWishList(cartId, productId, quantity))
+        when(cartService.addProductToWishlist(eq(cartId), any(WishlistItemRequestModel.class)))
                 .thenReturn(Mono.error(new NotFoundException("Product not found: " + productId)));
 
         // Act & Assert
         webTestClient.post()
-                .uri("/api/v1/carts/" + cartId + "/products/" + productId + "/quantity/" + quantity)
+                .uri("/api/v1/carts/" + cartId + "/wishlist")
                 .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(new WishlistItemRequestModel(productId, quantity))
                 .exchange()
                 .expectStatus().isNotFound()
                 .expectBody(CartResponseModel.class)
@@ -696,7 +615,7 @@ class CartControllerUnitTest {
                     assertThat(response.getMessage()).isEqualTo("Product not found: " + productId);
                 });
 
-        verify(cartService, times(1)).addProductToWishList(cartId, productId, quantity);
+        verify(cartService, times(1)).addProductToWishlist(eq(cartId), any(WishlistItemRequestModel.class));
     }
 
     @Test
@@ -706,13 +625,14 @@ class CartControllerUnitTest {
         String productId = wishListProduct1.getProductId();
         int quantity = 2;
 
-        when(cartService.addProductToWishList(cartId, productId, quantity))
+        when(cartService.addProductToWishlist(eq(cartId), any(WishlistItemRequestModel.class)))
                 .thenReturn(Mono.error(new NotFoundException("Cart not found: " + cartId)));
 
         // Act & Assert
         webTestClient.post()
-                .uri("/api/v1/carts/" + cartId + "/products/" + productId + "/quantity/" + quantity)
+                .uri("/api/v1/carts/" + cartId + "/wishlist")
                 .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(new WishlistItemRequestModel(productId, quantity))
                 .exchange()
                 .expectStatus().isNotFound()
                 .expectBody(CartResponseModel.class)
@@ -721,7 +641,7 @@ class CartControllerUnitTest {
                     assertThat(response.getMessage()).isEqualTo("Cart not found: " + cartId);
                 });
 
-        verify(cartService, times(1)).addProductToWishList(cartId, productId, quantity);
+        verify(cartService, times(1)).addProductToWishlist(eq(cartId), any(WishlistItemRequestModel.class));
     }
 
     @Test
@@ -731,16 +651,20 @@ class CartControllerUnitTest {
         String invalidProductId = "invalidProductId";
         int quantity = 2;
 
+        when(cartService.addProductToWishlist(eq(cartId), any(WishlistItemRequestModel.class)))
+                .thenReturn(Mono.error(new InvalidInputException("Provided product id is invalid: " + invalidProductId)));
+
         // Act & Assert
         webTestClient.post()
-                .uri("/api/v1/carts/" + cartId + "/products/" + invalidProductId + "/quantity/" + quantity)
+                .uri("/api/v1/carts/" + cartId + "/wishlist")
                 .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(new WishlistItemRequestModel(invalidProductId, quantity))
                 .exchange()
-                .expectStatus().isEqualTo(422)
+                .expectStatus().isBadRequest()
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("Provided product id is invalid: " + invalidProductId);
 
-        verify(cartService, never()).addProductToWishList(cartId, invalidProductId, quantity);
+        verify(cartService, times(1)).addProductToWishlist(eq(cartId), any(WishlistItemRequestModel.class));
     }
 
     @Test
@@ -752,14 +676,15 @@ class CartControllerUnitTest {
 
         // Act & Assert
         webTestClient.post()
-                .uri("/api/v1/carts/" + invalidCartId + "/products/" + productId + "/quantity/" + quantity)
+                .uri("/api/v1/carts/" + invalidCartId + "/wishlist")
                 .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(new WishlistItemRequestModel(productId, quantity))
                 .exchange()
                 .expectStatus().isEqualTo(422)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("Provided cart id is invalid: " + invalidCartId);
 
-        verify(cartService, never()).addProductToWishList(invalidCartId, productId, quantity);
+        verify(cartService, never()).addProductToWishlist(anyString(), any());
     }
 
     @Test
@@ -769,19 +694,20 @@ class CartControllerUnitTest {
         String productId = wishListProduct1.getProductId();
         int quantity = 2;
 
-        when(cartService.addProductToWishList(cartId, productId, quantity))
+        when(cartService.addProductToWishlist(eq(cartId), any(WishlistItemRequestModel.class)))
                 .thenReturn(Mono.error(new OutOfStockException("Only 5 items left in stock.")));
 
         // Act & Assert
         webTestClient.post()
-                .uri("/api/v1/carts/" + cartId + "/products/" + productId + "/quantity/" + quantity)
+                .uri("/api/v1/carts/" + cartId + "/wishlist")
                 .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(new WishlistItemRequestModel(productId, quantity))
                 .exchange()
                 .expectStatus().isBadRequest()
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("Only 5 items left in stock.");
 
-        verify(cartService, times(1)).addProductToWishList(cartId, productId, quantity);
+        verify(cartService, times(1)).addProductToWishlist(eq(cartId), any(WishlistItemRequestModel.class));
     }
 
 
@@ -821,18 +747,18 @@ class CartControllerUnitTest {
 
 
     @Test
-    void moveProductFromCartToWishlist_invalidIds_returns422() {
-        String badCartId = "bad";
-        String badProductId = "bad";
+        void addProductToWishlist_invalidCart_returns422() {
+                String badCartId = "bad";
 
-        webTestClient.put()
-                .uri("/api/v1/carts/{cartId}/wishlist/{productId}/toWishList", badCartId, badProductId)
-                .exchange()
-                .expectStatus().isEqualTo(422)
-                .expectBody(CartResponseModel.class)
-                .value(r -> assertEquals("Provided cart id is invalid: " + badCartId, r.getMessage()));
+                webTestClient.post()
+                                .uri("/api/v1/carts/{cartId}/wishlist", badCartId)
+                                .bodyValue(new WishlistItemRequestModel(wishListProduct1.getProductId(), 1))
+                                .exchange()
+                                .expectStatus().isEqualTo(422)
+                                .expectBody(CartResponseModel.class)
+                                .value(r -> assertEquals("Provided cart id is invalid: " + badCartId, r.getMessage()));
 
-        verify(cartService, never()).moveProductFromCartToWishlist(anyString(), anyString());
+                verify(cartService, never()).addProductToWishlist(anyString(), any());
     }
 
     // --- wishlist transfer endpoint ---

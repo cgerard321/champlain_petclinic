@@ -162,63 +162,25 @@ public class CartController {
     --------------------------------------------------------------------------------------------------------------------
         from here it's related to the wishlist
     */
-
-
-    @PutMapping("/{cartId}/wishlist/{productId}/toCart")
-    public Mono<ResponseEntity<CartResponseDTO>> moveProductFromWishListToCart(@PathVariable String cartId, @PathVariable String productId) {
-        return cartServiceClient.moveProductFromWishListToCart(cartId, productId)
-                .map(cartResponseDTO -> ResponseEntity.ok(cartResponseDTO)) // Map directly to ResponseEntity
-                .defaultIfEmpty(ResponseEntity.notFound().build())
+    @PostMapping("/{cartId}/wishlist")
+    public Mono<ResponseEntity<CartResponseDTO>> addProductToWishlist(
+            @PathVariable String cartId,
+            @RequestBody WishlistItemRequestDTO requestDTO) {
+        return cartServiceClient.addProductToWishlist(cartId, requestDTO)
+                .map(cartResponseDTO -> ResponseEntity.status(HttpStatus.CREATED).body(cartResponseDTO))
                 .onErrorResume(e -> {
-                    if (e instanceof WebClientResponseException.UnprocessableEntity) {
-                        log.error("Invalid input for cartId: {} or productId: {} - {}", cartId, productId, e.getMessage());
-                        return Mono.just(ResponseEntity.unprocessableEntity().build());
-                    } else if (e instanceof WebClientResponseException.NotFound) {
-                        log.error("Cart or product not found for cartId: {} and productId: {} - {}", cartId, productId, e.getMessage());
+                    if (e instanceof InvalidInputException || e instanceof WebClientResponseException.BadRequest) {
+                        CartResponseDTO errorResponse = new CartResponseDTO();
+                        errorResponse.setMessage(e.getMessage());
+                        return Mono.just(ResponseEntity.badRequest().body(errorResponse));
+                    } else if (e instanceof NotFoundException) {
                         return Mono.just(ResponseEntity.notFound().build());
-                    } else {
-                        log.error("An unexpected error occurred: {}", e.getMessage());
-                        return Mono.error(e);
-                    }
-                });
-    }
-
-
-    @PutMapping("/{cartId}/wishlist/{productId}/toWishList")
-    public Mono<ResponseEntity<CartResponseDTO>> moveProductFromCartToWishlist(@PathVariable String cartId, @PathVariable String productId) {
-        return cartServiceClient.moveProductFromCartToWishlist(cartId, productId)
-                .map(cartResponseDTO -> ResponseEntity.ok(cartResponseDTO))
-                .defaultIfEmpty(ResponseEntity.notFound().build())
-                .onErrorResume(e -> {
-                    if (e instanceof WebClientResponseException.UnprocessableEntity) {
-                        log.error("Invalid input for cartId: {} or productId: {} - {}", cartId, productId, e.getMessage());
+                    } else if (e instanceof WebClientResponseException.UnprocessableEntity) {
                         return Mono.just(ResponseEntity.unprocessableEntity().build());
-                    } else if (e instanceof WebClientResponseException.NotFound) {
-                        log.error("Cart or product not found for cartId: {} and productId: {} - {}", cartId, productId, e.getMessage());
-                        return Mono.just(ResponseEntity.notFound().build());
-                    } else {
-                        log.error("An unexpected error occurred: {}", e.getMessage());
-                        return Mono.error(e);
+                    } else if (e instanceof WebClientResponseException ex) {
+                        return Mono.just(ResponseEntity.status(ex.getStatusCode()).build());
                     }
-                });
-    }
-
-    @PostMapping("/{cartId}/products/{productId}/quantity/{quantity}")
-    public Mono<ResponseEntity<CartResponseDTO>> addProductToWishList(@PathVariable String cartId, @PathVariable String productId, @PathVariable int quantity) {
-        return cartServiceClient.addProductToWishList(cartId, productId, quantity)
-                .map(cartResponseDTO -> ResponseEntity.ok(cartResponseDTO))
-                .defaultIfEmpty(ResponseEntity.notFound().build())
-                .onErrorResume(e -> {
-                    if (e instanceof WebClientResponseException.UnprocessableEntity) {
-                        log.error("Invalid input for cartId: {} or productId: {} - {}", cartId, productId, e.getMessage());
-                        return Mono.just(ResponseEntity.unprocessableEntity().build());
-                    } else if (e instanceof WebClientResponseException.NotFound) {
-                        log.error("Cart or product not found for cartId: {} and productId: {} - {}", cartId, productId, e.getMessage());
-                        return Mono.just(ResponseEntity.notFound().build());
-                    } else {
-                        log.error("An unexpected error occurred: {}", e.getMessage());
-                        return Mono.error(e);
-                    }
+                    return Mono.error(e);
                 });
     }
 

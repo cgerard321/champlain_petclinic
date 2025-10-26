@@ -284,7 +284,7 @@ public class CartControllerV1 {
                                         @RequestBody UpdateProductQuantityRequestDTO requestDTO) {
     return handleQuantityUpdate(cartId, productId, requestDTO);
     }
-
+    
     @Deprecated
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
     @PutMapping("/{cartId}/products/{productId}")
@@ -301,45 +301,21 @@ public class CartControllerV1 {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
-    @PutMapping("/{cartId}/wishlist/{productId}/toCart")
-    public Mono<ResponseEntity<CartResponseDTO>> moveProductFromWishListToCart(@PathVariable String cartId, @PathVariable String productId) {
-        return cartServiceClient.moveProductFromWishListToCart(cartId, productId)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build())
-                .onErrorResume(e -> mapCartError(e,
-                        ErrorOptions.builder("moveProductFromWishListToCart")
-                                .cartId(cartId)
-                                .productId(productId)
-                                .build()
-                ));
-    }
+    @PostMapping("/{cartId}/wishlist")
+    public Mono<ResponseEntity<CartResponseDTO>> addProductToWishlist(
+        @PathVariable String cartId,
+        @RequestBody WishlistItemRequestDTO requestDTO) {
 
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
-    @PutMapping("/{cartId}/wishlist/{productId}/toWishList")
-    public Mono<ResponseEntity<CartResponseDTO>> moveProductFromCartToWishlist(@PathVariable String cartId, @PathVariable String productId) {
-        return cartServiceClient.moveProductFromCartToWishlist(cartId, productId)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build())
-                .onErrorResume(e -> mapCartError(e,
-                        ErrorOptions.builder("moveProductFromCartToWishlist")
-                                .cartId(cartId)
-                                .productId(productId)
-                                .build()
-                ));
-    }
-
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
-    @PostMapping("/{cartId}/products/{productId}/quantity/{quantity}")
-    public Mono<ResponseEntity<CartResponseDTO>> addProductToWishList(@PathVariable String cartId, @PathVariable String productId, @PathVariable int quantity) {
-        return cartServiceClient.addProductToWishList(cartId, productId, quantity)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build())
-                .onErrorResume(e -> mapCartError(e,
-                        ErrorOptions.builder("addProductToWishList")
-                                .cartId(cartId)
-                                .productId(productId)
-                                .build()
-                ));
+    return cartServiceClient.addProductToWishlist(cartId, requestDTO)
+        .map(body -> ResponseEntity.status(HttpStatus.CREATED).body(body))
+        .onErrorResume(e -> mapCartErrorWithMessage(
+            e,
+            ErrorOptions.builder("addProductToWishlist")
+                .cartId(cartId)
+                .includeBadRequestBodyMessage(true)
+                .invalidInputAsUnprocessable(false)
+                .build()
+        ));
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})

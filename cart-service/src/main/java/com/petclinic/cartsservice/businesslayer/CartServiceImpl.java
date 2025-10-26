@@ -6,6 +6,7 @@ import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.domainclientlayer.CartItemRequestModel;
 import com.petclinic.cartsservice.domainclientlayer.ProductClient;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
+import com.petclinic.cartsservice.presentationlayer.WishlistItemRequestModel;
 import com.petclinic.cartsservice.presentationlayer.WishlistTransferDirection;
 import com.petclinic.cartsservice.utils.EntityModelUtil;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
@@ -444,120 +445,62 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public Mono<CartResponseModel> moveProductFromCartToWishlist(String cartId, String productId) {
-        return cartRepository.findCartByCartId(cartId)
-                .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
-                .flatMap(cart -> {
-                    // Find the product in the main cart
-                    CartProduct cartProduct = cart.getProducts().stream()
-                            .filter(p -> p.getProductId().equals(productId))
-                            .findFirst()
-                            .orElseThrow(() -> new NotFoundException("Product not found in cart: " + productId));
-
-                    // Create new mutable lists for products and wishlist
-                    List<CartProduct> updatedProducts = new ArrayList<>(cart.getProducts());
-                    List<CartProduct> updatedWishListProducts = cart.getWishListProducts() != null
-                            ? new ArrayList<>(cart.getWishListProducts())
-                            : new ArrayList<>();
-
-                    // Add the product to the wishlist and remove it from the cart
-                    updatedWishListProducts.add(cartProduct);
-                    updatedProducts.remove(cartProduct);
-
-                    // Update the cart with the new lists
-                    cart.setProducts(updatedProducts);
-                    cart.setWishListProducts(updatedWishListProducts);
-
-                    // Save the updated cart and map to CartResponseModel
-                    return cartRepository.save(cart)
-                            .map(savedCart -> EntityModelUtil.toCartResponseModel(savedCart, savedCart.getProducts()));
-                });
+    public Mono<CartResponseModel> addProductToWishlist(String cartId, WishlistItemRequestModel requestModel) {
+    if (requestModel == null || requestModel.getProductId() == null || requestModel.getProductId().trim().isEmpty()) {
+        return Mono.error(new InvalidInputException("Product ID must be provided."));
     }
 
+        final String productId = requestModel.getProductId().trim();
+        if (productId.length() != 36) {
+            return Mono.error(new InvalidInputException("Provided product id is invalid: " + productId));
+        }
+    final int quantity = requestModel.resolveQuantity();
 
+    return cartRepository.findCartByCartId(cartId)
+        .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
+        .flatMap(cart -> productClient.getProductByProductId(productId)
+            .switchIfEmpty(Mono.error(new NotFoundException("Product not found: " + productId)))
+            .flatMap(product -> {
+                if (quantity <= 0) {
+                return Mono.error(new InvalidInputException("Quantity must be greater than zero"));
+                }
+                if (product.getProductQuantity() < quantity) {
+                return Mono.error(new OutOfStockException("Only " + product.getProductQuantity() + " items left in stock. You added: " + quantity));
+                }
 
-    public Mono<CartResponseModel> moveProductFromWishListToCart(String cartId, String productId) {
-        return cartRepository.findCartByCartId(cartId)
-                .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
-                .flatMap(cart -> {
-                    // Find the product in the wishlist
-                    CartProduct wishListProduct = cart.getWishListProducts().stream()
-                            .filter(p -> p.getProductId().equals(productId))
-                            .findFirst()
-                            .orElseThrow(() -> new NotFoundException("Product not found in wishlist: " + productId));
+                List<CartProduct> wishListProducts = cart.getWishListProducts() != null
+                    ? new ArrayList<>(cart.getWishListProducts())
+                    : new ArrayList<>();
 
-                    // Check if the product is out of stock
-                    if (wishListProduct.getProductQuantity() == 0) {
-                        return Mono.error(new OutOfStockException("Product is out of stock and cannot be added to the cart."));
-                    }
+                Optional<CartProduct> existingProductOpt = wishListProducts.stream()
+                    .filter(p -> p.getProductId().equals(productId))
+                    .findFirst();
 
-                    // Create new mutable lists for products and wishlist
-                    List<CartProduct> updatedProducts = new ArrayList<>(cart.getProducts());
-                    List<CartProduct> updatedWishListProducts = new ArrayList<>(cart.getWishListProducts());
+                if (existingProductOpt.isPresent()) {
+                CartProduct existingProduct = existingProductOpt.get();
+                Integer currentQty = existingProduct.getQuantityInCart() == null ? 0 : existingProduct.getQuantityInCart();
+                existingProduct.setQuantityInCart(currentQty + quantity);
+                existingProduct.setProductQuantity(product.getProductQuantity());
+                } else {
+                CartProduct cartProduct = CartProduct.builder()
+                    .productId(product.getProductId())
+                    .productName(product.getProductName())
+                    .imageId(product.getImageId())
+                    .productDescription(product.getProductDescription())
+                    .productSalePrice(product.getProductSalePrice())
+                    .averageRating(product.getAverageRating())
+                    .quantityInCart(quantity)
+                    .productQuantity(product.getProductQuantity())
+                    .build();
+                wishListProducts.add(cartProduct);
+                }
 
-                    // Add the product to the cart's products list and remove it from the wishlist
-                    updatedProducts.add(wishListProduct);
-                    updatedWishListProducts.remove(wishListProduct);
+                cart.setWishListProducts(wishListProducts);
 
-                    // Update the cart with the new lists
-                    cart.setProducts(updatedProducts);
-                    cart.setWishListProducts(updatedWishListProducts);
-
-                    // Save the updated cart and map to CartResponseModel
-                    return cartRepository.save(cart)
-                            .map(savedCart -> EntityModelUtil.toCartResponseModel(savedCart, savedCart.getProducts()));
-                });
-    }
-
-
-    @Override
-    public Mono<CartResponseModel> addProductToWishList(String cartId, String productId, int quantity) {
-        return cartRepository.findCartByCartId(cartId)
-                .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
-                .flatMap(cart -> productClient.getProductByProductId(productId)
-                        .switchIfEmpty(Mono.error(new NotFoundException("Product not found: " + productId)))
-                        .flatMap(product -> {
-                            if (quantity <= 0) {
-                                return Mono.error(new InvalidInputException("Quantity must be greater than zero"));
-                            }
-                            if (product.getProductQuantity() < quantity) {
-                                return Mono.error(new OutOfStockException("Only "  + product.getProductQuantity() + " items left in stock. You added: " + quantity));
-                            }
-
-                            // Create a mutable copy of the wishlist
-                            List<CartProduct> wishListProducts = cart.getWishListProducts() != null
-                                    ? new ArrayList<>(cart.getWishListProducts())
-                                    : new ArrayList<>();
-
-                            Optional<CartProduct> existingProductOpt = wishListProducts.stream()
-                                    .filter(p -> p.getProductId().equals(productId))
-                                    .findFirst();
-
-                            if (existingProductOpt.isPresent()) {
-                                CartProduct existingProduct = existingProductOpt.get();
-                                existingProduct.setQuantityInCart(existingProduct.getQuantityInCart() + quantity);
-                                existingProduct.setProductQuantity(product.getProductQuantity());
-                            } else {
-                                CartProduct cartProduct = CartProduct.builder()
-                                        .productId(product.getProductId())
-                                        .productName(product.getProductName())
-                                        .imageId(product.getImageId())
-                                        .productDescription(product.getProductDescription())
-                                        .productSalePrice(product.getProductSalePrice())
-                                        .averageRating(product.getAverageRating())
-                                        .quantityInCart(quantity)
-                                        .productQuantity(product.getProductQuantity())
-                                        .build();
-                                wishListProducts.add(cartProduct);
-                            }
-
-                            // Update the cart with the modified wishlist
-                            cart.setWishListProducts(wishListProducts);
-
-                            return cartRepository.save(cart)
-                                    .map(savedCart -> EntityModelUtil.toCartResponseModel(savedCart, savedCart.getWishListProducts()));
-                        })
-                );
+                return cartRepository.save(cart)
+                    .map(savedCart -> EntityModelUtil.toCartResponseModel(savedCart, savedCart.getProducts() != null ? savedCart.getProducts() : Collections.emptyList()));
+            })
+        );
     }
 
     // transfer wishlist/cart items based on direction
