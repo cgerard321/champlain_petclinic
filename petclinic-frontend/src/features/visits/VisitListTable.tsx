@@ -24,16 +24,15 @@ import SidebarItem from './components/SidebarItem';
 import SvgIcon from '@/shared/components/SvgIcon';
 import { FaCalendarAlt } from 'react-icons/fa';
 
+interface EditingVisitHandle {
+  openCreateBill: () => void;
+  openPrescription: () => void;
+}
+
 export default function VisitListTable(): JSX.Element {
   // refs for each EditingVisit instance, keyed by visitId
   const editingRefs = useRef<
-    Record<
-      string,
-      React.RefObject<{
-        openCreateBill?: () => void;
-        openPrescription?: () => void;
-      }>
-    >
+    Record<string, React.RefObject<EditingVisitHandle>>
   >({});
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
