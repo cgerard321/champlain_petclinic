@@ -6,14 +6,51 @@ angular.module('inventoriesForm')
     console.log("State params: " + $stateParams)
     $scope.saving = false;
 
-    $scope.existingInventoryNames = new Set();
-    $http.get("api/gateway/inventories").then(function (resp) {
-      (resp.data || []).forEach(function (inv) {
-        if (inv && inv.inventoryName) {
-          $scope.existingInventoryNames.add(inv.inventoryName.toLowerCase().trim());
-        }
-      });
-    }, handleHttpError);
+      $scope.existingInventoryNames = new Set();
+
+      (function startNamesSSE_Add () {
+          var esNames = new EventSource('api/gateway/inventories');
+          var idleTimer = null;
+          var IDLE_MS = 1000;
+          var initialFired = false;
+
+          function bumpIdle() {
+              if (idleTimer) clearTimeout(idleTimer);
+              idleTimer = setTimeout(function () {
+                  try { esNames.close(); } catch (_) {}
+              }, IDLE_MS);
+          }
+
+          function addInv(inv) {
+              if (!inv || !inv.inventoryName) return;
+              $scope.$evalAsync(function () {
+                  $scope.existingInventoryNames.add(inv.inventoryName.toLowerCase().trim());
+              });
+          }
+
+          esNames.onmessage = function (e) {
+              if (!e.data || e.data === 'heartbeat' || e.data === ':') { bumpIdle(); return; }
+              try {
+                  var payload = JSON.parse(e.data);
+                  if (Array.isArray(payload)) payload.forEach(addInv);
+                  else addInv(payload);
+              } catch (_) {
+                  // ignore non-JSON
+              }
+              if (!initialFired) {
+                  initialFired = true;
+                  if ($scope.checkNameAdd) $scope.checkNameAdd();
+              }
+              bumpIdle();
+          };
+
+          esNames.onerror = function () {};
+
+          $scope.$on('$destroy', function () {
+              if (idleTimer) clearTimeout(idleTimer);
+              try { esNames.close(); } catch (_) {}
+          });
+      })();
 
     $scope.checkNameAdd = function () {
       if (!$scope.inventoryForm || !$scope.inventoryForm.inventoryName) return;

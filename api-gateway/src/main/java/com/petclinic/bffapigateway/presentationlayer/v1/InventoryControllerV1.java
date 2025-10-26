@@ -321,7 +321,7 @@ public class InventoryControllerV1 {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER,Roles.VET})
-    @GetMapping()//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<InventoryResponseDTO> searchInventory(@RequestParam Optional<Integer> page,
                                                       @RequestParam Optional<Integer> size,
                                                       @RequestParam(required = false) String inventoryCode,
