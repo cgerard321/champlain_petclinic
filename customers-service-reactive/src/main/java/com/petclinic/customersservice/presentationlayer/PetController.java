@@ -2,6 +2,8 @@ package com.petclinic.customersservice.presentationlayer;
 
 import com.petclinic.customersservice.business.PetService;
 import com.petclinic.customersservice.customersExceptions.ApplicationExceptions;
+import com.petclinic.customersservice.customersExceptions.exceptions.NotFoundException;
+import com.petclinic.customersservice.customersExceptions.exceptions.UnprocessableEntityException;
 import com.petclinic.customersservice.domainclientlayer.FileRequestDTO;
 import com.petclinic.customersservice.util.Validator;
 import lombok.extern.slf4j.Slf4j;
@@ -99,6 +101,30 @@ public class PetController {
                 .map(pet -> ResponseEntity.status(HttpStatus.CREATED).body(pet))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+
+    @PatchMapping("/{petId}/photos")
+    public Mono<ResponseEntity<PetResponseDTO>> addPetPhoto(
+            @PathVariable String petId,
+            @RequestBody Mono<FileRequestDTO> photoMono) {
+
+        return Mono.just(petId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(ApplicationExceptions.invalidPetId(petId))
+                .flatMap(validPetId ->
+                        photoMono.flatMap(photo ->
+                                petService.addPetPhoto(validPetId, photo)
+                                        .map(savedPet -> ResponseEntity.status(HttpStatus.CREATED).body(savedPet))
+                        )
+                )
+                .switchIfEmpty(ApplicationExceptions.petNotFound(petId))
+                .onErrorResume(UnprocessableEntityException.class, e ->
+                        Mono.just(ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build())
+                )
+                .onErrorResume(NotFoundException.class, e ->
+                        Mono.just(ResponseEntity.notFound().build())
+                );
+    }
+
 
     @PatchMapping("/{petId}/photo")
     public Mono<ResponseEntity<PetResponseDTO>> deletePetPhoto(@PathVariable String petId, @RequestBody(required = false) Mono<FileRequestDTO> photoMono) {

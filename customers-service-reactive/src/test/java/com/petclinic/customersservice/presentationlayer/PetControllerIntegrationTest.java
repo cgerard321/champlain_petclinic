@@ -1,16 +1,12 @@
 package com.petclinic.customersservice.presentationlayer;
 
-import com.petclinic.customersservice.customersExceptions.exceptions.InvalidInputException;
-import com.petclinic.customersservice.customersExceptions.exceptions.NotFoundException;
 import com.petclinic.customersservice.data.Pet;
 import com.petclinic.customersservice.data.PetRepo;
+import com.petclinic.customersservice.domainclientlayer.FileRequestDTO;
+import com.petclinic.customersservice.domainclientlayer.FileResponseDTO;
 import com.petclinic.customersservice.domainclientlayer.FilesServiceClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.Mono;
-
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -26,9 +22,11 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 
-import static com.mongodb.assertions.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @AutoConfigureWebTestClient
@@ -43,23 +41,23 @@ class PetControllerIntegrationTest {
     @MockBean
     private FilesServiceClient filesServiceClient;
 
-    Pet petEntity = buildPet();
-    PetRequestDTO petRequestDTO = buildPetRequest();
-    String PET_ID = petEntity.getPetId();
-
+    private final Pet petEntity = buildPet();
+    private final PetRequestDTO petRequestDTO = buildPetRequest();
+    private final String PET_ID = petEntity.getPetId();
     private String validPetId;
 
     @BeforeEach
     void setUp() {
+        repo.deleteAll().block();
+        repo.save(petEntity).block();
         when(filesServiceClient.deleteFile(anyString())).thenReturn(Mono.empty());
     }
 
     @Test
     void deletePetByPetId() {
         Publisher<Pet> setup = repo.save(petEntity);
-        StepVerifier.create(setup)
-                .expectNextCount(1)
-                .verifyComplete();
+        StepVerifier.create(setup).expectNextCount(1).verifyComplete();
+
         client.delete()
                 .uri("/pets/" + PET_ID)
                 .accept(MediaType.APPLICATION_JSON)
@@ -71,16 +69,15 @@ class PetControllerIntegrationTest {
     void getAllPets() {
         Publisher<Pet> setup = repo.deleteAll().thenMany(repo.save(petEntity));
         StepVerifier.create(setup).expectNextCount(1).verifyComplete();
-        client
-                .get()
+
+        client.get()
                 .uri("/pets")
                 .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
-                .acceptCharset(StandardCharsets.UTF_8)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
                 .expectBodyList(PetResponseDTO.class)
-                .value((list) -> {
+                .value(list -> {
                     assertNotNull(list);
                     assertEquals(1, list.size());
                 });
@@ -89,17 +86,13 @@ class PetControllerIntegrationTest {
     @Test
     void getPetByPetId() {
         Mono<Pet> petMono = Mono.from(repo.findAll()
-                .doOnNext(pet -> {
-                    validPetId = pet.getPetId();
-                    System.out.println(validPetId);
-                }));
+                .doOnNext(pet -> validPetId = pet.getPetId()));
 
         StepVerifier.create(petMono)
                 .expectNextCount(1)
                 .verifyComplete();
 
-        client
-                .get()
+        client.get()
                 .uri("/pets/{petId}", validPetId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -113,17 +106,19 @@ class PetControllerIntegrationTest {
     void updatePetByPetId() {
         Publisher<Pet> setup = repo.deleteAll().thenMany(repo.save(petEntity));
         StepVerifier.create(setup).expectNextCount(1).verifyComplete();
-        client.put().uri("/pets/" + PET_ID)
+
+        client.put()
+                .uri("/pets/" + PET_ID)
                 .body(Mono.just(petRequestDTO), PetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
-                .exchange().expectStatus().isOk()
+                .exchange()
+                .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.petId").isEqualTo(petEntity.getPetId())
                 .jsonPath("$.name").isEqualTo(petEntity.getName())
                 .jsonPath("$.petTypeId").isEqualTo(petEntity.getPetTypeId())
                 .jsonPath("$.ownerId").isEqualTo(petEntity.getOwnerId())
-//                .jsonPath("$.photoId").isEqualTo(petEntity.getPhotoId())
                 .jsonPath("$.isActive").isEqualTo(petEntity.getIsActive());
     }
 
@@ -131,17 +126,19 @@ class PetControllerIntegrationTest {
     void insertPet() {
         Publisher<Void> setup = repo.deleteAll();
         StepVerifier.create(setup).expectNextCount(0).verifyComplete();
-        client.post().uri("/pets")
+
+        client.post()
+                .uri("/pets")
                 .body(Mono.just(petRequestDTO), PetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
-                .exchange().expectStatus().isCreated()
+                .exchange()
+                .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.name").isEqualTo(petEntity.getName())
                 .jsonPath("$.petTypeId").isEqualTo(petEntity.getPetTypeId())
                 .jsonPath("$.ownerId").isEqualTo(petEntity.getOwnerId())
                 .jsonPath("$.weight").isEqualTo(petEntity.getWeight())
-//                .jsonPath("$.photoId").isEqualTo(petEntity.getPhotoId())
                 .jsonPath("$.isActive").isEqualTo(petEntity.getIsActive());
     }
 
@@ -183,7 +180,7 @@ class PetControllerIntegrationTest {
     @Test
     void deletePetPhoto_WithNonExistentPet_ShouldReturnNotFound() {
         String nonExistentPetId = "00000000-0000-0000-0000-000000000000";
-        
+
         client.patch()
                 .uri("/pets/{petId}/photo", nonExistentPetId)
                 .accept(MediaType.APPLICATION_JSON)
@@ -194,14 +191,49 @@ class PetControllerIntegrationTest {
     @Test
     void deletePetPhoto_WithInvalidPetId_ShouldReturnUnprocessableEntity() {
         String invalidPetId = "invalid-id";
-        
+
         client.patch()
                 .uri("/pets/{petId}/photo", invalidPetId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(422);
     }
+    @Test
+    void addPetPhoto_WithValidPet_ShouldReturnCreated() {
+        byte[] imageData = "fake-image".getBytes(StandardCharsets.UTF_8);
+        FileRequestDTO fileRequest = new FileRequestDTO("photo.png", "image/png", imageData);
+        FileResponseDTO fileResponse = new FileResponseDTO("photo-xyz", "photo.png", "image/png", imageData);
 
+        when(filesServiceClient.addFile(any(FileRequestDTO.class))).thenReturn(Mono.just(fileResponse));
+
+        client.patch()
+                .uri("/pets/{petId}/photos", PET_ID)
+                .body(Mono.just(fileRequest), FileRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.petId").isEqualTo(PET_ID)
+                .jsonPath("$.photo.fileId").isEqualTo("photo-xyz")
+                .jsonPath("$.photo.fileName").isEqualTo("photo.png");
+    }
+    @Test
+    void addPetPhoto_WithNonExistentPet_ShouldReturnNotFound() {
+        String nonExistentPetId = "99999999-9999-9999-9999-999999999999";
+        byte[] imageData = "fake-image".getBytes(StandardCharsets.UTF_8);
+        FileRequestDTO fileRequest = new FileRequestDTO("photo.png", "image/png", imageData);
+
+        when(filesServiceClient.addFile(any(FileRequestDTO.class)))
+                .thenReturn(Mono.just(new FileResponseDTO("photo-xyz", "photo.png", "image/png", imageData)));
+
+        client.patch()
+                .uri("/pets/{petId}/photos", nonExistentPetId)
+                .body(Mono.just(fileRequest), FileRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
     private Pet buildPet() {
         return Pet.builder()
                 .id("123")
@@ -210,7 +242,7 @@ class PetControllerIntegrationTest {
                 .birthDate(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()))
                 .ownerId("54c76b87-e598-4f26-ac63-dcb8a9571b08")
                 .petTypeId("f24969bc-0009-4f02-99c9-9db426d872f3")
-                .photoId("dd10e169-5d5c-4610-9d6e-62825a594795")
+                .photoId(null)
                 .weight("5.0")
                 .isActive("true")
                 .build();

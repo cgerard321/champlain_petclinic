@@ -387,6 +387,18 @@ public class CustomersServiceClient {
                 .bodyToMono(OwnerResponseDTO.class);
     }
 
+    public Mono<PetResponseDTO> addPetPhoto(String petId, Mono<FileDetails> photoMono) {
+        return photoMono.flatMap(photo ->
+                webClientBuilder.build()
+                        .patch()
+                        .uri(customersServiceUrl + "/pets/" + petId + "/photos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(BodyInserters.fromValue(photo))
+                        .retrieve()
+                        .bodyToMono(PetResponseDTO.class)
+        );
+    }
+
     public Mono<PetResponseDTO> deletePetPhoto(String petId) {
         return webClientBuilder.build()
                 .patch()
