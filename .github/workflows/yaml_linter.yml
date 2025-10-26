@@ -11,6 +11,7 @@ jobs:
       - name: 'Yamllint'
         uses: karancode/yamllint-github-action@master
         with:
+          # "." directory refers to the root of the project. Can remove the whole line, is the root directory by default.
           yamllint_file_or_dir: .
           yamllint_strict: false
           yamllint_comment: true
