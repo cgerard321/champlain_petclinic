@@ -23,10 +23,47 @@ export async function searchInventories(
       ? `/inventories?page=${currentPage}&size=${listSize}&${queryString}`
       : `/inventories?page=${currentPage}&size=${listSize}`;
 
-    const res = await axiosInstance.get<Inventory[]>(url, {
+    const response = await axiosInstance.get<Inventory[]>(url, {
       useV2: false,
+      responseType: 'text',
     });
-    return { data: res.data, errorMessage: null };
+    const raw = String(response.data ?? '');
+
+    const items: Inventory[] = raw
+      .split(/\r?\n\r?\n/) // split SSE events
+      .map(block => {
+        // collapse multiple data: lines in the same event
+        const dataLines = block
+          .split(/\r?\n/)
+          .filter(line => line.startsWith('data:'))
+          .map(line => line.slice(5).trim());
+
+        if (dataLines.length === 0) return null;
+
+        const jsonText = dataLines.join('\n').trim();
+        if (!jsonText || jsonText === '__END__') return null; // optional sentinel support
+
+        try {
+          const parsed = JSON.parse(jsonText);
+          if (Array.isArray(parsed)) {
+            // when the server sends an array as one event, return a marker object; we'll expand below
+            return parsed as Inventory[];
+          }
+          return parsed as Inventory;
+        } catch (e) {
+          console.error("Can't parse JSON from SSE event:", e, jsonText);
+          return null;
+        }
+      })
+      .filter((x): x is Inventory | Inventory[] => x !== null)
+      // flatten optional array payloads while preserving order
+      .reduce<Inventory[]>((acc, chunk) => {
+        if (Array.isArray(chunk)) acc.push(...chunk);
+        else acc.push(chunk);
+        return acc;
+      }, []);
+
+    return { data: items, errorMessage: null };
   } catch (error: unknown) {
     const maybeMsg = (error as { response?: { data?: { message?: unknown } } })
       ?.response?.data?.message;

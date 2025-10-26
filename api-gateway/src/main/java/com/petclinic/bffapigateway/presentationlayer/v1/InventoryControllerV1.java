@@ -227,7 +227,7 @@ public class InventoryControllerV1 {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER})
-    @GetMapping(value="/{inventoryId}/products/lowstock")
+    @GetMapping(value="/{inventoryId}/products/lowstock", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ProductResponseDTO>getLowStockProducts(@PathVariable String inventoryId, @RequestParam Optional<Integer> threshold){
         int stockThreshold = threshold.orElse(20);
         return inventoryServiceClient.getLowStockProducts(inventoryId, stockThreshold);
