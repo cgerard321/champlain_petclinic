@@ -94,6 +94,20 @@ public class MockServerConfigCustomersService {
                 );
     }
 
+    public void registerDeleteOwnerEmptyResponseEndpoint() {
+        mockServerClient_CustomersService
+                .when(
+                        request()
+                                .withMethod("DELETE")
+                                .withPath("/owners/12345678-1234-1234-1234-123456789012")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withBody("")
+                );
+    }
+
     public void registerGetOwnerByIdEndpoint() {
         String ownerResponseJson = "{"
                 + "\"ownerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\","
