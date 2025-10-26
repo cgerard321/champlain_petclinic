@@ -21,11 +21,43 @@ export async function searchProducts(
       ? `/inventories/${inventoryId}/products/search?${queryString}`
       : `/inventories/${inventoryId}/products/search`;
 
-    const res = await axiosInstance.get<ProductModel[]>(url, {
+    const response = await axiosInstance.get(url, {
       useV2: false,
+      responseType: 'text',
     });
 
-    return { data: res.data, errorMessage: null };
+    const raw = String(response.data ?? '');
+    if (!raw.trim()) {
+      return { data: [], errorMessage: null };
+    }
+
+    const items: ProductModel[] = raw
+      .split(/\r?\n\r?\n/)
+      .map(block => {
+        const dataLines = block
+          .split(/\r?\n/)
+          .filter(line => line.startsWith('data:'))
+          .map(line => line.slice(5).trim());
+
+        if (dataLines.length === 0) return null;
+
+        const jsonText = dataLines.join('\n').trim();
+        if (!jsonText || jsonText === '__END__') return null;
+
+        try {
+          const product = JSON.parse(jsonText) as ProductModel;
+          product.productMargin = parseFloat(
+            (product.productSalePrice - product.productPrice).toFixed(2)
+          );
+          return product;
+        } catch (e) {
+          console.error("Can't parse JSON from SSE event:", e, jsonText);
+          return null;
+        }
+      })
+      .filter((x): x is ProductModel => x !== null);
+
+    return { data: items, errorMessage: null };
   } catch (error: unknown) {
     const maybeMsg = (error as { response?: { data?: { message?: unknown } } })
       ?.response?.data?.message;

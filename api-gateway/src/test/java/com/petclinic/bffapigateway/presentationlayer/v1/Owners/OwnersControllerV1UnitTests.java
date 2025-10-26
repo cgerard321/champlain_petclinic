@@ -64,7 +64,7 @@ public class OwnersControllerV1UnitTests {
 
         client.get()
                 .uri("/api/gateway/owners")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(OwnerResponseDTO.class)
@@ -383,11 +383,11 @@ public class OwnersControllerV1UnitTests {
         requestDTO.setFirstName("John");
         requestDTO.setLastName("Doe");
 
-        when(customersServiceClient.updateOwner(eq("nonexistent"), any()))
+        when(customersServiceClient.updateOwner(eq("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a"), any()))
                 .thenReturn(Mono.empty());
 
         client.put()
-                .uri("/api/gateway/owners/{ownerId}", "nonexistent")
+                .uri("/api/gateway/owners/{ownerId}", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(requestDTO))
                 .exchange()

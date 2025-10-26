@@ -185,7 +185,7 @@ public class InventoryServiceClient {
 
         return webClient.get()
                 .uri(uriBuilder.buildAndExpand(inventoryId).toUri())
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError,
                         resp -> rethrower.rethrow(resp, ex -> new ProductListNotFoundException(ex.get("message").toString(), NOT_FOUND)))
@@ -227,7 +227,7 @@ public class InventoryServiceClient {
 
         return webClient.get()
                 .uri(uriBuilder.buildAndExpand(inventoryId).toUri())
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError,
                         resp -> rethrower.rethrow(resp, ex -> new ProductListNotFoundException(ex.get("message").toString(), NOT_FOUND)))
@@ -287,7 +287,7 @@ public class InventoryServiceClient {
 
         return webClient.get()
                 .uri(uriBuilder.buildAndExpand().toUri())
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
                 // Consider adding error-handling logic here if needed.
                 .bodyToFlux(InventoryResponseDTO.class);
@@ -332,7 +332,7 @@ public class InventoryServiceClient {
     public Flux<InventoryTypeResponseDTO> getAllInventoryTypes(){
         return webClient.get()
                 .uri(inventoryServiceUrl + "/type")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
                 .onStatus(status -> status.value() == 404,
                         resp -> rethrower.rethrow(
@@ -371,7 +371,7 @@ public class InventoryServiceClient {
 
         return webClient.get()
                 .uri(uriBuilder.buildAndExpand(inventoryId).toUri())
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError,
                         resp -> Mono.error(new NotFoundException("No products below threshold in inventory: " + inventoryId)))
@@ -391,7 +391,7 @@ public class InventoryServiceClient {
 
         return webClient.get()
                 .uri(uriBuilder.buildAndExpand(inventoryId).toUri())
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError,
                         resp -> Mono.error(new InventoryNotFoundException("No products found in inventory: " + inventoryId + " that match the search criteria", HttpStatus.NOT_FOUND)))
@@ -471,7 +471,7 @@ public class InventoryServiceClient {
     public Flux<InventoryResponseDTO> getAllInventories() {
         return webClient.get()
                 .uri(inventoryServiceUrl)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
                 .onStatus(status -> status.value() == 404,
                         resp -> rethrower.rethrow(resp,
