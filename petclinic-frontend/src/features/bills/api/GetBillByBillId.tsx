@@ -1,13 +1,6 @@
 import { Bill } from '@/features/bills/models/Bill.ts';
 import axiosInstance from '@/shared/api/axiosInstance.ts';
 import axios, { AxiosResponse, AxiosError } from 'axios';
-
-/**
- * Robust helper to find a bill by its billId.
- * Tries a few endpoint shapes and a final absolute-URL fallback because
- * the shared axios instance may prefix paths (gateway/version) which
- * can produce invalid routes depending on environment configuration.
- */
 export async function getBillByBillId(billId: string): Promise<Bill | null> {
   const candidatePaths = [`/bills/admin/${billId}`, `/bills/${billId}`];
   const useV2Options = [false, true];
@@ -27,7 +20,6 @@ export async function getBillByBillId(billId: string): Promise<Bill | null> {
             try {
               return JSON.parse(data) as Bill;
             } catch {
-              // not JSON — return null since we couldn't parse
               return null;
             }
           }
@@ -40,11 +32,8 @@ export async function getBillByBillId(billId: string): Promise<Bill | null> {
           status = axiosErr.response?.status;
         }
         if (status === 404) {
-          // try next candidate
           continue;
         }
-        // log and continue trying other combinations
-        // eslint-disable-next-line no-console
         console.error(
           `getBillByBillId request error for ${path} (useV2=${useV2}):`,
           err
@@ -53,8 +42,6 @@ export async function getBillByBillId(billId: string): Promise<Bill | null> {
       }
     }
   }
-
-  // Final fallback: try absolute backend URL (avoid axios interceptor prefixing)
   try {
     const env =
       (import.meta.env as Record<string, string | undefined> | undefined) ||
@@ -63,7 +50,6 @@ export async function getBillByBillId(billId: string): Promise<Bill | null> {
     if (base) {
       const url = `${base.replace(/\/$/, '')}/bills/admin/${billId}`;
       try {
-        // when passing a full absolute URL axiosInstance will not re-prefix it
         const resp: AxiosResponse<unknown> = await axiosInstance.get(url, {
           responseType: 'text',
         });
@@ -79,14 +65,10 @@ export async function getBillByBillId(billId: string): Promise<Bill | null> {
           return d as Bill;
         }
       } catch (e) {
-        // ignore and return null below
-        // eslint-disable-next-line no-console
         console.error('getBillByBillId fallback absolute URL error:', e);
       }
     }
-  } catch (e) {
-    // ignore
-  }
+  } catch (e) {}
 
   return null;
 }
