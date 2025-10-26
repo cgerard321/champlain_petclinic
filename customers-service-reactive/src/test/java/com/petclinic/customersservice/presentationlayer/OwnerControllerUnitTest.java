@@ -29,7 +29,7 @@ public class OwnerControllerUnitTest {
     @InjectMocks
     private OwnerController ownerController;
 
-    private final String TEST_OWNER_ID = "ownerId-123";
+    private final String TEST_OWNER_ID = "f9b46d32-0951-420b-afe6-22a738d97d9b";
     private Owner mockOwner;
 
     @BeforeEach
@@ -39,7 +39,7 @@ public class OwnerControllerUnitTest {
         mockOwner = new Owner();
         mockOwner.setOwnerId(TEST_OWNER_ID);
         mockOwner.setFirstName("John");
-        mockOwner.setPhotoId("photo-123");
+        mockOwner.setPhotoId("11aef324-15b4-409d-8078-86d22e38cde4");
     }
 
     @Test

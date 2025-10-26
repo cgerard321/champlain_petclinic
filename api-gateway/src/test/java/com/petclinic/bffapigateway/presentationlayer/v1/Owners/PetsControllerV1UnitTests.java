@@ -92,7 +92,9 @@ class PetsControllerV1UnitTests {
 
     @Test
     void whenGetPetByPetId_thenReturnPet() {
+        String ownerId = "valid-owner-id";
         String petId = "petId-123";
+        boolean includePhoto = false;
 
         PetResponseDTO expectedResponse = new PetResponseDTO();
         expectedResponse.setPetId(petId);
@@ -101,12 +103,13 @@ class PetsControllerV1UnitTests {
         expectedResponse.setPetTypeId("5");
         expectedResponse.setWeight("10.5");
         expectedResponse.setIsActive("true");
+        expectedResponse.setOwnerId(ownerId);
 
-        when(customersServiceClient.getPetByPetId(petId))
+        when(customersServiceClient.getPetByPetId(petId, includePhoto))
                 .thenReturn(Mono.just(expectedResponse));
 
         client.get()
-                .uri("/api/gateway/pets/{petId}", petId)
+                .uri("/api/gateway/pets/owners/{ownerId}/pets/{petId}", ownerId, petId)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -118,7 +121,7 @@ class PetsControllerV1UnitTests {
                 });
 
         verify(customersServiceClient, times(1))
-                .getPetByPetId(petId);
+                .getPetByPetId(petId, includePhoto);
     }
 
     @Test
@@ -191,7 +194,7 @@ class PetsControllerV1UnitTests {
         expectedResponse.setWeight("10.5");
         expectedResponse.setIsActive("true");
 
-        when(customersServiceClient.getPetByPetId(petId))
+        when(customersServiceClient.getPetByPetId(petId, false))
                 .thenReturn(Mono.just(expectedResponse));
 
         client.get()
@@ -207,7 +210,7 @@ class PetsControllerV1UnitTests {
                 });
 
         verify(customersServiceClient, times(1))
-                .getPetByPetId(petId);
+                .getPetByPetId(petId, false);
     }
 
     @Test
@@ -283,33 +286,68 @@ class PetsControllerV1UnitTests {
     }
 
     @Test
-    void whenPatchPet_withInvalidJson_thenReturnBadRequest() {
-        String ownerId = "ownerId-1";
+    void whenDeletePetPhoto_thenReturnOk() {
         String petId = "petId-123";
-        String invalidJson = "{\"isActive\": }";
+
+        PetResponseDTO expectedResponse = new PetResponseDTO();
+        expectedResponse.setPetId(petId);
+        expectedResponse.setName("Fluffy");
+        expectedResponse.setBirthDate(birthDate);
+        expectedResponse.setPetTypeId("5");
+        expectedResponse.setWeight("10.5");
+        expectedResponse.setIsActive("true");
+        expectedResponse.setPhoto(null);
+
+        when(customersServiceClient.deletePetPhoto(petId))
+                .thenReturn(Mono.just(expectedResponse));
 
         client.patch()
-                .uri("/api/gateway/owners/{ownerId}/pets/{petId}", ownerId, petId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(invalidJson)
+                .uri("/api/gateway/pets/{petId}/photo", petId)
                 .exchange()
-                .expectStatus().is4xxClientError();
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(PetResponseDTO.class)
+                .value(response -> {
+                    assertEquals(petId, response.getPetId());
+                    assertEquals("Fluffy", response.getName());
+                    assertEquals("10.5", response.getWeight());
+                    assertNull(response.getPhoto());
+                });
 
-        verify(customersServiceClient, never()).patchPet(any(), any());
+        verify(customersServiceClient, times(1))
+                .deletePetPhoto(petId);
     }
 
     @Test
-    void whenPatchPet_withEmptyBody_thenReturnBadRequest() {
-        String ownerId = "ownerId-1";
-        String petId = "petId-123";
+    void whenDeletePetPhoto_withNonExistentPet_thenReturnNotFound() {
+        String petId = "non-existent-pet-id";
+
+        when(customersServiceClient.deletePetPhoto(petId))
+                .thenReturn(Mono.empty());
 
         client.patch()
-                .uri("/api/gateway/owners/{ownerId}/pets/{petId}", ownerId, petId)
-                .contentType(MediaType.APPLICATION_JSON)
+                .uri("/api/gateway/pets/{petId}/photo", petId)
                 .exchange()
-                .expectStatus().is4xxClientError();
+                .expectStatus().isNotFound();
 
-        verify(customersServiceClient, never()).patchPet(any(), any());
+        verify(customersServiceClient, times(1))
+                .deletePetPhoto(petId);
+    }
+
+    @Test
+    void whenDeletePetPhoto_withInvalidPetId_thenReturnNotFound() {
+        String invalidPetId = "invalid-id";
+
+        when(customersServiceClient.deletePetPhoto(invalidPetId))
+                .thenReturn(Mono.empty());
+
+        client.patch()
+                .uri("/api/gateway/pets/{petId}/photo", invalidPetId)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        verify(customersServiceClient, times(1))
+                .deletePetPhoto(invalidPetId);
     }
 
 }

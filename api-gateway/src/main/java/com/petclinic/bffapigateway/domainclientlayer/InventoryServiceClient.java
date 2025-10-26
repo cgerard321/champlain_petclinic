@@ -174,12 +174,14 @@ public class InventoryServiceClient {
     }
 
 
-    public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductsField(final String inventoryId, final String productName, final Double productPrice, final Integer productQuantity, final Double productSalePrice){
+    public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductsField(final String inventoryId, final String productName, final Double minPrice, final Double maxPrice, final Integer productQuantity, final Double minSalePrice, final Double maxSalePrice){
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(inventoryServiceUrl + "/{inventoryType}/products")
                 .queryParamIfPresent("productName", Optional.ofNullable(productName))
-                .queryParamIfPresent("productPrice", Optional.ofNullable(productPrice))
+                .queryParamIfPresent("minPrice", Optional.ofNullable(minPrice))
+                .queryParamIfPresent("maxPrice", Optional.ofNullable(maxPrice))
                 .queryParamIfPresent("productQuantity", Optional.ofNullable(productQuantity))
-                .queryParamIfPresent("productSalePrice", Optional.ofNullable(productSalePrice));
+                .queryParamIfPresent("minSalePrice", Optional.ofNullable(minSalePrice))
+                .queryParamIfPresent("maxSalePrice", Optional.ofNullable(maxSalePrice));
 
         return webClient.get()
                 .uri(uriBuilder.buildAndExpand(inventoryId).toUri())
@@ -192,8 +194,11 @@ public class InventoryServiceClient {
 
     public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductFieldPagination(final String inventoryId,
                                                                                                  final String productName,
-                                                                                                 final Double productPrice,
+                                                                                                 final Double minPrice,
+                                                                                                 final Double maxPrice,
                                                                                                  final Integer productQuantity,
+                                                                                                 final Double minSalePrice,
+                                                                                                 final Double maxSalePrice,
                                                                                                  final Optional<Integer> page,
                                                                                                  final Optional<Integer> size){
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(inventoryServiceUrl + "/" + inventoryId + "/products-pagination");
@@ -204,11 +209,20 @@ public class InventoryServiceClient {
         if (productName != null) {
             uriBuilder.queryParam("productName", productName);
         }
-        if (productPrice != null) {
-            uriBuilder.queryParam("productPrice", productPrice);
+        if (minPrice != null) {
+            uriBuilder.queryParam("minPrice", minPrice);
+        }
+        if (maxPrice != null) {
+            uriBuilder.queryParam("maxPrice", maxPrice);
         }
         if (productQuantity != null) {
             uriBuilder.queryParam("productQuantity", productQuantity);
+        }
+        if (minSalePrice != null) {
+            uriBuilder.queryParam("minSalePrice", minSalePrice);
+        }
+        if (maxSalePrice != null) {
+            uriBuilder.queryParam("maxSalePrice", maxSalePrice);
         }
 
         return webClient.get()
@@ -222,12 +236,18 @@ public class InventoryServiceClient {
 
     public Mono<Long> getTotalNumberOfProductsWithRequestParams(final String inventoryId,
                                                                 final String productName,
-                                                                final Double productPrice,
-                                                                final Integer productQuantity){
+                                                                final Double minPrice,
+                                                                final Double maxPrice,
+                                                                final Integer productQuantity,
+                                                                final Double minSalePrice,
+                                                                final Double maxSalePrice){
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(inventoryServiceUrl + "/" + inventoryId + "/products-count")
                 .queryParamIfPresent("productName", Optional.ofNullable(productName))
-                .queryParamIfPresent("productPrice", Optional.ofNullable(productPrice))
-                .queryParamIfPresent("productQuantity", Optional.ofNullable(productQuantity));
+                .queryParamIfPresent("minPrice", Optional.ofNullable(minPrice))
+                .queryParamIfPresent("maxPrice", Optional.ofNullable(maxPrice))
+                .queryParamIfPresent("productQuantity", Optional.ofNullable(productQuantity))
+                .queryParamIfPresent("minSalePrice", Optional.ofNullable(minSalePrice))
+                .queryParamIfPresent("maxSalePrice", Optional.ofNullable(maxSalePrice));
 
         return webClient.get()
                 .uri(uriBuilder.buildAndExpand(inventoryId).toUri())

@@ -6,7 +6,7 @@ import { NavBar } from '@/layouts/AppNavBar.tsx';
 import axiosInstance from '@/shared/api/axiosInstance';
 import { isAxiosError } from 'axios';
 import './SignUp.css';
-import eyeDark from '@/assets/Icons/eyeDark.svg';
+import SvgIcon from '@/shared/components/SvgIcon';
 
 const SignUp: React.FC = (): JSX.Element => {
   const characterLimit = 60;
@@ -35,16 +35,7 @@ const SignUp: React.FC = (): JSX.Element => {
     owner,
   });
 
-  function togglePasswordVisibility(): void {
-    const passwordInput = document.getElementById(
-      'passwordInput'
-    ) as HTMLInputElement;
-    if (passwordInput.type === 'password') {
-      passwordInput.type = 'text';
-    } else {
-      passwordInput.type = 'password';
-    }
-  }
+  const [showPassword, setShowPassword] = useState(false);
 
   const validatePassword = (password: string): string | undefined => {
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
@@ -316,17 +307,20 @@ const SignUp: React.FC = (): JSX.Element => {
               <label>Password: </label>
               <div className="input-wrapper">
                 <input
-                  type="password"
-                  id="passwordInput"
-                  placeholder="Enter your password"
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  value={userData.password}
+                  onChange={handleChange}
+                  className="password-container"
                 />
                 <button
                   className="toggle-password"
                   id="toggle-password"
-                  onClick={togglePasswordVisibility}
+                  onClick={() => setShowPassword(prev => !prev)}
                   type="button"
+                  title="Show Password"
                 >
-                  <img className="icon" src={eyeDark} title="showPassword" />
+                  <SvgIcon id="eye" />
                 </button>
               </div>
               {errorMessage.password && (
