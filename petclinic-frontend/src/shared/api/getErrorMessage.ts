@@ -32,10 +32,9 @@ export default function getErrorMessage(err: unknown, opts?: Opts): string {
 
   try {
     if (axios.isAxiosError(err)) {
-      const data =
-        (err.response?.data as
-          | { message?: string; error?: string; title?: string }
-          | undefined) || undefined;
+      const data = err.response?.data as
+        | { message?: string; error?: string; title?: string }
+        | undefined;
       const msg =
         (data && (data.message || data.error || data.title)) ||
         err.message ||

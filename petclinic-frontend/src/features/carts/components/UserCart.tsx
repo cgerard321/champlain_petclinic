@@ -96,14 +96,22 @@ const UserCart: React.FC = () => {
 
   const [promoPercent, setPromoPercent] = useState<number | null>(null);
 
-  // Helper: map 404 -> friendly message, otherwise use getErrorMessage with default.
-  const apiErrorMessage = (err: unknown, defaultMessage: string): string => {
-    const status = (err as { response?: { status?: number } }).response?.status;
-    if (status === 404) return 'Cart not found';
-    return getErrorMessage(err, { defaultMessage });
-  };
+  // Helper: safely extract HTTP status from various error shapes
+  const getStatusCode = useCallback((err: unknown): number | undefined => {
+    return (err as { response?: { status?: number } })?.response?.status;
+  }, []);
 
-  // Helper: used by actions that require cartId — sets visible error and returns false when missing.
+  // Helper: map 404
+  const apiErrorMessage = useCallback(
+    (err: unknown, defaultMessage: string): string => {
+      const status = getStatusCode(err);
+      if (status === 404) return 'Cart not found';
+      return getErrorMessage(err, { defaultMessage });
+    },
+    [getStatusCode]
+  );
+
+  // Helper: used by actions that require cartId
   const ensureCartId = useCallback((): boolean => {
     if (!cartId) {
       setError('Invalid cart ID');
@@ -369,7 +377,7 @@ const UserCart: React.FC = () => {
     };
 
     fetchCartItems();
-  }, [cartId, wishlistUpdated, syncAfterAddToCart]);
+  }, [cartId, wishlistUpdated, syncAfterAddToCart, apiErrorMessage]);
 
   useEffect(() => {
     updateCartItemCount();
@@ -593,7 +601,7 @@ const UserCart: React.FC = () => {
         setNotificationMessage(msg);
       }
     },
-    [cartId, blockIfReadOnly, confirm, ensureCartId]
+    [cartId, blockIfReadOnly, confirm, ensureCartId, apiErrorMessage]
   );
 
   const clearCart = async (): Promise<void> => {
