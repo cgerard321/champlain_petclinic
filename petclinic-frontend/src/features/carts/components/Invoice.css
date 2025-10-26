@@ -22,12 +22,6 @@
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
 }
 
-.invoice-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
 .invoice-nav button[disabled] {
     opacity: 0.5;
 }
@@ -57,4 +51,24 @@
     border: none;
     font-size: 1.25rem;
     cursor: pointer;
+}
+
+.invoice-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+}
+
+.download-invoice-btn {
+    background: #0b5fff;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.download-invoice-btn:hover {
+    background: #094bdb;
 }

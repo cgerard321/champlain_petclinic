@@ -1,7 +1,6 @@
 package com.petclinic.bffapigateway.presentationlayer.v1;
 
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
-import com.petclinic.bffapigateway.dtos.Pets.PetType;
 import com.petclinic.bffapigateway.dtos.Pets.PetTypeRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetTypeResponseDTO;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
@@ -27,16 +26,10 @@ public class PetTypeControllerV1 {
     private final CustomersServiceClient customersServiceClient;
 
     @SecuredEndpoint(allowedRoles = {Roles.ALL})
-    @GetMapping(value = "")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<PetTypeResponseDTO> getAllPetTypes() {
         return customersServiceClient.getAllPetTypes();
     }
-
-    @GetMapping(value = "", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<PetType> getPetTypes(){
-        return customersServiceClient.getPetTypes();
-    }
-
 
     @SecuredEndpoint(allowedRoles = {Roles.ALL})
     @GetMapping(value = "/{petTypeId}")
@@ -83,7 +76,7 @@ public class PetTypeControllerV1 {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "/pet-types-pagination")
+    @GetMapping(value = "/pet-types-pagination", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<PetTypeResponseDTO> getPetTypesByPagination(@RequestParam Optional<Integer> page,
                                                             @RequestParam Optional<Integer> size,
                                                             @RequestParam(required = false) String petTypeId,

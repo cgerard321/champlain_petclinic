@@ -8,6 +8,7 @@ import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,9 +26,12 @@ public class PetControllerV1 {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET, Roles.OWNER,Roles.RECEPTIONIST})
     @GetMapping("/{petId}")
-    public Mono<ResponseEntity<PetResponseDTO>> getPetByPetId(@PathVariable String petId) {
-        return customersServiceClient.getPetByPetId(petId)
-                .map(ResponseEntity::ok)
+    public Mono<ResponseEntity<PetResponseDTO>> getPetByPetId(
+            @PathVariable String petId,
+            @RequestParam(required = false, defaultValue = "false") boolean includePhoto) {
+
+        return customersServiceClient.getPetByPetId(petId, includePhoto)
+                .map(p -> ResponseEntity.ok(p))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
@@ -37,13 +41,21 @@ public class PetControllerV1 {
         return customersServiceClient.getAllPets();
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<PetResponseDTO>> addPet(@RequestBody Mono<PetRequestDTO> petRequestDTO) {
+        return customersServiceClient.addPet(petRequestDTO)
+                .map(e -> ResponseEntity.status(HttpStatus.CREATED).body(e))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
 
     @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN, Roles.VET})
     @GetMapping("/owners/{ownerId}/pets/{petId}")
     public Mono<ResponseEntity<PetResponseDTO>> getPetForOwner(
             @PathVariable String ownerId,
-            @PathVariable String petId) {
-        return customersServiceClient.getPetByPetId(petId)
+            @PathVariable String petId,
+            @RequestParam(required = false, defaultValue = "false") boolean includePhoto) {
+        return customersServiceClient.getPetByPetId(petId, includePhoto)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
@@ -77,4 +89,19 @@ public class PetControllerV1 {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.OWNER,Roles.ADMIN,Roles.VET})
+    @PatchMapping(value = "/{petId}/active", produces = "application/json")
+    public Mono<ResponseEntity<PetResponseDTO>> patchPet(@RequestParam String isActive, @PathVariable String petId) {
+        return customersServiceClient.patchPet(isActive, petId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET, Roles.OWNER})
+    @PatchMapping("/{petId}/photo")
+    public Mono<ResponseEntity<PetResponseDTO>> deletePetPhoto(@PathVariable String petId) {
+        return customersServiceClient.deletePetPhoto(petId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 }

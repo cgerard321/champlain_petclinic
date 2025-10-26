@@ -1,7 +1,17 @@
 package com.petclinic.visits.visitsservicenew.BusinessLayer;
 
+import com.petclinic.visits.visitsservicenew.BusinessLayer.Prescriptions.PrescriptionService;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.Auth.Role;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FileResponseDTO;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FilesServiceClient;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.Prescriptions.PrescriptionRequestDTO;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.Prescriptions.PrescriptionResponseDTO;
+import com.petclinic.visits.visitsservicenew.Utils.IdGenerator;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.springframework.test.util.ReflectionTestUtils;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.Auth.UserDetails;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.Mailing.Mail;
@@ -9,7 +19,6 @@ import java.time.LocalDateTime;
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
-import com.petclinic.visits.visitsservicenew.DomainClientLayer.Mailing.Mail;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.Mailing.MailService;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.*;
 import com.petclinic.visits.visitsservicenew.Exceptions.BadRequestException;
@@ -18,7 +27,6 @@ import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
 import com.petclinic.visits.visitsservicenew.Utils.EntityDtoUtil;
-import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -28,14 +36,12 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.lang.reflect.Method;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
@@ -59,6 +65,14 @@ class VisitServiceImplTest {
 
     @MockBean
     private EntityDtoUtil entityDtoUtil;
+
+    @MockBean
+    private FilesServiceClient filesServiceClient;
+
+    @MockBean
+    PrescriptionService prescriptionService;
+
+
 
 //    private final Long dbSize = 2L;
 
@@ -143,17 +157,17 @@ class VisitServiceImplTest {
     }
 
 
-    @Test
-    void getVisitByVisitId() {
-        when(visitRepo.findByVisitId(anyString())).thenReturn(Mono.just(visit1));
-        when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(visitResponseDTO));
-
-
-        StepVerifier.create(visitService.getVisitByVisitId(visitResponseDTO.getVisitId()))
-                .expectNextMatches(visitDTO -> visitDTO.getVisitId().equals(visit1.getVisitId()))
-                .expectComplete()
-                .verify();
-    }
+//    @Test
+//    void getVisitByVisitId() {
+//        when(visitRepo.findByVisitId(anyString())).thenReturn(Mono.just(visit1));
+//        when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(visitResponseDTO));
+//
+//
+//        StepVerifier.create(visitService.getVisitByVisitId(visitResponseDTO.getVisitId(), includePrescription))
+//                .expectNextMatches(visitDTO -> visitDTO.getVisitId().equals(visit1.getVisitId()))
+//                .expectComplete()
+//                .verify();
+//    }
 
 
     @Test
@@ -301,17 +315,20 @@ class VisitServiceImplTest {
         when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(new VetDTO()));
         when(visitRepo.findByVisitDateAndPractitionerId(any(LocalDateTime.class), anyString())).thenReturn(Flux.empty());
         when(entityDtoUtil.toVisitEntity(any())).thenReturn(visit1);
-        when(entityDtoUtil.generateVisitIdString()).thenReturn("yourVisitId");
         when(visitRepo.insert(visit1)).thenReturn(Mono.just(visit1));
         when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(visitResponseDTO));
 
-        // Act
-        Mono<VisitResponseDTO> result = visitService.addVisit(Mono.just(visitRequestDTO));
+        // Using MockedStatic to stub the static IdGenerator method
+        try (MockedStatic<IdGenerator> mocked = mockStatic(IdGenerator.class)) {
+            mocked.when(IdGenerator::generateVisitId).thenReturn("VIST-2510-2401");
+            // Act
+            Mono<VisitResponseDTO> result = visitService.addVisit(Mono.just(visitRequestDTO));
 
-        // Assert
-        StepVerifier.create(result)
-                .expectNextMatches(response -> response.equals(visitResponseDTO))
-                .verifyComplete();
+            // Assert
+            StepVerifier.create(result)
+                    .expectNextMatches(response -> response.equals(visitResponseDTO))
+                    .verifyComplete();
+        }
 
         verify(visitRepo, times(1)).insert(any(Visit.class));
     }
@@ -346,18 +363,21 @@ class VisitServiceImplTest {
         when(visitRepo.findByVisitDateAndPractitionerId(any(), any()))
                 .thenReturn(Flux.just(existingVisit)); // Return existingVisit in case of conflict
         when(entityDtoUtil.toVisitEntity(any())).thenReturn(visit1);
-        when(entityDtoUtil.generateVisitIdString()).thenReturn("yourVisitId");
         when(visitRepo.insert(visit1)).thenReturn(Mono.just(visit1));
         when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(visitResponseDTO)); // This simulates finding a conflicting visit
 
-        // Act
-        Mono<VisitResponseDTO> result = visitService.addVisit(Mono.just(visitRequestDTO));
+        // Using MockedStatic to stub the static IdGenerator method
+        try (MockedStatic<IdGenerator> mocked = mockStatic(IdGenerator.class)) {
+            mocked.when(IdGenerator::generateVisitId).thenReturn("VIST-2510-2401");
+            // Act
+            Mono<VisitResponseDTO> result = visitService.addVisit(Mono.just(visitRequestDTO));
 
-        // Assert
-        StepVerifier.create(result)
-                .expectErrorMatches(throwable -> throwable instanceof DuplicateTimeException
-                        && throwable.getMessage().contains("A visit with the same time and practitioner already exists."))
-                .verify();
+            // Assert
+            StepVerifier.create(result)
+                    .expectErrorMatches(throwable -> throwable instanceof DuplicateTimeException
+                            && throwable.getMessage().contains("A visit with the same time and practitioner already exists."))
+                    .verify();
+        }
 
         // Ensure no attempt was made to insert a new visit due to the conflict
         verify(visitRepo, times(0)).insert(any(Visit.class));
@@ -376,17 +396,20 @@ class VisitServiceImplTest {
         when(petsClient.getPetById(anyString())).thenReturn(Mono.just(petResponseDTO));
         when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(vet));
         when(entityDtoUtil.toVisitEntity(requestDTO)).thenReturn(visit);
-        when(entityDtoUtil.generateVisitIdString()).thenReturn("yourVisitId");
         when(visitRepo.insert(visit)).thenReturn(Mono.just(visit));
         when(entityDtoUtil.toVisitResponseDTO(visit)).thenReturn(Mono.just(visitResponseDTO));
 
-        // Act
-        Mono<VisitResponseDTO> result = visitService.addVisit(Mono.just(requestDTO));
+        // Using MockedStatic to stub the static IdGenerator method
+        try (MockedStatic<IdGenerator> mocked = mockStatic(IdGenerator.class)) {
+            mocked.when(IdGenerator::generateVisitId).thenReturn("VIST-2510-2401");
+            // Act
+            Mono<VisitResponseDTO> result = visitService.addVisit(Mono.just(requestDTO));
 
-        // Assert
-        StepVerifier.create(result)
-                .expectError(BadRequestException.class)
-                .verify();
+            // Assert
+            StepVerifier.create(result)
+                    .expectError(BadRequestException.class)
+                    .verify();
+        }
     }
 
     @Test
@@ -402,17 +425,20 @@ class VisitServiceImplTest {
         when(petsClient.getPetById(anyString())).thenReturn(Mono.just(petResponseDTO));
         when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(vet));
         when(entityDtoUtil.toVisitEntity(requestDTO)).thenReturn(visit);
-        when(entityDtoUtil.generateVisitIdString()).thenReturn("yourVisitId");
         when(visitRepo.insert(visit)).thenReturn(Mono.just(visit));
         when(entityDtoUtil.toVisitResponseDTO(visit)).thenReturn(Mono.just(visitResponseDTO));
 
-        // Act
-        Mono<VisitResponseDTO> result = visitService.addVisit(Mono.just(requestDTO));
+        // Using MockedStatic to stub the static IdGenerator method
+        try (MockedStatic<IdGenerator> mocked = mockStatic(IdGenerator.class)) {
+            mocked.when(IdGenerator::generateVisitId).thenReturn("VIST-2510-2401");
+            // Act
+            Mono<VisitResponseDTO> result = visitService.addVisit(Mono.just(requestDTO));
 
-        // Assert
-        StepVerifier.create(result)
-                .expectError(BadRequestException.class)
-                .verify();
+            // Assert
+            StepVerifier.create(result)
+                    .expectError(BadRequestException.class)
+                    .verify();
+        }
     }
 
     @Test
@@ -429,17 +455,20 @@ class VisitServiceImplTest {
         when(petsClient.getPetById(anyString())).thenReturn(Mono.just(petResponseDTO));
         when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(vet));
         when(entityDtoUtil.toVisitEntity(requestDTO)).thenReturn(visit);
-        when(entityDtoUtil.generateVisitIdString()).thenReturn("yourVisitId");
         when(visitRepo.insert(visit)).thenReturn(Mono.just(visit));
         when(entityDtoUtil.toVisitResponseDTO(visit)).thenReturn(Mono.just(visitResponseDTO));
 
-        // Act
-        Mono<VisitResponseDTO> result = visitService.addVisit(Mono.just(requestDTO));
+        // Using MockedStatic to stub the static IdGenerator method
+        try (MockedStatic<IdGenerator> mocked = mockStatic(IdGenerator.class)) {
+            mocked.when(IdGenerator::generateVisitId).thenReturn("VIST-2510-2401");
+            // Act
+            Mono<VisitResponseDTO> result = visitService.addVisit(Mono.just(requestDTO));
 
-        // Assert
-        StepVerifier.create(result)
-                .expectError(BadRequestException.class)
-                .verify();
+            // Assert
+            StepVerifier.create(result)
+                    .expectError(BadRequestException.class)
+                    .verify();
+        }
     }
 
     @Test
@@ -456,17 +485,20 @@ class VisitServiceImplTest {
         when(petsClient.getPetById(anyString())).thenReturn(Mono.just(petResponseDTO));
         when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(vet));
         when(entityDtoUtil.toVisitEntity(requestDTO)).thenReturn(visit);
-        when(entityDtoUtil.generateVisitIdString()).thenReturn("yourVisitId");
         when(visitRepo.insert(visit)).thenReturn(Mono.just(visit));
         when(entityDtoUtil.toVisitResponseDTO(visit)).thenReturn(Mono.just(visitResponseDTO));
 
-        // Act
-        Mono<VisitResponseDTO> result = visitService.addVisit(Mono.just(requestDTO));
+        // Using MockedStatic to stub the static IdGenerator method
+        try (MockedStatic<IdGenerator> mocked = mockStatic(IdGenerator.class)) {
+            mocked.when(IdGenerator::generateVisitId).thenReturn("VIST-2510-2401");
+            // Act
+            Mono<VisitResponseDTO> result = visitService.addVisit(Mono.just(requestDTO));
 
-        // Assert
-        StepVerifier.create(result)
-                .expectError(BadRequestException.class)
-                .verify();
+            // Assert
+            StepVerifier.create(result)
+                    .expectError(BadRequestException.class)
+                    .verify();
+        }
     }
 
     @Test
@@ -483,17 +515,20 @@ class VisitServiceImplTest {
         when(petsClient.getPetById(anyString())).thenReturn(Mono.just(petResponseDTO));
         when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(vet));
         when(entityDtoUtil.toVisitEntity(requestDTO)).thenReturn(visit);
-        when(entityDtoUtil.generateVisitIdString()).thenReturn("yourVisitId");
         when(visitRepo.insert(visit)).thenReturn(Mono.just(visit));
         when(entityDtoUtil.toVisitResponseDTO(visit)).thenReturn(Mono.just(visitResponseDTO));
 
-        // Act
-        Mono<VisitResponseDTO> result = visitService.addVisit(Mono.just(requestDTO));
+        // Using MockedStatic to stub the static IdGenerator method
+        try (MockedStatic<IdGenerator> mocked = mockStatic(IdGenerator.class)) {
+            mocked.when(IdGenerator::generateVisitId).thenReturn("VIST-2510-2401");
+            // Act
+            Mono<VisitResponseDTO> result = visitService.addVisit(Mono.just(requestDTO));
 
-        // Assert
-        StepVerifier.create(result)
-                .expectError(BadRequestException.class)
-                .verify();
+            // Assert
+            StepVerifier.create(result)
+                    .expectError(BadRequestException.class)
+                    .verify();
+        }
     }
 
     @Test
@@ -510,17 +545,20 @@ class VisitServiceImplTest {
         when(petsClient.getPetById(anyString())).thenReturn(Mono.just(petResponseDTO));
         when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(vet));
         when(entityDtoUtil.toVisitEntity(requestDTO)).thenReturn(visit);
-        when(entityDtoUtil.generateVisitIdString()).thenReturn("yourVisitId");
         when(visitRepo.insert(visit)).thenReturn(Mono.just(visit));
         when(entityDtoUtil.toVisitResponseDTO(visit)).thenReturn(Mono.just(visitResponseDTO));
 
-        // Act
-        Mono<VisitResponseDTO> result = visitService.addVisit(Mono.just(requestDTO));
+        // Using MockedStatic to stub the static IdGenerator method
+        try (MockedStatic<IdGenerator> mocked = mockStatic(IdGenerator.class)) {
+            mocked.when(IdGenerator::generateVisitId).thenReturn("VIST-2510-2401");
+            // Act
+            Mono<VisitResponseDTO> result = visitService.addVisit(Mono.just(requestDTO));
 
-        // Assert
-        StepVerifier.create(result)
-                .expectError(BadRequestException.class)
-                .verify();
+            // Assert
+            StepVerifier.create(result)
+                    .expectError(BadRequestException.class)
+                    .verify();
+        }
     }
 
     @Test
@@ -851,5 +889,82 @@ class VisitServiceImplTest {
                 "We have received a request to schedule a visit for your pet with id: " + petName + " on the following date and time: " + visitDate.toString() + "." + "\n" +
                 "If you do not wish to create an account, please disregard this email."));
         assertTrue(result.getSenderName().contains("ChamplainPetClinic@gmail.com"));
+    }
+
+    @Test
+    void getVisitByVisitId_withPrescription_callsFileService_andSetsDto() {
+        Visit visit = mock(Visit.class);
+        when(visit.getVisitId()).thenReturn("v1");
+        when(visit.getPrescriptionFileId()).thenReturn("p1");
+
+        VisitResponseDTO dto = new VisitResponseDTO();
+        FileResponseDTO file = mock(FileResponseDTO.class);
+
+        when(visitRepo.findByVisitId("v1")).thenReturn(Mono.just(visit));
+        when(entityDtoUtil.toVisitResponseDTO(visit)).thenReturn(Mono.just(dto));
+        when(filesServiceClient.getFile("p1")).thenReturn(Mono.just(file));
+
+        StepVerifier.create(visitService.getVisitByVisitId("v1", true))
+                .expectNextMatches(result -> result == dto && result.getPrescription() == file)
+                .verifyComplete();
+
+        verify(filesServiceClient, times(1)).getFile("p1");
+    }
+
+    @Test
+    void getVisitByVisitId_whenFileServiceErrors_returnsBaseDto() {
+        // Arrange
+        Visit visit = mock(Visit.class);
+        when(visit.getVisitId()).thenReturn("v2");
+        when(visit.getPrescriptionFileId()).thenReturn("p2");
+
+        VisitResponseDTO dto = new VisitResponseDTO();
+
+        when(visitRepo.findByVisitId("v2")).thenReturn(Mono.just(visit));
+        when(entityDtoUtil.toVisitResponseDTO(visit)).thenReturn(Mono.just(dto));
+        when(filesServiceClient.getFile("p2")).thenReturn(Mono.error(new RuntimeException("file error")));
+
+        // Act & Assert
+        StepVerifier.create(visitService.getVisitByVisitId("v2", true))
+                .expectNextMatches(result -> {
+                    assertSame(dto, result, "Expected the same DTO instance");
+                    assertNull(result.getPrescription(), "Prescription should not be set when file service fails");
+                    return true;
+                })
+                .verifyComplete();
+
+        // Verify interactions
+        verify(visitRepo, times(1)).findByVisitId("v2");
+        verify(entityDtoUtil, times(1)).toVisitResponseDTO(visit);
+        verify(filesServiceClient, times(1)).getFile("p2");
+    }
+
+
+    @Test
+    void getVisitByVisitId_withNoPrescription_doesNotCallFileService() {
+        Visit visit = mock(Visit.class);
+        when(visit.getVisitId()).thenReturn("v3");
+        when(visit.getPrescriptionFileId()).thenReturn(null);
+
+        VisitResponseDTO dto = new VisitResponseDTO();
+
+        when(visitRepo.findByVisitId("v3")).thenReturn(Mono.just(visit));
+        when(entityDtoUtil.toVisitResponseDTO(visit)).thenReturn(Mono.just(dto));
+
+        StepVerifier.create(visitService.getVisitByVisitId("v3", false))
+                .expectNextMatches(result -> result == dto)
+                .verifyComplete();
+
+        verify(filesServiceClient, never()).getFile(anyString());
+    }
+
+    @Test
+    void getVisitByVisitId_notFound_emitsNotFoundException() {
+        when(visitRepo.findByVisitId("missing")).thenReturn(Mono.empty());
+
+        StepVerifier.create(visitService.getVisitByVisitId("missing", true))
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException
+                        && throwable.getMessage().contains("missing"))
+                .verify();
     }
 }

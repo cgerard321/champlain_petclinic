@@ -1,53 +1,88 @@
 'use strict';
 
 angular.module('inventoriesProductForm')
-    .controller('InventoriesProductFormController', ["$http", '$state', '$stateParams', '$scope', 'InventoryService', function ($http, $state , $scope,  $stateParams, InventoryService) {
-        var self = this;
-        var product = {}
-        // post request to create a new product
-        self.submitProductForm = function (product) {
-            var data  = {
-                productName: self.product.productName,
-                productDescription: self.product.productDescription,
-                productPrice: self.product.productPrice,
-                productQuantity: self.product.productQuantity,
-                productSalePrice: self.product.productSalePrice
-            }
-            var inventoryId = $stateParams.inventoryId || InventoryService.getInventoryId();
-            console.log("InventoryId: " + inventoryId);
-            $http.post('/api/gateway/inventories/' + inventoryId + '/products', data
-            )
-                .then(function (response) {
-                    console.log(response);
-                    $state.go('inventoriesProduct', {inventoryId: inventoryId});
-                }, function (response) {
-                    var data = (response && response.data) || {};
-                    var baseMsg =
-                        (typeof data === 'string' && data) ||
-                        data.message ||
-                        data.error ||
-                        (response && response.status ? ('HTTP ' + response.status + ' ' + (response.statusText || '')) : 'Request failed');
-                    var fieldErrors =
-                        (Array.isArray(data.errors) && data.errors) ||
-                        (Array.isArray(data.details) && data.details) ||
-                        data.fieldErrors ||
-                        [];
+  .controller('InventoriesProductFormController', [
+    "$http", '$state', '$stateParams', '$scope', 'InventoryService',
+    function ($http, $state, $stateParams, $scope, InventoryService) {
 
-                    var fieldText = '';
-                    if (Array.isArray(fieldErrors) && fieldErrors.length) {
-                        fieldText = fieldErrors.map(function (e) {
-                            if (typeof e === 'string') return e;
-                            var field = e.field || e.path || e.parameter || '';
-                            var msg = e.defaultMessage || e.message || e.reason || JSON.stringify(e);
-                            return field ? (field + ': ' + msg) : msg;
-                        }).join('\r\n');
-                    }
+      var self = this;
+      $scope.saving = false;
 
-                    alert(fieldText ? (baseMsg + '\r\n' + fieldText) : baseMsg);
-                    // ---------------------------------------------------
+      var inventoryId = $stateParams.inventoryId || (InventoryService && InventoryService.getInventoryId && InventoryService.getInventoryId());
+      $scope.inventoryId = inventoryId; // used by hidden field if needed
+      if (!inventoryId) { console.warn('No inventoryId found for product creation.'); }
 
-                });
+      self._nameSet = new Set();
+
+      // Fetch existing product names once; afterwards validation is client-side
+      if (inventoryId) {
+        $http.get('/api/gateway/inventories/' + inventoryId + '/products')
+          .then(function (resp) {
+            var list = Array.isArray(resp.data) ? resp.data : [];
+            list.forEach(function (p) {
+              if (p && p.productName != null) {
+                self._nameSet.add(p.productName.toString().trim().toLowerCase());
+              }
+            });
+          }, function (err) {
+            try { console.warn('Could not prefetch product names for uniqueness check.', err); } catch(e){}
+          });
+      }
+
+      self.onNameChange = function (ngModelCtrl) {
+        if (!ngModelCtrl || !self.product) return;
+        var current = (self.product.productName || '').toString().trim().toLowerCase();
+        var isDuplicate = current && self._nameSet.has(current);
+        ngModelCtrl.$setValidity('dupname', !isDuplicate);
+      };
+
+      // Submit handler
+      self.submitProductForm = function () {
+        // Block submit if invalid and reveal messages
+        if ($scope.productForm && $scope.productForm.$invalid) {
+          angular.forEach($scope.productForm.$error, function (fields) {
+            (fields || []).forEach(function (f) { f.$setTouched(); });
+          });
+          return;
         }
 
+        if (!inventoryId) { alert('Inventory ID is missing.'); return; }
 
-    }]);
+        var data  = {
+          productName:        (self.product.productName || '').trim(),
+          productDescription: (self.product.productDescription || '').trim(),
+          productPrice:       parseFloat(self.product.productPrice),
+          productQuantity:    parseInt(self.product.productQuantity, 10),
+          productSalePrice:   parseFloat(self.product.productSalePrice)
+        };
+
+        $scope.saving = true;
+        $http.post('/api/gateway/inventories/' + inventoryId + '/products', data)
+          .then(function () {
+            $state.go('inventoriesProduct', { inventoryId: inventoryId });
+          }, handleHttpError)
+          .finally(function(){ $scope.saving = false; });
+      };
+
+      function handleHttpError(response) {
+        try { console.error('HTTP error:', response); } catch (e) {}
+        var data = (response && response.data);
+        var status = (response && response.status);
+        var statusText = (response && response.statusText) || '';
+
+        if (typeof data === 'string') {
+          try { data = JSON.parse(data); }
+          catch (e) {
+            var plain = data.trim();
+            if (plain) { alert(plain); return; }
+            data = {};
+          }
+        }
+        data = data || {};
+        var msg =
+          data.message || data.error || data.title || data.detail ||
+          (status ? ('HTTP ' + status + (statusText ? (' ' + statusText) : '')) : 'Request failed');
+        alert(msg);
+      }
+    }
+  ]);

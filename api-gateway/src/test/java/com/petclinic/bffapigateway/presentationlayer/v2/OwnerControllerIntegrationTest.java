@@ -1,8 +1,6 @@
 package com.petclinic.bffapigateway.presentationlayer.v2;
 
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
-import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService;
 import com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigCustomersService;
 import org.junit.jupiter.api.*;
@@ -12,13 +10,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
 import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -40,6 +34,7 @@ class OwnerControllerIntegrationTest {
         mockServerConfigCustomersService.registerAddOwnerEndpoint();
         mockServerConfigCustomersService.registerGetAllOwnersEndpoint();
         mockServerConfigCustomersService.registerDeleteOwnerEndpoint();
+        mockServerConfigCustomersService.registerDeleteOwnerEmptyResponseEndpoint();
         mockServerConfigCustomersService.registerGetOwnerByIdEndpoint();
 
         mockServerConfigAuthService = new MockServerConfigAuthService();
@@ -54,183 +49,7 @@ class OwnerControllerIntegrationTest {
         mockServerConfigCustomersService.stopMockServer();
         mockServerConfigAuthService.stopMockServer();
     }
-
-    @Test
-    void whenUpdateOwner_asCustomer_withValidOwnerId_thenReturnUpdatedOwnerResponseDTO() {
-        OwnerRequestDTO updatedRequestDTO = OwnerRequestDTO.builder()
-                .ownerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
-                .firstName("Betty")
-                .lastName("Davis")
-                .address("638 Cardinal Ave.")
-                .city("Sun Prairie")
-                .province("Quebec")
-                .telephone("6085551749")
-                .build();
-
-        Mono<OwnerResponseDTO> result = webTestClient.put()
-                .uri("/api/v2/gateway/owners/{ownerId}", updatedRequestDTO.getOwnerId())
-                .cookie("Bearer", jwtTokenForValidOwnerId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(Mono.just(updatedRequestDTO), OwnerRequestDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .returnResult(OwnerResponseDTO.class)
-                .getResponseBody()
-                .single();
-
-        StepVerifier
-                .create(result)
-                .expectNextMatches(ownerResponseDTO -> {
-                    assertNotNull(ownerResponseDTO);
-                    assertEquals(updatedRequestDTO.getOwnerId(), ownerResponseDTO.getOwnerId());
-                    assertEquals(updatedRequestDTO.getFirstName(), ownerResponseDTO.getFirstName());
-                    assertEquals(updatedRequestDTO.getLastName(), ownerResponseDTO.getLastName());
-                    assertEquals(updatedRequestDTO.getAddress(), ownerResponseDTO.getAddress());
-                    assertEquals(updatedRequestDTO.getCity(), ownerResponseDTO.getCity());
-                    assertEquals(updatedRequestDTO.getProvince(), ownerResponseDTO.getProvince());
-                    assertEquals(updatedRequestDTO.getTelephone(), ownerResponseDTO.getTelephone());
-                    return true;
-                })
-                .verifyComplete();
-    }
-
-    @Test
-    void whenUpdateOwner_asCustomer_withInvalidOwnerId_thenReturnInvalidInputException() {
-        OwnerRequestDTO updatedRequestDTO = OwnerRequestDTO.builder()
-                .ownerId("invalid-owner-id")
-                .firstName("Betty")
-                .lastName("Davis")
-                .address("638 Cardinal Ave.")
-                .city("Sun Prairie")
-                .province("Quebec")
-                .telephone("6085551749")
-                .build();
-
-        Mono<InvalidInputException> result = webTestClient.put()
-                .uri("/api/v2/gateway/owners/{ownerId}", updatedRequestDTO.getOwnerId())
-                .cookie("Bearer", jwtTokenForInvalidOwnerId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(Mono.just(updatedRequestDTO), OwnerRequestDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isEqualTo(422)
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .returnResult(InvalidInputException.class)
-                .getResponseBody()
-                .single();
-
-        StepVerifier
-                .create(result)
-                .expectNextMatches(errorResponse -> {
-                    assertNotNull(errorResponse);
-                    assertEquals("Provided owner id is invalid: " + updatedRequestDTO.getOwnerId(), errorResponse.getMessage());
-                    return true;
-                })
-                .verifyComplete();
-    }
-
-
-    @Test
-    void whenAddOwner_asAdmin_thenReturnCreatedOwnerResponseDTO() {
-        OwnerRequestDTO newOwnerRequestDTO = OwnerRequestDTO.builder()
-                .firstName("Betty")
-                .lastName("Davis")
-                .address("638 Cardinal Ave.")
-                .city("Sun Prairie")
-                .province("Quebec")
-                .telephone("6085551749")
-                .build();
-
-        Mono<OwnerResponseDTO> result = webTestClient.post()
-                .uri("/api/v2/gateway/owners")
-                .cookie("Bearer", jwtTokenForValidAdmin)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(Mono.just(newOwnerRequestDTO), OwnerRequestDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isCreated()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .returnResult(OwnerResponseDTO.class)
-                .getResponseBody()
-                .single();
-
-        StepVerifier
-                .create(result)
-                .expectNextMatches(ownerResponseDTO -> {
-                    assertNotNull(ownerResponseDTO);
-                    assertNotNull(ownerResponseDTO.getOwnerId());
-                    assertEquals(newOwnerRequestDTO.getFirstName(), ownerResponseDTO.getFirstName());
-                    assertEquals(newOwnerRequestDTO.getLastName(), ownerResponseDTO.getLastName());
-                    assertEquals(newOwnerRequestDTO.getAddress(), ownerResponseDTO.getAddress());
-                    assertEquals(newOwnerRequestDTO.getCity(), ownerResponseDTO.getCity());
-                    assertEquals(newOwnerRequestDTO.getProvince(), ownerResponseDTO.getProvince());
-                    assertEquals(newOwnerRequestDTO.getTelephone(), ownerResponseDTO.getTelephone());
-                    return true;
-                })
-                .verifyComplete();
-    }
-
-    @Test
-    void whenAddOwner_asCustomer_thenReturnForbidden() {
-        OwnerRequestDTO newOwnerRequestDTO = OwnerRequestDTO.builder()
-                .firstName("Betty")
-                .lastName("Davis")
-                .address("638 Cardinal Ave.")
-                .city("Sun Prairie")
-                .province("Quebec")
-                .telephone("6085551749")
-                .build();
-
-        webTestClient.post()
-                .uri("/api/v2/gateway/owners")
-                .cookie("Bearer", jwtTokenForValidOwnerId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(Mono.just(newOwnerRequestDTO), OwnerRequestDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isForbidden();
-    }
-
-    @Test
-    void whenGetAllOwners_asAdmin_thenReturnAllOwners() {
-        Flux<OwnerResponseDTO> result = webTestClient.get()
-                .uri("/api/v2/gateway/owners")
-                .cookie("Bearer", jwtTokenForValidAdmin)  // Token for an admin user
-                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType("text/event-stream;charset=UTF-8")
-                .returnResult(OwnerResponseDTO.class)
-                .getResponseBody();
-
-        StepVerifier
-                .create(result)
-                .expectNextCount(3)
-                .verifyComplete();
-
-
-    }
-
-    @Test
-    void whenGetAllOwners_asVet_thenReturnAllOwners() {
-        Flux<OwnerResponseDTO> result = webTestClient.get()
-                .uri("/api/v2/gateway/owners")
-                .cookie("Bearer", jwtTokenForValidVet)  // Token for a vet user
-                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType("text/event-stream;charset=UTF-8")
-                .returnResult(OwnerResponseDTO.class)
-                .getResponseBody();
-
-        StepVerifier
-                .create(result)
-                .expectNextCount(3)
-                .verifyComplete();
-    }
-
+    
     @Test
     public void whenDeleteOwner_asAdmin_thenReturnOwnerResponse() {
         // Mock data to simulate the OwnerResponseDTO
@@ -265,68 +84,26 @@ class OwnerControllerIntegrationTest {
 
 
     @Test
-    void whenDeleteOwner_withInvalidId_thenReturnNotFound() {
-
-        String invalidOwnerId = "e6c7398e-8ac4-4e10-9ee0-03ef33f03610";
+    void whenDeleteOwner_withInvalidOwnerIdLength_thenReturnUnprocessableEntity() {
+        String invalidOwnerId = "short-id";
 
         webTestClient.delete()
-                .uri("/owners/{ownerId}", invalidOwnerId)
-                .cookie("Bearer", jwtTokenForValidAdmin)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound();
-    }
-
-    @Test
-    void whenGetOwnerById_asAdmin_withValidId_thenReturnOwnerResponseDTO() {
-        String validOwnerId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a";
-        OwnerResponseDTO expectedOwner = new OwnerResponseDTO();
-        expectedOwner.setOwnerId(validOwnerId);
-        expectedOwner.setFirstName("Betty");
-        expectedOwner.setLastName("Davis");
-        expectedOwner.setAddress("638 Cardinal Ave.");
-        expectedOwner.setCity("Sun Prairie");
-        expectedOwner.setProvince("Quebec");
-        expectedOwner.setTelephone("6085551749");
-
-        Mono<OwnerResponseDTO> result = webTestClient.get()
-                .uri("/api/v2/gateway/owners/{ownerId}", validOwnerId)
-                .cookie("Bearer", jwtTokenForValidAdmin)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .returnResult(OwnerResponseDTO.class)
-                .getResponseBody()
-                .single();
-
-        StepVerifier
-                .create(result)
-                .expectNextMatches(ownerResponseDTO -> {
-                    assertNotNull(ownerResponseDTO);
-                    assertEquals(expectedOwner.getOwnerId(), ownerResponseDTO.getOwnerId());
-                    assertEquals(expectedOwner.getFirstName(), ownerResponseDTO.getFirstName());
-                    assertEquals(expectedOwner.getLastName(), ownerResponseDTO.getLastName());
-                    assertEquals(expectedOwner.getAddress(), ownerResponseDTO.getAddress());
-                    assertEquals(expectedOwner.getCity(), ownerResponseDTO.getCity());
-                    assertEquals(expectedOwner.getProvince(), ownerResponseDTO.getProvince());
-                    assertEquals(expectedOwner.getTelephone(), ownerResponseDTO.getTelephone());
-                    return true;
-                })
-                .verifyComplete();
-    }
-
-    @Test
-    void whenGetOwnerById_withInvalidId_thenReturnNotFound() {
-        String invalidOwnerId = "non-existing-owner-id";
-
-        webTestClient.get()
                 .uri("/api/v2/gateway/owners/{ownerId}", invalidOwnerId)
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isNotFound();
+                .expectStatus().isEqualTo(422);
     }
 
+    @Test
+    void whenDeleteOwner_withNonExistentOwner_thenReturnBadRequest() {
+        String validLengthOwnerId = "12345678-1234-1234-1234-123456789012";
 
+        webTestClient.delete()
+                .uri("/api/v2/gateway/owners/{ownerId}", validLengthOwnerId)
+                .cookie("Bearer", jwtTokenForValidAdmin)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
 }

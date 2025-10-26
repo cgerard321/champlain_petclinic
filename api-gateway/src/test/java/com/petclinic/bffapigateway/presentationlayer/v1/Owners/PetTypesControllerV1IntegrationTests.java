@@ -1,4 +1,4 @@
-package com.petclinic.bffapigateway.presentationlayer.V1.Owners;
+package com.petclinic.bffapigateway.presentationlayer.v1.Owners;
 
 import com.petclinic.bffapigateway.dtos.Pets.PetTypeResponseDTO;
 import com.petclinic.bffapigateway.presentationlayer.v1.mockservers.MockServerConfigCustomersService;
@@ -63,10 +63,10 @@ class PetTypesControllerV1IntegrationTests {
         Mono<List<PetTypeResponseDTO>> result = webTestClient.get()
                 .uri(PET_TYPE_PATH)
                 .cookie("Bearer", jwtTokenForValidAdmin)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType(MediaType.valueOf("text/event-stream;charset=UTF-8"))
                 .returnResult(PetTypeResponseDTO.class)
                 .getResponseBody()
                 .collectList()

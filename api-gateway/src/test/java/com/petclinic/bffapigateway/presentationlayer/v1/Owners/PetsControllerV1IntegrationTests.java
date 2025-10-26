@@ -1,4 +1,4 @@
-package com.petclinic.bffapigateway.presentationlayer.V1.Owners;
+package com.petclinic.bffapigateway.presentationlayer.v1.Owners;
 
 import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
@@ -75,12 +75,13 @@ class PetsControllerV1IntegrationTests {
 
     @Test
     void whenGetPetByPetId_WithValidClient_thenReturnPet() {
+        final String OWNER_ID = "test-owner-id";
         PetResponseDTO expectedPet = buildPetResponseDTO();
 
         mockServerConfigCustomersService.registerGetPetByIdEndpoint(PET_ID, expectedPet);
 
         Mono<PetResponseDTO> result = webTestClient.get()
-                .uri(PET_PATH + "/{petId}", PET_ID)
+                .uri(PET_PATH + "/owners/{ownerId}/pets/{petId}", OWNER_ID, PET_ID)
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -130,7 +131,7 @@ class PetsControllerV1IntegrationTests {
     }
 
     @Test
-    void whenGetPetByPetId_WithServiceFail_thenReturn500() {
+    void whenGetPetByPetId_WithServiceFail_thenReturnError() {
         mockServerConfigCustomersService.registerPetEndpoint_500(PET_ID);
 
         webTestClient.get()

@@ -16,6 +16,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import static org.mockito.Mockito.verify;
 import static reactor.core.publisher.Mono.just;
 import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
@@ -174,7 +176,6 @@ class BillControllerIntegrationTest {
     }
 
     @Test
-
     void createBill_ShouldReturnCreatedBillWithVetAndOwner() {
         // Arrange
         BillRequestDTO billRequest = new BillRequestDTO();
@@ -197,13 +198,19 @@ class BillControllerIntegrationTest {
         when(vetClient.getVetByVetId("vet-1")).thenReturn(Mono.just(vet));
         when(ownerClient.getOwnerByOwnerId("cust-1")).thenReturn(Mono.just(owner));
 
+        String testJwtToken = "test-jwt-token";
+
         // Act
         client.post()
-                .uri("/bills")
+                .uri(uriBuilder -> uriBuilder
+                        .path("/bills")
+                        .queryParam("sendEmail", false)
+                        .queryParam("currency", "USD")
+                        .build())
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(billRequest)
+                .cookie("Bearer", testJwtToken)
+                .body(Mono.just(billRequest), BillRequestDTO.class)
                 .exchange()
-                // Assert
                 .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
@@ -214,6 +221,10 @@ class BillControllerIntegrationTest {
                 .jsonPath("$.ownerLastName").isEqualTo("Smith")
                 .jsonPath("$.billStatus").isEqualTo("PAID")
                 .jsonPath("$.amount").isEqualTo(100.00);
+
+        // Verify mock interactions
+        verify(vetClient).getVetByVetId("vet-1");
+        verify(ownerClient).getOwnerByOwnerId("cust-1");
     }
 
     @Test
@@ -575,10 +586,10 @@ class BillControllerIntegrationTest {
                         .queryParam("year", 2022)
                         .queryParam("month", 9)
                         .build())
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(BillResponseDTO.class)
                 .hasSize(5);
     }

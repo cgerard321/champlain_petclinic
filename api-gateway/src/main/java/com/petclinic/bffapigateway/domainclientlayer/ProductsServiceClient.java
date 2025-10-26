@@ -198,7 +198,12 @@ public class ProductsServiceClient {
                 .bodyToMono(Void.class);
     }
 
-
+    public Mono<ProductEnumsResponseDTO> getProductEnumsValues(){
+        return webClient.get()
+                .uri("/enums")
+                .retrieve()
+                .bodyToMono(ProductEnumsResponseDTO.class);
+    }
 
 
 

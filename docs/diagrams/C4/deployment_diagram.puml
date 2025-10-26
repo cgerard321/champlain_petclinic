@@ -73,13 +73,22 @@ Deployment_Node(cpc, "Proxmox Server", "Proxmox 8.4.14 Server"){
 
     Deployment_Node(docker, "Docker Engine", "Compose v3.9"){
 
-      ' -------- FRONTEND ----------
+      ' -------- FRONTENDS ----------
       Deployment_Node(frontend_host, "petclinic-frontend container", "Node.js/React"){
         Container(petclinic_fe, "Petclinic Frontend", "React app", "SPA served by the frontend container; talks to API Gateway.")
 
 
           note right of petclinic_fe
           Accessible at https://petclinic.benmusicgeek.synology.me/
+          end note
+      }
+
+      Deployment_Node(employee_frontend_host, "employee-frontend container", "Node.js/Angular"){
+        Container(employee_fe, "Employee Portal", "Angular app", "SPA served by the employee frontend container; talks to API Gateway.")
+
+
+          note right of employee_fe
+          Accessible at https://petclinic-backend.benmusicgeek.synology.me/employee/
           end note
       }
 
@@ -192,6 +201,7 @@ Deployment_Node(cpc, "Proxmox Server", "Proxmox 8.4.14 Server"){
 System_Ext(smtp_srv, "smtp.gmail.com", "SMTP server", "Sends email (via Mailer Service)")
 
       Rel_D(petclinic_fe, api_gateway, "HTTPS/HTTP calls", "REST/JSON", $tags="http")
+      Rel_D(employee_fe, api_gateway, "HTTPS/HTTP calls", "REST/JSON", $tags="http")
       Rel_D(api_gateway, customers_svc, "Routes requests to", "HTTP", $tags="http")
       Rel_D(api_gateway, vet_svc, "Routes requests to", "HTTP", $tags="http")
       Rel_D(api_gateway, visits_svc, "Routes requests to", "HTTP", $tags="http")
@@ -219,6 +229,7 @@ System_Ext(smtp_srv, "smtp.gmail.com", "SMTP server", "Sends email (via Mailer S
       Rel_U(billing_svc, mailer_svc, "Send email request", "HTTP/REST", $tags="http")
 
       Rel(customers_svc, files_svc, "Store/Fetch profile pictures", "HTTP/REST", $tags="http")
+      Rel(visits_svc, files_svc, "Store/Fetch prescription PDFs", "HTTP/REST", $tags="http")
 
       Rel_D(files_svc, minio_s3, "Store/Fetch objects", "S3 API (HTTPS)", $tags="s3")
 

@@ -14,7 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -280,7 +281,7 @@ public class CartController {
     @PostMapping(value = "/{cartId}/wishlist/moveAll", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<CartResponseModel>> moveAllWishlistToCart(@PathVariable String cartId) {
         return Mono.just(cartId)
-                .filter(id -> id.length() == 36) // match your other endpoints' ID check
+                .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
                 .flatMap(validId -> cartService.moveAllWishlistToCart(validId))
                 .map(ResponseEntity::ok)
@@ -319,6 +320,12 @@ public class CartController {
         return cartService.getRecommendationPurchases(cartId)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+    @PutMapping("/{cartId}/promo")
+    public Mono<CartResponseModel> applyPromoToCart(
+            @PathVariable String cartId,
+            @RequestParam("promoPercent") Double promoPercent) {
+        return cartService.applyPromoToCart(cartId, promoPercent);
     }
 
 }

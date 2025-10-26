@@ -10,6 +10,7 @@ import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
 import com.petclinic.billing.util.EntityDtoUtil;
+import com.petclinic.billing.util.FormatBillUtil;
 import com.petclinic.billing.util.InterestCalculationUtil;
 import com.petclinic.billing.util.PdfGenerator;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +41,8 @@ public class BillServiceImpl implements BillService{
 
    @Override
     public Mono<BillResponseDTO> getBillByBillId(String billUUID) {
-        return billRepository.findByBillId(billUUID)
+        return updateOverdueBills()
+            .then(billRepository.findByBillId(billUUID))
             .doOnNext(bill -> log.info("Retrieved Bill: {}", bill))
             .map(EntityDtoUtil::toBillResponseDto);
 }
@@ -56,7 +58,8 @@ public class BillServiceImpl implements BillService{
 
     @Override
     public Flux<BillResponseDTO> getAllBills() {
-        return billRepository.findAll()
+        return updateOverdueBills()
+                .thenMany(billRepository.findAll())
                 .map(EntityDtoUtil::toBillResponseDto);
     }
 
@@ -105,7 +108,8 @@ public class BillServiceImpl implements BillService{
                         (vetFirstName == null || bill.getVetFirstName().equals(vetFirstName)) &&
                         (vetLastName == null || bill.getVetLastName().equals(vetLastName));
 
-        return billRepository.findAll()
+        return updateOverdueBills()
+                .thenMany(billRepository.findAll())
                 .filter(filterCriteria)
                 .skip(pageable.getPageNumber() * pageable.getPageSize())
                 .take(pageable.getPageSize())
@@ -159,10 +163,9 @@ public class BillServiceImpl implements BillService{
 
 
     @Override
-    public Mono<BillResponseDTO> createBill(Mono<BillRequestDTO> billRequestDTO) {
+    public Mono<BillResponseDTO> createBill(Mono<BillRequestDTO> billRequestDTO, boolean sendEmail, String currency, String jwtToken) {
         return billRequestDTO
                 .flatMap(dto -> {
-                    // Validate required fields
                     if (dto.getBillStatus() == null) {
                         return Mono.error(new ResponseStatusException(
                                 HttpStatus.BAD_REQUEST, "Bill status is required"
@@ -176,7 +179,6 @@ public class BillServiceImpl implements BillService{
                     if (dto.getCustomerId() == null || dto.getCustomerId().isEmpty()) {
                         return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer ID is required"));
                     }
-
                     // Fetch Vet and Owner details
                     Mono<VetResponseDTO> vetMono = vetClient.getVetByVetId(dto.getVetId());
                     Mono<OwnerResponseDTO> ownerMono = ownerClient.getOwnerByOwnerId(dto.getCustomerId())
@@ -201,6 +203,26 @@ public class BillServiceImpl implements BillService{
                     // Generate unique short ID safely
                     return generateUniqueBillId(bill, 1)
                             .then(Mono.defer(() -> billRepository.insert(bill)));
+                })
+                .flatMap(billResponse -> {
+                    if (sendEmail) {
+                        return authClient.getUserById(jwtToken, billResponse.getCustomerId())
+                                .switchIfEmpty(Mono.error(new ResponseStatusException(
+                                        HttpStatus.BAD_REQUEST, "Customer ID does not exist"
+                                )))
+                                .flatMap(userDetails -> {
+                                    if (currency.equals("USD")){
+                                        Mail mail = generateReceiptEmailUSD(userDetails, EntityDtoUtil.toBillResponseDto(billResponse), currency);
+                                        mailService.sendMail(mail);
+                                        return Mono.just(billResponse);
+                                    }
+                                    Mail mail = generateReceiptEmail(userDetails, EntityDtoUtil.toBillResponseDto(billResponse), currency);
+                                    mailService.sendMail(mail);
+                                    return Mono.just(billResponse);
+                                });
+                    } else {
+                        return Mono.just(billResponse);
+                    }
                 })
                 .map(EntityDtoUtil::toBillResponseDto);
     }
@@ -348,6 +370,72 @@ public class BillServiceImpl implements BillService{
     }
 
 
+    private Mail generateReceiptEmail(UserDetails user, BillResponseDTO bill, String currency) {
+        String formattedAmount = FormatBillUtil.formatCurrency(bill.getAmount(), currency);
+        String formattedInterest = FormatBillUtil.formatCurrency(bill.getInterest(), currency);
+        String formattedTotal = FormatBillUtil.formatCurrency(bill.getAmount().add(bill.getInterest()), currency);
+
+        String emailBody = String.format(
+                "Dear %s,<br><br>" +
+                        "Please find below the details of your payment receipt:<br><br>" +
+                        "--------------------------------------------<br>" +
+                        "Bill ID: %s<br>" +
+                        "Date: %s<br>" +
+                        "Subtotal: %s<br>" +
+                        "Interest: %s<br>" +
+                        "Total Due: %s<br>" +
+                        "--------------------------------------------<br><br>" +
+                        "Thank you for choosing Pet Clinic.<br><br>" +
+                        "Best regards,<br>" +
+                        "Pet Clinic Team",
+                user.getUsername(),
+                bill.getBillId(),
+                bill.getDate(),
+                formattedAmount,
+                formattedInterest,
+                formattedTotal
+        );
+
+        return new Mail(
+                user.getEmail(),
+                "Pet Clinic - Payment Receipt",
+                "default",
+                "Pet Clinic payment receipt",
+                emailBody,
+                "Pet Clinic Payment Receipt",
+                user.getEmail(),
+                user.getUsername()
+        );
+    }
+
+    private Mail generateReceiptEmailUSD(UserDetails user, BillResponseDTO bill, String currency) {
+        BigDecimal convertedAmount = FormatBillUtil.convertFromCad(bill.getAmount(), currency);
+        BigDecimal convertedInterest = FormatBillUtil.convertFromCad(bill.getInterest(), currency);
+        BigDecimal convertedTotal = convertedAmount.add(convertedInterest);
+
+        BillResponseDTO convertedBill = BillResponseDTO.builder()
+                .billId(bill.getBillId())
+                .customerId(bill.getCustomerId())
+                .ownerFirstName(bill.getOwnerFirstName())
+                .ownerLastName(bill.getOwnerLastName())
+                .visitType(bill.getVisitType())
+                .vetId(bill.getVetId())
+                .vetFirstName(bill.getVetFirstName())
+                .vetLastName(bill.getVetLastName())
+                .date(bill.getDate())
+                .amount(convertedAmount)
+                .taxedAmount(convertedTotal)
+                .interest(convertedInterest)
+                .billStatus(bill.getBillStatus())
+                .dueDate(bill.getDueDate())
+                .timeRemaining(bill.getTimeRemaining())
+                .archive(bill.getArchive())
+                .interestExempt(bill.isInterestExempt())
+                .build();
+
+        return generateReceiptEmail(user, convertedBill, currency);
+    }
+
 
 
 
@@ -490,11 +578,6 @@ public class BillServiceImpl implements BillService{
                 .map(EntityDtoUtil::toBillResponseDto);
     }
 
-    /**
-     * Generates a short, unique 10-character Bill ID.
-     * Retries up to 5 times if a collision is detected in the database.
-     * (Collisions are extremely rare but this adds a safety net.)
-     */
     private Mono<Void> generateUniqueBillId(Bill bill, int attempt) {
         if (attempt > 5) {
             return Mono.error(new RuntimeException("Failed to generate unique Bill ID after 5 attempts"));
@@ -533,6 +616,23 @@ public class BillServiceImpl implements BillService{
                         return Mono.error(new RuntimeException("Error generating PDF", e));
                     }
                 });
+    }
+
+    @Override
+    public Mono<Void> updateOverdueBills() {
+        LocalDate today = LocalDate.now();
+        
+        return billRepository.findAllBillsByBillStatus(BillStatus.UNPAID)
+                .filter(bill -> bill.getDueDate() != null && bill.getDueDate().isBefore(today))
+                .flatMap(bill -> {
+                    log.info("Updating bill {} from UNPAID to OVERDUE (due date: {}, today: {})", 
+                             bill.getBillId(), bill.getDueDate(), today);
+                    bill.setBillStatus(BillStatus.OVERDUE);
+                    return billRepository.save(bill);
+                })
+                .then()
+                .doOnSuccess(unused -> log.info("Completed overdue bills update check"))
+                .doOnError(error -> log.error("Error updating overdue bills: {}", error.getMessage(), error));
     }
 
 }

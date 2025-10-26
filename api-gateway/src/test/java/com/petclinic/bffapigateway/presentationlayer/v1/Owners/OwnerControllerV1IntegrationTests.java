@@ -1,4 +1,4 @@
-package com.petclinic.bffapigateway.presentationlayer.V1.Owners;
+package com.petclinic.bffapigateway.presentationlayer.v1.Owners;
 
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
@@ -92,10 +92,10 @@ public class OwnerControllerV1IntegrationTests {
         Mono<List<OwnerResponseDTO>> result = webTestClient.get()
                 .uri(OWNER_BASE_PATH)
                 .cookie("Bearer", jwtTokenForValidAdmin)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType(MediaType.valueOf("text/event-stream;charset=UTF-8"))
                 .returnResult(OwnerResponseDTO.class)
                 .getResponseBody()
                 .collectList()
@@ -230,4 +230,52 @@ public class OwnerControllerV1IntegrationTests {
                 .exchange()
                 .expectStatus().isNotFound();
     }
+
+    @Test
+    void whenDeletePetPhotoForOwnerIntegration_thenReturnOk() {
+        PetResponseDTO petResponseDTO = new PetResponseDTO();
+        petResponseDTO.setPetId(PET_ID);
+        petResponseDTO.setName("Test Pet");
+        petResponseDTO.setPhoto(null);
+        
+        mockServerConfigCustomersService.registerDeletePetPhotoEndpoint(PET_ID, petResponseDTO);
+
+        webTestClient.patch()
+                .uri(OWNER_BASE_PATH + "/{ownerId}/pets/{petId}/photo", OWNER_ID, PET_ID)
+                .cookie("Bearer", jwtTokenForValidAdmin)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(PetResponseDTO.class)
+                .value(body -> {
+                    assertThat(body.getPetId()).isEqualTo(PET_ID);
+                    assertThat(body.getName()).isEqualTo("Test Pet");
+                    assertThat(body.getPhoto()).isNull();
+                });
+    }
+
+    @Test
+    void whenDeletePetPhotoForOwnerIntegration_withNonExistentPet_thenReturnNotFound() {
+        mockServerConfigCustomersService.registerDeletePetPhotoEndpoint(PET_ID, null);
+
+        webTestClient.patch()
+                .uri(OWNER_BASE_PATH + "/{ownerId}/pets/{petId}/photo", OWNER_ID, PET_ID)
+                .cookie("Bearer", jwtTokenForValidAdmin)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void whenDeletePetPhotoForOwnerIntegration_withoutAuth_thenReturnUnauthorized() {
+        webTestClient.patch()
+                .uri(OWNER_BASE_PATH + "/{ownerId}/pets/{petId}/photo", OWNER_ID, PET_ID)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isUnauthorized();
+    }
+
+
+
 }

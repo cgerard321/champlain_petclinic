@@ -29,6 +29,7 @@ interface CartContextType {
   setCartId: (id: string | null) => void;
   setCartCount: (count: number) => void;
   refreshFromAPI: () => Promise<{ cartId: string | null; cartCount: number }>;
+  syncAfterAddToCart: () => Promise<void>;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -105,6 +106,19 @@ export function CartProvider({
     return { cartId: id, cartCount: count };
   }, [user?.userId, cartId, isOwner]);
 
+  // Force sync after "Add to Cart" to prevent UI mismatch
+  const syncAfterAddToCart = useCallback(async () => {
+    try {
+      const id = cartId || (await fetchCartIdByCustomerId(user?.userId));
+      if (!id) return;
+      setCartId(id);
+      const count = await fetchCartCountByCartId(id);
+      setCartCount(count);
+    } catch (err) {
+      console.error('Failed to sync cart after add:', err);
+    }
+  }, [user?.userId, cartId]);
+
   // When the user logs in, check if we already have cart data in localStorage.
   // If not, fetch it from the API to keep the cart state in sync.
   useEffect(() => {
@@ -173,8 +187,9 @@ export function CartProvider({
       setCartId,
       setCartCount,
       refreshFromAPI,
+      syncAfterAddToCart,
     }),
-    [cartId, cartCount, refreshFromAPI]
+    [cartId, cartCount, refreshFromAPI, syncAfterAddToCart]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

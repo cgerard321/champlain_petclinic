@@ -11,15 +11,16 @@ function PetDetailsController($http, $state, $stateParams, $scope, $timeout, $q)
     vm.showDeleteModal = false; // Delete modal
     vm.showModal = false;       // Update modal (if needed)
 
-    // Helper to get pet type name
+    //Should not be hard coded anymore
     vm.getPetTypeName = function (petTypeId) {
         switch (petTypeId) {
-            case '1': return 'Cat';
-            case '2': return 'Dog';
-            case '3': return 'Lizard';
-            case '4': return 'Snake';
-            case '5': return 'Bird';
-            case '6': return 'Hamster';
+            case '4283c9b8-4ffd-4866-a5ed-287117c60a40': return 'Cat';
+            case '1233c9b8-4ffd-4866-4h36-287117c60a35': return 'Dog';
+            case '9783c9b8-4ffd-4866-a5ed-287117c60a10': return 'Lizard';
+            case '9133c9b8-4ffd-4866-a5ed-287117c60a19': return 'Snake';
+            case '2093c9b8-4ffd-4866-a5ed-287117c60a11': return 'Bird';
+            case '1103c9b8-4ffd-4866-a5ed-287117c60a89': return 'Hamster';
+            case '9993c9b8-4ffd-4866-a5ed-287117c60a99': return 'Others';
             default: return 'Unknown';
         }
     };
@@ -48,11 +49,12 @@ function PetDetailsController($http, $state, $stateParams, $scope, $timeout, $q)
 
     // Toggle pet's active status
     vm.toggleActiveStatus = function (petId) {
-        return $http.get('api/gateway/pets/' + $stateParams.petId + '?_=' + new Date().getTime(), { headers: { 'Cache-Control': 'no-cache' } })
+        return $http.get('api/gateway/pets/' + $stateParams.petId + '?_=' + new Date().getTime(), {headers: { 'Cache-Control': 'no-cache' }})
             .then(function (resp) {
                 vm.pet = resp.data;
                 vm.pet.isActive = vm.pet.isActive === "true" ? "false" : "true";
-                return $http.patch('api/gateway/pet/' + $stateParams.petId, { isActive: vm.pet.isActive }, { headers: { 'Cache-Control': 'no-cache' } });
+
+                return $http.patch('api/gateway/pets/' + $stateParams.petId + "/active" + '?isActive=' + vm.pet.isActive, null, {headers: { 'Cache-Control': 'no-cache' }});
             })
             .then(function (resp) {
                 vm.pet = resp.data;
