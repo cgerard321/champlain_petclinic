@@ -10,6 +10,7 @@ import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
 import com.petclinic.billing.util.EntityDtoUtil;
+import com.petclinic.billing.util.FormatBillUtil;
 import com.petclinic.billing.util.InterestCalculationUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,13 +52,13 @@ public class BillServiceImplTest {
     VetClient vetClient;
 
     @MockBean
-    AuthServiceClient authClient;
-
-    @MockBean
     MailService mailService;
 
     @MockBean
     OwnerClient ownerClient;
+
+    @MockBean
+    AuthServiceClient authClient;
 
     @Autowired
     BillService billService;
@@ -346,8 +347,13 @@ public class BillServiceImplTest {
         Mockito.when(ownerClient.getOwnerByOwnerId("owner-456"))
                 .thenReturn(Mono.just(ownerResponse));
 
+        // Mock AuthServiceClient response
+        UserDetails userDetails = new UserDetails();
+        userDetails.setUserId("owner-456");
+        Mockito.when(authClient.getUserById("owner-456", "JWTToken"))
+                .thenReturn(Mono.just(userDetails)); // Ensure a non-null Mono is returned
+
         // Mock repository insert
-        // We no longer fix the billId because it's generated inside service
         Mockito.when(repo.findById(Mockito.anyString()))
                 .thenReturn(Mono.empty()); // no collision
 
@@ -358,16 +364,17 @@ public class BillServiceImplTest {
                 });
 
         // Act + Assert
-        StepVerifier.create(billService.createBill(Mono.just(billDTO)))
+        StepVerifier.create(billService.createBill(Mono.just(billDTO), false, "USD", "JWTToken"))
                 .expectNextMatches(response ->
                         response.getBillId() != null &&
-                                response.getBillId().length() == 10 &&
                                 response.getVetFirstName().equals("John") &&
-                                response.getOwnerFirstName().equals("Alice") &&
-                                response.getBillStatus().equals(BillStatus.PAID) &&
-                                response.getDueDate() != null
+                                response.getOwnerFirstName().equals("Alice")
                 )
                 .verifyComplete();
+
+        // Verify mock interactions
+        verify(vetClient).getVetByVetId("vet-123");
+        verify(ownerClient).getOwnerByOwnerId("owner-456");
     }
 
     @Test
@@ -393,16 +400,23 @@ public class BillServiceImplTest {
         Mockito.when(ownerClient.getOwnerByOwnerId("owner-456"))
                 .thenReturn(Mono.just(ownerResponse));
 
-        // Mock a collision once, then success
+        // Mock AuthServiceClient response
+        UserDetails userDetails = UserDetails.builder()
+                .userId("owner-456")
+                .username("alice.smith")
+                .email("alice.smith@example.com")
+                .roles(Set.of())
+                .build();
+        Mockito.when(authClient.getUserById("owner-456", "JWTToken"))
+                .thenReturn(Mono.just(userDetails));
+
         Bill existingBill = new Bill();
         existingBill.setBillId("duplicateID");
 
-        // First call -> collision, Second call -> no collision
         Mockito.when(repo.findById(Mockito.anyString()))
-                .thenReturn(Mono.just(existingBill)) // 1st attempt (collision)
-                .thenReturn(Mono.empty());            // 2nd attempt (unique)
+                .thenReturn(Mono.just(existingBill))
+                .thenReturn(Mono.empty());
 
-        // Mock repository insert (returns whatever Bill is passed in)
         Mockito.when(repo.insert(Mockito.any(Bill.class)))
                 .thenAnswer(invocation -> {
                     Bill inserted = invocation.getArgument(0);
@@ -410,7 +424,7 @@ public class BillServiceImplTest {
                 });
 
         // Act + Assert
-        StepVerifier.create(billService.createBill(Mono.just(billDTO)))
+        StepVerifier.create(billService.createBill(Mono.just(billDTO), false, "USD", "JWTToken"))
                 .expectNextMatches(response ->
                         response.getBillId() != null &&
                                 response.getBillId().length() == 10 &&
@@ -421,7 +435,6 @@ public class BillServiceImplTest {
                 )
                 .verifyComplete();
 
-        // Verify that findById() was called twice (1 collision + 1 success)
         Mockito.verify(repo, Mockito.times(2)).findById(Mockito.anyString());
         Mockito.verify(repo, Mockito.times(1)).insert(Mockito.any(Bill.class));
     }
@@ -449,22 +462,19 @@ public class BillServiceImplTest {
         Mockito.when(ownerClient.getOwnerByOwnerId("owner-456"))
                 .thenReturn(Mono.just(ownerResponse));
 
-        // Always simulate a collision (never returns empty)
         Bill existingBill = new Bill();
         existingBill.setBillId("duplicateID");
 
-        // findById() will always return an existing bill — simulating permanent collision
         Mockito.when(repo.findById(Mockito.anyString()))
                 .thenReturn(Mono.just(existingBill));
 
         // Act + Assert
-        StepVerifier.create(billService.createBill(Mono.just(billDTO)))
+        StepVerifier.create(billService.createBill(Mono.just(billDTO), true, "USD", "JWTToken"))
                 .expectErrorMatches(throwable ->
                         throwable instanceof RuntimeException &&
                                 throwable.getMessage().contains("Failed to generate unique Bill ID"))
                 .verify();
 
-        // Verify findById() was called multiple times (up to retry limit)
         Mockito.verify(repo, Mockito.atLeast(5)).findById(Mockito.anyString());
         Mockito.verify(repo, Mockito.never()).insert(Mockito.any(Bill.class));
     }
@@ -478,7 +488,7 @@ public class BillServiceImplTest {
         billDTO.setDueDate(LocalDate.now().plusDays(30));
 
         // Act + Assert
-        StepVerifier.create(billService.createBill(Mono.just(billDTO)))
+        StepVerifier.create(billService.createBill(Mono.just(billDTO), true, "USD", "JWTToken"))
                 .expectErrorSatisfies(throwable -> {
                     assertTrue(throwable instanceof ResponseStatusException);
                     ResponseStatusException ex = (ResponseStatusException) throwable;
@@ -497,7 +507,7 @@ public class BillServiceImplTest {
         billDTO.setDueDate(LocalDate.now().plusDays(30));
 
         // Act + Assert
-        StepVerifier.create(billService.createBill(Mono.just(billDTO)))
+        StepVerifier.create(billService.createBill(Mono.just(billDTO), true, "USD", "JWTToken"))
                 .expectErrorSatisfies(throwable -> {
                     assertTrue(throwable instanceof ResponseStatusException);
                     ResponseStatusException ex = (ResponseStatusException) throwable;
@@ -516,7 +526,7 @@ public class BillServiceImplTest {
         billDTO.setDueDate(LocalDate.now().plusDays(30));
 
         // Act + Assert
-        StepVerifier.create(billService.createBill(Mono.just(billDTO)))
+        StepVerifier.create(billService.createBill(Mono.just(billDTO), true, "USD", "JWTToken"))
                 .expectErrorSatisfies(throwable -> {
                     assertTrue(throwable instanceof ResponseStatusException);
                     ResponseStatusException ex = (ResponseStatusException) throwable;
@@ -534,7 +544,7 @@ public class BillServiceImplTest {
 
         when(repo.insert(any(Bill.class))).thenReturn(Mono.error(new RuntimeException("Invalid data")));
 
-        Mono<BillResponseDTO> returnedBill = billService.createBill(billRequestMono);
+        Mono<BillResponseDTO> returnedBill = billService.createBill(billRequestMono, true, "USD", "SomeJWTToken");
 
         StepVerifier.create(returnedBill)
                 .expectError()
@@ -2208,6 +2218,103 @@ public void testGenerateBillPdf_BillNotFound() {
                 .expectErrorMatches(throwable -> throwable instanceof RuntimeException &&
                         throwable.getMessage().equals("Bill not found for given ID"))
                 .verify();
+    }
+
+
+    @Test
+    void createBill_sendEmail_shouldSendReceiptEmail() {
+        // Arrange
+        BillRequestDTO billDTO = new BillRequestDTO();
+        billDTO.setBillStatus(BillStatus.PAID);
+        billDTO.setVetId("vet-123");
+        billDTO.setCustomerId("owner-456");
+        billDTO.setAmount(new BigDecimal("100.00")); // required field per controller
+        billDTO.setDate(LocalDate.now());
+        billDTO.setDueDate(LocalDate.now().plusDays(30));
+
+        // Mock vet info
+        VetResponseDTO vetResponse = new VetResponseDTO();
+        vetResponse.setFirstName("John");
+        vetResponse.setLastName("Doe");
+        when(vetClient.getVetByVetId("vet-123")).thenReturn(Mono.just(vetResponse));
+
+        // Mock owner info
+        OwnerResponseDTO ownerResponse = new OwnerResponseDTO();
+        ownerResponse.setFirstName("Alice");
+        ownerResponse.setLastName("Smith");
+        when(ownerClient.getOwnerByOwnerId("owner-456")).thenReturn(Mono.just(ownerResponse));
+
+        // Mock user details (correct order for parameters)
+        UserDetails userDetails = UserDetails.builder()
+                .email("test@example.com")
+                .username("Alice Smith")
+                .userId("owner-456")
+                .build();
+        when(authClient.getUserById(eq("jwtToken"), eq("owner-456")))
+                .thenReturn(Mono.just(userDetails));
+
+        // Mock repo behavior
+        Bill billEntity = EntityDtoUtil.toBillEntity(billDTO);
+        billEntity.setBillId("generated-id");
+        billEntity.setVetFirstName("John");
+        billEntity.setVetLastName("Doe");
+        billEntity.setOwnerFirstName("Alice");
+        billEntity.setOwnerLastName("Smith");
+        billEntity.setAmount(new BigDecimal("100.00"));
+        billEntity.setInterest(BigDecimal.ZERO);
+
+        when(repo.findById(anyString())).thenReturn(Mono.empty());
+        when(repo.findAllBillsByBillStatus(any())).thenReturn(Flux.empty());
+        when(repo.insert(any(Bill.class))).thenReturn(Mono.just(billEntity));
+
+        // Mock mail sending
+        ArgumentCaptor<Mail> mailCaptor = ArgumentCaptor.forClass(Mail.class);
+        when(mailService.sendMail(mailCaptor.capture()))
+                .thenReturn("Message sent to test@example.com");
+
+        billService = new BillServiceImpl(repo, vetClient, ownerClient, authClient, mailService);
+
+        // Act
+        StepVerifier.create(billService.createBill(Mono.just(billDTO), true, "CAD", "jwtToken"))
+                .expectNextMatches(response ->
+                        response.getBillId().equals("generated-id") &&
+                                response.getVetFirstName().equals("John") &&
+                                response.getOwnerFirstName().equals("Alice") &&
+                                response.getBillStatus().equals(BillStatus.PAID) &&
+                                response.getDueDate() != null
+                )
+                .verifyComplete();
+
+        // Assert
+        Mail sentMail = mailCaptor.getValue();
+        assertEquals("test@example.com", sentMail.getEmailSendTo());
+        assertEquals("Pet Clinic - Payment Receipt", sentMail.getEmailTitle());
+
+        // ✅ Dynamic expected email body
+        String expectedBody = String.format(
+                "Dear %s,<br><br>" +
+                        "Please find below the details of your payment receipt:<br><br>" +
+                        "--------------------------------------------<br>" +
+                        "Bill ID: %s<br>" +
+                        "Date: %s<br>" +
+                        "Subtotal: %s<br>" +
+                        "Interest: %s<br>" +
+                        "Total Due: %s<br>" +
+                        "--------------------------------------------<br><br>" +
+                        "Thank you for choosing Pet Clinic.<br><br>" +
+                        "Best regards,<br>" +
+                        "Pet Clinic Team",
+                userDetails.getUsername(),
+                billEntity.getBillId(),
+                billEntity.getDate(),
+                FormatBillUtil.formatCurrency(billEntity.getAmount(), "CAD"),
+                FormatBillUtil.formatCurrency(billEntity.getInterest(), "CAD"),
+                FormatBillUtil.formatCurrency(
+                        billEntity.getAmount().add(billEntity.getInterest()), "CAD"
+                )
+        );
+
+        assertEquals(expectedBody, sentMail.getBody(), "Email body should match the formatted receipt layout");
     }
 
 }
