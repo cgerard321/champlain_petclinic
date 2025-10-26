@@ -66,7 +66,15 @@ const OwnerBookingVisit: React.FC = (): JSX.Element => {
     const fetchPets = async (): Promise<void> => {
       try {
         setLoadingPets(true);
-        const petsData = await getAllPets();
+        const isOwner = Array.from(user.roles).some(
+          role => role.name === 'OWNER'
+        );
+        let petsData;
+        if (isOwner) {
+          petsData = await getAllPets(user.userId);
+        } else {
+          petsData = await getAllPets();
+        }
 
         // Filter only active pets
         const activePets = petsData.filter(pet => pet.isActive === 'true');
@@ -80,7 +88,7 @@ const OwnerBookingVisit: React.FC = (): JSX.Element => {
     };
 
     fetchPets();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     const fetchVets = async (): Promise<void> => {

@@ -12,6 +12,7 @@ import {
 import { VisitRequestModel } from '@/features/visits/models/VisitRequestModel';
 import { PetResponseModel } from '@/features/customers/models/PetResponseModel';
 import { getAllPets } from '@/features/visits/api/getAllPets';
+import { useUser } from '@/context/UserContext';
 
 interface ApiError {
   message: string;
@@ -59,12 +60,22 @@ const AddingVisit: React.FC = (): JSX.Element => {
   const [showNotification, setShowNotification] = useState<boolean>(false);
 
   const navigate = useNavigate();
+  const { user } = useUser();
+
   //Fetch pets
   useEffect(() => {
     const fetchPets = async (): Promise<void> => {
       try {
         setLoadingPets(true);
-        const petsData = await getAllPets();
+        const isOwner = Array.from(user.roles).some(
+          role => role.name === 'OWNER'
+        );
+        let petsData;
+        if (isOwner) {
+          petsData = await getAllPets(user.userId);
+        } else {
+          petsData = await getAllPets();
+        }
 
         setPets(petsData);
       } catch (error) {
@@ -76,9 +87,9 @@ const AddingVisit: React.FC = (): JSX.Element => {
     };
 
     fetchPets();
-  }, []);
+  }, [user]);
 
-  //Fetch vets
+  // Fetch vets
   useEffect(() => {
     const fetchVets = async (): Promise<void> => {
       try {
