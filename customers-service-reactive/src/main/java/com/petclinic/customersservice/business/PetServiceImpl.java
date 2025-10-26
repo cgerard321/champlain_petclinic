@@ -104,20 +104,6 @@ public class PetServiceImpl implements PetService {
                 });
     }
 
-    @Override
-    public Mono<PetResponseDTO> deletePetByPetIdV2(String petId) {
-        return petRepo.findPetByPetId(petId)
-                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Pet id not found: " + petId))))
-                .flatMap(found -> {
-                    Mono<Void> deletePhotoMono = Mono.justOrEmpty(found.getPhotoId())
-                            .flatMap(filesServiceClient::deleteFile);
-                    Mono<Void> deletePetMono = petRepo.delete(found);
-                    
-                    return Mono.when(deletePetMono, deletePhotoMono)
-                            .thenReturn(found);
-                })
-                .map(EntityDTOUtil::toPetResponseDTO);
-    }
 
     @Override
     public Mono<PetResponseDTO> createPetForOwner(String ownerId, Mono<PetRequestDTO> petRequestDTO) {
