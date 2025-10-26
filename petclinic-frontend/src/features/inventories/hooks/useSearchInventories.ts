@@ -87,15 +87,18 @@ export default function useSearchInventories(): useSearchInventoriesResponseMode
   );
 
   const debounceRef = useRef<number | null>(null);
+  // runIdRef is used to invalidate in-flight fetches when filters change.
+  // Each fetch run captures a unique id; if that id no longer matches the
+  // current ref value the response is discarded. This avoids closure-based
+  // cancellation race conditions.
+  const runIdRef = useRef<number>(0);
 
   useEffect(() => {
     if (debounceRef.current) {
       window.clearTimeout(debounceRef.current);
     }
 
-    let cancelled = false;
-
-    const fetchAllPages = async (): Promise<boolean | null> => {
+    const fetchAllPages = async (runId: number): Promise<boolean | null> => {
       setIsLoading(true);
       setErrorMessage('');
       const aggregated: Inventory[] = [];
@@ -110,7 +113,8 @@ export default function useSearchInventories(): useSearchInventoriesResponseMode
           filters.importantOnly
         );
 
-        if (cancelled) return null;
+        // if a newer run started, abort processing this one
+        if (runId !== runIdRef.current) return null;
 
         if (res.errorMessage) {
           setInventoryList([]);
@@ -133,7 +137,8 @@ export default function useSearchInventories(): useSearchInventoriesResponseMode
         page += 1;
       }
 
-      if (cancelled) return null;
+      // double-check still current
+      if (runId !== runIdRef.current) return null;
 
       // apply client-side filters as an extra safety (server-side already
       // received the filters but some fields may be normalized differently)
@@ -168,11 +173,15 @@ export default function useSearchInventories(): useSearchInventoriesResponseMode
     };
 
     debounceRef.current = window.setTimeout(async () => {
-      await fetchAllPages();
+      // start a new run and capture its id
+      runIdRef.current += 1;
+      const myRun = runIdRef.current;
+      await fetchAllPages(myRun);
     }, 300);
 
     return () => {
-      cancelled = true;
+      // invalidate any in-flight run by bumping the run id
+      runIdRef.current += 1;
       if (debounceRef.current) {
         window.clearTimeout(debounceRef.current);
       }
