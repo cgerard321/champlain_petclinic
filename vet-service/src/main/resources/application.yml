@@ -27,8 +27,10 @@ spring:
 
   servlet:
     multipart:
-      max-file-size: 1MB
-      max-request-size: 1MB
+      max-file-size: 2MB
+      max-request-size: 2MB
+  codec:
+    max-in-memory-size: 10MB
 
 ---
 # for test
@@ -75,8 +77,8 @@ spring:
 
   servlet:
     multipart:
-      max-file-size: 1MB
-      max-request-size: 1MB
+      max-file-size: 2MB
+      max-request-size: 2MB
 
 ---
 spring:
@@ -100,8 +102,11 @@ spring:
 
   servlet:
     multipart:
-      max-file-size: 1MB
-      max-request-size: 1MB
+      max-file-size: 2MB
+      max-request-size: 2MB
+
+  codec:
+    max-in-memory-size: 16MB
 
 management:
   endpoints:
