@@ -217,7 +217,7 @@ class VetControllerIntegrationTest {
     }
 
     @Test
-    void whenDeleteVet_asAdmin_thenReturnNoContent() {
+    void whenDeleteVet_asAdmin_thenReturnDeactivatedVetResponseDTO() {
         String vetId = UUID.randomUUID().toString();
 
         mockServerConfigVetService.registerDeleteVetEndpoint();
@@ -227,8 +227,13 @@ class VetControllerIntegrationTest {
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isNoContent()
-                .expectBody().isEmpty();
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(VetResponseDTO.class)
+                .value(dto -> {
+                    assertNotNull(dto);
+                    assertFalse(dto.isActive());
+                });
     }
 
     @Test
@@ -315,25 +320,6 @@ class VetControllerIntegrationTest {
                 .expectStatus().isNotFound();
     }
 
-//    @Test
-//    public void whenUpdatePhotoByVetId_thenReturnUpdatedPhoto() {
-//        String vetId = "69f852ca-625b-11ee-8c99-0242ac120002";
-//        String photoName = "vet_default.jpg";
-//        byte[] newPhotoData = "mockPhotoData".getBytes();
-//
-//        mockServerConfigVetService.registerUpdatePhotoOfVetEndpoint(vetId, photoName, newPhotoData);
-//
-//        webTestClient.put()
-//                .uri(VET_ENDPOINT + "/" + vetId + "/photo/" + photoName)
-//                .cookie("Bearer", BEARER_TOKEN)
-//                .contentType(MediaType.IMAGE_JPEG)
-//                .bodyValue(newPhotoData)
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectHeader().contentType(MediaType.IMAGE_JPEG_VALUE)
-//                .expectBody(byte[].class)
-//                .isEqualTo(newPhotoData);
-//    }
 
 
     @Test

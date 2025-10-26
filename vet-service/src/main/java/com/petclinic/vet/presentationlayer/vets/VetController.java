@@ -140,27 +140,12 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-
-   /*@PutMapping("{vetId}/ratings/{ratingId}")
-   public Mono<RatingResponseDTO> updateRatingByVetIdAndRatingId(@PathVariable String vetId, @PathVariable String ratingId, @RequestBody Mono<RatingRequestDTO> ratingRequestDTOMono){
-       return ratingService.updateRating(vetId, ratingId, ratingRequestDTOMono);
-   }*/
-
-
     @GetMapping("{vetId}/ratings/percentages")
     public Mono<ResponseEntity<String>> getPercentageOfRatingsByVetId(@PathVariable String vetId){
         return ratingService.getRatingPercentagesByVetId(EntityDtoUtil.verifyId(vetId))
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-
-
-  /*@GetMapping("{vetId}/ratings/{predefinedDescription}/count")
-  public Mono<ResponseEntity<Integer>> getCountOfRatingsByVetIdAndPredefinedDescription(@PathVariable String vetId, @PathVariable PredefinedDescription predefinedDescription){
-      return ratingService.getCountOfRatingsByVetIdAndPredefinedDescription(EntityDtoUtil.verifyId(vetId), predefinedDescription)
-              .map(ResponseEntity::ok)
-              .defaultIfEmpty(ResponseEntity.notFound().build());
-  }*/
 
 
     //Vets
@@ -219,9 +204,9 @@ public class VetController {
 
 
     @DeleteMapping("{vetId}")
-    public Mono<ResponseEntity<Void>> deleteVet(@PathVariable String vetId) {
+    public Mono<ResponseEntity<VetResponseDTO>> deleteVet(@PathVariable String vetId) {
         return vetService.deleteVetByVetId(EntityDtoUtil.verifyId(vetId))
-                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 

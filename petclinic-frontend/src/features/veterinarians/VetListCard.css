@@ -58,3 +58,30 @@
   justify-content: space-between;
   width: 100%;
 }
+
+
+.inactive-indicator {
+  display: inline-block; 
+  width: 1em;            
+  height: 1em;           
+  margin-left: 8px;     
+  border: 2px solid red; 
+  border-radius: 50%;   
+  position: relative;   
+  vertical-align: middle; 
+}
+
+.inactive-indicator::before {
+  content: '';
+  position: absolute;
+  top: 50%;            
+  left: 10%;          
+  right: 10%;          
+  height: 2px;         
+  background-color: red;
+  transform: translateY(-50%) rotate(-45deg); 
+}
+
+.card-vets.inactive-vet-card {
+  opacity: 0.6;
+}

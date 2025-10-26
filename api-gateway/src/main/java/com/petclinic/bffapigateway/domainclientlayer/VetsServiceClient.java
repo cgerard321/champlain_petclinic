@@ -577,7 +577,7 @@ public class VetsServiceClient {
                 .bodyToMono(VetResponseDTO.class);
     }
 
-    public Mono<Void> deleteVet(String vetId) {
+    public Mono<VetResponseDTO> deleteVet(String vetId) {
 
         return webClientBuilder
                 .build()
@@ -593,7 +593,7 @@ public class VetsServiceClient {
                 .onStatus(HttpStatusCode::is5xxServerError,error->
                         Mono.error(new IllegalArgumentException("Something went wrong with the server"))
                 )
-                .bodyToMono(Void.class);
+                .bodyToMono(VetResponseDTO.class);
     }
 
     public Mono<VetResponseDTO> updateVet(String vetId,Mono<VetRequestDTO> model) {
