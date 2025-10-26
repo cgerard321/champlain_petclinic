@@ -1,0 +1,1 @@
+pub const SESSION_EXPIRATION_HR: i64 = 24;
