@@ -1,8 +1,8 @@
 #[macro_use]
 extern crate rocket;
 
-use crate::adapters::input::error::register_catchers;
-use crate::adapters::input::routes;
+use crate::adapters::input::rest_handler::error::register_catchers;
+use crate::adapters::input::rest_handler::routes;
 use crate::adapters::output::minio::store::MinioStore;
 use bootstrap::stage;
 
