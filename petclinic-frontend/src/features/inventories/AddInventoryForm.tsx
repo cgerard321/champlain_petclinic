@@ -11,6 +11,7 @@ interface AddInventoryProps {
   handleInventoryClose: () => void;
   refreshInventoryTypes: () => void;
   existingInventoryNames?: string[];
+  onAdded?: () => void;
 }
 const isHttpUrl = (url: string): boolean => {
   try {
@@ -104,6 +105,7 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
   handleInventoryClose,
   refreshInventoryTypes,
   existingInventoryNames = [],
+  onAdded,
 }: AddInventoryProps): React.ReactElement | null => {
   const [inventoryName, setInventoryName] = useState<string>('');
   const [inventoryType, setInventoryType] = useState<string>('');
@@ -344,6 +346,13 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
     setImageUploaded(null);
     setFieldErrors({});
     refreshInventoryTypes();
+    if (onAdded) {
+      try {
+        await onAdded();
+      } catch {
+        // ignore refresh errors
+      }
+    }
     handleInventoryClose();
   };
 

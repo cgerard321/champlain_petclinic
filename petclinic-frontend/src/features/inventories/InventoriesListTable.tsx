@@ -134,6 +134,7 @@ export default function InventoriesListTable(): JSX.Element {
     getInventoryList,
     setCurrentPage,
     updateFilters,
+    refreshAllInventories,
   } = useSearchInventories();
 
   const refreshInventoryTypes = async (): Promise<void> => {
@@ -141,10 +142,10 @@ export default function InventoriesListTable(): JSX.Element {
   };
 
   useEffect(() => {
-    getInventoryList('', '', '', showImportantOnly);
     refreshInventoryTypes();
+    // No server fetch here; hook loads all inventories and paginates locally.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, showImportantOnly]);
+  }, [showImportantOnly]);
 
   // load archived from localStorage on mount
   useEffect(() => {
@@ -237,11 +238,7 @@ export default function InventoriesListTable(): JSX.Element {
   ): Promise<void> => {
     try {
       await deleteInventory(inventoryToDelete);
-      await getInventoryList(
-        inventoryName,
-        inventoryType,
-        inventoryDescription
-      );
+      await refreshAllInventories();
     } catch (error) {
       const msg =
         error instanceof Error ? error.message : 'Failed to delete inventory.';
@@ -913,6 +910,9 @@ export default function InventoriesListTable(): JSX.Element {
               handleInventoryClose={() => setShowAddInventoryForm(false)}
               refreshInventoryTypes={refreshInventoryTypes}
               existingInventoryNames={inventoryList.map(i => i.inventoryName)}
+              onAdded={async () => {
+                await refreshAllInventories();
+              }}
             />
           )}
 
@@ -939,15 +939,10 @@ export default function InventoriesListTable(): JSX.Element {
               open={editOpen}
               inventoryIdProp={editInventoryId}
               existingInventoryNames={inventoryList.map(i => i.inventoryName)}
-              onClose={() => {
+              onClose={async () => {
                 setEditOpen(false);
                 setEditInventoryId(null);
-                getInventoryList(
-                  inventoryName,
-                  inventoryType,
-                  inventoryDescription,
-                  showImportantOnly
-                );
+                await refreshAllInventories();
               }}
             />
           )}
