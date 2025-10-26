@@ -77,6 +77,12 @@ export default function VetCardTable({
             <div className="card-content">
               <h3>
                 {vet.firstName} {vet.lastName}
+                {!vet.active && (
+                  <span
+                    className="inactive-indicator"
+                    aria-label="Inactive"
+                  ></span>
+                )}
               </h3>
               <p>
                 <strong>Specialties:</strong>{' '}

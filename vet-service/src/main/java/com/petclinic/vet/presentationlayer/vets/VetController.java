@@ -150,6 +150,8 @@ public class VetController {
     }
 
 
+
+ 
     @GetMapping("{vetId}/ratings/percentages")
     public Mono<ResponseEntity<String>> getPercentageOfRatingsByVetId(@PathVariable String vetId){
         return ratingService.getRatingPercentagesByVetId(EntityDtoUtil.verifyId(vetId))
@@ -220,9 +222,9 @@ public class VetController {
 
 
     @DeleteMapping("{vetId}")
-    public Mono<ResponseEntity<Void>> deleteVet(@PathVariable String vetId) {
+    public Mono<ResponseEntity<VetResponseDTO>> deleteVet(@PathVariable String vetId) {
         return vetService.deleteVetByVetId(EntityDtoUtil.verifyId(vetId))
-                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
