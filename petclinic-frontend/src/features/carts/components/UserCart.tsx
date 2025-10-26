@@ -14,6 +14,7 @@ import { NavBar } from '@/layouts/AppNavBar';
 import { FaShoppingCart } from 'react-icons/fa';
 import ImageContainer from '@/features/products/components/ImageContainer';
 import axiosInstance from '@/shared/api/axiosInstance';
+import getErrorMessage from '@/shared/api/getErrorMessage';
 import { formatPrice } from '../utils/formatPrice';
 import { applyPromo } from '@/shared/api/cart';
 import {
@@ -37,7 +38,6 @@ import {
   setCartIdInLS,
 } from '../api/cartEvent';
 import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
-import axios from 'axios';
 interface ProductAPIResponse {
   productId: number;
   imageId: string;
@@ -176,10 +176,9 @@ const UserCart: React.FC = () => {
         setCartCountInLS(updatedCount);
       }
     } catch (err: unknown) {
-      const msg =
-        (axios.isAxiosError(err) &&
-          (err.response?.data as { message?: string } | undefined)?.message) ||
-        `Failed to add ${item.productName} to cart.`;
+      const msg = getErrorMessage(err, {
+        defaultMessage: `Failed to add ${item.productName} to cart.`,
+      });
       setNotificationMessage(msg);
     }
   };
@@ -263,10 +262,9 @@ const UserCart: React.FC = () => {
         await syncAfterAddToCart();
       }
     } catch (err: unknown) {
-      const msg =
-        (axios.isAxiosError(err) &&
-          (err.response?.data as { message?: string } | undefined)?.message) ||
-        `Failed to add ${item.productName} to cart.`;
+      const msg = getErrorMessage(err, {
+        defaultMessage: `Failed to add ${item.productName} to cart.`,
+      });
       setNotificationMessage(msg);
     }
   };
@@ -437,9 +435,11 @@ const UserCart: React.FC = () => {
       } catch {
         /* ignore */
       }
-    } catch (err) {
-      console.error('Error validating promo code:', err);
-      setVoucherError('Promo code invalid or expired.');
+    } catch (err: unknown) {
+      const msg = getErrorMessage(err, {
+        defaultMessage: 'Promo code invalid or expired.',
+      });
+      setVoucherError(msg);
     }
   };
 
@@ -513,11 +513,13 @@ const UserCart: React.FC = () => {
           bumpCartCountInLS(newQuantity - prevQty);
           notifyCartChanged(); // qty changed
         }
-      } catch (err) {
-        console.error('Error updating quantity:', err);
+      } catch (err: unknown) {
+        const msg = getErrorMessage(err, {
+          defaultMessage: 'Failed to update quantity',
+        });
         setErrorMessages(prev => ({
           ...prev,
-          [index]: 'Failed to update quantity',
+          [index]: msg,
         }));
       }
     },
@@ -561,9 +563,11 @@ const UserCart: React.FC = () => {
           return prev.filter((_, idx) => idx !== indexToDelete);
         });
         notifyCartChanged(); // item removed
-      } catch (error) {
-        console.error('Error deleting item: ', error);
-        setNotificationMessage('Failed to delete item.');
+      } catch (error: unknown) {
+        const msg = getErrorMessage(error, {
+          defaultMessage: 'Failed to delete item.',
+        });
+        setNotificationMessage(msg);
       }
     },
     [cartId, blockIfReadOnly, confirm]
@@ -594,9 +598,11 @@ const UserCart: React.FC = () => {
       setCartCountInLS(0);
       notifyCartChanged();
       setNotificationMessage('Cart has been cleared.');
-    } catch (error) {
-      console.error('Error clearing cart:', error);
-      setNotificationMessage('Failed to clear cart.');
+    } catch (error: unknown) {
+      const msg = getErrorMessage(error, {
+        defaultMessage: 'Failed to clear cart.',
+      });
+      setNotificationMessage(msg);
     }
   };
 
@@ -634,8 +640,10 @@ const UserCart: React.FC = () => {
       //notify navbar (item moved out of cart)
       notifyCartChanged();
     } catch (error: unknown) {
-      console.error('Error adding to wishlist:', error);
-      alert('Failed to add item to wishlist.');
+      const msg = getErrorMessage(error, {
+        defaultMessage: 'Failed to add item to wishlist.',
+      });
+      setNotificationMessage(msg);
     }
   };
 
@@ -682,8 +690,10 @@ const UserCart: React.FC = () => {
       //notify navbar (item moved into cart)
       notifyCartChanged();
     } catch (error: unknown) {
-      console.error('Error adding to cart:', error);
-      setNotificationMessage('Failed to add item to cart.');
+      const msg = getErrorMessage(error, {
+        defaultMessage: 'Failed to add item to cart.',
+      });
+      setNotificationMessage(msg);
     }
   };
 
@@ -710,9 +720,11 @@ const UserCart: React.FC = () => {
       setWishlistItems(prev =>
         prev.filter(p => p.productId !== item.productId)
       );
-    } catch (e) {
-      console.error(e);
-      setNotificationMessage('Could not remove item from wishlist.');
+    } catch (e: unknown) {
+      const msg = getErrorMessage(e, {
+        defaultMessage: 'Could not remove item from wishlist.',
+      });
+      setNotificationMessage(msg);
     }
   };
 
@@ -749,11 +761,11 @@ const UserCart: React.FC = () => {
           `Move All failed (${res.status})`;
         setNotificationMessage(msg);
       }
-    } catch (e) {
-      console.error(e);
-      setNotificationMessage('Unexpected error while moving wishlist items.');
-    } finally {
-      setMovingAll(false);
+    } catch (e: unknown) {
+      const msg = getErrorMessage(e, {
+        defaultMessage: 'Unexpected error while moving wishlist items.',
+      });
+      setNotificationMessage(msg);
     }
   };
 
