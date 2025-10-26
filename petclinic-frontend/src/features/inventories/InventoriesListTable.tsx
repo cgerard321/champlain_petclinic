@@ -517,6 +517,91 @@ export default function InventoriesListTable(): JSX.Element {
           </div>
         </div>
 
+        <div className={inventoryStyles.mobileFilters}>
+          <div className={inventoryStyles.mobileFilterGroup}>
+            <label className={inventoryStyles.mobileFilterLabel}>Name</label>
+            <input
+              type="text"
+              value={inventoryName}
+              onChange={e => handleInventoryNameChange(e.target.value)}
+              className={inventoryStyles.mobileFilterInput}
+            />
+          </div>
+
+          <div className={inventoryStyles.mobileFilterGroup}>
+            <label className={inventoryStyles.mobileFilterLabel}>Type</label>
+            <select
+              value={inventoryType}
+              onChange={e => handleInventoryTypeChange(e.target.value)}
+              className={inventoryStyles.mobileFilterSelect}
+            >
+              <option value="">None</option>
+              {inventoryTypeList.map(type => (
+                <option key={type.type} value={type.type}>
+                  {type.type}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className={inventoryStyles.mobileFilterGroup}>
+            <label className={inventoryStyles.mobileFilterLabel}>
+              Description
+            </label>
+            <input
+              type="text"
+              value={inventoryDescription}
+              onChange={e => handleInventoryDescriptionChange(e.target.value)}
+              className={inventoryStyles.mobileFilterInput}
+            />
+          </div>
+
+          <div className={inventoryStyles.mobileCheckboxGroup}>
+            <input
+              type="checkbox"
+              checked={showImportantOnly}
+              onChange={e => {
+                const value = e.target.checked;
+                setShowImportantOnly(value);
+                updateFilters({
+                  inventoryName,
+                  inventoryType,
+                  inventoryDescription,
+                  importantOnly: value,
+                });
+              }}
+              className={inventoryStyles.mobileCheckboxInput}
+            />
+            <label className={inventoryStyles.mobileCheckboxLabel}>
+              Show Important Only
+            </label>
+          </div>
+
+          <div className={inventoryStyles.mobileFilterGroup}>
+            <label className={inventoryStyles.mobileFilterLabel}>
+              View Status
+            </label>
+            <select
+              value={viewMode}
+              onChange={e =>
+                setViewMode(e.target.value as 'active' | 'archived' | 'all')
+              }
+              className={inventoryStyles.mobileFilterSelect}
+            >
+              <option value="active">Active</option>
+              <option value="archived">Archived</option>
+              <option value="all">All</option>
+            </select>
+          </div>
+
+          <button
+            onClick={clearQueries}
+            className={inventoryStyles.mobileClearButton}
+          >
+            Clear Filters
+          </button>
+        </div>
+
         <div>
           <table
             className={`table table-striped ${inventoryStyles.inventoryTable} ${inventoryStyles.fixedTable} ${inventoryStyles.cleanTable}`}
