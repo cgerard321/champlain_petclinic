@@ -1,5 +1,5 @@
-use crate::http::prelude::AppError;
-use minio::s3::error::Error::S3Error;
+use crate::core::error::AppError;
+use minio::s3::error::Error::{InvalidBucketName, S3Error};
 use minio::s3::error::{Error as MinioError, ErrorCode};
 
 impl From<MinioError> for AppError {
@@ -12,6 +12,7 @@ impl From<MinioError> for AppError {
                 ErrorCode::AccessDenied => AppError::Forbidden,
                 _ => AppError::FailedDependency,
             },
+            InvalidBucketName(bn) => AppError::BadRequest(format!("invalid bucket name {0}", bn)),
             _ => AppError::FailedDependency,
         }
     }

@@ -1,14 +1,16 @@
 #[macro_use]
 extern crate rocket;
-mod http;
-mod minio_service;
 
-use crate::http::routes;
+use crate::adapters::input::error::register_catchers;
+use crate::adapters::input::routes;
+use crate::adapters::output::minio::store::MinioStore;
+use bootstrap::stage;
 
 mod core;
 
-use crate::http::prelude::register_catchers;
-use crate::minio_service::store::MinioStore;
+mod adapters;
+pub mod bootstrap;
+mod domain;
 
 #[launch]
 fn rocket() -> _ {
@@ -20,6 +22,7 @@ fn rocket() -> _ {
         .expect("MinIO config must be valid at startup");
 
     rocket::build()
+        .attach(stage())
         .manage(store)
         .mount("/api/v1", routes())
         .register("/", register_catchers())
