@@ -48,11 +48,11 @@ private final String baseBillURL = "/api/v2/gateway/bills";
             .customerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
             .visitType("general")
             .vetId("3")
-            .date(LocalDate.parse("2024-10-11"))
+            .date(LocalDate.now().plusDays(1))
             .amount(new BigDecimal("100.0"))
             .taxedAmount(new BigDecimal("0.0"))
             .billStatus(BillStatus.UNPAID)
-            .dueDate(LocalDate.parse("2024-10-13"))
+            .dueDate(LocalDate.now().plusDays(46))
             .build();
 
     private BillResponseDTO billresponse2 = BillResponseDTO.builder()
@@ -60,21 +60,21 @@ private final String baseBillURL = "/api/v2/gateway/bills";
             .customerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
             .visitType("general")
             .vetId("2")
-            .date(LocalDate.parse("2024-10-11"))
+            .date(LocalDate.now().plusDays(1))
             .amount(new BigDecimal("120.0"))
             .taxedAmount(new BigDecimal("10.0"))
             .billStatus(BillStatus.UNPAID)
-            .dueDate(LocalDate.parse("2024-10-13"))
+            .dueDate(LocalDate.now().plusDays(46))
             .build();
 
     private BillRequestDTO billRequestDTO = BillRequestDTO.builder()
             .customerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
             .visitType("general")
             .vetId("3")
-            .date(LocalDate.parse("2024-10-11"))
+            .date(LocalDate.now().plusDays(1))
             .amount(new BigDecimal("100.0"))
             .billStatus(BillStatus.UNPAID)
-            .dueDate(LocalDate.parse("2024-10-13"))
+            .dueDate(LocalDate.now().plusDays(46))
             .build();
 
 

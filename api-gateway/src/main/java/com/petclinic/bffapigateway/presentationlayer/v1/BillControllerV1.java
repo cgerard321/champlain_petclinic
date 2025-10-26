@@ -3,12 +3,14 @@ package com.petclinic.bffapigateway.presentationlayer.v1;
 import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
+import com.petclinic.bffapigateway.dtos.Bills.BillStatus;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Optional;
 
 @RestController
@@ -25,6 +29,7 @@ import java.util.Optional;
 public class BillControllerV1 {
 
     private final BillServiceClient billServiceClient;
+    
 
     // Define endpoints to interact with the BillServiceClient here
 
@@ -47,11 +52,45 @@ public class BillControllerV1 {
     @PostMapping(value = "",
             consumes = "application/json",
             produces = "application/json")
-    public Mono<ResponseEntity<BillResponseDTO>> createBill(@RequestBody BillRequestDTO model,
-                                                            @RequestParam(defaultValue = "false") boolean sendEmail,
-                                                            @RequestParam(required = false, defaultValue = "CAD") String currency,
-                                                            @CookieValue("Bearer") String jwtToken) {
-        return billServiceClient.createBill(model, sendEmail, currency, jwtToken).map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
+    public Mono<ResponseEntity<BillResponseDTO>> createBill(@RequestBody BillRequestDTO model) {
+        if (model.getCustomerId() == null || model.getCustomerId().trim().isEmpty()) {
+            return Mono.just(ResponseEntity.badRequest().build());
+        }
+        
+        if (model.getVetId() == null || model.getVetId().trim().isEmpty()) {
+            return Mono.just(ResponseEntity.badRequest().build());
+        }
+        
+        if (model.getAmount() == null || model.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            return Mono.just(ResponseEntity.badRequest().build());
+        }
+        
+        if (model.getBillStatus() == null) {
+            model.setBillStatus(BillStatus.UNPAID);
+            log.debug("Auto-set bill status to UNPAID");
+        }
+        
+        if (model.getDate() == null) {
+            model.setDate(LocalDate.now());
+            log.debug("Auto-set bill date to today: {}", model.getDate());
+        }
+        
+        if (model.getDate().isBefore(LocalDate.now())) {
+            log.error("Attempted to create bill with past date: {}", model.getDate());
+            return Mono.just(ResponseEntity.badRequest().build());
+        }
+        
+        if (model.getBillStatus() == BillStatus.OVERDUE) {
+            log.error("Attempted to create bill with OVERDUE status - not allowed for manual creation");
+            return Mono.just(ResponseEntity.badRequest().build());
+        }
+        
+        if (model.getDueDate() == null) {
+            model.setDueDate(model.getDate().plusDays(45));
+            log.debug("Auto-suggested due date (45 days): {}", model.getDueDate());
+        }
+        
+        return billServiceClient.createBill(model).map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 

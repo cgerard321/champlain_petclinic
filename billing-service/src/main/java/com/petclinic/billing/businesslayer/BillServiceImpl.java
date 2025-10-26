@@ -41,7 +41,8 @@ public class BillServiceImpl implements BillService{
 
    @Override
     public Mono<BillResponseDTO> getBillByBillId(String billUUID) {
-        return billRepository.findByBillId(billUUID)
+        return updateOverdueBills()
+            .then(billRepository.findByBillId(billUUID))
             .doOnNext(bill -> log.info("Retrieved Bill: {}", bill))
             .map(EntityDtoUtil::toBillResponseDto);
 }
@@ -57,7 +58,8 @@ public class BillServiceImpl implements BillService{
 
     @Override
     public Flux<BillResponseDTO> getAllBills() {
-        return billRepository.findAll()
+        return updateOverdueBills()
+                .thenMany(billRepository.findAll())
                 .map(EntityDtoUtil::toBillResponseDto);
     }
 
@@ -106,7 +108,8 @@ public class BillServiceImpl implements BillService{
                         (vetFirstName == null || bill.getVetFirstName().equals(vetFirstName)) &&
                         (vetLastName == null || bill.getVetLastName().equals(vetLastName));
 
-        return billRepository.findAll()
+        return updateOverdueBills()
+                .thenMany(billRepository.findAll())
                 .filter(filterCriteria)
                 .skip(pageable.getPageNumber() * pageable.getPageSize())
                 .take(pageable.getPageSize())
@@ -613,6 +616,23 @@ public class BillServiceImpl implements BillService{
                         return Mono.error(new RuntimeException("Error generating PDF", e));
                     }
                 });
+    }
+
+    @Override
+    public Mono<Void> updateOverdueBills() {
+        LocalDate today = LocalDate.now();
+        
+        return billRepository.findAllBillsByBillStatus(BillStatus.UNPAID)
+                .filter(bill -> bill.getDueDate() != null && bill.getDueDate().isBefore(today))
+                .flatMap(bill -> {
+                    log.info("Updating bill {} from UNPAID to OVERDUE (due date: {}, today: {})", 
+                             bill.getBillId(), bill.getDueDate(), today);
+                    bill.setBillStatus(BillStatus.OVERDUE);
+                    return billRepository.save(bill);
+                })
+                .then()
+                .doOnSuccess(unused -> log.info("Completed overdue bills update check"))
+                .doOnError(error -> log.error("Error updating overdue bills: {}", error.getMessage(), error));
     }
 
 }

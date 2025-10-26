@@ -69,6 +69,7 @@ public class BillServiceImplTest {
         String BILL_ID = billEntity.getBillId();
 
         when(repo.findByBillId(anyString())).thenReturn(Mono.just(billEntity));
+        when(repo.findAllBillsByBillStatus(BillStatus.UNPAID)).thenReturn(Flux.empty());
 
         Mono<BillResponseDTO> billDTOMono = billService.getBillByBillId(BILL_ID);
 
@@ -131,6 +132,7 @@ public class BillServiceImplTest {
 
         // Mock the repository to return a Flux of owners
         when(repo.findAll()).thenReturn(Flux.just(bill1, bill2, bill3));
+        when(repo.findAllBillsByBillStatus(BillStatus.UNPAID)).thenReturn(Flux.empty());
 
         // Call the method under test
         Flux<BillResponseDTO> bills = billService.getAllBillsByPage(pageable, null, null,
@@ -675,6 +677,7 @@ public class BillServiceImplTest {
         String nonExistentBillId = "nonExistentId";
 
         when(repo.findByBillId(nonExistentBillId)).thenReturn(Mono.empty());
+        when(repo.findAllBillsByBillStatus(BillStatus.UNPAID)).thenReturn(Flux.empty());
 
         Mono<BillResponseDTO> billDTOMono = billService.getBillByBillId(nonExistentBillId);
 
@@ -862,6 +865,7 @@ public void testGenerateBillPdf_BillNotFound() {
         Pageable pageable = PageRequest.of(0, 1);
 
         when(repo.findAll()).thenReturn(Flux.just(bill1, bill2));
+        when(repo.findAllBillsByBillStatus(BillStatus.UNPAID)).thenReturn(Flux.empty());
 
 
         Flux<BillResponseDTO> result = billService.getAllBillsByPage(pageable, null, null,
@@ -880,6 +884,7 @@ public void testGenerateBillPdf_BillNotFound() {
         Pageable pageable = PageRequest.of(0, 10);
 
         when(repo.findAll()).thenReturn(Flux.empty());
+        when(repo.findAllBillsByBillStatus(BillStatus.UNPAID)).thenReturn(Flux.empty());
 
 
         Flux<BillResponseDTO> result = billService.getAllBillsByPage(pageable, null, null,
@@ -1227,6 +1232,7 @@ public void testGenerateBillPdf_BillNotFound() {
                 .build();
 
         when(repo.findByBillId("overdue-bill-id")).thenReturn(Mono.just(overdueBill));
+        when(repo.findAllBillsByBillStatus(BillStatus.UNPAID)).thenReturn(Flux.empty());
 
 
         Mono<BillResponseDTO> result = billService.getBillByBillId("overdue-bill-id");
@@ -1255,6 +1261,7 @@ public void testGenerateBillPdf_BillNotFound() {
                 .build();
 
         when(repo.findByBillId("unpaid-bill-id")).thenReturn(Mono.just(unpaidBill));
+        when(repo.findAllBillsByBillStatus(BillStatus.UNPAID)).thenReturn(Flux.empty());
 
 
         Mono<BillResponseDTO> result = billService.getBillByBillId("unpaid-bill-id");
@@ -2021,6 +2028,7 @@ public void testGenerateBillPdf_BillNotFound() {
             .build();
 
         when(repo.findByBillId("integration-test-id")).thenReturn(Mono.just(overdueBill));
+        when(repo.findAllBillsByBillStatus(BillStatus.UNPAID)).thenReturn(Flux.empty());
 
         
         Mono<BillResponseDTO> result = billService.getBillByBillId("integration-test-id");        StepVerifier.create(result)
