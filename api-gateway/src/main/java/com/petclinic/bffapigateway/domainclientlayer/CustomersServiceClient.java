@@ -54,6 +54,7 @@ public class CustomersServiceClient {
     public Flux<OwnerResponseDTO> getAllOwners() {
         return webClientBuilder.build().get()
                 .uri(customersServiceUrl + "/owners")
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
                 .bodyToFlux(OwnerResponseDTO.class);
     }
@@ -85,6 +86,7 @@ public class CustomersServiceClient {
         return webClientBuilder.build()
                 .get()
                 .uri(builder.build().toUri())
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
                 .bodyToFlux(OwnerResponseDTO.class);
     }
@@ -156,6 +158,7 @@ public class CustomersServiceClient {
     public Flux<PetTypeResponseDTO> getPetTypes() {
         return webClientBuilder.build().get()
                 .uri(customersServiceUrl + "/owners/petTypes")
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
                 .bodyToFlux(PetTypeResponseDTO.class);
     }
@@ -163,6 +166,7 @@ public class CustomersServiceClient {
     public Flux<PetResponseDTO> getAllPets() {
         return webClientBuilder.build().get()
                 .uri(customersServiceUrl + "/pets")
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
                 .bodyToFlux(PetResponseDTO.class);
     }
@@ -257,6 +261,7 @@ public class CustomersServiceClient {
     public Flux<PetTypeResponseDTO> getAllPetTypes() {
         return webClientBuilder.build().get()
                 .uri(customersServiceUrl + "/owners/petTypes")
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
                 .bodyToFlux(PetTypeResponseDTO.class);
     }
@@ -334,6 +339,7 @@ public class CustomersServiceClient {
         return webClientBuilder.build()
                 .get()
                 .uri(builder.build().toUri())
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
                 .bodyToFlux(PetTypeResponseDTO.class);
     }
