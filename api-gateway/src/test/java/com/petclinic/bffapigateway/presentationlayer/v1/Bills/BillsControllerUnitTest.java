@@ -58,11 +58,11 @@ public class BillsControllerUnitTest {
             .customerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
             .visitType("general")
             .vetId("3")
-            .date(LocalDate.parse("2024-10-11"))
+            .date(LocalDate.now().plusDays(1))
             .amount(new BigDecimal("100.0"))
             .taxedAmount(new BigDecimal("0.0"))
             .billStatus(BillStatus.UNPAID)
-            .dueDate(LocalDate.parse("2024-10-13"))
+            .dueDate(LocalDate.now().plusDays(46))
             .build();
 
     private BillResponseDTO billresponse2 = BillResponseDTO.builder()
@@ -70,11 +70,11 @@ public class BillsControllerUnitTest {
             .customerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
             .visitType("general")
             .vetId("2")
-            .date(LocalDate.parse("2024-10-11"))
+            .date(LocalDate.now().plusDays(1))
             .amount(new BigDecimal("120.0"))
             .taxedAmount(new BigDecimal("10.0"))
             .billStatus(BillStatus.UNPAID)
-            .dueDate(LocalDate.parse("2024-10-13"))
+            .dueDate(LocalDate.now().plusDays(46))
             .build();
 
     @Test
@@ -84,8 +84,8 @@ public class BillsControllerUnitTest {
                 .customerId("1")
                 .visitType("Test type")
                 .vetId("1")
-                .date(LocalDate.of(2024,10,1))
-                .dueDate(LocalDate.of(2024,10,30))
+                .date(LocalDate.now().plusDays(1))
+                .dueDate(LocalDate.now().plusDays(30))
                 .billStatus(BillStatus.UNPAID)
                 .amount(new BigDecimal("25.00"))
                 .taxedAmount(BigDecimal.ZERO)
@@ -98,8 +98,8 @@ public class BillsControllerUnitTest {
                 .customerId("2")
                 .visitType("Test type")
                 .vetId("2")
-                .date(LocalDate.of(2024,10,1))
-                .dueDate(LocalDate.of(2024,10,30))
+                .date(LocalDate.now().plusDays(1))
+                .dueDate(LocalDate.now().plusDays(30))
                 .billStatus(BillStatus.UNPAID)
                 .amount(new BigDecimal("27.00"))
                 .taxedAmount(BigDecimal.ZERO)
@@ -125,8 +125,8 @@ public class BillsControllerUnitTest {
                 .customerId("1")
                 .visitType("Test type")
                 .vetId("1")
-                .date(LocalDate.of(2024,10,1))
-                .dueDate(LocalDate.of(2024,10,30))
+                .date(LocalDate.now().plusDays(1))
+                .dueDate(LocalDate.now().plusDays(30))
                 .billStatus(PAID)
                 .amount(new BigDecimal("25.00"))
                 .taxedAmount(BigDecimal.ZERO)
@@ -138,8 +138,8 @@ public class BillsControllerUnitTest {
                 .customerId("2")
                 .visitType("Test type")
                 .vetId("2")
-                .date(LocalDate.of(2024,10,1))
-                .dueDate(LocalDate.of(2024,10,30))
+                .date(LocalDate.now().plusDays(1))
+                .dueDate(LocalDate.now().plusDays(30))
                 .billStatus(PAID)
                 .amount(new BigDecimal("27.00"))
                 .taxedAmount(BigDecimal.ZERO)
@@ -165,8 +165,8 @@ public class BillsControllerUnitTest {
                 .customerId("1")
                 .visitType("Test type")
                 .vetId("1")
-                .date(LocalDate.of(2024,10,1))
-                .dueDate(LocalDate.of(2024,10,30))
+                .date(LocalDate.now().plusDays(1))
+                .dueDate(LocalDate.now().plusDays(30))
                 .billStatus(BillStatus.UNPAID)
                 .amount(new BigDecimal("25.00"))
                 .taxedAmount(BigDecimal.ZERO)
@@ -178,8 +178,8 @@ public class BillsControllerUnitTest {
                 .customerId("2")
                 .visitType("Test type")
                 .vetId("2")
-                .date(LocalDate.of(2024,10,1))
-                .dueDate(LocalDate.of(2024,10,30))
+                .date(LocalDate.now().plusDays(1))
+                .dueDate(LocalDate.now().plusDays(30))
                 .billStatus(BillStatus.UNPAID)
                 .amount(new BigDecimal("27.00"))
                 .taxedAmount(BigDecimal.ZERO)
@@ -205,8 +205,8 @@ public class BillsControllerUnitTest {
                 .customerId("1")
                 .visitType("Test type")
                 .vetId("1")
-                .date(LocalDate.of(2024,10,1))
-                .dueDate(LocalDate.of(2024,10,8))
+                .date(LocalDate.now().minusDays(10))
+                .dueDate(LocalDate.now().minusDays(3))
                 .billStatus(BillStatus.OVERDUE)
                 .amount(new BigDecimal("25.00"))
                 .taxedAmount(BigDecimal.ZERO)
@@ -218,8 +218,8 @@ public class BillsControllerUnitTest {
                 .customerId("2")
                 .visitType("Test type")
                 .vetId("2")
-                .date(LocalDate.of(2024,10,1))
-                .dueDate(LocalDate.of(2024,10,8))
+                .date(LocalDate.now().minusDays(10))
+                .dueDate(LocalDate.now().minusDays(3))
                 .billStatus(BillStatus.OVERDUE)
                 .amount(new BigDecimal("27.00"))
                 .taxedAmount(BigDecimal.ZERO)
@@ -321,14 +321,22 @@ public class BillsControllerUnitTest {
     void createBill(){
         BillResponseDTO billResponseDTO = new BillResponseDTO();
         billResponseDTO.setBillId("9");
-        billResponseDTO.setDate(null);
+        billResponseDTO.setDate(LocalDate.now().plusDays(1));
         billResponseDTO.setAmount(new BigDecimal("600"));
         billResponseDTO.setVisitType("Adoption");
+        billResponseDTO.setDueDate(LocalDate.now().plusDays(46));
+        billResponseDTO.setCustomerId("customer-123");
+        billResponseDTO.setVetId("vet-456");
+        billResponseDTO.setBillStatus(BillStatus.UNPAID);
 
         BillRequestDTO billRequestDTO = new BillRequestDTO();
-        billRequestDTO.setDate(null);
+        billRequestDTO.setDate(LocalDate.now().plusDays(1));
         billRequestDTO.setAmount(new BigDecimal("600"));
         billRequestDTO.setVisitType("Adoption");
+        billRequestDTO.setDueDate(LocalDate.now().plusDays(46));
+        billRequestDTO.setCustomerId("customer-123");
+        billRequestDTO.setVetId("vet-456");
+        billRequestDTO.setBillStatus(BillStatus.UNPAID);
         when(billServiceClient.createBill(billRequestDTO))
                 .thenReturn(Mono.just(billResponseDTO));
 

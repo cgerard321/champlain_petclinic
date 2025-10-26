@@ -78,6 +78,12 @@ export default function AdminBillsListTable({
   const [detailBill, setDetailBill] = useState<Bill | null>(null);
   const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
   const [currencyOpen, setCurrencyOpen] = useState<boolean>(false);
+  const [customerError, setCustomerError] = useState<boolean>(false);
+  const [vetError, setVetError] = useState<boolean>(false);
+  const [visitTypeError, setVisitTypeError] = useState<boolean>(false);
+  const [dateError, setDateError] = useState<boolean>(false);
+  const [statusError, setStatusError] = useState<boolean>(false);
+  const [dueDateError, setDueDateError] = useState<boolean>(false);
 
   const fetchOwnersAndVets = useCallback(async (): Promise<void> => {
     try {
@@ -109,27 +115,51 @@ export default function AdminBillsListTable({
   }, []);
 
   const validateForm = (): boolean => {
-    if (
-      !newBill.customerId ||
-      !newBill.vetId ||
-      !newBill.date ||
-      newBill.amount <= 0 ||
-      !newBill.billStatus ||
-      !newBill.dueDate
-    ) {
-      setError(
-        'All fields are required and the amount must be greater than zero.'
-      );
-      return false;
+    let valid = true;
+    setCustomerError(false);
+    setVetError(false);
+    setVisitTypeError(false);
+    setDateError(false);
+    setStatusError(false);
+    setDueDateError(false);
+    setError(null);
+
+    if (!newBill.customerId) {
+      setCustomerError(true);
+      valid = false;
+    }
+    if (!newBill.vetId) {
+      setVetError(true);
+      valid = false;
+    }
+    if (!newBill.visitType) {
+      setVisitTypeError(true);
+      valid = false;
+    }
+    if (newBill.amount <= 0) {
+      setError('Please fill out this field.');
+      valid = false;
+    }
+    if (!newBill.date) {
+      setDateError(true);
+      valid = false;
+    }
+    if (!newBill.billStatus) {
+      setStatusError(true);
+      valid = false;
+    }
+    if (!newBill.dueDate) {
+      setDueDateError(true);
+      valid = false;
     }
     const billDate = new Date(newBill.date);
     const dueDate = new Date(newBill.dueDate);
     if (billDate > dueDate) {
+      setDateError(true);
       setError('The bill date cannot be after the due date.');
-      return false;
+      valid = false;
     }
-    setError(null);
-    return true;
+    return valid;
   };
 
   const handleFilterChange = async (
@@ -299,9 +329,38 @@ export default function AdminBillsListTable({
       await addBill(formattedBill);
       setActiveSection(null);
       getBillsList(currentPage, 10);
-    } catch (err) {
+      setError(null); // Clear any previous errors on success
+    } catch (err: unknown) {
       console.error('Error creating bill:', err);
-      setError('Failed to create bill. Please try again.');
+
+      // Extract detailed error message from the response
+      let errorMessage = 'Failed to create bill. Please try again.';
+
+      // Type guard for axios error
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosErr = err as { response?: { data?: unknown } };
+        if (axiosErr.response?.data) {
+          const responseData = axiosErr.response.data;
+          if (typeof responseData === 'string') {
+            // Handle plain text error responses
+            errorMessage = responseData;
+          } else if (responseData && typeof responseData === 'object') {
+            // Handle structured error responses
+            const structuredData = responseData as Record<string, unknown>;
+            if (typeof structuredData.message === 'string') {
+              errorMessage = structuredData.message;
+            } else if (typeof structuredData.reason === 'string') {
+              errorMessage = structuredData.reason;
+            }
+          }
+        } else if (err && typeof err === 'object' && 'message' in err) {
+          // Handle network/other errors
+          const genericErr = err as { message: string };
+          errorMessage = genericErr.message;
+        }
+      }
+
+      setError(errorMessage);
     }
   };
 
@@ -331,6 +390,42 @@ export default function AdminBillsListTable({
   useEffect(() => {
     fetchOwnersAndVets();
   }, [fetchOwnersAndVets]);
+
+  // Auto-fill logic for better UX
+  useEffect(() => {
+    // Reset and auto-fill when modal opens
+    if (activeSection === 'create') {
+      const today = new Date().toISOString().split('T')[0];
+      const dueDate = new Date();
+      dueDate.setDate(dueDate.getDate() + 45);
+      const dueDateString = dueDate.toISOString().split('T')[0];
+
+      setNewBill({
+        customerId: '',
+        vetId: '',
+        date: today,
+        amount: 0,
+        visitType: '',
+        billStatus: 'UNPAID',
+        dueDate: dueDateString,
+      });
+      setError(null); // Clear any previous errors
+    }
+  }, [activeSection]);
+
+  // Update due date when bill date changes
+  const handleDateChange = (selectedDate: string): void => {
+    const billDate = new Date(selectedDate);
+    const dueDate = new Date(billDate);
+    dueDate.setDate(billDate.getDate() + 45);
+    const dueDateString = dueDate.toISOString().split('T')[0];
+
+    setNewBill(prev => ({
+      ...prev,
+      date: selectedDate,
+      dueDate: dueDateString,
+    }));
+  };
 
   const handlePreviousPage = (): void => {
     if (currentPage > 0) {
@@ -679,59 +774,93 @@ export default function AdminBillsListTable({
                 >
                   <div className="form-grid">
                     <label htmlFor="newCustomer">Customer</label>
-                    <select
-                      id="newCustomer"
-                      value={newBill.customerId}
-                      onChange={e =>
-                        setNewBill({ ...newBill, customerId: e.target.value })
-                      }
-                    >
-                      <option value="">Select Customer</option>
-                      {owners.map(owner => (
-                        <option key={owner.ownerId} value={owner.ownerId}>
-                          {owner.firstName} {owner.lastName}
-                        </option>
-                      ))}
-                    </select>
+                    <div style={{ position: 'relative' }}>
+                      <select
+                        id="newCustomer"
+                        value={newBill.customerId}
+                        onChange={e => {
+                          setNewBill({
+                            ...newBill,
+                            customerId: e.target.value,
+                          });
+                          setCustomerError(false);
+                        }}
+                        style={
+                          customerError
+                            ? { border: '2px solid #ff3b3b', outline: 'none' }
+                            : {}
+                        }
+                      >
+                        <option value="">Select Customer</option>
+                        {owners.map(owner => (
+                          <option key={owner.ownerId} value={owner.ownerId}>
+                            {owner.firstName} {owner.lastName}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
 
                     <label htmlFor="newVet">Vet</label>
-                    <select
-                      id="newVet"
-                      value={newBill.vetId}
-                      onChange={e =>
-                        setNewBill({ ...newBill, vetId: e.target.value })
-                      }
-                    >
-                      <option value="">Select Vet</option>
-                      {vets.map(vet => (
-                        <option key={vet.vetId} value={vet.vetId}>
-                          {vet.firstName} {vet.lastName}
-                        </option>
-                      ))}
-                    </select>
+                    <div style={{ position: 'relative' }}>
+                      <select
+                        id="newVet"
+                        value={newBill.vetId}
+                        onChange={e => {
+                          setNewBill({ ...newBill, vetId: e.target.value });
+                          setVetError(false);
+                        }}
+                        style={
+                          vetError
+                            ? { border: '2px solid #ff3b3b', outline: 'none' }
+                            : {}
+                        }
+                      >
+                        <option value="">Select Vet</option>
+                        {vets.map(vet => (
+                          <option key={vet.vetId} value={vet.vetId}>
+                            {vet.firstName} {vet.lastName}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
 
                     <label htmlFor="newVisitType">Visit Type</label>
-                    <select
-                      id="newVisitType"
-                      value={newBill.visitType}
-                      onChange={e =>
-                        setNewBill({ ...newBill, visitType: e.target.value })
-                      }
-                    >
-                      <option value="">Select Visit Type</option>
-                      <option value="CHECKUP">Check-Up</option>
-                      <option value="VACCINE">Vaccine</option>
-                      <option value="SURGERY">Surgery</option>
-                      <option value="DENTAL">Dental</option>
-                    </select>
+                    <div style={{ position: 'relative' }}>
+                      <select
+                        id="newVisitType"
+                        value={newBill.visitType}
+                        onChange={e => {
+                          setNewBill({ ...newBill, visitType: e.target.value });
+                          setVisitTypeError(false);
+                        }}
+                        style={
+                          visitTypeError
+                            ? { border: '2px solid #ff3b3b', outline: 'none' }
+                            : {}
+                        }
+                      >
+                        <option value="">Select Visit Type</option>
+                        <option value="CHECKUP">Check-Up</option>
+                        <option value="VACCINE">Vaccine</option>
+                        <option value="SURGERY">Surgery</option>
+                        <option value="DENTAL">Dental</option>
+                      </select>
+                    </div>
 
                     <label htmlFor="newDate">Date</label>
                     <input
                       id="newDate"
                       type="date"
                       value={newBill.date}
-                      onChange={e =>
-                        setNewBill({ ...newBill, date: e.target.value })
+                      min={new Date().toISOString().split('T')[0]}
+                      onChange={e => {
+                        handleDateChange(e.target.value);
+                        setDateError(false);
+                      }}
+                      style={
+                        dateError
+                          ? { border: '2px solid #ff3b3b', outline: 'none' }
+                          : {}
                       }
                     />
 
@@ -741,13 +870,18 @@ export default function AdminBillsListTable({
                       type="number"
                       min="0"
                       step="0.01"
-                      value={newBill.amount}
+                      value={newBill.amount === 0 ? '' : newBill.amount}
                       onChange={e =>
                         setNewBill({
                           ...newBill,
-                          amount: parseFloat(e.target.value),
+                          amount:
+                            e.target.value === ''
+                              ? 0
+                              : parseFloat(e.target.value) || 0,
                         })
                       }
+                      placeholder="Enter bill amount"
+                      required
                     />
 
                     <label htmlFor="newStatus">Status</label>
@@ -757,11 +891,15 @@ export default function AdminBillsListTable({
                       onChange={e =>
                         setNewBill({ ...newBill, billStatus: e.target.value })
                       }
+                      style={
+                        statusError
+                          ? { border: '2px solid #ff3b3b', outline: 'none' }
+                          : {}
+                      }
                     >
                       <option value="">Select Status</option>
                       <option value="PAID">PAID</option>
                       <option value="UNPAID">UNPAID</option>
-                      <option value="OVERDUE">OVERDUE</option>
                     </select>
 
                     <label htmlFor="newDueDate">Due Date</label>
@@ -771,6 +909,11 @@ export default function AdminBillsListTable({
                       value={newBill.dueDate}
                       onChange={e =>
                         setNewBill({ ...newBill, dueDate: e.target.value })
+                      }
+                      style={
+                        dueDateError
+                          ? { border: '2px solid #ff3b3b', outline: 'none' }
+                          : {}
                       }
                     />
 

@@ -21,8 +21,8 @@ public class MockServerConfigBillService {
     public void registerGetAllBillsEndpoint() {
 
         String response = "["
-                + "{\"billId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361b\",\"customerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"visitType\":\"general\",\"vetId\":\"2\",\"date\":\"2024-10-11\",\"amount\":\"120\",\"taxedAmount\":\"0.0\", \"billStatus\":\"UNPAID\", \"dueDate\":\"2024-10-13\"},"
-                + "{\"billId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"customerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"visitType\":\"general\",\"vetId\":\"2\",\"date\":\"2024-10-11\",\"amount\":\"100\",\"taxedAmount\":\"10.0\", \"billStatus\":\"UNPAID\", \"dueDate\":\"2024-10-13\"}"
+                + "{\"billId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361b\",\"customerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"visitType\":\"general\",\"vetId\":\"2\",\"date\":\"" + java.time.LocalDate.now().plusDays(1) + "\",\"amount\":\"120\",\"taxedAmount\":\"0.0\", \"billStatus\":\"UNPAID\", \"dueDate\":\"" + java.time.LocalDate.now().plusDays(46) + "\"},"
+                + "{\"billId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"customerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"visitType\":\"general\",\"vetId\":\"2\",\"date\":\"" + java.time.LocalDate.now().plusDays(1) + "\",\"amount\":\"100\",\"taxedAmount\":\"10.0\", \"billStatus\":\"UNPAID\", \"dueDate\":\"" + java.time.LocalDate.now().plusDays(46) + "\"}"
                 + "]";
 
         mockServerClient_BillService
@@ -45,7 +45,7 @@ public class MockServerConfigBillService {
     }
 
     public void registerCreateBillEndpoint() {
-        String response = "{\"billId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361b\",\"customerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"visitType\":\"general\",\"vetId\":\"3\",\"date\":\"2024-10-11\",\"amount\":\"100\",\"taxedAmount\":\"0.0\", \"billStatus\":\"UNPAID\", \"dueDate\":\"2024-10-13\"}";
+        String response = "{\"billId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361b\",\"customerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"visitType\":\"general\",\"vetId\":\"3\",\"date\":\"" + java.time.LocalDate.now().plusDays(1) + "\",\"amount\":\"100\",\"taxedAmount\":\"0.0\", \"billStatus\":\"UNPAID\", \"dueDate\":\"" + java.time.LocalDate.now().plusDays(46) + "\"}";
 
         mockServerClient_BillService
                 .when(
@@ -80,14 +80,13 @@ public class MockServerConfigBillService {
 
 
     public void registerUpdateBillEndpoint() {
-        String response = "{\"billId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"customerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"visitType\":\"operation\",\"vetId\":\"3\",\"date\":\"2024-10-11\",\"amount\":100.00, \"taxedAmount\": 0.0, \"billStatus\":\"PAID\", \"dueDate\":\"2024-10-13\"}";
+        String response = "{\"billId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"customerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"visitType\":\"operation\",\"vetId\":\"3\",\"date\":\"" + java.time.LocalDate.now().plusDays(1) + "\",\"amount\":100.00, \"taxedAmount\": 0.0, \"billStatus\":\"PAID\", \"dueDate\":\"" + java.time.LocalDate.now().plusDays(46) + "\"}";
 
         mockServerClient_BillService
                 .when(
                         request()
                                 .withMethod("PUT")
                                 .withPath("/bills/e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
-                                .withBody(json("{\"customerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"visitType\":\"operation\",\"vetId\":\"3\",\"date\":\"2024-10-11\",\"amount\":100.00, \"billStatus\":\"PAID\", \"dueDate\":\"2024-10-13\"}"))
                 )
                 .respond(
                         response()
