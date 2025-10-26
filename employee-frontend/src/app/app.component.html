@@ -1,78 +1,192 @@
 <div class="app-container">
-  <div class="welcome-card">
-    <h1>Champlain College</h1>
-    <p class="subtitle">Employee Management Portal</p>
+  <app-navbar></app-navbar>
 
-    <div class="features-grid">
-      <div class="feature-card">
-        <mat-icon class="feature-icon">people</mat-icon>
-        <h3>Customer Management</h3>
-        <p>Manage pet owners, pets, and customer information</p>
-      </div>
-
-      <div class="feature-card">
-        <mat-icon class="feature-icon">event_available</mat-icon>
-        <h3>Appointment Booking</h3>
-        <p>Schedule and manage veterinary appointments</p>
-      </div>
-
-      <div class="feature-card">
-        <mat-icon class="feature-icon">verified_user</mat-icon>
-        <h3>Veterinarian Portal</h3>
-        <p>Manage vet availability and specializations</p>
-      </div>
-
-      <div class="feature-card">
-        <mat-icon class="feature-icon">inventory</mat-icon>
-        <h3>Inventory Management</h3>
-        <p>Track medical supplies, medications, and equipment</p>
-      </div>
-
-      <div class="feature-card">
-        <mat-icon class="feature-icon">receipt</mat-icon>
-        <h3>Billing System</h3>
-        <p>Process payments, generate invoices, and manage bills</p>
-      </div>
-
-      <div class="feature-card">
-        <mat-icon class="feature-icon">shopping_cart</mat-icon>
-        <h3>Product Store</h3>
-        <p>Manage online store products and customer carts</p>
-      </div>
-    </div>
-
-    <div class="pets-image">
-      <h3 class="pets-heading">Every animal deserves love</h3>
-      <img
-        src="/larry.jpg"
-        alt="Larry representing the pets we care for"
-        width="400"
-        height="300"
-      />
-    </div>
-
-    <div class="role-info">
-      <h4>Available for:</h4>
-      <div class="roles">
-        <mat-chip-listbox>
-          <mat-chip>Receptionist</mat-chip>
-          <mat-chip>Veterinarian</mat-chip>
-          <mat-chip>Inventory Manager</mat-chip>
-          <mat-chip>Administrator</mat-chip>
-        </mat-chip-listbox>
-      </div>
-    </div>
-
-    <div class="status-info">
-      <p class="status-text">
-        New Angular 20 Employee Portal - Will Soon Replace Legacy AngularJS App
-      </p>
-      <div class="progress-bar">
-        <div class="custom-progress-bar">
-          <div class="progress-fill" [style.width.%]="progressValue"></div>
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1 class="hero-title">Welcome to <span>PetClinic Employee Portal</span></h1>
+        <p class="hero-subtitle">
+          Your comprehensive management system for pet clinic operations. Manage veterinarians,
+          customers, appointments, inventory, and billing all in one place.
+        </p>
+        <div class="hero-actions">
+          <button class="btn-primary btn-large">Get Started</button>
+          <button class="btn-secondary btn-large">Learn More</button>
         </div>
       </div>
-      <p class="migration-note">Modern Angular 20 with Vite - Coming Soon</p>
+      <div class="hero-image">
+        <img
+          ngSrc="/larry.jpg"
+          alt="Larry representing the pets we care for"
+          class="hero-pet-image"
+          width="600"
+          height="450"
+          priority
+        />
+      </div>
     </div>
-  </div>
+  </section>
+
+  <section class="features">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Management Features</h2>
+        <p class="section-subtitle">Comprehensive tools for efficient pet clinic operations</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <mat-icon class="feature-icon">medical_services</mat-icon>
+          </div>
+          <h3 class="feature-title">Veterinarian Management</h3>
+          <p class="feature-description">Manage vet profiles, schedules, and specializations</p>
+          <a href="#" class="feature-link">Access →</a>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <mat-icon class="feature-icon">people</mat-icon>
+          </div>
+          <h3 class="feature-title">Customer Management</h3>
+          <p class="feature-description">Manage pet owners, pets, and customer information</p>
+          <a href="#" class="feature-link">Access →</a>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <mat-icon class="feature-icon">event_available</mat-icon>
+          </div>
+          <h3 class="feature-title">Visit Management</h3>
+          <p class="feature-description">Schedule and track veterinary appointments</p>
+          <a href="#" class="feature-link">Access →</a>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <mat-icon class="feature-icon">receipt</mat-icon>
+          </div>
+          <h3 class="feature-title">Billing System</h3>
+          <p class="feature-description">Process payments, generate invoices, and manage bills</p>
+          <a href="#" class="feature-link">Access →</a>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <mat-icon class="feature-icon">inventory</mat-icon>
+          </div>
+          <h3 class="feature-title">Inventory Management</h3>
+          <p class="feature-description">Track medical supplies, medications, and equipment</p>
+          <a href="#" class="feature-link">Access →</a>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <mat-icon class="feature-icon">shopping_cart</mat-icon>
+          </div>
+          <h3 class="feature-title">Product Store</h3>
+          <p class="feature-description">Manage online store products and customer orders</p>
+          <a href="#" class="feature-link">Access →</a>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <mat-icon class="feature-icon">pets</mat-icon>
+          </div>
+          <h3 class="feature-title">Pet Management</h3>
+          <p class="feature-description">
+            Register pets, manage pet types, and track pet information
+          </p>
+          <a href="#" class="feature-link">Access →</a>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <mat-icon class="feature-icon">admin_panel_settings</mat-icon>
+          </div>
+          <h3 class="feature-title">Admin Panel</h3>
+          <p class="feature-description">
+            User management, role assignments, and system administration
+          </p>
+          <a href="#" class="feature-link">Access →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="highlights-section">
+    <div class="container">
+      <div class="highlights-grid">
+        <div class="highlight-card">
+          <div class="highlight-icon">
+            <mat-icon>groups</mat-icon>
+          </div>
+          <div class="highlight-content">
+            <h3 class="highlight-title">Multi-Role Support</h3>
+            <p class="highlight-label">Admin, Vet, Receptionist, Manager</p>
+          </div>
+        </div>
+        <div class="highlight-card">
+          <div class="highlight-icon">
+            <mat-icon>security</mat-icon>
+          </div>
+          <div class="highlight-content">
+            <h3 class="highlight-title">Secure Access</h3>
+            <p class="highlight-label">Role-based permissions</p>
+          </div>
+        </div>
+        <div class="highlight-card">
+          <div class="highlight-icon">
+            <mat-icon>sync</mat-icon>
+          </div>
+          <div class="highlight-content">
+            <h3 class="highlight-title">Real-time Updates</h3>
+            <p class="highlight-label">Live data synchronization</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact-section">
+    <div class="container">
+      <div class="contact-card">
+        <div class="contact-content">
+          <h3 class="contact-title">Ready to get started?</h3>
+          <p class="contact-subtitle">
+            Access your employee portal and manage clinic operations efficiently.
+          </p>
+        </div>
+        <div class="contact-actions">
+          <button class="btn-secondary">Admin Panel</button>
+          <button class="btn-primary">Login</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="status-section">
+    <div class="container">
+      <div class="status-card">
+        <div class="status-content">
+          <h3 class="status-title">Next-Generation Employee Portal</h3>
+          <p class="status-description">
+            Modern Angular 20 platform migration coming soon - replacing the legacy system with
+            enhanced performance and user experience
+          </p>
+          <div class="progress-container">
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="progressValue"></div>
+            </div>
+            <span class="progress-text">{{ progressValue }}% Complete</span>
+          </div>
+        </div>
+        <div class="status-badge">
+          <span>Coming Soon</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <app-footer></app-footer>
 </div>
