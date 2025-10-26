@@ -30,7 +30,7 @@ spring:
       max-file-size: 2MB
       max-request-size: 2MB
   codec:
-    max-in-memory-size: 10MB
+    max-in-memory-size: 16MB
 
 ---
 # for test
@@ -79,6 +79,9 @@ spring:
     multipart:
       max-file-size: 2MB
       max-request-size: 2MB
+
+  codec:
+    max-in-memory-size: 16MB
 
 ---
 spring:
