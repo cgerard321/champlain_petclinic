@@ -64,7 +64,7 @@ class PetServiceImplTest {
     @Test
     void deletePetPhoto_WithNonExistentPet_ShouldThrowNotFoundException() {
         String NON_EXISTENT_ID = "non-existent-id";
-        when(repo.findPetByPetId(NON_EXISTENT_ID)).thenAnswer(invocation -> Mono.empty());
+        when(repo.findPetByPetId(NON_EXISTENT_ID)).thenReturn(Mono.empty());
         Mono<PetResponseDTO> result = petService.deletePetPhoto(NON_EXISTENT_ID);
         StepVerifier.create(result)
                 .expectErrorMatches(e -> e instanceof NotFoundException &&
