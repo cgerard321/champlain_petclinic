@@ -1,4 +1,4 @@
-use crate::adapters::output::minio::store::MinioStore;
+use crate::application::ports::output::file_storage_port::DynFileStorage;
 use crate::core::error::AppResult;
 use crate::domain::models::file::FileInfo;
 use crate::domain::models::user::AuthenticatedUser;
@@ -13,7 +13,7 @@ use std::path::PathBuf;
 #[get("/buckets/<bucket>/files")]
 pub(crate) async fn read_files(
     bucket: &str,
-    store: &State<MinioStore>,
+    store: &State<DynFileStorage>,
     _user: AuthenticatedUser,
 ) -> AppResult<Json<Vec<FileInfo>>> {
     Ok(Json(fetch_files(bucket, store).await?))
@@ -24,7 +24,7 @@ pub(crate) async fn add_file(
     bucket: &str,
     prefix: PathBuf,
     data: Data<'_>,
-    store: &State<MinioStore>,
+    store: &State<DynFileStorage>,
     _user: AuthenticatedUser,
 ) -> AppResult<Custom<Json<FileInfo>>> {
     let file_info = upload_file(bucket, prefix, data, store).await?;
