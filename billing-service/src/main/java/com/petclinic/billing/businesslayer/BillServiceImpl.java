@@ -208,7 +208,7 @@ public class BillServiceImpl implements BillService{
                                         HttpStatus.BAD_REQUEST, "Customer ID does not exist"
                                 )))
                                 .flatMap(userDetails -> {
-                                    if (currency == "USD" || currency.equals("USD")){
+                                    if (currency.equals("USD")){
                                         Mail mail = generateReceiptEmailUSD(userDetails, EntityDtoUtil.toBillResponseDto(billResponse), currency);
                                         mailService.sendMail(mail);
                                         return Mono.just(billResponse);
