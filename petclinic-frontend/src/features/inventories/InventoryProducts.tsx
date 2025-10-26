@@ -12,6 +12,7 @@ import axiosInstance from '@/shared/api/axiosInstance';
 import AddSupplyToInventory from '@/features/inventories/AddSupplyToInventory';
 import EditInventoryProducts from '@/features/inventories/EditInventoryProducts';
 import MoveInventoryProducts from '@/features/inventories/MoveInventoryProducts';
+import { searchProducts } from './api/searchProducts';
 
 const MAX_QTY = 100;
 
@@ -146,29 +147,27 @@ const InventoryProducts: React.FC = () => {
     if (!inventoryId) return;
     setLoading(true);
     setError(null);
+
     try {
-      const res = await axiosInstance.get<string>(
-        `/inventories/${inventoryId}/products/search`,
-        {
-          useV2: false,
-          responseType: 'text',
-          transformResponse: [(v: unknown) => String(v ?? '')],
-        }
-      );
+      const result = await searchProducts(inventoryId);
 
-      const data = parseProductsStream(res.data);
-
-      data.forEach(p => {
-        p.productMargin = parseFloat(
-          (p.productSalePrice - p.productPrice).toFixed(2)
-        );
-      });
-
-      setProducts(data);
-      setProductList(data);
-      setFilteredProducts(data);
-    } catch (e) {
+      if (result.errorMessage) {
+        setError(result.errorMessage);
+        setProducts([]);
+        setProductList([]);
+        setFilteredProducts([]);
+      } else {
+        const data = result.data ?? [];
+        setProducts(data);
+        setProductList(data);
+        setFilteredProducts(data);
+      }
+    } catch (err) {
+      console.error('Failed to load products:', err);
       setError('Failed to load products. Please try again.');
+      setProducts([]);
+      setProductList([]);
+      setFilteredProducts([]);
     } finally {
       setLoading(false);
     }
@@ -177,45 +176,6 @@ const InventoryProducts: React.FC = () => {
   useEffect(() => {
     void loadProducts();
   }, [loadProducts]);
-
-  const parseProductsStream = (rawIn: unknown): ProductModel[] => {
-    const raw = String(rawIn ?? '').trim();
-    if (!raw) return [];
-
-    // Plain JSON fallback
-    if (raw.startsWith('[') || raw.startsWith('{')) {
-      try {
-        const j = JSON.parse(raw);
-        return Array.isArray(j) ? (j as ProductModel[]) : [j as ProductModel];
-      } catch {
-        return [];
-      }
-    }
-
-    // SSE: split by blank lines, join "data:" lines, JSON.parse each block
-    const items: ProductModel[] = [];
-    raw.split(/\r?\n\r?\n/).forEach(block => {
-      const jsonText = block
-        .split(/\r?\n/)
-        .filter(line => line.startsWith('data:'))
-        .map(line => line.slice(5).trim())
-        .join('\n')
-        .trim();
-
-      if (!jsonText || jsonText === 'heartbeat' || jsonText === '__END__')
-        return;
-
-      try {
-        const v = JSON.parse(jsonText);
-        if (Array.isArray(v)) items.push(...(v as ProductModel[]));
-        else items.push(v as ProductModel);
-      } catch {
-        // ignore malformed chunk
-      }
-    });
-
-    return items;
-  };
 
   const deleteProduct = async (): Promise<void> => {
     if (productToDelete) {
@@ -363,13 +323,13 @@ const InventoryProducts: React.FC = () => {
   }, [productList, productStatus]);
 
   if (loading) return <p>Loading supplies...</p>;
-  if (error) return <p>{error}</p>;
 
   return (
     <div className="inventory-supplies">
       <h2 className="inventory-title">
         Supplies in Inventory: <span>{inventoryName}</span>
       </h2>
+      {error && <p style={{ color: 'red', marginBottom: '1rem' }}>{error}</p>}
       <button
         className="btn btn-secondary"
         onClick={() =>
@@ -561,7 +521,7 @@ const InventoryProducts: React.FC = () => {
             ))
           ) : (
             <tr>
-              <td colSpan={7} style={{ textAlign: 'center' }}>
+              <td colSpan={9} style={{ textAlign: 'center' }}>
                 No products available.
               </td>
             </tr>
