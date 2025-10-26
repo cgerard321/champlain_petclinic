@@ -1,68 +1,76 @@
 use crate::adapters::output::mysql::error::map_sqlx_err;
-use crate::bootstrap::Db;
-use crate::core::error::AppResult;
+use crate::application::ports::output::auth_repo_port::AuthRepoPort;
+use crate::core::error::{AppError, AppResult};
 use crate::domain::models::session::Session;
-use chrono::{NaiveDateTime, Utc};
-use sqlx::Row;
+use chrono::NaiveDateTime;
+use sqlx::{MySql, Pool, Row};
+use std::sync::Arc;
 use uuid::Uuid;
 
-pub async fn insert_session(
-    db: &Db,
-    session_id: Uuid,
-    user_id: Uuid,
-    expires_at: NaiveDateTime,
-) -> AppResult<Session> {
-    sqlx::query(
-        "INSERT INTO sessions (id, user_id, expires_at)
-         VALUES (?, ?, ?)",
-    )
-    .bind(session_id.to_string())
-    .bind(user_id.to_string())
-    .bind(expires_at)
-    .execute(&db.0)
-    .await
-    .map_err(|e| map_sqlx_err(e, "Session insert"))?;
-
-    Ok(Session {
-        id: session_id,
-        user_id,
-        created_at: Utc::now().naive_utc(),
-        expires_at,
-    })
+pub struct MySqlAuthRepo {
+    pool: Arc<Pool<MySql>>,
 }
 
-pub async fn find_session_by_id(db: &Db, sid: Uuid) -> AppResult<Session> {
-    let row = sqlx::query(
-        "SELECT id, user_id, created_at, expires_at
-         FROM sessions WHERE id = ?",
-    )
-    .bind(sid.to_string())
-    .fetch_one(&db.0)
-    .await
-    .map_err(|e| map_sqlx_err(e, "Session"))?;
-
-    Ok(Session {
-        id: Uuid::parse_str(row.get::<String, _>(0).as_str()).unwrap(),
-        user_id: Uuid::parse_str(row.get::<String, _>(1).as_str()).unwrap(),
-        created_at: row.get(2),
-        expires_at: row.get(3),
-    })
+impl MySqlAuthRepo {
+    pub fn new(pool: Arc<Pool<MySql>>) -> Self {
+        Self { pool }
+    }
 }
 
-pub async fn delete_session(db: &Db, sid: Uuid) -> AppResult<()> {
-    sqlx::query("DELETE FROM sessions WHERE id = ?")
-        .bind(sid.to_string())
-        .execute(&db.0)
-        .await
-        .map_err(|e| map_sqlx_err(e, "Session delete"))?;
-    Ok(())
-}
+#[async_trait::async_trait]
+impl AuthRepoPort for MySqlAuthRepo {
+    async fn insert_session(&self, sid: Uuid, uid: Uuid, exp: NaiveDateTime) -> AppResult<Session> {
+        sqlx::query("INSERT INTO sessions (id, user_id, expires_at) VALUES (?, ?, ?)")
+            .bind(sid.to_string())
+            .bind(uid.to_string())
+            .bind(exp)
+            .execute(&*self.pool)
+            .await
+            .map_err(|e| map_sqlx_err(e, "Sessions"))?;
 
-#[allow(dead_code)]
-pub async fn delete_expired_sessions(db: &Db) -> AppResult<u64> {
-    let res = sqlx::query("DELETE FROM sessions WHERE expires_at < NOW()")
-        .execute(&db.0)
-        .await
-        .map_err(|e| map_sqlx_err(e, "Delete expired sessions"))?;
-    Ok(res.rows_affected())
+        Ok(Session {
+            id: sid,
+            user_id: uid,
+            created_at: chrono::Utc::now().naive_utc(),
+            expires_at: exp,
+        })
+    }
+
+    async fn find_session_by_id(&self, sid: Uuid) -> AppResult<Session> {
+        let row =
+            sqlx::query("SELECT id, user_id, created_at, expires_at FROM sessions WHERE id = ?")
+                .bind(sid.to_string())
+                .fetch_optional(&*self.pool)
+                .await
+                .map_err(|e| map_sqlx_err(e, "Sessions"))?;
+
+        let Some(row) = row else {
+            return Err(AppError::Unauthorized);
+        };
+
+        Ok(Session {
+            id: sid,
+            user_id: Uuid::parse_str(row.get::<String, _>("user_id").as_str())
+                .unwrap_or(Uuid::nil()),
+            created_at: row.get("created_at"),
+            expires_at: row.get("expires_at"),
+        })
+    }
+
+    async fn delete_session(&self, sid: Uuid) -> AppResult<()> {
+        sqlx::query("DELETE FROM sessions WHERE id = ?")
+            .bind(sid.to_string())
+            .execute(&*self.pool)
+            .await
+            .map_err(|e| map_sqlx_err(e, "Sessions"))?;
+        Ok(())
+    }
+
+    async fn delete_expired_sessions(&self) -> AppResult<u64> {
+        let res = sqlx::query("DELETE FROM sessions WHERE expires_at < NOW()")
+            .execute(&*self.pool)
+            .await
+            .map_err(|e| map_sqlx_err(e, "Sessions"))?;
+        Ok(res.rows_affected())
+    }
 }

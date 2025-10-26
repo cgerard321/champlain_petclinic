@@ -1,25 +1,15 @@
-use crate::adapters::output::minio::config;
+use crate::application::ports::output::file_storage_port::DynFileStorage;
+use crate::core::config;
 use crate::core::error::{AppError, AppResult};
 use crate::domain::models::file::FileInfo;
-use rocket::data::ToByteUnit;
-use rocket::{Data, State};
 use std::path::PathBuf;
-use crate::application::ports::output::file_storage_port::DynFileStorage;
 
 pub async fn upload_file(
     bucket: &str,
     prefix: PathBuf,
-    data: Data<'_>,
-    store: &State<DynFileStorage>,
+    bytes: Vec<u8>,
+    store: &DynFileStorage,
 ) -> AppResult<FileInfo> {
-    let limit = config::MAX_FILE_SIZE_MB.mebibytes();
-    let bytes = data
-        .open(limit)
-        .into_bytes()
-        .await
-        .map_err(|e| AppError::BadRequest(format!("read body: {e}")))?
-        .into_inner();
-
     let extension = infer::get(&bytes)
         .map(|k| k.extension())
         .unwrap_or(config::DEFAULT_FILE_TYPE);

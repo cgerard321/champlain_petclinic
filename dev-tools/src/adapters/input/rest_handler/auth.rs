@@ -1,4 +1,5 @@
-use crate::bootstrap::Db;
+use crate::application::ports::output::auth_repo_port::DynAuthRepo;
+use crate::application::ports::output::user_repo_port::DynUsersRepo;
 use crate::core::error::{AppError, AppResult};
 use crate::domain::models::user::LoginReq;
 use crate::domain::usecases::auth::authenticate::authenticate;
@@ -10,8 +11,13 @@ use time::OffsetDateTime;
 use uuid::Uuid;
 
 #[post("/login", data = "<req>")]
-pub async fn login(db: &State<Db>, req: Json<LoginReq>, jar: &CookieJar<'_>) -> AppResult<Status> {
-    let new_session = authenticate(db, &req.email, &req.password)
+pub async fn login(
+    auth_db: &State<DynAuthRepo>,
+    user_db: &State<DynUsersRepo>,
+    req: Json<LoginReq>,
+    jar: &CookieJar<'_>,
+) -> AppResult<Status> {
+    let new_session = authenticate(auth_db, user_db, &req.email, &req.password)
         .await
         .map(Json)?;
 
@@ -37,7 +43,7 @@ pub async fn login(db: &State<Db>, req: Json<LoginReq>, jar: &CookieJar<'_>) -> 
 }
 
 #[post("/logout")]
-pub async fn logout(jar: &CookieJar<'_>, db: &State<Db>) -> AppResult<Status> {
+pub async fn logout(jar: &CookieJar<'_>, db: &State<DynAuthRepo>) -> AppResult<Status> {
     if let Some(cookie) = jar.get_private("sid") {
         let _ = remove_session(db, Uuid::parse_str(cookie.value()).unwrap()).await;
         jar.remove_private(Cookie::from("sid"));

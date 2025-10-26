@@ -1,5 +1,4 @@
-use crate::adapters::output::mysql::auth_repo::find_session_by_id;
-use crate::bootstrap::Db;
+use crate::application::ports::output::auth_repo_port::DynAuthRepo;
 use crate::core::error::AppError;
 use crate::domain::models::user::AuthenticatedUser;
 use rocket::{
@@ -15,7 +14,7 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
 
     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         let jar = req.cookies();
-        let db = req.guard::<&State<Db>>().await.unwrap();
+        let db = req.guard::<&State<DynAuthRepo>>().await.unwrap();
 
         let Some(cookie) = jar.get_private("sid") else {
             return Outcome::Error((Status::Unauthorized, ()));
@@ -25,7 +24,7 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
             return Outcome::Error((Status::Unauthorized, ()));
         };
 
-        match find_session_by_id(db, sid).await {
+        match db.find_session_by_id(sid).await {
             Ok(session) => Outcome::Success(AuthenticatedUser {
                 user_id: session.user_id,
             }),

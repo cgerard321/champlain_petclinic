@@ -1,11 +1,9 @@
-use crate::adapters::output::mysql::auth_repo;
-use crate::bootstrap::Db;
+use crate::application::ports::output::auth_repo_port::DynAuthRepo;
 use crate::core::error::{AppError, AppResult};
-use rocket::State;
 use uuid::Uuid;
 
-pub async fn remove_session(db: &State<Db>, cookie_id: Uuid) -> AppResult<()> {
-    auth_repo::delete_session(db, cookie_id)
+pub async fn remove_session(db: &DynAuthRepo, cookie_id: Uuid) -> AppResult<()> {
+    db.delete_session(cookie_id)
         .await
         .map_err(|_e| AppError::Internal)
 }
