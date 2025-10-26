@@ -82,28 +82,11 @@ public class EntityDtoUtil {
 
     public static Review toReviewEntity(ReviewRequestDTO reviewRequestDTO){
         return Review.builder()
-                .reviewId(generateReviewIdString())
                 .rating(reviewRequestDTO.getRating())
                 .reviewerName(reviewRequestDTO.getReviewerName())
                 .review(reviewRequestDTO.getReview())
                 .dateSubmitted(reviewRequestDTO.getDateSubmitted())
                 .build();
-    }
-
-    /**
-     * Generate a random UUID and returns it. IS NOT ERROR FREE
-     * @return The UUID as a string
-     */
-    public String generateVisitIdString() {
-        return UUID.randomUUID().toString();
-    }
-
-    public static String generateReviewIdString() {
-        return UUID.randomUUID().toString();
-    }
-
-    public static String generateEmergencyIdString() {
-        return UUID.randomUUID().toString();
     }
 
 
