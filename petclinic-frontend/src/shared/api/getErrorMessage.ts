@@ -2,7 +2,7 @@ import axios from 'axios';
 
 type Opts = {
   defaultMessage?: string;
-  log?: boolean; // defaults to true (console.debug)
+  log?: boolean; // defaults to true (console.debug) when undefined; set to false to disable logging
 };
 
 type AppLogger = {

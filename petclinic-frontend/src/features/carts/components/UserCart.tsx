@@ -160,6 +160,7 @@ const UserCart: React.FC = () => {
     const quantity = Math.max(1, recentPurchaseQuantities[item.productId] || 1);
 
     try {
+      // Concurrently add items to cart
       const addPromises = Array.from({ length: quantity }, () =>
         axiosInstance.post(
           `/carts/${cartId}/${item.productId}`,
@@ -173,7 +174,7 @@ const UserCart: React.FC = () => {
         `${item.productName} (x${quantity}) added to cart!`
       );
       notifyCartChanged();
-
+      // Fetch updated cart and update state
       const { data } = await axiosInstance.get(`/carts/${cartId}`, {
         useV2: false,
       });
@@ -264,7 +265,7 @@ const UserCart: React.FC = () => {
         `${item.productName} (x${quantity}) added to cart!`
       );
       notifyCartChanged();
-
+      // Fetch updated cart and update state
       const { data } = await axiosInstance.get(`/carts/${cartId}`, {
         useV2: false,
       });
@@ -665,6 +666,7 @@ const UserCart: React.FC = () => {
 
       bumpCartCountInLS(-(item.quantity || 1));
       notifyCartChanged();
+      //notify navbar (item moved out of cart)
     } catch (error: unknown) {
       const msg = apiErrorMessage(error, 'Failed to add item to wishlist.');
       setNotificationMessage(msg);
