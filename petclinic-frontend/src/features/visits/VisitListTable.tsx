@@ -1,5 +1,5 @@
 import './VisitListTable.css';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, createRef } from 'react';
 import { Visit } from './models/Visit';
 
 import { useNavigate } from 'react-router-dom';
@@ -25,6 +25,16 @@ import SvgIcon from '@/shared/components/SvgIcon';
 import { FaCalendarAlt } from 'react-icons/fa';
 
 export default function VisitListTable(): JSX.Element {
+  // refs for each EditingVisit instance, keyed by visitId
+  const editingRefs = useRef<
+    Record<
+      string,
+      React.RefObject<{
+        openCreateBill?: () => void;
+        openPrescription?: () => void;
+      }>
+    >
+  >({});
   const isVet = IsVet();
   const isAdmin = IsAdmin();
   const isReceptionist = IsReceptionist();
@@ -214,6 +224,29 @@ export default function VisitListTable(): JSX.Element {
     </a>
   );
 
+  const renderBillButton = (onClick?: () => void): JSX.Element => (
+    <a
+      title="Create Bill"
+      onClick={onClick}
+      className="icon-visits-anchor"
+      style={{ color: 'black' }}
+    >
+      <SvgIcon id="visit-bill" className="icon-visits" />
+    </a>
+  );
+
+  const renderPrescriptionButton = (onClick?: () => void): JSX.Element => (
+    <a
+      title="Create Prescription"
+      onClick={onClick}
+      className="icon-visits-anchor"
+      style={{ color: 'black' }}
+    >
+      <SvgIcon id="visit-prescription" className="icon-visits" />
+    </a>
+  );
+
+  // Unified table renderer for all visits
   const renderTable = (title: string, visits: Visit[]): JSX.Element =>
     currentTab === title ? (
       <div className="visit-table-section">
@@ -270,54 +303,98 @@ export default function VisitListTable(): JSX.Element {
                     {visit.status}
                   </td>
                   <td className="action-column">
-                    <BasicModal
-                      title="Visit Details"
-                      showButton={renderViewButton()}
-                    >
-                      <VisitDetails visitId={visit.visitId} />
-                    </BasicModal>
-
-                    <EditingVisit
-                      showButton={renderEditButton()}
-                      visitId={visit.visitId}
-                    />
-                    {visit.status === 'COMPLETED' && !isVet && (
+                    <div className="action-icons-grid">
                       <BasicModal
-                        title="Archive Visit"
-                        showButton={renderArchiveButton()}
-                        onConfirm={() => handleArchive(visit.visitId)}
+                        title="Visit Details"
+                        showButton={renderViewButton()}
                       >
-                        <div>
-                          This will set the status of this visit to Archived.
-                        </div>
-                        <div>Do you wish to proceed?</div>
-                        {showSuccessMessage && (
-                          <div
-                            className="visit-success-message"
-                            role="status"
-                            aria-live="polite"
-                          >
-                            {successMessage}
-                          </div>
-                        )}
+                        <VisitDetails visitId={visit.visitId} />
                       </BasicModal>
-                    )}
 
-                    {visit.status !== 'CANCELLED' &&
-                      visit.status !== 'ARCHIVED' &&
-                      visit.status !== 'COMPLETED' &&
-                      !isVet && (
-                        <BasicModal
-                          title="Cancel Visit"
-                          showButton={renderCancelButton()}
-                          onConfirm={() => handleCancel(visit.visitId)}
-                        >
-                          <div>
-                            This will set the status of this visit to Canceled.
-                          </div>
-                          <div>Do you wish to proceed?</div>
-                        </BasicModal>
-                      )}
+                      {(() => {
+                        const editRef =
+                          editingRefs.current[visit.visitId] ??
+                          (editingRefs.current[visit.visitId] = createRef());
+
+                        return (
+                          <>
+                            <EditingVisit
+                              ref={editRef}
+                              showButton={renderEditButton()}
+                              visitId={visit.visitId}
+                            />
+
+                            {visit.status === 'COMPLETED' && (
+                              <>
+                                <a
+                                  title="Create Bill"
+                                  className="icon-button"
+                                  onClick={() =>
+                                    editRef.current?.openCreateBill?.()
+                                  }
+                                  role="button"
+                                >
+                                  {renderBillButton()}
+                                </a>
+
+                                <a
+                                  title="Create Prescription"
+                                  className="icon-button"
+                                  onClick={() =>
+                                    editRef.current?.openPrescription?.()
+                                  }
+                                  role="button"
+                                >
+                                  {renderPrescriptionButton()}
+                                </a>
+
+                                {!isVet && (
+                                  <BasicModal
+                                    title="Archive Visit"
+                                    showButton={renderArchiveButton()}
+                                    onConfirm={() =>
+                                      handleArchive(visit.visitId)
+                                    }
+                                  >
+                                    <div>
+                                      This will set the status of this visit to
+                                      Archived.
+                                    </div>
+                                    <div>Do you wish to proceed?</div>
+                                    {showSuccessMessage && (
+                                      <div
+                                        className="visit-success-message"
+                                        role="status"
+                                        aria-live="polite"
+                                      >
+                                        {successMessage}
+                                      </div>
+                                    )}
+                                  </BasicModal>
+                                )}
+                              </>
+                            )}
+
+                            {visit.status !== 'CANCELLED' &&
+                              visit.status !== 'ARCHIVED' &&
+                              visit.status !== 'COMPLETED' &&
+                              !isVet && (
+                                <BasicModal
+                                  title="Cancel Visit"
+                                  showButton={renderCancelButton()}
+                                  onConfirm={() => handleCancel(visit.visitId)}
+                                >
+                                  <div>
+                                    This will set the status of this visit to
+                                    Canceled.
+                                  </div>
+                                  <div>Do you wish to proceed?</div>
+                                </BasicModal>
+                              )}
+                          </>
+                        );
+                      })()}
+                    </div>
                   </td>
                 </tr>
               ))}
