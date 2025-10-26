@@ -93,26 +93,51 @@ export default function useSearchInventories(): useSearchInventoriesResponseMode
       window.clearTimeout(debounceRef.current);
     }
 
-    debounceRef.current = window.setTimeout(async () => {
+    let cancelled = false;
+
+    const fetchAllPages = async (): Promise<boolean | null> => {
       setIsLoading(true);
       setErrorMessage('');
+      const aggregated: Inventory[] = [];
+      let page = 0;
+      while (true) {
+        const res = await searchInventories(
+          page,
+          listSize,
+          filters.inventoryName || undefined,
+          filters.inventoryType || undefined,
+          filters.inventoryDescription || undefined,
+          filters.importantOnly
+        );
 
-      // Get a fresh page from the server (unfiltered) then apply local filters.
-      // If you prefer server-side filtering, pass filters into searchInventories instead.
-      const res = await searchInventories(0, listSize);
+        if (cancelled) return null;
 
-      if (res.errorMessage) {
-        setInventoryList([]);
-        setRealPage(1);
-        setCurrentPage(() => 0);
-        setIsLoading(false);
-        setErrorMessage(res.errorMessage);
-        return;
+        if (res.errorMessage) {
+          setInventoryList([]);
+          setRealPage(1);
+          setCurrentPage(() => 0);
+          setIsLoading(false);
+          setErrorMessage(res.errorMessage);
+          return null;
+        }
+
+        const data = res.data ?? [];
+        // Append unique by inventoryId
+        for (const item of data) {
+          if (!aggregated.some(a => a.inventoryId === item.inventoryId)) {
+            aggregated.push(item);
+          }
+        }
+
+        if (data.length < listSize) break;
+        page += 1;
       }
 
-      const data = res.data ?? [];
+      if (cancelled) return null;
 
-      const filtered = data.filter(item => {
+      // apply client-side filters as an extra safety (server-side already
+      // received the filters but some fields may be normalized differently)
+      const filtered = aggregated.filter(item => {
         const nameMatch =
           !filters.inventoryName ||
           item.inventoryName
@@ -139,9 +164,15 @@ export default function useSearchInventories(): useSearchInventoriesResponseMode
       setRealPage(1);
       setCurrentPage(() => 0);
       setIsLoading(false);
+      return true;
+    };
+
+    debounceRef.current = window.setTimeout(async () => {
+      await fetchAllPages();
     }, 300);
 
     return () => {
+      cancelled = true;
       if (debounceRef.current) {
         window.clearTimeout(debounceRef.current);
       }
