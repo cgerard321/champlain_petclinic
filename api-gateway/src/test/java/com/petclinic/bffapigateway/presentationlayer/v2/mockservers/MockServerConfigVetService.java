@@ -5,10 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Vets.*;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
-import org.mockserver.model.JsonBody;
 import org.springframework.http.MediaType;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -241,7 +239,8 @@ public class MockServerConfigVetService {
                                         Set.of(
                                                 new SpecialtyDTO("surgery", "surgery"),
                                                 new SpecialtyDTO("radiology", "radiology")
-                                        )
+                                        ),
+                                        null
                                 ))));
     }
 
