@@ -11,6 +11,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Optional;
 
+import static com.petclinic.billing.util.FormatBillUtil.convertFromCad;
+import static com.petclinic.billing.util.FormatBillUtil.formatCurrency;
+
 public class PdfGenerator {
 
     public static byte[] generateBillPdf(BillResponseDTO bill, String currency) throws DocumentException {
@@ -144,10 +147,7 @@ public class PdfGenerator {
         return byteArrayOutputStream.toByteArray();
     }
 
-    private static String formatCurrency(BigDecimal value, String currency) {
-        Locale locale = "USD".equalsIgnoreCase(currency) ? Locale.US : Locale.CANADA;
-        return NumberFormat.getCurrencyInstance(locale).format(value);
-    }
+
 
     // Helper: metadata table cells
     private static void addMetaCell(PdfPTable table, String label, String value) {
@@ -177,12 +177,5 @@ public class PdfGenerator {
         return cell;
     }
 
-    private static BigDecimal convertFromCad(BigDecimal value, String currency) {
-        if (value == null) return BigDecimal.ZERO;
-        if ("USD".equalsIgnoreCase(currency)) {
-            return value.multiply(new BigDecimal("0.73"));
-        }
-        // Default/base: CAD
-        return value;
-    }
+
 }

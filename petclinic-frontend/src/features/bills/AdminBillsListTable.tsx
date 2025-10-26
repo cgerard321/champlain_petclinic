@@ -37,10 +37,7 @@ interface FilterModel {
   vetLastName: string;
 }
 
-export default function AdminBillsListTable({
-  currency,
-  setCurrency,
-}: AdminBillsListTableProps): JSX.Element {
+export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.Element {
   const [showArchivedBills, setShowArchivedBills] = useState(false);
   const [searchId, setSearchId] = useState('');
   const [searchedBill, setSearchedBill] = useState<Bill | null>(null);
@@ -78,6 +75,8 @@ export default function AdminBillsListTable({
   const [detailBill, setDetailBill] = useState<Bill | null>(null);
   const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
   const [currencyOpen, setCurrencyOpen] = useState<boolean>(false);
+  const [sendEmail, setSendEmail] = useState<boolean>(false);
+  const [currency, setCurrency] = useState<Currency>('CAD');
 
   const fetchOwnersAndVets = useCallback(async (): Promise<void> => {
     try {
@@ -296,7 +295,7 @@ export default function AdminBillsListTable({
       billStatus: newBill.billStatus.toUpperCase(),
     };
     try {
-      await addBill(formattedBill);
+      await addBill(formattedBill, sendEmail, currency);
       setActiveSection(null);
       getBillsList(currentPage, 10);
     } catch (err) {
@@ -773,6 +772,30 @@ export default function AdminBillsListTable({
                         setNewBill({ ...newBill, dueDate: e.target.value })
                       }
                     />
+                    <div>
+                      <label htmlFor="sendEmail">Send Email Notification</label>
+                      <select
+                        id="sendEmail"
+                        value={sendEmail ? 'true' : 'false'}
+                        onChange={e => setSendEmail(e.target.value === 'true')}
+                      >
+                        <option value="true">Yes</option>
+                        <option value="false">No</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label htmlFor="billCurrency">
+                        Bill Currency for Email:
+                      </label>
+                      <select
+                        id="billCurrency"
+                        value={currency}
+                        onChange={e => setCurrency(e.target.value as Currency)}
+                      >
+                        <option value="CAD">CAD</option>
+                        <option value="USD">USD</option>
+                      </select>
+                    </div>
 
                     <div className="form-actions">
                       <button type="submit" className="full-width-btn">

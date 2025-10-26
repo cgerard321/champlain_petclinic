@@ -44,7 +44,7 @@ public interface BillService {
 
     Flux<BillResponseDTO> getAllBillsByVisitType(String visitType);
 
-    Mono<BillResponseDTO> createBill(@RequestBody Mono<BillRequestDTO> model);
+    Mono<BillResponseDTO> createBill(@RequestBody Mono<BillRequestDTO> model, boolean sendEmail, String currency, String jwtToken);
 
     Mono<Void> deleteBill(@RequestParam(value = "billId", required = true) String billId);
 

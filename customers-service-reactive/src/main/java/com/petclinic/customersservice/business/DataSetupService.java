@@ -91,6 +91,7 @@ public class DataSetupService implements CommandLineRunner {
         Owner o10 = new Owner("10", "7c0d42c2-0c2d-41ce-bd9c-6ca67478956f", "Carlos", "Esteban",
                 "2335 Independence La.", "Waunakee", "Ontario", "6085555487", null);
 
+
         Flux.just(o1, o2, o3, o4, o5, o6, o7, o8, o9, o10)
                 .flatMap(ownerRepository::insert)
                 .log()

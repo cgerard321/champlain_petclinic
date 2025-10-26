@@ -79,7 +79,7 @@ private final String baseBillURL = "/api/v2/gateway/bills";
 
 
     public void AddBill_thenReturnBill(){
-        when(billServiceClient.createBill(billRequestDTO)).thenReturn(Mono.just(billresponse));
+        when(billServiceClient.createBill(billRequestDTO, false, "USD", "dummy-token")).thenReturn(Mono.just(billresponse));
         webTestClient.post()
                 .uri(baseBillURL + "/admin")
                 .bodyValue(billRequestDTO)

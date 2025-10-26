@@ -15,8 +15,15 @@ angular.module('billForm')
         });
 
         self.submitBillForm = function () {
-            var req;
-                req = $http.post("api/gateway/bills", self.bill);
+            var req = $http({
+                method: 'POST',
+                url: 'api/gateway/bills',
+                params: {
+                    sendEmail: self.sendEmail,
+                    currency: self.billCurrency
+                },
+                data: self.bill
+            });
 
             req.then(function () {
                 $state.go('bills');
@@ -28,4 +35,5 @@ angular.module('billForm')
                 }).join("\r\n"));
             });
         };
+
     }]);
