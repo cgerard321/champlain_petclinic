@@ -6,5 +6,5 @@ export const addPet = async (
   ownerId: string,
   pet: PetRequestModel
 ): Promise<AxiosResponse<PetRequestModel>> => {
-  return axiosInstance.post(`owners/${ownerId}/pets`, pet, { useV2: true });
+  return axiosInstance.post(`owners/${ownerId}/pets`, pet, { useV2: false });
 };
