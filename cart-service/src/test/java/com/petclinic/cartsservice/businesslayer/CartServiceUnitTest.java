@@ -1713,10 +1713,9 @@ class CartServiceUnitTest {
         StepVerifier.create(cartService.applyPromoToCart(cartId, promo))
                 .assertNext(resp -> {
                     assertNotNull(resp);
-                    // If CartResponseModel exposes promoPercent, assert it too:
                     try {
                         assertEquals(promo, resp.getPromoPercent());
-                    } catch (Exception ignored) { /* some models may not expose it; captor below asserts */ }
+                    } catch (Exception ignored) {  }
                 })
                 .verifyComplete();
 
