@@ -136,7 +136,11 @@ export default function CreateBillModal({
   const handleVisitTypeChange = (value: string): void => {
     const upper = value.toUpperCase();
     if (basePrices.hasOwnProperty(upper)) {
-      setForm(prev => ({ ...prev, visitType: upper, amount: basePrices[upper] }));
+      setForm(prev => ({
+        ...prev,
+        visitType: upper,
+        amount: basePrices[upper],
+      }));
       setError(null);
     } else {
       setForm(prev => ({ ...prev, visitType: upper, amount: 0 }));
@@ -152,7 +156,7 @@ export default function CreateBillModal({
         ...form,
         billStatus: form.billStatus ? form.billStatus : 'UNPAID',
       };
-      await addBill(payload);
+      await addBill(payload, false, 'CAD');
       onCreated?.();
       setError(null);
       setIsSubmitting(false);
