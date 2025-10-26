@@ -211,9 +211,10 @@
 
     <!-- Card list -->
     <div class="inventory-list">
+        <!-- tap card to open list view like desktop row -->
         <div class="inventory-card"
              ng-repeat="inventory in $ctrl.inventoryList | filter:$ctrl.query track by inventory.inventoryId"
-             ng-click="/* tap card to open list view like desktop row */ $state.go('inventoriesProductList', { inventoryId: inventory.inventoryId })">
+             ng-click="$state.go('inventoriesProductList', { inventoryId: inventory.inventoryId })">
 
             <div class="card-head">
                 <div class="code">{{ ::inventory.inventoryCode }}</div>
