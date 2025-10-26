@@ -5,7 +5,7 @@ use rocket::State;
 use uuid::Uuid;
 
 pub async fn remove_session(db: &State<Db>, cookie_id: Uuid) -> AppResult<()> {
-    Ok(auth_repo::delete_session(&*db, cookie_id)
+    auth_repo::delete_session(db, cookie_id)
         .await
-        .map_err(|_e| AppError::Internal)?)
+        .map_err(|_e| AppError::Internal)
 }

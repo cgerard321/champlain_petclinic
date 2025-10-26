@@ -10,7 +10,7 @@ use uuid::Uuid;
 
 pub async fn authenticate(db: &State<Db>, email: &str, password: &str) -> Result<Uuid, AppError> {
     let pep = get_pepper();
-    let row = get_user_auth_by_email(&*db, email)
+    let row = get_user_auth_by_email(db, email)
         .await
         .map_err(|_| AppError::Unauthorized)?;
 
@@ -25,9 +25,9 @@ pub async fn authenticate(db: &State<Db>, email: &str, password: &str) -> Result
     let session_id = Uuid::new_v4();
     let expires_at: NaiveDateTime = (Utc::now() + Duration::days(1)).naive_utc();
 
-    auth_repo::insert_session(&*db, session_id, row.id, expires_at)
+    auth_repo::insert_session(db, session_id, row.id, expires_at)
         .await
-        .map_err(|e| AppError::Internal)?;
+        .map_err(|_e| AppError::Internal)?;
 
     println!("Created session {session_id} for user {}", row.email);
 

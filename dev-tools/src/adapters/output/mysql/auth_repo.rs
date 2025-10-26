@@ -52,6 +52,7 @@ pub async fn delete_session(db: &Db, sid: Uuid) -> AppResult<()> {
     Ok(())
 }
 
+#[allow(dead_code)]
 pub async fn delete_expired_sessions(db: &Db) -> AppResult<u64> {
     let res = sqlx::query("DELETE FROM sessions WHERE expires_at < NOW()")
         .execute(&db.0)

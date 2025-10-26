@@ -1,6 +1,7 @@
 use chrono::NaiveDateTime;
 use uuid::Uuid;
 
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct Session {
     pub id: Uuid,
