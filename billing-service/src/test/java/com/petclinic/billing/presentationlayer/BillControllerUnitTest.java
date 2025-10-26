@@ -429,8 +429,9 @@ class BillControllerUnitTest {
     }
 
     @Test
-    void whenPostingBillWithNoBillStatus_thenReturnsBadRequest() {
-        BillRequestDTO invalidBill = BillRequestDTO.builder()
+    void whenPostingBillWithNoBillStatus_thenReturnsCreated() {
+        // Arrange
+        BillRequestDTO validBill = BillRequestDTO.builder()
                 .customerId("C001")
                 .visitType("Checkup")
                 .vetId("V100")
@@ -440,7 +441,6 @@ class BillControllerUnitTest {
                 .dueDate(LocalDate.now().plusDays(10))
                 .build();
 
-        // Mock successful bill creation - billStatus will be auto-filled to UNPAID
         BillResponseDTO mockResponse = BillResponseDTO.builder()
                 .billId("mock-bill-id")
                 .customerId("C001")
@@ -452,19 +452,32 @@ class BillControllerUnitTest {
                 .dueDate(LocalDate.now().plusDays(10))
                 .build();
 
-        when(billService.createBill(any(Mono.class))).thenReturn(Mono.just(mockResponse));
+        when(billService.createBill(any(Mono.class), eq(false), eq("CAD"), eq("jwtToken")))
+                .thenReturn(Mono.just(mockResponse));
 
-        // The new logic auto-fills null billStatus with UNPAID, so the request should succeed
+        when(billService.getAllBills()).thenReturn(Flux.empty());
+
         client.post()
-                .uri("/bills")
+                .uri(uriBuilder -> uriBuilder
+                        .path("/bills")
+                        .queryParam("sendEmail", false)
+                        .queryParam("currency", "CAD")
+                        .build())
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(invalidBill)
+                .cookie("Bearer", "jwtToken")
+                .bodyValue(validBill)
                 .exchange()
-                .expectStatus().isCreated()  // expect 201 CREATED instead of 400 BAD_REQUEST
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody(BillResponseDTO.class)
                 .value(response -> {
-                    assertThat(response.getBillStatus()).isEqualTo(BillStatus.UNPAID); // verify auto-fill worked
+                    assertThat(response.getBillStatus()).isEqualTo(BillStatus.UNPAID);
+                    assertThat(response.getCustomerId()).isEqualTo("C001");
+                    assertThat(response.getVetId()).isEqualTo("V100");
                 });
+
+        verify(billService, times(1))
+                .createBill(any(Mono.class), eq(false), eq("CAD"), eq("jwtToken"));
     }
 
     @Test
