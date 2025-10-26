@@ -1,5 +1,5 @@
 import { AxiosError } from 'axios';
-import axiosInstance from "@/shared/api/axiosInstance.ts";
+import axiosInstance from '@/shared/api/axiosInstance.ts';
 
 // Map status codes to their respective error pages
 const errorPageRedirects: Record<number, string> = {
@@ -17,20 +17,21 @@ export default function axiosErrorResponseHandler(
 ): void {
   // Specific handling for 401 Unauthorized
   if (statusCode === 401) {
-      const wasLoggedIn = localStorage.getItem('user') !== null;
+    const wasLoggedIn = localStorage.getItem('user') !== null;
 
-      if (wasLoggedIn) {
-          console.error('Session expired. Logging out and redirecting to unauthorized page.');
+    if (wasLoggedIn) {
+      console.error(
+        'Session expired. Logging out and redirecting to unauthorized page.'
+      );
 
-          axiosInstance.post('/users/logout', {}).catch(() => {
-          });
+      axiosInstance.post('/users/logout', {}).catch(() => {});
 
-          localStorage.clear();
+      localStorage.clear();
 
-          sessionStorage.setItem('sessionExpired', 'true');
-      } else {
-          console.error('Unauthorized access detected.');
-      }
+      sessionStorage.setItem('sessionExpired', 'true');
+    } else {
+      console.error('Unauthorized access detected.');
+    }
   }
 
   const redirectPath = errorPageRedirects[statusCode];
