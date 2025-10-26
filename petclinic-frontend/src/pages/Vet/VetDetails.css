@@ -63,6 +63,67 @@
   color: #555;
 }
 
+.work-info-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.btn-edit-work-info {
+  background-color: #4d7cff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-edit-work-info:hover {
+  background-color: #3b63d6;
+  transform: translateY(-1px);
+}
+
+.btn-edit-work-info:active {
+  transform: translateY(0);
+}
+
+.work-info-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.work-info-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #555;
+}
+
+.workday-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.workday-tag {
+  background-color: #eef2ff;
+  color: #314266;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(77, 124, 255, 0.15);
+}
+
+.workday-empty {
+  color: #777;
+}
+
 .specialties-list {
   display: flex;
   flex-direction: column;
@@ -339,10 +400,12 @@
 
 .notification-modal.success {
   border-left-color: #28a745;
+  background-color: rgba(240, 255, 244, 0.95);
 }
 
 .notification-modal.error {
   border-left-color: #dc3545;
+  background-color: rgba(255, 245, 245, 0.95);
 }
 
 .notification-icon {
