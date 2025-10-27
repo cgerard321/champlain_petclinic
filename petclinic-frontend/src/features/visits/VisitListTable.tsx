@@ -39,6 +39,17 @@ export default function VisitListTable(): JSX.Element {
   //use sidebar to select which table is shown
   const [currentTab, setCurrentTab] = useState<string>('All');
 
+  // helper to normalize API responses to an array of visits
+  const normalizeVisits = (payload: any): Visit[] => {
+    if (!payload) return [];
+    if (Array.isArray(payload)) return payload;
+    if (payload.visits && Array.isArray(payload.visits)) return payload.visits;
+    if (payload.data && Array.isArray(payload.data)) return payload.data;
+    // fallback: maybe payload is a single visit object
+    if (typeof payload === 'object') return [payload] as Visit[];
+    return [];
+  };
+
   // Sort visits: emergency visits first, then by start date
   const sortVisits = (visitsList: Visit[]): Visit[] => {
     return [...visitsList].sort((a, b) => {
@@ -119,8 +130,9 @@ export default function VisitListTable(): JSX.Element {
     const getVisits = async (): Promise<void> => {
       try {
         const fetchedVisits = await getAllVisits();
-        setVisits(fetchedVisits);
-        setDisplayedVisits(fetchedVisits);
+        const list = normalizeVisits(fetchedVisits);
+        setVisits(list);
+        setDisplayedVisits(list);
       } catch (err) {
         if (err instanceof Error) {
           setError(`Failed to fetch visits: ${err.message}`);

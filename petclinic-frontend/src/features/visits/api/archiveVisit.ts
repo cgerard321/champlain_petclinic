@@ -1,22 +1,15 @@
-import axiosInstance from '@/shared/api/axiosInstance.ts';
-import { Visit } from '@/features/visits/models/Visit.ts';
+import { VisitRequestModel } from '@/features/visits/models/VisitRequestModel.ts';
 import { VisitResponseModel } from '@/features/visits/models/VisitResponseModel.ts';
+import axiosInstance from '@/shared/api/axiosInstance.ts';
 
-export async function archiveVisit(
-  visitId: string,
-  onSuccess: (updatedVisit: Visit) => void
-): Promise<void> {
-  try {
-    const putResponse = await axiosInstance.patch<VisitResponseModel>(
-      `/visits/${visitId}/status/ARCHIVED`,
-      {},
-      { useV2: false }
+export const archiveVisit = async (
+    visitId: string,
+    visitRequest: VisitRequestModel
+): Promise<VisitResponseModel> => {
+    const response = await axiosInstance.put<VisitResponseModel>(
+        `/visits/${visitId}/archive`,
+        visitRequest,
+        { useV2: false }
     );
-    const updatedVisit = putResponse.data;
-
-    onSuccess(updatedVisit);
-  } catch (error) {
-    console.error('Error archiving visit:', error);
-    throw error;
-  }
-}
+    return response.data;
+};

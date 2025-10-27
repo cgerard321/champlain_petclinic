@@ -2,11 +2,15 @@ import { VisitResponseModel } from '@/features/visits/models/VisitResponseModel.
 import axiosInstance from '@/shared/api/axiosInstance.ts';
 
 export const getVisit = async (
-  visitId: string
+    visitId: string,
+    includePrescription: boolean = false
 ): Promise<VisitResponseModel> => {
-  const response = await axiosInstance.get<VisitResponseModel>(
-    `/visits/${visitId}`,
-    { useV2: false }
-  );
-  return response.data; // Return only the data
+    const response = await axiosInstance.get<VisitResponseModel>(
+        `/visits/${visitId}`,
+        {
+            params: { includePrescription },
+            useV2: false
+        }
+    );
+    return response.data;
 };

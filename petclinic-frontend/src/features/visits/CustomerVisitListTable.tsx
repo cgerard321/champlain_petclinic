@@ -32,6 +32,16 @@ export default function CustomerVisitListTable(): JSX.Element {
 
   const navigate = useNavigate();
 
+  // helper to normalize API responses to an array of visits
+  const normalizeVisits = (payload: any): Visit[] => {
+    if (!payload) return [];
+    if (Array.isArray(payload)) return payload;
+    if (payload.visits && Array.isArray(payload.visits)) return payload.visits;
+    if (payload.data && Array.isArray(payload.data)) return payload.data;
+    if (typeof payload === 'object') return [payload] as Visit[];
+    return [];
+  };
+
   // Sort visits: emergency visits first, then by start date
   const sortVisits = (visitsList: Visit[]): Visit[] => {
     return [...visitsList].sort((a, b) => {
@@ -44,38 +54,42 @@ export default function CustomerVisitListTable(): JSX.Element {
     });
   };
   // Filter visits based on status
-  // Derive the different lists from the displayed list so search / tabs compose
+  // Ensure we operate on a safe array even if displayedVisits was set incorrectly
+  const safeDisplayedVisits: Visit[] = Array.isArray(displayedVisits)
+    ? displayedVisits
+    : normalizeVisits(displayedVisits);
+
   const emergencyVisits = sortVisits(
-    displayedVisits.filter(visit => visit.isEmergency)
+    safeDisplayedVisits.filter(visit => visit.isEmergency)
   );
   const confirmedVisits = sortVisits(
-    displayedVisits.filter(visit => {
+    safeDisplayedVisits.filter(visit => {
       return visit.status === 'CONFIRMED';
     })
   );
   const upcomingVisits = sortVisits(
-    displayedVisits.filter(visit => {
+    safeDisplayedVisits.filter(visit => {
       return visit.status === 'UPCOMING';
     })
   );
   const completedVisits = sortVisits(
-    displayedVisits.filter(visit => {
+    safeDisplayedVisits.filter(visit => {
       return visit.status === 'COMPLETED';
     })
   );
   const cancelledVisits = sortVisits(
-    displayedVisits.filter(visit => {
+    safeDisplayedVisits.filter(visit => {
       return visit.status === 'CANCELLED';
     })
   );
   const archivedVisits = sortVisits(
-    displayedVisits.filter(visit => {
+    safeDisplayedVisits.filter(visit => {
       return visit.status === 'ARCHIVED';
     })
   );
 
   const categories: Category[] = [
-    { name: 'All', list: displayedVisits },
+    { name: 'All', list: safeDisplayedVisits },
     { name: 'Emergencies', emergency: true, list: emergencyVisits },
     { name: 'Confirmed', list: confirmedVisits },
     { name: 'Upcoming', list: upcomingVisits },
@@ -96,12 +110,9 @@ export default function CustomerVisitListTable(): JSX.Element {
           visitData = await getAllOwnerVisits(user.userId);
         }
 
-        if (Array.isArray(visitData)) {
-          setVisits(visitData);
-          setDisplayedVisits(visitData);
-        } else {
-          console.error('Fetched data is not an array', visitData);
-        }
+        const list = normalizeVisits(visitData);
+        setVisits(list);
+        setDisplayedVisits(list);
       } catch (err) {
         if (err instanceof Error) {
           setError(`Failed to fetch visits: ${err.message}`);

@@ -41,47 +41,65 @@ public class VisitController {
      *
      * @return All visits
      */
-    @GetMapping(value="", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<VisitResponseDTO> getAllVisits(@RequestParam(required = false) String description){
+    @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<VisitResponseDTO> getAllVisits(
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String petId,
+            @RequestParam(required = false) String practitionerId,
+            @RequestParam(required = false, defaultValue = "false") boolean archived) {
+
+        if (status != null) {
+            return visitService.getVisitsForStatus(status);
+        }
+        if (petId != null) {
+            return visitService.getVisitsForPet(petId);
+        }
+        if (practitionerId != null) {
+            return visitService.getVisitsForPractitioner(practitionerId);
+        }
+        if (archived) {
+            return visitService.getAllArchivedVisits();
+        }
 
         return visitService.getAllVisits(description);
     }
-
-    /**
-     * Get all the visits with the vet ID given
-     * localhost:8080/visits/practitioner/{VET_ID}
-     *
-     * @param practitionerId The Vet ID
-     * @return List of visits that have the Given vetID
-     */
-    @GetMapping(value = "practitioner/{practitionerId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<VisitResponseDTO> getVisitsByPractitionerId(@PathVariable String practitionerId) {
-        return visitService.getVisitsForPractitioner(practitionerId);
-    }
-
-    /**
-     * Get all the visits with the pet ID given
-     * localhost:8080/visits/pets/{petID}
-     *
-     * @param petId The Pet id to find the visit for
-     * @return All the visit with the common pet ID
-     */
-    @GetMapping(value = "/pets/{petId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<VisitResponseDTO> getVisitsForPet(@PathVariable String petId) {
-        return visitService.getVisitsForPet(petId);
-    }
-
-    /**
-     * Get all the visits by their status ( EX : DataLayer/Status ( ENUM ) )
-     * localhost:8080/visits/status/{Status.toString}
-     *
-     * @param status The status we are searching for
-     * @return All the visits with the status we searched for
-     */
-    @GetMapping(value = "/status/{status}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<VisitResponseDTO> getVisitsForStatus(@PathVariable String status) {
-        return visitService.getVisitsForStatus(status);
-    }
+//
+//    /**
+//     * Get all the visits with the vet ID given
+//     * localhost:8080/visits/practitioner/{VET_ID}
+//     *
+//     * @param practitionerId The Vet ID
+//     * @return List of visits that have the Given vetID
+//     */
+//    @GetMapping(value = "practitioner/{practitionerId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+//    public Flux<VisitResponseDTO> getVisitsByPractitionerId(@PathVariable String practitionerId) {
+//        return visitService.getVisitsForPractitioner(practitionerId);
+//    }
+//
+//    /**
+//     * Get all the visits with the pet ID given
+//     * localhost:8080/visits/pets/{petID}
+//     *
+//     * @param petId The Pet id to find the visit for
+//     * @return All the visit with the common pet ID
+//     */
+//    @GetMapping(value = "/pets/{petId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+//    public Flux<VisitResponseDTO> getVisitsForPet(@PathVariable String petId) {
+//        return visitService.getVisitsForPet(petId);
+//    }
+//
+//    /**
+//     * Get all the visits by their status ( EX : DataLayer/Status ( ENUM ) )
+//     * localhost:8080/visits/status/{Status.toString}
+//     *
+//     * @param status The status we are searching for
+//     * @return All the visits with the status we searched for
+//     */
+//    @GetMapping(value = "/status/{status}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+//    public Flux<VisitResponseDTO> getVisitsForStatus(@PathVariable String status) {
+//        return visitService.getVisitsForStatus(status);
+//    }
 
     /**
      * Get a visit by its ID
@@ -137,9 +155,13 @@ public class VisitController {
      * @param status  The new status DataLayer/Status.toString
      * @return The modified Visit
      */
-    @PutMapping(value = "/{visitId}/status/{status}", produces = "application/json")
-    public Mono<VisitResponseDTO> updateStatusForVisitByVisitId(@PathVariable String visitId, @PathVariable String status) {
-        return visitService.updateStatusForVisitByVisitId(visitId, status);
+    @PatchMapping(value = "/{visitId}")
+    public Mono<ResponseEntity<VisitResponseDTO>> updateStatusForVisitByVisitId(
+            @PathVariable String visitId,
+            @RequestParam String status) {
+        return visitService.updateStatusForVisitByVisitId(visitId, status)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     /**
@@ -150,10 +172,26 @@ public class VisitController {
      * @return The body of the visit we just deleted
      */
     @DeleteMapping("/{visitId}")
-    public Mono<ResponseEntity<Void>> deleteVisit(@PathVariable String visitId) {
+    public Mono<ResponseEntity<Void>> deleteVisit(
+            @PathVariable String visitId) {
         return visitService.deleteVisit(visitId)
                 .then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)));
     }
+//    @DeleteMapping("/{visitId}")
+//    public Mono<ResponseEntity<Void>> deleteVisitByVisitId(
+//            @PathVariable String visitId,
+//            @RequestParam(required = false, defaultValue = "false") boolean allCancelled) {
+//
+//        if (allCancelled) {
+//            return visitService.deleteAllCancelledVisits()
+//                    .map(v -> ResponseEntity.noContent().<Void>build())
+//                    .defaultIfEmpty(ResponseEntity.notFound().build());
+//        }
+//
+//        return visitService.deleteVisit(visitId)
+//                .map(v -> ResponseEntity.noContent().<Void>build())
+//                .defaultIfEmpty(ResponseEntity.notFound().build());
+//    }
 
     /**
      * Delete all visit whose status DataLayer/Status is Cancelled
@@ -244,7 +282,7 @@ public class VisitController {
 //    }
 
 
-    @PutMapping(value = "/completed/{visitId}/archive", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/{visitId}/archive", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VisitResponseDTO>> archiveCompletedVisit(@PathVariable String visitId, @RequestBody Mono<VisitRequestDTO> visitRequestDTO) {
         return Mono.just(visitId)
                 .switchIfEmpty(Mono.error(new InvalidInputException("the provided visit id is invalid: " + visitId)))
@@ -270,13 +308,6 @@ public class VisitController {
 //        return visitService.testingGetVetDTO(vetId);
 //    }
 
-    @PatchMapping("/{visitId}/{status}")
-    public Mono<ResponseEntity<VisitResponseDTO>> updateVisitStatus(
-            @PathVariable String visitId, @PathVariable String status) {
-        return visitService.patchVisitStatusInVisit(visitId, status)
-                .map(visitResponseDTO -> new ResponseEntity<>(visitResponseDTO, HttpStatus.OK))
-                .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
-    }
 
 
     @GetMapping(value = "/export", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
@@ -288,7 +319,7 @@ public class VisitController {
                         .body(csvData));
     }
 
-    @PostMapping("/{visitId}/prescription")
+    @PostMapping("/{visitId}/prescriptions")
     public Mono<ResponseEntity<PrescriptionResponseDTO>> createPrescription(
             @PathVariable String visitId,
             @RequestBody PrescriptionResponseDTO dto) {
@@ -307,7 +338,7 @@ public class VisitController {
                         Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()));
     }
 
-    @GetMapping(value = "/{visitId}/prescription/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    @GetMapping(value = "/{visitId}/prescriptions/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
     public Mono<ResponseEntity<byte[]>> downloadPdf(
             @PathVariable String visitId) {
 

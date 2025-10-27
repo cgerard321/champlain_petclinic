@@ -1,26 +1,15 @@
-import axiosInstance from '@/shared/api/axiosInstance';
 import { VisitRequestModel } from '@/features/visits/models/VisitRequestModel.ts';
-import { VisitResponseModel } from '../models/VisitResponseModel';
+import { VisitResponseModel } from '@/features/visits/models/VisitResponseModel.ts';
+import axiosInstance from '@/shared/api/axiosInstance.ts';
 
 export const updateVisit = async (
-  visitId: string,
-  visit: Partial<VisitRequestModel>
-): Promise<void> => {
-  await axiosInstance.put<void>(`/visits/${visitId}`, visit, {
-    useV2: false,
-  });
-};
-
-export const updateVisitStatus = async (
-  visitId: string,
-  status: string
+    visitId: string,
+    visitRequest: VisitRequestModel
 ): Promise<VisitResponseModel> => {
-  const response = await axiosInstance.put<VisitResponseModel>(
-    `/visits/${visitId}/status/${status}`,
-    null,
-    {
-      useV2: false,
-    }
-  );
-  return response.data;
+    const response = await axiosInstance.put<VisitResponseModel>(
+        `/visits/${visitId}`,
+        visitRequest,
+        { useV2: false }
+    );
+    return response.data;
 };

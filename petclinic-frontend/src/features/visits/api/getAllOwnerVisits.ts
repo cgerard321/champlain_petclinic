@@ -1,28 +1,37 @@
+import { VisitResponseModel } from '@/features/visits/models/VisitResponseModel.ts';
 import axiosInstance from '@/shared/api/axiosInstance.ts';
-import { VisitResponseModel } from '../models/VisitResponseModel';
 
-export async function getAllOwnerVisits(
-  ownerId: string
-): Promise<VisitResponseModel[]> {
-  try {
+export const getAllOwnerVisits = async (
+    ownerId: string
+): Promise<VisitResponseModel[]> => {
     const response = await axiosInstance.get(
-      `/visits/owners/${ownerId}/visits`,
-      {
-        useV2: false,
-      }
-    );
-    return response.data
-      .split('data:')
-      .map((dataChunk: string) => {
-        try {
-          if (dataChunk == '') return null;
-          return JSON.parse(dataChunk);
-        } catch (err) {
-          console.error('Could not parse JSON: ' + err);
+        `/visits`,
+        {
+            params: { ownerId },
+            responseType: 'text',
+            useV2: false
         }
-      })
-      .filter((data?: JSON) => data !== null);
-  } catch (error) {
-    throw error;
-  }
-}
+    );
+
+    const text = response.data;
+    if (!text) return [];
+
+    // Parse SSE format: extract data: lines
+    const visits: VisitResponseModel[] = [];
+    const lines = text.split('\n');
+
+    for (const line of lines) {
+        if (line.startsWith('data:')) {
+            try {
+                const json = line.substring(5).trim();
+                if (json) {
+                    visits.push(JSON.parse(json));
+                }
+            } catch (e) {
+                // skip invalid lines
+            }
+        }
+    }
+
+    return visits;
+};

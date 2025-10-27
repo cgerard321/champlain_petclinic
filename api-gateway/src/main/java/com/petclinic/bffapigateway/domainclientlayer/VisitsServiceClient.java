@@ -89,7 +89,9 @@ public class VisitsServiceClient {
     public Flux<VisitResponseDTO> getVisitsForStatus(final String status) {
         return webClient
                 .get()
-                .uri("/status/{status}", status)
+                .uri(uriBuilder -> uriBuilder
+                        .queryParam("status", status)
+                        .build())
                 .retrieve()
                 .bodyToFlux(VisitResponseDTO.class);
     }
@@ -98,7 +100,9 @@ public class VisitsServiceClient {
     public Flux<VisitResponseDTO> getVisitsForPet(final String petId) {
         return webClient
                 .get()
-                .uri("/pets/{petId}", petId)
+                .uri(uriBuilder -> uriBuilder
+                        .queryParam("petId", petId)
+                        .build())
                 .retrieve()
                 .bodyToFlux(VisitResponseDTO.class);
     }
@@ -106,7 +110,9 @@ public class VisitsServiceClient {
     public Flux<VisitResponseDTO> getVisitByPractitionerId(final String practitionerId) {
         return webClient
                 .get()
-                .uri("/practitioner/{practitionerId}", practitionerId)
+                .uri(uriBuilder -> uriBuilder
+                        .queryParam("practitionerId", practitionerId)
+                        .build())
                 .retrieve()
                 .bodyToFlux(VisitResponseDTO.class);
     }
@@ -138,17 +144,12 @@ public class VisitsServiceClient {
     }
 
     public Mono<VisitResponseDTO> updateStatusForVisitByVisitId(String visitId, String status) {
-
-        Status newStatus = switch (status) {
-            case "CONFIRMED" -> Status.CONFIRMED;
-            case "COMPLETED" -> Status.COMPLETED;
-            case "ARCHIVED" -> Status.ARCHIVED;
-            default -> Status.CANCELLED;
-        };
-
         return webClient
-                .put()
-                .uri("/" + visitId + "/status/" + newStatus)
+                .patch()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/{visitId}")
+                        .queryParam("status", status)
+                        .build(visitId))
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .retrieve()
                 .bodyToMono(VisitResponseDTO.class);
@@ -194,18 +195,21 @@ public class VisitsServiceClient {
                 .bodyToMono(Void.class);
     }
 
-    public Mono<Void> deleteAllCancelledVisits() {
-        return webClient
-                .delete()
-                .uri("/cancelled")
-                .retrieve()
-                .bodyToMono(Void.class);
-    }
-
+//    public Mono<Void> deleteAllCancelledVisits() {
+//        return webClient
+//                .delete()
+//                .uri(uriBuilder -> uriBuilder
+//                        .path("/{visitId}")
+//                        .queryParam("allCancelled", true)
+//                        .build("dummy")) // visitId not used when allCancelled=true
+//                .retrieve()
+//                .bodyToMono(Void.class);
+//    }
+//
     public Mono<VisitResponseDTO> archiveCompletedVisit(String visitId, Mono<VisitRequestDTO> visitRequestDTO) {
         return webClient
                 .put()
-                .uri("/completed/" + visitId + "/archive")
+                .uri("/{visitId}/archive", visitId)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .body(BodyInserters.fromPublisher(visitRequestDTO, VisitRequestDTO.class))
                 .retrieve()
@@ -217,8 +221,9 @@ public class VisitsServiceClient {
     public Flux<VisitResponseDTO> getAllArchivedVisits() {
         return webClient
                 .get()
-                .uri("/archived")
-//                .accept(MediaType.APPLICATION_JSON)
+                .uri(uriBuilder -> uriBuilder
+                        .queryParam("archived", true)
+                        .build())
                 .retrieve()
                 .bodyToFlux(VisitResponseDTO.class);
     }
@@ -408,7 +413,7 @@ public class VisitsServiceClient {
     public Mono<byte[]> downloadPrescriptionPdf(String visitId) {
         String url = UriComponentsBuilder
                 .fromHttpUrl(visitServiceUrl)
-                .path("/{visitId}/prescription/pdf")
+                .path("/{visitId}/prescriptions/pdf")
                 .buildAndExpand(visitId)
                 .toUriString();
 
@@ -422,7 +427,7 @@ public class VisitsServiceClient {
     public Mono<PrescriptionResponseDTO> createPrescription(String visitId, Mono<PrescriptionResponseDTO> request) {
         String url = UriComponentsBuilder
                 .fromHttpUrl(visitServiceUrl)
-                .path("/{visitId}/prescription")
+                .path("/{visitId}/prescriptions")
                 .buildAndExpand(visitId)
                 .toUriString();
 
