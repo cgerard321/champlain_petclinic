@@ -1,6 +1,7 @@
 package com.petclinic.bffapigateway.presentationlayer.v1;
 
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
+import com.petclinic.bffapigateway.dtos.Files.FileDetails;
 import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
@@ -8,6 +9,7 @@ import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,12 +36,21 @@ public class PetControllerV1 {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET,Roles.RECEPTIONIST})
+    // NOTE: Owner was added as one of the allowed roles to fix pet owners being unable to create visits.
+    // Really, there should be a "getAllPetsForOwner" instead and get rid of Owners being able to get all pets.
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET, Roles.OWNER, Roles.RECEPTIONIST})
     @GetMapping(value = "", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<PetResponseDTO> getAllPets(){
         return customersServiceClient.getAllPets();
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<PetResponseDTO>> addPet(@RequestBody Mono<PetRequestDTO> petRequestDTO) {
+        return customersServiceClient.addPet(petRequestDTO)
+                .map(e -> ResponseEntity.status(HttpStatus.CREATED).body(e))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
 
     @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN, Roles.VET})
     @GetMapping("/owners/{ownerId}/pets/{petId}")
@@ -88,6 +99,17 @@ public class PetControllerV1 {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.OWNER, Roles.VET})
+    @PatchMapping("/{petId}/photos")
+    public Mono<ResponseEntity<PetResponseDTO>> addPetPhoto(
+            @PathVariable String petId,
+            @RequestBody Mono<FileDetails> photoMono) {
+        return customersServiceClient.addPetPhoto(petId, photoMono)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET, Roles.OWNER})
     @PatchMapping("/{petId}/photo")

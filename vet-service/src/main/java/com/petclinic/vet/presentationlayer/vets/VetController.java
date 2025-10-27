@@ -20,6 +20,7 @@ import com.petclinic.vet.businesslayer.ratings.RatingService;
 import com.petclinic.vet.businesslayer.vets.VetService;
 import com.petclinic.vet.dataaccesslayer.albums.Album;
 import com.petclinic.vet.presentationlayer.badges.BadgeResponseDTO;
+import com.petclinic.vet.presentationlayer.files.FileRequestDTO;
 import com.petclinic.vet.presentationlayer.photos.PhotoRequestDTO;
 import com.petclinic.vet.presentationlayer.photos.PhotoResponseDTO;
 import com.petclinic.vet.presentationlayer.education.EducationRequestDTO;
@@ -58,7 +59,10 @@ public class VetController {
 
 
     //Ratings
-    @GetMapping("{vetId}/ratings")
+    @GetMapping(
+            value = "{vetId}/ratings",
+            produces = MediaType.TEXT_EVENT_STREAM_VALUE
+    )
     public Flux<RatingResponseDTO> getAllRatingsByVetId(@PathVariable String vetId) {
         return ratingService.getAllRatingsByVetId(EntityDtoUtil.verifyId(vetId))
                 .doOnNext(rating -> log.info("Rating ID: {}, Vet ID: {}, Rating: {}, Customer Name: {}, Experience: {}",
@@ -107,7 +111,10 @@ public class VetController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-    @GetMapping("{vetId}/ratings/date")
+    @GetMapping(
+            value = "{vetId}/ratings/date",
+            produces = MediaType.TEXT_EVENT_STREAM_VALUE
+    )
     public Flux<RatingResponseDTO> getRatingsOfAVetBasedOnDate(@PathVariable String vetId, @RequestParam Map<String,String> queryParams) {
         if (queryParams.containsKey("year")) {
             String year = queryParams.get("year");
@@ -125,7 +132,10 @@ public class VetController {
 
 
 
-    @GetMapping("topVets")
+    @GetMapping(
+            value = "topVets",
+            produces = MediaType.TEXT_EVENT_STREAM_VALUE
+    )
     public Flux<VetAverageRatingDTO> getTopThreeVetsWithHighestAverageRating() {
         return ratingService.getTopThreeVetsWithHighestAverageRating();
     }
@@ -141,12 +151,8 @@ public class VetController {
     }
 
 
-   /*@PutMapping("{vetId}/ratings/{ratingId}")
-   public Mono<RatingResponseDTO> updateRatingByVetIdAndRatingId(@PathVariable String vetId, @PathVariable String ratingId, @RequestBody Mono<RatingRequestDTO> ratingRequestDTOMono){
-       return ratingService.updateRating(vetId, ratingId, ratingRequestDTOMono);
-   }*/
 
-
+ 
     @GetMapping("{vetId}/ratings/percentages")
     public Mono<ResponseEntity<String>> getPercentageOfRatingsByVetId(@PathVariable String vetId){
         return ratingService.getRatingPercentagesByVetId(EntityDtoUtil.verifyId(vetId))
@@ -155,27 +161,19 @@ public class VetController {
     }
 
 
-  /*@GetMapping("{vetId}/ratings/{predefinedDescription}/count")
-  public Mono<ResponseEntity<Integer>> getCountOfRatingsByVetIdAndPredefinedDescription(@PathVariable String vetId, @PathVariable PredefinedDescription predefinedDescription){
-      return ratingService.getCountOfRatingsByVetIdAndPredefinedDescription(EntityDtoUtil.verifyId(vetId), predefinedDescription)
-              .map(ResponseEntity::ok)
-              .defaultIfEmpty(ResponseEntity.notFound().build());
-  }*/
-
-
     //Vets
-    @GetMapping()
+    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VetResponseDTO> getAllVets() {
         return vetService.getAll();
     }
 
 
     @GetMapping(value = "/{vetId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<VetResponseDTO>> getVetByVetId(@PathVariable String vetId) {
+    public Mono<ResponseEntity<VetResponseDTO>> getVetByVetId(@PathVariable String vetId, @RequestParam(required = false, defaultValue = "false") boolean includePhoto) {
         return Mono.just(vetId)
                 .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided vet id is invalid:" + vetId)))
-                .flatMap(vetService::getVetByVetId)
+                .flatMap(id -> vetService.getVetByVetId(id, includePhoto))
                 .map(ResponseEntity::ok);
     }
 
@@ -189,13 +187,19 @@ public class VetController {
     }
 
 
-    @GetMapping("/active")
+    @GetMapping(
+            value = "/active",
+            produces = MediaType.TEXT_EVENT_STREAM_VALUE
+    )
     public Flux<VetResponseDTO> getActiveVets() {
         return vetService.getVetByIsActive(true);
     }
 
 
-    @GetMapping("/inactive")
+    @GetMapping(
+            value = "/inactive",
+            produces = MediaType.TEXT_EVENT_STREAM_VALUE
+    )
     public Flux<VetResponseDTO> getInactiveVets() {
         return vetService.getVetByIsActive(false);
     }
@@ -219,15 +223,18 @@ public class VetController {
 
 
     @DeleteMapping("{vetId}")
-    public Mono<ResponseEntity<Void>> deleteVet(@PathVariable String vetId) {
+    public Mono<ResponseEntity<VetResponseDTO>> deleteVet(@PathVariable String vetId) {
         return vetService.deleteVetByVetId(EntityDtoUtil.verifyId(vetId))
-                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
 
     //Education
-    @GetMapping("{vetId}/educations")
+    @GetMapping(
+            value = "{vetId}/educations",
+            produces = MediaType.TEXT_EVENT_STREAM_VALUE
+    )
     public Flux<EducationResponseDTO> getAllEducationsByVetId(@PathVariable String vetId) {
         return educationService.getAllEducationsByVetId(EntityDtoUtil.verifyId(vetId));
     }
@@ -282,11 +289,20 @@ public class VetController {
 
     @PostMapping(value = "{vetId}/photos",
             consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<PhotoResponseDTO>> addPhotoByVetId(
+    public Mono<ResponseEntity<VetResponseDTO>> addPhotoByVetId(
             @PathVariable String vetId,
             @RequestBody Mono<PhotoRequestDTO> photoRequestDTO) {
-        return photoService.insertPhotoOfVet(vetId, photoRequestDTO)
-                .map(photo -> ResponseEntity.status(HttpStatus.CREATED).body(photo))
+        return photoRequestDTO
+                .map(photoReq -> {
+                    FileRequestDTO fileReq = FileRequestDTO.builder()
+                            .fileName(photoReq.getFilename())
+                            .fileType(photoReq.getImgType())
+                            .build();
+                    fileReq.setFileDataFromBytes(photoReq.getData());
+                    return fileReq;
+                })
+                .flatMap(fileReq -> vetService.updateVetPhoto(vetId, fileReq))
+                .map(vet -> ResponseEntity.status(HttpStatus.CREATED).body(vet))
                 .switchIfEmpty(Mono.just(ResponseEntity.badRequest().build()));
     }
 
@@ -335,6 +351,14 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
+    @PatchMapping("/{vetId}/photo")
+    public Mono<ResponseEntity<VetResponseDTO>> updateVetPhoto(@PathVariable String vetId, @RequestBody Mono<FileRequestDTO> photoMono) {
+        return photoMono
+                .flatMap(photo -> vetService.updateVetPhoto(vetId, photo))
+                .map(updatedVet -> ResponseEntity.ok().body(updatedVet))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
 
     //Badge
     @GetMapping("{vetId}/badge")
@@ -357,12 +381,15 @@ public class VetController {
     public Mono<ResponseEntity<Void>> deleteSpecialtyBySpecialtyId(
             @PathVariable String vetId,
             @PathVariable String specialtyId) {
-        return vetService.deleteSpecialtyBySpecialtyId(vetId, specialtyId)
+        return vetService.deleteSpecialtiesBySpecialtyId(vetId, specialtyId)
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("{vetId}/albums")
+    @GetMapping(
+            value = "{vetId}/albums",
+            produces = MediaType.TEXT_EVENT_STREAM_VALUE
+    )
     public Flux<Album> getAllAlbumsByVetId(@PathVariable String vetId) {
         return albumService.getAllAlbumsByVetId(vetId)
                 .doOnNext(album -> log.info("Album ID: {}, Vet ID: {}, Filename: {}, ImgType: {}",

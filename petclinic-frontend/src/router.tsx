@@ -20,8 +20,6 @@ import AddingCustomer from '@/pages/Customer/AddingCustomer.tsx';
 import AllOwners from '@/pages/Customer/AllOwners.tsx';
 import CustomerBillingPage from '@/pages/Bills/CustomerBills.tsx';
 import AdminBillingPage from '@/pages/Bills/AdminBill.tsx';
-import EditingVisit from './features/visits/models/EditingVisit';
-import AddingVisit from './features/visits/models/AddingVisit';
 import InternalServerError from '@/pages/Error/InternalServerError.tsx';
 import RequestTimeout from '@/pages/Error/RequestTimeout.tsx';
 import ServiceUnavailable from '@/pages/Error/ServiceUnavailable.tsx';
@@ -33,6 +31,7 @@ import CustomerDetailsPage from '@/pages/Customer/CustomerDetailsPage.tsx';
 import UpdateCustomerPage from '@/pages/Customer/UpdateCustomerPage.tsx';
 import VisitDetails from './features/visits/components/VisitByVisitId';
 import CustomerVisits from '@/pages/Visit/CustomerVisits.tsx';
+import VisitsCalendar from '@/pages/Visit/VisitsCalendar.tsx';
 import UpdateOwnerPetPage from '@/pages/Customer/UpdateOwnerPetPage.tsx';
 import AllUsers from '@/pages/Users/AllUsers.tsx';
 import ProductDetails from '@/features/products/components/ProductDetails';
@@ -53,6 +52,7 @@ import OwnerBookAppointment from '@/pages/Visit/OwnerBookAppointment.tsx';
 import FAQ from './pages/FAQ/FAQ';
 import ContactPage from './pages/Contact/Contact';
 import PrivacyPolicyPage from './pages/PrivacyPolicy/PrivacyPolicy';
+import CustomerVisitsCalendar from '@/pages/Visit/CustomerVisitsCalendar.tsx';
 
 const router = createBrowserRouter([
   {
@@ -236,10 +236,18 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: AppRoutePaths.AddVisit,
+        path: AppRoutePaths.VisitsCalendar,
         element: (
-          <ProtectedRoute>
-            <AddingVisit />
+          <ProtectedRoute roles={['ADMIN', 'VET', 'RECEPTIONIST']}>
+            <VisitsCalendar />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.CustomerVisitsCalendar,
+        element: (
+          <ProtectedRoute roles={['OWNER']}>
+            <CustomerVisitsCalendar />
           </ProtectedRoute>
         ),
       },
@@ -328,14 +336,6 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute roles={['ADMIN']}>
             <AllRoles />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: AppRoutePaths.EditVisit,
-        element: (
-          <ProtectedRoute>
-            <EditingVisit />
           </ProtectedRoute>
         ),
       },

@@ -1,6 +1,7 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.Vets.*;
+import com.petclinic.bffapigateway.dtos.Files.FileDetails;
 import com.petclinic.bffapigateway.exceptions.ExistingRatingNotFoundException;
 import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -406,6 +408,7 @@ public class VetsServiceClient {
                         .path("/" + vetId + "/ratings/date")
                         .queryParam("year",queryParams.get("year"))
                         .build())
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, error->{
                     HttpStatusCode statusCode = error.statusCode();
@@ -577,7 +580,7 @@ public class VetsServiceClient {
                 .bodyToMono(VetResponseDTO.class);
     }
 
-    public Mono<Void> deleteVet(String vetId) {
+    public Mono<VetResponseDTO> deleteVet(String vetId) {
 
         return webClientBuilder
                 .build()
@@ -593,7 +596,7 @@ public class VetsServiceClient {
                 .onStatus(HttpStatusCode::is5xxServerError,error->
                         Mono.error(new IllegalArgumentException("Something went wrong with the server"))
                 )
-                .bodyToMono(Void.class);
+                .bodyToMono(VetResponseDTO.class);
     }
 
     public Mono<VetResponseDTO> updateVet(String vetId,Mono<VetRequestDTO> model) {
@@ -744,7 +747,7 @@ public class VetsServiceClient {
         return webClientBuilder.build()
                 .get()
                 .uri(vetsServiceUrl + "/" + vetId + "/albums")
-                .accept(MediaType.APPLICATION_JSON) // Set Content-Type to application/json
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, error -> {
                     HttpStatusCode statusCode = error.statusCode();
@@ -837,5 +840,35 @@ public Mono<Album> addAlbumPhoto(String vetId, String photoName, FilePart filePa
                             error -> Mono.error(new IllegalArgumentException("Server error while adding album photo")))
                     .bodyToMono(Album.class));
 }
+
+    public Mono<VetResponseDTO> getVet(final String vetId, boolean includePhoto) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(vetsServiceUrl + "/" + vetId);
+        builder.queryParam("includePhoto", includePhoto);
+    
+        return webClientBuilder.build().get()
+                .uri(builder.build().toUri())
+                .retrieve()
+                .bodyToMono(VetResponseDTO.class);
+    }
+
+    public Mono<VetResponseDTO> updateVetPhoto(String vetId, Mono<FileDetails> photoMono) {
+        return photoMono.flatMap(photo ->
+            webClientBuilder.build()
+                    .patch()
+                    .uri(vetsServiceUrl + "/" + vetId + "/photo")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(photo)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                        if (error.statusCode().equals(NOT_FOUND)) {
+                            return Mono.error(new NotFoundException("Vet not found with id: " + vetId));
+                        }
+                        return Mono.error(new IllegalArgumentException("Client error"));
+                    })
+                    .onStatus(HttpStatusCode::is5xxServerError,
+                            error -> Mono.error(new IllegalArgumentException("Server error")))
+                    .bodyToMono(VetResponseDTO.class)
+        );
+    }
 
 }

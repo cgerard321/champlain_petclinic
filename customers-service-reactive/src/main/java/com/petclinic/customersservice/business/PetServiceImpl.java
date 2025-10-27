@@ -1,8 +1,10 @@
 package com.petclinic.customersservice.business;
 
 import com.petclinic.customersservice.customersExceptions.exceptions.NotFoundException;
+import com.petclinic.customersservice.customersExceptions.exceptions.UnprocessableEntityException;
 import com.petclinic.customersservice.data.Pet;
 import com.petclinic.customersservice.data.PetRepo;
+import com.petclinic.customersservice.domainclientlayer.FileRequestDTO;
 import com.petclinic.customersservice.domainclientlayer.FilesServiceClient;
 import com.petclinic.customersservice.presentationlayer.PetRequestDTO;
 import com.petclinic.customersservice.presentationlayer.PetResponseDTO;
@@ -104,20 +106,6 @@ public class PetServiceImpl implements PetService {
                 });
     }
 
-    @Override
-    public Mono<PetResponseDTO> deletePetByPetIdV2(String petId) {
-        return petRepo.findPetByPetId(petId)
-                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Pet id not found: " + petId))))
-                .flatMap(found -> {
-                    Mono<Void> deletePhotoMono = Mono.justOrEmpty(found.getPhotoId())
-                            .flatMap(filesServiceClient::deleteFile);
-                    Mono<Void> deletePetMono = petRepo.delete(found);
-                    
-                    return Mono.when(deletePetMono, deletePhotoMono)
-                            .thenReturn(found);
-                })
-                .map(EntityDTOUtil::toPetResponseDTO);
-    }
 
     @Override
     public Mono<PetResponseDTO> createPetForOwner(String ownerId, Mono<PetRequestDTO> petRequestDTO) {
@@ -140,6 +128,25 @@ public class PetServiceImpl implements PetService {
                 })
                 .flatMap(petRepo::save)
                 .map(EntityDTOUtil::toPetResponseDTO);
+    }
+
+    @Override
+    public Mono<PetResponseDTO> addPetPhoto(String petId, FileRequestDTO photo) {
+        return petRepo.findPetByPetId(petId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Pet not found with id: " + petId)))
+                .flatMap(pet -> {
+                    if (pet.getPhotoId() != null && !pet.getPhotoId().isEmpty()) {
+                        return Mono.error(new UnprocessableEntityException("Pet already has a photo. Use update endpoint instead."));
+                    }
+
+                    return filesServiceClient.addFile(photo)
+                            .flatMap(fileResponse -> {
+                                pet.setPhotoId(fileResponse.getFileId());
+                                return petRepo.save(pet)
+                                        .map(EntityDTOUtil::toPetResponseDTO)
+                                        .doOnNext(dto -> dto.setPhoto(fileResponse));
+                            });
+                });
     }
 
     @Override

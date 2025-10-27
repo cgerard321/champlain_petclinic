@@ -1,3 +1,4 @@
+import { useToast } from '@/shared/components/toast/ToastProvider';
 import { useCallback, useEffect, useState } from 'react';
 import CartBillingForm, { BillingInfo } from './CartBillingForm';
 import InvoiceComponent, {
@@ -14,6 +15,7 @@ import { NavBar } from '@/layouts/AppNavBar';
 import { FaShoppingCart } from 'react-icons/fa';
 import ImageContainer from '@/features/products/components/ImageContainer';
 import axiosInstance from '@/shared/api/axiosInstance';
+import getErrorMessage from '@/shared/api/getErrorMessage';
 import { formatPrice } from '../utils/formatPrice';
 import { applyPromo } from '@/shared/api/cart';
 import {
@@ -37,7 +39,6 @@ import {
   setCartIdInLS,
 } from '../api/cartEvent';
 import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
-import axios from 'axios';
 interface ProductAPIResponse {
   productId: number;
   imageId: string;
@@ -75,9 +76,7 @@ const UserCart: React.FC = () => {
   const [errorMessages, setErrorMessages] = useState<Record<number, string>>(
     {}
   );
-  const [notificationMessage, setNotificationMessage] = useState<string | null>(
-    null
-  );
+  const { showToast } = useToast();
 
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
   const [showInvoiceModal, setShowInvoiceModal] = useState<boolean>(false);
@@ -95,6 +94,30 @@ const UserCart: React.FC = () => {
   const [movingAll, setMovingAll] = useState<boolean>(false);
 
   const [promoPercent, setPromoPercent] = useState<number | null>(null);
+
+  // Helper: safely extract HTTP status from various error shapes
+  const getStatusCode = useCallback((err: unknown): number | undefined => {
+    return (err as { response?: { status?: number } })?.response?.status;
+  }, []);
+
+  // Helper: map 404
+  const apiErrorMessage = useCallback(
+    (err: unknown, defaultMessage: string): string => {
+      const status = getStatusCode(err);
+      if (status === 404) return 'Cart not found';
+      return getErrorMessage(err, { defaultMessage });
+    },
+    [getStatusCode]
+  );
+
+  // Helper: used by actions that require cartId
+  const ensureCartId = useCallback((): boolean => {
+    if (!cartId) {
+      setError('Invalid cart ID');
+      return false;
+    }
+    return true;
+  }, [cartId, setError]);
 
   // Recent purchases state
   const [recentPurchases, setRecentPurchases] = useState<
@@ -131,7 +154,7 @@ const UserCart: React.FC = () => {
     imageId: string;
     quantity: number;
   }): Promise<void> => {
-    if (!cartId) return;
+    if (!ensureCartId()) return;
 
     const quantity = Math.max(1, recentPurchaseQuantities[item.productId] || 1);
 
@@ -146,11 +169,8 @@ const UserCart: React.FC = () => {
       );
       await Promise.all(addPromises);
 
-      setNotificationMessage(
-        `${item.productName} (x${quantity}) added to cart!`
-      );
+      showToast(`${item.productName} (x${quantity}) added to cart!`, 'success');
       notifyCartChanged();
-
       // Fetch updated cart and update state
       const { data } = await axiosInstance.get(`/carts/${cartId}`, {
         useV2: false,
@@ -176,11 +196,11 @@ const UserCart: React.FC = () => {
         setCartCountInLS(updatedCount);
       }
     } catch (err: unknown) {
-      const msg =
-        (axios.isAxiosError(err) &&
-          (err.response?.data as { message?: string } | undefined)?.message) ||
-        `Failed to add ${item.productName} to cart.`;
-      setNotificationMessage(msg);
+      const msg = apiErrorMessage(
+        err,
+        `Failed to add ${item.productName} to cart.`
+      );
+      showToast(msg, 'error');
     }
   };
 
@@ -223,7 +243,7 @@ const UserCart: React.FC = () => {
     imageId: string;
     quantity: number;
   }): Promise<void> => {
-    if (!cartId) return;
+    if (!ensureCartId()) return;
 
     const quantity = Math.max(
       1,
@@ -238,9 +258,7 @@ const UserCart: React.FC = () => {
           { useV2: false }
         );
       }
-      setNotificationMessage(
-        `${item.productName} (x${quantity}) added to cart!`
-      );
+      showToast(`${item.productName} (x${quantity}) added to cart!`, 'success');
       notifyCartChanged();
       // Fetch updated cart and update state
       const { data } = await axiosInstance.get(`/carts/${cartId}`, {
@@ -263,11 +281,11 @@ const UserCart: React.FC = () => {
         await syncAfterAddToCart();
       }
     } catch (err: unknown) {
-      const msg =
-        (axios.isAxiosError(err) &&
-          (err.response?.data as { message?: string } | undefined)?.message) ||
-        `Failed to add ${item.productName} to cart.`;
-      setNotificationMessage(msg);
+      const msg = apiErrorMessage(
+        err,
+        `Failed to add ${item.productName} to cart.`
+      );
+      showToast(msg, 'error');
     }
   };
 
@@ -345,8 +363,9 @@ const UserCart: React.FC = () => {
           setPromoPercent(null);
         }
       } catch (err: unknown) {
-        console.error(err);
-        setError('Failed to fetch cart items');
+        // Map 404 -> "Cart not found", otherwise use getErrorMessage
+        const msg = apiErrorMessage(err, 'Failed to fetch cart items');
+        setError(msg);
       } finally {
         setLoading(false);
         if (wishlistUpdated) setWishlistUpdated(false);
@@ -354,7 +373,7 @@ const UserCart: React.FC = () => {
     };
 
     fetchCartItems();
-  }, [cartId, wishlistUpdated, syncAfterAddToCart]);
+  }, [cartId, wishlistUpdated, syncAfterAddToCart, apiErrorMessage]);
 
   useEffect(() => {
     updateCartItemCount();
@@ -421,8 +440,9 @@ const UserCart: React.FC = () => {
       const updated = await applyPromo(cartId, percent);
 
       setVoucherError(null);
-      setNotificationMessage(
-        `Promo applied${updated?.promoPercent != null ? `: ${updated.promoPercent}%` : `: ${percent}%`}`
+      showToast(
+        `Promo applied${updated?.promoPercent != null ? `: ${updated.promoPercent}%` : `: ${percent}%`}`,
+        'success'
       );
 
       setPromoPercent(updated?.promoPercent ?? percent);
@@ -437,21 +457,29 @@ const UserCart: React.FC = () => {
       } catch {
         /* ignore */
       }
-    } catch (err) {
-      console.error('Error validating promo code:', err);
-      setVoucherError('Promo code invalid or expired.');
+    } catch (err: unknown) {
+      // Narrow error shape without using `any`
+      type ErrorWithResponse = { response?: { status?: number } };
+      const status = (err as ErrorWithResponse).response?.status;
+
+      if (status === 400) {
+        setVoucherError('Promo code invalid or expired.');
+      } else {
+        const msg = getErrorMessage(err, {
+          defaultMessage: 'Promo code invalid or expired.',
+        });
+        setVoucherError(msg);
+      }
     }
   };
 
   const blockIfReadOnly = useCallback((): boolean => {
     if (isStaff) {
-      setNotificationMessage(
-        'Read-only mode: staff/admin cannot modify carts.'
-      );
+      showToast('Read-only mode: staff/admin cannot modify carts.', 'info');
       return true;
     }
     return false;
-  }, [isStaff, setNotificationMessage]);
+  }, [isStaff, showToast]);
 
   const changeItemQuantity = useCallback(
     async (
@@ -459,6 +487,7 @@ const UserCart: React.FC = () => {
       index: number
     ): Promise<void> => {
       if (blockIfReadOnly()) return;
+      if (!ensureCartId()) return;
 
       const newQuantity = Math.max(1, Number(event.target.value));
       const item = cartItems[index];
@@ -498,7 +527,7 @@ const UserCart: React.FC = () => {
               prevItems.filter((_, idx) => idx !== index)
             );
             setWishlistItems(prevItems => [...prevItems, item]);
-            setNotificationMessage(data.message);
+            showToast(data.message, 'info');
             bumpCartCountInLS(-prevQty);
             notifyCartChanged(); // left cart
             return;
@@ -509,19 +538,21 @@ const UserCart: React.FC = () => {
             next[index] = { ...next[index], quantity: newQuantity };
             return next;
           });
-          setNotificationMessage('Item quantity updated successfully.');
+          showToast('Quantity updated.', 'success');
           bumpCartCountInLS(newQuantity - prevQty);
           notifyCartChanged(); // qty changed
         }
-      } catch (err) {
-        console.error('Error updating quantity:', err);
+      } catch (err: unknown) {
+        const msg = getErrorMessage(err, {
+          defaultMessage: 'Failed to update quantity',
+        });
         setErrorMessages(prev => ({
           ...prev,
-          [index]: 'Failed to update quantity',
+          [index]: msg,
         }));
       }
     },
-    [cartItems, cartId, blockIfReadOnly]
+    [cartItems, cartId, blockIfReadOnly, ensureCartId, showToast]
   );
 
   const onClearPromo = async (): Promise<void> => {
@@ -529,16 +560,16 @@ const UserCart: React.FC = () => {
     try {
       await applyPromo(cartId, 0);
       setPromoPercent(null);
-      setNotificationMessage('Promo removed.');
+      showToast('Promo removed.', 'success');
     } catch {
-      setNotificationMessage('Failed to remove promo.');
+      showToast('Failed to remove promo.', 'error');
     }
   };
 
   const deleteItem = useCallback(
     async (productId: string, indexToDelete: number): Promise<void> => {
       if (blockIfReadOnly()) return;
-      if (!cartId) return;
+      if (!ensureCartId()) return;
 
       const ok = await confirm({
         title: 'Remove item',
@@ -556,27 +587,22 @@ const UserCart: React.FC = () => {
 
         setCartItems(prev => {
           const removedQty = prev[indexToDelete]?.quantity || 1;
-          setNotificationMessage('Item removed from cart.');
+          showToast('Item removed from cart.', 'success');
           bumpCartCountInLS(-removedQty);
           return prev.filter((_, idx) => idx !== indexToDelete);
         });
         notifyCartChanged(); // item removed
-      } catch (error) {
-        console.error('Error deleting item: ', error);
-        setNotificationMessage('Failed to delete item.');
+      } catch (error: unknown) {
+        const msg = apiErrorMessage(error, 'Failed to delete item.');
+        showToast(msg, 'error');
       }
     },
-    [cartId, blockIfReadOnly, confirm]
+    [cartId, blockIfReadOnly, confirm, ensureCartId, apiErrorMessage, showToast]
   );
 
   const clearCart = async (): Promise<void> => {
     if (blockIfReadOnly()) return;
-
-    if (!cartId) {
-      setNotificationMessage('Invalid cart ID');
-
-      return;
-    }
+    if (!ensureCartId()) return;
 
     const ok = await confirm({
       title: 'Clear cart',
@@ -593,15 +619,16 @@ const UserCart: React.FC = () => {
       setCartItemCount(0);
       setCartCountInLS(0);
       notifyCartChanged();
-      setNotificationMessage('Cart has been cleared.');
-    } catch (error) {
-      console.error('Error clearing cart:', error);
-      setNotificationMessage('Failed to clear cart.');
+      showToast('Cart has been cleared.', 'success');
+    } catch (error: unknown) {
+      const msg = apiErrorMessage(error, 'Failed to clear cart.');
+      showToast(msg, 'error');
     }
   };
 
   const addToWishlist = async (item: ProductModel): Promise<void> => {
     if (blockIfReadOnly()) return;
+    if (!ensureCartId()) return;
 
     try {
       const productId = item.productId;
@@ -618,33 +645,34 @@ const UserCart: React.FC = () => {
       );
 
       if (data && data.message) {
-        setNotificationMessage(data.message);
+        showToast(data.message, 'info');
       } else {
-        setNotificationMessage(
-          `${item.productName} has been added to your wishlist!`
+        showToast(
+          `${item.productName} has been added to your wishlist!`,
+          'success'
         );
       }
 
       setWishlistItems(prevItems => [...prevItems, item]);
       setWishlistUpdated(true);
 
-      // Decrement LS count since item left the cart
       bumpCartCountInLS(-(item.quantity || 1));
-
-      //notify navbar (item moved out of cart)
       notifyCartChanged();
+      //notify navbar (item moved out of cart)
     } catch (error: unknown) {
-      console.error('Error adding to wishlist:', error);
-      alert('Failed to add item to wishlist.');
+      const msg = apiErrorMessage(error, 'Failed to add item to wishlist.');
+      showToast(msg, 'error');
     }
   };
 
   const addToCartFunction = async (item: ProductModel): Promise<void> => {
     if (blockIfReadOnly()) return;
+    if (!ensureCartId()) return;
 
     if (item.productQuantity <= 0) {
-      setNotificationMessage(
-        `${item.productName} is out of stock and cannot be added to the cart.`
+      showToast(
+        `Cannot add ${item.productName} to cart: Out of stock.`,
+        'error'
       );
       return;
     }
@@ -663,10 +691,11 @@ const UserCart: React.FC = () => {
       );
 
       if (data && data.message) {
-        setNotificationMessage(data.message);
+        showToast(data.message, 'info');
       } else {
-        setNotificationMessage(
-          `${item.productName} has been added to your cart!`
+        showToast(
+          `${item.productName} has been added to your cart!`,
+          'success'
         );
       }
 
@@ -682,14 +711,16 @@ const UserCart: React.FC = () => {
       //notify navbar (item moved into cart)
       notifyCartChanged();
     } catch (error: unknown) {
-      console.error('Error adding to cart:', error);
-      setNotificationMessage('Failed to add item to cart.');
+      const msg = getErrorMessage(error, {
+        defaultMessage: 'Failed to add item to cart.',
+      });
+      showToast(msg, 'error');
     }
   };
 
   const removeFromWishlist = async (item: ProductModel): Promise<void> => {
     if (blockIfReadOnly()) return;
-    if (!cartId) return;
+    if (!ensureCartId()) return;
 
     const ok = await confirm({
       title: 'Remove from wishlist',
@@ -710,9 +741,9 @@ const UserCart: React.FC = () => {
       setWishlistItems(prev =>
         prev.filter(p => p.productId !== item.productId)
       );
-    } catch (e) {
-      console.error(e);
-      setNotificationMessage('Could not remove item from wishlist.');
+    } catch (e: unknown) {
+      const msg = apiErrorMessage(e, 'Could not remove item from wishlist.');
+      showToast(msg, 'error');
     }
   };
 
@@ -729,7 +760,7 @@ const UserCart: React.FC = () => {
     if (!ok) return;
 
     setMovingAll(true);
-    setNotificationMessage(null);
+    showToast('Moving all items from wishlist to cart...', 'info');
 
     try {
       const res = await axiosInstance.post(
@@ -741,17 +772,20 @@ const UserCart: React.FC = () => {
       if (res.status >= 200 && res.status < 300) {
         setWishlistUpdated(true);
         notifyCartChanged();
-        setNotificationMessage(null);
+        showToast('All wishlist items moved to cart!', 'success');
       } else {
         const msg =
           (res.data &&
             (res.data.message || res.data.error || res.data.title)) ||
           `Move All failed (${res.status})`;
-        setNotificationMessage(msg);
+        showToast(msg, 'error');
       }
-    } catch (e) {
-      console.error(e);
-      setNotificationMessage('Unexpected error while moving wishlist items.');
+    } catch (e: unknown) {
+      const msg = apiErrorMessage(
+        e,
+        'Unexpected error while moving wishlist items.'
+      );
+      showToast(msg, 'error');
     } finally {
       setMovingAll(false);
     }
@@ -958,19 +992,6 @@ const UserCart: React.FC = () => {
       <NavBar />
       <ConfirmModal />
       <div className="UserCart-container">
-        {notificationMessage && (
-          <div className="notification-message">
-            {notificationMessage}
-            <button
-              className="close-notification"
-              onClick={() => setNotificationMessage(null)}
-              aria-label="Close notification"
-            >
-              &times;
-            </button>
-          </div>
-        )}
-
         <div className="UserCart-checkout-flex">
           <div className="UserCart">
             <div
@@ -1014,7 +1035,7 @@ const UserCart: React.FC = () => {
                     addToWishlist={addToWishlist}
                     addToCart={() => {}}
                     isInWishlist={false}
-                    showNotification={setNotificationMessage}
+                    showNotification={showToast}
                   />
                 ))
               ) : (

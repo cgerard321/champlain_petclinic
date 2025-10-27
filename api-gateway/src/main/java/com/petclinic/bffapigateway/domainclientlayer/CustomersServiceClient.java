@@ -54,6 +54,7 @@ public class CustomersServiceClient {
     public Flux<OwnerResponseDTO> getAllOwners() {
         return webClientBuilder.build().get()
                 .uri(customersServiceUrl + "/owners")
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
                 .bodyToFlux(OwnerResponseDTO.class);
     }
@@ -85,6 +86,7 @@ public class CustomersServiceClient {
         return webClientBuilder.build()
                 .get()
                 .uri(builder.build().toUri())
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
                 .bodyToFlux(OwnerResponseDTO.class);
     }
@@ -156,6 +158,7 @@ public class CustomersServiceClient {
     public Flux<PetTypeResponseDTO> getPetTypes() {
         return webClientBuilder.build().get()
                 .uri(customersServiceUrl + "/owners/petTypes")
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
                 .bodyToFlux(PetTypeResponseDTO.class);
     }
@@ -163,6 +166,7 @@ public class CustomersServiceClient {
     public Flux<PetResponseDTO> getAllPets() {
         return webClientBuilder.build().get()
                 .uri(customersServiceUrl + "/pets")
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
                 .bodyToFlux(PetResponseDTO.class);
     }
@@ -238,12 +242,6 @@ public class CustomersServiceClient {
                 .bodyToMono(PetResponseDTO.class);
     }
 
-    public Mono<PetResponseDTO> deletePetByPetIdV2(final String petId) {
-        return webClientBuilder.build().delete()
-                .uri(customersServiceUrl + "/pets/{petId}/v2", petId)
-                .retrieve()
-                .bodyToMono(PetResponseDTO.class);
-    }
 
     public Mono<OwnerResponseDTO> deleteOwner(final String ownerId) {
         return webClientBuilder.build().delete()
@@ -263,6 +261,7 @@ public class CustomersServiceClient {
     public Flux<PetTypeResponseDTO> getAllPetTypes() {
         return webClientBuilder.build().get()
                 .uri(customersServiceUrl + "/owners/petTypes")
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
                 .bodyToFlux(PetTypeResponseDTO.class);
     }
@@ -340,6 +339,7 @@ public class CustomersServiceClient {
         return webClientBuilder.build()
                 .get()
                 .uri(builder.build().toUri())
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
                 .bodyToFlux(PetTypeResponseDTO.class);
     }
@@ -385,6 +385,18 @@ public class CustomersServiceClient {
                 .uri(customersServiceUrl + "/owners/" + ownerId + "/photo")
                 .retrieve()
                 .bodyToMono(OwnerResponseDTO.class);
+    }
+
+    public Mono<PetResponseDTO> addPetPhoto(String petId, Mono<FileDetails> photoMono) {
+        return photoMono.flatMap(photo ->
+                webClientBuilder.build()
+                        .patch()
+                        .uri(customersServiceUrl + "/pets/" + petId + "/photos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(BodyInserters.fromValue(photo))
+                        .retrieve()
+                        .bodyToMono(PetResponseDTO.class)
+        );
     }
 
     public Mono<PetResponseDTO> deletePetPhoto(String petId) {

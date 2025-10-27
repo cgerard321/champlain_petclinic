@@ -185,10 +185,10 @@ class InventoryControllerIntegrationTest {
 
         webTestClient.get()
                 .uri("/inventory/{inventoryId}/products", inventoryId)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(ProductResponseDTO.class)
                 .value((list) -> {
                     assertNotNull(list);
@@ -209,7 +209,7 @@ class InventoryControllerIntegrationTest {
                         , inventoryId, productName, productPrice, productQuantity)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(ProductResponseDTO.class)
                 .value((list) -> {
                     assertNotNull(list);
@@ -228,13 +228,18 @@ class InventoryControllerIntegrationTest {
         webTestClient.get()
                 .uri("/inventory/{inventoryId}/products?productName={productName}&productPrice={productPrice}&productQuantity={productQuantity}&productSalePrice={productSalePrice}",
                         invalidInventoryId, invalidProductName, invalidProductPrice, invalidProductQuantity, invalidProductSalePrice)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isNotFound()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.message").isEqualTo("Inventory not found with InventoryId: " + invalidInventoryId +
-                        "\nOr ProductQuantity: " + invalidProductQuantity);
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectBody(String.class)
+                .value(body -> {
+                    // Avoid exact newline matching; use contains
+                    org.assertj.core.api.Assertions.assertThat(body)
+                            .contains("Inventory not found with InventoryId: " + invalidInventoryId)
+                            .contains("Or ProductQuantity: " + invalidProductQuantity);
+                });
+
     }
 
     @Test
@@ -245,9 +250,10 @@ class InventoryControllerIntegrationTest {
         webTestClient.get()
                 .uri("/inventory/{inventoryId}/products?productName={productName}"
                         , inventoryId, productName)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(ProductResponseDTO.class)
                 .value((list) -> {
                     assertNotNull(list);
@@ -284,7 +290,7 @@ class InventoryControllerIntegrationTest {
                         , inventoryId, productPrice)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(ProductResponseDTO.class)
                 .value((list) -> {
                     assertNotNull(list);
@@ -300,10 +306,10 @@ class InventoryControllerIntegrationTest {
         webTestClient.get()
                 .uri("/inventory/{inventoryId}/products?productPrice={productPrice}",
                         invalidInventoryId, invalidProductPrice)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(ProductResponseDTO.class)
                 .hasSize(0);
     }
@@ -318,7 +324,7 @@ class InventoryControllerIntegrationTest {
                         , inventoryId, productQuantity)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(ProductResponseDTO.class)
                 .value((list) -> {
                     assertNotNull(list);
@@ -335,13 +341,16 @@ class InventoryControllerIntegrationTest {
         webTestClient.get()
                 .uri("/inventory/{inventoryId}/products?productQuantity={productQuantity}",
                         invalidInventoryId, invalidProductQuantity)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isNotFound()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.message").isEqualTo("Inventory not found with InventoryId: " + invalidInventoryId +
-                        "\nOr ProductQuantity: " + invalidProductQuantity);
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectBody(String.class)
+                .value(body -> {
+                    org.assertj.core.api.Assertions.assertThat(body)
+                            .contains("Inventory not found with InventoryId: " + invalidInventoryId)
+                            .contains("Or ProductQuantity: " + invalidProductQuantity);
+                });
     }
 
     @Test
@@ -355,7 +364,7 @@ class InventoryControllerIntegrationTest {
                         , inventoryId, productPrice, productQuantity)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(ProductResponseDTO.class)
                 .value((list) -> {
                     assertNotNull(list);
@@ -372,23 +381,26 @@ class InventoryControllerIntegrationTest {
         webTestClient.get()
                 .uri("/inventory/{inventoryId}/products?productPrice={productPrice}&productQuantity={productQuantity}",
                         invalidInventoryId, invalidProductPrice, invalidProductQuantity)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isNotFound()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.message").isEqualTo("Inventory not found with InventoryId: " + invalidInventoryId +
-                        "\nOr ProductQuantity: " + invalidProductQuantity);
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectBody(String.class)
+                .value(body -> {
+                    org.assertj.core.api.Assertions.assertThat(body)
+                            .contains("Inventory not found with InventoryId: " + invalidInventoryId)
+                            .contains("Or ProductQuantity: " + invalidProductQuantity);
+                });
     }
 
     @Test
     void getAllInventory_shouldSucceed() {
         webTestClient.get()
                 .uri("/inventory")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(InventoryResponseDTO.class)
                 .value((list) -> {
                     assertNotNull(list);
@@ -400,10 +412,10 @@ class InventoryControllerIntegrationTest {
     void getAllInventory_shouldSucceed2() {
         webTestClient.get()
                 .uri("/inventory/all")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(InventoryResponseDTO.class)
                 .value((list) -> {
                     assertNotNull(list);
@@ -860,7 +872,7 @@ class InventoryControllerIntegrationTest {
                 .uri(uriBuilder -> uriBuilder.path("/inventory")
                         .queryParam("inventoryName", name)
                         .build())
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(InventoryResponseDTO.class)
@@ -881,7 +893,7 @@ class InventoryControllerIntegrationTest {
                 .uri(uriBuilder -> uriBuilder.path("/inventory")
                         .queryParam("inventoryName", inventoryName)
                         .build())
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(InventoryResponseDTO.class)
@@ -904,7 +916,7 @@ class InventoryControllerIntegrationTest {
                 .uri(uriBuilder -> uriBuilder.path("/inventory")
                         .queryParam("inventoryDescription", description)
                         .build())
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(InventoryResponseDTO.class)
@@ -925,7 +937,7 @@ class InventoryControllerIntegrationTest {
                 .uri(uriBuilder -> uriBuilder.path("/inventory")
                         .queryParam("inventoryDescription", inventoryDescription)
                         .build())
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(InventoryResponseDTO.class)
@@ -948,7 +960,7 @@ class InventoryControllerIntegrationTest {
                 .uri(uriBuilder -> uriBuilder.path("/inventory/{inventoryId}/products")
                         .queryParam("productName", singleCharProductName)
                         .build(inventoryId))   // Supply the inventoryId here
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(ProductResponseDTO.class)
@@ -970,7 +982,7 @@ class InventoryControllerIntegrationTest {
                 .uri(uriBuilder -> uriBuilder.path("/inventory/{inventoryId}/products")
                         .queryParam("productName", productName)
                         .build(inventoryId))   // Supply the inventoryId here
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(ProductResponseDTO.class)
@@ -986,10 +998,10 @@ class InventoryControllerIntegrationTest {
     public void getAllInventoryTypes_shouldSucceed() {
         webTestClient.get()
                 .uri("/inventory/type")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON);
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM);
     }
 
     //search Products by name
@@ -1047,7 +1059,7 @@ class InventoryControllerIntegrationTest {
                         .queryParam("inventoryType", inventoryType)
                         .queryParam("inventoryDescription", inventoryDescription)
                         .build())
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(InventoryResponseDTO.class)
@@ -1071,7 +1083,7 @@ class InventoryControllerIntegrationTest {
                         .queryParam("inventoryName", inventoryName)
                         .queryParam("inventoryType", inventoryType)
                         .build())
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(InventoryResponseDTO.class)
@@ -1092,7 +1104,7 @@ class InventoryControllerIntegrationTest {
                 .uri(uriBuilder -> uriBuilder.path("/inventory")
                         .queryParam("inventoryCode", inventoryCode)
                         .build())
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(InventoryResponseDTO.class)
@@ -1112,7 +1124,7 @@ class InventoryControllerIntegrationTest {
                 .uri(uriBuilder -> uriBuilder.path("/inventory")
                         .queryParam("inventoryCode", invalidCode)
                         .build())
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isNotFound();
     }
@@ -1162,7 +1174,7 @@ class InventoryControllerIntegrationTest {
                         .queryParam("productName", productName)
                         .queryParam("productDescription", productDescription)
                         .build(inventoryId))
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(ProductResponseDTO.class)
@@ -1184,7 +1196,7 @@ class InventoryControllerIntegrationTest {
                 .uri(uriBuilder -> uriBuilder.path("/inventory/{inventoryId}/products/search")
                         .queryParam("productName", productName)
                         .build(inventoryId))
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(ProductResponseDTO.class)
@@ -1203,7 +1215,7 @@ class InventoryControllerIntegrationTest {
         webTestClient.get()
                 .uri(uriBuilder -> uriBuilder.path("/inventory/{inventoryId}/products/search")
                         .build(inventoryId))
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(ProductResponseDTO.class)

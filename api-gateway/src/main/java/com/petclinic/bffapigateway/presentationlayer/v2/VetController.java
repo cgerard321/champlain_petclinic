@@ -9,6 +9,7 @@ import com.petclinic.bffapigateway.dtos.Auth.RegisterVet;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.*;
+import com.petclinic.bffapigateway.dtos.Files.FileDetails;
 import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
@@ -81,9 +82,9 @@ public class VetController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @DeleteMapping(value = "{vetId}")
-    public Mono<ResponseEntity<Void>> deleteVet(@PathVariable String vetId) {
+    public Mono<ResponseEntity<VetResponseDTO>> deleteVet(@PathVariable String vetId) {
         return vetsServiceClient.deleteVet(VetsEntityDtoUtil.verifyId(vetId))
-                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .map(vetDto -> ResponseEntity.ok().body(vetDto))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
@@ -108,19 +109,49 @@ public class VetController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @PatchMapping("{vetId}/photo")
+    public Mono<ResponseEntity<VetResponseDTO>> updateVetPhoto(
+            @PathVariable String vetId,
+            @RequestBody Mono<FileDetails> photoMono) {
+        return Mono.just(vetId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(Mono.error(new InvalidInputException("Provided vet Id is invalid" + vetId)))
+                .flatMap(id -> vetsServiceClient.updateVetPhoto(id, photoMono))
+                .map(ResponseEntity::ok)
+                .onErrorResume(InvalidInputException.class, e ->
+                    Mono.just(ResponseEntity.badRequest().<VetResponseDTO>build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
     @PostMapping(value = "{vetId}/photos", consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public Mono<ResponseEntity<Resource>> addPhotoByVetId(
             @PathVariable String vetId,
             @RequestHeader("Photo-Name") String photoName,
+            @RequestHeader(value = "Content-Type", required = false) String contentType,
             @RequestBody Mono<byte[]> fileData) {
 
-        return fileData.flatMap(bytes -> 
-                vetsServiceClient.addPhotoToVetFromBytes(vetId, photoName, bytes)
-                        .map(res -> ResponseEntity.status(HttpStatus.CREATED)
-                                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                                .body(res))
-                        .defaultIfEmpty(ResponseEntity.badRequest().build())
-        );
+        return fileData.flatMap(bytes -> {
+            String fileType = contentType != null ? contentType : "image/jpeg";
+            FileDetails fileRequest = FileDetails.builder()
+                    .fileName(photoName)
+                    .fileType(fileType)
+                    .fileData(bytes)
+                    .build();
+            
+            return vetsServiceClient.updateVetPhoto(vetId, Mono.just(fileRequest))
+                    .<ResponseEntity<Resource>>map(vetResponse -> {
+                        if (vetResponse.getPhoto() != null) {
+                            byte[] photoData = vetResponse.getPhoto().getFileData();
+                            return ResponseEntity.status(HttpStatus.CREATED)
+                                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                                    .body((Resource) new ByteArrayResource(photoData));
+                        } else {
+                            return ResponseEntity.<Resource>badRequest().build();
+                        }
+                    })
+                    .defaultIfEmpty(ResponseEntity.<Resource>badRequest().build());
+        });
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
@@ -130,17 +161,48 @@ public class VetController {
             @RequestPart("photoName") String photoName,
             @RequestPart("file") FilePart file) {
 
-        return vetsServiceClient.addPhotoToVet(vetId, photoName, file)
-                .map(res -> ResponseEntity.status(HttpStatus.CREATED)
-                        .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                        .body(res))
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
+        return file.content()
+                .map(dataBuffer -> {
+                    byte[] bytes = new byte[dataBuffer.readableByteCount()];
+                    dataBuffer.read(bytes);
+                    return bytes;
+                })
+                .reduce((byte[] a, byte[] b) -> {
+                    byte[] combined = new byte[a.length + b.length];
+                    System.arraycopy(a, 0, combined, 0, a.length);
+                    System.arraycopy(b, 0, combined, a.length, b.length);
+                    return combined;
+                })
+                .flatMap(bytes -> {
+                    String contentType = file.headers().getContentType() != null 
+                            ? file.headers().getContentType().toString() : "image/jpeg";
+                    FileDetails fileRequest = FileDetails.builder()
+                            .fileName(photoName)
+                            .fileType(contentType)
+                            .fileData(bytes)
+                            .build();
+
+                    return vetsServiceClient.updateVetPhoto(vetId, Mono.just(fileRequest))
+                            .<ResponseEntity<Resource>>map(vetResponse -> {
+                                if (vetResponse.getPhoto() != null) {
+                                    byte[] photoData = vetResponse.getPhoto().getFileData();
+                                    return ResponseEntity.status(HttpStatus.CREATED)
+                                            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                                            .body((Resource) new ByteArrayResource(photoData));
+                                } else {
+                                    return ResponseEntity.<Resource>badRequest().build();
+                                }
+                            })
+                            .defaultIfEmpty(ResponseEntity.<Resource>badRequest().build());
+                });
     }
     
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping(value = "{vetId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<VetResponseDTO>> getVetByVetId(@PathVariable String vetId) {
-        return vetsServiceClient.getVetByVetId(vetId)
+    public Mono<ResponseEntity<VetResponseDTO>> getVetByVetId(
+            @PathVariable String vetId,
+            @RequestParam(required = false, defaultValue = "false") boolean includePhoto) {
+        return vetsServiceClient.getVet(vetId, includePhoto)
                 .map(vet -> ResponseEntity.status(HttpStatus.OK).body(vet))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
 
@@ -166,7 +228,10 @@ public class VetController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @GetMapping(value = "{vetId}/albums", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(
+            value = "{vetId}/albums",
+            produces = MediaType.TEXT_EVENT_STREAM_VALUE
+    )
     public Flux<Album> getAllAlbumsByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getAllAlbumsByVetId(vetId)
                 .doOnError(error -> log.error("Error fetching photos for vet {}", vetId, error));
@@ -225,7 +290,10 @@ public Mono<ResponseEntity<Album>> addAlbumPhotoMultipart(
 
     //education
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @GetMapping(value = "/{vetId}/educations", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(
+            value = "/{vetId}/educations",
+            produces = MediaType.TEXT_EVENT_STREAM_VALUE
+    )
     public Flux<EducationResponseDTO> getEducationsByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getEducationsByVetId(vetId);
     }
@@ -253,7 +321,10 @@ public Mono<ResponseEntity<Album>> addAlbumPhotoMultipart(
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @GetMapping(value = "{vetId}/ratings", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(
+            value = "{vetId}/ratings",
+            produces = MediaType.TEXT_EVENT_STREAM_VALUE
+    )
     public Flux<RatingResponseDTO> getRatingsByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getRatingsByVetId(vetId)
                 .doOnError(error -> log.error("Error fetching ratings for vet {}", vetId, error));
@@ -267,4 +338,5 @@ public Mono<ResponseEntity<Album>> addAlbumPhotoMultipart(
         return vetsServiceClient.deleteEducation(vetId, educationId)
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()));
     }
+
 }
