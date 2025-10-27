@@ -254,7 +254,7 @@ public class MockServerConfigVetService {
                 .respond(
                         response()
                                 .withStatusCode(404)
-                                .withBody("{\"statusCode\":404,\"message\":\"vetId not found: invalid-id\",\"timestamp\":\"" + java.time.Instant.now() + "\"}")
+                                .withBody("{\"statusCode\":404,\"message\":\"vetId not found: ac9adeb8-625b-11ee-8c99-0242ac12000200000\",\"timestamp\":\"" + java.time.Instant.now() + "\"}")
                 );
     }
 
