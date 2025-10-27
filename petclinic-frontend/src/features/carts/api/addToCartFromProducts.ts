@@ -24,27 +24,33 @@ export function useAddToCart(): UseAddToCartReturnType {
       return cachedId;
     }
 
-    try {
-      const existingCartId = await fetchCartIdByCustomerId(userId);
-      if (!existingCartId) throw new Error('Cart not found');
+    const existingCartId = await fetchCartIdByCustomerId(userId);
+    if (existingCartId) {
+      setCartIdInLS(existingCartId);
       return existingCartId;
+    }
+
+    try {
+      const { data } = await axiosInstance.post<CreateCartResponse>(
+        '/carts', // → POST /api/gateway/carts
+        { customerId: userId },
+        {
+          headers: { 'Content-Type': 'application/json' },
+          useV2: false,
+        }
+      );
+      const newId = (data?.cartId ?? data?.id) as string | undefined;
+      if (!newId) throw new Error('Could not create cart');
+      setCartIdInLS(newId);
+      return newId;
     } catch (err) {
       const ax = err as AxiosError;
       const status = ax.response?.status;
 
-      if (status === 404 || status === 401) {
-        const { data } = await axiosInstance.post<CreateCartResponse>(
-          '/carts', // → POST /api/gateway/carts
-          { customerId: userId },
-          {
-            headers: { 'Content-Type': 'application/json' },
-            useV2: false,
-          }
-        );
-        const newId = (data?.cartId ?? data?.id) as string | undefined;
-        if (!newId) throw new Error('Could not create cart');
-        return newId;
+      if (status === 401) {
+        console.error('User is not authorized to create a cart');
       }
+
       throw err;
     }
   };
