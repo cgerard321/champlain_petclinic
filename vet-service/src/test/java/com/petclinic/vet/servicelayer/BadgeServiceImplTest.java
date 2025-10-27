@@ -8,6 +8,7 @@ import com.petclinic.vet.dataaccesslayer.photos.PhotoRepository;
 import com.petclinic.vet.dataaccesslayer.ratings.PredefinedDescription;
 import com.petclinic.vet.dataaccesslayer.ratings.Rating;
 import com.petclinic.vet.dataaccesslayer.ratings.RatingRepository;
+import com.petclinic.vet.domainclientlayer.FilesServiceClient;
 import com.petclinic.vet.presentationlayer.badges.BadgeResponseDTO;
 import com.petclinic.vet.utils.exceptions.InvalidInputException;
 import com.petclinic.vet.utils.exceptions.NotFoundException;
@@ -42,6 +43,8 @@ class BadgeServiceImplTest {
     BadgeRepository badgeRepository;
     @MockBean
     RatingRepository ratingRepository;
+    @MockBean
+    FilesServiceClient filesServiceClient;
 
     //To counter missing bean error
     @MockBean

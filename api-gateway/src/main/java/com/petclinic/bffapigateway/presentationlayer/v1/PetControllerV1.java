@@ -35,7 +35,9 @@ public class PetControllerV1 {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET,Roles.RECEPTIONIST})
+    // NOTE: Owner was added as one of the allowed roles to fix pet owners being unable to create visits.
+    // Really, there should be a "getAllPetsForOwner" instead and get rid of Owners being able to get all pets.
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET, Roles.OWNER, Roles.RECEPTIONIST})
     @GetMapping(value = "", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<PetResponseDTO> getAllPets(){
         return customersServiceClient.getAllPets();

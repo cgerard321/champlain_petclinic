@@ -15,12 +15,14 @@ import com.petclinic.vet.dataaccesslayer.badges.Badge;
 import com.petclinic.vet.dataaccesslayer.badges.BadgeRepository;
 import com.petclinic.vet.dataaccesslayer.badges.BadgeTitle;
 import com.petclinic.vet.dataaccesslayer.education.EducationRepository;
-import com.petclinic.vet.dataaccesslayer.photos.Photo;
 import com.petclinic.vet.dataaccesslayer.photos.PhotoRepository;
 import com.petclinic.vet.dataaccesslayer.ratings.RatingRepository;
 import com.petclinic.vet.dataaccesslayer.vets.Specialty;
 import com.petclinic.vet.dataaccesslayer.vets.Vet;
 import com.petclinic.vet.dataaccesslayer.vets.VetRepository;
+import com.petclinic.vet.domainclientlayer.FilesServiceClient;
+import com.petclinic.vet.presentationlayer.files.FileRequestDTO;
+import com.petclinic.vet.presentationlayer.files.FileResponseDTO;
 import com.petclinic.vet.presentationlayer.vets.VetRequestDTO;
 import com.petclinic.vet.presentationlayer.vets.VetResponseDTO;
 import com.petclinic.vet.presentationlayer.vets.SpecialtyDTO;
@@ -52,6 +54,7 @@ public class VetServiceImpl implements VetService {
     private final PhotoRepository photoRepository;
     private final RatingRepository ratingRepository;
     private final EducationRepository educationRepository;
+    private final FilesServiceClient filesServiceClient;
 
     @Override
     public Flux<VetResponseDTO> getAll() {
@@ -63,10 +66,37 @@ public class VetServiceImpl implements VetService {
     public Mono<VetResponseDTO> addVet(Mono<VetRequestDTO> vetDTOMono) {
         return vetDTOMono
                 .flatMap(this::validateVetRequestDTO)
-                .flatMap(this::handleDefaultPhoto)
-                .map(EntityDtoUtil::vetRequestDtoToEntity)
-                .flatMap(this::assignBadgeAndSaveBadgeAndVet)
-                .map(EntityDtoUtil::vetEntityToResponseDTO);
+                .flatMap(vetRequest -> {
+                    Vet vetEntity = EntityDtoUtil.vetRequestDtoToEntity(vetRequest);
+                    
+                    Mono<FileResponseDTO> photoMono;
+                    if (vetRequest.getPhoto() != null && vetRequest.getPhoto().getFileData() != null) {
+                        photoMono = filesServiceClient.addFile(vetRequest.getPhoto());
+                    } else if (vetRequest.isPhotoDefault()) {
+                        FileRequestDTO defaultPhoto = FileRequestDTO.builder()
+                                .fileName("vet_default.jpg")
+                                .fileType("image/jpeg")
+                                .build();
+                        defaultPhoto.setFileDataFromBytes(loadImage("images/vet_default.jpg"));
+                        photoMono = filesServiceClient.addFile(defaultPhoto);
+                    } else {
+                        photoMono = Mono.empty();
+                    }
+                    
+                    return photoMono
+                            .defaultIfEmpty(null)
+                            .flatMap(photo -> {
+                                if (photo != null) {
+                                    vetEntity.setImageId(photo.getFileId());
+                                }
+                                return assignBadgeAndSaveBadgeAndVet(vetEntity)
+                                        .map(savedVet -> {
+                                            VetResponseDTO dto = EntityDtoUtil.vetEntityToResponseDTO(savedVet);
+                                            dto.setPhoto(photo);
+                                            return dto;
+                                        });
+                            });
+                });
     }
 
     @Override
@@ -138,7 +168,7 @@ public class VetServiceImpl implements VetService {
     }
 
     @Override
-    public Mono<Void> deleteSpecialtyBySpecialtyId(String vetId, String specialtyId) {
+    public Mono<Void> deleteSpecialtiesBySpecialtyId(String vetId, String specialtyId) {
         return vetRepository.findVetByVetId(vetId)
                 .switchIfEmpty(Mono.error(new NotFoundException("No vet found with vetId: " + vetId)))
                 .flatMap(vet -> {
@@ -163,7 +193,7 @@ public class VetServiceImpl implements VetService {
         return vetRepository.findVetByVetId(vetId)
                 .switchIfEmpty(Mono.error(new NotFoundException("No vet with this vetId was found: " + vetId)))
                 .flatMap(vet -> {
-                    log.info("Deleting associated data for vetId: {}", vetId);
+                    log.info("Deactivating vet with vetId: {}", vetId);
                     vet.setActive(false);
 
                     return Mono.when()
@@ -202,20 +232,6 @@ public class VetServiceImpl implements VetService {
         return Mono.just(requestDTO);
     }
 
-    private Mono<VetRequestDTO> handleDefaultPhoto(VetRequestDTO vet) {
-        if (vet.isPhotoDefault()) {
-            Photo photo = Photo.builder()
-                    .vetId(vet.getVetId())
-                    .filename("vet_default.jpg")
-                    .imgType("image/jpeg")
-                    .data(loadImage("images/vet_default.jpg"))
-                    .build();
-            return photoRepository.save(photo)
-                    .thenReturn(vet);
-        }
-        return Mono.just(vet);
-    }
-
     private Mono<Vet> assignBadgeAndSaveBadgeAndVet(Vet vetEntity) {
         Badge assignedBadge = Badge.builder()
                 .vetId(vetEntity.getVetId())
@@ -227,6 +243,60 @@ public class VetServiceImpl implements VetService {
         return badgeRepository.save(assignedBadge)
                 .zipWith(vetRepository.save(vetEntity))
                 .map(tuple -> tuple.getT2());
+    }
+
+    @Override
+    public Mono<VetResponseDTO> getVetByVetId(String vetId, boolean includePhoto) {
+        return vetRepository.findVetByVetId(vetId)
+                .switchIfEmpty(Mono.error(new NotFoundException("No vet with this vetId was found: " + vetId)))
+                .doOnNext(i -> log.debug("The vet entity is: " + i.toString()))
+                .flatMap(vet -> {
+                    VetResponseDTO dto = EntityDtoUtil.vetEntityToResponseDTO(vet);
+                    
+                    if (includePhoto && vet.getImageId() != null) {
+                        return filesServiceClient.getFileById(vet.getImageId())
+                                .map(fileDetails -> {
+                                    dto.setPhoto(fileDetails);
+                                    return dto;
+                                })
+                                .onErrorReturn(dto);
+                    } else {
+                        dto.setPhoto(null);
+                        return Mono.just(dto);
+                    }
+                })
+                .log();
+    }
+
+    @Override
+    public Mono<VetResponseDTO> updateVetPhoto(String vetId, FileRequestDTO photo) {
+        return vetRepository.findVetByVetId(vetId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Vet not found with id: " + vetId)))
+                .flatMap(existingVet -> {
+                    Mono<FileResponseDTO> fileOperation;
+
+                    if (existingVet.getImageId() != null && !existingVet.getImageId().isEmpty()) {
+                        fileOperation = filesServiceClient.updateFile(existingVet.getImageId(), photo)
+                                .onErrorResume(e -> {
+                                    log.warn("Photo file {} not found or error updating, creating new file instead: {}", 
+                                            existingVet.getImageId(), e.getMessage());
+                                    return filesServiceClient.addFile(photo);
+                                });
+                    } else {
+                        fileOperation = filesServiceClient.addFile(photo);
+                    }
+
+                    return fileOperation
+                            .flatMap(fileResp -> {
+                                existingVet.setImageId(fileResp.getFileId());
+                                return vetRepository.save(existingVet)
+                                        .map(savedVet -> {
+                                            VetResponseDTO dto = EntityDtoUtil.vetEntityToResponseDTO(savedVet);
+                                            dto.setPhoto(fileResp);
+                                            return dto;
+                                        });
+                            });
+                });
     }
 
 
