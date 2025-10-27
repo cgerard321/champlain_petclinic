@@ -4,12 +4,17 @@ import { useNavigate } from 'react-router-dom';
 import { getAllReviews } from './Api/getAllReviews';
 import { ReviewResponseDTO } from './Model/ReviewResponseDTO';
 import { deleteReview } from './Api/deleteReview';
-import { IsOwner } from '@/context/UserContext';
+import { IsOwner, IsAdmin } from '@/context/UserContext';
+import BasicModal from '@/shared/components/BasicModal';
 
 const ReviewsList: React.FC = (): JSX.Element => {
   const [reviewList, setReviewList] = useState<ReviewResponseDTO[]>([]);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
   const navigate = useNavigate();
-  const canAccessActions = IsOwner();
+  const isOwner = IsOwner();
+  const isAdmin = IsAdmin();
+  const canAccessActions = isOwner || isAdmin;
 
   useEffect(() => {
     const fetchReviewsData = async (): Promise<void> => {
@@ -30,25 +35,38 @@ const ReviewsList: React.FC = (): JSX.Element => {
     );
   }, []);
   const handleDelete = async (reviewId: number): Promise<void> => {
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete review with ID: ${reviewId}?`
-    );
-    if (!confirmDelete) return;
     try {
       await deleteReview(reviewId.toString());
 
       setReviewList(prev =>
         prev.filter(review => review.reviewId !== reviewId)
       );
+
+      // show a brief success message (mirrors CustomerReviewsList)
+      setSuccessMessage('Review successfully deleted.');
+      setShowSuccessMessage(true);
+      setTimeout(() => {
+        setShowSuccessMessage(false);
+        setSuccessMessage(null);
+      }, 2500);
     } catch (error) {
       console.error('Error deleting review:', error);
-      alert('Error deleting review.');
     }
   };
 
   return (
     <div className="reviews-container">
       <h1>Reviews</h1>
+      {showSuccessMessage && successMessage && (
+        <div
+          className="visit-success-message"
+          role="status"
+          aria-live="polite"
+          style={{ marginBottom: '0.75rem' }}
+        >
+          {successMessage}
+        </div>
+      )}
       <table className="reviews-table">
         <thead>
           <tr>
@@ -69,22 +87,33 @@ const ReviewsList: React.FC = (): JSX.Element => {
                 <td>{new Date(review.dateSubmitted).toLocaleDateString()}</td>
                 {canAccessActions && (
                   <td>
-                    <button
-                      className="btn btn-warning"
-                      onClick={() =>
-                        navigate(`/updateReview/${review.reviewId}/edit`)
-                      }
-                      title="Edit"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="btn btn-danger"
-                      onClick={() => handleDelete(review.reviewId)}
-                      title="Delete"
-                    >
-                      Delete
-                    </button>
+                    {isOwner && (
+                      <button
+                        className="btn btn-warning"
+                        onClick={() =>
+                          navigate(`/updateReview/${review.reviewId}/edit`)
+                        }
+                        title="Edit"
+                      >
+                        Edit
+                      </button>
+                    )}
+                    {(isOwner || isAdmin) && (
+                      <BasicModal
+                        title="Delete review"
+                        confirmText="Delete"
+                        onConfirm={async () =>
+                          await handleDelete(review.reviewId)
+                        }
+                        showButton={
+                          <button className="btn btn-danger" title="Delete">
+                            Delete
+                          </button>
+                        }
+                      >
+                        <p>Are you sure you want to delete this review?</p>
+                      </BasicModal>
+                    )}
                   </td>
                 )}
               </tr>
