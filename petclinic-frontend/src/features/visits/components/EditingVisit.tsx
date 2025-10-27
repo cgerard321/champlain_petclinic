@@ -213,7 +213,6 @@ const EditingVisit = forwardRef<EditingVisitHandle, EditingVisitProps>(
           <form id="modalform" onSubmit={handleSubmit}>
             <label>Pet Name:</label>
             <input disabled={true} value={visit.petName}></input>
-            <br />
             <label>
               Description:{' '}
               {errors.description && (
@@ -229,7 +228,6 @@ const EditingVisit = forwardRef<EditingVisitHandle, EditingVisitProps>(
               required
             />
 
-            <br />
             <div className="form-group">
               <label htmlFor="practitionerId">Veterinarian Preference:</label>
               <select
@@ -248,7 +246,6 @@ const EditingVisit = forwardRef<EditingVisitHandle, EditingVisitProps>(
                 ))}
               </select>
             </div>
-            <br />
             <label>
               Visit Date:{' '}
               {errors.visitStartDate && (
@@ -265,7 +262,6 @@ const EditingVisit = forwardRef<EditingVisitHandle, EditingVisitProps>(
               onChange={handleChange}
               required
             />
-            <br />
             <label>
               Status:{' '}
               {errors.status && <span className="error">{errors.status}</span>}
@@ -276,7 +272,6 @@ const EditingVisit = forwardRef<EditingVisitHandle, EditingVisitProps>(
               <option value="UPCOMING">Upcoming</option>
               <option value="COMPLETED">Completed</option>
             </select>
-            <br />
             <div className="form-group emergency-toggle-group">
               <label htmlFor="isEmergency">
                 <span className="emergency-label-text">
@@ -300,7 +295,6 @@ const EditingVisit = forwardRef<EditingVisitHandle, EditingVisitProps>(
                 </div>
               </label>
             </div>
-            <br />
             {/* Buttons to create prescription / bill removed from the edit modal.
                 These actions are now provided as row-level icons in VisitListTable. */}
           </form>
