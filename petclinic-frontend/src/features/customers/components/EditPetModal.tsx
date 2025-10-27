@@ -5,6 +5,7 @@ import { updatePet } from '../api/updatePet';
 import { deletePet } from '../api/deletePet';
 import { getPetTypes } from '../api/getPetTypes';
 import { deletePetPhoto } from '../api/deletePetPhoto';
+import { addPetPhoto } from '../api/addPetPhoto';
 import { PetResponseModel } from '../models/PetResponseModel';
 import { PetRequestModel } from '../models/PetRequestModel';
 import { PetTypeModel } from '../models/PetTypeModel';
@@ -101,14 +102,25 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
     try {
       await deletePetPhoto(pet.petId);
       setPetPhotoUrl(defaultProfile);
-
-      // Update pet data to reflect photo deletion
       setPet(prev => (prev ? { ...prev, photo: undefined } : null));
-
       setSuccessMessage('Pet photo deleted successfully!');
     } catch (error) {
       console.error('Error deleting pet photo:', error);
       setErrors({ submit: 'Failed to delete pet photo. Please try again.' });
+    }
+  };
+
+  const handleAddPetPhoto = async (file: File): Promise<void> => {
+    if (!pet) return;
+
+    try {
+      const response = await addPetPhoto(pet.petId, file);
+      setPetPhotoUrl(URL.createObjectURL(file));
+      setPet(prev => (prev ? { ...prev, photo: response.data.photo } : null));
+      setSuccessMessage('Pet photo added successfully!');
+    } catch (error) {
+      console.error('Error adding pet photo:', error);
+      setErrors({ submit: 'Failed to add pet photo. Please try again.' });
     }
   };
 
@@ -168,13 +180,11 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
       setPet(prev => (prev ? { ...prev, [name]: checked } : null));
     } else if (type === 'date') {
       setDateInputValue(value);
-
       if (value && value.length === 10) {
         const dateValue = new Date(value);
         if (!isNaN(dateValue.getTime())) {
           setPet(prev => (prev ? { ...prev, [name]: dateValue } : null));
         }
-      } else if (!value || value.length < 10) {
       }
     } else {
       setPet(prev => (prev ? { ...prev, [name]: value } : null));
@@ -186,9 +196,8 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
     if (!pet?.name?.trim()) newErrors.name = 'Pet name is required';
     if (!pet?.weight?.trim()) newErrors.weight = 'Weight is required';
     if (!pet?.petTypeId) newErrors.petTypeId = 'Pet type is required';
-    if (pet?.weight && parseFloat(pet.weight) <= 0) {
+    if (pet?.weight && parseFloat(pet.weight) <= 0)
       newErrors.weight = 'Weight must be greater than 0';
-    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -202,7 +211,7 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
     setIsSubmitting(true);
     try {
       const petRequest: PetRequestModel = {
-        ownerId: ownerId,
+        ownerId,
         name: pet.name,
         petTypeId: pet.petTypeId,
         isActive: pet.isActive ? 'true' : 'false',
@@ -228,13 +237,8 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
         );
       }
 
-      if (onPetUpdated) {
-        onPetUpdated(updateResponse.data);
-      }
-
-      setTimeout(() => {
-        onClose();
-      }, 1500);
+      onPetUpdated?.(updateResponse.data);
+      setTimeout(() => onClose(), 1500);
     } catch (error) {
       console.error('Error updating pet:', error);
       setErrors({ submit: 'Failed to update pet. Please try again.' });
@@ -246,9 +250,7 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
   const handleDelete = async (): Promise<void> => {
     try {
       await deletePet(petId);
-      if (onPetDeleted) {
-        onPetDeleted();
-      }
+      onPetDeleted?.();
       onClose();
     } catch (error) {
       console.error('Error deleting pet:', error);
@@ -265,14 +267,12 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
   };
 
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>): void => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
+    if (e.target === e.currentTarget) onClose();
   };
 
   if (!isOpen) return <></>;
 
-  if (notFound) {
+  if (notFound)
     return (
       <div className="customer-modal-overlay" onClick={handleOverlayClick}>
         <div
@@ -294,9 +294,8 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
         </div>
       </div>
     );
-  }
 
-  if (!pet) {
+  if (!pet)
     return (
       <div className="customer-modal-overlay" onClick={handleOverlayClick}>
         <div
@@ -313,7 +312,6 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
         </div>
       </div>
     );
-  }
 
   return (
     <div className="customer-modal-overlay" onClick={handleOverlayClick}>
@@ -335,7 +333,7 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
               alt={`${pet.name} profile`}
               className="pet-photo"
             />
-            {petPhotoUrl && petPhotoUrl !== defaultProfile && pet.photo && (
+            {petPhotoUrl && petPhotoUrl !== defaultProfile && pet.photo ? (
               <button
                 type="button"
                 onClick={handleDeletePetPhoto}
@@ -344,6 +342,22 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
               >
                 Delete Photo
               </button>
+            ) : (
+              <>
+                <label htmlFor="petPhotoUpload" className="file-select-button">
+                  Add Photo
+                </label>
+                <input
+                  id="petPhotoUpload"
+                  type="file"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={e =>
+                    e.target.files && handleAddPetPhoto(e.target.files[0])
+                  }
+                  disabled={isSubmitting}
+                />
+              </>
             )}
           </div>
         </div>
@@ -437,7 +451,6 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
           {errors.submit && (
             <div className="error-message">{errors.submit}</div>
           )}
-
           {successMessage && (
             <div className="success-message">{successMessage}</div>
           )}
