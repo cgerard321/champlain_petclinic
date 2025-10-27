@@ -1702,7 +1702,6 @@ class CartServiceUnitTest {
                 .expectNextMatches(List::isEmpty)
                 .verifyComplete();
     }
-<<<<<<< HEAD
     @Test
     void applyPromoToCart_validPercent_setsAndSaves() {
         String cartId = cart1.getCartId();
@@ -1814,7 +1813,6 @@ class CartServiceUnitTest {
 
     @Test
     void removeProductFromAllCarts_removesFromProductsAndWishlist_countsOnce_andSavesOnce() {
-        // cible présente dans products ET wishlist du même cart
         String targetId = product1.getProductId(); // "9a29fff7-..."
         Cart cart = Cart.builder()
                 .cartId("C-1")
