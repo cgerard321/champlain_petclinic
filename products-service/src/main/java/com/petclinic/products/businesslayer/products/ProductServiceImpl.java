@@ -312,8 +312,7 @@ public class ProductServiceImpl implements ProductService {
         return productTypeRequestModel
             .map(request -> {
                 request.setTypeName(request.getTypeName().toUpperCase());
-                ProductTypeDb productType = EntityModelUtil.toProductTypeEntity(request);
-                return productType;
+                return EntityModelUtil.toProductTypeEntity(request);
             })
             .flatMap(productTypeRepository::save)
             .map(EntityModelUtil::toProductTypeResponseModel);

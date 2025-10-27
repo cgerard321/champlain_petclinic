@@ -3,7 +3,6 @@ package com.petclinic.products.utils;
 import com.petclinic.products.datalayer.images.Image;
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductBundle;
-import com.petclinic.products.datalayer.products.ProductType;
 import com.petclinic.products.datalayer.products.ProductTypeDb;
 import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.presentationlayer.images.ImageRequestModel;
