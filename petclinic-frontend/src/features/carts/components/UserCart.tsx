@@ -55,6 +55,33 @@ interface Invoice {
   productSalePrice: number;
   quantity: number;
 }
+// --- helpers pour gérer les items supprimés/invalides ---
+type CartLikeProduct = {
+  productId: string;
+  productName?: string | null;
+  productSalePrice?: number | null;
+  quantity?: number | null;
+  productQuantity?: number | null;
+};
+
+function isDeletedOrInvalid(p: CartLikeProduct): boolean {
+  return (
+    p == null ||
+    p.productId == null ||
+    p.productName == null ||
+    p.productName === '' ||
+    p.productSalePrice == null
+  );
+}
+
+function splitValidInvalid<T extends CartLikeProduct>(
+  items: T[]
+): { valid: T[]; invalid: T[] } {
+  const valid: T[] = [];
+  const invalid: T[] = [];
+  for (const it of items) (isDeletedOrInvalid(it) ? invalid : valid).push(it);
+  return { valid, invalid };
+}
 
 /**
  * UserCart component displays the user's shopping cart, allowing them to view, update, and remove items,
@@ -299,8 +326,11 @@ const UserCart: React.FC = () => {
   const isStaff =
     isAdmin || IsInventoryManager() || IsVet() || IsReceptionist();
 
-  // derived totals
-  const subtotal = cartItems.reduce(
+  const { valid: validCartItems, invalid: invalidCartItems } =
+    splitValidInvalid(cartItems);
+
+  // derived totals (uniquement sur les items valides)
+  const subtotal = validCartItems.reduce(
     (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
     0
   );
@@ -317,6 +347,65 @@ const UserCart: React.FC = () => {
     );
     setCartItemCount(count);
   }, [cartItems]);
+  const refetchCart = useCallback(async (): Promise<void> => {
+    if (!cartId) {
+      setError('Invalid cart ID');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { data } = await axiosInstance.get(`/carts/${cartId}`, {
+        useV2: false,
+      });
+
+      if (!Array.isArray(data.products)) {
+        throw new Error('Invalid data format: products should be an array');
+      }
+
+      const products: ProductModel[] = data.products.map(
+        (p: ProductAPIResponse) => ({
+          productId: p.productId,
+          imageId: p.imageId,
+          productName: p.productName,
+          productDescription: p.productDescription,
+          productSalePrice: p.productSalePrice,
+          averageRating: p.averageRating,
+          quantity: p.quantityInCart || 1,
+          productQuantity: p.productQuantity,
+        })
+      );
+
+      setCartItems(products);
+      setCartIdInLS(cartId);
+
+      const countFromFetch = products.reduce(
+        (acc, pr) => acc + (pr.quantity || 0),
+        0
+      );
+      setCartCountInLS(countFromFetch);
+
+      const enrichedWishlist = await Promise.all(
+        (data.wishListProducts || []).map(async (item: ProductModel) => {
+          const fullProduct = await getProductByProductId(item.productId);
+          return { ...fullProduct, quantity: item.quantity ?? 1 };
+        })
+      );
+      setWishlistItems(enrichedWishlist);
+
+      if (typeof data.promoPercent === 'number') {
+        setPromoPercent(data.promoPercent);
+      } else {
+        setPromoPercent(null);
+      }
+    } catch (err) {
+      console.error(err);
+      setError('Failed to fetch cart items');
+    } finally {
+      setLoading(false);
+      if (wishlistUpdated) setWishlistUpdated(false);
+    }
+  }, [cartId, wishlistUpdated]);
 
   useEffect(() => {
     const fetchCartItems = async (): Promise<void> => {
@@ -384,6 +473,16 @@ const UserCart: React.FC = () => {
     updateCartItemCount();
   }, [cartItems, updateCartItemCount]);
 
+  useEffect(() => {
+    void refetchCart();
+  }, [cartId, wishlistUpdated, refetchCart]);
+
+  useEffect(() => {
+    const onFocus = () => void refetchCart();
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, [refetchCart]);
+
   // Fetch recent purchases
   useEffect(() => {
     if (!cartId) return;
@@ -401,8 +500,6 @@ const UserCart: React.FC = () => {
     fetchRecentPurchases();
   }, [cartId]);
 
-  // Fetch recommendation purchases
-  // Reusable function to fetch recommendation purchases
   const fetchRecommendationPurchases = useCallback(async (): Promise<void> => {
     if (!cartId) return;
     try {
@@ -945,6 +1042,7 @@ const UserCart: React.FC = () => {
       } else {
         setCheckoutMessage('Checkout failed: Unexpected error');
       }
+      await refetchCart();
     }
   };
 
@@ -1040,10 +1138,35 @@ const UserCart: React.FC = () => {
                 Continue Shopping
               </button>
             </div>
+            {invalidCartItems.length > 0 && (
+              <div
+                className="notification-message"
+                role="alert"
+                data-testid="deleted-items-banner"
+                style={{
+                  background: '#fff3cd',
+                  color: '#664d03',
+                  border: '1px solid #ffe69c',
+                  marginTop: 8,
+                }}
+              >
+                Some items in your cart are no longer available and were removed
+                from display.
+                <button
+                  className="close-notification"
+                  onClick={() => setNotificationMessage(null)}
+                  aria-label="Close notification"
+                  style={{ marginLeft: 12 }}
+                >
+                  &times;
+                </button>
+              </div>
+            )}
 
             <div className="cart-items-container">
-              {cartItems.length > 0 ? (
-                cartItems.map((item, index) => (
+              {validCartItems.length > 0 ? (
+  validCartItems.map((item, index) => (
+
                   <CartItem
                     key={item.productId}
                     item={item}
@@ -1074,7 +1197,7 @@ const UserCart: React.FC = () => {
             </div>
 
             <div className="UserCart-buttons">
-              {cartItems.length > 0 && (
+              {validCartItems.length > 0 && (
                 <button
                   className="clear-cart-btn cart-button cart-button--danger"
                   onClick={clearCart}
@@ -1160,10 +1283,22 @@ const UserCart: React.FC = () => {
                 </p>
               </div>
 
+              {invalidCartItems.length > 0 && (
+                <div
+                  className="checkout-message"
+                  style={{ color: '#b42318', marginBottom: 8 }}
+                >
+                  Checkout blocked: your cart contains removed items. Please
+                  refresh or update your cart.
+                </div>
+              )}
+
               <button
                 className="checkout-btn cart-button cart-button--brand cart-button--block cart-button--disabled-muted"
                 onClick={handleCheckoutConfirmation}
-                disabled={cartItems.length === 0}
+                disabled={
+                  validCartItems.length === 0 || invalidCartItems.length > 0
+                }
               >
                 Checkout
               </button>

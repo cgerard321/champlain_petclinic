@@ -407,4 +407,13 @@ public class CartControllerV1 {
     }
 
 
+
+    @DeleteMapping("/internal/products/{productId}")
+    public Mono<ResponseEntity<Void>> purgeProductFromAllCarts(@PathVariable String productId) {
+        return cartServiceClient.purgeProductFromAllCarts(productId)
+                .thenReturn(ResponseEntity.noContent().build()); // 204
+    }
+
+
+
 }

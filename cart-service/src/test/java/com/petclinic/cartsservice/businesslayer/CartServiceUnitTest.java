@@ -1702,6 +1702,7 @@ class CartServiceUnitTest {
                 .expectNextMatches(List::isEmpty)
                 .verifyComplete();
     }
+<<<<<<< HEAD
     @Test
     void applyPromoToCart_validPercent_setsAndSaves() {
         String cartId = cart1.getCartId();
@@ -1793,5 +1794,53 @@ class CartServiceUnitTest {
 
         verify(cartRepository, never()).save(any(Cart.class));
     }
+    @Test
+    void removeProductFromAllCarts_noMatch_returnsZero_andDoesNotSave() {
+        // Cart sans correspondance
+        Cart cart = Cart.builder()
+                .cartId("C-no-match")
+                .products(new ArrayList<>(List.of(product2))) // product2 != target
+                .wishListProducts(new ArrayList<>(List.of(wishListProduct1))) // != target
+                .build();
+
+        when(cartRepository.findAll()).thenReturn(Flux.just(cart));
+
+        StepVerifier.create(cartService.removeProductFromAllCarts("non-matching-id"))
+                .expectNext(0)
+                .verifyComplete();
+
+        verify(cartRepository, times(0)).save(any(Cart.class));
+    }
+
+    @Test
+    void removeProductFromAllCarts_removesFromProductsAndWishlist_countsOnce_andSavesOnce() {
+        // cible présente dans products ET wishlist du même cart
+        String targetId = product1.getProductId(); // "9a29fff7-..."
+        Cart cart = Cart.builder()
+                .cartId("C-1")
+                .products(new ArrayList<>(List.of(product1, product2)))          // contient target
+                .wishListProducts(new ArrayList<>(List.of(wishlistProduct2)))    // contient aussi target
+                .build();
+
+        // Un second cart qui ne change pas
+        Cart cartNoChange = Cart.builder()
+                .cartId("C-2")
+                .products(new ArrayList<>(List.of(product2)))
+                .wishListProducts(new ArrayList<>(List.of(wishListProduct1)))
+                .build();
+
+        when(cartRepository.findAll()).thenReturn(Flux.just(cart, cartNoChange));
+        when(cartRepository.save(any(Cart.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
+
+        StepVerifier.create(cartService.removeProductFromAllCarts(targetId))
+                .expectNext(1) // 1 cart modifié
+                .verifyComplete();
+
+        // Sauvegarde appelée une seule fois et le produit n’est plus présent
+        verify(cartRepository, times(1)).save(any(Cart.class));
+        assertTrue(cart.getProducts().stream().noneMatch(p -> targetId.equals(p.getProductId())));
+        assertTrue(cart.getWishListProducts().stream().noneMatch(p -> targetId.equals(p.getProductId())));
+    }
+
 
 }

@@ -712,4 +712,28 @@ public class CartServiceImpl implements CartService {
                 .map(saved -> EntityModelUtil.toCartResponseModel(saved, saved.getProducts()));
     }
 
+    @Override
+    public Mono<Integer> removeProductFromAllCarts(String productId) {
+        return cartRepository.findAll()
+                .flatMap(cart -> {
+                    boolean changed = false;
+
+                    if (cart.getProducts() != null) {
+                        int before = cart.getProducts().size();
+                        cart.getProducts().removeIf(p -> productId.equals(p.getProductId()));
+                        changed |= (cart.getProducts().size() != before);
+                    }
+
+                    if (cart.getWishListProducts() != null) {
+                        int beforeW = cart.getWishListProducts().size();
+                        cart.getWishListProducts().removeIf(p -> productId.equals(p.getProductId()));
+                        changed |= (cart.getWishListProducts().size() != beforeW);
+                    }
+
+                    return changed ? cartRepository.save(cart).thenReturn(1) : Mono.just(0);
+                })
+                .reduce(0, Integer::sum);
+    }
+
+
 }

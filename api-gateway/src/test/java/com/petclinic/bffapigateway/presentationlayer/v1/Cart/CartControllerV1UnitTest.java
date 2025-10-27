@@ -1077,4 +1077,21 @@ public class CartControllerV1UnitTest {
                 .verifyComplete();
     }
 
+    @Test
+    void purgeProductFromAllCarts_returns204_andDelegatesToClient() {
+        String productId = "abc-123";
+        when(cartServiceClient.purgeProductFromAllCarts(productId))
+                .thenReturn(Mono.empty()); // succès
+
+        webTestClient.delete()
+                .uri(baseCartURL + "/internal/products/{productId}", productId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
+
+        verify(cartServiceClient, times(1)).purgeProductFromAllCarts(productId);
+    }
+
+
 }

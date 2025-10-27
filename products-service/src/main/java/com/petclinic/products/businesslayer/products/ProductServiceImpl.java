@@ -1,6 +1,7 @@
 package com.petclinic.products.businesslayer.products;
 
 import com.petclinic.products.datalayer.products.*;
+import com.petclinic.products.domainclientlayer.CartClient;
 import com.petclinic.products.utils.exceptions.*;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -29,13 +30,15 @@ public class ProductServiceImpl implements ProductService {
     private final RatingRepository ratingRepository;
     private final ProductBundleRepository productBundleRepository;
     private final ProductBundleService productBundleService;
+    private final CartClient cartClient;
 
     public ProductServiceImpl(ProductRepository productRepository, RatingRepository ratingRepository
-    , ProductBundleRepository productBundleRepository, ProductBundleService productBundleService) {
+    , ProductBundleRepository productBundleRepository, ProductBundleService productBundleService, CartClient cartClient) {
         this.productRepository = productRepository;
         this.ratingRepository = ratingRepository;
         this.productBundleRepository = productBundleRepository;
         this.productBundleService = productBundleService;
+        this.cartClient = cartClient;
     }
 
     private Mono<Product> getAverageRating(Product product) {
@@ -195,8 +198,17 @@ public class ProductServiceImpl implements ProductService {
                                             .thenReturn(found);
                                 })
                 )
-                .map(EntityModelUtil::toProductResponseModel);
+                .map(EntityModelUtil::toProductResponseModel)
+                .flatMap(resp ->
+                        cartClient.purgeProductFromAllCarts(resp.getProductId())
+                                .doOnSubscribe(sub -> log.info("[ProductService] Notifying cart-service for product deletion {}", resp.getProductId()))
+                                .doOnSuccess(v -> log.info("[ProductService] Product {} purged from all carts", resp.getProductId()))
+                                .doOnError(e -> log.warn("[ProductService] Failed to purge product {} from carts: {}", resp.getProductId(), e.getMessage()))
+                                .onErrorResume(e -> Mono.empty())
+                                .thenReturn(resp)
+                );
     }
+
 
 
     @Override

@@ -328,4 +328,13 @@ public class CartController {
         return cartService.applyPromoToCart(cartId, promoPercent);
     }
 
+
+    @DeleteMapping("/internal/products/{productId}")
+    public Mono<ResponseEntity<Void>> removeDeletedProductFromAllCarts(@PathVariable String productId) {
+        return cartService.removeProductFromAllCarts(productId)
+                .doOnNext(count -> log.info("Removed product {} from {} cart(s).", productId, count))
+                .then(Mono.just(ResponseEntity.noContent().build())); // 204 No Content
+    }
+
+
 }
