@@ -1,21 +1,26 @@
 #[macro_use]
 extern crate rocket;
+mod http;
+mod minio_service;
 
-use crate::adapters::input::rest_handler::error::register_catchers;
-use crate::adapters::input::rest_handler::routes;
-use bootstrap::stage;
+use crate::http::routes;
 
 mod core;
 
-mod adapters;
-mod application;
-pub mod bootstrap;
-mod domain;
+use crate::http::prelude::register_catchers;
+use crate::minio_service::store::MinioStore;
 
 #[launch]
 fn rocket() -> _ {
+    let store = MinioStore::from_env()
+        .map_err(|e| {
+            eprintln!("Fatal MinIO init error: {e}");
+            e
+        })
+        .expect("MinIO config must be valid at startup");
+
     rocket::build()
-        .attach(stage())
+        .manage(store)
         .mount("/api/v1", routes())
         .register("/", register_catchers())
 }

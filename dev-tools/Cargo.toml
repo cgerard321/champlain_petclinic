@@ -4,18 +4,10 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-rocket = { version = "0.5.1", features = ["json", "secrets"] }
+rocket = { version = "0.5.1", features = ["json"] }
 minio = "0.3.0"
 serde = { version = "1.0.228", features = ["derive"] }
-uuid = { version = "1.18.1", features = ["v4", "serde"] }
+uuid = { version = "1.18.1", features = ["v4"] }
 infer = "0.19.0"
 thiserror = "2.0.17"
 http = "1.3.1"
-rand_core = "0.9.3"
-sqlx = { version = "0.8.6", features = ["mysql", "runtime-tokio-rustls", "chrono"] }
-argon2 = { version = "0.5", features = ["std", "password-hash"] }
-chrono = "0.4.42"
-time = "0.3.44"
-async-trait = "0.1.89"
-bytes = "1.10.1"
-futures = "0.3.31"

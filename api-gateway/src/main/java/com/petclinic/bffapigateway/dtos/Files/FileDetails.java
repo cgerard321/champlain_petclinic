@@ -12,6 +12,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class FileDetails {
+
     private String fileName;
     private String fileType;
     private byte[] fileData;

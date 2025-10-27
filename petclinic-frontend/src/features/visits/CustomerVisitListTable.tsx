@@ -14,7 +14,6 @@ import SidebarItem from './components/SidebarItem';
 import Sidebar from './components/Sidebar';
 import SvgIcon from '@/shared/components/SvgIcon';
 import { Category } from './models/Category';
-import AddingVisit from './components/AddingVisit';
 
 export default function CustomerVisitListTable(): JSX.Element {
   const { user } = useUser();
@@ -302,14 +301,14 @@ export default function CustomerVisitListTable(): JSX.Element {
     return (
       <Sidebar title={tit}>
         <li>
-          <AddingVisit
-            showButton={
-              <button className="btn btn-primary" title="Create">
-                <SvgIcon id="pen-to-square" />
-                Create
-              </button>
-            }
-          />
+          <button
+            className="btn btn-primary"
+            onClick={() => navigate(AppRoutePaths.OwnerBookAppointment)}
+            title="Create"
+          >
+            <SvgIcon id="pen-to-square" />
+            Create
+          </button>
         </li>
         <li>
           <button

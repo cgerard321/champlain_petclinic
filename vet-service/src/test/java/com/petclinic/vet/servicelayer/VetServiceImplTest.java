@@ -6,7 +6,6 @@ import com.petclinic.vet.dataaccesslayer.photos.PhotoRepository;
 import com.petclinic.vet.dataaccesslayer.vets.Specialty;
 import com.petclinic.vet.dataaccesslayer.vets.Vet;
 import com.petclinic.vet.dataaccesslayer.vets.VetRepository;
-import com.petclinic.vet.domainclientlayer.FilesServiceClient;
 import com.petclinic.vet.presentationlayer.vets.SpecialtyDTO;
 import com.petclinic.vet.presentationlayer.vets.VetRequestDTO;
 import com.petclinic.vet.presentationlayer.vets.VetResponseDTO;
@@ -43,8 +42,6 @@ class VetServiceImplTest {
 
     @MockBean
     VetRepository vetRepository;
-    @MockBean
-    FilesServiceClient filesServiceClient;
     //To counter missing bean error
     @MockBean
     ConnectionFactoryInitializer connectionFactoryInitializer;
@@ -336,7 +333,7 @@ class VetServiceImplTest {
         when(vetRepository.findVetByVetId(vetId)).thenReturn(Mono.just(vet));
         when(vetRepository.save(any(Vet.class))).thenReturn(Mono.just(vet));
         
-        StepVerifier.create(vetService.deleteSpecialtiesBySpecialtyId(vetId, specialtyId))
+        StepVerifier.create(vetService.deleteSpecialtyBySpecialtyId(vetId, specialtyId))
                 .verifyComplete();
         
         verify(vetRepository, times(1)).findVetByVetId(vetId);
@@ -350,7 +347,7 @@ class VetServiceImplTest {
         
         when(vetRepository.findVetByVetId(vetId)).thenReturn(Mono.empty());
         
-        StepVerifier.create(vetService.deleteSpecialtiesBySpecialtyId(vetId, specialtyId))
+        StepVerifier.create(vetService.deleteSpecialtyBySpecialtyId(vetId, specialtyId))
                 .expectErrorMatches(throwable -> 
                     throwable instanceof NotFoundException &&
                     throwable.getMessage().contains("No vet found with vetId: " + vetId))
@@ -385,7 +382,7 @@ class VetServiceImplTest {
         
         when(vetRepository.findVetByVetId(vetId)).thenReturn(Mono.just(vet));
         
-        StepVerifier.create(vetService.deleteSpecialtiesBySpecialtyId(vetId, specialtyId))
+        StepVerifier.create(vetService.deleteSpecialtyBySpecialtyId(vetId, specialtyId))
                 .expectErrorMatches(throwable -> 
                     throwable instanceof NotFoundException &&
                     throwable.getMessage().contains("No specialty found with specialtyId: " + specialtyId))

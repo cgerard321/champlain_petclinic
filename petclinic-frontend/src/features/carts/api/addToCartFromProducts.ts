@@ -74,7 +74,6 @@ export function useAddToCart(): UseAddToCartReturnType {
       roleNames.has('RECEPTIONIST');
 
     if (isStaff) return false;
-
     try {
       const cartId = await getOrCreateCartId(user.userId);
       // Optimistic local update: no UI wait for API

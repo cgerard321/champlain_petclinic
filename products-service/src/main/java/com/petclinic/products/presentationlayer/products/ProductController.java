@@ -154,43 +154,5 @@ public class ProductController {
                 .map(ResponseEntity::ok);
     }
 
-    @GetMapping(value = "/types", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ProductTypeResponseModel> getAllProductTypes() {
-        return productService.getAllProductTypes();
-    }
 
-    @GetMapping(value = "/types/{productTypeId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<ProductTypeResponseModel>> getProductTypeByProductTypeId(@PathVariable String productTypeId) {
-        return Mono.just(productTypeId)
-                .filter(id -> id.length() == 36)
-                .switchIfEmpty(Mono.error(new InvalidInputException("Provided product type id is invalid: " + productTypeId)))
-                .flatMap(productService::getProductTypeByProductTypeId)
-                .map(ResponseEntity::ok);
-    }
-
-    @PostMapping(value = "/types", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<ProductTypeResponseModel>> addProductType(@RequestBody Mono<ProductTypeRequestModel> productTypeRequestModel) {
-        return productService.addProductType(productTypeRequestModel)
-                .map(c -> ResponseEntity.status(HttpStatus.CREATED).body(c))
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
-    }
-
-    @PutMapping(value = "/types/{productTypeId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<ProductTypeResponseModel>> updateProductType(@RequestBody Mono<ProductTypeRequestModel> productTypeRequestModel,
-                                                                    @PathVariable String productTypeId) {
-        return Mono.just(productTypeId)
-                .filter(id -> id.length() == 36)
-                .switchIfEmpty(Mono.error(new InvalidInputException("Provided product type id is invalid: " + productTypeId)))
-                .flatMap(id -> productService.updateProductTypeByProductTypeId(id, productTypeRequestModel))
-                .map(ResponseEntity::ok);
-    }
-
-    @DeleteMapping(value = "/types/{productTypeId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<ProductTypeResponseModel>> deleteProductType(@PathVariable String productTypeId) {
-        return Mono.just(productTypeId)
-                .filter(id -> id.length() == 36)
-                .switchIfEmpty(Mono.error(new InvalidInputException("Provided product type id is invalid: " + productTypeId)))
-                .flatMap(productService::deleteProductTypeByProductTypeId)
-                .map(ResponseEntity::ok);
-    }
 }

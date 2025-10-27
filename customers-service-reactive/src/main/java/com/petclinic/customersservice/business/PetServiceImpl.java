@@ -1,10 +1,8 @@
 package com.petclinic.customersservice.business;
 
 import com.petclinic.customersservice.customersExceptions.exceptions.NotFoundException;
-import com.petclinic.customersservice.customersExceptions.exceptions.UnprocessableEntityException;
 import com.petclinic.customersservice.data.Pet;
 import com.petclinic.customersservice.data.PetRepo;
-import com.petclinic.customersservice.domainclientlayer.FileRequestDTO;
 import com.petclinic.customersservice.domainclientlayer.FilesServiceClient;
 import com.petclinic.customersservice.presentationlayer.PetRequestDTO;
 import com.petclinic.customersservice.presentationlayer.PetResponseDTO;
@@ -128,25 +126,6 @@ public class PetServiceImpl implements PetService {
                 })
                 .flatMap(petRepo::save)
                 .map(EntityDTOUtil::toPetResponseDTO);
-    }
-
-    @Override
-    public Mono<PetResponseDTO> addPetPhoto(String petId, FileRequestDTO photo) {
-        return petRepo.findPetByPetId(petId)
-                .switchIfEmpty(Mono.error(new NotFoundException("Pet not found with id: " + petId)))
-                .flatMap(pet -> {
-                    if (pet.getPhotoId() != null && !pet.getPhotoId().isEmpty()) {
-                        return Mono.error(new UnprocessableEntityException("Pet already has a photo. Use update endpoint instead."));
-                    }
-
-                    return filesServiceClient.addFile(photo)
-                            .flatMap(fileResponse -> {
-                                pet.setPhotoId(fileResponse.getFileId());
-                                return petRepo.save(pet)
-                                        .map(EntityDTOUtil::toPetResponseDTO)
-                                        .doOnNext(dto -> dto.setPhoto(fileResponse));
-                            });
-                });
     }
 
     @Override

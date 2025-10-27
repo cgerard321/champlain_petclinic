@@ -3,24 +3,31 @@ package com.petclinic.vet.servicelayer;
 import com.petclinic.vet.businesslayer.photos.PhotoService;
 import com.petclinic.vet.dataaccesslayer.photos.Photo;
 import com.petclinic.vet.dataaccesslayer.photos.PhotoRepository;
-import com.petclinic.vet.dataaccesslayer.vets.Vet;
-import com.petclinic.vet.dataaccesslayer.vets.VetRepository;
-import com.petclinic.vet.domainclientlayer.FilesServiceClient;
 import com.petclinic.vet.presentationlayer.photos.PhotoRequestDTO;
 import com.petclinic.vet.presentationlayer.photos.PhotoResponseDTO;
 import com.petclinic.vet.utils.exceptions.InvalidInputException;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.r2dbc.init.R2dbcScriptDatabaseInitializer;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
 import org.springframework.test.context.ActiveProfiles;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -36,10 +43,6 @@ class PhotoServiceImplTest {
 
     @MockBean
     PhotoRepository photoRepository;
-    @MockBean
-    VetRepository vetRepository;
-    @MockBean
-    FilesServiceClient filesServiceClient;
 
     //To counter missing bean error
     @MockBean
@@ -58,13 +61,6 @@ class PhotoServiceImplTest {
 
     @Test
     void getPhotoByValidVetId() {
-        // Create a vet with null imageId to trigger fallback to MongoDB
-        Vet vet = Vet.builder()
-                .vetId(VET_ID)
-                .imageId(null)
-                .build();
-        
-        when(vetRepository.findVetByVetId(anyString())).thenReturn(Mono.just(vet));
         when(photoRepository.findByVetId(anyString())).thenReturn(Mono.just(photo));
 
         Mono<PhotoResponseDTO> photoMono = photoService.getPhotoByVetId(VET_ID);

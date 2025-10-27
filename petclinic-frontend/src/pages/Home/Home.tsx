@@ -75,10 +75,7 @@ export default function Home(): JSX.Element {
           </Reveal>
           <Reveal delay={500}>
             <div className="intro-ctas">
-              <Button
-                variant="primary"
-                onClick={() => navigate('/customer/visits')}
-              >
+              <Button variant="primary" onClick={() => navigate('/visits/add')}>
                 Book Appointment
               </Button>
               <Button variant="light" onClick={() => navigate('/contact')}>
@@ -204,7 +201,7 @@ export default function Home(): JSX.Element {
                 </Button>
                 <Button
                   variant="primary"
-                  onClick={() => navigate('/customer/visits')}
+                  onClick={() => navigate('/visits/add')}
                 >
                   Book Appointment
                 </Button>

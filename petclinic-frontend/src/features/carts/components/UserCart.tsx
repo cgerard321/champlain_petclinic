@@ -160,31 +160,32 @@ const UserCart: React.FC = () => {
     const quantity = Math.max(1, recentPurchaseQuantities[item.productId] || 1);
 
     try {
-      // Make navbar aware of active cart and do optimistic bump
-        setCartIdInLS(cartId!)
-        bumpCartCountInLS(quantity)
-        notifyCartChanged()
-        showToast(`${item.productName} (x${quantity}) added to cart!`, 'success');
 
-        // Fire-and-forget adds; don't fail whole flow on partial errors
-        const results = await Promise.allSettled(
-            Array.from({ length: quantity }, () =>
-                axiosInstance.post(
-                    `/carts/${cartId}/${item.productId}`,
-                    {},
-                    { useV2: false }
-                )
-            )
-        );
+      // Ensure LS knows the active cart id for navbar routing
+      setCartIdInLS(cartId!);
+      // Optimistic: bump LS once for the total quantity and toast
+      bumpCartCountInLS(quantity);
+      notifyCartChanged();
+      showToast(`${item.productName} (x${quantity}) added to cart!`, 'success');
 
+      // Fire-and-forget server posts
+      void Promise.allSettled(
+        Array.from({ length: quantity }, () =>
+          axiosInstance.post(
+            `/carts/${cartId}/${item.productId}`,
+            {},
+            { useV2: false }
+          )
+        )
+      ).then(results => {
         const failures = results.filter(r => r.status === 'rejected').length;
         if (failures > 0) {
-            // Roll back only the failed portion, notify, and keep user informed
-            bumpCartCountInLS(-failures);
-            notifyCartChanged();
-            showToast(`Some items failed to add (${failures}). Cart updated.`, 'error');
+          // revert failed portion
+          bumpCartCountInLS(-failures);
+          notifyCartChanged();
+          showToast(`Some items failed to add (${failures}). Cart updated.`, 'error');
         }
-
+      });
     } catch (err: unknown) {
         bumpCartCountInLS(-quantity)
         notifyCartChanged()
@@ -248,7 +249,7 @@ const UserCart: React.FC = () => {
       // Optimistic total bump
       bumpCartCountInLS(quantity);
       notifyCartChanged();
-        showToast(`${item.productName} (x${quantity}) added to cart!`, 'success');
+      showToast(`${item.productName} (x${quantity}) added to cart!`, 'success');
 
       // Fire-and-forget posts; revert failed portion
       void Promise.allSettled(
@@ -264,7 +265,7 @@ const UserCart: React.FC = () => {
         if (failures > 0) {
           bumpCartCountInLS(-failures);
           notifyCartChanged();
-            showToast(`Some items failed to add (${failures}). Cart updated.`, 'error');
+          showToast(`Some items failed to add (${failures}). Cart updated.`, 'error');
         }
       });
     } catch (err: unknown) {
@@ -535,7 +536,7 @@ const UserCart: React.FC = () => {
       });
       bumpCartCountInLS(delta);
       notifyCartChanged();
-        showToast('Quantity updated.', 'success');
+      showToast('Item quantity updated.', 'success');
 
       // Fire-and-forget server update
       void axiosInstance

@@ -8,11 +8,9 @@
     height: fit-content;
 }
 
-.basic-modal-body > form input, 
-.basic-modal-body > form textarea {
+.basic-modal-body > form > input {
     width: 100%;
 }
-
 
 .basic-modal-footer {
     margin-top: auto;

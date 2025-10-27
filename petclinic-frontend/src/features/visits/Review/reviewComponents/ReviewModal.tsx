@@ -7,11 +7,25 @@ type ReviewModalProps = {
   maskedPreview: string;
 };
 
-const ReviewModal: React.FC<ReviewModalProps> = ({ open, maskedPreview }) => {
+const ReviewModal: React.FC<ReviewModalProps> = ({
+  open,
+  onClose,
+  maskedPreview,
+}) => {
   if (!open) return null;
 
+  const onBackdropClick: React.MouseEventHandler<HTMLDivElement> = e => {
+    if (e.currentTarget === e.target) onClose();
+  };
+
   return (
-    <div>
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="review-modal-title"
+      className="review-modal__overlay"
+      onClick={onBackdropClick}
+    >
       <div className="review-modal__card" onClick={e => e.stopPropagation()}>
         <h3 id="review-modal-title" className="review-modal__title">
           Woah! Watch your language, pal!
@@ -27,6 +41,12 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ open, maskedPreview }) => {
             <br />
             {maskedPreview}
           </div>
+        </div>
+
+        <div className="review-modal__actions">
+          <button onClick={onClose} className="review-modal__btn-primary">
+            Go back
+          </button>
         </div>
       </div>
     </div>
