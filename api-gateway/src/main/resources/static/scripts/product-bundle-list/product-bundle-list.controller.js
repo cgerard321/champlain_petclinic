@@ -116,8 +116,8 @@ angular.module('productBundleList')
 
                 self.bundleList.forEach(function (b) {
                     b.__hiddenByFilter = false;
-                    if (nameFilter && !b.bundleName?.toLowerCase().includes(nameFilter)) b.__hiddenByFilter = true;
-                    if (!b.__hiddenByFilter && idFilter && !b.bundleId?.toLowerCase().includes(idFilter)) b.__hiddenByFilter = true;
+                    if (nameFilter && !(b.bundleName && b.bundleName.toLowerCase().includes(nameFilter))) b.__hiddenByFilter = true;
+                    if (!b.__hiddenByFilter && idFilter && !(b.bundleId && b.bundleId.toLowerCase().includes(idFilter))) b.__hiddenByFilter = true;
                     if (!b.__hiddenByFilter && !isNaN(maxOrig) && b.originalTotalPrice > maxOrig) b.__hiddenByFilter = true;
                     if (!b.__hiddenByFilter && !isNaN(maxBundle) && b.bundlePrice > maxBundle) b.__hiddenByFilter = true;
                 });
