@@ -109,20 +109,37 @@ public class VetController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @PatchMapping("{vetId}/photo")
+    public Mono<ResponseEntity<VetResponseDTO>> updateVetPhoto(
+            @PathVariable String vetId,
+            @RequestBody Mono<FileRequestDTO> photoMono) {
+        return Mono.just(vetId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(Mono.error(new InvalidInputException("Provided vet Id is invalid" + vetId)))
+                .flatMap(id -> vetsServiceClient.updateVetPhoto(id, photoMono))
+                .map(ResponseEntity::ok)
+                .onErrorResume(InvalidInputException.class, e ->
+                    Mono.just(ResponseEntity.badRequest().<VetResponseDTO>build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
     @PostMapping(value = "{vetId}/photos", consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public Mono<ResponseEntity<Resource>> addPhotoByVetId(
             @PathVariable String vetId,
             @RequestHeader("Photo-Name") String photoName,
+            @RequestHeader(value = "Content-Type", required = false) String contentType,
             @RequestBody Mono<byte[]> fileData) {
 
         return fileData.flatMap(bytes -> {
+            String fileType = contentType != null ? contentType : "image/jpeg";
             FileRequestDTO fileRequest = FileRequestDTO.builder()
                     .fileName(photoName)
-                    .fileType(determineContentType(photoName))
+                    .fileType(fileType)
                     .fileData(bytes)
                     .build();
             
-            return vetsServiceClient.updateVetPhoto(vetId, fileRequest)
+            return vetsServiceClient.updateVetPhoto(vetId, Mono.just(fileRequest))
                     .<ResponseEntity<Resource>>map(vetResponse -> {
                         if (vetResponse.getPhoto() != null) {
                             byte[] photoData = vetResponse.getPhoto().getFileData();
@@ -157,13 +174,15 @@ public class VetController {
                     return combined;
                 })
                 .flatMap(bytes -> {
+                    String contentType = file.headers().getContentType() != null 
+                            ? file.headers().getContentType().toString() : "image/jpeg";
                     FileRequestDTO fileRequest = FileRequestDTO.builder()
                             .fileName(photoName)
-                            .fileType(determineContentType(photoName))
+                            .fileType(contentType)
                             .fileData(bytes)
                             .build();
 
-                    return vetsServiceClient.updateVetPhoto(vetId, fileRequest)
+                    return vetsServiceClient.updateVetPhoto(vetId, Mono.just(fileRequest))
                             .<ResponseEntity<Resource>>map(vetResponse -> {
                                 if (vetResponse.getPhoto() != null) {
                                     byte[] photoData = vetResponse.getPhoto().getFileData();
@@ -180,8 +199,10 @@ public class VetController {
     
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping(value = "{vetId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<VetResponseDTO>> getVetByVetId(@PathVariable String vetId) {
-        return vetsServiceClient.getVetByVetId(vetId)
+    public Mono<ResponseEntity<VetResponseDTO>> getVetByVetId(
+            @PathVariable String vetId,
+            @RequestParam(required = false, defaultValue = "false") boolean includePhoto) {
+        return vetsServiceClient.getVet(vetId, includePhoto)
                 .map(vet -> ResponseEntity.status(HttpStatus.OK).body(vet))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
 
@@ -309,19 +330,4 @@ public Mono<ResponseEntity<Album>> addAlbumPhotoMultipart(
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()));
     }
 
-    private String determineContentType(String filename) {
-        if (filename == null) {
-            return "image/jpeg";
-        }
-        String lowerCase = filename.toLowerCase();
-        if (lowerCase.endsWith(".png")) {
-            return "image/png";
-        } else if (lowerCase.endsWith(".gif")) {
-            return "image/gif";
-        } else if (lowerCase.endsWith(".webp")) {
-            return "image/webp";
-        } else {
-            return "image/jpeg"; // Default to JPEG
-        }
-    }
 }

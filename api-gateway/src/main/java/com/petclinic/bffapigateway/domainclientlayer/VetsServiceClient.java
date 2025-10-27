@@ -850,22 +850,24 @@ public Mono<Album> addAlbumPhoto(String vetId, String photoName, FilePart filePa
                 .bodyToMono(VetResponseDTO.class);
     }
 
-    public Mono<VetResponseDTO> updateVetPhoto(String vetId, FileRequestDTO photo) {
-        return webClientBuilder.build()
-                .patch()
-                .uri(vetsServiceUrl + "/" + vetId + "/photo")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(photo)
-                .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, error -> {
-                    if (error.statusCode().equals(NOT_FOUND)) {
-                        return Mono.error(new NotFoundException("Vet not found with id: " + vetId));
-                    }
-                    return Mono.error(new IllegalArgumentException("Client error"));
-                })
-                .onStatus(HttpStatusCode::is5xxServerError,
-                        error -> Mono.error(new IllegalArgumentException("Server error")))
-                .bodyToMono(VetResponseDTO.class);
+    public Mono<VetResponseDTO> updateVetPhoto(String vetId, Mono<FileRequestDTO> photoMono) {
+        return photoMono.flatMap(photo ->
+            webClientBuilder.build()
+                    .patch()
+                    .uri(vetsServiceUrl + "/" + vetId + "/photo")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(photo)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                        if (error.statusCode().equals(NOT_FOUND)) {
+                            return Mono.error(new NotFoundException("Vet not found with id: " + vetId));
+                        }
+                        return Mono.error(new IllegalArgumentException("Client error"));
+                    })
+                    .onStatus(HttpStatusCode::is5xxServerError,
+                            error -> Mono.error(new IllegalArgumentException("Server error")))
+                    .bodyToMono(VetResponseDTO.class)
+        );
     }
 
 }

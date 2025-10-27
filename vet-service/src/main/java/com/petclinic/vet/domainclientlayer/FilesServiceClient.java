@@ -2,8 +2,9 @@ package com.petclinic.vet.domainclientlayer;
 
 import com.petclinic.vet.presentationlayer.files.FileRequestDTO;
 import com.petclinic.vet.presentationlayer.files.FileResponseDTO;
-import com.petclinic.vet.utils.exceptions.NotFoundException;
-import com.petclinic.vet.utils.exceptions.InvalidInputException;
+import com.petclinic.vet.utils.exceptions.BadRequestException;
+import com.petclinic.vet.utils.exceptions.FailedDependencyException;
+import com.petclinic.vet.utils.exceptions.UnprocessableEntityException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -30,11 +31,11 @@ public class FilesServiceClient {
                 .uri(filesServiceUrl + "/{fileId}", fileId)
                 .retrieve()
                 .onStatus(HttpStatus.NOT_FOUND::equals, resp -> 
-                    Mono.error(new NotFoundException("File not found with id: " + fileId)))
+                    Mono.error(new FailedDependencyException("Failed to get file from Files Service")))
                 .onStatus(HttpStatus.BAD_REQUEST::equals, resp -> 
-                    Mono.error(new InvalidInputException("Invalid request for file: " + fileId)))
+                    Mono.error(new BadRequestException("Invalid File Request Model")))
                 .onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, resp -> 
-                    Mono.error(new RuntimeException("Files Service internal error")))
+                    Mono.error(new FailedDependencyException("Failed to get file from Files Service")))
                 .bodyToMono(FileResponseDTO.class);
     }
 
@@ -49,10 +50,12 @@ public class FilesServiceClient {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(fileRequest))
                 .retrieve()
+                .onStatus(HttpStatus.UNPROCESSABLE_ENTITY::equals, resp -> 
+                    Mono.error(new UnprocessableEntityException("Unprocessable File Request Model")))
                 .onStatus(HttpStatus.BAD_REQUEST::equals, resp -> 
-                    Mono.error(new InvalidInputException("Invalid file request")))
+                    Mono.error(new BadRequestException("Invalid File Request Model")))
                 .onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, resp -> 
-                    Mono.error(new RuntimeException("Files Service internal error")))
+                    Mono.error(new FailedDependencyException("Failed to add file from Files Service")))
                 .bodyToMono(FileResponseDTO.class)
                 .doOnSuccess(response -> log.info("Successfully received response from Files Service, fileId: {}", 
                         response != null ? response.getFileId() : "null"))
@@ -67,11 +70,13 @@ public class FilesServiceClient {
                 .body(BodyInserters.fromValue(fileRequest))
                 .retrieve()
                 .onStatus(HttpStatus.NOT_FOUND::equals, resp -> 
-                    Mono.error(new NotFoundException("File not found with id: " + fileId)))
+                    Mono.error(new FailedDependencyException("Failed to update file from Files Service")))
+                .onStatus(HttpStatus.UNPROCESSABLE_ENTITY::equals, resp -> 
+                    Mono.error(new UnprocessableEntityException("Unprocessable File Request Model")))
                 .onStatus(HttpStatus.BAD_REQUEST::equals, resp -> 
-                    Mono.error(new InvalidInputException("Invalid file request")))
+                    Mono.error(new BadRequestException("Invalid File Request Model")))
                 .onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, resp -> 
-                    Mono.error(new RuntimeException("Files Service internal error")))
+                    Mono.error(new FailedDependencyException("Failed to update file from Files Service")))
                 .bodyToMono(FileResponseDTO.class);
     }
 
@@ -81,11 +86,11 @@ public class FilesServiceClient {
                 .uri(filesServiceUrl + "/{fileId}", fileId)
                 .retrieve()
                 .onStatus(HttpStatus.NOT_FOUND::equals, resp -> 
-                    Mono.error(new NotFoundException("File not found with id: " + fileId)))
+                    Mono.error(new FailedDependencyException("Failed to delete file from Files Service")))
                 .onStatus(HttpStatus.BAD_REQUEST::equals, resp -> 
-                    Mono.error(new InvalidInputException("Invalid file request")))
+                    Mono.error(new BadRequestException("Invalid File Request Model")))
                 .onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, resp -> 
-                    Mono.error(new RuntimeException("Files Service internal error")))
+                    Mono.error(new FailedDependencyException("Failed to delete file from Files Service")))
                 .bodyToMono(Void.class);
     }
 }

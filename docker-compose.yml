@@ -254,8 +254,6 @@ services:
       - "9101:9101"
     expose:
       - "9100:9100"
-    volumes:
-      - ./data/minio:/data
     restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9100/minio/health/live"]

@@ -1,35 +1,25 @@
 package com.petclinic.vet.presentationlayer.files;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
+import lombok.*;
 import java.util.Base64;
 
+@Builder
 @Getter
 @Setter
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class FileRequestDTO {
-
-    @JsonProperty("fileName")
+    
     private String fileName;
-    
-    @JsonProperty("fileType")
     private String fileType;
+    private String fileData; 
     
-    @JsonProperty("fileData")
-    private String fileData;  
-    
-    public void setFileDataFromBytes(byte[] bytes) {
-        this.fileData = Base64.getEncoder().encodeToString(bytes);
+    public void setFileDataFromBytes(byte[] data) {
+        this.fileData = Base64.getEncoder().encodeToString(data);
     }
     
     public byte[] getFileDataAsBytes() {
-        return fileData != null ? Base64.getDecoder().decode(fileData) : null;
+        if (fileData == null) return new byte[0];
+        return Base64.getDecoder().decode(fileData);
     }
 }

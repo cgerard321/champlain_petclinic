@@ -61,7 +61,6 @@ de:
         version: 4.4.0
 
 ---
-
 spring:
   config:
     activate:
@@ -78,6 +77,12 @@ spring:
     url: r2dbc:h2:mem:///images
     username: user
     password: pwd
+
+app:
+  files-service:
+    host: localhost
+    port: 8000
+
 ---
 spring:
   config:

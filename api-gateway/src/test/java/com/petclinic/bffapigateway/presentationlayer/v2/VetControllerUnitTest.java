@@ -282,7 +282,7 @@ class VetControllerUnitTest {
     @Test
     void whenGetVetByVetId_withValidId_thenReturnVet() {
         String vetId = "2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb";
-        when(vetsServiceClient.getVetByVetId(vetId))
+        when(vetsServiceClient.getVet(vetId, false))
                 .thenReturn(Mono.just(vetResponseDTO));
 
         webTestClient.get()
@@ -297,13 +297,13 @@ class VetControllerUnitTest {
                     assertEquals(vetResponseDTO.getFirstName(), vet.getFirstName());
                 });
 
-        verify(vetsServiceClient, times(1)).getVetByVetId(vetId);
+        verify(vetsServiceClient, times(1)).getVet(vetId, false);
     }
 
     @Test
     void whenGetVetByVetId_withValidId_butVetNotFound_thenReturnNotFound() {
         String vetId = "2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb";
-        when(vetsServiceClient.getVetByVetId(vetId))
+        when(vetsServiceClient.getVet(vetId, false))
                 .thenReturn(Mono.empty());
 
         webTestClient.get()
@@ -312,7 +312,7 @@ class VetControllerUnitTest {
                 .exchange()
                 .expectStatus().isNotFound();
 
-        verify(vetsServiceClient, times(1)).getVetByVetId(vetId);
+        verify(vetsServiceClient, times(1)).getVet(vetId, false);
     }
 
     @Test
