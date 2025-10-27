@@ -9,7 +9,7 @@ import com.petclinic.bffapigateway.dtos.Auth.RegisterVet;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.*;
-import com.petclinic.bffapigateway.dtos.Files.FileRequestDTO;
+import com.petclinic.bffapigateway.dtos.Files.FileDetails;
 import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
@@ -112,7 +112,7 @@ public class VetController {
     @PatchMapping("{vetId}/photo")
     public Mono<ResponseEntity<VetResponseDTO>> updateVetPhoto(
             @PathVariable String vetId,
-            @RequestBody Mono<FileRequestDTO> photoMono) {
+            @RequestBody Mono<FileDetails> photoMono) {
         return Mono.just(vetId)
                 .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided vet Id is invalid" + vetId)))
@@ -133,7 +133,7 @@ public class VetController {
 
         return fileData.flatMap(bytes -> {
             String fileType = contentType != null ? contentType : "image/jpeg";
-            FileRequestDTO fileRequest = FileRequestDTO.builder()
+            FileDetails fileRequest = FileDetails.builder()
                     .fileName(photoName)
                     .fileType(fileType)
                     .fileData(bytes)
@@ -176,7 +176,7 @@ public class VetController {
                 .flatMap(bytes -> {
                     String contentType = file.headers().getContentType() != null 
                             ? file.headers().getContentType().toString() : "image/jpeg";
-                    FileRequestDTO fileRequest = FileRequestDTO.builder()
+                    FileDetails fileRequest = FileDetails.builder()
                             .fileName(photoName)
                             .fileType(contentType)
                             .fileData(bytes)

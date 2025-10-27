@@ -1,7 +1,7 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.Vets.*;
-import com.petclinic.bffapigateway.dtos.Files.FileRequestDTO;
+import com.petclinic.bffapigateway.dtos.Files.FileDetails;
 import com.petclinic.bffapigateway.exceptions.ExistingRatingNotFoundException;
 import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -851,7 +851,7 @@ public Mono<Album> addAlbumPhoto(String vetId, String photoName, FilePart filePa
                 .bodyToMono(VetResponseDTO.class);
     }
 
-    public Mono<VetResponseDTO> updateVetPhoto(String vetId, Mono<FileRequestDTO> photoMono) {
+    public Mono<VetResponseDTO> updateVetPhoto(String vetId, Mono<FileDetails> photoMono) {
         return photoMono.flatMap(photo ->
             webClientBuilder.build()
                     .patch()
