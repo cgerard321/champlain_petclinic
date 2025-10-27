@@ -78,7 +78,7 @@ public class VisitsControllerV1 {
         return visitsServiceClient.getVisitByPractitionerId(practitionerId);
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.OWNER, Roles.VET})
+    @SecuredEndpoint(allowedRoles = {Roles.RECEPTIONIST, Roles.OWNER})
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VisitResponseDTO>> addVisit(@RequestBody Mono<VisitRequestDTO> visitRequestDTO) {
         return visitsServiceClient.addVisit(visitRequestDTO)

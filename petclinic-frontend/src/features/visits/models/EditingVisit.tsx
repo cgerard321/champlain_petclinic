@@ -9,6 +9,7 @@ import { getVisit } from '../api/getVisit';
 import { updateVisit } from '../api/updateVisit';
 import { getAllPets } from '@/features/visits/api/getAllPets';
 import { PetResponseModel } from '@/features/customers/models/PetResponseModel';
+import { useUser } from '@/context/UserContext';
 
 interface ApiError {
   message: string;
@@ -49,6 +50,7 @@ const EditingVisit: React.FC = (): JSX.Element => {
   const [loadingPets, setLoadingPets] = useState<boolean>(true);
 
   const navigate = useNavigate();
+  const { user } = useUser();
 
   useEffect(() => {
     const fetchVisitData = async (): Promise<void> => {
@@ -78,7 +80,15 @@ const EditingVisit: React.FC = (): JSX.Element => {
     const fetchPets = async (): Promise<void> => {
       try {
         setLoadingPets(true);
-        const petsData = await getAllPets();
+        const isOwner = Array.from(user.roles).some(
+          role => role.name === 'OWNER'
+        );
+        let petsData;
+        if (isOwner) {
+          petsData = await getAllPets(user.userId);
+        } else {
+          petsData = await getAllPets();
+        }
 
         // Filter only active pets
         const activePets = petsData.filter(pet => pet.isActive === 'true');
@@ -92,7 +102,7 @@ const EditingVisit: React.FC = (): JSX.Element => {
     };
 
     fetchPets();
-  }, []);
+  }, [user]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>

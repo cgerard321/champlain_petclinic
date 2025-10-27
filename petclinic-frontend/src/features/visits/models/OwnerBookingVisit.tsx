@@ -66,7 +66,7 @@ const OwnerBookingVisit: React.FC = (): JSX.Element => {
     const fetchPets = async (): Promise<void> => {
       try {
         setLoadingPets(true);
-        const petsData = await getAllPets();
+        const petsData = await getAllPets(user.userId);
 
         // Filter only active pets
         const activePets = petsData.filter(pet => pet.isActive === 'true');
@@ -80,7 +80,7 @@ const OwnerBookingVisit: React.FC = (): JSX.Element => {
     };
 
     fetchPets();
-  }, []);
+  }, [user.userId]);
 
   useEffect(() => {
     const fetchVets = async (): Promise<void> => {

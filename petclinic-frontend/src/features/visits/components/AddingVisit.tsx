@@ -12,6 +12,8 @@ import { VisitRequestModel } from '@/features/visits/models/VisitRequestModel';
 import BasicModal from '@/shared/components/BasicModal';
 import { getAllPets } from '@/features/visits/api/getAllPets';
 import { PetResponseModel } from '@/features/customers/models/PetResponseModel';
+import { getAllOwners } from '@/features/customers/api/getAllOwners';
+import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseModel';
 
 interface ApiError {
   message: string;
@@ -52,6 +54,9 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
     isEmergency: false,
   });
 
+  const [owners, setOwners] = useState<OwnerResponseModel[]>([]);
+  const [selectedOwnerId, setSelectedOwnerId] = useState<string>('');
+  const [loadingOwners, setLoadingOwners] = useState<boolean>(false);
   const [pets, setPets] = useState<PetResponseModel[]>([]);
   const [loadingPets, setLoadingPets] = useState<boolean>(true);
   const [vets, setVets] = useState<VetResponse[]>([]);
@@ -64,14 +69,37 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [showNotification, setShowNotification] = useState<boolean>(false);
 
+  // Fetch owners
+  useEffect(() => {
+    const fetchOwners = async (): Promise<void> => {
+      try {
+        setLoadingOwners(true);
+        const ownersData = await getAllOwners();
+        setOwners(ownersData);
+      } catch (error) {
+        console.error('Error fetching owners:', error);
+        setErrorMessage('Failed to load owners. Please try again.');
+      } finally {
+        setLoadingOwners(false);
+      }
+    };
+
+    fetchOwners();
+  }, []);
+
   //Fetch pets
   useEffect(() => {
     const fetchPets = async (): Promise<void> => {
+      if (!selectedOwnerId) {
+        setPets([]);
+        return;
+      }
       try {
         setLoadingPets(true);
-        const petsData = await getAllPets();
+        const petsData = await getAllPets(selectedOwnerId);
 
-        setPets(petsData);
+        const activePets = petsData.filter(pet => pet.isActive === 'true');
+        setPets(activePets);
       } catch (error) {
         console.error('Error fetching pets:', error);
         setErrorMessage('Failed to load pets. Please try again.');
@@ -81,7 +109,8 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
     };
 
     fetchPets();
-  }, []);
+  }, [selectedOwnerId]);
+
   //fetch vets
   useEffect(() => {
     const fetchVets = async (): Promise<void> => {
@@ -244,8 +273,18 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
     }
   };
 
+  const handleOwnerChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
+    const ownerId = e.target.value;
+    setSelectedOwnerId(ownerId);
+    setVisit(prev => ({ ...prev, petId: '' }));
+    if (errors.ownerId) {
+      setErrors(prev => ({ ...prev, ownerId: '' }));
+    }
+  };
+
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
+    if (!selectedOwnerId) newErrors.ownerId = 'Please select an owner';
     if (!visit.petId) newErrors.petId = 'Pet ID is required';
     if (!visit.description.trim())
       newErrors.description = 'Description is required';
@@ -348,6 +387,29 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
         </div>
       ) : (
         <form id="addvisit" onSubmit={handleSubmit}>
+          <label htmlFor="ownerId">
+            Select Owner: <span className="required">*</span>{' '}
+            {errors.ownerId && <span className="error">{errors.ownerId}</span>}
+          </label>
+          {loadingOwners ? (
+            <p>Loading owners...</p>
+          ) : (
+            <select
+              id="ownerId"
+              value={selectedOwnerId}
+              onChange={handleOwnerChange}
+              className={errors.ownerId ? 'error-input' : ''}
+            >
+              <option value="">Select an Owner</option>
+              {owners.map(owner => (
+                <option key={owner.ownerId} value={owner.ownerId}>
+                  {owner.firstName} {owner.lastName} ({owner.telephone})
+                </option>
+              ))}
+            </select>
+          )}
+
+          <br />
           <label htmlFor="petId">
             Select Pet: <span className="required">*</span>{' '}
             {errors.petId && <span className="error">{errors.petId}</span>}

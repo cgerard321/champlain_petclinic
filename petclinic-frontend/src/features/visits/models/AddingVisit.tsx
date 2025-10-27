@@ -11,7 +11,9 @@ import {
 } from '@/features/visits/api/getAvailableSlots';
 import { VisitRequestModel } from '@/features/visits/models/VisitRequestModel';
 import { PetResponseModel } from '@/features/customers/models/PetResponseModel';
+import { getAllOwners } from '@/features/customers/api/getAllOwners';
 import { getAllPets } from '@/features/visits/api/getAllPets';
+import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseModel';
 
 interface ApiError {
   message: string;
@@ -46,6 +48,9 @@ const AddingVisit: React.FC = (): JSX.Element => {
     isEmergency: false,
   });
 
+  const [owners, setOwners] = useState<OwnerResponseModel[]>([]);
+  const [selectedOwnerId, setSelectedOwnerId] = useState<string>('');
+  const [loadingOwners, setLoadingOwners] = useState<boolean>(false);
   const [pets, setPets] = useState<PetResponseModel[]>([]);
   const [loadingPets, setLoadingPets] = useState<boolean>(true);
   const [vets, setVets] = useState<VetResponse[]>([]);
@@ -59,14 +64,37 @@ const AddingVisit: React.FC = (): JSX.Element => {
   const [showNotification, setShowNotification] = useState<boolean>(false);
 
   const navigate = useNavigate();
+  //Fetch owners
+  useEffect(() => {
+    const fetchOwners = async (): Promise<void> => {
+      try {
+        setLoadingOwners(true);
+        const ownersData = await getAllOwners();
+        setOwners(ownersData);
+      } catch (error) {
+        console.error('Error fetching owners:', error);
+        setErrorMessage('Failed to load owners. Please try again.');
+      } finally {
+        setLoadingOwners(false);
+      }
+    };
+
+    fetchOwners();
+  }, []);
+
   //Fetch pets
   useEffect(() => {
     const fetchPets = async (): Promise<void> => {
+      if (!selectedOwnerId) {
+        setPets([]);
+        return;
+      }
       try {
         setLoadingPets(true);
-        const petsData = await getAllPets();
+        const petsData = await getAllPets(selectedOwnerId);
 
-        setPets(petsData);
+        const activePets = petsData.filter(pet => pet.isActive === 'true');
+        setPets(activePets);
       } catch (error) {
         console.error('Error fetching pets:', error);
         setErrorMessage('Failed to load pets. Please try again.');
@@ -76,7 +104,7 @@ const AddingVisit: React.FC = (): JSX.Element => {
     };
 
     fetchPets();
-  }, []);
+  }, [selectedOwnerId]);
 
   //Fetch vets
   useEffect(() => {
@@ -239,8 +267,18 @@ const AddingVisit: React.FC = (): JSX.Element => {
     }
   };
 
+  const handleOwnerChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
+    const ownerId = e.target.value;
+    setSelectedOwnerId(ownerId);
+    setVisit(prev => ({ ...prev, petId: '' }));
+    if (errors.ownerId) {
+      setErrors(prev => ({ ...prev, ownerId: '' }));
+    }
+  };
+
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
+    if (!selectedOwnerId) newErrors.ownerId = 'Please select an owner';
     if (!visit.petId) newErrors.petId = 'Please select a pet';
     if (!visit.description.trim())
       newErrors.description = 'Description is required';
@@ -347,29 +385,57 @@ const AddingVisit: React.FC = (): JSX.Element => {
       <h1>Schedule Visit For Your Pet</h1>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="petId">
-            Select Pet: <span className="required">*</span>
+          <label htmlFor="ownerId">
+            Select Owner: <span className="required">*</span>
           </label>
-          {loadingPets ? (
-            <p>Loading pets...</p>
+          {loadingOwners ? (
+            <p>Loading owners...</p>
           ) : (
             <select
-              id="petId"
-              name="petId"
-              value={visit.petId}
-              onChange={handleChange}
-              className={errors.petId ? 'error-input' : ''}
+              id="ownerId"
+              value={selectedOwnerId}
+              onChange={handleOwnerChange}
+              className={errors.ownerId ? 'error-input' : ''}
             >
-              <option value="">Select a Pet</option>
-              {pets.map(pet => (
-                <option key={pet.petId} value={pet.petId}>
-                  {pet.name} {pet.isActive === 'false' ? '(Inactive)' : ''}
+              <option value="">Select an Owner</option>
+              {owners.map(owner => (
+                <option key={owner.ownerId} value={owner.ownerId}>
+                  {owner.firstName} {owner.lastName} ({owner.telephone})
                 </option>
               ))}
             </select>
           )}
-          {errors.petId && <span className="error">{errors.petId}</span>}
+          {errors.ownerId && <span className="error">{errors.ownerId}</span>}
         </div>
+
+        {selectedOwnerId && (
+          <div className="form-group">
+            <label htmlFor="petId">
+              Select Pet: <span className="required">*</span>
+            </label>
+            {loadingPets ? (
+              <p>Loading pets for this owner...</p>
+            ) : pets.length === 0 ? (
+              <p className="no-pets-message">This owner has no active pets.</p>
+            ) : (
+              <select
+                id="petId"
+                name="petId"
+                value={visit.petId}
+                onChange={handleChange}
+                className={errors.petId ? 'error-input' : ''}
+              >
+                <option value="">Select a Pet</option>
+                {pets.map(pet => (
+                  <option key={pet.petId} value={pet.petId}>
+                    {pet.name}
+                  </option>
+                ))}
+              </select>
+            )}
+            {errors.petId && <span className="error">{errors.petId}</span>}
+          </div>
+        )}
 
         <div className="form-group">
           <label htmlFor="description">

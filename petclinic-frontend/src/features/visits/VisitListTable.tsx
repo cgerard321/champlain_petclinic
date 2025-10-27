@@ -392,16 +392,18 @@ export default function VisitListTable(): JSX.Element {
   const renderSidebar = (tit: string): JSX.Element => {
     return (
       <Sidebar title={tit}>
-        <li>
-          <AddingVisit
-            showButton={
-              <button className="btn btn-primary" title="Create">
-                <SvgIcon id="pen-to-square" />
-                Create
-              </button>
-            }
-          />
-        </li>
+        {!isAdmin && (
+          <li>
+            <AddingVisit
+              showButton={
+                <button className="btn btn-primary" title="Create">
+                  <SvgIcon id="pen-to-square" />
+                  Create
+                </button>
+              }
+            />
+          </li>
+        )}
         <li>
           <button
             className="btn btn-primary"
