@@ -95,6 +95,28 @@ class VetControllerUnitTest {
                         .build()))
                 .build();
     }
+
+    private VetResponseDTO buildDeactivatedVetResponseDTO(String vetId) {
+        Set<Workday> workdaySet = Set.of(Workday.Monday, Workday.Wednesday);
+
+        return VetResponseDTO.builder()
+                .vetId(vetId)
+                .vetBillId("bill001")
+                .firstName("John")
+                .lastName("Doe")
+                .email("john.doe@example.com")
+                .phoneNumber("1234567890")
+                .resume("Specialist in dermatology")
+                .workday(workdaySet)
+                .workHoursJson("{\"08:00-16:00\"}")
+                .active(false)
+                .specialties(Set.of(SpecialtyDTO.builder()
+                        .specialtyId("dermatology")
+                        .name("Dermatology")
+                        .build()))
+                .build();
+    }
+
     VetResponseDTO vetResponseDTO = buildVetResponseDTO();
 
     RegisterVet registerVet = RegisterVet.builder()
@@ -265,15 +287,26 @@ class VetControllerUnitTest {
     }
 
     @Test
-    void whenDeleteVet_withValidId_thenReturnNoContent() {
+    void whenDeleteVet_withValidId_thenReturnDeactivatedVetResponseDTO() {
         String vetId = "2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb";
+
+        VetResponseDTO deactivatedVet = buildDeactivatedVetResponseDTO(vetId);
+
+
         when(vetsServiceClient.deleteVet(vetId))
-                .thenReturn(Mono.empty());
+                .thenReturn(Mono.just(deactivatedVet));
 
         webTestClient.delete()
                 .uri(BASE_VET_URL + "/" + vetId)
                 .exchange()
-                .expectStatus().isNoContent();
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(VetResponseDTO.class)
+                .value(responseDto -> {
+                    assertNotNull(responseDto);
+                    assertFalse(responseDto.isActive());
+                    assertEquals(vetId, responseDto.getVetId());
+                });
 
         verify(vetsServiceClient, times(1)).deleteVet(vetId);
     }
@@ -514,10 +547,10 @@ class VetControllerUnitTest {
 
         webTestClient.get()
                 .uri(BASE_VET_URL + "/" + vetId + "/albums")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(Album.class)
                 .hasSize(2)
                 .value(albums -> {
@@ -585,10 +618,10 @@ class VetControllerUnitTest {
 
         webTestClient.get()
                 .uri(BASE_VET_URL + "/" + vetId + "/educations")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(EducationResponseDTO.class)
                 .hasSize(1)
                 .value(educations -> {
@@ -658,10 +691,10 @@ class VetControllerUnitTest {
 
         webTestClient.get()
                 .uri(BASE_VET_URL + "/" + vetId + "/ratings")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(RatingResponseDTO.class)
                 .hasSize(1)
                 .value(ratings -> {
