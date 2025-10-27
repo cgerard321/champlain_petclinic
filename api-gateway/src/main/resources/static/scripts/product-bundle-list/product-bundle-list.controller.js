@@ -50,7 +50,7 @@ angular.module('productBundleList')
 
             // --- delete ---
             function performDelete(bundleId) {
-                const url = self.baseUrl + '/' + encodeURIComponent(bundleId);
+                var url = self.baseUrl + '/' + encodeURIComponent(bundleId);
                 return $http.delete(url);
             }
 
