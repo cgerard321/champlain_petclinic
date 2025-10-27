@@ -4,7 +4,7 @@ Modern Angular 20 frontend for Champlain Pet Clinic employees.
 
 ## Production Access
 
-**Live Application**: [https://petclinic-backend.benmusicgeek.synology.me/employee/](https://petclinic-backend.benmusicgeek.synology.me/employee/)
+**Live Application**: [https://petclinic-emp-portal.benmusicgeek.synology.me/](https://petclinic-emp-portal.benmusicgeek.synology.me/)
 
 ## Quick Start
 
