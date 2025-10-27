@@ -1,11 +1,9 @@
 import ReviewModal from './ReviewModal';
 import { FormEvent, useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { addReview } from '../Api/addReview';
 import { ReviewRequestDTO } from '../Model/ReviewRequestDTO';
 import '../AddForm.css';
 import { useUser } from '@/context/UserContext';
-import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 import StarRating from '../../../products/components/StarRating';
 import { OwnerResponseModel } from '../../../customers/models/OwnerResponseModel';
 import { getOwner } from '../../../customers/api/getOwner';
@@ -36,7 +34,6 @@ const AddingReview: React.FC = (): JSX.Element => {
   const [showProfanityModal, setShowProfanityModal] = useState(false);
   const [maskedPreview, setMaskedPreview] = useState<string>('');
 
-  const navigate = useNavigate();
   const { user } = useUser(); // Assuming this hook provides the user info
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -113,8 +110,6 @@ const AddingReview: React.FC = (): JSX.Element => {
       // Auto-hide success message after 3 seconds
       setTimeout(() => setShowNotification(false), 3000);
 
-      // Navigate to a different page or reset the form
-      navigate(AppRoutePaths.CustomerReviews);
       setReview({
         rating: 0,
         ownerId: '',

@@ -47,65 +47,66 @@ const ReviewsList: React.FC = (): JSX.Element => {
   };
 
   return (
-    <div className="reviews-container">
-      <h1>Reviews</h1>
-      <table className="reviews-table">
-        <thead>
-          <tr>
-            <th>Reviewer Name</th>
-            <th>Review</th>
-            <th>Rating</th>
-            <th>Date Submitted</th>
-            {canAccessActions && <th>Actions</th>}
-          </tr>
-        </thead>
-        <tbody>
-          {reviewList.length > 0 ? (
-            reviewList.map(review => (
-              <tr key={review.reviewId}>
-                <td>{review.reviewerName}</td>
-                <td>{review.review}</td>
-                <td>{review.rating}/5</td>
-                <td>{new Date(review.dateSubmitted).toLocaleDateString()}</td>
-                {canAccessActions && (
-                  <td>
-                    <button
-                      className="btn btn-warning"
-                      onClick={() =>
-                        navigate(`/updateReview/${review.reviewId}/edit`)
-                      }
-                      title="Edit"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="btn btn-danger"
-                      onClick={() => handleDelete(review.reviewId)}
-                      title="Delete"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                )}
-              </tr>
-            ))
-          ) : (
+    <div className="page-container">
+      <div className="visit-table-section">
+        <h1>Reviews</h1>
+        <button
+          className="btn btn-warning"
+          onClick={() => navigate('/visits')}
+          title="Return to visits"
+        >
+          Return to visits
+        </button>
+        <table className="reviews-table">
+          <thead>
             <tr>
-              <td colSpan={5} className="text-center">
-                No reviews available
-              </td>
+              <th>Reviewer Name</th>
+              <th>Review</th>
+              <th>Rating</th>
+              <th>Date Submitted</th>
+              {canAccessActions && <th>Actions</th>}
             </tr>
-          )}
-        </tbody>
-      </table>
-
-      <button
-        className="btn btn-warning"
-        onClick={() => navigate('/visits')}
-        title="Let a review"
-      >
-        Return to visits
-      </button>
+          </thead>
+          <tbody>
+            {reviewList.length > 0 ? (
+              reviewList.map(review => (
+                <tr key={review.reviewId}>
+                  <td>{review.reviewerName}</td>
+                  <td>{review.review}</td>
+                  <td>{review.rating}/5</td>
+                  <td>{new Date(review.dateSubmitted).toLocaleDateString()}</td>
+                  {canAccessActions && (
+                    <td>
+                      <button
+                        className="btn btn-warning"
+                        onClick={() =>
+                          navigate(`/updateReview/${review.reviewId}/edit`)
+                        }
+                        title="Edit"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="btn btn-danger"
+                        onClick={() => handleDelete(review.reviewId)}
+                        title="Delete"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  )}
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={5} className="text-center">
+                  No reviews available
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
