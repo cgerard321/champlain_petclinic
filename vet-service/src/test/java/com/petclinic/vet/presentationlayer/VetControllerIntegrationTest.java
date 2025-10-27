@@ -23,6 +23,7 @@ import com.petclinic.vet.presentationlayer.ratings.RatingRequestDTO;
 import com.petclinic.vet.presentationlayer.ratings.RatingResponseDTO;
 import com.petclinic.vet.utils.EntityDtoUtil;
 
+import com.petclinic.vet.utils.exceptions.HttpErrorInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
@@ -112,7 +113,7 @@ class VetControllerIntegrationTest {
     //badge image
     ClassPathResource cpr = new ClassPathResource("images/full_food_bowl.png");
 
-    // could this help?
+
     @BeforeEach
     public void setup() {
         Mono<Void> clean = badgeRepository.deleteAll()
@@ -139,10 +140,10 @@ class VetControllerIntegrationTest {
         client
                 .get()
                 .uri("/vets/" + VET_ID + "/ratings")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(RatingResponseDTO.class)
                 .value((list) -> {
                     assertEquals(2, list.size());
@@ -161,12 +162,17 @@ class VetControllerIntegrationTest {
         client
                 .get()
                 .uri("/vets/" + invalidVetId + "/ratings")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isNotFound()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.message").isEqualTo("vetId not found: " + invalidVetId);
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectBodyList(HttpErrorInfo.class)
+                .value(list -> {
+                    assertEquals(1, list.size());
+                    HttpErrorInfo errorInfo = list.get(0);
+                    assertEquals("vetId not found: " + invalidVetId, errorInfo.getMessage());
+                });
+
     }
 
     @Test
@@ -712,9 +718,9 @@ class VetControllerIntegrationTest {
         client
                 .get()
                 .uri("/vets/"+VET_ID+"/ratings/date?year={year}",existingDate)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(RatingResponseDTO.class)
                 .value((list) -> {
                     assertEquals(2, list.size());
@@ -744,11 +750,16 @@ class VetControllerIntegrationTest {
         client
                 .get()
                 .uri("/vets/"+invalidVetId+"/ratings/date?year={year}",existingDate)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isNotFound()
-                .expectBody()
-                .jsonPath("$.message").isEqualTo("No valid ratings were found for "+invalidVetId);
+                .expectBodyList(HttpErrorInfo.class)
+                .value(list -> {
+                    assertEquals(1, list.size());
+                    HttpErrorInfo errorInfo = list.get(0);
+                    assertEquals("No valid ratings were found for "+invalidVetId, errorInfo.getMessage());
+                });
+
 
     }
 
@@ -769,11 +780,16 @@ class VetControllerIntegrationTest {
         client
                 .get()
                 .uri("/vets/"+VET_ID+"/ratings/date?year="+ invalidYear)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isNotFound()
-                .expectBody()
-                .jsonPath("$.message").isEqualTo("Invalid year format. Please enter a valid year.");
+                .expectBodyList(HttpErrorInfo.class)
+                .value(list -> {
+                    assertEquals(1, list.size());
+                    HttpErrorInfo errorInfo = list.get(0);
+                    assertEquals("Invalid year format. Please enter a valid year.", errorInfo.getMessage());
+                });
+
 
     }
 
@@ -799,10 +815,10 @@ class VetControllerIntegrationTest {
         client
                 .get()
                 .uri("/vets/" + "topVets")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(VetAverageRatingDTO.class)
                 .value(resp -> {
                     assertEquals(rating1.getVetId(), vetAverageRatingDTO1.getVetId());
@@ -868,18 +884,23 @@ class VetControllerIntegrationTest {
         client
                 .get()
                 .uri("/vets")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$[0].vetId").isEqualTo(vet.getVetId())
-                .jsonPath("$[0].resume").isEqualTo(vet.getResume())
-                .jsonPath("$[0].lastName").isEqualTo(vet.getLastName())
-                .jsonPath("$[0].firstName").isEqualTo(vet.getFirstName())
-                .jsonPath("$[0].email").isEqualTo(vet.getEmail())
-                .jsonPath("$[0].active").isEqualTo(vet.isActive())
-                .jsonPath("$[0].workHoursJson").isEqualTo(vet.getWorkHoursJson());
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectBodyList(VetResponseDTO.class)
+                .value(list -> {
+                    assertEquals(1, list.size());
+                    VetResponseDTO returnedVet = list.get(0);
+
+                    assertEquals(vet.getVetId(), returnedVet.getVetId());
+                    assertEquals(vet.getResume(), returnedVet.getResume());
+                    assertEquals(vet.getLastName(), returnedVet.getLastName());
+                    assertEquals(vet.getFirstName(), returnedVet.getFirstName());
+                    assertEquals(vet.getEmail(), returnedVet.getEmail());
+                    assertEquals(vet.isActive(), returnedVet.isActive());
+                    assertEquals(vet.getWorkHoursJson(), returnedVet.getWorkHoursJson());
+                });
     }
 
     @Test
@@ -1188,18 +1209,23 @@ class VetControllerIntegrationTest {
         client
                 .get()
                 .uri("/vets/active")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$[0].vetId").isEqualTo(vet2.getVetId())
-                .jsonPath("$[0].resume").isEqualTo(vet2.getResume())
-                .jsonPath("$[0].lastName").isEqualTo(vet2.getLastName())
-                .jsonPath("$[0].firstName").isEqualTo(vet2.getFirstName())
-                .jsonPath("$[0].email").isEqualTo(vet2.getEmail())
-                .jsonPath("$[0].active").isEqualTo(vet2.isActive())
-                .jsonPath("$[0].workHoursJson").isEqualTo(vet2.getWorkHoursJson());
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectBodyList(VetResponseDTO.class)
+                .value(list -> {
+                    assertEquals(1, list.size());
+                    VetResponseDTO returnedVet = list.get(0);
+
+                    assertEquals(vet2.getVetId(), returnedVet.getVetId());
+                    assertEquals(vet2.getResume(), returnedVet.getResume());
+                    assertEquals(vet2.getLastName(), returnedVet.getLastName());
+                    assertEquals(vet2.getFirstName(), returnedVet.getFirstName());
+                    assertEquals(vet2.getEmail(), returnedVet.getEmail());
+                    assertEquals(vet2.isActive(), returnedVet.isActive());
+                    assertEquals(vet2.getWorkHoursJson(), returnedVet.getWorkHoursJson());
+                });
     }
 
     @Test
@@ -1214,18 +1240,23 @@ class VetControllerIntegrationTest {
         client
                 .get()
                 .uri("/vets/inactive")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$[0].vetId").isEqualTo(vet.getVetId())
-                .jsonPath("$[0].resume").isEqualTo(vet.getResume())
-                .jsonPath("$[0].lastName").isEqualTo(vet.getLastName())
-                .jsonPath("$[0].firstName").isEqualTo(vet.getFirstName())
-                .jsonPath("$[0].email").isEqualTo(vet.getEmail())
-                .jsonPath("$[0].active").isEqualTo(vet.isActive())
-                .jsonPath("$[0].workHoursJson").isEqualTo(vet.getWorkHoursJson());
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectBodyList(VetResponseDTO.class)
+                .value(list -> {
+                    assertEquals(1, list.size());
+                    VetResponseDTO returnedVet = list.get(0);
+
+                    assertEquals(vet.getVetId(), returnedVet.getVetId());
+                    assertEquals(vet.getResume(), returnedVet.getResume());
+                    assertEquals(vet.getLastName(), returnedVet.getLastName());
+                    assertEquals(vet.getFirstName(), returnedVet.getFirstName());
+                    assertEquals(vet.getEmail(), returnedVet.getEmail());
+                    assertEquals(vet.isActive(), returnedVet.isActive());
+                    assertEquals(vet.getWorkHoursJson(), returnedVet.getWorkHoursJson());
+                });
     }
 
 
@@ -1336,77 +1367,6 @@ class VetControllerIntegrationTest {
 
     }
 
-    /*
-    @Test
-    void createVet_withInvalidFirstName() {
-        Publisher<Void> setup = vetRepository.deleteAll();
-
-        StepVerifier
-                .create(setup)
-                .expectNextCount(0)
-                .verifyComplete();
-
-        VetRequestDTO newVet = VetRequestDTO.builder()
-                .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
-                .vetBillId("1")
-                .firstName("Clementineeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
-                .lastName("LeBlanc")
-                .email("skjfhf@gmail.com")
-                .phoneNumber("947-238-28479")
-                .resume("Just became a vet")
-                .workday(new HashSet<>())
-                .specialties(new HashSet<>())
-                .active(false)
-                .build();
-
-        client
-                .post()
-                .uri("/vets")
-                .body(Mono.just(newVet), VetRequestDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.message").isEqualTo("firstName length should be between 2 and 30 characters: "+newVet.getFirstName());
-    }*/
-
-    /*
-    @Test
-    void createVet_withInvalidLastName() {
-        Publisher<Void> setup = vetRepository.deleteAll();
-
-        StepVerifier
-                .create(setup)
-                .expectNextCount(0)
-                .verifyComplete();
-
-        String extensionNum="0987";
-        VetRequestDTO newVet = VetRequestDTO.builder()
-                .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
-                .vetBillId("1")
-                .firstName("Clementine")
-                .lastName("LeBlanccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc")
-                .email("skjfhf@gmail.com")
-                .phoneNumber("(514)-634-8276 #"+extensionNum)
-                .resume("Just became a vet")
-                .workday(new HashSet<>())
-                .specialties(new HashSet<>())
-                .active(false)
-                .build();
-
-        client
-                .post()
-                .uri("/vets")
-                .body(Mono.just(newVet), VetRequestDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.message").isEqualTo("lastName length should be between 2 and 30 characters: "+newVet.getLastName());
-    }*/
-
     @Test
     void createVet_withInvalidResume() {
         Publisher<Void> setup = vetRepository.deleteAll();
@@ -1492,43 +1452,8 @@ class VetControllerIntegrationTest {
                 .uri("/vets/" + VET_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isNoContent()
+                .expectStatus().isOk()
                 .expectBody();
-    }
-
-    @Test
-    void deleteVetById_ShouldDeleteAssociatedDataAndReturnNoContent() throws IOException{
-
-        Badge badge1 = buildBadge();
-        Photo photo1 = buildPhoto();
-
-        Publisher<Void> setup = vetRepository.deleteAll()
-                .thenMany(vetRepository.save(vet))
-                .thenMany(ratingRepository.save(rating1))
-                .thenMany(educationRepository.save(education1))
-                //.thenMany(badgeRepository.save(badge1))
-                //.thenMany(photoRepository.save(photo1))
-                .then();
-
-        StepVerifier.create(setup).verifyComplete();
-
-        client.delete()
-                .uri("/vets/" + VET_ID)
-                .exchange()
-                .expectStatus().isNoContent();
-
-        // Step 3: Check if the vet and associated data were deleted
-        Mono<Boolean> vetExists = vetRepository.existsById(VET_ID);
-        Mono<Boolean> ratingsExist = ratingRepository.existsById(VET_ID);
-        Mono<Boolean> educationsExist = educationRepository.existsById(VET_ID);
-        //Mono<Boolean> badgesExist = badgeRepository.existsById(Integer.valueOf(VET_ID));
-        //Mono<Boolean> photosExist = photoRepository.existsById(Integer.valueOf(VET_ID));
-
-        StepVerifier.create(vetExists).expectNext(false).verifyComplete();
-        StepVerifier.create(ratingsExist).expectNext(false).verifyComplete();
-        StepVerifier.create(educationsExist).expectNext(false).verifyComplete();
-        //StepVerifier.create(badgesExist).expectNext(false).verifyComplete();
-        //StepVerifier.create(photosExist).expectNext(false).verifyComplete();
     }
 
     @Test
@@ -1567,10 +1492,10 @@ class VetControllerIntegrationTest {
         client
                 .get()
                 .uri("/vets/" + vet.getVetId() + "/educations")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(EducationResponseDTO.class)
                 .value((list) -> {
                     assertEquals(2, list.size());
@@ -1639,61 +1564,6 @@ class VetControllerIntegrationTest {
                 });
     }
 
-//    @Test
-//    void addEducationToAVet_WithValidValues_shouldSucceed(){
-//        Publisher<Education> setup = educationRepository.deleteAll()
-//                .thenMany(educationRepository.save(education1));
-//
-//        StepVerifier
-//                .create(setup)
-//                .expectNextCount(1)
-//                .verifyComplete();
-//
-//        client.post()
-//                .uri("/vets/" + vet.getVetId() + "/educations")
-//                .accept(MediaType.APPLICATION_JSON)
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .bodyValue(education2)
-//                .exchange()
-//                .expectStatus().isCreated()
-//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-//                .expectBody(EducationResponseDTO.class)
-//                .value(dto -> {
-//                    assertNotNull(dto);
-//                    assertNotNull(dto.getEducationId());
-//                    assertThat(dto.getVetId()).isEqualTo(education2.getVetId());
-//                    assertThat(dto.getDegree()).isEqualTo(education2.getDegree());
-//                    assertThat(dto.getFieldOfStudy()).isEqualTo(education2.getFieldOfStudy());
-//                    assertThat(dto.getSchoolName()).isEqualTo(education2.getSchoolName());
-//                    assertThat(dto.getStartDate()).isEqualTo(education2.getStartDate());
-//                    assertThat(dto.getEndDate()).isEqualTo(education2.getEndDate());
-//                });
-//    }
-
-    //Spring Boot version incompatibility issue with postgresql r2dbc
-    /*@Test
-    void getPhotoByVetId() {
-        Publisher<Photo> setup = photoRepository.deleteAll()
-                .thenMany(photoRepository.save(buildPhoto()));
-        StepVerifier
-                .create(setup)
-                .expectNextCount(1)
-                .verifyComplete();
-
-        byte[] photo = {123, 23, 75, 34};
-        Resource resource = new ByteArrayResource(photo);
-
-        client.get()
-                .uri("/api/gateway/vets/{vetId}/photo", VET_ID)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.IMAGE_JPEG_VALUE)
-                .expectBody(Resource.class)
-                .consumeWith(response -> {
-                    assertEquals(resource, response.getResponseBody());
-                });
-    }*/
-
     @Test
     void getPhotoByVetId_NoExistingPhoto_ShouldReturnNotFound() {
         String emptyVetId = "1234567";
@@ -1706,34 +1576,6 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.path").isEqualTo("/api/gateway/vets/" + emptyVetId + "/photo");
     }
 
-    //Spring Boot version incompatibility issue with postgresql r2dbc
-    /*@Test
-    void getBadgeByVetId_shouldSucceed() throws IOException {
-        Badge badge=buildBadge();
-
-        Publisher<Badge> setup=badgeRepository.deleteAll()
-                .thenMany(badgeRepository.save(badge));
-
-        StepVerifier
-                .create(badgeRepository.deleteAll()
-                        .then(badgeRepository.save(badge)))
-                .expectNext(badge)  // Expect the saved badge
-                .verifyComplete();
-
-        client.get()
-                .uri("/api/gateway/vets/{vetId}/badge", VET_ID)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(BadgeResponseDTO.class)
-                .value(responseDTO -> {
-                    assertEquals(badge.getBadgeTitle(), responseDTO.getBadgeTitle());
-                    assertEquals(badge.getBadgeDate(), responseDTO.getBadgeDate());
-                    assertEquals(badge.getVetId(), responseDTO.getVetId());
-                    assertEquals(Base64.getEncoder().encodeToString(badge.getData()), responseDTO.getResourceBase64());
-                });
-    }*/
 
     @Test
     void getBadgeByInvalidVetId_shouldReturnNotFoundException(){
