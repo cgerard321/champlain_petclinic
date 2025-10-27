@@ -1,5 +1,6 @@
 package com.petclinic.bffapigateway.dtos.Vets;
 
+import com.petclinic.bffapigateway.dtos.Files.FileDetails;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -25,4 +26,5 @@ public class VetResponseDTO {
     private String workHoursJson;
     private boolean active;
     private Set<SpecialtyDTO> specialties;
+    private FileDetails photo;
 }
