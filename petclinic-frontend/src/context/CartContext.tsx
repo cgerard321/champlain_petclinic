@@ -21,6 +21,8 @@ import {
 import {
   fetchCartIdByCustomerId,
   fetchCartDetailsByCartId,
+  fetchCartCountByCartId,
+  calculateCartItemsCount,
 } from '@/features/carts/api/getCart';
 
 interface CartContextType {
@@ -101,24 +103,10 @@ export function CartProvider({
     }
 
     const cart = await fetchCartDetailsByCartId(id);
-    const count = Array.isArray(cart?.products)
-      ? cart.products.reduce((acc, product) => {
-          const quantity = Number(product?.quantityInCart);
-          if (Number.isFinite(quantity) && quantity > 0) {
-            return acc + Math.trunc(quantity);
-          }
-          return acc + 1;
-        }, 0)
-      : 0;
-    const fallbackCount =
-      count > 0
-        ? count
-        : Array.isArray(cart?.products)
-          ? cart.products.length
-          : 0;
+    const nextCount = calculateCartItemsCount(cart);
 
-    setCartCount(fallbackCount);
-    return { cartId: id, cartCount: fallbackCount };
+    setCartCount(nextCount);
+    return { cartId: id, cartCount: nextCount };
   }, [user?.userId, cartId, isOwner]);
 
   // Force sync after "Add to Cart" to prevent UI mismatch
