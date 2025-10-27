@@ -479,7 +479,7 @@ export default function VisitListTable(): JSX.Element {
     );
   };
 
-  const renderSidebar = (tit: string): JSX.Element => {
+  const renderSidebar = (title: string): JSX.Element => {
     return (
       <Sidebar title={title}>
         {!isAdmin && (
