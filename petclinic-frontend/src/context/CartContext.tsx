@@ -7,6 +7,7 @@ import {
   useState,
   ReactNode,
   useCallback,
+  useRef,
 } from 'react';
 import { useUser } from '@/context/UserContext';
 import { Role } from '@/shared/models/Role';
@@ -42,6 +43,8 @@ export function CartProvider({
   const { user } = useUser();
   const [cartId, setCartIdState] = useState<string | null>(getCartIdFromLS());
   const [cartCount, setCartCountState] = useState<number>(getCartCountFromLS());
+  const latestSyncRequest = useRef<number>(0);
+
 
   const roleList = useMemo<Role[]>(() => {
     const rawRoles = user?.roles;
@@ -108,12 +111,22 @@ export function CartProvider({
 
   // Force sync after "Add to Cart" to prevent UI mismatch
   const syncAfterAddToCart = useCallback(async () => {
+    const requestId = Date.now();
+    latestSyncRequest.current = requestId;
+
     try {
       const id = cartId || (await fetchCartIdByCustomerId(user?.userId));
       if (!id) return;
       setCartId(id);
+
       const count = await fetchCartCountByCartId(id);
-      setCartCount(count);
+
+      // Only update if this is the most recent request
+      if (latestSyncRequest.current === requestId) {
+        setCartCount(count);
+      } else {
+        console.warn('Stale cart sync ignored');
+      }
     } catch (err) {
       console.error('Failed to sync cart after add:', err);
     }
