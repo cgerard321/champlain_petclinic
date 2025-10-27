@@ -695,7 +695,7 @@ const UserCart: React.FC = () => {
         showToast(data.message, 'info');
       } else {
         showToast(
-          `${item.productName} has been moved to your cart!`,
+          `${item.productName} has been added to your cart!`,
           'success'
         );
       }
