@@ -6,7 +6,7 @@ export async function getAllBillsByOwnerName(
   ownerLastName: string
 ): Promise<Bill[]> {
   const response = await axiosInstance.get(
-    `/bills/${ownerFirstName}/${ownerLastName}/owner`,
+    `/bills/owner/${ownerFirstName}/${ownerLastName}`,
     {
       responseType: 'stream',
       useV2: false,

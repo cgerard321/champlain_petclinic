@@ -410,7 +410,7 @@ public class BillsControllerUnitTest {
         when(billServiceClient.deleteBillsByVetId("9"))
                 .thenReturn(Flux.empty());
         client.delete()
-                .uri("/api/gateway/bills/9/vets")
+                .uri("/api/gateway/bills/vets/9")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNoContent()
@@ -433,7 +433,7 @@ public class BillsControllerUnitTest {
 
         // Act & Assert
         client.get()
-                .uri("/api/gateway/bills/" + vetFirstName + "/" + vetLastName + "/vet")
+                .uri("/api/gateway/bills/vet/" + vetFirstName + "/" + vetLastName)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(BillResponseDTO.class)
@@ -454,7 +454,7 @@ public class BillsControllerUnitTest {
                 .thenReturn(Flux.just(bill));
 
         client.get()
-                .uri("/api/gateway/bills/" + visitType + "/visitType")
+                .uri("/api/gateway/bills/visitType/" + visitType)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(BillResponseDTO.class)

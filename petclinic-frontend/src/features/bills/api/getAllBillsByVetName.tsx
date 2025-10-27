@@ -6,7 +6,7 @@ export async function getAllBillsByVetName(
   vetLastName: string
 ): Promise<Bill[]> {
   const response = await axiosInstance.get(
-    `/bills/${vetFirstName}/${vetLastName}/vet`,
+    `/bills/vet/${vetFirstName}/${vetLastName}`,
     {
       responseType: 'stream',
       useV2: false,

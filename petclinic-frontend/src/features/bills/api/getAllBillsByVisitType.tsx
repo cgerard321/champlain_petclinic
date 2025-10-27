@@ -4,7 +4,7 @@ import { Bill } from '@/features/bills/models/Bill.ts';
 export async function getAllBillsByVisitType(
   visitType: string
 ): Promise<Bill[]> {
-  const response = await axiosInstance.get(`/bills/${visitType}/visitType`, {
+  const response = await axiosInstance.get(`/bills/visitType/${visitType}`, {
     responseType: 'stream',
     useV2: false,
   });

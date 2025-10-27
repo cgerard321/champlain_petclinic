@@ -186,7 +186,7 @@ public class BillServiceClient {
 
     public Flux<BillResponseDTO> getBillsByOwnerName(final String ownerFirstName, final String ownerLastName) {
         return webClientBuilder.build().get()
-                .uri(billServiceUrl + "/{ownerFirstName}/{ownerLastName}/owner", ownerFirstName, ownerLastName)
+                .uri(billServiceUrl + "/owner/{ownerFirstName}/{ownerLastName}", ownerFirstName, ownerLastName)
                 .retrieve()
                 .bodyToFlux(BillResponseDTO.class)
                 .switchIfEmpty(Flux.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "No bills found for owner: " + ownerFirstName + " " + ownerLastName)));
@@ -194,7 +194,7 @@ public class BillServiceClient {
 
     public Flux<BillResponseDTO> getBillsByVetName(final String vetFirstName, final String vetLastName) {
         return webClientBuilder.build().get()
-                .uri(billServiceUrl + "/{vetFirstName}/{vetLastName}/vet", vetFirstName, vetLastName)
+                .uri(billServiceUrl + "/vet/{vetFirstName}/{vetLastName}", vetFirstName, vetLastName)
                 .retrieve()
                 .bodyToFlux(BillResponseDTO.class)
                 .switchIfEmpty(Flux.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "No bills found for vet: " + vetFirstName + " " + vetLastName)));
@@ -202,7 +202,7 @@ public class BillServiceClient {
 
     public Flux<BillResponseDTO> getBillsByVisitType(final String visitType) {
         return webClientBuilder.build().get()
-                .uri(billServiceUrl + "/{visitType}/visitType", visitType)
+                .uri(billServiceUrl + "/visitType/{visitType}", visitType)
                 .retrieve()
                 .bodyToFlux(BillResponseDTO.class)
                 .switchIfEmpty(Flux.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "No bills found for visit type: " + visitType)));
@@ -261,7 +261,7 @@ public class BillServiceClient {
     public Flux<Void> deleteBillsByVetId(final String vetId) {
         return webClientBuilder.build()
                 .delete()
-                .uri(billServiceUrl + "/{vetId}/vet", vetId)
+                .uri(billServiceUrl + "/vet/{vetId}", vetId)
                 .retrieve()
                 .bodyToFlux(Void.class);
     }
