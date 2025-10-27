@@ -7,18 +7,29 @@ export async function getAllVisits(): Promise<VisitResponseModel[]> {
       responseType: 'stream',
       useV2: false,
     });
+
+    if (typeof response.data !== 'string') {
+      console.error('Expected string response, got:', typeof response.data);
+      return [];
+    }
+
     return response.data
       .split('data:')
-      .map((payload: string) => {
+      .map((payload: string): VisitResponseModel | null => {
         try {
-          if (payload == '') return null;
-          return JSON.parse(payload);
+          const trimmed = payload.trim();
+          if (trimmed === '') return null;
+
+          return JSON.parse(trimmed) as VisitResponseModel;
         } catch (err) {
           console.error("Can't parse JSON:", err);
+          return null;
         }
-        return null;
       })
-      .filter((data?: VisitResponseModel | null) => data !== null);
+      .filter(
+        (data: VisitResponseModel | null): data is VisitResponseModel =>
+          data !== null
+      );
   } catch (error) {
     console.error('Error fetching visits:', error);
     throw error;

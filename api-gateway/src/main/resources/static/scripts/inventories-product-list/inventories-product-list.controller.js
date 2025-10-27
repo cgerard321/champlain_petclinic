@@ -5,7 +5,7 @@ angular.module('inventoriesProductList')
     '$http', '$scope', '$stateParams', '$window', '$location', 'InventoryService',
     function ($http, $scope, $stateParams, $window, $location, InventoryService) {
       var self = this;
-      var inventoryId;
+      var inventoryId = $stateParams.inventoryId;
       const pageSize = 15;
       self.currentPage = $stateParams.page || 0;
       self.pageSize = $stateParams.size || pageSize;
@@ -26,6 +26,70 @@ angular.module('inventoriesProductList')
         $scope.inventory = resp.data;
       });
       fetchProductList();
+
+      var esProducts = null;
+      var currentESUrl = null;
+      var openTimer = null;
+      var idleTimer = null;
+      var IDLE_MS = 2000;
+
+      function closeProductsES() {
+        if (idleTimer) { clearTimeout(idleTimer); idleTimer = null; }
+        if (openTimer) { clearTimeout(openTimer); openTimer = null; }
+        if (esProducts) { try { esProducts.close(); } catch(e) {} esProducts = null; }
+        currentESUrl = null;
+      }
+
+      function bumpIdle() {
+        if (idleTimer) clearTimeout(idleTimer);
+        idleTimer = setTimeout(function () {
+          try { if (esProducts) esProducts.close(); } catch (e) {}
+        }, IDLE_MS);
+      }
+
+      function upsertById(list, item, idKey) {
+        if (!item || !Array.isArray(list)) return;
+        if (item.productPrice != null)     item.productPrice     = (+item.productPrice).toFixed(2);
+        if (item.productSalePrice != null) item.productSalePrice = (+item.productSalePrice).toFixed(2);
+        var idx = list.findIndex(function (x) { return x[idKey] === item[idKey]; });
+        if (idx >= 0) list[idx] = item; else list.push(item);
+      }
+
+      function openProductsES(url) {
+        // avoid reopening same active stream
+        if (esProducts && currentESUrl === url && esProducts.readyState === 1) return;
+
+        if (openTimer) clearTimeout(openTimer);
+        openTimer = setTimeout(function () {
+          closeProductsES();
+          currentESUrl = url;
+          self.inventoryProductList = []; // reset when opening a NEW stream
+          esProducts = new EventSource(url);
+
+          esProducts.onmessage = function (e) {
+            if (!e.data || e.data === 'heartbeat' || e.data === ':') { bumpIdle(); return; }
+            try {
+              var payload = JSON.parse(e.data);
+              $scope.$evalAsync(function () {
+                if (Array.isArray(payload)) {
+                  payload.forEach(function (p) { upsertById(self.inventoryProductList, p, 'productId'); });
+                } else {
+                  upsertById(self.inventoryProductList, payload, 'productId');
+                }
+              });
+            } catch (_e) {
+              // ignore non-JSON lines
+            }
+            bumpIdle();
+          };
+
+          esProducts.onerror = function () {
+            // let browser auto-reconnect; do not open a new EventSource here
+          };
+        }, 150);
+      }
+
+      $scope.$on('$destroy', function () { closeProductsES(); });
 
       // ===== helper to get the logged-in user's email (stored at login) =====
       function getCurrentEmail() {
@@ -319,31 +383,14 @@ angular.module('inventoriesProductList')
           queryString += "maxSalePrice=" + maxSalePrice;
           self.lastParams.maxSalePrice = maxSalePrice;
         }
-
         var apiUrl = "api/gateway/inventories/" + inventoryId + "/products";
         if (queryString !== '') apiUrl += "?" + queryString;
 
-        let response = [];
-        $http.get(apiUrl)
-          .then(function(resp) {
-            resp.data.forEach(function (current) {
-              current.productPrice = current.productPrice.toFixed(2);
-              current.productSalePrice = current.productSalePrice.toFixed(2);
-              response.push(current);
-            });
-            self.inventoryProductList = response;
-            loadTotalItem(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)
-            InventoryService.setInventoryId(inventoryId);
-          })
-          .catch(function(error) {
-            if (error.status === 404) {
-              self.inventoryProductList = [];
-              self.currentPage = 0;
-              updateActualCurrentPageShown();
-            } else {
-              alert('An error occurred: ' + error.statusText);
-            }
-          });
+        openProductsES(apiUrl);
+
+        loadTotalItem(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice);
+        InventoryService.setInventoryId(inventoryId);
+
       };
 
       function fetchProductList(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice) {
@@ -363,24 +410,13 @@ angular.module('inventoriesProductList')
           self.lastParams.minSalePrice = null;
           self.lastParams.maxSalePrice = null;
           let inventoryId = $stateParams.inventoryId;
-          let response = [];
-          $http.get('api/gateway/inventories/' + $stateParams.inventoryId + '/products-pagination?page=' + self.currentPage + '&size=' + self.pageSize)
-            .then(function (resp) {
-              resp.data.forEach(function (current) {
-                current.productPrice = current.productPrice.toFixed(2);
-                current.productSalePrice = current.productSalePrice.toFixed(2);
-                response.push(current);
-              });
-              self.inventoryProductList = response;
-              inventoryId = $stateParams.inventoryId;
-              loadTotalItem(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)
-              InventoryService.setInventoryId(inventoryId);
-              if (resp.data.length === 0) {
-                console.log("The inventory is empty!");
-              }
-            }).catch(function (error) {
-              console.error('An error occurred:', error);
-            });
+          var url = 'api/gateway/inventories/' + $stateParams.inventoryId + '/products-pagination?page=' + self.currentPage + '&size=' + self.pageSize;
+
+
+          openProductsES(url);
+
+          loadTotalItem(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice);
+          InventoryService.setInventoryId(inventoryId);
         }
       }
 

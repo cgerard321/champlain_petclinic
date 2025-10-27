@@ -28,7 +28,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.MockServerHttpResponse;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -276,7 +275,7 @@ public class AuthServiceClientIntegrationTest {
         server.enqueue(mockResponse);
 
         Login login = Login.builder()
-                .email("email")
+                .emailOrUsername("email")
                 .password("password")
                 .build();
 
@@ -296,7 +295,7 @@ public class AuthServiceClientIntegrationTest {
         server.enqueue(loginMockResponse);
         ServerHttpRequest loginRequest = MockServerHttpRequest.post("/users/login").build();
         Login login = Login.builder()
-                .email("email")
+                .emailOrUsername("email")
                 .password("password")
                 .build();
         final Mono<ResponseEntity<UserPasswordLessDTO>> validatedTokenResponse = authServiceClient.login(Mono.just(login));
@@ -1151,7 +1150,7 @@ public class AuthServiceClientIntegrationTest {
     @DisplayName("Should handle 5xx error in login")
     void shouldHandle5xxErrorInLogin() throws Exception {
         Login loginRequest = Login.builder()
-                .email("testuser@example.com")
+                .emailOrUsername("testuser@example.com")
                 .password("password")
                 .build();
 
