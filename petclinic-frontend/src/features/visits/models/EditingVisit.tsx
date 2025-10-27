@@ -102,7 +102,7 @@ const EditingVisit: React.FC = (): JSX.Element => {
     };
 
     fetchPets();
-  }, [user]);
+  }, [user.userId, user.roles]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
