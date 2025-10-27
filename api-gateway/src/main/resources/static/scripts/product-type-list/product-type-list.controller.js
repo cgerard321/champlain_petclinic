@@ -229,22 +229,4 @@ angular.module('productTypeList')
             });
             return productTypes;
         }
-
-        self.saveFormToast = function() {
-            const pt = $scope.toast.productType;
-            if (!$scope.toast.isEdit) {
-                $http.post(self.baseUrl, pt).then(resp => {
-                    self.productTypeList.push(resp.data);
-                    toastHide();
-                });
-            } else {
-                $http.put(`${self.baseUrl}/${pt.productTypeId}`, pt).then(resp => {
-                    const idx = self.productTypeList.findIndex(p => p.productTypeId === pt.productTypeId);
-                    if (idx !== -1) self.productTypeList[idx] = resp.data;
-                    toastHide();
-                });
-            }
-        };
-
-
     }]);
