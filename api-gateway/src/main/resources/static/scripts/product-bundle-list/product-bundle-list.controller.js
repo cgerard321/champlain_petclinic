@@ -76,7 +76,7 @@ angular.module('productBundleList')
                     performDelete(bundle.bundleId)
                         .then(function () {
                             toastShow({ title: 'Deleted', lines: ['Bundle removed.'], autoHideMs: 2000 });
-                            self.bundleList = self.bundleList.filter(function(b) { return b.bundleId !== b.bundleId; });
+                            self.bundleList = self.bundleList.filter(function(b) { return b.bundleId !== bundle.bundleId; });
                         })
                         .catch(function (err) {
                             bundle.isTemporarilyDeleted = false;
