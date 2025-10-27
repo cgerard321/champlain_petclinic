@@ -4,7 +4,18 @@ import { Bill } from '../models/Bill';
 
 interface UseGetAllBillsPaginatedReturn {
   billsList: Bill[];
-  getBillsList: (page: number, size: number) => Promise<void>;
+  getBillsList: (
+    page: number,
+    size: number,
+    billId?: string,
+    customerId?: string,
+    ownerFirstName?: string,
+    ownerLastName?: string,
+    visitType?: string,
+    vetId?: string,
+    vetFirstName?: string,
+    vetLastName?: string
+  ) => Promise<void>;
   setCurrentPage: (page: number) => void;
   currentPage: number;
   hasMore: boolean;
@@ -16,17 +27,40 @@ export default function useGetAllBillsPaginated(): UseGetAllBillsPaginatedReturn
   const [hasMore, setHasMore] = useState(false);
 
   const getBillsList = useCallback(
-    async (page: number, size: number): Promise<void> => {
+    async (
+      page: number,
+      size: number,
+      billId?: string,
+      customerId?: string,
+      ownerFirstName?: string,
+      ownerLastName?: string,
+      visitType?: string,
+      vetId?: string,
+      vetFirstName?: string,
+      vetLastName?: string
+    ): Promise<void> => {
       try {
-        const bills = await getAllBillsPaginated(page, size);
+        const bills = await getAllBillsPaginated(
+          page,
+          size,
+          billId,
+          customerId,
+          ownerFirstName,
+          ownerLastName,
+          visitType,
+          vetId,
+          vetFirstName,
+          vetLastName
+        );
 
+        // NEW: always replace with the fetched page (don't append)
         setBillsList(bills);
 
-        if (bills.length === size) {
-          setHasMore(true);
-        } else {
-          setHasMore(false);
-        }
+        // keep currentPage in sync with the request
+        setCurrentPage(page);
+
+        // if the returned page is full, there may be more
+        setHasMore(bills.length === size);
       } catch (error) {
         console.error('Error fetching bills:', error);
       }
