@@ -1,3 +1,4 @@
+---
 server:
   port: 8080
 
@@ -25,6 +26,15 @@ spring:
     embedded:
       version: 4.0.21
 
+  # set to 2MB as only file transfers are images which dont need much memory
+  codec:
+    max-in-memory-size: 2MB
+
+app:
+  files-service:
+    host: localhost
+    port: 8000
+
 ---
 # for test
 
@@ -43,6 +53,11 @@ spring:
       authentication-database: admin
       auto-index-creation: true
 
+app:
+  files-service:
+    host: localhost
+    port: 8000
+
 de:
   flapdoodle:
     mongodb:
@@ -50,7 +65,6 @@ de:
         version: 4.4.0
 
 ---
-
 spring:
   config:
     activate:
@@ -67,6 +81,16 @@ spring:
     url: r2dbc:h2:mem:///images
     username: user
     password: pwd
+
+  # set to 2MB as only file transfers are images which don't need much memory
+  codec:
+    max-in-memory-size: 2MB
+
+app:
+  files-service:
+    host: localhost
+    port: 8000
+
 ---
 spring:
   config:
@@ -86,6 +110,16 @@ spring:
       username: root
       password: password
       authentication-database: admin
+
+  # set to 2MB as only file transfers are images which don't need much memory
+  codec:
+    max-in-memory-size: 2MB
+
+app:
+  files-service:
+    host: files-service
+    port: 8000
+
 management:
   endpoints:
     web:

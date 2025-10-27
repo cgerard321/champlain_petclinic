@@ -94,7 +94,7 @@ export default function ProductDetails(): JSX.Element {
   const getDeliveryTypeLabel = (deliveryType: string): string => {
     if (deliveryType === 'DELIVERY') return 'Standard Delivery';
     if (deliveryType === 'PICKUP') return 'Pickup';
-    if (deliveryType === 'DELIVERY_AND_PICKUP') return 'Delivery and Pickup';
+    if (deliveryType === 'DELIVERY_AND_PICKUP') return 'Delivery & Pickup';
     if (deliveryType === 'NO_DELIVERY_OPTION') return 'No delivery option';
     return 'Unknown Delivery Type';
   };
@@ -200,7 +200,9 @@ export default function ProductDetails(): JSX.Element {
     if (isStaff) return;
     const ok = await addToCart(String(productId), quantity);
     alert(
-      ok ? 'Item added to cart' : "Couldn't add to cart. Please try again."
+      ok
+        ? `Added ${quantity} item${quantity > 1 ? 's' : ''} to cart`
+        : "Couldn't add to cart. Please try again."
     );
   };
 

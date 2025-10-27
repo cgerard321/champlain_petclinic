@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -1367,4 +1368,96 @@ class CartServiceUnitTest {
                                 .expectNextMatches(List::isEmpty)
                                 .verifyComplete();
     }
+    @Test
+    void applyPromoToCart_validPercent_setsAndSaves() {
+        String cartId = cart1.getCartId();
+        double promo = 15.0;
+
+        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart1));
+        when(cartRepository.save(any(Cart.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
+
+        StepVerifier.create(cartService.applyPromoToCart(cartId, promo))
+                .assertNext(resp -> {
+                    assertNotNull(resp);
+                    try {
+                        assertEquals(promo, resp.getPromoPercent());
+                    } catch (Exception ignored) {  }
+                })
+                .verifyComplete();
+
+        ArgumentCaptor<Cart> cap = ArgumentCaptor.forClass(Cart.class);
+        verify(cartRepository).save(cap.capture());
+        assertEquals(promo, cap.getValue().getPromoPercent());
+    }
+
+    @Test
+    void applyPromoToCart_nullPercent_clearsPromo() {
+        String cartId = cart1.getCartId();
+
+        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart1));
+        when(cartRepository.save(any(Cart.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
+
+        StepVerifier.create(cartService.applyPromoToCart(cartId, null))
+                .assertNext(resp -> {
+                    assertNotNull(resp);
+                    try {
+                        assertNull(resp.getPromoPercent());
+                    } catch (Exception ignored) {}
+                })
+                .verifyComplete();
+
+        ArgumentCaptor<Cart> cap = ArgumentCaptor.forClass(Cart.class);
+        verify(cartRepository).save(cap.capture());
+        assertNull(cap.getValue().getPromoPercent());
+    }
+
+    @Test
+    void applyPromoToCart_zeroOrNegative_clearsPromo() {
+        String cartId = cart1.getCartId();
+
+        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart1));
+        when(cartRepository.save(any(Cart.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
+
+        StepVerifier.create(cartService.applyPromoToCart(cartId, 0.0))
+                .assertNext(resp -> {
+                    assertNotNull(resp);
+                    try {
+                        assertNull(resp.getPromoPercent());
+                    } catch (Exception ignored) {}
+                })
+                .verifyComplete();
+
+        ArgumentCaptor<Cart> cap = ArgumentCaptor.forClass(Cart.class);
+        verify(cartRepository).save(cap.capture());
+        assertNull(cap.getValue().getPromoPercent());
+    }
+
+    @Test
+    void applyPromoToCart_over100_throwsInvalidInput_andDoesNotSave() {
+        String cartId = cart1.getCartId();
+
+        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart1));
+
+        StepVerifier.create(cartService.applyPromoToCart(cartId, 101.0))
+                .expectErrorMatches(t -> t instanceof InvalidInputException &&
+                        t.getMessage().equals("promoPercent must be 1..100"))
+                .verify();
+
+        verify(cartRepository, never()).save(any(Cart.class));
+    }
+
+    @Test
+    void applyPromoToCart_cartNotFound_throwsNotFound() {
+        String cartId = "missing";
+
+        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.empty());
+
+        StepVerifier.create(cartService.applyPromoToCart(cartId, 10.0))
+                .expectErrorMatches(t -> t instanceof NotFoundException &&
+                        t.getMessage().equals("Cart not found: " + cartId))
+                .verify();
+
+        verify(cartRepository, never()).save(any(Cart.class));
+    }
+
 }

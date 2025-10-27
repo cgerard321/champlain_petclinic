@@ -1,10 +1,72 @@
+---
 version: "3.9"
 
+# =========================
+# Reusable healthchecks
+# =========================
+x-healthchecks:
+  springboot: &springboot
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/actuator/health || curl -fsS http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  react-node: &react_node
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:3000/ || true"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  angular-node: &angular_node
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:4200/ || true"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  dbgate: &dbgate_hc
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS -u CPC_Admin:${DBGATE_PASSWORD} http://localhost:3000/ || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  mysql: &mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-uuser", "-ppwd", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  postgres: &postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d images -h localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  mongo: &mongo
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --eval 'db.runCommand({ ping: 1 }).ok' || mongo --quiet --eval 'db.runCommand({ ping: 1 }).ok'"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
 services:
-  # -------------------
-  # FRONTEND SERVICES
-  # -------------------
+  # =========================
+  # FRONTEND (React/Node)
+  # =========================
   petclinicFrontend:
+    <<: *react_node
     image: petclinic-frontend
     container_name: petclinic-frontend
     pull_policy: never
@@ -26,11 +88,35 @@ services:
       - homepage.description=Petclinic Frontend Container
       - homepage.siteMonitor=https://petclinic.benmusicgeek.synology.me/
 
-  # -------------------
-  # BACKEND MICROSERVICES
-  # -------------------
+  # Employee front-end
+  employeeFrontend:
+    <<: *angular_node
+    image: employee-frontend
+    container_name: employee-frontend
+    pull_policy: never
+    build:
+      context: ./employee-frontend
+      dockerfile: Dockerfile
+      args:
+        - BUILD_MODE=production
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./employee-frontend/src:/app/src
+    restart: unless-stopped
+    labels:
+      - homepage.group=Development
+      - homepage.name=Employee Frontend
+      - homepage.icon=https://github.com/homarr-labs/dashboard-icons/blob/main/png/angular.png?raw=true
+      - homepage.href=https://petclinic-backend.benmusicgeek.synology.me/employee/
+      - homepage.description=Employee Frontend Container
+      - homepage.siteMonitor=https://petclinic-backend.benmusicgeek.synology.me/employee/
 
+  # =========================
+  # BACKEND — Spring Boot
+  # =========================
   api-gateway:
+    <<: *springboot
     build: api-gateway
     ports:
       - "8080:8080"
@@ -38,14 +124,22 @@ services:
       - SPRING_PROFILES_ACTIVE=prod
     restart: unless-stopped
     depends_on:
-      - customers-service-reactive
-      - vet-service
-      - visits-service-new
-      - products-service
-      - cart-service
-      - inventory-service
-      - billing-service
-      - auth-service
+      customers-service-reactive:
+        condition: service_healthy
+      vet-service:
+        condition: service_healthy
+      visits-service-new:
+        condition: service_healthy
+      products-service:
+        condition: service_healthy
+      cart-service:
+        condition: service_healthy
+      inventory-service:
+        condition: service_healthy
+      billing-service:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
     labels:
       - homepage.group=Development
       - homepage.name=Petclinic Api Gateway
@@ -55,41 +149,52 @@ services:
       - homepage.siteMonitor=https://petclinic-backend.benmusicgeek.synology.me/api/v2/gateway/vets
 
   visits-service-new:
+    <<: *springboot
     build: visits-service-new
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     restart: unless-stopped
     depends_on:
-      - mongo-visits
-      - mailer-service
+      mongo-visits:
+        condition: service_healthy
+      mailer-service:
+        condition: service_started
 
   inventory-service:
+    <<: *springboot
     build: inventory-service
     hostname: inventory
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     restart: unless-stopped
     depends_on:
-      - mongo-inventory
+      mongo-inventory:
+        condition: service_healthy
 
   vet-service:
+    <<: *springboot
     build: vet-service
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     restart: unless-stopped
     depends_on:
-      - mongo-vet
-      - postgres-vet
+      mongo-vet:
+        condition: service_healthy
+      postgres-vet:
+        condition: service_healthy
 
   customers-service-reactive:
+    <<: *springboot
     build: customers-service-reactive
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     restart: unless-stopped
     depends_on:
-      - mongo-customers
+      mongo-customers:
+        condition: service_healthy
 
   auth-service:
+    <<: *springboot
     build: auth-service
     hostname: auth
     environment:
@@ -102,14 +207,41 @@ services:
         condition: service_started
 
   billing-service:
+    <<: *springboot
     build: billing-service
     hostname: billing
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     restart: unless-stopped
     depends_on:
-      - mongo-billing
+      mongo-billing:
+        condition: service_healthy
 
+  products-service:
+    <<: *springboot
+    build: products-service
+    hostname: products-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    restart: unless-stopped
+    depends_on:
+      mongo-products:
+        condition: service_healthy
+
+  cart-service:
+    <<: *springboot
+    build: cart-service
+    hostname: cart
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    restart: unless-stopped
+    depends_on:
+      mongo-carts:
+        condition: service_healthy
+
+  # =========================
+  # BACKEND — Go (manual)
+  # =========================
   mailer-service:
     build: mailer-service
     environment:
@@ -118,24 +250,6 @@ services:
     env_file:
       - stack.env
     restart: unless-stopped
-
-  products-service:
-    build: products-service
-    hostname: products-service
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-    restart: unless-stopped
-    depends_on:
-      - mongo-products
-
-  cart-service:
-    build: cart-service
-    hostname: cart
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-    restart: unless-stopped
-    depends_on:
-      - mongo-carts
 
   files-service:
     build: files-service
@@ -148,15 +262,15 @@ services:
     depends_on:
       mysql-files:
         condition: service_healthy
+    restart: unless-stopped
 
-  # -------------------
-  # DATABASES
-  # -------------------
+  # =========================
+  # DATABASES — SQL
+  # =========================
   mysql-auth:
+    <<: *mysql
     image: mysql:5.7
     platform: linux/amd64
-    ports:
-      - "3310:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=rootpwd
       - MYSQL_DATABASE=auth-db
@@ -166,17 +280,11 @@ services:
       - mysql-auth-data:/var/lib/mysql
       - ./data/init.d:/docker-entrypoint-initdb.d
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-uuser", "-ppwd", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
 
   mysql-files:
+    <<: *mysql
     image: mysql:5.7
     platform: linux/amd64
-    ports:
-      - "3311:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=rootpwd
       - MYSQL_DATABASE=files-db
@@ -184,13 +292,9 @@ services:
       - MYSQL_PASSWORD=pwd
     volumes:
       - mysql-files-data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-uuser", "-ppwd", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
 
   postgres-vet:
+    <<: *postgres
     image: postgres:17
     container_name: postgres-vet
     hostname: postgres
@@ -198,20 +302,17 @@ services:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=pwd
       - POSTGRES_DB=images
-    ports:
-      - "5432:5432"
     volumes:
       - postgres-vet-data:/var/lib/postgresql/data
     restart: unless-stopped
 
-  # -------------------
-  # MONGODB DATABASES
-  # -------------------
+  # =========================
+  # DATABASES — MongoDB
+  # =========================
   mongo-vet:
+    <<: *mongo
     image: mongo
     container_name: mongo-vet
-    ports:
-      - "27017:27017"
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=password
@@ -221,10 +322,9 @@ services:
     restart: unless-stopped
 
   mongo-billing:
+    <<: *mongo
     image: mongo
     container_name: mongo-billing
-    ports:
-      - "27018:27017"
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=password
@@ -234,10 +334,9 @@ services:
     restart: unless-stopped
 
   mongo-visits:
+    <<: *mongo
     image: mongo
     container_name: mongo-visits
-    ports:
-      - "27015:27017"
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=password
@@ -247,10 +346,9 @@ services:
     restart: unless-stopped
 
   mongo-customers:
+    <<: *mongo
     image: mongo
     container_name: mongo-customers
-    ports:
-      - "27019:27017"
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=password
@@ -260,10 +358,9 @@ services:
     restart: unless-stopped
 
   mongo-inventory:
+    <<: *mongo
     image: mongo
     container_name: mongo-inventory
-    ports:
-      - "27020:27017"
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=password
@@ -273,10 +370,9 @@ services:
     restart: unless-stopped
 
   mongo-products:
+    <<: *mongo
     image: mongo
     container_name: mongo-products
-    ports:
-      - "27021:27017"
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=password
@@ -286,10 +382,9 @@ services:
     restart: unless-stopped
 
   mongo-carts:
+    <<: *mongo
     image: mongo
     container_name: mongo-carts
-    ports:
-      - "27022:27017"
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=password
@@ -298,7 +393,11 @@ services:
       - mongo-carts-config:/data/configdb
     restart: unless-stopped
 
+  # =========================
+  # ADMIN / TOOLING
+  # =========================
   dbgate:
+    <<: *dbgate_hc
     image: dbgate/dbgate:latest
     container_name: dbgate
     ports:
@@ -371,20 +470,30 @@ services:
       - ENGINE_mongoCarts=mongo@dbgate-plugin-mongo
       - URL_mongoCarts=mongodb://root:password@mongo-carts:27017/?authSource=admin
     depends_on:
-      - mysql-auth
-      - mysql-files
-      - postgres-vet
-      - mongo-vet
-      - mongo-billing
-      - mongo-visits
-      - mongo-customers
-      - mongo-inventory
-      - mongo-products
-      - mongo-carts
+      mysql-auth:
+        condition: service_healthy
+      mysql-files:
+        condition: service_healthy
+      postgres-vet:
+        condition: service_healthy
+      mongo-vet:
+        condition: service_healthy
+      mongo-billing:
+        condition: service_healthy
+      mongo-visits:
+        condition: service_healthy
+      mongo-customers:
+        condition: service_healthy
+      mongo-inventory:
+        condition: service_healthy
+      mongo-products:
+        condition: service_healthy
+      mongo-carts:
+        condition: service_healthy
 
-# -------------------
+# =========================
 # VOLUMES
-# -------------------
+# =========================
 volumes:
   mysql-auth-data:
   mongo-vet-data:

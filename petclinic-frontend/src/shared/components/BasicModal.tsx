@@ -1,3 +1,8 @@
+// This component creates a button that makes a modal pop up upon pressing it.
+// The modal's contents can be customized into anything you want such as a form or just a description.
+// It also has a confirmation button which allows you to perform any function upon pressing it.
+// If you're using the modal for a form, you'll want to use the formId instead of onConfirm.
+
 import * as React from 'react';
 import { useState } from 'react';
 import { Button, Modal } from 'react-bootstrap';

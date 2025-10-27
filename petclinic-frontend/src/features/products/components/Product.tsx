@@ -12,6 +12,7 @@ import {
 } from '@/context/UserContext';
 import { useAddToWishlist } from '@/features/carts/api/addToWishlistFromProducts';
 import StarRating from './StarRating';
+import { FaHeart, FaRegHeart } from 'react-icons/fa';
 
 export default function Product({
   product,
@@ -33,6 +34,7 @@ export default function Product({
     string | null
   >(null);
   const [, setTooLong] = useState<boolean>(false);
+  const [isWishlisted, setIsWishlisted] = useState(false);
 
   const navigate = useNavigate();
   const { addToCart } = useAddToCart();
@@ -68,7 +70,10 @@ export default function Product({
   const handleBackToList = (): void => setSelectedProduct(null);
 
   const handleAddToCart = async (): Promise<void> => {
-    const isSuccess = await addToCart(currentProduct.productId, 1);
+    const isSuccess = await addToCart(
+      currentProduct.productId,
+      currentProduct.productQuantity
+    );
     if (isSuccess) {
       setSuccessMessageCart('Product added to cart successfully!');
       setTimeout(() => setSuccessMessageCart(null), 3000);
@@ -79,6 +84,7 @@ export default function Product({
     const isSuccess = await addToWishlist(currentProduct.productId, 1);
     if (isSuccess) {
       setSuccessMessageWishlist('Product added to wishlist successfully!');
+      setIsWishlisted(true); // stays true after adding
       setTimeout(() => setSuccessMessageWishlist(null), 3000);
     }
   };
@@ -99,7 +105,7 @@ export default function Product({
 
   return (
     <div
-      className={`card ${
+      className={`card product-card product-card-no-bg ${
         currentProduct.productQuantity === 0
           ? 'out-of-stock'
           : currentProduct.productQuantity < 10
@@ -107,18 +113,33 @@ export default function Product({
             : ''
       }`}
       key={currentProduct.productId}
+      style={{ position: 'relative' }}
     >
+      {/* Wishlist Heart Button */}
+      {!isInventoryManager && !isVet && !isReceptionist && (
+        <button
+          className="wishlist-heart-btn"
+          title="Add to Wishlist"
+          onClick={handleAddToWishlist}
+        >
+          {isWishlisted ? (
+            <FaHeart style={{ color: '#e11d48' }} />
+          ) : (
+            <FaRegHeart style={{ color: '#000' }} />
+          )}
+        </button>
+      )}
+
       <div onClick={handleProductClick} className="product-title">
         <ImageContainer imageId={currentProduct.imageId} />
-
         <h2 className="product-title">{currentProduct.productName}</h2>
       </div>
-
-      <p>Price: ${currentProduct.productSalePrice.toFixed(2)}</p>
 
       <div className="deliveryType-container">
         <p>{getDeliveryTypeLabel(currentProduct.deliveryType)}</p>
       </div>
+
+      <p>Price: ${currentProduct.productSalePrice.toFixed(2)}</p>
 
       <div className="avgrating-container">
         <StarRating
@@ -127,10 +148,11 @@ export default function Product({
         />
       </div>
 
-      {/* Only show Add to Cart/Wishlist for customers */}
+      {/* Only show Add to Cart for customers */}
       {!isInventoryManager && !isVet && !isReceptionist && (
         <>
           <button
+            className={`add-to-cart-btn${currentProduct.productQuantity === 0 ? ' disabled' : ''}`}
             onClick={handleAddToCart}
             disabled={currentProduct.productQuantity === 0}
           >
@@ -141,8 +163,6 @@ export default function Product({
           {successMessageCart && (
             <p className="success-message">{successMessageCart}</p>
           )}
-
-          <button onClick={handleAddToWishlist}>Add to Wishlist</button>
           {successMessageWishlist && (
             <p className="success-message">{successMessageWishlist}</p>
           )}

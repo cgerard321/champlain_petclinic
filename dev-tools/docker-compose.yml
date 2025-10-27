@@ -1,0 +1,26 @@
+services:
+  dev-tools:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        pkg: dev-tools
+    ports:
+      - "4242:8080"
+    environment:
+      - MINIO_URL=petclinic-bucket.benmusicgeek.synology.me
+      - DATABASE_URL=mysql://user:pwd@mysql-devtools:3306/devtools-db?ssl-mode=DISABLED
+      - PASSWORD_PEPPER=Ceramic1-Sultan-Zenith
+      - ROCKET_LOG_LEVEL=normal
+      - ROCKET_SECRET_KEY=MEi/s8sSd6sbw+7acSBJv/Fk27+YL+/PAB8YZ25gydE=
+    env_file:
+      - ../mailer.env
+
+  mysql-devtools:
+    image: mysql:5.7
+    platform: linux/amd64
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpwd
+      - MYSQL_DATABASE=devtools-db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=pwd

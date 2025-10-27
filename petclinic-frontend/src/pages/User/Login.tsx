@@ -13,7 +13,7 @@ import './Login.css';
 import Slideshow from './Slideshow';
 import { Alert } from 'react-bootstrap';
 import { isAxiosError } from 'axios';
-import eyeDark from '@/assets/Icons/eyeDark.svg';
+import SvgIcon from '@/shared/components/SvgIcon';
 const images = [
   doctorAndDoggy,
   anotherDoctorAndDoggy,
@@ -51,7 +51,7 @@ export default function Login(): JSX.Element {
       const response = await axiosInstance.post<UserResponseModel>(
         '/users/login',
         {
-          email: formElements.emailInput.value,
+          emailOrUsername: formElements.emailInput.value,
           password: formElements.passwordInput.value,
         },
         {
@@ -123,8 +123,9 @@ export default function Login(): JSX.Element {
               id="toggle-password"
               onClick={togglePasswordVisibility}
               type="button"
+              title="Show Password"
             >
-              <img className="icon-eye" src={eyeDark} title="showPassword" />
+              <SvgIcon id="eye" />
             </button>
           </div>
           <br />

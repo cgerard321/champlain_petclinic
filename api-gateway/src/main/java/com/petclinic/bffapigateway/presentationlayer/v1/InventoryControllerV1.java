@@ -62,30 +62,36 @@ public class InventoryControllerV1 {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER})
-    @GetMapping(value = "/types")
+    @GetMapping(value = "/types", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<InventoryTypeResponseDTO> getAllInventoryTypes(){
         return inventoryServiceClient.getAllInventoryTypes();
     }
 
     //Start of Inventory Methods
-    @GetMapping("/{inventoryId}/products-pagination")
+    @GetMapping(value = "/{inventoryId}/products-pagination", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER, Roles.VET})
     public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductFieldPagination(@PathVariable String inventoryId,
                                                                                                  @RequestParam(required = false) String productName,
-                                                                                                 @RequestParam(required = false) Double productPrice,
+                                                                                                 @RequestParam(required = false) Double minPrice,
+                                                                                                 @RequestParam(required = false) Double maxPrice,
                                                                                                  @RequestParam(required = false) Integer productQuantity,
+                                                                                                 @RequestParam(required = false) Double minSalePrice,
+                                                                                                 @RequestParam(required = false) Double maxSalePrice,
                                                                                                  @RequestParam Optional<Integer> page,
                                                                                                  @RequestParam Optional<Integer> size){
-        return inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductFieldPagination(inventoryId, productName, productPrice, productQuantity, page, size);
+        return inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductFieldPagination(inventoryId, productName, minPrice, maxPrice, productQuantity, minSalePrice, maxSalePrice, page, size);
     }
 
-    @GetMapping("/{inventoryId}/products-count")
+    @GetMapping(value = "/{inventoryId}/products-count")
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER,Roles.VET})
     public Mono<ResponseEntity<Long>> getTotalNumberOfProductsWithRequestParams(@PathVariable String inventoryId,
                                                                                 @RequestParam(required = false) String productName,
-                                                                                @RequestParam(required = false) Double productPrice,
-                                                                                @RequestParam(required = false) Integer productQuantity){
-        return inventoryServiceClient.getTotalNumberOfProductsWithRequestParams(inventoryId, productName, productPrice, productQuantity)
+                                                                                @RequestParam(required = false) Double minPrice,
+                                                                                @RequestParam(required = false) Double maxPrice,
+                                                                                @RequestParam(required = false) Integer productQuantity,
+                                                                                @RequestParam(required = false) Double minSalePrice,
+                                                                                @RequestParam(required = false) Double maxSalePrice){
+        return inventoryServiceClient.getTotalNumberOfProductsWithRequestParams(inventoryId, productName, minPrice, maxPrice, productQuantity, minSalePrice, maxSalePrice)
                 .map(response -> ResponseEntity.status(HttpStatus.OK).body(response));
     }
 
@@ -167,13 +173,15 @@ public class InventoryControllerV1 {
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER,Roles.VET})
-    @GetMapping(value = "/{inventoryId}/products")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "/{inventoryId}/products" , produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndFields(@PathVariable String inventoryId,
                                                                                  @RequestParam(required = false) String productName,
-                                                                                 @RequestParam(required = false) Double productPrice,
+                                                                                 @RequestParam(required = false) Double minPrice,
+                                                                                 @RequestParam(required = false) Double maxPrice,
                                                                                  @RequestParam(required = false) Integer productQuantity,
-                                                                                 @RequestParam(required = false) Double productSalePrice){
-        return inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, productPrice, productQuantity, productSalePrice);
+                                                                                 @RequestParam(required = false) Double minSalePrice,
+                                                                                 @RequestParam(required = false) Double maxSalePrice){
+        return inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, minPrice, maxPrice, productQuantity, minSalePrice, maxSalePrice);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER, Roles.VET})
@@ -219,14 +227,14 @@ public class InventoryControllerV1 {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER})
-    @GetMapping(value="/{inventoryId}/products/lowstock")
+    @GetMapping(value="/{inventoryId}/products/lowstock", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ProductResponseDTO>getLowStockProducts(@PathVariable String inventoryId, @RequestParam Optional<Integer> threshold){
         int stockThreshold = threshold.orElse(20);
         return inventoryServiceClient.getLowStockProducts(inventoryId, stockThreshold);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
-    @GetMapping(value = "/{inventoryId}/products/search")
+    @GetMapping(value = "/{inventoryId}/products/search", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Mono<ResponseEntity<Flux<ProductResponseDTO>>> searchProducts(
             @PathVariable String inventoryId,
             @RequestParam(required = false) String productName,
@@ -259,7 +267,7 @@ public class InventoryControllerV1 {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
-    @GetMapping("/{inventoryName}/products/by-name")
+    @GetMapping(value = "/{inventoryName}/products/by-name", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 //    @ApiResponses(value = {
 //            @ApiResponse(description = "Get products by inventory name", responseCode = "200"),
 //            @ApiResponse(description = "Inventory name not found", responseCode = "404")
@@ -276,7 +284,7 @@ public class InventoryControllerV1 {
                 });
     }
 
-    @GetMapping("/all")
+    @GetMapping(value = "/all", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<InventoryResponseDTO> getAllInventories() {
         return inventoryServiceClient.getAllInventories();
     }
@@ -313,7 +321,7 @@ public class InventoryControllerV1 {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER,Roles.VET})
-    @GetMapping()//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<InventoryResponseDTO> searchInventory(@RequestParam Optional<Integer> page,
                                                       @RequestParam Optional<Integer> size,
                                                       @RequestParam(required = false) String inventoryCode,

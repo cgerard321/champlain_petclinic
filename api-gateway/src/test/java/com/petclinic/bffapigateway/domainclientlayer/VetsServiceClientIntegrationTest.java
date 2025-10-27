@@ -1613,13 +1613,20 @@ class VetsServiceClientIntegrationTest {
                         "        \"email\": \"skjfhf@gmail.com\",\n" +
                         "        \"phoneNumber\": \"947-238-2847\",\n" +
                         "        \"resume\": \"Just became a vet\",\n" +
-                        "        \"workday\": \"Monday\",\n" +
+                        "        \"workday\": [],\n" +
                         "        \"active\": false\n" +
                         "    }"));
 
-        final Mono<Void> empty = vetsServiceClient.deleteVet(vetResponseDTO.getVetId());
+        final Mono<VetResponseDTO> resultMono = vetsServiceClient.deleteVet(vetResponseDTO.getVetId());
 
-        assertEquals(empty.block(), null);
+        StepVerifier.create(resultMono)
+                .expectNextMatches(responseDto -> {
+                    assertNotNull(responseDto);
+                    assertFalse(responseDto.isActive());
+                    assertEquals("deb1950c-3c56-45dc-874b-89e352695eb7", responseDto.getVetId());
+                    return true;
+                })
+                .verifyComplete();
     }
 
     @Test
@@ -1631,7 +1638,7 @@ class VetsServiceClientIntegrationTest {
                 .setResponseCode(404)
                 .setBody("vetId not found: "+invalidVetId));
 
-        final Void empty = vetsServiceClient.deleteVet(invalidVetId)
+        final VetResponseDTO empty = vetsServiceClient.deleteVet(invalidVetId)
                 .onErrorResume(throwable -> {
                     if (throwable instanceof ExistingVetNotFoundException && throwable.getMessage().equals("vetId not found: "+invalidVetId)) {
                         return Mono.empty();
@@ -1651,7 +1658,7 @@ class VetsServiceClientIntegrationTest {
                 .setResponseCode(400)
                 .setBody("Something went wrong with the client"));
 
-        final Void empty = vetsServiceClient.deleteVet(vetResponseDTO.getVetId())
+        final VetResponseDTO empty = vetsServiceClient.deleteVet(vetResponseDTO.getVetId())
                 .onErrorResume(throwable -> {
                     if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the client")) {
                         return Mono.empty();
@@ -1671,7 +1678,7 @@ class VetsServiceClientIntegrationTest {
                 .setResponseCode(500)
                 .setBody("Something went wrong with the server"));
 
-        final Void empty = vetsServiceClient.deleteVet(vetResponseDTO.getVetId())
+        final VetResponseDTO empty = vetsServiceClient.deleteVet(vetResponseDTO.getVetId())
                 .onErrorResume(throwable -> {
                     if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the server")) {
                         return Mono.empty();
@@ -2189,12 +2196,12 @@ class VetsServiceClientIntegrationTest {
 
         server.enqueue(new MockResponse()
                 .setResponseCode(200)
-                .setBody("")); // Assuming successful delete returns an empty body
+                .setBody(""));
 
-        Mono<Void> result = vetsServiceClient.deleteSpecialtiesByVetId(vetId, specialtyId);
+        Mono<Void> result = vetsServiceClient.deleteSpecialtyBySpecialtyId(vetId, specialtyId);
 
         StepVerifier.create(result)
-                .verifyComplete(); // Verifies that the operation completes successfully
+                .verifyComplete();
 
         RecordedRequest recordedRequest = server.takeRequest();
         assertEquals("/deb1950c-3c56-45dc-874b-89e352695eb7/specialties/794ac37f-1e07-43c2-93bc-61839e61d989", recordedRequest.getPath());
@@ -2208,15 +2215,15 @@ class VetsServiceClientIntegrationTest {
 
         server.enqueue(new MockResponse()
                 .setResponseCode(404)
-                .setBody("")); // Simulating a 404 response
+                .setBody(""));
 
-        Mono<Void> result = vetsServiceClient.deleteSpecialtiesByVetId(vetId, specialtyId);
+        Mono<Void> result = vetsServiceClient.deleteSpecialtyBySpecialtyId(vetId, specialtyId);
 
         StepVerifier.create(result)
                 .expectErrorMatches(throwable ->
                         throwable instanceof ExistingVetNotFoundException &&
                                 throwable.getMessage().contains("Vet not found: " + vetId))
-                .verify(); // Verifying the error
+                .verify();
 
         // Validating the request was sent correctly
         RecordedRequest recordedRequest = server.takeRequest();
@@ -3313,19 +3320,6 @@ class VetsServiceClientIntegrationTest {
                     assertThat(response.getFirstName()).isEqualTo(expectedResponse.getFirstName());
                     assertThat(response.getLastName()).isEqualTo(expectedResponse.getLastName());
                 })
-                .verifyComplete();
-    }
-
-    @Test
-    void deleteVet_successTest() throws Exception {
-        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
-
-        server.enqueue(new MockResponse()
-                .setResponseCode(204));
-
-        Mono<Void> result = vetsServiceClient.deleteVet(vetId);
-
-        StepVerifier.create(result)
                 .verifyComplete();
     }
 

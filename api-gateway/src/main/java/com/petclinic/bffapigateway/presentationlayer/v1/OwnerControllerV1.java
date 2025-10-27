@@ -6,6 +6,7 @@ import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
+import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
@@ -27,14 +28,22 @@ public class OwnerControllerV1 {
     private final CustomersServiceClient customersServiceClient;
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET,Roles.RECEPTIONIST})
-    @GetMapping(value = "")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<OwnerResponseDTO> getAllOwners() {
         return customersServiceClient.getAllOwners();
 
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST})
+    @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<OwnerResponseDTO>> addOwner(@RequestBody Mono<OwnerRequestDTO> ownerRequestDTO) {
+        return customersServiceClient.createOwner(ownerRequestDTO)
+                .map(e -> ResponseEntity.status(HttpStatus.CREATED).body(e))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET,Roles.RECEPTIONIST})
-    @GetMapping(value = "/owners-pagination")
+    @GetMapping(value = "/owners-pagination", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<OwnerResponseDTO> getOwnersByPagination(@RequestParam Optional<Integer> page,
                                                         @RequestParam Optional<Integer> size,
                                                         @RequestParam(required = false) String ownerId,
@@ -92,11 +101,14 @@ public class OwnerControllerV1 {
     public Mono<ResponseEntity<OwnerResponseDTO>> updateOwner(
             @PathVariable String ownerId,
             @RequestBody Mono<OwnerRequestDTO> ownerRequestMono) {
-        return ownerRequestMono.flatMap(ownerRequestDTO ->
-                customersServiceClient.updateOwner(ownerId, Mono.just(ownerRequestDTO))
-                        .map(updatedOwner -> ResponseEntity.ok().body(updatedOwner))
-                        .defaultIfEmpty(ResponseEntity.notFound().build())
-        );
+        return Mono.just(ownerId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(Mono.error(new InvalidInputException("Provided owner id is invalid: " + ownerId)))
+                .flatMap(id -> ownerRequestMono.flatMap(ownerRequestDTO ->
+                        customersServiceClient.updateOwner(id, Mono.just(ownerRequestDTO))
+                                .map(updatedOwner -> ResponseEntity.ok().body(updatedOwner))
+                                .defaultIfEmpty(ResponseEntity.notFound().build())
+                ));
     }
 
     @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN, Roles.RECEPTIONIST})
@@ -141,7 +153,8 @@ public class OwnerControllerV1 {
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET,Roles.RECEPTIONIST})
     @DeleteMapping("/{ownerId}/pets/{petId}")
     public Mono<ResponseEntity<PetResponseDTO>> deletePet(@PathVariable String ownerId, @PathVariable String petId){
-        return customersServiceClient.deletePet(ownerId,petId).then(Mono.just(ResponseEntity.noContent().<PetResponseDTO>build()))
+         return customersServiceClient.deletePet(ownerId,petId)
+                .map(pet -> ResponseEntity.noContent().<PetResponseDTO>build())
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
@@ -149,6 +162,16 @@ public class OwnerControllerV1 {
     @DeleteMapping("/{ownerId}/photo")
     public Mono<ResponseEntity<OwnerResponseDTO>> deleteOwnerPhoto(@PathVariable String ownerId) {
         return customersServiceClient.deleteOwnerPhoto(ownerId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN, Roles.VET})
+    @PatchMapping("/{ownerId}/pets/{petId}/photo")
+    public Mono<ResponseEntity<PetResponseDTO>> deletePetPhotoForOwner(
+            @PathVariable String ownerId,
+            @PathVariable String petId) {
+        return customersServiceClient.deletePetPhoto(petId)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }

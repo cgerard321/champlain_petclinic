@@ -4,6 +4,7 @@ import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
 import com.petclinic.bffapigateway.dtos.Auth.RegisterVet;
 import com.petclinic.bffapigateway.dtos.Auth.Role;
+import com.petclinic.bffapigateway.dtos.Files.FileDetails;
 import com.petclinic.bffapigateway.dtos.Vets.*;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import org.junit.jupiter.api.Test;
@@ -95,6 +96,28 @@ class VetControllerUnitTest {
                         .build()))
                 .build();
     }
+
+    private VetResponseDTO buildDeactivatedVetResponseDTO(String vetId) {
+        Set<Workday> workdaySet = Set.of(Workday.Monday, Workday.Wednesday);
+
+        return VetResponseDTO.builder()
+                .vetId(vetId)
+                .vetBillId("bill001")
+                .firstName("John")
+                .lastName("Doe")
+                .email("john.doe@example.com")
+                .phoneNumber("1234567890")
+                .resume("Specialist in dermatology")
+                .workday(workdaySet)
+                .workHoursJson("{\"08:00-16:00\"}")
+                .active(false)
+                .specialties(Set.of(SpecialtyDTO.builder()
+                        .specialtyId("dermatology")
+                        .name("Dermatology")
+                        .build()))
+                .build();
+    }
+
     VetResponseDTO vetResponseDTO = buildVetResponseDTO();
 
     RegisterVet registerVet = RegisterVet.builder()
@@ -265,15 +288,26 @@ class VetControllerUnitTest {
     }
 
     @Test
-    void whenDeleteVet_withValidId_thenReturnNoContent() {
+    void whenDeleteVet_withValidId_thenReturnDeactivatedVetResponseDTO() {
         String vetId = "2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb";
+
+        VetResponseDTO deactivatedVet = buildDeactivatedVetResponseDTO(vetId);
+
+
         when(vetsServiceClient.deleteVet(vetId))
-                .thenReturn(Mono.empty());
+                .thenReturn(Mono.just(deactivatedVet));
 
         webTestClient.delete()
                 .uri(BASE_VET_URL + "/" + vetId)
                 .exchange()
-                .expectStatus().isNoContent();
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(VetResponseDTO.class)
+                .value(responseDto -> {
+                    assertNotNull(responseDto);
+                    assertFalse(responseDto.isActive());
+                    assertEquals(vetId, responseDto.getVetId());
+                });
 
         verify(vetsServiceClient, times(1)).deleteVet(vetId);
     }
@@ -281,7 +315,7 @@ class VetControllerUnitTest {
     @Test
     void whenGetVetByVetId_withValidId_thenReturnVet() {
         String vetId = "2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb";
-        when(vetsServiceClient.getVetByVetId(vetId))
+        when(vetsServiceClient.getVet(vetId, false))
                 .thenReturn(Mono.just(vetResponseDTO));
 
         webTestClient.get()
@@ -296,13 +330,13 @@ class VetControllerUnitTest {
                     assertEquals(vetResponseDTO.getFirstName(), vet.getFirstName());
                 });
 
-        verify(vetsServiceClient, times(1)).getVetByVetId(vetId);
+        verify(vetsServiceClient, times(1)).getVet(vetId, false);
     }
 
     @Test
     void whenGetVetByVetId_withValidId_butVetNotFound_thenReturnNotFound() {
         String vetId = "2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb";
-        when(vetsServiceClient.getVetByVetId(vetId))
+        when(vetsServiceClient.getVet(vetId, false))
                 .thenReturn(Mono.empty());
 
         webTestClient.get()
@@ -311,7 +345,7 @@ class VetControllerUnitTest {
                 .exchange()
                 .expectStatus().isNotFound();
 
-        verify(vetsServiceClient, times(1)).getVetByVetId(vetId);
+        verify(vetsServiceClient, times(1)).getVet(vetId, false);
     }
 
     @Test
@@ -341,11 +375,11 @@ class VetControllerUnitTest {
     }
 
     @Test
-    void whenDeleteSpecialtiesByVetId_thenReturnNoContent() {
+    void whenDeleteSpecialtyByVetId_thenReturnNoContent() {
         String vetId = "2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb";
         String specialtyId = "cardiology";
 
-        when(vetsServiceClient.deleteSpecialtiesByVetId(vetId, specialtyId))
+        when(vetsServiceClient.deleteSpecialtyBySpecialtyId(vetId, specialtyId))
                 .thenReturn(Mono.empty());
 
         webTestClient.delete()
@@ -353,15 +387,15 @@ class VetControllerUnitTest {
                 .exchange()
                 .expectStatus().isNoContent();
 
-        verify(vetsServiceClient, times(1)).deleteSpecialtiesByVetId(vetId, specialtyId);
+        verify(vetsServiceClient, times(1)).deleteSpecialtyBySpecialtyId(vetId, specialtyId);
     }
 
     @Test
-    void whenDeleteSpecialtiesByVetId_withNotFound_thenReturnNotFound() {
+    void whenDeleteSpecialtyByVetId_withNotFound_thenReturnNotFound() {
         String vetId = "2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb";
         String specialtyId = "invalid-specialty";
 
-        when(vetsServiceClient.deleteSpecialtiesByVetId(vetId, specialtyId))
+        when(vetsServiceClient.deleteSpecialtyBySpecialtyId(vetId, specialtyId))
                 .thenReturn(Mono.error(new RuntimeException("Not found")));
 
         webTestClient.delete()
@@ -369,7 +403,7 @@ class VetControllerUnitTest {
                 .exchange()
                 .expectStatus().isNotFound();
 
-        verify(vetsServiceClient, times(1)).deleteSpecialtiesByVetId(vetId, specialtyId);
+        verify(vetsServiceClient, times(1)).deleteSpecialtyBySpecialtyId(vetId, specialtyId);
     }
 
     @Test
@@ -461,10 +495,20 @@ class VetControllerUnitTest {
         String vetId = "2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb";
         String photoName = "new-photo.jpg";
         byte[] photoData = "new photo data".getBytes();
-        org.springframework.core.io.Resource photoResource = new org.springframework.core.io.ByteArrayResource(photoData);
+        
+        FileDetails photo = FileDetails.builder()
+                .fileName(photoName)
+                .fileType("image/jpeg")
+                .fileData(photoData)
+                .build();
+        
+        VetResponseDTO vetResponse = VetResponseDTO.builder()
+                .vetId(vetId)
+                .photo(photo)
+                .build();
 
-        when(vetsServiceClient.addPhotoToVetFromBytes(eq(vetId), eq(photoName), any(byte[].class)))
-                .thenReturn(Mono.just(photoResource));
+        when(vetsServiceClient.updateVetPhoto(eq(vetId), any()))
+                .thenReturn(Mono.just(vetResponse));
 
         webTestClient.post()
                 .uri(BASE_VET_URL + "/" + vetId + "/photos")
@@ -480,7 +524,7 @@ class VetControllerUnitTest {
                     assertArrayEquals(photoData, body);
                 });
 
-        verify(vetsServiceClient, times(1)).addPhotoToVetFromBytes(eq(vetId), eq(photoName), any(byte[].class));
+        verify(vetsServiceClient, times(1)).updateVetPhoto(eq(vetId), any());
     }
 
     @Test
@@ -489,8 +533,8 @@ class VetControllerUnitTest {
         String photoName = "new-photo.jpg";
         byte[] photoData = "new photo data".getBytes();
 
-        when(vetsServiceClient.addPhotoToVetFromBytes(eq(vetId), eq(photoName), any(byte[].class)))
-                .thenReturn(Mono.empty());
+        when(vetsServiceClient.updateVetPhoto(eq(vetId), any()))
+                .thenReturn(Mono.just(VetResponseDTO.builder().vetId(vetId).build())); // Return vet without photo
 
         webTestClient.post()
                 .uri(BASE_VET_URL + "/" + vetId + "/photos")
@@ -500,7 +544,7 @@ class VetControllerUnitTest {
                 .exchange()
                 .expectStatus().isBadRequest();
 
-        verify(vetsServiceClient, times(1)).addPhotoToVetFromBytes(eq(vetId), eq(photoName), any(byte[].class));
+        verify(vetsServiceClient, times(1)).updateVetPhoto(eq(vetId), any());
     }
 
     @Test
@@ -514,10 +558,10 @@ class VetControllerUnitTest {
 
         webTestClient.get()
                 .uri(BASE_VET_URL + "/" + vetId + "/albums")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(Album.class)
                 .hasSize(2)
                 .value(albums -> {
@@ -585,10 +629,10 @@ class VetControllerUnitTest {
 
         webTestClient.get()
                 .uri(BASE_VET_URL + "/" + vetId + "/educations")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(EducationResponseDTO.class)
                 .hasSize(1)
                 .value(educations -> {
@@ -658,10 +702,10 @@ class VetControllerUnitTest {
 
         webTestClient.get()
                 .uri(BASE_VET_URL + "/" + vetId + "/ratings")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(RatingResponseDTO.class)
                 .hasSize(1)
                 .value(ratings -> {
@@ -694,10 +738,20 @@ class VetControllerUnitTest {
         String vetId = "2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb";
         String photoName = "test-photo.jpg";
         byte[] photoData = "test photo data".getBytes();
-        org.springframework.core.io.Resource photoResource = new org.springframework.core.io.ByteArrayResource(photoData);
+        
+        FileDetails photo = FileDetails.builder()
+                .fileName(photoName)
+                .fileType("image/jpeg")
+                .fileData(photoData)
+                .build();
+        
+        VetResponseDTO vetResponse = VetResponseDTO.builder()
+                .vetId(vetId)
+                .photo(photo)
+                .build();
 
-        when(vetsServiceClient.addPhotoToVet(eq(vetId), eq(photoName), any(FilePart.class)))
-                .thenReturn(Mono.just(photoResource));
+        when(vetsServiceClient.updateVetPhoto(eq(vetId), any()))
+                .thenReturn(Mono.just(vetResponse));
 
         webTestClient.post()
                 .uri("/api/v2/gateway/vets/{vetId}/photos", vetId)
@@ -713,7 +767,7 @@ class VetControllerUnitTest {
                 .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_OCTET_STREAM);
 
-        verify(vetsServiceClient, times(1)).addPhotoToVet(eq(vetId), eq(photoName), any(FilePart.class));
+        verify(vetsServiceClient, times(1)).updateVetPhoto(eq(vetId), any());
     }
 
     @Test
@@ -722,8 +776,8 @@ class VetControllerUnitTest {
         String photoName = "test-photo.jpg";
         byte[] photoData = "test photo data".getBytes();
 
-        when(vetsServiceClient.addPhotoToVet(eq(vetId), eq(photoName), any(FilePart.class)))
-                .thenReturn(Mono.empty());
+        when(vetsServiceClient.updateVetPhoto(eq(vetId), any()))
+                .thenReturn(Mono.just(VetResponseDTO.builder().vetId(vetId).build())); // Return vet without photo
 
         webTestClient.post()
                 .uri("/api/v2/gateway/vets/{vetId}/photos", vetId)
@@ -738,7 +792,7 @@ class VetControllerUnitTest {
                 .exchange()
                 .expectStatus().isBadRequest();
 
-        verify(vetsServiceClient, times(1)).addPhotoToVet(eq(vetId), eq(photoName), any(FilePart.class));
+        verify(vetsServiceClient, times(1)).updateVetPhoto(eq(vetId), any());
     }
 
     @Test

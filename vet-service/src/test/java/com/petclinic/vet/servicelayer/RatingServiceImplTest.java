@@ -9,6 +9,7 @@ import com.petclinic.vet.dataaccesslayer.ratings.Rating;
 import com.petclinic.vet.dataaccesslayer.ratings.RatingRepository;
 import com.petclinic.vet.dataaccesslayer.vets.Vet;
 import com.petclinic.vet.dataaccesslayer.vets.VetRepository;
+import com.petclinic.vet.domainclientlayer.FilesServiceClient;
 import com.petclinic.vet.presentationlayer.ratings.RatingRequestDTO;
 import com.petclinic.vet.presentationlayer.ratings.RatingResponseDTO;
 import com.petclinic.vet.presentationlayer.vets.VetAverageRatingDTO;
@@ -50,6 +51,8 @@ class RatingServiceImplTest {
     RatingRepository ratingRepository;
     @MockBean
     VetRepository vetRepository;
+    @MockBean
+    FilesServiceClient filesServiceClient;
 
     //To counter missing bean error
     @MockBean
@@ -182,6 +185,7 @@ class RatingServiceImplTest {
                 .verify();
     }
 
+    // Pass when should fail
     @Test
     void addRatingToVet() {
         when(vetRepository.findVetByVetId(anyString())).thenReturn(Mono.just(existingVet));
@@ -190,6 +194,7 @@ class RatingServiceImplTest {
                 .map(ratingResponseDTO -> {
                     assertEquals(ratingResponseDTO.getVetId(), ratingRequestDTO.getVetId());
                     assertEquals(ratingResponseDTO.getRateScore(), ratingRequestDTO.getRateScore());
+                    assertEquals("test1", "test2");
                     assertNotNull(ratingResponseDTO.getRatingId());
                     return ratingResponseDTO;
                 });

@@ -70,9 +70,13 @@ out/
 
 # End of https://www.toptal.com/developers/gitignore/api/go
 
+### Rust ###
+/debug/
+/target/
 .env
 cover.html
 app
+data/
 
 # Ignore swagger docs for mailer
 mailer-service/docs
@@ -80,6 +84,7 @@ mailer-service/docs
 # Ignore environment files
 *.env
 .env
+
 
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 

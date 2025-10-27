@@ -11,30 +11,47 @@ import { NavBar } from '@/layouts/AppNavBar.tsx';
 import AddPetModal from '@/features/customers/components/AddPetModal';
 import EditPetModal from '@/features/customers/components/EditPetModal';
 import UploadPhotoModal from '@/features/customers/components/UploadPhotoModal';
+import UploadPetPhotoModal from '@/features/customers/components/UploadPetPhotoModal';
 import './ProfilePage.css';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '@/shared/api/axiosInstance';
-import { getPetTypeName } from '@/features/customers/utils/petTypeMapping';
+import {
+  getPetTypeName,
+  getPetTypeImage, // ✅ added
+} from '@/features/customers/utils/petTypeMapping';
 import { deletePet } from '@/features/customers/api/deletePet';
 import defaultProfile from '@/assets/Owners/defaultProfilePicture.png';
 import { deleteOwnerPhoto } from '@/features/customers/api/deleteOwnerPhoto.ts';
+import { deletePetPhoto } from '@/features/customers/api/deletePetPhoto';
+import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
 
 const ProfilePage = (): JSX.Element => {
   const [profilePicUrl, setProfilePicUrl] = useState<string>('');
   const { user } = useUser();
+  const [petImageUrls, setPetImageUrls] = useState<Record<string, string>>({});
   const [owner, setOwner] = useState<OwnerResponseModel | null>(null);
   const [userDetails, setUserDetails] = useState<UserDetailsModel | null>(null);
   const [error, setError] = useState<string | null>(null);
+
   const [isAddPetModalOpen, setIsAddPetModalOpen] = useState<boolean>(false);
   const [isEditPetModalOpen, setIsEditPetModalOpen] = useState<boolean>(false);
   const [isUploadPhotoModalOpen, setIsUploadPhotoModalOpen] =
     useState<boolean>(false);
+
+  const [isUploadPetPhotoModalOpen, setIsUploadPetPhotoModalOpen] =
+    useState<boolean>(false);
+  const [selectedPetIdForPhoto, setSelectedPetIdForPhoto] =
+    useState<string>('');
+
   const [selectedPetId, setSelectedPetId] = useState<string>('');
   const [petTypes, setPetTypes] = useState<PetTypeModel[]>([]);
   const navigate = useNavigate();
+
   const [isDeletePhotoModalOpen, setIsDeletePhotoModalOpen] =
     useState<boolean>(false);
+
+  const { confirm, ConfirmModal } = useConfirmModal();
   useEffect(() => {
     const fetchPetTypes = async (): Promise<void> => {
       try {
@@ -116,7 +133,7 @@ const ProfilePage = (): JSX.Element => {
           err
         );
         if (isMounted) {
-          setProfilePicUrl(''); // will fall back to default
+          setProfilePicUrl('');
         }
       }
     };
@@ -131,6 +148,48 @@ const ProfilePage = (): JSX.Element => {
     };
   }, [user.userId]);
 
+  const fetchPetPhotoUrl = async (
+    petId: string,
+    petName: string,
+    petTypeId: string // ✅ added param
+  ): Promise<string> => {
+    try {
+      const response = await axiosInstance.get(`/pets/${petId}`, {
+        useV2: false,
+        params: { includePhoto: true },
+      });
+      const petData = response.data;
+
+      if (
+        petData.photo &&
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (petData.photo.data || (petData.photo as any).fileData)
+      ) {
+        const base64Data =
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          petData.photo.data || (petData.photo as any).fileData;
+        const contentType =
+          petData.photo.contentType ||
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (petData.photo as any).fileType ||
+          'image/png';
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: contentType });
+        return URL.createObjectURL(blob);
+      } else {
+        // ✅ type-based fallback
+        return getPetTypeImage(petTypeId, petTypes);
+      }
+    } catch (error) {
+      console.error(`Error fetching photo for ${petName} (${petId}):`, error);
+      return getPetTypeImage(petTypeId, petTypes);
+    }
+  };
   useEffect(() => {
     let isMounted = true;
 
@@ -163,7 +222,17 @@ const ProfilePage = (): JSX.Element => {
             petsData = petsResponse.data;
           }
 
+          const newPetImageUrls: Record<string, string> = {};
+          for (const pet of petsData) {
+            newPetImageUrls[pet.petId] = await fetchPetPhotoUrl(
+              pet.petId,
+              pet.name,
+              pet.petTypeId // ✅ now uses the added param
+            );
+          }
+
           if (isMounted) {
+            setPetImageUrls(newPetImageUrls);
             setOwner({
               ...ownerData,
               pets: petsData,
@@ -194,7 +263,8 @@ const ProfilePage = (): JSX.Element => {
     return () => {
       isMounted = false;
     };
-  }, [user.userId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user.userId, petTypes]);
 
   const handleUpdateClick = (): void => {
     navigate(AppRoutePaths.CustomerProfileEdit);
@@ -215,14 +285,6 @@ const ProfilePage = (): JSX.Element => {
     setIsAddPetModalOpen(false);
   };
 
-  const handleOpenUploadPhotoModal = (): void => {
-    setIsUploadPhotoModalOpen(true);
-  };
-
-  const handleCloseUploadPhotoModal = (): void => {
-    setIsUploadPhotoModalOpen(false);
-  };
-
   const handlePetAdded = (newPet: PetResponseModel): void => {
     if (owner) {
       setOwner({
@@ -232,45 +294,12 @@ const ProfilePage = (): JSX.Element => {
     }
   };
 
-  const handleDeletePhoto = async (): Promise<void> => {
-    try {
-      await deleteOwnerPhoto(user.userId);
-      if (profilePicUrl) {
-        URL.revokeObjectURL(profilePicUrl);
-      }
-      setProfilePicUrl('');
-      setIsDeletePhotoModalOpen(false);
-    } catch (error) {
-      console.error('Error deleting profile photo:', error);
-      alert('Failed to delete profile photo. Please try again.');
-    }
+  const handleOpenUploadPhotoModal = (): void => {
+    setIsUploadPhotoModalOpen(true);
   };
 
-  const handleDeletePet = async (petId: string): Promise<void> => {
-    const confirmed = window.confirm(
-      'Are you sure you want to delete this pet? This action cannot be undone.'
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
-    try {
-      await deletePet(petId);
-
-      if (owner) {
-        setOwner({
-          ...owner,
-          pets: owner.pets?.filter(pet => pet.petId !== petId) || [],
-        });
-      }
-
-      // eslint-disable-next-line no-console
-      console.log('Pet deleted successfully');
-    } catch (error) {
-      console.error('Error deleting pet:', error);
-      alert('Failed to delete pet. Please try again.');
-    }
+  const handleCloseUploadPhotoModal = (): void => {
+    setIsUploadPhotoModalOpen(false);
   };
 
   const handlePhotoUploaded = async (): Promise<void> => {
@@ -292,18 +321,26 @@ const ProfilePage = (): JSX.Element => {
         const blob = new Blob([byteArray], { type: contentType });
         const objectUrl = URL.createObjectURL(blob);
 
-        if (profilePicUrl) {
-          URL.revokeObjectURL(profilePicUrl);
-        }
+        if (profilePicUrl) URL.revokeObjectURL(profilePicUrl);
         setProfilePicUrl(objectUrl);
       } else {
-        if (profilePicUrl) {
-          URL.revokeObjectURL(profilePicUrl);
-        }
+        if (profilePicUrl) URL.revokeObjectURL(profilePicUrl);
         setProfilePicUrl('');
       }
     } catch (error) {
       console.error('Error refreshing profile picture:', error);
+    }
+  };
+
+  const handleDeletePhoto = async (): Promise<void> => {
+    try {
+      await deleteOwnerPhoto(user.userId);
+      if (profilePicUrl) URL.revokeObjectURL(profilePicUrl);
+      setProfilePicUrl('');
+      setIsDeletePhotoModalOpen(false);
+    } catch (error) {
+      console.error('Error deleting profile photo:', error);
+      alert('Failed to delete profile photo. Please try again.');
     }
   };
 
@@ -317,20 +354,38 @@ const ProfilePage = (): JSX.Element => {
     setSelectedPetId('');
   };
 
-  //eliminated code duplication
+  const handleDeletePet = async (petId: string): Promise<void> => {
+    const confirmed = window.confirm(
+      'Are you sure you want to delete this pet? This action cannot be undone.'
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deletePet(petId);
+      if (owner) {
+        setOwner({
+          ...owner,
+          pets: owner.pets?.filter(pet => pet.petId !== petId) || [],
+        });
+      }
+      // eslint-disable-next-line no-console
+      console.log('Pet deleted successfully');
+    } catch (error) {
+      console.error('Error deleting pet:', error);
+      alert('Failed to delete pet. Please try again.');
+    }
+  };
+
   const fetchOwnerData = async (): Promise<void> => {
     if (!user.userId) return;
-
     try {
       const ownerResponse = await getOwner(user.userId);
       const ownerData = ownerResponse.data;
       if (ownerData.pets && ownerData.pets.length > 0) {
         setOwner(ownerData);
       } else {
-        setOwner({
-          ...ownerData,
-          pets: [],
-        });
+        setOwner({ ...ownerData, pets: [] });
       }
     } catch (error) {
       setError('Error fetching owner data');
@@ -354,10 +409,7 @@ const ProfilePage = (): JSX.Element => {
             : pet
         );
 
-        return {
-          ...prevOwner,
-          pets: updatedPets,
-        };
+        return { ...prevOwner, pets: updatedPets };
       });
     } else {
       fetchOwnerData();
@@ -368,13 +420,66 @@ const ProfilePage = (): JSX.Element => {
     fetchOwnerData();
   };
 
-  if (error) {
-    return <p>{error}</p>;
-  }
+  const handleDeletePetPhoto = async (petId: string): Promise<void> => {
+    if (!user.userId) return;
 
-  if (!owner) {
-    return <p>Loading...</p>;
-  }
+    const pet = owner?.pets?.find(p => p.petId === petId);
+    if (!pet) return;
+
+    const confirmed = await confirm({
+      title: 'Delete Pet Photo',
+      message:
+        "Are you sure you want to delete this pet's photo? This action cannot be undone.",
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      variant: 'danger',
+      destructive: true,
+    });
+
+    if (!confirmed) return;
+
+    try {
+      await deletePetPhoto(petId);
+
+      // ✅ reset to type-based image
+      setPetImageUrls(prev => ({
+        ...prev,
+        [petId]: getPetTypeImage(pet.petTypeId, petTypes),
+      }));
+
+      if (owner) {
+        const updatedPets = owner.pets.map(p =>
+          p.petId === petId ? { ...p, photo: undefined } : p
+        );
+        setOwner({ ...owner, pets: updatedPets });
+      }
+    } catch (error) {
+      console.error('Error deleting pet photo:', error);
+      setError('Failed to delete pet photo. Please try again.');
+    }
+  };
+
+  const handleOpenUploadPetPhotoModal = (petId: string): void => {
+    setSelectedPetIdForPhoto(petId);
+    setIsUploadPetPhotoModalOpen(true);
+  };
+
+  const handleCloseUploadPetPhotoModal = (): void => {
+    setIsUploadPetPhotoModalOpen(false);
+    setSelectedPetIdForPhoto('');
+  };
+
+  const handlePetPhotoUploaded = async (petId: string): Promise<void> => {
+    try {
+      const newUrl = await fetchPetPhotoUrl(petId, 'Pet', '');
+      setPetImageUrls(prev => ({ ...prev, [petId]: newUrl }));
+    } catch (e) {
+      console.error('Failed to refresh pet photo after upload', e);
+    }
+  };
+
+  if (error) return <p>{error}</p>;
+  if (!owner) return <p>Loading...</p>;
 
   return (
     <div>
@@ -401,9 +506,9 @@ const ProfilePage = (): JSX.Element => {
               <div className="photo-buttons-container">
                 <button
                   onClick={handleOpenUploadPhotoModal}
-                  className="photo-button change"
+                  className="pet-photo-change"
                 >
-                  Change Photo
+                  Upload Photo
                 </button>
                 {profilePicUrl && (
                   <button
@@ -419,6 +524,7 @@ const ProfilePage = (): JSX.Element => {
               {owner.firstName} {owner.lastName}&apos;s Profile
             </h1>
           </div>
+
           <div className="customers-profile-info">
             <p>
               <strong>Username:</strong> {userDetails?.username || 'Loading...'}
@@ -442,6 +548,7 @@ const ProfilePage = (): JSX.Element => {
               <strong>Telephone:</strong> {owner.telephone}
             </p>
           </div>
+
           <div className="customers-pets-section">
             <div className="customers-pets-header">
               <h3>Owner Pets</h3>
@@ -452,39 +559,76 @@ const ProfilePage = (): JSX.Element => {
                 Add Pet
               </button>
             </div>
+
             {owner.pets && owner.pets.length > 0 ? (
               <div className="customers-pets-list">
                 {owner.pets.map((pet: PetResponseModel) => (
                   <div key={pet.petId} className="customers-pet-card">
-                    <div className="customers-pet-info">
-                      <h4 className="customers-pet-name">{pet.name}</h4>
-                      <div className="customers-pet-details">
-                        <span className="customers-pet-detail">
-                          <strong>Type:</strong>{' '}
-                          {getPetTypeName(pet.petTypeId, petTypes)}
-                        </span>
-                        <span className="customers-pet-detail">
-                          <strong>Weight:</strong> {pet.weight}kg
-                        </span>
-                        <span className="customers-pet-detail">
-                          <strong>Age:</strong> {calculateAge(pet.birthDate)}{' '}
-                          years
-                        </span>
+                    <div className="customers-pet-card-content">
+                      <img
+                        src={
+                          petImageUrls[pet.petId] ||
+                          getPetTypeImage(pet.petTypeId, petTypes) // ✅ fallback
+                        }
+                        alt={`${pet.name} profile`}
+                        className="pet-profile-picture"
+                      />
+                      <div className="customers-pet-info">
+                        <h4 className="customers-pet-name">{pet.name}</h4>
+                        <div className="customers-pet-details">
+                          <span className="customers-pet-detail">
+                            <strong>Type:</strong>{' '}
+                            {getPetTypeName(pet.petTypeId, petTypes)}
+                          </span>
+                          <span className="customers-pet-detail">
+                            <strong>Weight:</strong> {pet.weight}kg
+                          </span>
+                          <span className="customers-pet-detail">
+                            <strong>Age:</strong> {calculateAge(pet.birthDate)}{' '}
+                            years
+                          </span>
+                        </div>
                       </div>
-                      <div className="customers-pet-actions">
+                    </div>
+
+                    <div className="customers-pet-actions">
+                      <button
+                        className="customers-edit-pet-button"
+                        onClick={() => handleEditPet(pet.petId)}
+                      >
+                        Edit Pet
+                      </button>
+
+                      {(!petImageUrls[pet.petId] ||
+                        petImageUrls[pet.petId] ===
+                          getPetTypeImage(pet.petTypeId, petTypes)) && (
                         <button
-                          className="customers-edit-pet-button"
-                          onClick={() => handleEditPet(pet.petId)}
+                          className="pet-photo-change"
+                          onClick={() =>
+                            handleOpenUploadPetPhotoModal(pet.petId)
+                          }
                         >
-                          Edit Pet
+                          Add Photo
                         </button>
-                        <button
-                          className="customers-delete-pet-button"
-                          onClick={() => handleDeletePet(pet.petId)}
-                        >
-                          Delete Pet
-                        </button>
-                      </div>
+                      )}
+
+                      {petImageUrls[pet.petId] &&
+                        petImageUrls[pet.petId] !==
+                          getPetTypeImage(pet.petTypeId, petTypes) && (
+                          <button
+                            className="customers-delete-photo-button"
+                            onClick={() => handleDeletePetPhoto(pet.petId)}
+                          >
+                            Delete Photo
+                          </button>
+                        )}
+
+                      <button
+                        className="customers-delete-pet-button"
+                        onClick={() => handleDeletePet(pet.petId)}
+                      >
+                        Delete Pet
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -496,6 +640,7 @@ const ProfilePage = (): JSX.Element => {
               </div>
             )}
           </div>
+
           <button
             className="customers-updateButton"
             onClick={handleUpdateClick}
@@ -526,6 +671,12 @@ const ProfilePage = (): JSX.Element => {
         onClose={handleCloseUploadPhotoModal}
         ownerId={user.userId}
         onPhotoUploaded={handlePhotoUploaded}
+      />
+      <UploadPetPhotoModal
+        isOpen={isUploadPetPhotoModalOpen}
+        onClose={handleCloseUploadPetPhotoModal}
+        petId={selectedPetIdForPhoto}
+        onPhotoUploaded={handlePetPhotoUploaded}
       />
 
       {isDeletePhotoModalOpen && (
@@ -560,6 +711,8 @@ const ProfilePage = (): JSX.Element => {
           </div>
         </div>
       )}
+
+      <ConfirmModal />
     </div>
   );
 };
