@@ -1,5 +1,5 @@
 import './VisitListTable.css';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, createRef } from 'react';
 import { Visit } from './models/Visit';
 
 import { useNavigate } from 'react-router-dom';
@@ -7,7 +7,6 @@ import { useNavigate } from 'react-router-dom';
 import { exportVisitsCSV } from './api/exportVisitsCSV';
 import { getAllVisits } from './api/getAllVisits';
 import { IsVet, IsAdmin, IsReceptionist } from '@/context/UserContext';
-// import { AppRoutePaths } from '@/shared/models/path.routes';
 import { archiveVisit } from './api/archiveVisit';
 import { cancelVisit } from './api/cancelVisit';
 
@@ -18,11 +17,29 @@ import AddingVisit from './components/AddingVisit';
 import BasicModal from '@/shared/components/BasicModal';
 import VisitDetails from '@/features/visits/components/VisitDetails';
 import EditingVisit from './components/EditingVisit';
+
+import { AppRoutePaths } from '@/shared/models/path.routes';
 import Sidebar from './components/Sidebar';
 import SidebarItem from './components/SidebarItem';
 import SvgIcon from '@/shared/components/SvgIcon';
+import { FaCalendarAlt } from 'react-icons/fa';
+
+interface EditingVisitHandle {
+  openCreateBill: () => void;
+  openPrescription: () => void;
+}
 
 export default function VisitListTable(): JSX.Element {
+  // refs for each EditingVisit instance, keyed by visitId
+  const editingRefs = useRef<
+    Record<string, React.RefObject<EditingVisitHandle>>
+  >({});
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+
+  const toggleMenu = (id: string): void => {
+    setOpenMenuId(prev => (prev === id ? null : id));
+  };
+
   const isVet = IsVet();
   const isAdmin = IsAdmin();
   const isReceptionist = IsReceptionist();
@@ -36,23 +53,16 @@ export default function VisitListTable(): JSX.Element {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
-  //use sidebar to select which table is shown
   const [currentTab, setCurrentTab] = useState<string>('All');
 
-  // Sort visits: emergency visits first, then by start date
   const sortVisits = (visitsList: Visit[]): Visit[] => {
     return [...visitsList].sort((a, b) => {
-      // Emergency visits come first
       if (a.isEmergency && !b.isEmergency) return -1;
       if (!a.isEmergency && b.isEmergency) return 1;
 
-      // Within the same emergency status, sort by start date (most recent first)
       return new Date(b.visitDate).getTime() - new Date(a.visitDate).getTime();
     });
   };
-
-  // Update the displayed list whenever the search term or the full visits list changes.
-  // This avoids refetching from the API and preserves the full list in `visits`.
   useEffect(() => {
     const term = searchTerm.trim().toLowerCase();
 
@@ -72,8 +82,6 @@ export default function VisitListTable(): JSX.Element {
     }
   }, [searchTerm, visits, currentTab, isStaffMember]);
 
-  // Filter visits based on status
-  // Derive the different lists from the displayed list so search / tabs compose
   const emergencyVisits = sortVisits(
     displayedVisits.filter(visit => visit.isEmergency)
   );
@@ -132,8 +140,6 @@ export default function VisitListTable(): JSX.Element {
     getVisits();
   }, []);
 
-  // Update the displayed list whenever the search term or the full visits list changes.
-  // This avoids refetching from the API and preserves the full list in `visits`.
   useEffect(() => {
     const term = searchTerm.trim().toLowerCase();
 
@@ -153,11 +159,9 @@ export default function VisitListTable(): JSX.Element {
     };
   }, [searchTerm, visits]);
 
-  // Handle archiving the visit
   const handleArchive = async (visitId: string): Promise<void> => {
     try {
       await archiveVisit(visitId, updatedVisit => {
-        // This should probably be removed once the visit list will be reactive
         setVisits(prev => {
           return prev.map(visit => {
             if (visit.visitId === visitId) return updatedVisit;
@@ -181,8 +185,6 @@ export default function VisitListTable(): JSX.Element {
   const handleCancel = async (visitId: string): Promise<void> => {
     try {
       await cancelVisit(visitId, updatedVisit => {
-        // Update the full visits list; the displayed list will update automatically
-        // via the search effect above.
         setVisits(prev => {
           return prev.map(visit => {
             if (visit.visitId === visitId) return updatedVisit;
@@ -203,30 +205,73 @@ export default function VisitListTable(): JSX.Element {
     }
   };
 
-  // RENDERING
-
-  // Buttons
   const renderCancelButton = (): JSX.Element => (
-    <a title="Cancel">
+    <a
+      title="Cancel"
+      className="icon-visits"
+      role="button"
+      aria-label="Cancel"
+      style={{ color: 'black' }}
+    >
       <SvgIcon id="xcross" className="icon-visits" />
     </a>
   );
 
   const renderArchiveButton = (): JSX.Element => (
-    <a title="Archive">
+    <a
+      title="Archive"
+      className="icon-visits"
+      role="button"
+      aria-label="Archive"
+      style={{ color: 'black' }}
+    >
       <SvgIcon id="archive" className="icon-visits" />
     </a>
   );
 
   const renderEditButton = (): JSX.Element => (
-    <a title="Edit">
+    <a
+      title="Edit"
+      className="icon-visits"
+      role="button"
+      aria-label="Edit"
+      style={{ color: 'black' }}
+    >
       <SvgIcon id="pencil" className="icon-visits" />
     </a>
   );
 
   const renderViewButton = (): JSX.Element => (
-    <a title="View">
+    <a
+      title="View"
+      className="icon-visits"
+      role="button"
+      aria-label="View"
+      style={{ color: 'black' }}
+    >
       <SvgIcon id="eye" className="icon-visits" />
+    </a>
+  );
+
+  const renderBillButton = (onClick?: () => void): JSX.Element => (
+    <a
+      title="Create Bill"
+      onClick={onClick}
+      className="icon-visits"
+      style={{ color: 'black' }}
+    >
+      <SvgIcon id="visit-bill" className="icon-visits" />
+    </a>
+  );
+
+  const renderPrescriptionButton = (onClick?: () => void): JSX.Element => (
+    <a
+      title="Create Prescription"
+      onClick={onClick}
+      className="icon-visits"
+      style={{ color: 'black' }}
+    >
+      <SvgIcon id="visit-prescription" className="icon-visits" />
     </a>
   );
 
@@ -287,54 +332,108 @@ export default function VisitListTable(): JSX.Element {
                     {visit.status}
                   </td>
                   <td className="action-column">
-                    <BasicModal
-                      title="Visit Details"
-                      showButton={renderViewButton()}
-                    >
-                      <VisitDetails visitId={visit.visitId} />
-                    </BasicModal>
-
-                    <EditingVisit
-                      showButton={renderEditButton()}
-                      visitId={visit.visitId}
-                    />
-                    {visit.status === 'COMPLETED' && !isVet && (
-                      <BasicModal
-                        title="Archive Visit"
-                        showButton={renderArchiveButton()}
-                        onConfirm={() => handleArchive(visit.visitId)}
+                    <div className="action-menu">
+                      <a
+                        href="#"
+                        className="icon-button menu-button icon-visits-anchor"
+                        onClick={e => {
+                          e.preventDefault();
+                          toggleMenu(visit.visitId);
+                        }}
+                        aria-expanded={openMenuId === visit.visitId}
+                        aria-label="Open actions"
+                        title="Actions"
+                        style={{ color: 'black' }}
                       >
-                        <div>
-                          This will set the status of this visit to Archived.
-                        </div>
-                        <div>Do you wish to proceed?</div>
-                        {showSuccessMessage && (
-                          <div
-                            className="visit-success-message"
-                            role="status"
-                            aria-live="polite"
-                          >
-                            {successMessage}
-                          </div>
-                        )}
-                      </BasicModal>
-                    )}
+                        <SvgIcon id="menu" className="icon-visits" />
+                      </a>
 
-                    {visit.status !== 'CANCELLED' &&
-                      visit.status !== 'ARCHIVED' &&
-                      visit.status !== 'COMPLETED' &&
-                      !isVet && (
-                        <BasicModal
-                          title="Cancel Visit"
-                          showButton={renderCancelButton()}
-                          onConfirm={() => handleCancel(visit.visitId)}
-                        >
-                          <div>
-                            This will set the status of this visit to Canceled.
+                      {openMenuId === visit.visitId && (
+                        <div className="action-popover" role="menu">
+                          <div className="action-icons-grid">
+                            <BasicModal
+                              title="Visit Details"
+                              showButton={renderViewButton()}
+                            >
+                              <VisitDetails visitId={visit.visitId} />
+                            </BasicModal>
+
+                            {(() => {
+                              const editRef =
+                                editingRefs.current[visit.visitId] ??
+                                (editingRefs.current[visit.visitId] =
+                                  createRef());
+
+                              return (
+                                <>
+                                  <EditingVisit
+                                    ref={editRef}
+                                    showButton={renderEditButton()}
+                                    visitId={visit.visitId}
+                                  />
+
+                                  {visit.status === 'COMPLETED' && (
+                                    <>
+                                      {renderBillButton(() =>
+                                        editRef.current?.openCreateBill?.()
+                                      )}
+
+                                      {renderPrescriptionButton(() =>
+                                        editRef.current?.openPrescription?.()
+                                      )}
+
+                                      {!isVet && (
+                                        <BasicModal
+                                          title="Archive Visit"
+                                          showButton={renderArchiveButton()}
+                                          onConfirm={() =>
+                                            handleArchive(visit.visitId)
+                                          }
+                                        >
+                                          <div>
+                                            This will set the status of this
+                                            visit to Archived.
+                                          </div>
+                                          <div>Do you wish to proceed?</div>
+                                          {showSuccessMessage && (
+                                            <div
+                                              className="visit-success-message"
+                                              role="status"
+                                              aria-live="polite"
+                                            >
+                                              {successMessage}
+                                            </div>
+                                          )}
+                                        </BasicModal>
+                                      )}
+                                    </>
+                                  )}
+
+                                  {visit.status !== 'CANCELLED' &&
+                                    visit.status !== 'ARCHIVED' &&
+                                    visit.status !== 'COMPLETED' &&
+                                    !isVet && (
+                                      <BasicModal
+                                        title="Cancel Visit"
+                                        showButton={renderCancelButton()}
+                                        onConfirm={() =>
+                                          handleCancel(visit.visitId)
+                                        }
+                                      >
+                                        <div>
+                                          This will set the status of this visit
+                                          to Canceled.
+                                        </div>
+                                        <div>Do you wish to proceed?</div>
+                                      </BasicModal>
+                                    )}
+                                </>
+                              );
+                            })()}
                           </div>
-                          <div>Do you wish to proceed?</div>
-                        </BasicModal>
+                        </div>
                       )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -352,13 +451,12 @@ export default function VisitListTable(): JSX.Element {
     return (
       <div className="page-container">
         <div className="visit-action-bar">
-          {/* Search bar for filtering visits */}
           <div className="search-bar">
             <input
               type="text"
               placeholder="Search by description"
               value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)} // Update the search term when input changes
+              onChange={e => setSearchTerm(e.target.value)}
             />
           </div>
 
@@ -389,9 +487,9 @@ export default function VisitListTable(): JSX.Element {
     );
   };
 
-  const renderSidebar = (tit: string): JSX.Element => {
+  const renderSidebar = (title: string): JSX.Element => {
     return (
-      <Sidebar title={tit}>
+      <Sidebar title={title}>
         <li>
           <AddingVisit
             showButton={
@@ -410,6 +508,16 @@ export default function VisitListTable(): JSX.Element {
           >
             <SvgIcon id="star-empty" />
             Reviews
+          </button>
+        </li>
+        <li>
+          <button
+            className="btn btn-primary"
+            onClick={() => navigate(AppRoutePaths.VisitsCalendar)}
+            title="Calendar View"
+          >
+            <FaCalendarAlt className="me-2" />
+            Calendar
           </button>
         </li>
         {categories.map(category =>

@@ -145,6 +145,7 @@ Rel(visits_service, visits_db, "Reads from and writes to", "Mongo/MQL/TCP", $tag
 Rel(visits_service, auth_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="orange-line")
 Rel(visits_service, customers_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="orange-line")
 Rel(visits_service, vets_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="orange-line")
+Rel(visits_service, billing_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="orange-line")
 
 Rel(dbgate, auth_db, "MySQL Driver", "Admin access")
 Rel(dbgate, files_db, "MySQL Driver", "Admin access")

@@ -153,7 +153,7 @@ public class OwnerControllerV1 {
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET,Roles.RECEPTIONIST})
     @DeleteMapping("/{ownerId}/pets/{petId}")
     public Mono<ResponseEntity<PetResponseDTO>> deletePet(@PathVariable String ownerId, @PathVariable String petId){
-        return customersServiceClient.deletePet(ownerId,petId)
+         return customersServiceClient.deletePet(ownerId,petId)
                 .map(pet -> ResponseEntity.noContent().<PetResponseDTO>build())
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
