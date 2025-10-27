@@ -44,7 +44,7 @@ angular.module('productBundleForm')
                     }
                     self.allProducts.forEach(function(p) { p.selected = false;});
                 })
-                .catch(err => {
+                .catch(function(err) {
                     console.error('Error loading products:', err);
                     alert('Could not load products list.');
                 });
