@@ -34,18 +34,19 @@ const ProfilePage = (): JSX.Element => {
   const [isAddPetModalOpen, setIsAddPetModalOpen] = useState<boolean>(false);
   const [isEditPetModalOpen, setIsEditPetModalOpen] = useState<boolean>(false);
   const [isUploadPhotoModalOpen, setIsUploadPhotoModalOpen] =
-      useState<boolean>(false);
+    useState<boolean>(false);
 
   const [isUploadPetPhotoModalOpen, setIsUploadPetPhotoModalOpen] =
-      useState<boolean>(false);
-  const [selectedPetIdForPhoto, setSelectedPetIdForPhoto] = useState<string>('');
+    useState<boolean>(false);
+  const [selectedPetIdForPhoto, setSelectedPetIdForPhoto] =
+    useState<string>('');
 
   const [selectedPetId, setSelectedPetId] = useState<string>('');
   const [petTypes, setPetTypes] = useState<PetTypeModel[]>([]);
   const navigate = useNavigate();
 
   const [isDeletePhotoModalOpen, setIsDeletePhotoModalOpen] =
-      useState<boolean>(false);
+    useState<boolean>(false);
 
   const { confirm, ConfirmModal } = useConfirmModal();
   useEffect(() => {
@@ -125,8 +126,8 @@ const ProfilePage = (): JSX.Element => {
         }
       } catch (err) {
         console.warn(
-            'Failed to fetch owner profile picture, using local default',
-            err
+          'Failed to fetch owner profile picture, using local default',
+          err
         );
         if (isMounted) {
           setProfilePicUrl(''); // will fall back to default
@@ -145,8 +146,8 @@ const ProfilePage = (): JSX.Element => {
   }, [user.userId]);
 
   const fetchPetPhotoUrl = async (
-      petId: string,
-      petName: string
+    petId: string,
+    petName: string
   ): Promise<string> => {
     try {
       const response = await axiosInstance.get(`/pets/${petId}`, {
@@ -156,18 +157,18 @@ const ProfilePage = (): JSX.Element => {
       const petData = response.data;
 
       if (
-          petData.photo &&
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (petData.photo.data || (petData.photo as any).fileData)
+        petData.photo &&
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (petData.photo.data || (petData.photo as any).fileData)
       ) {
         const base64Data =
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            petData.photo.data || (petData.photo as any).fileData;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          petData.photo.data || (petData.photo as any).fileData;
         const contentType =
-            petData.photo.contentType ||
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (petData.photo as any).fileType ||
-            'image/png';
+          petData.photo.contentType ||
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (petData.photo as any).fileType ||
+          'image/png';
         const byteCharacters = atob(base64Data);
         const byteNumbers = new Array(byteCharacters.length);
         for (let i = 0; i < byteCharacters.length; i++) {
@@ -195,8 +196,8 @@ const ProfilePage = (): JSX.Element => {
 
         try {
           const petsResponse = await axiosInstance.get(
-              `/owners/${user.userId}/pets`,
-              { useV2: false }
+            `/owners/${user.userId}/pets`,
+            { useV2: false }
           );
 
           let petsData: PetResponseModel[] = [];
@@ -220,8 +221,8 @@ const ProfilePage = (): JSX.Element => {
           const newPetImageUrls: Record<string, string> = {};
           for (const pet of petsData) {
             newPetImageUrls[pet.petId] = await fetchPetPhotoUrl(
-                pet.petId,
-                pet.name
+              pet.petId,
+              pet.name
             );
           }
 
@@ -234,8 +235,8 @@ const ProfilePage = (): JSX.Element => {
           }
         } catch (petsError) {
           console.warn(
-              'Error fetching pets, setting owner without pets:',
-              petsError
+            'Error fetching pets, setting owner without pets:',
+            petsError
           );
           if (isMounted) {
             setOwner({
@@ -355,7 +356,7 @@ const ProfilePage = (): JSX.Element => {
 
   const handleDeletePet = async (petId: string): Promise<void> => {
     const confirmed = window.confirm(
-        'Are you sure you want to delete this pet? This action cannot be undone.'
+      'Are you sure you want to delete this pet? This action cannot be undone.'
     );
 
     if (!confirmed) {
@@ -405,14 +406,14 @@ const ProfilePage = (): JSX.Element => {
         if (!prevOwner || !prevOwner.pets) return prevOwner;
 
         const updatedPets = prevOwner.pets.map(pet =>
-            pet.petId === updatedPet.petId
-                ? {
-                  ...updatedPet,
-                  birthDate: updatedPet.birthDate
-                      ? new Date(updatedPet.birthDate)
-                      : new Date(),
-                }
-                : pet
+          pet.petId === updatedPet.petId
+            ? {
+                ...updatedPet,
+                birthDate: updatedPet.birthDate
+                  ? new Date(updatedPet.birthDate)
+                  : new Date(),
+              }
+            : pet
         );
 
         return {
@@ -435,7 +436,7 @@ const ProfilePage = (): JSX.Element => {
     const confirmed = await confirm({
       title: 'Delete Pet Photo',
       message:
-          "Are you sure you want to delete this pet's photo? This action cannot be undone.",
+        "Are you sure you want to delete this pet's photo? This action cannot be undone.",
       confirmText: 'Delete',
       cancelText: 'Cancel',
       variant: 'danger',
@@ -454,7 +455,7 @@ const ProfilePage = (): JSX.Element => {
 
       if (owner) {
         const updatedPets = owner.pets.map(pet =>
-            pet.petId === petId ? { ...pet, photo: undefined } : pet
+          pet.petId === petId ? { ...pet, photo: undefined } : pet
         );
         setOwner({ ...owner, pets: updatedPets });
       }
@@ -495,227 +496,233 @@ const ProfilePage = (): JSX.Element => {
   }
 
   return (
-      <div>
-        <NavBar />
-        <div className="customers-page customers-container-profile">
-          <div className="customers-profile-card shadow-lg p-5 mb-5 bg-white rounded">
+    <div>
+      <NavBar />
+      <div className="customers-page customers-container-profile">
+        <div className="customers-profile-card shadow-lg p-5 mb-5 bg-white rounded">
+          <div
+            className="customers-profile-header"
+            style={{ display: 'flex,', alignItems: 'center', gap: '1rem' }}
+          >
             <div
-                className="customers-profile-header"
-                style={{ display: 'flex,', alignItems: 'center', gap: '1rem' }}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '8px',
+              }}
             >
-              <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '8px',
-                  }}
-              >
-                <img
-                    src={profilePicUrl || defaultProfile}
-                    alt="Profile Picture"
-                    className="profile-picture"
-                />
-                <div className="photo-buttons-container">
-                  <button
-                      onClick={handleOpenUploadPhotoModal}
-                      className="pet-photo-change"
-                  >
-                    Upload Photo
-                  </button>
-                  {profilePicUrl && (
-                      <button
-                          onClick={() => setIsDeletePhotoModalOpen(true)}
-                          className="photo-button delete"
-                      >
-                        Delete Photo
-                      </button>
-                  )}
-                </div>
-              </div>
-              <h1>
-                {owner.firstName} {owner.lastName}&apos;s Profile
-              </h1>
-            </div>
-
-            <div className="customers-profile-info">
-              <p>
-                <strong>Username:</strong> {userDetails?.username || 'Loading...'}
-              </p>
-              <p>
-                <strong>First Name:</strong> {owner.firstName}
-              </p>
-              <p>
-                <strong>Last Name:</strong> {owner.lastName}
-              </p>
-              <p>
-                <strong>Address:</strong> {owner.address}
-              </p>
-              <p>
-                <strong>City:</strong> {owner.city}
-              </p>
-              <p>
-                <strong>Province:</strong> {owner.province}
-              </p>
-              <p>
-                <strong>Telephone:</strong> {owner.telephone}
-              </p>
-            </div>
-
-            <div className="customers-pets-section">
-              <div className="customers-pets-header">
-                <h3>Owner Pets</h3>
+              <img
+                src={profilePicUrl || defaultProfile}
+                alt="Profile Picture"
+                className="profile-picture"
+              />
+              <div className="photo-buttons-container">
                 <button
-                    className="customers-add-pet-button"
-                    onClick={handleAddPet}
+                  onClick={handleOpenUploadPhotoModal}
+                  className="pet-photo-change"
                 >
-                  Add Pet
+                  Upload Photo
+                </button>
+                {profilePicUrl && (
+                  <button
+                    onClick={() => setIsDeletePhotoModalOpen(true)}
+                    className="photo-button delete"
+                  >
+                    Delete Photo
+                  </button>
+                )}
+              </div>
+            </div>
+            <h1>
+              {owner.firstName} {owner.lastName}&apos;s Profile
+            </h1>
+          </div>
+
+          <div className="customers-profile-info">
+            <p>
+              <strong>Username:</strong> {userDetails?.username || 'Loading...'}
+            </p>
+            <p>
+              <strong>First Name:</strong> {owner.firstName}
+            </p>
+            <p>
+              <strong>Last Name:</strong> {owner.lastName}
+            </p>
+            <p>
+              <strong>Address:</strong> {owner.address}
+            </p>
+            <p>
+              <strong>City:</strong> {owner.city}
+            </p>
+            <p>
+              <strong>Province:</strong> {owner.province}
+            </p>
+            <p>
+              <strong>Telephone:</strong> {owner.telephone}
+            </p>
+          </div>
+
+          <div className="customers-pets-section">
+            <div className="customers-pets-header">
+              <h3>Owner Pets</h3>
+              <button
+                className="customers-add-pet-button"
+                onClick={handleAddPet}
+              >
+                Add Pet
+              </button>
+            </div>
+
+            {owner.pets && owner.pets.length > 0 ? (
+              <div className="customers-pets-list">
+                {owner.pets.map((pet: PetResponseModel) => (
+                  <div key={pet.petId} className="customers-pet-card">
+                    <div className="customers-pet-card-content">
+                      <img
+                        src={petImageUrls[pet.petId] || defaultProfile}
+                        alt={`${pet.name} profile`}
+                        className="pet-profile-picture"
+                      />
+                      <div className="customers-pet-info">
+                        <h4 className="customers-pet-name">{pet.name}</h4>
+                        <div className="customers-pet-details">
+                          <span className="customers-pet-detail">
+                            <strong>Type:</strong>{' '}
+                            {getPetTypeName(pet.petTypeId, petTypes)}
+                          </span>
+                          <span className="customers-pet-detail">
+                            <strong>Weight:</strong> {pet.weight}kg
+                          </span>
+                          <span className="customers-pet-detail">
+                            <strong>Age:</strong> {calculateAge(pet.birthDate)}{' '}
+                            years
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="customers-pet-actions">
+                      <button
+                        className="customers-edit-pet-button"
+                        onClick={() => handleEditPet(pet.petId)}
+                      >
+                        Edit Pet
+                      </button>
+
+                      {(!petImageUrls[pet.petId] ||
+                        petImageUrls[pet.petId] === defaultProfile) && (
+                        <button
+                          className="pet-photo-change"
+                          onClick={() =>
+                            handleOpenUploadPetPhotoModal(pet.petId)
+                          }
+                        >
+                          Add Photo
+                        </button>
+                      )}
+
+                      {petImageUrls[pet.petId] &&
+                        petImageUrls[pet.petId] !== defaultProfile && (
+                          <button
+                            className="customers-delete-photo-button"
+                            onClick={() => handleDeletePetPhoto(pet.petId)}
+                          >
+                            Delete Photo
+                          </button>
+                        )}
+
+                      <button
+                        className="customers-delete-pet-button"
+                        onClick={() => handleDeletePet(pet.petId)}
+                      >
+                        Delete Pet
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="customers-no-pets">
+                <p>No pets found.</p>
+                <p className="customers-no-pets-subtitle">Add your first pet</p>
+              </div>
+            )}
+          </div>
+
+          <button
+            className="customers-updateButton"
+            onClick={handleUpdateClick}
+          >
+            Update Profile
+          </button>
+        </div>
+      </div>
+
+      <AddPetModal
+        ownerId={user.userId}
+        isOpen={isAddPetModalOpen}
+        onClose={handleCloseAddPetModal}
+        onPetAdded={handlePetAdded}
+      />
+
+      <EditPetModal
+        isOpen={isEditPetModalOpen}
+        onClose={handleCloseEditPetModal}
+        petId={selectedPetId}
+        ownerId={user.userId}
+        onPetUpdated={handlePetUpdated}
+        onPetDeleted={handlePetDeleted}
+      />
+
+      <UploadPhotoModal
+        isOpen={isUploadPhotoModalOpen}
+        onClose={handleCloseUploadPhotoModal}
+        ownerId={user.userId}
+        onPhotoUploaded={handlePhotoUploaded}
+      />
+      <UploadPetPhotoModal
+        isOpen={isUploadPetPhotoModalOpen}
+        onClose={handleCloseUploadPetPhotoModal}
+        petId={selectedPetIdForPhoto}
+        onPhotoUploaded={handlePetPhotoUploaded}
+      />
+
+      {isDeletePhotoModalOpen && (
+        <div
+          className="modal-overlay"
+          onClick={() => setIsDeletePhotoModalOpen(false)}
+        >
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Delete Profile Photo</h2>
+              <button
+                className="close-button"
+                onClick={() => setIsDeletePhotoModalOpen(false)}
+              >
+                ×
+              </button>
+            </div>
+            <div className="modal-body">
+              <p>Are you sure you want to delete your profile photo?</p>
+              <div className="modal-footer">
+                <button
+                  onClick={() => setIsDeletePhotoModalOpen(false)}
+                  className="cancel-button"
+                >
+                  Cancel
+                </button>
+                <button onClick={handleDeletePhoto} className="delete-button">
+                  Delete Photo
                 </button>
               </div>
-
-              {owner.pets && owner.pets.length > 0 ? (
-                  <div className="customers-pets-list">
-                    {owner.pets.map((pet: PetResponseModel) => (
-                        <div key={pet.petId} className="customers-pet-card">
-                          <div className="customers-pet-card-content">
-                            <img
-                                src={petImageUrls[pet.petId] || defaultProfile}
-                                alt={`${pet.name} profile`}
-                                className="pet-profile-picture"
-                            />
-                            <div className="customers-pet-info">
-                              <h4 className="customers-pet-name">{pet.name}</h4>
-                              <div className="customers-pet-details">
-              <span className="customers-pet-detail">
-                <strong>Type:</strong> {getPetTypeName(pet.petTypeId, petTypes)}
-              </span>
-                                <span className="customers-pet-detail">
-                <strong>Weight:</strong> {pet.weight}kg
-              </span>
-                                <span className="customers-pet-detail">
-                <strong>Age:</strong> {calculateAge(pet.birthDate)} years
-              </span>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="customers-pet-actions">
-                            <button
-                                className="customers-edit-pet-button"
-                                onClick={() => handleEditPet(pet.petId)}
-                            >
-                              Edit Pet
-                            </button>
-
-                            {(!petImageUrls[pet.petId] ||
-                                petImageUrls[pet.petId] === defaultProfile) && (
-                                <button
-                                    className="pet-photo-change"
-                                    onClick={() => handleOpenUploadPetPhotoModal(pet.petId)}
-                                >
-                                  Add Photo
-                                </button>
-                            )}
-
-                            {petImageUrls[pet.petId] &&
-                                petImageUrls[pet.petId] !== defaultProfile && (
-                                    <button
-                                        className="customers-delete-photo-button"
-                                        onClick={() => handleDeletePetPhoto(pet.petId)}
-                                    >
-                                      Delete Photo
-                                    </button>
-                                )}
-
-                            <button
-                                className="customers-delete-pet-button"
-                                onClick={() => handleDeletePet(pet.petId)}
-                            >
-                              Delete Pet
-                            </button>
-                          </div>
-                        </div>
-                    ))}
-                  </div>
-              ) : (
-                  <div className="customers-no-pets">
-                    <p>No pets found.</p>
-                    <p className="customers-no-pets-subtitle">Add your first pet</p>
-                  </div>
-              )}
-
             </div>
-
-            <button className="customers-updateButton" onClick={handleUpdateClick}>
-              Update Profile
-            </button>
           </div>
         </div>
+      )}
 
-        <AddPetModal
-            ownerId={user.userId}
-            isOpen={isAddPetModalOpen}
-            onClose={handleCloseAddPetModal}
-            onPetAdded={handlePetAdded}
-        />
-
-        <EditPetModal
-            isOpen={isEditPetModalOpen}
-            onClose={handleCloseEditPetModal}
-            petId={selectedPetId}
-            ownerId={user.userId}
-            onPetUpdated={handlePetUpdated}
-            onPetDeleted={handlePetDeleted}
-        />
-
-        <UploadPhotoModal
-            isOpen={isUploadPhotoModalOpen}
-            onClose={handleCloseUploadPhotoModal}
-            ownerId={user.userId}
-            onPhotoUploaded={handlePhotoUploaded}
-        />
-        <UploadPetPhotoModal
-            isOpen={isUploadPetPhotoModalOpen}
-            onClose={handleCloseUploadPetPhotoModal}
-            petId={selectedPetIdForPhoto}
-            onPhotoUploaded={handlePetPhotoUploaded}
-        />
-
-        {isDeletePhotoModalOpen && (
-            <div
-                className="modal-overlay"
-                onClick={() => setIsDeletePhotoModalOpen(false)}
-            >
-              <div className="modal-content" onClick={e => e.stopPropagation()}>
-                <div className="modal-header">
-                  <h2>Delete Profile Photo</h2>
-                  <button
-                      className="close-button"
-                      onClick={() => setIsDeletePhotoModalOpen(false)}
-                  >
-                    ×
-                  </button>
-                </div>
-                <div className="modal-body">
-                  <p>Are you sure you want to delete your profile photo?</p>
-                  <div className="modal-footer">
-                    <button
-                        onClick={() => setIsDeletePhotoModalOpen(false)}
-                        className="cancel-button"
-                    >
-                      Cancel
-                    </button>
-                    <button onClick={handleDeletePhoto} className="delete-button">
-                      Delete Photo
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-        )}
-
-        <ConfirmModal />
-      </div>
+      <ConfirmModal />
+    </div>
   );
 };
 
