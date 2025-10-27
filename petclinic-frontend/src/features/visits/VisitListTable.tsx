@@ -481,7 +481,7 @@ export default function VisitListTable(): JSX.Element {
 
   const renderSidebar = (title: string): JSX.Element => {
     return (
-      <Sidebar title={tit}>
+      <Sidebar title={title}>
         {!isAdmin && (
           <li>
             <AddingVisit
