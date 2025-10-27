@@ -5,10 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Vets.*;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
-import org.mockserver.model.JsonBody;
 import org.springframework.http.MediaType;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -241,7 +239,8 @@ public class MockServerConfigVetService {
                                         Set.of(
                                                 new SpecialtyDTO("surgery", "surgery"),
                                                 new SpecialtyDTO("radiology", "radiology")
-                                        )
+                                        ),
+                                        null
                                 ))));
     }
 
@@ -255,7 +254,7 @@ public class MockServerConfigVetService {
                 .respond(
                         response()
                                 .withStatusCode(404)
-                                .withBody("{\"statusCode\":404,\"message\":\"vetId not found: invalid-id\",\"timestamp\":\"" + java.time.Instant.now() + "\"}")
+                                .withBody("{\"statusCode\":404,\"message\":\"vetId not found: ac9adeb8-625b-11ee-8c99-0242ac12000200000\",\"timestamp\":\"" + java.time.Instant.now() + "\"}")
                 );
     }
 
@@ -278,7 +277,8 @@ public class MockServerConfigVetService {
                 Set.of(
                         new SpecialtyDTO("surgery", "surgery"),
                         new SpecialtyDTO("radiology", "radiology")
-                )
+                ),
+                null
         );
 
         mockServerClient_VetService

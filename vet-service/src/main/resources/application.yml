@@ -30,6 +30,11 @@ spring:
   codec:
     max-in-memory-size: 2MB
 
+app:
+  files-service:
+    host: localhost
+    port: 8000
+
 ---
 # for test
 
@@ -48,6 +53,11 @@ spring:
       authentication-database: admin
       auto-index-creation: true
 
+app:
+  files-service:
+    host: localhost
+    port: 8000
+
 de:
   flapdoodle:
     mongodb:
@@ -55,7 +65,6 @@ de:
         version: 4.4.0
 
 ---
-
 spring:
   config:
     activate:
@@ -76,6 +85,11 @@ spring:
   # set to 2MB as only file transfers are images which don't need much memory
   codec:
     max-in-memory-size: 2MB
+
+app:
+  files-service:
+    host: localhost
+    port: 8000
 
 ---
 spring:
@@ -100,6 +114,11 @@ spring:
   # set to 2MB as only file transfers are images which don't need much memory
   codec:
     max-in-memory-size: 2MB
+
+app:
+  files-service:
+    host: files-service
+    port: 8000
 
 management:
   endpoints:
