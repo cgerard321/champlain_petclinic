@@ -75,7 +75,7 @@ angular.module('productBundleList')
                         })
                         .catch(function (err) {
                             bundle.isTemporarilyDeleted = false;
-                            const msg = (err.data && err.data.message) || err.statusText || 'Delete failed';
+                            var msg = (err.data && err.data.message) || err.statusText || 'Delete failed';
                             toastShow({ title: 'Error', lines: [msg], autoHideMs: 3000 });
                         });
                 }, 5000);
