@@ -277,7 +277,8 @@ public class MockServerConfigVetService {
                 Set.of(
                         new SpecialtyDTO("surgery", "surgery"),
                         new SpecialtyDTO("radiology", "radiology")
-                )
+                ),
+                null
         );
 
         mockServerClient_VetService
