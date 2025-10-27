@@ -11,7 +11,6 @@ import InventoryProducts from '@/features/inventories/InventoryProducts.tsx';
 import Vet from '@/pages/Vet/Vet.tsx';
 import VetDetails from '@/pages/Vet/VetDetails.tsx';
 import Visits from './pages/Visit/Visit';
-import EditReviewForm from './features/visits/Review/EditReviewForm';
 import Review from './pages/Review/Review';
 import CartPage from '@/pages/Carts/Cart.tsx';
 import UpdateBillPage from '@/pages/Bills/UpdateBill.tsx';
@@ -43,7 +42,6 @@ import AddPromoPage from '@/pages/Promos/AddPromoPage.tsx';
 import UpdatePromoPage from '@/pages/Promos/UpdatePromoPage.tsx';
 import LowStockProducts from '@/features/inventories/LowStockProducts.tsx';
 import ReviewsCustomer from '@/pages/Review/CustomerReviews.tsx';
-import AddReviewsCustomer from '@/pages/Review/CustomerAddReviewForm.tsx';
 import CustomerPromoPage from '@/pages/Promos/CustomerPromoPage.tsx';
 import UserDetailsPage from './pages/Users/UserDetailsPage';
 import UpdateUserPage from './pages/Users/UpdateUserPage';
@@ -79,14 +77,6 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <Review />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: AppRoutePaths.UpdateReview,
-        element: (
-          <ProtectedRoute>
-            <EditReviewForm />
           </ProtectedRoute>
         ),
       },
@@ -378,14 +368,6 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <ReviewsCustomer />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: AppRoutePaths.CustomerAddReview,
-    element: (
-      <ProtectedRoute>
-        <AddReviewsCustomer />
       </ProtectedRoute>
     ),
   },

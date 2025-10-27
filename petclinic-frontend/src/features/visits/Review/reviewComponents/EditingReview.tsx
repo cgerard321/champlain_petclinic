@@ -145,7 +145,7 @@ const EditingReview: React.FC<EditingReviewProps> = ({
       title="Edit Review"
       validate={validate}
       showButton={
-        <a>
+        <a title="Edit">
           <SvgIcon id="pencil" className="icon-visits" />
         </a>
       }
@@ -189,7 +189,7 @@ const EditingReview: React.FC<EditingReviewProps> = ({
       </form>
 
       {showNotification && (
-        <div className="notification">Review updated successfully!</div>
+        <div className="notification">Review added successfully!</div>
       )}
       <ReviewModal
         open={showProfanityModal}
