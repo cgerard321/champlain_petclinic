@@ -151,7 +151,7 @@ public Mono<Void> deleteCartByCartId(String cartId) {
     }
 
     //method that helps to delete products from wishlist
-    public Mono<Void> removeProductFromWishlist(String cartId, String productId) {
+    public Mono<CartResponseDTO> removeProductFromWishlist(String cartId, String productId) {
         return webClientBuilder.build()
             .delete()
             .uri(cartServiceUrl + "/" + cartId + "/wishlist/" + productId)
@@ -159,21 +159,21 @@ public Mono<Void> deleteCartByCartId(String cartId) {
             .onStatus(HttpStatusCode::is4xxClientError, error -> {
                 HttpStatusCode statusCode = error.statusCode();
                 if (statusCode.equals(HttpStatus.NOT_FOUND)) {
-                return Mono.error(new NotFoundException(
-                    "Wishlist item not found for cartId: " + cartId + " and productId: " + productId));
+                    return Mono.error(new NotFoundException(
+                        "Wishlist item not found for cartId: " + cartId + " and productId: " + productId));
                 } else if (statusCode.equals(HttpStatus.UNPROCESSABLE_ENTITY)) {
-                return Mono.error(new InvalidInputException(
-                    "Invalid input for cartId: " + cartId + " or productId: " + productId));
+                    return Mono.error(new InvalidInputException(
+                        "Invalid input for cartId: " + cartId + " or productId: " + productId));
                 }
-                return Mono.error(new IllegalArgumentException("Client error"));
+                return error.createException().flatMap(Mono::error);
             })
             .onStatus(HttpStatusCode::is5xxServerError,
-                error -> Mono.error(new IllegalArgumentException("Server error")))
-            .toBodilessEntity()
+                error -> error.createException().flatMap(Mono::error))
+            .bodyToMono(CartResponseDTO.class)
+            .switchIfEmpty(Mono.fromSupplier(CartResponseDTO::new))
             .doOnSuccess(res -> log.info("Removed product {} from wishlist in cart {}", productId, cartId))
-            .doOnError(e -> log.error("Error removing product {} from wishlist in cart {}: {}", productId, cartId, e.getMessage()))
-            .then();
-        }
+            .doOnError(e -> log.error("Error removing product {} from wishlist in cart {}: {}", productId, cartId, e.getMessage()));
+    }
 
 
 

@@ -54,7 +54,7 @@ public class CartControllerV1UnitTest {
     private final String baseCartURL = "/api/gateway/carts";
 
     private CartControllerV1.ErrorOptions errorOptions(boolean includeBody, boolean asUnprocessable) {
-        return CartControllerV1.ErrorOptions.builder("testContext")
+        return CartControllerV1.ErrorOptions.builder()
                 .includeBadRequestBodyMessage(includeBody)
                 .invalidInputAsUnprocessable(asUnprocessable)
                 .build();
@@ -403,11 +403,11 @@ public class CartControllerV1UnitTest {
         String cartId = "cart-123";
         CartItemRequestDTO requestDTO = buildCartItemRequestDTO();
         CartResponseDTO updatedCart = buildCartResponseDTO();
-        when(cartServiceClient.addProductToCart(cartId, requestDTO))
+        when(cartServiceClient.addProductToCart(eq(cartId), any(CartItemRequestDTO.class)))
                 .thenReturn(Mono.just(updatedCart));
 
         // Act & Assert
-        webTestClient.post()
+        webTestClient.put()
                 .uri(baseCartURL + "/" + cartId + "/products")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestDTO)
@@ -417,7 +417,7 @@ public class CartControllerV1UnitTest {
                 .expectBody(CartResponseDTO.class)
                 .isEqualTo(updatedCart);
 
-        verify(cartServiceClient, times(1)).addProductToCart(cartId, requestDTO);
+        verify(cartServiceClient, times(1)).addProductToCart(eq(cartId), any(CartItemRequestDTO.class));
     }
 
     @Test
@@ -426,18 +426,18 @@ public class CartControllerV1UnitTest {
         // Arrange
         String cartId = "cart-123";
         CartItemRequestDTO requestDTO = buildCartItemRequestDTO();
-        when(cartServiceClient.addProductToCart(cartId, requestDTO))
+        when(cartServiceClient.addProductToCart(eq(cartId), any(CartItemRequestDTO.class)))
                 .thenReturn(Mono.error(new InvalidInputException("Invalid product quantity")));
 
         // Act & Assert
-        webTestClient.post()
+        webTestClient.put()
                 .uri(baseCartURL + "/" + cartId + "/products")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestDTO)
                 .exchange()
                 .expectStatus().isBadRequest();
 
-        verify(cartServiceClient, times(1)).addProductToCart(cartId, requestDTO);
+        verify(cartServiceClient, times(1)).addProductToCart(eq(cartId), any(CartItemRequestDTO.class));
     }
 
     @Test
@@ -446,18 +446,18 @@ public class CartControllerV1UnitTest {
         // Arrange
         String cartId = "invalid-cart";
         CartItemRequestDTO requestDTO = buildCartItemRequestDTO();
-        when(cartServiceClient.addProductToCart(cartId, requestDTO))
+        when(cartServiceClient.addProductToCart(eq(cartId), any(CartItemRequestDTO.class)))
                 .thenReturn(Mono.error(new NotFoundException("Cart not found")));
 
         // Act & Assert
-        webTestClient.post()
+        webTestClient.put()
                 .uri(baseCartURL + "/" + cartId + "/products")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestDTO)
                 .exchange()
                 .expectStatus().isNotFound();
 
-        verify(cartServiceClient, times(1)).addProductToCart(cartId, requestDTO);
+        verify(cartServiceClient, times(1)).addProductToCart(eq(cartId), any(CartItemRequestDTO.class));
     }
 
     // Tests for updateProductQuantityInCart endpoint
@@ -473,7 +473,7 @@ public class CartControllerV1UnitTest {
                 .thenReturn(Mono.just(updatedCart));
 
         // Act & Assert
-        webTestClient.put()
+        webTestClient.patch()
                 .uri(baseCartURL + "/" + cartId + "/products/" + productId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestDTO)
@@ -496,7 +496,7 @@ public class CartControllerV1UnitTest {
                 .thenReturn(Mono.error(new NotFoundException("Cart or product not found")));
 
         // Act & Assert
-        webTestClient.put()
+        webTestClient.patch()
                 .uri(baseCartURL + "/" + cartId + "/products/" + productId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestDTO)

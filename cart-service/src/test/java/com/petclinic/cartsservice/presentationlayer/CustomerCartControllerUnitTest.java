@@ -66,7 +66,7 @@ class CustomerCartControllerUnitTest {
     }
 
     @Test
-    void whenGetCartWithInvalidCustomerId_thenReturnBadRequest() {
+    void whenGetCartWithInvalidCustomerId_thenReturnUnprocessableEntity() {
         String invalidCustomerId = "invalid-id";
 
         webTestClient
@@ -74,7 +74,7 @@ class CustomerCartControllerUnitTest {
                 .uri("/api/v1/customers/{customerId}/cart", invalidCustomerId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isBadRequest()
+                .expectStatus().isEqualTo(422)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("Provided customer id is invalid: " + invalidCustomerId);
     }

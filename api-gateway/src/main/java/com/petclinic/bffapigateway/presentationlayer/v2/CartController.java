@@ -14,6 +14,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.server.ResponseStatusException;
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -115,13 +116,44 @@ public class CartController {
         return cartServiceClient.updateProductQuantityInCart(cartId, productId, requestDTO)
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> {
+                    if (e instanceof InvalidInputException) {
+                        return Mono.just(ResponseEntity.unprocessableEntity().build());
+                    }
+
+                    if (e instanceof NotFoundException) {
+                        return Mono.just(ResponseEntity.notFound().build());
+                    }
+
                     if (e instanceof WebClientResponseException.UnprocessableEntity) {
                         return Mono.just(ResponseEntity.unprocessableEntity().build());
-                    } else if (e instanceof WebClientResponseException.NotFound) {
-                        return Mono.just(ResponseEntity.notFound().build());
-                    } else {
-                        return Mono.error(e);
                     }
+
+                    if (e instanceof WebClientResponseException.NotFound) {
+                        return Mono.just(ResponseEntity.notFound().build());
+                    }
+
+                    if (e instanceof WebClientResponseException webClientEx) {
+                        if (webClientEx.getStatusCode().equals(HttpStatus.UNPROCESSABLE_ENTITY)) {
+                            return Mono.just(ResponseEntity.unprocessableEntity().build());
+                        }
+                        if (webClientEx.getStatusCode().equals(HttpStatus.NOT_FOUND)) {
+                            return Mono.just(ResponseEntity.notFound().build());
+                        }
+                        return Mono.just(ResponseEntity.status(webClientEx.getStatusCode()).build());
+                    }
+
+                    if (e instanceof ResponseStatusException responseStatusException) {
+                        HttpStatus status = HttpStatus.resolve(responseStatusException.getStatusCode().value());
+                        if (HttpStatus.UNPROCESSABLE_ENTITY.equals(status)) {
+                            return Mono.just(ResponseEntity.unprocessableEntity().build());
+                        }
+                        if (HttpStatus.NOT_FOUND.equals(status)) {
+                            return Mono.just(ResponseEntity.notFound().build());
+                        }
+                        return Mono.just(ResponseEntity.status(responseStatusException.getStatusCode().value()).build());
+                    }
+
+                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
                 });
     }
 

@@ -437,7 +437,7 @@ class CartControllerUnitTest {
                 .thenReturn(Mono.just(expectedResponse));
 
         // Act & Assert
-        webTestClient.put()
+        webTestClient.patch()
                 .uri("/api/v1/carts/" + cartId + "/products/" + productId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestModel)
@@ -460,7 +460,7 @@ class CartControllerUnitTest {
                 .thenReturn(Mono.error(new OutOfStockException("Only 5 items left in stock.")));
 
         // Act & Assert
-        webTestClient.put()
+        webTestClient.patch()
                 .uri("/api/v1/carts/" + cartId + "/products/" + productId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestModel)
@@ -660,7 +660,7 @@ class CartControllerUnitTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(new WishlistItemRequestModel(invalidProductId, quantity))
                 .exchange()
-                .expectStatus().isBadRequest()
+                .expectStatus().isEqualTo(422)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("Provided product id is invalid: " + invalidProductId);
 

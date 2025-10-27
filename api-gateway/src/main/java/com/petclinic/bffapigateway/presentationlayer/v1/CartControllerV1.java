@@ -40,35 +40,35 @@ public class CartControllerV1 {
 
     // Parameter object to configure error mapping (builder pattern)
     public static final class ErrorOptions {
-        final String context;
-        final String cartId;
-        final String productId;
         final boolean includeBadRequestBodyMessage;
         final boolean invalidInputAsUnprocessable;
 
-        public ErrorOptions(Builder b) {
-            this.context = b.context;
-            this.cartId = b.cartId;
-            this.productId = b.productId;
-            this.includeBadRequestBodyMessage = b.includeBadRequestBodyMessage;
-            this.invalidInputAsUnprocessable = b.invalidInputAsUnprocessable;
+        private ErrorOptions(Builder builder) {
+            this.includeBadRequestBodyMessage = builder.includeBadRequestBodyMessage;
+            this.invalidInputAsUnprocessable = builder.invalidInputAsUnprocessable;
         }
 
-        public static Builder builder(String context) { return new Builder(context); }
+        public static Builder builder() {
+            return new Builder();
+        }
 
         public static final class Builder {
-            private final String context;
-            private String cartId;
-            private String productId;
-            public boolean includeBadRequestBodyMessage;
+            private boolean includeBadRequestBodyMessage;
             private boolean invalidInputAsUnprocessable;
 
-            private Builder(String context) { this.context = context; }
-            Builder cartId(String v) { this.cartId = v; return this; }
-            Builder productId(String v) { this.productId = v; return this; }
-            public Builder includeBadRequestBodyMessage(boolean v) { this.includeBadRequestBodyMessage = v; return this; }
-            public Builder invalidInputAsUnprocessable(boolean v) { this.invalidInputAsUnprocessable = v; return this; }
-            public ErrorOptions build() { return new ErrorOptions(this); }
+            public Builder includeBadRequestBodyMessage(boolean value) {
+                this.includeBadRequestBodyMessage = value;
+                return this;
+            }
+
+            public Builder invalidInputAsUnprocessable(boolean value) {
+                this.invalidInputAsUnprocessable = value;
+                return this;
+            }
+
+            public ErrorOptions build() {
+                return new ErrorOptions(this);
+            }
         }
     }
 
@@ -156,7 +156,7 @@ public class CartControllerV1 {
         return cartServiceClient.createCart(cartRequestDTO)
                 .map(cart -> ResponseEntity.status(HttpStatus.CREATED).body(cart))
                 .onErrorResume(e -> mapCartErrorWithMessage(e,
-                        ErrorOptions.builder("createCart")
+                        ErrorOptions.builder()
                                 .includeBadRequestBodyMessage(true)
                                 .build()
                 ));
@@ -179,7 +179,7 @@ public class CartControllerV1 {
         .map(ResponseEntity::ok)
         .onErrorResume(e -> mapCartError(
             e,
-            ErrorOptions.builder("getAllCarts")
+            ErrorOptions.builder()
                 .invalidInputAsUnprocessable(true)
                 .build()
         ));
@@ -210,7 +210,7 @@ public class CartControllerV1 {
     return cartServiceClient.deleteCartByCartId(cartId)
         .thenReturn(ResponseEntity.noContent().<Void>build())
         .onErrorResume(e -> this.<Void>mapCartError(e,
-            ErrorOptions.builder("deleteCartByCartId").cartId(cartId).build()
+            ErrorOptions.builder().build()
         ));
     }
 
@@ -220,8 +220,7 @@ public class CartControllerV1 {
     return cartServiceClient.deleteAllItemsInCart(cartId)
         .then(Mono.just(ResponseEntity.noContent().<Void>build()))
         .onErrorResume(e -> this.<Void>mapCartError(e,
-            ErrorOptions.builder("deleteAllItemsInCart")
-                .cartId(cartId)
+            ErrorOptions.builder()
                 .build()
         ));
     }
@@ -232,15 +231,13 @@ public class CartControllerV1 {
     return cartServiceClient.removeProductFromCart(cartId, productId)
         .thenReturn(ResponseEntity.noContent().<Void>build())
         .onErrorResume(e -> this.<Void>mapCartError(e,
-            ErrorOptions.builder("removeProductFromCart")
-                .cartId(cartId)
-                .productId(productId)
+            ErrorOptions.builder()
                 .build()
         ));
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
-    @PostMapping("/{cartId}/products")
+    @RequestMapping(value = "/{cartId}/products", method = {RequestMethod.POST, RequestMethod.PUT})
     public Mono<ResponseEntity<CartResponseDTO>> addProductToCart(
         @PathVariable String cartId,
         @RequestBody CartItemRequestDTO requestDTO) {
@@ -251,14 +248,13 @@ public class CartControllerV1 {
     return cartServiceClient.addProductToCart(cartId, requestDTO)
         .map(cartResponse -> {
             if (requestedProductId != null && !requestedProductId.isBlank()) {
-            return ResponseEntity.created(URI.create(String.format("/api/gateway/carts/%s/products/%s", cartId, requestedProductId)))
+            return ResponseEntity.created(URI.create(String.format("/api/v1/carts/%s/products/%s", cartId, requestedProductId)))
                 .body(cartResponse);
             }
             return ResponseEntity.status(HttpStatus.CREATED).body(cartResponse);
         })
         .onErrorResume(e -> mapCartErrorWithMessage(e,
-            ErrorOptions.builder("addProductToCart")
-                .cartId(cartId)
+            ErrorOptions.builder()
                 .includeBadRequestBodyMessage(true)
                 .build()
         ));
@@ -270,9 +266,7 @@ public class CartControllerV1 {
     return cartServiceClient.updateProductQuantityInCart(cartId, productId, requestDTO)
         .map(ResponseEntity::ok)
         .onErrorResume(e -> mapCartError(e,
-            ErrorOptions.builder("updateProductQuantityInCart")
-                .cartId(cartId)
-                .productId(productId)
+            ErrorOptions.builder()
                 .build()
         ));
     }
@@ -285,15 +279,6 @@ public class CartControllerV1 {
     return handleQuantityUpdate(cartId, productId, requestDTO);
     }
     
-    @Deprecated
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
-    @PutMapping("/{cartId}/products/{productId}")
-    public Mono<ResponseEntity<CartResponseDTO>> updateProductQuantityInCart(@PathVariable String cartId,
-                                         @PathVariable String productId,
-                                         @RequestBody UpdateProductQuantityRequestDTO requestDTO) {
-    return handleQuantityUpdate(cartId, productId, requestDTO);
-    }
-
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
     @PostMapping("/{cartId}/checkout")
     public Mono<ResponseEntity<CartResponseDTO>> checkoutCart(@PathVariable String cartId) {
@@ -310,8 +295,7 @@ public class CartControllerV1 {
         .map(body -> ResponseEntity.status(HttpStatus.CREATED).body(body))
         .onErrorResume(e -> mapCartErrorWithMessage(
             e,
-            ErrorOptions.builder("addProductToWishlist")
-                .cartId(cartId)
+            ErrorOptions.builder()
                 .includeBadRequestBodyMessage(true)
                 .invalidInputAsUnprocessable(false)
                 .build()
@@ -326,9 +310,7 @@ public class CartControllerV1 {
     return cartServiceClient.removeProductFromWishlist(cartId, productId)
         .thenReturn(ResponseEntity.noContent().<Void>build())
         .onErrorResume(e -> this.<Void>mapCartError(e,
-            ErrorOptions.builder("removeProductFromWishlist")
-                .cartId(cartId)
-                .productId(productId)
+            ErrorOptions.builder()
                 .build()
         ));
     }
@@ -348,8 +330,7 @@ public class CartControllerV1 {
         .map(ResponseEntity::ok)
         .defaultIfEmpty(ResponseEntity.notFound().build())
         .onErrorResume(e -> mapCartError(e,
-            ErrorOptions.builder("createWishlistTransfer")
-                .cartId(cartId)
+            ErrorOptions.builder()
                 .build()
         ));
     }
@@ -365,8 +346,7 @@ public class CartControllerV1 {
         .map(ResponseEntity::ok)
         .onErrorResume(e -> mapCartErrorWithMessage(
             e,
-            ErrorOptions.builder("applyPromoToCart")
-                .cartId(cartId)
+            ErrorOptions.builder()
                 .includeBadRequestBodyMessage(true)
                 .build()
         ));
@@ -379,7 +359,7 @@ public class CartControllerV1 {
         return cartServiceClient.validatePromoCode(promoCode)
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> mapCartError(
-                        e, ErrorOptions.builder("validatePromo").build()
+                        e, ErrorOptions.builder().build()
                 ));
     }
 
@@ -389,7 +369,7 @@ public class CartControllerV1 {
     return cartServiceClient.clearPromo(cartId)
         .thenReturn(ResponseEntity.noContent().<Void>build())
         .onErrorResume(e -> this.<Void>mapCartError(
-            e, ErrorOptions.builder("clearPromo").cartId(cartId).build()
+            e, ErrorOptions.builder().build()
         ));
     }
 

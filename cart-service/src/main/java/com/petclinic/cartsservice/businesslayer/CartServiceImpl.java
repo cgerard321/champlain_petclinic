@@ -47,11 +47,6 @@ public class CartServiceImpl implements CartService {
     private static final int MAX_PAGE_SIZE = 200;
 
     @Override
-    public Flux<CartResponseModel> getAllCarts() {
-        return getAllCarts(CartQueryCriteria.builder().build());
-    }
-
-    @Override
     public Flux<CartResponseModel> getAllCarts(CartQueryCriteria criteria) {
         CartQueryCriteria effectiveCriteria = criteria == null ? CartQueryCriteria.builder().build() : criteria;
 

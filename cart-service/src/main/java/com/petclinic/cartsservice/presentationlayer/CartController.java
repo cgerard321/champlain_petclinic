@@ -181,18 +181,10 @@ public class CartController {
         return handleProductQuantityUpdate(cartId, productId, requestModel);
     }
 
-    @Deprecated
-    @PutMapping("/{cartId}/products/{productId}")
-    public Mono<ResponseEntity<CartResponseModel>> updateProductQuantityInCart(@PathVariable String cartId,
-                                                                               @PathVariable String productId,
-                                                                               @RequestBody UpdateProductQuantityRequestModel requestModel) {
-        return handleProductQuantityUpdate(cartId, productId, requestModel);
-    }
-
     @PostMapping("/{cartId}/checkout")
     public Mono<ResponseEntity<CartResponseModel>> checkoutCart(@PathVariable String cartId) {
         return cartService.checkoutCart(cartId)
-                .map(cartResponse -> ResponseEntity.ok(cartResponse))
+                .map(ResponseEntity::ok)
                 .onErrorResume(NotFoundException.class, e -> Mono.just(ResponseEntity.notFound().build()))
                 .onErrorResume(InvalidInputException.class, e -> Mono.just(ResponseEntity.badRequest().body(null)));
     }
@@ -210,7 +202,7 @@ public class CartController {
                     if (e instanceof InvalidInputException) {
                         CartResponseModel errorResponse = new CartResponseModel();
                         errorResponse.setMessage(e.getMessage());
-                        return Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse));
+                        return Mono.just(ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errorResponse));
                     } else if (e instanceof NotFoundException) {
                         CartResponseModel errorResponse = new CartResponseModel();
                         errorResponse.setMessage(e.getMessage());

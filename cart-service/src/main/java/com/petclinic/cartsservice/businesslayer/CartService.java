@@ -12,9 +12,7 @@ import java.util.List;
 
 public interface CartService {
 
-
     Mono<CartResponseModel> getCartByCartId(String cartId);
-    Flux<CartResponseModel> getAllCarts();
     Flux<CartResponseModel> getAllCarts(CartQueryCriteria criteria);
     Mono<Void> deleteAllItemsInCart(String cartId);
 
