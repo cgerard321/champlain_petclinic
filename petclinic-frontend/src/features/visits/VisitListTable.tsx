@@ -67,6 +67,37 @@ export default function VisitListTable(): JSX.Element {
   };
 
   // Sort visits: emergency visits first, then by start date
+  const navigate = useNavigate();
+
+  function showSuccessAndReload(message: string, delay = 3000): void {
+    setSuccessMessage(message);
+    setShowSuccessMessage(true);
+
+    setTimeout(() => {
+      setShowSuccessMessage(false);
+      setSuccessMessage('');
+    }, delay);
+  }
+
+  useEffect(() => {
+    const getVisits = async (): Promise<void> => {
+      try {
+        const fetchedVisits = await getAllVisits();
+        setVisits(fetchedVisits);
+        setDisplayedVisits(fetchedVisits);
+      } catch (error) {
+        console.error('Error fetching visits:', error);
+        const message =
+          error instanceof Error
+            ? error.message
+            : 'An unexpected error occurred while fetching visits.';
+        setError(`Failed to fetch visits: ${message}`);
+      }
+    };
+    getVisits();
+  }, []);
+
+  // Sort visits: emergency visits first, then by VisitDate
   const sortVisits = (visitsList: Visit[]): Visit[] => {
     return [...visitsList].sort((a, b) => {
       if (a.isEmergency && !b.isEmergency) return -1;
@@ -183,13 +214,7 @@ export default function VisitListTable(): JSX.Element {
         });
       });
 
-      setSuccessMessage('Visit archived successfully!');
-      setShowSuccessMessage(true);
-      setTimeout(() => {
-        setShowSuccessMessage(false);
-        setSuccessMessage('');
-        window.location.reload();
-      }, 3000);
+      showSuccessAndReload('Visit archived successfully!');
     } catch (error) {
       return;
     }
@@ -206,13 +231,7 @@ export default function VisitListTable(): JSX.Element {
         });
       });
 
-      setSuccessMessage('Visit cancelled successfully!');
-      setShowSuccessMessage(true);
-      setTimeout(() => {
-        setShowSuccessMessage(false);
-        setSuccessMessage('');
-        window.location.reload();
-      }, 3000);
+      showSuccessAndReload('Visit cancelled successfully!');
     } catch (error) {
       return;
     }
@@ -288,7 +307,6 @@ export default function VisitListTable(): JSX.Element {
     </a>
   );
 
-  // Unified table renderer for all visits
   // Unified table renderer for all visits
   const renderTable = (title: string, visits: Visit[]): JSX.Element =>
     currentTab === title ? (
@@ -482,6 +500,16 @@ export default function VisitListTable(): JSX.Element {
             Download CSV
           </button>
         </div>
+        {showSuccessMessage && (
+          <div
+            className="visit-success-message"
+            role="status"
+            aria-live="polite"
+            style={{ margin: '8px 0' }}
+          >
+            {successMessage}
+          </div>
+        )}
         {categories.map(category => renderTable(category.name, category.list))}
       </div>
     );
