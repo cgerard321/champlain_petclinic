@@ -9,10 +9,10 @@ import {
   TimeSlot,
 } from '@/features/visits/api/getAvailableSlots';
 import { VisitRequestModel } from '@/features/visits/models/VisitRequestModel';
-import BasicModal from '@/shared/components/BasicModal';
-import { getAllPets } from '@/features/visits/api/getAllPets';
 import { PetResponseModel } from '@/features/customers/models/PetResponseModel';
 import { getAllOwners } from '@/features/customers/api/getAllOwners';
+import BasicModal from '@/shared/components/BasicModal';
+import { getAllPets } from '@/features/visits/api/getAllPets';
 import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseModel';
 
 interface ApiError {
@@ -87,7 +87,7 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
     fetchOwners();
   }, []);
 
-  //Fetch pets
+  // Fetch pets
   useEffect(() => {
     const fetchPets = async (): Promise<void> => {
       if (!selectedOwnerId) {
@@ -98,7 +98,6 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
         setLoadingPets(true);
         const petsData = await getAllPets(selectedOwnerId);
 
-        // Filter only active pets
         const activePets = petsData.filter(pet => pet.isActive === 'true');
         setPets(activePets);
       } catch (error) {
@@ -112,7 +111,7 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
     fetchPets();
   }, [selectedOwnerId]);
 
-  //fetch vets
+  // Fetch vets
   useEffect(() => {
     const fetchVets = async (): Promise<void> => {
       try {
@@ -237,30 +236,36 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
       }
     };
 
-    fetchTimeSlots();
+    if (vets.length > 0 && visit.selectedDate) {
+      fetchTimeSlots();
+    }
   }, [visit.practitionerId, visit.selectedDate, vets]);
 
   const handleChange = (
     e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ): void => {
     const { name, value } = e.target;
-    setVisit(prevVisit => ({
-      ...prevVisit,
-      [name]: value,
-    }));
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
+    setVisit(prev => ({ ...prev, [name]: value }));
 
+    // Clear time slot if date or vet changes
     if (name === 'selectedDate' || name === 'practitionerId') {
       setVisit(prev => ({
         ...prev,
+        [name]: value,
         selectedTimeSlot: '',
         assignedVetId: '',
       }));
+      setTimeSlots([]);
     }
+  };
+
+  const handleOwnerChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
+    const ownerId = e.target.value;
+    setSelectedOwnerId(ownerId);
+    // Reset pet selection when owner changes
+    setVisit(prev => ({ ...prev, petId: '' }));
   };
 
   const handleTimeSlotSelect = (slot: TimeSlotWithVet): void => {
@@ -269,83 +274,79 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
       selectedTimeSlot: slot.startTime,
       assignedVetId: slot.vetId || '',
     }));
-    if (errors.selectedTimeSlot) {
-      setErrors(prev => ({ ...prev, selectedTimeSlot: '' }));
-    }
-  };
-
-  const handleOwnerChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
-    const ownerId = e.target.value;
-    setSelectedOwnerId(ownerId);
-    setVisit(prev => ({ ...prev, petId: '' }));
-    if (errors.ownerId) {
-      setErrors(prev => ({ ...prev, ownerId: '' }));
-    }
   };
 
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
-    if (!selectedOwnerId) newErrors.ownerId = 'Please select an owner';
-    if (!visit.petId) newErrors.petId = 'Pet ID is required';
-    if (!visit.description.trim())
-      newErrors.description = 'Description is required';
-    if (!visit.selectedDate) newErrors.selectedDate = 'Please select a date';
-    if (!visit.selectedTimeSlot)
-      newErrors.selectedTimeSlot = 'Please select a time slot';
-    if (!visit.assignedVetId) {
-      newErrors.assignedVetId = 'No vet assigned to this time slot';
+
+    if (!selectedOwnerId) {
+      newErrors.ownerId = 'Please select an owner';
     }
+
+    if (!visit.petId) {
+      newErrors.petId = 'Please select a pet';
+    }
+
+    if (!visit.description.trim()) {
+      newErrors.description = 'Please provide a description';
+    }
+
+    if (!visit.selectedDate) {
+      newErrors.selectedDate = 'Please select a date';
+    }
+
+    if (!visit.selectedTimeSlot) {
+      newErrors.selectedTimeSlot = 'Please select a time slot';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (
-    event: FormEvent<HTMLFormElement>
-  ): Promise<void> => {
-    event.preventDefault();
-    if (!validate()) return;
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
+    e.preventDefault();
+
+    if (!validate()) {
+      return;
+    }
 
     setIsSubmitting(true);
     setErrorMessage('');
-    setSuccessMessage('');
-
-    const formattedVisit: VisitRequestModel = {
-      visitDate: visit.selectedTimeSlot,
-      description: visit.description,
-      petId: visit.petId,
-      practitionerId: visit.assignedVetId,
-      status: visit.status,
-      isEmergency: visit.isEmergency,
-    };
 
     try {
-      await addVisit(formattedVisit); // Pass the Date object directly
-      setSuccessMessage('Visit added successfully!');
+      const visitData: VisitRequestModel = {
+        petId: visit.petId,
+        visitDate: visit.selectedTimeSlot,
+        description: visit.description,
+        practitionerId:
+          visit.practitionerId === 'no-preference'
+            ? visit.assignedVetId
+            : visit.practitionerId,
+        status: visit.status,
+        isEmergency: visit.isEmergency,
+      };
+
+      await addVisit(visitData);
+
+      setSuccessMessage('Visit scheduled successfully!');
       setShowNotification(true);
-      setVisit({
-        description: '',
-        petId: '',
-        practitionerId: 'no-preference',
-        assignedVetId: '',
-        selectedDate: '',
-        selectedTimeSlot: '',
-        status: 'UPCOMING' as Status,
-        //visitEndDate: new Date(),
-        isEmergency: false,
-      });
+
       setTimeout(() => {
+        setShowNotification(false);
         window.location.reload();
-      }, 1000);
+      }, 2000);
     } catch (error) {
       const apiError = error as ApiError;
-      setErrorMessage(`Error adding visit: ${apiError.message}`);
+      setErrorMessage(
+        apiError.message || 'Failed to schedule visit. Please try again.'
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const formatTimeSlot = (isoString: string): string => {
-    const date = new Date(isoString);
+  const formatTimeSlot = (dateTimeString: string): string => {
+    const date = new Date(dateTimeString);
     return date.toLocaleTimeString('en-US', {
       hour: 'numeric',
       minute: '2-digit',
@@ -431,6 +432,7 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
             </select>
           )}
 
+          <br />
           <div className="form-group">
             <label htmlFor="description">
               Description: <span className="required">*</span>{' '}
@@ -438,6 +440,8 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
                 <span className="error">{errors.description}</span>
               )}
             </label>
+            <br />
+            <br />
             <textarea
               id="description"
               name="description"
@@ -473,6 +477,7 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
                 : 'Showing slots only for selected veterinarian'}
             </small>
           </div>
+          <br />
           <label htmlFor="selectedDate">
             Date: <span className="required">*</span>{' '}
             {errors.selectedDate && (
@@ -487,6 +492,7 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
             onChange={handleChange}
             min={new Date().toISOString().split('T')[0]}
           />
+          <br />
           {visit.selectedDate && (
             <div className="form-group">
               <label>
