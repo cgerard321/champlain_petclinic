@@ -97,9 +97,9 @@ angular.module('productTypeList')
 
         };
 
-        function performDelete(productTypeId, cascade) {
+        function performDelete(productTypeId) {
             const url = self.baseUrl + '/' + encodeURIComponent(productTypeId);
-            const cfg = cascade ? { params: { cascadeBundles: true } } : undefined;
+            const cfg = undefined;
             return $http.delete(url, cfg);
         }
 
@@ -131,7 +131,7 @@ angular.module('productTypeList')
             deleteTimeout = setTimeout(function () {
                 if (!productType.isTemporarilyDeleted) return; // user undid it
 
-                performDelete(productType.productTypeId, false)
+                performDelete(productType.productTypeId)
                     .then(function () {
                         toastShow({
                             title: 'Success',

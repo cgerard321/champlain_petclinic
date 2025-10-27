@@ -204,7 +204,7 @@ public class ProductControllerV1 {
     }
 
 
-    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @SecuredEndpoint(allowedRoles = {Roles.ALL})
     @GetMapping(value = "/types/{productTypeId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ProductTypeResponseDTO>> getProductTypeByProductTypeId(@PathVariable String productTypeId) {
         return productsServiceClient.getProductTypeByProductTypeId(productTypeId)
