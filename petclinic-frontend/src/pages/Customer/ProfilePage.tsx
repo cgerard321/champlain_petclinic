@@ -373,6 +373,7 @@ const ProfilePage = (): JSX.Element => {
         });
       }
 
+      // eslint-disable-next-line no-console
       console.log('Pet deleted successfully');
     } catch (error) {
       console.error('Error deleting pet:', error);
