@@ -351,6 +351,92 @@ class CartServiceUnitTest {
     }
 
     @Test
+    void transferWishlist_skipsOutOfStockProducts() {
+        CartProduct inStockWishlistProduct = CartProduct.builder()
+                .productId("74d9a6af-e37d-451d-89b6-1d8c1ef1f3a9")
+                .productName("In Stock Treats")
+                .productSalePrice(19.99)
+                .quantityInCart(2)
+                .productQuantity(5)
+                .build();
+
+        CartProduct outOfStockWishlistProduct = CartProduct.builder()
+                .productId("21c7a9e8-5d4b-40b6-9e63-dfccde13d2dd")
+                .productName("Out of Stock Shampoo")
+                .productSalePrice(12.99)
+                .quantityInCart(3)
+                .productQuantity(0)
+                .build();
+
+        Cart cartWithWishlist = Cart.builder()
+                .cartId(cart1.getCartId())
+                .customerId(cart1.getCustomerId())
+                .products(new ArrayList<>())
+                .wishListProducts(new ArrayList<>(List.of(inStockWishlistProduct, outOfStockWishlistProduct)))
+                .build();
+
+        when(cartRepository.findCartByCartId(cartWithWishlist.getCartId()))
+                .thenReturn(Mono.just(cartWithWishlist));
+
+        StepVerifier.create(cartService.transferWishlist(
+                        cartWithWishlist.getCartId(),
+                        List.of(),
+                        WishlistTransferDirection.TO_CART))
+                .assertNext(response -> {
+                    assertEquals(1, response.getProducts().size(), "Only in-stock item should move to cart");
+                    assertEquals(
+                            inStockWishlistProduct.getProductId(),
+                            response.getProducts().get(0).getProductId()
+                    );
+                    assertTrue(
+                            response.getWishListProducts().stream()
+                                    .anyMatch(p -> p.getProductId().equals(outOfStockWishlistProduct.getProductId())),
+                            "Out-of-stock item should remain in wishlist"
+                    );
+                    assertTrue(
+                            response.getMessage() != null && response.getMessage().contains("Skipped"),
+                            "Response message should indicate skipped items"
+                    );
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void transferWishlist_onlyOutOfStockProducts_doesNotPopulateCart() {
+        CartProduct outOfStockWishlistProduct = CartProduct.builder()
+                .productId("f3de6a8a-a9f3-4caa-9cfc-c1bb0abd36fb")
+                .productName("Out of Stock Kibble")
+                .productSalePrice(54.99)
+                .quantityInCart(1)
+                .productQuantity(0)
+                .build();
+
+        Cart cartWithOnlyOutOfStock = Cart.builder()
+                .cartId(cart1.getCartId())
+                .customerId(cart1.getCustomerId())
+                .products(new ArrayList<>())
+                .wishListProducts(new ArrayList<>(List.of(outOfStockWishlistProduct)))
+                .build();
+
+        when(cartRepository.findCartByCartId(cartWithOnlyOutOfStock.getCartId()))
+                .thenReturn(Mono.just(cartWithOnlyOutOfStock));
+
+        StepVerifier.create(cartService.transferWishlist(
+                        cartWithOnlyOutOfStock.getCartId(),
+                        List.of(),
+                        WishlistTransferDirection.TO_CART))
+                .assertNext(response -> {
+                    assertTrue(response.getProducts().isEmpty(), "No items should be moved to cart");
+                    assertEquals(1, response.getWishListProducts().size(), "Wishlist should retain the out-of-stock item");
+                    assertTrue(
+                            response.getMessage() != null && response.getMessage().contains("Skipped"),
+                            "Response message should mention skipped out-of-stock items"
+                    );
+                })
+                .verifyComplete();
+    }
+
+    @Test
     void addProductToCart_NewProduct_Success() {
         String cartId = cart1.getCartId();
         String productId = product3.getProductId();

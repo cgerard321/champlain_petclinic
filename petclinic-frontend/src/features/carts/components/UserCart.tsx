@@ -732,21 +732,45 @@ const UserCart: React.FC = () => {
     const existingCartId = ensureCartId();
     if (!existingCartId) return;
 
+    const movableItems = wishlistItems.filter(
+      item => item.productQuantity == null || item.productQuantity > 0
+    );
+    if (movableItems.length === 0) {
+      showToast('All wishlist items are currently out of stock.', 'info');
+      return;
+    }
+
+    const blockedCount = wishlistItems.length - movableItems.length;
+
     const ok = await confirm({
       title: 'Move all from wishlist',
-      message: `Move ${wishlistItems.length} item(s) to your cart?`,
+      message:
+        blockedCount > 0
+          ? `Move ${movableItems.length} in-stock item(s) to your cart? ${blockedCount} item(s) are out of stock and will remain in your wishlist.`
+          : `Move ${movableItems.length} item(s) to your cart?`,
       confirmText: 'Move all',
       cancelText: 'Cancel',
     });
     if (!ok) return;
 
+    const productIds = Array.from(
+      new Set(
+        movableItems
+          .map(item => item.productId)
+          .filter((id): id is string => Boolean(id && id.trim()))
+      )
+    );
+
+    if (productIds.length === 0) {
+      showToast('No wishlist items are eligible to move.', 'info');
+      return;
+    }
+
     setMovingAll(true);
 
     try {
       const payload = {
-        productIds: wishlistItems
-          .map(item => item.productId)
-          .filter((id): id is string => Boolean(id && id.trim())),
+        productIds,
         direction: 'TO_CART' as const,
       };
 
@@ -756,7 +780,10 @@ const UserCart: React.FC = () => {
         { useV2: false }
       );
 
-      const fallback = `Moved ${wishlistItems.length} item(s) from wishlist to cart.`;
+      const fallback =
+        blockedCount > 0
+          ? `Moved ${movableItems.length} item(s) to your cart. ${blockedCount} item(s) stayed in your wishlist because they are out of stock.`
+          : `Moved ${movableItems.length} item(s) from wishlist to cart.`;
       syncCartState(data, fallback);
     } catch (e) {
       console.error(e);
@@ -943,6 +970,10 @@ const UserCart: React.FC = () => {
   const recommendationListClassName = `recommendation-purchases-list recent-purchases-list cart-scroll-strip${
     recommendationPurchasesList.length === 0 ? ' recommendation-empty' : ''
   }`;
+
+  const hasMovableWishlistItems = wishlistItems.some(
+    item => item.productQuantity == null || item.productQuantity > 0
+  );
 
   return (
     <div>
@@ -1197,13 +1228,15 @@ const UserCart: React.FC = () => {
               <button
                 className="cart-button cart-button--accent"
                 onClick={moveAllWishlistToCart}
-                disabled={isStaff || movingAll}
+                disabled={isStaff || movingAll || !hasMovableWishlistItems}
                 aria-busy={movingAll}
-                aria-disabled={isStaff || movingAll}
+                aria-disabled={isStaff || movingAll || !hasMovableWishlistItems}
                 title={
                   isStaff
                     ? 'Read-only: staff/admin cannot move wishlist items'
-                    : 'Move all wishlist items to cart'
+                    : !hasMovableWishlistItems
+                      ? 'All wishlist items are out of stock'
+                      : 'Move all wishlist items to cart'
                 }
               >
                 {movingAll ? 'Moving…' : 'Move All to Cart'}
@@ -1215,8 +1248,18 @@ const UserCart: React.FC = () => {
             {wishlistItems.length > 0 ? (
               wishlistItems.map(item => {
                 const isOutOfStock = item.productQuantity <= 0;
+                const wishlistCardClassName = `Wishlist-item cart-card${isOutOfStock ? ' Wishlist-item--out-of-stock' : ''}`;
+
                 return (
-                  <div key={item.productId} className="Wishlist-item cart-card">
+                  <div key={item.productId} className={wishlistCardClassName}>
+                    {isOutOfStock && (
+                      <span
+                        className="wishlist-stock-badge"
+                        aria-label="No stock left"
+                      >
+                        No Stock Left
+                      </span>
+                    )}
                     <div className="recent-purchase-image-container">
                       <div className="recent-purchase-image">
                         <ImageContainer imageId={item.imageId} />
