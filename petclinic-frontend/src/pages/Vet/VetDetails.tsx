@@ -7,7 +7,9 @@ import UpdateVetEducation from '@/pages/Vet/UpdateVetEducation';
 import AddEducation from '@/pages/Vet/AddEducation.tsx';
 import DeleteVetEducation from '@/pages/Vet/DeleteVetEducation';
 import { Workday } from '@/features/veterinarians/models/Workday.ts';
+import { VetRequestModel } from '@/features/veterinarians/models/VetRequestModel';
 import UpdateVet from '@/pages/Vet/UpdateVet.tsx';
+import WorkInformationModal from '@/pages/Vet/WorkInformationModal';
 import UploadAlbumPhoto from '@/features/veterinarians/api/UploadAlbumPhoto';
 import { getAlbumsByVetId } from '@/features/veterinarians/api/getAlbumByVetId.ts';
 import { fetchVetPhoto } from '@/features/veterinarians/api/fetchPhoto';
@@ -24,6 +26,32 @@ import { deleteAlbumPhoto } from '@/features/veterinarians/api/deleteAlbumPhoto'
 import { addSpecialty } from '@/features/veterinarians/api/addSpecialty';
 import { deleteSpecialty } from '@/features/veterinarians/api/deleteSpecialty';
 
+const WORKDAY_DISPLAY_ORDER: string[] = [
+  Workday.Monday,
+  Workday.Tuesday,
+  Workday.Wednesday,
+  Workday.Thursday,
+  Workday.Friday,
+  Workday.Saturday,
+  Workday.Sunday,
+];
+
+const sortWorkdayStrings = (days: string[] = []): string[] => {
+  const orderMap = new Map<string, number>();
+  WORKDAY_DISPLAY_ORDER.forEach((day, index) => orderMap.set(day, index));
+  return days
+    .filter(Boolean)
+    .slice()
+    .sort((a, b) => {
+      const indexA = orderMap.get(a) ?? Number.MAX_SAFE_INTEGER;
+      const indexB = orderMap.get(b) ?? Number.MAX_SAFE_INTEGER;
+      return indexA - indexB;
+    });
+};
+
+const mapToWorkdayEnum = (day: string): Workday | null =>
+  WORKDAY_DISPLAY_ORDER.includes(day) ? (day as Workday) : null;
+
 interface VetResponseType {
   vetId: string;
   vetBillId: string;
@@ -36,23 +64,6 @@ interface VetResponseType {
   workHoursJson: string;
   active: boolean;
   specialties: { specialtyId: string; name: string }[];
-}
-
-interface VetRequestModel {
-  vetId: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phoneNumber: string;
-  resume: string;
-  workday: Workday[];
-  workHoursJson: string;
-  active: boolean;
-  specialties: { specialtyId: string; name: string }[];
-  photoDefault: boolean;
-  username: string;
-  password: string;
-  vetBillId: string;
 }
 
 interface AlbumPhotoType {
@@ -109,13 +120,16 @@ export default function VetDetails(): JSX.Element {
   const [photo, setPhoto] = useState<string | null>(null);
   const [isDefaultPhoto, setIsDefaultPhoto] = useState(false);
   const [albumPhotos, setAlbumPhotos] = useState<AlbumPhotoType[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false); // To handle form visibility
   const [specialtyName, setSpecialtyName] = useState('');
   const [enlargedPhoto, setEnlargedPhoto] = useState<string | null>(null);
   const [formVisible, setFormVisible] = useState<boolean>(false);
   const [isRatingModalOpen, setIsRatingModalOpen] = useState<boolean>(false);
+  const [isWorkInfoModalOpen, setIsWorkInfoModalOpen] =
+    useState<boolean>(false);
+  const [workInfoVet, setWorkInfoVet] = useState<VetRequestModel | null>(null);
 
   // Confirm-delete modal state
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -138,6 +152,7 @@ export default function VetDetails(): JSX.Element {
   const [selectedVet, setSelectedVet] = useState<VetRequestModel | null>(null);
   const [currentCustomerName, setCurrentCustomerName] = useState<string>('');
   const canSubmitReview = Boolean(user.userId) && isOwner;
+  const orderedWorkdays = vet ? sortWorkdayStrings(vet.workday ?? []) : [];
 
   const showNotification = (
     message: string,
@@ -179,7 +194,9 @@ export default function VetDetails(): JSX.Element {
     email: vet.email,
     phoneNumber: vet.phoneNumber,
     resume: vet.resume,
-    workday: vet.workday.map(day => day as Workday),
+    workday: vet.workday
+      .map(mapToWorkdayEnum)
+      .filter((day): day is Workday => day !== undefined),
     workHoursJson: vet.workHoursJson,
     active: vet.active,
     specialties: vet.specialties,
@@ -188,6 +205,22 @@ export default function VetDetails(): JSX.Element {
     password: 'defaultPassword',
     vetBillId: vet.vetBillId,
   });
+
+  const openWorkInfoModal = (): void => {
+    if (!vet) return;
+    setWorkInfoVet(mapVetResponseToRequest(vet));
+    setIsWorkInfoModalOpen(true);
+  };
+
+  const handleCloseWorkInfoModal = (): void => {
+    setIsWorkInfoModalOpen(false);
+    setWorkInfoVet(null);
+  };
+
+  const handleWorkInfoSuccess = (): void => {
+    showNotification('Work information updated successfully!', 'success');
+    void refreshVetDetails();
+  };
 
   const fetchRatings = useCallback(async (): Promise<void> => {
     if (!vetId) return;
@@ -621,29 +654,44 @@ export default function VetDetails(): JSX.Element {
             </section>
 
             <section className="work-info">
-              <h2>Work Information</h2>
-              <p>
-                <strong>Resume:</strong> {vet.resume}
-              </p>
-              <p>
-                <strong>Workdays:</strong>
-                {vet.workday && vet.workday.length > 0 ? (
-                  <ul>
-                    {vet.workday.map((workday, index) => (
-                      <li key={index}>{workday}</li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p>No workdays available</p>
+              <div className="work-info-header">
+                <h2>Work Information</h2>
+                {canManageVet && (
+                  <button
+                    type="button"
+                    className="btn-edit-work-info"
+                    onClick={openWorkInfoModal}
+                  >
+                    Edit Work Information
+                  </button>
                 )}
-              </p>
-              <p>
-                <strong>Work Hours:</strong>{' '}
-                {renderWorkHours(vet.workHoursJson)}
-              </p>
-              <p>
-                <strong>Active:</strong> {vet.active ? 'Yes' : 'No'}
-              </p>
+              </div>
+              <div className="work-info-content">
+                <p>
+                  <strong>Resume:</strong> {vet.resume}
+                </p>
+                <div className="work-info-row">
+                  <strong>Workdays:</strong>
+                  {orderedWorkdays.length > 0 ? (
+                    <div className="workday-tags">
+                      {orderedWorkdays.map(day => (
+                        <span key={day} className="workday-tag">
+                          {day}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="workday-empty">No workdays available</span>
+                  )}
+                </div>
+                <div className="work-info-row">
+                  <strong>Work Hours:</strong>
+                  {renderWorkHours(vet.workHoursJson)}
+                </div>
+                <p>
+                  <strong>Active:</strong> {vet.active ? 'Yes' : 'No'}
+                </p>
+              </div>
             </section>
 
             <section className="specialties-info">
@@ -883,6 +931,16 @@ export default function VetDetails(): JSX.Element {
           </>
         )}
       </div>
+
+      {workInfoVet && (
+        <WorkInformationModal
+          show={isWorkInfoModalOpen}
+          vet={workInfoVet}
+          onClose={handleCloseWorkInfoModal}
+          onSuccess={handleWorkInfoSuccess}
+          onError={message => showNotification(message, 'error')}
+        />
+      )}
 
       {/* Modal for enlarged photo */}
       {enlargedPhoto && (

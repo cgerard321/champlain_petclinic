@@ -339,3 +339,92 @@ transition: transform 220ms cubic-bezier(.2,.7,.2,1);
   outline: none;
   box-shadow: 0 0 0 3px rgba(30,99,255,.25);
 }
+
+.mobileFilters {
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.mobileFilterGroup {
+  margin-bottom: 10px;
+}
+
+.mobileFilterLabel {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+.mobileFilterInput {
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 0.95rem;
+  background: #ffffff;
+}
+
+.mobileFilterSelect {
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 0.95rem;
+  background-color: #ffffff;
+}
+
+.mobileCheckboxGroup {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.mobileCheckboxInput {
+  margin-right: 8px;
+  transform: scale(1.2);
+  accent-color: #1e63ff;
+}
+
+.mobileCheckboxLabel {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+.mobileClearButton {
+  width: 100%;
+  padding: 10px;
+  background-color: #1e63ff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 180ms ease, transform 120ms ease;
+}
+
+.mobileClearButton:hover {
+  background-color: #1552d4;
+  transform: translateY(-1px);
+}
+
+.mobileClearButton:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .inventoryTable {
+    display: none;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobileFilters {
+    display: none;
+  }
+}

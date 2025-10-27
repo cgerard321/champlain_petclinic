@@ -26,14 +26,9 @@ public class PetTypeControllerV1 {
     private final CustomersServiceClient customersServiceClient;
 
     @SecuredEndpoint(allowedRoles = {Roles.ALL})
-    @GetMapping(value = "")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<PetTypeResponseDTO> getAllPetTypes() {
         return customersServiceClient.getAllPetTypes();
-    }
-
-    @GetMapping(value = "", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<PetTypeResponseDTO> getPetTypes(){
-        return customersServiceClient.getPetTypes();
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ALL})
@@ -81,7 +76,7 @@ public class PetTypeControllerV1 {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "/pet-types-pagination")
+    @GetMapping(value = "/pet-types-pagination", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<PetTypeResponseDTO> getPetTypesByPagination(@RequestParam Optional<Integer> page,
                                                             @RequestParam Optional<Integer> size,
                                                             @RequestParam(required = false) String petTypeId,

@@ -33,6 +33,7 @@ import CustomerDetailsPage from '@/pages/Customer/CustomerDetailsPage.tsx';
 import UpdateCustomerPage from '@/pages/Customer/UpdateCustomerPage.tsx';
 import VisitDetails from './features/visits/components/VisitByVisitId';
 import CustomerVisits from '@/pages/Visit/CustomerVisits.tsx';
+import VisitsCalendar from '@/pages/Visit/VisitsCalendar.tsx';
 import UpdateOwnerPetPage from '@/pages/Customer/UpdateOwnerPetPage.tsx';
 import AllUsers from '@/pages/Users/AllUsers.tsx';
 import ProductDetails from '@/features/products/components/ProductDetails';
@@ -53,6 +54,7 @@ import OwnerBookAppointment from '@/pages/Visit/OwnerBookAppointment.tsx';
 import FAQ from './pages/FAQ/FAQ';
 import ContactPage from './pages/Contact/Contact';
 import PrivacyPolicyPage from './pages/PrivacyPolicy/PrivacyPolicy';
+import CustomerVisitsCalendar from '@/pages/Visit/CustomerVisitsCalendar.tsx';
 
 const router = createBrowserRouter([
   {
@@ -240,6 +242,22 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <AddingVisit />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.VisitsCalendar,
+        element: (
+          <ProtectedRoute roles={['ADMIN', 'VET', 'RECEPTIONIST']}>
+            <VisitsCalendar />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.CustomerVisitsCalendar,
+        element: (
+          <ProtectedRoute roles={['OWNER']}>
+            <CustomerVisitsCalendar />
           </ProtectedRoute>
         ),
       },

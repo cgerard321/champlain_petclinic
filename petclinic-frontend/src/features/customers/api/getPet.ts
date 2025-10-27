@@ -6,16 +6,18 @@ export const getPet = async (
   petId: string,
   ownerId?: string
 ): Promise<AxiosResponse<PetResponseModel>> => {
-  const params = { useV2: false, includePhoto: true };
-
   if (ownerId) {
     return await axiosInstance.get<PetResponseModel>(
       `/pets/owners/${ownerId}/pets/${petId}`,
-      { params }
+      {
+        useV2: false,
+        params: { includePhoto: true },
+      }
     );
   } else {
     return await axiosInstance.get<PetResponseModel>(`/pets/${petId}`, {
-      params,
+      useV2: false,
+      params: { includePhoto: true },
     });
   }
 };
