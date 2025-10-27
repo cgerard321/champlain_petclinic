@@ -38,7 +38,6 @@ import {
   setCartIdInLS,
 } from '../api/cartEvent';
 import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
-import axios from 'axios';
 interface ProductAPIResponse {
   productId: number;
   imageId: string;
@@ -479,14 +478,21 @@ const UserCart: React.FC = () => {
     void refetchCart();
   }, [cartId, wishlistUpdated, refetchCart]);
 
-  useEffect(() => {
-    const onFocus = () => void refetchCart();
+  useEffect((): (() => void) | void => {
+    const onFocus = (): void => {
+      void refetchCart();
+    };
+
     window.addEventListener('focus', onFocus);
-    return () => window.removeEventListener('focus', onFocus);
+
+    // cleanup
+    return (): void => {
+      window.removeEventListener('focus', onFocus);
+    };
   }, [refetchCart]);
 
   // Fetch recent purchases
-  useEffect(() => {
+  useEffect((): void => {
     if (!cartId) return;
     const fetchRecentPurchases = async (): Promise<void> => {
       try {
