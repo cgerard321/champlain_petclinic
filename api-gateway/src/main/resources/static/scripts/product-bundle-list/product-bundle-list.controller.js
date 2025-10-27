@@ -43,7 +43,7 @@ angular.module('productBundleList')
             }
 
             $scope.onToastAction = function (index) {
-                const action = $scope.toast.actions[index];
+                var action = $scope.toast.actions[index];
                 toastHide();
                 if (action && typeof action.onClick === 'function') action.onClick();
             };
