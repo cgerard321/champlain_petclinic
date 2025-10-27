@@ -340,7 +340,6 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
       showButton={showButton}
       formId="addvisit"
       validate={validate}
-      // refreshPageOnConfirm={true}
       confirmText={isSubmitting ? 'Adding...' : 'Add'}
       errorMessage={errorMessage}
     >

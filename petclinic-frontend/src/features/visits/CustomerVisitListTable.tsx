@@ -302,25 +302,14 @@ export default function CustomerVisitListTable(): JSX.Element {
     return (
       <Sidebar title={tit}>
         <li>
-          {isVet ? (
-            <AddingVisit
-              showButton={
-                <button className="btn btn-primary" title="Create">
-                  <SvgIcon id="pen-to-square" />
-                  Create
-                </button>
-              }
-            />
-          ) : (
-            <button
-              className="btn btn-primary"
-              onClick={() => navigate(AppRoutePaths.OwnerBookAppointment)}
-              title="Create"
-            >
-              <SvgIcon id="pen-to-square" />
-              Create
-            </button>
-          )}
+          <AddingVisit
+            showButton={
+              <button className="btn btn-primary" title="Create">
+                <SvgIcon id="pen-to-square" />
+                Create
+              </button>
+            }
+          />
         </li>
         <li>
           <button

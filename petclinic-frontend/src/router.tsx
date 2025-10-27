@@ -20,8 +20,6 @@ import AddingCustomer from '@/pages/Customer/AddingCustomer.tsx';
 import AllOwners from '@/pages/Customer/AllOwners.tsx';
 import CustomerBillingPage from '@/pages/Bills/CustomerBills.tsx';
 import AdminBillingPage from '@/pages/Bills/AdminBill.tsx';
-import EditingVisit from './features/visits/models/EditingVisit';
-import AddingVisit from './features/visits/models/AddingVisit';
 import InternalServerError from '@/pages/Error/InternalServerError.tsx';
 import RequestTimeout from '@/pages/Error/RequestTimeout.tsx';
 import ServiceUnavailable from '@/pages/Error/ServiceUnavailable.tsx';
@@ -238,14 +236,6 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: AppRoutePaths.AddVisit,
-        element: (
-          <ProtectedRoute>
-            <AddingVisit />
-          </ProtectedRoute>
-        ),
-      },
-      {
         path: AppRoutePaths.VisitsCalendar,
         element: (
           <ProtectedRoute roles={['ADMIN', 'VET', 'RECEPTIONIST']}>
@@ -346,14 +336,6 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute roles={['ADMIN']}>
             <AllRoles />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: AppRoutePaths.EditVisit,
-        element: (
-          <ProtectedRoute>
-            <EditingVisit />
           </ProtectedRoute>
         ),
       },
