@@ -56,12 +56,15 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
 
       if (
         petData.photo &&
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (petData.photo.data || (petData.photo as any).fileData)
       ) {
         const base64Data =
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           petData.photo.data || (petData.photo as any).fileData;
         const contentType =
           petData.photo.contentType ||
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (petData.photo as any).fileType ||
           'image/png';
         const byteCharacters = atob(base64Data);
