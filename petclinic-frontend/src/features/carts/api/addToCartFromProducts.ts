@@ -10,7 +10,7 @@ import {
 import type { Role } from '@/shared/models/Role';
 
 type UseAddToCartReturnType = {
-  addToCart: (productId: string) => Promise<boolean>;
+  addToCart: (productId: string, quantity: number) => Promise<boolean>;
 };
 
 type CreateCartResponse = {
@@ -48,7 +48,10 @@ export function useAddToCart(): UseAddToCartReturnType {
     }
   };
 
-  const addToCart = async (productId: string): Promise<boolean> => {
+  const addToCart = async (
+    productId: string,
+    quantity: number
+  ): Promise<boolean> => {
     // pas connecté → on ne tente rien
     if (!user?.userId) return false;
 
@@ -77,13 +80,13 @@ export function useAddToCart(): UseAddToCartReturnType {
 
       await axiosInstance.post(
         `/carts/${encodeURIComponent(cartId)}/${encodeURIComponent(String(productId))}`,
-        undefined,
+        { quantity },
         { useV2: false }
       );
 
       //keep navbar offline, persist id + bump count locally
       setCartIdInLS(cartId);
-      bumpCartCountInLS(1);
+      bumpCartCountInLS(quantity);
       notifyCartChanged();
 
       return true;
