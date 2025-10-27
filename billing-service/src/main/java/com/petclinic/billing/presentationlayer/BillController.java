@@ -151,6 +151,7 @@ public class BillController {
                 vetFirstName, vetLastName);
     }
 
+
     @GetMapping(value = "/bills/owner/{ownerFirstName}/{ownerLastName}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getAllBillsByOwnerName(@PathVariable String ownerFirstName, @PathVariable String ownerLastName) {
         return billService.getAllBillsByOwnerName(ownerFirstName, ownerLastName);
