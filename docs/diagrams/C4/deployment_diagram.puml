@@ -88,7 +88,7 @@ Deployment_Node(cpc, "Proxmox Server", "Proxmox 8.4.14 Server"){
 
 
           note right of employee_fe
-          Accessible at https://petclinic-backend.benmusicgeek.synology.me/employee/
+          Accessible at https://petclinic-emp-portal.benmusicgeek.synology.me/
           end note
       }
 
