@@ -95,4 +95,3 @@ const handleAxiosError = (error: unknown): boolean => {
 const axiosInstance = createAxiosInstance();
 
 export default axiosInstance;
-export default axiosInstance;
