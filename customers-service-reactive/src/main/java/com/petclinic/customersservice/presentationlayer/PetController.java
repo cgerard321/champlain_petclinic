@@ -55,16 +55,6 @@ public class PetController {
     }
 
 
-    //this endpoint could probably be removed
-    @DeleteMapping("/{petId}/v2")
-    public Mono<ResponseEntity<PetResponseDTO>> deletePetByPetIdV2(@PathVariable String petId) {
-        return Mono.just(petId)
-                .filter(id -> id.length() == 36)
-                .switchIfEmpty(ApplicationExceptions.invalidPetId(petId))
-                .flatMap(id -> petService.deletePetByPetIdV2(id))
-                .map(ResponseEntity::ok)
-                .switchIfEmpty(ApplicationExceptions.petNotFound(petId));
-    }
 
     @PutMapping("/{petId}")
     public Mono<ResponseEntity<PetResponseDTO>> updatePetByPetId(@PathVariable String petId, @RequestBody Mono<PetRequestDTO> petMono) {

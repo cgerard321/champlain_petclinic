@@ -1,0 +1,165 @@
+<style>
+    .btn:hover {
+        transform: translateY(2px);
+        box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
+        border-bottom-width: 1px;
+    }
+
+    .table-striped tbody tr:hover {
+        background-color: #D8D8D8;
+    }
+
+    .action-toast {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        max-width: 380px;
+        background: #333;
+        color: #fff;
+        padding: 12px 14px;
+        border-radius: 8px;
+        box-shadow: 0 4px 16px rgba(0,0,0,.3);
+        z-index: 9999;
+        display: none;
+    }
+
+    .action-toast.show {
+        display: block;
+    }
+</style>
+
+<!-- Header with title and Add button -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="m-0">Bundles</h2>
+
+    <div class="d-flex" style="gap: .5rem;">
+        <button class="btn btn-success"
+                ui-sref="productBundleForm">
+            Add Bundle
+        </button>
+    </div>
+</div>
+
+<!-- Bundles Table -->
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <td>Name</td>
+        <td>Bundle Id</td>
+        <td>Original Total</td>
+        <td>Bundle Price</td>
+        <td></td> <!-- details -->
+        <td></td> <!-- edit -->
+        <td></td> <!-- delete/restore -->
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr ng-repeat="bundle in $ctrl.bundleList track by bundle.bundleId">
+        <td>{{ bundle.bundleName }}</td>
+        <td>{{ bundle.bundleId }}</td>
+        <td>{{ bundle.originalTotalPrice | currency:"$" }}</td>
+        <td><strong>{{ bundle.bundlePrice | currency:"$" }}</strong></td>
+
+        <!-- DETAILS -->
+        <td>
+            <a class="btn btn-info"
+               ui-sref="productBundleDetailsInfo({ bundleId: bundle.bundleId })"
+               title="Details">
+                <lord-icon
+                        src="https://cdn.lordicon.com/jnzhohhs.json"
+                        trigger="hover"
+                        style="width:32px;height:32px">
+                </lord-icon>
+            </a>
+        </td>
+
+        <!-- EDIT -->
+        <td>
+            <a ui-sref="productBundleUpdateForm({ bundleId: bundle.bundleId })"
+               title="Edit">
+                <button class="btn btn-warning">
+                    <lord-icon
+                            src="https://cdn.lordicon.com/wkvacbiw.json"
+                            trigger="hover"
+                            style="width:32px;height:32px">
+                    </lord-icon>
+                </button>
+            </a>
+        </td>
+
+        <!-- DELETE / RESTORE -->
+        <td>
+            <a ng-if="!bundle.isTemporarilyDeleted"
+               class="btn btn-danger"
+               href="javascript:void(0)"
+               ng-click="deleteBundle(bundle); $event.stopPropagation()"
+               title="Delete">
+                <lord-icon
+                        src="https://cdn.lordicon.com/skkahier.json"
+                        trigger="hover"
+                        style="width:32px;height:32px">
+                </lord-icon>
+            </a>
+
+            <a ng-if="bundle.isTemporarilyDeleted"
+               class="btn btn-info"
+               href="javascript:void(0)"
+               ng-click="undoDeleteBundle(bundle); $event.stopPropagation()"
+               title="Restore">
+                Restore
+            </a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<!-- Pagination -->
+<div class="d-flex justify-content-center pb-3">
+    <nav aria-label="Page navigation example">
+        <ul class="pagination">
+            <li class="page-item">
+                <a class="page-link text-dark" aria-label="Previous"
+                   ng-click="$ctrl.previousPage()">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+
+            <li class="page-item">
+                <a class="page-link text-dark" disabled>
+                    Page {{$ctrl.actualCurrentPageShown}}
+                </a>
+            </li>
+
+            <li class="page-item">
+                <a class="page-link text-dark" aria-label="Next"
+                   ng-click="$ctrl.nextPage()">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+<!-- Toast for Delete -->
+<div class="action-toast" ng-class="{'show': toast.visible}">
+    <div class="title">{{ toast.title }}</div>
+    <div class="line"
+         ng-repeat="line in toast.lines track by $index">
+        {{ line }}
+    </div>
+    <div class="actions"
+         ng-if="toast.actions && toast.actions.length">
+        <button class="btn"
+                ng-class="{
+                    'btn-primary': (action.kind||'primary')==='primary',
+                    'btn-secondary': action.kind==='secondary',
+                    'btn-danger': action.kind==='danger'
+                }"
+                ng-repeat="action in toast.actions track by $index"
+                ng-click="onToastAction($index)">
+            {{ action.label }}
+        </button>
+    </div>
+</div>

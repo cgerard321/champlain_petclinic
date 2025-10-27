@@ -6,14 +6,51 @@ angular.module('inventoriesForm')
     console.log("State params: " + $stateParams)
     $scope.saving = false;
 
-    $scope.existingInventoryNames = new Set();
-    $http.get("api/gateway/inventories").then(function (resp) {
-      (resp.data || []).forEach(function (inv) {
-        if (inv && inv.inventoryName) {
-          $scope.existingInventoryNames.add(inv.inventoryName.toLowerCase().trim());
-        }
-      });
-    }, handleHttpError);
+      $scope.existingInventoryNames = new Set();
+
+      (function startNamesSSE_Add () {
+          var esNames = new EventSource('api/gateway/inventories');
+          var idleTimer = null;
+          var IDLE_MS = 1000;
+          var initialFired = false;
+
+          function bumpIdle() {
+              if (idleTimer) clearTimeout(idleTimer);
+              idleTimer = setTimeout(function () {
+                  try { esNames.close(); } catch (_) {}
+              }, IDLE_MS);
+          }
+
+          function addInv(inv) {
+              if (!inv || !inv.inventoryName) return;
+              $scope.$evalAsync(function () {
+                  $scope.existingInventoryNames.add(inv.inventoryName.toLowerCase().trim());
+              });
+          }
+
+          esNames.onmessage = function (e) {
+              if (!e.data || e.data === 'heartbeat' || e.data === ':') { bumpIdle(); return; }
+              try {
+                  var payload = JSON.parse(e.data);
+                  if (Array.isArray(payload)) payload.forEach(addInv);
+                  else addInv(payload);
+              } catch (_) {
+                  // ignore non-JSON
+              }
+              if (!initialFired) {
+                  initialFired = true;
+                  if ($scope.checkNameAdd) $scope.checkNameAdd();
+              }
+              bumpIdle();
+          };
+
+          esNames.onerror = function () {};
+
+          $scope.$on('$destroy', function () {
+              if (idleTimer) clearTimeout(idleTimer);
+              try { esNames.close(); } catch (_) {}
+          });
+      })();
 
     $scope.checkNameAdd = function () {
       if (!$scope.inventoryForm || !$scope.inventoryForm.inventoryName) return;
@@ -23,13 +60,54 @@ angular.module('inventoriesForm')
       $scope.inventoryForm.inventoryName.$setValidity('duplicate', !isDup);
     };
 
-    $scope.inventoryTypeFormSearch = "";
-    $scope.inventoryTypeOptions = ["New Type"];
-    $http.get("api/gateway/inventories/types").then(function (resp) {
-      resp.data.forEach(function (type) { $scope.inventoryTypeOptions.push(type.type); });
-      if (!$scope.selectedOption) { $scope.selectedOption = $scope.inventoryTypeOptions[0]; }
-    }, handleHttpError);
-    $scope.selectedOption = $scope.inventoryTypeOptions[0];
+      $scope.inventoryTypeFormSearch = "";
+      $scope.inventoryTypeOptions = ["New Type"];
+      $scope.selectedOption = $scope.inventoryTypeOptions[0];
+
+      (function initTypesSSE() {
+          var es = new EventSource('api/gateway/inventories/types');
+          var seen = new Set();              // to dedupe types coming over time
+          var idleTimer = null;
+          var IDLE_MS = 1000;
+
+          function bumpIdle() {
+              if (idleTimer) clearTimeout(idleTimer);
+              idleTimer = setTimeout(function () {
+                  try { es.close(); } catch (_) {}
+              }, IDLE_MS);
+          }
+
+          function addType(t) {
+              if (!t) return;
+              // accept either string or object { type } / { inventoryType }
+              var label = (typeof t === 'string') ? t : (t.type || t.inventoryType);
+              if (!label || seen.has(label)) return;
+              seen.add(label);
+              $scope.$evalAsync(function () {
+                  $scope.inventoryTypeOptions.push(label);
+                  if (!$scope.selectedOption) $scope.selectedOption = $scope.inventoryTypeOptions[0];
+              });
+          }
+
+          es.onmessage = function (e) {
+              if (!e.data || e.data === 'heartbeat' || e.data === ':') { bumpIdle(); return; }
+              try {
+                  var payload = JSON.parse(e.data);
+                  if (Array.isArray(payload)) payload.forEach(addType);
+                  else addType(payload);
+              } catch (_e) {
+                  addType(e.data);
+              }
+              bumpIdle();
+          };
+
+          es.onerror = function () { /* let browser auto-reconnect */ };
+
+          $scope.$on('$destroy', function () {
+              if (idleTimer) clearTimeout(idleTimer);
+              try { es.close(); } catch (_) {}
+          });
+      })();
 
     self.submitInventoryForm = function () {
 

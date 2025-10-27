@@ -20,7 +20,6 @@ export default function BillsListTable({
   const [filteredBills, setFilteredBills] = useState<Bill[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  // Ensure bills and filteredBills are always arrays to prevent null filter errors
   const safeBills = useMemo(() => (Array.isArray(bills) ? bills : []), [bills]);
   const safeFilteredBills = useMemo(
     () => (Array.isArray(filteredBills) ? filteredBills : []),
@@ -65,7 +64,6 @@ export default function BillsListTable({
     } catch (err) {
       console.error('Error fetching bills:', err);
       setError('Failed to fetch bills');
-      // Ensure bills is always an array, never null
       setBills([]);
       setFilteredBills([]);
     }
@@ -87,23 +85,70 @@ export default function BillsListTable({
     );
   }, [selectedStatus, safeBills]);
 
-  const toggleSection = (section: 'status' | 'amount' | 'date'): void => {
-    setActiveSection(prev => {
-      const closing = prev === section;
-      if (closing) {
-        setSelectedStatus('all');
-        setAmountRangeOption('none');
-        setCustomMin('');
-        setCustomMax('');
-        setDateMonth(new Date().getMonth() + 1);
-        setDateYear(new Date().getFullYear());
-        setFilteredBills(safeBills.slice());
-        setError(null);
-        return null;
-      }
-      return section;
-    });
-  };
+  const toggleSection = useCallback(
+    (section: 'status' | 'amount' | 'date'): void => {
+      setActiveSection(prev => {
+        const closing = prev === section;
+        if (closing) {
+          setSelectedStatus('all');
+          setAmountRangeOption('none');
+          setCustomMin('');
+          setCustomMax('');
+          setDateMonth(new Date().getMonth() + 1);
+          setDateYear(new Date().getFullYear());
+          setFilteredBills(safeBills.slice());
+          setError(null);
+          return null;
+        }
+        return section;
+      });
+    },
+    [safeBills]
+  );
+
+  useEffect(() => {
+    const onStatus = (): void => {
+      toggleSection('status');
+    };
+    const onAmount = (): void => {
+      toggleSection('amount');
+    };
+    const onDate = (): void => {
+      toggleSection('date');
+    };
+
+    window.addEventListener(
+      'customerToggleStatusFilter',
+      onStatus as EventListener
+    );
+    window.addEventListener(
+      'customerToggleAmountFilter',
+      onAmount as EventListener
+    );
+    window.addEventListener(
+      'customerToggleDateFilter',
+      onDate as EventListener
+    );
+
+    return () => {
+      window.removeEventListener(
+        'customerToggleStatusFilter',
+        onStatus as EventListener
+      );
+      window.removeEventListener(
+        'customerToggleAmountFilter',
+        onAmount as EventListener
+      );
+      window.removeEventListener(
+        'customerToggleDateFilter',
+        onDate as EventListener
+      );
+    };
+  }, [toggleSection]);
+
+  useEffect(() => {
+    void setCurrency;
+  }, [setCurrency]);
 
   const applyAmountFilter = (): void => {
     let base = bills.slice();
@@ -269,169 +314,232 @@ export default function BillsListTable({
 
   return (
     <div>
-      <div className="filter-button-row">
-        <button className="filter-btn" onClick={() => toggleSection('status')}>
-          {activeSection === 'status' ? 'Close Status' : 'Filter by Status'}
-        </button>
-        <button className="filter-btn" onClick={() => toggleSection('amount')}>
-          {activeSection === 'amount' ? 'Close Amount' : 'Filter by Amount'}
-        </button>
-        <button className="filter-btn" onClick={() => toggleSection('date')}>
-          {activeSection === 'date' ? 'Close Date' : 'Filter by Date'}
-        </button>
-      </div>
-
-      <div
-        className="filterContainer"
-        style={{ display: 'flex', alignItems: 'center', gap: '16px' }}
-      >
-        <label htmlFor="currencyFilter">Currency:</label>
-        <select
-          id="currencyFilter"
-          value={currency}
-          onChange={e => setCurrency(e.target.value as Currency)}
-          style={{ width: '100px' }}
-        >
-          <option value="CAD">CAD</option>
-          <option value="USD">USD</option>
-        </select>
-      </div>
-
       {activeSection === 'status' && (
-        <div className="filter-section">
-          <label htmlFor="statusFilter">Status:</label>
-          <select
-            id="statusFilter"
-            value={selectedStatus}
-            onChange={e => setSelectedStatus(e.target.value)}
-          >
-            <option value="all">All</option>
-            <option value="overdue">Overdue</option>
-            <option value="paid">Paid</option>
-            <option value="unpaid">Unpaid</option>
-          </select>
+        <div className="modalOverlay">
+          <div className="modalContent form-modal">
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <h3>Filter by Status</h3>
+              <button
+                className="modal-close-btn"
+                onClick={() => toggleSection('status')}
+              >
+                Close
+              </button>
+            </div>
+            <div style={{ marginTop: '12px' }}>
+              <div className="form-grid">
+                <label htmlFor="statusFilter">Status</label>
+                <select
+                  id="statusFilter"
+                  value={selectedStatus}
+                  onChange={e => setSelectedStatus(e.target.value)}
+                >
+                  <option value="all">All</option>
+                  <option value="paid">Paid</option>
+                  <option value="unpaid">Unpaid</option>
+                </select>
+
+                <div className="form-actions">
+                  <button
+                    className="primary-modal-btn wide-btn"
+                    onClick={() => toggleSection('status')}
+                  >
+                    Apply
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedStatus('all');
+                      setFilteredBills(safeBills);
+                      setError(null);
+                      toggleSection('status');
+                    }}
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
       {activeSection === 'amount' && (
-        <div className="filter-section">
-          <label>Amount:</label>
-          <select
-            value={amountRangeOption}
-            onChange={e => setAmountRangeOption(e.target.value)}
-          >
-            <option value="none">None</option>
-            <option value="0-100">&lt; 100</option>
-            <option value="0-200">&lt; 200</option>
-            <option value="0-500">&lt; 500</option>
-            <option value="custom">Custom</option>
-          </select>
-          {amountRangeOption === 'custom' ? (
-            <div className="custom-amount-row">
-              <input
-                type="number"
-                placeholder="min"
-                value={customMin}
-                onChange={e => setCustomMin(e.target.value)}
-              />
-              <input
-                type="number"
-                placeholder="max"
-                value={customMax}
-                onChange={e => setCustomMax(e.target.value)}
-              />
-              <div className="filter-actions">
-                <button onClick={applyAmountFilter}>Apply</button>
-                <button
-                  onClick={() => {
-                    setAmountRangeOption('none');
-                    setCustomMin('');
-                    setCustomMax('');
-                    setError(null);
-                    setFilteredBills(safeBills);
-                  }}
-                >
-                  Clear
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="filter-actions">
-              <button onClick={applyAmountFilter}>Apply</button>
+        <div className="modalOverlay">
+          <div className="modalContent form-modal">
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <h3>Filter by Amount</h3>
               <button
-                onClick={() => {
-                  setAmountRangeOption('none');
-                  setFilteredBills(safeBills);
-                }}
+                className="modal-close-btn"
+                onClick={() => toggleSection('amount')}
               >
-                Clear
+                Close
               </button>
             </div>
-          )}
+            <div style={{ marginTop: '12px' }}>
+              <div className="form-grid">
+                <label>Amount range</label>
+                <select
+                  value={amountRangeOption}
+                  onChange={e => setAmountRangeOption(e.target.value)}
+                >
+                  <option value="none">None</option>
+                  <option value="0-100">&lt; 100</option>
+                  <option value="0-200">&lt; 200</option>
+                  <option value="0-500">&lt; 500</option>
+                  <option value="custom">Custom</option>
+                </select>
+
+                {amountRangeOption === 'custom' && (
+                  <>
+                    <label>Custom Min</label>
+                    <input
+                      type="number"
+                      placeholder="min"
+                      value={customMin}
+                      onChange={e => setCustomMin(e.target.value)}
+                    />
+                    <label>Custom Max</label>
+                    <input
+                      type="number"
+                      placeholder="max"
+                      value={customMax}
+                      onChange={e => setCustomMax(e.target.value)}
+                    />
+                  </>
+                )}
+
+                <div className="form-actions">
+                  <button
+                    className="primary-modal-btn wide-btn"
+                    onClick={() => {
+                      applyAmountFilter();
+                      toggleSection('amount');
+                    }}
+                  >
+                    Apply
+                  </button>
+                  <button
+                    onClick={() => {
+                      setAmountRangeOption('none');
+                      setCustomMin('');
+                      setCustomMax('');
+                      setError(null);
+                      setFilteredBills(safeBills);
+                      toggleSection('amount');
+                    }}
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
       {activeSection === 'date' && (
-        <div className="filter-section">
-          <label>Date mode:</label>
-          <select
-            value={dateMode}
-            onChange={e => setDateMode(e.target.value as 'due' | 'visit')}
-          >
-            <option value="due">Due date</option>
-            <option value="visit">Visit date</option>
-          </select>
-
-          <label>Month:</label>
-          <select
-            value={dateMonth}
-            onChange={e =>
-              setDateMonth(
-                e.target.value === 'any' ? 'any' : Number(e.target.value)
-              )
-            }
-          >
-            <option value="any">Any</option>
-            {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
-              <option key={m} value={m}>
-                {new Date(0, m - 1).toLocaleString('default', {
-                  month: 'long',
-                })}
-              </option>
-            ))}
-          </select>
-
-          <label>Year:</label>
-          <select
-            value={dateYear}
-            onChange={e =>
-              setDateYear(
-                e.target.value === 'any' ? 'any' : Number(e.target.value)
-              )
-            }
-          >
-            <option value="any">Any</option>
-            {Array.from({ length: 7 })
-              .map((_, i) => new Date().getFullYear() - 5 + i)
-              .map(y => (
-                <option key={y} value={y}>
-                  {y}
-                </option>
-              ))}
-          </select>
-
-          <div className="filter-actions">
-            <button onClick={applyDateFilter}>Apply</button>
-            <button
-              onClick={() => {
-                setDateMonth(new Date().getMonth() + 1);
-                setDateYear(new Date().getFullYear());
-                setFilteredBills(safeBills);
-                setError(null);
+        <div className="modalOverlay">
+          <div className="modalContent form-modal">
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
               }}
             >
-              Clear
-            </button>
+              <h3>Filter by Date</h3>
+              <button
+                className="modal-close-btn"
+                onClick={() => toggleSection('date')}
+              >
+                Close
+              </button>
+            </div>
+            <div style={{ marginTop: '12px' }}>
+              <div className="form-grid">
+                <label>Date mode</label>
+                <select
+                  value={dateMode}
+                  onChange={e => setDateMode(e.target.value as 'due' | 'visit')}
+                >
+                  <option value="due">Due date</option>
+                  <option value="visit">Visit date</option>
+                </select>
+
+                <label>Month</label>
+                <select
+                  value={dateMonth}
+                  onChange={e =>
+                    setDateMonth(
+                      e.target.value === 'any' ? 'any' : Number(e.target.value)
+                    )
+                  }
+                >
+                  <option value="any">Any</option>
+                  {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
+                    <option key={m} value={m}>
+                      {new Date(0, m - 1).toLocaleString('default', {
+                        month: 'long',
+                      })}
+                    </option>
+                  ))}
+                </select>
+
+                <label>Year</label>
+                <select
+                  value={dateYear}
+                  onChange={e =>
+                    setDateYear(
+                      e.target.value === 'any' ? 'any' : Number(e.target.value)
+                    )
+                  }
+                >
+                  <option value="any">Any</option>
+                  {Array.from({ length: 7 })
+                    .map((_, i) => new Date().getFullYear() - 5 + i)
+                    .map(y => (
+                      <option key={y} value={y}>
+                        {y}
+                      </option>
+                    ))}
+                </select>
+
+                <div className="form-actions">
+                  <button
+                    className="primary-modal-btn wide-btn"
+                    onClick={() => {
+                      applyDateFilter();
+                      toggleSection('date');
+                    }}
+                  >
+                    Apply
+                  </button>
+                  <button
+                    onClick={() => {
+                      setDateMonth(new Date().getMonth() + 1);
+                      setDateYear(new Date().getFullYear());
+                      setFilteredBills(safeBills);
+                      setError(null);
+                      toggleSection('date');
+                    }}
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

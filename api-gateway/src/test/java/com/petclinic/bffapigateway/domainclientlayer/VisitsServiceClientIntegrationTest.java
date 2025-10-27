@@ -49,6 +49,7 @@ class VisitsServiceClientIntegrationTest {
     private static MockWebServer server;
     private static ObjectMapper objectMapper = new ObjectMapper();
 
+
     private static final String VISIT_ID = "visitId4";
 
     private static final String PET_ID = "1";
@@ -907,7 +908,7 @@ class VisitsServiceClientIntegrationTest {
 
  */
 
-    
+
     @Test
     void testUpdateVisitByVisitId_BadRequest() {
         // Arrange
@@ -1029,7 +1030,7 @@ class VisitsServiceClientIntegrationTest {
     }
 
      */
-  
+
     @Test
       void updateVisitStatus_ShouldSucceed_WhenStatusUpdatedToCancelled() {
           String visitId = "12345";
@@ -1271,7 +1272,41 @@ class VisitsServiceClientIntegrationTest {
                 .verifyComplete();
     }
 
+    @Test
+    void archiveCompletedVisit_4xx_throwsBadRequestException_withServerMessage() {
+        String visitId = "bad-id";
+        String errorBody = "Invalid visit";
 
+        server.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE)
+                .setBody(errorBody));
+
+        Mono<VisitResponseDTO> mono = visitsServiceClient.archiveCompletedVisit(visitId, Mono.empty());
+
+        StepVerifier.create(mono)
+                .expectErrorMatches(ex -> ex instanceof BadRequestException
+                        && ex.getMessage().contains(errorBody))
+                .verify();
+    }
+
+    @Test
+    void getAllArchivedVisits_serverError_bubblesUp() {
+        server.enqueue(new MockResponse().setResponseCode(500));
+
+        StepVerifier.create(visitsServiceClient.getAllArchivedVisits())
+                .expectError(WebClientResponseException.class)
+                .verify();
+    }
+
+    @Test
+    void exportVisitsToCSV_serverError_throwsWebClientResponseException() {
+        server.enqueue(new MockResponse().setResponseCode(500));
+
+        StepVerifier.create(visitsServiceClient.exportVisitsToCSV())
+                .expectError(WebClientResponseException.class)
+                .verify();
+    }
 
 
 }

@@ -182,6 +182,7 @@ class RatingServiceImplTest {
                 .verify();
     }
 
+    // Pass when should fail
     @Test
     void addRatingToVet() {
         when(vetRepository.findVetByVetId(anyString())).thenReturn(Mono.just(existingVet));
@@ -190,6 +191,7 @@ class RatingServiceImplTest {
                 .map(ratingResponseDTO -> {
                     assertEquals(ratingResponseDTO.getVetId(), ratingRequestDTO.getVetId());
                     assertEquals(ratingResponseDTO.getRateScore(), ratingRequestDTO.getRateScore());
+                    assertEquals("test1", "test2");
                     assertNotNull(ratingResponseDTO.getRatingId());
                     return ratingResponseDTO;
                 });

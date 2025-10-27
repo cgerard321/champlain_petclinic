@@ -30,31 +30,129 @@ angular.module('inventoriesUpdateForm')
       }
     }
 
-    $http.get('/api/gateway/inventories/' + inventoryId).then(function (resp) {
-      self.inventory = resp.data || {};
-      self.originalName = (self.inventory.inventoryName || '').toLowerCase().trim();
-      inventoryLoaded = true;
-      syncSelectedType();
+    var esNamesUpdate = null;
 
-      return $http.get('/api/gateway/inventories');
-    }).then(function (listResp) {
-      (listResp.data || []).forEach(function (inv) {
-        if (inv && inv.inventoryName) {
-          $scope.existingInventoryNames.add(inv.inventoryName.toLowerCase().trim());
-        }
-      });
-      if ($scope.checkNameUpdate) $scope.checkNameUpdate();
-    }, handleHttpError);
+      $http.get('/api/gateway/inventories/' + inventoryId).then(function (resp) {
+          self.inventory = resp.data || {};
+          self.originalName = (self.inventory.inventoryName || '').toLowerCase().trim();
+          inventoryLoaded = true;
+          syncSelectedType();
 
-    $scope.inventoryTypeFormUpdateSearch = "";
-    $scope.inventoryTypeUpdateOptions = ["New Type"];
-    $http.get("/api/gateway/inventories/types").then(function (typesResp) {
-      (typesResp.data || []).forEach(function (t) {
-        if (t && t.type) $scope.inventoryTypeUpdateOptions.push(t.type);
-      });
-      typesLoaded = true;
-      syncSelectedType();
-    }, handleHttpError);
+          startNamesSSE_Update();
+      }, handleHttpError);
+
+      // stream all inventories and fill the Set of names
+      function startNamesSSE_Update () {
+          if (esNamesUpdate) {
+              try {
+                  esNamesUpdate.close();
+              } catch (_) {
+              }
+          }
+          esNamesUpdate = new EventSource('/api/gateway/inventories');
+
+          var idleTimer = null;
+          var IDLE_MS = 1000;
+          var initialFired = false;
+
+          function bumpIdle() {
+              if (idleTimer) clearTimeout(idleTimer);
+              idleTimer = setTimeout(function () {
+                  try {
+                      esNamesUpdate.close();
+                  } catch (_) {
+                  }
+              }, IDLE_MS);
+          }
+
+          function addInv(inv) {
+              if (!inv || !inv.inventoryName) return;
+              $scope.existingInventoryNames.add(inv.inventoryName.toLowerCase().trim());
+          }
+
+          esNamesUpdate.onmessage = function (e) {
+              if (!e.data || e.data === 'heartbeat' || e.data === ':') {
+                  bumpIdle();
+                  return;
+              }
+              try {
+                  var payload = JSON.parse(e.data);
+                  if (Array.isArray(payload)) payload.forEach(addInv);
+                  else addInv(payload);
+              } catch (_) {
+                  // ignore non-JSON
+              }
+              if (!initialFired) {
+                  initialFired = true;
+                  if ($scope.checkNameUpdate) $scope.checkNameUpdate();
+              }
+              bumpIdle();
+          };
+
+          esNamesUpdate.onerror = function () {
+              // let browser handle reconnects; we also auto-close on idle
+          };
+
+          $scope.$on('$destroy', function () {
+              if (idleTimer) clearTimeout(idleTimer);
+              try {
+                  esNamesUpdate.close();
+              } catch (_) {
+              }
+          });
+      }
+
+
+      $scope.inventoryTypeFormUpdateSearch = "";
+      $scope.inventoryTypeUpdateOptions = ["New Type"];
+
+      (function initTypesUpdateSSE() {
+          var es = new EventSource('/api/gateway/inventories/types');
+          var seen = new Set();
+          var idleTimer = null;
+          var IDLE_MS = 1000;
+
+          function bumpIdle() {
+              if (idleTimer) clearTimeout(idleTimer);
+              idleTimer = setTimeout(function () {
+                  try { es.close(); } catch (_) {}
+              }, IDLE_MS);
+          }
+
+          function addType(t) {
+              if (!t) return;
+              var label = (typeof t === 'string') ? t : (t.type || t.inventoryType);
+              if (!label || seen.has(label)) return;
+              seen.add(label);
+              $scope.$evalAsync(function () {
+                  $scope.inventoryTypeUpdateOptions.push(label);
+                  // once the list is ready at least once, allow sync with the loaded inventory
+                  if (!typesLoaded) {
+                      typesLoaded = true;
+                      syncSelectedType();
+                  }
+              });
+          }
+
+          es.onmessage = function (e) {
+              if (!e.data || e.data === 'heartbeat' || e.data === ':') { bumpIdle(); return; }
+              try {
+                  var payload = JSON.parse(e.data);
+                  if (Array.isArray(payload)) payload.forEach(addType);
+                  else addType(payload);
+              } catch (_e) {
+                  addType(e.data);
+              }
+              bumpIdle();
+          };
+
+          es.onerror = function () {};
+
+          $scope.$on('$destroy', function () {
+              if (idleTimer) clearTimeout(idleTimer);
+              try { es.close(); } catch (_) {}
+          });
+      })();
 
     $scope.checkNameUpdate = function () {
       if (!$scope.inventoryUpdateForm || !$scope.inventoryUpdateForm.inventoryName) return;

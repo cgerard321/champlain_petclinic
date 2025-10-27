@@ -29,6 +29,18 @@ or
 docker-compose --profile fe up --build
 ```
 
+## Docker Profile (for running with docker-compose with EMPLOYEE FRONTEND)
+For running the employee portal (Angular frontend) with all backend services.
+```
+docker-compose --profile fe-employee build
+docker-compose --profile fe-employee up -d
+docker-compose logs -f
+
+or
+
+docker-compose --profile fe-employee up --build
+```
+
 ## Docker Profile (for running with docker-compose with all services but NO FRONTEND)
 This can be used during development to avoid having to rebuild everything whenever you make a change to the frontend.
 ```
@@ -42,7 +54,7 @@ docker-compose up --build
 ```
 To learn more about how docker profiles are used in general, I strongly encourage a short read on how docker profiles function [here](https://docs.docker.com/compose/how-tos/profiles/).
 ## Bring up Frontend
-React frontend:
+React frontend :
 ```
 localhost:3000/
 ```
@@ -50,9 +62,28 @@ Until it is fixed, to login on React frontend, use need to enter the following U
 ```
 localhost:3000/users/login
 ```
-Angular frontend:
+employee-frontend :
+```
+localhost:4200/
+```
+
+Old Angular frontend:
 ```
 localhost:8080/
+```
+
+Running employee-frontend locally (development mode with auto-refresh):
+```
+cd employee-frontend
+npm install
+npm run dev
+```
+
+Running React frontend locally (development mode with auto-refresh):
+```
+cd petclinic-frontend
+npm install
+npm run dev
 ```
 In terminal:
 

@@ -21,6 +21,14 @@ x-healthchecks:
       retries: 3
       start_period: 15s
 
+  angular-node: &angular_node
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:4200/ || true"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
   dbgate: &dbgate_hc
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS -u CPC_Admin:${DBGATE_PASSWORD} http://localhost:3000/ || exit 1"]
@@ -79,6 +87,30 @@ services:
       - homepage.href=https://petclinic.benmusicgeek.synology.me/
       - homepage.description=Petclinic Frontend Container
       - homepage.siteMonitor=https://petclinic.benmusicgeek.synology.me/
+
+  # Employee front-end
+  employeeFrontend:
+    <<: *angular_node
+    image: employee-frontend
+    container_name: employee-frontend
+    pull_policy: never
+    build:
+      context: ./employee-frontend
+      dockerfile: Dockerfile
+      args:
+        - BUILD_MODE=production
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./employee-frontend/src:/app/src
+    restart: unless-stopped
+    labels:
+      - homepage.group=Development
+      - homepage.name=Employee Frontend
+      - homepage.icon=https://github.com/homarr-labs/dashboard-icons/blob/main/png/angular.png?raw=true
+      - homepage.href=https://petclinic-backend.benmusicgeek.synology.me/employee/
+      - homepage.description=Employee Frontend Container
+      - homepage.siteMonitor=https://petclinic-backend.benmusicgeek.synology.me/employee/
 
   # =========================
   # BACKEND — Spring Boot
