@@ -25,7 +25,12 @@ angular.module('productBundleList')
             $scope.toast = { visible: false, title: '', lines: [], actions: [] };
             var toastTimer = null;
 
-            function toastShow({ title = '', lines = [], actions = [], autoHideMs = 0 }) {
+            function toastShow(opts) {
+                opts = opts || {};
+                var title = typeof opts.title !== 'undefined' ? opts.title : '';
+                var lines = typeof opts.lines !== 'undefined' ? opts.lines : [];
+                var actions = typeof opts.actions !== 'undefined' ? opts.actions : [];
+                var autoHideMs = typeof opts.autoHideMs !== 'undefined' ? opts.autoHideMs : 0;
                 if (toastTimer) { clearTimeout(toastTimer); toastTimer = null; }
                 $scope.toast.title = title;
                 $scope.toast.lines = lines;
