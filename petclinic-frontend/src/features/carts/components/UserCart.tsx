@@ -598,7 +598,6 @@ const UserCart: React.FC = () => {
       }
     },
     [cartId, blockIfReadOnly, confirm, ensureCartId, apiErrorMessage, showToast]
-
   );
 
   const clearCart = async (): Promise<void> => {
@@ -662,7 +661,7 @@ const UserCart: React.FC = () => {
       //notify navbar (item moved out of cart)
     } catch (error: unknown) {
       const msg = apiErrorMessage(error, 'Failed to add item to wishlist.');
-      setNotificationMessage(msg);
+      showToast(msg, 'error');
     }
   };
 
