@@ -6,7 +6,6 @@ import InvoiceComponent, {
   InvoiceItem as InvoiceItemType,
 } from './Invoice';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useCart } from '@/context/CartContext';
 import CartItem from './CartItem';
 import { ProductModel } from '../models/ProductModel';
 import './cart-shared.css';
@@ -37,8 +36,11 @@ import {
   notifyCartChanged,
   setCartCountInLS,
   setCartIdInLS,
+  getCartCountFromLS,
+  CART_CHANGED,
 } from '../api/cartEvent';
 import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
+
 interface ProductAPIResponse {
   productId: number;
   imageId: string;
@@ -65,7 +67,6 @@ interface Invoice {
 const UserCart: React.FC = () => {
   const navigate = useNavigate();
   const { cartId } = useParams<{ cartId?: string }>();
-  const { syncAfterAddToCart } = useCart();
   const { confirm, ConfirmModal } = useConfirmModal();
 
   const [cartItems, setCartItems] = useState<ProductModel[]>([]);
@@ -159,43 +160,34 @@ const UserCart: React.FC = () => {
     const quantity = Math.max(1, recentPurchaseQuantities[item.productId] || 1);
 
     try {
-      // Concurrently add items to cart
-      const addPromises = Array.from({ length: quantity }, () =>
-        axiosInstance.post(
-          `/carts/${cartId}/${item.productId}`,
-          {},
-          { useV2: false }
-        )
-      );
-      await Promise.all(addPromises);
+      // Make navbar aware of active cart and do optimistic bump
+        setCartIdInLS(cartId!)
+        bumpCartCountInLS(quantity)
+        notifyCartChanged()
+        showToast(`${item.productName} (x${quantity}) added to cart!`, 'success');
 
-      showToast(`${item.productName} (x${quantity}) added to cart!`, 'success');
-      notifyCartChanged();
-      // Fetch updated cart and update state
-      const { data } = await axiosInstance.get(`/carts/${cartId}`, {
-        useV2: false,
-      });
-      if (Array.isArray(data.products)) {
-        const products: ProductModel[] = data.products.map(
-          (p: ProductAPIResponse) => ({
-            productId: p.productId,
-            imageId: p.imageId,
-            productName: p.productName,
-            productDescription: p.productDescription,
-            productSalePrice: p.productSalePrice,
-            averageRating: p.averageRating,
-            quantity: p.quantityInCart || 1,
-            productQuantity: p.productQuantity,
-          })
+        // Fire-and-forget adds; don't fail whole flow on partial errors
+        const results = await Promise.allSettled(
+            Array.from({ length: quantity }, () =>
+                axiosInstance.post(
+                    `/carts/${cartId}/${item.productId}`,
+                    {},
+                    { useV2: false }
+                )
+            )
         );
-        setCartItems(products);
-        const updatedCount = products.reduce(
-          (acc, p) => acc + (p.quantity || 0),
-          0
-        );
-        setCartCountInLS(updatedCount);
-      }
+
+        const failures = results.filter(r => r.status === 'rejected').length;
+        if (failures > 0) {
+            // Roll back only the failed portion, notify, and keep user informed
+            bumpCartCountInLS(-failures);
+            notifyCartChanged();
+            showToast(`Some items failed to add (${failures}). Cart updated.`, 'error');
+        }
+
     } catch (err: unknown) {
+        bumpCartCountInLS(-quantity)
+        notifyCartChanged()
       const msg = apiErrorMessage(
         err,
         `Failed to add ${item.productName} to cart.`
@@ -251,35 +243,30 @@ const UserCart: React.FC = () => {
     );
 
     try {
-      for (let i = 0; i < quantity; i += 1) {
-        await axiosInstance.post(
-          `/carts/${cartId}/${item.productId}`,
-          {},
-          { useV2: false }
-        );
-      }
-      showToast(`${item.productName} (x${quantity}) added to cart!`, 'success');
+      // Make sure LS has cart id for navbar routes
+      setCartIdInLS(cartId!);
+      // Optimistic total bump
+      bumpCartCountInLS(quantity);
       notifyCartChanged();
-      // Fetch updated cart and update state
-      const { data } = await axiosInstance.get(`/carts/${cartId}`, {
-        useV2: false,
+        showToast(`${item.productName} (x${quantity}) added to cart!`, 'success');
+
+      // Fire-and-forget posts; revert failed portion
+      void Promise.allSettled(
+        Array.from({ length: quantity }, () =>
+          axiosInstance.post(
+            `/carts/${cartId}/${item.productId}`,
+            {},
+            { useV2: false }
+          )
+        )
+      ).then(results => {
+        const failures = results.filter(r => r.status === 'rejected').length;
+        if (failures > 0) {
+          bumpCartCountInLS(-failures);
+          notifyCartChanged();
+            showToast(`Some items failed to add (${failures}). Cart updated.`, 'error');
+        }
       });
-      if (Array.isArray(data.products)) {
-        const products: ProductModel[] = data.products.map(
-          (p: ProductAPIResponse) => ({
-            productId: p.productId,
-            imageId: p.imageId,
-            productName: p.productName,
-            productDescription: p.productDescription,
-            productSalePrice: p.productSalePrice,
-            averageRating: p.averageRating,
-            quantity: p.quantityInCart || 1,
-            productQuantity: p.productQuantity,
-          })
-        );
-        setCartItems(products);
-        await syncAfterAddToCart();
-      }
     } catch (err: unknown) {
       const msg = apiErrorMessage(
         err,
@@ -345,7 +332,14 @@ const UserCart: React.FC = () => {
 
         setCartItems(products);
         setCartIdInLS(cartId);
-        await syncAfterAddToCart();
+        // Derive count locally and broadcast so navbar updates without API
+        const updatedCount = products.reduce(
+          (acc, p) => acc + (p.quantity || 0),
+          0
+        );
+        setCartCountInLS(updatedCount);
+        notifyCartChanged();
+
         const enrichedWishlist = await Promise.all(
           (data.wishListProducts || []).map(async (item: ProductModel) => {
             const fullProduct = await getProductByProductId(item.productId);
@@ -373,11 +367,37 @@ const UserCart: React.FC = () => {
     };
 
     fetchCartItems();
-  }, [cartId, wishlistUpdated, syncAfterAddToCart, apiErrorMessage]);
+  }, [cartId, wishlistUpdated, apiErrorMessage]);
 
   useEffect(() => {
     updateCartItemCount();
   }, [cartItems, updateCartItemCount]);
+
+  // Keep the page’s badge synced with LS (like the navbar)
+  useEffect(() => {
+    const syncFromLS = (): void => {
+      setCartItemCount(Math.max(0, Math.trunc(getCartCountFromLS())));
+    };
+    // initial
+    syncFromLS();
+    // same-tab custom event
+    window.addEventListener(
+      CART_CHANGED as unknown as string,
+      syncFromLS as EventListener
+    );
+    // cross-tab storage signal
+    const onStorage = (e: StorageEvent): void => {
+      if (e.key === 'cart:count' || e.key === 'cart:changed') syncFromLS();
+    };
+    window.addEventListener('storage', onStorage);
+    return () => {
+      window.removeEventListener(
+        CART_CHANGED as unknown as string,
+        syncFromLS as EventListener
+      );
+      window.removeEventListener('storage', onStorage);
+    };
+  }, []);
 
   // Fetch recent purchases
   useEffect(() => {
@@ -458,7 +478,6 @@ const UserCart: React.FC = () => {
         /* ignore */
       }
     } catch (err: unknown) {
-      // Narrow error shape without using `any`
       type ErrorWithResponse = { response?: { status?: number } };
       const status = (err as ErrorWithResponse).response?.status;
 
@@ -492,6 +511,7 @@ const UserCart: React.FC = () => {
       const newQuantity = Math.max(1, Number(event.target.value));
       const item = cartItems[index];
       const prevQty = item.quantity || 1;
+
       if (newQuantity > item.productQuantity) {
         setErrorMessages(prevErrors => ({
           ...prevErrors,
@@ -506,51 +526,63 @@ const UserCart: React.FC = () => {
         });
       }
 
-      try {
-        const { data } = await axiosInstance.put(
+      // Optimistic UI + LS bump
+        const delta = newQuantity - prevQty;
+      setCartItems(prev => {
+        const next = [...prev];
+        next[index] = { ...next[index], quantity: newQuantity };
+        return next;
+      });
+      bumpCartCountInLS(delta);
+      notifyCartChanged();
+        showToast('Quantity updated.', 'success');
+
+      // Fire-and-forget server update
+      void axiosInstance
+        .put(
           `/carts/${cartId}/products/${item.productId}`,
           { quantity: newQuantity },
           { useV2: false }
-        );
-
-        if (data && data.message) {
-          setErrorMessages(prevErrors => ({
-            ...prevErrors,
-            [index]: data.message || 'Failed to update quantity',
-          }));
-
-          if (
-            typeof data.message === 'string' &&
-            data.message.includes('moved to your wishlist')
-          ) {
-            setCartItems(prevItems =>
-              prevItems.filter((_, idx) => idx !== index)
-            );
-            setWishlistItems(prevItems => [...prevItems, item]);
-            showToast(data.message, 'info');
-            bumpCartCountInLS(-prevQty);
-            notifyCartChanged(); // left cart
-            return;
+        )
+        .then(({ data }) => {
+          // Handle special server message (e.g., moved to wishlist)
+          if (data && data.message) {
+            setErrorMessages(prev => ({
+              ...prev,
+              [index]: data.message || 'Failed to update quantity',
+            }));
+            if (
+              typeof data.message === 'string' &&
+              data.message.includes('moved to your wishlist')
+            ) {
+              // Remove from cart UI and move to wishlist
+              setCartItems(prevItems =>
+                prevItems.filter((_, idx) => idx !== index)
+              );
+              setWishlistItems(prevItems => [...prevItems, item]);
+                showToast(data.message, 'info');
+                // We already applied +delta; to remove the line entirely,
+                // apply -newQuantity so net effect = -prevQty.
+              bumpCartCountInLS(-newQuantity);
+              notifyCartChanged();
+            }
           }
-        } else {
+        })
+        .catch(err => {
+          const msg = getErrorMessage(err, {
+            defaultMessage: 'Failed to update quantity',
+          });
+          setErrorMessages(prev => ({ ...prev, [index]: msg }));
+          // Revert optimistic change
           setCartItems(prev => {
             const next = [...prev];
-            next[index] = { ...next[index], quantity: newQuantity };
+            next[index] = { ...next[index], quantity: prevQty };
             return next;
           });
-          showToast('Quantity updated.', 'success');
-          bumpCartCountInLS(newQuantity - prevQty);
+          bumpCartCountInLS(-delta);
           notifyCartChanged(); // qty changed
-        }
-      } catch (err: unknown) {
-        const msg = getErrorMessage(err, {
-          defaultMessage: 'Failed to update quantity',
+            showToast(msg, 'error')
         });
-        setErrorMessages(prev => ({
-          ...prev,
-          [index]: msg,
-        }));
-      }
     },
     [cartItems, cartId, blockIfReadOnly, ensureCartId, showToast]
   );
@@ -793,8 +825,7 @@ const UserCart: React.FC = () => {
 
   const { user } = useUser();
 
-  // For cart summary we always show a single estimated tax using the
-  // average Canadian combined tax rate to keep the summary snappy.
+  // For cart summary we always show a single estimated tax using the average Canadian combined tax rate.
   const avgRate = averageCanadianCombinedTaxRate();
   const estimatedTax = roundToCents(discountedSubtotal * avgRate);
   const total = discountedSubtotal + estimatedTax;

@@ -7,7 +7,6 @@ import {
   useState,
   ReactNode,
   useCallback,
-  useRef,
 } from 'react';
 import { useUser } from '@/context/UserContext';
 import { Role } from '@/shared/models/Role';
@@ -30,7 +29,6 @@ interface CartContextType {
   setCartId: (id: string | null) => void;
   setCartCount: (count: number) => void;
   refreshFromAPI: () => Promise<{ cartId: string | null; cartCount: number }>;
-  syncAfterAddToCart: () => Promise<void>;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -43,8 +41,6 @@ export function CartProvider({
   const { user } = useUser();
   const [cartId, setCartIdState] = useState<string | null>(getCartIdFromLS());
   const [cartCount, setCartCountState] = useState<number>(getCartCountFromLS());
-  const latestSyncRequest = useRef<number>(0);
-
 
   const roleList = useMemo<Role[]>(() => {
     const rawRoles = user?.roles;
@@ -105,30 +101,24 @@ export function CartProvider({
     }
 
     const count = await fetchCartCountByCartId(id);
-    setCartCount(count);
-    return { cartId: id, cartCount: count };
+    // Do not override LS if it already has a higher (optimistic) value
+    const currentLS = getCartCountFromLS();
+    const resolved = Math.max(currentLS, count);
+    setCartCount(resolved);
+    return { cartId: id, cartCount: resolved };
   }, [user?.userId, cartId, isOwner]);
 
-  // Force sync after "Add to Cart" to prevent UI mismatch
+  // Keep for rare hard resyncs if you need them, but UI won’t call this in the rapid-add path
   const syncAfterAddToCart = useCallback(async () => {
-    const requestId = Date.now();
-    latestSyncRequest.current = requestId;
-
     try {
       const id = cartId || (await fetchCartIdByCustomerId(user?.userId));
       if (!id) return;
       setCartId(id);
-
       const count = await fetchCartCountByCartId(id);
-
-      // Only update if this is the most recent request
-      if (latestSyncRequest.current === requestId) {
-        setCartCount(count);
-      } else {
-        console.warn('Stale cart sync ignored');
-      }
+      const currentLS = getCartCountFromLS();
+      setCartCount(Math.max(currentLS, count));
     } catch (err) {
-      console.error('Failed to sync cart after add:', err);
+      console.error('Failed to sync cart (manual):', err);
     }
   }, [user?.userId, cartId]);
 

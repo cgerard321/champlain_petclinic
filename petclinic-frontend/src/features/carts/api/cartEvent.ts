@@ -23,9 +23,14 @@ export function getCartIdFromLS(): string | null {
     return null;
   }
 }
-export function setCartIdInLS(id: string): void {
+
+export function setCartIdInLS(id: string | null | undefined): void {
   try {
-    localStorage.setItem(CART_ID_KEY, id);
+    if (id == null) {
+      localStorage.removeItem(CART_ID_KEY);
+    } else {
+      localStorage.setItem(CART_ID_KEY, id);
+    }
   } catch {
     /* ignore */
   }
@@ -41,6 +46,7 @@ export function getCartCountFromLS(): number {
     return 0;
   }
 }
+
 export function setCartCountInLS(n: number): void {
   try {
     localStorage.setItem(CART_COUNT_KEY, String(Math.max(0, Math.trunc(n))));
