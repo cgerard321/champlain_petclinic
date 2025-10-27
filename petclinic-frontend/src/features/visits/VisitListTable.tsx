@@ -55,6 +55,37 @@ export default function VisitListTable(): JSX.Element {
   const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
   const [currentTab, setCurrentTab] = useState<string>('All');
 
+  const navigate = useNavigate();
+
+  function showSuccessAndReload(message: string, delay = 3000): void {
+    setSuccessMessage(message);
+    setShowSuccessMessage(true);
+
+    setTimeout(() => {
+      setShowSuccessMessage(false);
+      setSuccessMessage('');
+    }, delay);
+  }
+
+  useEffect(() => {
+    const getVisits = async (): Promise<void> => {
+      try {
+        const fetchedVisits = await getAllVisits();
+        setVisits(fetchedVisits);
+        setDisplayedVisits(fetchedVisits);
+      } catch (error) {
+        console.error('Error fetching visits:', error);
+        const message =
+          error instanceof Error
+            ? error.message
+            : 'An unexpected error occurred while fetching visits.';
+        setError(`Failed to fetch visits: ${message}`);
+      }
+    };
+    getVisits();
+  }, []);
+
+  // Sort visits: emergency visits first, then by VisitDate
   const sortVisits = (visitsList: Visit[]): Visit[] => {
     return [...visitsList].sort((a, b) => {
       if (a.isEmergency && !b.isEmergency) return -1;
@@ -121,44 +152,7 @@ export default function VisitListTable(): JSX.Element {
     { name: 'Archived', list: archivedVisits },
   ];
 
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const getVisits = async (): Promise<void> => {
-      try {
-        const fetchedVisits = await getAllVisits();
-        setVisits(fetchedVisits);
-        setDisplayedVisits(fetchedVisits);
-      } catch (err) {
-        if (err instanceof Error) {
-          setError(`Failed to fetch visits: ${err.message}`);
-        } else {
-          setError('Failed to fetch visits');
-        }
-      }
-    };
-    getVisits();
-  }, []);
-
-  useEffect(() => {
-    const term = searchTerm.trim().toLowerCase();
-
-    const handler = setTimeout(() => {
-      if (term.length > 0) {
-        const filtered = visits.filter(v =>
-          (v.description || '').toLowerCase().includes(term)
-        );
-        setDisplayedVisits(sortVisits(filtered));
-      } else {
-        setDisplayedVisits(sortVisits(visits));
-      }
-    }, 300);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [searchTerm, visits]);
-
+  // Handle archiving the visit
   const handleArchive = async (visitId: string): Promise<void> => {
     try {
       await archiveVisit(visitId, updatedVisit => {
@@ -170,13 +164,7 @@ export default function VisitListTable(): JSX.Element {
         });
       });
 
-      setSuccessMessage('Visit archived successfully!');
-      setShowSuccessMessage(true);
-      setTimeout(() => {
-        setShowSuccessMessage(false);
-        setSuccessMessage('');
-        window.location.reload();
-      }, 3000);
+      showSuccessAndReload('Visit archived successfully!');
     } catch (error) {
       return;
     }
@@ -193,13 +181,7 @@ export default function VisitListTable(): JSX.Element {
         });
       });
 
-      setSuccessMessage('Visit cancelled successfully!');
-      setShowSuccessMessage(true);
-      setTimeout(() => {
-        setShowSuccessMessage(false);
-        setSuccessMessage('');
-        window.location.reload();
-      }, 3000);
+      showSuccessAndReload('Visit cancelled successfully!');
     } catch (error) {
       return;
     }
@@ -468,6 +450,16 @@ export default function VisitListTable(): JSX.Element {
             Download CSV
           </button>
         </div>
+        {showSuccessMessage && (
+          <div
+            className="visit-success-message"
+            role="status"
+            aria-live="polite"
+            style={{ margin: '8px 0' }}
+          >
+            {successMessage}
+          </div>
+        )}
         {categories.map(category => renderTable(category.name, category.list))}
       </div>
     );
