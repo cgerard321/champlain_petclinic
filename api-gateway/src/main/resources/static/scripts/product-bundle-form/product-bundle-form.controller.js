@@ -42,7 +42,7 @@ angular.module('productBundleForm')
                     } else if (typeof response.data === 'string') {
                         self.allProducts = parseProductsFromResponse(response.data);
                     }
-                    self.allProducts.forEach(p => p.selected = false);
+                    self.allProducts.forEach(function(p) { p.selected = false;});
                 })
                 .catch(err => {
                     console.error('Error loading products:', err);
@@ -52,37 +52,37 @@ angular.module('productBundleForm')
 
         // Called whenever a checkbox changes
         self.updateSelectedProducts = function () {
-            const selected = self.allProducts.filter(p => p.selected);
-            const total = selected.reduce((sum, p) => sum + (parseFloat(p.productSalePrice) || 0), 0);
+            var selected = self.allProducts.filter(p => p.selected);
+            var total = selected.reduce((sum, p) => sum + (parseFloat(p.productSalePrice) || 0), 0);
             self.bundle.originalTotalPrice = parseFloat(total.toFixed(2));
         };
 
         // Submit handler
         self.submitBundleForm = function () {
-            const selected = self.allProducts.filter(p => p.selected);
+            var selected = self.allProducts.filter(function(p) { return p.selected; });
             if (!self.bundle.bundleName || !self.bundle.bundleDescription || selected.length === 0) {
                 alert('Please fill out all required fields and select at least one product.');
                 return;
             }
 
-            const payload = {
+            var payload = {
                 bundleName: self.bundle.bundleName,
                 bundleDescription: self.bundle.bundleDescription,
-                productIds: selected.map(p => p.productId),
+                productIds: selected.map(function(p) { return p.productId; }),
                 originalTotalPrice: self.bundle.originalTotalPrice,
                 bundlePrice: self.bundle.bundlePrice
             };
 
             $http.post('/api/gateway/products/bundles', payload)
-                .then(() => {
+                .then(function() {
                     alert('Bundle created successfully!');
                     $state.go('productBundleList');
                 })
-                .catch(error => {
+                .catch(function(error) {
                     console.error('Bundle creation failed:', error);
-                    const err = error.data || {};
+                    var err = error.data || {};
                     alert((err.error || 'Error creating bundle') + '\n' +
-                        (err.errors ? err.errors.map(e => `${e.field}: ${e.defaultMessage}`).join('\n') : ''));
+                        (err.errors ? err.errors.map(function(e) { return e.field + ': ' + e.defaultMessage; }).join('\n') : ''));
                 });
         };
 

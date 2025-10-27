@@ -11,9 +11,9 @@ angular.module('productBundleDetailsInfo')
             self.bundle = {};
             self.resolvedProducts = [];
 
-            var baseBundlesUrl = 'api/gateway/products/bundles';
-            var baseProductsUrl = 'api/gateway/products';
-            var baseImagesUrl = 'api/gateway/images';
+            var baseBundlesUrl = '/api/gateway/products/bundles';
+            var baseProductsUrl = '/api/gateway/products';
+            var baseImagesUrl = '/api/gateway/images';
 
             function init() {
                 var bundleId = $stateParams.bundleId;
