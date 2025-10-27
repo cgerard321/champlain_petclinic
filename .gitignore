@@ -85,10 +85,6 @@ mailer-service/docs
 *.env
 .env
 
-# Ignore data directories (MinIO, MySQL volumes)
-data/minio/
-data/mysql-files-data/
-data/mysql-auth/
 
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 

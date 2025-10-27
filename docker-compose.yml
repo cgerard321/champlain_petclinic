@@ -241,7 +241,6 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
-    restart: unless-stopped
 
   # Object storage
   minio:
@@ -253,7 +252,7 @@ services:
     ports:
       - "9101:9101"
     expose:
-      - "9100:9100"
+      - "9100"
     restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9100/minio/health/live"]
@@ -273,7 +272,6 @@ services:
       - MYSQL_PASSWORD=pwd
     volumes:
       - ./data/mysql-files:/var/lib/mysql-files
-      - ./data/mysql-files-data:/var/lib/mysql
       - ./data/init.d:/docker-entrypoint-initdb.d
 
   mysql-auth:
