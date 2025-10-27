@@ -313,7 +313,7 @@ files-service/infra/
 TF_VAR_minio_access_key="your-access-key"
 TF_VAR_minio_secret_key="your-secret-key"
 
-# Optional for backend authentication, the AWS ACCESS KEY would be the same as the MINIO access key if you were looking to store the tf state in the same minio instance or within a different instance
+# Optional for backend authentication, the AWS ACCESS KEY would be the same as the MINIO access key if you were looking to store the tf state in the same MinIO instance or within a different instance
 AWS_ACCESS_KEY_ID="your-access-key"
 AWS_SECRET_ACCESS_KEY="your-secret-key"
 ```
