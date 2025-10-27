@@ -73,7 +73,6 @@ class VisitServiceImplTest {
     PrescriptionService prescriptionService;
 
 
-
 //    private final Long dbSize = 2L;
 
     private final VisitResponseDTO visitResponseDTO = buildVisitResponseDTO();
@@ -82,6 +81,21 @@ class VisitServiceImplTest {
 //    private final String PET_ID = visitResponseDTO.getPetId();
 //    private final String VISIT_ID = visitResponseDTO.getVisitId();
 
+    private VisitRequestDTO validDto() {
+        VisitRequestDTO dto = new VisitRequestDTO();
+        dto.setDescription("Annual checkup");
+        dto.setVisitDate(LocalDateTime.now().plusDays(1)); // must be future to avoid the "past date" branch
+        dto.setPetId("pet-123");
+        dto.setPractitionerId("vet-456");
+        dto.setStatus(Status.UPCOMING);
+        return dto;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Mono<VisitRequestDTO> invokeValidate(VisitRequestDTO dto) {
+        return (Mono<VisitRequestDTO>) ReflectionTestUtils.invokeMethod(
+                visitService, "validateVisitRequest", dto);
+    }
 
     String uuidVet = UUID.randomUUID().toString();
     String uuidPet = UUID.randomUUID().toString();
@@ -965,6 +979,45 @@ class VisitServiceImplTest {
         StepVerifier.create(visitService.getVisitByVisitId("missing", true))
                 .expectErrorMatches(throwable -> throwable instanceof NotFoundException
                         && throwable.getMessage().contains("missing"))
+                .verify();
+    }
+
+    @Test
+    void validateVisitRequest_rejectsNullPetId() {
+        VisitRequestDTO dto = validDto();
+        dto.setPetId(null);
+
+        StepVerifier.create(invokeValidate(dto))
+                .expectErrorSatisfies(ex -> {
+                    assertTrue(ex instanceof BadRequestException);
+                    assertEquals("PetId cannot be null or blank", ex.getMessage());
+                })
+                .verify();
+    }
+
+    @Test
+    void validateVisitRequest_rejectsNullPractitionerId() {
+        VisitRequestDTO dto = validDto();
+        dto.setPractitionerId(null);
+
+        StepVerifier.create(invokeValidate(dto))
+                .expectErrorSatisfies(ex -> {
+                    assertTrue(ex instanceof BadRequestException);
+                    assertEquals("VetId cannot be null or blank", ex.getMessage());
+                })
+                .verify();
+    }
+
+    @Test
+    void validateVisitRequest_rejectsNullStatus() {
+        VisitRequestDTO dto = validDto();
+        dto.setStatus(null);
+
+        StepVerifier.create(invokeValidate(dto))
+                .expectErrorSatisfies(ex -> {
+                    assertTrue(ex instanceof BadRequestException);
+                    assertEquals("Status cannot be null", ex.getMessage());
+                })
                 .verify();
     }
 }

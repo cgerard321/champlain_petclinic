@@ -76,12 +76,18 @@ public class EntityDtoUtil {
 
     public static ReviewResponseDTO toReviewResponseDTO(Review review) {
         ReviewResponseDTO reviewResponseDTO  = new ReviewResponseDTO ();
-        BeanUtils.copyProperties(review, reviewResponseDTO);
+            reviewResponseDTO.setReviewId(review.getReviewId());
+            reviewResponseDTO.setOwnerId(review.getOwnerId());
+            reviewResponseDTO.setRating(review.getRating());
+            reviewResponseDTO.setReviewerName(review.getReviewerName());
+            reviewResponseDTO.setReview(review.getReview());
+            reviewResponseDTO.setDateSubmitted(review.getDateSubmitted());
         return reviewResponseDTO;
     }
 
     public static Review toReviewEntity(ReviewRequestDTO reviewRequestDTO){
         return Review.builder()
+                .ownerId(reviewRequestDTO.getOwnerId())
                 .rating(reviewRequestDTO.getRating())
                 .reviewerName(reviewRequestDTO.getReviewerName())
                 .review(reviewRequestDTO.getReview())
