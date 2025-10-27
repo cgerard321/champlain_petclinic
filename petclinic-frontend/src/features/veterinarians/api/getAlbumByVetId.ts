@@ -11,23 +11,12 @@ export interface AlbumPhotoDTO {
 export const getAlbumsByVetId = async (
   vetId: string
 ): Promise<AlbumPhotoDTO[]> => {
-  try {
-    const response = await axiosInstance.get<string>(`/vets/${vetId}/albums`, {
-      responseType: 'text',
+  const res = await axiosInstance.get<AlbumPhotoDTO[]>(
+    `/vets/${vetId}/albums`,
+    {
       useV2: true,
-    });
-    return response.data
-      .split('data:')
-      .map((payLoad: string) => {
-        try {
-          if (payLoad === '') return null;
-          return JSON.parse(payLoad);
-        } catch (err) {
-          return null;
-        }
-      })
-      .filter((data?: JSON) => data !== null);
-  } catch (error) {
-    return [];
-  }
+      headers: { Accept: 'application/json' },
+    }
+  );
+  return res.data ?? [];
 };
