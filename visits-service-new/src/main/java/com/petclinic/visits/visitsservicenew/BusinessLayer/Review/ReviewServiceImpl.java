@@ -46,7 +46,8 @@ public class ReviewServiceImpl implements ReviewService {
                 .flatMap(found->reviewRequestDTOMono
                         .map(EntityDtoUtil::toReviewEntity)
                         .doOnNext(e->e.setReviewId(found.getReviewId()))
-                        .doOnNext(e->e.setId(found.getId())))
+                        .doOnNext(e->e.setId(found.getId()))
+                        .doOnNext(e->e.setOwnerId(found.getOwnerId())))
                 .flatMap(reviewRepository::save)
                 .map(EntityDtoUtil::toReviewResponseDTO);
     }
