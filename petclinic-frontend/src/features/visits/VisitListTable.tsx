@@ -1,6 +1,8 @@
 import './VisitListTable.css';
 import { useEffect, useState, useRef, createRef } from 'react';
 import { Visit } from './models/Visit';
+import { VisitRequestModel } from './models/VisitRequestModel';
+import { Status } from './models/Status';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -67,8 +69,19 @@ export default function VisitListTable(): JSX.Element {
     return [];
   };
 
-  // Sort visits: emergency visits first, then by start date
   const navigate = useNavigate();
+
+  // Sort visits: emergency visits first, then by start date
+  const sortVisits = (visitsList: Visit[]): Visit[] => {
+    return [...visitsList].sort((a, b) => {
+      // Emergency visits come first
+      if (a.isEmergency && !b.isEmergency) return -1;
+      if (!a.isEmergency && b.isEmergency) return 1;
+
+      // Within the same emergency status, sort by start date (most recent first)
+      return new Date(b.visitDate).getTime() - new Date(a.visitDate).getTime();
+    });
+  };
 
   function showSuccessAndReload(message: string, delay = 3000): void {
     setSuccessMessage(message);
@@ -99,14 +112,6 @@ export default function VisitListTable(): JSX.Element {
   }, []);
 
   // Sort visits: emergency visits first, then by VisitDate
-  const sortVisits = (visitsList: Visit[]): Visit[] => {
-    return [...visitsList].sort((a, b) => {
-      if (a.isEmergency && !b.isEmergency) return -1;
-      if (!a.isEmergency && b.isEmergency) return 1;
-
-      return new Date(b.visitDate).getTime() - new Date(a.visitDate).getTime();
-    });
-  };
   useEffect(() => {
     const term = searchTerm.trim().toLowerCase();
 
@@ -165,7 +170,6 @@ export default function VisitListTable(): JSX.Element {
     { name: 'Archived', list: archivedVisits },
   ];
 
-  const navigate = useNavigate();
 
   useEffect(() => {
     const getVisits = async (): Promise<void> => {
@@ -245,37 +249,55 @@ export default function VisitListTable(): JSX.Element {
     };
   }, [searchTerm, visits]);
 
+  // Helper function to convert Visit to VisitRequestModel
+  const convertToVisitRequestModel = (visit: Visit): VisitRequestModel => {
+    return {
+      visitDate: visit.visitDate,
+      description: visit.description,
+      petId: visit.petId,
+      practitionerId: visit.practitionerId,
+      status: visit.status as Status,
+      isEmergency: visit.isEmergency,
+    };
+  };
+
   // Handle archiving the visit
   const handleArchive = async (visitId: string): Promise<void> => {
     try {
-      await archiveVisit(visitId, updatedVisit => {
-        setVisits(prev => {
-          return prev.map(visit => {
-            if (visit.visitId === visitId) return updatedVisit;
-            return visit;
-          });
+      const currentVisit = visits.find(v => v.visitId === visitId);
+      if (!currentVisit) return;
+
+      const visitRequest = convertToVisitRequestModel(currentVisit);
+      const updatedVisit = await archiveVisit(visitId, visitRequest);
+
+      setVisits(prev => {
+        return prev.map(visit => {
+          if (visit.visitId === visitId) return updatedVisit;
+          return visit;
         });
       });
 
       showSuccessAndReload('Visit archived successfully!');
     } catch (error) {
+      console.error('Error archiving visit:', error);
       return;
     }
   };
 
   const handleCancel = async (visitId: string): Promise<void> => {
     try {
-      await cancelVisit(visitId, updatedVisit => {
-        setVisits(prev => {
-          return prev.map(visit => {
-            if (visit.visitId === visitId) return updatedVisit;
-            return visit;
-          });
+      const updatedVisit = await cancelVisit(visitId);
+
+      setVisits(prev => {
+        return prev.map(visit => {
+          if (visit.visitId === visitId) return updatedVisit;
+          return visit;
         });
       });
 
       showSuccessAndReload('Visit cancelled successfully!');
     } catch (error) {
+      console.error('Error canceling visit:', error);
       return;
     }
   };

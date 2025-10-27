@@ -6,6 +6,7 @@ export interface Visit {
   description: string;
   petId: string;
   petName: string;
+  practitionerId: string;
   vetFirstName: string;
   vetLastName: string;
   vetEmail: string;
