@@ -72,7 +72,6 @@ export function CartProvider({
     const safe = Math.max(0, Math.trunc(n));
     setCartCountState(safe);
     setCartCountInLS(safe);
-    notifyCartChanged();
   };
 
   // Loads the cart ID and item count from the backend if needed

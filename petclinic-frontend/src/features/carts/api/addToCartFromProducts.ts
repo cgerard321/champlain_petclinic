@@ -2,11 +2,7 @@ import axiosInstance from '@/shared/api/axiosInstance';
 import { AxiosError } from 'axios';
 import { fetchCartIdByCustomerId } from './getCart';
 import { useUser } from '@/context/UserContext';
-import {
-  notifyCartChanged,
-  setCartIdInLS,
-  bumpCartCountInLS,
-} from './cartEvent';
+import { bumpCartCountInLS, getCartIdFromLS, setCartIdInLS } from './cartEvent';
 import type { Role } from '@/shared/models/Role';
 
 type UseAddToCartReturnType = {
@@ -23,6 +19,11 @@ export function useAddToCart(): UseAddToCartReturnType {
   const { user } = useUser();
 
   const getOrCreateCartId = async (userId: string): Promise<string> => {
+    const cachedId = getCartIdFromLS();
+    if (cachedId) {
+      return cachedId;
+    }
+
     try {
       const existingCartId = await fetchCartIdByCustomerId(userId);
       if (!existingCartId) throw new Error('Cart not found');
@@ -103,7 +104,6 @@ export function useAddToCart(): UseAddToCartReturnType {
       //keep navbar offline, persist id + bump count locally
       setCartIdInLS(cartId);
       bumpCartCountInLS(quantity);
-      notifyCartChanged();
 
       return true;
     } catch (err) {
