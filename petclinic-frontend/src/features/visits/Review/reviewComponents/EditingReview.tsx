@@ -189,7 +189,7 @@ const EditingReview: React.FC<EditingReviewProps> = ({
       </form>
 
       {showNotification && (
-        <div className="notification">Review added successfully!</div>
+        <div className="notification">Review updated successfully!</div>
       )}
       <ReviewModal
         open={showProfanityModal}

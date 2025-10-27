@@ -84,7 +84,7 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
 
     fetchPets();
   }, []);
-  //fetch vets
+  //Fetch vets
   useEffect(() => {
     const fetchVets = async (): Promise<void> => {
       try {
@@ -248,7 +248,7 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
 
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
-    if (!visit.petId) newErrors.petId = 'Pet ID is required';
+    if (!visit.petId) newErrors.petId = 'Please select a pet';
     if (!visit.description.trim())
       newErrors.description = 'Description is required';
     if (!visit.selectedDate) newErrors.selectedDate = 'Please select a date';
@@ -340,7 +340,6 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
       showButton={showButton}
       formId="addvisit"
       validate={validate}
-      // refreshPageOnConfirm={true}
       confirmText={isSubmitting ? 'Adding...' : 'Add'}
       errorMessage={errorMessage}
     >
@@ -351,7 +350,7 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
       ) : (
         <form id="addvisit" onSubmit={handleSubmit}>
           <label htmlFor="petId">
-            Select Pet: <span className="required">*</span>{' '}
+            Select Pet: <span className="required">*</span>
             {errors.petId && <span className="error">{errors.petId}</span>}
           </label>
           {loadingPets ? (
