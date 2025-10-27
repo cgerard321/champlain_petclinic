@@ -263,6 +263,7 @@ const ProfilePage = (): JSX.Element => {
     return () => {
       isMounted = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user.userId, petTypes]);
 
   const handleUpdateClick = (): void => {
@@ -368,6 +369,7 @@ const ProfilePage = (): JSX.Element => {
           pets: owner.pets?.filter(pet => pet.petId !== petId) || [],
         });
       }
+      // eslint-disable-next-line no-console
       console.log('Pet deleted successfully');
     } catch (error) {
       console.error('Error deleting pet:', error);
