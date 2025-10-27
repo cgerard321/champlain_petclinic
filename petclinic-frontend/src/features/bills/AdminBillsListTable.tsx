@@ -411,7 +411,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
         billStatus: 'UNPAID',
         dueDate: dueDateString,
       });
-      setError(null); 
+      setError(null);
     }
   }, [activeSection]);
 
