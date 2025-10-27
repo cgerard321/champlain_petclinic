@@ -109,10 +109,10 @@ angular.module('productBundleList')
             };
 
             function applyClientSideFilter() {
-                const nameFilter = (self.lastParams.bundleName || '').toLowerCase();
-                const idFilter = (self.lastParams.bundleId || '').toLowerCase();
-                const maxOrig = parseFloat(self.lastParams.maxOriginalTotalPrice || '');
-                const maxBundle = parseFloat(self.lastParams.maxBundlePrice || '');
+                var nameFilter = (self.lastParams.bundleName || '').toLowerCase();
+                var idFilter = (self.lastParams.bundleId || '').toLowerCase();
+                var maxOrig = parseFloat(self.lastParams.maxOriginalTotalPrice || '');
+                var maxBundle = parseFloat(self.lastParams.maxBundlePrice || '');
 
                 self.bundleList.forEach(function (b) {
                     b.__hiddenByFilter = false;
