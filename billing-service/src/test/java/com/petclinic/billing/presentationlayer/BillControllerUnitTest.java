@@ -191,7 +191,7 @@ class BillControllerUnitTest {
         when(billService.getAllBillsByOwnerName(anyString(), anyString())).thenReturn(Flux.just(responseDTO));
 
         client.get()
-                .uri("/bills/" + responseDTO.getOwnerFirstName() + "/" + responseDTO.getOwnerLastName() + "/owner")
+                .uri("/bills/owner/" + responseDTO.getOwnerFirstName() + "/" + responseDTO.getOwnerLastName())
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
@@ -210,7 +210,7 @@ class BillControllerUnitTest {
         when(billService.getAllBillsByVetName(anyString(), anyString())).thenReturn(Flux.just(responseDTO));
 
         client.get()
-                .uri("/bills/" + responseDTO.getVetFirstName() + "/" + responseDTO.getVetLastName() + "/vet")
+                .uri("/bills/vet/" + responseDTO.getVetFirstName() + "/" + responseDTO.getVetLastName())
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
@@ -232,7 +232,7 @@ class BillControllerUnitTest {
                 .thenReturn(Flux.just(responseDTO));
 
         client.get()
-                .uri("/bills/" + visitType + "/visitType")
+                .uri("/bills/visitType/" + visitType)
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
@@ -284,7 +284,7 @@ class BillControllerUnitTest {
         when(billService.deleteBillsByVetId(anyString())).thenReturn(Flux.empty());
 
         client.delete()
-                .uri("/bills/" + responseDTO.getVetId() + "/vet")
+                .uri("/bills/vet/" + responseDTO.getVetId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNoContent()
@@ -299,7 +299,7 @@ class BillControllerUnitTest {
         when(billService.deleteBillsByCustomerId(anyString())).thenReturn(Flux.empty());
 
         client.delete()
-                .uri("/bills/" + responseDTO.getCustomerId() + "/customer")
+                .uri("/bills/customer/" + responseDTO.getCustomerId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNoContent()//.isEqualTo(HttpStatus.METHOD_NOT_ALLOWED)

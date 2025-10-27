@@ -1179,7 +1179,7 @@ class ApiGatewayControllerTest {
 
         // Act & Assert
         client.get()
-                .uri("/api/gateway/bills/" + ownerFirstName + "/" + ownerLastName + "/owner")
+                .uri("/api/gateway/bills/owner/" + ownerFirstName + "/" + ownerLastName)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(BillResponseDTO.class)

@@ -106,7 +106,7 @@ public class BFFApiGatewayController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "bills/{ownerFirstName}/{ownerLastName}/owner", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "bills/owner/{ownerFirstName}/{ownerLastName}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getAllBillsByOwnerName(@PathVariable String ownerFirstName, @PathVariable String ownerLastName) {
         return billServiceClient.getBillsByOwnerName(ownerFirstName, ownerLastName);
     }

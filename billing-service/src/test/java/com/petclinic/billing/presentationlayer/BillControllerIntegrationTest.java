@@ -393,7 +393,7 @@ class BillControllerIntegrationTest {
                 .verifyComplete();
 
         client.delete()
-                .uri("/bills/" + billEntity.getVetId() + "/vet")
+                .uri("/bills/vet/" + billEntity.getVetId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNoContent()
@@ -411,7 +411,7 @@ class BillControllerIntegrationTest {
                 .verifyComplete();
 
         client.delete()
-                .uri("/bills/" + billEntity.getCustomerId() + "/customer")
+                .uri("/bills/customer/" + billEntity.getCustomerId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNoContent()
