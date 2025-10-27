@@ -249,6 +249,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
     setError(null);
     setFilteredBills(null);
     setApplyMonthFilter(true);
+    callGetBillsListWithFilters(currentPage, 10);
   };
 
   const clearMonthFilter = (): void => {
