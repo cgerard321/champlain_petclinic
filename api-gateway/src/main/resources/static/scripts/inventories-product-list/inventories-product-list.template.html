@@ -4,234 +4,158 @@
         box-shadow: 0 0 rgba(0, 0, 0, 2);
         border-bottom-width: 1px;
     }
-    .table-striped tbody tr:hover { background-color: #D8D8D8; }
 
-    /* ==== Mobile helpers ==== */
-    .gap-8 { gap: 8px; }
-    .flex-1 { flex: 1 1 0; }
-    .w-100 { width: 100%; }
-
-    .mobile-filters .filters-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
+    .table-striped tbody tr:hover {
+        background-color: #D8D8D8;
     }
-    @media (max-width: 420px) {
-        .mobile-filters .filters-grid { grid-template-columns: 1fr; }
-    }
-
-    /* Cards */
-    .product-list { display: grid; gap: 12px; }
-    .product-card {
-        border: 1px solid #e5e5e5;
-        border-radius: 12px;
-        padding: 12px;
-        background: #fff;
-        box-shadow: 0 1px 2px rgba(0,0,0,.04);
-    }
-    .product-card:active { transform: translateY(1px); }
-    .product-card .head {
-        display:flex; align-items: baseline; justify-content: space-between; gap:8px; margin-bottom:6px;
-    }
-    .product-card .name { font-weight: 700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .product-card .id { color:#666; font-size:.9rem; }
-    .product-card .kv { display:grid; grid-template-columns: 110px 1fr; gap:6px; margin:4px 0; }
-    .product-card .k { font-weight:600; color:#666; }
-    .product-card .v { color:#222; word-break:break-word; }
-    .product-card .actions { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
-
-    /* Mobile pager */
-    .mobile-pager { display:flex; justify-content:space-between; align-items:center; margin-top:12px; }
 </style>
 
 <h2>Inventory Products</h2>
 <p>{{inventory.inventoryCode}} - {{inventory.inventoryName}}</p>
 
-<!-- ================= DESKTOP/TABLET ================= -->
-<div class="d-none d-md-block">
-    <div class="table-responsive">
-        <table class="table table-striped">
-            <thead>
-            <tr>
-                <td>Name</td>
-                <td>Id</td>
-                <td>Quantity</td>
-                <td>Price</td>
-                <td>Description</td>
-                <td>Sale Price</td>
-                <td></td><td></td><td></td>
-            </tr>
-            <tr>
-                <td>
-                    <input type="text"
-                           ng-model="productName"
-                           ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)">
-                </td>
-                <td></td>
-                <td>
-                    <input type="number" min="0" step="1" aria-label="Product Quantity"
-                           ng-model="productQuantity"
-                           ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)"
-                           title="Quantity must be greater than 0"
-                           oninvalid="this.setCustomValidity('Quantity cannot be 0 or negative')"
-                           oninput="this.setCustomValidity('')">
-                </td>
-                <td>
-                    Min: <input type="number" step="0.01" min="0" ng-model="minPrice"
-                                ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)">
-                    Max: <input type="number" step="0.01" min="0" ng-model="maxPrice"
-                                ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)">
-                </td>
-                <td></td>
-                <td>
-                    Min: <input type="number" step="0.01" min="0" ng-model="minSalePrice"
-                                ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)">
-                    Max: <input type="number" step="0.01" min="0" ng-model="maxSalePrice"
-                                ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)">
-                </td>
-                <td></td>
-                <td>
-                    <a class="btn btn-success" type="button" ng-click="clearQueries()" title="Clear">
-                        <lord-icon src="https://cdn.lordicon.com/zxvuvcnc.json" trigger="hover" style="width:32px;height:32px"></lord-icon>
-                    </a>
-                </td>
-                <td>
-                    <a class="btn btn-success" type="button" ng-click="searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)" title="Search">
-                        <lord-icon src="https://cdn.lordicon.com/fkdzyfle.json" trigger="hover" style="width:32px;height:32px"></lord-icon>
-                    </a>
-                </td>
-            </tr>
-            </thead>
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <td>Name</td>
+        <td>Id</td>
+        <td>Quantity</td>
+        <td>Price</td>
+        <td>Description</td>
+        <td>Sale Price</td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>
+        <span>
+            <input type="text" ng-model="productName" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)">
+        </span>
+        </td>
+        <td></td>
+        <td>
+        <span>
+            <input type="number" min="0" step="1" ng-model="productQuantity" aria-label="Product Quantity" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)" title="Quantity must be greater than 0" oninvalid="this.setCustomValidity('Quantity cannot be 0 or negative')" oninput="this.setCustomValidity('')">
+        </span>
+        </td>
+        <td>
+        <span>
+            Min: <input type="number" step="0.01" min="0" ng-model="minPrice" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)" title="Enter a valid number" oninvalid="this.setCustomValidity('Please enter a valid number for minimum price')" oninput="this.setCustomValidity('')">
+            Max: <input type="number" step="0.01" min="0" ng-model="maxPrice" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)" title="Enter a valid number" oninvalid="this.setCustomValidity('Please enter a valid number for maximum price')" oninput="this.setCustomValidity('')">
+        </span>
+        </td>
+        <td></td>
+        <td>
+        <span>
+            Min: <input type="number" step="0.01" min="0" ng-model="minSalePrice" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)" title="Enter a valid number" oninvalid="this.setCustomValidity('Please enter a valid number for minimum sale price')" oninput="this.setCustomValidity('')">
+            Max: <input type="number" step="0.01" min="0" ng-model="maxSalePrice" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)" title="Enter a valid number" oninvalid="this.setCustomValidity('Please enter a valid number for maximum sale price')" oninput="this.setCustomValidity('')">
+        </span>
+        </td>
+        <td></td>
+        <td>
+         <span>
+            <a class="btn btn-success" type="button" ng-click="clearQueries()" title="Clear">
+                <lord-icon
+                        src="https://cdn.lordicon.com/zxvuvcnc.json"
+                        trigger="hover"
+                        style="width:32px;height:32px">
+                </lord-icon>
+            </a>
+        </span>
+        </td>
+        <td>
+        <span>
+            <a class="btn btn-success" type="button" ng-click="searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)" title="Search">
+                <lord-icon
+                        src="https://cdn.lordicon.com/fkdzyfle.json"
+                        trigger="hover"
+                        style="width:32px;height:32px">
+                </lord-icon>
+            </a>
+        </span>
+        </td>
+    </tr>
 
-            <tbody>
-            <tr ng-repeat="product in $ctrl.inventoryProductList | filter:$ctrl.query track by product.productId">
-                <td><span>{{product.productName}}</span></td>
-                <td><span>{{product.productId}}</span></td>
-                <td><span>{{product.productQuantity}}</span></td>
-                <td><span>{{product.productPrice}}$</span></td>
-                <td><span>{{product.productDescription}}</span></td>
-                <td><span>{{product.productSalePrice}}$</span></td>
+    </thead>
+    <tr ng-repeat="product in $ctrl.inventoryProductList | filter:$ctrl.query track by product.productId">
+        <td><span>{{product.productName}}</span></td>
+        <td><span>{{product.productId}}</span></td>
+        <td><span>{{product.productQuantity}}</span></td>
+        <td><span>{{product.productPrice}}$</span></td>
+        <td><span>{{product.productDescription}}</span></td>
+        <td><span>{{product.productSalePrice}}$</span></td>
 
-                <td>
-                    <a class="btn btn-info"
-                       ui-sref="inventoriesProductDetails({ inventoryId: product.inventoryId, productId: product.productId })"
-                       title="Details">
-                        <lord-icon src="https://cdn.lordicon.com/jnzhohhs.json" trigger="hover" style="width:32px;height:32px"></lord-icon>
-                    </a>
-                </td>
-                <td>
-                    <a ui-sref="updateProductInventory({inventoryId: $ctrl.inventoryProductList[0].inventoryId, productId: product.productId})" title="Edit">
-                        <button class="add-bundle-button btn btn-warning">
-                            <lord-icon src="https://cdn.lordicon.com/wkvacbiw.json" trigger="hover" style="width:32px;height:32px"></lord-icon>
-                        </button>
-                    </a>
-                </td>
-                <td>
-                    <a ng-if="!product.isTemporarilyDeleted" class="btn btn-danger" href="javascript:void(0)"
-                       ng-click="deleteProduct(product); $event.stopPropagation()" title="Delete">
-                        <lord-icon src="https://cdn.lordicon.com/skkahier.json" trigger="hover" style="width:32px;height:32px"></lord-icon>
-                    </a>
-                    <a ng-if="product.isTemporarilyDeleted" class="btn btn-info" href="javascript:void(0)"
-                       ng-click="undoDelete(product); $event.stopPropagation()">Restore</a>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
+        <td>
+            <a
+                    class="btn btn-info"
+                    ui-sref="inventoriesProductDetails({
+  inventoryId: product.inventoryId,
+  productId: product.productId
+})"
 
-    <!-- desktop pager -->
-    <div class="d-flex justify-content-center pb-3">
-        <nav aria-label="Page navigation example">
-            <ul class="pagination">
-                <li class="page-item">
-                    <a class="page-link text-dark" aria-label="Previous" ng-click="$ctrl.previousPage()">
-                        <span aria-hidden="true">&laquo;</span>
-                    </a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link text-dark" disabled>Page-{{$ctrl.actualCurrentPageShown}}</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link text-dark" aria-label="Next" ng-click="$ctrl.nextPage()">
-                        <span aria-hidden="true">&raquo;</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-    </div>
+                    title="Details"
+            >
+                <lord-icon
+                        src="https://cdn.lordicon.com/jnzhohhs.json"
+                        trigger="hover"
+                        style="width:32px;height:32px">
+                </lord-icon>
+            </a>
+        </td>
+        <td><a ui-sref="updateProductInventory({inventoryId: $ctrl.inventoryProductList[0].inventoryId, productId: product.productId})" title="Edit">
+            <button class="add-bundle-button btn btn-warning">
 
-    <a ui-sref="inventoriesProductNew"><button class="add-bundle-button btn btn-success">Add Product</button></a>
-    <a ui-sref="inventories"><button class="btn btn-success">Inventory List</button></a>
+                <lord-icon
+                        src="https://cdn.lordicon.com/wkvacbiw.json"
+                        trigger="hover"
+                        style="width:32px;height:32px">
+                </lord-icon>
+
+            </button>
+        </a></td>
+
+
+
+        <td><a ng-if="!product.isTemporarilyDeleted" class="btn btn-danger" href="javascript:void(0)" ng-click="deleteProduct(product); $event.stopPropagation()" title="Delete">
+            <lord-icon
+                    src="https://cdn.lordicon.com/skkahier.json"
+                    trigger="hover"
+                    style="width:32px;height:32px">
+            </lord-icon>
+            <a ng-if="product.isTemporarilyDeleted"  class="btn btn-info" href="javascript:void(0)" ng-click="undoDelete(product); $event.stopPropagation()">Restore</a>
+        </a>
+        </td>
+
+        <td></td>
+    </tr>
+</table>
+<div class="d-flex justify-content-center pb-3">
+    <nav aria-label="Page navigation example">
+        <ul class="pagination">
+            <li class="page-item">
+                <a class="page-link text-dark" aria-label="Previous" ng-click="$ctrl.previousPage()">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+
+            <li class="page-item">
+                <a class="page-link text-dark" disabled>Page-{{$ctrl.actualCurrentPageShown}}</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link text-dark" aria-label="Next" ng-click="$ctrl.nextPage()">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
 </div>
 
-<!-- ======================== MOBILE ======================== -->
-<div class="d-md-none">
-    <!-- Filters -->
-    <form class="mobile-filters"
-          ng-submit="searchProduct(productName, productQuantity, minPrice, maxPrice, minSalePrice, maxSalePrice)">
-        <div class="filters-grid">
-            <input class="form-control" type="text" placeholder="Name" ng-model="productName">
-
-            <input class="form-control" type="number" min="0" step="1" placeholder="Min Qty"
-                   ng-model="productQuantity" title="Quantity must be greater than 0"
-                   oninvalid="this.setCustomValidity('Quantity cannot be 0 or negative')"
-                   oninput="this.setCustomValidity('')">
-
-            <input class="form-control" type="number" step="0.01" min="0" placeholder="Min Price" ng-model="minPrice">
-            <input class="form-control" type="number" step="0.01" min="0" placeholder="Max Price" ng-model="maxPrice">
-
-            <input class="form-control" type="number" step="0.01" min="0" placeholder="Min Sale $" ng-model="minSalePrice">
-            <input class="form-control" type="number" step="0.01" min="0" placeholder="Max Sale $" ng-model="maxSalePrice">
-        </div>
-
-        <div class="d-flex gap-8 mt-2">
-            <button type="button" class="btn btn-outline-secondary flex-1" ng-click="clearQueries()">Clear</button>
-            <button type="submit" class="btn btn-success flex-1">Search</button>
-        </div>
-    </form>
-
-    <!-- Card list -->
-    <div class="product-list">
-        <div class="product-card"
-             ng-repeat="product in $ctrl.inventoryProductList | filter:$ctrl.query track by product.productId">
-
-            <div class="head">
-                <div class="name">{{ ::product.productName }}</div>
-                <div class="id">#{{ ::product.productId }}</div>
-            </div>
-
-            <div class="kv"><span class="k">Quantity</span><span class="v">{{ ::product.productQuantity }}</span></div>
-            <div class="kv"><span class="k">Price</span><span class="v">{{ ::product.productPrice }}$</span></div>
-            <div class="kv" ng-if="product.productSalePrice"><span class="k">Sale</span><span class="v">{{ ::product.productSalePrice }}$</span></div>
-            <div class="kv" ng-if="product.productDescription"><span class="k">Desc</span><span class="v">{{ ::product.productDescription }}</span></div>
-
-            <div class="actions">
-                <a class="btn btn-info btn-sm"
-                   ui-sref="inventoriesProductDetails({ inventoryId: product.inventoryId, productId: product.productId })">Details</a>
-
-                <a class="btn btn-warning btn-sm"
-                   ui-sref="updateProductInventory({inventoryId: $ctrl.inventoryProductList[0].inventoryId, productId: product.productId})">Edit</a>
-
-                <a class="btn btn-danger btn-sm" ng-if="!product.isTemporarilyDeleted"
-                   href="javascript:void(0)" ng-click="deleteProduct(product)">Delete</a>
-
-                <a class="btn btn-info btn-sm" ng-if="product.isTemporarilyDeleted"
-                   href="javascript:void(0)" ng-click="undoDelete(product)">Restore</a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Pager + CTAs -->
-    <div class="mobile-pager">
-        <button class="btn btn-outline-secondary btn-sm" ng-click="$ctrl.previousPage()">&lsaquo; Prev</button>
-        <div class="small text-muted">Page {{$ctrl.actualCurrentPageShown}}</div>
-        <button class="btn btn-outline-secondary btn-sm" ng-click="$ctrl.nextPage()">Next &rsaquo;</button>
-    </div>
-
-    <a ui-sref="inventoriesProductNew" class="btn btn-success w-100 mt-3">Add Product</a>
-    <a ui-sref="inventories" class="btn btn-outline-success w-100 mt-2">Inventory List</a>
-</div>
-
-<div id="notification" style="display:none; position:fixed; bottom:10px; right:10px; background-color:#4CAF50; color:white; padding:10px; border-radius:5px;">
+<div id="notification" style="display: none; position: fixed; bottom: 10px; right: 10px; background-color: #4CAF50; color: white; padding: 10px; border-radius: 5px;">
     Notification Text Here
 </div>
+<a ui-sref="inventoriesProductNew">
+    <button class="add-bundle-button btn btn-success">Add Product</button>
+</a>
+<a ui-sref="inventories">
+    <button class="btn btn-success">Inventory List</button>
+</a>

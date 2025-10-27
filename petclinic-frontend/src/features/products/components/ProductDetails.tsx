@@ -198,11 +198,9 @@ export default function ProductDetails(): JSX.Element {
   const handleAddToCartClick = async (): Promise<void> => {
     if (!productId) return;
     if (isStaff) return;
-    const ok = await addToCart(String(productId), quantity);
+    const ok = await addToCart(String(productId));
     alert(
-      ok
-        ? `Added ${quantity} item${quantity > 1 ? 's' : ''} to cart`
-        : "Couldn't add to cart. Please try again."
+      ok ? 'Item added to cart' : "Couldn't add to cart. Please try again."
     );
   };
 

@@ -1,4 +1,3 @@
-import { useToast } from '@/shared/components/toast/ToastProvider';
 import { useCallback, useEffect, useState } from 'react';
 import CartBillingForm, { BillingInfo } from './CartBillingForm';
 import InvoiceComponent, {
@@ -81,7 +80,9 @@ const UserCart: React.FC = () => {
   const [errorMessages, setErrorMessages] = useState<Record<number, string>>(
     {}
   );
-  const { showToast } = useToast();
+  const [notificationMessage, setNotificationMessage] = useState<string | null>(
+    null
+  );
 
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
   const [showInvoiceModal, setShowInvoiceModal] = useState<boolean>(false);
@@ -164,13 +165,14 @@ const UserCart: React.FC = () => {
     const quantity = Math.max(1, recentPurchaseQuantities[item.productId] || 1);
 
     try {
-
       // Ensure LS knows the active cart id for navbar routing
       setCartIdInLS(cartId!);
       // Optimistic: bump LS once for the total quantity and toast
       bumpCartCountInLS(quantity);
       notifyCartChanged();
-      showToast(`${item.productName} (x${quantity}) added to cart!`, 'success');
+      setNotificationMessage(
+        `${item.productName} (x${quantity}) added to cart!`
+      );
 
       // Fire-and-forget server posts
       void Promise.allSettled(
@@ -187,7 +189,9 @@ const UserCart: React.FC = () => {
           // revert failed portion
           bumpCartCountInLS(-failures);
           notifyCartChanged();
-          showToast(`Some items failed to add (${failures}). Cart updated.`, 'error');
+          setNotificationMessage(
+            `Some items failed to add (${failures}). Cart updated.`
+          );
         }
       });
     } catch (err: unknown) {
@@ -195,7 +199,7 @@ const UserCart: React.FC = () => {
         err,
         `Failed to add ${item.productName} to cart.`
       );
-      showToast(msg, 'error');
+      setNotificationMessage(msg);
     }
   };
 
@@ -251,7 +255,9 @@ const UserCart: React.FC = () => {
       // Optimistic total bump
       bumpCartCountInLS(quantity);
       notifyCartChanged();
-      showToast(`${item.productName} (x${quantity}) added to cart!`, 'success');
+      setNotificationMessage(
+        `${item.productName} (x${quantity}) added to cart!`
+      );
 
       // Fire-and-forget posts; revert failed portion
       void Promise.allSettled(
@@ -267,7 +273,9 @@ const UserCart: React.FC = () => {
         if (failures > 0) {
           bumpCartCountInLS(-failures);
           notifyCartChanged();
-          showToast(`Some items failed to add (${failures}). Cart updated.`, 'error');
+          setNotificationMessage(
+            `Some items failed to add (${failures}). Cart updated.`
+          );
         }
       });
     } catch (err: unknown) {
@@ -275,7 +283,7 @@ const UserCart: React.FC = () => {
         err,
         `Failed to add ${item.productName} to cart.`
       );
-      showToast(msg, 'error');
+      setNotificationMessage(msg);
     }
   };
 
@@ -461,9 +469,8 @@ const UserCart: React.FC = () => {
       const updated = await applyPromo(cartId, percent);
 
       setVoucherError(null);
-      showToast(
-        `Promo applied${updated?.promoPercent != null ? `: ${updated.promoPercent}%` : `: ${percent}%`}`,
-        'success'
+      setNotificationMessage(
+        `Promo applied${updated?.promoPercent != null ? `: ${updated?.promoPercent}%` : `: ${percent}%`}`
       );
 
       setPromoPercent(updated?.promoPercent ?? percent);
@@ -495,11 +502,13 @@ const UserCart: React.FC = () => {
 
   const blockIfReadOnly = useCallback((): boolean => {
     if (isStaff) {
-      showToast('Read-only mode: staff/admin cannot modify carts.', 'info');
+      setNotificationMessage(
+        'Read-only mode: staff/admin cannot modify carts.'
+      );
       return true;
     }
     return false;
-  }, [isStaff, showToast]);
+  }, [isStaff]);
 
   const changeItemQuantity = useCallback(
     async (
@@ -535,52 +544,54 @@ const UserCart: React.FC = () => {
       });
       bumpCartCountInLS(newQuantity - prevQty);
       notifyCartChanged();
-      showToast('Item quantity updated.', 'success');
+      setNotificationMessage('Item quantity updated successfully.');
 
-      // Server update (await so we can handle success/failure cleanly)
-      try {
-        const { data } = await axiosInstance.put(
+      // Fire-and-forget server update
+      void axiosInstance
+        .put(
           `/carts/${cartId}/products/${item.productId}`,
           { quantity: newQuantity },
           { useV2: false }
-        );
-        
-        //Handle special server message (e.g., moved to wishlist)
-        if (data && data.message) {
-          setErrorMessages(prev => ({
-            ...prev,
-            [index]: data.message || 'Failed to update quantity',
-        }));
-        if (
-          typeof data.message === 'string' &&
-          data.message.includes('moved to your wishlist')
-        ) {
-            // Remove from cart UI and move to wishlist
-            setCartItems(prevItems => prevItems.filter((_, idx) => idx !== index));
-            setWishlistItems(prevItems => [...prevItems, item]);
-            showToast(data.message, 'info');
-            // We bumped by (new - prev); item leaving cart → subtract the whole new qty
-            bumpCartCountInLS(-newQuantity);
-            notifyCartChanged();
+        )
+        .then(({ data }) => {
+          // Handle special server message (e.g., moved to wishlist)
+          if (data && data.message) {
+            setErrorMessages(prev => ({
+              ...prev,
+              [index]: data.message || 'Failed to update quantity',
+            }));
+            if (
+              typeof data.message === 'string' &&
+              data.message.includes('moved to your wishlist')
+            ) {
+              // Remove from cart UI and move to wishlist
+              setCartItems(prevItems =>
+                prevItems.filter((_, idx) => idx !== index)
+              );
+              setWishlistItems(prevItems => [...prevItems, item]);
+              setNotificationMessage(data.message);
+              // We had already bumped by (new - prev); removing the line should subtract the remaining new qty
+              bumpCartCountInLS(-newQuantity);
+              notifyCartChanged();
+            }
           }
-        }
-      } catch (err: unknown) {
-        const msg = getErrorMessage(err, { defaultMessage: 'Failed to update quantity' });
-        setErrorMessages(prev => ({ ...prev, [index]: msg }));
-        
-        // Revert optimistic change
-        setCartItems(prev => {
-          const next = [...prev];
-          next[index] = { ...next[index], quantity: prevQty };
-          return next;
+        })
+        .catch(err => {
+          const msg = getErrorMessage(err, {
+            defaultMessage: 'Failed to update quantity',
+          });
+          setErrorMessages(prev => ({ ...prev, [index]: msg }));
+          // Revert optimistic change
+          setCartItems(prev => {
+            const next = [...prev];
+            next[index] = { ...next[index], quantity: prevQty };
+            return next;
+          });
+          bumpCartCountInLS(prevQty - newQuantity);
+          notifyCartChanged();
         });
-        bumpCartCountInLS(prevQty - newQuantity);
-        notifyCartChanged();
-        showToast(msg, 'error');
-      }
-          
     },
-    [cartItems, cartId, blockIfReadOnly, ensureCartId, showToast]
+    [cartItems, cartId, blockIfReadOnly, ensureCartId]
   );
 
   const onClearPromo = async (): Promise<void> => {
@@ -588,9 +599,9 @@ const UserCart: React.FC = () => {
     try {
       await applyPromo(cartId, 0);
       setPromoPercent(null);
-      showToast('Promo removed.', 'success');
+      setNotificationMessage('Promo removed.');
     } catch {
-      showToast('Failed to remove promo.', 'error');
+      setNotificationMessage('Failed to remove promo.');
     }
   };
 
@@ -615,22 +626,25 @@ const UserCart: React.FC = () => {
 
         setCartItems(prev => {
           const removedQty = prev[indexToDelete]?.quantity || 1;
-          showToast('Item removed from cart.', 'success');
+          setNotificationMessage('Item removed from cart.');
           bumpCartCountInLS(-removedQty);
           return prev.filter((_, idx) => idx !== indexToDelete);
         });
         notifyCartChanged(); // item removed
       } catch (error: unknown) {
         const msg = apiErrorMessage(error, 'Failed to delete item.');
-        showToast(msg, 'error');
+        setNotificationMessage(msg);
       }
     },
-    [cartId, blockIfReadOnly, confirm, ensureCartId, apiErrorMessage, showToast]
+    [cartId, blockIfReadOnly, confirm, ensureCartId, apiErrorMessage]
   );
 
   const clearCart = async (): Promise<void> => {
     if (blockIfReadOnly()) return;
-    if (!ensureCartId()) return;
+
+    if (!ensureCartId()) {
+      return;
+    }
 
     const ok = await confirm({
       title: 'Clear cart',
@@ -647,10 +661,10 @@ const UserCart: React.FC = () => {
       setCartItemCount(0);
       setCartCountInLS(0);
       notifyCartChanged();
-      showToast('Cart has been cleared.', 'success');
+      setNotificationMessage('Cart has been cleared.');
     } catch (error: unknown) {
       const msg = apiErrorMessage(error, 'Failed to clear cart.');
-      showToast(msg, 'error');
+      setNotificationMessage(msg);
     }
   };
 
@@ -673,11 +687,10 @@ const UserCart: React.FC = () => {
       );
 
       if (data && data.message) {
-        showToast(data.message, 'info');
+        setNotificationMessage(data.message);
       } else {
-        showToast(
-          `${item.productName} has been added to your wishlist!`,
-          'success'
+        setNotificationMessage(
+          `${item.productName} has been added to your wishlist!`
         );
       }
 
@@ -688,7 +701,7 @@ const UserCart: React.FC = () => {
       notifyCartChanged();
     } catch (error: unknown) {
       const msg = apiErrorMessage(error, 'Failed to add item to wishlist.');
-      showToast(msg, 'error');
+      setNotificationMessage(msg);
     }
   };
 
@@ -697,9 +710,8 @@ const UserCart: React.FC = () => {
     if (!ensureCartId()) return;
 
     if (item.productQuantity <= 0) {
-      showToast(
-        `Cannot add ${item.productName} to cart: Out of stock.`,
-        'error'
+      setNotificationMessage(
+        `${item.productName} is out of stock and cannot be added to the cart.`
       );
       return;
     }
@@ -718,11 +730,10 @@ const UserCart: React.FC = () => {
       );
 
       if (data && data.message) {
-        showToast(data.message, 'info');
+        setNotificationMessage(data.message);
       } else {
-        showToast(
-          `${item.productName} has been added to your cart!`,
-          'success'
+        setNotificationMessage(
+          `${item.productName} has been added to your cart!`
         );
       }
 
@@ -741,7 +752,7 @@ const UserCart: React.FC = () => {
       const msg = getErrorMessage(error, {
         defaultMessage: 'Failed to add item to cart.',
       });
-      showToast(msg, 'error');
+      setNotificationMessage(msg);
     }
   };
 
@@ -770,7 +781,7 @@ const UserCart: React.FC = () => {
       );
     } catch (e: unknown) {
       const msg = apiErrorMessage(e, 'Could not remove item from wishlist.');
-      showToast(msg, 'error');
+      setNotificationMessage(msg);
     }
   };
 
@@ -787,7 +798,7 @@ const UserCart: React.FC = () => {
     if (!ok) return;
 
     setMovingAll(true);
-    showToast('Moving all items from wishlist to cart...', 'info');
+    setNotificationMessage(null);
 
     try {
       const res = await axiosInstance.post(
@@ -799,20 +810,20 @@ const UserCart: React.FC = () => {
       if (res.status >= 200 && res.status < 300) {
         setWishlistUpdated(true);
         notifyCartChanged();
-        showToast('All wishlist items moved to cart!', 'success');
+        setNotificationMessage(null);
       } else {
         const msg =
           (res.data &&
             (res.data.message || res.data.error || res.data.title)) ||
           `Move All failed (${res.status})`;
-        showToast(msg, 'error');
+        setNotificationMessage(msg);
       }
     } catch (e: unknown) {
       const msg = apiErrorMessage(
         e,
         'Unexpected error while moving wishlist items.'
       );
-      showToast(msg, 'error');
+      setNotificationMessage(msg);
     } finally {
       setMovingAll(false);
     }
@@ -1014,6 +1025,19 @@ const UserCart: React.FC = () => {
       <NavBar />
       <ConfirmModal />
       <div className="UserCart-container">
+        {notificationMessage && (
+          <div className="notification-message">
+            {notificationMessage}
+            <button
+              className="close-notification"
+              onClick={() => setNotificationMessage(null)}
+              aria-label="Close notification"
+            >
+              &times;
+            </button>
+          </div>
+        )}
+
         <div className="UserCart-checkout-flex">
           <div className="UserCart">
             <div
@@ -1057,7 +1081,7 @@ const UserCart: React.FC = () => {
                     addToWishlist={addToWishlist}
                     addToCart={() => {}}
                     isInWishlist={false}
-                    showNotification={showToast}
+                    showNotification={setNotificationMessage}
                   />
                 ))
               ) : (

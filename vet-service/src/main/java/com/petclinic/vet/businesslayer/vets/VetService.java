@@ -11,7 +11,6 @@ package com.petclinic.vet.businesslayer.vets;
   * Ticket: feat(VVS-CPC-553): add veterinarian
  */
 
-import com.petclinic.vet.presentationlayer.files.FileRequestDTO;
 import com.petclinic.vet.presentationlayer.vets.VetRequestDTO;
 import com.petclinic.vet.presentationlayer.vets.VetResponseDTO;
 import com.petclinic.vet.presentationlayer.vets.SpecialtyDTO;
@@ -29,7 +28,5 @@ public interface VetService {
     Flux<VetResponseDTO> getVetByIsActive(boolean isActive);
     Mono<VetResponseDTO> getVetByVetBillId(String vetBillId);
     Mono<VetResponseDTO> addSpecialtiesByVetId(String vetId, Mono<SpecialtyDTO> specialtyDTO);
-    Mono<Void> deleteSpecialtiesBySpecialtyId(String vetId, String specialtyId);
-    Mono<VetResponseDTO> getVetByVetId(String vetId, boolean includePhoto);
-    Mono<VetResponseDTO> updateVetPhoto(String vetId, FileRequestDTO photo);
+    Mono<Void> deleteSpecialtyBySpecialtyId(String vetId, String specialtyId);
 }

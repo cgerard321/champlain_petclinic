@@ -19,14 +19,11 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
-
 import java.util.List;
 
 import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
@@ -93,12 +90,6 @@ class ProductControllerV1UnitTest {
             .bundleDescription("Description 2")
             .bundlePrice(119.99)
             .build();
-
-    private ProductTypeResponseDTO productType1 = ProductTypeResponseDTO.builder()
-            .productTypeId("6a247af0-52d9-4179-a5b4-ad4b92e686b1")
-            .typeName("ACCESSORY")
-            .build();
-
 
 //TODO: GetALL
     @Test
@@ -726,201 +717,4 @@ public void whenGetAllProductBundles_thenReturnBundles() {
 
         verify(productsServiceClient).getProductEnumsValues();
     }
-
-    @Test
-    void whenGetAllProductTypes_thenReturnAllProductTypes() {
-        when(productsServiceClient.getAllProductTypes())
-                .thenReturn(Flux.just(productType1));
-
-        webTestClient
-                .get()
-                .uri(baseProductsURL + "/types")
-                .accept(MediaType.TEXT_EVENT_STREAM)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
-                .expectBodyList(ProductTypeResponseDTO.class)
-                .value(productTypes -> {
-                    assertNotNull(productTypes);
-                    assertTrue(productTypes.size() > 0);
-                });
-
-        verify(productsServiceClient, times(1)).getAllProductTypes();
-    }
-
-    // ✅ Get All Product Types
-    @Test
-    void whenGetAllProductTypes_thenReturnFluxProductTypeResponseDTO() {
-        when(productsServiceClient.getAllProductTypes())
-                .thenReturn(Flux.just(productType1));
-
-        webTestClient.get()
-                .uri(baseProductsURL + "/types")
-                .accept(MediaType.TEXT_EVENT_STREAM)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBodyList(ProductTypeResponseDTO.class)
-                .value(productTypeResponseDTOS -> {
-                    assertNotNull(productTypeResponseDTOS);
-                    assertEquals(1, productTypeResponseDTOS.size());
-                    assertEquals(productType1.getProductTypeId(), productTypeResponseDTOS.get(0).getProductTypeId());
-                    assertEquals(productType1.getTypeName(), productTypeResponseDTOS.get(0).getTypeName());
-                });
-
-        verify(productsServiceClient, times(1)).getAllProductTypes();
-    }
-
-    // ✅ Get Product Type by valid ID
-    @Test
-    void whenGetProductTypeByValidId_thenReturnProductTypeResponseDTO() {
-        when(productsServiceClient.getProductTypeByProductTypeId(productType1.getProductTypeId()))
-                .thenReturn(Mono.just(productType1));
-
-        webTestClient.get()
-                .uri(baseProductsURL + "/types/" + productType1.getProductTypeId())
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(ProductTypeResponseDTO.class)
-                .value(response -> {
-                    assertNotNull(response);
-                    assertEquals(productType1.getProductTypeId(), response.getProductTypeId());
-                    assertEquals(productType1.getTypeName(), response.getTypeName());
-                });
-
-        verify(productsServiceClient, times(1)).getProductTypeByProductTypeId(productType1.getProductTypeId());
-    }
-
-    // ✅ Get Product Type by invalid ID
-    @Test
-    void whenGetProductTypeByInvalidId_thenReturnNotFound() {
-        String invalidId = "non-existent-id";
-        when(productsServiceClient.getProductTypeByProductTypeId(invalidId))
-                .thenReturn(Mono.empty());
-
-        webTestClient.get()
-                .uri(baseProductsURL + "/types/" + invalidId)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound();
-
-        verify(productsServiceClient, times(1)).getProductTypeByProductTypeId(invalidId);
-    }
-
-    // ✅ Create Product Type
-    @Test
-    void whenCreateProductType_thenReturnCreatedProductTypeResponseDTO() {
-        ProductTypeRequestDTO requestDTO = ProductTypeRequestDTO.builder()
-                .typeName("TOY")
-                .build();
-
-        ProductTypeResponseDTO createdResponse = ProductTypeResponseDTO.builder()
-                .productTypeId("b12345")
-                .typeName("TOY")
-                .build();
-
-        when(productsServiceClient.createProductType(requestDTO))
-                .thenReturn(Mono.just(createdResponse));
-
-        webTestClient.post()
-                .uri(baseProductsURL + "/types")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(requestDTO)
-                .exchange()
-                .expectStatus().isCreated()
-                .expectBody(ProductTypeResponseDTO.class)
-                .value(response -> {
-                    assertNotNull(response);
-                    assertEquals("TOY", response.getTypeName());
-                    assertEquals("b12345", response.getProductTypeId());
-                });
-
-        verify(productsServiceClient, times(1)).createProductType(requestDTO);
-    }
-
-    // ✅ Update Product Type (valid ID)
-    @Test
-    void whenUpdateProductTypeWithValidId_thenUpdateProductType() {
-        ProductTypeRequestDTO updateRequest = ProductTypeRequestDTO.builder()
-                .typeName("UPDATED_ACCESSORY")
-                .build();
-
-        ProductTypeResponseDTO updatedResponse = ProductTypeResponseDTO.builder()
-                .productTypeId(productType1.getProductTypeId())
-                .typeName("UPDATED_ACCESSORY")
-                .build();
-
-        when(productsServiceClient.updateProductType(productType1.getProductTypeId(), updateRequest))
-                .thenReturn(Mono.just(updatedResponse));
-
-        webTestClient.put()
-                .uri(baseProductsURL + "/types/" + productType1.getProductTypeId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(updateRequest)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(ProductTypeResponseDTO.class)
-                .value(response -> {
-                    assertNotNull(response);
-                    assertEquals("UPDATED_ACCESSORY", response.getTypeName());
-                    assertEquals(productType1.getProductTypeId(), response.getProductTypeId());
-                });
-
-        verify(productsServiceClient, times(1)).updateProductType(productType1.getProductTypeId(), updateRequest);
-    }
-
-    // ✅ Update Product Type (nonexistent ID)
-    @Test
-    void whenUpdateProductTypeWithInvalidId_thenReturnNotFound() {
-        String invalidId = "invalid-id";
-        ProductTypeRequestDTO updateRequest = ProductTypeRequestDTO.builder()
-                .typeName("UPDATED_ACCESSORY")
-                .build();
-
-        when(productsServiceClient.updateProductType(invalidId, updateRequest))
-                .thenReturn(Mono.empty());
-
-        webTestClient.put()
-                .uri(baseProductsURL + "/types/" + invalidId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(updateRequest)
-                .exchange()
-                .expectStatus().isNotFound();
-
-        verify(productsServiceClient, times(1)).updateProductType(invalidId, updateRequest);
-    }
-
-    // ✅ Delete Product Type (valid ID)
-    @Test
-    void whenDeleteProductTypeWithValidId_thenReturnDeletedProductType() {
-        when(productsServiceClient.deleteProductType(productType1.getProductTypeId()))
-                .thenReturn(Mono.just(productType1));
-
-        webTestClient.delete()
-                .uri(baseProductsURL + "/types/" + productType1.getProductTypeId())
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(ProductTypeResponseDTO.class)
-                .value(response -> {
-                    assertNotNull(response);
-                    assertEquals(productType1.getProductTypeId(), response.getProductTypeId());
-                });
-
-        verify(productsServiceClient, times(1)).deleteProductType(productType1.getProductTypeId());
-    }
-
-    // ✅ Delete Product Type (invalid ID)
-    @Test
-    void whenDeleteProductTypeWithNonExistingId_thenThrowNotFoundError() {
-        String invalidId = "non-existent-id";
-        when(productsServiceClient.deleteProductType(invalidId)).thenReturn(Mono.empty());
-
-        webTestClient.delete()
-                .uri(baseProductsURL + "/types/" + invalidId)
-                .exchange()
-                .expectStatus().isNotFound();
-
-        verify(productsServiceClient, times(1)).deleteProductType(invalidId);
-    }
-
 }

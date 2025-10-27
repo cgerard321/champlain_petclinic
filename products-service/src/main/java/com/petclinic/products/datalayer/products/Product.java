@@ -29,7 +29,6 @@ public class Product {
     private Integer productQuantity;
     private Boolean isUnlisted;
     private ProductType productType;
-    private String productTypeId;
     private LocalDate releaseDate;
     private ProductStatus productStatus;
     private DeliveryType deliveryType;

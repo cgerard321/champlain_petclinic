@@ -6,7 +6,6 @@ import com.petclinic.vet.dataaccesslayer.education.EducationRepository;
 import com.petclinic.vet.dataaccesslayer.photos.PhotoRepository;
 import com.petclinic.vet.dataaccesslayer.vets.Vet;
 import com.petclinic.vet.dataaccesslayer.vets.VetRepository;
-import com.petclinic.vet.domainclientlayer.FilesServiceClient;
 import com.petclinic.vet.businesslayer.education.EducationService;
 import com.petclinic.vet.presentationlayer.education.EducationRequestDTO;
 import com.petclinic.vet.presentationlayer.education.EducationResponseDTO;
@@ -46,8 +45,6 @@ class EducationServiceImplTest {
     ObjectMapper objectMapper;
     @MockBean
     VetRepository vetRepository;
-    @MockBean
-    FilesServiceClient filesServiceClient;
 
     //To counter missing bean error
     @Autowired

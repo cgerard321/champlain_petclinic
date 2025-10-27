@@ -2,9 +2,15 @@ package com.petclinic.products.utils;
 
 import com.petclinic.products.datalayer.images.Image;
 import com.petclinic.products.datalayer.images.ImageRepository;
-import com.petclinic.products.datalayer.products.*;
+import com.petclinic.products.datalayer.products.DeliveryType;
+import com.petclinic.products.datalayer.products.ProductStatus;
+import com.petclinic.products.datalayer.products.Product;
+import com.petclinic.products.datalayer.products.ProductBundle;
+import com.petclinic.products.datalayer.products.ProductBundleRepository;
+import com.petclinic.products.datalayer.products.ProductRepository;
 import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.datalayer.ratings.RatingRepository;
+import com.petclinic.products.datalayer.products.ProductType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
@@ -36,8 +42,6 @@ public class DataLoaderService implements CommandLineRunner {
     @Autowired
     RatingRepository ratingRepository;
 
-    @Autowired
-    ProductTypeRepository productTypeRepository;
     @Override
     public void run(String... args) throws Exception {
 
@@ -60,10 +64,6 @@ public class DataLoaderService implements CommandLineRunner {
                 return;
             }
 
-            if (Boolean.TRUE.equals(productTypeRepository.findAll().hasElements().block())) {
-                return;
-            }
-
         } catch (Exception e) {
             System.out.println("Error checking if products exist: " + e.getMessage());
             return;
@@ -77,7 +77,6 @@ public class DataLoaderService implements CommandLineRunner {
                 .productSalePrice(45.99)
                 .requestCount(0)
                 .productType(ProductType.FOOD)
-                .productTypeId("586d0700-57db-4312-b6f1-413b79dd018c")
                 .productStatus(ProductStatus.AVAILABLE)
                 .productQuantity(44)
                 .isUnlisted(false)
@@ -93,7 +92,6 @@ public class DataLoaderService implements CommandLineRunner {
                 .productSalePrice(12.99)
                 .requestCount(0)
                 .productType(ProductType.ACCESSORY)
-                .productTypeId("6a247af0-52d9-4179-a5b4-ad4b92e686b1")
                 .productStatus(ProductStatus.AVAILABLE)
                 .productQuantity(3)
                 .isUnlisted(false)
@@ -109,7 +107,6 @@ public class DataLoaderService implements CommandLineRunner {
                 .productSalePrice(9.99)
                 .requestCount(0)
                 .productType(ProductType.MEDICATION)
-                .productTypeId("86627454-970e-41a9-baa6-71ab759bf66c")
                 .productStatus(ProductStatus.AVAILABLE)
                 .productQuantity(53)
                 .isUnlisted(false)
@@ -125,7 +122,6 @@ public class DataLoaderService implements CommandLineRunner {
                 .productSalePrice(29.99)
                 .requestCount(0)
                 .productType(ProductType.ACCESSORY)
-                .productTypeId("6a247af0-52d9-4179-a5b4-ad4b92e686b1")
                 .productStatus(ProductStatus.AVAILABLE)
                 .productQuantity(8)
                 .isUnlisted(false)
@@ -141,7 +137,6 @@ public class DataLoaderService implements CommandLineRunner {
                 .productSalePrice(19.99)
                 .requestCount(0)
                 .productType(ProductType.ACCESSORY)
-                .productTypeId("6a247af0-52d9-4179-a5b4-ad4b92e686b1")
                 .productStatus(ProductStatus.AVAILABLE)
                 .productQuantity(14)
                 .isUnlisted(false)
@@ -157,7 +152,6 @@ public class DataLoaderService implements CommandLineRunner {
                 .productSalePrice(199.99)
                 .requestCount(0)
                 .productType(ProductType.EQUIPMENT)
-                .productTypeId("79c8723a-8df3-495d-8eb0-07d574ff5ae5")
                 .productStatus(ProductStatus.AVAILABLE)
                 .productQuantity(58)
                 .isUnlisted(false)
@@ -173,7 +167,6 @@ public class DataLoaderService implements CommandLineRunner {
                 .productSalePrice(79.99)
                 .requestCount(0)
                 .productType(ProductType.ACCESSORY)
-                .productTypeId("6a247af0-52d9-4179-a5b4-ad4b92e686b1")
                 .productStatus(ProductStatus.AVAILABLE)
                 .productQuantity(66)
                 .isUnlisted(false)
@@ -189,32 +182,11 @@ public class DataLoaderService implements CommandLineRunner {
                 .productSalePrice(14.99)
                 .requestCount(0)
                 .productType(ProductType.ACCESSORY)
-                .productTypeId("6a247af0-52d9-4179-a5b4-ad4b92e686b1")
                 .productStatus(ProductStatus.AVAILABLE)
                 .productQuantity(0)
                 .isUnlisted(false)
                 .releaseDate(LocalDate.parse("2022-09-19"))
                 .deliveryType(DeliveryType.PICKUP)
-                .build();
-
-        ProductTypeDb productType1 = ProductTypeDb.builder()
-                .productTypeId("86627454-970e-41a9-baa6-71ab759bf66c")
-                .typeName("MEDICATION")
-                .build();
-
-        ProductTypeDb productType2 = ProductTypeDb.builder()
-                .productTypeId("6a247af0-52d9-4179-a5b4-ad4b92e686b1")
-                .typeName("ACCESSORY")
-                .build();
-
-        ProductTypeDb productType3 = ProductTypeDb.builder()
-                .productTypeId("586d0700-57db-4312-b6f1-413b79dd018c")
-                .typeName("FOOD")
-                .build();
-
-        ProductTypeDb productType4 = ProductTypeDb.builder()
-                .productTypeId("79c8723a-8df3-495d-8eb0-07d574ff5ae5")
-                .typeName("EQUIPMENT")
                 .build();
 
         ProductBundle bundle1 = ProductBundle.builder()
@@ -467,11 +439,6 @@ public class DataLoaderService implements CommandLineRunner {
 
         Flux.just(image1, image2, image3, image4, image5, image6, image7, image8)
                 .flatMap(s -> imageRepository.insert(Mono.just(s))
-                        .log(s.toString()))
-                .subscribe();
-
-        Flux.just(productType1, productType2, productType3, productType4)
-                .flatMap(s -> productTypeRepository.insert(Mono.just(s))
                         .log(s.toString()))
                 .subscribe();
     }

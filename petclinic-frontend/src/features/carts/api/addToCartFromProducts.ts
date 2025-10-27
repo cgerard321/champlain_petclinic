@@ -10,7 +10,7 @@ import {
 import type { Role } from '@/shared/models/Role';
 
 type UseAddToCartReturnType = {
-  addToCart: (productId: string, quantity: number) => Promise<boolean>;
+  addToCart: (productId: string) => Promise<boolean>;
 };
 
 type CreateCartResponse = {
@@ -48,10 +48,7 @@ export function useAddToCart(): UseAddToCartReturnType {
     }
   };
 
-  const addToCart = async (
-    productId: string,
-    quantity: number
-  ): Promise<boolean> => {
+  const addToCart = async (productId: string): Promise<boolean> => {
     // pas connecté → on ne tente rien
     if (!user?.userId) return false;
 
@@ -76,22 +73,21 @@ export function useAddToCart(): UseAddToCartReturnType {
     if (isStaff) return false;
     try {
       const cartId = await getOrCreateCartId(user.userId);
-
       // Optimistic local update: no UI wait for API
       setCartIdInLS(cartId);
-      bumpCartCountInLS(quantity);
+      bumpCartCountInLS(1);
       notifyCartChanged();
 
       // Fire-and-forget server sync, on failure, revert the single bump
       void axiosInstance
         .post(
           `/carts/${encodeURIComponent(cartId)}/${encodeURIComponent(String(productId))}`,
-        { quantity },
+          undefined,
           { useV2: false }
         )
         .catch(err => {
           console.error('AddToCart failed (will revert 1):', err);
-          bumpCartCountInLS(-quantity);
+          bumpCartCountInLS(-1);
           notifyCartChanged();
         });
       return true;
