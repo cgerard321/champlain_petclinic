@@ -38,6 +38,7 @@ import {
   setCartIdInLS,
 } from '../api/cartEvent';
 import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
+import axios from 'axios';
 interface ProductAPIResponse {
   productId: number;
   imageId: string;
@@ -201,6 +202,7 @@ const UserCart: React.FC = () => {
         `${item.productName} (x${quantity}) added to cart!`
       );
       notifyCartChanged();
+
       // Fetch updated cart and update state
       const { data } = await axiosInstance.get(`/carts/${cartId}`, {
         useV2: false,
@@ -1165,8 +1167,7 @@ const UserCart: React.FC = () => {
 
             <div className="cart-items-container">
               {validCartItems.length > 0 ? (
-  validCartItems.map((item, index) => (
-
+                validCartItems.map((item, index) => (
                   <CartItem
                     key={item.productId}
                     item={item}
