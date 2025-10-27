@@ -32,6 +32,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
@@ -736,6 +737,116 @@ public class CartControllerV1UnitTest {
 
         verify(cartServiceClient, times(1)).createWishlistTransfer(eq(cartId), anyList(), eq(WishlistTransferDirectionDTO.TO_CART));
     }
+
+    @Test
+    @DisplayName("PUT /api/gateway/carts/{cartId}/promo - Should apply promo successfully")
+    void applyPromoToCart_shouldReturnUpdatedCart() {
+        String cartId = "cart-123";
+        CartResponseDTO response = buildCartResponseDTO();
+
+        when(cartServiceClient.applyPromoToCart(eq(cartId), eq(10.0))).thenReturn(Mono.just(response));
+
+        webTestClient.put()
+                .uri(baseCartURL + "/" + cartId + "/promo")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(new ApplyPromoRequestDTO(10.0))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(CartResponseDTO.class)
+                .isEqualTo(response);
+
+        verify(cartServiceClient).applyPromoToCart(eq(cartId), eq(10.0));
+    }
+
+    @Test
+    @DisplayName("PUT /api/gateway/carts/{cartId}/promo - Should return 400 when client rejects promo")
+    void applyPromoToCart_withInvalidInput_shouldReturnBadRequest() {
+        String cartId = "cart-123";
+        when(cartServiceClient.applyPromoToCart(eq(cartId), eq(5.0)))
+                .thenReturn(Mono.error(new InvalidInputException("promoPercent must be between 1 and 50")));
+
+        webTestClient.put()
+                .uri(baseCartURL + "/" + cartId + "/promo")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(new ApplyPromoRequestDTO(5.0))
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(CartResponseDTO.class)
+                .value(body -> assertEquals("promoPercent must be between 1 and 50", body.getMessage()));
+
+        verify(cartServiceClient).applyPromoToCart(eq(cartId), eq(5.0));
+    }
+
+    @Test
+    @DisplayName("PUT /api/gateway/carts/{cartId}/promo - Should return 400 when promo percent missing")
+    void applyPromoToCart_withMissingPercent_shouldReturnBadRequest() {
+        String cartId = "cart-123";
+        when(cartServiceClient.applyPromoToCart(eq(cartId), isNull()))
+                .thenReturn(Mono.error(new InvalidInputException("promoPercent must be provided")));
+
+        webTestClient.put()
+                .uri(baseCartURL + "/" + cartId + "/promo")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(new ApplyPromoRequestDTO())
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(CartResponseDTO.class)
+                .value(body -> assertEquals("promoPercent must be provided", body.getMessage()));
+
+        verify(cartServiceClient).applyPromoToCart(eq(cartId), isNull());
+    }
+
+    @Test
+    @DisplayName("DELETE /api/gateway/carts/{cartId}/promo - Should clear promo successfully")
+    void clearPromo_shouldReturnNoContent() {
+        String cartId = "cart-123";
+        when(cartServiceClient.clearPromo(cartId)).thenReturn(Mono.empty());
+
+        webTestClient.delete()
+                .uri(baseCartURL + "/" + cartId + "/promo")
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
+
+        verify(cartServiceClient).clearPromo(cartId);
+    }
+
+    @Test
+    @DisplayName("GET /api/gateway/carts/promos/validate/{promoCode} - Should return promo details")
+    void validatePromo_shouldReturnOk() {
+        String promoCode = "SAVE10";
+        PromoCodeResponseDTO promo = PromoCodeResponseDTO.builder()
+                .code(promoCode)
+                .discount(10.0)
+                .build();
+
+        when(cartServiceClient.validatePromoCode(promoCode)).thenReturn(Mono.just(promo));
+
+        webTestClient.get()
+                .uri(baseCartURL + "/promos/validate/" + promoCode)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(PromoCodeResponseDTO.class)
+                .isEqualTo(promo);
+
+        verify(cartServiceClient).validatePromoCode(promoCode);
+    }
+
+    @Test
+    @DisplayName("GET /api/gateway/carts/promos/validate/{promoCode} - Should return 400 on invalid promo")
+    void validatePromo_withInvalidCode_shouldReturnBadRequest() {
+        String promoCode = "BADCODE";
+        when(cartServiceClient.validatePromoCode(promoCode))
+                .thenReturn(Mono.error(new InvalidInputException("Promo code is not valid: " + promoCode)));
+
+        webTestClient.get()
+                .uri(baseCartURL + "/promos/validate/" + promoCode)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        verify(cartServiceClient).validatePromoCode(promoCode);
+    }
+
     @Test
     void testUnprocessableEntity() {
         WebClientResponseException ex = WebClientResponseException.create(422, "Unprocessable Entity", null, null, null);

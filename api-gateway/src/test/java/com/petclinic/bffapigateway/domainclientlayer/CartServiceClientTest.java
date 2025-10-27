@@ -600,6 +600,54 @@ public class CartServiceClientTest {
                 .verify();
     }
 
+        @Test
+        void testApplyPromoToCart_Success() {
+                String cartId = "cart-apply";
+                String responseBody = """
+                        {
+                                "cartId": "cart-apply",
+                                "promoPercent": 12.0
+                        }
+                        """;
+
+                prepareResponse(response -> response
+                                .setHeader("Content-Type", "application/json")
+                                .setBody(responseBody)
+                                .setResponseCode(200));
+
+                Mono<CartResponseDTO> result = mockCartServiceClient.applyPromoToCart(cartId, 12.0);
+
+                StepVerifier.create(result)
+                                .expectNextMatches(cart -> cart.getCartId().equals(cartId))
+                                .verifyComplete();
+        }
+
+        @Test
+        void testApplyPromoToCart_NullPercent_ThrowsInvalidInput() {
+                Mono<CartResponseDTO> result = mockCartServiceClient.applyPromoToCart("cart-apply", null);
+
+                StepVerifier.create(result)
+                                .expectErrorSatisfies(throwable -> {
+                                        assertThat(throwable).isInstanceOf(InvalidInputException.class);
+                                        assertThat(throwable.getMessage()).contains("promoPercent must be provided");
+                                })
+                                .verify();
+        }
+
+        @Test
+        void testClearPromo_Success() {
+                String cartId = "cart-apply";
+
+                prepareResponse(response -> response
+                                .setHeader("Content-Type", "application/json")
+                                .setResponseCode(204));
+
+                Mono<Void> result = mockCartServiceClient.clearPromo(cartId);
+
+                StepVerifier.create(result)
+                                .verifyComplete();
+        }
+
     @Test
     void testAddProductToCart_InvalidInput_ErrorFromResponse() {
         String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";

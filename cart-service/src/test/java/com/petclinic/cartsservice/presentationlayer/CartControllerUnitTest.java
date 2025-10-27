@@ -881,4 +881,87 @@ class CartControllerUnitTest {
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
+    @Test
+    void applyPromoToCart_success() {
+        String cartId = VALID_CART_ID;
+        CartResponseModel response = CartResponseModel.builder()
+                .cartId(cartId)
+                .promoPercent(15.0)
+                .build();
+
+        when(cartService.applyPromoToCart(cartId, 15.0)).thenReturn(Mono.just(response));
+
+        webTestClient.put()
+                .uri("/api/v1/carts/" + cartId + "/promo")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(new CartPromoRequestModel(15.0))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(CartResponseModel.class)
+                .value(result -> {
+                    assertEquals(cartId, result.getCartId());
+                    assertEquals(15.0, result.getPromoPercent());
+                });
+
+        verify(cartService).applyPromoToCart(cartId, 15.0);
+    }
+
+    @Test
+    void applyPromoToCart_missingPercent_returns422() {
+        webTestClient.put()
+                .uri("/api/v1/carts/" + VALID_CART_ID + "/promo")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(new CartPromoRequestModel(null))
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+
+        verify(cartService, never()).applyPromoToCart(anyString(), any());
+    }
+
+    @Test
+    void clearPromoFromCart_success() {
+        String cartId = VALID_CART_ID;
+        when(cartService.applyPromoToCart(cartId, null)).thenReturn(Mono.just(new CartResponseModel()));
+
+        webTestClient.delete()
+                .uri("/api/v1/carts/" + cartId + "/promo")
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
+
+        verify(cartService).applyPromoToCart(cartId, null);
+    }
+
+    @Test
+    void getAllCartsAsJson_withNegativePage_returns422() {
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/api/v1/carts")
+                        .queryParam("page", -1)
+                        .queryParam("size", 5)
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("page must be greater than or equal to 0");
+
+        verify(cartService, never()).getAllCarts(any());
+    }
+
+    @Test
+    void getAllCartsAsJson_withZeroSize_returns422() {
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/api/v1/carts")
+                        .queryParam("page", 0)
+                        .queryParam("size", 0)
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("size must be greater than 0");
+
+        verify(cartService, never()).getAllCarts(any());
+    }
+
 }
