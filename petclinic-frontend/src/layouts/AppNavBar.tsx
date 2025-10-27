@@ -9,6 +9,7 @@ import {
 } from '@/context/UserContext';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import { useState, useCallback } from 'react';
+import { getCartIdFromLS } from '@/features/carts/api/cartEvent';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Navbar, Nav, NavDropdown, Container } from 'react-bootstrap';
 import { FaShoppingCart } from 'react-icons/fa'; // Importing the shopping cart icon
@@ -59,14 +60,19 @@ export function NavBar(): JSX.Element {
     if (cartLoading) return; // prevent multiple clicks
     setCartLoading(true);
     try {
-      // Fetch the latest cart ID and count before redirecting
-      const { cartId: resolvedId } = await refreshFromAPI();
-      if (resolvedId) {
-        navigate(AppRoutePaths.UserCart.replace(':cartId', resolvedId));
-      } else {
-        // if no active cart, redirect to shop
-        navigate(AppRoutePaths.Products);
+      // Use LS as source of truth first to avoid any blocking
+      const lsId = getCartIdFromLS();
+      if (lsId) {
+        navigate(AppRoutePaths.UserCart.replace(':cartId', lsId));
+        return;
       }
+      // Fallback: resolve from API if LS empty (non-blocking for normal flow)
+      const { cartId: resolvedId } = await refreshFromAPI();
+      navigate(
+        resolvedId
+          ? AppRoutePaths.UserCart.replace(':cartId', resolvedId)
+          : AppRoutePaths.Products
+      );
     } catch (e) {
       console.error('Could not go to cart: ' + e);
       navigate(AppRoutePaths.Products);

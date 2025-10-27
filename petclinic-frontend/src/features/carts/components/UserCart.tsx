@@ -36,8 +36,11 @@ import {
   notifyCartChanged,
   setCartCountInLS,
   setCartIdInLS,
+  getCartCountFromLS,
+  CART_CHANGED,
 } from '../api/cartEvent';
 import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
+
 interface ProductAPIResponse {
   productId: number;
   imageId: string;
@@ -64,7 +67,9 @@ interface Invoice {
 const UserCart: React.FC = () => {
   const navigate = useNavigate();
   const { cartId } = useParams<{ cartId?: string }>();
-  const { syncAfterAddToCart } = useCart();
+  const {
+    /* syncAfterAddToCart */
+  } = useCart();
   const { confirm, ConfirmModal } = useConfirmModal();
 
   const [cartItems, setCartItems] = useState<ProductModel[]>([]);
@@ -118,7 +123,7 @@ const UserCart: React.FC = () => {
       return false;
     }
     return true;
-  }, [cartId, setError]);
+  }, [cartId]);
 
   // Recent purchases state
   const [recentPurchases, setRecentPurchases] = useState<
@@ -160,44 +165,35 @@ const UserCart: React.FC = () => {
     const quantity = Math.max(1, recentPurchaseQuantities[item.productId] || 1);
 
     try {
-      // Concurrently add items to cart
-      const addPromises = Array.from({ length: quantity }, () =>
-        axiosInstance.post(
-          `/carts/${cartId}/${item.productId}`,
-          {},
-          { useV2: false }
-        )
-      );
-      await Promise.all(addPromises);
-
+      // Ensure LS knows the active cart id for navbar routing
+      setCartIdInLS(cartId!);
+      // Optimistic: bump LS once for the total quantity and toast
+      bumpCartCountInLS(quantity);
+      notifyCartChanged();
       setNotificationMessage(
         `${item.productName} (x${quantity}) added to cart!`
       );
-      notifyCartChanged();
-      // Fetch updated cart and update state
-      const { data } = await axiosInstance.get(`/carts/${cartId}`, {
-        useV2: false,
+
+      // Fire-and-forget server posts
+      void Promise.allSettled(
+        Array.from({ length: quantity }, () =>
+          axiosInstance.post(
+            `/carts/${cartId}/${item.productId}`,
+            {},
+            { useV2: false }
+          )
+        )
+      ).then(results => {
+        const failures = results.filter(r => r.status === 'rejected').length;
+        if (failures > 0) {
+          // revert failed portion
+          bumpCartCountInLS(-failures);
+          notifyCartChanged();
+          setNotificationMessage(
+            `Some items failed to add (${failures}). Cart updated.`
+          );
+        }
       });
-      if (Array.isArray(data.products)) {
-        const products: ProductModel[] = data.products.map(
-          (p: ProductAPIResponse) => ({
-            productId: p.productId,
-            imageId: p.imageId,
-            productName: p.productName,
-            productDescription: p.productDescription,
-            productSalePrice: p.productSalePrice,
-            averageRating: p.averageRating,
-            quantity: p.quantityInCart || 1,
-            productQuantity: p.productQuantity,
-          })
-        );
-        setCartItems(products);
-        const updatedCount = products.reduce(
-          (acc, p) => acc + (p.quantity || 0),
-          0
-        );
-        setCartCountInLS(updatedCount);
-      }
     } catch (err: unknown) {
       const msg = apiErrorMessage(
         err,
@@ -254,37 +250,34 @@ const UserCart: React.FC = () => {
     );
 
     try {
-      for (let i = 0; i < quantity; i += 1) {
-        await axiosInstance.post(
-          `/carts/${cartId}/${item.productId}`,
-          {},
-          { useV2: false }
-        );
-      }
+      // Make sure LS has cart id for navbar routes
+      setCartIdInLS(cartId!);
+      // Optimistic total bump
+      bumpCartCountInLS(quantity);
+      notifyCartChanged();
       setNotificationMessage(
         `${item.productName} (x${quantity}) added to cart!`
       );
-      notifyCartChanged();
-      // Fetch updated cart and update state
-      const { data } = await axiosInstance.get(`/carts/${cartId}`, {
-        useV2: false,
+
+      // Fire-and-forget posts; revert failed portion
+      void Promise.allSettled(
+        Array.from({ length: quantity }, () =>
+          axiosInstance.post(
+            `/carts/${cartId}/${item.productId}`,
+            {},
+            { useV2: false }
+          )
+        )
+      ).then(results => {
+        const failures = results.filter(r => r.status === 'rejected').length;
+        if (failures > 0) {
+          bumpCartCountInLS(-failures);
+          notifyCartChanged();
+          setNotificationMessage(
+            `Some items failed to add (${failures}). Cart updated.`
+          );
+        }
       });
-      if (Array.isArray(data.products)) {
-        const products: ProductModel[] = data.products.map(
-          (p: ProductAPIResponse) => ({
-            productId: p.productId,
-            imageId: p.imageId,
-            productName: p.productName,
-            productDescription: p.productDescription,
-            productSalePrice: p.productSalePrice,
-            averageRating: p.averageRating,
-            quantity: p.quantityInCart || 1,
-            productQuantity: p.productQuantity,
-          })
-        );
-        setCartItems(products);
-        await syncAfterAddToCart();
-      }
     } catch (err: unknown) {
       const msg = apiErrorMessage(
         err,
@@ -350,7 +343,14 @@ const UserCart: React.FC = () => {
 
         setCartItems(products);
         setCartIdInLS(cartId);
-        await syncAfterAddToCart();
+        // Derive count locally and broadcast so navbar updates without API
+        const updatedCount = products.reduce(
+          (acc, p) => acc + (p.quantity || 0),
+          0
+        );
+        setCartCountInLS(updatedCount);
+        notifyCartChanged();
+
         const enrichedWishlist = await Promise.all(
           (data.wishListProducts || []).map(async (item: ProductModel) => {
             const fullProduct = await getProductByProductId(item.productId);
@@ -368,7 +368,6 @@ const UserCart: React.FC = () => {
           setPromoPercent(null);
         }
       } catch (err: unknown) {
-        // Map 404 -> "Cart not found", otherwise use getErrorMessage
         const msg = apiErrorMessage(err, 'Failed to fetch cart items');
         setError(msg);
       } finally {
@@ -378,11 +377,37 @@ const UserCart: React.FC = () => {
     };
 
     fetchCartItems();
-  }, [cartId, wishlistUpdated, syncAfterAddToCart, apiErrorMessage]);
+  }, [cartId, wishlistUpdated, apiErrorMessage]);
 
   useEffect(() => {
     updateCartItemCount();
   }, [cartItems, updateCartItemCount]);
+
+  // Keep the page’s badge synced with LS (like the navbar)
+  useEffect(() => {
+    const syncFromLS = (): void => {
+      setCartItemCount(Math.max(0, Math.trunc(getCartCountFromLS())));
+    };
+    // initial
+    syncFromLS();
+    // same-tab custom event
+    window.addEventListener(
+      CART_CHANGED as unknown as string,
+      syncFromLS as EventListener
+    );
+    // cross-tab storage signal
+    const onStorage = (e: StorageEvent): void => {
+      if (e.key === 'cart:count' || e.key === 'cart:changed') syncFromLS();
+    };
+    window.addEventListener('storage', onStorage);
+    return () => {
+      window.removeEventListener(
+        CART_CHANGED as unknown as string,
+        syncFromLS as EventListener
+      );
+      window.removeEventListener('storage', onStorage);
+    };
+  }, []);
 
   // Fetch recent purchases
   useEffect(() => {
@@ -394,7 +419,7 @@ const UserCart: React.FC = () => {
           { useV2: false }
         );
         setRecentPurchases(data || []);
-      } catch (err) {
+      } catch {
         setRecentPurchases([]);
       }
     };
@@ -402,7 +427,6 @@ const UserCart: React.FC = () => {
   }, [cartId]);
 
   // Fetch recommendation purchases
-  // Reusable function to fetch recommendation purchases
   const fetchRecommendationPurchases = useCallback(async (): Promise<void> => {
     if (!cartId) return;
     try {
@@ -411,7 +435,7 @@ const UserCart: React.FC = () => {
         { useV2: false }
       );
       setRecommendationPurchases(data || []);
-    } catch (err) {
+    } catch {
       setRecommendationPurchases([]);
     }
   }, [cartId]);
@@ -446,7 +470,7 @@ const UserCart: React.FC = () => {
 
       setVoucherError(null);
       setNotificationMessage(
-        `Promo applied${updated?.promoPercent != null ? `: ${updated.promoPercent}%` : `: ${percent}%`}`
+        `Promo applied${updated?.promoPercent != null ? `: ${updated?.promoPercent}%` : `: ${percent}%`}`
       );
 
       setPromoPercent(updated?.promoPercent ?? percent);
@@ -462,7 +486,6 @@ const UserCart: React.FC = () => {
         /* ignore */
       }
     } catch (err: unknown) {
-      // Narrow error shape without using `any`
       type ErrorWithResponse = { response?: { status?: number } };
       const status = (err as ErrorWithResponse).response?.status;
 
@@ -485,7 +508,7 @@ const UserCart: React.FC = () => {
       return true;
     }
     return false;
-  }, [isStaff, setNotificationMessage]);
+  }, [isStaff]);
 
   const changeItemQuantity = useCallback(
     async (
@@ -498,6 +521,7 @@ const UserCart: React.FC = () => {
       const newQuantity = Math.max(1, Number(event.target.value));
       const item = cartItems[index];
       const prevQty = item.quantity || 1;
+
       if (newQuantity > item.productQuantity) {
         setErrorMessages(prevErrors => ({
           ...prevErrors,
@@ -512,51 +536,60 @@ const UserCart: React.FC = () => {
         });
       }
 
-      try {
-        const { data } = await axiosInstance.put(
+      // Optimistic UI + LS first
+      setCartItems(prev => {
+        const next = [...prev];
+        next[index] = { ...next[index], quantity: newQuantity };
+        return next;
+      });
+      bumpCartCountInLS(newQuantity - prevQty);
+      notifyCartChanged();
+      setNotificationMessage('Item quantity updated successfully.');
+
+      // Fire-and-forget server update
+      void axiosInstance
+        .put(
           `/carts/${cartId}/products/${item.productId}`,
           { quantity: newQuantity },
           { useV2: false }
-        );
-
-        if (data && data.message) {
-          setErrorMessages(prevErrors => ({
-            ...prevErrors,
-            [index]: data.message || 'Failed to update quantity',
-          }));
-
-          if (
-            typeof data.message === 'string' &&
-            data.message.includes('moved to your wishlist')
-          ) {
-            setCartItems(prevItems =>
-              prevItems.filter((_, idx) => idx !== index)
-            );
-            setWishlistItems(prevItems => [...prevItems, item]);
-            setNotificationMessage(data.message);
-            bumpCartCountInLS(-prevQty);
-            notifyCartChanged(); // left cart
-            return;
+        )
+        .then(({ data }) => {
+          // Handle special server message (e.g., moved to wishlist)
+          if (data && data.message) {
+            setErrorMessages(prev => ({
+              ...prev,
+              [index]: data.message || 'Failed to update quantity',
+            }));
+            if (
+              typeof data.message === 'string' &&
+              data.message.includes('moved to your wishlist')
+            ) {
+              // Remove from cart UI and move to wishlist
+              setCartItems(prevItems =>
+                prevItems.filter((_, idx) => idx !== index)
+              );
+              setWishlistItems(prevItems => [...prevItems, item]);
+              setNotificationMessage(data.message);
+              // We had already bumped by (new - prev); removing the line should subtract the remaining new qty
+              bumpCartCountInLS(-newQuantity);
+              notifyCartChanged();
+            }
           }
-        } else {
+        })
+        .catch(err => {
+          const msg = getErrorMessage(err, {
+            defaultMessage: 'Failed to update quantity',
+          });
+          setErrorMessages(prev => ({ ...prev, [index]: msg }));
+          // Revert optimistic change
           setCartItems(prev => {
             const next = [...prev];
-            next[index] = { ...next[index], quantity: newQuantity };
+            next[index] = { ...next[index], quantity: prevQty };
             return next;
           });
-          setNotificationMessage('Item quantity updated successfully.');
-          bumpCartCountInLS(newQuantity - prevQty);
-          notifyCartChanged(); // qty changed
-        }
-      } catch (err: unknown) {
-        const msg = getErrorMessage(err, {
-          defaultMessage: 'Failed to update quantity',
+          bumpCartCountInLS(prevQty - newQuantity);
+          notifyCartChanged();
         });
-        setErrorMessages(prev => ({
-          ...prev,
-          [index]: msg,
-        }));
-      }
     },
     [cartItems, cartId, blockIfReadOnly, ensureCartId]
   );
@@ -666,7 +699,6 @@ const UserCart: React.FC = () => {
 
       bumpCartCountInLS(-(item.quantity || 1));
       notifyCartChanged();
-      //notify navbar (item moved out of cart)
     } catch (error: unknown) {
       const msg = apiErrorMessage(error, 'Failed to add item to wishlist.');
       setNotificationMessage(msg);
@@ -799,8 +831,7 @@ const UserCart: React.FC = () => {
 
   const { user } = useUser();
 
-  // For cart summary we always show a single estimated tax using the
-  // average Canadian combined tax rate to keep the summary snappy.
+  // For cart summary we always show a single estimated tax using the average Canadian combined tax rate.
   const avgRate = averageCanadianCombinedTaxRate();
   const estimatedTax = roundToCents(discountedSubtotal * avgRate);
   const total = discountedSubtotal + estimatedTax;
@@ -852,12 +883,11 @@ const UserCart: React.FC = () => {
         0
       );
       const invoiceSubtotal = invoiceSubtotalCents / 100;
-      // determine province for invoice tax calculation
-      // Prefer billing/provided province, otherwise use user's province if available.
+
       function hasProvince(obj: unknown): obj is { province?: string } {
         if (typeof obj !== 'object' || obj === null) return false;
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore - narrow below
+        // @ts-ignore
         const val = (obj as { [k: string]: unknown })['province'];
         return typeof val === 'string' || typeof val === 'undefined';
       }
@@ -893,9 +923,6 @@ const UserCart: React.FC = () => {
         items: invoiceItemsForFull,
         subtotal: invoiceSubtotal,
         // legacy fields: map by tax line name for backward compatibility
-        // Older code expects 'tvq' (provincial) and 'tvc' (federal). Map common
-        // names from our tax lines. NOTE: PROVINCE_TAX_MAP uses 'PST' for QC
-        // (not 'QST'/'TVQ'), so check for 'PST' here.
         tvq:
           invoiceTaxLines.find(t => ['PST', 'TVQ'].includes(t.name))?.amount ??
           0,
@@ -928,8 +955,8 @@ const UserCart: React.FC = () => {
           { useV2: false }
         );
         setRecentPurchases(data || []);
-      } catch (err) {
-        // Optionally handle error, but don't block checkout
+      } catch {
+        // ignore
       }
 
       // Fetch recommendation purchases after checkout
@@ -1137,16 +1164,11 @@ const UserCart: React.FC = () => {
                 <p className="summary-item">
                   Subtotal: {formatPrice(subtotal)}
                 </p>
-                {/* Show estimated taxes (English names like PST, GST, HST).
-                    If subtotal is zero (e.g., after checkout) show a single $0.00 line and do not render breakdown.
-                    Otherwise, if there's exactly one Estimated Taxes line (unknown province), render a single line without percentage.
-                */}
                 {discountedSubtotal <= 0 ? (
                   <p className="summary-item">
                     Estimated Taxes: {formatPrice(0)}
                   </p>
                 ) : (
-                  // Always show a single estimated taxes line using the average rate
                   <p className="summary-item">
                     Estimated Taxes: {formatPrice(estimatedTax)}
                   </p>
@@ -1248,7 +1270,6 @@ const UserCart: React.FC = () => {
 
         {/* Wishlist */}
         <div className="wishlist-section cart-panel cart-panel--padded">
-          {/* Header with Move All button */}
           <div
             className="wishlist-header"
             style={{
@@ -1343,7 +1364,7 @@ const UserCart: React.FC = () => {
                     {item.productName}
                   </div>
                   <div className="recommendation-product-price recent-purchase-price">
-                    ${formatPrice(item.productSalePrice)}
+                    {formatPrice(item.productSalePrice)}
                   </div>
                   <div className="recommendation-qty-row recent-purchase-qty-row">
                     <label

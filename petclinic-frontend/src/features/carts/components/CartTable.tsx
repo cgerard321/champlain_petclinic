@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import './cart-shared.css';
 import './CartTable.css';
 import axiosInstance from '@/shared/api/axiosInstance';
-import { useCart } from '@/context/CartContext';
 
 interface CartModel {
   cartId: string;
@@ -38,11 +37,10 @@ interface CustomerDTO {
 }
 
 export default function CartListTable(): JSX.Element {
-
   const [carts, setCarts] = useState<CartModel[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const { syncAfterAddToCart } = useCart();
+
   const nameCacheRef = useRef<Record<string, string>>({});
 
   const [selectedCartId, setSelectedCartId] = useState<string | null>(null);
@@ -100,7 +98,6 @@ export default function CartListTable(): JSX.Element {
         }
 
         setSelectedCart(data);
-        await syncAfterAddToCart();
       } catch (e) {
         console.error('Failed to load cart details', e);
         setSelectedCart(null);
@@ -158,7 +155,6 @@ export default function CartListTable(): JSX.Element {
           { useV2: false }
         );
         setSelectedCart(data);
-        await syncAfterAddToCart();
       } catch (e) {
         console.error('Failed to update quantity', e);
       } finally {
@@ -189,7 +185,6 @@ export default function CartListTable(): JSX.Element {
         { useV2: false }
       );
       setSelectedCart(data);
-      await syncAfterAddToCart();
     } catch (e) {
       console.error('Failed to remove product', e);
     } finally {

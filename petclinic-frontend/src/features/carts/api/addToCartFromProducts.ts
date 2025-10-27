@@ -71,21 +71,25 @@ export function useAddToCart(): UseAddToCartReturnType {
       roleNames.has('RECEPTIONIST');
 
     if (isStaff) return false;
-
     try {
       const cartId = await getOrCreateCartId(user.userId);
-
-      await axiosInstance.post(
-        `/carts/${encodeURIComponent(cartId)}/${encodeURIComponent(String(productId))}`,
-        undefined,
-        { useV2: false }
-      );
-
-      //keep navbar offline, persist id + bump count locally
+      // Optimistic local update: no UI wait for API
       setCartIdInLS(cartId);
       bumpCartCountInLS(1);
       notifyCartChanged();
 
+      // Fire-and-forget server sync, on failure, revert the single bump
+      void axiosInstance
+        .post(
+          `/carts/${encodeURIComponent(cartId)}/${encodeURIComponent(String(productId))}`,
+          undefined,
+          { useV2: false }
+        )
+        .catch(err => {
+          console.error('AddToCart failed (will revert 1):', err);
+          bumpCartCountInLS(-1);
+          notifyCartChanged();
+        });
       return true;
     } catch (err) {
       const ax = err as AxiosError;
