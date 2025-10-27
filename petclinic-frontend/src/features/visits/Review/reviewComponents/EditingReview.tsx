@@ -12,6 +12,7 @@ import StarRating from '../../../products/components/StarRating';
 import { Filter } from 'bad-words';
 import BasicModal from '@/shared/components/BasicModal';
 import { ReviewResponseDTO } from '../Model/ReviewResponseDTO';
+import SvgIcon from '@/shared/components/SvgIcon';
 
 const filter = new Filter();
 filter.addWords('badWord', 'anotherBadWord'); // Custom bad words for demo purposes
@@ -141,12 +142,12 @@ const EditingReview: React.FC<EditingReviewProps> = ({
   return (
     <BasicModal
       formId="review-form"
-      title="Add a Customer Review"
+      title="Edit Review"
       validate={validate}
       showButton={
-        <button className="btn btn-warning" title="Edit">
-          Edit
-        </button>
+        <a>
+          <SvgIcon id="pencil" className="icon-visits" />
+        </a>
       }
       errorMessage={errorMessage}
     >
@@ -181,6 +182,7 @@ const EditingReview: React.FC<EditingReviewProps> = ({
             value={review.review}
             onChange={handleInputChange}
             required
+            placeholder="Write your review here..."
             rows={5}
           />
         </div>

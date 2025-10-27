@@ -8,6 +8,8 @@ import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 import { deleteReview } from './Api/deleteReview';
 import AddingReview from './reviewComponents/AddingReview';
 import EditingReview from './reviewComponents/EditingReview';
+import '../VisitListTable.css';
+import StarRating from '@/features/products/components/StarRating';
 
 const CustomerReviewsList: React.FC = (): JSX.Element => {
   const [reviewList, setReviewList] = useState<ReviewResponseDTO[]>([]);
@@ -54,59 +56,66 @@ const CustomerReviewsList: React.FC = (): JSX.Element => {
   };
 
   return (
-    <div className="reviews-container">
-      <h1>Reviews</h1>
-      <table className="reviews-table">
-        <thead>
-          <tr>
-            <th>Reviewer Name</th>
-            <th>Review</th>
-            <th>Rating</th>
-            <th>Date Submitted</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {reviewList.length > 0 ? (
-            reviewList.map(review => (
-              <tr key={review.reviewId}>
-                <td>{review.reviewerName}</td>
-                <td>{review.review}</td>
-                <td>{review.rating}/5</td>
-                <td>{new Date(review.dateSubmitted).toLocaleDateString()}</td>
-                <td>
-                  <EditingReview
-                    reviewId={review.reviewId.toString()}
-                    reviewData={review}
-                  />
-                  <button
-                    className="btn btn-danger"
-                    onClick={() => handleDelete(review.reviewId)}
-                    title="Delete"
-                  >
-                    Delete
-                  </button>
+    <div className="page-container">
+      <div className="visit-table-section">
+        <h1>Reviews</h1>
+        <button
+          className="btn btn-warning"
+          onClick={() => navigate(AppRoutePaths.CustomerVisits)}
+          title="Return to visits"
+        >
+          Return to visits
+        </button>
+        {isOwner && <AddingReview />}
+        <table>
+          <thead>
+            <tr>
+              <th>Reviewer Name</th>
+              <th>Review</th>
+              <th>Rating</th>
+              <th>Date Submitted</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {reviewList.length > 0 ? (
+              reviewList.map(review => (
+                <tr key={review.reviewId}>
+                  <td>{review.reviewerName}</td>
+                  <td>{review.review}</td>
+                  <td>
+                    <StarRating
+                      currentRating={review.rating}
+                      viewOnly={true}
+                    ></StarRating>
+                  </td>
+
+                  <td>{new Date(review.dateSubmitted).toLocaleDateString()}</td>
+                  <td>
+                    <EditingReview
+                      reviewId={review.reviewId.toString()}
+                      reviewData={review}
+                    />
+                    <button
+                      className="btn btn-danger"
+                      onClick={() => handleDelete(review.reviewId)}
+                      title="Delete"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={5} className="text-center">
+                  No reviews available
                 </td>
               </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan={5} className="text-center">
-                No reviews available
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-
-      <button
-        className="btn btn-warning"
-        onClick={() => navigate(AppRoutePaths.CustomerVisits)}
-        title="Return to visits"
-      >
-        Return to visits
-      </button>
-      {isOwner && <AddingReview />}
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

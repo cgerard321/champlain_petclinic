@@ -146,7 +146,7 @@ const AddingReview: React.FC = (): JSX.Element => {
   return (
     <BasicModal
       formId="review-form"
-      title="Add a Customer Review"
+      title="Add Review"
       validate={validate}
       showButton={
         <button className="btn btn-primary" title="Add Review">
@@ -186,6 +186,7 @@ const AddingReview: React.FC = (): JSX.Element => {
             value={review.review}
             onChange={handleInputChange}
             required
+            placeholder="Write your review here..."
             rows={5}
           />
         </div>
