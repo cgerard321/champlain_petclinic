@@ -33,7 +33,21 @@
 
 </style>
 
-<h2>Products</h2>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="m-0">Products</h2>
+
+    <div class="d-flex" style="gap: .5rem;">
+        <button class="btn btn-outline-secondary"
+                ui-sref="productBundleList">
+            Bundles
+        </button>
+
+        <button class="btn btn-success"
+                ui-sref="productAdd">
+            Add Product
+        </button>
+    </div>
+</div>
 
 <table class="table table-striped">
     <thead>
@@ -176,9 +190,6 @@
 <div id="notification" style="display: none; position: fixed; bottom: 10px; right: 10px; background-color: #4CAF50; color: white; padding: 10px; border-radius: 5px;">
     Notification Text Here
 </div>
-<a ui-sref="productAdd">
-    <button class="add-bundle-button btn btn-success">Add Product</button>
-</a>
 
 <div class="action-toast" ng-class="{'show': toast.visible}">
     <div class="title">{{ toast.title }}</div>
