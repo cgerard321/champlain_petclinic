@@ -196,5 +196,48 @@ public class ProductControllerV1 {
         return productsServiceClient.getProductEnumsValues();
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ALL})
+    @GetMapping(value="/types", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ProductTypeResponseDTO> getAllProductTypes(){
+        return productsServiceClient.getAllProductTypes();
+
+    }
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.ALL})
+    @GetMapping(value = "/types/{productTypeId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<ProductTypeResponseDTO>> getProductTypeByProductTypeId(@PathVariable String productTypeId) {
+        return productsServiceClient.getProductTypeByProductTypeId(productTypeId)
+                .map(productType -> ResponseEntity.status(HttpStatus.OK).body(productType))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @PostMapping(value = "/types", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<ProductTypeResponseDTO>> addProductType(@RequestBody ProductTypeRequestDTO productTypeRequestDTO) {
+        return productsServiceClient.createProductType(productTypeRequestDTO)
+                .map(productType -> ResponseEntity.status(HttpStatus.CREATED).body(productType))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @PutMapping(value = "/types/{productTypeId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<ProductTypeResponseDTO>> updateProductType(@PathVariable String productTypeId,
+                                                                  @RequestBody ProductTypeRequestDTO productTypeRequestDTO) {
+        return productsServiceClient.updateProductType(productTypeId, productTypeRequestDTO)
+                .map(productType -> ResponseEntity.status(HttpStatus.OK).body(productType))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @DeleteMapping(value = "/types/{productTypeId}")
+    public Mono<ResponseEntity<ProductTypeResponseDTO>> deleteProductType(@PathVariable String productTypeId) {
+        return productsServiceClient.deleteProductType(productTypeId)
+                .map(productType -> ResponseEntity.status(HttpStatus.OK).body(productType))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 
 }

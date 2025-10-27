@@ -5,131 +5,251 @@
         box-shadow: 0 0 rgba(0,0,0,2);
         border-bottom-width: 1px;
     }
+
+    /* --------- Mobile helpers --------- */
+    .gap-8 { gap: 8px; }
+    .flex-1 { flex: 1 1 0; }
+
+    /* Mobile filters grid */
+    .mobile-filters .filters-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+    @media (max-width: 400px) {
+        .mobile-filters .filters-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Cards */
+    .inventory-list { display: grid; gap: 12px; }
+    .inventory-card {
+        border: 1px solid #e5e5e5;
+        border-radius: 12px;
+        padding: 12px;
+        background: #fff;
+        box-shadow: 0 1px 2px rgba(0,0,0,.04);
+    }
+    .inventory-card:active { transform: translateY(1px); }
+    .inventory-card .card-head {
+        display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+        margin-bottom: 6px;
+    }
+    .inventory-card .code { font-weight: 700; letter-spacing: .2px; }
+    .inventory-card .name {
+        font-size: 0.95rem; font-weight: 600; text-align: right; flex: 1;
+        color: #1565c0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .inventory-card .kv {
+        display: grid; grid-template-columns: 90px 1fr; gap: 6px; margin: 4px 0;
+    }
+    .inventory-card .k { font-weight: 600; color: #666; }
+    .inventory-card .v { color: #222; word-break: break-word; }
+    .inventory-card .card-actions {
+        display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;
+    }
+    .inventory-card .btn { padding: .45rem .6rem; }
+
+    .mobile-pager { display:flex; justify-content:space-between; align-items:center; margin-top:12px; }
 </style>
 
 <h2>Inventory</h2>
 
-<table class="table table-striped">
-    <thead>
-    <tr>
-        <td>Inventory ID</td>
-        <td>Name</td>
-        <td>Type</td>
-        <td>Description</td>
-        <td>Updates</td>
-        <td></td>
-        <td></td>
-        <td></td>
-    </tr>
-    <tr>
-        <td>
-            <input type="text"
-                   ng-model="inventoryCode"
-                   placeholder="INV-XXXX"
-                   ng-keyup="$event.keyCode == 13 && searchInventory(inventoryCode, inventoryName, inventoryType, inventoryDescription)">
-        </td>
-        <td>
-            <input type="text"
-                   ng-model="inventoryName"
-                   ng-keyup="$event.keyCode == 13 && searchInventory(inventoryCode, inventoryName, inventoryType, inventoryDescription)">
-        </td>
-        <td>
-            <select class="form-control col-sm-4"
-                    id="inventoryType"
+<!-- ================= DESKTOP/TABLET ================= -->
+<div class="d-none d-md-block">
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <td>Inventory ID</td>
+                <td>Name</td>
+                <td>Type</td>
+                <td>Description</td>
+                <td>Updates</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="text"
+                           ng-model="inventoryCode"
+                           placeholder="INV-XXXX"
+                           ng-keyup="$event.keyCode == 13 && searchInventory(inventoryCode, inventoryName, inventoryType, inventoryDescription)">
+                </td>
+                <td>
+                    <input type="text"
+                           ng-model="inventoryName"
+                           ng-keyup="$event.keyCode == 13 && searchInventory(inventoryCode, inventoryName, inventoryType, inventoryDescription)">
+                </td>
+                <td>
+                    <select class="form-control col-sm-4"
+                            id="inventoryType"
+                            ng-model="inventoryType"
+                            name="inventoryType"
+                            ng-options="type for type in inventoryTypeOptions"
+                            ng-keyup="$event.keyCode == 13 && searchInventory(inventoryCode, inventoryName, inventoryType, inventoryDescription)">
+                        <option value=""></option>
+                    </select>
+                </td>
+                <td>
+                    <input type="text"
+                           ng-model="inventoryDescription"
+                           ng-keyup="$event.keyCode == 13 && searchInventory(inventoryCode, inventoryName, inventoryType, inventoryDescription)">
+                </td>
+                <td></td>
+                <td>
+                    <a class="btn btn-success" type="button" ng-click="clearQueries()" title="Clear">
+                        <lord-icon src="https://cdn.lordicon.com/zxvuvcnc.json" trigger="hover" style="width:32px;height:32px"></lord-icon>
+                    </a>
+                </td>
+                <td>
+                    <a class="btn btn-success" type="button"
+                       ng-click="searchInventory(inventoryCode, inventoryName, inventoryType, inventoryDescription)"
+                       title="Search">
+                        <lord-icon src="https://cdn.lordicon.com/fkdzyfle.json" trigger="hover" style="width:32px;height:32px"></lord-icon>
+                    </a>
+                </td>
+                <td></td>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr ng-repeat="inventory in $ctrl.inventoryList | filter:$ctrl.query track by inventory.inventoryId"
+                ui-sref="inventoriesProductList({ inventoryId: inventory.inventoryId })">
+
+                <td><span>{{inventory.inventoryCode}}</span></td>
+
+                <td>
+          <span>
+            <a style="text-decoration: none;"
+               ui-sref="inventoriesProduct({ inventoryId: inventory.inventoryId })">
+              {{ inventory.inventoryName }}
+            </a>
+          </span>
+                </td>
+
+                <td><span>{{inventory.inventoryType}}</span></td>
+                <td><span>{{inventory.inventoryDescription}}</span></td>
+
+                <!-- last update message -->
+                <td><span>{{ inventory.recentUpdateMessage || '—' }}</span></td>
+
+                <!-- Edit -->
+                <td>
+                    <a class="btn btn-warning"
+                       ui-sref="updateInventory({inventoryId: inventory.inventoryId, method: 'edit'})"
+                       ng-click="$event.stopPropagation()" title="Edit">
+                        <lord-icon src="https://cdn.lordicon.com/wkvacbiw.json" trigger="hover" style="width:32px;height:32px"></lord-icon>
+                    </a>
+                </td>
+
+                <!-- Delete / Restore -->
+                <td>
+                    <a ng-if="!inventory.isTemporarilyDeleted"
+                       class="btn btn-danger"
+                       href="javascript:void(0)"
+                       ng-click="deleteInventory(inventory); $event.stopPropagation()"
+                       title="Delete">
+                        <lord-icon src="https://cdn.lordicon.com/skkahier.json" trigger="hover" style="width:32px;height:32px"></lord-icon>
+                    </a>
+
+                    <a ng-if="inventory.isTemporarilyDeleted"
+                       class="btn btn-info"
+                       href="javascript:void(0)"
+                       ng-click="undoDelete(inventory); $event.stopPropagation()"
+                       title="Restore">
+                        Restore
+                    </a>
+                </td>
+
+                <td></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="text-center">
+        <table class="mx-auto">
+            <tr>
+                <td><a class="btn btn-success btn-sm" ng-click="pageBefore()"><</a></td>
+                <td><span>{{$ctrl.realPage}}</span></td>
+                <td><a class="btn btn-success btn-sm" ng-click="pageAfter()">></a></td>
+            </tr>
+        </table>
+    </div>
+
+    <a ui-sref="inventoriesNew">
+        <button class="add-inventory-button btn btn-success">Add Inventory</button>
+    </a>
+</div>
+
+<!-- ====================== MOBILE ====================== -->
+<div class="d-md-none">
+    <!-- Mobile filters -->
+    <form class="mobile-filters" ng-submit="searchInventory(inventoryCode, inventoryName, inventoryType, inventoryDescription)">
+        <div class="filters-grid">
+            <input class="form-control" type="text" placeholder="INV-XXXX"
+                   ng-model="inventoryCode">
+            <input class="form-control" type="text" placeholder="Name"
+                   ng-model="inventoryName">
+            <select class="form-control"
+                    id="inventoryTypeMobile"
                     ng-model="inventoryType"
-                    name="inventoryType"
-                    ng-options="type for type in inventoryTypeOptions"
-                    ng-keyup="$event.keyCode == 13 && searchInventory(inventoryCode, inventoryName, inventoryType, inventoryDescription)">
-                <option value=""></option>
+                    name="inventoryTypeMobile"
+                    ng-options="type for type in inventoryTypeOptions">
+                <option value="">All Types</option>
             </select>
-        </td>
-        <td>
-            <input type="text"
-                   ng-model="inventoryDescription"
-                   ng-keyup="$event.keyCode == 13 && searchInventory(inventoryCode, inventoryName, inventoryType, inventoryDescription)">
-        </td>
-        <td></td>
-        <td>
-            <a class="btn btn-success" type="button" ng-click="clearQueries()" title="Clear">
-                <lord-icon src="https://cdn.lordicon.com/zxvuvcnc.json" trigger="hover" style="width:32px;height:32px"></lord-icon>
-            </a>
-        </td>
-        <td>
-            <a class="btn btn-success" type="button"
-               ng-click="searchInventory(inventoryCode, inventoryName, inventoryType, inventoryDescription)"
-               title="Search">
-                <lord-icon src="https://cdn.lordicon.com/fkdzyfle.json" trigger="hover" style="width:32px;height:32px"></lord-icon>
-            </a>
-        </td>
-        <td></td>
-    </tr>
-    </thead>
+            <input class="form-control" type="text" placeholder="Description"
+                   ng-model="inventoryDescription">
+        </div>
 
-    <tbody>
-    <tr ng-repeat="inventory in $ctrl.inventoryList | filter:$ctrl.query track by inventory.inventoryId"
-        ui-sref="inventoriesProductList({ inventoryId: inventory.inventoryId })">
+        <div class="d-flex gap-8 mt-2">
+            <button type="button" class="btn btn-outline-secondary flex-1" ng-click="clearQueries()">Clear</button>
+            <button type="submit" class="btn btn-success flex-1">Search</button>
+        </div>
+    </form>
 
-        <td><span>{{inventory.inventoryCode}}</span></td>
+    <!-- Card list -->
+    <div class="inventory-list">
+        <!-- tap card to open list view like desktop row -->
+        <div class="inventory-card"
+             ng-repeat="inventory in $ctrl.inventoryList | filter:$ctrl.query track by inventory.inventoryId"
+             ng-click="$state.go('inventoriesProductList', { inventoryId: inventory.inventoryId })">
 
-        <td>
-        <span>
-          <a style="text-decoration: none;"
-             ui-sref="inventoriesProduct({ inventoryId: inventory.inventoryId })">
-            {{ inventory.inventoryName }}
-          </a>
-        </span>
-        </td>
+            <div class="card-head">
+                <div class="code">{{ inventory.inventoryCode }}</div>
+                <div class="name">
+                    <a ui-sref="inventoriesProduct({ inventoryId: inventory.inventoryId })" style="text-decoration:none;">
+                        {{ inventory.inventoryName }}
+                    </a>
+                </div>
+            </div>
 
-        <td><span>{{inventory.inventoryType}}</span></td>
-        <td><span>{{inventory.inventoryDescription}}</span></td>
+            <div class="kv"><span class="k">Type</span><span class="v">{{ inventory.inventoryType || '—' }}</span></div>
+            <div class="kv"><span class="k">Desc</span><span class="v">{{ inventory.inventoryDescription || '—' }}</span></div>
+            <div class="kv" ng-if="inventory.recentUpdateMessage"><span class="k">Update</span><span class="v">{{ inventory.recentUpdateMessage }}</span></div>
 
-        <!-- NEW: last update message (Show Supply Updates) -->
-        <td>
-            <span>{{ inventory.recentUpdateMessage || '—' }}</span>
-        </td>
+            <div class="card-actions" ng-click="$event.stopPropagation()">
+                <a class="btn btn-warning btn-sm"
+                   ui-sref="updateInventory({inventoryId: inventory.inventoryId, method: 'edit'})">Edit</a>
 
-        <!-- Edit -->
-        <td>
-            <a class="btn btn-warning"
-               ui-sref="updateInventory({inventoryId: inventory.inventoryId, method: 'edit'})"
-               ng-click="$event.stopPropagation()" title="Edit">
-                <lord-icon src="https://cdn.lordicon.com/wkvacbiw.json" trigger="hover" style="width:32px;height:32px"></lord-icon>
-            </a>
-        </td>
+                <a class="btn btn-info btn-sm" ng-if="inventory.isTemporarilyDeleted"
+                   href="javascript:void(0)" ng-click="undoDelete(inventory)">Restore</a>
 
-        <!-- Delete / Restore -->
-        <td>
-            <a ng-if="!inventory.isTemporarilyDeleted"
-               class="btn btn-danger"
-               href="javascript:void(0)"
-               ng-click="deleteInventory(inventory); $event.stopPropagation()"
-               title="Delete">
-                <lord-icon src="https://cdn.lordicon.com/skkahier.json" trigger="hover" style="width:32px;height:32px"></lord-icon>
-            </a>
+                <a class="btn btn-danger btn-sm" ng-if="!inventory.isTemporarilyDeleted"
+                   href="javascript:void(0)" ng-click="deleteInventory(inventory)">Delete</a>
+            </div>
+        </div>
+    </div>
 
-            <a ng-if="inventory.isTemporarilyDeleted"
-               class="btn btn-info"
-               href="javascript:void(0)"
-               ng-click="undoDelete(inventory); $event.stopPropagation()"
-               title="Restore">
-                Restore
-            </a>
-        </td>
+    <!-- Pager + add CTA -->
+    <div class="mobile-pager">
+        <button class="btn btn-outline-secondary btn-sm" ng-click="pageBefore()">&lsaquo; Prev</button>
+        <div class="small text-muted">Page {{$ctrl.realPage}}</div>
+        <button class="btn btn-outline-secondary btn-sm" ng-click="pageAfter()">Next &rsaquo;</button>
+    </div>
 
-        <!-- spare last cell (kept like your layout) -->
-        <td></td>
-    </tr>
-    </tbody>
-</table>
-
-<div class="text-center">
-    <table class="mx-auto">
-        <tr>
-            <td><a class="btn btn-success btn-sm" ng-click="pageBefore()"><</a></td>
-            <td><span>{{$ctrl.realPage}}</span></td>
-            <td><a class="btn btn-success btn-sm" ng-click="pageAfter()">></a></td>
-        </tr>
-    </table>
+    <a ui-sref="inventoriesNew" class="btn btn-success w-100 mt-3">Add Inventory</a>
 </div>
 
 <div id="loadingObject" style="display: none;">Loading...</div>
@@ -137,7 +257,3 @@
      style="display: none; position: fixed; bottom: 10px; right: 10px; background-color: #4CAF50; color: white; padding: 10px; border-radius: 5px;">
     Notification Text Here
 </div>
-
-<a ui-sref="inventoriesNew">
-    <button class="add-inventory-button btn btn-success">Add Inventory</button>
-</a>

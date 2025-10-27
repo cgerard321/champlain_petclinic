@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: vet-service
+
+app:
+  files-service:
+    host: localhost
+    port: 8000
+
+de:
+  flapdoodle:
+    mongodb:
+      embedded:
+        version: 4.4.0

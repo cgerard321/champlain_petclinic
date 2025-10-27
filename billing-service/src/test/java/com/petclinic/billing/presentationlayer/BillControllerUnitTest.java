@@ -232,7 +232,7 @@ class BillControllerUnitTest {
                 .thenReturn(Flux.just(responseDTO));
 
         client.get()
-                .uri("/bills/visitType/{visitType}", visitType)
+                .uri("/bills/visitType/" + visitType)
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
