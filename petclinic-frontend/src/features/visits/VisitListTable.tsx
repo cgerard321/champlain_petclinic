@@ -1,5 +1,5 @@
 import './VisitListTable.css';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, createRef } from 'react';
 import { Visit } from './models/Visit';
 
 import { useNavigate } from 'react-router-dom';
@@ -53,6 +53,7 @@ export default function VisitListTable(): JSX.Element {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
+  //use sidebar to select which table is shown
   const [currentTab, setCurrentTab] = useState<string>('All');
 
   // helper to normalize API responses to an array of visits
@@ -203,6 +204,48 @@ export default function VisitListTable(): JSX.Element {
     };
   }, [searchTerm, visits]);
 
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const getVisits = async (): Promise<void> => {
+      try {
+        const fetchedVisits = await getAllVisits();
+        const list = normalizeVisits(fetchedVisits);
+        setVisits(list);
+        setDisplayedVisits(list);
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(`Failed to fetch visits: ${err.message}`);
+        } else {
+          setError('Failed to fetch visits');
+        }
+      }
+    };
+    getVisits();
+  }, []);
+
+  // Update the displayed list whenever the search term or the full visits list changes.
+  // This avoids refetching from the API and preserves the full list in `visits`.
+  useEffect(() => {
+    const term = searchTerm.trim().toLowerCase();
+
+    const handler = setTimeout(() => {
+      if (term.length > 0) {
+        const filtered = visits.filter(v =>
+          (v.description || '').toLowerCase().includes(term)
+        );
+        setDisplayedVisits(sortVisits(filtered));
+      } else {
+        setDisplayedVisits(sortVisits(visits));
+      }
+    }, 300);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchTerm, visits]);
+
+  // Handle archiving the visit
   const handleArchive = async (visitId: string): Promise<void> => {
     try {
       await archiveVisit(visitId, updatedVisit => {
