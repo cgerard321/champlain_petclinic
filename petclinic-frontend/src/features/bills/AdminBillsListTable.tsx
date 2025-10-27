@@ -773,78 +773,69 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                 >
                   <div className="form-grid">
                     <label htmlFor="newCustomer">Customer</label>
-                    <div style={{ position: 'relative' }}>
-                      <select
-                        id="newCustomer"
-                        value={newBill.customerId}
-                        onChange={e => {
-                          setNewBill({
-                            ...newBill,
-                            customerId: e.target.value,
-                          });
-                          setCustomerError(false);
-                        }}
-                        style={
-                          customerError
-                            ? { border: '2px solid #ff3b3b', outline: 'none' }
-                            : {}
-                        }
-                      >
-                        <option value="">Select Customer</option>
-                        {owners.map(owner => (
-                          <option key={owner.ownerId} value={owner.ownerId}>
-                            {owner.firstName} {owner.lastName}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                    <select
+                      id="newCustomer"
+                      value={newBill.customerId}
+                      onChange={e => {
+                        setNewBill({ ...newBill, customerId: e.target.value });
+                        setCustomerError(false);
+                      }}
+                      style={
+                        customerError
+                          ? { border: '2px solid #ff3b3b', outline: 'none' }
+                          : {}
+                      }
+                    >
+                      <option value="">Select Customer</option>
+                      {owners.map(owner => (
+                        <option key={owner.ownerId} value={owner.ownerId}>
+                          {owner.firstName} {owner.lastName}
+                        </option>
+                      ))}
+                    </select>
 
                     <label htmlFor="newVet">Vet</label>
-                    <div style={{ position: 'relative' }}>
-                      <select
-                        id="newVet"
-                        value={newBill.vetId}
-                        onChange={e => {
-                          setNewBill({ ...newBill, vetId: e.target.value });
-                          setVetError(false);
-                        }}
-                        style={
-                          vetError
-                            ? { border: '2px solid #ff3b3b', outline: 'none' }
-                            : {}
-                        }
-                      >
-                        <option value="">Select Vet</option>
-                        {vets.map(vet => (
-                          <option key={vet.vetId} value={vet.vetId}>
-                            {vet.firstName} {vet.lastName}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                    <select
+                      id="newVet"
+                      value={newBill.vetId}
+                      onChange={e => {
+                        setNewBill({ ...newBill, vetId: e.target.value });
+                        setVetError(false);
+                      }}
+                      style={
+                        vetError
+                          ? { border: '2px solid #ff3b3b', outline: 'none' }
+                          : {}
+                      }
+                    >
+                      <option value="">Select Vet</option>
+                      {vets.map(vet => (
+                        <option key={vet.vetId} value={vet.vetId}>
+                          {vet.firstName} {vet.lastName}
+                        </option>
+                      ))}
+                    </select>
 
                     <label htmlFor="newVisitType">Visit Type</label>
-                    <div style={{ position: 'relative' }}>
-                      <select
-                        id="newVisitType"
-                        value={newBill.visitType}
-                        onChange={e => {
-                          setNewBill({ ...newBill, visitType: e.target.value });
-                          setVisitTypeError(false);
-                        }}
-                        style={
-                          visitTypeError
-                            ? { border: '2px solid #ff3b3b', outline: 'none' }
-                            : {}
-                        }
-                      >
-                        <option value="">Select Visit Type</option>
-                        <option value="CHECKUP">Check-Up</option>
-                        <option value="VACCINE">Vaccine</option>
-                        <option value="SURGERY">Surgery</option>
-                        <option value="DENTAL">Dental</option>
-                      </select>
-                    </div>
+                    <select
+                      id="newVisitType"
+                      value={newBill.visitType}
+                      onChange={e => {
+                        setNewBill({ ...newBill, visitType: e.target.value });
+                        setVisitTypeError(false);
+                      }}
+                      style={
+                        visitTypeError
+                          ? { border: '2px solid #ff3b3b', outline: 'none' }
+                          : {}
+                      }
+                    >
+                      <option value="">Select Visit Type</option>
+                      <option value="CHECKUP">Check-Up</option>
+                      <option value="VACCINE">Vaccine</option>
+                      <option value="SURGERY">Surgery</option>
+                      <option value="DENTAL">Dental</option>
+                    </select>
 
                     <label htmlFor="newDate">Date</label>
                     <input
@@ -934,6 +925,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                         id="billCurrency"
                         value={currency}
                         onChange={e => setCurrency(e.target.value as Currency)}
+                        style={{ marginTop: '20.5px' }}
                       >
                         <option value="CAD">CAD</option>
                         <option value="USD">USD</option>

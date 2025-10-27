@@ -12,6 +12,7 @@ import axiosInstance from '@/shared/api/axiosInstance';
 import AddSupplyToInventory from '@/features/inventories/AddSupplyToInventory';
 import EditInventoryProducts from '@/features/inventories/EditInventoryProducts';
 import MoveInventoryProducts from '@/features/inventories/MoveInventoryProducts';
+import { searchProducts } from './api/searchProducts';
 
 const MAX_QTY = 100;
 
@@ -146,20 +147,27 @@ const InventoryProducts: React.FC = () => {
     if (!inventoryId) return;
     setLoading(true);
     setError(null);
+
     try {
-      const res = await axiosInstance.get<ProductModel[]>(
-        `/inventories/${inventoryId}/products/search`,
-        { useV2: false }
-      );
-      const data = Array.isArray(res.data) ? res.data : [];
-      data.forEach(p => {
-        p.productMargin = parseFloat(
-          (p.productSalePrice - p.productPrice).toFixed(2)
-        );
-      });
-      setProducts(data);
-      setProductList(data);
-      setFilteredProducts(data);
+      const result = await searchProducts(inventoryId);
+
+      if (result.errorMessage) {
+        setError(result.errorMessage);
+        setProducts([]);
+        setProductList([]);
+        setFilteredProducts([]);
+      } else {
+        const data = result.data ?? [];
+        setProducts(data);
+        setProductList(data);
+        setFilteredProducts(data);
+      }
+    } catch (err) {
+      console.error('Failed to load products:', err);
+      setError('Failed to load products. Please try again.');
+      setProducts([]);
+      setProductList([]);
+      setFilteredProducts([]);
     } finally {
       setLoading(false);
     }
@@ -315,13 +323,13 @@ const InventoryProducts: React.FC = () => {
   }, [productList, productStatus]);
 
   if (loading) return <p>Loading supplies...</p>;
-  if (error) return <p>{error}</p>;
 
   return (
     <div className="inventory-supplies">
       <h2 className="inventory-title">
         Supplies in Inventory: <span>{inventoryName}</span>
       </h2>
+      {error && <p style={{ color: 'red', marginBottom: '1rem' }}>{error}</p>}
       <button
         className="btn btn-secondary"
         onClick={() =>
@@ -381,145 +389,270 @@ const InventoryProducts: React.FC = () => {
           </select>
         </div>
       </div>
-      <table className="table table-striped">
-        <thead>
-          <tr>
-            <th>Supply Id</th>
-            <th>Supply Name</th>
-            <th>Description</th>
-            <th>
-              <span className="th-2line">
-                Sale
-                <br />
-                Price
-              </span>
-            </th>
-            <th>
-              <span className="th-2line">
-                Cost
-                <br />
-                Price
-              </span>
-            </th>
-            <th>
-              <span className="th-2line">
-                Profit
-                <br />
-                Margin
-              </span>
-            </th>
-            <th>Quantity</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredProducts.length > 0 ? (
-            filteredProducts.map((product: ProductModel) => (
-              <tr key={product.productId}>
-                <td>{product.productId}</td>
-                <td>{product.productName}</td>
-                <td>{product.productDescription}</td>
-                <td>${product.productSalePrice}</td>
-                <td>${product.productPrice}</td>
-                <td
-                  style={{
-                    color: product.productMargin >= 0 ? 'green' : 'red',
-                    fontWeight: 'bold',
-                  }}
-                >
-                  ${product.productMargin}
-                </td>
-                <td>{product.productQuantity}</td>
-                <td
-                  style={{
-                    color:
-                      product.status === Status.RE_ORDER
-                        ? '#f4a460'
-                        : product.status === Status.OUT_OF_STOCK
-                          ? 'red'
-                          : product.status === Status.AVAILABLE
-                            ? 'green'
-                            : 'inherit',
-                  }}
-                >
-                  {product.status.replace('_', ' ')}
-                </td>
 
-                <td className="actions-cell">
-                  <div className="actions-group">
-                    <button
-                      onClick={e => {
-                        e.stopPropagation();
-                        setEditProductId(product.productId);
-                        setEditOpen(true);
-                      }}
-                      className="btn btn-warning btn-sm"
-                    >
-                      Edit
-                    </button>
+      {/* Desktop table view (hidden on mobile via CSS) */}
+      <div className="desktop-table-view">
+        <table className="table table-striped">
+          <thead>
+            <tr>
+              <th>Supply Id</th>
+              <th>Supply Name</th>
+              <th>Description</th>
+              <th>
+                <span className="th-2line">
+                  Sale
+                  <br />
+                  Price
+                </span>
+              </th>
+              <th>
+                <span className="th-2line">
+                  Cost
+                  <br />
+                  Price
+                </span>
+              </th>
+              <th>
+                <span className="th-2line">
+                  Profit
+                  <br />
+                  Margin
+                </span>
+              </th>
+              <th>Quantity</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredProducts.length > 0 ? (
+              filteredProducts.map((product: ProductModel) => (
+                <tr key={product.productId}>
+                  <td>{product.productId}</td>
+                  <td>{product.productName}</td>
+                  <td>{product.productDescription}</td>
+                  <td>${product.productSalePrice}</td>
+                  <td>${product.productPrice}</td>
+                  <td
+                    style={{
+                      color: product.productMargin >= 0 ? 'green' : 'red',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    ${product.productMargin}
+                  </td>
+                  <td>{product.productQuantity}</td>
+                  <td
+                    style={{
+                      color:
+                        product.status === Status.RE_ORDER
+                          ? '#f4a460'
+                          : product.status === Status.OUT_OF_STOCK
+                            ? 'red'
+                            : product.status === Status.AVAILABLE
+                              ? 'green'
+                              : 'inherit',
+                    }}
+                  >
+                    {product.status.replace('_', ' ')}
+                  </td>
 
-                    <button
-                      className="btn btn-danger btm-sm"
-                      onClick={() => handleDeleteClick(product.productId)}
-                    >
-                      Delete
-                    </button>
+                  <td className="actions-cell">
+                    <div className="actions-group">
+                      <button
+                        onClick={e => {
+                          e.stopPropagation();
+                          setEditProductId(product.productId);
+                          setEditOpen(true);
+                        }}
+                        className="btn btn-warning btn-sm"
+                      >
+                        Edit
+                      </button>
 
-                    <button
-                      className="btn btn-success btn-sm"
-                      onClick={() =>
-                        addQuantity(product.productId, product.productQuantity)
-                      }
-                      disabled={product.productQuantity >= MAX_QTY}
-                      title={
-                        product.productQuantity >= MAX_QTY
-                          ? 'Max quantity reached'
-                          : ''
-                      }
-                    >
-                      Add Quantity
-                    </button>
+                      <button
+                        className="btn btn-danger btm-sm"
+                        onClick={() => handleDeleteClick(product.productId)}
+                      >
+                        Delete
+                      </button>
 
-                    <button
-                      className="btn btn-info btn-sm"
-                      onClick={() =>
-                        reduceQuantity(
-                          product.productId,
-                          product.productQuantity
-                        )
-                      }
-                      disabled={product.productQuantity <= 0}
-                      title={
-                        product.productQuantity <= 0 ? 'Quantity already 0' : ''
-                      }
-                    >
-                      Reduce Quantity
-                    </button>
+                      <button
+                        className="btn btn-success btn-sm"
+                        onClick={() =>
+                          addQuantity(
+                            product.productId,
+                            product.productQuantity
+                          )
+                        }
+                        disabled={product.productQuantity >= MAX_QTY}
+                        title={
+                          product.productQuantity >= MAX_QTY
+                            ? 'Max quantity reached'
+                            : ''
+                        }
+                      >
+                        Add Quantity
+                      </button>
 
-                    <button
-                      onClick={e => {
-                        e.stopPropagation();
-                        setMoveProductId(product.productId);
-                        setMoveOpen(true);
-                      }}
-                      className="btn btn-info btn-sm"
-                    >
-                      Move
-                    </button>
-                  </div>
+                      <button
+                        className="btn btn-info btn-sm"
+                        onClick={() =>
+                          reduceQuantity(
+                            product.productId,
+                            product.productQuantity
+                          )
+                        }
+                        disabled={product.productQuantity <= 0}
+                        title={
+                          product.productQuantity <= 0
+                            ? 'Quantity already 0'
+                            : ''
+                        }
+                      >
+                        Reduce Quantity
+                      </button>
+
+                      <button
+                        onClick={e => {
+                          e.stopPropagation();
+                          setMoveProductId(product.productId);
+                          setMoveOpen(true);
+                        }}
+                        className="btn btn-info btn-sm"
+                      >
+                        Move
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={9} style={{ textAlign: 'center' }}>
+                  No products available.
                 </td>
               </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan={7} style={{ textAlign: 'center' }}>
-                No products available.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile card view (shown only on mobile via CSS) */}
+      <div className="mobile-cards-view">
+        {filteredProducts.length > 0 ? (
+          filteredProducts.map((product: ProductModel) => (
+            <div key={product.productId} className="mobile-product-card">
+              <div className="mobile-card-header">
+                <h3 className="mobile-card-title">{product.productName}</h3>
+                <span
+                  className="mobile-card-status"
+                  data-status={product.status.toLowerCase().replace('_', '-')}
+                >
+                  {product.status.replace('_', ' ')}
+                </span>
+              </div>
+
+              <div className="mobile-card-body">
+                <div className="mobile-card-row">
+                  <span className="mobile-card-label">ID:</span>
+                  <span className="mobile-card-value">{product.productId}</span>
+                </div>
+
+                <div className="mobile-card-row">
+                  <span className="mobile-card-label">Description:</span>
+                  <span className="mobile-card-value">
+                    {product.productDescription}
+                  </span>
+                </div>
+
+                <div className="mobile-card-row">
+                  <span className="mobile-card-label">Sale Price:</span>
+                  <span className="mobile-card-value">
+                    ${product.productSalePrice}
+                  </span>
+                </div>
+
+                <div className="mobile-card-row">
+                  <span className="mobile-card-label">Cost Price:</span>
+                  <span className="mobile-card-value">
+                    ${product.productPrice}
+                  </span>
+                </div>
+
+                <div className="mobile-card-row">
+                  <span className="mobile-card-label">Profit Margin:</span>
+                  <span
+                    className="mobile-card-value mobile-card-margin"
+                    data-positive={product.productMargin >= 0}
+                  >
+                    ${product.productMargin}
+                  </span>
+                </div>
+
+                <div className="mobile-card-row">
+                  <span className="mobile-card-label">Quantity:</span>
+                  <span className="mobile-card-value">
+                    {product.productQuantity}
+                  </span>
+                </div>
+              </div>
+
+              <div className="mobile-card-actions">
+                <button
+                  onClick={() => {
+                    setEditProductId(product.productId);
+                    setEditOpen(true);
+                  }}
+                  className="btn btn-warning btn-sm mobile-action-btn"
+                >
+                  Edit
+                </button>
+
+                <button
+                  className="btn btn-danger btn-sm mobile-action-btn"
+                  onClick={() => handleDeleteClick(product.productId)}
+                >
+                  Delete
+                </button>
+
+                <button
+                  className="btn btn-success btn-sm mobile-action-btn"
+                  onClick={() =>
+                    addQuantity(product.productId, product.productQuantity)
+                  }
+                  disabled={product.productQuantity >= MAX_QTY}
+                >
+                  Add Qty
+                </button>
+
+                <button
+                  className="btn btn-info btn-sm mobile-action-btn"
+                  onClick={() =>
+                    reduceQuantity(product.productId, product.productQuantity)
+                  }
+                  disabled={product.productQuantity <= 0}
+                >
+                  Reduce Qty
+                </button>
+
+                <button
+                  onClick={() => {
+                    setMoveProductId(product.productId);
+                    setMoveOpen(true);
+                  }}
+                  className="btn btn-info btn-sm mobile-action-btn"
+                >
+                  Move
+                </button>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="mobile-no-products">No products available.</div>
+        )}
+      </div>
+
       <button className="btn btn-add" onClick={() => setAddOpen(true)}>
         Add
       </button>

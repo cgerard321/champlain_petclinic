@@ -8,7 +8,7 @@ import {
 import { InventoryRequestModel } from '@/features/inventories/models/InventoryModels/InventoryRequestModel.ts';
 import { InventoryType } from '@/features/inventories/models/InventoryType.ts';
 import { getAllInventoryTypes } from '@/features/inventories/api/getAllInventoryTypes.ts';
-
+import { createPortal } from 'react-dom';
 import styles from './InvProForm.module.css';
 
 type EditInventoryProps = {
@@ -480,7 +480,7 @@ const EditInventory: React.FC<EditInventoryProps> = ({
     if (e.target === e.currentTarget) handleCancel();
   };
 
-  return (
+  return createPortal(
     <div
       ref={overlayRef}
       className={styles.overlay}
@@ -712,7 +712,8 @@ const EditInventory: React.FC<EditInventoryProps> = ({
           </button>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 export default EditInventory;

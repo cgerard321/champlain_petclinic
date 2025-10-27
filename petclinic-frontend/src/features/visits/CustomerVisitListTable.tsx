@@ -1,4 +1,3 @@
-import './VisitListTable.css';
 import { useEffect, useState } from 'react';
 import { useUser, IsVet } from '@/context/UserContext';
 import { Visit } from '@/features/visits/models/Visit.ts';
@@ -9,8 +8,8 @@ import { getAllVetVisits } from './api/getAllVetVisits';
 import axios from 'axios';
 import { downloadPrescription } from '@/features/visits/Prescription/api/downloadPrescription';
 import './CustomerVisitListTable.css';
-import BasicModal from '@/shared/components/BasicModal';
 import '@/shared/components/BasicModal.css';
+import AutoDismissAlert from '@/shared/components/AutoDismissAlert';
 import SidebarItem from './components/SidebarItem';
 import Sidebar from './components/Sidebar';
 import SvgIcon from '@/shared/components/SvgIcon';
@@ -21,10 +20,14 @@ export default function CustomerVisitListTable(): JSX.Element {
   const isVet = IsVet();
   const [visits, setVisits] = useState<Visit[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [showErrorDialog, setShowErrorDialog] = useState(false);
-  const [errorDialogMessage, setErrorDialogMessage] = useState<string | null>(
-    null
+
+  // Alert state (replaces modal)
+  const [alertShow, setAlertShow] = useState(false);
+  const [alertMessage, setAlertMessage] = useState<string>('');
+  const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>(
+    'info'
   );
+
   const [displayedVisits, setDisplayedVisits] = useState<Visit[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>(''); // Search term state
   //use sidebar to select which table is shown
@@ -98,7 +101,6 @@ export default function CustomerVisitListTable(): JSX.Element {
 
         if (Array.isArray(visitData)) {
           setVisits(visitData);
-          setDisplayedVisits(visitData);
         } else {
           console.error('Fetched data is not an array', visitData);
         }
@@ -114,6 +116,15 @@ export default function CustomerVisitListTable(): JSX.Element {
     fetchVisits();
   }, [user.userId, isVet]);
 
+  const showAlert = (
+    message: string,
+    type: 'success' | 'error' | 'info'
+  ): void => {
+    setAlertMessage(message);
+    setAlertType(type);
+    setAlertShow(true);
+  };
+
   const handleDownloadPrescription = async (
     visitId: string,
     downloadName?: string
@@ -122,8 +133,7 @@ export default function CustomerVisitListTable(): JSX.Element {
       const blob = await downloadPrescription(visitId);
 
       if (!(blob instanceof Blob) || blob.size === 0) {
-        setErrorDialogMessage('No prescription is associated with this visit.');
-        setShowErrorDialog(true);
+        showAlert('No prescription is associated with this visit.', 'error');
         return;
       }
 
@@ -135,23 +145,16 @@ export default function CustomerVisitListTable(): JSX.Element {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
+
+      showAlert('Prescription downloaded.', 'success');
     } catch (e) {
       if (axios.isAxiosError(e) && e.response?.status === 404) {
-        setErrorDialogMessage('No prescription is associated with this visit.');
-        setShowErrorDialog(true);
+        showAlert('No prescription is associated with this visit.', 'error');
         return;
       }
-      setErrorDialogMessage('An unexpected error occurred.');
-      setShowErrorDialog(true);
+      showAlert('An unexpected error occurred.', 'error');
     }
   };
-
-  useEffect(() => {
-    if (showErrorDialog) {
-      const trigger = document.getElementById('error-modal-trigger');
-      trigger?.click();
-    }
-  }, [showErrorDialog]);
 
   useEffect(() => {
     const term = searchTerm.trim().toLowerCase();
@@ -275,24 +278,6 @@ export default function CustomerVisitListTable(): JSX.Element {
         ) : (
           <div>No visits here!</div>
         )}
-        {showErrorDialog && (
-          <BasicModal
-            title="No Prescription Available"
-            confirmText="OK"
-            onConfirm={async () => {
-              setShowErrorDialog(false);
-              navigate(AppRoutePaths.CustomerVisits);
-            }}
-            showButton={
-              <button id="error-modal-trigger" style={{ display: 'none' }} />
-            }
-          >
-            <p className="basic-modal-body">
-              {errorDialogMessage ??
-                'An error occurred while downloading the prescription.'}
-            </p>
-          </BasicModal>
-        )}
       </div>
     ) : (
       <></>
@@ -346,6 +331,13 @@ export default function CustomerVisitListTable(): JSX.Element {
     <div className="visit-page-container">
       {renderSidebar('My visits')}
       {error ? <p>{error}</p> : <>{renderVisitsTables()}</>}
+      <AutoDismissAlert
+        show={alertShow}
+        message={alertMessage}
+        type={alertType}
+        duration={5000}
+        onClose={() => setAlertShow(false)}
+      />
     </div>
   );
 }
