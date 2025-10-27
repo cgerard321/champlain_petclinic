@@ -71,7 +71,9 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
         setLoadingPets(true);
         const petsData = await getAllPets();
 
-        setPets(petsData);
+        // Filter only active pets
+        const activePets = petsData.filter(pet => pet.isActive === 'true');
+        setPets(activePets);
       } catch (error) {
         console.error('Error fetching pets:', error);
         setErrorMessage('Failed to load pets. Please try again.');
@@ -293,8 +295,6 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
         //visitEndDate: new Date(),
         isEmergency: false,
       });
-      setTimeout(() => setShowNotification(false), 3000); // Hide notification after 3 seconds
-
       setTimeout(() => {
         window.location.reload();
       }, 1000);
@@ -338,7 +338,6 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
       showButton={showButton}
       formId="addvisit"
       validate={validate}
-      // refreshPageOnConfirm={true}
       confirmText={isSubmitting ? 'Adding...' : 'Add'}
       errorMessage={errorMessage}
     >
@@ -371,7 +370,6 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
             </select>
           )}
 
-          <br />
           <div className="form-group">
             <label htmlFor="description">
               Description: <span className="required">*</span>{' '}
@@ -379,8 +377,6 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
                 <span className="error">{errors.description}</span>
               )}
             </label>
-            <br />
-            <br />
             <textarea
               id="description"
               name="description"
@@ -416,7 +412,6 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
                 : 'Showing slots only for selected veterinarian'}
             </small>
           </div>
-          <br />
           <label htmlFor="selectedDate">
             Date: <span className="required">*</span>{' '}
             {errors.selectedDate && (
@@ -431,7 +426,6 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
             onChange={handleChange}
             min={new Date().toISOString().split('T')[0]}
           />
-          <br />
           {visit.selectedDate && (
             <div className="form-group">
               <label>
