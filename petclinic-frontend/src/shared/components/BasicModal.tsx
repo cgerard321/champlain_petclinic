@@ -3,8 +3,6 @@
 // It also has a confirmation button which allows you to perform any function upon pressing it.
 // If you're using the modal for a form, you'll want to use the formId instead of onConfirm.
 
-// TODO: Make it possible to give the modal a custom size. Right now the modal is pretty thin. It'd be nice to make the width more variable.
-
 import * as React from 'react';
 import { useState } from 'react';
 import { Button, Modal } from 'react-bootstrap';
