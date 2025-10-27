@@ -9,15 +9,15 @@ import { VetResponseModel } from '@/features/veterinarians/models/VetResponseMod
 import useGetAllBillsPaginated from '@/features/bills/hooks/useGetAllBillsPaginated.ts';
 import './AdminBillsListTable.css';
 import { archiveBills } from './api/archiveBills';
-import { getAllPaidBills } from '@/features/bills/api/getAllPaidBills.tsx';
-import { getAllOverdueBills } from '@/features/bills/api/getAllOverdueBills.tsx';
-import { getAllUnpaidBills } from '@/features/bills/api/getAllUnpaidBills.tsx';
+//import { getAllPaidBills } from '@/features/bills/api/getAllPaidBills.tsx';
+//import { getAllOverdueBills } from '@/features/bills/api/getAllOverdueBills.tsx';
+//import { getAllUnpaidBills } from '@/features/bills/api/getAllUnpaidBills.tsx';
 import { getBillByBillId } from '@/features/bills/api/GetBillByBillId.tsx';
-import { getBillsByMonth } from '@/features/bills/api/getBillByMonth.tsx';
-import { getAllBillsByOwnerName } from './api/getAllBillsByOwnerName';
-import { getAllBillsByVetName } from './api/getAllBillsByVetName';
-import { getAllBillsByVisitType } from './api/getAllBillsByVisitType';
-import { getAllBills } from './api/getAllBills';
+//import { getBillsByMonth } from '@/features/bills/api/getBillByMonth.tsx';
+//import { getAllBillsByOwnerName } from './api/getAllBillsByOwnerName';
+//import { getAllBillsByVetName } from './api/getAllBillsByVetName';
+//import { getAllBillsByVisitType } from './api/getAllBillsByVisitType';
+//import { getAllBills } from './api/getAllBills';
 import InterestExemptToggle from './components/InterestExemptToggle';
 import { Currency, convertCurrency } from './utils/convertCurrency';
 import axiosInstance from '@/shared/api/axiosInstance';
@@ -47,6 +47,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
   const [error, setError] = useState<string | null>(null);
   const { billsList, getBillsList, setCurrentPage, currentPage, hasMore } =
     useGetAllBillsPaginated();
+
   const [filter, setFilter] = useState<FilterModel>({
     customerId: '',
     firstName: '',
@@ -55,10 +56,30 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
     vetFirstName: '',
     vetLastName: '',
   });
+
+  // helper that forwards the current local filter state into the paginated API
+  const callGetBillsListWithFilters = useCallback(
+    async (page = 0, size = 10): Promise<void> => {
+      await getBillsList(
+        page,
+        size,
+        undefined, // billId
+        filter.customerId || undefined,
+        filter.firstName || undefined,
+        filter.lastName || undefined,
+        filter.visitType || undefined,
+        undefined, // vetId
+        filter.vetFirstName || undefined,
+        filter.vetLastName || undefined
+      );
+    },
+    [getBillsList, filter]
+  );
   const [filterYear, setFilterYear] = useState(new Date().getFullYear());
   const [filterMonth, setFilterMonth] = useState(new Date().getMonth() + 1);
   const [selectedFilter, setSelectedFilter] = useState('');
   const [filteredBills, setFilteredBills] = useState<Bill[] | null>(null);
+  const [applyMonthFilter, setApplyMonthFilter] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>(null);
 
   const [newBill, setNewBill] = useState<BillRequestModel>({
@@ -97,9 +118,9 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
 
   useEffect(() => {
     if (!selectedFilter) {
-      getBillsList(currentPage, 10);
+      callGetBillsListWithFilters(currentPage, 10);
     }
-  }, [currentPage, getBillsList, selectedFilter]);
+  }, [currentPage, callGetBillsListWithFilters, selectedFilter]);
 
   useEffect(() => {
     const callArchiveBills = async (): Promise<void> => {
@@ -161,28 +182,15 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
     return valid;
   };
 
-  const handleFilterChange = async (
+  const handleFilterChange = (
     event: React.ChangeEvent<HTMLSelectElement>
-  ): Promise<void> => {
+  ): void => {
     const status = event.target.value;
     setSelectedFilter(status);
-    try {
-      if (status === 'paid') {
-        const paidBills = await getAllPaidBills();
-        setFilteredBills(paidBills);
-      } else if (status === 'unpaid') {
-        const unpaidBills = await getAllUnpaidBills();
-        setFilteredBills(unpaidBills);
-      } else if (status === 'overdue') {
-        const overdueBills = await getAllOverdueBills();
-        setFilteredBills(overdueBills);
-      } else {
-        setFilteredBills(null);
-        getBillsList(currentPage, 10);
-      }
-    } catch (error) {
-      console.error('Error fetching filtered bills:', error);
-      setError('Error fetching filtered bills. Please try again.');
+    setFilteredBills(null);
+
+    if (!status) {
+      callGetBillsListWithFilters(currentPage, 10);
     }
   };
 
@@ -191,24 +199,17 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
   ): Promise<void> => {
     const fullName = event.target.value;
     setSelectedOwnerFilter(fullName);
-    try {
-      if (fullName) {
-        const [ownerFirstName, ownerLastName] = fullName.split(' ');
-        if (ownerFirstName && ownerLastName) {
-          const billsByOwner = await getAllBillsByOwnerName(
-            ownerFirstName,
-            ownerLastName
-          );
-          setFilteredBills(billsByOwner);
-        }
-      } else {
-        const all = await getAllBills();
-        setFilteredBills(all);
-      }
-    } catch (error) {
-      console.error('Error fetching bills by owner name:', error);
-      setError('Error fetching bills by owner name. Please try again.');
+
+    if (fullName) {
+      const parts = fullName.trim().split(' ');
+      const first = parts.shift() ?? '';
+      const last = parts.join(' ') ?? '';
+      setFilter(prev => ({ ...prev, firstName: first, lastName: last }));
+    } else {
+      setFilter(prev => ({ ...prev, firstName: '', lastName: '' }));
     }
+
+    setFilteredBills(null);
   };
 
   const handleVetNameChange = async (
@@ -216,63 +217,47 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
   ): Promise<void> => {
     const fullName = event.target.value;
     setSelectedVetFilter(fullName);
-    try {
-      if (fullName) {
-        const [vetFirstName, vetLastName] = fullName.split(' ');
-        if (vetFirstName && vetLastName) {
-          const billsByVetName = await getAllBillsByVetName(
-            vetFirstName,
-            vetLastName
-          );
-          setFilteredBills(billsByVetName);
-        } else {
-          setSelectedFilter('');
-          const all = await getAllBills();
-          setFilteredBills(all);
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching bills by vet name:', error);
-      setError('Error fetching bills by vet name. Please try again.');
+
+    if (fullName) {
+      const parts = fullName.trim().split(' ');
+      const first = parts.shift() ?? '';
+      const last = parts.join(' ') ?? '';
+      setFilter(prev => ({ ...prev, vetFirstName: first, vetLastName: last }));
+    } else {
+      setFilter(prev => ({ ...prev, vetFirstName: '', vetLastName: '' }));
     }
+
+    setFilteredBills(null);
   };
 
-  const handleVisitTypeChange = async (
+  const handleVisitTypeChange = (
     event: React.ChangeEvent<HTMLSelectElement>
-  ): Promise<void> => {
+  ): void => {
     const visitType = event.target.value;
     setSelectedVisitTypeFilter(visitType);
-    try {
-      if (visitType) {
-        const billsByVisitType = await getAllBillsByVisitType(visitType);
-        setFilteredBills(billsByVisitType);
-      } else {
-        setSelectedVisitTypeFilter('');
-        getBillsList(currentPage, 10);
-      }
-    } catch (error) {
-      console.error('Error fetching bills by visit type:', error);
-      setError('Error fetching bills by visit type. Please try again.');
+
+    if (visitType) {
+      setFilter(prev => ({ ...prev, visitType }));
+      setFilteredBills(null);
+    } else {
+      setFilter(prev => ({ ...prev, visitType: '' }));
+      callGetBillsListWithFilters(currentPage, 10);
     }
   };
 
   const handleMonthFilter = async (): Promise<void> => {
     setError(null);
     setFilteredBills(null);
-    try {
-      const billsByMonth = await getBillsByMonth(filterYear, filterMonth);
-      setFilteredBills(billsByMonth);
-    } catch (err) {
-      console.error('Error fetching bills by month:', err);
-      setError('Error fetching bills by month. Please try again.');
-    }
+    setApplyMonthFilter(true);
+    callGetBillsListWithFilters(currentPage, 10);
   };
 
   const clearMonthFilter = (): void => {
     setFilterYear(new Date().getFullYear());
     setFilterMonth(new Date().getMonth() + 1);
     setFilteredBills(null);
-    getBillsList(currentPage, 10);
+    setApplyMonthFilter(false);
+    callGetBillsListWithFilters(currentPage, 10);
   };
 
   const getFilteredBills = (): Bill[] => {
@@ -285,33 +270,58 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
       ? billsToFilter
       : billsToFilter.filter(bill => !bill.archive);
 
-    if (
-      filteredBills &&
-      (selectedOwnerFilter ||
-        selectedFilter === 'paid' ||
-        selectedFilter === 'unpaid' ||
-        selectedFilter === 'overdue')
-    ) {
-      return filteredByArchiveStatus.filter(bill => {
-        const matchesCustomerId =
-          !filter.customerId || bill.customerId.includes(filter.customerId);
-        return matchesCustomerId;
-      });
-    }
-
-    if (filteredBills && filter.vetId) {
-      return filteredByArchiveStatus.filter(
-        bill => bill.vetId === filter.vetId
-      );
-    }
-
     return filteredByArchiveStatus.filter(bill => {
       const matchesStatus =
         !selectedFilter ||
-        bill.billStatus.toLowerCase() === selectedFilter.toLowerCase();
+        (bill.billStatus || '').toLowerCase() === selectedFilter.toLowerCase();
+
       const matchesCustomerId =
         !filter.customerId || bill.customerId.includes(filter.customerId);
-      return matchesStatus && matchesCustomerId;
+
+      const ownerFirst = filter.firstName?.trim();
+      const ownerLast = filter.lastName?.trim();
+      const matchesOwner =
+        (!ownerFirst ||
+          (bill.ownerFirstName || '')
+            .toLowerCase()
+            .includes(ownerFirst.toLowerCase())) &&
+        (!ownerLast ||
+          (bill.ownerLastName || '')
+            .toLowerCase()
+            .includes(ownerLast.toLowerCase()));
+
+      // vet name
+      const vetFirst = filter.vetFirstName?.trim();
+      const vetLast = filter.vetLastName?.trim();
+      const matchesVet =
+        (!vetFirst ||
+          (bill.vetFirstName || '')
+            .toLowerCase()
+            .includes(vetFirst.toLowerCase())) &&
+        (!vetLast ||
+          (bill.vetLastName || '')
+            .toLowerCase()
+            .includes(vetLast.toLowerCase()));
+
+      const matchesVisitType =
+        !filter.visitType ||
+        (bill.visitType || '').toLowerCase() === filter.visitType.toLowerCase();
+
+      let matchesMonth = true;
+      if (applyMonthFilter) {
+        const d = new Date(bill.date);
+        matchesMonth =
+          d.getFullYear() === filterYear && d.getMonth() + 1 === filterMonth;
+      }
+
+      return (
+        matchesStatus &&
+        matchesCustomerId &&
+        matchesOwner &&
+        matchesVet &&
+        matchesVisitType &&
+        matchesMonth
+      );
     });
   };
 
@@ -327,24 +337,20 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
     try {
       await addBill(formattedBill, sendEmail, currency);
       setActiveSection(null);
-      getBillsList(currentPage, 10);
-      setError(null); // Clear any previous errors on success
+      callGetBillsListWithFilters(currentPage, 10);
+      setError(null);
     } catch (err: unknown) {
       console.error('Error creating bill:', err);
 
-      // Extract detailed error message from the response
       let errorMessage = 'Failed to create bill. Please try again.';
 
-      // Type guard for axios error
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosErr = err as { response?: { data?: unknown } };
         if (axiosErr.response?.data) {
           const responseData = axiosErr.response.data;
           if (typeof responseData === 'string') {
-            // Handle plain text error responses
             errorMessage = responseData;
           } else if (responseData && typeof responseData === 'object') {
-            // Handle structured error responses
             const structuredData = responseData as Record<string, unknown>;
             if (typeof structuredData.message === 'string') {
               errorMessage = structuredData.message;
@@ -390,9 +396,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
     fetchOwnersAndVets();
   }, [fetchOwnersAndVets]);
 
-  // Auto-fill logic for better UX
   useEffect(() => {
-    // Reset and auto-fill when modal opens
     if (activeSection === 'create') {
       const today = new Date().toISOString().split('T')[0];
       const dueDate = new Date();
@@ -408,11 +412,10 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
         billStatus: 'UNPAID',
         dueDate: dueDateString,
       });
-      setError(null); // Clear any previous errors
+      setError(null);
     }
   }, [activeSection]);
 
-  // Update due date when bill date changes
   const handleDateChange = (selectedDate: string): void => {
     const billDate = new Date(selectedDate);
     const dueDate = new Date(billDate);
@@ -1154,7 +1157,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                     billId={detailBill.billId}
                     isExempt={detailBill.interestExempt || false}
                     onToggleComplete={() => {
-                      getBillsList(currentPage, 10);
+                      callGetBillsListWithFilters(currentPage, 10);
                       setDetailBill({
                         ...detailBill,
                         interestExempt: !detailBill.interestExempt,
