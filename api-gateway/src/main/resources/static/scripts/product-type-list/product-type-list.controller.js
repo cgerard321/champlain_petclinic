@@ -176,7 +176,7 @@ angular.module('productTypeList')
         function fetchProductTypesList() {
                 $http.get('api/gateway/products/types').then(function (resp) {
                     self.productTypeList = parseProductsFromResponse(resp.data);
-                    if (!productTypes || productTypes.length === 0) {
+                    if (!self.productTypeList || self.productTypeList.length === 0) {
 
                         console.log("The productTypes list is empty!");
                     }
