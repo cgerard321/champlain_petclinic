@@ -1,0 +1,140 @@
+<style>
+    .btn:hover {
+        transform: translateY(2px);
+        box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
+        border-bottom-width: 1px;
+    }
+
+    .table-striped tbody tr:hover {
+        background-color: #D8D8D8;
+    }
+
+    .action-toast {
+        position: fixed;
+
+        /* CENTER IT */
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+
+        max-width: 380px;
+        background: #333;
+        color: #fff;
+        padding: 12px 14px;
+        border-radius: 8px;
+        box-shadow: 0 4px 16px rgba(0,0,0,.3);
+        z-index: 9999;
+        display: none;
+    }
+
+    .action-toast.show {
+        display: block;
+    }
+
+</style>
+
+<h2>Product Types</h2>
+
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <td>productTypeId</td>
+        <td>typeName</td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+
+    </thead>
+    <tr ng-repeat="productType in $ctrl.productTypeList | filter:$ctrl.query track by productType.productTypeId">
+
+        <td><span>{{productType.productTypeId}}</span></td>
+        <td><span>{{productType.typeName}}</span></td>
+        <td></td>
+
+        <td>
+            <button class="btn btn-info me-1" ng-click="$ctrl.openFormToast(productType)">
+                <lord-icon src="https://cdn.lordicon.com/jnzhohhs.json" trigger="hover" style="width:32px;height:32px"></lord-icon>
+            </button>
+        </td>
+
+        <td>
+            <button ng-if="!productType.isTemporarilyDeleted"
+                    class="btn btn-danger"
+                    type="button"
+                    ng-click="$ctrl.deleteProductType(productType); $event.stopPropagation()"
+                    title="Delete">
+                <lord-icon src="https://cdn.lordicon.com/skkahier.json" trigger="hover" style="width:32px;height:32px"></lord-icon>
+            </button>
+
+            <button ng-if="productType.isTemporarilyDeleted"
+                    class="btn btn-info"
+                    type="button"
+                    ng-click="$ctrl.undoDelete(productType); $event.stopPropagation()"
+                    title="Restore">
+                Restore
+            </button>
+        </td>
+    </tr>
+</table>
+
+<button class="btn btn-success" ng-click="$ctrl.openFormToast()">
+    Add Product Type
+</button>
+
+<div class="d-flex justify-content-center pb-3">
+    <nav aria-label="Page navigation example">
+        <ul class="pagination">
+            <li class="page-item">
+                <a class="page-link text-dark" aria-label="Previous" ng-click="$ctrl.previousPage()">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+
+            <li class="page-item">
+                <a class="page-link text-dark" disabled>Page-{{$ctrl.actualCurrentPageShown}}</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link text-dark" aria-label="Next" ng-click="$ctrl.nextPage()">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+<div id="notification" style="display: none; position: fixed; bottom: 10px; right: 10px; background-color: #4CAF50; color: white; padding: 10px; border-radius: 5px;">
+    Notification Text Here
+</div>
+
+<div class="action-toast" ng-class="{'show': toast.visible}">
+    <div class="title">{{ toast.title }}</div>
+
+    <div ng-if="toast.productType">
+        <div class="mb-2" ng-if="toast.isEdit">
+            <label>ID</label>
+            <input type="text" class="form-control" ng-model="toast.productType.productTypeId" ng-disabled="true">
+        </div>
+
+        <div class="mb-2">
+            <label>Name</label>
+            <input type="text" class="form-control" ng-model="toast.productType.typeName" placeholder="Enter product type name">
+        </div>
+    </div>
+
+    <div class="line" ng-repeat="line in toast.lines track by $index">{{ line }}</div>
+
+    <div class="actions mt-2 text-end">
+        <button ng-repeat="action in toast.actions track by $index"
+                class="btn me-1"
+                ng-class="{
+                    'btn-primary': action.kind==='primary',
+                    'btn-secondary': action.kind==='secondary',
+                    'btn-danger': action.kind==='danger'
+                }"
+                ng-click="onToastAction($index)">
+            {{ action.label }}
+        </button>
+    </div>
+</div>
+
