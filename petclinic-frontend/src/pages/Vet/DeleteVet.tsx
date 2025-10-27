@@ -1,6 +1,4 @@
-/*
-// Original delete logic (commented out for now)
-import * as React from 'react'; // Correct import for React
+import * as React from 'react';
 import { deleteVet } from '@/features/veterinarians/api/deleteVet';
 
 interface DeleteVetProps {
@@ -24,26 +22,19 @@ const DeleteVet: React.FC<DeleteVetProps> = ({ vetId, onVetDeleted }) => {
   };
   return (
     <button onClick={handleDelete} className="btn btn-danger">
-      Delete
+      Deactivate
     </button>
   );
 };
 
 export default DeleteVet;
-*/
 
-import * as React from 'react';
+/*
+// Temporary replacement for the delete button.
+// Original delete logic is commented out above so it can be restored easily.
+// This component now shows a modal explaining the delete feature is disabled.
 
-interface DeleteVetProps {
-  vetId: string;
-  onVetDeleted: (event: React.MouseEvent, vetId: string) => void;
-}
 
-/**
- * Temporary replacement for the delete button.
- * Original delete logic is commented out above so it can be restored easily.
- * This component now shows a modal explaining the delete feature is disabled.
- */
 const DeleteVet: React.FC<DeleteVetProps> = () => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const cardElementRef = React.useRef<HTMLElement | null>(null);
@@ -146,3 +137,5 @@ const DeleteVet: React.FC<DeleteVetProps> = () => {
 };
 
 export default DeleteVet;
+
+*/

@@ -1,50 +1,115 @@
 .menuSection {
+  position: relative;
   display: flex;
-  justify-content: center;   
+  justify-content: flex-end;   /* push content to the right */
   margin: 12px 0 20px;
+  width: 100%;
 }
 
 .menuContainer {
-  position: static;
+  position: relative;          /* anchor the dropdown panel */
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;   /* hamburger on the far right */
   margin: 0 auto;
   width: 100%;
 }
 
+
+/* Make the button frame a clean icon container */
 #menuIcon {
-  width: 55px;
-  height: 55px;
+   margin-top: -8px;  
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;              /* bigger button */
+  height: 64px;
   cursor: pointer;
-  color: #0d6efd;
+  background: transparent;
+  border: none;
+transition: transform 220ms cubic-bezier(.2,.7,.2,1);
 }
 
+/* rotate on hover, no drop shadow */
 #menuIcon:hover {
-  filter: drop-shadow(0 0 8px rgba(13, 110, 253, 0.45));
-  transform: translateY(-1px);
+  transform: rotate(90deg);
 }
+
+/* bar color */
+.hamburgerSvg rect { fill: #1e63ff; }
 
 .actionsMenu {
-  position: static;          
-  width: fit-content;
-  max-width: 1100px;         
-  margin: 0 auto;
+  position: absolute;
+  right: 0;
+  top: 68px;                                /* sits under the icon */
+  min-width: 340px;                         /* consistent width */
+  max-width: min(90vw, 420px);
 
-  display: flex;
-  justify-content: center;   
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
+  /* closed state (hidden by default) */
+  opacity: 0;
+  transform: translateY(-8px) scale(0.98);
+  transform-origin: top right;
+  visibility: hidden;                       /* hidden after fade completes */
+  pointer-events: none;
+  transition:
+    opacity 220ms cubic-bezier(.2,.7,.2,1),
+    transform 220ms cubic-bezier(.2,.7,.2,1),
+    visibility 0s linear 220ms;             /* delay hiding so fade-out shows */
 
-  background: transparent;
-  border: 0;
-  padding: 0;
+  /* panel look */
+  display: block;
+  background: #ffffff;
+  border-radius: 0;                          /* rectangular panel */
+  padding: 0;                                /* no side whitespace */
+  box-shadow: 0 10px 22px rgba(0,0,0,0.15);
+  z-index: 1000;
 }
 
+/* open state */
+.actionsMenu[data-open="true"] {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    opacity 220ms cubic-bezier(.2,.7,.2,1),
+    transform 220ms cubic-bezier(.2,.7,.2,1),
+    visibility 0s linear 0s;                 /* show immediately */
+}
+
+/* Buttons: big full-width rectangles */
 .actionsMenu :global(.btn) {
-  padding: 6px 12px;
-  font-size: 0.9rem;
+  display: block;
+  width: 100%;
+  padding: 16px 18px;
+  font-size: 1rem;
+  font-weight: 700;
   line-height: 1.2;
-  border-radius: 6px;
+  margin: 0;
+  background: #1e63ff !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 0 !important;               /* rectangular buttons */
+  transition: transform 120ms ease, box-shadow 120ms ease, opacity 160ms ease;
 }
+
+/* hover/active/disabled */
+.actionsMenu :global(.btn:hover):not(:disabled),
+.actionsMenu :global(.btn:focus-visible):not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(30, 99, 255, 0.35);
+}
+.actionsMenu :global(.btn:active):not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.18);
+}
+.actionsMenu :global(.btn:disabled) {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: #84a8ff !important;
+}
+
+
 
 .confirmDialog {
   position: fixed;
@@ -133,4 +198,233 @@
   min-width: 32px;
   text-align: center;
   font-weight: 600;
+}
+/* Remove dark header bar / borders & make headers ALL CAPS, left-aligned */
+.inventoryTable :global(thead) {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+.inventoryTable :global(thead tr) {
+  background: transparent !important;
+}
+.inventoryTable :global(thead th) {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: #111827;                  /* dark gray text */
+  font-weight: 700;
+  text-transform: uppercase;       /* ALL CAPS */
+  letter-spacing: 0.02em;
+  text-align: left !important;     /* left-align by default */
+}
+
+/* Center & enlarge the Important checkbox in the filter row (5th column) */
+.inventoryTable :global(thead tr:nth-of-type(2) td:nth-child(5)) {
+  text-align: center !important;   /* center that cell */
+}
+.inventoryTable :global(thead tr:nth-of-type(2) td:nth-child(5) input[type="checkbox"]) {
+  transform: scale(1.4);           /* make it bigger */
+  accent-color: #1e63ff;           /* blue tick color (modern browsers) */
+}
+
+/* Optional: ensure no table borders anywhere */
+.inventoryTable {
+  border: 0 !important;
+}
+.inventoryTable :global(th),
+.inventoryTable :global(td) {
+  border: 0 !important;
+}
+/* --- 1) Divider lines (between titles & inputs, and under inputs) --- */
+.inventoryTable :global(thead tr:first-of-type th) {
+  border-bottom: 1px solid #e5e7eb !important;   /* line under titles */
+  padding-bottom: 14px;
+}
+.inventoryTable :global(thead tr:nth-of-type(2) td) {
+  border-bottom: 1px solid #eef2f7 !important;   /* line under inputs */
+  padding-bottom: 16px;
+}
+
+/* --- 2) Center IMPORTANT / CLEAR / STATUS (title + inputs row) --- */
+.inventoryTable :global(thead tr:first-of-type th:nth-child(5)),
+.inventoryTable :global(thead tr:first-of-type th:nth-child(6)),
+.inventoryTable :global(thead tr:first-of-type th:nth-child(7)),
+.inventoryTable :global(thead tr:nth-of-type(2) td:nth-child(5)),
+.inventoryTable :global(thead tr:nth-of-type(2) td:nth-child(6)),
+.inventoryTable :global(thead tr:nth-of-type(2) td:nth-child(7)) {
+  text-align: center !important;
+}
+
+.inventoryTable :global(thead tr:nth-of-type(2) td:nth-child(5) input[type="checkbox"]) {
+  transform: translateY(4px) scale(2.0);   /* slightly lower + bigger */
+  accent-color: #1e63ff;
+}
+
+
+/* Make the Clear button and Status select align nicely when centered */
+.inventoryTable :global(thead tr:nth-of-type(2) td:nth-child(6) .btn) {
+  margin: 0 auto;                      /* center the Clear button */
+  display: inline-flex;
+}
+.inventoryTable :global(thead tr:nth-of-type(2) td:nth-child(7) select) {
+  margin: 0 auto;                      /* center the Status select */
+  display: inline-block;
+}
+
+/* Fix IMPORTANT checkbox alignment (override Bootstrap) */
+.inventoryTable :global(thead tr:nth-of-type(2) td:nth-child(5) .form-check) {
+  padding-left: 0 !important;                 /* kill BS padding */
+  display: inline-flex !important;            /* center properly */
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.inventoryTable :global(thead tr:nth-of-type(2) td:nth-child(5) .form-check-input) {
+  margin: 0 !important;                       /* remove default margins */
+  float: none !important;
+  position: static !important;
+  transform: translateY(4px) scale(2.0);      /* your size + slight drop */
+  accent-color: #1e63ff;
+}
+
+/* Ensure the cell itself centers the content */
+.inventoryTable :global(thead tr:nth-of-type(2) td:nth-child(5)) {
+  text-align: center !important;
+  vertical-align: middle !important;
+}
+.inventoryTable :global(thead tr:nth-of-type(2) td:nth-child(3) select) {
+  transform: translateY(3px);     /* tiny vertical nudge */
+}
+/* stack: small freeze button above, then the row with arrows */
+.pagerStack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;   /* center everything horizontally */
+  gap: 10px;             /* space between freeze and row */
+}
+
+/* row with the two arrows and the page number */
+.pagerRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+/* Freeze/Resume button inside the filter row header cell */
+.freezeHeaderBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: #ffffff;
+  color: #1e63ff;                 /* SVG uses currentColor */
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0;
+  line-height: 1;
+  box-shadow: 0 6px 18px rgba(0,0,0,.06);
+  transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+}
+.freezeHeaderBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(0,0,0,.12);
+  background: #f9fafb;
+}
+.freezeHeaderBtn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(0,0,0,.10);
+}
+.freezeHeaderBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(30,99,255,.25);
+}
+
+.mobileFilters {
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.mobileFilterGroup {
+  margin-bottom: 10px;
+}
+
+.mobileFilterLabel {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+.mobileFilterInput {
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 0.95rem;
+  background: #ffffff;
+}
+
+.mobileFilterSelect {
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 0.95rem;
+  background-color: #ffffff;
+}
+
+.mobileCheckboxGroup {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.mobileCheckboxInput {
+  margin-right: 8px;
+  transform: scale(1.2);
+  accent-color: #1e63ff;
+}
+
+.mobileCheckboxLabel {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+.mobileClearButton {
+  width: 100%;
+  padding: 10px;
+  background-color: #1e63ff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 180ms ease, transform 120ms ease;
+}
+
+.mobileClearButton:hover {
+  background-color: #1552d4;
+  transform: translateY(-1px);
+}
+
+.mobileClearButton:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .inventoryTable {
+    display: none;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobileFilters {
+    display: none;
+  }
 }

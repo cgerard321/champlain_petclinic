@@ -20,6 +20,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.time.LocalDate;
 import java.time.Month;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -231,7 +232,7 @@ class BillControllerUnitTest {
                 .thenReturn(Flux.just(responseDTO));
 
         client.get()
-                .uri("/bills/visitType/{visitType}", visitType)
+                .uri("/bills/visitType/" + visitType)
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
@@ -428,8 +429,9 @@ class BillControllerUnitTest {
     }
 
     @Test
-    void whenPostingBillWithNoBillStatus_thenReturnsBadRequest() {
-        BillRequestDTO invalidBill = BillRequestDTO.builder()
+    void whenPostingBillWithNoBillStatus_thenReturnsCreated() {
+        // Arrange
+        BillRequestDTO validBill = BillRequestDTO.builder()
                 .customerId("C001")
                 .visitType("Checkup")
                 .vetId("V100")
@@ -439,12 +441,43 @@ class BillControllerUnitTest {
                 .dueDate(LocalDate.now().plusDays(10))
                 .build();
 
+        BillResponseDTO mockResponse = BillResponseDTO.builder()
+                .billId("mock-bill-id")
+                .customerId("C001")
+                .visitType("Checkup")
+                .vetId("V100")
+                .date(LocalDate.now())
+                .amount(new BigDecimal(100.0))
+                .billStatus(BillStatus.UNPAID)
+                .dueDate(LocalDate.now().plusDays(10))
+                .build();
+
+        when(billService.createBill(any(Mono.class), eq(false), eq("CAD"), eq("jwtToken")))
+                .thenReturn(Mono.just(mockResponse));
+
+        when(billService.getAllBills()).thenReturn(Flux.empty());
+
         client.post()
-                .uri("/bills")
+                .uri(uriBuilder -> uriBuilder
+                        .path("/bills")
+                        .queryParam("sendEmail", false)
+                        .queryParam("currency", "CAD")
+                        .build())
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(invalidBill)
+                .cookie("Bearer", "jwtToken")
+                .bodyValue(validBill)
                 .exchange()
-                .expectStatus().isBadRequest();  // only check 400
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(BillResponseDTO.class)
+                .value(response -> {
+                    assertThat(response.getBillStatus()).isEqualTo(BillStatus.UNPAID);
+                    assertThat(response.getCustomerId()).isEqualTo("C001");
+                    assertThat(response.getVetId()).isEqualTo("V100");
+                });
+
+        verify(billService, times(1))
+                .createBill(any(Mono.class), eq(false), eq("CAD"), eq("jwtToken"));
     }
 
     @Test

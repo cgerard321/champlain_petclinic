@@ -9,6 +9,7 @@ import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,6 +42,13 @@ public class PetControllerV1 {
         return customersServiceClient.getAllPets();
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<PetResponseDTO>> addPet(@RequestBody Mono<PetRequestDTO> petRequestDTO) {
+        return customersServiceClient.addPet(petRequestDTO)
+                .map(e -> ResponseEntity.status(HttpStatus.CREATED).body(e))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
 
     @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN, Roles.VET})
     @GetMapping("/owners/{ownerId}/pets/{petId}")

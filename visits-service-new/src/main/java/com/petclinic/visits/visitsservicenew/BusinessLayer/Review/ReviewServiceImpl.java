@@ -1,18 +1,15 @@
 package com.petclinic.visits.visitsservicenew.BusinessLayer.Review;
 
-import com.petclinic.visits.visitsservicenew.DataLayer.Review.Review;
 import com.petclinic.visits.visitsservicenew.DataLayer.Review.ReviewRepository;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewResponseDTO;
 import com.petclinic.visits.visitsservicenew.Utils.EntityDtoUtil;
+import com.petclinic.visits.visitsservicenew.Utils.IdGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Service
 @Slf4j
@@ -29,15 +26,16 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
 
-
-
     @Override
     public Mono<ReviewResponseDTO> AddReview(Mono<ReviewRequestDTO> reviewRequestDTOMono) {
 
         return reviewRequestDTOMono
                 .map(EntityDtoUtil::toReviewEntity)
-                //.doOnNext(e-> e.setReviewId(EntityDtoUtil.generateReviewIdString()))
-                .flatMap(reviewRepository::save)
+                // Generate new ID with current date and incremented sequence
+                .flatMap(review -> {
+                    review.setReviewId(IdGenerator.generateReviewId());
+                    return reviewRepository.save(review);
+                })
                 .map(EntityDtoUtil::toReviewResponseDTO);
     }
 
@@ -48,7 +46,8 @@ public class ReviewServiceImpl implements ReviewService {
                 .flatMap(found->reviewRequestDTOMono
                         .map(EntityDtoUtil::toReviewEntity)
                         .doOnNext(e->e.setReviewId(found.getReviewId()))
-                        .doOnNext(e->e.setId(found.getId())))
+                        .doOnNext(e->e.setId(found.getId()))
+                        .doOnNext(e->e.setOwnerId(found.getOwnerId())))
                 .flatMap(reviewRepository::save)
                 .map(EntityDtoUtil::toReviewResponseDTO);
     }

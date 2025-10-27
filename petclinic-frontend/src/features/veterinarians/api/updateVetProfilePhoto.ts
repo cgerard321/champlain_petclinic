@@ -19,7 +19,6 @@ export const updateVetProfilePhoto = async (
     );
     return response.data;
   } catch (error) {
-    console.error('Failed to update vet photo:', error);
     throw new Error('Failed to update vet photo');
   }
 };

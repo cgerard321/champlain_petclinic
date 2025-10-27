@@ -59,10 +59,10 @@ public class BillControllerIntegrationTest {
             .customerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
             .visitType("general")
             .vetId("3")
-            .date(LocalDate.parse("2024-10-11"))
+            .date(LocalDate.now().plusDays(1))
             .amount(new BigDecimal("100.0"))
             .billStatus(BillStatus.UNPAID)
-            .dueDate(LocalDate.parse("2024-10-13"))
+            .dueDate(LocalDate.now().plusDays(46))
             .build();
 
     @Test
@@ -154,10 +154,10 @@ public class BillControllerIntegrationTest {
                 .customerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
                 .visitType("operation")
                 .vetId("3")
-                .date(LocalDate.parse("2024-10-11"))
+                .date(LocalDate.now().plusDays(1))
                 .amount(new BigDecimal("100.0"))
                 .billStatus(BillStatus.PAID)
-                .dueDate(LocalDate.parse("2024-10-13"))
+                .dueDate(LocalDate.now().plusDays(46))
                 .build();
 
         Mono<BillResponseDTO> result =
@@ -197,10 +197,10 @@ public class BillControllerIntegrationTest {
                 .customerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
                 .visitType("operation")
                 .vetId("3")
-                .date(LocalDate.parse("2024-10-11"))
+                .date(LocalDate.now().plusDays(1))
                 .amount(new BigDecimal("100.0"))
                 .billStatus(BillStatus.PAID)
-                .dueDate(LocalDate.parse("2024-10-13"))
+                .dueDate(LocalDate.now().plusDays(46))
                 .build();
 
         String invalidBillId = "invalid-bill-id";
