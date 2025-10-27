@@ -66,7 +66,6 @@ const AddingReview: React.FC = (): JSX.Element => {
         name === 'rating' ? parseInt(value, 10) : value,
     }));
   };
-
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
     if (!review.review?.trim()) newErrors.review = 'Review text is required';
