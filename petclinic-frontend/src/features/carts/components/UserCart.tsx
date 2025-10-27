@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useToast } from '@/shared/components/toast/ToastProvider';
 import CartBillingForm, { BillingInfo } from './CartBillingForm';
 import InvoiceComponent, {
   InvoiceFull as InvoiceFullType,
@@ -13,6 +14,7 @@ import { NavBar } from '@/layouts/AppNavBar';
 import { FaShoppingCart } from 'react-icons/fa';
 import ImageContainer from '@/features/products/components/ImageContainer';
 import axiosInstance from '@/shared/api/axiosInstance';
+import getErrorMessage from '@/shared/api/getErrorMessage';
 import { formatPrice } from '../utils/formatPrice';
 import {
   applyPromo,
@@ -27,9 +29,13 @@ import {
   useUser,
 } from '@/context/UserContext';
 import { AppRoutePaths } from '@/shared/models/path.routes';
-import { setCartCountInLS, setCartIdInLS } from '../api/cartEvent';
+import {
+  notifyCartChanged,
+  setCartCountInLS,
+  setCartIdInLS,
+} from '../api/cartEvent';
+import { computeTaxes, formatTaxRate, roundToCents } from '../utils/taxUtils';
 import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
-import axios from 'axios';
 interface ProductAPIResponse {
   productId: string;
   imageId?: string;
@@ -58,6 +64,7 @@ const UserCart: React.FC = () => {
   const { cartId } = useParams<{ cartId?: string }>();
   const { confirm, ConfirmModal } = useConfirmModal();
   const { user } = useUser();
+  const { showToast } = useToast();
   const customerId = user?.userId ?? null;
 
   const [cartItems, setCartItems] = useState<ProductModel[]>([]);
@@ -67,9 +74,6 @@ const UserCart: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [errorMessages, setErrorMessages] = useState<Record<number, string>>(
     {}
-  );
-  const [notificationMessage, setNotificationMessage] = useState<string | null>(
-    null
   );
 
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
@@ -105,6 +109,38 @@ const UserCart: React.FC = () => {
     []
   );
 
+  const emitCartMessage = useCallback(
+    (serverMessage?: string | null, fallbackMessage?: string) => {
+      const text = (serverMessage ?? '').trim() || fallbackMessage;
+      if (!text) return;
+      const tone = serverMessage?.trim() ? 'info' : 'success';
+      showToast(text, tone);
+    },
+    [showToast]
+  );
+
+  const getStatusCode = useCallback((err: unknown): number | undefined => {
+    return (err as { response?: { status?: number } })?.response?.status;
+  }, []);
+
+  const apiErrorMessage = useCallback(
+    (err: unknown, defaultMessage: string): string => {
+      if (getStatusCode(err) === 404) return 'Cart not found';
+      return getErrorMessage(err, { defaultMessage });
+    },
+    [getStatusCode]
+  );
+
+  const ensureCartId = useCallback((): string | undefined => {
+    if (!cartId) {
+      const message = 'Invalid cart ID';
+      setError(message);
+      showToast(message, 'error');
+      return undefined;
+    }
+    return cartId;
+  }, [cartId, setError, showToast]);
+
   const syncCartState = useCallback(
     (
       cartData: CartDetailsModel | null | undefined,
@@ -126,6 +162,7 @@ const UserCart: React.FC = () => {
       );
       setCartItemCount(cartCount);
       setCartCountInLS(cartCount);
+      notifyCartChanged();
 
       if (cartData.cartId) {
         setCartIdInLS(cartData.cartId);
@@ -142,20 +179,12 @@ const UserCart: React.FC = () => {
         typeof cartData.promoPercent === 'number' ? cartData.promoPercent : null
       );
 
-      if (typeof cartData.message === 'string' && cartData.message.trim()) {
-        setNotificationMessage(cartData.message);
-      } else if (fallbackMessage) {
-        setNotificationMessage(fallbackMessage);
-      }
+      emitCartMessage(
+        typeof cartData.message === 'string' ? cartData.message : undefined,
+        fallbackMessage
+      );
     },
-    [
-      setCartItems,
-      setCartItemCount,
-      setWishlistItems,
-      setPromoPercent,
-      setNotificationMessage,
-      toProductModel,
-    ]
+    [emitCartMessage, toProductModel]
   );
 
   // Recent purchases state
@@ -193,13 +222,14 @@ const UserCart: React.FC = () => {
     imageId: string;
     quantity: number;
   }): Promise<void> => {
-    if (!cartId) return;
+    const existingCartId = ensureCartId();
+    if (!existingCartId) return;
 
     const quantity = Math.max(1, recentPurchaseQuantities[item.productId] || 1);
 
     try {
       const { data } = await axiosInstance.post<CartDetailsModel>(
-        `/carts/${cartId}/products`,
+        `/carts/${existingCartId}/products`,
         {
           productId: item.productId,
           quantity,
@@ -209,11 +239,10 @@ const UserCart: React.FC = () => {
 
       syncCartState(data, `${item.productName} (x${quantity}) added to cart!`);
     } catch (err: unknown) {
-      const msg =
-        (axios.isAxiosError(err) &&
-          (err.response?.data as { message?: string } | undefined)?.message) ||
-        `Failed to add ${item.productName} to cart.`;
-      setNotificationMessage(msg);
+      showToast(
+        apiErrorMessage(err, `Failed to add ${item.productName} to cart.`),
+        'error'
+      );
     }
   };
 
@@ -256,7 +285,8 @@ const UserCart: React.FC = () => {
     imageId: string;
     quantity: number;
   }): Promise<void> => {
-    if (!cartId) return;
+    const existingCartId = ensureCartId();
+    if (!existingCartId) return;
 
     const quantity = Math.max(
       1,
@@ -265,7 +295,7 @@ const UserCart: React.FC = () => {
 
     try {
       const { data } = await axiosInstance.post<CartDetailsModel>(
-        `/carts/${cartId}/products`,
+        `/carts/${existingCartId}/products`,
         {
           productId: item.productId,
           quantity,
@@ -274,11 +304,10 @@ const UserCart: React.FC = () => {
       );
       syncCartState(data, `${item.productName} (x${quantity}) added to cart!`);
     } catch (err: unknown) {
-      const msg =
-        (axios.isAxiosError(err) &&
-          (err.response?.data as { message?: string } | undefined)?.message) ||
-        `Failed to add ${item.productName} to cart.`;
-      setNotificationMessage(msg);
+      showToast(
+        apiErrorMessage(err, `Failed to add ${item.productName} to cart.`),
+        'error'
+      );
     }
   };
 
@@ -296,13 +325,20 @@ const UserCart: React.FC = () => {
   const promoDiscount =
     promoPercent != null ? (subtotal * promoPercent) / 100 : 0;
   const discountedSubtotal = Math.max(0, subtotal - promoDiscount);
-
-  const tvq = discountedSubtotal * 0.09975;
-  const tvc = discountedSubtotal * 0.05;
+  const resolvedTaxLines = computeTaxes(
+    discountedSubtotal,
+    billingInfo?.province
+  ).map(line => ({
+    ...line,
+    amount: line.amount ?? roundToCents(discountedSubtotal * line.rate),
+  }));
+  const totalTax = roundToCents(
+    resolvedTaxLines.reduce((acc, line) => acc + (line.amount ?? 0), 0)
+  );
 
   const effectiveDiscount = promoDiscount;
 
-  const total = discountedSubtotal + tvq + tvc;
+  const total = roundToCents(discountedSubtotal + totalTax);
 
   const updateCartItemCount = useCallback(() => {
     const count = cartItems.reduce(
@@ -389,7 +425,8 @@ const UserCart: React.FC = () => {
   }, [fetchRecommendationPurchases]);
 
   const applyVoucherCode = async (): Promise<void> => {
-    if (!cartId) {
+    const existingCartId = ensureCartId();
+    if (!existingCartId) {
       setVoucherError('Invalid cart ID');
       return;
     }
@@ -410,7 +447,7 @@ const UserCart: React.FC = () => {
         return;
       }
 
-      const updated = await applyPromo(cartId, percent);
+      const updated = await applyPromo(existingCartId, percent);
 
       setVoucherError(null);
       const appliedMessage = `Promo applied${
@@ -427,13 +464,11 @@ const UserCart: React.FC = () => {
 
   const blockIfReadOnly = useCallback((): boolean => {
     if (isStaff) {
-      setNotificationMessage(
-        'Read-only mode: staff/admin cannot modify carts.'
-      );
+      showToast('Read-only mode: staff/admin cannot modify carts.', 'info');
       return true;
     }
     return false;
-  }, [isStaff, setNotificationMessage]);
+  }, [isStaff, showToast]);
 
   const changeItemQuantity = useCallback(
     async (
@@ -441,6 +476,8 @@ const UserCart: React.FC = () => {
       index: number
     ): Promise<void> => {
       if (blockIfReadOnly()) return;
+      const existingCartId = ensureCartId();
+      if (!existingCartId) return;
 
       const newQuantity = Math.max(1, Number(event.target.value));
       const item = cartItems[index];
@@ -460,7 +497,7 @@ const UserCart: React.FC = () => {
 
       try {
         const { data } = await axiosInstance.patch<CartDetailsModel>(
-          `/carts/${cartId}/products/${item.productId}`,
+          `/carts/${existingCartId}/products/${item.productId}`,
           { quantity: newQuantity },
           { useV2: false }
         );
@@ -498,24 +535,26 @@ const UserCart: React.FC = () => {
         }));
       }
     },
-    [cartItems, cartId, blockIfReadOnly, syncCartState]
+    [cartItems, blockIfReadOnly, ensureCartId, syncCartState]
   );
 
   const onClearPromo = async (): Promise<void> => {
-    if (!cartId) return;
+    const existingCartId = ensureCartId();
+    if (!existingCartId) return;
     try {
-      await clearPromo(cartId);
+      await clearPromo(existingCartId);
       setPromoPercent(null);
-      setNotificationMessage('Promo removed.');
-    } catch {
-      setNotificationMessage('Failed to remove promo.');
+      showToast('Promo removed.', 'success');
+    } catch (err: unknown) {
+      showToast(apiErrorMessage(err, 'Failed to remove promo.'), 'error');
     }
   };
 
   const deleteItem = useCallback(
     async (productId: string, indexToDelete: number): Promise<void> => {
       if (blockIfReadOnly()) return;
-      if (!cartId) return;
+      const existingCartId = ensureCartId();
+      if (!existingCartId) return;
 
       const ok = await confirm({
         title: 'Remove item',
@@ -527,9 +566,12 @@ const UserCart: React.FC = () => {
       if (!ok) return;
 
       try {
-        await axiosInstance.delete(`/carts/${cartId}/products/${productId}`, {
-          useV2: false,
-        });
+        await axiosInstance.delete(
+          `/carts/${existingCartId}/products/${productId}`,
+          {
+            useV2: false,
+          }
+        );
         // Expect a 204 response here; any errors are handled below.
 
         setCartItems(prev => {
@@ -540,25 +582,22 @@ const UserCart: React.FC = () => {
           );
           setCartItemCount(nextCount);
           setCartCountInLS(nextCount);
-          setNotificationMessage('Item removed from cart.');
+          notifyCartChanged();
           return next;
         });
+        showToast('Item removed from cart.', 'success');
       } catch (error) {
         console.error('Error deleting item: ', error);
-        setNotificationMessage('Failed to delete item.');
+        showToast(apiErrorMessage(error, 'Failed to delete item.'), 'error');
       }
     },
-    [cartId, blockIfReadOnly, confirm]
+    [apiErrorMessage, blockIfReadOnly, confirm, ensureCartId, showToast]
   );
 
   const clearCart = async (): Promise<void> => {
     if (blockIfReadOnly()) return;
-
-    if (!cartId) {
-      setNotificationMessage('Invalid cart ID');
-
-      return;
-    }
+    const existingCartId = ensureCartId();
+    if (!existingCartId) return;
 
     const ok = await confirm({
       title: 'Clear cart',
@@ -570,19 +609,25 @@ const UserCart: React.FC = () => {
     if (!ok) return;
 
     try {
-      await axiosInstance.delete(`/carts/${cartId}/products`, { useV2: false });
+      await axiosInstance.delete(`/carts/${existingCartId}/products`, {
+        useV2: false,
+      });
       setCartItems([]);
       setCartItemCount(0);
       setCartCountInLS(0);
-      setNotificationMessage('Cart has been cleared.');
+      notifyCartChanged();
+      showToast('Cart has been cleared.', 'success');
     } catch (error) {
       console.error('Error clearing cart:', error);
-      setNotificationMessage('Failed to clear cart.');
+      showToast(apiErrorMessage(error, 'Failed to clear cart.'), 'error');
     }
   };
 
   const addToWishlist = async (item: ProductModel): Promise<void> => {
     if (blockIfReadOnly()) return;
+
+    const existingCartId = ensureCartId();
+    if (!existingCartId) return;
 
     try {
       const productId = item.productId;
@@ -594,7 +639,7 @@ const UserCart: React.FC = () => {
       };
 
       const { data } = await axiosInstance.post<CartDetailsModel>(
-        `/carts/${cartId}/wishlist-transfers`,
+        `/carts/${existingCartId}/wishlist-transfers`,
         payload,
         { useV2: false }
       );
@@ -603,16 +648,23 @@ const UserCart: React.FC = () => {
       syncCartState(data, fallback);
     } catch (error: unknown) {
       console.error('Error adding to wishlist:', error);
-      alert('Failed to add item to wishlist.');
+      showToast(
+        apiErrorMessage(error, 'Failed to add item to wishlist.'),
+        'error'
+      );
     }
   };
 
   const addToCartFunction = async (item: ProductModel): Promise<void> => {
     if (blockIfReadOnly()) return;
 
+    const existingCartId = ensureCartId();
+    if (!existingCartId) return;
+
     if (item.productQuantity <= 0) {
-      setNotificationMessage(
-        `${item.productName} is out of stock and cannot be added to the cart.`
+      showToast(
+        `${item.productName} is out of stock and cannot be added to the cart.`,
+        'info'
       );
       return;
     }
@@ -626,7 +678,7 @@ const UserCart: React.FC = () => {
       };
 
       const { data } = await axiosInstance.post<CartDetailsModel>(
-        `/carts/${cartId}/wishlist-transfers`,
+        `/carts/${existingCartId}/wishlist-transfers`,
         payload,
         { useV2: false }
       );
@@ -635,13 +687,15 @@ const UserCart: React.FC = () => {
       syncCartState(data, fallback);
     } catch (error: unknown) {
       console.error('Error adding to cart:', error);
-      setNotificationMessage('Failed to add item to cart.');
+      showToast(apiErrorMessage(error, 'Failed to add item to cart.'), 'error');
     }
   };
 
   const removeFromWishlist = async (item: ProductModel): Promise<void> => {
     if (blockIfReadOnly()) return;
-    if (!cartId) return;
+
+    const existingCartId = ensureCartId();
+    if (!existingCartId) return;
 
     const ok = await confirm({
       title: 'Remove from wishlist',
@@ -655,7 +709,7 @@ const UserCart: React.FC = () => {
 
     try {
       await axiosInstance.delete(
-        `/carts/${cartId}/wishlist/${item.productId}`,
+        `/carts/${existingCartId}/wishlist/${item.productId}`,
         { useV2: false }
       );
 
@@ -664,13 +718,19 @@ const UserCart: React.FC = () => {
       );
     } catch (e) {
       console.error(e);
-      setNotificationMessage('Could not remove item from wishlist.');
+      showToast(
+        apiErrorMessage(e, 'Could not remove item from wishlist.'),
+        'error'
+      );
     }
   };
 
   const moveAllWishlistToCart = async (): Promise<void> => {
     if (blockIfReadOnly()) return;
-    if (!cartId || wishlistItems.length === 0) return;
+    if (wishlistItems.length === 0) return;
+
+    const existingCartId = ensureCartId();
+    if (!existingCartId) return;
 
     const ok = await confirm({
       title: 'Move all from wishlist',
@@ -681,7 +741,6 @@ const UserCart: React.FC = () => {
     if (!ok) return;
 
     setMovingAll(true);
-    setNotificationMessage(null);
 
     try {
       const payload = {
@@ -692,7 +751,7 @@ const UserCart: React.FC = () => {
       };
 
       const { data } = await axiosInstance.post<CartDetailsModel>(
-        `/carts/${cartId}/wishlist-transfers`,
+        `/carts/${existingCartId}/wishlist-transfers`,
         payload,
         { useV2: false }
       );
@@ -701,7 +760,10 @@ const UserCart: React.FC = () => {
       syncCartState(data, fallback);
     } catch (e) {
       console.error(e);
-      setNotificationMessage('Unexpected error while moving wishlist items.');
+      showToast(
+        apiErrorMessage(e, 'Unexpected error while moving wishlist items.'),
+        'error'
+      );
     } finally {
       setMovingAll(false);
     }
@@ -753,19 +815,29 @@ const UserCart: React.FC = () => {
         0
       );
       const invoiceSubtotal = invoiceSubtotalCents / 100;
-      const invoiceTvqCents = Math.round(invoiceSubtotalCents * 0.09975);
-      const invoiceTvcCents = Math.round(invoiceSubtotalCents * 0.05);
-      const invoiceTvq = invoiceTvqCents / 100;
-      const invoiceTvc = invoiceTvcCents / 100;
-      const discountCents = Math.round(effectiveDiscount * 100);
-      const invoiceTotal =
-        (invoiceSubtotalCents +
-          invoiceTvqCents +
-          invoiceTvcCents -
-          discountCents) /
-        100;
-
       const usedBilling = billing ?? billingInfo ?? null;
+
+      const invoiceTaxLines = computeTaxes(
+        invoiceSubtotal,
+        usedBilling?.province
+      ).map(line => ({
+        ...line,
+        amount: line.amount ?? roundToCents(invoiceSubtotal * line.rate),
+      }));
+      const invoiceTaxCents = invoiceTaxLines.map(line =>
+        Math.round((line.amount ?? 0) * 100)
+      );
+      const invoiceTaxTotalCents = invoiceTaxCents.reduce(
+        (sum, cents) => sum + cents,
+        0
+      );
+      const discountCents = Math.round(effectiveDiscount * 100);
+      const invoiceTotalCents =
+        invoiceSubtotalCents + invoiceTaxTotalCents - discountCents;
+      const invoiceTvq = (invoiceTaxCents[0] ?? 0) / 100;
+      const invoiceTvc =
+        invoiceTaxCents.slice(1).reduce((sum, cents) => sum + cents, 0) / 100;
+      const invoiceTotal = invoiceTotalCents / 100;
 
       const newInvoice: InvoiceFullType = {
         invoiceId: `${Date.now()}`,
@@ -877,19 +949,6 @@ const UserCart: React.FC = () => {
       <NavBar />
       <ConfirmModal />
       <div className="UserCart-container">
-        {notificationMessage && (
-          <div className="notification-message">
-            {notificationMessage}
-            <button
-              className="close-notification"
-              onClick={() => setNotificationMessage(null)}
-              aria-label="Close notification"
-            >
-              &times;
-            </button>
-          </div>
-        )}
-
         <div className="UserCart-checkout-flex">
           <div className="UserCart">
             <div
@@ -933,7 +992,7 @@ const UserCart: React.FC = () => {
                     addToWishlist={addToWishlist}
                     addToCart={() => {}}
                     isInWishlist={false}
-                    showNotification={setNotificationMessage}
+                    showNotification={message => showToast(message, 'info')}
                   />
                 ))
               ) : (
@@ -1016,8 +1075,17 @@ const UserCart: React.FC = () => {
                 <p className="summary-item">
                   Subtotal: {formatPrice(subtotal)}
                 </p>
-                <p className="summary-item">TVQ (9.975%): {formatPrice(tvq)}</p>
-                <p className="summary-item">TVC (5%): {formatPrice(tvc)}</p>
+                {resolvedTaxLines.map(line => (
+                  <p key={`${line.name}-${line.rate}`} className="summary-item">
+                    {line.name} ({formatTaxRate(line.rate)}%):{' '}
+                    {formatPrice(line.amount ?? 0)}
+                  </p>
+                ))}
+                {resolvedTaxLines.length > 1 && (
+                  <p className="summary-item">
+                    Total taxes: {formatPrice(totalTax)}
+                  </p>
+                )}
                 <p className="summary-item">
                   Discount{promoPercent != null ? ` (${promoPercent}%)` : ''}:{' '}
                   {formatPrice(effectiveDiscount)}
