@@ -6,13 +6,12 @@ use rocket::http::Status;
 use rocket::serde::json::Json;
 use rocket::{post, State};
 
-#[post("/users", format = "application/json", data = "<new_user_dto>")]
+#[post("/users", format = "application/json", data = "<new_user>")]
 pub async fn add_user(
     uc: &State<DynUsersPort>,
-    new_user_dto: Json<UserSignUpRequestContract>,
+    new_user: Json<UserSignUpRequestContract>,
 ) -> AppResult<(Status, Json<UserResponseContract>)> {
-    let dto = new_user_dto.into_inner();
-    let new_user_params = UserCreationParams::from(dto);
+    let new_user_params = UserCreationParams::from(new_user.into_inner());
 
     Ok((
         Status::Created,

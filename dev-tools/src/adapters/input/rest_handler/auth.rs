@@ -14,9 +14,8 @@ pub async fn login(
     req: Json<UserLoginRequestContract>,
     jar: &CookieJar<'_>,
 ) -> AppResult<Status> {
-    let dto = req.into_inner();
     let new_session = uc
-        .authenticate(UserLoginParams::from(dto))
+        .authenticate(UserLoginParams::from(req.into_inner()))
         .await
         .map(Json)?;
 
