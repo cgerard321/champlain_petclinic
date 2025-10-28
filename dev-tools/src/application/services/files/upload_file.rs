@@ -17,7 +17,7 @@ pub async fn upload_file(
     let file_len = bytes.len();
 
     if file_len == 0 {
-        return Err(AppError::BadRequest("Empty file_contracts".into()));
+        return Err(AppError::BadRequest("Empty file".into()));
     }
 
     let resp = store.upload_file(bucket, extension, prefix, bytes).await?;
