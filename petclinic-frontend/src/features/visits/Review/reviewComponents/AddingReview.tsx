@@ -8,11 +8,8 @@ import StarRating from '../../../products/components/StarRating';
 import { OwnerResponseModel } from '../../../customers/models/OwnerResponseModel';
 import { getOwner } from '../../../customers/api/getOwner';
 
-import { Filter } from 'bad-words';
+import { cleanLite, isProfaneLite } from '../ReviewProfanity';
 import BasicModal from '@/shared/components/BasicModal';
-
-const filter = new Filter();
-filter.addWords('badWord', 'anotherBadWord'); // Custom bad words for demo purposes
 
 interface ApiError {
   message: string;
@@ -37,6 +34,7 @@ const AddingReview: React.FC = (): JSX.Element => {
   const { user } = useUser(); // Assuming this hook provides the user info
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const MAX_REVIEW_LEN = 200;
 
   useEffect(() => {
     if (user?.userId) {
@@ -66,14 +64,19 @@ const AddingReview: React.FC = (): JSX.Element => {
         name === 'rating' ? parseInt(value, 10) : value,
     }));
   };
+
+
+
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
     if (!review.review?.trim()) newErrors.review = 'Review text is required';
     if (!review.rating || review.rating < 1 || review.rating > 5)
       newErrors.rating = 'Rating must be between 1 and 5';
+    if ((review.review || '').length > MAX_REVIEW_LEN)
+      newErrors.review = `Max ${MAX_REVIEW_LEN} characters`;
 
-    if (filter.isProfane(review.review || '')) {
-      setMaskedPreview(filter.clean(review.review || ''));
+    if (isProfaneLite(review.review || '')) {
+      setMaskedPreview(cleanLite(review.review || ''));
       setShowProfanityModal(true);
       newErrors.profanity = 'No profanities!';
     }
@@ -182,6 +185,7 @@ const AddingReview: React.FC = (): JSX.Element => {
             required
             placeholder="Write your review here..."
             rows={5}
+            maxLength={MAX_REVIEW_LEN}
           />
         </div>
       </form>

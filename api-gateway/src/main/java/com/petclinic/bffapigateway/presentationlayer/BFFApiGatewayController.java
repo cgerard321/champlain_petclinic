@@ -342,10 +342,7 @@ public class BFFApiGatewayController {
 
     //Ratings
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @GetMapping(
-            value = "vets/{vetId}/ratings",
-            produces = MediaType.TEXT_EVENT_STREAM_VALUE
-    )
+    @GetMapping(value = "vets/{vetId}/ratings")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<RatingResponseDTO> getRatingsByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getRatingsByVetId(VetsEntityDtoUtil.verifyId(vetId));
     }
@@ -391,19 +388,13 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @GetMapping(
-            value = "/vets/topVets",
-            produces = MediaType.TEXT_EVENT_STREAM_VALUE
-    )
+    @GetMapping("/vets/topVets")
     public Flux<VetAverageRatingDTO>getTopThreeVetsWithHighestAverageRating(){
         return vetsServiceClient.getTopThreeVetsWithHighestAverageRating();
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @GetMapping(
-            value = "vets/{vetId}/ratings/date",
-            produces = MediaType.TEXT_EVENT_STREAM_VALUE
-    )
+    @GetMapping("vets/{vetId}/ratings/date")
     public Flux<RatingResponseDTO> getRatingsOfAVetBasedOnDate(@PathVariable String vetId, @RequestParam Map<String,String> queryParams){
         return vetsServiceClient.getRatingsOfAVetBasedOnDate(vetId,queryParams);
     }
@@ -433,10 +424,7 @@ public class BFFApiGatewayController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @GetMapping(
-            value = "vets/{vetId}/educations",
-            produces = MediaType.TEXT_EVENT_STREAM_VALUE
-    )
+    @GetMapping(value = "vets/{vetId}/educations")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<EducationResponseDTO> getEducationsByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getEducationsByVetId(VetsEntityDtoUtil.verifyId(vetId));
     }
@@ -467,10 +455,7 @@ public class BFFApiGatewayController {
 
     //Vets
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @GetMapping(
-            value = "vets",
-            produces = MediaType.TEXT_EVENT_STREAM_VALUE
-    )
+    @GetMapping(value = "vets")
     public Flux<VetResponseDTO> getAllVets() {
         return vetsServiceClient.getVets();
     }
@@ -490,18 +475,12 @@ public class BFFApiGatewayController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-    @GetMapping(
-            value = "/vets/active",
-            produces = MediaType.TEXT_EVENT_STREAM_VALUE
-    )
+    @GetMapping(value = "/vets/active")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VetResponseDTO> getActiveVets() {
         return vetsServiceClient.getActiveVets();
     }
 
-    @GetMapping(
-            value = "/vets/inactive",
-            produces = MediaType.TEXT_EVENT_STREAM_VALUE
-    )
+    @GetMapping(value = "/vets/inactive")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VetResponseDTO> getInactiveVets() {
         return vetsServiceClient.getInactiveVets();
     }
