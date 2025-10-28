@@ -3,8 +3,6 @@ use crate::adapters::input::rest_handler::dtos::user::user_sign_up::UserSignUpDt
 use crate::application::ports::input::user_port::DynUsersPort;
 use crate::application::services::users::params::UserCreationParams;
 use crate::core::error::AppResult;
-use crate::domain::entities::user::UserEntity;
-use rocket::http::uri::fmt::UriArgumentsKind::Static;
 use rocket::http::Status;
 use rocket::serde::json::Json;
 use rocket::{post, State};

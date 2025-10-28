@@ -5,8 +5,8 @@ mod files;
 mod users;
 
 mod dtos;
-mod session_guard;
 mod mappers;
+mod session_guard;
 
 pub fn routes() -> Vec<rocket::Route> {
     routes![

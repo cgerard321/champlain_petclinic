@@ -17,9 +17,7 @@ pub async fn read_files(
     _user: AuthenticatedUser,
 ) -> AppResult<Json<Vec<FileDto>>> {
     let file = uc.list_files(bucket).await?;
-    Ok(Json(
-        file.into_iter().map(|file| FileDto::from(file)).collect(),
-    ))
+    Ok(Json(file.into_iter().map(FileDto::from).collect()))
 }
 
 #[post("/buckets/<bucket>/files/<prefix..>", data = "<data>")]
@@ -40,8 +38,5 @@ pub async fn add_file(
 
     let file_info = uc.upload(bucket, prefix, bytes).await?;
 
-    Ok(Custom(
-        Status::Created,
-        Json(FileDto::from(file_info)),
-    ))
+    Ok(Custom(Status::Created, Json(FileDto::from(file_info))))
 }

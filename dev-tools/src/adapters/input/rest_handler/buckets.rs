@@ -11,10 +11,5 @@ pub async fn read_buckets(
     _user: AuthenticatedUser,
 ) -> AppResult<Json<Vec<BucketDto>>> {
     let buckets = uc.fetch_buckets().await?;
-    Ok(Json(
-        buckets
-            .into_iter()
-            .map(|bucket| BucketDto::from(bucket))
-            .collect(),
-    ))
+    Ok(Json(buckets.into_iter().map(BucketDto::from).collect()))
 }
