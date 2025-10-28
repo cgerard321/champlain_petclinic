@@ -92,11 +92,6 @@ impl UsersRepoPort for MySqlUsersRepo {
 
         log::info!("User found: {:?}", row);
 
-        let pass_hash = row.pass_hash.clone();
-
-        Ok(AuthProjection {
-            user: UserEntity::from(row),
-            pass_hash,
-        })
+        Ok(AuthProjection::try_from(row)?)
     }
 }
