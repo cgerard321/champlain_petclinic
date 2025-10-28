@@ -4,7 +4,7 @@ pub mod error;
 mod files;
 mod users;
 
-mod dtos;
+mod contracts;
 mod mappers;
 mod session_guard;
 

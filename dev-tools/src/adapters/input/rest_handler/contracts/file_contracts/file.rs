@@ -1,7 +1,7 @@
 use rocket::serde::Serialize;
 
 #[derive(Serialize, Debug)]
-pub struct FileDto {
+pub struct FileResponseContract {
     pub name: String,
     pub size: u64,
     pub etag: Option<String>,

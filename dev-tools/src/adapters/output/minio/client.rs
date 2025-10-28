@@ -83,12 +83,12 @@ impl FileStoragePort for MinioStore {
         prefix: PathBuf,
         bytes: Vec<u8>,
     ) -> AppResult<FileEntity> {
-        log::info!("Uploading file");
+        log::info!("Uploading file_contracts");
         let clean_prefix = sanitize_prefix(&prefix)?;
 
         let ext = extension.trim().trim_matches('.');
         if ext.is_empty() {
-            return Err(AppError::BadRequest("Empty/invalid file extension".into()));
+            return Err(AppError::BadRequest("Empty/invalid file_contracts extension".into()));
         }
 
         let key = if clean_prefix.is_empty() {
