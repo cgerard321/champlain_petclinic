@@ -1,5 +1,6 @@
 use uuid::Uuid;
 
+#[derive(Debug)]
 pub struct UserEntity {
     pub user_id: Uuid,
     pub email: String,

@@ -29,6 +29,7 @@ impl UsersRepoPort for MySqlUsersRepo {
         pass_hash: &[u8],
         display_name: &str,
     ) -> AppResult<UserEntity> {
+        log::info!("Inserting user: {:?}", id);
         let id = Hyphenated::from_uuid(id);
 
         sqlx::query(
@@ -45,12 +46,17 @@ impl UsersRepoPort for MySqlUsersRepo {
         .await
         .map_err(|e| map_sqlx_err(e, "User"))?;
 
+        log::info!("User inserted");
+
         let user = self.get_user_by_id(id.into_uuid()).await?;
+
+        log::info!("User found: {:?}", user);
 
         Ok(user)
     }
 
     async fn get_user_by_id(&self, id: Uuid) -> AppResult<UserEntity> {
+        log::info!("Finding user: {:?}", id);
         let id = Hyphenated::from_uuid(id);
 
         let row: User = sqlx::query_as::<_, User>(
@@ -65,6 +71,8 @@ impl UsersRepoPort for MySqlUsersRepo {
         .await
         .map_err(|e| map_sqlx_err(e, "User"))?;
 
+        log::info!("User found: {:?}", row);
+
         Ok(UserEntity {
             user_id: row.id.into_uuid(),
             email: row.email,
@@ -74,6 +82,7 @@ impl UsersRepoPort for MySqlUsersRepo {
     }
 
     async fn get_user_auth_by_email_for_login(&self, email: &str) -> AppResult<AuthProjection> {
+        log::info!("Finding user for login: {:}", email);
         let row: User = sqlx::query_as::<_, User>(
             r#"
         SELECT id, email, display_name, is_active, pass_hash
@@ -85,6 +94,8 @@ impl UsersRepoPort for MySqlUsersRepo {
         .fetch_one(&*self.pool)
         .await
         .map_err(|e| map_sqlx_err(e, "User"))?;
+
+        log::info!("User found: {:?}", row);
 
         Ok(AuthProjection {
             user: UserEntity {

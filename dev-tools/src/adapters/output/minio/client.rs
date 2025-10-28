@@ -19,6 +19,7 @@ pub struct MinioStore {
 
 impl MinioStore {
     pub fn from_env() -> AppResult<Self> {
+        log::info!("Connecting to minio");
         let endpoint = env::var("MINIO_URL").map_err(|_| AppError::Internal)?;
         let access_key = env::var("FILE_ACCESS_KEY_ID").map_err(|_| AppError::Internal)?;
         let secret_key = env::var("FILE_SECRET_ACCESS_KEY").map_err(|_| AppError::Internal)?;
@@ -28,6 +29,8 @@ impl MinioStore {
 
         let client = Client::new(base_url, Some(Box::new(static_provider)), None, None)
             .map_err(|_e| AppError::Internal)?;
+
+        log::info!("Connected to minio");
 
         Ok(Self { client })
     }
@@ -41,6 +44,7 @@ impl MinioStore {
 #[async_trait]
 impl FileStoragePort for MinioStore {
     async fn list_buckets(&self) -> AppResult<Vec<BucketEntity>> {
+        log::info!("Getting buckets");
         let resp = self.client().list_buckets().send().await?;
         let buckets = resp
             .buckets
@@ -50,10 +54,12 @@ impl FileStoragePort for MinioStore {
                 creation_date: Some(b.creation_date.to_string()),
             })
             .collect();
+        log::info!("Buckets received: {:?}", buckets);
         Ok(buckets)
     }
 
     async fn list_bucket_files(&self, bucket: &str) -> AppResult<Vec<FileEntity>> {
+        log::info!("Getting bucket files");
         let mut stream = self
             .client()
             .list_objects(bucket)
@@ -78,6 +84,8 @@ impl FileStoragePort for MinioStore {
             }
         }
 
+        log::info!("Bucket files received: {:?}", files);
+
         Ok(files)
     }
 
@@ -88,6 +96,7 @@ impl FileStoragePort for MinioStore {
         prefix: PathBuf,
         bytes: Vec<u8>,
     ) -> AppResult<FileEntity> {
+        log::info!("Uploading file");
         let clean_prefix = sanitize_prefix(&prefix)?;
 
         let ext = extension.trim().trim_matches('.');

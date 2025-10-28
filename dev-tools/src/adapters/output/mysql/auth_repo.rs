@@ -27,6 +27,7 @@ impl AuthRepoPort for MySqlAuthRepo {
         uid: Uuid,
         exp: NaiveDateTime,
     ) -> AppResult<SessionEntity> {
+        log::info!("Inserting session: {:?}", sid);
         sqlx::query("INSERT INTO sessions (id, user_id, expires_at) VALUES (?, ?, ?)")
             .bind(sid.to_string())
             .bind(uid.to_string())
@@ -35,12 +36,17 @@ impl AuthRepoPort for MySqlAuthRepo {
             .await
             .map_err(|e| map_sqlx_err(e, "Sessions"))?;
 
+        log::info!("Session inserted");
+
         let session = self.find_session_by_id(sid).await?;
+
+        log::info!("Session found: {:?}", session);
 
         Ok(session)
     }
 
     async fn find_session_by_id(&self, sid: Uuid) -> AppResult<SessionEntity> {
+        log::info!("Finding session: {:?}", sid);
         let sid = Hyphenated::from_uuid(sid);
         let row: Option<Session> = sqlx::query_as::<_, Session>(
             "SELECT id, user_id, created_at, expires_at FROM sessions WHERE id = ?",
@@ -54,6 +60,8 @@ impl AuthRepoPort for MySqlAuthRepo {
             return Err(AppError::Unauthorized);
         };
 
+        log::info!("Session found: {:?}", row);
+
         Ok(SessionEntity {
             id: row.id.into_uuid(),
             user_id: Uuid::parse_str(row.user_id.to_string().as_str()).unwrap_or(Uuid::nil()),
@@ -63,12 +71,15 @@ impl AuthRepoPort for MySqlAuthRepo {
     }
 
     async fn delete_session(&self, sid: Uuid) -> AppResult<()> {
+        log::info!("Deleting session: {:?}", sid);
         let sid = Hyphenated::from_uuid(sid);
         sqlx::query("DELETE FROM sessions WHERE id = ?")
             .bind(sid.to_string())
             .execute(&*self.pool)
             .await
             .map_err(|e| map_sqlx_err(e, "Sessions"))?;
+
+        log::info!("Session deleted");
         Ok(())
     }
 

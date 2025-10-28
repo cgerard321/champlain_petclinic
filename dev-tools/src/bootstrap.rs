@@ -10,6 +10,7 @@ use crate::application::ports::output::user_repo_port::DynUsersRepo;
 use crate::application::services::auth::service::AuthService;
 use crate::application::services::files::service::FilesService;
 use crate::application::services::users::service::UsersService;
+use log::log;
 use rocket::fairing::AdHoc;
 use sqlx::mysql::MySqlPoolOptions;
 use std::sync::Arc;
@@ -18,16 +19,21 @@ pub fn stage() -> AdHoc {
     AdHoc::on_ignite("SQLx (MySQL)", |rocket| async move {
         let url = std::env::var("DATABASE_URL").expect("Missing DATABASE_URL env var");
         // MySQL
+        log::info!("Connecting to MySQL");
         let pool = MySqlPoolOptions::new()
             .max_connections(10)
             .connect(&url)
             .await
             .expect("DB connect error");
 
+        log::info!("Connected to MySQL, running migration script");
+
         sqlx::migrate!("./src/migrations")
             .run(&pool)
             .await
             .expect("Migrations failed");
+
+        log::info!("Migration script ran successfully");
 
         let auth_repo = MySqlAuthRepo::new(Arc::new(pool.clone()));
         let dyn_auth_repo: DynAuthRepo = Arc::new(auth_repo);

@@ -61,6 +61,7 @@ struct ErrorBody<'a> {
 
 impl<'r> Responder<'r, 'static> for AppError {
     fn respond_to(self, req: &Request<'_>) -> rocket::response::Result<'static> {
+        log::warn!("Request to {} returned {}", req.uri(), self.http_status());
         let status = self.http_status();
         let body = ErrorBody {
             code: status.code,
@@ -91,7 +92,7 @@ fn unprocessable(req: &Request<'_>) -> AppError {
 }
 
 #[catch(default)]
-fn default_catcher(status: Status, _req: &Request<'_>) -> AppError {
+fn default_catcher(status: Status, req: &Request<'_>) -> AppError {
     match StatusCode::from_u16(status.code).unwrap_or(StatusCode::INTERNAL_SERVER_ERROR) {
         StatusCode::BAD_REQUEST => AppError::BadRequest("Bad request".into()),
         StatusCode::UNAUTHORIZED => AppError::Unauthorized,
