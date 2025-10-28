@@ -16,25 +16,13 @@ export const fetchVetRatings = async (
   vetId: string
 ): Promise<RatingResponseType[]> => {
   try {
-    const response = await axiosInstance.get<string>(
+    const response = await axiosInstance.get<RatingResponseType[]>(
       `/vets/${vetId}/ratings`,
-      {
-        responseType: 'text',
-        useV2: true,
-      } // Go through BFF v2
+      { useV2: true } // Go through BFF v2
     );
-    return response.data
-      .split('data:')
-      .map((payLoad: string) => {
-        try {
-          if (payLoad === '') return null;
-          return JSON.parse(payLoad);
-        } catch (err) {
-          return null;
-        }
-      })
-      .filter((data?: JSON) => data !== null);
+    return response.data ?? [];
   } catch (error) {
-    return [];
+    console.error('Failed to fetch vet ratings:', error);
+    throw new Error('Failed to fetch vet ratings');
   }
 };

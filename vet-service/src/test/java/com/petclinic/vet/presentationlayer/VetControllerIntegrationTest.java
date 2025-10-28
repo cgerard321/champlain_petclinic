@@ -24,7 +24,6 @@ import com.petclinic.vet.presentationlayer.ratings.RatingRequestDTO;
 import com.petclinic.vet.presentationlayer.ratings.RatingResponseDTO;
 import com.petclinic.vet.utils.EntityDtoUtil;
 
-import com.petclinic.vet.utils.exceptions.HttpErrorInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -146,10 +145,10 @@ class VetControllerIntegrationTest {
         client
                 .get()
                 .uri("/vets/" + VET_ID + "/ratings")
-                .accept(MediaType.TEXT_EVENT_STREAM)
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBodyList(RatingResponseDTO.class)
                 .value((list) -> {
                     assertEquals(2, list.size());
@@ -168,17 +167,12 @@ class VetControllerIntegrationTest {
         client
                 .get()
                 .uri("/vets/" + invalidVetId + "/ratings")
-                .accept(MediaType.TEXT_EVENT_STREAM)
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound()
-                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
-                .expectBodyList(HttpErrorInfo.class)
-                .value(list -> {
-                    assertEquals(1, list.size());
-                    HttpErrorInfo errorInfo = list.get(0);
-                    assertEquals("vetId not found: " + invalidVetId, errorInfo.getMessage());
-                });
-
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("vetId not found: " + invalidVetId);
     }
 
     @Test
@@ -724,9 +718,9 @@ class VetControllerIntegrationTest {
         client
                 .get()
                 .uri("/vets/"+VET_ID+"/ratings/date?year={year}",existingDate)
-                .accept(MediaType.TEXT_EVENT_STREAM)
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBodyList(RatingResponseDTO.class)
                 .value((list) -> {
                     assertEquals(2, list.size());
@@ -756,16 +750,11 @@ class VetControllerIntegrationTest {
         client
                 .get()
                 .uri("/vets/"+invalidVetId+"/ratings/date?year={year}",existingDate)
-                .accept(MediaType.TEXT_EVENT_STREAM)
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound()
-                .expectBodyList(HttpErrorInfo.class)
-                .value(list -> {
-                    assertEquals(1, list.size());
-                    HttpErrorInfo errorInfo = list.get(0);
-                    assertEquals("No valid ratings were found for "+invalidVetId, errorInfo.getMessage());
-                });
-
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("No valid ratings were found for "+invalidVetId);
 
     }
 
@@ -786,16 +775,11 @@ class VetControllerIntegrationTest {
         client
                 .get()
                 .uri("/vets/"+VET_ID+"/ratings/date?year="+ invalidYear)
-                .accept(MediaType.TEXT_EVENT_STREAM)
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound()
-                .expectBodyList(HttpErrorInfo.class)
-                .value(list -> {
-                    assertEquals(1, list.size());
-                    HttpErrorInfo errorInfo = list.get(0);
-                    assertEquals("Invalid year format. Please enter a valid year.", errorInfo.getMessage());
-                });
-
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Invalid year format. Please enter a valid year.");
 
     }
 
@@ -821,10 +805,10 @@ class VetControllerIntegrationTest {
         client
                 .get()
                 .uri("/vets/" + "topVets")
-                .accept(MediaType.TEXT_EVENT_STREAM)
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBodyList(VetAverageRatingDTO.class)
                 .value(resp -> {
                     assertEquals(rating1.getVetId(), vetAverageRatingDTO1.getVetId());
@@ -890,23 +874,18 @@ class VetControllerIntegrationTest {
         client
                 .get()
                 .uri("/vets")
-                .accept(MediaType.TEXT_EVENT_STREAM)
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
-                .expectBodyList(VetResponseDTO.class)
-                .value(list -> {
-                    assertEquals(1, list.size());
-                    VetResponseDTO returnedVet = list.get(0);
-
-                    assertEquals(vet.getVetId(), returnedVet.getVetId());
-                    assertEquals(vet.getResume(), returnedVet.getResume());
-                    assertEquals(vet.getLastName(), returnedVet.getLastName());
-                    assertEquals(vet.getFirstName(), returnedVet.getFirstName());
-                    assertEquals(vet.getEmail(), returnedVet.getEmail());
-                    assertEquals(vet.isActive(), returnedVet.isActive());
-                    assertEquals(vet.getWorkHoursJson(), returnedVet.getWorkHoursJson());
-                });
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$[0].vetId").isEqualTo(vet.getVetId())
+                .jsonPath("$[0].resume").isEqualTo(vet.getResume())
+                .jsonPath("$[0].lastName").isEqualTo(vet.getLastName())
+                .jsonPath("$[0].firstName").isEqualTo(vet.getFirstName())
+                .jsonPath("$[0].email").isEqualTo(vet.getEmail())
+                .jsonPath("$[0].active").isEqualTo(vet.isActive())
+                .jsonPath("$[0].workHoursJson").isEqualTo(vet.getWorkHoursJson());
     }
 
     @Test
@@ -1215,23 +1194,18 @@ class VetControllerIntegrationTest {
         client
                 .get()
                 .uri("/vets/active")
-                .accept(MediaType.TEXT_EVENT_STREAM)
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
-                .expectBodyList(VetResponseDTO.class)
-                .value(list -> {
-                    assertEquals(1, list.size());
-                    VetResponseDTO returnedVet = list.get(0);
-
-                    assertEquals(vet2.getVetId(), returnedVet.getVetId());
-                    assertEquals(vet2.getResume(), returnedVet.getResume());
-                    assertEquals(vet2.getLastName(), returnedVet.getLastName());
-                    assertEquals(vet2.getFirstName(), returnedVet.getFirstName());
-                    assertEquals(vet2.getEmail(), returnedVet.getEmail());
-                    assertEquals(vet2.isActive(), returnedVet.isActive());
-                    assertEquals(vet2.getWorkHoursJson(), returnedVet.getWorkHoursJson());
-                });
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$[0].vetId").isEqualTo(vet2.getVetId())
+                .jsonPath("$[0].resume").isEqualTo(vet2.getResume())
+                .jsonPath("$[0].lastName").isEqualTo(vet2.getLastName())
+                .jsonPath("$[0].firstName").isEqualTo(vet2.getFirstName())
+                .jsonPath("$[0].email").isEqualTo(vet2.getEmail())
+                .jsonPath("$[0].active").isEqualTo(vet2.isActive())
+                .jsonPath("$[0].workHoursJson").isEqualTo(vet2.getWorkHoursJson());
     }
 
     @Test
@@ -1246,23 +1220,18 @@ class VetControllerIntegrationTest {
         client
                 .get()
                 .uri("/vets/inactive")
-                .accept(MediaType.TEXT_EVENT_STREAM)
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
-                .expectBodyList(VetResponseDTO.class)
-                .value(list -> {
-                    assertEquals(1, list.size());
-                    VetResponseDTO returnedVet = list.get(0);
-
-                    assertEquals(vet.getVetId(), returnedVet.getVetId());
-                    assertEquals(vet.getResume(), returnedVet.getResume());
-                    assertEquals(vet.getLastName(), returnedVet.getLastName());
-                    assertEquals(vet.getFirstName(), returnedVet.getFirstName());
-                    assertEquals(vet.getEmail(), returnedVet.getEmail());
-                    assertEquals(vet.isActive(), returnedVet.isActive());
-                    assertEquals(vet.getWorkHoursJson(), returnedVet.getWorkHoursJson());
-                });
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$[0].vetId").isEqualTo(vet.getVetId())
+                .jsonPath("$[0].resume").isEqualTo(vet.getResume())
+                .jsonPath("$[0].lastName").isEqualTo(vet.getLastName())
+                .jsonPath("$[0].firstName").isEqualTo(vet.getFirstName())
+                .jsonPath("$[0].email").isEqualTo(vet.getEmail())
+                .jsonPath("$[0].active").isEqualTo(vet.isActive())
+                .jsonPath("$[0].workHoursJson").isEqualTo(vet.getWorkHoursJson());
     }
 
 
@@ -1499,10 +1468,10 @@ class VetControllerIntegrationTest {
         client
                 .get()
                 .uri("/vets/" + vet.getVetId() + "/educations")
-                .accept(MediaType.TEXT_EVENT_STREAM)
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBodyList(EducationResponseDTO.class)
                 .value((list) -> {
                     assertEquals(2, list.size());
