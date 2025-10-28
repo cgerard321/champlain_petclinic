@@ -1,4 +1,4 @@
-use crate::adapters::input::rest_handler::dtos::user::user_login::UserLoginDto;
+use crate::adapters::input::rest_handler::dtos::user::user_login_dto::UserLoginDto;
 use crate::application::ports::input::auth_port::DynAuthPort;
 use crate::application::services::auth::params::UserLoginParams;
 use crate::core::error::{AppError, AppResult};

@@ -1,6 +1,6 @@
 use crate::adapters::input::rest_handler::dtos::user::user_dto::UserDto;
-use crate::adapters::input::rest_handler::dtos::user::user_login::UserLoginDto;
-use crate::adapters::input::rest_handler::dtos::user::user_sign_up::UserSignUpDto;
+use crate::adapters::input::rest_handler::dtos::user::user_login_dto::UserLoginDto;
+use crate::adapters::input::rest_handler::dtos::user::user_sign_up_dto::UserSignUpDto;
 use crate::application::services::auth::params::UserLoginParams;
 use crate::application::services::users::params::UserCreationParams;
 use crate::domain::entities::user::UserEntity;

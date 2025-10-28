@@ -1,5 +1,5 @@
 use crate::adapters::input::rest_handler::dtos::user::user_dto::UserDto;
-use crate::adapters::input::rest_handler::dtos::user::user_sign_up::UserSignUpDto;
+use crate::adapters::input::rest_handler::dtos::user::user_sign_up_dto::UserSignUpDto;
 use crate::application::ports::input::user_port::DynUsersPort;
 use crate::application::services::users::params::UserCreationParams;
 use crate::core::error::AppResult;
