@@ -29,7 +29,7 @@ impl UsersRepoPort for MySqlUsersRepo {
         pass_hash: &[u8],
         display_name: &str,
     ) -> AppResult<UserEntity> {
-        log::info!("Inserting user_contracts: {:?}", id);
+        log::info!("Inserting user: {:?}", id);
         let id = Hyphenated::from_uuid(id);
 
         sqlx::query(
@@ -56,7 +56,7 @@ impl UsersRepoPort for MySqlUsersRepo {
     }
 
     async fn get_user_by_id(&self, id: Uuid) -> AppResult<UserEntity> {
-        log::info!("Finding user_contracts: {:?}", id);
+        log::info!("Finding user: {:?}", id);
         let id = Hyphenated::from_uuid(id);
 
         let row: User = sqlx::query_as::<_, User>(
@@ -77,7 +77,7 @@ impl UsersRepoPort for MySqlUsersRepo {
     }
 
     async fn get_user_auth_by_email_for_login(&self, email: &str) -> AppResult<AuthProjection> {
-        log::info!("Finding user_contracts for login: {:}", email);
+        log::info!("Finding user for login: {:}", email);
         let row: User = sqlx::query_as::<_, User>(
             r#"
         SELECT id, email, display_name, is_active, pass_hash
