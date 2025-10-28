@@ -16,10 +16,7 @@ pub async fn login(
 ) -> AppResult<Status> {
     let dto = req.into_inner();
     let new_session = uc
-        .authenticate(UserLoginParams {
-            email: dto.email,
-            password: dto.password,
-        })
+        .authenticate(UserLoginParams::from(dto))
         .await
         .map(Json)?;
 

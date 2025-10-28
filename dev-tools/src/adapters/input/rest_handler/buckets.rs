@@ -14,10 +14,7 @@ pub async fn read_buckets(
     Ok(Json(
         buckets
             .into_iter()
-            .map(|bucket| BucketDto {
-                name: bucket.name,
-                creation_date: bucket.creation_date,
-            })
+            .map(|bucket| BucketDto::from(bucket))
             .collect(),
     ))
 }
