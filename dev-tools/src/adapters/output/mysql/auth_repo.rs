@@ -62,12 +62,7 @@ impl AuthRepoPort for MySqlAuthRepo {
 
         log::info!("Session found: {:?}", row);
 
-        Ok(SessionEntity {
-            id: row.id.into_uuid(),
-            user_id: Uuid::parse_str(row.user_id.to_string().as_str()).unwrap_or(Uuid::nil()),
-            created_at: row.created_at,
-            expires_at: row.expires_at,
-        })
+        Ok(SessionEntity::from(row))
     }
 
     async fn delete_session(&self, sid: Uuid) -> AppResult<()> {

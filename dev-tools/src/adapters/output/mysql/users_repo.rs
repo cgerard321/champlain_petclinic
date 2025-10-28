@@ -73,12 +73,7 @@ impl UsersRepoPort for MySqlUsersRepo {
 
         log::info!("User found: {:?}", row);
 
-        Ok(UserEntity {
-            user_id: row.id.into_uuid(),
-            email: row.email,
-            display_name: row.display_name,
-            is_active: row.is_active,
-        })
+        Ok(UserEntity::from(row))
     }
 
     async fn get_user_auth_by_email_for_login(&self, email: &str) -> AppResult<AuthProjection> {
@@ -97,14 +92,11 @@ impl UsersRepoPort for MySqlUsersRepo {
 
         log::info!("User found: {:?}", row);
 
+        let pass_hash = row.pass_hash.clone();
+
         Ok(AuthProjection {
-            user: UserEntity {
-                user_id: row.id.into_uuid(),
-                email: row.email,
-                display_name: row.display_name,
-                is_active: row.is_active,
-            },
-            pass_hash: row.pass_hash,
+            user: UserEntity::from(row),
+            pass_hash,
         })
     }
 }
