@@ -1,8 +1,8 @@
+use crate::adapters::input::rest_handler::dtos::file::file::FileDto;
+use crate::adapters::input::rest_handler::session_guard::AuthenticatedUser;
 use crate::application::ports::input::files_port::DynFilesPort;
 use crate::core::config;
 use crate::core::error::{AppError, AppResult};
-use crate::domain::models::file::FileInfo;
-use crate::domain::models::user::AuthenticatedUser;
 use rocket::data::ToByteUnit;
 use rocket::http::Status;
 use rocket::response::status::Custom;
@@ -11,22 +11,32 @@ use rocket::{Data, State};
 use std::path::PathBuf;
 
 #[get("/buckets/<bucket>/files")]
-pub(crate) async fn read_files(
+pub async fn read_files(
     bucket: &str,
     uc: &State<DynFilesPort>,
     _user: AuthenticatedUser,
-) -> AppResult<Json<Vec<FileInfo>>> {
-    Ok(Json(uc.list_files(bucket).await?))
+) -> AppResult<Json<Vec<FileDto>>> {
+    let file = uc.list_files(bucket).await?;
+    Ok(Json(
+        file.into_iter()
+            .map(|f| FileDto {
+                name: f.name,
+                size: f.size,
+                etag: f.etag,
+                version_id: f.version_id,
+            })
+            .collect(),
+    ))
 }
 
 #[post("/buckets/<bucket>/files/<prefix..>", data = "<data>")]
-pub(crate) async fn add_file(
+pub async fn add_file(
     bucket: &str,
     prefix: PathBuf,
     data: Data<'_>,
     uc: &State<DynFilesPort>,
     _user: AuthenticatedUser,
-) -> AppResult<Custom<Json<FileInfo>>> {
+) -> AppResult<Custom<Json<FileDto>>> {
     let limit = config::MAX_FILE_SIZE_MB.mebibytes();
     let bytes = data
         .open(limit)
@@ -37,5 +47,13 @@ pub(crate) async fn add_file(
 
     let file_info = uc.upload(bucket, prefix, bytes).await?;
 
-    Ok(Custom(Status::Created, Json(file_info)))
+    Ok(Custom(
+        Status::Created,
+        Json(FileDto {
+            name: file_info.name,
+            size: file_info.size,
+            etag: file_info.etag,
+            version_id: file_info.version_id,
+        }),
+    ))
 }

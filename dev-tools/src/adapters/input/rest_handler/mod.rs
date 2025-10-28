@@ -4,6 +4,7 @@ pub mod error;
 mod files;
 mod users;
 
+mod dtos;
 mod session_guard;
 
 pub fn routes() -> Vec<rocket::Route> {
@@ -14,6 +15,5 @@ pub fn routes() -> Vec<rocket::Route> {
         auth::login,
         auth::logout,
         users::add_user,
-        users::me,
     ]
 }

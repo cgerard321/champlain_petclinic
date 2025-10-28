@@ -11,7 +11,6 @@ use rocket::Response;
 use std::io::Cursor;
 
 impl AppError {
-    // HTTP-specific mapping lives in the adapter
     pub fn http_status(&self) -> Status {
         match self {
             AppError::BadRequest(_) => Status::BadRequest,

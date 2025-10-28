@@ -1,7 +1,7 @@
 use crate::application::ports::output::file_storage_port::DynFileStorage;
 use crate::core::config;
 use crate::core::error::{AppError, AppResult};
-use crate::domain::models::file::FileInfo;
+use crate::domain::entities::file::FileEntity;
 use std::path::PathBuf;
 
 pub async fn upload_file(
@@ -9,7 +9,7 @@ pub async fn upload_file(
     bucket: &str,
     prefix: PathBuf,
     bytes: Vec<u8>,
-) -> AppResult<FileInfo> {
+) -> AppResult<FileEntity> {
     let extension = infer::get(&bytes)
         .map(|k| k.extension())
         .unwrap_or(config::DEFAULT_FILE_TYPE);
@@ -22,12 +22,10 @@ pub async fn upload_file(
 
     let resp = store.upload_file(bucket, extension, prefix, bytes).await?;
 
-    Ok(FileInfo {
+    Ok(FileEntity {
         name: resp.name,
         size: file_len as u64,
-        last_modified: None,
         etag: resp.etag,
-        is_latest: true,
         version_id: resp.version_id,
     })
 }

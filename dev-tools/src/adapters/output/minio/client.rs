@@ -1,7 +1,7 @@
 use crate::application::ports::output::file_storage_port::FileStoragePort;
 use crate::core::error::{AppError, AppResult};
-use crate::domain::models::bucket::BucketInfo;
-use crate::domain::models::file::FileInfo;
+use crate::domain::entities::bucket::BucketEntity;
+use crate::domain::entities::file::FileEntity;
 use bytes::Bytes;
 use futures::StreamExt;
 use minio::s3::creds::StaticProvider;
@@ -12,6 +12,7 @@ use minio::s3::Client;
 use std::env;
 use std::path::{Component, Path, PathBuf};
 use uuid::Uuid;
+
 pub struct MinioStore {
     client: Client,
 }
@@ -39,12 +40,12 @@ impl MinioStore {
 
 #[async_trait]
 impl FileStoragePort for MinioStore {
-    async fn list_buckets(&self) -> AppResult<Vec<BucketInfo>> {
+    async fn list_buckets(&self) -> AppResult<Vec<BucketEntity>> {
         let resp = self.client().list_buckets().send().await?;
         let buckets = resp
             .buckets
             .into_iter()
-            .map(|b| BucketInfo {
+            .map(|b| BucketEntity {
                 name: b.name,
                 creation_date: Some(b.creation_date.to_string()),
             })
@@ -52,7 +53,7 @@ impl FileStoragePort for MinioStore {
         Ok(buckets)
     }
 
-    async fn list_bucket_files(&self, bucket: &str) -> AppResult<Vec<FileInfo>> {
+    async fn list_bucket_files(&self, bucket: &str) -> AppResult<Vec<FileEntity>> {
         let mut stream = self
             .client()
             .list_objects(bucket)
@@ -68,12 +69,10 @@ impl FileStoragePort for MinioStore {
             let tmp_files = objects.map_err(AppError::from)?;
 
             for obj in tmp_files.contents {
-                files.push(FileInfo {
+                files.push(FileEntity {
                     name: obj.name,
                     size: obj.size.unwrap_or(0),
-                    last_modified: obj.last_modified.map(|dt| dt.to_string()),
                     etag: obj.etag,
-                    is_latest: false,
                     version_id: None,
                 });
             }
@@ -88,7 +87,7 @@ impl FileStoragePort for MinioStore {
         extension: &str,
         prefix: PathBuf,
         bytes: Vec<u8>,
-    ) -> AppResult<FileInfo> {
+    ) -> AppResult<FileEntity> {
         let clean_prefix = sanitize_prefix(&prefix)?;
 
         let ext = extension.trim().trim_matches('.');
@@ -107,12 +106,10 @@ impl FileStoragePort for MinioStore {
         let data = SegmentedBytes::from(Bytes::from(bytes));
         let resp = self.client().put_object(bucket, key, data).send().await?;
 
-        Ok(FileInfo {
+        Ok(FileEntity {
             name: resp.object,
             size: len as u64,
-            last_modified: None,
             etag: Option::from(resp.etag),
-            is_latest: true,
             version_id: resp.version_id,
         })
     }

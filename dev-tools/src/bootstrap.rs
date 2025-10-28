@@ -1,4 +1,4 @@
-use crate::adapters::output::minio::store::MinioStore;
+use crate::adapters::output::minio::client::MinioStore;
 use crate::adapters::output::mysql::auth_repo::MySqlAuthRepo;
 use crate::adapters::output::mysql::users_repo::MySqlUsersRepo;
 use crate::application::ports::input::auth_port::DynAuthPort;
@@ -7,9 +7,9 @@ use crate::application::ports::input::user_port::DynUsersPort;
 use crate::application::ports::output::auth_repo_port::DynAuthRepo;
 use crate::application::ports::output::file_storage_port::DynFileStorage;
 use crate::application::ports::output::user_repo_port::DynUsersRepo;
-use crate::application::usecases::auth::service::AuthService;
-use crate::application::usecases::files::service::FilesService;
-use crate::application::usecases::users::service::UsersService;
+use crate::application::services::auth::service::AuthService;
+use crate::application::services::files::service::FilesService;
+use crate::application::services::users::service::UsersService;
 use rocket::fairing::AdHoc;
 use sqlx::mysql::MySqlPoolOptions;
 use std::sync::Arc;
@@ -34,6 +34,7 @@ pub fn stage() -> AdHoc {
 
         let user_repo = MySqlUsersRepo::new(Arc::new(pool.clone()));
         let dyn_user_repo: DynUsersRepo = Arc::new(user_repo);
+
         // MinIO
         let store = MinioStore::from_env()
             .map_err(|e| {

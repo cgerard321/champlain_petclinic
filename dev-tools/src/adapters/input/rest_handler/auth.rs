@@ -1,16 +1,16 @@
 use crate::application::ports::input::auth_port::DynAuthPort;
 use crate::core::error::{AppError, AppResult};
-use crate::domain::models::user::LoginReq;
 use rocket::http::{Cookie, CookieJar, SameSite};
 use rocket::serde::json::Json;
 use rocket::{http::Status, post, State};
 use time::OffsetDateTime;
 use uuid::Uuid;
+use crate::adapters::input::rest_handler::dtos::user::user_login::UserLoginDto;
 
 #[post("/login", data = "<req>")]
 pub async fn login(
     uc: &State<DynAuthPort>,
-    req: Json<LoginReq>,
+    req: Json<UserLoginDto>,
     jar: &CookieJar<'_>,
 ) -> AppResult<Status> {
     let new_session = uc.authenticate(&req.email, &req.password).await.map(Json)?;

@@ -1,2 +1,3 @@
 mod error;
-pub mod store;
+pub mod client;
+pub mod model;

@@ -1,11 +1,12 @@
 use crate::adapters::output::mysql::error::map_sqlx_err;
+use crate::adapters::output::mysql::model::session::Session;
 use crate::application::ports::output::auth_repo_port::AuthRepoPort;
 use crate::core::error::{AppError, AppResult};
-use crate::domain::models::session::Session;
 use chrono::NaiveDateTime;
-use sqlx::{MySql, Pool, Row};
+use sqlx::{MySql, Pool};
 use std::sync::Arc;
 use uuid::Uuid;
+use crate::domain::entities::session::SessionEntity;
 
 pub struct MySqlAuthRepo {
     pool: Arc<Pool<MySql>>,
@@ -19,7 +20,7 @@ impl MySqlAuthRepo {
 
 #[async_trait::async_trait]
 impl AuthRepoPort for MySqlAuthRepo {
-    async fn insert_session(&self, sid: Uuid, uid: Uuid, exp: NaiveDateTime) -> AppResult<Session> {
+    async fn insert_session(&self, sid: Uuid, uid: Uuid, exp: NaiveDateTime) -> AppResult<SessionEntity> {
         sqlx::query("INSERT INTO sessions (id, user_id, expires_at) VALUES (?, ?, ?)")
             .bind(sid.to_string())
             .bind(uid.to_string())
@@ -28,32 +29,29 @@ impl AuthRepoPort for MySqlAuthRepo {
             .await
             .map_err(|e| map_sqlx_err(e, "Sessions"))?;
 
-        Ok(Session {
-            id: sid,
-            user_id: uid,
-            created_at: chrono::Utc::now().naive_utc(),
-            expires_at: exp,
-        })
+        let session = self.find_session_by_id(sid).await?;
+
+        Ok(session)
     }
 
-    async fn find_session_by_id(&self, sid: Uuid) -> AppResult<Session> {
-        let row =
-            sqlx::query("SELECT id, user_id, created_at, expires_at FROM sessions WHERE id = ?")
-                .bind(sid.to_string())
-                .fetch_optional(&*self.pool)
-                .await
-                .map_err(|e| map_sqlx_err(e, "Sessions"))?;
+    async fn find_session_by_id(&self, sid: Uuid) -> AppResult<SessionEntity> {
+        let row: Option<Session> = sqlx::query_as::<_, Session>(
+            "SELECT id, user_id, created_at, expires_at FROM sessions WHERE id = ?",
+        )
+        .bind(sid.to_string())
+        .fetch_optional(&*self.pool)
+        .await
+        .map_err(|e| map_sqlx_err(e, "Sessions"))?;
 
         let Some(row) = row else {
             return Err(AppError::Unauthorized);
         };
 
-        Ok(Session {
-            id: sid,
-            user_id: Uuid::parse_str(row.get::<String, _>("user_id").as_str())
-                .unwrap_or(Uuid::nil()),
-            created_at: row.get("created_at"),
-            expires_at: row.get("expires_at"),
+        Ok(SessionEntity {
+            id: row.id,
+            user_id: Uuid::parse_str(row.user_id.to_string().as_str()).unwrap_or(Uuid::nil()),
+            created_at: row.created_at,
+            expires_at: row.expires_at,
         })
     }
 

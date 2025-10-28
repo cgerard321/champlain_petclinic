@@ -1,11 +1,13 @@
-use sqlx::{MySql, Pool, Row};
+use sqlx::{MySql, Pool};
 use std::sync::Arc;
 use uuid::Uuid;
 
 use crate::adapters::output::mysql::error::map_sqlx_err;
+use crate::adapters::output::mysql::model::user::User;
 use crate::application::ports::output::user_repo_port::UsersRepoPort;
-use crate::core::error::{AppError, AppResult};
-use crate::domain::models::user::FullUser;
+use crate::application::services::auth::projections::AuthProjection;
+use crate::core::error::AppResult;
+use crate::domain::entities::user::UserEntity;
 
 pub struct MySqlUsersRepo {
     pool: Arc<Pool<MySql>>,
@@ -25,7 +27,7 @@ impl UsersRepoPort for MySqlUsersRepo {
         email: &str,
         pass_hash: &[u8],
         display_name: &str,
-    ) -> AppResult<()> {
+    ) -> AppResult<UserEntity> {
         sqlx::query(
             r#"
             INSERT INTO users (id, email, pass_hash, display_name)
@@ -38,40 +40,55 @@ impl UsersRepoPort for MySqlUsersRepo {
         .bind(display_name)
         .execute(&*self.pool)
         .await
-        .map_err(|e| map_sqlx_err(e, "User insert"))?;
+        .map_err(|e| map_sqlx_err(e, "User"))?;
 
-        Ok(())
+        let user = self.get_user_by_id(id).await?;
+
+        Ok(user)
     }
 
-    async fn get_user_auth_by_email_full(&self, email: &str) -> AppResult<FullUser> {
-        let row = sqlx::query(
+    async fn get_user_by_id(&self, id: Uuid) -> AppResult<UserEntity> {
+        let row: User = sqlx::query_as::<_, User>(
             r#"
-            SELECT id, email, display_name, is_active, pass_hash
-            FROM users
-            WHERE email = ?
-            "#,
+        SELECT id, email, display_name, is_active
+        FROM users
+        WHERE id = ?
+        "#,
+        )
+        .bind(id.to_string())
+        .fetch_one(&*self.pool)
+        .await
+        .map_err(|e| map_sqlx_err(e, "User"))?;
+
+        Ok(UserEntity {
+            user_id: row.id,
+            email: row.email,
+            display_name: row.display_name,
+            is_active: row.is_active,
+        })
+    }
+
+    async fn get_user_auth_by_email_for_login(&self, email: &str) -> AppResult<AuthProjection> {
+        let row: User = sqlx::query_as::<_, User>(
+            r#"
+        SELECT id, email, display_name, is_active, pass_hash
+        FROM users
+        WHERE email = ?
+        "#,
         )
         .bind(email)
         .fetch_one(&*self.pool)
         .await
-        .map_err(|e| map_sqlx_err(e, "User lookup"))?;
+        .map_err(|e| map_sqlx_err(e, "User"))?;
 
-        let id_str: String = row.try_get("id").map_err(|_| AppError::Internal)?;
-        let id = Uuid::parse_str(&id_str).map_err(|_| AppError::Internal)?;
-
-        let email: String = row.try_get("email").map_err(|_| AppError::Internal)?;
-        let display_name: String = row
-            .try_get("display_name")
-            .map_err(|_| AppError::Internal)?;
-        let is_active: bool = row.try_get("is_active").map_err(|_| AppError::Internal)?;
-        let pass_hash: Vec<u8> = row.try_get("pass_hash").map_err(|_| AppError::Internal)?;
-
-        Ok(FullUser {
-            id,
-            email,
-            display_name,
-            is_active,
-            pass_hash,
+        Ok(AuthProjection {
+            user: UserEntity {
+                user_id: row.id,
+                email: row.email,
+                display_name: row.display_name,
+                is_active: row.is_active,
+            },
+            pass_hash: row.pass_hash,
         })
     }
 }

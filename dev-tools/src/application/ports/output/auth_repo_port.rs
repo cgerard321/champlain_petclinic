@@ -1,5 +1,5 @@
 use crate::core::error::AppResult;
-use crate::domain::models::session::Session;
+use crate::domain::entities::session::SessionEntity;
 use chrono::NaiveDateTime;
 use std::sync::Arc;
 use uuid::Uuid;
@@ -11,8 +11,8 @@ pub trait AuthRepoPort: Send + Sync {
         session_id: Uuid,
         user_id: Uuid,
         expires_at: NaiveDateTime,
-    ) -> AppResult<Session>;
-    async fn find_session_by_id(&self, sid: Uuid) -> AppResult<Session>;
+    ) -> AppResult<SessionEntity>;
+    async fn find_session_by_id(&self, sid: Uuid) -> AppResult<SessionEntity>;
     async fn delete_session(&self, sid: Uuid) -> AppResult<()>;
     #[allow(dead_code)]
     async fn delete_expired_sessions(&self) -> AppResult<u64>;

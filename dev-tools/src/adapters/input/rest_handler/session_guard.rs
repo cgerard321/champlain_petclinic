@@ -1,12 +1,15 @@
 use crate::application::ports::input::auth_port::DynAuthPort;
 use crate::core::error::AppError;
-use crate::domain::models::user::AuthenticatedUser;
 use rocket::{
     http::Status,
     request::{FromRequest, Outcome, Request},
     State,
 };
 use uuid::Uuid;
+
+pub struct AuthenticatedUser {
+    pub user_id: Uuid,
+}
 
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for AuthenticatedUser {
