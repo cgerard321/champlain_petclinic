@@ -1,6 +1,6 @@
-use uuid::Uuid;
 use crate::adapters::output::mysql::model::session::Session;
 use crate::domain::entities::session::SessionEntity;
+use uuid::Uuid;
 
 impl From<Session> for SessionEntity {
     fn from(session: Session) -> Self {

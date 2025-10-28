@@ -2,5 +2,5 @@ pub mod users_repo;
 
 pub mod auth_repo;
 mod error;
-mod model;
 mod mappers;
+mod model;

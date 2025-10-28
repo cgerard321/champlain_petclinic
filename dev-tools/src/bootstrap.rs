@@ -10,7 +10,6 @@ use crate::application::ports::output::user_repo_port::DynUsersRepo;
 use crate::application::services::auth::service::AuthService;
 use crate::application::services::files::service::FilesService;
 use crate::application::services::users::service::UsersService;
-use log::log;
 use rocket::fairing::AdHoc;
 use sqlx::mysql::MySqlPoolOptions;
 use std::sync::Arc;

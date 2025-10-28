@@ -1,3 +1,4 @@
+use crate::adapters::output::minio::mappers::file::PutObjectMap;
 use crate::application::ports::output::file_storage_port::FileStoragePort;
 use crate::core::error::{AppError, AppResult};
 use crate::domain::entities::bucket::BucketEntity;
@@ -46,14 +47,8 @@ impl FileStoragePort for MinioStore {
     async fn list_buckets(&self) -> AppResult<Vec<BucketEntity>> {
         log::info!("Getting buckets");
         let resp = self.client().list_buckets().send().await?;
-        let buckets = resp
-            .buckets
-            .into_iter()
-            .map(|b| BucketEntity {
-                name: b.name,
-                creation_date: Some(b.creation_date.to_string()),
-            })
-            .collect();
+        let buckets: Vec<BucketEntity> = resp.buckets.into_iter().map(Into::into).collect();
+
         log::info!("Buckets received: {:?}", buckets);
         Ok(buckets)
     }
@@ -69,24 +64,16 @@ impl FileStoragePort for MinioStore {
             .to_stream()
             .await;
 
-        let mut files = Vec::new();
+        let mut all = Vec::<FileEntity>::new();
 
-        while let Some(objects) = stream.next().await {
-            let tmp_files = objects.map_err(AppError::from)?;
-
-            for obj in tmp_files.contents {
-                files.push(FileEntity {
-                    name: obj.name,
-                    size: obj.size.unwrap_or(0),
-                    etag: obj.etag,
-                    version_id: None,
-                });
-            }
+        while let Some(page) = stream.next().await {
+            let page = page.map_err(AppError::from)?;
+            all.extend(page.contents.into_iter().map(Into::into));
         }
 
-        log::info!("Bucket files received: {:?}", files);
+        log::info!("Bucket files received: {:?}", all);
 
-        Ok(files)
+        Ok(all)
     }
 
     async fn upload_file(
@@ -110,17 +97,13 @@ impl FileStoragePort for MinioStore {
             format!("{}/{}.{}", clean_prefix, Uuid::new_v4(), ext)
         };
 
-        let len = bytes.len();
+        let size = bytes.len() as u64;
 
         let data = SegmentedBytes::from(Bytes::from(bytes));
         let resp = self.client().put_object(bucket, key, data).send().await?;
+        let file: FileEntity = PutObjectMap { resp, size }.into();
 
-        Ok(FileEntity {
-            name: resp.object,
-            size: len as u64,
-            etag: Option::from(resp.etag),
-            version_id: resp.version_id,
-        })
+        Ok(file)
     }
 }
 

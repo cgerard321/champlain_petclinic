@@ -1,6 +1,6 @@
-use uuid::Uuid;
 use crate::adapters::output::mysql::model::user::User;
 use crate::domain::entities::user::UserEntity;
+use uuid::Uuid;
 
 impl From<User> for UserEntity {
     fn from(user: User) -> Self {
