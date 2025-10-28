@@ -1,2 +1,2 @@
-mod bucket;
-pub mod file;
+mod bucket_mapper;
+pub mod file_mapper;

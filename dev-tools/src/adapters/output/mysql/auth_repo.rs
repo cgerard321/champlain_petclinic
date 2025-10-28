@@ -28,6 +28,11 @@ impl AuthRepoPort for MySqlAuthRepo {
         exp: NaiveDateTime,
     ) -> AppResult<SessionEntity> {
         log::info!("Inserting session: {:?}", sid);
+        // I tested and it does not seem to be needed, but for the sake of uniformity I will
+        // convert it, and it will also make sure the format is correct.
+        let sid = Hyphenated::from_uuid(sid);
+        let uid = Hyphenated::from_uuid(uid);
+
         sqlx::query("INSERT INTO sessions (id, user_id, expires_at) VALUES (?, ?, ?)")
             .bind(sid.to_string())
             .bind(uid.to_string())
@@ -38,7 +43,7 @@ impl AuthRepoPort for MySqlAuthRepo {
 
         log::info!("Session inserted");
 
-        let session = self.find_session_by_id(sid).await?;
+        let session = self.find_session_by_id(Uuid::from(sid)).await?;
 
         log::info!("Session found: {:?}", session);
 

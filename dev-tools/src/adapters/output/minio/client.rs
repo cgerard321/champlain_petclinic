@@ -1,4 +1,4 @@
-use crate::adapters::output::minio::mappers::file::PutObjectMap;
+use crate::adapters::output::minio::mappers::file_mapper::PutObjectMap;
 use crate::application::ports::output::file_storage_port::FileStoragePort;
 use crate::core::error::{AppError, AppResult};
 use crate::domain::entities::bucket::BucketEntity;
