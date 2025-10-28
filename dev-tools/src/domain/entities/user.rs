@@ -6,6 +6,3 @@ pub struct UserEntity {
     pub display_name: String,
     pub is_active: bool,
 }
-
-pub struct UserLogin {
-}

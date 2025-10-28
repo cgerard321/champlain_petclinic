@@ -1,8 +1,5 @@
-use uuid::Uuid;
-
+#[derive(Debug, Clone)]
 pub struct UserLoginParams {
-    pub user_id: Uuid,
     pub email: String,
-    pub pass_hash: Vec<u8>,
-    pub is_active: bool,
+    pub password: String,
 }

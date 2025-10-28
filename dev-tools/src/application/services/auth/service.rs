@@ -4,9 +4,10 @@ use crate::application::ports::output::user_repo_port::DynUsersRepo;
 use crate::application::services::auth::authenticate::authenticate;
 use crate::application::services::auth::find_session_by_id::find_session_by_id;
 use crate::application::services::auth::logout::remove_session;
+use crate::application::services::auth::params::UserLoginParams;
 use crate::core::error::AppResult;
-use uuid::Uuid;
 use crate::domain::entities::session::SessionEntity;
+use uuid::Uuid;
 
 pub struct AuthService {
     auth_repo: DynAuthRepo,
@@ -23,8 +24,14 @@ impl AuthService {
 
 #[async_trait::async_trait]
 impl AuthPort for AuthService {
-    async fn authenticate(&self, email: &str, password: &str) -> AppResult<SessionEntity> {
-        authenticate(&self.auth_repo, &self.users_repo, email, password).await
+    async fn authenticate(&self, user_login_params: UserLoginParams) -> AppResult<SessionEntity> {
+        authenticate(
+            &self.auth_repo,
+            &self.users_repo,
+            user_login_params.email.as_str(),
+            user_login_params.password.as_str(),
+        )
+        .await
     }
 
     async fn logout(&self, session_id: Uuid) -> AppResult<()> {

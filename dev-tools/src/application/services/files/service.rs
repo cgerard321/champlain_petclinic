@@ -3,8 +3,8 @@ use crate::application::ports::output::file_storage_port::DynFileStorage;
 use crate::application::services::files::{fetch_bucket_files, fetch_buckets, upload_file};
 use crate::core::error::AppResult;
 use crate::domain::entities::bucket::BucketEntity;
-use std::path::PathBuf;
 use crate::domain::entities::file::FileEntity;
+use std::path::PathBuf;
 
 pub struct FilesService {
     storage: DynFileStorage,

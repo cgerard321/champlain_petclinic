@@ -2,11 +2,12 @@ use crate::adapters::output::mysql::error::map_sqlx_err;
 use crate::adapters::output::mysql::model::session::Session;
 use crate::application::ports::output::auth_repo_port::AuthRepoPort;
 use crate::core::error::{AppError, AppResult};
+use crate::domain::entities::session::SessionEntity;
 use chrono::NaiveDateTime;
 use sqlx::{MySql, Pool};
 use std::sync::Arc;
+use uuid::fmt::Hyphenated;
 use uuid::Uuid;
-use crate::domain::entities::session::SessionEntity;
 
 pub struct MySqlAuthRepo {
     pool: Arc<Pool<MySql>>,
@@ -20,7 +21,12 @@ impl MySqlAuthRepo {
 
 #[async_trait::async_trait]
 impl AuthRepoPort for MySqlAuthRepo {
-    async fn insert_session(&self, sid: Uuid, uid: Uuid, exp: NaiveDateTime) -> AppResult<SessionEntity> {
+    async fn insert_session(
+        &self,
+        sid: Uuid,
+        uid: Uuid,
+        exp: NaiveDateTime,
+    ) -> AppResult<SessionEntity> {
         sqlx::query("INSERT INTO sessions (id, user_id, expires_at) VALUES (?, ?, ?)")
             .bind(sid.to_string())
             .bind(uid.to_string())
@@ -35,10 +41,11 @@ impl AuthRepoPort for MySqlAuthRepo {
     }
 
     async fn find_session_by_id(&self, sid: Uuid) -> AppResult<SessionEntity> {
+        let sid = Hyphenated::from_uuid(sid);
         let row: Option<Session> = sqlx::query_as::<_, Session>(
             "SELECT id, user_id, created_at, expires_at FROM sessions WHERE id = ?",
         )
-        .bind(sid.to_string())
+        .bind(sid)
         .fetch_optional(&*self.pool)
         .await
         .map_err(|e| map_sqlx_err(e, "Sessions"))?;
@@ -48,7 +55,7 @@ impl AuthRepoPort for MySqlAuthRepo {
         };
 
         Ok(SessionEntity {
-            id: row.id,
+            id: row.id.into_uuid(),
             user_id: Uuid::parse_str(row.user_id.to_string().as_str()).unwrap_or(Uuid::nil()),
             created_at: row.created_at,
             expires_at: row.expires_at,
@@ -56,6 +63,7 @@ impl AuthRepoPort for MySqlAuthRepo {
     }
 
     async fn delete_session(&self, sid: Uuid) -> AppResult<()> {
+        let sid = Hyphenated::from_uuid(sid);
         sqlx::query("DELETE FROM sessions WHERE id = ?")
             .bind(sid.to_string())
             .execute(&*self.pool)

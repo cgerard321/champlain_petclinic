@@ -7,9 +7,7 @@ use rocket::{
 };
 use uuid::Uuid;
 
-pub struct AuthenticatedUser {
-    pub user_id: Uuid,
-}
+pub struct AuthenticatedUser {}
 
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for AuthenticatedUser {
@@ -32,7 +30,7 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
         };
 
         match uc.validate_session(sid).await {
-            Ok(user_id) => Outcome::Success(AuthenticatedUser { user_id }),
+            Ok(..) => Outcome::Success(AuthenticatedUser {}),
             Err(AppError::NotFound(_)) | Err(AppError::Unauthorized) => {
                 Outcome::Error((Status::Unauthorized, ()))
             }

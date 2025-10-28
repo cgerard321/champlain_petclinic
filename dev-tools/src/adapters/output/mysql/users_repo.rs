@@ -1,5 +1,6 @@
 use sqlx::{MySql, Pool};
 use std::sync::Arc;
+use uuid::fmt::Hyphenated;
 use uuid::Uuid;
 
 use crate::adapters::output::mysql::error::map_sqlx_err;
@@ -28,13 +29,15 @@ impl UsersRepoPort for MySqlUsersRepo {
         pass_hash: &[u8],
         display_name: &str,
     ) -> AppResult<UserEntity> {
+        let id = Hyphenated::from_uuid(id);
+
         sqlx::query(
             r#"
             INSERT INTO users (id, email, pass_hash, display_name)
             VALUES (?, ?, ?, ?)
             "#,
         )
-        .bind(id.to_string())
+        .bind(id)
         .bind(email)
         .bind(pass_hash)
         .bind(display_name)
@@ -42,26 +45,28 @@ impl UsersRepoPort for MySqlUsersRepo {
         .await
         .map_err(|e| map_sqlx_err(e, "User"))?;
 
-        let user = self.get_user_by_id(id).await?;
+        let user = self.get_user_by_id(id.into_uuid()).await?;
 
         Ok(user)
     }
 
     async fn get_user_by_id(&self, id: Uuid) -> AppResult<UserEntity> {
+        let id = Hyphenated::from_uuid(id);
+
         let row: User = sqlx::query_as::<_, User>(
             r#"
-        SELECT id, email, display_name, is_active
+        SELECT id, email, display_name, is_active, pass_hash
         FROM users
         WHERE id = ?
         "#,
         )
-        .bind(id.to_string())
+        .bind(id)
         .fetch_one(&*self.pool)
         .await
         .map_err(|e| map_sqlx_err(e, "User"))?;
 
         Ok(UserEntity {
-            user_id: row.id,
+            user_id: row.id.into_uuid(),
             email: row.email,
             display_name: row.display_name,
             is_active: row.is_active,
@@ -83,7 +88,7 @@ impl UsersRepoPort for MySqlUsersRepo {
 
         Ok(AuthProjection {
             user: UserEntity {
-                user_id: row.id,
+                user_id: row.id.into_uuid(),
                 email: row.email,
                 display_name: row.display_name,
                 is_active: row.is_active,

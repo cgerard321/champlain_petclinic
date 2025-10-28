@@ -1,4 +1,4 @@
-use crate::adapters::input::rest_handler::dtos::file::file::FileDto;
+use crate::adapters::input::rest_handler::dtos::file::file_dto::FileDto;
 use crate::adapters::input::rest_handler::session_guard::AuthenticatedUser;
 use crate::application::ports::input::files_port::DynFilesPort;
 use crate::core::config;

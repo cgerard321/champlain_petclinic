@@ -1,4 +1,4 @@
-use crate::adapters::input::rest_handler::dtos::file::bucket::BucketDto;
+use crate::adapters::input::rest_handler::dtos::file::bucket_dto::BucketDto;
 use crate::adapters::input::rest_handler::session_guard::AuthenticatedUser;
 use crate::application::ports::input::files_port::DynFilesPort;
 use crate::core::error::AppResult;

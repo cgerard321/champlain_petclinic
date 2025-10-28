@@ -1,11 +1,12 @@
+use crate::adapters::input::rest_handler::dtos::user::user_login::UserLoginDto;
 use crate::application::ports::input::auth_port::DynAuthPort;
+use crate::application::services::auth::params::UserLoginParams;
 use crate::core::error::{AppError, AppResult};
 use rocket::http::{Cookie, CookieJar, SameSite};
 use rocket::serde::json::Json;
 use rocket::{http::Status, post, State};
 use time::OffsetDateTime;
 use uuid::Uuid;
-use crate::adapters::input::rest_handler::dtos::user::user_login::UserLoginDto;
 
 #[post("/login", data = "<req>")]
 pub async fn login(
@@ -13,7 +14,14 @@ pub async fn login(
     req: Json<UserLoginDto>,
     jar: &CookieJar<'_>,
 ) -> AppResult<Status> {
-    let new_session = uc.authenticate(&req.email, &req.password).await.map(Json)?;
+    let dto = req.into_inner();
+    let new_session = uc
+        .authenticate(UserLoginParams {
+            email: dto.email,
+            password: dto.password,
+        })
+        .await
+        .map(Json)?;
 
     let expires_offset =
         OffsetDateTime::from_unix_timestamp(new_session.expires_at.and_utc().timestamp())

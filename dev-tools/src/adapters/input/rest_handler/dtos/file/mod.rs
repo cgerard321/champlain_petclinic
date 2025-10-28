@@ -1,2 +1,2 @@
-pub mod file;
-pub mod bucket;
+pub mod bucket_dto;
+pub mod file_dto;

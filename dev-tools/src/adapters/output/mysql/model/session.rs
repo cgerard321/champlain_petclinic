@@ -1,11 +1,11 @@
 use chrono::NaiveDateTime;
-use sqlx::{Decode, FromRow};
-use uuid::Uuid;
+use sqlx::FromRow;
+use uuid::fmt::Hyphenated;
 
 #[derive(Debug, FromRow)]
 pub struct Session {
-    pub id: Uuid,
-    pub user_id: Uuid,
+    pub id: Hyphenated,
+    pub user_id: Hyphenated,
     pub created_at: NaiveDateTime,
     pub expires_at: NaiveDateTime,
 }
