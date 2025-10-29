@@ -68,7 +68,9 @@ pub fn stage() -> AdHoc {
         let files_port: DynFilesPort = Arc::new(FilesService::new(storage.clone()));
         let users_port: DynUsersPort = Arc::new(UsersService::new(dyn_user_repo.clone()));
 
-        add_default_user(&users_port).await;
+        if let Err(e) = add_default_user(&users_port).await {
+            log::error!("Failed to insert default user: {e}");
+        }
 
         rocket
             .manage(auth_port)
@@ -111,7 +113,7 @@ async fn add_default_roles(pool: &MySqlPool) -> Result<(), sqlx::Error> {
     Ok(())
 }
 
-async fn add_default_user(user_port: &DynUsersPort) {
+async fn add_default_user(user_port: &DynUsersPort) -> Result<(), sqlx::Error> {
     let admin_email =
         std::env::var("DEFAULT_ADMIN_EMAIL").expect("Missing DEFAULT_ADMIN_EMAIL env var");
 
@@ -131,4 +133,6 @@ async fn add_default_user(user_port: &DynUsersPort) {
         .create_user(params)
         .await
         .expect("Failed to create default admin user");
+
+    Ok(())
 }
