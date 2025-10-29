@@ -122,5 +122,3 @@ fn sanitize_prefix(prefix: &Path) -> AppResult<String> {
     }
     Ok(parts.join("/"))
 }
-
-

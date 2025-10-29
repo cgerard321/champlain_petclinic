@@ -17,10 +17,7 @@ pub async fn read_files(
     uc: &State<DynFilesPort>,
     _user: AuthenticatedUser,
 ) -> AppResult<Json<Vec<FileResponseContract>>> {
-    require_any(
-        &_user,
-        &[uuid::uuid!(ADMIN_ROLE_UUID), uuid::uuid!(READER_ROLE_UUID)],
-    )?;
+    require_any(&_user, &[ADMIN_ROLE_UUID, READER_ROLE_UUID])?;
 
     let file = uc.list_files(bucket).await?;
     Ok(Json(
@@ -36,10 +33,7 @@ pub async fn add_file(
     uc: &State<DynFilesPort>,
     user: AuthenticatedUser,
 ) -> AppResult<Custom<Json<FileResponseContract>>> {
-    require_any(
-        &user,
-        &[uuid::uuid!(ADMIN_ROLE_UUID), uuid::uuid!(EDITOR_ROLE_UUID)],
-    )?;
+    require_any(&user, &[ADMIN_ROLE_UUID, EDITOR_ROLE_UUID])?;
 
     let limit = config::MAX_FILE_SIZE_MB.mebibytes();
     let bytes = data

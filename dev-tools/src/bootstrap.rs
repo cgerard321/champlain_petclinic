@@ -81,7 +81,7 @@ pub fn stage() -> AdHoc {
 
 async fn add_default_roles(pool: &MySqlPool) -> Result<(), sqlx::Error> {
     // TODO : Add role repo
-    // Since I don't see a relative future of having a role repo
+    // Since I don't see a foreseeable future of having a role repo
     // I'm just going to hardcode the roles here.
     let admin = Uuid::parse_str(ADMIN_ROLE_UUID)
         .expect("Invalid UUID")

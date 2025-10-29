@@ -11,10 +11,7 @@ pub async fn read_buckets(
     uc: &State<DynFilesPort>,
     user: AuthenticatedUser,
 ) -> AppResult<Json<Vec<BucketResponseContract>>> {
-    require_any(
-        &user,
-        &[uuid::uuid!(ADMIN_ROLE_UUID), uuid::uuid!(READER_ROLE_UUID)],
-    )?;
+    require_any(&user, &[ADMIN_ROLE_UUID, READER_ROLE_UUID])?;
 
     let buckets = uc.fetch_buckets().await?;
     Ok(Json(

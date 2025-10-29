@@ -16,7 +16,7 @@ pub async fn add_user(
     new_user: Json<UserSignUpRequestContract>,
     user: AuthenticatedUser,
 ) -> AppResult<(Status, Json<UserResponseContract>)> {
-    require_any(&user, &[uuid::uuid!(ADMIN_ROLE_UUID)])?;
+    require_any(&user, &[ADMIN_ROLE_UUID])?;
 
     let new_user_params = UserCreationParams::from(new_user.into_inner());
 
