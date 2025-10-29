@@ -1,4 +1,7 @@
-use crate::adapters::input::rest_handler::contracts::user_contracts::user::{UserResponseContract, UserSignUpRequestContract};
+use crate::adapters::input::rest_handler::auth_guard::{require_any, AuthenticatedUser};
+use crate::adapters::input::rest_handler::contracts::user_contracts::user::{
+    UserResponseContract, UserSignUpRequestContract,
+};
 use crate::application::ports::input::user_port::DynUsersPort;
 use crate::application::services::users::params::UserCreationParams;
 use crate::core::error::AppResult;
@@ -10,11 +13,19 @@ use rocket::{post, State};
 pub async fn add_user(
     uc: &State<DynUsersPort>,
     new_user: Json<UserSignUpRequestContract>,
+    user: AuthenticatedUser,
 ) -> AppResult<(Status, Json<UserResponseContract>)> {
+    require_any(
+        &user,
+        &[uuid::uuid!("a48d7b18-ceb7-435b-b8ff-b28531f1a09f")],
+    )?;
+
     let new_user_params = UserCreationParams::from(new_user.into_inner());
 
     Ok((
         Status::Created,
-        Json(UserResponseContract::from(uc.create_user(new_user_params).await?)),
+        Json(UserResponseContract::from(
+            uc.create_user(new_user_params).await?,
+        )),
     ))
 }

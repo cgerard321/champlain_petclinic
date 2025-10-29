@@ -1,3 +1,4 @@
+use crate::adapters::input::rest_handler::contracts::user_contracts::user::UserLoginRequestContract;
 use crate::application::ports::input::auth_port::DynAuthPort;
 use crate::application::services::auth::params::UserLoginParams;
 use crate::core::error::{AppError, AppResult};
@@ -6,7 +7,6 @@ use rocket::serde::json::Json;
 use rocket::{http::Status, post, State};
 use time::OffsetDateTime;
 use uuid::Uuid;
-use crate::adapters::input::rest_handler::contracts::user_contracts::user::UserLoginRequestContract;
 
 #[post("/login", data = "<req>")]
 pub async fn login(

@@ -11,6 +11,7 @@ impl From<User> for UserEntity {
             email: user.email,
             display_name: user.display_name,
             is_active: user.is_active,
+            roles: Default::default(),
         }
     }
 }
@@ -32,6 +33,7 @@ impl TryFrom<User> for AuthProjection {
             email,
             display_name,
             is_active: row.is_active,
+            roles: Default::default(),
         };
         Ok(AuthProjection { user, pass_hash })
     }

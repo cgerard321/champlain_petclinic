@@ -7,6 +7,7 @@ pub struct UserResponseContract {
     pub user_id: Uuid,
     pub email: String,
     pub display_name: String,
+    pub roles: Vec<Uuid>,
 }
 
 // Technically you should not log the entire DTO but I wanted
@@ -24,4 +25,5 @@ pub struct UserSignUpRequestContract {
     #[redact(fixed = 3)]
     pub password: String,
     pub display_name: String,
+    pub roles: Vec<Uuid>,
 }
