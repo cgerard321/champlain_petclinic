@@ -66,7 +66,7 @@ pub fn stage() -> AdHoc {
         let files_port: DynFilesPort = Arc::new(FilesService::new(storage.clone()));
         let users_port: DynUsersPort = Arc::new(UsersService::new(dyn_user_repo.clone()));
 
-        if let Err(e) = add_default_user(&users_port).await {
+        if let Err(e) = add_default_user(&users_port, &pool).await {
             log::error!("Failed to insert default user: {e}");
         }
 
@@ -105,14 +105,29 @@ async fn add_default_roles(pool: &MySqlPool) -> Result<(), sqlx::Error> {
     Ok(())
 }
 
-async fn add_default_user(user_port: &DynUsersPort) -> Result<(), sqlx::Error> {
+async fn add_default_user(user_port: &DynUsersPort, pool: &MySqlPool) -> Result<(), sqlx::Error> {
     let admin_email =
         std::env::var("DEFAULT_ADMIN_EMAIL").expect("Missing DEFAULT_ADMIN_EMAIL env var");
+
+    //Check if default user exists
+    let row = sqlx::query("SELECT * FROM users WHERE email = ?")
+        .bind(&admin_email)
+        .fetch_optional(pool)
+        .await?;
+
+    if row.is_some() {
+        return Ok(());
+    }
 
     let admin_password =
         std::env::var("DEFAULT_ADMIN_PASSWORD").expect("Missing DEFAULT_ADMIN_PASSWORD env var");
 
-    let admin_roles = HashSet::from([SUDO_USER_UUID, ADMIN_ROLE_UUID, READER_ROLE_UUID, EDITOR_ROLE_UUID]);
+    let admin_roles = HashSet::from([
+        SUDO_USER_UUID,
+        ADMIN_ROLE_UUID,
+        READER_ROLE_UUID,
+        EDITOR_ROLE_UUID,
+    ]);
 
     let params = UserCreationParams {
         email: admin_email,

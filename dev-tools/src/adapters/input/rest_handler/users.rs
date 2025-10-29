@@ -4,7 +4,7 @@ use crate::adapters::input::rest_handler::contracts::user_contracts::user::{
 };
 use crate::application::ports::input::user_port::DynUsersPort;
 use crate::application::services::users::params::UserCreationParams;
-use crate::core::config::{ADMIN_ROLE_UUID, SUDO_USER_UUID};
+use crate::core::config::SUDO_USER_UUID;
 use crate::core::error::AppResult;
 use rocket::http::Status;
 use rocket::serde::json::Json;
