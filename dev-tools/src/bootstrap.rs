@@ -83,18 +83,9 @@ async fn add_default_roles(pool: &MySqlPool) -> Result<(), sqlx::Error> {
     // TODO : Add role repo
     // Since I don't see a foreseeable future of having a role repo
     // I'm just going to hardcode the roles here.
-    let admin = Uuid::parse_str(ADMIN_ROLE_UUID)
-        .expect("Invalid UUID")
-        .hyphenated()
-        .to_string();
-    let reader = Uuid::parse_str(READER_ROLE_UUID)
-        .expect("Invalid UUID")
-        .hyphenated()
-        .to_string();
-    let editor = Uuid::parse_str(EDITOR_ROLE_UUID)
-        .expect("Invalid UUID")
-        .hyphenated()
-        .to_string();
+    let admin = ADMIN_ROLE_UUID.hyphenated().to_string();
+    let reader = READER_ROLE_UUID.hyphenated().to_string();
+    let editor = EDITOR_ROLE_UUID.hyphenated().to_string();
 
     sqlx::query(
         r#"
@@ -120,7 +111,7 @@ async fn add_default_user(user_port: &DynUsersPort) -> Result<(), sqlx::Error> {
     let admin_password =
         std::env::var("DEFAULT_ADMIN_PASSWORD").expect("Missing DEFAULT_ADMIN_PASSWORD env var");
 
-    let admin_roles = HashSet::from([Uuid::parse_str(ADMIN_ROLE_UUID).unwrap()]);
+    let admin_roles = HashSet::from([ADMIN_ROLE_UUID]);
 
     let params = UserCreationParams {
         email: admin_email,
