@@ -4,6 +4,8 @@ pub mod error;
 mod files;
 mod users;
 
+mod contracts;
+mod mappers;
 mod session_guard;
 
 pub fn routes() -> Vec<rocket::Route> {
@@ -14,6 +16,5 @@ pub fn routes() -> Vec<rocket::Route> {
         auth::login,
         auth::logout,
         users::add_user,
-        users::me,
     ]
 }

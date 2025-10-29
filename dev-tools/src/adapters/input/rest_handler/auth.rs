@@ -1,19 +1,23 @@
 use crate::application::ports::input::auth_port::DynAuthPort;
+use crate::application::services::auth::params::UserLoginParams;
 use crate::core::error::{AppError, AppResult};
-use crate::domain::models::user::LoginReq;
 use rocket::http::{Cookie, CookieJar, SameSite};
 use rocket::serde::json::Json;
 use rocket::{http::Status, post, State};
 use time::OffsetDateTime;
 use uuid::Uuid;
+use crate::adapters::input::rest_handler::contracts::user_contracts::user::UserLoginRequestContract;
 
 #[post("/login", data = "<req>")]
 pub async fn login(
     uc: &State<DynAuthPort>,
-    req: Json<LoginReq>,
+    req: Json<UserLoginRequestContract>,
     jar: &CookieJar<'_>,
 ) -> AppResult<Status> {
-    let new_session = uc.authenticate(&req.email, &req.password).await.map(Json)?;
+    let new_session = uc
+        .authenticate(UserLoginParams::from(req.into_inner()))
+        .await
+        .map(Json)?;
 
     let expires_offset =
         OffsetDateTime::from_unix_timestamp(new_session.expires_at.and_utc().timestamp())

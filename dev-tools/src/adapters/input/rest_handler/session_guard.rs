@@ -1,12 +1,13 @@
 use crate::application::ports::input::auth_port::DynAuthPort;
 use crate::core::error::AppError;
-use crate::domain::models::user::AuthenticatedUser;
 use rocket::{
     http::Status,
     request::{FromRequest, Outcome, Request},
     State,
 };
 use uuid::Uuid;
+
+pub struct AuthenticatedUser {}
 
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for AuthenticatedUser {
@@ -29,7 +30,7 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
         };
 
         match uc.validate_session(sid).await {
-            Ok(user_id) => Outcome::Success(AuthenticatedUser { user_id }),
+            Ok(..) => Outcome::Success(AuthenticatedUser {}),
             Err(AppError::NotFound(_)) | Err(AppError::Unauthorized) => {
                 Outcome::Error((Status::Unauthorized, ()))
             }

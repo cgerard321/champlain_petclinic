@@ -1,7 +1,7 @@
+use crate::adapters::input::rest_handler::contracts::file_contracts::bucket::BucketResponseContract;
+use crate::adapters::input::rest_handler::session_guard::AuthenticatedUser;
 use crate::application::ports::input::files_port::DynFilesPort;
 use crate::core::error::AppResult;
-use crate::domain::models::bucket::BucketInfo;
-use crate::domain::models::user::AuthenticatedUser;
 use rocket::serde::json::Json;
 use rocket::State;
 
@@ -9,6 +9,7 @@ use rocket::State;
 pub async fn read_buckets(
     uc: &State<DynFilesPort>,
     _user: AuthenticatedUser,
-) -> AppResult<Json<Vec<BucketInfo>>> {
-    Ok(Json(uc.fetch_buckets().await?))
+) -> AppResult<Json<Vec<BucketResponseContract>>> {
+    let buckets = uc.fetch_buckets().await?;
+    Ok(Json(buckets.into_iter().map(BucketResponseContract::from).collect()))
 }
