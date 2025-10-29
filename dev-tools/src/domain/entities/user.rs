@@ -14,5 +14,5 @@ pub struct UserEntity {
 pub struct RoleEntity {
     pub role_id: Uuid,
     pub name: String,
-    pub description: String,
+    pub description: Option<String>,
 }
