@@ -4,7 +4,7 @@ use crate::adapters::input::rest_handler::contracts::user_contracts::user::{
 };
 use crate::application::ports::input::user_port::DynUsersPort;
 use crate::application::services::users::params::UserCreationParams;
-use crate::core::config::SUDO_USER_UUID;
+use crate::core::config::SUDO_ROLE_UUID;
 use crate::core::error::AppResult;
 use rocket::http::Status;
 use rocket::serde::json::Json;
@@ -16,7 +16,7 @@ pub async fn add_user(
     new_user: Json<UserSignUpRequestContract>,
     user: AuthenticatedUser,
 ) -> AppResult<(Status, Json<UserResponseContract>)> {
-    require_any(&user, &[SUDO_USER_UUID])?;
+    require_any(&user, &[SUDO_ROLE_UUID])?;
 
     let new_user_params = UserCreationParams::from(new_user.into_inner());
 
