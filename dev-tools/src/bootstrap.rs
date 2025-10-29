@@ -109,7 +109,7 @@ async fn add_default_user(user_port: &DynUsersPort, pool: &MySqlPool) -> Result<
     let admin_email =
         std::env::var("DEFAULT_ADMIN_EMAIL").expect("Missing DEFAULT_ADMIN_EMAIL env var");
 
-    //Check if default user exists
+    // Check if default user exists
     let row = sqlx::query("SELECT * FROM users WHERE email = ?")
         .bind(&admin_email)
         .fetch_optional(pool)

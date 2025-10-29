@@ -75,9 +75,13 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
                     roles: role_ids,
                 })
             }
-            Err(AppError::Unauthorized) | Err(AppError::Forbidden) | Err(AppError::NotFound(_)) => {
+            Err(AppError::Unauthorized) | Err(AppError::NotFound(_)) => {
                 log::info!("User isn't authenticated");
                 Outcome::Error((Status::Unauthorized, ()))
+            }
+            Err(AppError::Forbidden) => {
+                log::info!("User is authenticated but not authorized");
+                Outcome::Error((Status::Forbidden, ()))
             }
             Err(error) => {
                 log::error!("validate_session internal error: {:?}", error);
