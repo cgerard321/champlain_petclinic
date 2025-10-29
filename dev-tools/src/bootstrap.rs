@@ -11,6 +11,7 @@ use crate::application::services::auth::service::AuthService;
 use crate::application::services::files::service::FilesService;
 use crate::application::services::users::params::UserCreationParams;
 use crate::application::services::users::service::UsersService;
+use crate::core::config::{ADMIN_ROLE_UUID, EDITOR_ROLE_UUID, READER_ROLE_UUID};
 use rocket::fairing::AdHoc;
 use sqlx::mysql::MySqlPoolOptions;
 use sqlx::MySqlPool;
@@ -18,8 +19,6 @@ use std::collections::HashSet;
 use std::string::ToString;
 use std::sync::Arc;
 use uuid::Uuid;
-
-const ADMIN_ROLE_UUID: &str = "a48d7b18-ceb7-435b-b8ff-b28531f1a09f";
 
 pub fn stage() -> AdHoc {
     AdHoc::on_ignite("SQLx (MySQL)", |rocket| async move {
@@ -86,7 +85,11 @@ async fn add_default_roles(pool: &MySqlPool) -> Result<(), sqlx::Error> {
         .expect("Invalid UUID")
         .hyphenated()
         .to_string();
-    let reader = Uuid::parse_str("51f20832-79a3-4c05-b4da-ca175cba2ffc")
+    let reader = Uuid::parse_str(READER_ROLE_UUID)
+        .expect("Invalid UUID")
+        .hyphenated()
+        .to_string();
+    let editor = Uuid::parse_str(EDITOR_ROLE_UUID)
         .expect("Invalid UUID")
         .hyphenated()
         .to_string();
@@ -95,18 +98,20 @@ async fn add_default_roles(pool: &MySqlPool) -> Result<(), sqlx::Error> {
         r#"
         INSERT IGNORE INTO roles (id, code, description)
         VALUES (?, 'ADMIN',  'Administrator'),
-               (?, 'READER', 'Read-only')
+               (?, 'READER', 'Read-only'),
+               (?, 'EDITOR', 'Editor');
         "#,
     )
     .bind(&admin)
     .bind(&reader)
+    .bind(&editor)
     .execute(pool)
     .await?;
 
     Ok(())
 }
 
-async fn add_default_user(user_port: &DynUsersPort) -> () {
+async fn add_default_user(user_port: &DynUsersPort) {
     let admin_email =
         std::env::var("DEFAULT_ADMIN_EMAIL").expect("Missing DEFAULT_ADMIN_EMAIL env var");
 
@@ -125,5 +130,5 @@ async fn add_default_user(user_port: &DynUsersPort) -> () {
     user_port
         .create_user(params)
         .await
-        .expect("TODO: panic message");
+        .expect("Failed to create default admin user");
 }
