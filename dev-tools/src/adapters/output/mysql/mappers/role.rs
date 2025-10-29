@@ -7,7 +7,7 @@ impl From<Role> for RoleEntity {
         Self {
             role_id: Uuid::from(role.id),
             name: role.code,
-            description: role.description,
+            description: Option::from(role.description),
         }
     }
 }
