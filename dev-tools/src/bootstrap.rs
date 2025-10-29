@@ -18,7 +18,6 @@ use sqlx::MySqlPool;
 use std::collections::HashSet;
 use std::string::ToString;
 use std::sync::Arc;
-use uuid::Uuid;
 
 pub fn stage() -> AdHoc {
     AdHoc::on_ignite("SQLx (MySQL)", |rocket| async move {
