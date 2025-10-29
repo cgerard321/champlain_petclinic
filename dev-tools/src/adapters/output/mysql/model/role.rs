@@ -5,5 +5,5 @@ use uuid::fmt::Hyphenated;
 pub struct Role {
     pub id: Hyphenated,
     pub code: String,
-    pub description: String,
+    pub description: Option<String>,
 }
