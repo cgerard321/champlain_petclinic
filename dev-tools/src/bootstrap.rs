@@ -11,12 +11,11 @@ use crate::application::services::auth::service::AuthService;
 use crate::application::services::files::service::FilesService;
 use crate::application::services::users::params::UserCreationParams;
 use crate::application::services::users::service::UsersService;
-use crate::core::config::{ADMIN_ROLE_UUID, EDITOR_ROLE_UUID, READER_ROLE_UUID};
+use crate::core::config::{ADMIN_ROLE_UUID, EDITOR_ROLE_UUID, READER_ROLE_UUID, SUDO_USER_UUID};
 use rocket::fairing::AdHoc;
 use sqlx::mysql::MySqlPoolOptions;
 use sqlx::MySqlPool;
 use std::collections::HashSet;
-use std::string::ToString;
 use std::sync::Arc;
 
 pub fn stage() -> AdHoc {
@@ -82,6 +81,7 @@ async fn add_default_roles(pool: &MySqlPool) -> Result<(), sqlx::Error> {
     // TODO : Add role repo
     // Since I don't see a foreseeable future of having a role repo
     // I'm just going to hardcode the roles here.
+    let sudo = SUDO_USER_UUID.hyphenated().to_string();
     let admin = ADMIN_ROLE_UUID.hyphenated().to_string();
     let reader = READER_ROLE_UUID.hyphenated().to_string();
     let editor = EDITOR_ROLE_UUID.hyphenated().to_string();
@@ -89,11 +89,13 @@ async fn add_default_roles(pool: &MySqlPool) -> Result<(), sqlx::Error> {
     sqlx::query(
         r#"
         INSERT IGNORE INTO roles (id, code, description)
-        VALUES (?, 'ADMIN',  'Administrator'),
+        VALUES (?, 'SUDO',   'Super user'),
+               (?, 'ADMIN',  'Administrator'),
                (?, 'READER', 'Read-only'),
                (?, 'EDITOR', 'Editor');
         "#,
     )
+    .bind(&sudo)
     .bind(&admin)
     .bind(&reader)
     .bind(&editor)
@@ -110,7 +112,7 @@ async fn add_default_user(user_port: &DynUsersPort) -> Result<(), sqlx::Error> {
     let admin_password =
         std::env::var("DEFAULT_ADMIN_PASSWORD").expect("Missing DEFAULT_ADMIN_PASSWORD env var");
 
-    let admin_roles = HashSet::from([ADMIN_ROLE_UUID]);
+    let admin_roles = HashSet::from([SUDO_USER_UUID, ADMIN_ROLE_UUID, READER_ROLE_UUID, EDITOR_ROLE_UUID]);
 
     let params = UserCreationParams {
         email: admin_email,
