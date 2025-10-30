@@ -51,7 +51,7 @@ pub fn stage() -> AdHoc {
         // MinIO
         let store = MinioStore::from_env()
             .map_err(|e| {
-                eprintln!("Fatal MinIO init error: {e}");
+                log::error!("Failed to create MinIO client: {e}");
                 e
             })
             .expect("MinIO config must be valid at startup");
