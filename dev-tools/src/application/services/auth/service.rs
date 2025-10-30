@@ -5,7 +5,7 @@ use crate::application::services::auth::authenticate::authenticate;
 use crate::application::services::auth::find_session_by_id::find_session_by_id;
 use crate::application::services::auth::logout::remove_session;
 use crate::application::services::auth::params::UserLoginParams;
-use crate::core::error::AppResult;
+use crate::core::error::{AppError, AppResult};
 use crate::domain::entities::session::SessionEntity;
 use crate::domain::entities::user::UserEntity;
 use uuid::Uuid;
@@ -42,6 +42,15 @@ impl AuthPort for AuthService {
     async fn validate_session(&self, session_id: Uuid) -> AppResult<UserEntity> {
         log::info!("Validating session {}", session_id);
         let session = find_session_by_id(&self.auth_repo, session_id).await?;
+
+        log::info!("Session found: {:?}", session);
+
+        if session.is_expired() {
+            log::info!("Session {} is expired", session_id);
+            return Err(AppError::Unauthorized);
+        }
+
+        log::info!("Session {} is valid", session_id);
 
         Ok(self.users_repo.get_user_by_id(session.user_id).await?)
     }
