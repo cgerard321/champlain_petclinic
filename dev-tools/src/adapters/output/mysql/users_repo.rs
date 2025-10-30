@@ -74,6 +74,7 @@ impl UsersRepoPort for MySqlUsersRepo {
             .execute(&mut *tx)
             .await
             {
+                tx.rollback().await.map_err(|e| map_sqlx_err(e, "User"))?;
                 return Err(map_sqlx_err(e, "User"));
             }
         }
