@@ -136,10 +136,10 @@ async fn add_default_user(user_port: &DynUsersPort, pool: &MySqlPool) -> Result<
         roles: admin_roles,
     };
 
-    user_port
-        .create_user(params)
-        .await
-        .expect("Failed to create default admin user");
+    let _ = user_port.create_user(params).await.map_err(|e| {
+        log::error!("Failed to create default user: {e}");
+        e
+    });
 
     Ok(())
 }
