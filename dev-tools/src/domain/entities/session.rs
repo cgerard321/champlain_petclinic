@@ -12,5 +12,5 @@ pub struct SessionEntity {
 impl SessionEntity {
     pub fn is_expired(&self) -> bool {
         self.expires_at < chrono::Utc::now().naive_utc()
-    }   
+    }
 }

@@ -75,13 +75,14 @@ impl UsersRepoPort for MySqlUsersRepo {
             .await
             {
                 if let sqlx::Error::Database(db_err) = &e
-                    && db_err.kind() == sqlx::error::ErrorKind::ForeignKeyViolation {
-                        tx.rollback().await.ok();
-                        return Err(AppError::BadRequest(format!(
-                            "Unknown role id: {}",
-                            rid_str
-                        )));
-                    }
+                    && db_err.kind() == sqlx::error::ErrorKind::ForeignKeyViolation
+                {
+                    tx.rollback().await.ok();
+                    return Err(AppError::BadRequest(format!(
+                        "Unknown role id: {}",
+                        rid_str
+                    )));
+                }
 
                 tx.rollback().await.ok();
                 return Err(map_sqlx_err(e, "Role"));
