@@ -1,7 +1,11 @@
 x-healthchecks:
   springboot: &springboot
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/actuator/health || curl -fsS http://localhost:8080/health"]
+      test:
+        [
+          "CMD-SHELL",
+          "curl -fsS http://localhost:8080/actuator/health || curl -fsS http://localhost:8080/health",
+        ]
       interval: 10s
       timeout: 3s
       retries: 10
@@ -49,7 +53,11 @@ x-healthchecks:
 
   mongo: &mongo
     healthcheck:
-      test: ["CMD-SHELL", "mongosh --quiet --eval 'db.runCommand({ ping: 1 }).ok' || mongo --quiet --eval 'db.runCommand({ ping: 1 }).ok'"]
+      test:
+        [
+          "CMD-SHELL",
+          "mongosh --quiet --eval 'db.runCommand({ ping: 1 }).ok' || mongo --quiet --eval 'db.runCommand({ ping: 1 }).ok'",
+        ]
       interval: 15s
       timeout: 5s
       retries: 5
@@ -333,7 +341,7 @@ services:
     image: dbgate/dbgate:latest
     container_name: dbgate
     ports:
-      - "8030:3000"     # open http://localhost:8030
+      - "8030:3000" # open http://localhost:8030
     restart: unless-stopped
     volumes:
       - ./data/dbgate:/root/.dbgate
@@ -415,4 +423,23 @@ services:
       mongo-products:
         condition: service_healthy
       mongo-carts:
+        condition: service_healthy
+
+  billingscheduler:
+    build:
+      context: ./billing-service/BillingScheduler
+      dockerfile: Dockerfile
+    container_name: billingscheduler
+    restart: unless-stopped
+    environment:
+      MONGO_HOST: mongo-billing
+      MONGO_PORT: 27017
+      MONGO_DB: billings
+      MONGO_USER: root
+      MONGO_PASS: password
+      MONGO_AUTH_DB: admin
+    depends_on:
+      billing-service:
+        condition: service_healthy
+      mongo-billing:
         condition: service_healthy
