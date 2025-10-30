@@ -9,7 +9,7 @@ use crate::adapters::output::mysql::model::role::Role;
 use crate::adapters::output::mysql::model::user::User;
 use crate::application::ports::output::user_repo_port::UsersRepoPort;
 use crate::application::services::auth::projections::AuthProjection;
-use crate::core::error::AppResult;
+use crate::core::error::{AppError, AppResult};
 use crate::domain::entities::user::{RoleEntity, UserEntity};
 
 pub struct MySqlUsersRepo {
@@ -32,6 +32,12 @@ impl UsersRepoPort for MySqlUsersRepo {
         display_name: &str,
         user_roles: HashSet<Uuid>,
     ) -> AppResult<UserEntity> {
+        if user_roles.is_empty() {
+            return Err(AppError::BadRequest(
+                "At least one role must be provided".to_string(),
+            ));
+        }
+
         log::info!("Inserting user: {:?}", id);
         let mut tx = self
             .pool
@@ -57,23 +63,34 @@ impl UsersRepoPort for MySqlUsersRepo {
 
         for role_id in user_roles {
             let rid_str = Hyphenated::from_uuid(role_id).to_string();
-            sqlx::query(
+            if let Err(e) = sqlx::query(
                 r#"
-                INSERT INTO user_roles (user_id, role_id)
-                VALUES (?, ?)
-                "#,
+        INSERT INTO user_roles (user_id, role_id)
+        VALUES (?, ?)
+        "#,
             )
             .bind(&user_id)
             .bind(&rid_str)
             .execute(&mut *tx)
             .await
-            .map_err(|e| map_sqlx_err(e, "User"))?;
+            {
+                if let sqlx::Error::Database(db_err) = &e {
+                    if db_err.kind() == sqlx::error::ErrorKind::ForeignKeyViolation {
+                        tx.rollback().await.ok();
+                        return Err(AppError::BadRequest(format!(
+                            "Unknown role id: {}",
+                            rid_str
+                        )));
+                    }
+                }
+                tx.rollback().await.ok();
+                return Err(map_sqlx_err(e, "Role"));
+            }
         }
 
         tx.commit().await.map_err(|e| map_sqlx_err(e, "User"))?;
 
-        let user = self.get_user_by_id(id).await?;
-        Ok(user)
+        Ok(self.get_user_by_id(id).await?)
     }
     async fn get_user_by_id(&self, id: Uuid) -> AppResult<UserEntity> {
         log::info!("Finding user: {:?}", id);
@@ -122,7 +139,7 @@ impl UsersRepoPort for MySqlUsersRepo {
     }
 
     async fn get_roles_for_user(&self, user_id: Uuid) -> AppResult<HashSet<RoleEntity>> {
-        let user_id = uuid::fmt::Hyphenated::from_uuid(user_id).to_string();
+        let user_id = Hyphenated::from_uuid(user_id).to_string();
 
         let rows: Vec<Role> = sqlx::query_as::<_, Role>(
             r#"
