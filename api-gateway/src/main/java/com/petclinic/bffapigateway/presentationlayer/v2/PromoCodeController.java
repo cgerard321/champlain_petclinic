@@ -65,7 +65,7 @@ public class PromoCodeController {
 
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ALL,Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.ALL})
     @GetMapping(value = "/actives", produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<PromoCodeResponseDTO> getActivePromos() {
         return cartServiceClient.getActivePromos();
