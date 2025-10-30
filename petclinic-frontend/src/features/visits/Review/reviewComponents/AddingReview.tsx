@@ -65,8 +65,6 @@ const AddingReview: React.FC = (): JSX.Element => {
     }));
   };
 
-
-
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
     if (!review.review?.trim()) newErrors.review = 'Review text is required';
