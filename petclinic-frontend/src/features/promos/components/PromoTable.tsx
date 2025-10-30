@@ -13,8 +13,8 @@ export default function PromoListTable(): JSX.Element {
 
   const fetchPromos = async (): Promise<void> => {
     try {
-      const response = PromoApi.fetchPromos();
-      setPromos(await response);
+      const data = await PromoApi.fetchActivePromos();
+      setPromos(data);
     } catch (err) {
       console.error('Error fetching promos:', err);
       setError('Failed to fetch promos');
