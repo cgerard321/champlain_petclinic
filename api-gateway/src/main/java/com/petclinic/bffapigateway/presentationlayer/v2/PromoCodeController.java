@@ -65,12 +65,13 @@ public class PromoCodeController {
 
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ALL,Roles.ADMIN})
     @GetMapping(value = "/actives", produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<PromoCodeResponseDTO> getActivePromos() {
         return cartServiceClient.getActivePromos();
     }
 
-
+    @SecuredEndpoint(allowedRoles = {Roles.ALL})
     @GetMapping(value = "/validate/{promoCode}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<PromoCodeResponseDTO>> validatePromoCode(@PathVariable String promoCode) {
         return cartServiceClient.validatePromoCode(promoCode)
