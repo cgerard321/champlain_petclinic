@@ -100,12 +100,14 @@ impl DockerAPIPort for BollardDockerAPI {
 
         let id = BollardDockerAPI::resolve_id(&docker, container_name).await?;
 
-        let options = Some(RestartContainerOptions {
-            ..Default::default()
-        });
+        // If we want to pass options to the restart, we can do it like this:
+        // let options = Some(RestartContainerOptions {
+        //     ..Default::default()
+        // });
+        // For now, we just use the default options.
 
         Ok(docker
-            .restart_container(id.as_str(), options)
+            .restart_container(id.as_str(), None::<RestartContainerOptions>)
             .await
             .map_err(|e| {
                 log::error!("Error restarting container: {e}");
