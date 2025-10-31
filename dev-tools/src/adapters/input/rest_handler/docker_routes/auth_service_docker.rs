@@ -10,7 +10,7 @@ use crate::core::error::AppResult;
 use rocket::State;
 use rocket_ws::{Channel, WebSocket};
 
-#[get("/docker/logs/ws/auth-service?<number_of_lines>")]
+#[get("/docker/ws/auth-service/logs?<number_of_lines>")]
 pub fn auth_service_logs(
     user: AuthenticatedUser,
     ws: WebSocket,
@@ -22,7 +22,7 @@ pub fn auth_service_logs(
     ws_logs_for_container(ws, docker, "auth-service", number_of_lines)
 }
 
-#[get("/docker/logs/ws/auth-service-db?<number_of_lines>")]
+#[get("/docker/ws/auth-service-db/logs?<number_of_lines>")]
 pub fn auth_service_db_logs(
     user: AuthenticatedUser,
     ws: WebSocket,
