@@ -29,7 +29,7 @@ pub fn customers_service_db_logs(
 ) -> AppResult<Channel<'static>> {
     ensure_logs_permissions(&user, Option::from(CUSTOMERS_SERVICE_DEV_ROLE))?;
 
-    ws_logs_for_container(ws, docker, "mongo-visit", number_of_lines)
+    ws_logs_for_container(ws, docker, "mongo-customers", number_of_lines)
 }
 
 #[post("/containers/customers-service/restart")]

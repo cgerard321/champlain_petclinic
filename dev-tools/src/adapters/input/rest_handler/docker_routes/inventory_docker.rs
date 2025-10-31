@@ -29,7 +29,7 @@ pub fn inventory_service_db_logs(
 ) -> AppResult<Channel<'static>> {
     ensure_logs_permissions(&user, Option::from(INVENTORY_SERVICE_DEV_ROLE))?;
 
-    ws_logs_for_container(ws, docker, "mongo-visit", number_of_lines)
+    ws_logs_for_container(ws, docker, "mongo-inventory", number_of_lines)
 }
 
 #[post("/containers/inventory-service/restart")]

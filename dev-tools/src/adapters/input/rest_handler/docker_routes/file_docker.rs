@@ -28,7 +28,7 @@ pub fn files_service_db_logs(
 ) -> AppResult<Channel<'static>> {
     ensure_logs_permissions(&user, None)?;
 
-    ws_logs_for_container(ws, docker, "mongo-visit", number_of_lines)
+    ws_logs_for_container(ws, docker, "mysql-files", number_of_lines)
 }
 
 #[post("/containers/files-service/restart")]

@@ -29,7 +29,7 @@ pub fn cart_service_db_logs(
 ) -> AppResult<Channel<'static>> {
     ensure_logs_permissions(&user, Option::from(CART_SERVICE_DEV_ROLE))?;
 
-    ws_logs_for_container(ws, docker, "mongo-visit", number_of_lines)
+    ws_logs_for_container(ws, docker, "mongo-carts", number_of_lines)
 }
 
 #[post("/containers/cart-service/restart")]
@@ -49,5 +49,5 @@ pub async fn restart_cart_service_db_container(
 ) -> AppResult<()> {
     ensure_restart_permissions(&user, Option::from(CART_SERVICE_DEV_ROLE))?;
 
-    docker.restart_container("mongo-cart").await
+    docker.restart_container("mongo-carts").await
 }
