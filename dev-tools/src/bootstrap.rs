@@ -75,8 +75,8 @@ pub fn stage() -> AdHoc {
         }
 
         // Docker
-        let docket_api: DynDockerAPI = Arc::new(BollardDockerAPI::new());
-        let docker_port: DynDockerPort = Arc::new(DockerService::new(docket_api.clone()));
+        let docker_api: DynDockerAPI = Arc::new(BollardDockerAPI::new());
+        let docker_port: DynDockerPort = Arc::new(DockerService::new(docker_api.clone()));
 
         rocket
             .manage(auth_port)

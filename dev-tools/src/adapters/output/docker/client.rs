@@ -1,9 +1,10 @@
 use crate::application::ports::output::docker_api::DockerAPIPort;
 use crate::core::error::{AppError, AppResult};
 use crate::domain::entities::docker::DockerLogEntity;
-use bollard::query_parameters::{ListContainersOptions, LogsOptions};
+use bollard::query_parameters::{ListContainersOptions, LogsOptions, RestartContainerOptions};
 use bollard::Docker;
 use futures::{Stream, TryStreamExt};
+use std::collections::HashMap;
 use std::pin::Pin;
 
 pub struct BollardDockerAPI {}
@@ -13,12 +14,16 @@ impl BollardDockerAPI {
         Self {}
     }
 
-    async fn resolve_id(docker: &Docker, target: &str) -> Result<String, AppError> {
-        log::info!("Resolving container ID for {}", target);
+    async fn resolve_id(docker: &Docker, target_name: &str) -> Result<String, AppError> {
+        log::info!("Resolving container ID for {}", target_name);
+
+        let mut filters: HashMap<String, Vec<String>> = HashMap::new();
+        filters.insert("name".to_string(), vec![target_name.to_string()]);
 
         let list = docker
             .list_containers(Some(ListContainersOptions {
                 all: true,
+                filters: Option::from(filters),
                 ..Default::default()
             }))
             .await
@@ -29,8 +34,11 @@ impl BollardDockerAPI {
 
         log::info!("Found {} containers", list.len());
 
+        // We expect only one container to match the name so we take the first one
+        // if we have more, we just ignore the rest since that is probably an
+        // orphan container. If we ever do scale the container count, we will
+        // need to handle this properly.
         if let Some(c) = list.into_iter().next() {
-            log::info!("Found container: {:?}", c.id);
             return Ok(c.id.unwrap_or_default());
         }
 
@@ -38,7 +46,7 @@ impl BollardDockerAPI {
 
         Err(AppError::NotFound(format!(
             "Container not found: {}",
-            target
+            target_name
         )))
     }
 }
@@ -48,6 +56,7 @@ impl DockerAPIPort for BollardDockerAPI {
     async fn stream_container_logs(
         &self,
         container_name: &str,
+        number_of_lines: Option<usize>,
     ) -> AppResult<Pin<Box<dyn Stream<Item = Result<DockerLogEntity, AppError>> + Send>>> {
         log::info!("Streaming logs for container: {}", container_name);
 
@@ -58,15 +67,9 @@ impl DockerAPIPort for BollardDockerAPI {
 
         log::info!("Connected to Docker");
 
-        let id = BollardDockerAPI::resolve_id(&docker, container_name)
-            .await
-            .map_err(|e| {
-                match &e {
-                    AppError::NotFound(msg) => log::warn!("{msg}"),
-                    _ => log::error!("resolve_id error: {e}"),
-                }
-                e
-            })?;
+        let id = BollardDockerAPI::resolve_id(&docker, container_name).await?;
+
+        let number_of_lines = number_of_lines.unwrap_or(10).to_string();
 
         let log_stream = docker
             .logs(
@@ -76,7 +79,7 @@ impl DockerAPIPort for BollardDockerAPI {
                     stdout: true,
                     stderr: true,
                     timestamps: true,
-                    tail: "10".into(),
+                    tail: number_of_lines,
                     ..Default::default()
                 }),
             )
@@ -87,5 +90,26 @@ impl DockerAPIPort for BollardDockerAPI {
             });
 
         Ok(Box::pin(log_stream))
+    }
+
+    async fn restart_container(&self, container_name: &str) -> AppResult<()> {
+        let docker = Docker::connect_with_unix_defaults().map_err(|e| {
+            log::error!("Failed to connect to Docker socket: {e}");
+            AppError::Internal
+        })?;
+
+        let id = BollardDockerAPI::resolve_id(&docker, container_name).await?;
+
+        let options = Some(RestartContainerOptions {
+            ..Default::default()
+        });
+
+        Ok(docker
+            .restart_container(id.as_str(), options)
+            .await
+            .map_err(|e| {
+                log::error!("Error restarting container: {e}");
+                AppError::Internal
+            })?)
     }
 }

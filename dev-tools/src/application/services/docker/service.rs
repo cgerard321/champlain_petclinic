@@ -17,21 +17,17 @@ impl DockerService {
 
 #[async_trait::async_trait]
 impl DockerPort for DockerService {
-    async fn stream_auth_service_logs(
+    async fn stream_container_logs(
         &self,
+        container_name: &str,
+        number_of_lines: Option<usize>,
     ) -> AppResult<Pin<Box<dyn Stream<Item = Result<DockerLogEntity, AppError>> + Send>>> {
-        self.docker_api.stream_container_logs("auth_service").await
+        self.docker_api
+            .stream_container_logs(container_name, number_of_lines)
+            .await
     }
 
-    async fn stop_container(&self, container_id: &str) -> AppResult<()> {
-        todo!()
-    }
-
-    async fn start_container(&self, container_id: &str) -> AppResult<()> {
-        todo!()
-    }
-
-    async fn restart_container(&self, container_id: &str) -> AppResult<()> {
-        todo!()
+    async fn restart_container(&self, container_name: &str) -> AppResult<()> {
+        self.docker_api.restart_container(container_name).await
     }
 }
