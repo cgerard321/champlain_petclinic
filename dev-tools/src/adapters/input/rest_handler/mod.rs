@@ -6,6 +6,7 @@ mod users;
 
 mod auth_guard;
 mod contracts;
+mod docker;
 mod mappers;
 
 pub fn routes() -> Vec<rocket::Route> {
@@ -16,5 +17,6 @@ pub fn routes() -> Vec<rocket::Route> {
         auth::login,
         auth::logout,
         users::add_user,
+        docker::auth_service_logs,
     ]
 }

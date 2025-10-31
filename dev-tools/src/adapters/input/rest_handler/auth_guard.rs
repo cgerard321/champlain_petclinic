@@ -36,7 +36,7 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
             }
         };
 
-        let uc = match req.guard::<&State<DynAuthPort>>().await {
+        let port = match req.guard::<&State<DynAuthPort>>().await {
             Outcome::Success(state) => state,
             Outcome::Error(error) => {
                 log::error!("DynAuthPort state guard failed: {:?}", error);
@@ -61,7 +61,7 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
             }
         };
 
-        match uc.validate_session(sid).await {
+        match port.validate_session(sid).await {
             Ok(user) => {
                 log::info!("User {} authenticated", user.email);
                 let role_ids: HashSet<Uuid> = user

@@ -12,7 +12,7 @@ use rocket::{post, State};
 
 #[post("/users", format = "application/json", data = "<new_user>")]
 pub async fn add_user(
-    uc: &State<DynUsersPort>,
+    port: &State<DynUsersPort>,
     new_user: Json<UserSignUpRequestContract>,
     user: AuthenticatedUser,
 ) -> AppResult<(Status, Json<UserResponseContract>)> {
@@ -23,7 +23,7 @@ pub async fn add_user(
     Ok((
         Status::Created,
         Json(UserResponseContract::from(
-            uc.create_user(new_user_params).await?,
+            port.create_user(new_user_params).await?,
         )),
     ))
 }

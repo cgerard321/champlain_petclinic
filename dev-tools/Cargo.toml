@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 rocket = { version = "0.5.1", features = ["json", "secrets"] }
+rocket_ws = "0.1.1"
 minio = "0.3.0"
 serde = { version = "1.0.228", features = ["derive"] }
 validator = { version = "0.20.0", features = ["derive"] }
@@ -23,3 +24,5 @@ futures = "0.3.31"
 veil = "0.2.0"
 log = "0.4.28"
 env_logger = "0.11.8"
+tokio = "1.48.0"
+bollard = "0.19.3"

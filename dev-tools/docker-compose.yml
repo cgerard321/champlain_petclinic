@@ -7,6 +7,8 @@ services:
         pkg: dev-tools
     ports:
       - "4242:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - MINIO_URL=petclinic-bucket.benmusicgeek.synology.me
       - DATABASE_URL=mysql://user:pwd@mysql-devtools:3306/devtools-db?ssl-mode=DISABLED
@@ -27,3 +29,26 @@ services:
       - MYSQL_DATABASE=devtools-db
       - MYSQL_USER=user
       - MYSQL_PASSWORD=pwd
+
+
+  auth-service:
+    build:
+      context: ../auth-service
+      dockerfile: Dockerfile
+      args:
+        pkg: auth-service
+    hostname: auth
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  mysql-auth:
+    image: mysql:5.7
+    platform: linux/amd64
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpwd
+      - MYSQL_DATABASE=auth-db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=pwd
+    volumes:
+      - ./data/mysql-auth:/var/lib/mysql-auth
+      - ./data/init.d:/docker-entrypoint-initdb.d
