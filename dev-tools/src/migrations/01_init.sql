@@ -31,7 +31,11 @@ CREATE TABLE IF NOT EXISTS roles
     code VARCHAR
 (
     64
-) NOT NULL UNIQUE
+) NOT NULL UNIQUE,
+    description VARCHAR
+(
+    255
+)
     );
 
 CREATE TABLE IF NOT EXISTS user_roles

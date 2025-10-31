@@ -14,6 +14,7 @@ mod domain;
 
 #[launch]
 fn rocket() -> _ {
+    env_logger::init();
     rocket::build()
         .attach(stage())
         .mount("/api/v1", routes())

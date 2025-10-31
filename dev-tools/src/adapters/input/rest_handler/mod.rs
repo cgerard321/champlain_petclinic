@@ -4,9 +4,9 @@ pub mod error;
 mod files;
 mod users;
 
+mod auth_guard;
 mod contracts;
 mod mappers;
-mod session_guard;
 
 pub fn routes() -> Vec<rocket::Route> {
     routes![

@@ -10,8 +10,12 @@ services:
     environment:
       - MINIO_URL=petclinic-bucket.benmusicgeek.synology.me
       - DATABASE_URL=mysql://user:pwd@mysql-devtools:3306/devtools-db?ssl-mode=DISABLED
+      - RUST_LOG=info
+      # TODO : In prod these will be in the stack.env file
       - PASSWORD_PEPPER=Ceramic1-Sultan-Zenith
       - ROCKET_SECRET_KEY=MEi/s8sSd6sbw+7acSBJv/Fk27+YL+/PAB8YZ25gydE=
+      - DEFAULT_ADMIN_EMAIL=admin@admin.com
+      - DEFAULT_ADMIN_PASSWORD=V1wjft2QXPUKYvLg
     env_file:
       - ../mailer.env
 
