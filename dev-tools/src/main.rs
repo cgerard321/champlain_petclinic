@@ -2,7 +2,7 @@
 extern crate rocket;
 
 use crate::adapters::input::rest_handler::error::register_catchers;
-use crate::adapters::input::rest_handler::routes;
+use crate::adapters::input::rest_handler::{routes, routes_docker};
 use bootstrap::stage;
 
 mod core;
@@ -18,5 +18,6 @@ fn rocket() -> _ {
     rocket::build()
         .attach(stage())
         .mount("/api/v1", routes())
+        .mount("/api/v1/docker", routes_docker())
         .register("/", register_catchers())
 }

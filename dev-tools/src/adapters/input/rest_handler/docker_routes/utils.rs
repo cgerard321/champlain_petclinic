@@ -6,6 +6,9 @@ use rocket::serde::json::serde_json;
 use rocket::State;
 use rocket_ws::stream::DuplexStream;
 use rocket_ws::{Channel, Message, WebSocket};
+use uuid::Uuid;
+use crate::adapters::input::rest_handler::auth_guard::{require_all, require_any, AuthenticatedUser};
+use crate::core::config::{ADMIN_ROLE_UUID, EDITOR_ROLE_UUID, READER_ROLE_UUID};
 
 pub fn ws_logs_for_container(
     ws: WebSocket,
@@ -77,4 +80,24 @@ pub async fn send_logs(
             }
         }
     }
+}
+
+pub fn ensure_logs_permissions(user: &AuthenticatedUser, extra_role: Option<Uuid>) -> AppResult<()> {
+    if let Some(sr) = extra_role {
+        require_any(user, &[ADMIN_ROLE_UUID, sr])?;
+    } else {
+        require_any(user, &[ADMIN_ROLE_UUID])?;
+    }
+    require_all(user, &[READER_ROLE_UUID])?;
+    Ok(())
+}
+
+pub fn ensure_restart_permissions(user: &AuthenticatedUser, service_role: Option<Uuid>) -> AppResult<()> {
+    if let Some(sr) = service_role {
+        require_any(user, &[ADMIN_ROLE_UUID, sr])?;
+    } else {
+        require_any(user, &[ADMIN_ROLE_UUID])?;
+    }
+    require_all(user, &[EDITOR_ROLE_UUID])?;
+    Ok(())
 }

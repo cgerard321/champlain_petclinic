@@ -49,6 +49,3 @@ services:
       - MYSQL_DATABASE=auth-db
       - MYSQL_USER=user
       - MYSQL_PASSWORD=pwd
-    volumes:
-      - ./data/mysql-auth:/var/lib/mysql-auth
-      - ./data/init.d:/docker-entrypoint-initdb.d

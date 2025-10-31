@@ -1,5 +1,3 @@
-use crate::adapters::input::rest_handler::docker_routes::auth_service_docker;
-
 mod auth;
 mod buckets;
 pub mod error;
@@ -19,9 +17,9 @@ pub fn routes() -> Vec<rocket::Route> {
         auth::login,
         auth::logout,
         users::add_user,
-        auth_service_docker::auth_service_logs,
-        auth_service_docker::auth_service_db_logs,
-        auth_service_docker::restart_auth_service_container,
-        auth_service_docker::restart_auth_service_db_container,
     ]
+}
+
+pub fn routes_docker() -> Vec<rocket::Route> {
+    docker_routes::docker_routes()
 }
