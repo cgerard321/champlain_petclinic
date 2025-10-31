@@ -1,14 +1,9 @@
-use crate::adapters::input::rest_handler::auth_guard::{
-    require_all, require_any, AuthenticatedUser,
-};
+use crate::adapters::input::rest_handler::auth_guard::AuthenticatedUser;
 use crate::adapters::input::rest_handler::docker_routes::utils::{
     ensure_logs_permissions, ensure_restart_permissions, ws_logs_for_container,
 };
 use crate::application::ports::input::docker_logs_port::DynDockerPort;
-use crate::core::config::{
-    ADMIN_ROLE_UUID, AUTH_SERVICE_DEV_ROLE, EDITOR_ROLE_UUID, READER_ROLE_UUID,
-    VET_SERVICE_DEV_ROLE,
-};
+use crate::core::config::VET_SERVICE_DEV_ROLE;
 use crate::core::error::AppResult;
 use rocket::State;
 use rocket_ws::{Channel, WebSocket};
