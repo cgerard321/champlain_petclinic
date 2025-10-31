@@ -34,7 +34,7 @@ pub fn auth_service_db_logs(
     ws_logs_for_container(ws, docker, "mysql-auth", number_of_lines)
 }
 
-#[post("/docker/stop/auth-service")]
+#[post("/docker/auth-service/restart")]
 pub async fn restart_auth_service_container(
     user: AuthenticatedUser,
     docker: &State<DynDockerPort>,
@@ -45,7 +45,7 @@ pub async fn restart_auth_service_container(
     docker.restart_container("auth-service").await
 }
 
-#[post("/docker/stop/auth-service-db")]
+#[post("/docker/auth-service-db/restart")]
 pub async fn restart_auth_service_db_container(
     user: AuthenticatedUser,
     docker: &State<DynDockerPort>,
