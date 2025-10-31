@@ -426,4 +426,17 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
                 .bodyToMono(CartResponseDTO.class);
     }
 
+    // Dans com.petclinic.bffapigateway.domainclientlayer.CartServiceClient
+
+    public Mono<Void> purgeProductFromAllCarts(String productId) {
+        return webClientBuilder.build()
+                .delete()
+                .uri(cartServiceUrl + "/internal/products/{productId}", productId)
+                .retrieve()
+                .toBodilessEntity()
+                .then();
+    }
+
+
+
 }

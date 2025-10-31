@@ -1,6 +1,7 @@
 package com.petclinic.products.businesslayer.products;
 
 import com.petclinic.products.datalayer.products.*;
+import com.petclinic.products.domainclientlayer.CartClient;
 import com.petclinic.products.presentationlayer.products.*;
 import com.petclinic.products.utils.exceptions.*;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -23,18 +24,25 @@ import java.util.List;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
-
     private final RatingRepository ratingRepository;
     private final ProductBundleRepository productBundleRepository;
     private final ProductBundleService productBundleService;
+    private final CartClient cartClient;
     private final ProductTypeRepository productTypeRepository;
 
-    public ProductServiceImpl(ProductRepository productRepository, RatingRepository ratingRepository
-    , ProductBundleRepository productBundleRepository, ProductBundleService productBundleService, ProductTypeRepository productTypeRepository) {
+    public ProductServiceImpl(
+            ProductRepository productRepository,
+            RatingRepository ratingRepository,
+            ProductBundleRepository productBundleRepository,
+            ProductBundleService productBundleService,
+            CartClient cartClient,
+            ProductTypeRepository productTypeRepository
+    ) {
         this.productRepository = productRepository;
         this.ratingRepository = ratingRepository;
         this.productBundleRepository = productBundleRepository;
         this.productBundleService = productBundleService;
+        this.cartClient = cartClient;
         this.productTypeRepository = productTypeRepository;
     }
 
@@ -43,7 +51,7 @@ public class ProductServiceImpl implements ProductService {
                 .map(Rating::getRating)
                 .collectList()
                 .flatMap(ratings -> {
-                    if(ratings.isEmpty()){
+                    if (ratings.isEmpty()) {
                         product.setAverageRating(0.0);
                         return Mono.just(product);
                     }
@@ -53,14 +61,18 @@ public class ProductServiceImpl implements ProductService {
                             .mapToDouble(Byte::doubleValue)
                             .sum();
                     Double ratio = sumOfRatings / ratings.size();
-                    // This sets truncates to 2 decimal places without converting data types
+                    // truncate à 2 décimales
                     product.setAverageRating(Math.floor(ratio * 100) / 100);
                     return Mono.just(product);
                 });
     }
 
     @Override
-    public Flux<ProductResponseModel> getAllProducts(Double minPrice, Double maxPrice, Double minRating, Double maxRating, String sort,String deliveryType, String productType) {
+    public Flux<ProductResponseModel> getAllProducts(
+            Double minPrice, Double maxPrice,
+            Double minRating, Double maxRating,
+            String sort, String deliveryType, String productType
+    ) {
         if (sort != null && !Arrays.asList("asc", "desc", "default").contains(sort.toLowerCase())) {
             throw new InvalidInputException("Invalid sort parameter: " + sort);
         }
@@ -91,9 +103,9 @@ public class ProductServiceImpl implements ProductService {
                         return product.getDeliveryType().toString().equalsIgnoreCase(deliveryType);
                     }
                 })
-                //Filter productType
-                .filter(product->{
-                    if(productType == null || productType.trim().isEmpty()){
+                // Filter productType
+                .filter(product -> {
+                    if (productType == null || productType.trim().isEmpty()) {
                         return true;
                     }
                     return product.getProductType().toString().equalsIgnoreCase(productType);
@@ -110,7 +122,6 @@ public class ProductServiceImpl implements ProductService {
                 .map(EntityModelUtil::toProductResponseModel);
     }
 
-
     @Override
     public Mono<ProductResponseModel> getProductByProductId(String productId) {
         return productRepository.findProductByProductId(productId)
@@ -125,9 +136,7 @@ public class ProductServiceImpl implements ProductService {
                 .filter(product -> product.getProductSalePrice() > 0)
                 .switchIfEmpty(Mono.error(new InvalidAmountException("Product sale price must be greater than 0")))
                 .map(request -> {
-
                     Product product = EntityModelUtil.toProductEntity(request);
-
 
                     LocalDate today = LocalDate.now();
                     if (product.getReleaseDate() != null && product.getReleaseDate().isAfter(today)) {
@@ -195,9 +204,16 @@ public class ProductServiceImpl implements ProductService {
                                             .thenReturn(found);
                                 })
                 )
-                .map(EntityModelUtil::toProductResponseModel);
+                .map(EntityModelUtil::toProductResponseModel)
+                .flatMap(resp ->
+                        cartClient.purgeProductFromAllCarts(resp.getProductId())
+                                .doOnSubscribe(sub -> log.info("[ProductService] Notifying cart-service for product deletion {}", resp.getProductId()))
+                                .doOnSuccess(v -> log.info("[ProductService] Product {} purged from all carts", resp.getProductId()))
+                                .doOnError(e -> log.warn("[ProductService] Failed to purge product {} from carts: {}", resp.getProductId(), e.getMessage()))
+                                .onErrorResume(e -> Mono.empty())
+                                .thenReturn(resp)
+                );
     }
-
 
     @Override
     public Mono<Void> requestCount(String productId) {
@@ -206,12 +222,11 @@ public class ProductServiceImpl implements ProductService {
                 .flatMap(product -> {
                     Integer currentCount = product.getRequestCount() != null ? product.getRequestCount() : 0;
                     product.setRequestCount(currentCount + 1);
-                    return productRepository.save(product).then(); // Save and complete
+                    return productRepository.save(product).then();
                 });
     }
 
-
-    @Scheduled(cron = "0 0 0 */30 * *")  // Runs every 30 days at midnight
+    @Scheduled(cron = "0 0 0 */30 * *") // every 30 days at midnight
     public Mono<Void> resetRequestCounts() {
         return productRepository.findAll()
                 .flatMap(product -> {
@@ -236,7 +251,6 @@ public class ProductServiceImpl implements ProductService {
                 });
     }
 
-
     @Override
     public Mono<Void> DecreaseProductCount(String productId) {
         return productRepository.findProductByProductId(productId)
@@ -257,15 +271,12 @@ public class ProductServiceImpl implements ProductService {
                 });
     }
 
-
     @Override
     public List<Product> getProductsByType(ProductType productType) {
         return productRepository.findByProductType(productType);
     }
 
-
-
-    @Scheduled(cron = "0 0 0 * * ?") // Runs daily at midnight
+    @Scheduled(cron = "0 0 0 * * ?") // daily at midnight
     public Mono<Void> patchProductStatus() {
         return productRepository.findAll()
                 .flatMap(existingProduct -> {
@@ -283,7 +294,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Mono<ProductEnumsResponseModel> getProductsEnumValues(){
+    public Mono<ProductEnumsResponseModel> getProductsEnumValues() {
         ProductEnumsResponseModel response = ProductEnumsResponseModel.builder()
                 .productStatus(Arrays.asList(ProductStatus.values()))
                 .productType(Arrays.asList(ProductType.values()))
@@ -296,52 +307,50 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Flux<ProductTypeResponseModel> getAllProductTypes() {
         return productTypeRepository.findAll()
-            .map(EntityModelUtil::toProductTypeResponseModel);
+                .map(EntityModelUtil::toProductTypeResponseModel);
     }
-
 
     @Override
     public Mono<ProductTypeResponseModel> getProductTypeByProductTypeId(String productTypeId) {
         return productTypeRepository.findByProductTypeId(productTypeId)
-            .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("ProductType id was not found: " + productTypeId))))
-            .map(EntityModelUtil::toProductTypeResponseModel);
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("ProductType id was not found: " + productTypeId))))
+                .map(EntityModelUtil::toProductTypeResponseModel);
     }
 
     @Override
     public Mono<ProductTypeResponseModel> addProductType(Mono<ProductTypeRequestModel> productTypeRequestModel) {
         return productTypeRequestModel
-            .map(request -> {
-                request.setTypeName(request.getTypeName().toUpperCase());
-                return EntityModelUtil.toProductTypeEntity(request);
-            })
-            .flatMap(productTypeRepository::save)
-            .map(EntityModelUtil::toProductTypeResponseModel);
+                .map(request -> {
+                    request.setTypeName(request.getTypeName().toUpperCase());
+                    return EntityModelUtil.toProductTypeEntity(request);
+                })
+                .flatMap(productTypeRepository::save)
+                .map(EntityModelUtil::toProductTypeResponseModel);
     }
 
     @Override
     public Mono<ProductTypeResponseModel> updateProductTypeByProductTypeId(String productTypeId, Mono<ProductTypeRequestModel> productTypeRequestModel) {
         return productTypeRepository.findByProductTypeId(productTypeId)
-            .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("ProductType id was not found: " + productTypeId))))
-            .flatMap(found -> productTypeRequestModel
-                .map(EntityModelUtil::toProductTypeEntity)
-                .map(entity -> {
-                    entity.setId(found.getId());
-                    entity.setProductTypeId(found.getProductTypeId());
-                    entity.setTypeName(entity.getTypeName().toUpperCase());
-                    return entity;
-                })
-                .flatMap(productTypeRepository::save))
-            .map(EntityModelUtil::toProductTypeResponseModel);
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("ProductType id was not found: " + productTypeId))))
+                .flatMap(found -> productTypeRequestModel
+                        .map(EntityModelUtil::toProductTypeEntity)
+                        .map(entity -> {
+                            entity.setId(found.getId());
+                            entity.setProductTypeId(found.getProductTypeId());
+                            entity.setTypeName(entity.getTypeName().toUpperCase());
+                            return entity;
+                        })
+                        .flatMap(productTypeRepository::save))
+                .map(EntityModelUtil::toProductTypeResponseModel);
     }
 
     @Override
     public Mono<ProductTypeResponseModel> deleteProductTypeByProductTypeId(String productTypeId) {
         return productTypeRepository.findByProductTypeId(productTypeId)
-            .switchIfEmpty(Mono.error(new NotFoundException("ProductType id was not found: " + productTypeId)))
-            .flatMap(existingProductType ->
-                productTypeRepository.delete(existingProductType)
-                .thenReturn(EntityModelUtil.toProductTypeResponseModel(existingProductType))
-            );
+                .switchIfEmpty(Mono.error(new NotFoundException("ProductType id was not found: " + productTypeId)))
+                .flatMap(existingProductType ->
+                        productTypeRepository.delete(existingProductType)
+                                .thenReturn(EntityModelUtil.toProductTypeResponseModel(existingProductType))
+                );
     }
-
-    }
+}

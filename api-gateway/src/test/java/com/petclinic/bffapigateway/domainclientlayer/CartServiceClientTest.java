@@ -1572,4 +1572,34 @@ public class CartServiceClientTest {
                 .verifyComplete();
     }
 
+    @Test
+    void purgeProductFromAllCarts_204_NoContent_completes_andUsesDELETE() throws Exception {
+        // Arrange
+        mockWebServer.enqueue(new MockResponse().setResponseCode(204));
+
+        // Act + Assert
+        StepVerifier.create(mockCartServiceClient.purgeProductFromAllCarts("abc-123"))
+                .verifyComplete();
+
+        var recorded = mockWebServer.takeRequest();
+        assertEquals("DELETE", recorded.getMethod());
+        assertThat(recorded.getPath()).endsWith("/internal/products/abc-123");
+    }
+
+    @Test
+    void purgeProductFromAllCarts_404_propagatesWebClientResponseException() {
+        // Arrange
+        mockWebServer.enqueue(new MockResponse().setResponseCode(404));
+
+        // Act + Assert
+        StepVerifier.create(mockCartServiceClient.purgeProductFromAllCarts("missing-id"))
+                .expectErrorSatisfies(ex -> {
+                    assertThat(ex).isInstanceOf(org.springframework.web.reactive.function.client.WebClientResponseException.class);
+                    var wcre = (org.springframework.web.reactive.function.client.WebClientResponseException) ex;
+                    assertEquals(404, wcre.getRawStatusCode());
+                })
+                .verify();
+    }
+
+
 }
