@@ -8,6 +8,8 @@ mod product_docker;
 mod cart_docker;
 mod inventory_docker;
 mod billing_docker;
+mod mailer_docker;
+mod file_docker;
 
 pub fn docker_routes() -> Vec<rocket::Route> {
     rocket::routes![
@@ -52,5 +54,13 @@ pub fn docker_routes() -> Vec<rocket::Route> {
         billing_docker::billing_service_db_logs,
         billing_docker::restart_billing_service_container,
         billing_docker::restart_billing_service_db_container,
+        // Files service
+        file_docker::files_service_logs,
+        file_docker::files_service_db_logs,
+        file_docker::restart_files_service_container,
+        file_docker::restart_files_service_db_container,
+        // Mailer service
+        mailer_docker::mailer_service_logs,
+        mailer_docker::restart_mailer_service_container,
     ]
 }
