@@ -515,7 +515,7 @@ services:
     env_file:
       - stack.env
     volumes:
-      - devtools-mysql-data:/var/lib/mysql
+      - mysql-devtools-data:/var/lib/mysql
 
 # =========================
 # VOLUMES
