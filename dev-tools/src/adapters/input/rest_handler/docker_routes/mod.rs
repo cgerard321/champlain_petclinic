@@ -1,18 +1,18 @@
 mod auth_service_docker;
-mod utils;
-mod vet_service_docker;
-mod portainer_docker;
-mod visit_service_docker;
-mod customer_docker;
-mod product_docker;
-mod cart_docker;
-mod inventory_docker;
 mod billing_docker;
-mod mailer_docker;
-mod file_docker;
-mod gateway_docker;
+mod cart_docker;
+mod customer_docker;
 mod customer_portal_docker;
 mod employee_portal_docker;
+mod file_docker;
+mod gateway_docker;
+mod inventory_docker;
+mod mailer_docker;
+mod portainer_docker;
+mod product_docker;
+mod utils;
+mod vet_service_docker;
+mod visit_service_docker;
 
 pub fn docker_routes() -> Vec<rocket::Route> {
     rocket::routes![

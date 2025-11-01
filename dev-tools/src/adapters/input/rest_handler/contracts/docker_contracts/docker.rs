@@ -8,5 +8,5 @@ pub struct LogResponseContract {
 
 #[derive(Deserialize, Debug)]
 pub struct ContainerActionRequestContract {
-    pub container_type: String
+    pub container_type: String,
 }

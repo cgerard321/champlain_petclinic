@@ -500,7 +500,8 @@ services:
         pkg: dev-tools
     restart: unless-stopped
     depends_on:
-      - mysql-devtools
+      mysql-devtools:
+          condition: service_healthy
     env_file:
       - stack.env
     ports:
@@ -514,7 +515,7 @@ services:
     env_file:
       - stack.env
     volumes:
-      - /devtools-mysql-data:/var/lib/mysql
+      - devtools-mysql-data:/var/lib/mysql
 
 # =========================
 # VOLUMES
