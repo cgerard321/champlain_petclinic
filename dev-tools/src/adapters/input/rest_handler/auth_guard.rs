@@ -17,6 +17,15 @@ pub struct AuthenticatedUser {
     pub roles: HashSet<Uuid>,
 }
 
+impl AuthenticatedUser {
+    pub fn into(self) -> crate::application::services::auth_context::AuthContext {
+        crate::application::services::auth_context::AuthContext {
+            user_id: self.user_id,
+            roles: self.roles,
+        }
+    }
+}
+
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for AuthenticatedUser {
     type Error = ();
@@ -88,25 +97,5 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
                 Outcome::Error((Status::InternalServerError, ()))
             }
         }
-    }
-}
-
-#[inline]
-pub fn require_any(user: &AuthenticatedUser, required: &[Uuid]) -> Result<(), AppError> {
-    if required.iter().any(|r| user.roles.contains(r)) {
-        Ok(())
-    } else {
-        Err(AppError::Forbidden)
-    }
-}
-
-// Not used currently, but may be useful in the future
-#[inline]
-#[allow(dead_code)]
-pub fn require_all(user: &AuthenticatedUser, required: &[Uuid]) -> Result<(), AppError> {
-    if required.iter().all(|r| user.roles.contains(r)) {
-        Ok(())
-    } else {
-        Err(AppError::Forbidden)
     }
 }

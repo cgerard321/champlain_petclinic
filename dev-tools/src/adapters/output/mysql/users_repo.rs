@@ -62,7 +62,9 @@ impl UsersRepoPort for MySqlUsersRepo {
         .map_err(|e| map_sqlx_err(e, "User"))?;
 
         for role_id in user_roles {
-            let rid_str = Hyphenated::from_uuid(role_id).to_string();
+            let rid_str = role_id.as_hyphenated().to_string();
+            log::info!("Inserting role: {:?}", rid_str);
+
             if let Err(e) = sqlx::query(
                 r#"
         INSERT INTO user_roles (user_id, role_id)
@@ -74,8 +76,8 @@ impl UsersRepoPort for MySqlUsersRepo {
             .execute(&mut *tx)
             .await
             {
-                tx.rollback().await.map_err(|e| map_sqlx_err(e, "User"))?;
-                return Err(map_sqlx_err(e, "User"));
+                tx.rollback().await.map_err(|e| map_sqlx_err(e, "Role"))?;
+                return Err(map_sqlx_err(e, "Role"));
             }
         }
 

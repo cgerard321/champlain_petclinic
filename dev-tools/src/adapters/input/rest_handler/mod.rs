@@ -6,6 +6,7 @@ mod users;
 
 mod auth_guard;
 mod contracts;
+mod database_routes;
 mod docker_routes;
 mod mappers;
 
