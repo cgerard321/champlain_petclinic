@@ -6,7 +6,7 @@ services:
       args:
         pkg: dev-tools
     ports:
-      - "4242:8080"
+      - "6000:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
