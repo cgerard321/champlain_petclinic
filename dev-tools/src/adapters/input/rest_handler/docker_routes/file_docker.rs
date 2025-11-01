@@ -55,9 +55,9 @@ fn determine_container_type(container_type: &str) -> AppResult<&'static str> {
     } else if container_type.eq_ignore_ascii_case("db") {
         Ok("mysql-files")
     } else {
-        return Err(AppError::BadRequest(format!(
+        Err(AppError::BadRequest(format!(
             "Invalid container type: {}",
             container_type
-        )));
+        )))
     }
 }
