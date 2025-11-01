@@ -26,7 +26,7 @@ impl DockerPort for DockerService {
         &self,
         view_logs_params: ViewLogsParams,
         auth_context: AuthContext,
-    ) -> AppResult<Pin<Box<dyn Stream<Item=Result<DockerLogEntity, AppError>> + Send>>> {
+    ) -> AppResult<Pin<Box<dyn Stream<Item = Result<DockerLogEntity, AppError>> + Send>>> {
         log::info!(
             "Streaming logs for container: {}",
             view_logs_params.container_name
@@ -59,12 +59,8 @@ impl DockerPort for DockerService {
             view_logs_params.container_name
         };
 
-
         self.docker_api
-            .stream_container_logs(
-                &service_name,
-                view_logs_params.number_of_lines,
-            )
+            .stream_container_logs(&service_name, view_logs_params.number_of_lines)
             .await
     }
 
@@ -105,6 +101,5 @@ impl DockerPort for DockerService {
 fn resolve_descriptor_by_container(container: &str) -> Option<&'static ServiceDescriptor> {
     let c = container.trim();
     log::info!("Resolving descriptor for container: {}", c);
-    SERVICES
-        .get(c)
+    SERVICES.get(c)
 }

@@ -29,7 +29,7 @@ pub fn ws_logs_for_container(
             let view_logs_params = ViewLogsParams {
                 container_name: container,
                 number_of_lines,
-                container_type: container_type.clone(),
+                container_type,
             };
 
             let mut stream = match docker

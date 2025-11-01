@@ -9,7 +9,6 @@ pub struct AuthContext {
 
 // System User
 impl AuthContext {
-
     /// Creates a new system user instance with predefined sudo roles.
     ///
     /// # Returns
@@ -19,7 +18,7 @@ impl AuthContext {
     ///
     /// # Example
     /// ```
-    /// let system_user = YourStruct::system();
+    /// let system_user = AuthContext::system();
     /// assert_eq!(system_user.user_id, Uuid::nil());
     /// assert!(system_user.roles.contains(&SUDO_ROLE_UUID));
     /// ```
