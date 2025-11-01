@@ -26,5 +26,5 @@ pub async fn restart_customer_portal_service_container(
 ) -> AppResult<()> {
     ensure_restart_permissions(&user, None)?;
 
-    docker.restart_container("petclinicFrontend").await
+    docker.restart_container("petclinic-frontend").await
 }

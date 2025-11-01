@@ -26,5 +26,5 @@ pub async fn restart_employee_portal_service_container(
 ) -> AppResult<()> {
     ensure_restart_permissions(&user, None)?;
 
-    docker.restart_container("employeeFrontend").await
+    docker.restart_container("employee-frontend").await
 }
