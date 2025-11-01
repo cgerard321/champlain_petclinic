@@ -496,6 +496,8 @@ services:
     build:
       context: ./dev-tools
       dockerfile: Dockerfile
+      args:
+        pkg: dev-tools
     restart: unless-stopped
     depends_on:
       - mysql-devtools
@@ -505,6 +507,7 @@ services:
       - "4242:8080"
 
   mysql-devtools:
+    <<: *mysql
     image: mysql:5.7
     platform: linux/amd64
     container_name: mysql-devtools
