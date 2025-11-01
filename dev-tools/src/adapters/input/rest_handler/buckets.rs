@@ -8,12 +8,12 @@ use rocket::State;
 
 #[get("/buckets")]
 pub async fn read_buckets(
-    uc: &State<DynFilesPort>,
+    port: &State<DynFilesPort>,
     user: AuthenticatedUser,
 ) -> AppResult<Json<Vec<BucketResponseContract>>> {
     require_any(&user, &[ADMIN_ROLE_UUID, READER_ROLE_UUID])?;
 
-    let buckets = uc.fetch_buckets().await?;
+    let buckets = port.fetch_buckets().await?;
     Ok(Json(
         buckets
             .into_iter()

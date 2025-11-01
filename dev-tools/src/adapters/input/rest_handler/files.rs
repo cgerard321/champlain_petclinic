@@ -14,12 +14,12 @@ use std::path::PathBuf;
 #[get("/buckets/<bucket>/files")]
 pub async fn read_files(
     bucket: &str,
-    uc: &State<DynFilesPort>,
+    port: &State<DynFilesPort>,
     _user: AuthenticatedUser,
 ) -> AppResult<Json<Vec<FileResponseContract>>> {
     require_any(&_user, &[ADMIN_ROLE_UUID, READER_ROLE_UUID])?;
 
-    let file = uc.list_files(bucket).await?;
+    let file = port.list_files(bucket).await?;
     Ok(Json(
         file.into_iter().map(FileResponseContract::from).collect(),
     ))
@@ -30,7 +30,7 @@ pub async fn add_file(
     bucket: &str,
     prefix: PathBuf,
     data: Data<'_>,
-    uc: &State<DynFilesPort>,
+    port: &State<DynFilesPort>,
     user: AuthenticatedUser,
 ) -> AppResult<Custom<Json<FileResponseContract>>> {
     require_any(&user, &[ADMIN_ROLE_UUID, EDITOR_ROLE_UUID])?;
@@ -43,7 +43,7 @@ pub async fn add_file(
         .map_err(|e| AppError::BadRequest(format!("read body: {e}")))?
         .into_inner();
 
-    let file_info = uc.upload(bucket, prefix, bytes).await?;
+    let file_info = port.upload(bucket, prefix, bytes).await?;
 
     Ok(Custom(
         Status::Created,
