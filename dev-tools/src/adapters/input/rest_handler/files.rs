@@ -1,8 +1,7 @@
-use crate::adapters::input::rest_handler::auth_guard::{require_any, AuthenticatedUser};
+use crate::adapters::input::rest_handler::auth_guard::AuthenticatedUser;
 use crate::adapters::input::rest_handler::contracts::file_contracts::file::FileResponseContract;
 use crate::application::ports::input::files_port::DynFilesPort;
 use crate::core::config;
-use crate::core::config::{ADMIN_ROLE_UUID, EDITOR_ROLE_UUID, READER_ROLE_UUID};
 use crate::core::error::{AppError, AppResult};
 use rocket::data::ToByteUnit;
 use rocket::http::Status;
@@ -15,11 +14,11 @@ use std::path::PathBuf;
 pub async fn read_files(
     bucket: &str,
     port: &State<DynFilesPort>,
-    _user: AuthenticatedUser,
+    user: AuthenticatedUser,
 ) -> AppResult<Json<Vec<FileResponseContract>>> {
-    require_any(&_user, &[ADMIN_ROLE_UUID, READER_ROLE_UUID])?;
+    let auth_context = user.into();
 
-    let file = port.list_files(bucket).await?;
+    let file = port.list_files(bucket, auth_context).await?;
     Ok(Json(
         file.into_iter().map(FileResponseContract::from).collect(),
     ))
@@ -33,7 +32,7 @@ pub async fn add_file(
     port: &State<DynFilesPort>,
     user: AuthenticatedUser,
 ) -> AppResult<Custom<Json<FileResponseContract>>> {
-    require_any(&user, &[ADMIN_ROLE_UUID, EDITOR_ROLE_UUID])?;
+    let auth_context = user.into();
 
     let limit = config::MAX_FILE_SIZE_MB.mebibytes();
     let bytes = data
@@ -43,7 +42,7 @@ pub async fn add_file(
         .map_err(|e| AppError::BadRequest(format!("read body: {e}")))?
         .into_inner();
 
-    let file_info = port.upload(bucket, prefix, bytes).await?;
+    let file_info = port.upload(bucket, prefix, bytes, auth_context).await?;
 
     Ok(Custom(
         Status::Created,

@@ -1,35 +1,37 @@
-use crate::adapters::input::rest_handler::auth_guard::{
-    require_all, require_any, AuthenticatedUser,
-};
 use crate::adapters::input::rest_handler::contracts::docker_contracts::docker::LogResponseContract;
 use crate::application::ports::input::docker_logs_port::DynDockerPort;
-use crate::core::config::{ADMIN_ROLE_UUID, EDITOR_ROLE_UUID, READER_ROLE_UUID};
+use crate::application::services::auth_context::AuthContext;
+use crate::application::services::docker::params::ViewLogsParams;
 use crate::core::error::{AppError, AppResult};
 use futures::{SinkExt, StreamExt};
 use rocket::serde::json::serde_json;
 use rocket::State;
 use rocket_ws::stream::DuplexStream;
 use rocket_ws::{Channel, Message, WebSocket};
-use uuid::Uuid;
 
 pub fn ws_logs_for_container(
     ws: WebSocket,
     docker: &State<DynDockerPort>,
-    container: &'static str,
+    container: String,
     number_of_lines: Option<usize>,
+    auth_context: AuthContext,
 ) -> AppResult<Channel<'static>> {
     // We clone docker here because we need to move it into the closure,
     // so we need it to own the reference.
     let docker = docker.inner().clone();
-    let container = container.to_string();
 
     Ok(ws.channel(move |mut socket| {
         let docker = docker.clone();
         let container = container.clone();
 
         Box::pin(async move {
+            let view_logs_params = ViewLogsParams {
+                container_name: container,
+                number_of_lines,
+            };
+
             let mut stream = match docker
-                .stream_container_logs(&container, number_of_lines)
+                .stream_container_logs(view_logs_params, auth_context)
                 .await
             {
                 Ok(s) => s,
@@ -82,30 +84,4 @@ pub async fn send_logs(
             }
         }
     }
-}
-
-pub fn ensure_logs_permissions(
-    user: &AuthenticatedUser,
-    extra_role: Option<Uuid>,
-) -> AppResult<()> {
-    if let Some(sr) = extra_role {
-        require_any(user, &[ADMIN_ROLE_UUID, sr])?;
-    } else {
-        require_any(user, &[ADMIN_ROLE_UUID])?;
-    }
-    require_all(user, &[READER_ROLE_UUID])?;
-    Ok(())
-}
-
-pub fn ensure_restart_permissions(
-    user: &AuthenticatedUser,
-    service_role: Option<Uuid>,
-) -> AppResult<()> {
-    if let Some(sr) = service_role {
-        require_any(user, &[ADMIN_ROLE_UUID, sr])?;
-    } else {
-        require_any(user, &[ADMIN_ROLE_UUID])?;
-    }
-    require_all(user, &[EDITOR_ROLE_UUID])?;
-    Ok(())
 }

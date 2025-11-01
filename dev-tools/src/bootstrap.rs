@@ -11,11 +11,17 @@ use crate::application::ports::output::docker_api::DynDockerAPI;
 use crate::application::ports::output::file_storage_port::DynFileStorage;
 use crate::application::ports::output::user_repo_port::DynUsersRepo;
 use crate::application::services::auth::service::AuthService;
+use crate::application::services::auth_context::AuthContext;
 use crate::application::services::docker::service::DockerService;
 use crate::application::services::files::service::FilesService;
 use crate::application::services::users::params::UserCreationParams;
 use crate::application::services::users::service::UsersService;
-use crate::core::config::{ADMIN_ROLE_UUID, EDITOR_ROLE_UUID, READER_ROLE_UUID, SUDO_ROLE_UUID};
+use crate::core::config::{
+    ADMIN_ROLE_UUID, AUTH_SERVICE_DEV_ROLE, BILLING_SERVICE_DEV_ROLE, CART_SERVICE_DEV_ROLE,
+    CUSTOMERS_SERVICE_DEV_ROLE, EDITOR_ROLE_UUID, INVENTORY_SERVICE_DEV_ROLE,
+    PRODUCTS_SERVICE_DEV_ROLE, READER_ROLE_UUID, SUDO_ROLE_UUID, VET_SERVICE_DEV_ROLE,
+    VISITS_SERVICE_DEV_ROLE,
+};
 use rocket::fairing::AdHoc;
 use sqlx::mysql::MySqlPoolOptions;
 use sqlx::MySqlPool;
@@ -94,23 +100,47 @@ async fn add_default_roles(pool: &MySqlPool) -> Result<(), sqlx::Error> {
     let admin = ADMIN_ROLE_UUID.hyphenated().to_string();
     let reader = READER_ROLE_UUID.hyphenated().to_string();
     let editor = EDITOR_ROLE_UUID.hyphenated().to_string();
+    let auth_service_dev = AUTH_SERVICE_DEV_ROLE.hyphenated().to_string();
+    let vet_service_dev = VET_SERVICE_DEV_ROLE.hyphenated().to_string();
+    let visits_service_dev = VISITS_SERVICE_DEV_ROLE.hyphenated().to_string();
+    let customers_service_dev = CUSTOMERS_SERVICE_DEV_ROLE.hyphenated().to_string();
+    let products_service_dev = PRODUCTS_SERVICE_DEV_ROLE.hyphenated().to_string();
+    let cart_service_dev = CART_SERVICE_DEV_ROLE.hyphenated().to_string();
+    let inventory_service_dev = INVENTORY_SERVICE_DEV_ROLE.hyphenated().to_string();
+    let billing_service_dev = BILLING_SERVICE_DEV_ROLE.hyphenated().to_string();
 
     sqlx::query(
         r#"
-        INSERT IGNORE INTO roles (id, code, description)
-        VALUES (?, 'SUDO',   'Super user'),
-               (?, 'ADMIN',  'Administrator'),
-               (?, 'READER', 'Read-only'),
-               (?, 'EDITOR', 'Editor');
-        "#,
+    INSERT IGNORE INTO roles (id, code, description)
+    VALUES 
+        (?, 'SUDO',                   'Super user'),
+        (?, 'ADMIN',                  'Administrator'),
+        (?, 'READER',                 'Read-only'),
+        (?, 'EDITOR',                 'Editor'),
+        (?, 'AUTH_SERVICE_DEV',       'Auth Service Dev'),
+        (?, 'VET_SERVICE_DEV',        'Vet Service Dev'),
+        (?, 'VISITS_SERVICE_DEV',     'Visits Service Dev'),
+        (?, 'CUSTOMERS_SERVICE_DEV',  'Customers Service Dev'),
+        (?, 'PRODUCTS_SERVICE_DEV',   'Products Service Dev'),
+        (?, 'CART_SERVICE_DEV',       'Cart Service Dev'),
+        (?, 'INVENTORY_SERVICE_DEV',  'Inventory Service Dev'),
+        (?, 'BILLING_SERVICE_DEV',    'Billing Service Dev');
+    "#,
     )
     .bind(&sudo)
     .bind(&admin)
     .bind(&reader)
     .bind(&editor)
+    .bind(&auth_service_dev)
+    .bind(&vet_service_dev)
+    .bind(&visits_service_dev)
+    .bind(&customers_service_dev)
+    .bind(&products_service_dev)
+    .bind(&cart_service_dev)
+    .bind(&inventory_service_dev)
+    .bind(&billing_service_dev)
     .execute(pool)
     .await?;
-
     Ok(())
 }
 
@@ -145,8 +175,10 @@ async fn add_default_user(user_port: &DynUsersPort, pool: &MySqlPool) -> Result<
         roles: admin_roles,
     };
 
+    let auth_context = AuthContext::system();
+
     user_port
-        .create_user(params)
+        .create_user(params, auth_context)
         .await
         .expect("Failed to create default user");
 
