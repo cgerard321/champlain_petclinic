@@ -41,9 +41,15 @@ impl BollardDockerAPI {
         // We sort by length and take the shortest one.
         if let Some(container) = list
             .into_iter()
-            .min_by_key(|c| c.names.as_ref().map_or(usize::MAX, |names| names.len()))
+            .min_by_key(|c| {
+                c.names
+                    .as_ref()
+                    .and_then(|names| names.first())
+                    .map(|name| name.len())
+                    .unwrap_or(usize::MAX)
+            })
         {
-            let container_id = container.id.unwrap_or(Default::default());
+            let container_id = container.id.unwrap_or_default();
             return Ok(container_id);
         }
 
