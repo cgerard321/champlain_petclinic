@@ -507,7 +507,7 @@ services:
     env_file:
       - stack.env
     ports:
-      - "4242:8080"
+      - "6000:8080"
 
   mysql-devtools:
     <<: *mysql
