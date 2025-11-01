@@ -52,7 +52,7 @@ pub async fn restart_carts_container(
 
 fn determine_container_type(container_type: &str) -> AppResult<&'static str> {
     if container_type.eq_ignore_ascii_case("service") {
-        Ok("carts-service")
+        Ok("cart-service")
     } else if container_type.eq_ignore_ascii_case("db") {
         Ok("mongo-carts")
     } else {

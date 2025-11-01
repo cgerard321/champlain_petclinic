@@ -10,7 +10,7 @@ use rocket::serde::json::Json;
 use rocket::State;
 use rocket_ws::{Channel, WebSocket};
 
-#[get("/billing/actions/tail?<container_type>&<number_of_lines>")]
+#[get("/billing/actions/fetch/logs/tail?<container_type>&<number_of_lines>")]
 pub fn billing_logs(
     user: AuthenticatedUser,
     ws: WebSocket,

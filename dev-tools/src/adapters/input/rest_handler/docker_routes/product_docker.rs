@@ -10,8 +10,8 @@ use rocket::serde::json::Json;
 use rocket::State;
 use rocket_ws::{Channel, WebSocket};
 
-#[get("/products/actions/tail?<container_type>&<number_of_lines>")]
-pub fn carts_logs(
+#[get("/products/actions/fetch/logs/tail?<container_type>&<number_of_lines>")]
+pub fn products_logs(
     user: AuthenticatedUser,
     ws: WebSocket,
     docker: &State<DynDockerPort>,
@@ -32,7 +32,7 @@ pub fn carts_logs(
     format = "application/json",
     data = "<restart_request>"
 )]
-pub async fn restart_carts_container(
+pub async fn restart_products_container(
     user: AuthenticatedUser,
     docker: &State<DynDockerPort>,
     restart_request: Json<ContainerActionRequestContract>,

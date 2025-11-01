@@ -49,8 +49,8 @@ pub fn docker_routes() -> Vec<rocket::Route> {
         mailer_docker::mailer_service_logs,
         mailer_docker::restart_mailer_service_container,
         // Product service
-        product_docker::carts_logs,
-        product_docker::restart_carts_container,
+        product_docker::products_logs,
+        product_docker::restart_products_container,
         // Vet service
         vet_service_docker::vet_logs,
         vet_service_docker::restart_vet_container,

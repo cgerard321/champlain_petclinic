@@ -492,8 +492,11 @@ services:
         condition: service_healthy
 
   dev-tools:
-    image: your-dev-tools-image:latest
     container_name: dev-tools
+    build:
+      context: ./dev-tools
+      dockerfile: Dockerfile
+    restart: unless-stopped
     depends_on:
       - mysql-devtools
     env_file:
@@ -507,10 +510,8 @@ services:
     container_name: mysql-devtools
     env_file:
       - stack.env
-    ports:
-      - "3307:3306"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - /devtools-mysql-data:/var/lib/mysql
 
 # =========================
 # VOLUMES
@@ -534,3 +535,4 @@ volumes:
   postgres-vet-data:
   mysql-files-data:
   dbgate-data:
+  mysql-devtools-data:

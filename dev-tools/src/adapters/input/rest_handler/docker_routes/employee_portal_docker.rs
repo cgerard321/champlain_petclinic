@@ -7,7 +7,7 @@ use crate::core::error::AppResult;
 use rocket::State;
 use rocket_ws::{Channel, WebSocket};
 
-#[get("/employee-portal/actions/tail?<number_of_lines>")]
+#[get("/employee-portal/actions/fetch/logs/tail?<number_of_lines>")]
 pub fn employee_portal_service_logs(
     user: AuthenticatedUser,
     ws: WebSocket,

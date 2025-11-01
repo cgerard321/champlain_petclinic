@@ -6,7 +6,7 @@ use crate::core::error::AppResult;
 use rocket::State;
 use rocket_ws::{Channel, WebSocket};
 
-#[get("/portainer/actions/tail?<number_of_lines>")]
+#[get("/portainer/actions/fetch/logs/tail?<number_of_lines>")]
 pub fn portainer_service_logs(
     user: AuthenticatedUser,
     ws: WebSocket,
