@@ -91,7 +91,7 @@ impl DockerPort for DockerService {
         let container_name: String = if container_type == "db" {
             desc.docker_db.to_string()
         } else {
-            container_name
+            desc.docker_service.to_string()
         };
 
         self.docker_api.restart_container(&container_name).await

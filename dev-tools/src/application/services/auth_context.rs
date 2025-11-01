@@ -3,6 +3,7 @@ use std::collections::HashSet;
 use uuid::Uuid;
 
 pub struct AuthContext {
+    #[allow(dead_code)]
     pub user_id: Uuid,
     pub roles: HashSet<Uuid>,
 }
