@@ -16,7 +16,7 @@ pub fn employee_portal_service_logs(
 ) -> AppResult<Channel<'static>> {
     ensure_logs_permissions(&user, None)?;
 
-    ws_logs_for_container(ws, docker, "employeeFrontend", number_of_lines)
+    ws_logs_for_container(ws, docker, "employee-frontend", number_of_lines)
 }
 
 #[post("/employee-portal/actions/restart")]

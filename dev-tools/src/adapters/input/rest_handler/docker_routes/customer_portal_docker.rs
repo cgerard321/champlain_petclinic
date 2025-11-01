@@ -16,7 +16,7 @@ pub fn customer_portal_service_logs(
 ) -> AppResult<Channel<'static>> {
     ensure_logs_permissions(&user, None)?;
 
-    ws_logs_for_container(ws, docker, "petclinicFrontend", number_of_lines)
+    ws_logs_for_container(ws, docker, "petclinic-frontend", number_of_lines)
 }
 
 #[post("/customer-portal/actions/restart")]
