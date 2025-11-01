@@ -38,8 +38,13 @@ impl BollardDockerAPI {
         // if we have more, we just ignore the rest since that is probably an
         // orphan container. If we ever do scale the container count, we will
         // need to handle this properly.
-        if let Some(c) = list.into_iter().next() {
-            return Ok(c.id.unwrap_or_default());
+        // We sort by length and take the shortest one.
+        if let Some(container) = list
+            .into_iter()
+            .min_by_key(|c| c.names.as_ref().map_or(usize::MAX, |names| names.len()))
+        {
+            let container_id = container.id.unwrap_or(Default::default());
+            return Ok(container_id);
         }
 
         log::info!("No containers found");
