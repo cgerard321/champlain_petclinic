@@ -13,6 +13,7 @@ pub fn ws_logs_for_container(
     ws: WebSocket,
     docker: &State<DynDockerPort>,
     container: String,
+    container_type: String,
     number_of_lines: Option<usize>,
     auth_context: AuthContext,
 ) -> AppResult<Channel<'static>> {
@@ -28,6 +29,7 @@ pub fn ws_logs_for_container(
             let view_logs_params = ViewLogsParams {
                 container_name: container,
                 number_of_lines,
+                container_type: container_type.clone(),
             };
 
             let mut stream = match docker

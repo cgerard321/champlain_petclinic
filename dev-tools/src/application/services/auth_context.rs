@@ -10,28 +10,21 @@ pub struct AuthContext {
 // System User
 impl AuthContext {
 
-    /// Creates a new system-level user with pre-defined "sudo" roles.
-    ///
-    /// This function initializes a `Self` instance, representing a system-level user.
-    /// The user will have a `user_id` of `Uuid::nil()` (indicating a nil UUID) and
-    /// be assigned the "sudo" roles, which is a predefined set of administrative permissions.
+    /// Creates a new system user instance with predefined sudo roles.
     ///
     /// # Returns
-    ///
-    /// Returns an instance of `Self` containing:
-    /// - `user_id`: A nil UUID representing the system-level user.
-    /// - `roles`: A `HashSet` containing only the `SUDO_ROLE_UUID` indicating
-    ///    the user's elevated administrative privileges.
+    /// A `Self` instance initialized with the following properties:
+    /// - `user_id`: A nil UUID (00000000-0000-0000-0000-000000000000), representing a default system user.
+    /// - `roles`: A `HashSet` containing the `SUDO_ROLE_UUID` to designate this user as having sudo privileges.
     ///
     /// # Example
-    /// ```rust
+    /// ```
     /// let system_user = YourStruct::system();
     /// assert_eq!(system_user.user_id, Uuid::nil());
     /// assert!(system_user.roles.contains(&SUDO_ROLE_UUID));
     /// ```
     ///
-    /// This function is particularly useful for initializing a special system user
-    /// with the highest permissions for administrative or maintenance purposes.
+    /// This function is useful for scenarios where a default administrative entity (e.g., system-level user) is required.
     pub fn system() -> Self {
         // Sudo roles
         let sudo_roles = HashSet::from([SUDO_ROLE_UUID]);

@@ -1,5 +1,5 @@
 use crate::application::services::auth_context::AuthContext;
-use crate::application::services::docker::params::ViewLogsParams;
+use crate::application::services::docker::params::{RestartContainerParams, ViewLogsParams};
 use crate::core::error::{AppError, AppResult};
 use crate::domain::entities::docker::DockerLogEntity;
 use futures::Stream;
@@ -14,7 +14,7 @@ pub trait DockerPort: Send + Sync {
     ) -> AppResult<Pin<Box<dyn Stream<Item = Result<DockerLogEntity, AppError>> + Send>>>;
     async fn restart_container(
         &self,
-        container_name: String,
+        restart_params: RestartContainerParams,
         auth_context: AuthContext,
     ) -> AppResult<()>;
 }

@@ -7,11 +7,11 @@ use futures::{Stream, TryStreamExt};
 use std::collections::HashMap;
 use std::pin::Pin;
 
-pub struct BollardDockerAPI {}
+pub struct BollardDockerAPI;
 
 impl BollardDockerAPI {
     pub fn new() -> Self {
-        Self {}
+        Self
     }
 
     async fn resolve_id(docker: &Docker, target_name: &str) -> Result<String, AppError> {
