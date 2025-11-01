@@ -501,7 +501,9 @@ services:
     restart: unless-stopped
     depends_on:
       mysql-devtools:
-          condition: service_healthy
+        condition: service_healthy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     env_file:
       - stack.env
     ports:
