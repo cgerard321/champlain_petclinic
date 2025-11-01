@@ -18,6 +18,6 @@ fn rocket() -> _ {
     rocket::build()
         .attach(stage())
         .mount("/api/v1", routes())
-        .mount("/api/v1/docker", routes_docker())
+        .mount("/api/v1/services", routes_docker())
         .register("/", register_catchers())
 }

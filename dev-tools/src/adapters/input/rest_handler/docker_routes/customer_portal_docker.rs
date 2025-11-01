@@ -7,8 +7,8 @@ use crate::core::error::AppResult;
 use rocket::State;
 use rocket_ws::{Channel, WebSocket};
 
-#[get("/mailer/actions/tail?<number_of_lines>")]
-pub fn mailer_service_logs(
+#[get("/customer-portal/actions/tail?<number_of_lines>")]
+pub fn customer_portal_service_logs(
     user: AuthenticatedUser,
     ws: WebSocket,
     docker: &State<DynDockerPort>,
@@ -16,15 +16,15 @@ pub fn mailer_service_logs(
 ) -> AppResult<Channel<'static>> {
     ensure_logs_permissions(&user, None)?;
 
-    ws_logs_for_container(ws, docker, "mailer-service", number_of_lines)
+    ws_logs_for_container(ws, docker, "petclinicFrontend", number_of_lines)
 }
 
-#[post("/mailer/actions/restart")]
-pub async fn restart_mailer_service_container(
+#[post("/customer-portal/actions/restart")]
+pub async fn restart_customer_portal_service_container(
     user: AuthenticatedUser,
     docker: &State<DynDockerPort>,
 ) -> AppResult<()> {
     ensure_restart_permissions(&user, None)?;
 
-    docker.restart_container("mailer-service").await
+    docker.restart_container("petclinicFrontend").await
 }

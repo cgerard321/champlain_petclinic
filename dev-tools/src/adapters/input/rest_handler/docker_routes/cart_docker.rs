@@ -1,53 +1,64 @@
 use crate::adapters::input::rest_handler::auth_guard::AuthenticatedUser;
+use crate::adapters::input::rest_handler::contracts::docker_contracts::docker::ContainerActionRequestContract;
 use crate::adapters::input::rest_handler::docker_routes::utils::{
     ensure_logs_permissions, ensure_restart_permissions, ws_logs_for_container,
 };
 use crate::application::ports::input::docker_logs_port::DynDockerPort;
 use crate::core::config::CART_SERVICE_DEV_ROLE;
-use crate::core::error::AppResult;
+use crate::core::error::{AppError, AppResult};
+use rocket::serde::json::Json;
 use rocket::State;
 use rocket_ws::{Channel, WebSocket};
 
-#[get("/containers/cart-service/logs?<number_of_lines>")]
-pub fn cart_service_logs(
+#[get("/carts/actions/tail?<container_type>&<number_of_lines>")]
+pub fn carts_logs(
     user: AuthenticatedUser,
     ws: WebSocket,
     docker: &State<DynDockerPort>,
+    container_type: &str,
     number_of_lines: Option<usize>,
 ) -> AppResult<Channel<'static>> {
     ensure_logs_permissions(&user, Option::from(CART_SERVICE_DEV_ROLE))?;
 
-    ws_logs_for_container(ws, docker, "cart-service", number_of_lines)
+    if container_type.is_empty() {
+        return Err(AppError::BadRequest("Container type is empty".to_string()));
+    }
+    let result = determine_container_type(container_type)?;
+
+    ws_logs_for_container(ws, docker, result, number_of_lines)
 }
-
-#[get("/containers/cart-service-db/logs?<number_of_lines>")]
-pub fn cart_service_db_logs(
-    user: AuthenticatedUser,
-    ws: WebSocket,
-    docker: &State<DynDockerPort>,
-    number_of_lines: Option<usize>,
-) -> AppResult<Channel<'static>> {
-    ensure_logs_permissions(&user, Option::from(CART_SERVICE_DEV_ROLE))?;
-
-    ws_logs_for_container(ws, docker, "mongo-carts", number_of_lines)
-}
-
-#[post("/containers/cart-service/restart")]
-pub async fn restart_cart_service_container(
+#[post(
+    "/carts/actions/restart",
+    format = "application/json",
+    data = "<restart_request>"
+)]
+pub async fn restart_carts_container(
     user: AuthenticatedUser,
     docker: &State<DynDockerPort>,
+    restart_request: Json<ContainerActionRequestContract>,
 ) -> AppResult<()> {
     ensure_restart_permissions(&user, Option::from(CART_SERVICE_DEV_ROLE))?;
 
-    docker.restart_container("cart-service").await
+    let container_type = &restart_request.container_type;
+
+    if container_type.is_empty() {
+        return Err(AppError::BadRequest("Container type is empty".to_string()));
+    }
+
+    let result: &str = determine_container_type(container_type)?;
+
+    docker.restart_container(result).await
 }
 
-#[post("/containers/cart-service-db/restart")]
-pub async fn restart_cart_service_db_container(
-    user: AuthenticatedUser,
-    docker: &State<DynDockerPort>,
-) -> AppResult<()> {
-    ensure_restart_permissions(&user, Option::from(CART_SERVICE_DEV_ROLE))?;
-
-    docker.restart_container("mongo-carts").await
+fn determine_container_type(container_type: &str) -> AppResult<&'static str> {
+    if container_type.eq_ignore_ascii_case("service") {
+        Ok("carts-service")
+    } else if container_type.eq_ignore_ascii_case("db") {
+        Ok("mongo-carts")
+    } else {
+        return Err(AppError::BadRequest(format!(
+            "Invalid container type: {}",
+            container_type
+        )));
+    }
 }

@@ -7,7 +7,7 @@ version: "3.9"
 x-healthchecks:
   springboot: &springboot
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/actuator/health || curl -fsS http://localhost:8080/health"]
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:8080/actuator/health || curl -fsS http://localhost:8080/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -15,7 +15,7 @@ x-healthchecks:
 
   react-node: &react_node
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:3000/ || true"]
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:3000/ || true" ]
       interval: 10s
       timeout: 10s
       retries: 3
@@ -23,7 +23,7 @@ x-healthchecks:
 
   angular-node: &angular_node
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:4200/ || true"]
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:4200/ || true" ]
       interval: 10s
       timeout: 10s
       retries: 3
@@ -31,7 +31,7 @@ x-healthchecks:
 
   dbgate: &dbgate_hc
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS -u CPC_Admin:${DBGATE_PASSWORD} http://localhost:3000/ || exit 1"]
+      test: [ "CMD-SHELL", "curl -fsS -u CPC_Admin:${DBGATE_PASSWORD} http://localhost:3000/ || exit 1" ]
       interval: 10s
       timeout: 10s
       retries: 3
@@ -39,7 +39,7 @@ x-healthchecks:
 
   mysql: &mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-uuser", "-ppwd", "-h", "localhost"]
+      test: [ "CMD", "mysqladmin", "ping", "-uuser", "-ppwd", "-h", "localhost" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -47,7 +47,7 @@ x-healthchecks:
 
   postgres: &postgres
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d images -h localhost"]
+      test: [ "CMD-SHELL", "pg_isready -U user -d images -h localhost" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -55,7 +55,7 @@ x-healthchecks:
 
   mongo: &mongo
     healthcheck:
-      test: ["CMD-SHELL", "mongosh --quiet --eval 'db.runCommand({ ping: 1 }).ok' || mongo --quiet --eval 'db.runCommand({ ping: 1 }).ok'"]
+      test: [ "CMD-SHELL", "mongosh --quiet --eval 'db.runCommand({ ping: 1 }).ok' || mongo --quiet --eval 'db.runCommand({ ping: 1 }).ok'" ]
       interval: 15s
       timeout: 5s
       retries: 5
@@ -490,6 +490,31 @@ services:
         condition: service_healthy
       mongo-carts:
         condition: service_healthy
+
+
+  # =========================
+  # Dev tools
+  # =========================
+  dev-tools:
+    image: your-dev-tools-image:latest
+    container_name: dev-tools
+    depends_on:
+      - mysql-devtools
+    env_file:
+      - stack.env
+    ports:
+      - "4242:8080"
+
+  mysql-devtools:
+    image: mysql:5.7
+    platform: linux/amd64
+    container_name: mysql-devtools
+    env_file:
+      - stack.env
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
 
 # =========================
 # VOLUMES

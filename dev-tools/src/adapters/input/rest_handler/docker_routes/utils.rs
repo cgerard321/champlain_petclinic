@@ -21,7 +21,7 @@ pub fn ws_logs_for_container(
     // We clone docker here because we need to move it into the closure,
     // so we need it to own the reference.
     let docker = docker.inner().clone();
-    let container = container.to_string();
+    let container = container.to_string().clone();
 
     Ok(ws.channel(move |mut socket| {
         let docker = docker.clone();
