@@ -16,8 +16,6 @@ Back to [Main page](../README.md)
   - [Endpoint Patterns](#endpoint-patterns)
   - [Request/Response Standards](#requestresponse-standards)
 - [Scheduled Tasks in Spring Boot](#scheduled-tasks-in-spring-boot)
-  <!-- TOC -->
-
 ## API Gateway Controller Standards
 
 ### API Versioning
