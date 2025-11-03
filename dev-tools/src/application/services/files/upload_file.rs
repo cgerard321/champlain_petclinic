@@ -26,6 +26,5 @@ pub async fn upload_file(
         name: resp.name,
         size: file_len as u64,
         etag: resp.etag,
-        version_id: resp.version_id,
     })
 }

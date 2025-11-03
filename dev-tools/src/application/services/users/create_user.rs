@@ -10,6 +10,7 @@ pub async fn create_user(db: &DynUsersRepo, new_user: UserCreationParams) -> App
     let pep = get_pepper();
     let id = Uuid::new_v4();
     let pass_hash = hash_password(&new_user.password, &pep)?;
+    let roles = new_user.roles;
 
     let created = db
         .insert_user_hashed(
@@ -17,13 +18,9 @@ pub async fn create_user(db: &DynUsersRepo, new_user: UserCreationParams) -> App
             &new_user.email,
             pass_hash.as_bytes(),
             &new_user.display_name,
+            roles,
         )
         .await?;
 
-    Ok(UserEntity {
-        user_id: created.user_id,
-        email: created.email,
-        display_name: created.display_name,
-        is_active: created.is_active,
-    })
+    Ok(created)
 }

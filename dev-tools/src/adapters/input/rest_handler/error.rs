@@ -79,6 +79,11 @@ impl<'r> Responder<'r, 'static> for AppError {
     }
 }
 
+#[catch(400)]
+fn bad_request(req: &Request<'_>) -> AppError {
+    AppError::BadRequest(format!("Bad request to {}", req.uri().path()))
+}
+
 #[catch(404)]
 fn not_found(req: &Request<'_>) -> AppError {
     AppError::NotFound(format!("Resource not found: {}", req.uri().path()))
@@ -107,5 +112,5 @@ fn default_catcher(status: Status, _req: &Request<'_>) -> AppError {
 }
 
 pub fn register_catchers() -> Vec<rocket::Catcher> {
-    catchers![not_found, unprocessable, default_catcher]
+    catchers![bad_request, not_found, unprocessable, default_catcher]
 }
