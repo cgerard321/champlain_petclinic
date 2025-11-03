@@ -7,7 +7,6 @@ impl From<FileEntity> for FileResponseContract {
             name: value.name,
             size: value.size,
             etag: value.etag,
-            version_id: value.version_id,
         }
     }
 }
