@@ -22,7 +22,7 @@ public class BillingSchedulerTest {
 
     @Test
     public void testMarkOverdueBillsRuns() {
-    Mockito.when(billService.updateOverdueBills()).thenReturn(Mono.empty());
+        Mockito.when(billService.updateOverdueBills()).thenReturn(Mono.empty());
         billingScheduler.markOverdueBills();
         Mockito.verify(billService, Mockito.times(1)).updateOverdueBills();
     }
