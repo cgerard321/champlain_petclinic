@@ -3,11 +3,13 @@ package com.petclinic.billing.scheduler;
 
 import com.petclinic.billing.businesslayer.BillService;
 import org.junit.jupiter.api.Test;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.junit.jupiter.api.extension.ExtendWith;
+import reactor.core.publisher.Mono;
 
 @ExtendWith(MockitoExtension.class)
 public class BillingSchedulerTest {
@@ -20,7 +22,7 @@ public class BillingSchedulerTest {
 
     @Test
     public void testMarkOverdueBillsRuns() {
-        Mockito.when(billService.updateOverdueBills()).thenReturn(reactor.core.publisher.Mono.empty());
+    Mockito.when(billService.updateOverdueBills()).thenReturn(Mono.empty());
         billingScheduler.markOverdueBills();
         Mockito.verify(billService, Mockito.times(1)).updateOverdueBills();
     }

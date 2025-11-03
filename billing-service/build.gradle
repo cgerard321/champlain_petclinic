@@ -41,14 +41,11 @@ dependencies {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	implementation 'io.projectreactor:reactor-core:3.4.30'
 	testImplementation 'io.projectreactor:reactor-test'
 	testImplementation 'com.squareup.okhttp3:okhttp:4.11.0'
 	testImplementation 'com.squareup.okhttp3:mockwebserver:4.11.0'
 
-	// Add JUnit Jupiter and Mockito for unit testing
-	testImplementation 'org.junit.jupiter:junit-jupiter:5.9.3'
-	testImplementation 'org.mockito:mockito-core:4.11.0'
-	testImplementation 'org.mockito:mockito-junit-jupiter:4.11.0'
 
 	// Retrofit for HTTP client
 	implementation 'com.squareup.retrofit2:retrofit:2.9.0'
