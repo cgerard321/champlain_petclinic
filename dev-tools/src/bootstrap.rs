@@ -1,13 +1,17 @@
+use crate::adapters::output::docker::client::BollardDockerAPI;
 use crate::adapters::output::minio::client::MinioStore;
 use crate::adapters::output::mysql::auth_repo::MySqlAuthRepo;
 use crate::adapters::output::mysql::users_repo::MySqlUsersRepo;
 use crate::application::ports::input::auth_port::DynAuthPort;
+use crate::application::ports::input::docker_logs_port::DynDockerPort;
 use crate::application::ports::input::files_port::DynFilesPort;
 use crate::application::ports::input::user_port::DynUsersPort;
 use crate::application::ports::output::auth_repo_port::DynAuthRepo;
+use crate::application::ports::output::docker_api::DynDockerAPI;
 use crate::application::ports::output::file_storage_port::DynFileStorage;
 use crate::application::ports::output::user_repo_port::DynUsersRepo;
 use crate::application::services::auth::service::AuthService;
+use crate::application::services::docker::service::DockerService;
 use crate::application::services::files::service::FilesService;
 use crate::application::services::users::params::UserCreationParams;
 use crate::application::services::users::service::UsersService;
@@ -70,10 +74,15 @@ pub fn stage() -> AdHoc {
             log::error!("Failed to insert default user: {e}");
         }
 
+        // Docker
+        let docker_api: DynDockerAPI = Arc::new(BollardDockerAPI::new());
+        let docker_port: DynDockerPort = Arc::new(DockerService::new(docker_api.clone()));
+
         rocket
             .manage(auth_port)
             .manage(files_port)
             .manage(users_port)
+            .manage(docker_port)
     })
 }
 
@@ -136,8 +145,10 @@ async fn add_default_user(user_port: &DynUsersPort, pool: &MySqlPool) -> Result<
         roles: admin_roles,
     };
 
-    user_port.create_user(params).await.
-        expect("Failed to create default user");
+    user_port
+        .create_user(params)
+        .await
+        .expect("Failed to create default user");
 
     Ok(())
 }
