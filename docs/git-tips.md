@@ -77,12 +77,11 @@ git checkout main
 
 - Next, we will want to update our local project with any code our fellow devs have pushed while we were gone. 
 - To do this we must first 'download' the code using the following command:
-- Usually, you would want to 'download' changes from all branches, but if you only need to fetch changes from main or from a specific branch, then replace `--all` with either `main` or `your_branch_name`
 
 ```
 git fetch origin --all
 ```
-
+- Usually, you would want to 'download' changes from all branches, but if you only need to fetch changes from main or from a specific branch, then replace `--all` with either `main` or `your_branch_name`
 - We are telling git to download the latest stuff from the main branch on our remote
 - Then we want to actually start our story fresh with that code, so we will reset our local environment with that newly fetched code:
 
