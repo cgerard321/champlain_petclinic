@@ -20,7 +20,7 @@ impl UserContext {
     ///
     /// # Example
     /// ```
-    /// let system_user = AuthContext::system();
+    /// let system_user = UserContext::system();
     /// assert_eq!(system_user.user_id, Uuid::nil());
     /// assert!(system_user.roles.contains(&SUDO_ROLE_UUID));
     /// ```
