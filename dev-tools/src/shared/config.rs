@@ -2,6 +2,7 @@ use uuid::Uuid;
 pub const SESSION_EXPIRATION_HR: i64 = 24;
 pub const DEFAULT_FILE_TYPE: &str = "bin";
 pub const MAX_FILE_SIZE_MB: u64 = 50;
+pub const DEFAULT_CONTAINER_TYPE: &str = "service";
 pub const SUDO_ROLE_UUID: Uuid = uuid::uuid!("11111111-1111-1111-1111-111111111111");
 pub const ADMIN_ROLE_UUID: Uuid = uuid::uuid!("a48d7b18-ceb7-435b-b8ff-b28531f1a09f");
 pub const READER_ROLE_UUID: Uuid = uuid::uuid!("51f20832-79a3-4c05-b4da-ca175cba2ffc");

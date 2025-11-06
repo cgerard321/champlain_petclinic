@@ -98,7 +98,7 @@ impl DockerPort for DockerService {
 }
 
 fn resolve_descriptor_by_container(container: &str) -> Option<&'static ServiceDescriptor> {
-    let c = container.trim();
-    log::info!("Resolving descriptor for container: {}", c);
-    SERVICES.get(c)
+    let cleaned_name = container.trim();
+    log::info!("Resolving descriptor for container: {}", cleaned_name);
+    SERVICES.get(cleaned_name)
 }

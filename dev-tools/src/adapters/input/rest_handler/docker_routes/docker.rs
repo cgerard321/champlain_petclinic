@@ -7,6 +7,7 @@ use crate::shared::error::AppResult;
 use rocket::serde::json::Json;
 use rocket::State;
 use rocket_ws::{Channel, WebSocket};
+use crate::shared::config::DEFAULT_CONTAINER_TYPE;
 
 #[get("/<service>/actions/fetch/logs/tail?<container_type>&<number_of_lines>")]
 pub fn service_logs(
@@ -19,7 +20,7 @@ pub fn service_logs(
 ) -> AppResult<Channel<'static>> {
     let auth_context = user.into();
 
-    let container_type = container_type.unwrap_or_else(|| "service".to_string());
+    let container_type = container_type.unwrap_or_else(|| DEFAULT_CONTAINER_TYPE.to_string());
 
     ws_logs_for_container(
         ws,
