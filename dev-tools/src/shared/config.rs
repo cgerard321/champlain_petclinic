@@ -14,3 +14,4 @@ pub const PRODUCTS_SERVICE_DEV_ROLE: Uuid = uuid::uuid!("84ab3608-e5d4-4e45-8b02
 pub const CART_SERVICE_DEV_ROLE: Uuid = uuid::uuid!("a51e4699-3250-4cf7-ac2a-836675f62175");
 pub const INVENTORY_SERVICE_DEV_ROLE: Uuid = uuid::uuid!("a7975ad7-f86e-49b7-898d-95da0175f4e5");
 pub const BILLING_SERVICE_DEV_ROLE: Uuid = uuid::uuid!("d1d928c3-b8a8-4a01-8eaf-9f7dc1cf9739");
+pub const DEFAULT_TAIL_AMOUNT: usize = 100;

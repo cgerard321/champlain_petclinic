@@ -9,8 +9,8 @@ use crate::adapters::output::mysql::model::role::Role;
 use crate::adapters::output::mysql::model::user::User;
 use crate::application::ports::output::user_repo_port::UsersRepoPort;
 use crate::application::services::auth::projections::AuthProjection;
-use crate::core::error::{AppError, AppResult};
 use crate::domain::entities::user::{RoleEntity, UserEntity};
+use crate::shared::error::{AppError, AppResult};
 
 pub struct MySqlUsersRepo {
     pool: Arc<Pool<MySql>>,

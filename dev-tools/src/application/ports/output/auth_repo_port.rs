@@ -1,5 +1,5 @@
-use crate::core::error::AppResult;
 use crate::domain::entities::session::SessionEntity;
+use crate::shared::error::AppResult;
 use chrono::NaiveDateTime;
 use std::sync::Arc;
 use uuid::Uuid;

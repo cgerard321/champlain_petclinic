@@ -1,7 +1,7 @@
 use crate::adapters::input::rest_handler::contracts::user_contracts::user::UserLoginRequestContract;
 use crate::application::ports::input::auth_port::DynAuthPort;
 use crate::application::services::auth::params::UserLoginParams;
-use crate::core::error::{AppError, AppResult};
+use crate::shared::error::{AppError, AppResult};
 use rocket::http::{Cookie, CookieJar, SameSite};
 use rocket::serde::json::Json;
 use rocket::{http::Status, post, State};

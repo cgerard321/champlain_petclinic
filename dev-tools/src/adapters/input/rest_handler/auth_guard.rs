@@ -1,6 +1,6 @@
 use crate::application::ports::input::auth_port::DynAuthPort;
-use crate::core::error::AppError;
 use crate::domain::entities::user::RoleEntity;
+use crate::shared::error::AppError;
 use rocket::http::CookieJar;
 use rocket::{
     http::Status,
@@ -18,8 +18,8 @@ pub struct AuthenticatedUser {
 }
 
 impl AuthenticatedUser {
-    pub fn into(self) -> crate::application::services::auth_context::AuthContext {
-        crate::application::services::auth_context::AuthContext {
+    pub fn into(self) -> crate::application::services::user_context::UserContext {
+        crate::application::services::user_context::UserContext {
             user_id: self.user_id,
             roles: self.roles,
         }

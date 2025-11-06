@@ -18,6 +18,8 @@ pub enum AppError {
     FailedDependency,
     #[error("Internal error")]
     Internal,
+    #[error("Gateway timeout")]
+    GatewayTimeout,
 }
 
 pub type AppResult<T> = Result<T, AppError>;

@@ -1,8 +1,8 @@
 use crate::adapters::input::rest_handler::auth_guard::AuthenticatedUser;
 use crate::adapters::input::rest_handler::contracts::file_contracts::file::FileResponseContract;
 use crate::application::ports::input::files_port::DynFilesPort;
-use crate::core::config;
-use crate::core::error::{AppError, AppResult};
+use crate::shared::config;
+use crate::shared::error::{AppError, AppResult};
 use rocket::data::ToByteUnit;
 use rocket::http::Status;
 use rocket::response::status::Custom;

@@ -6,7 +6,7 @@ use crate::adapters::input::rest_handler::{routes, routes_docker};
 use bootstrap::stage;
 use rocket::State;
 
-mod core;
+mod shared;
 
 mod adapters;
 mod application;

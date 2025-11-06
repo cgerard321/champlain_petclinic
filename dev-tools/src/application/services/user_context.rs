@@ -1,15 +1,16 @@
-use crate::core::config::SUDO_ROLE_UUID;
+use crate::shared::config::SUDO_ROLE_UUID;
+use crate::shared::error::AppError;
 use std::collections::HashSet;
 use uuid::Uuid;
 
-pub struct AuthContext {
+pub struct UserContext {
     #[allow(dead_code)]
     pub user_id: Uuid,
     pub roles: HashSet<Uuid>,
 }
 
 // System User
-impl AuthContext {
+impl UserContext {
     /// Creates a new system user instance with predefined sudo roles.
     ///
     /// # Returns
@@ -32,5 +33,23 @@ impl AuthContext {
             user_id: Uuid::nil(),
             roles: sudo_roles,
         }
+    }
+}
+
+#[inline]
+pub fn require_any(user: &UserContext, required: &[Uuid]) -> Result<(), AppError> {
+    if required.iter().any(|r| user.roles.contains(r)) {
+        Ok(())
+    } else {
+        Err(AppError::Forbidden)
+    }
+}
+
+#[inline]
+pub fn require_all(user: &UserContext, required: &[Uuid]) -> Result<(), AppError> {
+    if required.iter().all(|r| user.roles.contains(r)) {
+        Ok(())
+    } else {
+        Err(AppError::Forbidden)
     }
 }

@@ -3,7 +3,7 @@ use crate::adapters::input::rest_handler::contracts::docker_contracts::docker::C
 use crate::adapters::input::rest_handler::docker_routes::utils::ws_logs_for_container;
 use crate::application::ports::input::docker_logs_port::DynDockerPort;
 use crate::application::services::docker::params::RestartContainerParams;
-use crate::core::error::AppResult;
+use crate::shared::error::AppResult;
 use rocket::serde::json::Json;
 use rocket::State;
 use rocket_ws::{Channel, WebSocket};

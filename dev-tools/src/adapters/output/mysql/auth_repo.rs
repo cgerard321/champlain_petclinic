@@ -1,8 +1,8 @@
 use crate::adapters::output::mysql::error::map_sqlx_err;
 use crate::adapters::output::mysql::model::session::Session;
 use crate::application::ports::output::auth_repo_port::AuthRepoPort;
-use crate::core::error::{AppError, AppResult};
 use crate::domain::entities::session::SessionEntity;
+use crate::shared::error::{AppError, AppResult};
 use chrono::NaiveDateTime;
 use sqlx::{MySql, Pool};
 use std::sync::Arc;

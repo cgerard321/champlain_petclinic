@@ -1,12 +1,11 @@
 use crate::application::ports::input::docker_logs_port::DockerPort;
 use crate::application::ports::output::docker_api::DynDockerAPI;
-use crate::application::services::auth_context::AuthContext;
 use crate::application::services::docker::params::{RestartContainerParams, ViewLogsParams};
 use crate::application::services::docker::utils::{ServiceDescriptor, SERVICES};
-use crate::application::services::utils::{require_all, require_any};
-use crate::core::config::{ADMIN_ROLE_UUID, EDITOR_ROLE_UUID, READER_ROLE_UUID};
-use crate::core::error::{AppError, AppResult};
+use crate::application::services::user_context::{require_all, require_any, UserContext};
 use crate::domain::entities::docker::DockerLogEntity;
+use crate::shared::config::{ADMIN_ROLE_UUID, EDITOR_ROLE_UUID, READER_ROLE_UUID};
+use crate::shared::error::{AppError, AppResult};
 use futures::Stream;
 use std::pin::Pin;
 
@@ -25,7 +24,7 @@ impl DockerPort for DockerService {
     async fn stream_container_logs(
         &self,
         view_logs_params: ViewLogsParams,
-        auth_context: AuthContext,
+        auth_context: UserContext,
     ) -> AppResult<Pin<Box<dyn Stream<Item = Result<DockerLogEntity, AppError>> + Send>>> {
         log::info!(
             "Streaming logs for container: {}",
@@ -56,7 +55,7 @@ impl DockerPort for DockerService {
         let service_name: String = if view_logs_params.container_type == "db" {
             desc.docker_db.to_string()
         } else {
-            view_logs_params.container_name
+            desc.docker_service.to_string()
         };
 
         self.docker_api
@@ -67,7 +66,7 @@ impl DockerPort for DockerService {
     async fn restart_container(
         &self,
         restart_params: RestartContainerParams,
-        auth_context: AuthContext,
+        auth_context: UserContext,
     ) -> AppResult<()> {
         let container_name = restart_params.container_name;
         let container_type = restart_params.container_type;

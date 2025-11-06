@@ -11,17 +11,18 @@ use crate::application::ports::output::docker_api::DynDockerAPI;
 use crate::application::ports::output::file_storage_port::DynFileStorage;
 use crate::application::ports::output::user_repo_port::DynUsersRepo;
 use crate::application::services::auth::service::AuthService;
-use crate::application::services::auth_context::AuthContext;
 use crate::application::services::docker::service::DockerService;
 use crate::application::services::files::service::FilesService;
+use crate::application::services::user_context::UserContext;
 use crate::application::services::users::params::UserCreationParams;
 use crate::application::services::users::service::UsersService;
-use crate::core::config::{
+use crate::shared::config::{
     ADMIN_ROLE_UUID, AUTH_SERVICE_DEV_ROLE, BILLING_SERVICE_DEV_ROLE, CART_SERVICE_DEV_ROLE,
     CUSTOMERS_SERVICE_DEV_ROLE, EDITOR_ROLE_UUID, INVENTORY_SERVICE_DEV_ROLE,
     PRODUCTS_SERVICE_DEV_ROLE, READER_ROLE_UUID, SUDO_ROLE_UUID, VET_SERVICE_DEV_ROLE,
     VISITS_SERVICE_DEV_ROLE,
 };
+use bollard::Docker;
 use rocket::fairing::AdHoc;
 use sqlx::mysql::MySqlPoolOptions;
 use sqlx::MySqlPool;
@@ -81,7 +82,14 @@ pub fn stage() -> AdHoc {
         }
 
         // Docker
-        let docker_api: DynDockerAPI = Arc::new(BollardDockerAPI::new());
+        let docker = Docker::connect_with_unix_defaults()
+            .map_err(|e| {
+                log::error!("Failed to create Docker client: {e}");
+                e
+            })
+            .expect("Docker must be available at startup");
+
+        let docker_api: DynDockerAPI = Arc::new(BollardDockerAPI::new(docker));
         let docker_port: DynDockerPort = Arc::new(DockerService::new(docker_api.clone()));
 
         rocket
@@ -175,7 +183,7 @@ async fn add_default_user(user_port: &DynUsersPort, pool: &MySqlPool) -> Result<
         roles: admin_roles,
     };
 
-    let auth_context = AuthContext::system();
+    let auth_context = UserContext::system();
 
     user_port
         .create_user(params, auth_context)

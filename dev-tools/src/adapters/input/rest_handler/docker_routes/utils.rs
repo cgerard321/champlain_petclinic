@@ -1,8 +1,8 @@
 use crate::adapters::input::rest_handler::contracts::docker_contracts::docker::LogResponseContract;
 use crate::application::ports::input::docker_logs_port::DynDockerPort;
-use crate::application::services::auth_context::AuthContext;
 use crate::application::services::docker::params::ViewLogsParams;
-use crate::core::error::{AppError, AppResult};
+use crate::application::services::user_context::UserContext;
+use crate::shared::error::{AppError, AppResult};
 use futures::{SinkExt, StreamExt};
 use rocket::serde::json::serde_json;
 use rocket::State;
@@ -15,7 +15,7 @@ pub fn ws_logs_for_container(
     container: String,
     container_type: String,
     number_of_lines: Option<usize>,
-    auth_context: AuthContext,
+    auth_context: UserContext,
 ) -> AppResult<Channel<'static>> {
     // We clone docker here because we need to move it into the closure,
     // so we need it to own the reference.

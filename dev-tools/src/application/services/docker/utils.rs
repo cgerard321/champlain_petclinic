@@ -1,4 +1,4 @@
-use crate::core::config::{
+use crate::shared::config::{
     AUTH_SERVICE_DEV_ROLE, BILLING_SERVICE_DEV_ROLE, CART_SERVICE_DEV_ROLE,
     CUSTOMERS_SERVICE_DEV_ROLE, INVENTORY_SERVICE_DEV_ROLE, PRODUCTS_SERVICE_DEV_ROLE,
     VET_SERVICE_DEV_ROLE, VISITS_SERVICE_DEV_ROLE,
@@ -19,7 +19,7 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
     let mut m = HashMap::new();
 
     m.insert(
-        "petclinic-frontend",
+        "petclinic-portal",
         ServiceDescriptor {
             docker_service: "petclinic-frontend",
             docker_db: "",
@@ -28,7 +28,7 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
         },
     );
     m.insert(
-        "employee-frontend",
+        "employee-portal",
         ServiceDescriptor {
             docker_service: "employee-frontend",
             docker_db: "",

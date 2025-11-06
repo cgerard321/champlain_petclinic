@@ -1,21 +1,7 @@
-use crate::application::services::auth_context::AuthContext;
-use crate::core::error::AppError;
-use uuid::Uuid;
+use crate::shared::error::AppError;
 
-#[inline]
-pub fn require_any(user: &AuthContext, required: &[Uuid]) -> Result<(), AppError> {
-    if required.iter().any(|r| user.roles.contains(r)) {
-        Ok(())
-    } else {
-        Err(AppError::Forbidden)
-    }
-}
-
-#[inline]
-pub fn require_all(user: &AuthContext, required: &[Uuid]) -> Result<(), AppError> {
-    if required.iter().all(|r| user.roles.contains(r)) {
-        Ok(())
-    } else {
-        Err(AppError::Forbidden)
-    }
+pub fn get_pepper() -> String {
+    std::env::var("PASSWORD_PEPPER")
+        .map_err(|_| AppError::Internal)
+        .expect("Missing password pepper")
 }

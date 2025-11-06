@@ -1,4 +1,4 @@
-use crate::core::error::AppError;
+use crate::shared::error::AppError;
 
 /// Maps sqlx errors to AppErrors
 /// <p>The context is what entity was being operated on (e.g. User) when the error occurred.<p>

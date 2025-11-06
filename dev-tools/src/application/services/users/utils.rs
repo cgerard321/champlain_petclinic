@@ -1,4 +1,4 @@
-use crate::core::error::{AppError, AppResult};
+use crate::shared::error::{AppError, AppResult};
 use argon2::password_hash::rand_core::OsRng;
 use argon2::password_hash::SaltString;
 use argon2::{Argon2, PasswordHasher};

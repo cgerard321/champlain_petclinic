@@ -1,4 +1,4 @@
-use crate::core::error::AppError;
+use crate::shared::error::AppError;
 use http::StatusCode;
 use rocket::http::Status;
 use rocket::{catch, catchers, Request};
@@ -21,6 +21,7 @@ impl AppError {
             AppError::UnprocessableEntity(_) => Status::UnprocessableEntity,
             AppError::FailedDependency => Status::FailedDependency,
             AppError::Internal => Status::InternalServerError,
+            AppError::GatewayTimeout => Status::GatewayTimeout,
         }
     }
 
@@ -34,6 +35,7 @@ impl AppError {
             AppError::UnprocessableEntity(_) => "unprocessable_entity",
             AppError::FailedDependency => "dependency_failed",
             AppError::Internal => "internal_error",
+            AppError::GatewayTimeout => "gateway_timeout",
         }
     }
 
@@ -47,6 +49,7 @@ impl AppError {
             AppError::Conflict => "A resource with this name already exists".into(),
             AppError::FailedDependency => "A dependent service failed".into(),
             AppError::Internal => "An unexpected error occurred".into(),
+            AppError::GatewayTimeout => "The upstream service timed out".into(),
         }
     }
 }

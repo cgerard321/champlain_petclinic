@@ -1,4 +1,4 @@
-use crate::core::error::AppError;
+use crate::shared::error::AppError;
 use minio::s3::error::Error::{InvalidBucketName, S3Error};
 use minio::s3::error::{Error as MinioError, ErrorCode};
 

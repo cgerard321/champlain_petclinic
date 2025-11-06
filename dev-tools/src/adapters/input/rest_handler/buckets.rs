@@ -1,7 +1,7 @@
 use crate::adapters::input::rest_handler::auth_guard::AuthenticatedUser;
 use crate::adapters::input::rest_handler::contracts::file_contracts::bucket::BucketResponseContract;
 use crate::application::ports::input::files_port::DynFilesPort;
-use crate::core::error::AppResult;
+use crate::shared::error::AppResult;
 use rocket::serde::json::Json;
 use rocket::State;
 
