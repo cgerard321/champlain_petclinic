@@ -1203,4 +1203,20 @@ class CartControllerUnitTest {
                         && response.getBody() == null)
                 .verifyComplete();
     }
+
+    @Test
+    void deleteInternalProduct_returns204_andDelegatesToService() {
+        String productId = "9a29fff7-564a-4cc9-8fe1-36f6ca9bc223";
+        when(cartService.removeProductFromAllCarts(productId)).thenReturn(Mono.just(3));
+
+        webTestClient.delete()
+                .uri("/api/v1/carts/internal/products/{productId}", productId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
+
+        verify(cartService, times(1)).removeProductFromAllCarts(productId);
+    }
+
 }

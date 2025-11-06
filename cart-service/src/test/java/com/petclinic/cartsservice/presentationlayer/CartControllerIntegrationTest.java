@@ -351,4 +351,30 @@ class CartControllerIntegrationTest {
                 });
     }
 
+    @Test
+    void deleteInternalProduct_removesFromAllCarts_andReturns204() {
+        // target présent dans cart1.products et dans cart2.wishListProducts
+        String targetId = product1.getProductId();
+
+        webTestClient.delete()
+                .uri("/api/v1/carts/internal/products/{productId}", targetId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
+
+        // Vérifie dans la DB que la cible n'est plus nulle part
+        StepVerifier.create(cartRepository.findAll().collectList())
+                .assertNext(carts -> {
+                    carts.forEach(c -> {
+                        assertTrue(c.getProducts() == null ||
+                                c.getProducts().stream().noneMatch(p -> targetId.equals(p.getProductId())));
+                        assertTrue(c.getWishListProducts() == null ||
+                                c.getWishListProducts().stream().noneMatch(p -> targetId.equals(p.getProductId())));
+                    });
+                })
+                .verifyComplete();
+    }
+
+
 }
