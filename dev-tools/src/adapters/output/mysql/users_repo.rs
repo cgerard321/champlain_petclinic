@@ -63,7 +63,7 @@ impl UsersRepoPort for MySqlUsersRepo {
 
         for role_id in user_roles {
             let rid_str = role_id.as_hyphenated().to_string();
-            log::info!("Inserting role: {:?}", rid_str);
+            log::info!("Inserting role: {} for user: {}", rid_str, user_id);
 
             if let Err(e) = sqlx::query(
                 r#"
