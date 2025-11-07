@@ -11,7 +11,6 @@ use rocket::Response;
 use std::io::Cursor;
 
 impl AppError {
-    // HTTP-specific mapping lives in the adapter
     pub fn http_status(&self) -> Status {
         match self {
             AppError::BadRequest(_) => Status::BadRequest,
@@ -62,6 +61,7 @@ struct ErrorBody<'a> {
 
 impl<'r> Responder<'r, 'static> for AppError {
     fn respond_to(self, req: &Request<'_>) -> rocket::response::Result<'static> {
+        log::warn!("Request to {} returned {}", req.uri(), self.http_status());
         let status = self.http_status();
         let body = ErrorBody {
             code: status.code,
@@ -77,6 +77,11 @@ impl<'r> Responder<'r, 'static> for AppError {
             .sized_body(json.len(), Cursor::new(json))
             .ok()
     }
+}
+
+#[catch(400)]
+fn bad_request(req: &Request<'_>) -> AppError {
+    AppError::BadRequest(format!("Bad request to {}", req.uri().path()))
 }
 
 #[catch(404)]
@@ -107,5 +112,5 @@ fn default_catcher(status: Status, _req: &Request<'_>) -> AppError {
 }
 
 pub fn register_catchers() -> Vec<rocket::Catcher> {
-    catchers![not_found, unprocessable, default_catcher]
+    catchers![bad_request, not_found, unprocessable, default_catcher]
 }

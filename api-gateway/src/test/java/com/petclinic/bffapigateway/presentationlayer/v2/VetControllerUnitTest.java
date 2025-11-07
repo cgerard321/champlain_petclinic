@@ -558,10 +558,10 @@ class VetControllerUnitTest {
 
         webTestClient.get()
                 .uri(BASE_VET_URL + "/" + vetId + "/albums")
-                .accept(MediaType.TEXT_EVENT_STREAM)
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBodyList(Album.class)
                 .hasSize(2)
                 .value(albums -> {
@@ -629,10 +629,10 @@ class VetControllerUnitTest {
 
         webTestClient.get()
                 .uri(BASE_VET_URL + "/" + vetId + "/educations")
-                .accept(MediaType.TEXT_EVENT_STREAM)
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBodyList(EducationResponseDTO.class)
                 .hasSize(1)
                 .value(educations -> {
@@ -702,10 +702,10 @@ class VetControllerUnitTest {
 
         webTestClient.get()
                 .uri(BASE_VET_URL + "/" + vetId + "/ratings")
-                .accept(MediaType.TEXT_EVENT_STREAM)
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBodyList(RatingResponseDTO.class)
                 .hasSize(1)
                 .value(ratings -> {

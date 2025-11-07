@@ -59,10 +59,7 @@ public class VetController {
 
 
     //Ratings
-    @GetMapping(
-            value = "{vetId}/ratings",
-            produces = MediaType.TEXT_EVENT_STREAM_VALUE
-    )
+    @GetMapping("{vetId}/ratings")
     public Flux<RatingResponseDTO> getAllRatingsByVetId(@PathVariable String vetId) {
         return ratingService.getAllRatingsByVetId(EntityDtoUtil.verifyId(vetId))
                 .doOnNext(rating -> log.info("Rating ID: {}, Vet ID: {}, Rating: {}, Customer Name: {}, Experience: {}",
@@ -111,10 +108,7 @@ public class VetController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-    @GetMapping(
-            value = "{vetId}/ratings/date",
-            produces = MediaType.TEXT_EVENT_STREAM_VALUE
-    )
+    @GetMapping("{vetId}/ratings/date")
     public Flux<RatingResponseDTO> getRatingsOfAVetBasedOnDate(@PathVariable String vetId, @RequestParam Map<String,String> queryParams) {
         if (queryParams.containsKey("year")) {
             String year = queryParams.get("year");
@@ -132,10 +126,7 @@ public class VetController {
 
 
 
-    @GetMapping(
-            value = "topVets",
-            produces = MediaType.TEXT_EVENT_STREAM_VALUE
-    )
+    @GetMapping("topVets")
     public Flux<VetAverageRatingDTO> getTopThreeVetsWithHighestAverageRating() {
         return ratingService.getTopThreeVetsWithHighestAverageRating();
     }
@@ -150,9 +141,6 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-
-
- 
     @GetMapping("{vetId}/ratings/percentages")
     public Mono<ResponseEntity<String>> getPercentageOfRatingsByVetId(@PathVariable String vetId){
         return ratingService.getRatingPercentagesByVetId(EntityDtoUtil.verifyId(vetId))
@@ -162,7 +150,7 @@ public class VetController {
 
 
     //Vets
-    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping()
     public Flux<VetResponseDTO> getAllVets() {
         return vetService.getAll();
     }
@@ -187,19 +175,13 @@ public class VetController {
     }
 
 
-    @GetMapping(
-            value = "/active",
-            produces = MediaType.TEXT_EVENT_STREAM_VALUE
-    )
+    @GetMapping("/active")
     public Flux<VetResponseDTO> getActiveVets() {
         return vetService.getVetByIsActive(true);
     }
 
 
-    @GetMapping(
-            value = "/inactive",
-            produces = MediaType.TEXT_EVENT_STREAM_VALUE
-    )
+    @GetMapping("/inactive")
     public Flux<VetResponseDTO> getInactiveVets() {
         return vetService.getVetByIsActive(false);
     }
@@ -231,10 +213,7 @@ public class VetController {
 
 
     //Education
-    @GetMapping(
-            value = "{vetId}/educations",
-            produces = MediaType.TEXT_EVENT_STREAM_VALUE
-    )
+    @GetMapping("{vetId}/educations")
     public Flux<EducationResponseDTO> getAllEducationsByVetId(@PathVariable String vetId) {
         return educationService.getAllEducationsByVetId(EntityDtoUtil.verifyId(vetId));
     }
@@ -386,10 +365,7 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @GetMapping(
-            value = "{vetId}/albums",
-            produces = MediaType.TEXT_EVENT_STREAM_VALUE
-    )
+    @GetMapping("{vetId}/albums")
     public Flux<Album> getAllAlbumsByVetId(@PathVariable String vetId) {
         return albumService.getAllAlbumsByVetId(vetId)
                 .doOnNext(album -> log.info("Album ID: {}, Vet ID: {}, Filename: {}, ImgType: {}",

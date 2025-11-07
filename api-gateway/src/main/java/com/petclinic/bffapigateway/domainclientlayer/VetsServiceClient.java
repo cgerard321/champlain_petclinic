@@ -408,7 +408,6 @@ public class VetsServiceClient {
                         .path("/" + vetId + "/ratings/date")
                         .queryParam("year",queryParams.get("year"))
                         .build())
-                .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, error->{
                     HttpStatusCode statusCode = error.statusCode();
@@ -747,7 +746,7 @@ public class VetsServiceClient {
         return webClientBuilder.build()
                 .get()
                 .uri(vetsServiceUrl + "/" + vetId + "/albums")
-                .accept(MediaType.TEXT_EVENT_STREAM)
+                .accept(MediaType.APPLICATION_JSON) // Set Content-Type to application/json
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, error -> {
                     HttpStatusCode statusCode = error.statusCode();

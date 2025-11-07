@@ -4,7 +4,10 @@ pub mod error;
 mod files;
 mod users;
 
-mod session_guard;
+mod auth_guard;
+mod contracts;
+mod docker_routes;
+mod mappers;
 
 pub fn routes() -> Vec<rocket::Route> {
     routes![
@@ -14,6 +17,9 @@ pub fn routes() -> Vec<rocket::Route> {
         auth::login,
         auth::logout,
         users::add_user,
-        users::me,
     ]
+}
+
+pub fn routes_docker() -> Vec<rocket::Route> {
+    docker_routes::docker_routes()
 }
