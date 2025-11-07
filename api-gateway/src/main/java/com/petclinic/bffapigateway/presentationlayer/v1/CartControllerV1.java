@@ -237,7 +237,7 @@ public class CartControllerV1 {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
-    @RequestMapping(value = "/{cartId}/products", method = {RequestMethod.POST, RequestMethod.PUT})
+    @PostMapping("/{cartId}/products")
     public Mono<ResponseEntity<CartResponseDTO>> addProductToCart(
         @PathVariable String cartId,
         @RequestBody CartItemRequestDTO requestDTO) {
@@ -248,7 +248,7 @@ public class CartControllerV1 {
     return cartServiceClient.addProductToCart(cartId, requestDTO)
         .map(cartResponse -> {
             if (requestedProductId != null && !requestedProductId.isBlank()) {
-            return ResponseEntity.created(URI.create(String.format("/api/v1/carts/%s/products/%s", cartId, requestedProductId)))
+            return ResponseEntity.created(URI.create(String.format("/api/gateway/carts/%s/products/%s", cartId, requestedProductId)))
                 .body(cartResponse);
             }
             return ResponseEntity.status(HttpStatus.CREATED).body(cartResponse);

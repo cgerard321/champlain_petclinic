@@ -408,13 +408,13 @@ public class CartControllerV1UnitTest {
                 .thenReturn(Mono.just(updatedCart));
 
         // Act & Assert
-        webTestClient.put()
+        webTestClient.post()
                 .uri(baseCartURL + "/" + cartId + "/products")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestDTO)
                 .exchange()
                 .expectStatus().isCreated()
-                .expectHeader().valueEquals("Location", "/api/v1/carts/" + cartId + "/products/" + requestDTO.getProductId())
+                .expectHeader().valueEquals("Location", baseCartURL + "/" + cartId + "/products/" + requestDTO.getProductId())
                 .expectBody(CartResponseDTO.class)
                 .isEqualTo(updatedCart);
 
@@ -431,7 +431,7 @@ public class CartControllerV1UnitTest {
                 .thenReturn(Mono.error(new InvalidInputException("Invalid product quantity")));
 
         // Act & Assert
-        webTestClient.put()
+        webTestClient.post()
                 .uri(baseCartURL + "/" + cartId + "/products")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestDTO)
@@ -451,7 +451,7 @@ public class CartControllerV1UnitTest {
                 .thenReturn(Mono.error(new NotFoundException("Cart not found")));
 
         // Act & Assert
-        webTestClient.put()
+        webTestClient.post()
                 .uri(baseCartURL + "/" + cartId + "/products")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestDTO)
