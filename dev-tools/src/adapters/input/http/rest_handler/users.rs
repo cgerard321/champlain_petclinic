@@ -1,5 +1,5 @@
-use crate::adapters::input::rest_handler::auth_guard::AuthenticatedUser;
-use crate::adapters::input::rest_handler::contracts::user_contracts::user::{
+use crate::adapters::input::http::guards::auth_guard::AuthenticatedUser;
+use crate::adapters::input::http::rest_handler::contracts::user_contracts::user::{
     UserResponseContract, UserSignUpRequestContract,
 };
 use crate::application::ports::input::user_port::DynUsersPort;

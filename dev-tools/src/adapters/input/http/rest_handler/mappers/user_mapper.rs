@@ -1,4 +1,4 @@
-use crate::adapters::input::rest_handler::contracts::user_contracts::user::{
+use crate::adapters::input::http::rest_handler::contracts::user_contracts::user::{
     UserLoginRequestContract, UserResponseContract, UserSignUpRequestContract,
 };
 use crate::application::services::auth::params::UserLoginParams;

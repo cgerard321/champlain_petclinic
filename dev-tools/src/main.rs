@@ -1,8 +1,8 @@
 #[macro_use]
 extern crate rocket;
 
-use crate::adapters::input::rest_handler::error::register_catchers;
-use crate::adapters::input::rest_handler::{routes, routes_docker};
+use crate::adapters::input::http::rest_handler::error::register_catchers;
+use crate::adapters::input::http::rest_handler::{routes, routes_docker};
 use bootstrap::stage;
 use rocket::State;
 

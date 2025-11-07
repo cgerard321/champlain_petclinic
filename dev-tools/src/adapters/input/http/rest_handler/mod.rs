@@ -4,7 +4,6 @@ pub mod error;
 mod files;
 mod users;
 
-mod auth_guard;
 mod contracts;
 mod database_routes;
 mod docker_routes;

@@ -8,6 +8,9 @@ use crate::shared::config::{ADMIN_ROLE_UUID, EDITOR_ROLE_UUID, READER_ROLE_UUID}
 use crate::shared::error::{AppError, AppResult};
 use futures::Stream;
 use std::pin::Pin;
+use crate::application::services::docker::resolve_descriptor_by_container::resolve_descriptor_by_container;
+use crate::application::services::docker::restart_container::restart_container;
+use crate::application::services::docker::stream_container_logs::stream_container_logs;
 
 pub struct DockerService {
     pub docker_api: DynDockerAPI,
@@ -52,15 +55,11 @@ impl DockerPort for DockerService {
         }
         log::info!("Access granted");
 
-        let service_name: String = if view_logs_params.container_type == "db" {
-            desc.docker_db.to_string()
-        } else {
-            desc.docker_service.to_string()
-        };
-
-        self.docker_api
-            .stream_container_logs(&service_name, view_logs_params.number_of_lines)
-            .await
+        stream_container_logs(
+            &self.docker_api,
+            view_logs_params,
+            desc,
+        ).await
     }
 
     async fn restart_container(
@@ -87,18 +86,11 @@ impl DockerPort for DockerService {
             require_all(&auth_context, &[ADMIN_ROLE_UUID])?;
         }
 
-        let container_name: String = if container_type == "db" {
-            desc.docker_db.to_string()
-        } else {
-            desc.docker_service.to_string()
-        };
-
-        self.docker_api.restart_container(&container_name).await
+        restart_container(
+            &self.docker_api,
+            &desc,
+            &container_type,
+        ).await
     }
 }
 
-fn resolve_descriptor_by_container(container: &str) -> Option<&'static ServiceDescriptor> {
-    let cleaned_name = container.trim();
-    log::info!("Resolving descriptor for container: {}", cleaned_name);
-    SERVICES.get(cleaned_name)
-}
