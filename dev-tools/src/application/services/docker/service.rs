@@ -1,7 +1,6 @@
 use crate::application::ports::input::docker_logs_port::DockerPort;
 use crate::application::ports::output::docker_api::DynDockerAPI;
 use crate::application::services::docker::params::{RestartContainerParams, ViewLogsParams};
-use crate::application::services::docker::utils::{ServiceDescriptor, SERVICES};
 use crate::application::services::user_context::{require_all, require_any, UserContext};
 use crate::domain::entities::docker::DockerLogEntity;
 use crate::shared::config::{ADMIN_ROLE_UUID, EDITOR_ROLE_UUID, READER_ROLE_UUID};
@@ -87,8 +86,7 @@ impl DockerPort for DockerService {
         }
 
         restart_container(
-            &self.docker_api,
-            &desc,
+            &self.docker_api, desc,
             &container_type,
         ).await
     }
