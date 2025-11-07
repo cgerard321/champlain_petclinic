@@ -688,14 +688,27 @@ class CartControllerUnitTest {
     }
 
     @Test
-    void whenAddProductToWishlist_thenOutOfStock(){
+    void whenAddProductToWishlist_thenOutOfStockProductStillAdded(){
         // Arrange
         String cartId = VALID_CART_ID;
         String productId = wishListProduct1.getProductId();
         int quantity = 2;
 
+        CartProduct outOfStockProduct = CartProduct.builder()
+                .productId(productId)
+                .productName(wishListProduct1.getProductName())
+                .quantityInCart(quantity)
+                .productQuantity(0)
+                .build();
+
+        Cart updatedCart = Cart.builder()
+                .cartId(cartId)
+                .wishListProducts(List.of(outOfStockProduct))
+                .products(new ArrayList<>())
+                .build();
+
         when(cartService.addProductToWishlist(eq(cartId), any(WishlistItemRequestModel.class)))
-                .thenReturn(Mono.error(new OutOfStockException("Only 5 items left in stock.")));
+                .thenReturn(Mono.just(EntityModelUtil.toCartResponseModel(updatedCart, updatedCart.getProducts())));
 
         // Act & Assert
         webTestClient.post()
@@ -703,9 +716,15 @@ class CartControllerUnitTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(new WishlistItemRequestModel(productId, quantity))
                 .exchange()
-                .expectStatus().isBadRequest()
-                .expectBody()
-                .jsonPath("$.message").isEqualTo("Only 5 items left in stock.");
+                .expectStatus().isCreated()
+                .expectBody(Cart.class)
+                .value(responseCart -> {
+                    assertThat(responseCart.getWishListProducts()).hasSize(1);
+                    CartProduct wishlistEntry = responseCart.getWishListProducts().get(0);
+                    assertEquals(productId, wishlistEntry.getProductId());
+                    assertEquals(0, wishlistEntry.getProductQuantity());
+                    assertEquals(quantity, wishlistEntry.getQuantityInCart());
+                });
 
         verify(cartService, times(1)).addProductToWishlist(eq(cartId), any(WishlistItemRequestModel.class));
     }

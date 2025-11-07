@@ -1252,14 +1252,6 @@ const UserCart: React.FC = () => {
 
                 return (
                   <div key={item.productId} className={wishlistCardClassName}>
-                    {isOutOfStock && (
-                      <span
-                        className="wishlist-stock-badge"
-                        aria-label="No stock left"
-                      >
-                        No Stock Left
-                      </span>
-                    )}
                     <div className="recent-purchase-image-container">
                       <div className="recent-purchase-image">
                         <ImageContainer imageId={item.imageId} />

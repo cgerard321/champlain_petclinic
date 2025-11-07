@@ -9,6 +9,7 @@ import com.petclinic.cartsservice.domainclientlayer.ProductClient;
 import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
 import com.petclinic.cartsservice.domainclientlayer.CartItemRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
+import com.petclinic.cartsservice.presentationlayer.WishlistItemRequestModel;
 import com.petclinic.cartsservice.presentationlayer.WishlistTransferDirection;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
@@ -131,7 +132,6 @@ class CartServiceUnitTest {
     private final String nonExistentCartId = "a7d573-bcab-4db3-956f-773324b92a80";
     private final String validCustomerId = "f470653d-05c5-4c45-b7a0-7d70f003d2ac";
     private final String nonExistentCustomerId = "non-existent-customer-id";
-    private final String nonExistentProductId = "a7d573-bcab-5555-956f-773324b92a80";
 
 
 
@@ -377,6 +377,18 @@ class CartServiceUnitTest {
 
         when(cartRepository.findCartByCartId(cartWithWishlist.getCartId()))
                 .thenReturn(Mono.just(cartWithWishlist));
+        when(productClient.getProductByProductId(inStockWishlistProduct.getProductId()))
+                .thenReturn(Mono.just(ProductResponseModel.builder()
+                        .productId(inStockWishlistProduct.getProductId())
+                        .productName(inStockWishlistProduct.getProductName())
+                        .productQuantity(5)
+                        .build()));
+        when(productClient.getProductByProductId(outOfStockWishlistProduct.getProductId()))
+                .thenReturn(Mono.just(ProductResponseModel.builder()
+                        .productId(outOfStockWishlistProduct.getProductId())
+                        .productName(outOfStockWishlistProduct.getProductName())
+                        .productQuantity(0)
+                        .build()));
 
         StepVerifier.create(cartService.transferWishlist(
                         cartWithWishlist.getCartId(),
@@ -420,6 +432,12 @@ class CartServiceUnitTest {
 
         when(cartRepository.findCartByCartId(cartWithOnlyOutOfStock.getCartId()))
                 .thenReturn(Mono.just(cartWithOnlyOutOfStock));
+        when(productClient.getProductByProductId(outOfStockWishlistProduct.getProductId()))
+                .thenReturn(Mono.just(ProductResponseModel.builder()
+                        .productId(outOfStockWishlistProduct.getProductId())
+                        .productName(outOfStockWishlistProduct.getProductName())
+                        .productQuantity(0)
+                        .build()));
 
         StepVerifier.create(cartService.transferWishlist(
                         cartWithOnlyOutOfStock.getCartId(),
@@ -432,6 +450,38 @@ class CartServiceUnitTest {
                             response.getMessage() != null && response.getMessage().contains("Skipped"),
                             "Response message should mention skipped out-of-stock items"
                     );
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void addProductToWishlist_AllowsOutOfStockProducts() {
+        String cartId = "wishlist-cart-allow";
+        String productId = "0e6d3f24-2e7a-4db0-86f2-5920a5fdc9aa";
+
+        Cart emptyWishlistCart = Cart.builder()
+                .cartId(cartId)
+                .customerId("customer-allow")
+                .products(new ArrayList<>())
+                .wishListProducts(new ArrayList<>())
+                .build();
+
+        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(emptyWishlistCart));
+        when(productClient.getProductByProductId(productId)).thenReturn(Mono.just(ProductResponseModel.builder()
+                .productId(productId)
+                .productName("Backordered Toy")
+                .productQuantity(0)
+                .build()));
+        when(cartRepository.save(any(Cart.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+
+        StepVerifier.create(cartService.addProductToWishlist(cartId, new WishlistItemRequestModel(productId, 3)))
+                .assertNext(response -> {
+                    assertNotNull(response.getWishListProducts());
+                    assertEquals(1, response.getWishListProducts().size());
+                    CartProduct added = response.getWishListProducts().get(0);
+                    assertEquals(productId, added.getProductId());
+                    assertEquals(3, added.getQuantityInCart());
+                    assertEquals(0, added.getProductQuantity());
                 })
                 .verifyComplete();
     }
@@ -738,43 +788,41 @@ class CartServiceUnitTest {
     }
 
     @Test
-    void addProductToCart_ProductAlreadyInWishlist_DoesNotAddAgain() {
-        // Arrange: Mock the cart that already has the product in the wishlist
+    void addProductToCart_ProductAlreadyInWishlist_OutOfStockThrowsException() {
         String cartId = cart1.getCartId();
         String productId = wishlistProduct2.getProductId();
 
-        List<CartProduct> wishListWithProduct = List.of(wishlistProduct2);
-        cart1.setWishListProducts(wishListWithProduct);
+        Cart cartWithWishlist = Cart.builder()
+                .cartId(cartId)
+                .customerId(cart1.getCustomerId())
+                .products(new ArrayList<>(cart1.getProducts()))
+                .wishListProducts(new ArrayList<>(List.of(wishlistProduct2)))
+                .build();
 
-        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart1));
+        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cartWithWishlist));
         when(productClient.getProductByProductId(productId)).thenReturn(Mono.just(ProductResponseModel.builder()
                 .productId(productId)
                 .productName("Cat Litter")
-                .productQuantity(0) // Out of stock
+                .productQuantity(0)
                 .build()));
-        when(cartRepository.save(any(Cart.class))).thenReturn(Mono.just(cart1));  // Mock the save method to return the saved cart
 
-        // Act: Attempt to add the product again
         Mono<CartResponseModel> result = cartService.addProductToCart(cartId, new CartItemRequestModel(productId, 1));
 
-        // Assert: Ensure it is not added again to the wishlist
         StepVerifier.create(result)
-                .expectNextMatches(cartResponse -> cartResponse.getWishListProducts().size() == 1 &&
-                        cartResponse.getWishListProducts().get(0).getProductId().equals(productId))
-                .verifyComplete();
+                .expectErrorMatches(error -> error instanceof OutOfStockException &&
+                        error.getMessage().toLowerCase().contains("out of stock"))
+                .verify();
 
-        // Verify repository interaction
-        verify(cartRepository, times(1)).save(any(Cart.class));
+        verify(cartRepository, never()).save(any(Cart.class));
     }
 
     @Test
-    void addProductToCart_ProductOutOfStock_WishlistInitiallyNull() {
-        // Arrange: Create a cart with a null wishlist
+    void addProductToCart_ProductOutOfStock_WishlistInitiallyNullThrowsException() {
         Cart cartWithNullWishlist = Cart.builder()
                 .cartId(cart1.getCartId())
                 .customerId(cart1.getCustomerId())
                 .products(new ArrayList<>(cart1.getProducts()))
-                .wishListProducts(null) // Wishlist is null initially
+                .wishListProducts(null)
                 .build();
 
         String productId = product3.getProductId();
@@ -783,22 +831,17 @@ class CartServiceUnitTest {
         when(productClient.getProductByProductId(productId)).thenReturn(Mono.just(ProductResponseModel.builder()
                 .productId(productId)
                 .productName("OutOfStockProduct")
-                .productQuantity(0) // Out of stock
+                .productQuantity(0)
                 .build()));
-        when(cartRepository.save(any(Cart.class))).thenReturn(Mono.just(cartWithNullWishlist));  // Mock the save method to return the saved cart
 
-        // Act: Add out-of-stock product
         Mono<CartResponseModel> result = cartService.addProductToCart(cart1.getCartId(), new CartItemRequestModel(productId, 1));
 
-        // Assert: Verify the product is added to the newly initialized wishlist
         StepVerifier.create(result)
-                .expectNextMatches(cartResponse -> cartResponse.getWishListProducts() != null &&
-                        cartResponse.getWishListProducts().stream()
-                                .anyMatch(product -> product.getProductId().equals(productId)))
-                .verifyComplete();
+                .expectErrorMatches(error -> error instanceof OutOfStockException &&
+                        error.getMessage().toLowerCase().contains("out of stock"))
+                .verify();
 
-        // Verify repository interaction
-        verify(cartRepository, times(1)).save(any(Cart.class));
+        verify(cartRepository, never()).save(any(Cart.class));
     }
 
 
@@ -847,7 +890,7 @@ class CartServiceUnitTest {
         // Assert: Expect OutOfStockException to be thrown
         StepVerifier.create(result)
                 .expectErrorMatches(throwable -> throwable instanceof OutOfStockException &&
-                        throwable.getMessage().equals("You cannot add more than 10 items. Only 10 items left in stock."))
+                        throwable.getMessage().equals("You cannot add more than 10 item(s). Only 10 items left in stock."))
                 .verify();
 
         // Verify repository interactions
@@ -976,20 +1019,19 @@ class CartServiceUnitTest {
 
     // positive path
     @Test
-    void addProductToCart_outOfStock_goesToWishlist() {
-        // Arrange
+    void addProductToCart_outOfStock_returnsError() {
         String cartId = cart1.getCartId();
         String productId = "out-stock-1";
         CartItemRequestModel request = new CartItemRequestModel(productId, 1);
 
-        Cart emptyLists = Cart.builder()
+        Cart cart = Cart.builder()
                 .cartId(cartId)
                 .customerId(cart1.getCustomerId())
                 .products(new ArrayList<>(cart1.getProducts()))
                 .wishListProducts(new ArrayList<>())
                 .build();
 
-        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(emptyLists));
+        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
         when(productClient.getProductByProductId(productId)).thenReturn(
                 Mono.just(ProductResponseModel.builder()
                         .productId(productId)
@@ -998,16 +1040,13 @@ class CartServiceUnitTest {
                         .productSalePrice(10.0)
                         .build())
         );
-        when(cartRepository.save(any(Cart.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
 
-        // Act + Assert
         StepVerifier.create(cartService.addProductToCart(cartId, request))
-                .expectNextMatches(res ->
-                        res.getMessage() != null &&
-                                res.getWishListProducts() != null &&
-                                res.getWishListProducts().stream().anyMatch(p -> p.getProductId().equals(productId))
-                )
-                .verifyComplete();
+                .expectErrorMatches(error -> error instanceof OutOfStockException &&
+                        error.getMessage().toLowerCase().contains("out of stock"))
+                .verify();
+
+        verify(cartRepository, never()).save(any(Cart.class));
     }
 
     // negative path
@@ -1259,6 +1298,11 @@ class CartServiceUnitTest {
         savedCart.setWishListProducts(new ArrayList<>());
         savedCart.setProducts(List.of(wishItem));
 
+        when(productClient.getProductByProductId("prod-1")).thenReturn(Mono.just(ProductResponseModel.builder()
+                .productId("prod-1")
+                .productName("Test Product")
+                .productQuantity(10)
+                .build()));
         when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
         when(cartRepository.save(any())).thenReturn(Mono.just(savedCart));
 
@@ -1302,6 +1346,11 @@ class CartServiceUnitTest {
                 .build();
         savedCart.setProducts(List.of(merged));
 
+        when(productClient.getProductByProductId("prod-1")).thenReturn(Mono.just(ProductResponseModel.builder()
+                .productId("prod-1")
+                .productName("Test Product")
+                .productQuantity(10)
+                .build()));
         when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
         when(cartRepository.save(any())).thenReturn(Mono.just(savedCart));
 
@@ -1310,6 +1359,54 @@ class CartServiceUnitTest {
                                         assertEquals("Moved 2 item(s) from wishlist to cart.", resp.getMessage());
                     assertEquals(1, resp.getProducts().size());
                     assertEquals(5, resp.getProducts().get(0).getQuantityInCart());
+                })
+                .verifyComplete();
+    }
+
+        @Test
+        void testTransferWishlist_ToCart_SkipsUnavailableItems() {
+        String cartId = "cart-skip";
+        CartProduct inStock = CartProduct.builder()
+                .productId("prod-in-stock")
+                .productName("In Stock")
+                .quantityInCart(2)
+                .productSalePrice(10.0)
+                .build();
+        CartProduct outOfStock = CartProduct.builder()
+                .productId("prod-out")
+                .productName("Out Of Stock")
+                .quantityInCart(1)
+                .productSalePrice(5.0)
+                .build();
+
+        Cart cart = new Cart();
+        cart.setCartId(cartId);
+        cart.setWishListProducts(new ArrayList<>(List.of(inStock, outOfStock)));
+        cart.setProducts(new ArrayList<>());
+
+        when(productClient.getProductByProductId("prod-in-stock")).thenReturn(Mono.just(ProductResponseModel.builder()
+                .productId("prod-in-stock")
+                .productName("In Stock")
+                .productQuantity(5)
+                .build()));
+        when(productClient.getProductByProductId("prod-out")).thenReturn(Mono.just(ProductResponseModel.builder()
+                .productId("prod-out")
+                .productName("Out Of Stock")
+                .productQuantity(0)
+                .build()));
+        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
+        when(cartRepository.save(any())).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
+
+                StepVerifier.create(cartService.transferWishlist(cartId, List.of(), WishlistTransferDirection.TO_CART))
+                .assertNext(resp -> {
+                    assertEquals(1, resp.getProducts().size());
+                    assertTrue(resp.getProducts().stream()
+                            .anyMatch(p -> p.getProductId().equals("prod-in-stock") && p.getQuantityInCart() == 2));
+                    assertTrue(resp.getWishListProducts().stream()
+                            .anyMatch(p -> p.getProductId().equals("prod-out")));
+                    assertNotNull(resp.getMessage());
+                    assertTrue(resp.getMessage().contains("Skipped"));
+                    assertTrue(resp.getMessage().contains("out of stock or unavailable"));
                 })
                 .verifyComplete();
     }
