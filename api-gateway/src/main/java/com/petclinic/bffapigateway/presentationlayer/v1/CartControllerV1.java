@@ -209,7 +209,7 @@ public class CartControllerV1 {
     public Mono<ResponseEntity<Void>> deleteCartByCartId(@PathVariable String cartId){
     return cartServiceClient.deleteCartByCartId(cartId)
         .thenReturn(ResponseEntity.noContent().<Void>build())
-        .onErrorResume(e -> this.<Void>mapCartError(e,
+        .onErrorResume(e -> this.mapCartError(e,
             ErrorOptions.builder().build()
         ));
     }
@@ -219,7 +219,7 @@ public class CartControllerV1 {
     public Mono<ResponseEntity<Void>> deleteAllItemsInCart(@PathVariable String cartId) {
     return cartServiceClient.deleteAllItemsInCart(cartId)
         .then(Mono.just(ResponseEntity.noContent().<Void>build()))
-        .onErrorResume(e -> this.<Void>mapCartError(e,
+        .onErrorResume(e -> this.mapCartError(e,
             ErrorOptions.builder()
                 .build()
         ));
@@ -230,7 +230,7 @@ public class CartControllerV1 {
     public Mono<ResponseEntity<Void>> removeProductFromCart(@PathVariable String cartId, @PathVariable String productId){
     return cartServiceClient.removeProductFromCart(cartId, productId)
         .thenReturn(ResponseEntity.noContent().<Void>build())
-        .onErrorResume(e -> this.<Void>mapCartError(e,
+        .onErrorResume(e -> this.mapCartError(e,
             ErrorOptions.builder()
                 .build()
         ));
@@ -309,7 +309,7 @@ public class CartControllerV1 {
         @PathVariable String productId) {
     return cartServiceClient.removeProductFromWishlist(cartId, productId)
         .thenReturn(ResponseEntity.noContent().<Void>build())
-        .onErrorResume(e -> this.<Void>mapCartError(e,
+        .onErrorResume(e -> this.mapCartError(e,
             ErrorOptions.builder()
                 .build()
         ));
@@ -368,7 +368,7 @@ public class CartControllerV1 {
     public Mono<ResponseEntity<Void>> clearPromo(@PathVariable String cartId) {
     return cartServiceClient.clearPromo(cartId)
         .thenReturn(ResponseEntity.noContent().<Void>build())
-        .onErrorResume(e -> this.<Void>mapCartError(
+        .onErrorResume(e -> this.mapCartError(
             e, ErrorOptions.builder().build()
         ));
     }

@@ -98,7 +98,7 @@ public class CartController {
                 .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
                 .flatMap(cartService::deleteCartByCartId)
-        .map(r -> ResponseEntity.noContent().<Void>build());
+        .map(r -> ResponseEntity.noContent().build());
 
     }
 
@@ -108,7 +108,7 @@ public class CartController {
                 .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
                 .flatMap(validId -> cartService.removeProductFromCart(validId, productId))
-        .map(r -> ResponseEntity.noContent().<Void>build());
+        .map(r -> ResponseEntity.noContent().build());
     }
 
     @PostMapping

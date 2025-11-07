@@ -148,6 +148,7 @@ public class CartServiceImpl implements CartService {
                 });
     }
 
+    @Override
     public Mono<Void> deleteAllItemsInCart(String cartId) {
         return cartRepository.findCartByCartId(cartId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
@@ -553,7 +554,7 @@ public class CartServiceImpl implements CartService {
 
         List<CartProduct> selectedItems = wishlist.stream()
                 .filter(item -> moveAll || (item.getProductId() != null && targetIds.contains(item.getProductId())))
-                .collect(Collectors.toList());
+                .toList();
 
         if (!moveAll && selectedItems.isEmpty()) {
             return Mono.error(new NotFoundException("No wishlist items matched the requested product IDs."));
