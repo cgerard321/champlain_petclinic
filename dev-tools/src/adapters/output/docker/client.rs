@@ -32,7 +32,7 @@ impl BollardDockerAPI {
                 ..Default::default()
             }))
             .await
-            .map_err(|e| map_docker_error(e))?;
+            .map_err(map_docker_error)?;
 
         log::info!("Found {} containers", list.len());
 
@@ -76,7 +76,7 @@ impl DockerAPIPort for BollardDockerAPI {
 
         log::info!("Connected to Docker");
 
-        let id = BollardDockerAPI::resolve_id(&self, container_name).await?;
+        let id = BollardDockerAPI::resolve_id(self, container_name).await?;
 
         let number_of_lines = number_of_lines.unwrap_or(DEFAULT_TAIL_AMOUNT).to_string();
 
@@ -94,13 +94,13 @@ impl DockerAPIPort for BollardDockerAPI {
                 }),
             )
             .map_ok(DockerLogEntity::from)
-            .map_err(|e| map_docker_error(e));
+            .map_err(map_docker_error);
 
         Ok(Box::pin(log_stream))
     }
 
     async fn restart_container(&self, container_name: &str) -> AppResult<()> {
-        let id = BollardDockerAPI::resolve_id(&self, container_name).await?;
+        let id = BollardDockerAPI::resolve_id(self, container_name).await?;
 
         // If we want to pass options to the restart, we can do it like this:
         // let options = Some(RestartContainerOptions {
@@ -112,6 +112,6 @@ impl DockerAPIPort for BollardDockerAPI {
             .docker
             .restart_container(id.as_str(), None::<RestartContainerOptions>)
             .await
-            .map_err(|e| map_docker_error(e))?)
+            .map_err(map_docker_error)?)
     }
 }

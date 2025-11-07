@@ -3,11 +3,11 @@ use crate::adapters::input::rest_handler::contracts::docker_contracts::docker::C
 use crate::adapters::input::rest_handler::docker_routes::utils::ws_logs_for_container;
 use crate::application::ports::input::docker_logs_port::DynDockerPort;
 use crate::application::services::docker::params::RestartContainerParams;
+use crate::shared::config::DEFAULT_CONTAINER_TYPE;
 use crate::shared::error::AppResult;
 use rocket::serde::json::Json;
 use rocket::State;
 use rocket_ws::{Channel, WebSocket};
-use crate::shared::config::DEFAULT_CONTAINER_TYPE;
 
 #[get("/<service>/actions/fetch/logs/tail?<container_type>&<number_of_lines>")]
 pub fn service_logs(
