@@ -7,6 +7,7 @@ import com.petclinic.bffapigateway.presentationlayer.v1.CartControllerV1;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -26,8 +27,12 @@ import reactor.test.StepVerifier;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.List;
+import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
@@ -50,7 +55,7 @@ public class CartControllerV1UnitTest {
     private final String baseCartURL = "/api/gateway/carts";
 
     private CartControllerV1.ErrorOptions errorOptions(boolean includeBody, boolean asUnprocessable) {
-        return CartControllerV1.ErrorOptions.builder("testContext")
+        return CartControllerV1.ErrorOptions.builder()
                 .includeBadRequestBodyMessage(includeBody)
                 .invalidInputAsUnprocessable(asUnprocessable)
                 .build();
@@ -84,11 +89,8 @@ public class CartControllerV1UnitTest {
                 .build();
     }
 
-    private AddProductRequestDTO buildAddProductRequestDTO() {
-        return AddProductRequestDTO.builder()
-                .productId("product-789")
-                .quantity(2)
-                .build();
+        private CartItemRequestDTO buildCartItemRequestDTO() {
+                return new CartItemRequestDTO("product-789", 2);
     }
 
     private UpdateProductQuantityRequestDTO buildUpdateQuantityRequestDTO() {
@@ -145,51 +147,12 @@ public class CartControllerV1UnitTest {
         verify(cartServiceClient, times(1)).createCart(any(CartRequestDTO.class));
     }
 
-    // Tests for getCartItemCount endpoint
-    @Test
-    @DisplayName("GET /api/gateway/carts/{cartId}/count - Should return item count successfully")
-    void getCartItemCount_withValidId_shouldReturnCount() {
-        // Arrange
-        String cartId = "cart-123";
-        when(cartServiceClient.getCartItemCount(cartId))
-                .thenReturn(Mono.just(3));
-
-        // Act & Assert
-        webTestClient.get()
-                .uri(baseCartURL + "/" + cartId + "/count")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.itemCount").isEqualTo(3);
-
-        verify(cartServiceClient, times(1)).getCartItemCount(cartId);
-    }
-
-    @Test
-    @DisplayName("GET /api/gateway/carts/{cartId}/count - Should return 404 when cart not found")
-    void getCartItemCount_withNonExistingId_shouldReturnNotFound() {
-        // Arrange
-        String cartId = "missing-cart";
-        when(cartServiceClient.getCartItemCount(cartId))
-                .thenReturn(Mono.error(new NotFoundException("Cart not found")));
-
-        // Act & Assert
-        webTestClient.get()
-                .uri(baseCartURL + "/" + cartId + "/count")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound();
-
-        verify(cartServiceClient, times(1)).getCartItemCount(cartId);
-    }
-
     // Tests for getAllCarts endpoint
     @Test
     @DisplayName("GET /api/gateway/carts - Should return all carts successfully")
     void getAllCarts_shouldReturnAllCarts() {
         // Arrange
-        when(cartServiceClient.getAllCarts())
+        when(cartServiceClient.getAllCarts(anyMap()))
                 .thenReturn(Flux.just(buildCartResponseDTO()));
 
         // Act & Assert
@@ -203,14 +166,14 @@ public class CartControllerV1UnitTest {
                 .hasSize(1)
                 .contains(buildCartResponseDTO());
 
-        verify(cartServiceClient, times(1)).getAllCarts();
+        verify(cartServiceClient, times(1)).getAllCarts(anyMap());
     }
 
     @Test
     @DisplayName("GET /api/gateway/carts - Should return empty list when no carts exist")
     void getAllCarts_shouldReturnEmptyList() {
         // Arrange
-        when(cartServiceClient.getAllCarts())
+        when(cartServiceClient.getAllCarts(anyMap()))
                 .thenReturn(Flux.empty());
 
         // Act & Assert
@@ -223,7 +186,41 @@ public class CartControllerV1UnitTest {
                 .expectBodyList(CartResponseDTO.class)
                 .hasSize(0);
 
-        verify(cartServiceClient, times(1)).getAllCarts();
+        verify(cartServiceClient, times(1)).getAllCarts(anyMap());
+    }
+
+    @Test
+    @DisplayName("GET /api/gateway/carts - JSON list should honour pagination parameters")
+    void getAllCartsAsJson_shouldReturnList() {
+        CartResponseDTO first = buildCartResponseDTO();
+        CartResponseDTO second = buildCartResponseDTO();
+        second.setCartId("cart-456");
+
+        when(cartServiceClient.getAllCarts(anyMap()))
+                .thenReturn(Flux.just(first, second));
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path(baseCartURL)
+                        .queryParam("page", 0)
+                        .queryParam("size", 5)
+                        .queryParam("customerName", "john")
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(CartResponseDTO.class)
+                .hasSize(2)
+                .contains(first, second);
+
+                @SuppressWarnings("unchecked")
+                ArgumentCaptor<Map<String, Object>> captor =
+                        ArgumentCaptor.forClass((Class<Map<String, Object>>) (Class<?>) Map.class);
+                verify(cartServiceClient).getAllCarts(captor.capture());
+                Map<String, Object> params = captor.getValue();
+                assertEquals(0, ((Number) params.get("page")).intValue());
+                assertEquals(5, ((Number) params.get("size")).intValue());
+                assertEquals("john", params.get("customerName"));
     }
 
     // Tests for getCartById endpoint
@@ -272,18 +269,16 @@ public class CartControllerV1UnitTest {
     void deleteCartByCartId_withValidId_shouldDeleteCart() {
         // Arrange
         String cartId = "cart-123";
-        CartResponseDTO deletedCart = buildCartResponseDTO();
         when(cartServiceClient.deleteCartByCartId(cartId))
-                .thenReturn(Mono.just(deletedCart));
+                                .thenReturn(Mono.empty());
 
         // Act & Assert
         webTestClient.delete()
                 .uri(baseCartURL + "/" + cartId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
-                .expectBody(CartResponseDTO.class)
-                .isEqualTo(deletedCart);
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
 
         verify(cartServiceClient, times(1)).deleteCartByCartId(cartId);
     }
@@ -294,7 +289,7 @@ public class CartControllerV1UnitTest {
         // Arrange
         String cartId = "non-existent-cart";
         when(cartServiceClient.deleteCartByCartId(cartId))
-                .thenReturn(Mono.empty());
+                                .thenReturn(Mono.error(new NotFoundException("Cart not found")));
 
         // Act & Assert
         webTestClient.delete()
@@ -306,68 +301,65 @@ public class CartControllerV1UnitTest {
         verify(cartServiceClient, times(1)).deleteCartByCartId(cartId);
     }
 
-    // Tests for clearCart endpoint
+    // Tests for deleteAllItemsInCart endpoint
     @Test
-    @DisplayName("DELETE /api/gateway/carts/{cartId}/clear - Should clear cart successfully")
-    void clearCart_withValidId_shouldClearCart() {
+    @DisplayName("DELETE /api/gateway/carts/{cartId}/products - Should remove all products successfully")
+    void deleteAllItemsInCart_withValidId_shouldReturnNoContent() {
         // Arrange
         String cartId = "cart-123";
-        when(cartServiceClient.clearCart(cartId))
+        when(cartServiceClient.deleteAllItemsInCart(cartId))
                 .thenReturn(Mono.empty());
 
         // Act & Assert
         webTestClient.delete()
-                .uri(baseCartURL + "/" + cartId + "/clear")
+                .uri(baseCartURL + "/" + cartId + "/products")
                 .exchange()
-                .expectStatus().isOk()
-                .expectBody(String.class)
-                .isEqualTo("Cart successfully cleared");
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
 
-        verify(cartServiceClient, times(1)).clearCart(cartId);
+        verify(cartServiceClient, times(1)).deleteAllItemsInCart(cartId);
     }
 
     @Test
-    @DisplayName("DELETE /api/gateway/carts/{cartId}/clear - Should return 404 when cart not found")
-    void clearCart_withNonExistingId_shouldReturnNotFound() {
+    @DisplayName("DELETE /api/gateway/carts/{cartId}/products - Should return 404 when cart not found")
+    void deleteAllItemsInCart_withNonExistingId_shouldReturnNotFound() {
         // Arrange
         String cartId = "non-existent-cart";
-        when(cartServiceClient.clearCart(cartId))
+        when(cartServiceClient.deleteAllItemsInCart(cartId))
                 .thenReturn(Mono.error(new NotFoundException("Cart not found")));
 
         // Act & Assert
         webTestClient.delete()
-                .uri(baseCartURL + "/" + cartId + "/clear")
+                .uri(baseCartURL + "/" + cartId + "/products")
                 .exchange()
                 .expectStatus().isNotFound();
 
-        verify(cartServiceClient, times(1)).clearCart(cartId);
+        verify(cartServiceClient, times(1)).deleteAllItemsInCart(cartId);
     }
 
     // Tests for removeProductFromCart endpoint
     @Test
-    @DisplayName("DELETE /api/gateway/carts/{cartId}/{productId} - Should remove product successfully")
+        @DisplayName("DELETE /api/gateway/carts/{cartId}/products/{productId} - Should remove product successfully")
     void removeProductFromCart_withValidIds_shouldRemoveProduct() {
         // Arrange
         String cartId = "cart-123";
         String productId = "product-789";
-        CartResponseDTO updatedCart = buildCartResponseDTO();
         when(cartServiceClient.removeProductFromCart(cartId, productId))
-                .thenReturn(Mono.just(updatedCart));
+                                .thenReturn(Mono.empty());
 
         // Act & Assert
         webTestClient.delete()
-                .uri(baseCartURL + "/" + cartId + "/" + productId)
+                .uri(baseCartURL + "/" + cartId + "/products/" + productId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
-                .expectBody(CartResponseDTO.class)
-                .isEqualTo(updatedCart);
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
 
         verify(cartServiceClient, times(1)).removeProductFromCart(cartId, productId);
     }
 
     @Test
-    @DisplayName("DELETE /api/gateway/carts/{cartId}/{productId} - Should return 404 when cart or product not found")
+        @DisplayName("DELETE /api/gateway/carts/{cartId}/products/{productId} - Should return 404 when cart or product not found")
     void removeProductFromCart_withNonExistingIds_shouldReturnNotFound() {
         // Arrange
         String cartId = "invalid-cart";
@@ -377,7 +369,7 @@ public class CartControllerV1UnitTest {
 
         // Act & Assert
         webTestClient.delete()
-                .uri(baseCartURL + "/" + cartId + "/" + productId)
+                .uri(baseCartURL + "/" + cartId + "/products/" + productId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound();
@@ -386,7 +378,7 @@ public class CartControllerV1UnitTest {
     }
 
     @Test
-    @DisplayName("DELETE /api/gateway/carts/{cartId}/{productId} - Should return 422 for invalid input")
+        @DisplayName("DELETE /api/gateway/carts/{cartId}/products/{productId} - Should return 422 for invalid input")
     void removeProductFromCart_withInvalidInput_shouldReturnUnprocessableEntity() {
         // Arrange
         String cartId = "cart-123";
@@ -396,7 +388,7 @@ public class CartControllerV1UnitTest {
 
         // Act & Assert
         webTestClient.delete()
-                .uri(baseCartURL + "/" + cartId + "/" + productId)
+                .uri(baseCartURL + "/" + cartId + "/products/" + productId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
@@ -410,9 +402,9 @@ public class CartControllerV1UnitTest {
     void addProductToCart_withValidRequest_shouldAddProduct() {
         // Arrange
         String cartId = "cart-123";
-        AddProductRequestDTO requestDTO = buildAddProductRequestDTO();
+        CartItemRequestDTO requestDTO = buildCartItemRequestDTO();
         CartResponseDTO updatedCart = buildCartResponseDTO();
-        when(cartServiceClient.addProductToCart(cartId, requestDTO))
+        when(cartServiceClient.addProductToCart(eq(cartId), any(CartItemRequestDTO.class)))
                 .thenReturn(Mono.just(updatedCart));
 
         // Act & Assert
@@ -421,11 +413,12 @@ public class CartControllerV1UnitTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestDTO)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
+                .expectHeader().valueEquals("Location", baseCartURL + "/" + cartId + "/products/" + requestDTO.getProductId())
                 .expectBody(CartResponseDTO.class)
                 .isEqualTo(updatedCart);
 
-        verify(cartServiceClient, times(1)).addProductToCart(cartId, requestDTO);
+        verify(cartServiceClient, times(1)).addProductToCart(eq(cartId), any(CartItemRequestDTO.class));
     }
 
     @Test
@@ -433,8 +426,8 @@ public class CartControllerV1UnitTest {
     void addProductToCart_withInvalidInput_shouldReturnBadRequest() {
         // Arrange
         String cartId = "cart-123";
-        AddProductRequestDTO requestDTO = buildAddProductRequestDTO();
-        when(cartServiceClient.addProductToCart(cartId, requestDTO))
+        CartItemRequestDTO requestDTO = buildCartItemRequestDTO();
+        when(cartServiceClient.addProductToCart(eq(cartId), any(CartItemRequestDTO.class)))
                 .thenReturn(Mono.error(new InvalidInputException("Invalid product quantity")));
 
         // Act & Assert
@@ -445,7 +438,7 @@ public class CartControllerV1UnitTest {
                 .exchange()
                 .expectStatus().isBadRequest();
 
-        verify(cartServiceClient, times(1)).addProductToCart(cartId, requestDTO);
+        verify(cartServiceClient, times(1)).addProductToCart(eq(cartId), any(CartItemRequestDTO.class));
     }
 
     @Test
@@ -453,8 +446,8 @@ public class CartControllerV1UnitTest {
     void addProductToCart_withNonExistingCartId_shouldReturnNotFound() {
         // Arrange
         String cartId = "invalid-cart";
-        AddProductRequestDTO requestDTO = buildAddProductRequestDTO();
-        when(cartServiceClient.addProductToCart(cartId, requestDTO))
+        CartItemRequestDTO requestDTO = buildCartItemRequestDTO();
+        when(cartServiceClient.addProductToCart(eq(cartId), any(CartItemRequestDTO.class)))
                 .thenReturn(Mono.error(new NotFoundException("Cart not found")));
 
         // Act & Assert
@@ -465,7 +458,7 @@ public class CartControllerV1UnitTest {
                 .exchange()
                 .expectStatus().isNotFound();
 
-        verify(cartServiceClient, times(1)).addProductToCart(cartId, requestDTO);
+        verify(cartServiceClient, times(1)).addProductToCart(eq(cartId), any(CartItemRequestDTO.class));
     }
 
     // Tests for updateProductQuantityInCart endpoint
@@ -481,7 +474,7 @@ public class CartControllerV1UnitTest {
                 .thenReturn(Mono.just(updatedCart));
 
         // Act & Assert
-        webTestClient.put()
+        webTestClient.patch()
                 .uri(baseCartURL + "/" + cartId + "/products/" + productId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestDTO)
@@ -504,7 +497,7 @@ public class CartControllerV1UnitTest {
                 .thenReturn(Mono.error(new NotFoundException("Cart or product not found")));
 
         // Act & Assert
-        webTestClient.put()
+        webTestClient.patch()
                 .uri(baseCartURL + "/" + cartId + "/products/" + productId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestDTO)
@@ -552,109 +545,27 @@ public class CartControllerV1UnitTest {
         verify(cartServiceClient, times(1)).checkoutCart(cartId);
     }
 
-    // Tests for getCartByCustomerId endpoint
-    @Test
-    @DisplayName("GET /api/gateway/carts/customer/{customerId} - Should return cart by customer ID")
-    void getCartByCustomerId_withValidId_shouldReturnCart() {
-        // Arrange
-        String customerId = "customer-456";
-        CartResponseDTO cart = buildCartResponseDTO();
-        when(cartServiceClient.getCartByCustomerId(customerId))
-                .thenReturn(Mono.just(cart));
-
-        // Act & Assert
-        webTestClient.get()
-                .uri(baseCartURL + "/customer/" + customerId)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(CartResponseDTO.class)
-                .isEqualTo(cart);
-
-        verify(cartServiceClient, times(1)).getCartByCustomerId(customerId);
-    }
-
-    @Test
-    @DisplayName("GET /api/gateway/carts/customer/{customerId} - Should return 404 when customer has no cart")
-    void getCartByCustomerId_withNonExistingId_shouldReturnNotFound() {
-        // Arrange
-        String customerId = "non-existent-customer";
-        when(cartServiceClient.getCartByCustomerId(customerId))
-                .thenReturn(Mono.empty());
-
-        // Act & Assert
-        webTestClient.get()
-                .uri(baseCartURL + "/customer/" + customerId)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound();
-
-        verify(cartServiceClient, times(1)).getCartByCustomerId(customerId);
-    }
-
     // Tests for wishlist operations
     @Test
-    @DisplayName("PUT /api/gateway/carts/{cartId}/wishlist/{productId}/toCart - Should move product from wishlist to cart")
-    void moveProductFromWishListToCart_withValidIds_shouldMoveProduct() {
+    @DisplayName("POST /api/gateway/carts/{cartId}/wishlist - Should add product to wishlist")
+    void addProductToWishlist_withValidIds_shouldAddToWishlist() {
         // Arrange
         String cartId = "cart-123";
-        String productId = "product-789";
+        WishlistItemRequestDTO request = new WishlistItemRequestDTO("product-789", 2);
         CartResponseDTO updatedCart = buildCartResponseDTO();
-        when(cartServiceClient.moveProductFromWishListToCart(cartId, productId))
-                .thenReturn(Mono.just(updatedCart));
-
-        // Act & Assert
-        webTestClient.put()
-                .uri(baseCartURL + "/" + cartId + "/wishlist/" + productId + "/toCart")
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(CartResponseDTO.class)
-                .isEqualTo(updatedCart);
-
-        verify(cartServiceClient, times(1)).moveProductFromWishListToCart(cartId, productId);
-    }
-
-    @Test
-    @DisplayName("PUT /api/gateway/carts/{cartId}/wishlist/{productId}/toWishList - Should move product from cart to wishlist")
-    void moveProductFromCartToWishlist_withValidIds_shouldMoveProduct() {
-        // Arrange
-        String cartId = "cart-123";
-        String productId = "product-789";
-        CartResponseDTO updatedCart = buildCartResponseDTO();
-        when(cartServiceClient.moveProductFromCartToWishlist(cartId, productId))
-                .thenReturn(Mono.just(updatedCart));
-
-        // Act & Assert
-        webTestClient.put()
-                .uri(baseCartURL + "/" + cartId + "/wishlist/" + productId + "/toWishList")
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(CartResponseDTO.class)
-                .isEqualTo(updatedCart);
-
-        verify(cartServiceClient, times(1)).moveProductFromCartToWishlist(cartId, productId);
-    }
-
-    @Test
-    @DisplayName("POST /api/gateway/carts/{cartId}/products/{productId}/quantity/{quantity} - Should add product to wishlist")
-    void addProductToWishList_withValidIds_shouldAddToWishlist() {
-        // Arrange
-        String cartId = "cart-123";
-        String productId = "product-789";
-        int quantity = 2;
-        CartResponseDTO updatedCart = buildCartResponseDTO();
-        when(cartServiceClient.addProductToWishList(cartId, productId, quantity))
+        when(cartServiceClient.addProductToWishlist(eq(cartId), any(WishlistItemRequestDTO.class)))
                 .thenReturn(Mono.just(updatedCart));
 
         // Act & Assert
         webTestClient.post()
-                .uri(baseCartURL + "/" + cartId + "/products/" + productId + "/quantity/" + quantity)
+                .uri(baseCartURL + "/" + cartId + "/wishlist")
+                .bodyValue(request)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectBody(CartResponseDTO.class)
                 .isEqualTo(updatedCart);
 
-        verify(cartServiceClient, times(1)).addProductToWishList(cartId, productId, quantity);
+        verify(cartServiceClient, times(1)).addProductToWishlist(eq(cartId), any(WishlistItemRequestDTO.class));
     }
 
     @Test
@@ -663,17 +574,15 @@ public class CartControllerV1UnitTest {
         // Arrange
         String cartId = "cart-123";
         String productId = "product-789";
-        CartResponseDTO updatedCart = buildCartResponseDTO();
         when(cartServiceClient.removeProductFromWishlist(cartId, productId))
-                .thenReturn(Mono.just(updatedCart));
+                .thenReturn(Mono.empty());
 
         // Act & Assert
         webTestClient.delete()
                 .uri(baseCartURL + "/" + cartId + "/wishlist/" + productId)
                 .exchange()
-                .expectStatus().isOk()
-                .expectBody(CartResponseDTO.class)
-                .isEqualTo(updatedCart);
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
 
         verify(cartServiceClient, times(1)).removeProductFromWishlist(cartId, productId);
     }
@@ -696,46 +605,6 @@ public class CartControllerV1UnitTest {
         verify(cartServiceClient, times(1)).removeProductFromWishlist(cartId, productId);
     }
 
-    // Tests for addProductToCartFromProducts endpoint
-    @Test
-    @DisplayName("POST /api/gateway/carts/{cartId}/{productId} - Should add product from products view")
-    void addProductToCartFromProducts_withValidIds_shouldAddProduct() {
-        // Arrange
-        String cartId = "cart-123";
-        String productId = "product-789";
-        CartResponseDTO updatedCart = buildCartResponseDTO();
-        when(cartServiceClient.addProductToCartFromProducts(cartId, productId))
-                .thenReturn(Mono.just(updatedCart));
-
-        // Act & Assert
-        webTestClient.post()
-                .uri(baseCartURL + "/" + cartId + "/" + productId)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(CartResponseDTO.class)
-                .isEqualTo(updatedCart);
-
-        verify(cartServiceClient, times(1)).addProductToCartFromProducts(cartId, productId);
-    }
-
-    @Test
-    @DisplayName("POST /api/gateway/carts/{cartId}/{productId} - Should return 400 for invalid input")
-    void addProductToCartFromProducts_withInvalidInput_shouldReturnBadRequest() {
-        // Arrange
-        String cartId = "cart-123";
-        String productId = "product-789";
-        when(cartServiceClient.addProductToCartFromProducts(cartId, productId))
-                .thenReturn(Mono.error(new InvalidInputException("Product out of stock")));
-
-        // Act & Assert
-        webTestClient.post()
-                .uri(baseCartURL + "/" + cartId + "/" + productId)
-                .exchange()
-                .expectStatus().isBadRequest();
-
-        verify(cartServiceClient, times(1)).addProductToCartFromProducts(cartId, productId);
-    }
-
     // Additional error handling tests
     @Test
     @DisplayName("Should handle WebClientResponseException.BadRequest")
@@ -748,7 +617,7 @@ public class CartControllerV1UnitTest {
 
         // Act & Assert
         webTestClient.delete()
-                .uri(baseCartURL + "/" + cartId + "/" + productId)
+                .uri(baseCartURL + "/" + cartId + "/products/" + productId)
                 .exchange()
                 .expectStatus().isBadRequest();
 
@@ -766,7 +635,7 @@ public class CartControllerV1UnitTest {
 
         // Act & Assert
         webTestClient.delete()
-                .uri(baseCartURL + "/" + cartId + "/" + productId)
+                .uri(baseCartURL + "/" + cartId + "/products/" + productId)
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.CONFLICT);
 
@@ -784,168 +653,200 @@ public class CartControllerV1UnitTest {
 
         // Act & Assert
         webTestClient.delete()
-                .uri(baseCartURL + "/" + cartId + "/" + productId)
+                .uri(baseCartURL + "/" + cartId + "/products/" + productId)
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
 
         verify(cartServiceClient, times(1)).removeProductFromCart(cartId, productId);
     }
 
-    // New tests for moveAllWishlistToCart endpoint
+    // New tests for wishlist transfer endpoint
     @Test
-    @DisplayName("POST /api/gateway/carts/{cartId}/wishlist/moveAll - Should move all wishlist items to cart successfully")
-    void moveAllWishlistToCart_withValidId_shouldReturnUpdatedCart() {
+    @DisplayName("POST /api/gateway/carts/{cartId}/wishlist-transfers - Should move wishlist items to cart successfully")
+    void createWishlistTransfer_withValidId_shouldReturnUpdatedCart() {
         // Arrange
         String cartId = "cart-123";
         CartResponseDTO updatedCart = buildCartResponseDTO();
-        when(cartServiceClient.moveAllWishlistToCart(cartId))
+        when(cartServiceClient.createWishlistTransfer(eq(cartId), anyList(), eq(WishlistTransferDirectionDTO.TO_CART)))
                 .thenReturn(Mono.just(updatedCart));
 
         // Act & Assert
         webTestClient.post()
-                .uri(baseCartURL + "/" + cartId + "/wishlist/moveAll")
+                .uri(baseCartURL + "/" + cartId + "/wishlist-transfers")
+                .bodyValue(new WishlistTransferRequestDTO(null, WishlistTransferDirectionDTO.TO_CART))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(CartResponseDTO.class)
                 .isEqualTo(updatedCart);
 
-        verify(cartServiceClient, times(1)).moveAllWishlistToCart(cartId);
+        verify(cartServiceClient, times(1)).createWishlistTransfer(eq(cartId), anyList(), eq(WishlistTransferDirectionDTO.TO_CART));
     }
 
     @Test
-    @DisplayName("POST /api/gateway/carts/{cartId}/wishlist/moveAll - Should return 404 when cart not found")
-    void moveAllWishlistToCart_withNonExistingCartId_shouldReturnNotFound() {
+    @DisplayName("POST /api/gateway/carts/{cartId}/wishlist-transfers - Should return 404 when cart not found")
+    void createWishlistTransfer_withNonExistingCartId_shouldReturnNotFound() {
         // Arrange
         String cartId = "non-existent-cart";
-        when(cartServiceClient.moveAllWishlistToCart(cartId))
+        when(cartServiceClient.createWishlistTransfer(eq(cartId), anyList(), eq(WishlistTransferDirectionDTO.TO_CART)))
                 .thenReturn(Mono.empty());
 
         // Act & Assert
         webTestClient.post()
-                .uri(baseCartURL + "/" + cartId + "/wishlist/moveAll")
+                .uri(baseCartURL + "/" + cartId + "/wishlist-transfers")
+                .bodyValue(new WishlistTransferRequestDTO(null, WishlistTransferDirectionDTO.TO_CART))
                 .exchange()
                 .expectStatus().isNotFound();
 
-        verify(cartServiceClient, times(1)).moveAllWishlistToCart(cartId);
+        verify(cartServiceClient, times(1)).createWishlistTransfer(eq(cartId), anyList(), eq(WishlistTransferDirectionDTO.TO_CART));
     }
 
     // Focused error mapping tests for wishlist/cart endpoints
     @Test
-    @DisplayName("PUT /api/gateway/carts/{cartId}/wishlist/{productId}/toCart - Should return 404 when cart or product not found")
-    void moveProductFromWishListToCart_withNonExistingIds_shouldReturnNotFound() {
-        // Arrange
-        String cartId = "missing-cart";
-        String productId = "missing-product";
-        when(cartServiceClient.moveProductFromWishListToCart(cartId, productId))
-                .thenReturn(Mono.error(new NotFoundException("Not found")));
-
-        // Act & Assert
-        webTestClient.put()
-                .uri(baseCartURL + "/" + cartId + "/wishlist/" + productId + "/toCart")
-                .exchange()
-                .expectStatus().isNotFound();
-
-        verify(cartServiceClient, times(1)).moveProductFromWishListToCart(cartId, productId);
-    }
-
-    @Test
-    @DisplayName("PUT /api/gateway/carts/{cartId}/wishlist/{productId}/toWishList - Should return 400 for invalid input")
-    void moveProductFromCartToWishlist_withInvalidInput_shouldReturnBadRequest() {
+    @DisplayName("POST /api/gateway/carts/{cartId}/wishlist - Should return 422 for unprocessable entity")
+    void addProductToWishlist_withUnprocessableEntity_shouldReturnUnprocessable() {
         // Arrange
         String cartId = "cart-123";
-        String productId = "bad-product";
-        when(cartServiceClient.moveProductFromCartToWishlist(cartId, productId))
-                .thenReturn(Mono.error(new InvalidInputException("Invalid input")));
-
-        // Act & Assert
-        webTestClient.put()
-                .uri(baseCartURL + "/" + cartId + "/wishlist/" + productId + "/toWishList")
-                .exchange()
-                .expectStatus().isBadRequest();
-
-        verify(cartServiceClient, times(1)).moveProductFromCartToWishlist(cartId, productId);
-    }
-
-    @Test
-    @DisplayName("POST /api/gateway/carts/{cartId}/products/{productId}/quantity/{quantity} - Should return 422 for unprocessable entity")
-    void addProductToWishList_withUnprocessableEntity_shouldReturnUnprocessable() {
-        // Arrange
-        String cartId = "cart-123";
-        String productId = "product-789";
-        int quantity = 2;
-        when(cartServiceClient.addProductToWishList(cartId, productId, quantity))
+        WishlistItemRequestDTO request = new WishlistItemRequestDTO("product-789", 2);
+        when(cartServiceClient.addProductToWishlist(eq(cartId), any(WishlistItemRequestDTO.class)))
                 .thenReturn(Mono.error(WebClientResponseException.create(422, "Unprocessable Entity", null, null, null)));
 
         // Act & Assert
         webTestClient.post()
-                .uri(baseCartURL + "/" + cartId + "/products/" + productId + "/quantity/" + quantity)
+                .uri(baseCartURL + "/" + cartId + "/wishlist")
+                .bodyValue(request)
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
 
-        verify(cartServiceClient, times(1)).addProductToWishList(cartId, productId, quantity);
+        verify(cartServiceClient, times(1)).addProductToWishlist(eq(cartId), any(WishlistItemRequestDTO.class));
     }
 
     @Test
-    @DisplayName("POST /api/gateway/carts/{cartId}/wishlist/moveAll - Should pass through custom 409 status")
-    void moveAllWishlistToCart_withConflict_shouldReturnConflict() {
+    @DisplayName("POST /api/gateway/carts/{cartId}/wishlist-transfers - Should pass through custom 409 status")
+    void createWishlistTransfer_withConflict_shouldReturnConflict() {
         // Arrange
         String cartId = "cart-123";
-        when(cartServiceClient.moveAllWishlistToCart(cartId))
+        when(cartServiceClient.createWishlistTransfer(eq(cartId), anyList(), eq(WishlistTransferDirectionDTO.TO_CART)))
                 .thenReturn(Mono.error(WebClientResponseException.create(409, "Conflict", null, null, null)));
 
         // Act & Assert
         webTestClient.post()
-                .uri(baseCartURL + "/" + cartId + "/wishlist/moveAll")
+                .uri(baseCartURL + "/" + cartId + "/wishlist-transfers")
+                .bodyValue(new WishlistTransferRequestDTO(null, WishlistTransferDirectionDTO.TO_CART))
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.CONFLICT);
 
-        verify(cartServiceClient, times(1)).moveAllWishlistToCart(cartId);
-    }
-    @Test
-    void testGetRecentPurchases_ReturnsOk() {
-        // Arrange
-        CartServiceClient cartServiceClient = Mockito.mock(CartServiceClient.class);
-        CartControllerV1 controller = new CartControllerV1(cartServiceClient);
-
-        String cartId = "test-cart-id";
-        List<CartProductResponseDTO> products = List.of(
-                CartProductResponseDTO.builder().productId("prod1").build()
-        );
-
-        Mockito.when(cartServiceClient.getRecentPurchases(cartId))
-                .thenReturn(Mono.just(products));
-
-        // Act
-        Mono<ResponseEntity<List<CartProductResponseDTO>>> result = controller.getRecentPurchases(cartId);
-
-        // Assert
-        StepVerifier.create(result)
-                .expectNextMatches(response -> response.getStatusCode().is2xxSuccessful()
-                        && response.getBody() != null
-                        && response.getBody().size() == 1
-                        && "prod1".equals(response.getBody().get(0).getProductId()))
-                .verifyComplete();
+        verify(cartServiceClient, times(1)).createWishlistTransfer(eq(cartId), anyList(), eq(WishlistTransferDirectionDTO.TO_CART));
     }
 
     @Test
-    void testGetRecentPurchases_ReturnsNotFound() {
-        // Arrange
-        CartServiceClient cartServiceClient = Mockito.mock(CartServiceClient.class);
-        CartControllerV1 controller = new CartControllerV1(cartServiceClient);
+    @DisplayName("PUT /api/gateway/carts/{cartId}/promo - Should apply promo successfully")
+    void applyPromoToCart_shouldReturnUpdatedCart() {
+        String cartId = "cart-123";
+        CartResponseDTO response = buildCartResponseDTO();
 
-        String cartId = "missing-cart-id";
-        Mockito.when(cartServiceClient.getRecentPurchases(cartId))
-                .thenReturn(Mono.empty());
+        when(cartServiceClient.applyPromoToCart(eq(cartId), eq(10.0))).thenReturn(Mono.just(response));
 
-        // Act
-        Mono<ResponseEntity<List<CartProductResponseDTO>>> result = controller.getRecentPurchases(cartId);
+        webTestClient.put()
+                .uri(baseCartURL + "/" + cartId + "/promo")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(new ApplyPromoRequestDTO(10.0))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(CartResponseDTO.class)
+                .isEqualTo(response);
 
-        // Assert
-        StepVerifier.create(result)
-                .expectNextMatches(response -> response.getStatusCode().is4xxClientError()
-                        && response.getBody() == null)
-                .verifyComplete();
+        verify(cartServiceClient).applyPromoToCart(eq(cartId), eq(10.0));
     }
+
+    @Test
+    @DisplayName("PUT /api/gateway/carts/{cartId}/promo - Should return 400 when client rejects promo")
+    void applyPromoToCart_withInvalidInput_shouldReturnBadRequest() {
+        String cartId = "cart-123";
+        when(cartServiceClient.applyPromoToCart(eq(cartId), eq(5.0)))
+                .thenReturn(Mono.error(new InvalidInputException("promoPercent must be between 1 and 50")));
+
+        webTestClient.put()
+                .uri(baseCartURL + "/" + cartId + "/promo")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(new ApplyPromoRequestDTO(5.0))
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(CartResponseDTO.class)
+                .value(body -> assertEquals("promoPercent must be between 1 and 50", body.getMessage()));
+
+        verify(cartServiceClient).applyPromoToCart(eq(cartId), eq(5.0));
+    }
+
+    @Test
+    @DisplayName("PUT /api/gateway/carts/{cartId}/promo - Should return 400 when promo percent missing")
+    void applyPromoToCart_withMissingPercent_shouldReturnBadRequest() {
+        String cartId = "cart-123";
+        when(cartServiceClient.applyPromoToCart(eq(cartId), isNull()))
+                .thenReturn(Mono.error(new InvalidInputException("promoPercent must be provided")));
+
+        webTestClient.put()
+                .uri(baseCartURL + "/" + cartId + "/promo")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(new ApplyPromoRequestDTO())
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(CartResponseDTO.class)
+                .value(body -> assertEquals("promoPercent must be provided", body.getMessage()));
+
+        verify(cartServiceClient).applyPromoToCart(eq(cartId), isNull());
+    }
+
+    @Test
+    @DisplayName("DELETE /api/gateway/carts/{cartId}/promo - Should clear promo successfully")
+    void clearPromo_shouldReturnNoContent() {
+        String cartId = "cart-123";
+        when(cartServiceClient.clearPromo(cartId)).thenReturn(Mono.empty());
+
+        webTestClient.delete()
+                .uri(baseCartURL + "/" + cartId + "/promo")
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
+
+        verify(cartServiceClient).clearPromo(cartId);
+    }
+
+    @Test
+    @DisplayName("GET /api/gateway/carts/promos/validate/{promoCode} - Should return promo details")
+    void validatePromo_shouldReturnOk() {
+        String promoCode = "SAVE10";
+        PromoCodeResponseDTO promo = PromoCodeResponseDTO.builder()
+                .code(promoCode)
+                .discount(10.0)
+                .build();
+
+        when(cartServiceClient.validatePromoCode(promoCode)).thenReturn(Mono.just(promo));
+
+        webTestClient.get()
+                .uri(baseCartURL + "/promos/validate/" + promoCode)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(PromoCodeResponseDTO.class)
+                .isEqualTo(promo);
+
+        verify(cartServiceClient).validatePromoCode(promoCode);
+    }
+
+    @Test
+    @DisplayName("GET /api/gateway/carts/promos/validate/{promoCode} - Should return 400 on invalid promo")
+    void validatePromo_withInvalidCode_shouldReturnBadRequest() {
+        String promoCode = "BADCODE";
+        when(cartServiceClient.validatePromoCode(promoCode))
+                .thenReturn(Mono.error(new InvalidInputException("Promo code is not valid: " + promoCode)));
+
+        webTestClient.get()
+                .uri(baseCartURL + "/promos/validate/" + promoCode)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        verify(cartServiceClient).validatePromoCode(promoCode);
+    }
+
     @Test
     void testUnprocessableEntity() {
         WebClientResponseException ex = WebClientResponseException.create(422, "Unprocessable Entity", null, null, null);
@@ -1035,45 +936,6 @@ public class CartControllerV1UnitTest {
         Mono<ResponseEntity<CartResponseDTO>> result = controller.mapCartErrorWithMessage(ex, errorOptions(false, false));
         StepVerifier.create(result)
                 .expectNextMatches(r -> r.getStatusCode().is5xxServerError())
-                .verifyComplete();
-    }
-    @Test
-    void testGetRecommendationPurchases_ReturnsOk() {
-        CartServiceClient cartServiceClient = Mockito.mock(CartServiceClient.class);
-        CartControllerV1 controller = new CartControllerV1(cartServiceClient);
-
-        String cartId = "test-cart-id";
-        List<CartProductResponseDTO> products = List.of(
-                CartProductResponseDTO.builder().productId("prod1").build()
-        );
-
-        Mockito.when(cartServiceClient.getRecommendationPurchases(cartId))
-                .thenReturn(Mono.just(products));
-
-        Mono<ResponseEntity<List<CartProductResponseDTO>>> result = controller.getRecommendationPurchases(cartId);
-
-        StepVerifier.create(result)
-                .expectNextMatches(response -> response.getStatusCode().is2xxSuccessful()
-                        && response.getBody() != null
-                        && response.getBody().size() == 1
-                        && "prod1".equals(response.getBody().get(0).getProductId()))
-                .verifyComplete();
-    }
-
-    @Test
-    void testGetRecommendationPurchases_ReturnsNotFound() {
-        CartServiceClient cartServiceClient = Mockito.mock(CartServiceClient.class);
-        CartControllerV1 controller = new CartControllerV1(cartServiceClient);
-
-        String cartId = "missing-cart-id";
-        Mockito.when(cartServiceClient.getRecommendationPurchases(cartId))
-                .thenReturn(Mono.empty());
-
-        Mono<ResponseEntity<List<CartProductResponseDTO>>> result = controller.getRecommendationPurchases(cartId);
-
-        StepVerifier.create(result)
-                .expectNextMatches(response -> response.getStatusCode().is4xxClientError()
-                        && response.getBody() == null)
                 .verifyComplete();
     }
 

@@ -21,6 +21,7 @@ interface CartDetailsModel {
   tvc: number;
   total: number;
   message?: string;
+  promoPercent?: number | null;
 }
 
 interface CartProductModel {
@@ -35,6 +36,36 @@ interface CustomerDTO {
   firstName?: string;
   lastName?: string;
 }
+
+const round2 = (value: number): number => Math.round(value * 100) / 100;
+
+const computeTotals = (
+  products: CartProductModel[],
+  promoPercent?: number | null
+): { subtotal: number; tvq: number; tvc: number; total: number } => {
+  const subtotal = round2(
+    products.reduce(
+      (sum, product) => sum + product.productSalePrice * product.quantityInCart,
+      0
+    )
+  );
+
+  const effectivePromo =
+    typeof promoPercent === 'number' && promoPercent >= 0 && promoPercent <= 100
+      ? promoPercent
+      : null;
+
+  const discountedSubtotal =
+    effectivePromo != null
+      ? round2(subtotal * (1 - effectivePromo / 100))
+      : subtotal;
+
+  const tvq = round2(discountedSubtotal * 0.09975);
+  const tvc = round2(discountedSubtotal * 0.05);
+  const total = round2(discountedSubtotal + tvq + tvc);
+
+  return { subtotal, tvq, tvc, total };
+};
 
 export default function CartListTable(): JSX.Element {
   const [carts, setCarts] = useState<CartModel[]>([]);
@@ -121,40 +152,24 @@ export default function CartListTable(): JSX.Element {
       if (nextQty <= 0) return;
       try {
         setActionLoadingId(productId);
-        await axiosInstance.put(
+        const { data } = await axiosInstance.put<CartDetailsModel>(
           `/carts/${cartId}/products/${productId}`,
           { quantity: nextQty },
           { useV2: false }
         );
 
-        setSelectedCart(prev =>
-          prev
-            ? {
-                ...prev,
-                products: prev.products.map(p =>
-                  p.productId === productId
-                    ? { ...p, quantityInCart: nextQty }
-                    : p
-                ),
-                subtotal: prev.products.reduce(
-                  (sum, p) =>
-                    sum +
-                    (p.productId === productId ? nextQty : p.quantityInCart) *
-                      p.productSalePrice,
-                  0
-                ),
-                tvq: prev.tvq,
-                tvc: prev.tvc,
-                total: prev.total,
-              }
-            : prev
-        );
-
-        const { data } = await axiosInstance.get<CartDetailsModel>(
-          `/carts/${cartId}`,
-          { useV2: false }
-        );
-        setSelectedCart(data);
+        setSelectedCart(prev => {
+          if (!data) return prev;
+          const merged: CartDetailsModel = {
+            ...(prev ?? data),
+            ...data,
+            customerId: data.customerId ?? prev?.customerId ?? '',
+            customerName: data.customerName ?? prev?.customerName,
+            promoPercent: data.promoPercent ?? prev?.promoPercent ?? null,
+            wishListProducts: data.wishListProducts ?? prev?.wishListProducts,
+          };
+          return merged;
+        });
       } catch (e) {
         console.error('Failed to update quantity', e);
       } finally {
@@ -167,24 +182,28 @@ export default function CartListTable(): JSX.Element {
   const removeLine = useCallback(async (cartId: string, productId: string) => {
     try {
       setActionLoadingId(productId);
-      await axiosInstance.delete(`/carts/${cartId}/${productId}`, {
+      await axiosInstance.delete(`/carts/${cartId}/products/${productId}`, {
         useV2: false,
       });
 
       setSelectedCart(prev =>
         prev
-          ? {
-              ...prev,
-              products: prev.products.filter(p => p.productId !== productId),
-            }
+          ? (() => {
+              const nextProducts = prev.products.filter(
+                p => p.productId !== productId
+              );
+              const totals = computeTotals(nextProducts, prev.promoPercent);
+              return {
+                ...prev,
+                products: nextProducts,
+                subtotal: totals.subtotal,
+                tvq: totals.tvq,
+                tvc: totals.tvc,
+                total: totals.total,
+              };
+            })()
           : prev
       );
-
-      const { data } = await axiosInstance.get<CartDetailsModel>(
-        `/carts/${cartId}`,
-        { useV2: false }
-      );
-      setSelectedCart(data);
     } catch (e) {
       console.error('Failed to remove product', e);
     } finally {
@@ -252,7 +271,7 @@ export default function CartListTable(): JSX.Element {
 
       const { data } = await axiosInstance.get<
         CartModel[] | string | Record<string, unknown>
-      >('/carts/list', {
+      >('/carts', {
         useV2: false,
         headers: { Accept: 'application/json' },
       });

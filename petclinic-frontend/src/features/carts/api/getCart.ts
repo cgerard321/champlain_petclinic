@@ -1,14 +1,15 @@
 import axiosInstance from '@/shared/api/axiosInstance';
+import type { CartDetailsModel } from '@/shared/api/cart';
+
 export type CartIdResponse = { cartId: string };
-export type CartCountResponse = { itemCount: number };
 
 export async function fetchCartIdByCustomerId(
   userId: string
 ): Promise<string | null> {
   try {
-    // was http://localhost:8080/api/v2/gateway/carts/customer/${userId}
+    // RESTful location: http://localhost:8080/api/gateway/customers/{customerId}/cart
     const { data } = await axiosInstance.get<CartIdResponse>(
-      `/carts/customer/${userId}`,
+      `/customers/${userId}/cart`,
       { useV2: false }
     );
     return data?.cartId ?? null;
@@ -18,16 +19,36 @@ export async function fetchCartIdByCustomerId(
   }
 }
 
-export async function fetchCartCountByCartId(cartId: string): Promise<number> {
+export async function fetchCartDetailsByCartId(
+  cartId: string
+): Promise<CartDetailsModel | null> {
   try {
-    const { data } = await axiosInstance.get<CartCountResponse>(
-      `/carts/${cartId}/count`,
+    const { data } = await axiosInstance.get<CartDetailsModel>(
+      `/carts/${cartId}`,
       { useV2: false }
     );
-    const n = Number(data?.itemCount);
-    return Number.isFinite(n) && n >= 0 ? Math.trunc(n) : 0;
+    return data ?? null;
   } catch (error) {
-    console.error(`Error fetching cart count for ${cartId}`, error);
-    return 0;
+    console.error(`Error fetching cart for ${cartId}`, error);
+    return null;
   }
+}
+
+export function calculateCartItemsCount(cart: CartDetailsModel | null): number {
+  if (!cart || !Array.isArray(cart.products)) return 0;
+
+  const totalByQuantity = cart.products.reduce((acc, product) => {
+    const quantity = Number(product?.quantityInCart);
+    if (Number.isFinite(quantity) && quantity > 0) {
+      return acc + Math.trunc(quantity);
+    }
+    return acc + 1;
+  }, 0);
+
+  return totalByQuantity > 0 ? totalByQuantity : cart.products.length;
+}
+
+export async function fetchCartCountByCartId(cartId: string): Promise<number> {
+  const cart = await fetchCartDetailsByCartId(cartId);
+  return calculateCartItemsCount(cart);
 }
