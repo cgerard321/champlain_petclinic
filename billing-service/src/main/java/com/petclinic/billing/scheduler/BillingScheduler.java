@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class BillingScheduler {
     private static final Logger log = LoggerFactory.getLogger(BillingScheduler.class);
+    private static final int MAX_RETRIES = 3;
+    private static final long RETRY_DELAY_MS = 5000;
     private final BillService billService;
 
     public BillingScheduler(BillService billService) {
@@ -27,8 +29,6 @@ public class BillingScheduler {
      */
     @Scheduled(cron = "0 0 0 * * ?")
     public void markOverdueBills() {
-        final int MAX_RETRIES = 3;
-        final long RETRY_DELAY_MS = 5000;
         billService.updateOverdueBills()
             .retryWhen(
                 Retry.backoff(MAX_RETRIES, java.time.Duration.ofMillis(RETRY_DELAY_MS))
