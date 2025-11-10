@@ -1,8 +1,8 @@
 use sqlx::{MySql, Pool};
 use std::collections::HashSet;
 use std::sync::Arc;
-use uuid::fmt::Hyphenated;
 use uuid::Uuid;
+use uuid::fmt::Hyphenated;
 
 use crate::adapters::output::mysql::error::map_sqlx_err;
 use crate::adapters::output::mysql::model::role::Role;
