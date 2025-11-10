@@ -1,12 +1,11 @@
-import { useToast } from '@/shared/components/toast/ToastProvider';
 import { useCallback, useEffect, useState } from 'react';
+import { useToast } from '@/shared/components/toast/ToastProvider';
 import CartBillingForm, { BillingInfo } from './CartBillingForm';
 import InvoiceComponent, {
   InvoiceFull as InvoiceFullType,
   InvoiceItem as InvoiceItemType,
 } from './Invoice';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useCart } from '@/context/CartContext';
 import CartItem from './CartItem';
 import { ProductModel } from '../models/ProductModel';
 import './cart-shared.css';
@@ -17,7 +16,11 @@ import ImageContainer from '@/features/products/components/ImageContainer';
 import axiosInstance from '@/shared/api/axiosInstance';
 import getErrorMessage from '@/shared/api/getErrorMessage';
 import { formatPrice } from '../utils/formatPrice';
-import { applyPromo } from '@/shared/api/cart';
+import {
+  applyPromo,
+  clearPromo,
+  type CartDetailsModel,
+} from '@/shared/api/cart';
 import {
   IsAdmin,
   IsInventoryManager,
@@ -25,29 +28,23 @@ import {
   IsVet,
   useUser,
 } from '@/context/UserContext';
-import {
-  computeTaxes,
-  averageCanadianCombinedTaxRate,
-  roundToCents,
-} from '../utils/taxUtils';
 import { AppRoutePaths } from '@/shared/models/path.routes';
-import { getProductByProductId } from '@/features/products/api/getProductByProductId';
 import {
-  bumpCartCountInLS,
   notifyCartChanged,
   setCartCountInLS,
   setCartIdInLS,
 } from '../api/cartEvent';
+import { computeTaxes, formatTaxRate, roundToCents } from '../utils/taxUtils';
 import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
 interface ProductAPIResponse {
-  productId: number;
-  imageId: string;
+  productId: string;
+  imageId?: string;
   productName: string;
-  productDescription: string;
+  productDescription?: string;
   productSalePrice: number;
-  averageRating: number;
-  quantityInCart: number;
-  productQuantity: number;
+  averageRating?: number;
+  quantityInCart?: number;
+  productQuantity?: number;
 }
 
 interface Invoice {
@@ -65,8 +62,10 @@ interface Invoice {
 const UserCart: React.FC = () => {
   const navigate = useNavigate();
   const { cartId } = useParams<{ cartId?: string }>();
-  const { syncAfterAddToCart } = useCart();
   const { confirm, ConfirmModal } = useConfirmModal();
+  const { user } = useUser();
+  const { showToast } = useToast();
+  const customerId = user?.userId ?? null;
 
   const [cartItems, setCartItems] = useState<ProductModel[]>([]);
   const [wishlistItems, setWishlistItems] = useState<ProductModel[]>([]);
@@ -76,7 +75,6 @@ const UserCart: React.FC = () => {
   const [errorMessages, setErrorMessages] = useState<Record<number, string>>(
     {}
   );
-  const { showToast } = useToast();
 
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
   const [showInvoiceModal, setShowInvoiceModal] = useState<boolean>(false);
@@ -87,7 +85,6 @@ const UserCart: React.FC = () => {
   const [showBillingForm, setShowBillingForm] = useState<boolean>(false);
   const [billingInfo, setBillingInfo] = useState<BillingInfo | null>(null);
 
-  const [wishlistUpdated, setWishlistUpdated] = useState(false);
   const [voucherCode, setVoucherCode] = useState<string>('');
   const [voucherError, setVoucherError] = useState<string | null>(null);
 
@@ -95,29 +92,100 @@ const UserCart: React.FC = () => {
 
   const [promoPercent, setPromoPercent] = useState<number | null>(null);
 
-  // Helper: safely extract HTTP status from various error shapes
+  const toProductModel = useCallback(
+    (product: ProductAPIResponse): ProductModel => ({
+      productId: String(product.productId ?? ''),
+      imageId: product.imageId ?? '',
+      productName: product.productName,
+      productDescription: product.productDescription ?? '',
+      productSalePrice: product.productSalePrice,
+      averageRating: product.averageRating,
+      quantity:
+        product.quantityInCart && product.quantityInCart > 0
+          ? product.quantityInCart
+          : 1,
+      productQuantity: product.productQuantity ?? 0,
+    }),
+    []
+  );
+
+  const emitCartMessage = useCallback(
+    (serverMessage?: string | null, fallbackMessage?: string) => {
+      const text = (serverMessage ?? '').trim() || fallbackMessage;
+      if (!text) return;
+      const tone = serverMessage?.trim() ? 'info' : 'success';
+      showToast(text, tone);
+    },
+    [showToast]
+  );
+
   const getStatusCode = useCallback((err: unknown): number | undefined => {
     return (err as { response?: { status?: number } })?.response?.status;
   }, []);
 
-  // Helper: map 404
   const apiErrorMessage = useCallback(
     (err: unknown, defaultMessage: string): string => {
-      const status = getStatusCode(err);
-      if (status === 404) return 'Cart not found';
+      if (getStatusCode(err) === 404) return 'Cart not found';
       return getErrorMessage(err, { defaultMessage });
     },
     [getStatusCode]
   );
 
-  // Helper: used by actions that require cartId
-  const ensureCartId = useCallback((): boolean => {
+  const ensureCartId = useCallback((): string | undefined => {
     if (!cartId) {
-      setError('Invalid cart ID');
-      return false;
+      const message = 'Invalid cart ID';
+      setError(message);
+      showToast(message, 'error');
+      return undefined;
     }
-    return true;
-  }, [cartId, setError]);
+    return cartId;
+  }, [cartId, setError, showToast]);
+
+  const syncCartState = useCallback(
+    (
+      cartData: CartDetailsModel | null | undefined,
+      fallbackMessage?: string
+    ) => {
+      if (!cartData) return;
+
+      const normalizedCartItems = Array.isArray(cartData.products)
+        ? cartData.products.map(item =>
+            toProductModel(item as ProductAPIResponse)
+          )
+        : [];
+
+      setCartItems(normalizedCartItems);
+
+      const cartCount = normalizedCartItems.reduce(
+        (acc, item) => acc + (item.quantity ?? 0),
+        0
+      );
+      setCartItemCount(cartCount);
+      setCartCountInLS(cartCount);
+      notifyCartChanged();
+
+      if (cartData.cartId) {
+        setCartIdInLS(cartData.cartId);
+      }
+
+      const normalizedWishlist = Array.isArray(cartData.wishListProducts)
+        ? cartData.wishListProducts.map(item =>
+            toProductModel(item as ProductAPIResponse)
+          )
+        : [];
+      setWishlistItems(normalizedWishlist);
+
+      setPromoPercent(
+        typeof cartData.promoPercent === 'number' ? cartData.promoPercent : null
+      );
+
+      emitCartMessage(
+        typeof cartData.message === 'string' ? cartData.message : undefined,
+        fallbackMessage
+      );
+    },
+    [emitCartMessage, toProductModel]
+  );
 
   // Recent purchases state
   const [recentPurchases, setRecentPurchases] = useState<
@@ -154,53 +222,27 @@ const UserCart: React.FC = () => {
     imageId: string;
     quantity: number;
   }): Promise<void> => {
-    if (!ensureCartId()) return;
+    const existingCartId = ensureCartId();
+    if (!existingCartId) return;
 
     const quantity = Math.max(1, recentPurchaseQuantities[item.productId] || 1);
 
     try {
-      // Concurrently add items to cart
-      const addPromises = Array.from({ length: quantity }, () =>
-        axiosInstance.post(
-          `/carts/${cartId}/${item.productId}`,
-          {},
-          { useV2: false }
-        )
+      const { data } = await axiosInstance.post<CartDetailsModel>(
+        `/carts/${existingCartId}/products`,
+        {
+          productId: item.productId,
+          quantity,
+        },
+        { useV2: false }
       );
-      await Promise.all(addPromises);
 
-      showToast(`${item.productName} (x${quantity}) added to cart!`, 'success');
-      notifyCartChanged();
-      // Fetch updated cart and update state
-      const { data } = await axiosInstance.get(`/carts/${cartId}`, {
-        useV2: false,
-      });
-      if (Array.isArray(data.products)) {
-        const products: ProductModel[] = data.products.map(
-          (p: ProductAPIResponse) => ({
-            productId: p.productId,
-            imageId: p.imageId,
-            productName: p.productName,
-            productDescription: p.productDescription,
-            productSalePrice: p.productSalePrice,
-            averageRating: p.averageRating,
-            quantity: p.quantityInCart || 1,
-            productQuantity: p.productQuantity,
-          })
-        );
-        setCartItems(products);
-        const updatedCount = products.reduce(
-          (acc, p) => acc + (p.quantity || 0),
-          0
-        );
-        setCartCountInLS(updatedCount);
-      }
+      syncCartState(data, `${item.productName} (x${quantity}) added to cart!`);
     } catch (err: unknown) {
-      const msg = apiErrorMessage(
-        err,
-        `Failed to add ${item.productName} to cart.`
+      showToast(
+        apiErrorMessage(err, `Failed to add ${item.productName} to cart.`),
+        'error'
       );
-      showToast(msg, 'error');
     }
   };
 
@@ -243,7 +285,8 @@ const UserCart: React.FC = () => {
     imageId: string;
     quantity: number;
   }): Promise<void> => {
-    if (!ensureCartId()) return;
+    const existingCartId = ensureCartId();
+    if (!existingCartId) return;
 
     const quantity = Math.max(
       1,
@@ -251,41 +294,20 @@ const UserCart: React.FC = () => {
     );
 
     try {
-      for (let i = 0; i < quantity; i += 1) {
-        await axiosInstance.post(
-          `/carts/${cartId}/${item.productId}`,
-          {},
-          { useV2: false }
-        );
-      }
-      showToast(`${item.productName} (x${quantity}) added to cart!`, 'success');
-      notifyCartChanged();
-      // Fetch updated cart and update state
-      const { data } = await axiosInstance.get(`/carts/${cartId}`, {
-        useV2: false,
-      });
-      if (Array.isArray(data.products)) {
-        const products: ProductModel[] = data.products.map(
-          (p: ProductAPIResponse) => ({
-            productId: p.productId,
-            imageId: p.imageId,
-            productName: p.productName,
-            productDescription: p.productDescription,
-            productSalePrice: p.productSalePrice,
-            averageRating: p.averageRating,
-            quantity: p.quantityInCart || 1,
-            productQuantity: p.productQuantity,
-          })
-        );
-        setCartItems(products);
-        await syncAfterAddToCart();
-      }
-    } catch (err: unknown) {
-      const msg = apiErrorMessage(
-        err,
-        `Failed to add ${item.productName} to cart.`
+      const { data } = await axiosInstance.post<CartDetailsModel>(
+        `/carts/${existingCartId}/products`,
+        {
+          productId: item.productId,
+          quantity,
+        },
+        { useV2: false }
       );
-      showToast(msg, 'error');
+      syncCartState(data, `${item.productName} (x${quantity}) added to cart!`);
+    } catch (err: unknown) {
+      showToast(
+        apiErrorMessage(err, `Failed to add ${item.productName} to cart.`),
+        'error'
+      );
     }
   };
 
@@ -303,7 +325,20 @@ const UserCart: React.FC = () => {
   const promoDiscount =
     promoPercent != null ? (subtotal * promoPercent) / 100 : 0;
   const discountedSubtotal = Math.max(0, subtotal - promoDiscount);
+  const resolvedTaxLines = computeTaxes(
+    discountedSubtotal,
+    billingInfo?.province
+  ).map(line => ({
+    ...line,
+    amount: line.amount ?? roundToCents(discountedSubtotal * line.rate),
+  }));
+  const totalTax = roundToCents(
+    resolvedTaxLines.reduce((acc, line) => acc + (line.amount ?? 0), 0)
+  );
+
   const effectiveDiscount = promoDiscount;
+
+  const total = roundToCents(discountedSubtotal + totalTax);
 
   const updateCartItemCount = useCallback(() => {
     const count = cartItems.reduce(
@@ -322,58 +357,24 @@ const UserCart: React.FC = () => {
       }
 
       try {
-        const { data } = await axiosInstance.get(`/carts/${cartId}`, {
-          useV2: false,
-        });
-
-        if (!Array.isArray(data.products)) {
-          throw new Error('Invalid data format: products should be an array');
-        }
-
-        const products: ProductModel[] = data.products.map(
-          (p: ProductAPIResponse) => ({
-            productId: p.productId,
-            imageId: p.imageId,
-            productName: p.productName,
-            productDescription: p.productDescription,
-            productSalePrice: p.productSalePrice,
-            averageRating: p.averageRating,
-            quantity: p.quantityInCart || 1,
-            productQuantity: p.productQuantity,
-          })
+        const { data } = await axiosInstance.get<CartDetailsModel>(
+          `/carts/${cartId}`,
+          {
+            useV2: false,
+          }
         );
 
-        setCartItems(products);
-        setCartIdInLS(cartId);
-        await syncAfterAddToCart();
-        const enrichedWishlist = await Promise.all(
-          (data.wishListProducts || []).map(async (item: ProductModel) => {
-            const fullProduct = await getProductByProductId(item.productId);
-            return {
-              ...fullProduct,
-              quantity: item.quantity ?? 1,
-            };
-          })
-        );
-        setWishlistItems(enrichedWishlist);
-
-        if (typeof data.promoPercent === 'number') {
-          setPromoPercent(data.promoPercent);
-        } else {
-          setPromoPercent(null);
-        }
+        syncCartState(data);
       } catch (err: unknown) {
-        // Map 404 -> "Cart not found", otherwise use getErrorMessage
-        const msg = apiErrorMessage(err, 'Failed to fetch cart items');
-        setError(msg);
+        console.error(err);
+        setError('Failed to fetch cart items');
       } finally {
         setLoading(false);
-        if (wishlistUpdated) setWishlistUpdated(false);
       }
     };
 
     fetchCartItems();
-  }, [cartId, wishlistUpdated, syncAfterAddToCart, apiErrorMessage]);
+  }, [cartId, syncCartState]);
 
   useEffect(() => {
     updateCartItemCount();
@@ -381,11 +382,15 @@ const UserCart: React.FC = () => {
 
   // Fetch recent purchases
   useEffect(() => {
-    if (!cartId) return;
+    if (!customerId) {
+      setRecentPurchases([]);
+      return;
+    }
+
     const fetchRecentPurchases = async (): Promise<void> => {
       try {
         const { data } = await axiosInstance.get(
-          `/carts/${cartId}/recent-purchases`,
+          `/customers/${customerId}/cart/recent-purchases`,
           { useV2: false }
         );
         setRecentPurchases(data || []);
@@ -393,30 +398,35 @@ const UserCart: React.FC = () => {
         setRecentPurchases([]);
       }
     };
+
     fetchRecentPurchases();
-  }, [cartId]);
+  }, [customerId]);
 
   // Fetch recommendation purchases
   // Reusable function to fetch recommendation purchases
   const fetchRecommendationPurchases = useCallback(async (): Promise<void> => {
-    if (!cartId) return;
+    if (!customerId) {
+      setRecommendationPurchases([]);
+      return;
+    }
     try {
       const { data } = await axiosInstance.get(
-        `/carts/${cartId}/recommendation-purchases`,
+        `/customers/${customerId}/cart/recommendation-purchases`,
         { useV2: false }
       );
       setRecommendationPurchases(data || []);
     } catch (err) {
       setRecommendationPurchases([]);
     }
-  }, [cartId]);
+  }, [customerId]);
 
   useEffect(() => {
     fetchRecommendationPurchases();
-  }, [cartId, fetchRecommendationPurchases]);
+  }, [fetchRecommendationPurchases]);
 
   const applyVoucherCode = async (): Promise<void> => {
-    if (!cartId) {
+    const existingCartId = ensureCartId();
+    if (!existingCartId) {
       setVoucherError('Invalid cart ID');
       return;
     }
@@ -437,39 +447,18 @@ const UserCart: React.FC = () => {
         return;
       }
 
-      const updated = await applyPromo(cartId, percent);
+      const updated = await applyPromo(existingCartId, percent);
 
       setVoucherError(null);
-      showToast(
-        `Promo applied${updated?.promoPercent != null ? `: ${updated.promoPercent}%` : `: ${percent}%`}`,
-        'success'
-      );
-
-      setPromoPercent(updated?.promoPercent ?? percent);
-
-      try {
-        const refreshed = await axiosInstance.get(`/carts/${cartId}`, {
-          useV2: false,
-        });
-        if (typeof refreshed.data?.promoPercent === 'number') {
-          setPromoPercent(refreshed.data.promoPercent);
-        }
-      } catch {
-        /* ignore */
-      }
-    } catch (err: unknown) {
-      // Narrow error shape without using `any`
-      type ErrorWithResponse = { response?: { status?: number } };
-      const status = (err as ErrorWithResponse).response?.status;
-
-      if (status === 400) {
-        setVoucherError('Promo code invalid or expired.');
-      } else {
-        const msg = getErrorMessage(err, {
-          defaultMessage: 'Promo code invalid or expired.',
-        });
-        setVoucherError(msg);
-      }
+      const appliedMessage = `Promo applied${
+        updated?.promoPercent != null
+          ? `: ${updated.promoPercent}%`
+          : `: ${percent}%`
+      }`;
+      syncCartState(updated, appliedMessage);
+    } catch (err) {
+      console.error('Error validating promo code:', err);
+      setVoucherError('Promo code invalid or expired.');
     }
   };
 
@@ -487,11 +476,11 @@ const UserCart: React.FC = () => {
       index: number
     ): Promise<void> => {
       if (blockIfReadOnly()) return;
-      if (!ensureCartId()) return;
+      const existingCartId = ensureCartId();
+      if (!existingCartId) return;
 
       const newQuantity = Math.max(1, Number(event.target.value));
       const item = cartItems[index];
-      const prevQty = item.quantity || 1;
       if (newQuantity > item.productQuantity) {
         setErrorMessages(prevErrors => ({
           ...prevErrors,
@@ -507,69 +496,65 @@ const UserCart: React.FC = () => {
       }
 
       try {
-        const { data } = await axiosInstance.put(
-          `/carts/${cartId}/products/${item.productId}`,
+        const { data } = await axiosInstance.patch<CartDetailsModel>(
+          `/carts/${existingCartId}/products/${item.productId}`,
           { quantity: newQuantity },
           { useV2: false }
         );
 
-        if (data && data.message) {
-          setErrorMessages(prevErrors => ({
-            ...prevErrors,
-            [index]: data.message || 'Failed to update quantity',
-          }));
-
-          if (
-            typeof data.message === 'string' &&
-            data.message.includes('moved to your wishlist')
-          ) {
-            setCartItems(prevItems =>
-              prevItems.filter((_, idx) => idx !== index)
-            );
-            setWishlistItems(prevItems => [...prevItems, item]);
-            showToast(data.message, 'info');
-            bumpCartCountInLS(-prevQty);
-            notifyCartChanged(); // left cart
+        if (data?.message) {
+          if (data.message.includes('moved to your wishlist')) {
+            setErrorMessages(prevErrors => {
+              const next = { ...prevErrors };
+              delete next[index];
+              return next;
+            });
+            syncCartState(data, data.message);
             return;
           }
-        } else {
-          setCartItems(prev => {
-            const next = [...prev];
-            next[index] = { ...next[index], quantity: newQuantity };
-            return next;
-          });
-          showToast('Quantity updated.', 'success');
-          bumpCartCountInLS(newQuantity - prevQty);
-          notifyCartChanged(); // qty changed
+
+          setErrorMessages(prevErrors => ({
+            ...prevErrors,
+            [index]: data.message ?? 'Failed to update quantity',
+          }));
+          syncCartState(data, data.message);
+          return;
         }
-      } catch (err: unknown) {
-        const msg = getErrorMessage(err, {
-          defaultMessage: 'Failed to update quantity',
+
+        setErrorMessages(prevErrors => {
+          const next = { ...prevErrors };
+          delete next[index];
+          return next;
         });
+        syncCartState(data, 'Item quantity updated successfully.');
+      } catch (err) {
+        console.error('Error updating quantity:', err);
         setErrorMessages(prev => ({
           ...prev,
-          [index]: msg,
+          [index]: 'Failed to update quantity',
         }));
       }
     },
-    [cartItems, cartId, blockIfReadOnly, ensureCartId, showToast]
+    [cartItems, blockIfReadOnly, ensureCartId, syncCartState]
   );
 
   const onClearPromo = async (): Promise<void> => {
-    if (!cartId) return;
+    const existingCartId = ensureCartId();
+    if (!existingCartId) return;
     try {
-      await applyPromo(cartId, 0);
+      await clearPromo(existingCartId);
       setPromoPercent(null);
       showToast('Promo removed.', 'success');
-    } catch {
-      showToast('Failed to remove promo.', 'error');
+    } catch (err: unknown) {
+      showToast(apiErrorMessage(err, 'Failed to remove promo.'), 'error');
     }
   };
 
   const deleteItem = useCallback(
     async (productId: string, indexToDelete: number): Promise<void> => {
       if (blockIfReadOnly()) return;
-      if (!ensureCartId()) return;
+      const existingCartId = ensureCartId();
+      if (!existingCartId) return;
 
       const ok = await confirm({
         title: 'Remove item',
@@ -581,28 +566,38 @@ const UserCart: React.FC = () => {
       if (!ok) return;
 
       try {
-        await axiosInstance.delete(`/carts/${cartId}/${productId}`, {
-          useV2: false,
-        });
+        await axiosInstance.delete(
+          `/carts/${existingCartId}/products/${productId}`,
+          {
+            useV2: false,
+          }
+        );
+        // Expect a 204 response here; any errors are handled below.
 
         setCartItems(prev => {
-          const removedQty = prev[indexToDelete]?.quantity || 1;
-          showToast('Item removed from cart.', 'success');
-          bumpCartCountInLS(-removedQty);
-          return prev.filter((_, idx) => idx !== indexToDelete);
+          const next = prev.filter((_, idx) => idx !== indexToDelete);
+          const nextCount = next.reduce(
+            (acc, cartItem) => acc + (cartItem.quantity || 0),
+            0
+          );
+          setCartItemCount(nextCount);
+          setCartCountInLS(nextCount);
+          notifyCartChanged();
+          return next;
         });
-        notifyCartChanged(); // item removed
-      } catch (error: unknown) {
-        const msg = apiErrorMessage(error, 'Failed to delete item.');
-        showToast(msg, 'error');
+        showToast('Item removed from cart.', 'success');
+      } catch (error) {
+        console.error('Error deleting item: ', error);
+        showToast(apiErrorMessage(error, 'Failed to delete item.'), 'error');
       }
     },
-    [cartId, blockIfReadOnly, confirm, ensureCartId, apiErrorMessage, showToast]
+    [apiErrorMessage, blockIfReadOnly, confirm, ensureCartId, showToast]
   );
 
   const clearCart = async (): Promise<void> => {
     if (blockIfReadOnly()) return;
-    if (!ensureCartId()) return;
+    const existingCartId = ensureCartId();
+    if (!existingCartId) return;
 
     const ok = await confirm({
       title: 'Clear cart',
@@ -614,113 +609,93 @@ const UserCart: React.FC = () => {
     if (!ok) return;
 
     try {
-      await axiosInstance.delete(`/carts/${cartId}/clear`, { useV2: false });
+      await axiosInstance.delete(`/carts/${existingCartId}/products`, {
+        useV2: false,
+      });
       setCartItems([]);
       setCartItemCount(0);
       setCartCountInLS(0);
       notifyCartChanged();
       showToast('Cart has been cleared.', 'success');
-    } catch (error: unknown) {
-      const msg = apiErrorMessage(error, 'Failed to clear cart.');
-      showToast(msg, 'error');
+    } catch (error) {
+      console.error('Error clearing cart:', error);
+      showToast(apiErrorMessage(error, 'Failed to clear cart.'), 'error');
     }
   };
 
   const addToWishlist = async (item: ProductModel): Promise<void> => {
     if (blockIfReadOnly()) return;
-    if (!ensureCartId()) return;
+
+    const existingCartId = ensureCartId();
+    if (!existingCartId) return;
 
     try {
       const productId = item.productId;
 
-      const { data } = await axiosInstance.put(
-        `/carts/${cartId}/wishlist/${productId}/toWishList`,
-        {
-          productId: item.productId,
-          imageId: item.imageId,
-          productName: item.productName,
-          productSalePrice: item.productSalePrice,
-        },
+      const normalizedId = productId?.trim();
+      const payload = {
+        productIds: normalizedId ? [normalizedId] : [],
+        direction: 'TO_WISHLIST',
+      };
+
+      const { data } = await axiosInstance.post<CartDetailsModel>(
+        `/carts/${existingCartId}/wishlist-transfers`,
+        payload,
         { useV2: false }
       );
 
-      if (data && data.message) {
-        showToast(data.message, 'info');
-      } else {
-        showToast(
-          `${item.productName} has been added to your wishlist!`,
-          'success'
-        );
-      }
-
-      setWishlistItems(prevItems => [...prevItems, item]);
-      setWishlistUpdated(true);
-
-      bumpCartCountInLS(-(item.quantity || 1));
-      notifyCartChanged();
-      //notify navbar (item moved out of cart)
+      const fallback = `${item.productName} has been added to your wishlist!`;
+      syncCartState(data, fallback);
     } catch (error: unknown) {
-      const msg = apiErrorMessage(error, 'Failed to add item to wishlist.');
-      showToast(msg, 'error');
+      console.error('Error adding to wishlist:', error);
+      showToast(
+        apiErrorMessage(error, 'Failed to add item to wishlist.'),
+        'error'
+      );
     }
   };
 
   const addToCartFunction = async (item: ProductModel): Promise<void> => {
     if (blockIfReadOnly()) return;
-    if (!ensureCartId()) return;
+
+    const existingCartId = ensureCartId();
+    if (!existingCartId) return;
 
     if (item.productQuantity <= 0) {
       showToast(
-        `Cannot add ${item.productName} to cart: Out of stock.`,
-        'error'
+        `${item.productName} is out of stock and cannot be added to the cart.`,
+        'info'
       );
       return;
     }
     try {
       const productId = item.productId;
 
-      const { data } = await axiosInstance.put(
-        `/carts/${cartId}/wishlist/${productId}/toCart`,
-        {
-          productId: item.productId,
-          imageId: item.imageId,
-          productName: item.productName,
-          productSalePrice: item.productSalePrice,
-        },
+      const normalizedId = productId?.trim();
+      const payload = {
+        productIds: normalizedId ? [normalizedId] : [],
+        direction: 'TO_CART',
+      };
+
+      const { data } = await axiosInstance.post<CartDetailsModel>(
+        `/carts/${existingCartId}/wishlist-transfers`,
+        payload,
         { useV2: false }
       );
 
-      if (data && data.message) {
-        showToast(data.message, 'info');
-      } else {
-        showToast(
-          `${item.productName} has been added to your cart!`,
-          'success'
-        );
-      }
-
-      setCartItems(prevItems => [...prevItems, item]);
-      setWishlistItems(prevItems =>
-        prevItems.filter(product => product.productId !== item.productId)
-      );
-      setWishlistUpdated(true);
-
-      // Item entered the cart, increment LS count
-      bumpCartCountInLS(item.quantity || 1);
-
-      //notify navbar (item moved into cart)
-      notifyCartChanged();
+      const fallback = `${item.productName} has been added to your cart!`;
+      syncCartState(data, fallback);
     } catch (error: unknown) {
-      const msg = getErrorMessage(error, {
-        defaultMessage: 'Failed to add item to cart.',
-      });
-      showToast(msg, 'error');
+      console.error('Error adding to cart:', error);
+      showToast(apiErrorMessage(error, 'Failed to add item to cart.'), 'error');
     }
   };
 
   const removeFromWishlist = async (item: ProductModel): Promise<void> => {
     if (blockIfReadOnly()) return;
-    if (!ensureCartId()) return;
+
+    const existingCartId = ensureCartId();
+    if (!existingCartId) return;
 
     const ok = await confirm({
       title: 'Remove from wishlist',
@@ -734,70 +709,92 @@ const UserCart: React.FC = () => {
 
     try {
       await axiosInstance.delete(
-        `/carts/${cartId}/wishlist/${item.productId}`,
+        `/carts/${existingCartId}/wishlist/${item.productId}`,
         { useV2: false }
       );
 
       setWishlistItems(prev =>
         prev.filter(p => p.productId !== item.productId)
       );
-    } catch (e: unknown) {
-      const msg = apiErrorMessage(e, 'Could not remove item from wishlist.');
-      showToast(msg, 'error');
+    } catch (e) {
+      console.error(e);
+      showToast(
+        apiErrorMessage(e, 'Could not remove item from wishlist.'),
+        'error'
+      );
     }
   };
 
   const moveAllWishlistToCart = async (): Promise<void> => {
     if (blockIfReadOnly()) return;
-    if (!cartId || wishlistItems.length === 0) return;
+    if (wishlistItems.length === 0) return;
+
+    const existingCartId = ensureCartId();
+    if (!existingCartId) return;
+
+    const movableItems = wishlistItems.filter(
+      item => item.productQuantity == null || item.productQuantity > 0
+    );
+    if (movableItems.length === 0) {
+      showToast('All wishlist items are currently out of stock.', 'info');
+      return;
+    }
+
+    const blockedCount = wishlistItems.length - movableItems.length;
 
     const ok = await confirm({
       title: 'Move all from wishlist',
-      message: `Move ${wishlistItems.length} item(s) to your cart?`,
+      message:
+        blockedCount > 0
+          ? `Move ${movableItems.length} in-stock item(s) to your cart? ${blockedCount} item(s) are out of stock and will remain in your wishlist.`
+          : `Move ${movableItems.length} item(s) to your cart?`,
       confirmText: 'Move all',
       cancelText: 'Cancel',
     });
     if (!ok) return;
 
+    const productIds = Array.from(
+      new Set(
+        movableItems
+          .map(item => item.productId)
+          .filter((id): id is string => Boolean(id && id.trim()))
+      )
+    );
+
+    if (productIds.length === 0) {
+      showToast('No wishlist items are eligible to move.', 'info');
+      return;
+    }
+
     setMovingAll(true);
-    showToast('Moving all items from wishlist to cart...', 'info');
 
     try {
-      const res = await axiosInstance.post(
-        `/carts/${cartId}/wishlist/moveAll`,
-        {},
-        { useV2: false, validateStatus: () => true }
+      const payload = {
+        productIds,
+        direction: 'TO_CART' as const,
+      };
+
+      const { data } = await axiosInstance.post<CartDetailsModel>(
+        `/carts/${existingCartId}/wishlist-transfers`,
+        payload,
+        { useV2: false }
       );
 
-      if (res.status >= 200 && res.status < 300) {
-        setWishlistUpdated(true);
-        notifyCartChanged();
-        showToast('All wishlist items moved to cart!', 'success');
-      } else {
-        const msg =
-          (res.data &&
-            (res.data.message || res.data.error || res.data.title)) ||
-          `Move All failed (${res.status})`;
-        showToast(msg, 'error');
-      }
-    } catch (e: unknown) {
-      const msg = apiErrorMessage(
-        e,
-        'Unexpected error while moving wishlist items.'
+      const fallback =
+        blockedCount > 0
+          ? `Moved ${movableItems.length} item(s) to your cart. ${blockedCount} item(s) stayed in your wishlist because they are out of stock.`
+          : `Moved ${movableItems.length} item(s) from wishlist to cart.`;
+      syncCartState(data, fallback);
+    } catch (e) {
+      console.error(e);
+      showToast(
+        apiErrorMessage(e, 'Unexpected error while moving wishlist items.'),
+        'error'
       );
-      showToast(msg, 'error');
     } finally {
       setMovingAll(false);
     }
   };
-
-  const { user } = useUser();
-
-  // For cart summary we always show a single estimated tax using the
-  // average Canadian combined tax rate to keep the summary snappy.
-  const avgRate = averageCanadianCombinedTaxRate();
-  const estimatedTax = roundToCents(discountedSubtotal * avgRate);
-  const total = discountedSubtotal + estimatedTax;
 
   const handleCheckoutConfirmation = (): void => {
     if (isStaff) {
@@ -806,7 +803,6 @@ const UserCart: React.FC = () => {
       });
       return;
     }
-    // Opening billing form implies the user wants to provide billing details
     setShowBillingForm(true);
     setIsCheckoutModalOpen(false);
   };
@@ -846,29 +842,29 @@ const UserCart: React.FC = () => {
         0
       );
       const invoiceSubtotal = invoiceSubtotalCents / 100;
-      // determine province for invoice tax calculation
-      // Prefer billing/provided province, otherwise use user's province if available.
-      function hasProvince(obj: unknown): obj is { province?: string } {
-        if (typeof obj !== 'object' || obj === null) return false;
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore - narrow below
-        const val = (obj as { [k: string]: unknown })['province'];
-        return typeof val === 'string' || typeof val === 'undefined';
-      }
-
-      const usedProvince =
-        (billing ?? billingInfo)?.province ||
-        (hasProvince(user) ? user.province : undefined);
-      const invoiceTaxLines = computeTaxes(invoiceSubtotal, usedProvince);
-      const invoiceTaxCents = invoiceTaxLines.reduce((s, t) => {
-        const amount = t.amount ?? roundToCents(invoiceSubtotal * t.rate);
-        return s + Math.round(amount * 100);
-      }, 0);
-      const discountCents = Math.round(effectiveDiscount * 100);
-      const invoiceTotal =
-        (invoiceSubtotalCents + invoiceTaxCents - discountCents) / 100;
-
       const usedBilling = billing ?? billingInfo ?? null;
+
+      const invoiceTaxLines = computeTaxes(
+        invoiceSubtotal,
+        usedBilling?.province
+      ).map(line => ({
+        ...line,
+        amount: line.amount ?? roundToCents(invoiceSubtotal * line.rate),
+      }));
+      const invoiceTaxCents = invoiceTaxLines.map(line =>
+        Math.round((line.amount ?? 0) * 100)
+      );
+      const invoiceTaxTotalCents = invoiceTaxCents.reduce(
+        (sum, cents) => sum + cents,
+        0
+      );
+      const discountCents = Math.round(effectiveDiscount * 100);
+      const invoiceTotalCents =
+        invoiceSubtotalCents + invoiceTaxTotalCents - discountCents;
+      const invoiceTvq = (invoiceTaxCents[0] ?? 0) / 100;
+      const invoiceTvc =
+        invoiceTaxCents.slice(1).reduce((sum, cents) => sum + cents, 0) / 100;
+      const invoiceTotal = invoiceTotalCents / 100;
 
       const newInvoice: InvoiceFullType = {
         invoiceId: `${Date.now()}`,
@@ -886,25 +882,14 @@ const UserCart: React.FC = () => {
         date: new Date().toISOString(),
         items: invoiceItemsForFull,
         subtotal: invoiceSubtotal,
-        // legacy fields: map by tax line name for backward compatibility
-        // Older code expects 'tvq' (provincial) and 'tvc' (federal). Map common
-        // names from our tax lines. NOTE: PROVINCE_TAX_MAP uses 'PST' for QC
-        // (not 'QST'/'TVQ'), so check for 'PST' here.
-        tvq:
-          invoiceTaxLines.find(t => ['PST', 'TVQ'].includes(t.name))?.amount ??
-          0,
-        // For tvc prefer HST (single combined) then GST
-        tvc:
-          invoiceTaxLines.find(t => t.name === 'HST')?.amount ??
-          invoiceTaxLines.find(t => t.name === 'GST')?.amount ??
-          0,
+        tvq: invoiceTvq,
+        tvc: invoiceTvc,
         discount: effectiveDiscount,
         total: invoiceTotal,
       };
       setLastInvoice(newInvoice);
       setShowInvoiceModal(true);
       setCheckoutMessage('Checkout successful! Your order is being processed.');
-      // keep cart summary showing average estimated tax
       setCartItems([]);
       setCartItemCount(0);
       setIsCheckoutModalOpen(false);
@@ -912,18 +897,17 @@ const UserCart: React.FC = () => {
       // Reset LS so navbar badge = 0 without API
       setCartCountInLS(0);
 
-      // notify navbar (cart emptied)
-      notifyCartChanged();
-
       // Fetch recent purchases after checkout
-      try {
-        const { data } = await axiosInstance.get(
-          `/carts/${cartId}/recent-purchases`,
-          { useV2: false }
-        );
-        setRecentPurchases(data || []);
-      } catch (err) {
-        // Optionally handle error, but don't block checkout
+      if (customerId) {
+        try {
+          const { data } = await axiosInstance.get(
+            `/customers/${customerId}/cart/recent-purchases`,
+            { useV2: false }
+          );
+          setRecentPurchases(data || []);
+        } catch (err) {
+          // Optionally handle error, but don't block checkout
+        }
       }
 
       // Fetch recommendation purchases after checkout
@@ -987,6 +971,10 @@ const UserCart: React.FC = () => {
     recommendationPurchasesList.length === 0 ? ' recommendation-empty' : ''
   }`;
 
+  const hasMovableWishlistItems = wishlistItems.some(
+    item => item.productQuantity == null || item.productQuantity > 0
+  );
+
   return (
     <div>
       <NavBar />
@@ -1035,7 +1023,7 @@ const UserCart: React.FC = () => {
                     addToWishlist={addToWishlist}
                     addToCart={() => {}}
                     isInWishlist={false}
-                    showNotification={showToast}
+                    showNotification={message => showToast(message, 'info')}
                   />
                 ))
               ) : (
@@ -1118,18 +1106,15 @@ const UserCart: React.FC = () => {
                 <p className="summary-item">
                   Subtotal: {formatPrice(subtotal)}
                 </p>
-                {/* Show estimated taxes (English names like PST, GST, HST).
-                    If subtotal is zero (e.g., after checkout) show a single $0.00 line and do not render breakdown.
-                    Otherwise, if there's exactly one Estimated Taxes line (unknown province), render a single line without percentage.
-                */}
-                {discountedSubtotal <= 0 ? (
-                  <p className="summary-item">
-                    Estimated Taxes: {formatPrice(0)}
+                {resolvedTaxLines.map(line => (
+                  <p key={`${line.name}-${line.rate}`} className="summary-item">
+                    {line.name} ({formatTaxRate(line.rate)}%):{' '}
+                    {formatPrice(line.amount ?? 0)}
                   </p>
-                ) : (
-                  // Always show a single estimated taxes line using the average rate
+                ))}
+                {resolvedTaxLines.length > 1 && (
                   <p className="summary-item">
-                    Estimated Taxes: {formatPrice(estimatedTax)}
+                    Total taxes: {formatPrice(totalTax)}
                   </p>
                 )}
                 <p className="summary-item">
@@ -1243,13 +1228,15 @@ const UserCart: React.FC = () => {
               <button
                 className="cart-button cart-button--accent"
                 onClick={moveAllWishlistToCart}
-                disabled={isStaff || movingAll}
+                disabled={isStaff || movingAll || !hasMovableWishlistItems}
                 aria-busy={movingAll}
-                aria-disabled={isStaff || movingAll}
+                aria-disabled={isStaff || movingAll || !hasMovableWishlistItems}
                 title={
                   isStaff
                     ? 'Read-only: staff/admin cannot move wishlist items'
-                    : 'Move all wishlist items to cart'
+                    : !hasMovableWishlistItems
+                      ? 'All wishlist items are out of stock'
+                      : 'Move all wishlist items to cart'
                 }
               >
                 {movingAll ? 'Moving…' : 'Move All to Cart'}
@@ -1261,8 +1248,10 @@ const UserCart: React.FC = () => {
             {wishlistItems.length > 0 ? (
               wishlistItems.map(item => {
                 const isOutOfStock = item.productQuantity <= 0;
+                const wishlistCardClassName = `Wishlist-item cart-card${isOutOfStock ? ' Wishlist-item--out-of-stock' : ''}`;
+
                 return (
-                  <div key={item.productId} className="Wishlist-item cart-card">
+                  <div key={item.productId} className={wishlistCardClassName}>
                     <div className="recent-purchase-image-container">
                       <div className="recent-purchase-image">
                         <ImageContainer imageId={item.imageId} />

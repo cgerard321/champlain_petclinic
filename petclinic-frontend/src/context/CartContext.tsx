@@ -20,7 +20,9 @@ import {
 } from '@/features/carts/api/cartEvent';
 import {
   fetchCartIdByCustomerId,
+  fetchCartDetailsByCartId,
   fetchCartCountByCartId,
+  calculateCartItemsCount,
 } from '@/features/carts/api/getCart';
 
 interface CartContextType {
@@ -73,7 +75,6 @@ export function CartProvider({
     const safe = Math.max(0, Math.trunc(n));
     setCartCountState(safe);
     setCartCountInLS(safe);
-    notifyCartChanged();
   };
 
   // Loads the cart ID and item count from the backend if needed
@@ -101,9 +102,11 @@ export function CartProvider({
       }
     }
 
-    const count = await fetchCartCountByCartId(id);
-    setCartCount(count);
-    return { cartId: id, cartCount: count };
+    const cart = await fetchCartDetailsByCartId(id);
+    const nextCount = calculateCartItemsCount(cart);
+
+    setCartCount(nextCount);
+    return { cartId: id, cartCount: nextCount };
   }, [user?.userId, cartId, isOwner]);
 
   // Force sync after "Add to Cart" to prevent UI mismatch

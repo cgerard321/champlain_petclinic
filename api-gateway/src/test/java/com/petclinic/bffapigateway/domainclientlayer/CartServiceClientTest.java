@@ -4,8 +4,8 @@ import com.petclinic.bffapigateway.dtos.Cart.*;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import org.assertj.core.condition.Not;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -15,19 +15,15 @@ import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import okhttp3.mockwebserver.MockResponse;
-import reactor.test.StepVerifier;
-import static org.assertj.core.api.Assertions.assertThat;
-import reactor.test.StepVerifier;
-import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class CartServiceClientTest {
 
@@ -68,22 +64,20 @@ public class CartServiceClientTest {
         Mono<CartResponseDTO> cartResponseDTO = mockCartServiceClient.createCart((cartRequestDTO));
 
         StepVerifier.create(cartResponseDTO)
-                .assertNext(result -> {
-                    assertEquals("98f7b33a-d62a-420a-a84a-05a27c85fc91", result.getCartId());
-                })
+                .assertNext(result -> assertEquals("98f7b33a-d62a-420a-a84a-05a27c85fc91", result.getCartId()))
                 .verifyComplete();
     }
 
     @Test
-    void testClearCart_Success() {
+    void testDeleteAllItemsInCart_Success() {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
-                .setResponseCode(200)
+                .setResponseCode(204)
         );
 
-        Mono<Void> clearCartResponse = mockCartServiceClient.clearCart("98f7b33a-d62a-420a-a84a-05a27c85fc91");
+        Mono<Void> response = mockCartServiceClient.deleteAllItemsInCart("98f7b33a-d62a-420a-a84a-05a27c85fc91");
 
-        StepVerifier.create(clearCartResponse)
+        StepVerifier.create(response)
                 .verifyComplete();
     }
 
@@ -109,6 +103,7 @@ public class CartServiceClientTest {
         Flux<CartResponseDTO> result = mockCartServiceClient.getAllCarts();
 
         List<CartResponseDTO> carts = result.collectList().block();
+        assertNotNull(carts);
         assertEquals(2, carts.size());
         assertEquals("cart1", carts.get(0).getCartId());
         assertEquals("cart2", carts.get(1).getCartId());
@@ -123,13 +118,35 @@ public class CartServiceClientTest {
         Flux<CartResponseDTO> result = mockCartServiceClient.getAllCarts();
 
         List<CartResponseDTO> carts = result.collectList().block();
+        assertNotNull(carts);
         assertEquals(0, carts.size());
+    }
+
+    @Test
+    void testGetAllCartsWithQueryParams() throws InterruptedException {
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody("[]"));
+
+        Flux<CartResponseDTO> result = mockCartServiceClient.getAllCarts(Map.of(
+                "page", 2,
+                "size", 25,
+                "customerName", "Snow"
+        ));
+
+        result.collectList().block();
+
+        var recordedRequest = mockWebServer.takeRequest();
+        assertNotNull(recordedRequest.getRequestUrl());
+        assertThat(recordedRequest.getRequestUrl().queryParameter("page")).isEqualTo("2");
+        assertThat(recordedRequest.getRequestUrl().queryParameter("size")).isEqualTo("25");
+        assertThat(recordedRequest.getRequestUrl().queryParameter("customerName")).isEqualTo("Snow");
     }
 
     @Test
     void testAddProductToCart_Success() {
         String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
-        AddProductRequestDTO requestDTO = new AddProductRequestDTO("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223", 3);
+        CartItemRequestDTO requestDTO = new CartItemRequestDTO("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223", 3);
         String responseBody = """
                 {
                     "cartId": "98f7b33a-d62a-420a-a84a-05a27c85fc91",
@@ -215,14 +232,14 @@ public class CartServiceClientTest {
                 .expectErrorSatisfies(throwable -> {
                     assert throwable instanceof WebClientResponseException;
                     WebClientResponseException exception = (WebClientResponseException) throwable;
-                    assertEquals(400, exception.getRawStatusCode()); // Assert that we got a 400 status
+                    assertEquals(400, exception.getStatusCode().value()); // Assert that we got a 400 status
                     assert exception.getResponseBodyAsString().contains("Only 10 items left in stock");
                 })
                 .verify();
     }
 
-    @Test
-    void testGetCartByCustomerId_Success() {
+        @Test
+        void testGetCartByCustomerId_Success() throws InterruptedException {
         String customerId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
         String responseBody = """
             {
@@ -252,10 +269,12 @@ public class CartServiceClientTest {
                     assertEquals(1, cartResponseDTO.getProducts().get(0).getQuantityInCart());
                 })
                 .verifyComplete();
+
+                assertEquals("/api/v1/customers/" + customerId + "/cart", mockWebServer.takeRequest().getPath());
     }
 
-    @Test
-    void testGetCartByCustomerId_NotFound() {
+        @Test
+        void testGetCartByCustomerId_NotFound() throws InterruptedException {
         String customerId = "non-existent-cart-id";
         String responseBody = """
             {
@@ -274,79 +293,12 @@ public class CartServiceClientTest {
                 .expectErrorSatisfies(throwable -> {
                     assert throwable instanceof WebClientResponseException;
                     WebClientResponseException exception = (WebClientResponseException) throwable;
-                    assertEquals(404, exception.getRawStatusCode());
+                    assertEquals(404, exception.getStatusCode().value());
                     assert exception.getResponseBodyAsString().contains("Cart for customer id was not found");
                 })
                 .verify();
-    }
 
-    /*
-    --------------------------------------------------------------------------------------------------------------------
-        from here it's the tests related to the wishlist
-    */
-
-    @Test
-    void MoveProductFromCartToWishlist_Success() {
-        String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
-        String productId = "9a29fff7-564a-4cc9-8fe1-36f6ca9bc223";
-        String responseBody = """
-                {
-                    "cartId": "98f7b33a-d62a-420a-a84a-05a27c85fc91",
-                    "products": [
-                        {
-                            "productId": "9a29fff7-564a-4cc9-8fe1-36f6ca9bc223",
-                            "quantityInCart": 1
-                        }
-                    ]
-                }
-                """;
-
-        prepareResponse(response -> response
-                .setHeader("Content-Type", "application/json")
-                .setBody(responseBody));
-
-        Mono<CartResponseDTO> result = mockCartServiceClient.moveProductFromCartToWishlist(cartId, productId);
-
-        StepVerifier.create(result)
-                .assertNext(cartResponseDTO -> {
-                    assertEquals(cartId, cartResponseDTO.getCartId());
-                    assertEquals(1, cartResponseDTO.getProducts().size());
-                    assertEquals("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223", cartResponseDTO.getProducts().get(0).getProductId());
-                    assertEquals(1, cartResponseDTO.getProducts().get(0).getQuantityInCart());
-                })
-                .verifyComplete();
-    }
-
-    @Test
-    void MoveProductFromWishListToCart_Success() {
-        String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
-        String productId = "9a29fff7-564a-4cc9-8fe1-36f6ca9bc223";
-        String responseBody = """
-                {
-                    "cartId": "98f7b33a-d62a-420a-a84a-05a27c85fc91",
-                    "products": [
-                        {
-                            "productId": "9a29fff7-564a-4cc9-8fe1-36f6ca9bc223",
-                            "quantityInCart": 1
-                        }
-                    ]
-                }
-                """;
-
-        prepareResponse(response -> response
-                .setHeader("Content-Type", "application/json")
-                .setBody(responseBody));
-
-        Mono<CartResponseDTO> result = mockCartServiceClient.moveProductFromWishListToCart(cartId, productId);
-
-        StepVerifier.create(result)
-                .assertNext(cartResponseDTO -> {
-                    assertEquals(cartId, cartResponseDTO.getCartId());
-                    assertEquals(1, cartResponseDTO.getProducts().size());
-                    assertEquals("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223", cartResponseDTO.getProducts().get(0).getProductId());
-                    assertEquals(1, cartResponseDTO.getProducts().get(0).getQuantityInCart());
-                })
-                .verifyComplete();
+                assertEquals("/api/v1/customers/" + customerId + "/cart", mockWebServer.takeRequest().getPath());
     }
 
     /*
@@ -371,13 +323,9 @@ public class CartServiceClientTest {
                 .setResponseCode(200)
                 .setBody(responseBody));
 
-        Mono<CartResponseDTO> result = mockCartServiceClient.removeProductFromCart(cartId, productId);
+        Mono<Void> result = mockCartServiceClient.removeProductFromCart(cartId, productId);
 
         StepVerifier.create(result)
-                .assertNext(cartResponseDTO -> {
-                    assertEquals(cartId, cartResponseDTO.getCartId());
-                    assertEquals(0, cartResponseDTO.getProducts().size()); // No products in the cart after removal
-                })
                 .verifyComplete();
     }
 
@@ -397,7 +345,7 @@ public class CartServiceClientTest {
                 .setResponseCode(404)
                 .setBody(responseBody));
 
-        Mono<CartResponseDTO> result = mockCartServiceClient.removeProductFromCart(cartId, productId);
+        Mono<Void> result = mockCartServiceClient.removeProductFromCart(cartId, productId);
 
         StepVerifier.create(result)
                 .expectErrorSatisfies(throwable -> {
@@ -445,6 +393,7 @@ public class CartServiceClientTest {
 
         List<PromoCodeResponseDTO> promos = result.collectList().block();
 
+        assertNotNull(promos);
         assertEquals(2, promos.size());
 
         assertEquals("Promo 1", promos.get(0).getName());
@@ -584,14 +533,15 @@ public class CartServiceClientTest {
 
         List<PromoCodeResponseDTO> promos = result.collectList().block();
 
+        assertNotNull(promos);
         assertEquals(2, promos.size());
         assertEquals("Active Promo 1", promos.get(0).getName());
         assertEquals("ACTIVEPROMO1", promos.get(0).getCode());
-        assertEquals(true, promos.get(0).isActive());
+        assertTrue(promos.get(0).isActive());
 
         assertEquals("Active Promo 2", promos.get(1).getName());
         assertEquals("ACTIVEPROMO2", promos.get(1).getCode());
-        assertEquals(true, promos.get(1).isActive());
+        assertTrue(promos.get(1).isActive());
     }
 
     @Test
@@ -650,10 +600,58 @@ public class CartServiceClientTest {
                 .verify();
     }
 
+        @Test
+        void testApplyPromoToCart_Success() {
+                String cartId = "cart-apply";
+                String responseBody = """
+                        {
+                                "cartId": "cart-apply",
+                                "promoPercent": 12.0
+                        }
+                        """;
+
+                prepareResponse(response -> response
+                                .setHeader("Content-Type", "application/json")
+                                .setBody(responseBody)
+                                .setResponseCode(200));
+
+                Mono<CartResponseDTO> result = mockCartServiceClient.applyPromoToCart(cartId, 12.0);
+
+                StepVerifier.create(result)
+                                .expectNextMatches(cart -> cart.getCartId().equals(cartId))
+                                .verifyComplete();
+        }
+
+        @Test
+        void testApplyPromoToCart_NullPercent_ThrowsInvalidInput() {
+                Mono<CartResponseDTO> result = mockCartServiceClient.applyPromoToCart("cart-apply", null);
+
+                StepVerifier.create(result)
+                                .expectErrorSatisfies(throwable -> {
+                                        assertThat(throwable).isInstanceOf(InvalidInputException.class);
+                                        assertThat(throwable.getMessage()).contains("promoPercent must be provided");
+                                })
+                                .verify();
+        }
+
+        @Test
+        void testClearPromo_Success() {
+                String cartId = "cart-apply";
+
+                prepareResponse(response -> response
+                                .setHeader("Content-Type", "application/json")
+                                .setResponseCode(204));
+
+                Mono<Void> result = mockCartServiceClient.clearPromo(cartId);
+
+                StepVerifier.create(result)
+                                .verifyComplete();
+        }
+
     @Test
     void testAddProductToCart_InvalidInput_ErrorFromResponse() {
         String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
-        AddProductRequestDTO requestDTO = new AddProductRequestDTO("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223", 3);
+        CartItemRequestDTO requestDTO = new CartItemRequestDTO("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223", 3);
         String responseBody = """
             {
                 "message": "Invalid product quantity."
@@ -678,7 +676,7 @@ public class CartServiceClientTest {
     @Test
     void testAddProductToCart_GenericErrorHandling() {
         String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
-        AddProductRequestDTO requestDTO = new AddProductRequestDTO("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223", 3);
+        CartItemRequestDTO requestDTO = new CartItemRequestDTO("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223", 3);
 
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
@@ -695,48 +693,48 @@ public class CartServiceClientTest {
                 .verify();
     }
 
-    @Test
-    void testClearCart_InvalidCartId() {
-        String cartId = "invalid-cart-id";
+                @Test
+                void testDeleteAllItemsInCart_InvalidCartId() {
+                        String cartId = "invalid-cart-id";
 
-        prepareResponse(response -> response
-                .setHeader("Content-Type", "application/json")
-                .setResponseCode(422) // Simulate a 422 Unprocessable Entity
-                .setBody("""
-                {
-                    "message": "Cart id is invalid: invalid-cart-id"
+                        prepareResponse(response -> response
+                                        .setHeader("Content-Type", "application/json")
+                                        .setResponseCode(422) // Simulate a 422 Unprocessable Entity
+                                        .setBody("""
+                                        {
+                                                "message": "Cart id is invalid: invalid-cart-id"
+                                        }
+                                        """)
+                        );
+
+                        Mono<Void> response = mockCartServiceClient.deleteAllItemsInCart(cartId);
+
+                        StepVerifier.create(response)
+                                        .expectErrorSatisfies(throwable -> {
+                                                assertThat(throwable).isInstanceOf(InvalidInputException.class);
+                                                assertThat(throwable.getMessage()).isEqualTo("Cart id is invalid: " + cartId);
+                                        })
+                                        .verify();
                 }
-                """)
-        );
 
-        Mono<Void> clearCartResponse = mockCartServiceClient.clearCart(cartId);
+                @Test
+                void testDeleteAllItemsInCart_GenericClientError() {
+                        String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
 
-        StepVerifier.create(clearCartResponse)
-                .expectErrorSatisfies(throwable -> {
-                    assertThat(throwable).isInstanceOf(InvalidInputException.class);
-                    assertThat(throwable.getMessage()).isEqualTo("Cart id is invalid: " + cartId);
-                })
-                .verify();
-    }
+                        prepareResponse(response -> response
+                                        .setHeader("Content-Type", "application/json")
+                                        .setResponseCode(400) // Simulate a generic 400 Bad Request
+                        );
 
-    @Test
-    void testClearCart_GenericClientError() {
-        String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
+                        Mono<Void> response = mockCartServiceClient.deleteAllItemsInCart(cartId);
 
-        prepareResponse(response -> response
-                .setHeader("Content-Type", "application/json")
-                .setResponseCode(400) // Simulate a generic 400 Bad Request
-        );
-
-        Mono<Void> clearCartResponse = mockCartServiceClient.clearCart(cartId);
-
-        StepVerifier.create(clearCartResponse)
-                .expectErrorSatisfies(throwable -> {
-                    assertThat(throwable).isInstanceOf(IllegalArgumentException.class);
-                    assertThat(throwable.getMessage()).isEqualTo("Client error");
-                })
-                .verify();
-    }
+                        StepVerifier.create(response)
+                                        .expectErrorSatisfies(throwable -> {
+                                                assertThat(throwable).isInstanceOf(IllegalArgumentException.class);
+                                                assertThat(throwable.getMessage()).isEqualTo("Client error");
+                                        })
+                                        .verify();
+                }
     @Test
     void testGetCartByCartId_Success() {
         String cartId = "c-200";
@@ -811,7 +809,7 @@ public class CartServiceClientTest {
                 .setBody(body)
         );
 
-        AddProductRequestDTO req = new AddProductRequestDTO();
+        CartItemRequestDTO req = new CartItemRequestDTO();
         req.setProductId("p-1");
         req.setQuantity(2);
 
@@ -841,8 +839,8 @@ public class CartServiceClientTest {
                 .verify();
     }
 
-    @Test
-    void testClearCart_NoContent204() {
+        @Test
+        void testDeleteAllItemsInCart_NoContent204() {
         String cartId = "c-2";
 
         prepareResponse(r -> r
@@ -850,7 +848,7 @@ public class CartServiceClientTest {
                 .setResponseCode(204)
         );
 
-        StepVerifier.create(mockCartServiceClient.clearCart(cartId))
+                StepVerifier.create(mockCartServiceClient.deleteAllItemsInCart(cartId))
                 .verifyComplete();
     }
 
@@ -961,7 +959,7 @@ public class CartServiceClientTest {
 
 
     @Test
-    void testClearCart_Unprocessable422() {
+    void testDeleteAllItemsInCart_Unprocessable422() {
         String cartId = "bad";
         prepareResponse(r -> r
                 .setHeader("Content-Type", "application/json")
@@ -969,7 +967,7 @@ public class CartServiceClientTest {
                 .setBody("{\"message\":\"Cart id is invalid\"}")
         );
 
-        StepVerifier.create(mockCartServiceClient.clearCart(cartId))
+        StepVerifier.create(mockCartServiceClient.deleteAllItemsInCart(cartId))
                 .expectErrorSatisfies(ex ->
                         org.assertj.core.api.Assertions.assertThat(ex.getClass().getSimpleName().toLowerCase())
                                 .contains("invalid"))
@@ -1051,7 +1049,7 @@ public class CartServiceClientTest {
                 .setBody("{\"message\":\"Only 10 items left in stock\"}")
         );
 
-        AddProductRequestDTO req = new AddProductRequestDTO();
+        CartItemRequestDTO req = new CartItemRequestDTO();
         req.setProductId("p-1");
         req.setQuantity(999);
 
@@ -1072,7 +1070,7 @@ public class CartServiceClientTest {
                 .setBody("{}")
         );
 
-        AddProductRequestDTO req = new AddProductRequestDTO();
+        CartItemRequestDTO req = new CartItemRequestDTO();
         req.setProductId("p-1");
         req.setQuantity(999);
 
@@ -1082,27 +1080,6 @@ public class CartServiceClientTest {
                                 .contains("Invalid input"))
                 .verify();
     }
-
-
-    @Test
-    void testAddProductToCartFromProducts_BadRequest400_WithMessage() {
-        String cartId = "c-7";
-        String productId = "p-77";
-
-        // Mirrors code: 400 -> bodyToMono(CartResponseDTO) -> if message != null throw InvalidInput(message)
-        prepareResponse(r -> r
-                .setHeader("Content-Type", "application/json")
-                .setResponseCode(400)
-                .setBody("{\"message\":\"Cannot add from products page\"}")
-        );
-
-        StepVerifier.create(mockCartServiceClient.addProductToCartFromProducts(cartId, productId))
-                .expectErrorSatisfies(ex ->
-                        org.assertj.core.api.Assertions.assertThat(ex.getMessage())
-                                .contains("Cannot add from products page"))
-                .verify();
-    }
-
 
     @Test
     void testValidatePromoCode_BadRequest400() {
@@ -1170,7 +1147,7 @@ public class CartServiceClientTest {
     }
 
     @Test
-    void testClearCart_ClientErrorElse_401() {
+    void testDeleteAllItemsInCart_ClientErrorElse_401() {
         String cartId = "c-err";
         prepareResponse(r -> r
                 .setHeader("Content-Type", "application/json")
@@ -1178,7 +1155,7 @@ public class CartServiceClientTest {
                 .setBody("{\"message\":\"unauthorized\"}")
         );
 
-        StepVerifier.create(mockCartServiceClient.clearCart(cartId))
+        StepVerifier.create(mockCartServiceClient.deleteAllItemsInCart(cartId))
                 .expectErrorSatisfies(ex ->
                         org.assertj.core.api.Assertions.assertThat(ex.getClass().getSimpleName())
                                 .containsIgnoringCase("IllegalArgument"))
@@ -1216,134 +1193,8 @@ public class CartServiceClientTest {
                 .verify();
     }
 
-
-    @Test
-    void testAddProductToCartFromProducts_BadRequest400_NoMessage() {
-        String cartId = "c-7";
-        String productId = "p-77";
-        prepareResponse(r -> r
-                .setHeader("Content-Type", "application/json")
-                .setResponseCode(400)
-                .setBody("{}")
-        );
-
-        StepVerifier.create(mockCartServiceClient.addProductToCartFromProducts(cartId, productId))
-                .expectErrorSatisfies(ex ->
-                        org.assertj.core.api.Assertions.assertThat(ex.getMessage())
-                                .contains("Invalid input"))
-                .verify();
-    }
-
-    @Test
-    void testAddProductToWishList_DoOnError_5xx() {
-        String cartId = "c-1";
-        String productId = "p-1";
-        int quantity = 3;
-
-        prepareResponse(r -> r
-                .setHeader("Content-Type", "application/json")
-                .setResponseCode(500) // retrieve() -> error -> doOnError path executed
-                .setBody("{\"message\":\"server\"}")
-        );
-
-        StepVerifier.create(mockCartServiceClient.addProductToWishList(cartId, productId, quantity))
-                .expectError() // we just need the error to flow to trigger doOnError
-                .verify();
-    }
-
-    @Test
-    void testMoveProductFromCartToWishlist_DoOnError_5xx() {
-        String cartId = "c-err";
-        String productId = "p-err";
-        prepareResponse(r -> r
-                .setHeader("Content-Type", "application/json")
-                .setResponseCode(500)
-                .setBody("{\"message\":\"server\"}")
-        );
-
-        StepVerifier.create(mockCartServiceClient.moveProductFromCartToWishlist(cartId, productId))
-                .expectError()
-                .verify();
-    }
-
-    @Test
-    void testGetCartItemCount_Success() {
-        String body = """
-        {"itemCount":5}
-        """;
-        prepareResponse(r -> r
-                .setHeader("Content-Type", "application/json")
-                .setResponseCode(200)
-                .setBody(body)
-        );
-
-        StepVerifier.create(mockCartServiceClient.getCartItemCount("cart-1"))
-                .expectNext(5)
-                .verifyComplete();
-    }
-
-    @Test
-    void testGetCartItemCount_MissingKey_DefaultZero() {
-        String body = "{}";
-        prepareResponse(r -> r
-                .setHeader("Content-Type", "application/json")
-                .setResponseCode(200)
-                .setBody(body)
-        );
-
-        StepVerifier.create(mockCartServiceClient.getCartItemCount("cart-1"))
-                .expectNext(0)
-                .verifyComplete();
-    }
-
-    @Test
-    void testGetCartItemCount_NotFound404() {
-        prepareResponse(r -> r
-                .setHeader("Content-Type", "application/json")
-                .setResponseCode(404)
-                .setBody("{\"message\":\"Cart not found\"}")
-        );
-
-        StepVerifier.create(mockCartServiceClient.getCartItemCount("missing"))
-                .expectErrorSatisfies(ex ->
-                        org.assertj.core.api.Assertions.assertThat(ex.getClass().getSimpleName().toLowerCase())
-                                .contains("notfound"))
-                .verify();
-    }
-
-    @Test
-    void testGetCartItemCount_InvalidInput400() {
-        prepareResponse(r -> r
-                .setHeader("Content-Type", "application/json")
-                .setResponseCode(400)
-                .setBody("{\"message\":\"bad id\"}")
-        );
-
-        StepVerifier.create(mockCartServiceClient.getCartItemCount("bad"))
-                .expectErrorSatisfies(ex ->
-                        org.assertj.core.api.Assertions.assertThat(ex.getClass().getSimpleName().toLowerCase())
-                                .contains("invalid"))
-                .verify();
-    }
-
-    @Test
-    void testGetCartItemCount_ServerError500() {
-        prepareResponse(r -> r
-                .setHeader("Content-Type", "application/json")
-                .setResponseCode(500)
-                .setBody("{\"message\":\"server\"}")
-        );
-
-        StepVerifier.create(mockCartServiceClient.getCartItemCount("cart-err"))
-                .expectErrorSatisfies(ex ->
-                        org.assertj.core.api.Assertions.assertThat(ex.getClass().getSimpleName())
-                                .containsIgnoringCase("IllegalArgument"))
-                .verify();
-    }
-
     @Test
     void testCreateCart_BadRequest400() {
-        String request = "{\"customerId\":\"u-1\"}";
         prepareResponse(r -> r
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(400)
@@ -1387,22 +1238,7 @@ public class CartServiceClientTest {
     }
 
     @Test
-    void testMoveProductFromWishListToCart_DoOnError_5xx() {
-        String cartId = "c-err";
-        String productId = "p-err";
-        prepareResponse(r -> r
-                .setHeader("Content-Type", "application/json")
-                .setResponseCode(500)
-                .setBody("{\"message\":\"server\"}")
-        );
-
-        StepVerifier.create(mockCartServiceClient.moveProductFromWishListToCart(cartId, productId))
-                .expectError()
-                .verify();
-    }
-
-    @Test
-    void testMoveAllWishlistToCart_Success() {
+        void testCreateWishlistTransfer_Success() {
         String body = """
       {"cartId":"c-x","customerId":"u-x","products":[]}
     """;
@@ -1412,45 +1248,30 @@ public class CartServiceClientTest {
                 .setBody(body)
         );
 
-        StepVerifier.create(mockCartServiceClient.moveAllWishlistToCart("c-x"))
-                .assertNext(resp -> { assertThat(resp).isNotNull(); })
+                StepVerifier.create(mockCartServiceClient.createWishlistTransfer("c-x", List.of(), WishlistTransferDirectionDTO.TO_CART))
+                .assertNext(Assertions::assertNotNull)
                 .verifyComplete();
     }
 
     @Test
-    void testMoveAllWishlistToCart_NotFound404() {
+        void testCreateWishlistTransfer_NotFound404() {
         prepareResponse(r -> r
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(404)
                 .setBody("{\"message\":\"wishlist empty\"}")
         );
 
-        StepVerifier.create(mockCartServiceClient.moveAllWishlistToCart("missing"))
+                StepVerifier.create(mockCartServiceClient.createWishlistTransfer("missing", List.of(), WishlistTransferDirectionDTO.TO_CART))
                 .expectErrorSatisfies(ex -> {
                     org.assertj.core.api.Assertions.assertThat(ex)
                             .isInstanceOf(org.springframework.web.reactive.function.client.WebClientResponseException.class);
-                    org.assertj.core.api.Assertions.assertThat(((org.springframework.web.reactive.function.client.WebClientResponseException) ex).getRawStatusCode()).isEqualTo(404);
+                    org.assertj.core.api.Assertions.assertThat(
+                            ((org.springframework.web.reactive.function.client.WebClientResponseException) ex)
+                                    .getStatusCode()
+                                    .value())
+                            .isEqualTo(404);
                 })
                 .verify();
-    }
-
-    @Test
-    void testAddProductToWishList_Success() {
-        String cartId = "c-3";
-        String productId = "p-3";
-        int qty = 1;
-        String body = """
-      {"cartId":"c-3","customerId":"u","products":[{"productId":"p-3","quantityInCart":1}]}
-    """;
-        prepareResponse(r -> r
-                .setHeader("Content-Type", "application/json")
-                .setResponseCode(200)
-                .setBody(body)
-        );
-
-        StepVerifier.create(mockCartServiceClient.addProductToWishList(cartId, productId, qty))
-                .assertNext(resp -> { assertThat(resp).isNotNull(); })
-                .verifyComplete();
     }
 
     @Test
@@ -1467,7 +1288,7 @@ public class CartServiceClientTest {
         );
 
         StepVerifier.create(mockCartServiceClient.removeProductFromWishlist(cartId, productId))
-                .assertNext(resp -> { assertThat(resp).isNotNull(); })
+                .assertNext(Assertions::assertNotNull)
                 .verifyComplete();
     }
 
@@ -1487,27 +1308,10 @@ public class CartServiceClientTest {
                 .verify();
     }
     @Test
-    void testGetRecentPurchases_Success() throws IOException {
+        void testGetRecentPurchases_Success() {
         // Arrange
-        String cartId = "test-cart-id";
-        List<CartProductResponseDTO> expectedProducts = List.of(
-                CartProductResponseDTO.builder()
-                        .productId("prod1")
-                        .productName("Product 1")
-                        .productSalePrice(10.0)
-                        .quantityInCart(2)
-                        .productQuantity(5)
-                        .build(),
-                CartProductResponseDTO.builder()
-                        .productId("prod2")
-                        .productName("Product 2")
-                        .productSalePrice(20.0)
-                        .quantityInCart(1)
-                        .productQuantity(3)
-                        .build()
-        );
-
-        String responseBody = "[{\"productId\":\"prod1\",\"productName\":\"Product 1\",\"productSalePrice\":10.0,\"quantityInCart\":2,\"productQuantity\":5}," +
+                String customerId = "test-customer-id";
+                String responseBody = "[{\"productId\":\"prod1\",\"productName\":\"Product 1\",\"productSalePrice\":10.0,\"quantityInCart\":2,\"productQuantity\":5}," +
                 "{\"productId\":\"prod2\",\"productName\":\"Product 2\",\"productSalePrice\":20.0,\"quantityInCart\":1,\"productQuantity\":3}]";
 
         mockWebServer.enqueue(new MockResponse()
@@ -1521,7 +1325,7 @@ public class CartServiceClientTest {
         );
 
         // Act
-        Mono<List<CartProductResponseDTO>> resultMono = client.getRecentPurchases(cartId);
+        Mono<List<CartProductResponseDTO>> resultMono = client.getRecentPurchasesByCustomerId(customerId);
 
         // Assert
         StepVerifier.create(resultMono)
@@ -1534,7 +1338,7 @@ public class CartServiceClientTest {
                 .verifyComplete();
     }
     @Test
-    void testGetRecommendationPurchases_ReturnsProducts() {
+        void testGetRecommendationPurchases_ReturnsProducts() {
         String host = "localhost";
         String port = String.valueOf(mockWebServer.getPort());
         WebClient.Builder webClientBuilder = WebClient.builder();
@@ -1546,14 +1350,14 @@ public class CartServiceClientTest {
 
         CartServiceClient client = new CartServiceClient(webClientBuilder, host, port);
 
-        Mono<List<CartProductResponseDTO>> result = client.getRecommendationPurchases("test-cart-id");
+                Mono<List<CartProductResponseDTO>> result = client.getRecommendationPurchasesByCustomerId("test-customer-id");
 
         StepVerifier.create(result)
                 .expectNextMatches(list -> list.size() == 1 && "prod1".equals(list.get(0).getProductId()))
                 .verifyComplete();
     }
     @Test
-    void testGetRecommendationPurchases_ReturnsEmpty() {
+        void testGetRecommendationPurchases_ReturnsEmpty() {
         String host = "localhost";
         String port = String.valueOf(mockWebServer.getPort());
         WebClient.Builder webClientBuilder = WebClient.builder();
@@ -1565,7 +1369,7 @@ public class CartServiceClientTest {
 
         CartServiceClient client = new CartServiceClient(webClientBuilder, host, port);
 
-        Mono<List<CartProductResponseDTO>> result = client.getRecommendationPurchases("empty-cart-id");
+        Mono<List<CartProductResponseDTO>> result = client.getRecommendationPurchasesByCustomerId("empty-customer-id");
 
         StepVerifier.create(result)
                 .expectNextMatches(List::isEmpty)
