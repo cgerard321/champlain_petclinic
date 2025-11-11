@@ -142,7 +142,16 @@ impl MongoConsolePort for MongoConsoleService {
             affected = affected.max(dc);
         }
 
+        log::info!("Mongo command affected {} documents", affected);
+        if affected > 0 {
+            return Ok(MongoResult {
+                bson: vec![],
+                affected_count: affected,
+            });
+        }
+
         // We return a single document, this will include the mongo response
+        
         let single = bson_to_serde_json(Bson::Document(res))?;
 
         Ok(MongoResult {
