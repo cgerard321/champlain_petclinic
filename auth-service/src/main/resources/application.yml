@@ -82,8 +82,8 @@ spring:
 
   datasource:
     url: jdbc:mysql://mysql-auth/auth-db
-    username: user
-    password: pwd
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
 
   jpa:
     hibernate:
@@ -144,8 +144,8 @@ spring:
 
   datasource:
     url: jdbc:mysql://mysql-auth/auth-db
-    username: user
-    password: pwd
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
 
   jpa:
     hibernate:

@@ -20,9 +20,9 @@ impl UsersPort for UsersService {
     async fn create_user(
         &self,
         new_user: UserCreationParams,
-        auth_context: UserContext,
+        user_ctx: UserContext,
     ) -> AppResult<UserEntity> {
-        require_any(&auth_context, &[SUDO_ROLE_UUID])?;
+        require_any(&user_ctx, &[SUDO_ROLE_UUID])?;
 
         create_user(&self.users_repo, new_user).await
     }

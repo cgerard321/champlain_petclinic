@@ -19,7 +19,7 @@ services:
       - DEFAULT_ADMIN_EMAIL=admin@admin.com
       - DEFAULT_ADMIN_PASSWORD=V1wjft2QXPUKYvLg
     env_file:
-      - ../mailer.env
+      - ../.env
 
   mysql-devtools:
     image: mysql:5.7

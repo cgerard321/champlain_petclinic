@@ -99,16 +99,16 @@ spring:
 
   r2dbc:
     url: r2dbc:postgresql://postgres-vet:5432/images
-    username: user
-    password: pwd
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
 
   data:
     mongodb:
       host: mongo-vet
       port: 27017
       database: veterinarians
-      username: root
-      password: password
+      username: ${DB_USER}
+      password: ${DB_PASSWORD}
       authentication-database: admin
 
   # set to 2MB as only file transfers are images which don't need much memory

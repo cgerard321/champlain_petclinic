@@ -1,7 +1,8 @@
-use crate::shared::config::SUDO_ROLE_UUID;
-use crate::shared::error::AppError;
+use crate::shared::config::{ADMIN_ROLE_UUID, READER_ROLE_UUID, SUDO_ROLE_UUID};
+use crate::shared::error::{AppError, AppResult};
 use std::collections::HashSet;
 use uuid::Uuid;
+use crate::application::services::utils::ServiceDescriptor;
 
 pub struct UserContext {
     #[allow(dead_code)]
@@ -37,7 +38,7 @@ impl UserContext {
 }
 
 #[inline]
-pub fn require_any(user: &UserContext, required: &[Uuid]) -> Result<(), AppError> {
+pub fn require_any(user: &UserContext, required: &[Uuid]) -> AppResult<()> {
     if required.iter().any(|r| user.roles.contains(r)) {
         Ok(())
     } else {
@@ -46,10 +47,22 @@ pub fn require_any(user: &UserContext, required: &[Uuid]) -> Result<(), AppError
 }
 
 #[inline]
-pub fn require_all(user: &UserContext, required: &[Uuid]) -> Result<(), AppError> {
+pub fn require_all(user: &UserContext, required: &[Uuid]) -> AppResult<()> {
     if required.iter().all(|r| user.roles.contains(r)) {
         Ok(())
     } else {
         Err(AppError::Forbidden)
+    }
+}
+
+#[inline]
+pub fn verify_service_or_admin_perms(user_ctx: &UserContext, desc: &ServiceDescriptor) -> AppResult<()> {
+    if let Some(required_role) = desc.logs_role {
+        log::info!("Verifying logs role:");
+        require_all(&user_ctx, &[READER_ROLE_UUID])?;
+        require_any(&user_ctx, &[ADMIN_ROLE_UUID, required_role])?;
+    } else {
+        log::info!("Verifying admin role:");
+        require_any(&user_ctx, &[ADMIN_ROLE_UUID])?;
     }
 }

@@ -8,7 +8,7 @@ pub trait UsersPort: Send + Sync {
     async fn create_user(
         &self,
         new_user: UserCreationParams,
-        auth_context: UserContext,
+        user_ctx: UserContext,
     ) -> AppResult<UserEntity>;
 }
 pub type DynUsersPort = std::sync::Arc<dyn UsersPort>;

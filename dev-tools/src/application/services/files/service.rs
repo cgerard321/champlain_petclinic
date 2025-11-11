@@ -19,17 +19,17 @@ impl FilesService {
 
 #[async_trait::async_trait]
 impl FilesPort for FilesService {
-    async fn fetch_buckets(&self, auth_context: UserContext) -> AppResult<Vec<BucketEntity>> {
-        require_any(&auth_context, &[ADMIN_ROLE_UUID, READER_ROLE_UUID])?;
+    async fn fetch_buckets(&self, user_ctx: UserContext) -> AppResult<Vec<BucketEntity>> {
+        require_any(&user_ctx, &[ADMIN_ROLE_UUID, READER_ROLE_UUID])?;
 
         fetch_buckets::fetch_buckets(&self.storage).await
     }
     async fn list_files(
         &self,
         bucket: &str,
-        auth_context: UserContext,
+        user_ctx: UserContext,
     ) -> AppResult<Vec<FileEntity>> {
-        require_any(&auth_context, &[ADMIN_ROLE_UUID, READER_ROLE_UUID])?;
+        require_any(&user_ctx, &[ADMIN_ROLE_UUID, READER_ROLE_UUID])?;
 
         fetch_bucket_files::fetch_files(bucket, &self.storage).await
     }
@@ -38,9 +38,9 @@ impl FilesPort for FilesService {
         bucket: &str,
         prefix: PathBuf,
         bytes: Vec<u8>,
-        auth_context: UserContext,
+        user_ctx: UserContext,
     ) -> AppResult<FileEntity> {
-        require_any(&auth_context, &[ADMIN_ROLE_UUID, EDITOR_ROLE_UUID])?;
+        require_any(&user_ctx, &[ADMIN_ROLE_UUID, EDITOR_ROLE_UUID])?;
 
         upload_file::upload_file(&self.storage, bucket, prefix, bytes).await
     }

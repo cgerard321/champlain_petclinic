@@ -10,12 +10,12 @@ pub trait DockerPort: Send + Sync {
     async fn stream_container_logs(
         &self,
         view_logs_params: ViewLogsParams,
-        auth_context: UserContext,
+        user_ctx: UserContext,
     ) -> AppResult<Pin<Box<dyn Stream<Item = Result<DockerLogEntity, AppError>> + Send>>>;
     async fn restart_container(
         &self,
         restart_params: RestartContainerParams,
-        auth_context: UserContext,
+        user_ctx: UserContext,
     ) -> AppResult<()>;
 }
 pub type DynDockerPort = std::sync::Arc<dyn DockerPort>;

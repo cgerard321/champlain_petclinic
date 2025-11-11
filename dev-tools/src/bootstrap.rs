@@ -26,8 +26,13 @@ use bollard::Docker;
 use rocket::fairing::AdHoc;
 use sqlx::mysql::MySqlPoolOptions;
 use sqlx::MySqlPool;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
+use crate::adapters::output::sql_driver::sql_driver::MySqlDriver;
+use crate::application::ports::input::sql_console_port::SqlConsolePort;
+use crate::application::ports::output::db_drivers::sql_driver::DynSqlDriver;
+use crate::application::services::{DbType, SERVICES};
+use crate::application::services::db_consoles::sql_service::SqlConsoleService;
 
 pub fn stage() -> AdHoc {
     AdHoc::on_ignite("SQLx (MySQL)", |rocket| async move {
@@ -92,13 +97,52 @@ pub fn stage() -> AdHoc {
         let docker_api: DynDockerAPI = Arc::new(BollardDockerAPI::new(docker));
         let docker_port: DynDockerPort = Arc::new(DockerService::new(docker_api.clone()));
 
+        // SQL Console
+        let drivers = build_sql_drivers_from_services();
+
+        let sql_console_port: Arc<dyn SqlConsolePort> =
+            Arc::new(SqlConsoleService::new(drivers));
+
+
         rocket
             .manage(auth_port)
             .manage(files_port)
             .manage(users_port)
             .manage(docker_port)
+            .manage(sql_console_port)
     })
 }
+
+pub fn build_sql_drivers_from_services() -> HashMap<&'static str, Arc<DynSqlDriver>> {
+    let mut map = HashMap::new();
+
+    for (_name, svc) in SERVICES.iter() {
+        let Some(db) = &svc.db else { continue };
+
+        if !matches!(db.db_type, DbType::MySql) {
+            continue;
+        }
+
+        let id = db.db_host; // key by db host / container name
+
+        if map.contains_key(id) {
+            continue;
+        }
+
+        let user = std::env::var(db.db_user_env)
+            .unwrap_or_else(|_| panic!("Missing env {}", db.db_user_env));
+        let pass = std::env::var(db.db_password_env)
+            .unwrap_or_else(|_| panic!("Missing env {}", db.db_password_env));
+
+        let url = format!("mysql://{}:{}@{}:3306", user, pass, db.db_host);
+
+        let driver = MySqlDriver::new(&url);
+        map.insert(id, Arc::new(driver) as Arc<DynSqlDriver>);
+    }
+
+    map
+}
+
 
 async fn add_default_roles(pool: &MySqlPool) -> Result<(), sqlx::Error> {
     // TODO : Add role repo

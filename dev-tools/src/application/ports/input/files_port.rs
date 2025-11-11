@@ -10,14 +10,14 @@ pub trait FilesPort: Send + Sync {
     async fn list_files(
         &self,
         bucket: &str,
-        auth_context: UserContext,
+        user_ctx: UserContext,
     ) -> AppResult<Vec<FileEntity>>;
     async fn upload(
         &self,
         bucket: &str,
         prefix: PathBuf,
         bytes: Vec<u8>,
-        auth_context: UserContext,
+        user_ctx: UserContext,
     ) -> AppResult<FileEntity>;
 }
 pub type DynFilesPort = std::sync::Arc<dyn FilesPort>;
