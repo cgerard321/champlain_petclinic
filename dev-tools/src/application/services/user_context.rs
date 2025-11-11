@@ -61,11 +61,9 @@ pub fn verify_service_or_admin_perms(
     desc: &ServiceDescriptor,
 ) -> AppResult<()> {
     if let Some(required_role) = desc.logs_role {
-        log::info!("Verifying logs role:");
         require_all(&user_ctx, &[READER_ROLE_UUID])?;
         Ok(require_any(&user_ctx, &[ADMIN_ROLE_UUID, required_role])?)
     } else {
-        log::info!("Verifying admin role:");
         Ok(require_any(&user_ctx, &[ADMIN_ROLE_UUID])?)
     }
 }

@@ -91,7 +91,10 @@ impl MongoConsolePort for MongoConsoleService {
 
         let client = Client::with_uri_str(&uri)
             .await
-            .map_err(|e| AppError::Internal)?;
+            .map_err(|e| {
+                log::error!("Failed to connect to Mongo: {}", e);
+                AppError::Internal
+            })?;
 
         let db_handle = client.database(db.db_name);
         let coll = db_handle.collection::<Document>(&payload.collection);
