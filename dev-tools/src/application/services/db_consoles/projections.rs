@@ -9,7 +9,6 @@ pub struct SqlResult {
 
 #[derive(Debug)]
 pub struct MongoResult {
-    pub collection: String,
     pub documents: Vec<Value>,
     pub count: i64,
 }

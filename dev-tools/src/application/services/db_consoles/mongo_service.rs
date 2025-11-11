@@ -13,6 +13,7 @@ use rocket::form::FromForm;
 use serde::Deserialize;
 use serde_json::Value;
 use std::sync::Arc;
+use mongodb::bson::Bson;
 
 pub struct MongoConsoleService {}
 
@@ -64,7 +65,6 @@ impl MongoConsolePort for MongoConsoleService {
             )));
         }
 
-        // Build MongoDB URI from descriptor
         let username = std::env::var(db.db_user_env)
             .map_err(|_| AppError::Internal)?;
         let password = std::env::var(db.db_password_env)
@@ -103,31 +103,57 @@ impl MongoConsolePort for MongoConsoleService {
             .await
             .map_err(|e| {
                 log::info!("Mongo command failed: {}", e);
-                AppError::Internal
+                AppError::BadRequest(format!("Mongo command failed: {}", e))
             })?;
 
         log::info!("Mongo command executed successfully");
 
-        let collection = res["cursor"]["firstBatch"].as_array().ok_or_else(|| {
-            AppError::BadRequest(format!("Invalid Mongo response: {}", res))
-        })?;
+        // If the response contains a cursor with firstBatch, extract documents
+        // This is when we do find() or aggregate()
+        if let Ok(cursor) = res.get_document("cursor") {
+            if let Ok(first_batch) = cursor.get_array("firstBatch") {
+                let mut docs = Vec::with_capacity(first_batch.len());
 
-        let mut docs = Vec::new();
-        for doc in collection {
-            let doc = doc.as_document().ok_or_else(|| {
-                AppError::BadRequest(format!("Invalid Mongo response: {}", res))
-            })?;
+                for b in first_batch {
+                    let v = bson_to_serde_json(b.clone())?;
+                    docs.push(v);
+                }
 
-            docs.push(bson_to_serde_json(bson::Bson::Document(doc.clone()))?);
+                return Ok(MongoResult {
+                    documents: docs,
+                    count: docs.len() as i64,
+                });
+            }
         }
 
+        // If the response contains n, nModified, or deletedCount, return the result
+        // This is when we do update() or delete()
+        let mut affected: i64 = 0;
+
+        if let Ok(n) = res.get_i32("n") {
+            affected = affected.max(n as i64);
+        }
+        if let Ok(nm) = res.get_i32("nModified") {
+            affected = affected.max(nm as i64);
+        }
+        if let Ok(dc) = res.get_i64("deletedCount") {
+            affected = affected.max(dc);
+        }
+
+        if affected > 0 {
+            return Ok(MongoResult {
+                documents: vec![],
+                count: affected,
+            });
+        }
+
+        // Otherwise, return the whole response as a single document
+        // This is when we do findOne() or findOneAndDelete() (Also a fallback)
+        let single = bson_to_serde_json(Bson::Document(res))?;
+
         Ok(MongoResult {
-            collection: res["ns"]
-                .as_str()
-                .unwrap_or_default()
-                .to_string(),
-            documents: docs,
-            count: 0,
+            documents: vec![single],
+            count: 1,
         })
     }
 }
