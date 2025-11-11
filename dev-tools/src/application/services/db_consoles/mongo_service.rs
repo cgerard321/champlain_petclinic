@@ -119,9 +119,11 @@ impl MongoConsolePort for MongoConsoleService {
                     docs.push(v);
                 }
 
+                let len = docs.len();
+
                 return Ok(MongoResult {
                     documents: docs,
-                    count: docs.len() as i64,
+                    count: len as i64,
                 });
             }
         }
