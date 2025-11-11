@@ -3,8 +3,8 @@ use crate::application::ports::output::docker_api::DockerAPIPort;
 use crate::domain::entities::docker::DockerLogEntity;
 use crate::shared::config::DEFAULT_TAIL_AMOUNT;
 use crate::shared::error::{AppError, AppResult};
-use bollard::Docker;
 use bollard::query_parameters::{ListContainersOptions, LogsOptions, RestartContainerOptions};
+use bollard::Docker;
 use futures::{Stream, TryStreamExt};
 use std::collections::HashMap;
 use std::pin::Pin;
@@ -71,7 +71,7 @@ impl DockerAPIPort for BollardDockerAPI {
         &self,
         container_name: &str,
         number_of_lines: Option<usize>,
-    ) -> AppResult<Pin<Box<dyn Stream<Item = AppResult<DockerLogEntity>> + Send>>> {
+    ) -> AppResult<Pin<Box<dyn Stream<Item=AppResult<DockerLogEntity>> + Send>>> {
         log::info!("Streaming logs for container: {}", container_name);
 
         log::info!("Connected to Docker");

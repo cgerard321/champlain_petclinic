@@ -7,15 +7,15 @@ pub fn map_sqlx_err(e: sqlx::Error, context: &str) -> AppError {
     match e {
         sqlx::Error::RowNotFound => AppError::NotFound(format!("{context} not found")),
         sqlx::Error::Database(ref db_err)
-            if db_err.kind() == sqlx::error::ErrorKind::ForeignKeyViolation =>
-        {
-            AppError::BadRequest(format!("Invalid {context} reference"))
-        }
+        if db_err.kind() == sqlx::error::ErrorKind::ForeignKeyViolation =>
+            {
+                AppError::BadRequest(format!("Invalid {context} reference"))
+            }
         sqlx::Error::Database(ref db_err)
-            if db_err.kind() == sqlx::error::ErrorKind::UniqueViolation =>
-        {
-            AppError::Conflict
-        }
+        if db_err.kind() == sqlx::error::ErrorKind::UniqueViolation =>
+            {
+                AppError::Conflict
+            }
         sqlx::Error::ColumnDecode {
             index: _,
             source: _,

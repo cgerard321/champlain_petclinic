@@ -10,7 +10,10 @@ use uuid::Uuid;
 
 pub fn get_pepper() -> String {
     std::env::var("PASSWORD_PEPPER")
-        .map_err(AppError::Internal)
+        .map_err(|_| {
+            log::error!("PASSWORD_PEPPER env var is not set");
+            AppError::Internal
+        })
         .expect("Missing password pepper")
 }
 

@@ -32,7 +32,7 @@ impl AuthPort for AuthService {
             user_login_params.email.as_str(),
             user_login_params.password.as_str(),
         )
-        .await
+            .await
     }
 
     async fn logout(&self, session_id: Uuid) -> AppResult<()> {

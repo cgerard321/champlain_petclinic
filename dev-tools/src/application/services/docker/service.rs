@@ -4,7 +4,7 @@ use crate::application::services::docker::params::{RestartContainerParams, ViewL
 use crate::application::services::docker::restart_container::restart_container;
 use crate::application::services::docker::stream_container_logs::stream_container_logs;
 use crate::application::services::user_context::{
-    UserContext, require_all, require_any, verify_service_or_admin_perms,
+    require_all, require_any, verify_service_or_admin_perms, UserContext,
 };
 use crate::application::services::utils::resolve_descriptor_by_container;
 use crate::domain::entities::docker::DockerLogEntity;
@@ -29,7 +29,7 @@ impl DockerPort for DockerService {
         &self,
         view_logs_params: ViewLogsParams,
         user_ctx: UserContext,
-    ) -> AppResult<Pin<Box<dyn Stream<Item = Result<DockerLogEntity, AppError>> + Send>>> {
+    ) -> AppResult<Pin<Box<dyn Stream<Item=Result<DockerLogEntity, AppError>> + Send>>> {
         log::info!(
             "Streaming logs for container: {}",
             view_logs_params.container_name

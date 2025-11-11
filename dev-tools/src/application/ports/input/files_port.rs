@@ -7,11 +7,7 @@ use std::path::PathBuf;
 #[async_trait::async_trait]
 pub trait FilesPort: Send + Sync {
     async fn fetch_buckets(&self, auth_context: UserContext) -> AppResult<Vec<BucketEntity>>;
-    async fn list_files(
-        &self,
-        bucket: &str,
-        user_ctx: UserContext,
-    ) -> AppResult<Vec<FileEntity>>;
+    async fn list_files(&self, bucket: &str, user_ctx: UserContext) -> AppResult<Vec<FileEntity>>;
     async fn upload(
         &self,
         bucket: &str,

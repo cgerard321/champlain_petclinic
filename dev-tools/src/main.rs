@@ -1,11 +1,11 @@
 #[macro_use]
 extern crate rocket;
 
+use crate::adapters::input::http::graphql_handler::{routes_graphql, schemas};
 use crate::adapters::input::http::rest_handler::error::register_catchers;
 use crate::adapters::input::http::rest_handler::{routes, routes_docker};
 use bootstrap::stage;
 use rocket::State;
-use crate::adapters::input::http::graphql_handler::{routes_graphql, schemas};
 
 mod shared;
 
@@ -32,10 +32,7 @@ fn rocket() -> _ {
         .mount("/api/v1/services", routes_docker())
         // GraphQL
         .manage(schemas())
-        .mount(
-            "/api/v1/graphql",
-            routes_graphql()
-        )
+        .mount("/api/v1/graphql", routes_graphql())
         .register("/", register_catchers());
 
     let endpoints: Vec<String> = rocket

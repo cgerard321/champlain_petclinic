@@ -2,20 +2,25 @@ use crate::adapters::output::docker::client::BollardDockerAPI;
 use crate::adapters::output::minio::client::MinioStore;
 use crate::adapters::output::mysql::auth_repo::MySqlAuthRepo;
 use crate::adapters::output::mysql::users_repo::MySqlUsersRepo;
+use crate::adapters::output::sql_driver::sql_driver::MySqlDriver;
 use crate::application::ports::input::auth_port::DynAuthPort;
 use crate::application::ports::input::docker_logs_port::DynDockerPort;
 use crate::application::ports::input::files_port::DynFilesPort;
+use crate::application::ports::input::sql_console_port::SqlConsolePort;
 use crate::application::ports::input::user_port::DynUsersPort;
 use crate::application::ports::output::auth_repo_port::DynAuthRepo;
+use crate::application::ports::output::db_drivers::sql_driver::DynSqlDriver;
 use crate::application::ports::output::docker_api::DynDockerAPI;
 use crate::application::ports::output::file_storage_port::DynFileStorage;
 use crate::application::ports::output::user_repo_port::DynUsersRepo;
 use crate::application::services::auth::service::AuthService;
+use crate::application::services::db_consoles::sql_service::SqlConsoleService;
 use crate::application::services::docker::service::DockerService;
 use crate::application::services::files::service::FilesService;
 use crate::application::services::user_context::UserContext;
 use crate::application::services::users::params::UserCreationParams;
 use crate::application::services::users::service::UsersService;
+use crate::application::services::{DbType, SERVICES};
 use crate::shared::config::{
     ADMIN_ROLE_UUID, AUTH_SERVICE_DEV_ROLE, BILLING_SERVICE_DEV_ROLE, CART_SERVICE_DEV_ROLE,
     CUSTOMERS_SERVICE_DEV_ROLE, EDITOR_ROLE_UUID, INVENTORY_SERVICE_DEV_ROLE,
@@ -28,11 +33,6 @@ use sqlx::mysql::MySqlPoolOptions;
 use sqlx::MySqlPool;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
-use crate::adapters::output::sql_driver::sql_driver::MySqlDriver;
-use crate::application::ports::input::sql_console_port::SqlConsolePort;
-use crate::application::ports::output::db_drivers::sql_driver::DynSqlDriver;
-use crate::application::services::{DbType, SERVICES};
-use crate::application::services::db_consoles::sql_service::SqlConsoleService;
 
 pub fn stage() -> AdHoc {
     AdHoc::on_ignite("SQLx (MySQL)", |rocket| async move {
@@ -100,9 +100,7 @@ pub fn stage() -> AdHoc {
         // SQL Console
         let drivers = build_sql_drivers_from_services();
 
-        let sql_console_port: Arc<dyn SqlConsolePort> =
-            Arc::new(SqlConsoleService::new(drivers));
-
+        let sql_console_port: Arc<dyn SqlConsolePort> = Arc::new(SqlConsoleService::new(drivers));
 
         rocket
             .manage(auth_port)
@@ -143,7 +141,6 @@ pub fn build_sql_drivers_from_services() -> HashMap<&'static str, Arc<DynSqlDriv
     map
 }
 
-
 async fn add_default_roles(pool: &MySqlPool) -> Result<(), sqlx::Error> {
     // TODO : Add role repo
     // Since I don't see a foreseeable future of having a role repo
@@ -179,20 +176,20 @@ async fn add_default_roles(pool: &MySqlPool) -> Result<(), sqlx::Error> {
         (?, 'BILLING_SERVICE_DEV',    'Billing Service Dev');
     "#,
     )
-    .bind(&sudo)
-    .bind(&admin)
-    .bind(&reader)
-    .bind(&editor)
-    .bind(&auth_service_dev)
-    .bind(&vet_service_dev)
-    .bind(&visits_service_dev)
-    .bind(&customers_service_dev)
-    .bind(&products_service_dev)
-    .bind(&cart_service_dev)
-    .bind(&inventory_service_dev)
-    .bind(&billing_service_dev)
-    .execute(pool)
-    .await?;
+        .bind(&sudo)
+        .bind(&admin)
+        .bind(&reader)
+        .bind(&editor)
+        .bind(&auth_service_dev)
+        .bind(&vet_service_dev)
+        .bind(&visits_service_dev)
+        .bind(&customers_service_dev)
+        .bind(&products_service_dev)
+        .bind(&cart_service_dev)
+        .bind(&inventory_service_dev)
+        .bind(&billing_service_dev)
+        .execute(pool)
+        .await?;
     Ok(())
 }
 

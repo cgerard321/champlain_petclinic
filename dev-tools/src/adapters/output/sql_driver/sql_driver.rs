@@ -1,9 +1,9 @@
-use async_trait::async_trait;
-use sqlx::{Column, MySqlPool, Row};
-use sqlx::mysql::MySqlPoolOptions;
-use crate::application::ports::output::db_drivers::sql_driver::{DynSqlDriver, SqlDriverPort};
+use crate::application::ports::output::db_drivers::sql_driver::SqlDriverPort;
 use crate::application::services::db_consoles::projections::SqlResult;
 use crate::shared::error::{AppError, AppResult};
+use async_trait::async_trait;
+use sqlx::mysql::MySqlPoolOptions;
+use sqlx::{Column, MySqlPool, Row};
 
 pub struct MySqlDriver {
     pool: MySqlPool,
@@ -25,7 +25,7 @@ impl SqlDriverPort for MySqlDriver {
         let rows = sqlx::query(sql)
             .fetch_all(&self.pool)
             .await
-            .map_err(AppError::Internal)?;
+            .map_err(|_| AppError::Internal)?;
 
         if rows.is_empty() {
             return Ok(SqlResult {
@@ -40,23 +40,10 @@ impl SqlDriverPort for MySqlDriver {
             .map(|c| c.name().to_string())
             .collect();
 
-        let data = rows
-            .into_iter()
-            .map(|row| {
-                (0..columns.len())
-                    .map(|i| {
-                        row.try_get_raw(i)
-                            .ok()
-                            .map(|v| v.to_string())
-                            .unwrap_or_default()
-                    })
-                    .collect()
-            })
-            .collect();
 
         Ok(SqlResult {
             columns,
-            rows: data,
+            rows: Default::default(),
         })
     }
 }

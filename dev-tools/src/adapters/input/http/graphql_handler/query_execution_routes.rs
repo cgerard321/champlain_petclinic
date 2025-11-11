@@ -1,7 +1,7 @@
+use crate::adapters::input::http::graphql_handler::schemas::sql_schema::QueryRoot;
 use async_graphql::{EmptyMutation, EmptySubscription, Schema};
 use async_graphql_rocket::{GraphQLRequest, GraphQLResponse};
 use rocket::State;
-use crate::adapters::input::http::graphql_handler::schemas::sql_schema::QueryRoot;
 
 pub type ExecuteSqlQuerySchema = Schema<QueryRoot, EmptyMutation, EmptySubscription>;
 

@@ -24,11 +24,7 @@ impl FilesPort for FilesService {
 
         fetch_buckets::fetch_buckets(&self.storage).await
     }
-    async fn list_files(
-        &self,
-        bucket: &str,
-        user_ctx: UserContext,
-    ) -> AppResult<Vec<FileEntity>> {
+    async fn list_files(&self, bucket: &str, user_ctx: UserContext) -> AppResult<Vec<FileEntity>> {
         require_any(&user_ctx, &[ADMIN_ROLE_UUID, READER_ROLE_UUID])?;
 
         fetch_bucket_files::fetch_files(bucket, &self.storage).await

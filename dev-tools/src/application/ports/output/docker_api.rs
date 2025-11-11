@@ -10,7 +10,7 @@ pub trait DockerAPIPort: Send + Sync {
         &self,
         container_name: &str,
         number_of_lines: Option<usize>,
-    ) -> AppResult<Pin<Box<dyn Stream<Item = AppResult<DockerLogEntity>> + Send>>>;
+    ) -> AppResult<Pin<Box<dyn Stream<Item=AppResult<DockerLogEntity>> + Send>>>;
 
     async fn restart_container(&self, container_id: &str) -> AppResult<()>;
 }
