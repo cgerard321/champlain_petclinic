@@ -92,17 +92,23 @@ impl MongoConsolePort for MongoConsoleService {
         let client = Client::with_uri_str(&uri)
             .await
             .map_err(|e| {
-                log::error!("Failed to connect to Mongo: {}", e);
+                log::info!("Failed to connect to Mongo: {}", e);
                 AppError::Internal
             })?;
 
+        log::info!("Connected to Mongo");
+
         let db_handle = client.database(db.db_name);
         let coll = db_handle.collection::<Document>(&payload.collection);
+
+        log::info!("Executing query");
 
         let mut cursor = coll
             .find(filter_doc)
             .await
             .map_err(|e| AppError::Internal)?;
+
+        log::info!("Query executed");
 
         let mut docs = Vec::new();
         while let Some(doc) = cursor
@@ -117,6 +123,8 @@ impl MongoConsolePort for MongoConsoleService {
         }
 
         let count = docs.len() as i64;
+
+        log::info!("Query returned {} documents", count);
 
         Ok(MongoResult {
             collection: payload.collection,
