@@ -132,7 +132,7 @@ pub fn build_sql_drivers_from_services() -> HashMap<&'static str, Arc<DynSqlDriv
         let pass = std::env::var(db.db_password_env)
             .unwrap_or_else(|_| panic!("Missing env {}", db.db_password_env));
 
-        let url = format!("mysql://{}:{}@{}:3306", user, pass, db.db_host);
+        let url = format!("mysql://{}:{}@{}:3306/{}", user, pass, db.db_host, db.db_name);
 
         let driver = MySqlDriver::new(&url);
         map.insert(id, Arc::new(driver) as Arc<DynSqlDriver>);
