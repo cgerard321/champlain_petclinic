@@ -143,12 +143,13 @@ pub async fn build_mongo_drivers_from_services() -> HashMap<&'static str, Arc<Dy
             .unwrap_or_else(|_| panic!("Missing env {}", db.db_password_env));
 
         let uri = format!(
-            "mongodb://{}:{}@{}:{}/{}",
+            "mongodb://{}:{}@{}:{}/{}?authSource={}",
             user,
             pass,
             db.db_host,
             27017, // For now we will use the default port, maybe later we will add a configurable port
-            db.db_name
+            db.db_name,
+            "admin" // For now we will use the default authSource, maybe later we will add a configurable authSource
         );
 
         let driver = MongoDriver::new(&uri).await;
