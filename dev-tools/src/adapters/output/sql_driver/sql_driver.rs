@@ -59,9 +59,16 @@ impl SqlDriverPort for MySqlDriver {
                     AppError::BadRequest(format!("Error getting value: {}", e))
                 });
                 log::info!("Value: {:?}", value.is_ok());
+                let value = value?;
+                log::info!("Value: {:?}", value);
+                let value = value.to_string();
+                log::info!("Value: {:?}", value);
+                data.push(value);
 
             }
         }
+
+        row_data.push(data);
 
         log::info!("Columns: {:?}", columns);
         Ok(SqlResult {
