@@ -47,19 +47,26 @@ impl SqlDriverPort for MySqlDriver {
             .map(|c| c.name().to_string())
             .collect();
 
-        let mut data: Vec<Vec<String>> = vec![];
+        let mut data: Vec<String> = vec![];
+        let mut row_data: Vec<Vec<String>> = vec![];
 
         for row in &rows {
+            log::info!("Row: {:?}", row);
             for (i, col) in row.columns().iter().enumerate() {
-                let value = row.try_get(i).unwrap();
-                data.push(vec![value]);
+                log::info!("Column: {:?}", col);
+                let value = row.try_get_raw(i).map_err(|e| {
+                    log::info!("Error getting value: {}", e);
+                    AppError::BadRequest(format!("Error getting value: {}", e))
+                });
+                log::info!("Value: {:?}", value);
+
             }
         }
 
         log::info!("Columns: {:?}", columns);
         Ok(SqlResult {
             columns,
-            rows: data,
+            rows: row_data,
         })
     }
 }
