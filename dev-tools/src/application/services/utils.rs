@@ -27,8 +27,7 @@ pub fn resolve_descriptor_by_container(container: &str) -> Option<&'static Servi
 pub struct ServiceDescriptor {
     pub docker_service: &'static str,
     pub db: Option<DbDescriptor>,
-    pub logs_role: Option<Uuid>,
-    pub restart_role: Option<Uuid>,
+    pub service_role: Option<Uuid>,
 }
 
 #[derive(Debug)]
@@ -48,11 +47,7 @@ pub enum DbType {
 
 impl PartialEq for DbType {
     fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (DbType::Mongo, DbType::Mongo) => true,
-            (DbType::Sql, DbType::Sql) => true,
-            _ => false,
-        }
+        matches!((self, other), (DbType::Mongo, DbType::Mongo) | (DbType::Sql, DbType::Sql))
     }
 }
 
@@ -69,8 +64,7 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
         S {
             docker_service: "petclinic-frontend",
             db: None,
-            logs_role: None,
-            restart_role: None,
+            service_role: None,
         },
     );
 
@@ -79,8 +73,7 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
         S {
             docker_service: "employee-frontend",
             db: None,
-            logs_role: None,
-            restart_role: None,
+            service_role: None,
         },
     );
 
@@ -90,8 +83,7 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
         S {
             docker_service: "api-gateway",
             db: None,
-            logs_role: None,
-            restart_role: None,
+            service_role: None,
         },
     );
 
@@ -108,8 +100,7 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
                 db_name: "visits",
                 db_type: Mongo,
             }),
-            logs_role: Some(VISITS_SERVICE_DEV_ROLE),
-            restart_role: Some(VISITS_SERVICE_DEV_ROLE),
+            service_role: Some(VISITS_SERVICE_DEV_ROLE),
         },
     );
 
@@ -124,8 +115,7 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
                 db_name: "inventory",
                 db_type: Mongo,
             }),
-            logs_role: Some(INVENTORY_SERVICE_DEV_ROLE),
-            restart_role: Some(INVENTORY_SERVICE_DEV_ROLE),
+            service_role: Some(INVENTORY_SERVICE_DEV_ROLE),
         },
     );
 
@@ -140,8 +130,7 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
                 db_name: "veterinarians",
                 db_type: Mongo,
             }),
-            logs_role: Some(VET_SERVICE_DEV_ROLE),
-            restart_role: Some(VET_SERVICE_DEV_ROLE),
+            service_role: Some(VET_SERVICE_DEV_ROLE),
         },
     );
 
@@ -157,8 +146,7 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
                 db_name: "customers",
                 db_type: Mongo,
             }),
-            logs_role: Some(CUSTOMERS_SERVICE_DEV_ROLE),
-            restart_role: Some(CUSTOMERS_SERVICE_DEV_ROLE),
+            service_role: Some(CUSTOMERS_SERVICE_DEV_ROLE),
         },
     );
 
@@ -173,8 +161,7 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
                 db_name: "billings",
                 db_type: Mongo,
             }),
-            logs_role: Some(BILLING_SERVICE_DEV_ROLE),
-            restart_role: Some(BILLING_SERVICE_DEV_ROLE),
+            service_role: Some(BILLING_SERVICE_DEV_ROLE),
         },
     );
 
@@ -189,8 +176,7 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
                 db_name: "products",
                 db_type: Mongo,
             }),
-            logs_role: Some(PRODUCTS_SERVICE_DEV_ROLE),
-            restart_role: Some(PRODUCTS_SERVICE_DEV_ROLE),
+            service_role: Some(PRODUCTS_SERVICE_DEV_ROLE),
         },
     );
 
@@ -205,8 +191,7 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
                 db_name: "carts",
                 db_type: Mongo,
             }),
-            logs_role: Some(CART_SERVICE_DEV_ROLE),
-            restart_role: Some(CART_SERVICE_DEV_ROLE),
+            service_role: Some(CART_SERVICE_DEV_ROLE),
         },
     );
 
@@ -223,8 +208,7 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
                 db_name: "auth-db",
                 db_type: Sql,
             }),
-            logs_role: Some(AUTH_SERVICE_DEV_ROLE),
-            restart_role: Some(AUTH_SERVICE_DEV_ROLE),
+            service_role: Some(AUTH_SERVICE_DEV_ROLE),
         },
     );
 
@@ -239,8 +223,7 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
                 db_name: "files-db",
                 db_type: Sql,
             }),
-            logs_role: None,
-            restart_role: None,
+            service_role: None,
         },
     );
 
@@ -251,8 +234,7 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
         S {
             docker_service: "mailer-service",
             db: None,
-            logs_role: None,
-            restart_role: None,
+            service_role: None,
         },
     );
 

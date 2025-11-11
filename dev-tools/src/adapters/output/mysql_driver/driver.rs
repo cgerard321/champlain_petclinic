@@ -3,7 +3,6 @@ use crate::application::services::db_consoles::projections::SqlResult;
 use crate::shared::error::{AppError, AppResult};
 use async_trait::async_trait;
 use futures::StreamExt;
-use log::log;
 use sqlx::mysql::{MySqlConnectOptions, MySqlPool, MySqlRow, MySqlSslMode};
 use sqlx::{Column, Either, Row};
 use std::str::FromStr;
@@ -37,8 +36,8 @@ impl MySqlDriverPort for MySqlDriver {
         let mut has_columns = false;
 
         while let Some(item) = stream.next().await {
-            let either = item
-                .map_err(|e| AppError::BadRequest(format!("Error executing query: {}", e)))?;
+            let either =
+                item.map_err(|e| AppError::BadRequest(format!("Error executing query: {}", e)))?;
 
             match either {
                 Either::Left(res) => {
@@ -91,10 +90,10 @@ fn cell_to_string(row: &MySqlRow, idx: usize) -> String {
     }
 
     if let Ok(bytes) = row.try_get::<Vec<u8>, _>(idx) {
-        if bytes.len() == 16 {
-            if let Ok(u) = Uuid::from_slice(&bytes) {
-                return u.to_string();
-            }
+        if bytes.len() == 16
+            && let Ok(u) = Uuid::from_slice(&bytes)
+        {
+            return u.to_string();
         }
         return bytes.iter().map(|b| format!("{:02x}", b)).collect();
     }

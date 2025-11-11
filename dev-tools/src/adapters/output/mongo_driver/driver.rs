@@ -4,8 +4,6 @@ use crate::shared::error::{AppError, AppResult};
 use mongodb::bson::{Bson, Document};
 use mongodb::{bson, Client};
 use serde_json::Value;
-use sqlx::mysql::{MySqlConnectOptions, MySqlSslMode};
-use sqlx::MySqlPool;
 
 pub struct MongoDriver {
     client: Client,
@@ -13,7 +11,9 @@ pub struct MongoDriver {
 
 impl MongoDriver {
     pub async fn new(url: &str) -> Self {
-        let client = Client::with_uri_str(url).await.expect("Failed to create MongoDB client");
+        let client = Client::with_uri_str(url)
+            .await
+            .expect("Failed to create MongoDB client");
         Self { client }
     }
 }
@@ -27,7 +27,7 @@ impl MongoDriverPort for MongoDriver {
     ) -> AppResult<MongoResult> {
         let db_handle = self.client.database(database_name);
 
-        let json: Value = serde_json::from_str(&mongo_command)
+        let json: Value = serde_json::from_str(mongo_command)
             .map_err(|e| AppError::BadRequest(format!("Invalid Mongo command JSON: {}", e)))?;
 
         let command_doc: Document = bson::to_document(&json)
@@ -42,22 +42,22 @@ impl MongoDriverPort for MongoDriver {
 
         // If the response contains a cursor with firstBatch, extract documents
         // This is when we do find() or aggregate()
-        if let Ok(cursor) = res.get_document("cursor") {
-            if let Ok(first_batch) = cursor.get_array("firstBatch") {
-                let mut docs = Vec::with_capacity(first_batch.len());
+        if let Ok(cursor) = res.get_document("cursor")
+            && let Ok(first_batch) = cursor.get_array("firstBatch")
+        {
+            let mut docs = Vec::with_capacity(first_batch.len());
 
-                for b in first_batch {
-                    let v = bson_to_serde_json(b.clone())?;
-                    docs.push(v);
-                }
-
-                let len = docs.len();
-
-                return Ok(MongoResult {
-                    bson: docs,
-                    affected_count: len as i64,
-                });
+            for b in first_batch {
+                let v = bson_to_serde_json(b.clone())?;
+                docs.push(v);
             }
+
+            let len = docs.len();
+
+            return Ok(MongoResult {
+                bson: docs,
+                affected_count: len as i64,
+            });
         }
 
         // If the response contains n, nModified, or deletedCount, return the result
@@ -93,5 +93,5 @@ impl MongoDriverPort for MongoDriver {
 }
 
 fn bson_to_serde_json(b: Bson) -> AppResult<Value> {
-    serde_json::to_value(&b).map_err(|e| AppError::Internal)
+    serde_json::to_value(&b).map_err(|_| AppError::Internal)
 }

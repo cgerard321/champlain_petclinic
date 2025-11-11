@@ -60,10 +60,10 @@ pub fn verify_service_or_admin_perms(
     user_ctx: &UserContext,
     desc: &ServiceDescriptor,
 ) -> AppResult<()> {
-    if let Some(required_role) = desc.logs_role {
-        require_all(&user_ctx, &[READER_ROLE_UUID])?;
-        Ok(require_any(&user_ctx, &[ADMIN_ROLE_UUID, required_role])?)
+    if let Some(required_role) = desc.service_role {
+        require_all(user_ctx, &[READER_ROLE_UUID])?;
+        Ok(require_any(user_ctx, &[ADMIN_ROLE_UUID, required_role])?)
     } else {
-        Ok(require_any(&user_ctx, &[ADMIN_ROLE_UUID])?)
+        Ok(require_any(user_ctx, &[ADMIN_ROLE_UUID])?)
     }
 }

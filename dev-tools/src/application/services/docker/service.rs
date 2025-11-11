@@ -3,12 +3,9 @@ use crate::application::ports::output::docker_api::DynDockerAPI;
 use crate::application::services::docker::params::{RestartContainerParams, ViewLogsParams};
 use crate::application::services::docker::restart_container::restart_container;
 use crate::application::services::docker::stream_container_logs::stream_container_logs;
-use crate::application::services::user_context::{
-    require_all, require_any, verify_service_or_admin_perms, UserContext,
-};
+use crate::application::services::user_context::{verify_service_or_admin_perms, UserContext};
 use crate::application::services::utils::resolve_descriptor_by_container;
 use crate::domain::entities::docker::DockerLogEntity;
-use crate::shared::config::{ADMIN_ROLE_UUID, EDITOR_ROLE_UUID, READER_ROLE_UUID};
 use crate::shared::error::{AppError, AppResult};
 use futures::Stream;
 use std::pin::Pin;
@@ -29,7 +26,7 @@ impl DockerPort for DockerService {
         &self,
         view_logs_params: ViewLogsParams,
         user_ctx: UserContext,
-    ) -> AppResult<Pin<Box<dyn Stream<Item=Result<DockerLogEntity, AppError>> + Send>>> {
+    ) -> AppResult<Pin<Box<dyn Stream<Item = Result<DockerLogEntity, AppError>> + Send>>> {
         log::info!(
             "Streaming logs for container: {}",
             view_logs_params.container_name

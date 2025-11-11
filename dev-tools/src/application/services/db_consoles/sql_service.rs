@@ -2,13 +2,11 @@ use crate::application::ports::input::sql_console_port::SqlConsolePort;
 use crate::application::ports::output::db_drivers::mysql_driver::DynMySqlDriver;
 use crate::application::services::db_consoles::projections::SqlResult;
 use crate::application::services::user_context::{
-    require_all, require_any, verify_service_or_admin_perms, UserContext,
+    verify_service_or_admin_perms, UserContext,
 };
 use crate::application::services::utils::resolve_descriptor_by_container;
 use crate::application::services::DbType;
-use crate::shared::config::{ADMIN_ROLE_UUID, READER_ROLE_UUID};
 use crate::shared::error::{AppError, AppResult};
-use std::cmp::PartialEq;
 use std::collections::HashMap;
 use std::sync::Arc;
 

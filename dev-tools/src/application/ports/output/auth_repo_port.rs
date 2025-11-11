@@ -14,6 +14,8 @@ pub trait AuthRepoPort: Send + Sync {
     ) -> AppResult<SessionEntity>;
     async fn find_session_by_id(&self, sid: Uuid) -> AppResult<SessionEntity>;
     async fn delete_session(&self, sid: Uuid) -> AppResult<()>;
+
+    #[allow(dead_code)]
     async fn delete_expired_sessions(&self) -> AppResult<u64>;
 }
 
