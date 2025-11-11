@@ -27,7 +27,7 @@ impl SqlDriverPort for MySqlDriver {
         let rows = sqlx::query(sql)
             .fetch_all(&self.pool)
             .await
-            .map_err(|_| AppError::Internal)?;
+            .map_err(|e| AppError::BadRequest(format!("Error executing query: {}", e)))?;
 
         if rows.is_empty() {
             return Ok(SqlResult {
