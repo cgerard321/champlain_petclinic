@@ -2,6 +2,7 @@ use crate::application::ports::output::db_drivers::sql_driver::SqlDriverPort;
 use crate::application::services::db_consoles::projections::SqlResult;
 use crate::shared::error::{AppError, AppResult};
 use async_trait::async_trait;
+use log::log;
 use sqlx::mysql::MySqlPoolOptions;
 use sqlx::{Column, MySqlPool, Row};
 
@@ -22,6 +23,7 @@ impl MySqlDriver {
 #[async_trait]
 impl SqlDriverPort for MySqlDriver {
     async fn execute_query(&self, sql: &str) -> AppResult<SqlResult> {
+        log::info!("Executing query: {}", sql);
         let rows = sqlx::query(sql)
             .fetch_all(&self.pool)
             .await
@@ -40,7 +42,7 @@ impl SqlDriverPort for MySqlDriver {
             .map(|c| c.name().to_string())
             .collect();
 
-
+        log::info!("Columns: {:?}", columns);
         Ok(SqlResult {
             columns,
             rows: Default::default(),
