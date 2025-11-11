@@ -107,7 +107,7 @@ pub fn stage() -> AdHoc {
         let sql_console_port: DynSqlConsolePort = Arc::new(SqlConsoleService::new(drivers));
 
         // Mongo Console
-        let mongo_drivers = build_mongo_drivers_from_services();
+        let mongo_drivers = build_mongo_drivers_from_services().await;
 
         let mongo_console_port: DynMongoConsolePort = Arc::new(MongoConsoleService::new(mongo_drivers));
 
@@ -121,7 +121,7 @@ pub fn stage() -> AdHoc {
     })
 }
 
-pub fn build_mongo_drivers_from_services() -> HashMap<&'static str, Arc<DynMongoDriver>> {
+pub async fn build_mongo_drivers_from_services() -> HashMap<&'static str, Arc<DynMongoDriver>> {
     let mut map = HashMap::new();
 
     for (_name, svc) in SERVICES.iter() {
@@ -151,7 +151,7 @@ pub fn build_mongo_drivers_from_services() -> HashMap<&'static str, Arc<DynMongo
             db.db_name
         );
 
-        let driver = MongoDriver::new(&uri);
+        let driver = MongoDriver::new(&uri).await;
 
         map.insert(id, Arc::new(driver) as Arc<DynMongoDriver>);
     }

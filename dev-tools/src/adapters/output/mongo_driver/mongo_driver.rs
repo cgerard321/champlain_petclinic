@@ -12,12 +12,13 @@ pub struct MongoDriver {
 }
 
 impl MongoDriver {
-    pub fn new(url: &str) -> Self {
-        let client = Client::with_uri_str(url).expect("Invalid MongoDB URL");
+    pub async fn new(url: &str) -> Self {
+        let client = Client::with_uri_str(url).await.expect("Failed to create MongoDB client");
         Self { client }
     }
 }
 
+#[async_trait::async_trait]
 impl MongoDriverPort for MongoDriver {
     async fn execute_query(
         &self,
