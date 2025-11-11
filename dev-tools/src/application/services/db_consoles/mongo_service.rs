@@ -14,7 +14,7 @@ use serde::Deserialize;
 use serde_json::Value;
 use std::sync::Arc;
 
-pub struct MongoConsoleService;
+pub struct MongoConsoleService {}
 
 impl MongoConsoleService {
     pub fn new() -> Arc<Self> {

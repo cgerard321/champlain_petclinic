@@ -1,3 +1,3 @@
 pub mod projections;
 pub mod sql_service;
-mod mongo_service;
+pub mod mongo_service;

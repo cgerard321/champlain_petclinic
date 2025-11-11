@@ -6,6 +6,7 @@ use crate::adapters::output::sql_driver::sql_driver::MySqlDriver;
 use crate::application::ports::input::auth_port::DynAuthPort;
 use crate::application::ports::input::docker_logs_port::DynDockerPort;
 use crate::application::ports::input::files_port::DynFilesPort;
+use crate::application::ports::input::mongo_console_port::DynMongoConsolePort;
 use crate::application::ports::input::sql_console_port::{DynSqlConsolePort, SqlConsolePort};
 use crate::application::ports::input::user_port::DynUsersPort;
 use crate::application::ports::output::auth_repo_port::DynAuthRepo;
@@ -14,6 +15,7 @@ use crate::application::ports::output::docker_api::DynDockerAPI;
 use crate::application::ports::output::file_storage_port::DynFileStorage;
 use crate::application::ports::output::user_repo_port::DynUsersRepo;
 use crate::application::services::auth::service::AuthService;
+use crate::application::services::db_consoles::mongo_service::MongoConsoleService;
 use crate::application::services::db_consoles::sql_service::SqlConsoleService;
 use crate::application::services::docker::service::DockerService;
 use crate::application::services::files::service::FilesService;
@@ -102,12 +104,16 @@ pub fn stage() -> AdHoc {
 
         let sql_console_port: DynSqlConsolePort = Arc::new(SqlConsoleService::new(drivers));
 
+        // Mongo Console
+        let mongo_console_port: DynMongoConsolePort = MongoConsoleService::new();
+
         rocket
             .manage(auth_port)
             .manage(files_port)
             .manage(users_port)
             .manage(docker_port)
             .manage(sql_console_port)
+            .manage(mongo_console_port)
     })
 }
 
@@ -131,7 +137,10 @@ pub fn build_sql_drivers_from_services() -> HashMap<&'static str, Arc<DynSqlDriv
         let pass = std::env::var(db.db_password_env)
             .unwrap_or_else(|_| panic!("Missing env {}", db.db_password_env));
 
-        let url = format!("mysql://{}:{}@{}:3306/{}", user, pass, db.db_host, db.db_name);
+        let url = format!(
+            "mysql://{}:{}@{}:3306/{}",
+            user, pass, db.db_host, db.db_name
+        );
 
         let driver = MySqlDriver::new(&url);
         map.insert(id, Arc::new(driver) as Arc<DynSqlDriver>);
@@ -175,20 +184,20 @@ async fn add_default_roles(pool: &MySqlPool) -> Result<(), sqlx::Error> {
         (?, 'BILLING_SERVICE_DEV',    'Billing Service Dev');
     "#,
     )
-        .bind(&sudo)
-        .bind(&admin)
-        .bind(&reader)
-        .bind(&editor)
-        .bind(&auth_service_dev)
-        .bind(&vet_service_dev)
-        .bind(&visits_service_dev)
-        .bind(&customers_service_dev)
-        .bind(&products_service_dev)
-        .bind(&cart_service_dev)
-        .bind(&inventory_service_dev)
-        .bind(&billing_service_dev)
-        .execute(pool)
-        .await?;
+    .bind(&sudo)
+    .bind(&admin)
+    .bind(&reader)
+    .bind(&editor)
+    .bind(&auth_service_dev)
+    .bind(&vet_service_dev)
+    .bind(&visits_service_dev)
+    .bind(&customers_service_dev)
+    .bind(&products_service_dev)
+    .bind(&cart_service_dev)
+    .bind(&inventory_service_dev)
+    .bind(&billing_service_dev)
+    .execute(pool)
+    .await?;
     Ok(())
 }
 

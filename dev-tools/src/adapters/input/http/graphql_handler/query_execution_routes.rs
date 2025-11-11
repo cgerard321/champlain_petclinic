@@ -7,6 +7,7 @@ use crate::application::services::user_context::UserContext;
 use async_graphql::{EmptyMutation, EmptySubscription, Schema};
 use async_graphql_rocket::{GraphQLRequest, GraphQLResponse};
 use rocket::State;
+use crate::application::ports::input::mongo_console_port::DynMongoConsolePort;
 
 pub type ExecuteSqlQuerySchema = Schema<QueryRoot, EmptyMutation, EmptySubscription>;
 
@@ -15,12 +16,13 @@ pub async fn graphql_request(
     schema: &State<ExecuteSqlQuerySchema>,
     request: GraphQLRequest,
     user: AuthenticatedUser,
-    port: &State<DynSqlConsolePort>,
+    sql_port: &State<DynSqlConsolePort>,
+    mongo_port: &State<DynMongoConsolePort>,
 ) -> GraphQLResponse {
     let user_ctx: UserContext = user.into();
-    let sql_console_port = port.inner().clone();
     request
-        .data(sql_console_port)
+        .data(sql_port.inner().clone())
+        .data(mongo_port.inner().clone())
         .data(user_ctx)
         .execute(schema.inner())
         .await
