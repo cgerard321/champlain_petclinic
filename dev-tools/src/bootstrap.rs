@@ -117,11 +117,11 @@ pub fn build_sql_drivers_from_services() -> HashMap<&'static str, Arc<DynSqlDriv
     for (_name, svc) in SERVICES.iter() {
         let Some(db) = &svc.db else { continue };
 
-        if !matches!(db.db_type, DbType::MySql) {
+        if !matches!(db.db_type, DbType::Sql) {
             continue;
         }
 
-        let id = db.db_host; 
+        let id = db.db_host;
         if map.contains_key(id) {
             continue;
         }

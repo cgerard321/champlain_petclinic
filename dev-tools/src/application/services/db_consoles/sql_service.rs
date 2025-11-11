@@ -1,3 +1,4 @@
+use std::cmp::PartialEq;
 use crate::application::ports::input::sql_console_port::SqlConsolePort;
 use crate::application::ports::output::db_drivers::sql_driver::DynSqlDriver;
 use crate::application::services::db_consoles::projections::SqlResult;
@@ -9,6 +10,7 @@ use crate::shared::config::{ADMIN_ROLE_UUID, READER_ROLE_UUID};
 use crate::shared::error::{AppError, AppResult};
 use std::collections::HashMap;
 use std::sync::Arc;
+use crate::application::services::DbType;
 
 pub struct SqlConsoleService {
     drivers: HashMap<&'static str, Arc<DynSqlDriver>>, // key = db host (docker container name)
@@ -19,6 +21,7 @@ impl SqlConsoleService {
         Self { drivers }
     }
 }
+
 
 #[async_trait::async_trait]
 impl SqlConsolePort for SqlConsoleService {
@@ -42,6 +45,18 @@ impl SqlConsolePort for SqlConsoleService {
         if db_host.is_empty() {
             return Err(AppError::BadRequest(format!(
                 "Service '{}' has no associated database",
+                service
+            )));
+        }
+
+        let db = desc.db.as_ref().ok_or_else(|| {
+            log::info!("Service '{}' has no associated database", service);
+            AppError::BadRequest(format!("Service '{}' has no associated database", service))
+        })?;
+
+        if db.db_type != DbType::Sql {
+            return Err(AppError::BadRequest(format!(
+                "Service '{}' does not use a SQL database",
                 service
             )));
         }

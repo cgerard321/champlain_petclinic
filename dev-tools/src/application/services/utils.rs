@@ -43,7 +43,17 @@ pub struct DbDescriptor {
 #[derive(Debug)]
 pub enum DbType {
     Mongo,
-    MySql,
+    Sql,
+}
+
+impl PartialEq for DbType {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (DbType::Mongo, DbType::Mongo) => true,
+            (DbType::Sql, DbType::Sql) => true,
+            _ => false,
+        }
+    }
 }
 
 pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLock::new(|| {
@@ -87,7 +97,6 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
 
     // ======== Spring Boot (Mongo) ========
 
-    // visits-service-new -> mongo-visits
     map.insert(
         "visits",
         S {
@@ -104,7 +113,6 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
         },
     );
 
-    // inventory-service -> mongo-inventory
     map.insert(
         "inventory",
         S {
@@ -121,7 +129,6 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
         },
     );
 
-    // vet-service -> mongo-vet
     map.insert(
         "vet",
         S {
@@ -155,7 +162,6 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
         },
     );
 
-    // billing-service -> mongo-billing
     map.insert(
         "billing",
         S {
@@ -172,7 +178,6 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
         },
     );
 
-    // products-service -> mongo-products
     map.insert(
         "products",
         S {
@@ -189,7 +194,6 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
         },
     );
 
-    // cart-service -> mongo-carts
     map.insert(
         "cart",
         S {
@@ -208,7 +212,6 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
 
     // ======== Spring Boot (MySQL) ========
 
-    // auth-service -> mysql-auth / auth-db
     map.insert(
         "auth",
         S {
@@ -218,14 +221,13 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
                 db_password_env: "DB_PASSWORD",
                 db_host: "mysql-auth",
                 db_name: "auth-db",
-                db_type: MySql,
+                db_type: Sql,
             }),
             logs_role: Some(AUTH_SERVICE_DEV_ROLE),
             restart_role: Some(AUTH_SERVICE_DEV_ROLE),
         },
     );
 
-    // files-service -> mysql-files / files-db
     map.insert(
         "files",
         S {
@@ -235,7 +237,7 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
                 db_password_env: "DB_PASSWORD",
                 db_host: "mysql-files",
                 db_name: "files-db",
-                db_type: MySql,
+                db_type: Sql,
             }),
             logs_role: None,
             restart_role: None,
