@@ -28,50 +28,81 @@ impl MySqlDriver {
 impl SqlDriverPort for MySqlDriver {
     async fn execute_query(&self, sql: &str) -> AppResult<SqlResult> {
         log::info!("Executing query: {}", sql);
-        log::info!("Pool: {:?}", self.pool.connect_options());
-        log::info!("Pool: {:?}", self.pool);
-        let rows = sqlx::query(sql)
-            .fetch_all(&self.pool)
+
+        // We need to check if the query returns rows or not.
+        let describe = sqlx::query(sql)
+            .describe(&self.pool)
             .await
-            .map_err(|e| AppError::BadRequest(format!("Error executing query: {}", e)))?;
+            .map_err(|e| AppError::BadRequest(format!("Error describing query: {}", e)))?;
 
-        if rows.is_empty() {
-            return Ok(SqlResult {
-                columns: vec![],
-                rows: vec![],
-            });
-        }
+        let returns_rows = !describe.columns.is_empty();
 
-        let columns: Vec<String> = rows[0]
-            .columns()
-            .iter()
-            .map(|c| c.name().to_string())
-            .collect();
+        // If the query returns rows, we need to fetch them.
+        if returns_rows {
+            let rows = sqlx::query(sql)
+                .fetch_all(&self.pool)
+                .await
+                .map_err(|e| AppError::BadRequest(format!("Error executing query: {}", e)))?;
 
-        let mut row_data: Vec<Vec<String>> = vec![];
-
-        for row in &rows {
-            let mut row_values = Vec::new();
-
-            for (i, _) in row.columns().iter().enumerate() {
-                let value = cell_to_string(row, i);
-                row_values.push(value);
+            if rows.is_empty() {
+                return Ok(SqlResult {
+                    columns: vec![],
+                    rows: vec![],
+                    affected_rows: 0,
+                });
             }
 
-            row_data.push(row_values);
-        }
+            let columns: Vec<String> = rows[0]
+                .columns()
+                .iter()
+                .map(|c| c.name().to_string())
+                .collect();
 
-        log::info!("Columns: {:?}", columns);
-        Ok(SqlResult {
-            columns,
-            rows: row_data,
-        })
-    }
-}
+            let mut row_data: Vec<Vec<String>> = Vec::with_capacity(rows.len());
+
+            for row in &rows {
+                let mysql_row: &MySqlRow = row; // make type explicit for cell_to_string
+                let mut row_values = Vec::with_capacity(columns.len());
+
+                for i in 0..columns.len() {
+                    let value = cell_to_string(mysql_row, i);
+                    row_values.push(value);
+                }
+
+                row_data.push(row_values);
+            }
+
+            Ok(SqlResult {
+                columns,
+                rows: row_data,
+                affected_rows: rows.len() as i64,
+            })
+        } else {
+            // If the query doesn't return rows, we need to execute it.
+            let result = sqlx::query(sql)
+                .execute(&self.pool)
+                .await
+                .map_err(|e| AppError::BadRequest(format!("Error executing statement: {}", e)))?;
+
+            let affected = result.rows_affected() as i64;
+            let last_id = result.last_insert_id();
+
+            log::info!("Affected rows: {}", affected);
+            log::info!("Last insert ID: {}", last_id);
+
+            Ok(SqlResult {
+                columns: vec![],
+                rows: vec![vec![
+                    format!("affected_rows: {}", affected),
+                    format!("last_insert_id: {}", last_id),
+                ]],
+                affected_rows: affected,
+            })
+        }
+    }}
 
 /// Try to render any cell as a String (Handles NULL, Vec<u8>, Uuid, etc.)
 fn cell_to_string(row: &MySqlRow, idx: usize) -> String {
-    // 1) NULL (works for any type)
     if let Ok(v) = row.try_get::<Option<String>, _>(idx) {
         return if let Some(s) = v {
             s
