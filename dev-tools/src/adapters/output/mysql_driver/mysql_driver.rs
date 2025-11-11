@@ -1,4 +1,4 @@
-use crate::application::ports::output::db_drivers::sql_driver::SqlDriverPort;
+use crate::application::ports::output::db_drivers::mysql_driver::MySqlDriverPort;
 use crate::application::services::db_consoles::projections::SqlResult;
 use crate::shared::error::{AppError, AppResult};
 use async_trait::async_trait;
@@ -25,7 +25,7 @@ impl MySqlDriver {
 }
 
 #[async_trait]
-impl SqlDriverPort for MySqlDriver {
+impl MySqlDriverPort for MySqlDriver {
     async fn execute_query(&self, sql: &str) -> AppResult<SqlResult> {
         log::info!("Executing query: {}", sql);
 
@@ -76,7 +76,7 @@ impl SqlDriverPort for MySqlDriver {
     }
 }
 
-/// Render any cell as String (handles NULL, UUID, Vec<u8>, numbers, bool)
+/// Render any cell in a row as String (handles NULL, UUID, Vec<u8>, numbers, bool)
 fn cell_to_string(row: &MySqlRow, idx: usize) -> String {
     if let Ok(v) = row.try_get::<Option<String>, _>(idx) {
         return v.unwrap_or_else(|| "NULL".to_string());

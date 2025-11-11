@@ -1,8 +1,8 @@
 use crate::adapters::output::docker::client::BollardDockerAPI;
 use crate::adapters::output::minio::client::MinioStore;
-use crate::adapters::output::mysql::auth_repo::MySqlAuthRepo;
-use crate::adapters::output::mysql::users_repo::MySqlUsersRepo;
-use crate::adapters::output::sql_driver::sql_driver::MySqlDriver;
+use crate::adapters::output::mysql_repo::auth_repo::MySqlAuthRepo;
+use crate::adapters::output::mysql_repo::users_repo::MySqlUsersRepo;
+use crate::adapters::output::mysql_driver::mysql_driver::MySqlDriver;
 use crate::application::ports::input::auth_port::DynAuthPort;
 use crate::application::ports::input::docker_logs_port::DynDockerPort;
 use crate::application::ports::input::files_port::DynFilesPort;
@@ -10,7 +10,7 @@ use crate::application::ports::input::mongo_console_port::DynMongoConsolePort;
 use crate::application::ports::input::sql_console_port::{DynSqlConsolePort, SqlConsolePort};
 use crate::application::ports::input::user_port::DynUsersPort;
 use crate::application::ports::output::auth_repo_port::DynAuthRepo;
-use crate::application::ports::output::db_drivers::sql_driver::DynSqlDriver;
+use crate::application::ports::output::db_drivers::mysql_driver::DynMySqlDriver;
 use crate::application::ports::output::docker_api::DynDockerAPI;
 use crate::application::ports::output::file_storage_port::DynFileStorage;
 use crate::application::ports::output::user_repo_port::DynUsersRepo;
@@ -35,6 +35,8 @@ use sqlx::mysql::MySqlPoolOptions;
 use sqlx::MySqlPool;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
+use crate::adapters::output::mongo_driver::mongo_driver::MongoDriver;
+use crate::application::ports::output::db_drivers::mongo_driver::DynMongoDriver;
 
 pub fn stage() -> AdHoc {
     AdHoc::on_ignite("SQLx (MySQL)", |rocket| async move {
@@ -105,7 +107,9 @@ pub fn stage() -> AdHoc {
         let sql_console_port: DynSqlConsolePort = Arc::new(SqlConsoleService::new(drivers));
 
         // Mongo Console
-        let mongo_console_port: DynMongoConsolePort = Arc::new(MongoConsoleService::new());
+        let mongo_drivers = build_mongo_drivers_from_services();
+
+        let mongo_console_port: DynMongoConsolePort = Arc::new(MongoConsoleService::new(mongo_drivers));
 
         rocket
             .manage(auth_port)
@@ -117,7 +121,46 @@ pub fn stage() -> AdHoc {
     })
 }
 
-pub fn build_sql_drivers_from_services() -> HashMap<&'static str, Arc<DynSqlDriver>> {
+pub fn build_mongo_drivers_from_services() -> HashMap<&'static str, Arc<DynMongoDriver>> {
+    let mut map = HashMap::new();
+
+    for (_name, svc) in SERVICES.iter() {
+        let Some(db) = &svc.db else { continue };
+
+        if !matches!(db.db_type, DbType::Mongo) {
+            continue;
+        }
+
+        let id = db.db_host;
+
+        if map.contains_key(id) {
+            continue;
+        }
+
+        let user = std::env::var(db.db_user_env)
+            .unwrap_or_else(|_| panic!("Missing env {}", db.db_user_env));
+        let pass = std::env::var(db.db_password_env)
+            .unwrap_or_else(|_| panic!("Missing env {}", db.db_password_env));
+
+        let uri = format!(
+            "mongodb://{}:{}@{}:{}/{}",
+            user,
+            pass,
+            db.db_host,
+            27017, // For now we will use the default port, maybe later we will add a configurable port
+            db.db_name
+        );
+
+        let driver = MongoDriver::new(&uri);
+
+        map.insert(id, Arc::new(driver) as Arc<DynMongoDriver>);
+    }
+
+    map
+}
+
+
+pub fn build_sql_drivers_from_services() -> HashMap<&'static str, Arc<DynMySqlDriver>> {
     let mut map = HashMap::new();
 
     for (_name, svc) in SERVICES.iter() {
@@ -138,12 +181,12 @@ pub fn build_sql_drivers_from_services() -> HashMap<&'static str, Arc<DynSqlDriv
             .unwrap_or_else(|_| panic!("Missing env {}", db.db_password_env));
 
         let url = format!(
-            "mysql://{}:{}@{}:3306/{}",
+            "mysql_repo://{}:{}@{}:3306/{}",
             user, pass, db.db_host, db.db_name
         );
 
         let driver = MySqlDriver::new(&url);
-        map.insert(id, Arc::new(driver) as Arc<DynSqlDriver>);
+        map.insert(id, Arc::new(driver) as Arc<DynMySqlDriver>);
     }
 
     map

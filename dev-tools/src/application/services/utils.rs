@@ -219,7 +219,7 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
             db: Some(D {
                 db_user_env: "DB_USER",
                 db_password_env: "DB_PASSWORD",
-                db_host: "mysql-auth",
+                db_host: "mysql_repo-auth",
                 db_name: "auth-db",
                 db_type: Sql,
             }),
@@ -235,7 +235,7 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
             db: Some(D {
                 db_user_env: "DB_USER",
                 db_password_env: "DB_PASSWORD",
-                db_host: "mysql-files",
+                db_host: "mysql_repo-files",
                 db_name: "files-db",
                 db_type: Sql,
             }),

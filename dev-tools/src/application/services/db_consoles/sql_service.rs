@@ -1,5 +1,5 @@
 use crate::application::ports::input::sql_console_port::SqlConsolePort;
-use crate::application::ports::output::db_drivers::sql_driver::DynSqlDriver;
+use crate::application::ports::output::db_drivers::mysql_driver::DynMySqlDriver;
 use crate::application::services::db_consoles::projections::SqlResult;
 use crate::application::services::user_context::{
     require_all, require_any, verify_service_or_admin_perms, UserContext,
@@ -13,11 +13,11 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 pub struct SqlConsoleService {
-    drivers: HashMap<&'static str, Arc<DynSqlDriver>>, // key = db host (docker container name)
+    drivers: HashMap<&'static str, Arc<DynMySqlDriver>>, // key = db host (docker container name)
 }
 
 impl SqlConsoleService {
-    pub fn new(drivers: HashMap<&'static str, Arc<DynSqlDriver>>) -> Self {
+    pub fn new(drivers: HashMap<&'static str, Arc<DynMySqlDriver>>) -> Self {
         Self { drivers }
     }
 }

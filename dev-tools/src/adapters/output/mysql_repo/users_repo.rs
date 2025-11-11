@@ -4,9 +4,9 @@ use std::sync::Arc;
 use uuid::fmt::Hyphenated;
 use uuid::Uuid;
 
-use crate::adapters::output::mysql::error::map_sqlx_err;
-use crate::adapters::output::mysql::model::role::Role;
-use crate::adapters::output::mysql::model::user::User;
+use crate::adapters::output::mysql_repo::error::map_sqlx_err;
+use crate::adapters::output::mysql_repo::model::role::Role;
+use crate::adapters::output::mysql_repo::model::user::User;
 use crate::application::ports::output::user_repo_port::UsersRepoPort;
 use crate::application::services::auth::projections::AuthProjection;
 use crate::domain::entities::user::{RoleEntity, UserEntity};

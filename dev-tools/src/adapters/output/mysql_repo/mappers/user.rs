@@ -1,4 +1,4 @@
-use crate::adapters::output::mysql::model::user::User;
+use crate::adapters::output::mysql_repo::model::user::User;
 use crate::application::services::auth::projections::AuthProjection;
 use crate::domain::entities::user::UserEntity;
 use crate::shared::error::AppError;
