@@ -6,7 +6,7 @@ use crate::adapters::output::sql_driver::sql_driver::MySqlDriver;
 use crate::application::ports::input::auth_port::DynAuthPort;
 use crate::application::ports::input::docker_logs_port::DynDockerPort;
 use crate::application::ports::input::files_port::DynFilesPort;
-use crate::application::ports::input::sql_console_port::SqlConsolePort;
+use crate::application::ports::input::sql_console_port::{DynSqlConsolePort, SqlConsolePort};
 use crate::application::ports::input::user_port::DynUsersPort;
 use crate::application::ports::output::auth_repo_port::DynAuthRepo;
 use crate::application::ports::output::db_drivers::sql_driver::DynSqlDriver;
@@ -100,7 +100,7 @@ pub fn stage() -> AdHoc {
         // SQL Console
         let drivers = build_sql_drivers_from_services();
 
-        let sql_console_port: Arc<dyn SqlConsolePort> = Arc::new(SqlConsoleService::new(drivers));
+        let sql_console_port: DynSqlConsolePort = Arc::new(SqlConsoleService::new(drivers));
 
         rocket
             .manage(auth_port)

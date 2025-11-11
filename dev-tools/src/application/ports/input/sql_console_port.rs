@@ -1,3 +1,4 @@
+use crate::application::ports::input::files_port::FilesPort;
 use crate::application::services::db_consoles::projections::SqlResult;
 use crate::application::services::user_context::UserContext;
 use crate::shared::error::AppResult;
@@ -11,3 +12,6 @@ pub trait SqlConsolePort: Send + Sync {
         sql: String,
     ) -> AppResult<SqlResult>;
 }
+
+pub type DynSqlConsolePort = std::sync::Arc<dyn SqlConsolePort>;
+
