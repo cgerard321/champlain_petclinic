@@ -39,7 +39,7 @@ impl MongoConsolePort for MongoConsoleService {
         &self,
         user_ctx: &UserContext,
         service: String,
-        mongo_query: String,
+        mongo_command: String,
     ) -> AppResult<MongoResult> {
         let desc = resolve_descriptor_by_container(&service).ok_or_else(|| {
             log::info!("Unknown container '{}'", service);
@@ -64,18 +64,6 @@ impl MongoConsolePort for MongoConsoleService {
             )));
         }
 
-        let payload: MongoQueryPayload = serde_json::from_str(&mongo_query).map_err(|e| {
-            AppError::BadRequest(format!("Invalid mongoQuery JSON: {}", e))
-        })?;
-
-        let filter_doc = if payload.filter.is_null() {
-            Document::new()
-        } else {
-            bson::to_document(&payload.filter).map_err(|e| {
-                AppError::BadRequest(format!("Invalid filter BSON: {}", e))
-            })?
-        };
-
         // Build MongoDB URI from descriptor
         let username = std::env::var(db.db_user_env)
             .map_err(|_| AppError::Internal)?;
@@ -99,40 +87,44 @@ impl MongoConsolePort for MongoConsoleService {
         log::info!("Connected to Mongo");
 
         let db_handle = client.database(db.db_name);
-        let coll = db_handle.collection::<Document>(&payload.collection);
 
         log::info!("Executing query");
 
-        let mut cursor = coll
-            .find(filter_doc)
+        let json: Value = serde_json::from_str(&mongo_command).map_err(|e| {
+            AppError::BadRequest(format!("Invalid Mongo command JSON: {}", e))
+        })?;
+
+        let command_doc: Document = bson::to_document(&json).map_err(|e| {
+            AppError::BadRequest(format!("Invalid Mongo command BSON: {}", e))
+        })?;
+
+        let res: Document = db_handle
+            .run_command(command_doc)
             .await
             .map_err(|e| {
-                log::info!("Query execution failed: {}", e);
+                log::info!("Mongo command failed: {}", e);
                 AppError::Internal
             })?;
 
-        log::info!("Query executed");
+        log::info!("Mongo command executed successfully");
+
+        let collection = res["cursor"]["firstBatch"].as_array().ok_or_else(|| {
+            AppError::BadRequest(format!("Invalid Mongo response: {}", res))
+        })?;
 
         let mut docs = Vec::new();
-        while let Some(doc) = cursor
-            .try_next()
-            .await
-            .map_err(|e| AppError::Internal)?
-        {
-            let json_val = bson::to_bson(&doc)
-                .map_err(|e| AppError::Internal)?;
-            let json_val = bson_to_serde_json(json_val)?;
-            docs.push(json_val);
+        for doc in collection {
+            let doc = doc.as_document().ok_or_else(|| {
+                AppError::BadRequest(format!("Invalid Mongo response: {}", res))
+            })?;
+
+            docs.push(bson_to_serde_json(bson::Bson::Document(doc.clone()))?);
         }
 
-        let count = docs.len() as i64;
-
-        log::info!("Query returned {} documents", count);
-
         Ok(MongoResult {
-            collection: payload.collection,
+            collection: "test".to_string(),
             documents: docs,
-            count,
+            count: 0,
         })
     }
 }
