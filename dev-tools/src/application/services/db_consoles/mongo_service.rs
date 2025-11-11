@@ -122,7 +122,10 @@ impl MongoConsolePort for MongoConsoleService {
         }
 
         Ok(MongoResult {
-            collection: "test".to_string(),
+            collection: res["ns"]
+                .as_str()
+                .unwrap_or_default()
+                .to_string(),
             documents: docs,
             count: 0,
         })
