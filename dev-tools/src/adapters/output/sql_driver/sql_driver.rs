@@ -24,7 +24,7 @@ impl MySqlDriver {
 impl SqlDriverPort for MySqlDriver {
     async fn execute_query(&self, sql: &str) -> AppResult<SqlResult> {
         log::info!("Executing query: {}", sql);
-        log::info!("Pool: {:?}", self.pool);
+        log::info!("Pool: {:?}", self.pool.connect_options());
         let rows = sqlx::query(sql)
             .fetch_all(&self.pool)
             .await
