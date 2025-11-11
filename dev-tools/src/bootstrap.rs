@@ -121,8 +121,7 @@ pub fn build_sql_drivers_from_services() -> HashMap<&'static str, Arc<DynSqlDriv
             continue;
         }
 
-        let id = db.db_host; // key by db host / container name
-
+        let id = db.db_host; 
         if map.contains_key(id) {
             continue;
         }
