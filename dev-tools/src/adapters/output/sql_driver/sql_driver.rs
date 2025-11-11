@@ -58,7 +58,7 @@ impl SqlDriverPort for MySqlDriver {
                     log::info!("Error getting value: {}", e);
                     AppError::BadRequest(format!("Error getting value: {}", e))
                 });
-                log::info!("Value: {:?}", value);
+                log::info!("Value: {:?}", value.is_ok());
 
             }
         }
