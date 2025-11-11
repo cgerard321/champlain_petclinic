@@ -51,24 +51,31 @@ impl SqlDriverPort for MySqlDriver {
         let mut row_data: Vec<Vec<String>> = vec![];
 
         for row in &rows {
-            log::info!("Row: {:?}", row);
-            for (i, col) in row.columns().iter().enumerate() {
-                log::info!("Column: {:?}", col);
-                let value = row.try_get_raw(i).map_err(|e| {
-                    log::info!("Error getting value: {}", e);
-                    AppError::BadRequest(format!("Error getting value: {}", e))
-                });
-                log::info!("Value: {:?}", value.is_ok());
-                let value = value?;
-                log::info!("Value: {:?}", value);
-                let value = value.to_string();
-                log::info!("Value: {:?}", value);
-                data.push(value);
+            let mut row_values = Vec::new();
 
+            for (i, col) in row.columns().iter().enumerate() {
+                let value: Result<String, _> = row.try_get(i);
+                log::info!("Getting value");
+
+                let value_str = match value {
+                    Ok(v) => v,
+                    Err(_) => {
+                        log::info!("Getting value as string");
+                        match row.try_get::<Option<String>, _>(i) {
+                            Ok(Some(v)) => v,
+                            _ => "NULL".to_string(),
+                        }
+                    }
+                };
+
+                log::info!("Value: {}", value_str);
+
+                row_values.push(value_str);
             }
+
+            row_data.push(row_values);
         }
 
-        row_data.push(data);
 
         log::info!("Columns: {:?}", columns);
         Ok(SqlResult {
