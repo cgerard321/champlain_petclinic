@@ -83,7 +83,7 @@ impl MongoConsolePort for MongoConsoleService {
             .map_err(|_| AppError::Internal)?;
 
         let uri = format!(
-            "mongodb://{}:{}@{}:27017/{}",
+            "mongodb://{}:{}@{}:27017/{}?authSource=admin",
             username, password, db.db_host, db.db_name
         );
 
