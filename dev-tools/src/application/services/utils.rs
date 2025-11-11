@@ -170,7 +170,7 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
                 db_user_env: "DB_USER",
                 db_password_env: "DB_PASSWORD",
                 db_host: "mongo-billing",
-                db_name: "billing",
+                db_name: "billings",
                 db_type: Mongo,
             }),
             logs_role: Some(BILLING_SERVICE_DEV_ROLE),
