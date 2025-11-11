@@ -1,9 +1,10 @@
+use std::str::FromStr;
 use crate::application::ports::output::db_drivers::sql_driver::SqlDriverPort;
 use crate::application::services::db_consoles::projections::SqlResult;
 use crate::shared::error::{AppError, AppResult};
 use async_trait::async_trait;
 use log::log;
-use sqlx::mysql::MySqlPoolOptions;
+use sqlx::mysql::{MySqlConnectOptions, MySqlPoolOptions, MySqlSslMode};
 use sqlx::{Column, MySqlPool, Row};
 
 pub struct MySqlDriver {
@@ -12,10 +13,13 @@ pub struct MySqlDriver {
 
 impl MySqlDriver {
     pub fn new(url: &str) -> Self {
-        let pool = MySqlPoolOptions::new()
-            .max_connections(5)
-            .connect_lazy(url)
+        let mut options = MySqlConnectOptions::from_str(url)
             .expect("Invalid MySQL URL");
+
+        options = options.ssl_mode(MySqlSslMode::Disabled);
+
+        let pool = MySqlPool::connect_lazy_with(options);
+
         Self { pool }
     }
 }
