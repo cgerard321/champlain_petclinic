@@ -1,4 +1,3 @@
-use std::str::FromStr;
 use crate::application::ports::output::db_drivers::sql_driver::SqlDriverPort;
 use crate::application::services::db_consoles::projections::SqlResult;
 use crate::shared::error::{AppError, AppResult};
@@ -6,6 +5,7 @@ use async_trait::async_trait;
 use log::log;
 use sqlx::mysql::{MySqlConnectOptions, MySqlPoolOptions, MySqlSslMode};
 use sqlx::{Column, MySqlPool, Row};
+use std::str::FromStr;
 
 pub struct MySqlDriver {
     pool: MySqlPool,
@@ -13,8 +13,7 @@ pub struct MySqlDriver {
 
 impl MySqlDriver {
     pub fn new(url: &str) -> Self {
-        let mut options = MySqlConnectOptions::from_str(url)
-            .expect("Invalid MySQL URL");
+        let mut options = MySqlConnectOptions::from_str(url).expect("Invalid MySQL URL");
 
         options = options.ssl_mode(MySqlSslMode::Disabled);
 
@@ -48,10 +47,14 @@ impl SqlDriverPort for MySqlDriver {
             .map(|c| c.name().to_string())
             .collect();
 
+        let rows: Vec<Vec<String>> = rows
+            .iter()
+            .map(|row| row.iter().map(|c| c.to_string()).collect());
+
         log::info!("Columns: {:?}", columns);
         Ok(SqlResult {
             columns,
-            rows: Default::default(),
+            rows,
         })
     }
 }
