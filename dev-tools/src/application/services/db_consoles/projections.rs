@@ -9,6 +9,6 @@ pub struct SqlResult {
 
 #[derive(Debug)]
 pub struct MongoResult {
-    pub documents: Vec<Value>,
-    pub count: i64,
+    pub bson: Vec<Value>,
+    pub affected_count: i64,
 }

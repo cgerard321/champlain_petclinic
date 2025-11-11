@@ -122,8 +122,8 @@ impl MongoConsolePort for MongoConsoleService {
                 let len = docs.len();
 
                 return Ok(MongoResult {
-                    documents: docs,
-                    count: len as i64,
+                    bson: docs,
+                    affected_count: len as i64,
                 });
             }
         }
@@ -142,20 +142,12 @@ impl MongoConsolePort for MongoConsoleService {
             affected = affected.max(dc);
         }
 
-        if affected > 0 {
-            return Ok(MongoResult {
-                documents: vec![],
-                count: affected,
-            });
-        }
-
-        // Otherwise, return the whole response as a single document
-        // This is when we do findOne() or findOneAndDelete() (Also a fallback)
+        // We return a single document, this will include the mongo response
         let single = bson_to_serde_json(Bson::Document(res))?;
 
         Ok(MongoResult {
-            documents: vec![single],
-            count: 1,
+            bson: vec![single],
+            affected_count: affected,
         })
     }
 }

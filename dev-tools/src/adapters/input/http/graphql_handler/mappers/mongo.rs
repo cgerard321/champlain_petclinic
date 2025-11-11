@@ -5,8 +5,8 @@ use async_graphql::Json;
 impl From<MongoResult> for MongoResultResponseContract {
     fn from(src: MongoResult) -> Self {
         MongoResultResponseContract {
-            documents: src.documents.into_iter().map(Json).collect(),
-            count: src.count,
+            bson: src.bson.into_iter().map(Json).collect(),
+            affected_count: src.affected_count,
         }
     }
 }
