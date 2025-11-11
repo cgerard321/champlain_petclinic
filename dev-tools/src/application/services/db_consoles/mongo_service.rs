@@ -1,5 +1,6 @@
-use std::collections::HashMap;
 use crate::application::ports::input::mongo_console_port::MongoConsolePort;
+use crate::application::ports::output::db_drivers::mongo_driver::DynMongoDriver;
+use crate::application::ports::output::db_drivers::mysql_driver::DynMySqlDriver;
 use crate::application::services::db_consoles::projections::MongoResult;
 use crate::application::services::user_context::{
     verify_service_or_admin_perms, UserContext,
@@ -14,9 +15,8 @@ use mongodb::{bson::{self, doc, Document}, options::FindOptions, Client};
 use rocket::form::FromForm;
 use serde::Deserialize;
 use serde_json::Value;
+use std::collections::HashMap;
 use std::sync::Arc;
-use crate::application::ports::output::db_drivers::mongo_driver::DynMongoDriver;
-use crate::application::ports::output::db_drivers::mysql_driver::DynMySqlDriver;
 
 pub struct MongoConsoleService {
     drivers: HashMap<&'static str, Arc<DynMongoDriver>>, // key = db host (docker container name)

@@ -1,8 +1,9 @@
 use crate::adapters::output::docker::client::BollardDockerAPI;
 use crate::adapters::output::minio::client::MinioStore;
+use crate::adapters::output::mongo_driver::mongo_driver::MongoDriver;
+use crate::adapters::output::mysql_driver::mysql_driver::MySqlDriver;
 use crate::adapters::output::mysql_repo::auth_repo::MySqlAuthRepo;
 use crate::adapters::output::mysql_repo::users_repo::MySqlUsersRepo;
-use crate::adapters::output::mysql_driver::mysql_driver::MySqlDriver;
 use crate::application::ports::input::auth_port::DynAuthPort;
 use crate::application::ports::input::docker_logs_port::DynDockerPort;
 use crate::application::ports::input::files_port::DynFilesPort;
@@ -10,6 +11,7 @@ use crate::application::ports::input::mongo_console_port::DynMongoConsolePort;
 use crate::application::ports::input::sql_console_port::{DynSqlConsolePort, SqlConsolePort};
 use crate::application::ports::input::user_port::DynUsersPort;
 use crate::application::ports::output::auth_repo_port::DynAuthRepo;
+use crate::application::ports::output::db_drivers::mongo_driver::DynMongoDriver;
 use crate::application::ports::output::db_drivers::mysql_driver::DynMySqlDriver;
 use crate::application::ports::output::docker_api::DynDockerAPI;
 use crate::application::ports::output::file_storage_port::DynFileStorage;
@@ -35,8 +37,6 @@ use sqlx::mysql::MySqlPoolOptions;
 use sqlx::MySqlPool;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
-use crate::adapters::output::mongo_driver::mongo_driver::MongoDriver;
-use crate::application::ports::output::db_drivers::mongo_driver::DynMongoDriver;
 
 pub fn stage() -> AdHoc {
     AdHoc::on_ignite("SQLx (MySQL)", |rocket| async move {
