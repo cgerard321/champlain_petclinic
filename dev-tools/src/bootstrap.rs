@@ -181,7 +181,7 @@ pub fn build_sql_drivers_from_services() -> HashMap<&'static str, Arc<DynMySqlDr
             .unwrap_or_else(|_| panic!("Missing env {}", db.db_password_env));
 
         let url = format!(
-            "mysql_repo://{}:{}@{}:3306/{}",
+            "mysql://{}:{}@{}/{}",
             user, pass, db.db_host, db.db_name
         );
 
