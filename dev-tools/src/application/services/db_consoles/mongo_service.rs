@@ -8,12 +8,12 @@ use crate::application::services::DbType;
 use crate::shared::error::{AppError, AppResult};
 use async_trait::async_trait;
 use futures::TryStreamExt;
+use mongodb::bson::Bson;
 use mongodb::{bson::{self, doc, Document}, options::FindOptions, Client};
 use rocket::form::FromForm;
 use serde::Deserialize;
 use serde_json::Value;
 use std::sync::Arc;
-use mongodb::bson::Bson;
 
 pub struct MongoConsoleService {}
 
@@ -21,8 +21,6 @@ impl MongoConsoleService {
     pub fn new() -> Self {
         Self {}
     }
-
-
 }
 
 #[derive(Debug, Deserialize)]
@@ -151,7 +149,7 @@ impl MongoConsolePort for MongoConsoleService {
         }
 
         // We return a single document, this will include the mongo response
-        
+
         let single = bson_to_serde_json(Bson::Document(res))?;
 
         Ok(MongoResult {

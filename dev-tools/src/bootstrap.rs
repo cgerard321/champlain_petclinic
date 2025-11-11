@@ -184,20 +184,20 @@ async fn add_default_roles(pool: &MySqlPool) -> Result<(), sqlx::Error> {
         (?, 'BILLING_SERVICE_DEV',    'Billing Service Dev');
     "#,
     )
-    .bind(&sudo)
-    .bind(&admin)
-    .bind(&reader)
-    .bind(&editor)
-    .bind(&auth_service_dev)
-    .bind(&vet_service_dev)
-    .bind(&visits_service_dev)
-    .bind(&customers_service_dev)
-    .bind(&products_service_dev)
-    .bind(&cart_service_dev)
-    .bind(&inventory_service_dev)
-    .bind(&billing_service_dev)
-    .execute(pool)
-    .await?;
+        .bind(&sudo)
+        .bind(&admin)
+        .bind(&reader)
+        .bind(&editor)
+        .bind(&auth_service_dev)
+        .bind(&vet_service_dev)
+        .bind(&visits_service_dev)
+        .bind(&customers_service_dev)
+        .bind(&products_service_dev)
+        .bind(&cart_service_dev)
+        .bind(&inventory_service_dev)
+        .bind(&billing_service_dev)
+        .execute(pool)
+        .await?;
     Ok(())
 }
 
