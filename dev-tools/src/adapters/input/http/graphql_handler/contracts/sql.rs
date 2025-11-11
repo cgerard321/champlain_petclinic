@@ -1,6 +1,6 @@
 use async_graphql::SimpleObject;
 
-#[derive(Debug, SimpleObject)]
+#[derive(Debug, SimpleObject, Clone)]
 pub struct SqlResultResponseContract {
     pub columns: Vec<String>,
     pub rows: Vec<Vec<String>>,
