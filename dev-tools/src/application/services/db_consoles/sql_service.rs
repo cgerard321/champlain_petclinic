@@ -51,7 +51,7 @@ impl SqlConsolePort for SqlConsoleService {
             .get(db_host)
             .ok_or_else(|| AppError::BadRequest(format!("Unknown container '{}'", service)))?;
 
-        log::info!("Using driver: {:?}", driver);
+        log::info!("Using driver for db host: {}", db_host);
         driver.execute_query(&sql).await
     }
 }
