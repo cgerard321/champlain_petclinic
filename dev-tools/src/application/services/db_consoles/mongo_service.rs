@@ -1,10 +1,3 @@
-use async_trait::async_trait;
-use futures::TryStreamExt;
-use mongodb::{bson::{self, doc, Document}, options::FindOptions, Client};
-use serde::Deserialize;
-use std::sync::Arc;
-use rocket::form::FromForm;
-use serde_json::Value;
 use crate::application::ports::input::mongo_console_port::MongoConsolePort;
 use crate::application::services::db_consoles::projections::MongoResult;
 use crate::application::services::user_context::{
@@ -13,6 +6,13 @@ use crate::application::services::user_context::{
 use crate::application::services::utils::resolve_descriptor_by_container;
 use crate::application::services::DbType;
 use crate::shared::error::{AppError, AppResult};
+use async_trait::async_trait;
+use futures::TryStreamExt;
+use mongodb::{bson::{self, doc, Document}, options::FindOptions, Client};
+use rocket::form::FromForm;
+use serde::Deserialize;
+use serde_json::Value;
+use std::sync::Arc;
 
 pub struct MongoConsoleService;
 

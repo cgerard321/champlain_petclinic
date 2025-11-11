@@ -8,5 +8,5 @@ impl From<SqlResult> for SqlResultResponseContract {
             rows: sql_result.rows,
             affected_rows: sql_result.affected_rows,
         }
-    }   
+    }
 }

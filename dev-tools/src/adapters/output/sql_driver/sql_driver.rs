@@ -2,12 +2,12 @@ use crate::application::ports::output::db_drivers::sql_driver::SqlDriverPort;
 use crate::application::services::db_consoles::projections::SqlResult;
 use crate::shared::error::{AppError, AppResult};
 use async_trait::async_trait;
+use futures::StreamExt;
 use log::log;
 use sqlx::mysql::{MySqlConnectOptions, MySqlPool, MySqlRow, MySqlSslMode};
 use sqlx::{Column, Either, Row};
 use std::str::FromStr;
 use uuid::Uuid;
-use futures::StreamExt;
 
 pub struct MySqlDriver {
     pool: MySqlPool,

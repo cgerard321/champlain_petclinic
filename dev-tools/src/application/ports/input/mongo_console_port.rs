@@ -1,5 +1,4 @@
-use crate::application::ports::input::files_port::FilesPort;
-use crate::application::services::db_consoles::projections::{MongoResult, SqlResult};
+use crate::application::services::db_consoles::projections::MongoResult;
 use crate::application::services::user_context::UserContext;
 use crate::shared::error::AppResult;
 
