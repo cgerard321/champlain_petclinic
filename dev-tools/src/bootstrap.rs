@@ -105,7 +105,7 @@ pub fn stage() -> AdHoc {
         let sql_console_port: DynSqlConsolePort = Arc::new(SqlConsoleService::new(drivers));
 
         // Mongo Console
-        let mongo_console_port: DynMongoConsolePort = MongoConsoleService::new();
+        let mongo_console_port: DynMongoConsolePort = Arc::new(MongoConsoleService::new());
 
         rocket
             .manage(auth_port)

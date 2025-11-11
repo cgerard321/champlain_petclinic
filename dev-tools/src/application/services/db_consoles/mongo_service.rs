@@ -17,9 +17,11 @@ use std::sync::Arc;
 pub struct MongoConsoleService {}
 
 impl MongoConsoleService {
-    pub fn new() -> Arc<Self> {
-        Arc::new(Self)
+    pub fn new() -> Self {
+        Self {}
     }
+
+
 }
 
 #[derive(Debug, Deserialize)]
