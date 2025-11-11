@@ -106,7 +106,10 @@ impl MongoConsolePort for MongoConsoleService {
         let mut cursor = coll
             .find(filter_doc)
             .await
-            .map_err(|e| AppError::Internal)?;
+            .map_err(|e| {
+                log::info!("Query execution failed: {}", e);
+                AppError::Internal
+            })?;
 
         log::info!("Query executed");
 
