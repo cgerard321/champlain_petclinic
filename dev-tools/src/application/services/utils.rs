@@ -36,6 +36,7 @@ pub struct DbDescriptor {
     pub db_user_env: &'static str,
     pub db_password_env: &'static str,
     pub db_host: &'static str,
+    pub db_name: &'static str,
     pub db_type: DbType,
 }
 
@@ -55,16 +56,17 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
     // ======== Frontends (no DBs) ========
     map.insert(
         "petclinic-portal",
-        ServiceDescriptor {
+        S {
             docker_service: "petclinic-frontend",
             db: None,
             logs_role: None,
             restart_role: None,
         },
     );
+
     map.insert(
         "employee-portal",
-        ServiceDescriptor {
+        S {
             docker_service: "employee-frontend",
             db: None,
             logs_role: None,
@@ -75,7 +77,7 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
     // ======== API Gateway (no DBs) ========
     map.insert(
         "api-gateway",
-        ServiceDescriptor {
+        S {
             docker_service: "api-gateway",
             db: None,
             logs_role: None,
@@ -84,14 +86,17 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
     );
 
     // ======== Spring Boot (Mongo) ========
+
+    // visits-service-new -> mongo-visits
     map.insert(
         "visits",
-        ServiceDescriptor {
+        S {
             docker_service: "visits-service-new",
             db: Some(D {
                 db_user_env: "DB_USER",
                 db_password_env: "DB_PASSWORD",
                 db_host: "mongo-visits",
+                db_name: "visits-db",
                 db_type: Mongo,
             }),
             logs_role: Some(VISITS_SERVICE_DEV_ROLE),
@@ -99,14 +104,16 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
         },
     );
 
+    // inventory-service -> mongo-inventory
     map.insert(
         "inventory",
-        ServiceDescriptor {
+        S {
             docker_service: "inventory-service",
             db: Some(D {
                 db_user_env: "DB_USER",
                 db_password_env: "DB_PASSWORD",
                 db_host: "mongo-inventory",
+                db_name: "inventory-db",
                 db_type: Mongo,
             }),
             logs_role: Some(INVENTORY_SERVICE_DEV_ROLE),
@@ -114,14 +121,16 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
         },
     );
 
+    // vet-service -> mongo-vet
     map.insert(
         "vet",
-        ServiceDescriptor {
+        S {
             docker_service: "vet-service",
             db: Some(D {
                 db_user_env: "DB_USER",
                 db_password_env: "DB_PASSWORD",
                 db_host: "mongo-vet",
+                db_name: "vet-db",
                 db_type: Mongo,
             }),
             logs_role: Some(VET_SERVICE_DEV_ROLE),
@@ -129,14 +138,16 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
         },
     );
 
+    // customers-service-reactive -> mongo-customers
     map.insert(
         "customers",
-        ServiceDescriptor {
+        S {
             docker_service: "customers-service-reactive",
             db: Some(D {
                 db_user_env: "DB_USER",
                 db_password_env: "DB_PASSWORD",
                 db_host: "mongo-customers",
+                db_name: "customers-db",
                 db_type: Mongo,
             }),
             logs_role: Some(CUSTOMERS_SERVICE_DEV_ROLE),
@@ -144,14 +155,16 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
         },
     );
 
+    // billing-service -> mongo-billing
     map.insert(
         "billing",
-        ServiceDescriptor {
+        S {
             docker_service: "billing-service",
             db: Some(D {
                 db_user_env: "DB_USER",
                 db_password_env: "DB_PASSWORD",
                 db_host: "mongo-billing",
+                db_name: "billing-db",
                 db_type: Mongo,
             }),
             logs_role: Some(BILLING_SERVICE_DEV_ROLE),
@@ -159,6 +172,7 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
         },
     );
 
+    // products-service -> mongo-products
     map.insert(
         "products",
         S {
@@ -167,6 +181,7 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
                 db_user_env: "DB_USER",
                 db_password_env: "DB_PASSWORD",
                 db_host: "mongo-products",
+                db_name: "products-db",
                 db_type: Mongo,
             }),
             logs_role: Some(PRODUCTS_SERVICE_DEV_ROLE),
@@ -174,14 +189,16 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
         },
     );
 
+    // cart-service -> mongo-carts
     map.insert(
         "cart",
-        ServiceDescriptor {
+        S {
             docker_service: "cart-service",
             db: Some(D {
                 db_user_env: "DB_USER",
                 db_password_env: "DB_PASSWORD",
                 db_host: "mongo-carts",
+                db_name: "cart-db",
                 db_type: Mongo,
             }),
             logs_role: Some(CART_SERVICE_DEV_ROLE),
@@ -190,14 +207,17 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
     );
 
     // ======== Spring Boot (MySQL) ========
+
+    // auth-service -> mysql-auth / auth-db
     map.insert(
         "auth",
-        ServiceDescriptor {
+        S {
             docker_service: "auth-service",
             db: Some(D {
                 db_user_env: "DB_USER",
                 db_password_env: "DB_PASSWORD",
                 db_host: "mysql-auth",
+                db_name: "auth-db",
                 db_type: MySql,
             }),
             logs_role: Some(AUTH_SERVICE_DEV_ROLE),
@@ -205,14 +225,16 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
         },
     );
 
+    // files-service -> mysql-files / files-db
     map.insert(
         "files",
-        ServiceDescriptor {
+        S {
             docker_service: "files-service",
             db: Some(D {
                 db_user_env: "DB_USER",
                 db_password_env: "DB_PASSWORD",
                 db_host: "mysql-files",
+                db_name: "files-db",
                 db_type: MySql,
             }),
             logs_role: None,
@@ -221,9 +243,10 @@ pub static SERVICES: LazyLock<HashMap<&'static str, ServiceDescriptor>> = LazyLo
     );
 
     // ======== Go / Utility Services (no DBs) ========
+
     map.insert(
         "mailer",
-        ServiceDescriptor {
+        S {
             docker_service: "mailer-service",
             db: None,
             logs_role: None,
