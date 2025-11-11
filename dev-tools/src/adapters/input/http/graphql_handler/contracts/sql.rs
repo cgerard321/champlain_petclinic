@@ -1,6 +1,6 @@
-use rocket::serde::{Deserialize, Serialize};
+use async_graphql::SimpleObject;
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, SimpleObject)]
 pub struct SqlResultResponseContract {
     pub columns: Vec<String>,
     pub rows: Vec<Vec<String>>,
