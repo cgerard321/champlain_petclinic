@@ -28,7 +28,7 @@ impl DockerPort for DockerService {
         &self,
         view_logs_params: ViewLogsParams,
         user_ctx: UserContext,
-    ) -> AppResult<Pin<Box<dyn Stream<Item = Result<DockerLogEntity, AppError>> + Send>>> {
+    ) -> AppResult<Pin<Box<dyn Stream<Item=Result<DockerLogEntity, AppError>> + Send>>> {
         log::info!(
             "Streaming logs for container: {}",
             view_logs_params.container_name
@@ -74,7 +74,7 @@ impl DockerPort for DockerService {
         Ok(SERVICES
             .values()
             .filter_map(|desc| {
-                let perm_check = verify_service_or_admin_perms(&user_ctx, desc);
+                let perm_check = verify_service_or_admin_perms(user_ctx, desc);
                 match perm_check {
                     Ok(_) => Some(ServiceProjection::from_descriptor(desc)),
                     Err(_) => None,

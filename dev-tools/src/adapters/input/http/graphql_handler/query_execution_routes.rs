@@ -1,13 +1,14 @@
-use crate::adapters::input::http::graphql_handler::schemas::db_console_schema::{MutationRoot, QueryRoot};
+use crate::adapters::input::http::graphql_handler::schemas::db_console_schema::{
+    MutationRoot, QueryRoot,
+};
 use crate::adapters::input::http::guards::auth_guard::AuthenticatedUser;
+use crate::application::ports::input::docker_port::DynDockerPort;
 use crate::application::ports::input::mongo_console_port::DynMongoConsolePort;
 use crate::application::ports::input::sql_console_port::DynSqlConsolePort;
 use crate::application::services::user_context::UserContext;
-use async_graphql::{EmptyMutation, EmptySubscription, Schema};
+use async_graphql::{EmptySubscription, Schema};
 use async_graphql_rocket::{GraphQLRequest, GraphQLResponse};
 use rocket::State;
-use crate::application::ports::input::docker_port::DynDockerPort;
-use crate::application::ports::output::docker_api::DynDockerAPI;
 
 pub type ExecuteDatabaseQuerySchema = Schema<QueryRoot, MutationRoot, EmptySubscription>;
 

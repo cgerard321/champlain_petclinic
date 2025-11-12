@@ -10,7 +10,7 @@ pub struct ServiceProjection {
 
 impl ServiceProjection {
     pub fn from_descriptor(desc: &ServiceDescriptor) -> Self {
-        Self    {
+        Self {
             name: desc.docker_service.to_string(),
             docker_service: desc.docker_service.to_string(),
             db_name: desc.db.as_ref().map(|db| db.db_name.to_string()),

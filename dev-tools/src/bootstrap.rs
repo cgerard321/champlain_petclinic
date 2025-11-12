@@ -1,5 +1,6 @@
 use crate::adapters::output::docker::client::BollardDockerAPI;
 use crate::adapters::output::minio::client::MinioStore;
+use crate::adapters::output::mongo_driver::driver::MongoDriver;
 use crate::adapters::output::mysql_driver::driver::MySqlDriver;
 use crate::adapters::output::mysql_repo::auth_repo::MySqlAuthRepo;
 use crate::adapters::output::mysql_repo::users_repo::MySqlUsersRepo;
@@ -36,7 +37,6 @@ use sqlx::mysql::MySqlPoolOptions;
 use sqlx::MySqlPool;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
-use crate::adapters::output::mongo_driver::driver::MongoDriver;
 
 pub fn stage() -> AdHoc {
     AdHoc::on_ignite("SQLx (MySQL)", |rocket| async move {
@@ -225,20 +225,20 @@ async fn add_default_roles(pool: &MySqlPool) -> Result<(), sqlx::Error> {
         (?, 'BILLING_SERVICE_DEV',    'Billing Service Dev');
     "#,
     )
-    .bind(&sudo)
-    .bind(&admin)
-    .bind(&reader)
-    .bind(&editor)
-    .bind(&auth_service_dev)
-    .bind(&vet_service_dev)
-    .bind(&visits_service_dev)
-    .bind(&customers_service_dev)
-    .bind(&products_service_dev)
-    .bind(&cart_service_dev)
-    .bind(&inventory_service_dev)
-    .bind(&billing_service_dev)
-    .execute(pool)
-    .await?;
+        .bind(&sudo)
+        .bind(&admin)
+        .bind(&reader)
+        .bind(&editor)
+        .bind(&auth_service_dev)
+        .bind(&vet_service_dev)
+        .bind(&visits_service_dev)
+        .bind(&customers_service_dev)
+        .bind(&products_service_dev)
+        .bind(&cart_service_dev)
+        .bind(&inventory_service_dev)
+        .bind(&billing_service_dev)
+        .execute(pool)
+        .await?;
     Ok(())
 }
 

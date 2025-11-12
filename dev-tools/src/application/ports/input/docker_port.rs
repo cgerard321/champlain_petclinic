@@ -1,10 +1,10 @@
 use crate::application::services::docker::params::{RestartContainerParams, ViewLogsParams};
+use crate::application::services::docker::projections::ServiceProjection;
 use crate::application::services::user_context::UserContext;
 use crate::domain::entities::docker::DockerLogEntity;
 use crate::shared::error::{AppError, AppResult};
 use futures::Stream;
 use std::pin::Pin;
-use crate::application::services::docker::projections::ServiceProjection;
 
 #[async_trait::async_trait]
 pub trait DockerPort: Send + Sync {

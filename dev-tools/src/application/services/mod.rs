@@ -6,4 +6,4 @@ pub mod user_context;
 pub mod users;
 mod utils;
 
-pub use utils::{DbType, SERVICES, ServiceDescriptor};
+pub use utils::{DbType, ServiceDescriptor, SERVICES};
