@@ -5,7 +5,6 @@ mod files;
 mod users;
 
 mod contracts;
-mod database_routes;
 mod docker_routes;
 mod mappers;
 
