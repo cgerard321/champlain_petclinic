@@ -14,6 +14,8 @@ spring:
 
   r2dbc:
     url: r2dbc:h2:mem:///images
+    username: user
+    password: pwd
 
   data:
     mongodb:
@@ -97,6 +99,11 @@ spring:
 
   r2dbc:
     url: r2dbc:postgresql://postgres-vet:5432/images
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+
+  datasource:
+    url: jdbc:postgresql://postgres-vet:5432/images
     username: ${DB_USER}
     password: ${DB_PASSWORD}
 
