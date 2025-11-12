@@ -14,8 +14,6 @@ spring:
 
   r2dbc:
     url: r2dbc:h2:mem:///images
-    username: user
-    password: pwd
 
   data:
     mongodb:
