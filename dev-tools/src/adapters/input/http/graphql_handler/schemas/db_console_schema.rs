@@ -43,15 +43,12 @@ impl QueryRoot {
         &self,
         ctx: &Context<'_>,
     ) -> Result<Vec<ServiceResponseContract>> {
-        let docker_api = ctx.data::<DynDockerPort>()?;
+        let docker_port = ctx.data::<DynDockerPort>()?;
         let user_ctx = ctx.data::<UserContext>()?;
-        let services = docker_api
-            .container_list(*user_ctx)
-            .await?
-            .map(ServiceResponseContract::from)
-            .collect();
 
-        Ok(services)
+        let services = docker_port.container_list(*user_ctx).await?;
+
+        Ok(services.into_iter().map(ServiceResponseContract::from).collect())
     }
 }
 
