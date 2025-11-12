@@ -1,7 +1,7 @@
 use crate::adapters::input::http::guards::auth_guard::AuthenticatedUser;
 use crate::adapters::input::http::rest_handler::contracts::docker_contracts::docker::ContainerActionRequestContract;
 use crate::adapters::input::http::rest_handler::docker_routes::utils::ws_logs_for_container;
-use crate::application::ports::input::docker_logs_port::DynDockerPort;
+use crate::application::ports::input::docker_port::DynDockerPort;
 use crate::application::services::docker::params::RestartContainerParams;
 use crate::shared::config::DEFAULT_CONTAINER_TYPE;
 use crate::shared::error::AppResult;

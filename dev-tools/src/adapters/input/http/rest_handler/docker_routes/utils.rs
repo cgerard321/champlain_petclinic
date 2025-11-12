@@ -1,5 +1,5 @@
 use crate::adapters::input::http::rest_handler::contracts::docker_contracts::docker::LogResponseContract;
-use crate::application::ports::input::docker_logs_port::DynDockerPort;
+use crate::application::ports::input::docker_port::DynDockerPort;
 use crate::application::services::docker::params::ViewLogsParams;
 use crate::application::services::user_context::UserContext;
 use crate::shared::error::{AppError, AppResult};

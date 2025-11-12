@@ -4,7 +4,7 @@ use crate::adapters::output::mysql_driver::driver::MySqlDriver;
 use crate::adapters::output::mysql_repo::auth_repo::MySqlAuthRepo;
 use crate::adapters::output::mysql_repo::users_repo::MySqlUsersRepo;
 use crate::application::ports::input::auth_port::DynAuthPort;
-use crate::application::ports::input::docker_logs_port::DynDockerPort;
+use crate::application::ports::input::docker_port::DynDockerPort;
 use crate::application::ports::input::files_port::DynFilesPort;
 use crate::application::ports::input::mongo_console_port::DynMongoConsolePort;
 use crate::application::ports::input::sql_console_port::DynSqlConsolePort;

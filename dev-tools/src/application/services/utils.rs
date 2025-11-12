@@ -3,17 +3,12 @@ use crate::shared::config::{
     CUSTOMERS_SERVICE_DEV_ROLE, INVENTORY_SERVICE_DEV_ROLE, PRODUCTS_SERVICE_DEV_ROLE,
     VET_SERVICE_DEV_ROLE, VISITS_SERVICE_DEV_ROLE,
 };
-use crate::shared::error::AppError;
 use std::collections::HashMap;
 use std::sync::LazyLock;
 use uuid::Uuid;
 
 pub fn get_pepper() -> String {
     std::env::var("PASSWORD_PEPPER")
-        .map_err(|_| {
-            log::error!("PASSWORD_PEPPER env var is not set");
-            AppError::Internal
-        })
         .expect("Missing password pepper")
 }
 

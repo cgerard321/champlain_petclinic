@@ -1,10 +1,35 @@
 use crate::adapters::input::http::graphql_handler::contracts::mongo::MongoResultResponseContract;
+use crate::adapters::input::http::graphql_handler::contracts::service::ServiceResponseContract;
 use crate::adapters::input::http::graphql_handler::contracts::sql::SqlResultResponseContract;
+use crate::application::ports::input::docker_port::DynDockerPort;
 use crate::application::ports::input::mongo_console_port::MongoConsolePort;
 use crate::application::ports::input::sql_console_port::SqlConsolePort;
 use crate::application::services::user_context::UserContext;
 use async_graphql::{Context, Object, Result};
 use std::sync::Arc;
+
+#[Object]
+impl ServiceResponseContract {
+    async fn name(&self) -> &str {
+        &self.name
+    }
+
+    async fn docker_service(&self) -> &str {
+        &self.docker_service
+    }
+
+    async fn db_name(&self) -> Option<&str> {
+        self.db_name.as_deref()
+    }
+
+    async fn db_host(&self) -> Option<&str> {
+        self.db_host.as_deref()
+    }
+
+    async fn db_type(&self) -> Option<&str> {
+        self.db_type.as_deref()
+    }
+}
 
 pub struct QueryRoot;
 
@@ -12,6 +37,21 @@ pub struct QueryRoot;
 impl QueryRoot {
     async fn api_health(&self) -> &str {
         "ok"
+    }
+
+    async fn query_monitored_services(
+        &self,
+        ctx: &Context<'_>,
+    ) -> Result<Vec<ServiceResponseContract>> {
+        let docker_api = ctx.data::<DynDockerPort>()?;
+        let user_ctx = ctx.data::<UserContext>()?;
+        let services = docker_api
+            .container_list(*user_ctx)
+            .await?
+            .map(ServiceResponseContract::from)
+            .collect();
+
+        Ok(services)
     }
 }
 

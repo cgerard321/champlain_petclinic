@@ -1,10 +1,12 @@
-use crate::application::ports::input::docker_logs_port::DockerPort;
+use crate::application::ports::input::docker_port::DockerPort;
 use crate::application::ports::output::docker_api::DynDockerAPI;
 use crate::application::services::docker::params::{RestartContainerParams, ViewLogsParams};
+use crate::application::services::docker::projections::ServiceProjection;
 use crate::application::services::docker::restart_container::restart_container;
 use crate::application::services::docker::stream_container_logs::stream_container_logs;
 use crate::application::services::user_context::{verify_service_or_admin_perms, UserContext};
 use crate::application::services::utils::resolve_descriptor_by_container;
+use crate::application::services::SERVICES;
 use crate::domain::entities::docker::DockerLogEntity;
 use crate::shared::error::{AppError, AppResult};
 use futures::Stream;
@@ -66,5 +68,18 @@ impl DockerPort for DockerService {
         log::info!("Access granted");
 
         restart_container(&self.docker_api, desc, &container_type).await
+    }
+
+    async fn container_list(&self, user_ctx: UserContext) -> AppResult<Vec<ServiceProjection>> {
+        Ok(SERVICES
+            .values()
+            .filter_map(|desc| {
+                let perm_check = verify_service_or_admin_perms(&user_ctx, desc);
+                match perm_check {
+                    Ok(_) => Some(ServiceProjection::from_descriptor(desc)),
+                    Err(_) => None,
+                }
+            })
+            .collect::<Vec<ServiceProjection>>())
     }
 }
