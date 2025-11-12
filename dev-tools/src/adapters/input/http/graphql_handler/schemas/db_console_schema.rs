@@ -10,6 +10,15 @@ pub struct QueryRoot;
 
 #[Object]
 impl QueryRoot {
+    async fn api_health(&self) -> &str {
+        "ok"
+    }
+}
+
+pub struct MutationRoot;
+
+#[Object]
+impl MutationRoot {
     async fn execute_sql_query(
         &self,
         ctx: &Context<'_>,

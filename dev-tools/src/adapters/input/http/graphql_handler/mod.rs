@@ -5,7 +5,7 @@ mod contracts;
 mod mappers;
 
 use crate::adapters::input::http::graphql_handler::query_execution_routes::graphql_request;
-use crate::adapters::input::http::graphql_handler::schemas::sql_schema::QueryRoot;
+use crate::adapters::input::http::graphql_handler::schemas::db_console_schema::QueryRoot;
 use async_graphql::{EmptyMutation, EmptySubscription, Schema};
 
 pub fn schemas() -> Schema<QueryRoot, EmptyMutation, EmptySubscription> {

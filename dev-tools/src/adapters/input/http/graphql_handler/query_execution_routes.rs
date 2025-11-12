@@ -1,4 +1,4 @@
-use crate::adapters::input::http::graphql_handler::schemas::sql_schema::QueryRoot;
+use crate::adapters::input::http::graphql_handler::schemas::db_console_schema::{MutationRoot, QueryRoot};
 use crate::adapters::input::http::guards::auth_guard::AuthenticatedUser;
 use crate::application::ports::input::mongo_console_port::DynMongoConsolePort;
 use crate::application::ports::input::sql_console_port::DynSqlConsolePort;
@@ -7,11 +7,11 @@ use async_graphql::{EmptyMutation, EmptySubscription, Schema};
 use async_graphql_rocket::{GraphQLRequest, GraphQLResponse};
 use rocket::State;
 
-pub type ExecuteSqlQuerySchema = Schema<QueryRoot, EmptyMutation, EmptySubscription>;
+pub type ExecuteDatabaseQuerySchema = Schema<QueryRoot, MutationRoot, EmptySubscription>;
 
 #[post("/", data = "<request>", format = "application/json")]
 pub async fn graphql_request(
-    schema: &State<ExecuteSqlQuerySchema>,
+    schema: &State<ExecuteDatabaseQuerySchema>,
     request: GraphQLRequest,
     user: AuthenticatedUser,
     sql_port: &State<DynSqlConsolePort>,
