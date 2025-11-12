@@ -70,7 +70,7 @@ impl DockerPort for DockerService {
         restart_container(&self.docker_api, desc, &container_type).await
     }
 
-    async fn container_list(&self, user_ctx: UserContext) -> AppResult<Vec<ServiceProjection>> {
+    async fn container_list(&self, user_ctx: &UserContext) -> AppResult<Vec<ServiceProjection>> {
         Ok(SERVICES
             .values()
             .filter_map(|desc| {

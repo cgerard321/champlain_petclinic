@@ -19,6 +19,6 @@ pub trait DockerPort: Send + Sync {
         user_ctx: UserContext,
     ) -> AppResult<()>;
 
-    async fn container_list(&self, user_ctx: UserContext) -> AppResult<Vec<ServiceProjection>>;
+    async fn container_list(&self, user_ctx: &UserContext) -> AppResult<Vec<ServiceProjection>>;
 }
 pub type DynDockerPort = std::sync::Arc<dyn DockerPort>;
