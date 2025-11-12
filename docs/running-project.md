@@ -4,7 +4,7 @@ Back to [Main page](../README.md)
 
 <!-- TOC -->
 * [Running the project](#running-the-project)
-  * [.env](#.env)
+  * [.env](#env)
   * [Docker Profile (for running with docker-compose with ALL SERVICES)](#docker-profile-for-running-with-docker-compose-with-all-services)
   * [Docker Profile (for running with docker-compose with all services but NO FRONTEND)](#docker-profile-for-running-with-docker-compose-with-all-services-but-no-frontend)
   * [Bring up Frontend](#bring-up-frontend)

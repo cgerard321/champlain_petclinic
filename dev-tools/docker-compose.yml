@@ -11,7 +11,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - MINIO_URL=petclinic-bucket.benmusicgeek.synology.me
-      - DATABASE_URL=mysql://user:pwd@mysql_repo-devtools:3306/devtools-db?ssl-mode=DISABLED
+      - DATABASE_URL=mysql://user:pwd@mysql-devtools:3306/devtools-db?ssl-mode=DISABLED
       - RUST_LOG=info
       # TODO : In prod these will be in the stack.env file
       - PASSWORD_PEPPER=Ceramic1-Sultan-Zenith
