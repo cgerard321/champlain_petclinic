@@ -4,6 +4,7 @@ use crate::shared::config::{
     VET_SERVICE_DEV_ROLE, VISITS_SERVICE_DEV_ROLE,
 };
 use std::collections::HashMap;
+use std::fmt::Display;
 use std::sync::LazyLock;
 use uuid::Uuid;
 
@@ -38,6 +39,16 @@ pub struct DbDescriptor {
 pub enum DbType {
     Mongo,
     Sql,
+}
+
+impl Display for DbType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
+            DbType::Mongo => "mongo".to_string(),
+            DbType::Sql => "sql".to_string(),
+        };
+        write!(f, "{}", str)
+    }
 }
 
 impl PartialEq for DbType {

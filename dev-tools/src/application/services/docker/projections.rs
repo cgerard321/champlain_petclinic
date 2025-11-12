@@ -15,7 +15,7 @@ impl ServiceProjection {
             docker_service: desc.docker_service.to_string(),
             db_name: desc.db.as_ref().map(|db| db.db_name.to_string()),
             db_host: desc.db.as_ref().map(|db| db.db_host.to_string()),
-            db_type: Default::default(),
+            db_type: desc.db.as_ref().map(|db| db.db_type.to_string()),
         }
     }
 }
