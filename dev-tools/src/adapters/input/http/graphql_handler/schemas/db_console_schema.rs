@@ -17,6 +17,11 @@ impl QueryRoot {
 
 pub struct MutationRoot;
 
+// After some thinking, I decided to put these operations in mutations
+// because they are not idempotent, even if a SELECT or find operation
+// is idempotent. There's no easy and not complex way (without parsers or reading the query)
+// to know if a query is a SELECT or a find. I found this simpler, and since this is executing a query,
+// I think treating it as a mutation is fair and reasonable.
 #[Object]
 impl MutationRoot {
     async fn execute_sql_query(
