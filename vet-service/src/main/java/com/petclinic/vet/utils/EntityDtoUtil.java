@@ -186,8 +186,9 @@ public class EntityDtoUtil {
 
     public static DataSource createDataSource() {
         // url specifies address of database along with username and password
+        // TODO: externalize these values, we are hardcoding which is not a good practice
         final String url =
-                "jdbc:postgresql://postgres-vet:5432/images?user=user&password=pwd";
+                "jdbc:postgresql://postgres-vet:5432/images?user=petclinic&password=petclinicpw";
         final PGSimpleDataSource dataSource = new PGSimpleDataSource();
         dataSource.setUrl(url);
         return dataSource;

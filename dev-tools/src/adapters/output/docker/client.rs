@@ -1,36 +1,38 @@
+use crate::adapters::output::docker::error::map_docker_error;
 use crate::application::ports::output::docker_api::DockerAPIPort;
-use crate::core::error::{AppError, AppResult};
 use crate::domain::entities::docker::DockerLogEntity;
+use crate::shared::config::DEFAULT_TAIL_AMOUNT;
+use crate::shared::error::{AppError, AppResult};
 use bollard::query_parameters::{ListContainersOptions, LogsOptions, RestartContainerOptions};
 use bollard::Docker;
 use futures::{Stream, TryStreamExt};
 use std::collections::HashMap;
 use std::pin::Pin;
 
-pub struct BollardDockerAPI {}
+pub struct BollardDockerAPI {
+    docker: Docker,
+}
 
 impl BollardDockerAPI {
-    pub fn new() -> Self {
-        Self {}
+    pub fn new(docker: Docker) -> Self {
+        Self { docker }
     }
 
-    async fn resolve_id(docker: &Docker, target_name: &str) -> Result<String, AppError> {
+    async fn resolve_id(&self, target_name: &str) -> AppResult<String> {
         log::info!("Resolving container ID for {}", target_name);
 
         let mut filters: HashMap<String, Vec<String>> = HashMap::new();
         filters.insert("name".to_string(), vec![target_name.to_string()]);
 
-        let list = docker
+        let list = self
+            .docker
             .list_containers(Some(ListContainersOptions {
                 all: true,
                 filters: Option::from(filters),
                 ..Default::default()
             }))
             .await
-            .map_err(|e| {
-                log::error!("list_containers: {e}");
-                AppError::Internal
-            })?;
+            .map_err(map_docker_error)?;
 
         log::info!("Found {} containers", list.len());
 
@@ -50,6 +52,7 @@ impl BollardDockerAPI {
                 log::error!("Container ID not found for container: {}", target_name);
                 AppError::Internal
             })?;
+
             return Ok(container_id);
         }
 
@@ -68,21 +71,17 @@ impl DockerAPIPort for BollardDockerAPI {
         &self,
         container_name: &str,
         number_of_lines: Option<usize>,
-    ) -> AppResult<Pin<Box<dyn Stream<Item = Result<DockerLogEntity, AppError>> + Send>>> {
+    ) -> AppResult<Pin<Box<dyn Stream<Item=AppResult<DockerLogEntity>> + Send>>> {
         log::info!("Streaming logs for container: {}", container_name);
-
-        let docker = Docker::connect_with_unix_defaults().map_err(|e| {
-            log::error!("Failed to connect to Docker socket: {e}");
-            AppError::Internal
-        })?;
 
         log::info!("Connected to Docker");
 
-        let id = BollardDockerAPI::resolve_id(&docker, container_name).await?;
+        let id = BollardDockerAPI::resolve_id(self, container_name).await?;
 
-        let number_of_lines = number_of_lines.unwrap_or(10).to_string();
+        let number_of_lines = number_of_lines.unwrap_or(DEFAULT_TAIL_AMOUNT).to_string();
 
-        let log_stream = docker
+        let log_stream = self
+            .docker
             .logs(
                 id.as_str(),
                 Some(LogsOptions {
@@ -95,21 +94,13 @@ impl DockerAPIPort for BollardDockerAPI {
                 }),
             )
             .map_ok(DockerLogEntity::from)
-            .map_err(|e| {
-                log::error!("Error streaming logs: {e}");
-                AppError::Internal
-            });
+            .map_err(map_docker_error);
 
         Ok(Box::pin(log_stream))
     }
 
     async fn restart_container(&self, container_name: &str) -> AppResult<()> {
-        let docker = Docker::connect_with_unix_defaults().map_err(|e| {
-            log::error!("Failed to connect to Docker socket: {e}");
-            AppError::Internal
-        })?;
-
-        let id = BollardDockerAPI::resolve_id(&docker, container_name).await?;
+        let id = BollardDockerAPI::resolve_id(self, container_name).await?;
 
         // If we want to pass options to the restart, we can do it like this:
         // let options = Some(RestartContainerOptions {
@@ -117,12 +108,10 @@ impl DockerAPIPort for BollardDockerAPI {
         // });
         // For now, we just use the default options.
 
-        Ok(docker
+        Ok(self
+            .docker
             .restart_container(id.as_str(), None::<RestartContainerOptions>)
             .await
-            .map_err(|e| {
-                log::error!("Error restarting container: {e}");
-                AppError::Internal
-            })?)
+            .map_err(map_docker_error)?)
     }
 }

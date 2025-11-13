@@ -39,7 +39,7 @@ x-healthchecks:
 
   mysql: &mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-uuser", "-ppwd", "-h", "localhost"]
+      test: ["CMD", "mysqladmin", "ping", "-u${DB_USER}", "-p${DB_PASSWORD}", "-h", "localhost"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -47,7 +47,7 @@ x-healthchecks:
 
   postgres: &postgres
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d images -h localhost"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d images -h localhost"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -55,7 +55,11 @@ x-healthchecks:
 
   mongo: &mongo
     healthcheck:
-      test: ["CMD-SHELL", "mongosh --quiet --eval 'db.runCommand({ ping: 1 }).ok' || mongo --quiet --eval 'db.runCommand({ ping: 1 }).ok'"]
+      test:
+        [
+          "CMD-SHELL",
+          "mongosh --quiet -u ${DB_USER} -p ${DB_PASSWORD} --eval 'db.runCommand({ ping: 1 }).ok' || mongo --quiet -u ${DB_USER} -p ${DB_PASSWORD} --eval 'db.runCommand({ ping: 1 }).ok'",
+        ]
       interval: 15s
       timeout: 5s
       retries: 5
@@ -80,6 +84,8 @@ services:
     volumes:
       - ./petclinic-frontend/src:/app/src
     restart: unless-stopped
+    env_file:
+      - stack.env
     labels:
       - homepage.group=Development
       - homepage.name=Petclinic Frontend
@@ -104,6 +110,8 @@ services:
     volumes:
       - ./employee-frontend/src:/app/src
     restart: unless-stopped
+    env_file:
+      - stack.env
     labels:
       - homepage.group=Development
       - homepage.name=Employee Frontend
@@ -122,6 +130,8 @@ services:
       - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
+    env_file:
+      - stack.env
     restart: unless-stopped
     depends_on:
       customers-service-reactive:
@@ -153,6 +163,8 @@ services:
     build: visits-service-new
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+    env_file:
+      - stack.env
     restart: unless-stopped
     depends_on:
       mongo-visits:
@@ -166,6 +178,8 @@ services:
     hostname: inventory
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+    env_file:
+      - stack.env
     restart: unless-stopped
     depends_on:
       mongo-inventory:
@@ -176,6 +190,8 @@ services:
     build: vet-service
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+    env_file:
+      - stack.env
     restart: unless-stopped
     depends_on:
       mongo-vet:
@@ -188,6 +204,8 @@ services:
     build: customers-service-reactive
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+    env_file:
+      - stack.env
     restart: unless-stopped
     depends_on:
       mongo-customers:
@@ -199,6 +217,8 @@ services:
     hostname: auth
     environment:
       - SPRING_PROFILES_ACTIVE=prod
+    env_file:
+      - stack.env
     restart: unless-stopped
     depends_on:
       mysql-auth:
@@ -212,6 +232,8 @@ services:
     hostname: billing
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+    env_file:
+      - stack.env
     restart: unless-stopped
     depends_on:
       mongo-billing:
@@ -223,6 +245,8 @@ services:
     hostname: products-service
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+    env_file:
+      - stack.env
     restart: unless-stopped
     depends_on:
       mongo-products:
@@ -234,6 +258,8 @@ services:
     hostname: cart
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+    env_file:
+      - stack.env
     restart: unless-stopped
     depends_on:
       mongo-carts:
@@ -244,21 +270,27 @@ services:
   # =========================
   mailer-service:
     build: mailer-service
-    environment:
-      - SMTP_USER=champlain.petclinic@gmail.com
-      - SMTP_SERVER=smtp.gmail.com
     env_file:
       - stack.env
+    environment:
+      - SMTP_SERVER=${SMTP_SERVER}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USERNAME=${SMTP_USERNAME}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_EMAIL=${SMTP_EMAIL}
+      - SMTP_DISPLAY_NAME=${SMTP_DISPLAY_NAME}
     restart: unless-stopped
 
   files-service:
     build: files-service
-    environment:
-      - FILE_DATABASE=user:pwd@tcp(mysql-files:3306)/files-db
-      - FILE_ENDPOINT=petclinic-bucket.benmusicgeek.synology.me
-      - FILE_ENV=prod
     env_file:
       - stack.env
+    environment:
+      - FILE_DATABASE=${DB_USER}:${DB_PASSWORD}@tcp(mysql-files:3306)/files-db
+      - FILE_ENDPOINT=${FILE_ENDPOINT}
+      - FILE_ENV=prod
+      - FILE_ACCESS_KEY_ID=${FILE_ACCESS_KEY_ID}
+      - FILE_SECRET_ACCESS_KEY=${FILE_SECRET_ACCESS_KEY}
     depends_on:
       mysql-files:
         condition: service_healthy
@@ -271,11 +303,13 @@ services:
     <<: *mysql
     image: mysql:5.7
     platform: linux/amd64
+    env_file:
+      - stack.env
     environment:
-      - MYSQL_ROOT_PASSWORD=rootpwd
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-rootpwd}
       - MYSQL_DATABASE=auth-db
-      - MYSQL_USER=user
-      - MYSQL_PASSWORD=pwd
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
     volumes:
       - mysql-auth-data:/var/lib/mysql
       - ./data/init.d:/docker-entrypoint-initdb.d
@@ -285,22 +319,27 @@ services:
     <<: *mysql
     image: mysql:5.7
     platform: linux/amd64
+    env_file:
+      - stack.env
     environment:
-      - MYSQL_ROOT_PASSWORD=rootpwd
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-rootpwd}
       - MYSQL_DATABASE=files-db
-      - MYSQL_USER=user
-      - MYSQL_PASSWORD=pwd
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
     volumes:
       - mysql-files-data:/var/lib/mysql
+    restart: unless-stopped
 
   postgres-vet:
     <<: *postgres
     image: postgres:17
     container_name: postgres-vet
     hostname: postgres
+    env_file:
+      - stack.env
     environment:
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=pwd
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=images
     volumes:
       - postgres-vet-data:/var/lib/postgresql/data
@@ -313,9 +352,11 @@ services:
     <<: *mongo
     image: mongo
     container_name: mongo-vet
+    env_file:
+      - stack.env
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_ROOT_USERNAME=${DB_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD}
     volumes:
       - mongo-vet-data:/data/db
       - mongo-vet-config:/data/configdb
@@ -325,9 +366,11 @@ services:
     <<: *mongo
     image: mongo
     container_name: mongo-billing
+    env_file:
+      - stack.env
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_ROOT_USERNAME=${DB_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD}
     volumes:
       - mongo-billing-data:/data/db
       - mongo-billing-config:/data/configdb
@@ -337,9 +380,11 @@ services:
     <<: *mongo
     image: mongo
     container_name: mongo-visits
+    env_file:
+      - stack.env
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_ROOT_USERNAME=${DB_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD}
     volumes:
       - mongo-visits-data:/data/db
       - mongo-visits-config:/data/configdb
@@ -349,9 +394,11 @@ services:
     <<: *mongo
     image: mongo
     container_name: mongo-customers
+    env_file:
+      - stack.env
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_ROOT_USERNAME=${DB_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD}
     volumes:
       - mongo-customers-data:/data/db
       - mongo-customers-config:/data/configdb
@@ -361,9 +408,11 @@ services:
     <<: *mongo
     image: mongo
     container_name: mongo-inventory
+    env_file:
+      - stack.env
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_ROOT_USERNAME=${DB_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD}
     volumes:
       - mongo-inventory-data:/data/db
       - mongo-inventory-config:/data/configdb
@@ -373,9 +422,11 @@ services:
     <<: *mongo
     image: mongo
     container_name: mongo-products
+    env_file:
+      - stack.env
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_ROOT_USERNAME=${DB_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD}
     volumes:
       - mongo-products-data:/data/db
       - mongo-products-config:/data/configdb
@@ -385,9 +436,11 @@ services:
     <<: *mongo
     image: mongo
     container_name: mongo-carts
+    env_file:
+      - stack.env
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_ROOT_USERNAME=${DB_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD}
     volumes:
       - mongo-carts-data:/data/db
       - mongo-carts-config:/data/configdb
@@ -405,13 +458,14 @@ services:
     restart: unless-stopped
     volumes:
       - dbgate-data:/root/.dbgate
+    env_file:
+      - stack.env
     environment:
       - BASIC_AUTH=1
       - LOGIN=CPC_Admin
       - PASSWORD=${DBGATE_PASSWORD:-change-me}
       - SKIP_ALL_AUTH=0
       - ADMIN_PASSWORD=${DBGATE_ADMIN_PASSWORD:-change-me}
-
       - CONNECTIONS=mysqlAuth,mysqlFiles,postgresVet,mongoVet,mongoBilling,mongoVisits,mongoCustomers,mongoInventory,mongoProducts,mongoCarts
 
       # MySQL (auth)
@@ -419,8 +473,8 @@ services:
       - ENGINE_mysqlAuth=mysql@dbgate-plugin-mysql
       - SERVER_mysqlAuth=mysql-auth
       - PORT_mysqlAuth=3306
-      - USER_mysqlAuth=user
-      - PASSWORD_mysqlAuth=pwd
+      - USER_mysqlAuth=${DB_USER}
+      - PASSWORD_mysqlAuth=${DB_PASSWORD}
       - DATABASE_mysqlAuth=auth-db
 
       # MySQL (files)
@@ -428,8 +482,8 @@ services:
       - ENGINE_mysqlFiles=mysql@dbgate-plugin-mysql
       - SERVER_mysqlFiles=mysql-files
       - PORT_mysqlFiles=3306
-      - USER_mysqlFiles=user
-      - PASSWORD_mysqlFiles=pwd
+      - USER_mysqlFiles=${DB_USER}
+      - PASSWORD_mysqlFiles=${DB_PASSWORD}
       - DATABASE_mysqlFiles=files-db
 
       # Postgres (vet)
@@ -437,38 +491,38 @@ services:
       - ENGINE_postgresVet=postgres@dbgate-plugin-postgres
       - SERVER_postgresVet=postgres
       - PORT_postgresVet=5432
-      - USER_postgresVet=user
-      - PASSWORD_postgresVet=pwd
+      - USER_postgresVet=${DB_USER}
+      - PASSWORD_postgresVet=${DB_PASSWORD}
       - DATABASE_postgresVet=images
 
       # MongoDBs
       - LABEL_mongoVet=Mongo (vet)
       - ENGINE_mongoVet=mongo@dbgate-plugin-mongo
-      - URL_mongoVet=mongodb://root:password@mongo-vet:27017/?authSource=admin
+      - URL_mongoVet=mongodb://${DB_USER}:${DB_PASSWORD}@mongo-vet:27017/?authSource=admin
 
       - LABEL_mongoBilling=Mongo (billing)
       - ENGINE_mongoBilling=mongo@dbgate-plugin-mongo
-      - URL_mongoBilling=mongodb://root:password@mongo-billing:27017/?authSource=admin
+      - URL_mongoBilling=mongodb://${DB_USER}:${DB_PASSWORD}@mongo-billing:27017/?authSource=admin
 
       - LABEL_mongoVisits=Mongo (visits)
       - ENGINE_mongoVisits=mongo@dbgate-plugin-mongo
-      - URL_mongoVisits=mongodb://root:password@mongo-visits:27017/?authSource=admin
+      - URL_mongoVisits=mongodb://${DB_USER}:${DB_PASSWORD}@mongo-visits:27017/?authSource=admin
 
       - LABEL_mongoCustomers=Mongo (customers)
       - ENGINE_mongoCustomers=mongo@dbgate-plugin-mongo
-      - URL_mongoCustomers=mongodb://root:password@mongo-customers:27017/?authSource=admin
+      - URL_mongoCustomers=mongodb://${DB_USER}:${DB_PASSWORD}@mongo-customers:27017/?authSource=admin
 
       - LABEL_mongoInventory=Mongo (inventory)
       - ENGINE_mongoInventory=mongo@dbgate-plugin-mongo
-      - URL_mongoInventory=mongodb://root:password@mongo-inventory:27017/?authSource=admin
+      - URL_mongoInventory=mongodb://${DB_USER}:${DB_PASSWORD}@mongo-inventory:27017/?authSource=admin
 
       - LABEL_mongoProducts=Mongo (products)
       - ENGINE_mongoProducts=mongo@dbgate-plugin-mongo
-      - URL_mongoProducts=mongodb://root:password@mongo-products:27017/?authSource=admin
+      - URL_mongoProducts=mongodb://${DB_USER}:${DB_PASSWORD}@mongo-products:27017/?authSource=admin
 
       - LABEL_mongoCarts=Mongo (carts)
       - ENGINE_mongoCarts=mongo@dbgate-plugin-mongo
-      - URL_mongoCarts=mongodb://root:password@mongo-carts:27017/?authSource=admin
+      - URL_mongoCarts=mongodb://${DB_USER}:${DB_PASSWORD}@mongo-carts:27017/?authSource=admin
     depends_on:
       mysql-auth:
         condition: service_healthy
@@ -516,6 +570,11 @@ services:
     container_name: mysql-devtools
     env_file:
       - stack.env
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_DEV_TOOLS_ROOT_PASSWORD:-rootpwd}
+      - MYSQL_DATABASE=devtools-db
+      - MYSQL_USER=${DB_DEV_TOOLS_USER}
+      - MYSQL_PASSWORD=${DB_DEV_TOOLS_PASSWORD}
     volumes:
       - mysql-devtools-data:/var/lib/mysql
 

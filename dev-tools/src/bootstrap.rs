@@ -1,25 +1,41 @@
 use crate::adapters::output::docker::client::BollardDockerAPI;
 use crate::adapters::output::minio::client::MinioStore;
-use crate::adapters::output::mysql::auth_repo::MySqlAuthRepo;
-use crate::adapters::output::mysql::users_repo::MySqlUsersRepo;
+use crate::adapters::output::mongo_driver::driver::MongoDriver;
+use crate::adapters::output::mysql_driver::driver::MySqlDriver;
+use crate::adapters::output::mysql_repo::auth_repo::MySqlAuthRepo;
+use crate::adapters::output::mysql_repo::users_repo::MySqlUsersRepo;
 use crate::application::ports::input::auth_port::DynAuthPort;
-use crate::application::ports::input::docker_logs_port::DynDockerPort;
+use crate::application::ports::input::docker_port::DynDockerPort;
 use crate::application::ports::input::files_port::DynFilesPort;
+use crate::application::ports::input::mongo_console_port::DynMongoConsolePort;
+use crate::application::ports::input::sql_console_port::DynSqlConsolePort;
 use crate::application::ports::input::user_port::DynUsersPort;
 use crate::application::ports::output::auth_repo_port::DynAuthRepo;
+use crate::application::ports::output::db_drivers::mongo_driver::DynMongoDriver;
+use crate::application::ports::output::db_drivers::mysql_driver::DynMySqlDriver;
 use crate::application::ports::output::docker_api::DynDockerAPI;
 use crate::application::ports::output::file_storage_port::DynFileStorage;
 use crate::application::ports::output::user_repo_port::DynUsersRepo;
 use crate::application::services::auth::service::AuthService;
+use crate::application::services::db_consoles::mongo_service::MongoConsoleService;
+use crate::application::services::db_consoles::sql_service::SqlConsoleService;
 use crate::application::services::docker::service::DockerService;
 use crate::application::services::files::service::FilesService;
+use crate::application::services::user_context::UserContext;
 use crate::application::services::users::params::UserCreationParams;
 use crate::application::services::users::service::UsersService;
-use crate::core::config::{ADMIN_ROLE_UUID, EDITOR_ROLE_UUID, READER_ROLE_UUID, SUDO_ROLE_UUID};
+use crate::application::services::{DbType, SERVICES};
+use crate::shared::config::{
+    ADMIN_ROLE_UUID, AUTH_SERVICE_DEV_ROLE, BILLING_SERVICE_DEV_ROLE, CART_SERVICE_DEV_ROLE,
+    CUSTOMERS_SERVICE_DEV_ROLE, EDITOR_ROLE_UUID, INVENTORY_SERVICE_DEV_ROLE,
+    PRODUCTS_SERVICE_DEV_ROLE, READER_ROLE_UUID, SUDO_ROLE_UUID, VET_SERVICE_DEV_ROLE,
+    VISITS_SERVICE_DEV_ROLE,
+};
+use bollard::Docker;
 use rocket::fairing::AdHoc;
 use sqlx::mysql::MySqlPoolOptions;
 use sqlx::MySqlPool;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
 pub fn stage() -> AdHoc {
@@ -75,15 +91,103 @@ pub fn stage() -> AdHoc {
         }
 
         // Docker
-        let docker_api: DynDockerAPI = Arc::new(BollardDockerAPI::new());
+        let docker = Docker::connect_with_unix_defaults()
+            .map_err(|e| {
+                log::error!("Failed to create Docker client: {e}");
+                e
+            })
+            .expect("Docker must be available at startup");
+
+        let docker_api: DynDockerAPI = Arc::new(BollardDockerAPI::new(docker));
         let docker_port: DynDockerPort = Arc::new(DockerService::new(docker_api.clone()));
+
+        // SQL Console
+        let drivers = build_sql_drivers_from_services();
+
+        let sql_console_port: DynSqlConsolePort = Arc::new(SqlConsoleService::new(drivers));
+
+        // Mongo Console
+        let mongo_drivers = build_mongo_drivers_from_services().await;
+
+        let mongo_console_port: DynMongoConsolePort =
+            Arc::new(MongoConsoleService::new(mongo_drivers));
 
         rocket
             .manage(auth_port)
             .manage(files_port)
             .manage(users_port)
             .manage(docker_port)
+            .manage(sql_console_port)
+            .manage(mongo_console_port)
     })
+}
+
+pub async fn build_mongo_drivers_from_services() -> HashMap<&'static str, Arc<DynMongoDriver>> {
+    let mut map = HashMap::new();
+
+    for (_name, svc) in SERVICES.iter() {
+        let Some(db) = &svc.db else { continue };
+
+        if !matches!(db.db_type, DbType::Mongo) {
+            continue;
+        }
+
+        let id = db.db_host;
+
+        if map.contains_key(id) {
+            continue;
+        }
+
+        let user = std::env::var(db.db_user_env)
+            .unwrap_or_else(|_| panic!("Missing env {}", db.db_user_env));
+        let pass = std::env::var(db.db_password_env)
+            .unwrap_or_else(|_| panic!("Missing env {}", db.db_password_env));
+
+        let uri = format!(
+            "mongodb://{}:{}@{}:{}/{}?authSource={}",
+            user,
+            pass,
+            db.db_host,
+            27017, // For now we will use the default port, maybe later we will add a configurable port
+            db.db_name,
+            "admin" // For now we will use the default authSource, maybe later we will add a configurable authSource
+        );
+
+        let driver = MongoDriver::new(&uri).await;
+
+        map.insert(id, Arc::new(driver) as Arc<DynMongoDriver>);
+    }
+
+    map
+}
+
+pub fn build_sql_drivers_from_services() -> HashMap<&'static str, Arc<DynMySqlDriver>> {
+    let mut map = HashMap::new();
+
+    for (_name, svc) in SERVICES.iter() {
+        let Some(db) = &svc.db else { continue };
+
+        if !matches!(db.db_type, DbType::Sql) {
+            continue;
+        }
+
+        let id = db.db_host;
+        if map.contains_key(id) {
+            continue;
+        }
+
+        let user = std::env::var(db.db_user_env)
+            .unwrap_or_else(|_| panic!("Missing env {}", db.db_user_env));
+        let pass = std::env::var(db.db_password_env)
+            .unwrap_or_else(|_| panic!("Missing env {}", db.db_password_env));
+
+        let url = format!("mysql://{}:{}@{}/{}", user, pass, db.db_host, db.db_name);
+
+        let driver = MySqlDriver::new(&url);
+        map.insert(id, Arc::new(driver) as Arc<DynMySqlDriver>);
+    }
+
+    map
 }
 
 async fn add_default_roles(pool: &MySqlPool) -> Result<(), sqlx::Error> {
@@ -94,23 +198,47 @@ async fn add_default_roles(pool: &MySqlPool) -> Result<(), sqlx::Error> {
     let admin = ADMIN_ROLE_UUID.hyphenated().to_string();
     let reader = READER_ROLE_UUID.hyphenated().to_string();
     let editor = EDITOR_ROLE_UUID.hyphenated().to_string();
+    let auth_service_dev = AUTH_SERVICE_DEV_ROLE.hyphenated().to_string();
+    let vet_service_dev = VET_SERVICE_DEV_ROLE.hyphenated().to_string();
+    let visits_service_dev = VISITS_SERVICE_DEV_ROLE.hyphenated().to_string();
+    let customers_service_dev = CUSTOMERS_SERVICE_DEV_ROLE.hyphenated().to_string();
+    let products_service_dev = PRODUCTS_SERVICE_DEV_ROLE.hyphenated().to_string();
+    let cart_service_dev = CART_SERVICE_DEV_ROLE.hyphenated().to_string();
+    let inventory_service_dev = INVENTORY_SERVICE_DEV_ROLE.hyphenated().to_string();
+    let billing_service_dev = BILLING_SERVICE_DEV_ROLE.hyphenated().to_string();
 
     sqlx::query(
         r#"
-        INSERT IGNORE INTO roles (id, code, description)
-        VALUES (?, 'SUDO',   'Super user'),
-               (?, 'ADMIN',  'Administrator'),
-               (?, 'READER', 'Read-only'),
-               (?, 'EDITOR', 'Editor');
-        "#,
+    INSERT IGNORE INTO roles (id, code, description)
+    VALUES 
+        (?, 'SUDO',                   'Super user'),
+        (?, 'ADMIN',                  'Administrator'),
+        (?, 'READER',                 'Read-only'),
+        (?, 'EDITOR',                 'Editor'),
+        (?, 'AUTH_SERVICE_DEV',       'Auth Service Dev'),
+        (?, 'VET_SERVICE_DEV',        'Vet Service Dev'),
+        (?, 'VISITS_SERVICE_DEV',     'Visits Service Dev'),
+        (?, 'CUSTOMERS_SERVICE_DEV',  'Customers Service Dev'),
+        (?, 'PRODUCTS_SERVICE_DEV',   'Products Service Dev'),
+        (?, 'CART_SERVICE_DEV',       'Cart Service Dev'),
+        (?, 'INVENTORY_SERVICE_DEV',  'Inventory Service Dev'),
+        (?, 'BILLING_SERVICE_DEV',    'Billing Service Dev');
+    "#,
     )
-    .bind(&sudo)
-    .bind(&admin)
-    .bind(&reader)
-    .bind(&editor)
-    .execute(pool)
-    .await?;
-
+        .bind(&sudo)
+        .bind(&admin)
+        .bind(&reader)
+        .bind(&editor)
+        .bind(&auth_service_dev)
+        .bind(&vet_service_dev)
+        .bind(&visits_service_dev)
+        .bind(&customers_service_dev)
+        .bind(&products_service_dev)
+        .bind(&cart_service_dev)
+        .bind(&inventory_service_dev)
+        .bind(&billing_service_dev)
+        .execute(pool)
+        .await?;
     Ok(())
 }
 
@@ -145,8 +273,10 @@ async fn add_default_user(user_port: &DynUsersPort, pool: &MySqlPool) -> Result<
         roles: admin_roles,
     };
 
+    let auth_context = UserContext::system();
+
     user_port
-        .create_user(params)
+        .create_user(params, auth_context)
         .await
         .expect("Failed to create default user");
 

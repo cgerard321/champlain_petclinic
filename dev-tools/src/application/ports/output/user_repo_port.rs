@@ -1,6 +1,6 @@
 use crate::application::services::auth::projections::AuthProjection;
-use crate::core::error::AppResult;
 use crate::domain::entities::user::{RoleEntity, UserEntity};
+use crate::shared::error::AppResult;
 use std::collections::HashSet;
 use uuid::Uuid;
 

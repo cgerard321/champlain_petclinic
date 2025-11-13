@@ -1,4 +1,4 @@
-use crate::core::error::{AppError, AppResult};
+use crate::shared::error::{AppError, AppResult};
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
 
 pub fn verify_password(stored_hash_bytes: &[u8], candidate: &str, pepper: &str) -> AppResult<bool> {

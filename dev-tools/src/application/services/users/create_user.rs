@@ -1,9 +1,9 @@
 use crate::application::ports::output::user_repo_port::DynUsersRepo;
 use crate::application::services::users::params::UserCreationParams;
 use crate::application::services::users::utils::hash_password;
-use crate::core::error::AppResult;
-use crate::core::utils::auth::get_pepper;
+use crate::application::services::utils::get_pepper;
 use crate::domain::entities::user::UserEntity;
+use crate::shared::error::AppResult;
 use uuid::Uuid;
 
 pub async fn create_user(db: &DynUsersRepo, new_user: UserCreationParams) -> AppResult<UserEntity> {
