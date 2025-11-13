@@ -286,6 +286,7 @@ services:
     env_file:
       - stack.env
     environment:
+      - FILE_DATABASE=${DB_USER}:${DB_PASSWORD}@tcp(mysql-files:3306)/files-db
       - FILE_ENDPOINT=${FILE_ENDPOINT}
       - FILE_ENV=prod
       - FILE_ACCESS_KEY_ID=${FILE_ACCESS_KEY_ID}
