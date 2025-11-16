@@ -14,7 +14,13 @@ infer = "0.19.0"
 thiserror = "2.0.17"
 http = "1.3.1"
 rand_core = "0.9.3"
-sqlx = { version = "0.8.6", features = ["mysql", "runtime-tokio-rustls", "chrono", "uuid"] }
+sqlx = { version = "0.8.6", features = [
+  "mysql",
+  "runtime-tokio-rustls",
+  "chrono",
+  "uuid",
+] }
+mongodb = "3.3.0"
 argon2 = { version = "0.5", features = ["std", "password-hash"] }
 chrono = "0.4.42"
 time = "0.3.44"
@@ -26,3 +32,6 @@ log = "0.4.28"
 env_logger = "0.11.8"
 tokio = "1.48.0"
 bollard = "0.19.3"
+async-graphql-rocket = "7.0.17"
+async-graphql = "7.0.17"
+serde_json = "1.0.145"

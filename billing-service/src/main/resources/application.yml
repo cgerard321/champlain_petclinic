@@ -54,8 +54,8 @@ spring:
       host: mongo-billing
       port: 27017
       database: billings
-      username: root
-      password: password
+      username: ${DB_USER}
+      password: ${DB_PASSWORD}
       authentication-database: admin
 server.port: 8080
 app:

@@ -1,10 +1,10 @@
 use crate::application::ports::output::auth_repo_port::DynAuthRepo;
 use crate::application::ports::output::user_repo_port::DynUsersRepo;
 use crate::application::services::auth::utils::verify_password;
-use crate::core::config::SESSION_EXPIRATION_HR;
-use crate::core::error::{AppError, AppResult};
-use crate::core::utils::auth::get_pepper;
+use crate::application::services::utils::get_pepper;
 use crate::domain::entities::session::SessionEntity;
+use crate::shared::config::SESSION_EXPIRATION_HR;
+use crate::shared::error::{AppError, AppResult};
 use chrono::{Duration, NaiveDateTime, Utc};
 use uuid::Uuid;
 

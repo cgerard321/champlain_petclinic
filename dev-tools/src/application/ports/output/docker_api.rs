@@ -1,5 +1,5 @@
-use crate::core::error::{AppError, AppResult};
 use crate::domain::entities::docker::DockerLogEntity;
+use crate::shared::error::AppResult;
 use futures::Stream;
 use std::pin::Pin;
 use std::sync::Arc;
@@ -10,7 +10,7 @@ pub trait DockerAPIPort: Send + Sync {
         &self,
         container_name: &str,
         number_of_lines: Option<usize>,
-    ) -> AppResult<Pin<Box<dyn Stream<Item = Result<DockerLogEntity, AppError>> + Send>>>;
+    ) -> AppResult<Pin<Box<dyn Stream<Item=AppResult<DockerLogEntity>> + Send>>>;
 
     async fn restart_container(&self, container_id: &str) -> AppResult<()>;
 }

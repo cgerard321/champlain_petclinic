@@ -40,8 +40,8 @@ spring:
       host: mongo-inventory
       port: 27017
       database: inventory
-      username: root
-      password: password
+      username: ${DB_USER}
+      password: ${DB_PASSWORD}
       authentication-database: admin
 management:
   endpoints:

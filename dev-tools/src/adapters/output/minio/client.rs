@@ -1,8 +1,8 @@
 use crate::adapters::output::minio::mappers::file_mapper::PutObjectMap;
 use crate::application::ports::output::file_storage_port::FileStoragePort;
-use crate::core::error::{AppError, AppResult};
 use crate::domain::entities::bucket::BucketEntity;
 use crate::domain::entities::file::FileEntity;
+use crate::shared::error::{AppError, AppResult};
 use bytes::Bytes;
 use futures::StreamExt;
 use minio::s3::creds::StaticProvider;
