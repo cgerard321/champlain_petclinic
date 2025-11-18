@@ -98,7 +98,7 @@ obj/
 _ReSharper*/
 *.ncrunch*
 *.ncrunchsolution
-wwwroot/lib/
+/dev-tools-ui/DevToolsUI/DevToolsUI/wwwroot/lib/
 
 # Ignore swagger docs for mailer
 mailer-service/docs
