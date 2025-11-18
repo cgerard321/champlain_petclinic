@@ -76,11 +76,10 @@ out/
 .env
 cover.html
 app
-data/
+/dev-tools/data/
 /dev-tools/target/
 
 ## C# ##
-bin/
 obj/
 *.user
 *.rsuser
