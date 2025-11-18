@@ -14,7 +14,7 @@ impl CryptoFunctions {
 
 impl CryptoPort for CryptoFunctions {
     fn hash(&self, plain: &str) -> AppResult<String> {
-        let pepper = get_pepper();
+        let pepper = get_pepper()?;
         let salt = SaltString::generate(&mut OsRng);
         let argon = Argon2::default();
         argon
@@ -24,7 +24,7 @@ impl CryptoPort for CryptoFunctions {
     }
 
     fn verify_hash(&self, stored_hash_bytes: &[u8], candidate: &str) -> AppResult<bool> {
-        let pepper = get_pepper();
+        let pepper = get_pepper()?;
         let stored = std::str::from_utf8(stored_hash_bytes)
             .map_err(|_| AppError::BadRequest("invalid stored hash bytes".into()))?;
         let parsed = PasswordHash::new(stored)
@@ -35,6 +35,9 @@ impl CryptoPort for CryptoFunctions {
     }
 }
 
-fn get_pepper() -> String {
-    std::env::var("PASSWORD_PEPPER").unwrap_or_else(|_| "".into())
+fn get_pepper() -> AppResult<String> {
+    std::env::var("PASSWORD_PEPPER").map_err(|_| {
+        log::error!("PASSWORD_PEPPER env var not set");
+        AppError::UnprocessableEntity("PASSWORD_PEPPER env var not set".into())
+    })
 }
