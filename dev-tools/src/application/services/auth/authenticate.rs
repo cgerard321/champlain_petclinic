@@ -1,20 +1,19 @@
 use crate::application::ports::output::auth_repo_port::DynAuthRepo;
 use crate::application::ports::output::user_repo_port::DynUsersRepo;
-use crate::application::services::auth::utils::verify_password;
-use crate::application::services::utils::get_pepper;
 use crate::domain::entities::session::SessionEntity;
 use crate::shared::config::SESSION_EXPIRATION_HR;
 use crate::shared::error::{AppError, AppResult};
 use chrono::{Duration, NaiveDateTime, Utc};
 use uuid::Uuid;
+use crate::application::ports::output::crypto_port::DynCrypto;
 
 pub async fn authenticate(
+    crypto_functions: &DynCrypto,
     auth_db: &DynAuthRepo,
     user_db: &DynUsersRepo,
     email: &str,
     password: &str,
 ) -> AppResult<SessionEntity> {
-    let pep = get_pepper();
     let auth_obj = user_db
         .get_user_auth_by_email_for_login(email)
         .await
@@ -24,7 +23,7 @@ pub async fn authenticate(
         return Err(AppError::Forbidden);
     }
 
-    if !verify_password(&auth_obj.pass_hash, password, &pep)? {
+    if !crypto_functions.verify_hash(&auth_obj.pass_hash, password)? {
         return Err(AppError::Unauthorized);
     }
 

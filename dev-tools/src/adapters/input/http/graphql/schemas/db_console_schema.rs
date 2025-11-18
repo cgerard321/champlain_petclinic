@@ -1,6 +1,6 @@
-use crate::adapters::input::http::graphql_handler::contracts::mongo::MongoResultResponseContract;
-use crate::adapters::input::http::graphql_handler::contracts::service::ServiceResponseContract;
-use crate::adapters::input::http::graphql_handler::contracts::sql::SqlResultResponseContract;
+use crate::adapters::input::http::graphql::contracts::mongo::MongoResultResponseContract;
+use crate::adapters::input::http::graphql::contracts::service::ServiceResponseContract;
+use crate::adapters::input::http::graphql::contracts::sql::SqlResultResponseContract;
 use crate::application::ports::input::docker_port::DynDockerPort;
 use crate::application::ports::input::mongo_console_port::MongoConsolePort;
 use crate::application::ports::input::sql_console_port::SqlConsolePort;

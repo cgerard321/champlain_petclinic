@@ -1,4 +1,4 @@
-use crate::application::ports::output::db_drivers::mongo_driver::MongoDriverPort;
+use crate::application::ports::output::db_drivers_port::mongo_driver::MongoDriverPort;
 use crate::application::services::db_consoles::projections::MongoResult;
 use crate::shared::error::{AppError, AppResult};
 use mongodb::bson::{Bson, Document};

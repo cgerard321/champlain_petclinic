@@ -1,5 +1,5 @@
 use crate::application::ports::input::docker_port::DockerPort;
-use crate::application::ports::output::docker_api::DynDockerAPI;
+use crate::application::ports::output::docker_api_port::DynDockerAPI;
 use crate::application::services::docker::params::{RestartContainerParams, ViewLogsParams};
 use crate::application::services::docker::projections::ServiceProjection;
 use crate::application::services::docker::restart_container::restart_container;

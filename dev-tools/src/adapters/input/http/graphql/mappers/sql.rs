@@ -1,4 +1,4 @@
-use crate::adapters::input::http::graphql_handler::contracts::sql::SqlResultResponseContract;
+use crate::adapters::input::http::graphql::contracts::sql::SqlResultResponseContract;
 use crate::application::services::db_consoles::projections::SqlResult;
 
 impl From<SqlResult> for SqlResultResponseContract {

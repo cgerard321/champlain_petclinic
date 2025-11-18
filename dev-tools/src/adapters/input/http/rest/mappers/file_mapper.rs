@@ -1,4 +1,4 @@
-use crate::adapters::input::http::rest_handler::contracts::file_contracts::file::FileResponseContract;
+use crate::adapters::input::http::rest::contracts::file_contracts::file::FileResponseContract;
 use crate::domain::entities::file::FileEntity;
 
 impl From<FileEntity> for FileResponseContract {

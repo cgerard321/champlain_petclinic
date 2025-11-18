@@ -1,4 +1,4 @@
-use crate::adapters::input::http::rest_handler::contracts::docker_contracts::docker::LogResponseContract;
+use crate::adapters::input::http::rest::contracts::docker_contracts::docker::LogResponseContract;
 use crate::domain::entities::docker::DockerLogEntity;
 
 impl From<DockerLogEntity> for LogResponseContract {

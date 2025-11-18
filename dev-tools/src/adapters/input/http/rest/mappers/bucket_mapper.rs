@@ -1,4 +1,4 @@
-use crate::adapters::input::http::rest_handler::contracts::file_contracts::bucket::BucketResponseContract;
+use crate::adapters::input::http::rest::contracts::file_contracts::bucket::BucketResponseContract;
 use crate::domain::entities::bucket::BucketEntity;
 
 impl From<BucketEntity> for BucketResponseContract {

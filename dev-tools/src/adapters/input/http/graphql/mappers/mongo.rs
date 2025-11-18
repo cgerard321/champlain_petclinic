@@ -1,4 +1,4 @@
-use crate::adapters::input::http::graphql_handler::contracts::mongo::MongoResultResponseContract;
+use crate::adapters::input::http::graphql::contracts::mongo::MongoResultResponseContract;
 use crate::application::services::db_consoles::projections::MongoResult;
 use async_graphql::Json;
 

@@ -1,4 +1,4 @@
-use crate::adapters::input::http::rest_handler::contracts::user_contracts::user::UserLoginRequestContract;
+use crate::adapters::input::http::rest::contracts::user_contracts::user::UserLoginRequestContract;
 use crate::application::ports::input::auth_port::DynAuthPort;
 use crate::application::services::auth::params::UserLoginParams;
 use crate::shared::error::{AppError, AppResult};

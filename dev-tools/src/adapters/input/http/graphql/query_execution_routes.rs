@@ -1,4 +1,4 @@
-use crate::adapters::input::http::graphql_handler::schemas::db_console_schema::{
+use crate::adapters::input::http::graphql::schemas::db_console_schema::{
     MutationRoot, QueryRoot,
 };
 use crate::adapters::input::http::guards::auth_guard::AuthenticatedUser;

@@ -11,9 +11,9 @@ use crate::application::ports::input::mongo_console_port::DynMongoConsolePort;
 use crate::application::ports::input::sql_console_port::DynSqlConsolePort;
 use crate::application::ports::input::user_port::DynUsersPort;
 use crate::application::ports::output::auth_repo_port::DynAuthRepo;
-use crate::application::ports::output::db_drivers::mongo_driver::DynMongoDriver;
-use crate::application::ports::output::db_drivers::mysql_driver::DynMySqlDriver;
-use crate::application::ports::output::docker_api::DynDockerAPI;
+use crate::application::ports::output::db_drivers_port::mongo_driver::DynMongoDriver;
+use crate::application::ports::output::db_drivers_port::mysql_driver::DynMySqlDriver;
+use crate::application::ports::output::docker_api_port::DynDockerAPI;
 use crate::application::ports::output::file_storage_port::DynFileStorage;
 use crate::application::ports::output::user_repo_port::DynUsersRepo;
 use crate::application::services::auth::service::AuthService;
@@ -37,6 +37,7 @@ use sqlx::mysql::MySqlPoolOptions;
 use sqlx::MySqlPool;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
+use crate::adapters::output::crypto::crypto_functions::CryptoFunctions;
 
 pub fn stage() -> AdHoc {
     AdHoc::on_ignite("SQLx (MySQL)", |rocket| async move {
@@ -78,13 +79,17 @@ pub fn stage() -> AdHoc {
 
         let storage: DynFileStorage = Arc::new(store);
 
+        let crypto_port = CryptoFunctions::new();
+        let crypto = Arc::new(crypto_port);
+
         // Ports
         let auth_port: DynAuthPort = Arc::new(AuthService::new(
             dyn_auth_repo.clone(),
             dyn_user_repo.clone(),
+            crypto.clone()
         ));
         let files_port: DynFilesPort = Arc::new(FilesService::new(storage.clone()));
-        let users_port: DynUsersPort = Arc::new(UsersService::new(dyn_user_repo.clone()));
+        let users_port: DynUsersPort = Arc::new(UsersService::new(dyn_user_repo.clone(), crypto.clone()));
 
         if let Err(e) = add_default_user(&users_port, &pool).await {
             log::error!("Failed to insert default user: {e}");

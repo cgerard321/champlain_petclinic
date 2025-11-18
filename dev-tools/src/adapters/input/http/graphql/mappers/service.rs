@@ -1,4 +1,4 @@
-use crate::adapters::input::http::graphql_handler::contracts::service::ServiceResponseContract;
+use crate::adapters::input::http::graphql::contracts::service::ServiceResponseContract;
 use crate::application::services::docker::projections::ServiceProjection;
 
 impl From<ServiceProjection> for ServiceResponseContract {
