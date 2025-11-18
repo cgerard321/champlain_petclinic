@@ -44,11 +44,11 @@ out/
 .vs/ProjectSettings.json
 
 ### Keep VS Code settings for frontend projects ###
-!/employee-frontend/.vscode/
-!/employee-frontend/.vscode/**
+!employee-frontend/.vscode/
+!employee-frontend/.vscode/**
 
-!/petclinic-frontend/.vscode/
-!/petclinic-frontend/.vscode/**
+!petclinic-frontend/.vscode/
+!petclinic-frontend/.vscode/**
 
 # Created by https://www.toptal.com/developers/gitignore/api/go
 # Edit at https://www.toptal.com/developers/gitignore?templates=go
@@ -105,7 +105,6 @@ mailer-service/docs
 
 # Ignore environment files
 *.env
-.env
 
 
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
@@ -122,7 +121,6 @@ mailer-service/docs
 /build
 
 # misc
-.DS_Store
 .env.local
 .env.development.local
 .env.test.local
