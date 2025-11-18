@@ -43,6 +43,12 @@ out/
 .vs/slnx.sqlite
 .vs/ProjectSettings.json
 
+### Keep VS Code settings for frontend projects ###
+!/employee-frontend/.vscode/
+!/employee-frontend/.vscode/**
+
+!/petclinic-frontend/.vscode/
+!/petclinic-frontend/.vscode/**
 
 # Created by https://www.toptal.com/developers/gitignore/api/go
 # Edit at https://www.toptal.com/developers/gitignore?templates=go
