@@ -1,6 +1,5 @@
 use crate::application::ports::input::auth_port::AuthPort;
 use crate::application::ports::output::auth_repo_port::DynAuthRepo;
-use crate::application::ports::output::crypto_port::DynCrypto;
 use crate::application::ports::output::user_repo_port::DynUsersRepo;
 use crate::application::services::auth::authenticate::authenticate;
 use crate::application::services::auth::find_session_by_id::find_session_by_id;
@@ -10,6 +9,7 @@ use crate::domain::entities::session::SessionEntity;
 use crate::domain::entities::user::UserEntity;
 use crate::shared::error::{AppError, AppResult};
 use uuid::Uuid;
+use crate::application::ports::output::crypto_port::DynCrypto;
 
 pub struct AuthService {
     auth_repo: DynAuthRepo,
@@ -36,7 +36,7 @@ impl AuthPort for AuthService {
             user_login_params.email.as_str(),
             user_login_params.password.as_str(),
         )
-        .await
+            .await
     }
 
     async fn logout(&self, session_id: Uuid) -> AppResult<()> {
@@ -45,15 +45,7 @@ impl AuthPort for AuthService {
 
     async fn validate_session(&self, session_id: Uuid) -> AppResult<UserEntity> {
         log::info!("Validating session {}", session_id);
-        let session = find_session_by_id(&self.auth_repo, session_id)
-            .await
-            .map_err(|e| match e {
-                AppError::NotFound(_) => {
-                    log::info!("Session {} not found", session_id);
-                    AppError::Unauthorized
-                }
-                _ => e,
-            })?;
+        let session = find_session_by_id(&self.auth_repo, session_id).await?;
 
         log::info!("Session found: {:?}", session);
 
