@@ -75,7 +75,7 @@ out/
 /target/
 .env
 cover.html
-app
+/dev-tools/app/
 /dev-tools/data/
 /dev-tools/target/
 
