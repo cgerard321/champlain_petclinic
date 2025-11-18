@@ -93,6 +93,7 @@ obj/
 _ReSharper*/
 *.ncrunch*
 *.ncrunchsolution
+wwwroot/lib/
 
 # Ignore swagger docs for mailer
 mailer-service/docs
