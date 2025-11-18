@@ -79,6 +79,21 @@ app
 data/
 /dev-tools/target/
 
+## C# ##
+bin/
+obj/
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+*.cache
+*.ide
+*.dotCover
+_ReSharper*/
+*.ncrunch*
+*.ncrunchsolution
+
 # Ignore swagger docs for mailer
 mailer-service/docs
 
