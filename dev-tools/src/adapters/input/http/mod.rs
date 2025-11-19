@@ -1,3 +1,3 @@
-pub mod graphql_handler;
+pub mod graphql;
 mod guards;
-pub mod rest_handler;
+pub mod rest;

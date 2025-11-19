@@ -1,4 +1,4 @@
-use crate::application::ports::output::db_drivers::mysql_driver::MySqlDriverPort;
+use crate::application::ports::output::db_drivers_port::mysql_driver::MySqlDriverPort;
 use crate::application::services::db_consoles::projections::SqlResult;
 use crate::shared::error::{AppError, AppResult};
 use async_trait::async_trait;

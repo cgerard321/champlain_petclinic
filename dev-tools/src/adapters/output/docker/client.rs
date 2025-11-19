@@ -1,5 +1,5 @@
 use crate::adapters::output::docker::error::map_docker_error;
-use crate::application::ports::output::docker_api::DockerAPIPort;
+use crate::application::ports::output::docker_api_port::DockerAPIPort;
 use crate::domain::entities::docker::DockerLogEntity;
 use crate::shared::config::DEFAULT_TAIL_AMOUNT;
 use crate::shared::error::{AppError, AppResult};
