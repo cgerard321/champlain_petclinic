@@ -62,7 +62,7 @@ impl AuthRepoPort for MySqlAuthRepo {
             .map_err(|e| map_sqlx_err(e, "Sessions"))?;
 
         let Some(row) = row else {
-            return Err(AppError::Unauthorized);
+            return Err(AppError::NotFound("No sessions found".to_string()));
         };
 
         log::info!("Session found: {:?}", row);

@@ -8,10 +8,6 @@ use std::fmt::Display;
 use std::sync::LazyLock;
 use uuid::Uuid;
 
-pub fn get_pepper() -> String {
-    std::env::var("PASSWORD_PEPPER")
-        .expect("Missing password pepper")
-}
 
 pub fn resolve_descriptor_by_container(container: &str) -> Option<&'static ServiceDescriptor> {
     let cleaned_name = container.trim();

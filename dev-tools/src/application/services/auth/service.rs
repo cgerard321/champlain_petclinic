@@ -9,16 +9,19 @@ use crate::domain::entities::session::SessionEntity;
 use crate::domain::entities::user::UserEntity;
 use crate::shared::error::{AppError, AppResult};
 use uuid::Uuid;
+use crate::application::ports::output::crypto_port::DynCrypto;
 
 pub struct AuthService {
     auth_repo: DynAuthRepo,
     users_repo: DynUsersRepo,
+    crypto: DynCrypto,
 }
 impl AuthService {
-    pub fn new(auth_repo: DynAuthRepo, users_repo: DynUsersRepo) -> Self {
+    pub fn new(auth_repo: DynAuthRepo, users_repo: DynUsersRepo, crypto: DynCrypto) -> Self {
         Self {
             auth_repo,
             users_repo,
+            crypto,
         }
     }
 }
@@ -27,6 +30,7 @@ impl AuthService {
 impl AuthPort for AuthService {
     async fn authenticate(&self, user_login_params: UserLoginParams) -> AppResult<SessionEntity> {
         authenticate(
+            &self.crypto,
             &self.auth_repo,
             &self.users_repo,
             user_login_params.email.as_str(),

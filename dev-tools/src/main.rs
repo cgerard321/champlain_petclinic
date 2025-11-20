@@ -1,9 +1,9 @@
 #[macro_use]
 extern crate rocket;
 
-use crate::adapters::input::http::graphql_handler::{routes_graphql, schemas};
-use crate::adapters::input::http::rest_handler::error::register_catchers;
-use crate::adapters::input::http::rest_handler::{routes, routes_docker};
+use crate::adapters::input::http::graphql::{routes_graphql, schemas};
+use crate::adapters::input::http::rest::error::register_catchers;
+use crate::adapters::input::http::rest::{routes, routes_docker};
 use bootstrap::stage;
 use rocket::State;
 

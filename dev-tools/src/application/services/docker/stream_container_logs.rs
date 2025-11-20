@@ -1,4 +1,4 @@
-use crate::application::ports::output::docker_api::DynDockerAPI;
+use crate::application::ports::output::docker_api_port::DynDockerAPI;
 use crate::application::services::docker::params::ViewLogsParams;
 use crate::application::services::utils::ServiceDescriptor;
 use crate::domain::entities::docker::DockerLogEntity;
