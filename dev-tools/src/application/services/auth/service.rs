@@ -5,9 +5,9 @@ use crate::application::services::auth::authenticate::authenticate;
 use crate::application::services::auth::find_session_by_id::find_session_by_id;
 use crate::application::services::auth::logout::remove_session;
 use crate::application::services::auth::params::UserLoginParams;
-use crate::core::error::{AppError, AppResult};
 use crate::domain::entities::session::SessionEntity;
 use crate::domain::entities::user::UserEntity;
+use crate::shared::error::{AppError, AppResult};
 use uuid::Uuid;
 
 pub struct AuthService {
@@ -32,7 +32,7 @@ impl AuthPort for AuthService {
             user_login_params.email.as_str(),
             user_login_params.password.as_str(),
         )
-        .await
+            .await
     }
 
     async fn logout(&self, session_id: Uuid) -> AppResult<()> {

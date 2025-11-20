@@ -1,7 +1,7 @@
 use crate::application::services::auth::params::UserLoginParams;
-use crate::core::error::AppResult;
 use crate::domain::entities::session::SessionEntity;
 use crate::domain::entities::user::UserEntity;
+use crate::shared::error::AppResult;
 use uuid::Uuid;
 
 #[async_trait::async_trait]
