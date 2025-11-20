@@ -4,7 +4,7 @@ import com.petclinic.billing.businesslayer.BillService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.util.retry.Retry;
-import reactor.core.publisher.Mono;
+// Note: method below subscribes to the reactive chain for fire-and-forget scheduling
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -26,14 +26,16 @@ public class BillingScheduler {
      *   - Logs each retry and permanent failure
      */
     @Scheduled(cron = "0 0 0 * * ?")
-    public Mono<Void> markOverdueBills() {
-        return billService.updateOverdueBills()
+    public void markOverdueBills() {
+        // subscribe() because @Scheduled does not auto-subscribe reactive types; this is fire-and-forget
+        billService.updateOverdueBills()
             .retryWhen(
                 Retry.backoff(MAX_RETRIES, java.time.Duration.ofMillis(RETRY_DELAY_MS))
                     .doBeforeRetry(retrySignal ->
                         log.warn("Retrying updateOverdueBills (attempt {}/{}): {}", retrySignal.totalRetries() + 1, MAX_RETRIES, retrySignal.failure())
                     )
             )
-            .doOnError(error -> log.error("Permanently failed to update overdue bills after {} retries", MAX_RETRIES, error));
+            .doOnError(error -> log.error("Permanently failed to update overdue bills after {} retries", MAX_RETRIES, error))
+            .subscribe();
     }
 }

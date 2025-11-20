@@ -4,16 +4,19 @@ Back to [Main page](../README.md)
 
 <!-- TOC -->
 
-* [Backend Standards (Java Spring Boot 3.x)](#backend-standards-java-spring-boot-3x)
-  * [API Gateway Controller Standards](#api-gateway-controller-standards)
-    * [API Versioning](#api-versioning)
-    * [Security Annotations](#security-annotations)
-    * [Response Patterns](#response-patterns)
-  * [Service Client Standards](#service-client-standards)
-* [API Design Guidelines](#api-design-guidelines)
-  * [Endpoint Patterns](#endpoint-patterns)
-  * [Request/Response Standards](#requestresponse-standards)
-* [Scheduled Tasks in Spring Boot](#scheduled-tasks-in-spring-boot)
+- [Backend Standards (Java Spring Boot 3.x)](#backend-standards-java-spring-boot-3x)
+  - [API Gateway Controller Standards](#api-gateway-controller-standards)
+    - [API Versioning](#api-versioning)
+    - [Security Annotations](#security-annotations)
+    - [Response Patterns](#response-patterns)
+  - [Service Client Standards](#service-client-standards)
+- [API Design Guidelines](#api-design-guidelines)
+  - [Endpoint Patterns](#endpoint-patterns)
+  - [Request/Response Standards](#requestresponse-standards)
+- [Scheduled Tasks in Spring Boot](#scheduled-tasks-in-spring-boot)
+
+<!-- /TOC -->
+
 ## API Gateway Controller Standards
 
 ### API Versioning

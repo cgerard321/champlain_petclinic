@@ -45,9 +45,10 @@ public class BillingScheduler {
      * Retries up to 3 times with 5s delay between attempts.
      */
     @Scheduled(cron = "0 0 0 * * ?")
-    public reactor.core.publisher.Mono<Void> markOverdueBills() {
+    public void markOverdueBills() {
         // The actual MAX_RETRIES constant is defined in BillingScheduler.java; use the same constant in your implementation
-        return billService.updateOverdueBills()
+        // @Scheduled methods should subscribe to reactive chains if they are fire-and-forget.
+        billService.updateOverdueBills()
             .retryWhen(
                 reactor.util.retry.Retry.backoff(MAX_RETRIES, java.time.Duration.ofSeconds(5))
                     .doBeforeRetry(retrySignal ->
@@ -57,7 +58,8 @@ public class BillingScheduler {
             )
             .doOnError(error -> org.slf4j.LoggerFactory.getLogger(BillingScheduler.class)
                     .error("Permanently failed to update overdue bills after {} retries", MAX_RETRIES, error)
-            );
+            )
+            .subscribe();
     }
 }
 ```
@@ -86,7 +88,6 @@ public class BillingSchedulerTest {
     public void testMarkOverdueBillsRuns() throws InterruptedException {
         Mockito.when(billService.updateOverdueBills()).thenReturn(reactor.core.publisher.Mono.empty());
         billingScheduler.markOverdueBills();
-        Thread.sleep(100); // Wait for async subscription
         Mockito.verify(billService, Mockito.times(1)).updateOverdueBills();
     }
 }

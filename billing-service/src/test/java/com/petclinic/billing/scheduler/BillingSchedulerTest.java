@@ -20,25 +20,25 @@ public class BillingSchedulerTest {
     private BillingScheduler billingScheduler;
 
     @Test
-    public void testMarkOverdueBillsRuns() throws InterruptedException {
+    public void testMarkOverdueBillsRuns() {
         Mockito.when(billService.updateOverdueBills()).thenReturn(Mono.empty());
-        // Call the reactive method and block to allow the chain to execute synchronously in the test
-        billingScheduler.markOverdueBills().block();
+        // The scheduler subscribes internally (fire-and-forget). Verify interaction.
+        billingScheduler.markOverdueBills();
         Mockito.verify(billService, Mockito.times(1)).updateOverdueBills();
     }
 
     @Test
-    public void testMarkOverdueBillsHandlesError() throws InterruptedException {
+    public void testMarkOverdueBillsHandlesError() {
         Mockito.when(billService.updateOverdueBills())
             .thenReturn(Mono.error(new RuntimeException("Simulated error")));
-        billingScheduler.markOverdueBills().onErrorResume(e -> Mono.empty()).block();
+        billingScheduler.markOverdueBills();
         Mockito.verify(billService, Mockito.times(1)).updateOverdueBills();
     }
 
     @Test
-    public void testMarkOverdueBillsHandlesCompletedMono() throws InterruptedException {
+    public void testMarkOverdueBillsHandlesCompletedMono() {
         Mockito.when(billService.updateOverdueBills()).thenReturn(Mono.justOrEmpty(null));
-        billingScheduler.markOverdueBills().block();
+        billingScheduler.markOverdueBills();
         Mockito.verify(billService, Mockito.times(1)).updateOverdueBills();
     }
 }
