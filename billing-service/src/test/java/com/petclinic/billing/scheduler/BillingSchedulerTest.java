@@ -4,7 +4,6 @@ import com.petclinic.billing.businesslayer.BillService;
 import org.junit.jupiter.api.Test;
 
 import org.mockito.InjectMocks;
-import reactor.test.StepVerifier;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -29,24 +28,27 @@ public class BillingSchedulerTest {
     }
 
     @Test
-    public void testMarkOverdueBillsHandlesError() {
+    public void testMarkOverdueBillsHandlesError() throws InterruptedException {
         Mockito.when(billService.updateOverdueBills())
             .thenReturn(Mono.error(new RuntimeException("Simulated error")));
         billingScheduler.markOverdueBills();
+        Thread.sleep(100); // Wait for async subscription
         Mockito.verify(billService, Mockito.times(1)).updateOverdueBills();
     }
 
     @Test
-    public void testMarkOverdueBillsHandlesEmptyMono() {
+    public void testMarkOverdueBillsHandlesEmptyMono() throws InterruptedException {
         Mockito.when(billService.updateOverdueBills()).thenReturn(Mono.empty());
         billingScheduler.markOverdueBills();
+        Thread.sleep(100);
         Mockito.verify(billService, Mockito.times(1)).updateOverdueBills();
     }
 
     @Test
-    public void testMarkOverdueBillsHandlesCompletedMono() {
+    public void testMarkOverdueBillsHandlesCompletedMono() throws InterruptedException {
         Mockito.when(billService.updateOverdueBills()).thenReturn(Mono.justOrEmpty(null));
         billingScheduler.markOverdueBills();
+        Thread.sleep(100); // Wait for async subscription
         Mockito.verify(billService, Mockito.times(1)).updateOverdueBills();
     }
 }
