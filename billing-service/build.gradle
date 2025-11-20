@@ -23,7 +23,7 @@ dependencies {
 	implementation 'com.itextpdf:itextpdf:5.5.13.2'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
-	implementation 'io.micrometer:micrometer-registry-prometheus'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
 	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
 	testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo'
 
