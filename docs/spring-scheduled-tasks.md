@@ -34,6 +34,7 @@ Create a component class and use the `@Scheduled` annotation. Example for markin
 ```java
 @Component
 public class BillingScheduler {
+    private static final int MAX_RETRIES = 3; // example constant for the snippet
     private final BillService billService;
 
     public BillingScheduler(BillService billService) {
@@ -85,8 +86,10 @@ public class BillingSchedulerTest {
     private BillingScheduler billingScheduler;
 
     @Test
-    public void testMarkOverdueBillsRuns() throws InterruptedException {
+    public void testMarkOverdueBillsRuns() {
         Mockito.when(billService.updateOverdueBills()).thenReturn(reactor.core.publisher.Mono.empty());
+        // This unit test calls the scheduled method directly; it verifies the method triggers the service call.
+        // It does NOT verify that Spring's scheduling infrastructure actually runs the method on a schedule.
         billingScheduler.markOverdueBills();
         Mockito.verify(billService, Mockito.times(1)).updateOverdueBills();
     }
