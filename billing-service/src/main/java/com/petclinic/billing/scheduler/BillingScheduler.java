@@ -34,6 +34,7 @@ public class BillingScheduler {
                         log.warn("Retrying updateOverdueBills (attempt {}/{}): {}", retrySignal.totalRetries() + 1, MAX_RETRIES, retrySignal.failure())
                     )
             )
-            .doOnError(error -> log.error("Permanently failed to update overdue bills after {} retries", MAX_RETRIES, error));
+            .doOnError(error -> log.error("Permanently failed to update overdue bills after {} retries", MAX_RETRIES, error))
+            .onErrorResume(e -> Mono.empty());
     }
 }
