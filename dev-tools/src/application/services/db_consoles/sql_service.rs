@@ -1,5 +1,5 @@
 use crate::application::ports::input::sql_console_port::SqlConsolePort;
-use crate::application::ports::output::db_drivers::mysql_driver::DynMySqlDriver;
+use crate::application::ports::output::db_drivers_port::mysql_driver::DynMySqlDriver;
 use crate::application::services::db_consoles::projections::SqlResult;
 use crate::application::services::user_context::{
     verify_service_or_admin_perms, UserContext,
