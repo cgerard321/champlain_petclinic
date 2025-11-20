@@ -45,18 +45,17 @@ public class BillingScheduler {
      * Retries up to 3 times with 5s delay between attempts.
      */
     @Scheduled(cron = "0 0 0 * * ?")
-    public void markOverdueBills() {
-        billService.updateOverdueBills()
+    public reactor.core.publisher.Mono<Void> markOverdueBills() {
+        // The actual MAX_RETRIES constant is defined in BillingScheduler.java; use the same constant in your implementation
+        return billService.updateOverdueBills()
             .retryWhen(
                 reactor.util.retry.Retry.backoff(MAX_RETRIES, java.time.Duration.ofSeconds(5))
                     .doBeforeRetry(retrySignal ->
                         org.slf4j.LoggerFactory.getLogger(BillingScheduler.class)
-                            .warn("Retrying updateOverdueBills (attempt {}/{}): {}", retrySignal.totalRetries() + 1, MAX_RETRIES, retrySignal.failure().toString())
+                            .warn("Retrying updateOverdueBills (attempt {}/{}): {}", retrySignal.totalRetries() + 1, MAX_RETRIES, retrySignal.failure())
                     )
             )
-            .subscribe(
-                null,
-                error -> org.slf4j.LoggerFactory.getLogger(BillingScheduler.class)
+            .doOnError(error -> org.slf4j.LoggerFactory.getLogger(BillingScheduler.class)
                     .error("Permanently failed to update overdue bills after {} retries", MAX_RETRIES, error)
             );
     }
