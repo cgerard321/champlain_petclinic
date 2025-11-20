@@ -48,16 +48,16 @@ public class BillingScheduler {
     public void markOverdueBills() {
         billService.updateOverdueBills()
             .retryWhen(
-                reactor.util.retry.Retry.backoff(3, java.time.Duration.ofSeconds(5))
+                reactor.util.retry.Retry.backoff(MAX_RETRIES, java.time.Duration.ofSeconds(5))
                     .doBeforeRetry(retrySignal ->
                         org.slf4j.LoggerFactory.getLogger(BillingScheduler.class)
-                            .warn("Retrying updateOverdueBills (attempt {}/3): {}", retrySignal.totalRetries() + 1, retrySignal.failure().toString())
+                            .warn("Retrying updateOverdueBills (attempt {}/{}): {}", retrySignal.totalRetries() + 1, MAX_RETRIES, retrySignal.failure().toString())
                     )
             )
             .subscribe(
                 null,
                 error -> org.slf4j.LoggerFactory.getLogger(BillingScheduler.class)
-                    .error("Permanently failed to update overdue bills after 3 retries", error)
+                    .error("Permanently failed to update overdue bills after {} retries", MAX_RETRIES, error)
             );
     }
 }
