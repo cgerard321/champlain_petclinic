@@ -1,5 +1,5 @@
 docker-compose.prod.yml dylan.brassard@outlook.com
 dev-tools/ dylan.brassard@outlook.com
 .github/CODEOWNERS dylan.brassard@outlook.com cgerard@champlaincollege.qc.ca
-petclinic-frontend/.vscode cgerard@champlaincollege.qc.ca
-employee-frontend/.vscode cgerard@champlaincollege.qc.ca
+petclinic-frontend/.vscode/ cgerard@champlaincollege.qc.ca
+employee-frontend/.vscode/ cgerard@champlaincollege.qc.ca
