@@ -46,10 +46,10 @@ impl ServicesRepoPort for MySqlServicesRepo {
         let s = sqlx::query_as::<_, Service>(
             "SELECT docker_service, service_role FROM services WHERE docker_service = ?",
         )
-        .bind(service_name)
-        .fetch_one(&*self.pool)
-        .await
-        .map_err(|e| map_sqlx_err(e, "Service"))?;
+            .bind(service_name)
+            .fetch_one(&*self.pool)
+            .await
+            .map_err(|e| map_sqlx_err(e, "Service"))?;
 
         let dbs = self.get_service_dbs(service_name).await?;
 
@@ -66,10 +66,10 @@ impl ServicesRepoPort for MySqlServicesRepo {
              FROM service_dbs
              WHERE service_docker_service = ?",
         )
-        .bind(service_name)
-        .fetch_all(&*self.pool)
-        .await
-        .map_err(|e| map_sqlx_err(e, "Service DB"))?;
+            .bind(service_name)
+            .fetch_all(&*self.pool)
+            .await
+            .map_err(|e| map_sqlx_err(e, "Service DB"))?;
 
         let dbs = if db_rows.is_empty() {
             None

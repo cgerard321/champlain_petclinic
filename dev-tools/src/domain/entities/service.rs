@@ -14,20 +14,22 @@ impl ServiceEntity {
         &self,
         db_name: Option<String>,
     ) -> AppResult<&ServiceDbEntity> {
+        let dbs = self.dbs.as_ref().ok_or_else(|| {
+            AppError::BadRequest(format!(
+                "Service '{}' has no associated database",
+                self.docker_service
+            ))
+        })?;
+
         let db = if let Some(db_name) = db_name {
-            self.dbs
-                .as_ref()
-                .unwrap()
-                .iter()
-                .find(|db| db.db_name == db_name)
-                .ok_or_else(|| {
-                    AppError::BadRequest(format!(
-                        "Service '{}' has no associated database named '{}'",
-                        self.docker_service, db_name
-                    ))
-                })?
+            dbs.iter().find(|db| db.db_name == db_name).ok_or_else(|| {
+                AppError::BadRequest(format!(
+                    "Service '{}' has no associated database named '{}'",
+                    self.docker_service, db_name
+                ))
+            })?
         } else {
-            self.dbs.as_ref().unwrap().first().ok_or_else(|| {
+            dbs.first().ok_or_else(|| {
                 AppError::BadRequest(format!(
                     "Service '{}' has no associated database",
                     self.docker_service
@@ -58,10 +60,10 @@ pub enum DbType {
 impl Display for DbType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let str = match self {
-            DbType::Mongo => "Mongo".to_string(),
-            DbType::MySQL => "MySQL".to_string(),
-            DbType::Postgres => "Postgres".to_string(),
-            DbType::Unknown => "unknown".to_string(),
+            DbType::Mongo => "Mongo",
+            DbType::MySQL => "MySQL",
+            DbType::Postgres => "Postgres",
+            DbType::Unknown => "unknown",
         };
         write!(f, "{}", str)
     }
@@ -74,6 +76,7 @@ impl PartialEq for DbType {
             (DbType::Mongo, DbType::Mongo)
                 | (DbType::MySQL, DbType::MySQL)
                 | (DbType::Postgres, DbType::Postgres)
+                | (DbType::Unknown, DbType::Unknown)
         )
     }
 }

@@ -31,7 +31,7 @@ impl DockerPort for DockerService {
         &self,
         view_logs_params: ViewLogsParams,
         user_ctx: UserContext,
-    ) -> AppResult<Pin<Box<dyn Stream<Item = Result<DockerLogEntity, AppError>> + Send>>> {
+    ) -> AppResult<Pin<Box<dyn Stream<Item=Result<DockerLogEntity, AppError>> + Send>>> {
         log::info!(
             "Streaming logs for container: {}",
             view_logs_params.container_name

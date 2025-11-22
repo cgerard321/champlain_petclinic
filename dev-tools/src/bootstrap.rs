@@ -4,6 +4,7 @@ use crate::adapters::output::db::mysql::console::driver::MySqlDriver;
 use crate::adapters::output::db::mysql::repo::auth_repo::MySqlAuthRepo;
 use crate::adapters::output::db::mysql::repo::services_repo::MySqlServicesRepo;
 use crate::adapters::output::db::mysql::repo::users_repo::MySqlUsersRepo;
+use crate::adapters::output::db::postgres::console::driver::PostgresDriver;
 use crate::adapters::output::docker::client::BollardDockerAPI;
 use crate::adapters::output::minio::client::MinioStore;
 use crate::application::ports::input::auth_port::DynAuthPort;
@@ -40,7 +41,6 @@ use sqlx::mysql::MySqlPoolOptions;
 use sqlx::MySqlPool;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
-use crate::adapters::output::db::postgres::console::driver::PostgresDriver;
 
 pub fn stage() -> AdHoc {
     AdHoc::on_ignite("SQLx (MySQL)", |rocket| async move {
@@ -191,7 +191,6 @@ pub async fn build_mongo_drivers_from_services(
     map
 }
 
-
 pub async fn build_sql_drivers_from_services(
     dyn_services_repo: DynServicesRepo,
 ) -> HashMap<String, Arc<DynSqlDriver>> {
@@ -230,10 +229,7 @@ pub async fn build_sql_drivers_from_services(
                     Arc::new(MySqlDriver::new(&url)) as Arc<DynSqlDriver>
                 }
                 DbType::Postgres => {
-                    let url = format!(
-                        "postgres://{}:{}@{}/{}",
-                        user, pass, db.db_host, db.db_name
-                    );
+                    let url = format!("postgres://{}:{}@{}/{}", user, pass, db.db_host, db.db_name);
                     Arc::new(PostgresDriver::new(&url)) as Arc<DynSqlDriver>
                 }
                 _ => continue,
@@ -280,20 +276,20 @@ async fn add_default_roles(pool: &MySqlPool) -> Result<(), sqlx::Error> {
         (?, 'BILLING_SERVICE_DEV',    'Billing Service Dev');
     "#,
     )
-    .bind(&sudo)
-    .bind(&admin)
-    .bind(&reader)
-    .bind(&editor)
-    .bind(&auth_service_dev)
-    .bind(&vet_service_dev)
-    .bind(&visits_service_dev)
-    .bind(&customers_service_dev)
-    .bind(&products_service_dev)
-    .bind(&cart_service_dev)
-    .bind(&inventory_service_dev)
-    .bind(&billing_service_dev)
-    .execute(pool)
-    .await?;
+        .bind(&sudo)
+        .bind(&admin)
+        .bind(&reader)
+        .bind(&editor)
+        .bind(&auth_service_dev)
+        .bind(&vet_service_dev)
+        .bind(&visits_service_dev)
+        .bind(&customers_service_dev)
+        .bind(&products_service_dev)
+        .bind(&cart_service_dev)
+        .bind(&inventory_service_dev)
+        .bind(&billing_service_dev)
+        .execute(pool)
+        .await?;
     Ok(())
 }
 
@@ -382,7 +378,6 @@ async fn add_default_services(pool: &MySqlPool) -> Result<(), sqlx::Error> {
             "DB_PASSWORD",
             "mongo-visits",
             "MONGO",
-            Some(VISITS_SERVICE_DEV_ROLE),
         ),
         (
             "inventory-service",
@@ -391,7 +386,6 @@ async fn add_default_services(pool: &MySqlPool) -> Result<(), sqlx::Error> {
             "DB_PASSWORD",
             "mongo-inventory",
             "MONGO",
-            Some(INVENTORY_SERVICE_DEV_ROLE),
         ),
         (
             "vet-service",
@@ -400,7 +394,6 @@ async fn add_default_services(pool: &MySqlPool) -> Result<(), sqlx::Error> {
             "DB_PASSWORD",
             "mongo-vet",
             "MONGO",
-            Some(VET_SERVICE_DEV_ROLE),
         ),
         (
             "vet-service",
@@ -409,7 +402,6 @@ async fn add_default_services(pool: &MySqlPool) -> Result<(), sqlx::Error> {
             "DB_PASSWORD",
             "postgres-vet",
             "POSTGRES",
-            Some(VET_SERVICE_DEV_ROLE),
         ),
         (
             "customers-service-reactive",
@@ -418,7 +410,6 @@ async fn add_default_services(pool: &MySqlPool) -> Result<(), sqlx::Error> {
             "DB_PASSWORD",
             "mongo-customers",
             "MONGO",
-            Some(CUSTOMERS_SERVICE_DEV_ROLE),
         ),
         (
             "billing-service",
@@ -427,7 +418,6 @@ async fn add_default_services(pool: &MySqlPool) -> Result<(), sqlx::Error> {
             "DB_PASSWORD",
             "mongo-billing",
             "MONGO",
-            Some(BILLING_SERVICE_DEV_ROLE),
         ),
         (
             "products-service",
@@ -436,7 +426,6 @@ async fn add_default_services(pool: &MySqlPool) -> Result<(), sqlx::Error> {
             "DB_PASSWORD",
             "mongo-products",
             "MONGO",
-            Some(PRODUCTS_SERVICE_DEV_ROLE),
         ),
         (
             "cart-service",
@@ -445,7 +434,6 @@ async fn add_default_services(pool: &MySqlPool) -> Result<(), sqlx::Error> {
             "DB_PASSWORD",
             "mongo-carts",
             "MONGO",
-            Some(CART_SERVICE_DEV_ROLE),
         ),
         (
             "auth-service",
@@ -454,7 +442,6 @@ async fn add_default_services(pool: &MySqlPool) -> Result<(), sqlx::Error> {
             "DB_PASSWORD",
             "mysql-auth",
             "MYSQL",
-            Some(AUTH_SERVICE_DEV_ROLE),
         ),
         (
             "files-service",
@@ -463,24 +450,23 @@ async fn add_default_services(pool: &MySqlPool) -> Result<(), sqlx::Error> {
             "DB_PASSWORD",
             "mysql-files",
             "MYSQL",
-            None,
         ),
     ];
 
-    for (service, db_name, user_env, pass_env, host, db_type, _role) in dbs {
+    for (service, db_name, user_env, pass_env, host, db_type) in dbs {
         sqlx::query(
             "INSERT IGNORE INTO service_dbs
              (service_docker_service, db_name, db_user_env, db_password_env, db_host, db_type)
              VALUES (?, ?, ?, ?, ?, ?)",
         )
-        .bind(service)
-        .bind(db_name)
-        .bind(user_env)
-        .bind(pass_env)
-        .bind(host)
-        .bind(db_type)
-        .execute(pool)
-        .await?;
+            .bind(service)
+            .bind(db_name)
+            .bind(user_env)
+            .bind(pass_env)
+            .bind(host)
+            .bind(db_type)
+            .execute(pool)
+            .await?;
     }
 
     Ok(())

@@ -53,13 +53,13 @@ impl UsersRepoPort for MySqlUsersRepo {
             VALUES (?, ?, ?, ?)
             "#,
         )
-        .bind(&user_id)
-        .bind(email)
-        .bind(pass_hash)
-        .bind(display_name)
-        .execute(&mut *tx)
-        .await
-        .map_err(|e| map_sqlx_err(e, "User"))?;
+            .bind(&user_id)
+            .bind(email)
+            .bind(pass_hash)
+            .bind(display_name)
+            .execute(&mut *tx)
+            .await
+            .map_err(|e| map_sqlx_err(e, "User"))?;
 
         for role_id in user_roles {
             let rid_str = role_id.as_hyphenated().to_string();
@@ -71,10 +71,10 @@ impl UsersRepoPort for MySqlUsersRepo {
         VALUES (?, ?)
         "#,
             )
-            .bind(&user_id)
-            .bind(&rid_str)
-            .execute(&mut *tx)
-            .await
+                .bind(&user_id)
+                .bind(&rid_str)
+                .execute(&mut *tx)
+                .await
             {
                 tx.rollback().await.map_err(|e| map_sqlx_err(e, "Role"))?;
                 return Err(map_sqlx_err(e, "Role"));
@@ -96,10 +96,10 @@ impl UsersRepoPort for MySqlUsersRepo {
         WHERE id = ?
         "#,
         )
-        .bind(id)
-        .fetch_one(&*self.pool)
-        .await
-        .map_err(|e| map_sqlx_err(e, "User"))?;
+            .bind(id)
+            .fetch_one(&*self.pool)
+            .await
+            .map_err(|e| map_sqlx_err(e, "User"))?;
 
         log::info!("User found: {:?}", row);
 
@@ -121,10 +121,10 @@ impl UsersRepoPort for MySqlUsersRepo {
         WHERE email = ?
         "#,
         )
-        .bind(email)
-        .fetch_one(&*self.pool)
-        .await
-        .map_err(|e| map_sqlx_err(e, "User"))?;
+            .bind(email)
+            .fetch_one(&*self.pool)
+            .await
+            .map_err(|e| map_sqlx_err(e, "User"))?;
 
         log::info!("User found: {:?}", row);
 
@@ -142,10 +142,10 @@ impl UsersRepoPort for MySqlUsersRepo {
             WHERE ur.user_id = ?
             "#,
         )
-        .bind(user_id)
-        .fetch_all(&*self.pool)
-        .await
-        .map_err(|e| map_sqlx_err(e, "Role"))?;
+            .bind(user_id)
+            .fetch_all(&*self.pool)
+            .await
+            .map_err(|e| map_sqlx_err(e, "Role"))?;
 
         let roles = rows.into_iter().map(RoleEntity::from);
 

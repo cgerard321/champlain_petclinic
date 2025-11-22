@@ -10,7 +10,7 @@ pub async fn stream_container_logs(
     docker_api: &DynDockerAPI,
     view_logs_params: ViewLogsParams,
     descriptor: &ServiceEntity,
-) -> AppResult<Pin<Box<dyn Stream<Item = Result<DockerLogEntity, AppError>> + Send>>> {
+) -> AppResult<Pin<Box<dyn Stream<Item=Result<DockerLogEntity, AppError>> + Send>>> {
     let db = descriptor
         .get_db_by_name_or_default(view_logs_params.db_name.as_ref().map(|s| s.to_string()))?;
 

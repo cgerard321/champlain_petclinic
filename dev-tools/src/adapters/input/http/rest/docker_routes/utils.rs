@@ -55,7 +55,7 @@ pub fn ws_logs_for_container(
 
 pub async fn send_logs(
     mut socket: DuplexStream,
-    mut stream: impl futures::Stream<Item = Result<impl Into<LogResponseContract>, AppError>> + Unpin,
+    mut stream: impl futures::Stream<Item=Result<impl Into<LogResponseContract>, AppError>> + Unpin,
 ) {
     while let Some(item) = stream.next().await {
         match item {
