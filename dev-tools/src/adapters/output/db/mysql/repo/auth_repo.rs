@@ -1,5 +1,5 @@
-use crate::adapters::output::mysql_repo::error::map_sqlx_err;
-use crate::adapters::output::mysql_repo::model::session::Session;
+use crate::adapters::output::db::mysql::repo::error::map_sqlx_err;
+use crate::adapters::output::db::mysql::repo::model::session::Session;
 use crate::application::ports::output::auth_repo_port::AuthRepoPort;
 use crate::domain::entities::session::SessionEntity;
 use crate::shared::error::{AppError, AppResult};
@@ -56,10 +56,10 @@ impl AuthRepoPort for MySqlAuthRepo {
         let row: Option<Session> = sqlx::query_as::<_, Session>(
             "SELECT id, user_id, created_at, expires_at FROM sessions WHERE id = ?",
         )
-            .bind(sid)
-            .fetch_optional(&*self.pool)
-            .await
-            .map_err(|e| map_sqlx_err(e, "Sessions"))?;
+        .bind(sid)
+        .fetch_optional(&*self.pool)
+        .await
+        .map_err(|e| map_sqlx_err(e, "Sessions"))?;
 
         let Some(row) = row else {
             return Err(AppError::NotFound("No sessions found".to_string()));

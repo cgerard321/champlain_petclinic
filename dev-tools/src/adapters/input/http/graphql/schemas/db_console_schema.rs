@@ -1,5 +1,7 @@
 use crate::adapters::input::http::graphql::contracts::mongo::MongoResultResponseContract;
-use crate::adapters::input::http::graphql::contracts::service::ServiceResponseContract;
+use crate::adapters::input::http::graphql::contracts::service::{
+    ServiceDbResponseContract, ServiceResponseContract,
+};
 use crate::adapters::input::http::graphql::contracts::sql::SqlResultResponseContract;
 use crate::application::ports::input::docker_port::DynDockerPort;
 use crate::application::ports::input::mongo_console_port::MongoConsolePort;
@@ -7,6 +9,21 @@ use crate::application::ports::input::sql_console_port::SqlConsolePort;
 use crate::application::services::user_context::UserContext;
 use async_graphql::{Context, Object, Result};
 use std::sync::Arc;
+
+#[Object]
+impl ServiceDbResponseContract {
+    async fn db_name(&self) -> &Option<String> {
+        &self.db_name
+    }
+
+    async fn db_host(&self) -> &Option<String> {
+        &self.db_host
+    }
+
+    async fn db_type(&self) -> &Option<String> {
+        &self.db_type
+    }
+}
 
 #[Object]
 impl ServiceResponseContract {
@@ -18,16 +35,8 @@ impl ServiceResponseContract {
         &self.docker_service
     }
 
-    async fn db_name(&self) -> Option<&str> {
-        self.db_name.as_deref()
-    }
-
-    async fn db_host(&self) -> Option<&str> {
-        self.db_host.as_deref()
-    }
-
-    async fn db_type(&self) -> Option<&str> {
-        self.db_type.as_deref()
+    async fn dbs(&self) -> &Option<Vec<ServiceDbResponseContract>> {
+        &self.dbs
     }
 }
 
@@ -48,7 +57,10 @@ impl QueryRoot {
 
         let services = docker_port.container_list(user_ctx).await?;
 
-        Ok(services.into_iter().map(ServiceResponseContract::from).collect())
+        Ok(services
+            .into_iter()
+            .map(ServiceResponseContract::from)
+            .collect())
     }
 }
 
@@ -66,11 +78,12 @@ impl MutationRoot {
         ctx: &Context<'_>,
         service: String,
         sql: String,
+        db_name: Option<String>,
     ) -> Result<SqlResultResponseContract> {
         let user_ctx = ctx.data::<UserContext>()?;
         let sql_console = ctx.data::<Arc<dyn SqlConsolePort>>()?;
         let result = sql_console
-            .exec_sql_on_service(user_ctx, service, sql)
+            .exec_sql_on_service(user_ctx, service, sql, db_name)
             .await?;
 
         Ok(SqlResultResponseContract::from(result))
@@ -81,11 +94,12 @@ impl MutationRoot {
         ctx: &Context<'_>,
         service: String,
         mongo_query: String,
+        db_name: Option<String>,
     ) -> Result<MongoResultResponseContract> {
         let user_ctx = ctx.data::<UserContext>()?;
         let mongo_console = ctx.data::<Arc<dyn MongoConsolePort>>()?;
         let result = mongo_console
-            .exec_mongo_on_service(user_ctx, service, mongo_query)
+            .exec_mongo_on_service(user_ctx, service, mongo_query, db_name)
             .await?;
 
         Ok(MongoResultResponseContract::from(result))

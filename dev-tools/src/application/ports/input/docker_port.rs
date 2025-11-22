@@ -12,7 +12,7 @@ pub trait DockerPort: Send + Sync {
         &self,
         view_logs_params: ViewLogsParams,
         user_ctx: UserContext,
-    ) -> AppResult<Pin<Box<dyn Stream<Item=Result<DockerLogEntity, AppError>> + Send>>>;
+    ) -> AppResult<Pin<Box<dyn Stream<Item = Result<DockerLogEntity, AppError>> + Send>>>;
     async fn restart_container(
         &self,
         restart_params: RestartContainerParams,

@@ -1,8 +1,8 @@
+mod contracts;
+mod error;
+mod mappers;
 mod query_execution_routes;
 mod schemas;
-mod error;
-mod contracts;
-mod mappers;
 
 use crate::adapters::input::http::graphql::query_execution_routes::graphql_request;
 use crate::adapters::input::http::graphql::schemas::db_console_schema::{MutationRoot, QueryRoot};

@@ -14,6 +14,7 @@ pub fn ws_logs_for_container(
     docker: &State<DynDockerPort>,
     container: String,
     container_type: String,
+    db_name: Option<String>,
     number_of_lines: Option<usize>,
     auth_context: UserContext,
 ) -> AppResult<Channel<'static>> {
@@ -30,6 +31,7 @@ pub fn ws_logs_for_container(
                 container_name: container,
                 number_of_lines,
                 container_type,
+                db_name,
             };
 
             let mut stream = match docker
@@ -53,7 +55,7 @@ pub fn ws_logs_for_container(
 
 pub async fn send_logs(
     mut socket: DuplexStream,
-    mut stream: impl futures::Stream<Item=Result<impl Into<LogResponseContract>, AppError>> + Unpin,
+    mut stream: impl futures::Stream<Item = Result<impl Into<LogResponseContract>, AppError>> + Unpin,
 ) {
     while let Some(item) = stream.next().await {
         match item {
