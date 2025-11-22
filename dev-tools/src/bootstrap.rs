@@ -66,6 +66,12 @@ pub fn stage() -> AdHoc {
             log::error!("Failed to insert default roles: {e}");
         }
 
+
+        // Default services
+        if let Err(e) = add_default_services(&pool).await {
+            log::error!("Failed to insert default services: {e}");
+        }
+
         let auth_repo = MySqlAuthRepo::new(Arc::new(pool.clone()));
         let dyn_auth_repo: DynAuthRepo = Arc::new(auth_repo);
 
@@ -116,10 +122,6 @@ pub fn stage() -> AdHoc {
             dyn_service_repo.clone(),
         ));
 
-        // Default services
-        if let Err(e) = add_default_services(&pool).await {
-            log::error!("Failed to insert default services: {e}");
-        }
 
         // SQL Console
         let drivers = build_sql_drivers_from_services(dyn_service_repo.clone()).await;

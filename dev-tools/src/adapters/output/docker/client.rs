@@ -79,7 +79,7 @@ impl DockerAPIPort for BollardDockerAPI {
         let id = BollardDockerAPI::resolve_id(self, container_name).await?;
 
         let number_of_lines = number_of_lines.unwrap_or(DEFAULT_TAIL_AMOUNT).to_string();
-
+        
         let log_stream = self
             .docker
             .logs(

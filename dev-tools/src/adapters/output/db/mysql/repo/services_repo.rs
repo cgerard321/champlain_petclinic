@@ -1,9 +1,11 @@
 use crate::adapters::output::db::mysql::repo::error::map_sqlx_err;
-use crate::adapters::output::db::mysql::repo::model::services::{Service, ServiceDb};
+use crate::adapters::output::db::mysql::repo::model::services::ServiceWithDb;
 use crate::application::ports::output::services_repo_port::ServicesRepoPort;
-use crate::domain::entities::service::{ServiceDbEntity, ServiceEntity};
+use crate::domain::entities::service::{DbType, ServiceDbEntity, ServiceEntity};
 use crate::shared::error::{AppError, AppResult};
+
 use sqlx::{MySql, Pool};
+use std::collections::HashMap;
 use std::sync::Arc;
 use uuid::fmt::Hyphenated;
 use uuid::Uuid;
@@ -21,65 +23,131 @@ impl MySqlServicesRepo {
 #[async_trait::async_trait]
 impl ServicesRepoPort for MySqlServicesRepo {
     async fn list_services(&self) -> AppResult<Vec<ServiceEntity>> {
-        let services =
-            sqlx::query_as::<_, Service>("SELECT docker_service, service_role FROM services")
-                .fetch_all(&*self.pool)
-                .await
-                .map_err(|e| map_sqlx_err(e, "Services"))?;
+        let rows = sqlx::query_as::<_, ServiceWithDb>(
+            r#"
+            SELECT
+                s.docker_service,
+                s.service_role,
+                d.db_name,
+                d.db_user_env,
+                d.db_password_env,
+                d.db_host,
+                d.db_type
+            FROM services s
+            LEFT JOIN service_dbs d
+                ON s.docker_service = d.service_docker_service
+            ORDER BY s.docker_service
+            "#,
+        )
+        .fetch_all(&*self.pool)
+        .await
+        .map_err(|e| map_sqlx_err(e, "Services"))?;
 
-        let mut entities = Vec::with_capacity(services.len());
+        let mut map: HashMap<String, (Option<Hyphenated>, Vec<ServiceDbEntity>)> = HashMap::new();
 
-        for s in services {
-            let dbs = self.get_service_dbs(&s.docker_service).await?;
+        for row in rows {
+            let entry = map
+                .entry(row.docker_service.clone())
+                .or_insert((row.service_role, Vec::new()));
 
-            entities.push(ServiceEntity {
-                docker_service: s.docker_service,
-                dbs,
-                service_role: convert_service_role(s.service_role)?,
-            });
+            if let (
+                Some(db_name),
+                Some(db_user_env),
+                Some(db_password_env),
+                Some(db_host),
+                Some(db_type),
+            ) = (
+                row.db_name,
+                row.db_user_env,
+                row.db_password_env,
+                row.db_host,
+                row.db_type,
+            ) {
+                entry.1.push(ServiceDbEntity {
+                    db_name,
+                    db_user_env,
+                    db_password_env,
+                    db_host,
+                    db_type: DbType::from(db_type),
+                });
+            }
         }
 
-        Ok(entities)
+        let services = map
+            .into_iter()
+            .map(|(docker_service, (role, dbs))| {
+                Ok(ServiceEntity {
+                    docker_service,
+                    dbs: if dbs.is_empty() { None } else { Some(dbs) },
+                    service_role: convert_service_role(role)?,
+                })
+            })
+            .collect::<Result<Vec<_>, AppError>>()?;
+
+        Ok(services)
     }
 
     async fn get_service(&self, service_name: &str) -> AppResult<ServiceEntity> {
-        let s = sqlx::query_as::<_, Service>(
-            "SELECT docker_service, service_role FROM services WHERE docker_service = ?",
+        let rows = sqlx::query_as::<_, ServiceWithDb>(
+            r#"
+            SELECT
+                s.docker_service,
+                s.service_role,
+                d.db_name,
+                d.db_user_env,
+                d.db_password_env,
+                d.db_host,
+                d.db_type
+            FROM services s
+            LEFT JOIN service_dbs d
+                ON s.docker_service = d.service_docker_service
+            WHERE s.docker_service = ?
+            "#,
         )
-            .bind(service_name)
-            .fetch_one(&*self.pool)
-            .await
-            .map_err(|e| map_sqlx_err(e, "Service"))?;
+        .bind(service_name)
+        .fetch_all(&*self.pool)
+        .await
+        .map_err(|e| map_sqlx_err(e, "Service"))?;
 
-        let dbs = self.get_service_dbs(service_name).await?;
+        if rows.is_empty() {
+            return Err(AppError::NotFound(format!(
+                "Service '{}' not found",
+                service_name
+            )));
+        }
+
+        let mut dbs = Vec::new();
+        let role = rows[0].service_role;
+
+        for row in rows {
+            if let (
+                Some(db_name),
+                Some(db_user_env),
+                Some(db_password_env),
+                Some(db_host),
+                Some(db_type),
+            ) = (
+                row.db_name,
+                row.db_user_env,
+                row.db_password_env,
+                row.db_host,
+                row.db_type,
+            ) {
+                dbs.push(ServiceDbEntity {
+                    db_name,
+                    db_user_env,
+                    db_password_env,
+                    db_host,
+                    db_type: DbType::from(db_type),
+                });
+            }
+        }
 
         Ok(ServiceEntity {
-            docker_service: s.docker_service,
-            dbs,
-            service_role: convert_service_role(s.service_role)?,
+            docker_service: service_name.to_string(),
+            dbs: if dbs.is_empty() { None } else { Some(dbs) },
+            service_role: convert_service_role(role)?,
         })
-    }
-
-    async fn get_service_dbs(&self, service_name: &str) -> AppResult<Option<Vec<ServiceDbEntity>>> {
-        let db_rows = sqlx::query_as::<_, ServiceDb>(
-            "SELECT db_name, db_user_env, db_password_env, db_host, db_type
-             FROM service_dbs
-             WHERE service_docker_service = ?",
-        )
-            .bind(service_name)
-            .fetch_all(&*self.pool)
-            .await
-            .map_err(|e| map_sqlx_err(e, "Service DB"))?;
-
-        let dbs = if db_rows.is_empty() {
-            None
-        } else {
-            Some(db_rows.into_iter().map(ServiceDbEntity::from).collect())
-        };
-
-        log::info!("Service '{}' has DBs: {:?}", service_name, dbs);
-
-        Ok(dbs)
     }
 
     async fn add_service(&self, service: &ServiceEntity) -> AppResult<()> {

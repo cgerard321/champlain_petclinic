@@ -49,7 +49,18 @@ pub struct ServiceDbEntity {
     pub db_type: DbType,
 }
 
-#[derive(Debug)]
+impl From<String> for DbType {
+    fn from(s: String) -> Self {
+        match s.to_lowercase().as_str() {
+            "mongo" => DbType::Mongo,
+            "mysql" => DbType::MySQL,
+            "postgres" => DbType::Postgres,
+            _ => DbType::Unknown,
+        }
+    }
+}
+
+#[derive(Debug, PartialEq, Eq)]
 pub enum DbType {
     Mongo,
     MySQL,
@@ -66,17 +77,5 @@ impl Display for DbType {
             DbType::Unknown => "unknown",
         };
         write!(f, "{}", str)
-    }
-}
-
-impl PartialEq for DbType {
-    fn eq(&self, other: &Self) -> bool {
-        matches!(
-            (self, other),
-            (DbType::Mongo, DbType::Mongo)
-                | (DbType::MySQL, DbType::MySQL)
-                | (DbType::Postgres, DbType::Postgres)
-                | (DbType::Unknown, DbType::Unknown)
-        )
     }
 }
