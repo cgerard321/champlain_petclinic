@@ -42,6 +42,8 @@ impl SqlConsolePort for SqlConsoleService {
 
         let db = desc.get_db_by_name_or_default(db_name)?;
 
+        log::info!("Resolved db: {:?}", db);
+
         if db.db_type != DbType::MySQL && db.db_type != DbType::Postgres {
             return Err(AppError::BadRequest(format!(
                 "Service '{}' does not use a SQL database",
