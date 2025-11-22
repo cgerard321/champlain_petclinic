@@ -97,8 +97,12 @@ impl MutationRoot {
     async fn execute_mongo_query(
         &self,
         ctx: &Context<'_>,
+        #[graphql(desc = "The service to execute the query on (e.g., vet-service)")]
         service: String,
         mongo_query: String,
+        #[graphql(
+            desc = "Optional database name if the service has multiple DBs, defaults to the first one"
+        )]
         db_name: Option<String>,
     ) -> Result<MongoResultResponseContract> {
         let user_ctx = ctx.data::<UserContext>()?;
