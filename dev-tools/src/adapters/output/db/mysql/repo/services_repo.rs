@@ -43,13 +43,24 @@ impl ServicesRepoPort for MySqlServicesRepo {
         .await
         .map_err(|e| map_sqlx_err(e, "Services"))?;
 
+        // Group by service name, the first value in the tuple is the service role, the second is the list of dbs
+        // This will help to aggregate the dbs for each service
         let mut map: HashMap<String, (Option<Hyphenated>, Vec<ServiceDbEntity>)> = HashMap::new();
 
+        // Iterate over the rows, which are ServiceWithDb objects,
+        // for example, if a service has two dbs, we will have two rows in the result.
+        // If a service has no dbs, we will have one row with null db fields.
+        // If a service has one db, we will have one row with non-null db fields and so on.
         for row in rows {
+            // Insert into map the service name and the associated dbs
             let entry = map
+                // Fetch the entry for the service name
                 .entry(row.docker_service.clone())
+                // If the service name doesn't exist, insert a new entry
+                // with the service role and an empty list of dbs
                 .or_insert((row.service_role, Vec::new()));
 
+            // Here we check if the db fields are not null, if so we add the db to the list
             if let (
                 Some(db_name),
                 Some(db_user_env),
@@ -63,6 +74,8 @@ impl ServicesRepoPort for MySqlServicesRepo {
                 row.db_host,
                 row.db_type,
             ) {
+                // Here we have the entry, which is the tuple (service role, dbs) that we fetched before
+                // We append the db to the list of dbs
                 entry.1.push(ServiceDbEntity {
                     db_name,
                     db_user_env,
@@ -73,6 +86,7 @@ impl ServicesRepoPort for MySqlServicesRepo {
             }
         }
 
+        // Map the entries to ServiceEntity objects
         let services = map
             .into_iter()
             .map(|(docker_service, (role, dbs))| {
