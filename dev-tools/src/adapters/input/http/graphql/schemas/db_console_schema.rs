@@ -10,30 +10,6 @@ use crate::application::services::user_context::UserContext;
 use async_graphql::{Context, InputObject, Object, Result};
 use std::sync::Arc;
 
-#[derive(InputObject)]
-struct ExecuteSqlQueryInput {
-    /// Name of the service as registered in dev-tools
-    pub service: String,
-
-    /// SQL query to execute
-    pub query: String,
-
-    /// Optional database name if the service exposes multiple DBs
-    pub db_name: Option<String>,
-}
-
-#[derive(InputObject)]
-struct ExecuteMongoQueryInput {
-    /// Name of the service as registered in dev-tools
-    pub service: String,
-
-    /// MongoDB query in JSON or shell-like syntax
-    pub mongo_query: String,
-
-    /// Optional database name if the service exposes multiple DBs
-    pub db_name: Option<String>,
-}
-
 #[Object]
 impl ServiceDbResponseContract {
     async fn db_name(&self) -> &Option<String> {
@@ -101,13 +77,16 @@ impl MutationRoot {
     async fn execute_sql_query(
         &self,
         ctx: &Context<'_>,
-        #[graphql(desc = "Parameters for the SQL execution")]
-        input: ExecuteSqlQueryInput,
+        #[graphql(desc = "The service to execute the query on (e.g., vet-service)")]
+        service: String,
+        sql: String,
+        #[graphql(desc = "Optional database name if the service has multiple DBs, defaults to the first one")]
+        db_name: Option<String>,
     ) -> Result<SqlResultResponseContract> {
         let user_ctx = ctx.data::<UserContext>()?;
         let sql_console = ctx.data::<Arc<dyn SqlConsolePort>>()?;
         let result = sql_console
-            .exec_sql_on_service(user_ctx, input.service, input.query, input.db_name)
+            .exec_sql_on_service(user_ctx, service, sql, db_name)
             .await?;
 
         Ok(SqlResultResponseContract::from(result))
@@ -116,12 +95,14 @@ impl MutationRoot {
     async fn execute_mongo_query(
         &self,
         ctx: &Context<'_>,
-        input: ExecuteMongoQueryInput,
+        service: String,
+        mongo_query: String,
+        db_name: Option<String>,
     ) -> Result<MongoResultResponseContract> {
         let user_ctx = ctx.data::<UserContext>()?;
         let mongo_console = ctx.data::<Arc<dyn MongoConsolePort>>()?;
         let result = mongo_console
-            .exec_mongo_on_service(user_ctx, input.service, input.mongo_query, input.db_name)
+            .exec_mongo_on_service(user_ctx, service, mongo_query, db_name)
             .await?;
 
         Ok(MongoResultResponseContract::from(result))
