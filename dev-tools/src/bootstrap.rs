@@ -408,7 +408,7 @@ async fn add_default_services(pool: &MySqlPool) -> Result<(), sqlx::Error> {
             "DB_USER",
             "DB_PASSWORD",
             "postgres-vet",
-            "",
+            "POSTGRES",
             Some(VET_SERVICE_DEV_ROLE),
         ),
         (
