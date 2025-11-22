@@ -34,7 +34,7 @@ impl ServiceResponseContract {
     async fn docker_service(&self) -> &str {
         &self.docker_service
     }
-
+    
     async fn dbs(&self) -> &Option<Vec<ServiceDbResponseContract>> {
         &self.dbs
     }
