@@ -7,7 +7,7 @@ use crate::application::ports::input::docker_port::DynDockerPort;
 use crate::application::ports::input::mongo_console_port::MongoConsolePort;
 use crate::application::ports::input::sql_console_port::SqlConsolePort;
 use crate::application::services::user_context::UserContext;
-use async_graphql::{Context, InputObject, Object, Result};
+use async_graphql::{Context, Object, Result};
 use std::sync::Arc;
 
 #[Object]
@@ -80,7 +80,9 @@ impl MutationRoot {
         #[graphql(desc = "The service to execute the query on (e.g., vet-service)")]
         service: String,
         sql: String,
-        #[graphql(desc = "Optional database name if the service has multiple DBs, defaults to the first one")]
+        #[graphql(
+            desc = "Optional database name if the service has multiple DBs, defaults to the first one"
+        )]
         db_name: Option<String>,
     ) -> Result<SqlResultResponseContract> {
         let user_ctx = ctx.data::<UserContext>()?;
