@@ -7,8 +7,32 @@ use crate::application::ports::input::docker_port::DynDockerPort;
 use crate::application::ports::input::mongo_console_port::MongoConsolePort;
 use crate::application::ports::input::sql_console_port::SqlConsolePort;
 use crate::application::services::user_context::UserContext;
-use async_graphql::{Context, Object, Result};
+use async_graphql::{Context, InputObject, Object, Result};
 use std::sync::Arc;
+
+#[derive(InputObject)]
+struct ExecuteSqlQueryInput {
+    /// Name of the service as registered in dev-tools
+    pub service: String,
+
+    /// SQL query to execute
+    pub query: String,
+
+    /// Optional database name if the service exposes multiple DBs
+    pub db_name: Option<String>,
+}
+
+#[derive(InputObject)]
+struct ExecuteMongoQueryInput {
+    /// Name of the service as registered in dev-tools
+    pub service: String,
+
+    /// MongoDB query in JSON or shell-like syntax
+    pub mongo_query: String,
+
+    /// Optional database name if the service exposes multiple DBs
+    pub db_name: Option<String>,
+}
 
 #[Object]
 impl ServiceDbResponseContract {
@@ -34,7 +58,8 @@ impl ServiceResponseContract {
     async fn docker_service(&self) -> &str {
         &self.docker_service
     }
-    
+
+    /// Returns the list of databases available in the service
     async fn dbs(&self) -> &Option<Vec<ServiceDbResponseContract>> {
         &self.dbs
     }
@@ -76,14 +101,13 @@ impl MutationRoot {
     async fn execute_sql_query(
         &self,
         ctx: &Context<'_>,
-        service: String,
-        sql: String,
-        db_name: Option<String>,
+        #[graphql(desc = "Parameters for the SQL execution")]
+        input: ExecuteSqlQueryInput,
     ) -> Result<SqlResultResponseContract> {
         let user_ctx = ctx.data::<UserContext>()?;
         let sql_console = ctx.data::<Arc<dyn SqlConsolePort>>()?;
         let result = sql_console
-            .exec_sql_on_service(user_ctx, service, sql, db_name)
+            .exec_sql_on_service(user_ctx, input.service, input.query, input.db_name)
             .await?;
 
         Ok(SqlResultResponseContract::from(result))
@@ -92,14 +116,12 @@ impl MutationRoot {
     async fn execute_mongo_query(
         &self,
         ctx: &Context<'_>,
-        service: String,
-        mongo_query: String,
-        db_name: Option<String>,
+        input: ExecuteMongoQueryInput,
     ) -> Result<MongoResultResponseContract> {
         let user_ctx = ctx.data::<UserContext>()?;
         let mongo_console = ctx.data::<Arc<dyn MongoConsolePort>>()?;
         let result = mongo_console
-            .exec_mongo_on_service(user_ctx, service, mongo_query, db_name)
+            .exec_mongo_on_service(user_ctx, input.service, input.mongo_query, input.db_name)
             .await?;
 
         Ok(MongoResultResponseContract::from(result))
