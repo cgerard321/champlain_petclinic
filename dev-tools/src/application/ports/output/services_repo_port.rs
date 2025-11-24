@@ -1,4 +1,4 @@
-use crate::domain::entities::service::{ServiceDbEntity, ServiceEntity};
+use crate::domain::entities::service::ServiceEntity;
 use crate::shared::error::AppResult;
 
 #[async_trait::async_trait]
