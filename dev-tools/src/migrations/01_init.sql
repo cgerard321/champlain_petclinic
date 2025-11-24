@@ -111,7 +111,7 @@ CREATE TABLE IF NOT EXISTS services
 (
     id
 )
-    );
+    ) ON DELETE SET NULL;
 
 CREATE TABLE IF NOT EXISTS service_dbs
 (
@@ -140,7 +140,8 @@ CREATE TABLE IF NOT EXISTS service_dbs
 (
     'MONGO',
     'MYSQL',
-    'POSTGRES'
+    'POSTGRES',
+    'UNKNOWN'
 ) NOT NULL,
     PRIMARY KEY
 (

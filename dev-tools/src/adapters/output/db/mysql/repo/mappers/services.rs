@@ -3,7 +3,6 @@ use crate::domain::entities::service::{DbType, ServiceDbEntity};
 
 impl From<ServiceDb> for ServiceDbEntity {
     fn from(value: ServiceDb) -> Self {
-        log::info!("Converting DB: {:?}", value);
         Self {
             db_name: value.db_name,
             db_user_env: value.db_user_env,
