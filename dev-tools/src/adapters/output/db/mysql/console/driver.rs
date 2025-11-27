@@ -1,4 +1,4 @@
-use crate::application::ports::output::db_drivers_port::mysql_driver::MySqlDriverPort;
+use crate::application::ports::output::db_drivers_port::sql_driver::SqlDriverPort;
 use crate::application::services::db_consoles::projections::SqlResult;
 use crate::shared::error::{AppError, AppResult};
 use async_trait::async_trait;
@@ -24,7 +24,7 @@ impl MySqlDriver {
 }
 
 #[async_trait]
-impl MySqlDriverPort for MySqlDriver {
+impl SqlDriverPort for MySqlDriver {
     async fn execute_query(&self, sql: &str) -> AppResult<SqlResult> {
         log::info!("Executing query: {}", sql);
 

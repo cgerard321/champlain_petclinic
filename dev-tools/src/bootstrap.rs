@@ -1,9 +1,12 @@
+use crate::adapters::output::crypto::crypto_functions::CryptoFunctions;
+use crate::adapters::output::db::mongo::console::driver::MongoDriver;
+use crate::adapters::output::db::mysql::console::driver::MySqlDriver;
+use crate::adapters::output::db::mysql::repo::auth_repo::MySqlAuthRepo;
+use crate::adapters::output::db::mysql::repo::services_repo::MySqlServicesRepo;
+use crate::adapters::output::db::mysql::repo::users_repo::MySqlUsersRepo;
+use crate::adapters::output::db::postgres::console::driver::PostgresDriver;
 use crate::adapters::output::docker::client::BollardDockerAPI;
 use crate::adapters::output::minio::client::MinioStore;
-use crate::adapters::output::mongo_driver::driver::MongoDriver;
-use crate::adapters::output::mysql_driver::driver::MySqlDriver;
-use crate::adapters::output::mysql_repo::auth_repo::MySqlAuthRepo;
-use crate::adapters::output::mysql_repo::users_repo::MySqlUsersRepo;
 use crate::application::ports::input::auth_port::DynAuthPort;
 use crate::application::ports::input::docker_port::DynDockerPort;
 use crate::application::ports::input::files_port::DynFilesPort;
@@ -12,9 +15,10 @@ use crate::application::ports::input::sql_console_port::DynSqlConsolePort;
 use crate::application::ports::input::user_port::DynUsersPort;
 use crate::application::ports::output::auth_repo_port::DynAuthRepo;
 use crate::application::ports::output::db_drivers_port::mongo_driver::DynMongoDriver;
-use crate::application::ports::output::db_drivers_port::mysql_driver::DynMySqlDriver;
+use crate::application::ports::output::db_drivers_port::sql_driver::DynSqlDriver;
 use crate::application::ports::output::docker_api_port::DynDockerAPI;
 use crate::application::ports::output::file_storage_port::DynFileStorage;
+use crate::application::ports::output::services_repo_port::DynServicesRepo;
 use crate::application::ports::output::user_repo_port::DynUsersRepo;
 use crate::application::services::auth::service::AuthService;
 use crate::application::services::db_consoles::mongo_service::MongoConsoleService;
@@ -24,7 +28,7 @@ use crate::application::services::files::service::FilesService;
 use crate::application::services::user_context::UserContext;
 use crate::application::services::users::params::UserCreationParams;
 use crate::application::services::users::service::UsersService;
-use crate::application::services::{DbType, SERVICES};
+use crate::domain::entities::service::DbType;
 use crate::shared::config::{
     ADMIN_ROLE_UUID, AUTH_SERVICE_DEV_ROLE, BILLING_SERVICE_DEV_ROLE, CART_SERVICE_DEV_ROLE,
     CUSTOMERS_SERVICE_DEV_ROLE, EDITOR_ROLE_UUID, INVENTORY_SERVICE_DEV_ROLE,
@@ -37,7 +41,6 @@ use sqlx::mysql::MySqlPoolOptions;
 use sqlx::MySqlPool;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
-use crate::adapters::output::crypto::crypto_functions::CryptoFunctions;
 
 pub fn stage() -> AdHoc {
     AdHoc::on_ignite("SQLx (MySQL)", |rocket| async move {
@@ -63,11 +66,20 @@ pub fn stage() -> AdHoc {
             log::error!("Failed to insert default roles: {e}");
         }
 
+
+        // Default services
+        if let Err(e) = add_default_services(&pool).await {
+            log::error!("Failed to insert default services: {e}");
+        }
+
         let auth_repo = MySqlAuthRepo::new(Arc::new(pool.clone()));
         let dyn_auth_repo: DynAuthRepo = Arc::new(auth_repo);
 
         let user_repo = MySqlUsersRepo::new(Arc::new(pool.clone()));
         let dyn_user_repo: DynUsersRepo = Arc::new(user_repo);
+
+        let service_repo = MySqlServicesRepo::new(Arc::new(pool.clone()));
+        let dyn_service_repo: DynServicesRepo = Arc::new(service_repo);
 
         // MinIO
         let store = MinioStore::from_env()
@@ -86,10 +98,11 @@ pub fn stage() -> AdHoc {
         let auth_port: DynAuthPort = Arc::new(AuthService::new(
             dyn_auth_repo.clone(),
             dyn_user_repo.clone(),
-            crypto.clone()
+            crypto.clone(),
         ));
         let files_port: DynFilesPort = Arc::new(FilesService::new(storage.clone()));
-        let users_port: DynUsersPort = Arc::new(UsersService::new(dyn_user_repo.clone(), crypto.clone()));
+        let users_port: DynUsersPort =
+            Arc::new(UsersService::new(dyn_user_repo.clone(), crypto.clone()));
 
         if let Err(e) = add_default_user(&users_port, &pool).await {
             log::error!("Failed to insert default user: {e}");
@@ -104,18 +117,25 @@ pub fn stage() -> AdHoc {
             .expect("Docker must be available at startup");
 
         let docker_api: DynDockerAPI = Arc::new(BollardDockerAPI::new(docker));
-        let docker_port: DynDockerPort = Arc::new(DockerService::new(docker_api.clone()));
+        let docker_port: DynDockerPort = Arc::new(DockerService::new(
+            docker_api.clone(),
+            dyn_service_repo.clone(),
+        ));
+
 
         // SQL Console
-        let drivers = build_sql_drivers_from_services();
+        let drivers = build_sql_drivers_from_services(dyn_service_repo.clone()).await;
 
-        let sql_console_port: DynSqlConsolePort = Arc::new(SqlConsoleService::new(drivers));
+        let sql_console_port: DynSqlConsolePort =
+            Arc::new(SqlConsoleService::new(drivers, dyn_service_repo.clone()));
 
         // Mongo Console
-        let mongo_drivers = build_mongo_drivers_from_services().await;
+        let mongo_drivers = build_mongo_drivers_from_services(dyn_service_repo.clone()).await;
 
-        let mongo_console_port: DynMongoConsolePort =
-            Arc::new(MongoConsoleService::new(mongo_drivers));
+        let mongo_console_port: DynMongoConsolePort = Arc::new(MongoConsoleService::new(
+            mongo_drivers,
+            dyn_service_repo.clone(),
+        ));
 
         rocket
             .manage(auth_port)
@@ -127,74 +147,102 @@ pub fn stage() -> AdHoc {
     })
 }
 
-pub async fn build_mongo_drivers_from_services() -> HashMap<&'static str, Arc<DynMongoDriver>> {
+pub async fn build_mongo_drivers_from_services(
+    dyn_services_repo: DynServicesRepo,
+) -> HashMap<String, Arc<DynMongoDriver>> {
     let mut map = HashMap::new();
 
-    for (_name, svc) in SERVICES.iter() {
-        let Some(db) = &svc.db else { continue };
-
-        if !matches!(db.db_type, DbType::Mongo) {
-            continue;
+    let services = match dyn_services_repo.list_services().await {
+        Ok(s) => s,
+        Err(e) => {
+            log::error!("Failed to list services: {e}");
+            return map;
         }
+    };
 
-        let id = db.db_host;
+    for svc in services {
+        let Some(dbs) = &svc.dbs else { continue };
 
-        if map.contains_key(id) {
-            continue;
+        for db in dbs {
+            if !matches!(db.db_type, DbType::Mongo) {
+                continue;
+            }
+
+            let id = db.db_host.clone();
+
+            if map.contains_key(&id) {
+                continue;
+            }
+
+            let user = std::env::var(&db.db_user_env)
+                .unwrap_or_else(|_| panic!("Missing env {}", db.db_user_env));
+            let pass = std::env::var(&db.db_password_env)
+                .unwrap_or_else(|_| panic!("Missing env {}", db.db_password_env));
+
+            let uri = format!(
+                "mongodb://{}:{}@{}:{}/{}?authSource={}",
+                user, pass, db.db_host, 27017, db.db_name, "admin"
+            );
+
+            let driver = MongoDriver::new(&uri).await;
+
+            map.insert(id, Arc::new(driver) as Arc<DynMongoDriver>);
         }
-
-        let user = std::env::var(db.db_user_env)
-            .unwrap_or_else(|_| panic!("Missing env {}", db.db_user_env));
-        let pass = std::env::var(db.db_password_env)
-            .unwrap_or_else(|_| panic!("Missing env {}", db.db_password_env));
-
-        let uri = format!(
-            "mongodb://{}:{}@{}:{}/{}?authSource={}",
-            user,
-            pass,
-            db.db_host,
-            27017, // For now we will use the default port, maybe later we will add a configurable port
-            db.db_name,
-            "admin" // For now we will use the default authSource, maybe later we will add a configurable authSource
-        );
-
-        let driver = MongoDriver::new(&uri).await;
-
-        map.insert(id, Arc::new(driver) as Arc<DynMongoDriver>);
     }
 
     map
 }
 
-pub fn build_sql_drivers_from_services() -> HashMap<&'static str, Arc<DynMySqlDriver>> {
-    let mut map = HashMap::new();
+pub async fn build_sql_drivers_from_services(
+    dyn_services_repo: DynServicesRepo,
+) -> HashMap<String, Arc<DynSqlDriver>> {
+    let mut map: HashMap<String, Arc<DynSqlDriver>> = HashMap::new();
 
-    for (_name, svc) in SERVICES.iter() {
-        let Some(db) = &svc.db else { continue };
-
-        if !matches!(db.db_type, DbType::Sql) {
-            continue;
+    let services = match dyn_services_repo.list_services().await {
+        Ok(s) => s,
+        Err(e) => {
+            log::error!("Failed to list services: {e}");
+            return map;
         }
+    };
 
-        let id = db.db_host;
-        if map.contains_key(id) {
-            continue;
+    for svc in services {
+        let Some(dbs) = &svc.dbs else { continue };
+
+        for db in dbs {
+            match db.db_type {
+                DbType::MySQL | DbType::Postgres => {}
+                _ => continue,
+            }
+
+            let id = db.db_host.clone();
+            if map.contains_key(&id) {
+                continue;
+            }
+
+            let user = std::env::var(&db.db_user_env)
+                .unwrap_or_else(|_| panic!("Missing env {}", db.db_user_env));
+            let pass = std::env::var(&db.db_password_env)
+                .unwrap_or_else(|_| panic!("Missing env {}", db.db_password_env));
+
+            let driver: Arc<DynSqlDriver> = match db.db_type {
+                DbType::MySQL => {
+                    let url = format!("mysql://{}:{}@{}/{}", user, pass, db.db_host, db.db_name);
+                    Arc::new(MySqlDriver::new(&url)) as Arc<DynSqlDriver>
+                }
+                DbType::Postgres => {
+                    let url = format!("postgres://{}:{}@{}/{}", user, pass, db.db_host, db.db_name);
+                    Arc::new(PostgresDriver::new(&url)) as Arc<DynSqlDriver>
+                }
+                _ => continue,
+            };
+
+            map.insert(id, driver);
         }
-
-        let user = std::env::var(db.db_user_env)
-            .unwrap_or_else(|_| panic!("Missing env {}", db.db_user_env));
-        let pass = std::env::var(db.db_password_env)
-            .unwrap_or_else(|_| panic!("Missing env {}", db.db_password_env));
-
-        let url = format!("mysql://{}:{}@{}/{}", user, pass, db.db_host, db.db_name);
-
-        let driver = MySqlDriver::new(&url);
-        map.insert(id, Arc::new(driver) as Arc<DynMySqlDriver>);
     }
 
     map
 }
-
 async fn add_default_roles(pool: &MySqlPool) -> Result<(), sqlx::Error> {
     // TODO : Add role repo
     // Since I don't see a foreseeable future of having a role repo
@@ -284,6 +332,144 @@ async fn add_default_user(user_port: &DynUsersPort, pool: &MySqlPool) -> Result<
         .create_user(params, auth_context)
         .await
         .expect("Failed to create default user");
+
+    Ok(())
+}
+
+async fn add_default_services(pool: &MySqlPool) -> Result<(), sqlx::Error> {
+    use crate::shared::config::{
+        AUTH_SERVICE_DEV_ROLE, BILLING_SERVICE_DEV_ROLE, CART_SERVICE_DEV_ROLE,
+        CUSTOMERS_SERVICE_DEV_ROLE, INVENTORY_SERVICE_DEV_ROLE, PRODUCTS_SERVICE_DEV_ROLE,
+        VET_SERVICE_DEV_ROLE, VISITS_SERVICE_DEV_ROLE,
+    };
+
+    let services = vec![
+        ("petclinic-frontend", None),
+        ("employee-frontend", None),
+        ("api-gateway", None),
+        ("mailer-service", None),
+        ("files-service", None),
+        ("visits-service-new", Some(VISITS_SERVICE_DEV_ROLE)),
+        ("inventory-service", Some(INVENTORY_SERVICE_DEV_ROLE)),
+        ("vet-service", Some(VET_SERVICE_DEV_ROLE)),
+        (
+            "customers-service-reactive",
+            Some(CUSTOMERS_SERVICE_DEV_ROLE),
+        ),
+        ("billing-service", Some(BILLING_SERVICE_DEV_ROLE)),
+        ("products-service", Some(PRODUCTS_SERVICE_DEV_ROLE)),
+        ("cart-service", Some(CART_SERVICE_DEV_ROLE)),
+        ("auth-service", Some(AUTH_SERVICE_DEV_ROLE)),
+    ];
+
+    for (docker_service, role) in services {
+        let role = role.map(|r| r.hyphenated().to_string());
+
+        sqlx::query("INSERT IGNORE INTO services (docker_service, service_role) VALUES (?, ?)")
+            .bind(docker_service)
+            .bind(role)
+            .execute(pool)
+            .await?;
+    }
+
+    let dbs = vec![
+        (
+            "visits-service-new",
+            "visits",
+            "DB_USER",
+            "DB_PASSWORD",
+            "mongo-visits",
+            "MONGO",
+        ),
+        (
+            "inventory-service",
+            "inventory",
+            "DB_USER",
+            "DB_PASSWORD",
+            "mongo-inventory",
+            "MONGO",
+        ),
+        (
+            "vet-service",
+            "veterinarians",
+            "DB_USER",
+            "DB_PASSWORD",
+            "mongo-vet",
+            "MONGO",
+        ),
+        (
+            "vet-service",
+            "images",
+            "DB_USER",
+            "DB_PASSWORD",
+            "postgres-vet",
+            "POSTGRES",
+        ),
+        (
+            "customers-service-reactive",
+            "customers",
+            "DB_USER",
+            "DB_PASSWORD",
+            "mongo-customers",
+            "MONGO",
+        ),
+        (
+            "billing-service",
+            "billings",
+            "DB_USER",
+            "DB_PASSWORD",
+            "mongo-billing",
+            "MONGO",
+        ),
+        (
+            "products-service",
+            "products",
+            "DB_USER",
+            "DB_PASSWORD",
+            "mongo-products",
+            "MONGO",
+        ),
+        (
+            "cart-service",
+            "carts",
+            "DB_USER",
+            "DB_PASSWORD",
+            "mongo-carts",
+            "MONGO",
+        ),
+        (
+            "auth-service",
+            "auth-db",
+            "DB_USER",
+            "DB_PASSWORD",
+            "mysql-auth",
+            "MYSQL",
+        ),
+        (
+            "files-service",
+            "files-db",
+            "DB_USER",
+            "DB_PASSWORD",
+            "mysql-files",
+            "MYSQL",
+        ),
+    ];
+
+    for (service, db_name, user_env, pass_env, host, db_type) in dbs {
+        sqlx::query(
+            "INSERT IGNORE INTO service_dbs
+             (service_docker_service, db_name, db_user_env, db_password_env, db_host, db_type)
+             VALUES (?, ?, ?, ?, ?, ?)",
+        )
+            .bind(service)
+            .bind(db_name)
+            .bind(user_env)
+            .bind(pass_env)
+            .bind(host)
+            .bind(db_type)
+            .execute(pool)
+            .await?;
+    }
 
     Ok(())
 }

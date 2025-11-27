@@ -1,24 +1,17 @@
 use crate::application::ports::output::docker_api_port::DynDockerAPI;
-use crate::application::services::utils::ServiceDescriptor;
-use crate::shared::error::{AppError, AppResult};
+use crate::domain::entities::service::ServiceEntity;
+use crate::shared::error::AppResult;
 
 pub async fn restart_container(
     docker_api: &DynDockerAPI,
-    descriptor: &ServiceDescriptor,
+    descriptor: &ServiceEntity,
     container_type: &str,
+    db_name: Option<&str>,
 ) -> AppResult<()> {
+    let db = descriptor.get_db_by_name_or_default(db_name.map(|s| s.to_string()))?;
+
     let container_name: String = if container_type == "db" {
-        descriptor
-            .db
-            .as_ref()
-            .ok_or_else(|| {
-                AppError::NotFound(format!(
-                    "Service '{}' does not have a database container",
-                    descriptor.docker_service
-                ))
-            })?
-            .db_host
-            .to_string()
+        db.db_host.to_string()
     } else {
         descriptor.docker_service.to_string()
     };

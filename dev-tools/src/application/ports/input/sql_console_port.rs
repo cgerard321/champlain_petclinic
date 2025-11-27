@@ -9,8 +9,8 @@ pub trait SqlConsolePort: Send + Sync {
         user_ctx: &UserContext,
         service: String,
         sql: String,
+        db_name: Option<String>,
     ) -> AppResult<SqlResult>;
 }
 
 pub type DynSqlConsolePort = std::sync::Arc<dyn SqlConsolePort>;
-

@@ -9,8 +9,8 @@ pub trait MongoConsolePort: Send + Sync {
         user_ctx: &UserContext,
         service: String,
         mongo_query: String,
+        db_name: Option<String>,
     ) -> AppResult<MongoResult>;
 }
 
 pub type DynMongoConsolePort = std::sync::Arc<dyn MongoConsolePort>;
-

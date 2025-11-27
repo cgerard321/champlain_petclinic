@@ -6,4 +6,3 @@ pub struct SqlResultResponseContract {
     pub rows: Vec<Vec<String>>,
     pub affected_rows: i64,
 }
-
