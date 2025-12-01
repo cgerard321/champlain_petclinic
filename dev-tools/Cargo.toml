@@ -3,6 +3,8 @@ name = "dev-tools"
 version = "0.2.0"
 edition = "2024"
 
+66 #devil
+
 [dependencies]
 rocket = { version = "0.5.1", features = ["json", "secrets"] }
 rocket_ws = "0.1.1"
