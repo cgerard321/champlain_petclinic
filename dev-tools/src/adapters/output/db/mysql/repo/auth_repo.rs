@@ -1,5 +1,5 @@
-use crate::adapters::output::mysql_repo::error::map_sqlx_err;
-use crate::adapters::output::mysql_repo::model::session::Session;
+use crate::adapters::output::db::mysql::repo::error::map_sqlx_err;
+use crate::adapters::output::db::mysql::repo::model::session::Session;
 use crate::application::ports::output::auth_repo_port::AuthRepoPort;
 use crate::domain::entities::session::SessionEntity;
 use crate::shared::error::{AppError, AppResult};
