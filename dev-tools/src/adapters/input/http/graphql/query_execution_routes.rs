@@ -1,6 +1,4 @@
-use crate::adapters::input::http::graphql::schemas::db_console_schema::{
-    MutationRoot, QueryRoot,
-};
+use crate::adapters::input::http::graphql::schemas::db_console_schema::{MutationRoot, QueryRoot};
 use crate::adapters::input::http::guards::auth_guard::AuthenticatedUser;
 use crate::application::ports::input::docker_port::DynDockerPort;
 use crate::application::ports::input::mongo_console_port::DynMongoConsolePort;

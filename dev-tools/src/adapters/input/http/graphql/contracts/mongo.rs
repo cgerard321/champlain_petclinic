@@ -6,4 +6,3 @@ pub struct MongoResultResponseContract {
     pub bson: Vec<Json<Value>>,
     pub affected_count: i64,
 }
-

@@ -1,4 +1,4 @@
-use crate::adapters::output::mysql_repo::model::role::Role;
+use crate::adapters::output::db::mysql::repo::model::role::Role;
 use crate::domain::entities::user::RoleEntity;
 use uuid::Uuid;
 

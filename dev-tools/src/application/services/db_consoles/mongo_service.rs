@@ -1,21 +1,28 @@
 use crate::application::ports::input::mongo_console_port::MongoConsolePort;
 use crate::application::ports::output::db_drivers_port::mongo_driver::DynMongoDriver;
+use crate::application::ports::output::services_repo_port::DynServicesRepo;
 use crate::application::services::db_consoles::projections::MongoResult;
 use crate::application::services::user_context::{verify_service_or_admin_perms, UserContext};
-use crate::application::services::utils::resolve_descriptor_by_container;
-use crate::application::services::DbType;
+use crate::domain::entities::service::DbType;
 use crate::shared::error::{AppError, AppResult};
 use async_trait::async_trait;
 use std::collections::HashMap;
 use std::sync::Arc;
 
 pub struct MongoConsoleService {
-    drivers: HashMap<&'static str, Arc<DynMongoDriver>>, // key = db host (docker container name)
+    drivers: HashMap<String, Arc<DynMongoDriver>>, // key = db host (docker container name)
+    service_repo: DynServicesRepo,
 }
 
 impl MongoConsoleService {
-    pub fn new(drivers: HashMap<&'static str, Arc<DynMongoDriver>>) -> Self {
-        Self { drivers }
+    pub fn new(
+        drivers: HashMap<String, Arc<DynMongoDriver>>,
+        service_repo: DynServicesRepo,
+    ) -> Self {
+        Self {
+            drivers,
+            service_repo,
+        }
     }
 }
 
@@ -26,19 +33,22 @@ impl MongoConsolePort for MongoConsoleService {
         user_ctx: &UserContext,
         service: String,
         mongo_command: String,
+        db_name: Option<String>,
     ) -> AppResult<MongoResult> {
-        let desc = resolve_descriptor_by_container(&service).ok_or_else(|| {
-            log::info!("Unknown container '{}'", service);
-            AppError::NotFound(format!("Unknown container '{}'", service))
-        })?;
+        let desc = self.service_repo.get_service(&service).await?;
 
         log::info!("Resolved descriptor: {:?}", desc);
-        verify_service_or_admin_perms(user_ctx, desc)?;
+        verify_service_or_admin_perms(user_ctx, &desc)?;
         log::info!("Access granted");
 
-        let db = desc.db.as_ref().ok_or_else(|| {
-            AppError::BadRequest(format!("Service '{}' has no associated database", service))
-        })?;
+        if desc.dbs.is_none() {
+            return Err(AppError::BadRequest(format!(
+                "Service '{}' has no associated database",
+                service
+            )));
+        }
+
+        let db = desc.get_db_by_name_or_default(db_name)?;
 
         if db.db_type != DbType::Mongo {
             return Err(AppError::BadRequest(format!(
@@ -50,9 +60,9 @@ impl MongoConsolePort for MongoConsoleService {
         log::info!("Executing query");
 
         self.drivers
-            .get(db.db_host)
+            .get(&db.db_host)
             .ok_or_else(|| AppError::BadRequest(format!("Unknown container '{}'", service)))?
-            .execute_query(&mongo_command, db.db_name)
+            .execute_query(&mongo_command, &db.db_name)
             .await
     }
 }

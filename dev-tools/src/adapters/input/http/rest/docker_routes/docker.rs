@@ -9,7 +9,7 @@ use rocket::serde::json::Json;
 use rocket::State;
 use rocket_ws::{Channel, WebSocket};
 
-#[get("/<service>/actions/fetch/logs/tail?<container_type>&<number_of_lines>")]
+#[get("/<service>/actions/fetch/logs/tail?<container_type>&<number_of_lines>&<db_name>")]
 pub fn service_logs(
     user: AuthenticatedUser,
     ws: WebSocket,
@@ -17,6 +17,7 @@ pub fn service_logs(
     service: String,
     container_type: Option<String>,
     number_of_lines: Option<usize>,
+    db_name: Option<String>,
 ) -> AppResult<Channel<'static>> {
     let auth_context = user.into();
 
@@ -27,6 +28,7 @@ pub fn service_logs(
         docker,
         service,
         container_type,
+        db_name,
         number_of_lines,
         auth_context,
     )
@@ -47,6 +49,7 @@ pub async fn restart_service_container(
     let restart_params = RestartContainerParams {
         container_name: service,
         container_type: restart_request.container_type.clone(),
+        db_name: restart_request.db_name.clone(),
     };
 
     docker.restart_container(restart_params, auth_context).await

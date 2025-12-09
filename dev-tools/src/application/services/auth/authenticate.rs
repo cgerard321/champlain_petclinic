@@ -1,11 +1,11 @@
 use crate::application::ports::output::auth_repo_port::DynAuthRepo;
+use crate::application::ports::output::crypto_port::DynCrypto;
 use crate::application::ports::output::user_repo_port::DynUsersRepo;
 use crate::domain::entities::session::SessionEntity;
 use crate::shared::config::SESSION_EXPIRATION_HR;
 use crate::shared::error::{AppError, AppResult};
 use chrono::{Duration, NaiveDateTime, Utc};
 use uuid::Uuid;
-use crate::application::ports::output::crypto_port::DynCrypto;
 
 pub async fn authenticate(
     crypto_functions: &DynCrypto,
