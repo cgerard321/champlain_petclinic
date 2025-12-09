@@ -1,4 +1,4 @@
-use crate::application::services::utils::ServiceDescriptor;
+use crate::domain::entities::service::ServiceEntity;
 use crate::shared::config::{ADMIN_ROLE_UUID, READER_ROLE_UUID, SUDO_ROLE_UUID};
 use crate::shared::error::{AppError, AppResult};
 use std::collections::HashSet;
@@ -58,7 +58,7 @@ pub fn require_all(user: &UserContext, required: &[Uuid]) -> AppResult<()> {
 #[inline]
 pub fn verify_service_or_admin_perms(
     user_ctx: &UserContext,
-    desc: &ServiceDescriptor,
+    desc: &ServiceEntity,
 ) -> AppResult<()> {
     if let Some(required_role) = desc.service_role {
         require_all(user_ctx, &[READER_ROLE_UUID])?;

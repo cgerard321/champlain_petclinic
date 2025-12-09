@@ -1,25 +1,29 @@
 use crate::application::ports::input::sql_console_port::SqlConsolePort;
-use crate::application::ports::output::db_drivers_port::mysql_driver::DynMySqlDriver;
+use crate::application::ports::output::db_drivers_port::sql_driver::DynSqlDriver;
+use crate::application::ports::output::services_repo_port::DynServicesRepo;
 use crate::application::services::db_consoles::projections::SqlResult;
-use crate::application::services::user_context::{
-    verify_service_or_admin_perms, UserContext,
-};
-use crate::application::services::utils::resolve_descriptor_by_container;
-use crate::application::services::DbType;
+use crate::application::services::user_context::{verify_service_or_admin_perms, UserContext};
+use crate::domain::entities::service::DbType;
 use crate::shared::error::{AppError, AppResult};
 use std::collections::HashMap;
 use std::sync::Arc;
 
 pub struct SqlConsoleService {
-    drivers: HashMap<&'static str, Arc<DynMySqlDriver>>, // key = db host (docker container name)
+    drivers: HashMap<String, Arc<DynSqlDriver>>, // key = db host (docker container name)
+    service_repo: DynServicesRepo,
 }
 
 impl SqlConsoleService {
-    pub fn new(drivers: HashMap<&'static str, Arc<DynMySqlDriver>>) -> Self {
-        Self { drivers }
+    pub fn new(
+        drivers: HashMap<String, Arc<DynSqlDriver>>,
+        service_repo: DynServicesRepo,
+    ) -> Self {
+        Self {
+            drivers,
+            service_repo,
+        }
     }
 }
-
 
 #[async_trait::async_trait]
 impl SqlConsolePort for SqlConsoleService {
@@ -28,43 +32,33 @@ impl SqlConsolePort for SqlConsoleService {
         user_ctx: &UserContext,
         service: String,
         sql: String,
+        db_name: Option<String>,
     ) -> AppResult<SqlResult> {
-        let desc = resolve_descriptor_by_container(&service).ok_or_else(|| {
-            log::info!("Unknown container '{}'", service);
-            AppError::NotFound(format!("Unknown container '{}'", service))
-        })?;
+        let desc = self.service_repo.get_service(&service).await?;
 
         log::info!("Resolved descriptor: {:?}", desc);
-        verify_service_or_admin_perms(user_ctx, desc)?;
+        verify_service_or_admin_perms(user_ctx, &desc)?;
         log::info!("Access granted");
 
-        let db_host = desc.db.as_ref().map_or("", |db| db.db_host);
+        let db = desc.get_db_by_name_or_default(db_name)?;
 
-        if db_host.is_empty() {
-            return Err(AppError::BadRequest(format!(
-                "Service '{}' has no associated database",
-                service
-            )));
-        }
+        log::info!("Resolved db: {:?}", db);
 
-        let db = desc.db.as_ref().ok_or_else(|| {
-            log::info!("Service '{}' has no associated database", service);
-            AppError::BadRequest(format!("Service '{}' has no associated database", service))
-        })?;
-
-        if db.db_type != DbType::Sql {
+        if db.db_type != DbType::MySQL && db.db_type != DbType::Postgres {
             return Err(AppError::BadRequest(format!(
                 "Service '{}' does not use a SQL database",
                 service
             )));
         }
 
+        log::info!("Executing query");
+
         let driver = self
             .drivers
-            .get(db_host)
+            .get(&db.db_host)
             .ok_or_else(|| AppError::BadRequest(format!("Unknown container '{}'", service)))?;
 
-        log::info!("Using driver for db host: {}", db_host);
+        log::info!("Using driver for db host: {}", db.db_host);
         driver.execute_query(&sql).await
     }
 }

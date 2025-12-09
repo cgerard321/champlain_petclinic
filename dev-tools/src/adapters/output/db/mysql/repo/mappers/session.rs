@@ -1,4 +1,4 @@
-use crate::adapters::output::mysql_repo::model::session::Session;
+use crate::adapters::output::db::mysql::repo::model::session::Session;
 use crate::domain::entities::session::SessionEntity;
 use uuid::Uuid;
 

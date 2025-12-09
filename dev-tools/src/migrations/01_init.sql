@@ -92,3 +92,69 @@ CREATE TABLE IF NOT EXISTS sessions
     id
 ) ON DELETE CASCADE
     );
+
+CREATE TABLE IF NOT EXISTS services
+(
+    docker_service
+    VARCHAR
+(
+    255
+) NOT NULL PRIMARY KEY,
+    service_role VARCHAR
+(
+    36
+),
+    FOREIGN KEY
+(
+    service_role
+) REFERENCES roles
+(
+    id
+)
+    ) ON DELETE SET NULL;
+
+CREATE TABLE IF NOT EXISTS service_dbs
+(
+    service_docker_service
+    VARCHAR
+(
+    255
+) NOT NULL,
+    db_name VARCHAR
+(
+    255
+) NOT NULL,
+    db_user_env VARCHAR
+(
+    255
+) NOT NULL,
+    db_password_env VARCHAR
+(
+    255
+) NOT NULL,
+    db_host VARCHAR
+(
+    255
+) NOT NULL,
+    db_type ENUM
+(
+    'MONGO',
+    'MYSQL',
+    'POSTGRES',
+    'UNKNOWN'
+) NOT NULL,
+    PRIMARY KEY
+(
+    service_docker_service,
+    db_name
+),
+    FOREIGN KEY
+(
+    service_docker_service
+)
+    REFERENCES services
+(
+    docker_service
+)
+    ON DELETE CASCADE
+    );
