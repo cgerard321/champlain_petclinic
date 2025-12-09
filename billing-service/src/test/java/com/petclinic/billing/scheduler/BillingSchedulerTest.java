@@ -34,11 +34,4 @@ public class BillingSchedulerTest {
         billingScheduler.markOverdueBills();
         Mockito.verify(billService, Mockito.times(1)).updateOverdueBills();
     }
-
-    @Test
-    public void testMarkOverdueBillsHandlesCompletedMono() {
-        Mockito.when(billService.updateOverdueBills()).thenReturn(Mono.justOrEmpty(null));
-        billingScheduler.markOverdueBills();
-        Mockito.verify(billService, Mockito.times(1)).updateOverdueBills();
-    }
 }

@@ -36,6 +36,10 @@ public class BillingScheduler {
                     )
             )
             .doOnError(error -> log.error("Permanently failed to update overdue bills after {} retries", MAX_RETRIES, error))
-            .subscribe();
+            .subscribe(
+                null,
+                error -> log.error("Subscription error in scheduled task", error),
+                () -> log.debug("Successfully completed overdue bills update")
+            );
     }
 }

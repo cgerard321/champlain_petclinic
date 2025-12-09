@@ -2,7 +2,7 @@
 
 Back to [Backend Standards](./java-coding-standards.md)
 
-<!-- TOC -->
+<!-- /TOC -->
 
 - [Scheduled Tasks in Spring Boot](#scheduled-tasks-in-spring-boot)
   - [Enabling Scheduling](#enabling-scheduling)
@@ -100,6 +100,9 @@ public class BillingSchedulerTest {
 
 - Verifies that when the scheduled method is called, it triggers the service method (`updateOverdueBills`).
 
+ - It does NOT test the actual scheduled execution (i.e., that Spring runs it on a schedule).
+ - It does NOT test the business logic inside `updateOverdueBills()`.
+
 ## Test Dependency Guidelines
 
 - Use only `spring-boot-starter-test` and `io.projectreactor:reactor-test` for most Spring Boot projects
@@ -111,10 +114,7 @@ Example Gradle configuration:
 testImplementation 'org.springframework.boot:spring-boot-starter-test'
 testImplementation 'io.projectreactor:reactor-test'
 ```
-
-- It does NOT test the actual scheduled execution (i.e., that Spring runs it on a schedule).
-- It does NOT test the business logic inside `updateOverdueBills()`.
-
+ 
 For full coverage, add separate tests for your business logic and consider integration tests for scheduled execution.
 
 ## Further Reading
