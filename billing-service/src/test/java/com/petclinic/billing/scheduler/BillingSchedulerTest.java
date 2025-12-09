@@ -32,6 +32,7 @@ public class BillingSchedulerTest {
         Mockito.when(billService.updateOverdueBills())
             .thenReturn(Mono.error(new RuntimeException("Simulated error")));
         billingScheduler.markOverdueBills();
-        Mockito.verify(billService, Mockito.times(1)).updateOverdueBills();
+        // Verify retry behavior: 1 initial attempt + 3 retries = 4 total calls (MAX_RETRIES = 3)
+        Mockito.verify(billService, Mockito.times(4)).updateOverdueBills();
     }
 }

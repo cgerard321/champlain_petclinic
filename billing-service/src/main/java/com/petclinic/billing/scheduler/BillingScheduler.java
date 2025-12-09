@@ -20,12 +20,15 @@ public class BillingScheduler {
     }
 
     /**
-     * Runs every day at midnight to mark overdue bills.
+     * Runs every 24 hours to mark overdue bills.
+     * Sequential execution is enforced: the next run will not start until the previous one completes,
+     * preventing concurrent executions.
      * Implements a retry system (similar to mailer) using Reactor's Retry.backoff:
      *   - Retries up to MAX_RETRIES times with RETRY_DELAY_MS delay between attempts
      *   - Logs each retry and permanent failure
      */
-    @Scheduled(cron = "0 0 0 * * ?")
+    // Using fixedDelay to prevent concurrent executions if a previous run is still in progress.
+    @Scheduled(fixedDelay = 86_400_000)
     public void markOverdueBills() {
         // subscribe() because @Scheduled does not auto-subscribe reactive types; this is fire-and-forget
         billService.updateOverdueBills()
@@ -35,7 +38,7 @@ public class BillingScheduler {
                         log.warn("Retrying updateOverdueBills (attempt {}/{}): {}", retrySignal.totalRetries() + 1, MAX_RETRIES, retrySignal.failure())
                     )
             )
-            .doOnError(error -> log.error("Permanently failed to update overdue bills after {} retries", MAX_RETRIES, error))
+            .doOnError(error -> log.error("Permanently failed to update overdue bills after {} retries: {}", MAX_RETRIES, error))
             .subscribe(
                 null,
                 error -> log.error("Subscription error in scheduled task", error),

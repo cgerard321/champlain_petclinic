@@ -2,16 +2,17 @@
 
 Back to [Backend Standards](./java-coding-standards.md)
 
-<!-- /TOC -->
+<!-- TOC -->
 
 - [Scheduled Tasks in Spring Boot](#scheduled-tasks-in-spring-boot)
   - [Enabling Scheduling](#enabling-scheduling)
   - [Scheduled Task Example](#scheduled-task-example)
+  - [Scheduling Approaches](#scheduling-approaches)
   - [Cron Expression Reference](#cron-expression-reference)
   - [Unit Testing Scheduled Tasks](#unit-testing-scheduled-tasks)
   - [Test Dependency Guidelines](#test-dependency-guidelines)
 
-<!-- TOC -->
+<!-- /TOC -->
 
 ## Enabling Scheduling
 
@@ -29,52 +30,114 @@ public class BillingServiceApplication {
 
 ## Scheduled Task Example
 
-Create a component class and use the `@Scheduled` annotation. Example for marking overdue bills:
+Here's how to create a scheduled task that runs every 24 hours:
 
 ```java
 @Component
 public class BillingScheduler {
-    private static final int MAX_RETRIES = 3; // example constant for the snippet
+    private static final Logger log = LoggerFactory.getLogger(BillingScheduler.class);
+    private static final int MAX_RETRIES = 3;
+    private static final long RETRY_DELAY_MS = 5000; // 5 seconds
     private final BillService billService;
 
     public BillingScheduler(BillService billService) {
         this.billService = billService;
     }
 
-    /**
-     * Runs every day at midnight to mark overdue bills.
-     * Retries up to 3 times with 5s delay between attempts.
-     */
-    @Scheduled(cron = "0 0 0 * * ?")
+    @Scheduled(fixedDelay = 86_400_000) // 24 hours
     public void markOverdueBills() {
-        // The actual MAX_RETRIES constant is defined in BillingScheduler.java; use the same constant in your implementation
-        // @Scheduled methods should subscribe to reactive chains if they are fire-and-forget.
         billService.updateOverdueBills()
             .retryWhen(
-                reactor.util.retry.Retry.backoff(MAX_RETRIES, java.time.Duration.ofSeconds(5))
+                reactor.util.retry.Retry.backoff(MAX_RETRIES, java.time.Duration.ofMillis(RETRY_DELAY_MS))
                     .doBeforeRetry(retrySignal ->
                         org.slf4j.LoggerFactory.getLogger(BillingScheduler.class)
                             .warn("Retrying updateOverdueBills (attempt {}/{}): {}", retrySignal.totalRetries() + 1, MAX_RETRIES, retrySignal.failure())
                     )
             )
             .doOnError(error -> org.slf4j.LoggerFactory.getLogger(BillingScheduler.class)
-                    .error("Permanently failed to update overdue bills after {} retries", MAX_RETRIES, error)
+                    .error("Permanently failed to update overdue bills after {} retries: {}", MAX_RETRIES, error)
             )
-            .subscribe();
+            .subscribe(
+                null,
+                error -> log.error("Subscription error in scheduled task", error),
+                () -> log.debug("Successfully completed overdue bills update")
+            );
     }
 }
 ```
 
+A few things to note:
+
+- We use `fixedDelay` instead of `cron` to prevent overlapping runs
+- The `.subscribe()` call is needed because Spring doesn't automatically subscribe to reactive chains
+- We include retry logic since network/database calls can fail
+
+## Scheduling Approaches
+
+Spring offers two main ways to schedule tasks:
+
+### Fixed Delay - Wait Between Runs
+
+```java
+@Scheduled(fixedDelay = 86_400_000) // 24 hours between runs
+public void processData() {
+    // Your task code
+}
+```
+
+This waits 24 hours after the task finishes before starting again. If your task takes 30 minutes, the next run starts 24 hours and 30 minutes after the original start time.
+
+**Use this when:**
+
+- Your task might take different amounts of time
+- You're making network calls or database operations
+- You have retry logic that could make runs longer
+- You don't want multiple instances running at once
+
+### Cron Expressions - Run at Specific Times
+
+```java
+@Scheduled(cron = "0 0 0 * * ?") // Every day at midnight
+public void generateDailyReport() {
+    // Your task code
+}
+```
+
+This runs at exact times based on a schedule. If your previous run is still going at midnight, Spring will start another one anyway.
+
+**Use this when:**
+
+- You need tasks to run at specific times
+- Your tasks are quick and predictable
+- Timing matters more than avoiding overlaps
+
+### Which Should You Choose?
+
+|                            | Fixed Delay                 | Cron                        |
+| -------------------------- | --------------------------- | --------------------------- |
+| **Multiple runs at once?** | Never                       | Possible                    |
+| **Timing**                 | Consistent gaps             | Exact schedule              |
+| **Good for**               | Long or unpredictable tasks | Quick, time-sensitive tasks |
+
+**Why we use fixed delay:** Our billing task has retries and reactive code, so runs can take different amounts of time. We'd rather avoid overlapping runs than hit an exact schedule.
+
 ## Cron Expression Reference
 
-- Format: `second minute hour day-of-month month day-of-week [year]`
-- Example: `0 0 0 * * ?` means at 00:00:00 (midnight) every day
-- `?` is used for 'no specific value' in day-of-month or day-of-week
-- See [Spring CronExpression docs](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/scheduling/support/CronExpression.html)
+Cron expressions follow this format: `second minute hour day-of-month month day-of-week`
 
-## Unit Testing Scheduled Tasks
+Common examples:
 
-Use Mockito and JUnit Jupiter to verify that your scheduled method calls the correct service method. Example:
+- `0 0 0 * * ?` - Every day at midnight
+- `0 0 9 * * MON-FRI` - Every weekday at 9 AM
+- `0 0 */6 * * ?` - Every 6 hours
+
+Use `?` when you don't care about that field (usually for day-of-month or day-of-week).
+
+For more complex expressions, check the [Spring CronExpression docs](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/scheduling/support/CronExpression.html).
+
+## Testing Your Scheduled Tasks
+
+Testing scheduled tasks is straightforward - just call the method directly and verify it does what you expect:
 
 ```java
 @ExtendWith(MockitoExtension.class)
@@ -88,34 +151,38 @@ public class BillingSchedulerTest {
     @Test
     public void testMarkOverdueBillsRuns() {
         Mockito.when(billService.updateOverdueBills()).thenReturn(reactor.core.publisher.Mono.empty());
-        // This unit test calls the scheduled method directly; it verifies the method triggers the service call.
-        // It does NOT verify that Spring's scheduling infrastructure actually runs the method on a schedule.
+
         billingScheduler.markOverdueBills();
+
         Mockito.verify(billService, Mockito.times(1)).updateOverdueBills();
     }
 }
 ```
 
-**What does this test check?**
+**What this test covers:**
 
-- Verifies that when the scheduled method is called, it triggers the service method (`updateOverdueBills`).
+- Verifies your scheduled method calls the right service method
+- Makes sure the basic wiring works
 
- - It does NOT test the actual scheduled execution (i.e., that Spring runs it on a schedule).
- - It does NOT test the business logic inside `updateOverdueBills()`.
+**What it doesn't test:**
 
-## Test Dependency Guidelines
+- Whether Spring actually runs the method on schedule
+- The business logic inside your service methods
 
-- Use only `spring-boot-starter-test` and `io.projectreactor:reactor-test` for most Spring Boot projects
-- No need to add Mockito or JUnit separately unless a specific version/feature is required
+> **Testing the actual scheduling:** If you want to test that Spring's scheduling really works, you'll need integration tests. Look into `ScheduledTaskRegistrar` or `@DirtiesContext` for managing scheduled tasks in tests.
 
-Example Gradle configuration:
+## Dependencies
+
+For most Spring Boot projects, you just need:
 
 ```gradle
 testImplementation 'org.springframework.boot:spring-boot-starter-test'
 testImplementation 'io.projectreactor:reactor-test'
 ```
- 
-For full coverage, add separate tests for your business logic and consider integration tests for scheduled execution.
+
+The first one includes Mockito and JUnit, so you don't need to add them separately.
+
+Test your business logic separately from your scheduling logic - it keeps things simpler.
 
 ## Further Reading
 
@@ -124,8 +191,6 @@ For full coverage, add separate tests for your business logic and consider integ
 
 ---
 
-### Note on Dependency Management
+**Tip:** Before adding new dependencies, check if they're already included in `spring-boot-starter-test`. It includes most testing libraries you'll need.
 
-Before adding new dependencies to `billing-service/build.gradle`, always check if the required libraries are already included via existing starter dependencies (e.g., `spring-boot-starter-test`). This helps keep your build clean and avoids unnecessary duplication.
-
-For more Java practices, see [java-coding-standards.md](./java-coding-standards.md).
+Back to [Java Coding Standards](./java-coding-standards.md)
