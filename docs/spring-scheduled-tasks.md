@@ -10,7 +10,7 @@ Back to [Backend Standards](./java-coding-standards.md)
   - [Scheduling Approaches](#scheduling-approaches)
   - [Cron Expression Reference](#cron-expression-reference)
   - [Unit Testing Scheduled Tasks](#unit-testing-scheduled-tasks)
-  - [Test Dependency Guidelines](#test-dependency-guidelines)
+  - [Dependencies](#dependencies)
 
 <!-- /TOC -->
 
@@ -50,12 +50,10 @@ public class BillingScheduler {
             .retryWhen(
                 reactor.util.retry.Retry.backoff(MAX_RETRIES, java.time.Duration.ofMillis(RETRY_DELAY_MS))
                     .doBeforeRetry(retrySignal ->
-                        org.slf4j.LoggerFactory.getLogger(BillingScheduler.class)
-                            .warn("Retrying updateOverdueBills (attempt {}/{}): {}", retrySignal.totalRetries() + 1, MAX_RETRIES, retrySignal.failure())
+                        log.warn("Retrying updateOverdueBills (attempt {}/{}): {}", retrySignal.totalRetries() + 1, MAX_RETRIES, retrySignal.failure())
                     )
             )
-            .doOnError(error -> org.slf4j.LoggerFactory.getLogger(BillingScheduler.class)
-                    .error("Permanently failed to update overdue bills after {} retries: {}", MAX_RETRIES, error)
+            .doOnError(error -> log.error("Permanently failed to update overdue bills after {} retries: {}", MAX_RETRIES, error)
             )
             .subscribe(
                 null,
