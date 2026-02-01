@@ -9,7 +9,7 @@ on:
 
 jobs:
   call_webhook:
-    if: github.event.pull_request.merged == true
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
     steps:
@@ -26,13 +26,11 @@ jobs:
           fi
 
       - name: Build payload
-        id: payload
         run: |
           BODY='{"ref":"refs/heads/main"}'
           echo "BODY=$BODY" >> $GITHUB_ENV
 
       - name: Generate HMAC signature
-        id: sign
         env:
           SECRET: ${{ secrets.WEBHOOK_SECRET }}
         run: |
@@ -40,10 +38,3 @@ jobs:
             openssl dgst -sha256 -hmac "$SECRET" | \
             sed 's/^.* //')
           echo "SIGNATURE=$SIG" >> $GITHUB_ENV
-
-      - name: Call Dockhand webhook
-        run: |
-          curl -v -X POST "${{ secrets.WEBHOOK_URL }}" \
-            -H "Content-Type: application/json" \
-            -H "X-Hub-Signature-256: sha256=$SIGNATURE" \
-            -d "$BODY"
