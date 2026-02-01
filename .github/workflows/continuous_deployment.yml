@@ -6,12 +6,10 @@ on:
     types: [closed]
     branches:
       - main
-  pull_request_target:
-    types: [opened, synchronize, reopened, closed]
 
 jobs:
   call_webhook:
-    if: github.event.pull_request.merged == true || github.event_name == 'pull_request_target'
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
     steps:
@@ -40,3 +38,10 @@ jobs:
             openssl dgst -sha256 -hmac "$SECRET" | \
             sed 's/^.* //')
           echo "SIGNATURE=$SIG" >> $GITHUB_ENV
+
+      - name: Call Dockhand webhook
+        run: |
+          curl -v -X POST "${{ secrets.WEBHOOK_URL }}" \
+            -H "Content-Type: application/json" \
+            -H "X-Hub-Signature-256: sha256=$SIGNATURE" \
+            -d "$BODY"
