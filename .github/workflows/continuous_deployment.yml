@@ -15,19 +15,24 @@ jobs:
     steps:
       - name: Validate secrets
         run: |
+          echo "Checking secrets..."
           if [ -z "${{ secrets.WEBHOOK_URL }}" ]; then
-            echo "WEBHOOK_URL is missing"
+            echo "❌ WEBHOOK_URL is missing"
             exit 1
           fi
 
           if [ -z "${{ secrets.WEBHOOK_SECRET }}" ]; then
-            echo "WEBHOOK_SECRET is missing"
+            echo "❌ WEBHOOK_SECRET is missing"
             exit 1
           fi
+
+          echo "✅ Secrets are present"
 
       - name: Build payload
         run: |
           BODY='{"ref":"refs/heads/main"}'
+          echo "Payload:"
+          echo "$BODY"
           echo "BODY=$BODY" >> $GITHUB_ENV
 
       - name: Generate HMAC signature
@@ -37,11 +42,30 @@ jobs:
           SIG=$(printf "%s" "$BODY" | \
             openssl dgst -sha256 -hmac "$SECRET" | \
             sed 's/^.* //')
+
+          echo "Generated signature:"
+          echo "sha256=${SIG:0:8}... (length: ${#SIG})"
+
           echo "SIGNATURE=$SIG" >> $GITHUB_ENV
 
-      - name: Call Dockhand webhook
+      - name: Call Dockhand webhook (with response logging)
         run: |
-          curl -v -X POST "${{ secrets.WEBHOOK_URL }}" \
+          echo "Calling webhook..."
+          RESPONSE=$(curl -s -v -w "\nHTTP_STATUS:%{http_code}\n" \
+            -X POST "${{ secrets.WEBHOOK_URL }}" \
             -H "Content-Type: application/json" \
             -H "X-Hub-Signature-256: sha256=$SIGNATURE" \
-            -d "$BODY"
+            -d "$BODY" 2>&1)
+
+          echo "Webhook response:"
+          echo "$RESPONSE"
+
+          STATUS=$(echo "$RESPONSE" | grep HTTP_STATUS | cut -d':' -f2)
+          echo "HTTP status: $STATUS"
+
+          if [ "$STATUS" -ge 400 ]; then
+            echo "❌ Webhook call failed"
+            exit 1
+          fi
+
+          echo "✅ Webhook call succeeded"
