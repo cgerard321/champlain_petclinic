@@ -1,6 +1,7 @@
 name: CD Webhook Trigger
 
 on:
+  workflow_dispatch:
   pull_request:
     types: [closed]
     branches:
