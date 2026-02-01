@@ -1,6 +1,7 @@
 name: CD Webhook Trigger
 
 on:
+  workflow_dispatch:
   pull_request:
     types: [closed]
     branches:
@@ -8,16 +9,63 @@ on:
 
 jobs:
   call_webhook:
-    if: github.event.pull_request.merged == true
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+
     steps:
-      - name: Call webhook
-        env:
-          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
-          SHA: ${{ github.event.pull_request.merge_commit_sha }}
+      - name: Validate secrets
         run: |
-          if [ -z "$WEBHOOK_URL" ]; then
-            echo "WEBHOOK_URL secret not set. Skipping webhook call."
+          echo "Checking secrets..."
+          if [ -z "${{ secrets.WEBHOOK_URL }}" ]; then
+            echo "❌ WEBHOOK_URL is missing"
             exit 1
           fi
-          curl --location --request POST "$WEBHOOK_URL"
+
+          if [ -z "${{ secrets.WEBHOOK_SECRET }}" ]; then
+            echo "❌ WEBHOOK_SECRET is missing"
+            exit 1
+          fi
+
+          echo "✅ Secrets are present"
+
+      - name: Build payload
+        run: |
+          BODY='{"ref":"refs/heads/main"}'
+          echo "Payload:"
+          echo "$BODY"
+          echo "BODY=$BODY" >> $GITHUB_ENV
+
+      - name: Generate HMAC signature
+        env:
+          SECRET: ${{ secrets.WEBHOOK_SECRET }}
+        run: |
+          SIG=$(printf "%s" "$BODY" | \
+            openssl dgst -sha256 -hmac "$SECRET" | \
+            sed 's/^.* //')
+
+          echo "Generated signature:"
+          echo "sha256=${SIG:0:8}... (length: ${#SIG})"
+
+          echo "SIGNATURE=$SIG" >> $GITHUB_ENV
+
+      - name: Call Dockhand webhook (with response logging)
+        run: |
+          echo "Calling webhook..."
+          RESPONSE=$(curl -s -v -w "\nHTTP_STATUS:%{http_code}\n" \
+            -X POST "${{ secrets.WEBHOOK_URL }}" \
+            -H "Content-Type: application/json" \
+            -H "X-Hub-Signature-256: sha256=$SIGNATURE" \
+            -d "$BODY" 2>&1)
+
+          echo "Webhook response:"
+          echo "$RESPONSE"
+
+          STATUS=$(echo "$RESPONSE" | grep HTTP_STATUS | cut -d':' -f2)
+          echo "HTTP status: $STATUS"
+
+          if [ "$STATUS" -ge 400 ]; then
+            echo "❌ Webhook call failed"
+            exit 1
+          fi
+
+          echo "✅ Webhook call succeeded"
