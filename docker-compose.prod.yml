@@ -85,7 +85,7 @@ services:
       - ./petclinic-frontend/src:/app/src
     restart: unless-stopped
     env_file:
-      - stack.env
+      - .env
     labels:
       - homepage.group=Development
       - homepage.name=Petclinic Frontend
@@ -111,7 +111,7 @@ services:
       - ./employee-frontend/src:/app/src
     restart: unless-stopped
     env_file:
-      - stack.env
+      - .env
     labels:
       - homepage.group=Development
       - homepage.name=Employee Frontend
@@ -131,7 +131,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=prod
     env_file:
-      - stack.env
+      - .env
     restart: unless-stopped
     depends_on:
       customers-service-reactive:
@@ -164,7 +164,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     env_file:
-      - stack.env
+      - .env
     restart: unless-stopped
     depends_on:
       mongo-visits:
@@ -179,7 +179,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     env_file:
-      - stack.env
+      - .env
     restart: unless-stopped
     depends_on:
       mongo-inventory:
@@ -191,7 +191,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     env_file:
-      - stack.env
+      - .env
     restart: unless-stopped
     depends_on:
       mongo-vet:
@@ -205,7 +205,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     env_file:
-      - stack.env
+      - .env
     restart: unless-stopped
     depends_on:
       mongo-customers:
@@ -218,7 +218,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=prod
     env_file:
-      - stack.env
+      - .env
     restart: unless-stopped
     depends_on:
       mysql-auth:
@@ -233,7 +233,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     env_file:
-      - stack.env
+      - .env
     restart: unless-stopped
     depends_on:
       mongo-billing:
@@ -246,7 +246,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     env_file:
-      - stack.env
+      - .env
     restart: unless-stopped
     depends_on:
       mongo-products:
@@ -259,7 +259,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     env_file:
-      - stack.env
+      - .env
     restart: unless-stopped
     depends_on:
       mongo-carts:
@@ -271,7 +271,7 @@ services:
   mailer-service:
     build: mailer-service
     env_file:
-      - stack.env
+      - .env
     environment:
       - SMTP_SERVER=${SMTP_SERVER}
       - SMTP_PORT=${SMTP_PORT}
@@ -284,7 +284,7 @@ services:
   files-service:
     build: files-service
     env_file:
-      - stack.env
+      - .env
     environment:
       - FILE_DATABASE=${DB_USER}:${DB_PASSWORD}@tcp(mysql-files:3306)/files-db
       - FILE_ENDPOINT=${FILE_ENDPOINT}
@@ -304,7 +304,7 @@ services:
     image: mysql:5.7
     platform: linux/amd64
     env_file:
-      - stack.env
+      - .env
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-rootpwd}
       - MYSQL_DATABASE=auth-db
@@ -320,7 +320,7 @@ services:
     image: mysql:5.7
     platform: linux/amd64
     env_file:
-      - stack.env
+      - .env
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-rootpwd}
       - MYSQL_DATABASE=files-db
@@ -336,7 +336,7 @@ services:
     container_name: postgres-vet
     hostname: postgres
     env_file:
-      - stack.env
+      - .env
     environment:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
@@ -353,7 +353,7 @@ services:
     image: mongo
     container_name: mongo-vet
     env_file:
-      - stack.env
+      - .env
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${DB_USER}
       - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD}
@@ -367,7 +367,7 @@ services:
     image: mongo
     container_name: mongo-billing
     env_file:
-      - stack.env
+      - .env
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${DB_USER}
       - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD}
@@ -381,7 +381,7 @@ services:
     image: mongo
     container_name: mongo-visits
     env_file:
-      - stack.env
+      - .env
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${DB_USER}
       - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD}
@@ -395,7 +395,7 @@ services:
     image: mongo
     container_name: mongo-customers
     env_file:
-      - stack.env
+      - .env
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${DB_USER}
       - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD}
@@ -409,7 +409,7 @@ services:
     image: mongo
     container_name: mongo-inventory
     env_file:
-      - stack.env
+      - .env
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${DB_USER}
       - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD}
@@ -423,7 +423,7 @@ services:
     image: mongo
     container_name: mongo-products
     env_file:
-      - stack.env
+      - .env
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${DB_USER}
       - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD}
@@ -437,7 +437,7 @@ services:
     image: mongo
     container_name: mongo-carts
     env_file:
-      - stack.env
+      - .env
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${DB_USER}
       - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD}
@@ -459,7 +459,7 @@ services:
     volumes:
       - dbgate-data:/root/.dbgate
     env_file:
-      - stack.env
+      - .env
     environment:
       - BASIC_AUTH=1
       - LOGIN=CPC_Admin
@@ -559,7 +559,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     env_file:
-      - stack.env
+      - .env
     ports:
       - "6000:8080"
 
@@ -569,7 +569,7 @@ services:
     platform: linux/amd64
     container_name: mysql-devtools
     env_file:
-      - stack.env
+      - .env
     environment:
       - MYSQL_ROOT_PASSWORD=${DB_DEV_TOOLS_ROOT_PASSWORD:-rootpwd}
       - MYSQL_DATABASE=devtools-db
