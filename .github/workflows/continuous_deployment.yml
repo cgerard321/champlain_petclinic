@@ -10,14 +10,39 @@ jobs:
   call_webhook:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+
     steps:
-      - name: Call webhook
-        env:
-          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
-          SHA: ${{ github.event.pull_request.merge_commit_sha }}
+      - name: Validate secrets
         run: |
-          if [ -z "$WEBHOOK_URL" ]; then
-            echo "WEBHOOK_URL secret not set. Skipping webhook call."
+          if [ -z "${{ secrets.WEBHOOK_URL }}" ]; then
+            echo "WEBHOOK_URL is missing"
             exit 1
           fi
-          curl --location --request POST "$WEBHOOK_URL"
+
+          if [ -z "${{ secrets.WEBHOOK_SECRET }}" ]; then
+            echo "WEBHOOK_SECRET is missing"
+            exit 1
+          fi
+
+      - name: Build payload
+        id: payload
+        run: |
+          BODY='{"ref":"refs/heads/main"}'
+          echo "BODY=$BODY" >> $GITHUB_ENV
+
+      - name: Generate HMAC signature
+        id: sign
+        env:
+          SECRET: ${{ secrets.WEBHOOK_SECRET }}
+        run: |
+          SIG=$(printf "%s" "$BODY" | \
+            openssl dgst -sha256 -hmac "$SECRET" | \
+            sed 's/^.* //')
+          echo "SIGNATURE=$SIG" >> $GITHUB_ENV
+
+      - name: Call Dockhand webhook
+        run: |
+          curl -v -X POST "${{ secrets.WEBHOOK_URL }}" \
+            -H "Content-Type: application/json" \
+            -H "X-Hub-Signature-256: sha256=$SIGNATURE" \
+            -d "$BODY"
