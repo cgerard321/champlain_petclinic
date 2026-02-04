@@ -103,15 +103,18 @@ CREATE TABLE IF NOT EXISTS services
     service_role VARCHAR
 (
     36
-),
+) NULL,
+    CONSTRAINT fk_services_role
     FOREIGN KEY
 (
     service_role
-) REFERENCES roles
+)
+    REFERENCES roles
 (
     id
 )
-    ) ON DELETE SET NULL;
+    ON DELETE SET NULL
+    );
 
 CREATE TABLE IF NOT EXISTS service_dbs
 (
