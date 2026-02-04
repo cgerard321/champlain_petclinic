@@ -564,7 +564,6 @@ services:
       - "6000:8080"
 
   mysql-devtools:
-    <<: *mysql
     image: mysql:5.7
     platform: linux/amd64
     container_name: mysql-devtools
