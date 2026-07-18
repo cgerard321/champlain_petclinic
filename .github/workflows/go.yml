@@ -19,7 +19,7 @@ jobs:
           go-version: '1.24'
 
       - name: Install Go Swagger CLI
-        run: go install github.com/swaggo/swag/cmd/swag@v1.3.2
+        run: go install github.com/swaggo/swag/cmd/swag@v1.7.9
 
       - name: Swagger
         run: |
