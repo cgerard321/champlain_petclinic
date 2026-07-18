@@ -52,12 +52,12 @@ x-healthchecks:
       start_period: 30s
 
   mongo: &mongo
-      healthcheck:
-        test: ["CMD", "mongosh", "--getServiceExecutor", "--quiet", "--eval", "db.adminCommand('ping')"]
-        interval: 15s
-        timeout: 5s
-        retries: 5
-        start_period: 30s
+    healthcheck:
+      test: ["CMD", "mongosh", "--getServiceExecutor", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
 services:
   # =========================
