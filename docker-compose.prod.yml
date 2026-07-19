@@ -359,10 +359,6 @@ services:
       - mongo-vet-data:/data/db
       - mongo-vet-config:/data/configdb
     restart: unless-stopped
-    ulimits:
-      nofile:
-        soft: 64000
-        hard: 64000
 
   mongo-billing:
     <<: *mongo
@@ -377,10 +373,6 @@ services:
       - mongo-billing-data:/data/db
       - mongo-billing-config:/data/configdb
     restart: unless-stopped
-    ulimits:
-      nofile:
-        soft: 64000
-        hard: 64000
 
   mongo-visits:
     <<: *mongo
@@ -395,10 +387,6 @@ services:
       - mongo-visits-data:/data/db
       - mongo-visits-config:/data/configdb
     restart: unless-stopped
-    ulimits:
-      nofile:
-        soft: 64000
-        hard: 64000
 
   mongo-customers:
     <<: *mongo
@@ -413,10 +401,6 @@ services:
       - mongo-customers-data:/data/db
       - mongo-customers-config:/data/configdb
     restart: unless-stopped
-    ulimits:
-      nofile:
-        soft: 64000
-        hard: 64000
 
   mongo-inventory:
     <<: *mongo
@@ -431,10 +415,6 @@ services:
       - mongo-inventory-data:/data/db
       - mongo-inventory-config:/data/configdb
     restart: unless-stopped
-    ulimits:
-      nofile:
-        soft: 64000
-        hard: 64000
 
   mongo-products:
     <<: *mongo
@@ -449,10 +429,6 @@ services:
       - mongo-products-data:/data/db
       - mongo-products-config:/data/configdb
     restart: unless-stopped
-    ulimits:
-      nofile:
-        soft: 64000
-        hard: 64000
 
   mongo-carts:
     <<: *mongo
@@ -467,10 +443,6 @@ services:
       - mongo-carts-data:/data/db
       - mongo-carts-config:/data/configdb
     restart: unless-stopped
-    ulimits:
-      nofile:
-        soft: 64000
-        hard: 64000
 
   # =========================
   # ADMIN / TOOLING
