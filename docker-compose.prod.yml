@@ -1,8 +1,74 @@
+---
+# =========================
+# Reusable healthchecks
+# =========================
+x-healthchecks:
+  springboot: &springboot
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/actuator/health || curl -fsS http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  react-node: &react_node
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:3000/ || true"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  angular-node: &angular_node
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:4200/ || true"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  dbgate: &dbgate_hc
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS -u CPC_Admin:${DBGATE_PASSWORD} http://localhost:3000/ || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  mysql: &mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-u${DB_USER}", "-p${DB_PASSWORD}", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  postgres: &postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d images -h localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  mongo: &mongo
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mongosh --quiet -u ${DB_USER} -p ${DB_PASSWORD} --eval 'db.runCommand({ ping: 1 }).ok' || mongo --quiet -u ${DB_USER} -p ${DB_PASSWORD} --eval 'db.runCommand({ ping: 1 }).ok'",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
 services:
   # =========================
   # FRONTEND (React/Node)
   # =========================
   petclinicFrontend:
+    <<: *react_node
     image: petclinic-frontend
     container_name: petclinic-frontend
     pull_policy: never
@@ -26,7 +92,9 @@ services:
       - homepage.description=Petclinic Frontend Container
       - homepage.siteMonitor=https://petclinic.benmusicgeek.synology.me/
 
+  # Employee front-end
   employeeFrontend:
+    <<: *angular_node
     image: employee-frontend
     container_name: employee-frontend
     pull_policy: never
@@ -54,6 +122,7 @@ services:
   # BACKEND — Spring Boot
   # =========================
   api-gateway:
+    <<: *springboot
     build: api-gateway
     ports:
       - "8080:8080"
@@ -63,15 +132,22 @@ services:
       - .env
     restart: unless-stopped
     depends_on:
-      - customers-service-reactive
-      - vet-service
-      - visits-service-new
-      - products-service
-      - cart-service
-      - inventory-service
-      - billing-service
-      - auth-service
-      - files-service
+      customers-service-reactive:
+        condition: service_healthy
+      vet-service:
+        condition: service_healthy
+      visits-service-new:
+        condition: service_healthy
+      products-service:
+        condition: service_healthy
+      cart-service:
+        condition: service_healthy
+      inventory-service:
+        condition: service_healthy
+      billing-service:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
     labels:
       - homepage.group=Development
       - homepage.name=Petclinic Api Gateway
@@ -81,6 +157,7 @@ services:
       - homepage.siteMonitor=https://petclinic-backend.benmusicgeek.synology.me/api/v2/gateway/vets
 
   visits-service-new:
+    <<: *springboot
     build: visits-service-new
     environment:
       - SPRING_PROFILES_ACTIVE=docker
@@ -88,10 +165,13 @@ services:
       - .env
     restart: unless-stopped
     depends_on:
-      - mongo-visits
-      - mailer-service
+      mongo-visits:
+        condition: service_healthy
+      mailer-service:
+        condition: service_started
 
   inventory-service:
+    <<: *springboot
     build: inventory-service
     hostname: inventory
     environment:
@@ -100,9 +180,11 @@ services:
       - .env
     restart: unless-stopped
     depends_on:
-      - mongo-inventory
+      mongo-inventory:
+        condition: service_healthy
 
   vet-service:
+    <<: *springboot
     build: vet-service
     environment:
       - SPRING_PROFILES_ACTIVE=docker
@@ -110,10 +192,13 @@ services:
       - .env
     restart: unless-stopped
     depends_on:
-      - postgres-vet
-      - mongo-vet
+      mongo-vet:
+        condition: service_healthy
+      postgres-vet:
+        condition: service_healthy
 
   customers-service-reactive:
+    <<: *springboot
     build: customers-service-reactive
     environment:
       - SPRING_PROFILES_ACTIVE=docker
@@ -121,9 +206,11 @@ services:
       - .env
     restart: unless-stopped
     depends_on:
-      - mongo-customers
+      mongo-customers:
+        condition: service_healthy
 
   auth-service:
+    <<: *springboot
     build: auth-service
     hostname: auth
     environment:
@@ -132,10 +219,13 @@ services:
       - .env
     restart: unless-stopped
     depends_on:
-      - mysql-auth
-      - mailer-service
+      mysql-auth:
+        condition: service_healthy
+      mailer-service:
+        condition: service_started
 
   billing-service:
+    <<: *springboot
     build: billing-service
     hostname: billing
     environment:
@@ -144,9 +234,11 @@ services:
       - .env
     restart: unless-stopped
     depends_on:
-      - mongo-billing
+      mongo-billing:
+        condition: service_healthy
 
   products-service:
+    <<: *springboot
     build: products-service
     hostname: products-service
     environment:
@@ -155,9 +247,11 @@ services:
       - .env
     restart: unless-stopped
     depends_on:
-      - mongo-products
+      mongo-products:
+        condition: service_healthy
 
   cart-service:
+    <<: *springboot
     build: cart-service
     hostname: cart
     environment:
@@ -166,10 +260,11 @@ services:
       - .env
     restart: unless-stopped
     depends_on:
-      - mongo-carts
+      mongo-carts:
+        condition: service_healthy
 
   # =========================
-  # BACKEND — Go & Utilities
+  # BACKEND — Go (manual)
   # =========================
   mailer-service:
     build: mailer-service
@@ -195,13 +290,15 @@ services:
       - FILE_ACCESS_KEY_ID=${FILE_ACCESS_KEY_ID}
       - FILE_SECRET_ACCESS_KEY=${FILE_SECRET_ACCESS_KEY}
     depends_on:
-      - mysql-files
+      mysql-files:
+        condition: service_healthy
     restart: unless-stopped
 
   # =========================
   # DATABASES — SQL
   # =========================
   mysql-auth:
+    <<: *mysql
     image: mysql:5.7
     platform: linux/amd64
     env_file:
@@ -217,6 +314,7 @@ services:
     restart: unless-stopped
 
   mysql-files:
+    <<: *mysql
     image: mysql:5.7
     platform: linux/amd64
     env_file:
@@ -231,6 +329,7 @@ services:
     restart: unless-stopped
 
   postgres-vet:
+    <<: *postgres
     image: postgres:17
     container_name: postgres-vet
     hostname: postgres
@@ -248,7 +347,8 @@ services:
   # DATABASES — MongoDB
   # =========================
   mongo-vet:
-    image: mongo:latest
+    <<: *mongo
+    image: mongo
     container_name: mongo-vet
     env_file:
       - .env
@@ -261,7 +361,8 @@ services:
     restart: unless-stopped
 
   mongo-billing:
-    image: mongo:latest
+    <<: *mongo
+    image: mongo
     container_name: mongo-billing
     env_file:
       - .env
@@ -274,7 +375,8 @@ services:
     restart: unless-stopped
 
   mongo-visits:
-    image: mongo:latest
+    <<: *mongo
+    image: mongo
     container_name: mongo-visits
     env_file:
       - .env
@@ -287,7 +389,8 @@ services:
     restart: unless-stopped
 
   mongo-customers:
-    image: mongo:latest
+    <<: *mongo
+    image: mongo
     container_name: mongo-customers
     env_file:
       - .env
@@ -300,7 +403,8 @@ services:
     restart: unless-stopped
 
   mongo-inventory:
-    image: mongo:latest
+    <<: *mongo
+    image: mongo
     container_name: mongo-inventory
     env_file:
       - .env
@@ -313,7 +417,8 @@ services:
     restart: unless-stopped
 
   mongo-products:
-    image: mongo:latest
+    <<: *mongo
+    image: mongo
     container_name: mongo-products
     env_file:
       - .env
@@ -326,7 +431,8 @@ services:
     restart: unless-stopped
 
   mongo-carts:
-    image: mongo:latest
+    <<: *mongo
+    image: mongo
     container_name: mongo-carts
     env_file:
       - .env
@@ -342,6 +448,7 @@ services:
   # ADMIN / TOOLING
   # =========================
   dbgate:
+    <<: *dbgate_hc
     image: dbgate/dbgate:latest
     container_name: dbgate
     ports:
@@ -359,7 +466,7 @@ services:
       - ADMIN_PASSWORD=${DBGATE_ADMIN_PASSWORD:-change-me}
       - CONNECTIONS=mysqlAuth,mysqlFiles,postgresVet,mongoVet,mongoBilling,mongoVisits,mongoCustomers,mongoInventory,mongoProducts,mongoCarts
 
-      # Connection Definitions
+      # MySQL (auth)
       - LABEL_mysqlAuth=MySQL auth-db
       - ENGINE_mysqlAuth=mysql@dbgate-plugin-mysql
       - SERVER_mysqlAuth=mysql-auth
@@ -368,6 +475,7 @@ services:
       - PASSWORD_mysqlAuth=${DB_PASSWORD}
       - DATABASE_mysqlAuth=auth-db
 
+      # MySQL (files)
       - LABEL_mysqlFiles=MySQL files-db
       - ENGINE_mysqlFiles=mysql@dbgate-plugin-mysql
       - SERVER_mysqlFiles=mysql-files
@@ -376,6 +484,7 @@ services:
       - PASSWORD_mysqlFiles=${DB_PASSWORD}
       - DATABASE_mysqlFiles=files-db
 
+      # Postgres (vet)
       - LABEL_postgresVet=Postgres images
       - ENGINE_postgresVet=postgres@dbgate-plugin-postgres
       - SERVER_postgresVet=postgres
@@ -384,6 +493,7 @@ services:
       - PASSWORD_postgresVet=${DB_PASSWORD}
       - DATABASE_postgresVet=images
 
+      # MongoDBs
       - LABEL_mongoVet=Mongo (vet)
       - ENGINE_mongoVet=mongo@dbgate-plugin-mongo
       - URL_mongoVet=mongodb://${DB_USER}:${DB_PASSWORD}@mongo-vet:27017/?authSource=admin
@@ -412,16 +522,26 @@ services:
       - ENGINE_mongoCarts=mongo@dbgate-plugin-mongo
       - URL_mongoCarts=mongodb://${DB_USER}:${DB_PASSWORD}@mongo-carts:27017/?authSource=admin
     depends_on:
-      - mysql-auth
-      - mysql-files
-      - postgres-vet
-      - mongo-vet
-      - mongo-billing
-      - mongo-visits
-      - mongo-customers
-      - mongo-inventory
-      - mongo-products
-      - mongo-carts
+      mysql-auth:
+        condition: service_healthy
+      mysql-files:
+        condition: service_healthy
+      postgres-vet:
+        condition: service_healthy
+      mongo-vet:
+        condition: service_healthy
+      mongo-billing:
+        condition: service_healthy
+      mongo-visits:
+        condition: service_healthy
+      mongo-customers:
+        condition: service_healthy
+      mongo-inventory:
+        condition: service_healthy
+      mongo-products:
+        condition: service_healthy
+      mongo-carts:
+        condition: service_healthy
 
   dev-tools:
     container_name: dev-tools
@@ -442,7 +562,6 @@ services:
     image: mysql:5.7
     platform: linux/amd64
     container_name: mysql-devtools
-    restart: unless-stopped
     env_file:
       - .env
     environment:
