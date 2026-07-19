@@ -1,4 +1,3 @@
----
 # =========================
 # Reusable healthchecks
 # =========================
@@ -50,13 +49,6 @@ x-healthchecks:
       timeout: 5s
       retries: 5
       start_period: 30s
-      
-  mongo-hc: &mongo_hc
-    test: ["CMD-SHELL", "mongosh --quiet --username $${DB_USER} --password $${DB_PASSWORD} --authenticationDatabase admin --eval \"db.adminCommand('ping')\""]
-    interval: 15s
-    timeout: 5s
-    retries: 5
-    start_period: 30s
 
 services:
   # =========================
@@ -162,7 +154,7 @@ services:
     restart: unless-stopped
     depends_on:
       mongo-visits:
-        condition: service_healthy
+        condition: service_started
       mailer-service:
         condition: service_started
 
@@ -177,7 +169,7 @@ services:
     restart: unless-stopped
     depends_on:
       mongo-inventory:
-        condition: service_healthy
+        condition: service_started
 
   vet-service:
     <<: *springboot
@@ -191,7 +183,7 @@ services:
       postgres-vet:
         condition: service_healthy
       mongo-vet:
-        condition: service_healthy
+        condition: service_started
 
   customers-service-reactive:
     <<: *springboot
@@ -203,7 +195,7 @@ services:
     restart: unless-stopped
     depends_on:
       mongo-customers:
-        condition: service_healthy
+        condition: service_started
 
   auth-service:
     <<: *springboot
@@ -231,7 +223,7 @@ services:
     restart: unless-stopped
     depends_on:
       mongo-billing:
-        condition: service_healthy
+        condition: service_started
 
   products-service:
     <<: *springboot
@@ -244,7 +236,7 @@ services:
     restart: unless-stopped
     depends_on:
       mongo-products:
-        condition: service_healthy
+        condition: service_started
 
   cart-service:
     <<: *springboot
@@ -257,7 +249,7 @@ services:
     restart: unless-stopped
     depends_on:
       mongo-carts:
-        condition: service_healthy
+        condition: service_started
 
   # =========================
   # BACKEND — Go & Utilities
@@ -355,7 +347,6 @@ services:
       - mongo-vet-data:/data/db
       - mongo-vet-config:/data/configdb
     restart: unless-stopped
-    healthcheck: *mongo_hc
 
   mongo-billing:
     image: mongo:latest
@@ -369,7 +360,6 @@ services:
       - mongo-billing-data:/data/db
       - mongo-billing-config:/data/configdb
     restart: unless-stopped
-    healthcheck: *mongo_hc
 
   mongo-visits:
     image: mongo:latest
@@ -383,7 +373,6 @@ services:
       - mongo-visits-data:/data/db
       - mongo-visits-config:/data/configdb
     restart: unless-stopped
-    healthcheck: *mongo_hc
 
   mongo-customers:
     image: mongo:latest
@@ -397,7 +386,6 @@ services:
       - mongo-customers-data:/data/db
       - mongo-customers-config:/data/configdb
     restart: unless-stopped
-    healthcheck: *mongo_hc
 
   mongo-inventory:
     image: mongo:latest
@@ -411,7 +399,6 @@ services:
       - mongo-inventory-data:/data/db
       - mongo-inventory-config:/data/configdb
     restart: unless-stopped
-    healthcheck: *mongo_hc
 
   mongo-products:
     image: mongo:latest
@@ -425,7 +412,6 @@ services:
       - mongo-products-data:/data/db
       - mongo-products-config:/data/configdb
     restart: unless-stopped
-    healthcheck: *mongo_hc
 
   mongo-carts:
     image: mongo:latest
@@ -439,7 +425,6 @@ services:
       - mongo-carts-data:/data/db
       - mongo-carts-config:/data/configdb
     restart: unless-stopped
-    healthcheck: *mongo_hc
 
   # =========================
   # ADMIN / TOOLING
@@ -523,19 +508,19 @@ services:
       postgres-vet:
         condition: service_healthy
       mongo-vet:
-        condition: service_healthy
+        condition: service_started
       mongo-billing:
-        condition: service_healthy
+        condition: service_started
       mongo-visits:
-        condition: service_healthy
+        condition: service_started
       mongo-customers:
-        condition: service_healthy
+        condition: service_started
       mongo-inventory:
-        condition: service_healthy
+        condition: service_started
       mongo-products:
-        condition: service_healthy
+        condition: service_started
       mongo-carts:
-        condition: service_healthy
+        condition: service_started
 
   dev-tools:
     container_name: dev-tools
