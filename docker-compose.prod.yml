@@ -558,6 +558,7 @@ services:
     image: mysql:5.7
     platform: linux/amd64
     container_name: mysql-devtools
+    restart: unless-stopped
     env_file:
       - .env
     environment:
