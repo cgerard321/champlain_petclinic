@@ -571,6 +571,7 @@ services:
       - MYSQL_PASSWORD=${DB_DEV_TOOLS_PASSWORD}
     volumes:
       - mysql-devtools-data:/var/lib/mysql
+    restart: unless-stopped
 
 # =========================
 # VOLUMES
