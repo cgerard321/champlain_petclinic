@@ -50,7 +50,7 @@ x-healthchecks:
       timeout: 5s
       retries: 5
       start_period: 30s
-
+      
   mongo-hc: &mongo_hc
     test: ["CMD-SHELL", "mongosh --quiet --username $${DB_USER} --password $${DB_PASSWORD} --authenticationDatabase admin --eval \"db.adminCommand('ping')\""]
     interval: 15s
