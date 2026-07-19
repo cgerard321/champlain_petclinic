@@ -29,7 +29,7 @@ x-healthchecks:
 
   dbgate: &dbgate_hc
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS -u CPC_Admin:${DBGATE_PASSWORD} http://localhost:3000/ || exit 1"]
+      test: ["CMD-SHELL", "curl -fsS -u CPC_Admin:${DBGATE_PASSWORD:-change-me} http://localhost:3000/ || exit 1"]
       interval: 10s
       timeout: 10s
       retries: 3
@@ -51,13 +51,12 @@ x-healthchecks:
       retries: 5
       start_period: 30s
 
-  mongo: &mongo
-    healthcheck:
-      test: ["CMD-SHELL", "mongosh --quiet --username ${DB_USER} --password ${DB_PASSWORD} --authenticationDatabase admin --eval \"db.adminCommand('ping')\""]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+  mongo-hc: &mongo_hc
+    test: ["CMD-SHELL", "mongosh --quiet --username $${DB_USER} --password $${DB_PASSWORD} --authenticationDatabase admin --eval \"db.adminCommand('ping')\""]
+    interval: 15s
+    timeout: 5s
+    retries: 5
+    start_period: 30s
 
 services:
   # =========================
@@ -88,7 +87,6 @@ services:
       - homepage.description=Petclinic Frontend Container
       - homepage.siteMonitor=https://petclinic.benmusicgeek.synology.me/
 
-  # Employee front-end
   employeeFrontend:
     <<: *angular_node
     image: employee-frontend
@@ -144,6 +142,8 @@ services:
         condition: service_healthy
       auth-service:
         condition: service_healthy
+      files-service:
+        condition: service_healthy
     labels:
       - homepage.group=Development
       - homepage.name=Petclinic Api Gateway
@@ -188,9 +188,9 @@ services:
       - .env
     restart: unless-stopped
     depends_on:
-      mongo-vet:
-        condition: service_healthy
       postgres-vet:
+        condition: service_healthy
+      mongo-vet:
         condition: service_healthy
 
   customers-service-reactive:
@@ -260,7 +260,7 @@ services:
         condition: service_healthy
 
   # =========================
-  # BACKEND — Go (manual)
+  # BACKEND — Go & Utilities
   # =========================
   mailer-service:
     build: mailer-service
@@ -276,6 +276,7 @@ services:
     restart: unless-stopped
 
   files-service:
+    <<: *springboot
     build: files-service
     env_file:
       - .env
@@ -343,8 +344,7 @@ services:
   # DATABASES — MongoDB
   # =========================
   mongo-vet:
-    <<: *mongo
-    image: mongo
+    image: mongo:latest
     container_name: mongo-vet
     env_file:
       - .env
@@ -355,10 +355,10 @@ services:
       - mongo-vet-data:/data/db
       - mongo-vet-config:/data/configdb
     restart: unless-stopped
+    healthcheck: *mongo_hc
 
   mongo-billing:
-    <<: *mongo
-    image: mongo
+    image: mongo:latest
     container_name: mongo-billing
     env_file:
       - .env
@@ -369,10 +369,10 @@ services:
       - mongo-billing-data:/data/db
       - mongo-billing-config:/data/configdb
     restart: unless-stopped
+    healthcheck: *mongo_hc
 
   mongo-visits:
-    <<: *mongo
-    image: mongo
+    image: mongo:latest
     container_name: mongo-visits
     env_file:
       - .env
@@ -383,10 +383,10 @@ services:
       - mongo-visits-data:/data/db
       - mongo-visits-config:/data/configdb
     restart: unless-stopped
+    healthcheck: *mongo_hc
 
   mongo-customers:
-    <<: *mongo
-    image: mongo
+    image: mongo:latest
     container_name: mongo-customers
     env_file:
       - .env
@@ -397,10 +397,10 @@ services:
       - mongo-customers-data:/data/db
       - mongo-customers-config:/data/configdb
     restart: unless-stopped
+    healthcheck: *mongo_hc
 
   mongo-inventory:
-    <<: *mongo
-    image: mongo
+    image: mongo:latest
     container_name: mongo-inventory
     env_file:
       - .env
@@ -411,10 +411,10 @@ services:
       - mongo-inventory-data:/data/db
       - mongo-inventory-config:/data/configdb
     restart: unless-stopped
+    healthcheck: *mongo_hc
 
   mongo-products:
-    <<: *mongo
-    image: mongo
+    image: mongo:latest
     container_name: mongo-products
     env_file:
       - .env
@@ -425,10 +425,10 @@ services:
       - mongo-products-data:/data/db
       - mongo-products-config:/data/configdb
     restart: unless-stopped
+    healthcheck: *mongo_hc
 
   mongo-carts:
-    <<: *mongo
-    image: mongo
+    image: mongo:latest
     container_name: mongo-carts
     env_file:
       - .env
@@ -439,6 +439,7 @@ services:
       - mongo-carts-data:/data/db
       - mongo-carts-config:/data/configdb
     restart: unless-stopped
+    healthcheck: *mongo_hc
 
   # =========================
   # ADMIN / TOOLING
@@ -462,7 +463,7 @@ services:
       - ADMIN_PASSWORD=${DBGATE_ADMIN_PASSWORD:-change-me}
       - CONNECTIONS=mysqlAuth,mysqlFiles,postgresVet,mongoVet,mongoBilling,mongoVisits,mongoCustomers,mongoInventory,mongoProducts,mongoCarts
 
-      # MySQL (auth)
+      # Connection Definitions
       - LABEL_mysqlAuth=MySQL auth-db
       - ENGINE_mysqlAuth=mysql@dbgate-plugin-mysql
       - SERVER_mysqlAuth=mysql-auth
@@ -471,7 +472,6 @@ services:
       - PASSWORD_mysqlAuth=${DB_PASSWORD}
       - DATABASE_mysqlAuth=auth-db
 
-      # MySQL (files)
       - LABEL_mysqlFiles=MySQL files-db
       - ENGINE_mysqlFiles=mysql@dbgate-plugin-mysql
       - SERVER_mysqlFiles=mysql-files
@@ -480,7 +480,6 @@ services:
       - PASSWORD_mysqlFiles=${DB_PASSWORD}
       - DATABASE_mysqlFiles=files-db
 
-      # Postgres (vet)
       - LABEL_postgresVet=Postgres images
       - ENGINE_postgresVet=postgres@dbgate-plugin-postgres
       - SERVER_postgresVet=postgres
@@ -489,7 +488,6 @@ services:
       - PASSWORD_postgresVet=${DB_PASSWORD}
       - DATABASE_postgresVet=images
 
-      # MongoDBs
       - LABEL_mongoVet=Mongo (vet)
       - ENGINE_mongoVet=mongo@dbgate-plugin-mongo
       - URL_mongoVet=mongodb://${DB_USER}:${DB_PASSWORD}@mongo-vet:27017/?authSource=admin
