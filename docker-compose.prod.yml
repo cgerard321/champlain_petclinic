@@ -423,35 +423,35 @@ services:
       - mongo-products
       - mongo-carts
 
-  # dev-tools:
-  #   container_name: dev-tools
-  #   build:
-  #     context: ./dev-tools
-  #     dockerfile: Dockerfile
-  #     args:
-  #       pkg: dev-tools
-  #   restart: unless-stopped
-  #   volumes:
-  #     - /var/run/docker.sock:/var/run/docker.sock:ro
-  #   env_file:
-  #     - .env
-  #   ports:
-  #     - "6000:8080"
+  dev-tools:
+    container_name: dev-tools
+    build:
+      context: ./dev-tools
+      dockerfile: Dockerfile
+      args:
+        pkg: dev-tools
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    env_file:
+      - .env
+    ports:
+      - "6000:8080"
 
-  # mysql-devtools:
-  #   image: mysql:5.7
-  #   platform: linux/amd64
-  #   container_name: mysql-devtools
-  #   restart: unless-stopped
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     - MYSQL_ROOT_PASSWORD=${DB_DEV_TOOLS_ROOT_PASSWORD:-rootpwd}
-  #     - MYSQL_DATABASE=devtools-db
-  #     - MYSQL_USER=${DB_DEV_TOOLS_USER}
-  #     - MYSQL_PASSWORD=${DB_DEV_TOOLS_PASSWORD}
-  #   volumes:
-  #     - mysql-devtools-data:/var/lib/mysql
+  mysql-devtools:
+    image: mysql:5.7
+    platform: linux/amd64
+    container_name: mysql-devtools
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_DEV_TOOLS_ROOT_PASSWORD:-rootpwd}
+      - MYSQL_DATABASE=devtools-db
+      - MYSQL_USER=${DB_DEV_TOOLS_USER}
+      - MYSQL_PASSWORD=${DB_DEV_TOOLS_PASSWORD}
+    volumes:
+      - mysql-devtools-data:/var/lib/mysql
 
 # =========================
 # VOLUMES
