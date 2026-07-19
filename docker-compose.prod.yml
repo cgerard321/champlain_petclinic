@@ -343,7 +343,7 @@ services:
     restart: unless-stopped
 
   # =========================
-  # DATABASES — MongoDB (Pinned to v7.0)
+  # DATABASES — MongoDB
   # =========================
   mongo-vet:
     <<: *mongo
