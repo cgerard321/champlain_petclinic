@@ -1,4 +1,3 @@
----
 # =========================
 # Reusable healthchecks
 # =========================
@@ -348,7 +347,7 @@ services:
   # =========================
   mongo-vet:
     <<: *mongo
-    image: mongo
+    image: mongo:7.0
     container_name: mongo-vet
     env_file:
       - .env
@@ -359,10 +358,14 @@ services:
       - mongo-vet-data:/data/db
       - mongo-vet-config:/data/configdb
     restart: unless-stopped
+    ulimits:
+      nofile:
+        soft: 64000
+        hard: 64000
 
   mongo-billing:
     <<: *mongo
-    image: mongo
+    image: mongo:7.0
     container_name: mongo-billing
     env_file:
       - .env
@@ -373,10 +376,14 @@ services:
       - mongo-billing-data:/data/db
       - mongo-billing-config:/data/configdb
     restart: unless-stopped
+    ulimits:
+      nofile:
+        soft: 64000
+        hard: 64000
 
   mongo-visits:
     <<: *mongo
-    image: mongo
+    image: mongo:7.0
     container_name: mongo-visits
     env_file:
       - .env
@@ -387,10 +394,14 @@ services:
       - mongo-visits-data:/data/db
       - mongo-visits-config:/data/configdb
     restart: unless-stopped
+    ulimits:
+      nofile:
+        soft: 64000
+        hard: 64000
 
   mongo-customers:
     <<: *mongo
-    image: mongo
+    image: mongo:7.0
     container_name: mongo-customers
     env_file:
       - .env
@@ -401,10 +412,14 @@ services:
       - mongo-customers-data:/data/db
       - mongo-customers-config:/data/configdb
     restart: unless-stopped
+    ulimits:
+      nofile:
+        soft: 64000
+        hard: 64000
 
   mongo-inventory:
     <<: *mongo
-    image: mongo
+    image: mongo:7.0
     container_name: mongo-inventory
     env_file:
       - .env
@@ -415,10 +430,14 @@ services:
       - mongo-inventory-data:/data/db
       - mongo-inventory-config:/data/configdb
     restart: unless-stopped
+    ulimits:
+      nofile:
+        soft: 64000
+        hard: 64000
 
   mongo-products:
     <<: *mongo
-    image: mongo
+    image: mongo:7.0
     container_name: mongo-products
     env_file:
       - .env
@@ -429,10 +448,14 @@ services:
       - mongo-products-data:/data/db
       - mongo-products-config:/data/configdb
     restart: unless-stopped
+    ulimits:
+      nofile:
+        soft: 64000
+        hard: 64000
 
   mongo-carts:
     <<: *mongo
-    image: mongo
+    image: mongo:7.0
     container_name: mongo-carts
     env_file:
       - .env
@@ -443,6 +466,10 @@ services:
       - mongo-carts-data:/data/db
       - mongo-carts-config:/data/configdb
     restart: unless-stopped
+    ulimits:
+      nofile:
+        soft: 64000
+        hard: 64000
 
   # =========================
   # ADMIN / TOOLING
@@ -571,6 +598,7 @@ services:
       - MYSQL_PASSWORD=${DB_DEV_TOOLS_PASSWORD}
     volumes:
       - mysql-devtools-data:/var/lib/mysql
+    restart: unless-stopped
 
 # =========================
 # VOLUMES
