@@ -8,7 +8,7 @@ pub async fn restart_container(
     container_type: &str,
     db_name: Option<&str>,
 ) -> AppResult<()> {
-    let db = descriptor.get_db_by_name_or_default(db_name.map(|s| s.to_string()))?;
+    let db = descriptor.get_db_by_name_or_default(db_name)?;
 
     let container_name: String = if container_type == "db" {
         db.db_host.to_string()

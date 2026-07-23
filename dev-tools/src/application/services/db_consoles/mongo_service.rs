@@ -48,7 +48,7 @@ impl MongoConsolePort for MongoConsoleService {
             )));
         }
 
-        let db = desc.get_db_by_name_or_default(db_name)?;
+        let db = desc.get_db_by_name_or_default(db_name.as_deref())?;
 
         if db.db_type != DbType::Mongo {
             return Err(AppError::BadRequest(format!(
