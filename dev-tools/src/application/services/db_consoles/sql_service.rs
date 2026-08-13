@@ -40,7 +40,7 @@ impl SqlConsolePort for SqlConsoleService {
         verify_service_or_admin_perms(user_ctx, &desc)?;
         log::info!("Access granted");
 
-        let db = desc.get_db_by_name_or_default(db_name)?;
+        let db = desc.get_db_by_name_or_default(db_name.as_deref())?;
 
         log::info!("Resolved db: {:?}", db);
 
