@@ -12,7 +12,7 @@ pub struct ServiceEntity {
 impl ServiceEntity {
     pub fn get_db_by_name_or_default(
         &self,
-        db_name: Option<String>,
+        db_name: Option<&str>,
     ) -> AppResult<&ServiceDbEntity> {
         let dbs = self.dbs.as_ref().ok_or_else(|| {
             AppError::BadRequest(format!(
