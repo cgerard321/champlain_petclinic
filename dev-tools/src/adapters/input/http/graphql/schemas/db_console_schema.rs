@@ -4,8 +4,8 @@ use crate::adapters::input::http::graphql::contracts::service::{
 };
 use crate::adapters::input::http::graphql::contracts::sql::SqlResultResponseContract;
 use crate::application::ports::input::docker_port::DynDockerPort;
-use crate::application::ports::input::mongo_console_port::MongoConsolePort;
-use crate::application::ports::input::sql_console_port::SqlConsolePort;
+use crate::application::ports::input::mongo_console_port::{DynMongoConsolePort};
+use crate::application::ports::input::sql_console_port::{DynSqlConsolePort};
 use crate::application::services::user_context::UserContext;
 use async_graphql::{Context, Object, Result};
 use std::sync::Arc;
@@ -86,7 +86,7 @@ impl MutationRoot {
         db_name: Option<String>,
     ) -> Result<SqlResultResponseContract> {
         let user_ctx = ctx.data::<UserContext>()?;
-        let sql_console = ctx.data::<Arc<dyn SqlConsolePort>>()?;
+        let sql_console = ctx.data::<Arc<DynSqlConsolePort>>()?;
         let result = sql_console
             .exec_sql_on_service(user_ctx, service, sql, db_name)
             .await?;
@@ -106,7 +106,7 @@ impl MutationRoot {
         db_name: Option<String>,
     ) -> Result<MongoResultResponseContract> {
         let user_ctx = ctx.data::<UserContext>()?;
-        let mongo_console = ctx.data::<Arc<dyn MongoConsolePort>>()?;
+        let mongo_console = ctx.data::<Arc<DynMongoConsolePort>>()?;
         let result = mongo_console
             .exec_mongo_on_service(user_ctx, service, mongo_query, db_name)
             .await?;
