@@ -29,8 +29,7 @@ RUN chown -R nginx:nginx /var/cache/nginx /var/run /var/log/nginx
 RUN chown -R nginx:0 /usr/share/nginx/html && \
   chmod -R g+r+rwX /usr/share/nginx/html
 
-COPY --from=build /app/dist/*/browser/ /usr/share/nginx/html/
-# Copy the default Nginx configuration file
+COPY --from=build /app/dist/dev-tools-frontend/browser/ /usr/share/nginx/html/
 COPY nginx.conf /etc/nginx/nginx.conf
 
 # Expose port 4200 for the NGINX web server
