@@ -1,0 +1,10 @@
+services:
+  angular:
+    build:
+      context: .
+      args:
+        BUILD_MODE: production
+    ports:
+      - '4200:80'
+    environment:
+      - NODE_ENV=production
