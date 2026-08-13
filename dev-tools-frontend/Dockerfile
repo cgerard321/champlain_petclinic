@@ -32,7 +32,7 @@ RUN chown -R nginx:0 /usr/share/nginx/html && \
 COPY --from=build /app/dist/dev-tools-frontend/browser/ /usr/share/nginx/html/
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# Expose port 4200 for the NGINX web server
+# Expose port 80 for the NGINX web server
 EXPOSE 80
 
 # Command to run NGINX
