@@ -1,4 +1,4 @@
-import VisitByVisitId from '@/features/visits/visits/VisitByVisitId';
+import VisitByVisitId from '@/features/visits/components/VisitByVisitId';
 import { NavBar } from '@/layouts/AppNavBar';
 
 export default function Visits(): JSX.Element {

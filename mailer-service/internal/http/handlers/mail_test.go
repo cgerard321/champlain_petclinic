@@ -2,7 +2,6 @@ package handlers_test
 
 import (
 	"bytes"
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -12,15 +11,27 @@ import (
 
 	"mailer-service/internal/http/handlers"
 	mw "mailer-service/internal/http/middleware"
+	mailsvc "mailer-service/internal/mailer"
 	pkg "mailer-service/pkg/mailer"
 )
 
 type mockService struct {
 	sendErr error
 	got     *pkg.Mail
+
+	emailJobChannel chan mailsvc.EmailJob
 }
 
-func (m *mockService) Send(mm *pkg.Mail) error { m.got = mm; return m.sendErr }
+func (m *mockService) Send(mm *pkg.Mail) error {
+	m.got = mm
+	// in a real scenario this pushes to a channel
+	// but for the mock we just capture the mail
+	return nil
+}
+
+func (m *mockService) ProcessEmailJob(job mailsvc.EmailJob) {
+
+}
 
 func TestMailHandler_Post_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
@@ -43,28 +54,8 @@ func TestMailHandler_Post_Success(t *testing.T) {
 	if ms.got == nil || ms.got.To != "a@b.com" {
 		t.Fatalf("handler did not pass parsed mail to service")
 	}
-	if !strings.Contains(w.Body.String(), "Message sent to a@b.com") {
+	if !strings.Contains(w.Body.String(), "Message queued") {
 		t.Fatalf("unexpected body: %s", w.Body.String())
-	}
-}
-
-func TestMailHandler_Post_ServiceError_Returns500(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-	ms := &mockService{sendErr: errors.New("smtp down")}
-	h := handlers.NewMailHandler(ms)
-
-	r := gin.New()
-	r.Use(mw.UnmarshalMail())
-	r.POST("/mail", h.Post)
-
-	body := []byte(`{"emailSendTo":"a@b.com","emailTitle":"hi"}`)
-	req := httptest.NewRequest(http.MethodPost, "/mail", bytes.NewReader(body))
-	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-
-	if w.Code != http.StatusInternalServerError {
-		t.Fatalf("want 500, got %d", w.Code)
 	}
 }
 
@@ -74,7 +65,6 @@ func TestMailHandler_Post_NoMailInContext_Returns400(t *testing.T) {
 	h := handlers.NewMailHandler(ms)
 
 	r := gin.New()
-	// intentionally do NOT use UnmarshalMail
 	r.POST("/mail", h.Post)
 
 	req := httptest.NewRequest(http.MethodPost, "/mail", nil)

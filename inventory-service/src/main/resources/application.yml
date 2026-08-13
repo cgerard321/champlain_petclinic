@@ -1,3 +1,4 @@
+---
 server.port: 7006
 
 logging:
@@ -36,9 +37,14 @@ spring:
       on-profile: docker
   data:
     mongodb:
-      host: mongo-vet
+      host: mongo-inventory
       port: 27017
       database: inventory
-      username: root
-      password: password
+      username: ${DB_USER}
+      password: ${DB_PASSWORD}
       authentication-database: admin
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus

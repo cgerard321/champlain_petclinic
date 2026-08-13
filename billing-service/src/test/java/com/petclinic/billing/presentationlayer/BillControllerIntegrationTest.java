@@ -16,15 +16,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import static org.mockito.Mockito.verify;
 import static reactor.core.publisher.Mono.just;
 import static org.mockito.Mockito.when;
-
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.Month;
-import java.time.Period;
 import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.List;
@@ -177,7 +176,6 @@ class BillControllerIntegrationTest {
     }
 
     @Test
-
     void createBill_ShouldReturnCreatedBillWithVetAndOwner() {
         // Arrange
         BillRequestDTO billRequest = new BillRequestDTO();
@@ -200,13 +198,19 @@ class BillControllerIntegrationTest {
         when(vetClient.getVetByVetId("vet-1")).thenReturn(Mono.just(vet));
         when(ownerClient.getOwnerByOwnerId("cust-1")).thenReturn(Mono.just(owner));
 
+        String testJwtToken = "test-jwt-token";
+
         // Act
         client.post()
-                .uri("/bills")
+                .uri(uriBuilder -> uriBuilder
+                        .path("/bills")
+                        .queryParam("sendEmail", false)
+                        .queryParam("currency", "USD")
+                        .build())
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(billRequest)
+                .cookie("Bearer", testJwtToken)
+                .body(Mono.just(billRequest), BillRequestDTO.class)
                 .exchange()
-                // Assert
                 .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
@@ -217,6 +221,10 @@ class BillControllerIntegrationTest {
                 .jsonPath("$.ownerLastName").isEqualTo("Smith")
                 .jsonPath("$.billStatus").isEqualTo("PAID")
                 .jsonPath("$.amount").isEqualTo(100.00);
+
+        // Verify mock interactions
+        verify(vetClient).getVetByVetId("vet-1");
+        verify(ownerClient).getOwnerByOwnerId("cust-1");
     }
 
     @Test
@@ -274,11 +282,21 @@ class BillControllerIntegrationTest {
     void getBillByCustomerId() {
 
         Bill billEntity = buildBill();
+        billEntity.setOwnerFirstName("John");
+        billEntity.setOwnerLastName("Doe");
+
+        // Mock the OwnerClient call
+        OwnerResponseDTO owner = new OwnerResponseDTO();
+        owner.setOwnerId(billEntity.getCustomerId());
+        owner.setFirstName("John");
+        owner.setLastName("Doe");
+
+        when(ownerClient.getOwnerByOwnerId(billEntity.getCustomerId()))
+                .thenReturn(Mono.just(owner));
 
         Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(billEntity));
 
-        StepVerifier
-                .create(setup)
+        StepVerifier.create(setup)
                 .expectNextCount(1)
                 .verifyComplete();
 
@@ -287,11 +305,13 @@ class BillControllerIntegrationTest {
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
                 .expectBodyList(Bill.class)
                 .consumeWith(response -> {
                     List<Bill> bills = response.getResponseBody();
                     Assertions.assertNotNull(bills);
+                    Assertions.assertFalse(bills.isEmpty());
+                    Assertions.assertEquals(billEntity.getCustomerId(), bills.get(0).getCustomerId());
                 });
     }
 
@@ -566,10 +586,10 @@ class BillControllerIntegrationTest {
                         .queryParam("year", 2022)
                         .queryParam("month", 9)
                         .build())
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(BillResponseDTO.class)
                 .hasSize(5);
     }
@@ -728,23 +748,6 @@ class BillControllerIntegrationTest {
         return Duration.between(LocalDate.now().atStartOfDay(), billEntity.getDueDate().atStartOfDay()).toDays();
     }
 
-    private BillResponseDTO buildBillResponseDTO() {
-        return BillResponseDTO.builder()
-                .billId("BillUUID")
-                .customerId("Customer1")
-                .vetId("Vet1")
-                .visitType("Routine Check")
-                .date(LocalDate.of(2022, 9, 25))
-                .amount(new BigDecimal(150.75))
-                .billStatus(BillStatus.PAID)
-                .dueDate(LocalDate.of(2022, 10, 15))
-                .ownerFirstName("John")
-                .ownerLastName("Doe")
-                .vetFirstName("Jane")
-                .vetLastName("Smith")
-                .archive(false)
-                .build();
-    }
         @Test
         void getBillByValidBillID_Overdue_ShouldReturnInterest() {
                 Bill billEntity = buildOverdueBill();

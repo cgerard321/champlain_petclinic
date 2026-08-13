@@ -258,7 +258,7 @@ public class MockServerConfigCustomersService {
                 .when(
                         request()
                                 .withMethod("GET")
-                                .withPath("/pet/" + petId)
+                                .withPath("/pets/" + petId)
                 )
                 .respond(
                         response()
@@ -272,7 +272,7 @@ public class MockServerConfigCustomersService {
                 .when(
                         request()
                                 .withMethod("PUT")
-                                .withPath("/pet/" + petId)
+                                .withPath("/pets/" + petId)
                 )
                 .respond(
                         response()
@@ -288,7 +288,7 @@ public class MockServerConfigCustomersService {
                 .when(
                         request()
                                 .withMethod("GET")
-                                .withPath("/pet/" + petId)
+                                .withPath("/pets/" + petId)
                 )
                 .respond(
                         response()
@@ -336,6 +336,167 @@ public class MockServerConfigCustomersService {
                                 .withStatusCode(200)
                                 .withBody(photoBytes)
                                 .withHeader("Content-Type", "image/png")
+                );
+    }
+
+    public void registerGetOwnerWithPhotoEndpoint(String ownerId, String ownerJson) {
+        mockServerClient_CustomersService
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/owners/" + ownerId)
+                                .withQueryStringParameter("includePhoto", "true")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withBody(ownerJson)
+                                .withHeader("Content-Type", "application/json")
+                );
+    }
+
+    public void registerDeletePetPhotoEndpoint(String petId, PetResponseDTO petResponseDTO) {
+        if (petResponseDTO != null) {
+            String petJson = String.format(
+                "{\"petId\":\"%s\",\"name\":\"%s\",\"photo\":null}",
+                petResponseDTO.getPetId(),
+                petResponseDTO.getName()
+            );
+            
+            mockServerClient_CustomersService
+                    .when(
+                            request()
+                                    .withMethod("PATCH")
+                                    .withPath("/pets/" + petId + "/photo")
+                    )
+                    .respond(
+                            response()
+                                    .withStatusCode(200)
+                                    .withBody(json(petJson))
+                                    .withHeader("Content-Type", "application/json")
+                    );
+        } else {
+            mockServerClient_CustomersService
+                    .when(
+                            request()
+                                    .withMethod("PATCH")
+                                    .withPath("/pets/" + petId + "/photo")
+                    )
+                    .respond(
+                            response()
+                                    .withStatusCode(404)
+                                    .withBody(json("{\"error\":\"Pet not found\"}"))
+                                    .withHeader("Content-Type", "application/json")
+                    );
+        }
+    }
+
+    public void clearExpectationsForOwner(String ownerId) {
+        //clear all expectations for this specific owner path
+        mockServerClient_CustomersService
+                .clear(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/owners/" + ownerId)
+                );
+    }
+
+    public void registerCreatePetForOwnerEndpoint(String ownerId, String petJson) {
+        if (petJson != null) {
+            mockServerClient_CustomersService
+                    .when(
+                            request()
+                                    .withMethod("POST")
+                                    .withPath("/owners/" + ownerId + "/pets")
+                    )
+                    .respond(
+                            response()
+                                    .withStatusCode(201)
+                                    .withHeader("Content-Type", "application/json")
+                                    .withBody(petJson)
+                    );
+        } else {
+            mockServerClient_CustomersService
+                    .when(
+                            request()
+                                    .withMethod("POST")
+                                    .withPath("/owners/" + ownerId + "/pets")
+                    )
+                    .respond(
+                            response()
+                                    .withStatusCode(400)
+                    );
+        }
+    }
+
+    public void registerGetAllPetsEndpoint(String petsJson) {
+        mockServerClient_CustomersService
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/pets")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withHeader("Content-Type", "text/event-stream")
+                                .withBody(petsJson)
+                );
+    }
+
+    public void registerPatchPetEndpoint(String petId, String petJson) {
+        if (petJson != null) {
+            mockServerClient_CustomersService
+                    .when(
+                            request()
+                                    .withMethod("PATCH")
+                                    .withPath("/pets/" + petId + "/active")
+                                    .withQueryStringParameter("isActive", "false")
+                    )
+                    .respond(
+                            response()
+                                    .withStatusCode(200)
+                                    .withHeader("Content-Type", "application/json")
+                                    .withBody(petJson)
+                    );
+        } else {
+            mockServerClient_CustomersService
+                    .when(
+                            request()
+                                    .withMethod("PATCH")
+                                    .withPath("/pets/" + petId + "/active")
+                                    .withQueryStringParameter("isActive", "invalid")
+                    )
+                    .respond(
+                            response()
+                                    .withStatusCode(400)
+                    );
+        }
+    }
+
+    public void registerDeletePetEndpoint(String ownerId, String petId) {
+        mockServerClient_CustomersService
+                .when(
+                        request()
+                                .withMethod("DELETE")
+                                .withPath("/owners/" + ownerId + "/pets/" + petId)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(204)
+                );
+    }
+
+    public void registerDeletePetEndpoint_404(String ownerId, String petId) {
+        mockServerClient_CustomersService
+                .when(
+                        request()
+                                .withMethod("DELETE")
+                                .withPath("/owners/" + ownerId + "/pets/" + petId)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(404)
                 );
     }
 

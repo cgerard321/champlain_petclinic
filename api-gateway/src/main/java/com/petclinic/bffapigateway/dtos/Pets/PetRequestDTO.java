@@ -15,12 +15,11 @@ import java.util.Date;
 public class PetRequestDTO {
 
     private String ownerId;
-    private String petId;
     private String name;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date birthDate;
     private String petTypeId;
-    //private String photoId;
+    private String photoId;
     private String isActive;
     private String weight;
 }

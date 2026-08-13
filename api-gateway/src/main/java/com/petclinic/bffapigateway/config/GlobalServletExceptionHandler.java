@@ -1,6 +1,5 @@
 package com.petclinic.bffapigateway.config;
 
-
 import com.petclinic.bffapigateway.exceptions.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;
@@ -8,7 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
-
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 

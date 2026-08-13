@@ -48,7 +48,8 @@ export default function TrendingList(): JSX.Element {
     .slice(0, 4);
 
   return (
-    <div>
+    <div className="products-section-container ">
+      <h2 className="section-title category-title">Trending</h2>
       <div className="grid">
         {topFourTrending.map((product: ProductModel) => (
           <div

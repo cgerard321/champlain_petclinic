@@ -1,6 +1,8 @@
 package com.petclinic.vet.presentationlayer.vets;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.petclinic.vet.dataaccesslayer.vets.Workday;
+import com.petclinic.vet.presentationlayer.files.FileResponseDTO;
 import lombok.*;
 
 import java.util.Set;
@@ -10,6 +12,7 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class VetResponseDTO {
     private String vetId;
     private String vetBillId;
@@ -22,4 +25,5 @@ public class VetResponseDTO {
     private String workHoursJson;
     private boolean active;
     private Set<SpecialtyDTO> specialties;
+    private FileResponseDTO photo;
 }

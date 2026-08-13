@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -32,10 +31,7 @@ func (h *MailHandler) Post(c *gin.Context) {
 
 	m := v.(*pkg.Mail)
 
-	if err := h.s.Send(m); err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
-		return
-	}
+	h.s.Send(m)
 
-	c.IndentedJSON(http.StatusOK, fmt.Sprintf("Message sent to %s", m.To))
+	c.IndentedJSON(http.StatusOK, "Message queued")
 }

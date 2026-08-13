@@ -43,6 +43,12 @@ out/
 .vs/slnx.sqlite
 .vs/ProjectSettings.json
 
+### Keep VS Code settings for frontend projects ###
+!employee-frontend/.vscode/
+!employee-frontend/.vscode/**
+
+!petclinic-frontend/.vscode/
+!petclinic-frontend/.vscode/**
 
 # Created by https://www.toptal.com/developers/gitignore/api/go
 # Edit at https://www.toptal.com/developers/gitignore?templates=go
@@ -70,16 +76,36 @@ out/
 
 # End of https://www.toptal.com/developers/gitignore/api/go
 
+### Rust ###
+/debug/
+/target/
 .env
 cover.html
-app
+/dev-tools/app/
+/dev-tools/data/
+/dev-tools/target/
+
+## C# ##
+obj/
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+*.cache
+*.ide
+*.dotCover
+_ReSharper*/
+*.ncrunch*
+*.ncrunchsolution
+/dev-tools-ui/DevToolsUI/DevToolsUI/wwwroot/lib/
 
 # Ignore swagger docs for mailer
 mailer-service/docs
 
 # Ignore environment files
 *.env
-.env
+
 
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
@@ -95,7 +121,6 @@ mailer-service/docs
 /build
 
 # misc
-.DS_Store
 .env.local
 .env.development.local
 .env.test.local
@@ -105,3 +130,4 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 /emailing-service/emailing-service-test/obj/
+/data/

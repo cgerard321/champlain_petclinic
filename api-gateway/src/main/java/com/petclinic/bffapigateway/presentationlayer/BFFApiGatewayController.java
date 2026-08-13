@@ -1,8 +1,8 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
-
 import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.Auth.*;
+import com.petclinic.bffapigateway.exceptions.InvalidCredentialsException;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.Bills.PaymentRequestDTO;
@@ -13,7 +13,6 @@ import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewResponseDTO;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
-import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import com.petclinic.bffapigateway.utils.VetsEntityDtoUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,7 +20,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.*;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -30,8 +28,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.time.LocalDate;
 import java.util.Map;
 import java.util.Optional;
 
@@ -62,11 +58,6 @@ public class BFFApiGatewayController {
     private final InventoryServiceClient inventoryServiceClient;
 
 
-
-
-
-
-
     //to be changed
 //    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
 //    @GetMapping(value = "bills/bills-pagination", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -91,11 +82,7 @@ public class BFFApiGatewayController {
 //                vetId, vetFirstName, vetLastName);
 //    }
 
-
-
-
     //to be changed
-
 
     @Validated
     @IsUserSpecific(idToMatch = {"customerId"}, bypassRoles = {Roles.ADMIN})
@@ -103,12 +90,12 @@ public class BFFApiGatewayController {
     public Mono<ResponseEntity<BillResponseDTO>> payBill(
             @PathVariable("customerId") String customerId,
             @PathVariable("billId") String billId,
-            @Valid @RequestBody PaymentRequestDTO paymentRequestDTO) {
-        return billServiceClient.payBill(customerId, billId, paymentRequestDTO)
+            @Valid @RequestBody PaymentRequestDTO paymentRequestDTO,
+            @CookieValue("Bearer") String jwtToken) {
+        return billServiceClient.payBill(customerId, billId, paymentRequestDTO, jwtToken)
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().build()));
     }
-
 
     //not for me to mess with
     @IsUserSpecific(idToMatch = {"customerId"}, bypassRoles = {Roles.ADMIN})
@@ -118,35 +105,17 @@ public class BFFApiGatewayController {
         return billServiceClient.getBillsByOwnerId(customerId);
     }
 
-
-
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "bills/owner/{ownerFirstName}/{ownerLastName}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getAllBillsByOwnerName(@PathVariable String ownerFirstName, @PathVariable String ownerLastName) {
         return billServiceClient.getBillsByOwnerName(ownerFirstName, ownerLastName);
     }
 
-
-
-
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @DeleteMapping(value = "bills/customer/{customerId}")
     public Mono<ResponseEntity<Void>> deleteBillsByCustomerId(final @PathVariable String customerId){
         return billServiceClient.deleteBillsByCustomerId(customerId).then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-
-
-
-// Owner method, the endpoint must be changed, but requires bigger changes in owner methods
-    //This will still work for this sprint, as the endpoint was fixed in the previous Sprint
-    //Yet someone pushed without updating and caused the endpoints to revert back to what they used to be.
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER,Roles.ADMIN,Roles.VET})
-    // /pet should become /pets, with further changes needed afterward.
-    @PatchMapping(value = "/pet/{petId}", produces = "application/json", consumes = "application/json")
-    public Mono<ResponseEntity<PetResponseDTO>> patchPet(@RequestBody PetRequestDTO pet, @PathVariable String petId) {
-        return customersServiceClient.patchPet(pet, petId).map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
 //        /* Visits Methods */
@@ -304,6 +273,17 @@ public class BFFApiGatewayController {
         return vetsServiceClient.addSpecialtiesByVetId(vetId, specialties);
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @DeleteMapping(value = "vets/{vetId}/specialties/{specialtyId}")
+    public Mono<ResponseEntity<Void>> deleteSpecialtyByVetId(
+            @PathVariable String vetId,
+            @PathVariable String specialtyId) {
+        return vetsServiceClient.deleteSpecialtyBySpecialtyId(vetId, specialtyId)
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .onErrorResume(RuntimeException.class, e ->
+                        Mono.just(ResponseEntity.notFound().<Void>build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping("vets/{vetId}/default-photo")
@@ -383,11 +363,27 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.OWNER})
     @DeleteMapping(value = "vets/{vetId}/ratings/{ratingId}")
     public Mono<ResponseEntity<Void>> deleteRatingByRatingId(@PathVariable String vetId,
-                                             @PathVariable String ratingId){
+                                                             @PathVariable String ratingId,
+                                                             @CookieValue("Bearer") String jwt){
         return vetsServiceClient.deleteRating(vetId,ratingId)
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
+    @DeleteMapping(value = "vets/{vetId}/ratings/customer")
+    public Mono<ResponseEntity<Void>> deleteRatingByCustomer(@PathVariable String vetId,
+                                                             @CookieValue("Bearer") String jwt){
+        return authServiceClient.validateToken(jwt)
+                .switchIfEmpty(Mono.error(new InvalidCredentialsException("Invalid credentials")))
+                .flatMap(tokenResponse -> customersServiceClient.getOwner(tokenResponse.getBody().getUserId(), false))
+                .flatMap(owner -> {
+                    String customerName = owner.getFirstName() + " " + owner.getLastName();
+                    return vetsServiceClient.deleteRatingByCustomerName(vetId, customerName);
+                })
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
@@ -436,7 +432,7 @@ public class BFFApiGatewayController {
     @IsUserSpecific(idToMatch = {"vetId"}, bypassRoles = {Roles.ADMIN})
     @DeleteMapping(value = "vets/{vetId}/educations/{educationId}")
     public Mono<ResponseEntity<Void>> deleteEducationByEducationId(@PathVariable String vetId,
-                                                   @PathVariable String educationId){
+                                                                   @PathVariable String educationId){
         return vetsServiceClient.deleteEducation(vetId,educationId).then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
@@ -489,14 +485,6 @@ public class BFFApiGatewayController {
         return vetsServiceClient.getInactiveVets();
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @PostMapping(value = "/users/vets",consumes = "application/json",produces = "application/json")
-    public Mono<ResponseEntity<VetResponseDTO>> insertVet(@RequestBody Mono<RegisterVet> vetDTOMono) {
-        return authServiceClient.createVetUser(vetDTOMono)
-                .map(v->ResponseEntity.status(HttpStatus.CREATED).body(v))
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
-    }
-
     @IsUserSpecific(idToMatch = {"vetId"}, bypassRoles = {Roles.ADMIN})
     @PutMapping(value = "/vets/{vetId}",consumes = "application/json",produces = "application/json")
     public Mono<ResponseEntity<VetResponseDTO>> updateVetByVetId(@PathVariable String vetId, @RequestBody Mono<VetRequestDTO> vetDTOMono) {
@@ -507,127 +495,13 @@ public class BFFApiGatewayController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @DeleteMapping(value = "/vets/{vetId}")
-    public Mono<ResponseEntity<Void>> deleteVet(@PathVariable String vetId) {
+    public Mono<ResponseEntity<VetResponseDTO>> deleteVet(@PathVariable String vetId) {
         return vetsServiceClient.deleteVet(VetsEntityDtoUtil.verifyId(vetId))
-                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .map(vetDto -> ResponseEntity.ok().body(vetDto))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     /**
      * End of Vet Methods
      **/
-//
-//    @DeleteMapping(value = "users/{userId}")
-//    public Mono<UserDetails> deleteUser(@RequestHeader(AUTHORIZATION) String auth, final @PathVariable long userId) {
-//        return authServiceClient.deleteUser(auth, userId);
-//    }
-//
-//    @GetMapping(value = "users/{userId}")
-//    public Mono<UserDetails> getUserDetails(final @PathVariable long userId) {
-//        return authServiceClient.getUser(userId);
-//    }
-
-//
-//    @PutMapping(value = "users/{userId}",
-//            consumes = "application/json",
-//            produces = "application/json")
-//    public Mono<UserDetails> updateUser(final @PathVariable long userId, @RequestBody Register model) {
-//        return authServiceClient.updateUser(userId, model);
-//    }
-
-    /**
-     * Beginning of Auth Methods
-     **/
-    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @GetMapping("/verification/{token}")
-    public Mono<ResponseEntity<UserDetails>> verifyUser(@PathVariable final String token) {
-        return authServiceClient.verifyUser(token)
-                .map(userDetailsResponseEntity -> {
-                    HttpHeaders headers = new HttpHeaders();
-                    headers.add("Location", "http://localhost:8080/#!/login");
-                    return ResponseEntity.status(HttpStatus.FOUND)
-                            .headers(headers)
-                            .body(userDetailsResponseEntity.getBody());
-                })
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-
-    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @PostMapping(value = "/users",
-            consumes = "application/json",
-            produces = "application/json")
-    public Mono<ResponseEntity<OwnerResponseDTO>> createUser(@RequestBody @Valid Mono<Register> model) {
-        return authServiceClient.createUser(model).map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
-    }
-
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "users", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<UserDetails> getAllUsers(@CookieValue("Bearer") String auth, @RequestParam Optional<String> username) {
-        if(username.isPresent()) {
-            return authServiceClient.getUsersByUsername(auth, username.get());
-        }
-        else {
-            return authServiceClient.getUsers(auth);
-        }
-    }
-
-    @PatchMapping(value = "users/{userId}",
-            consumes = "application/json",
-            produces = "application/json")
-    public Mono<ResponseEntity<UserResponseDTO>> updateUserRoles(final @PathVariable String userId, @RequestBody RolesChangeRequestDTO roleChangeDTO, @CookieValue("Bearer") String auth) {
-        return authServiceClient.updateUsersRoles(userId, roleChangeDTO, auth)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-
-
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @DeleteMapping(value = "users/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<Void>> deleteUserById(@PathVariable String userId, @CookieValue("Bearer") String auth) {
-        return authServiceClient.deleteUser(auth, userId)
-                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-
-    @Operation()
-    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @PostMapping(value = "/users/login",produces = "application/json;charset=utf-8;", consumes = "application/json")
-    public Mono<ResponseEntity<UserPasswordLessDTO>> login(@RequestBody Mono<Login> login) throws Exception {
-        log.info("Entered controller /login");
-        return authServiceClient.login(login);
-
-    }
-
-    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @PostMapping("/users/logout")
-    public Mono<ResponseEntity<Void>> logout(ServerHttpRequest request, ServerHttpResponse response) {
-        return authServiceClient.logout(request, response);
-    }
-
-    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @PostMapping(value = "/users/forgot_password")
-    public Mono<ResponseEntity<Void>> processForgotPassword(@RequestBody Mono<UserEmailRequestDTO> email) {
-        return authServiceClient.sendForgottenEmail(email);
-    }
-
-    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @PostMapping("/users/reset_password")
-    public Mono<ResponseEntity<Void>> processResetPassword(@RequestBody @Valid Mono<UserPasswordAndTokenRequestModel> resetRequest) {
-        return authServiceClient.changePassword(resetRequest);
-    }
-
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @PostMapping(value = "/users/inventoryManager")
-    public Mono<ResponseEntity<UserPasswordLessDTO>> createInventoryManager(@RequestBody @Valid Mono<RegisterInventoryManager> model) {
-        return authServiceClient.createInventoryMangerUser(model).map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
-    }
-
-
-
-    /**
-     * End of Auth Methods
-     **/
-
 }

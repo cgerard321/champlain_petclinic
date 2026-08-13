@@ -25,16 +25,44 @@ const LowStockPage: React.FC = () => {
   useEffect(() => {
     const fetchInventories = async (): Promise<void> => {
       try {
-        const response = await axiosInstance.get<Inventory[]>(
-          '/inventories/all',
-          { useV2: false }
-        );
-        setInventories(response.data);
+        const response = await axiosInstance.get<string>('/inventories/all', {
+          useV2: false,
+          responseType: 'text',
+        });
+
+        const raw = String(response.data ?? '');
+
+        // Parse SSE: split events, take "data:" lines, JSON.parse; flatten arrays
+        const items: Inventory[] = raw
+          .split(/\r?\n\r?\n/)
+          .map(block => {
+            const dataLines = block
+              .split(/\r?\n/)
+              .filter(line => line.startsWith('data:'))
+              .map(line => line.slice(5).trim());
+
+            if (dataLines.length === 0) return null;
+
+            const jsonText = dataLines.join('\n').trim();
+            if (!jsonText || jsonText === '__END__') return null;
+
+            try {
+              const v = JSON.parse(jsonText);
+              return Array.isArray(v) ? (v as Inventory[]) : [v as Inventory];
+            } catch (e) {
+              console.error("Can't parse JSON from SSE event:", e, jsonText);
+              return null;
+            }
+          })
+          .filter((x): x is Inventory[] => x !== null)
+          .flat();
+
+        setInventories(items);
       } catch (error) {
         console.error('Error fetching inventories:', error);
+        setInventories([]); // ensure array to keep downstream logic safe
       }
     };
-
     fetchInventories();
   }, []);
 
@@ -44,11 +72,41 @@ const LowStockPage: React.FC = () => {
       const lowStockData: { [key: string]: ProductResponseModel[] } = {};
       const promises = inventories.map(async inventory => {
         try {
-          const { data } = await axiosInstance.get<ProductResponseModel[]>(
+          const response = await axiosInstance.get<ProductResponseModel[]>(
             `/inventories/${inventory.inventoryId}/products/lowstock`,
-            { useV2: false }
+            { useV2: false, responseType: 'text' }
           );
-          const needingRestock = (data || []).filter(
+          const raw = String(response.data ?? '');
+
+          // Parse SSE: blank line–separated events; collect "data:" lines; JSON.parse each
+          const parsed: ProductResponseModel[] = raw
+            .split(/\r?\n\r?\n/)
+            .map(block => {
+              const dataLines = block
+                .split(/\r?\n/)
+                .filter(line => line.startsWith('data:'))
+                .map(line => line.slice(5).trim());
+
+              if (dataLines.length === 0) return null;
+
+              const jsonText = dataLines.join('\n').trim();
+              if (!jsonText || jsonText === '__END__') return null;
+
+              try {
+                const v = JSON.parse(jsonText);
+                // server could send single item or an array per event
+                return Array.isArray(v)
+                  ? (v as ProductResponseModel[])
+                  : [v as ProductResponseModel];
+              } catch (e) {
+                console.error("Can't parse JSON from SSE event:", e, jsonText);
+                return null;
+              }
+            })
+            .filter((x): x is ProductResponseModel[] => x !== null)
+            .flat();
+
+          const needingRestock = (parsed || []).filter(
             p =>
               p.status === Status.RE_ORDER || p.status === Status.OUT_OF_STOCK
           );

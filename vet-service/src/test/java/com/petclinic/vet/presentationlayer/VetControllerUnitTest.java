@@ -176,6 +176,25 @@ class VetControllerUnitTest {
     }
 
     @Test
+    void deleteRatingForVetByCustomerName_ShouldSucceed() {
+        String customerName = "Test Customer";
+        String vetId = "694ac37f-1e07-43c2-93bc-61839e61d989";
+
+        when(ratingService.deleteRatingByVetIdAndCustomerName(vetId, customerName))
+                .thenReturn((Mono.empty()));
+
+        client
+                .delete()
+                .uri("/vets/" + vetId + "/ratings/customer/{customerName}", customerName)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        Mockito.verify(ratingService, times(1))
+                .deleteRatingByVetIdAndCustomerName(vetId, customerName);
+    }
+
+    @Test
     void addRatingWithVetId_ValidValues_ShouldSucceed() {
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
                 .vetId(VET_ID)
@@ -388,7 +407,7 @@ class VetControllerUnitTest {
 
     @Test
     void getVetByVetId() {
-        when(vetService.getVetByVetId(anyString()))
+        when(vetService.getVetByVetId(anyString(), anyBoolean()))
                 .thenReturn(Mono.just(vetResponseDTO));
 
         client
@@ -410,7 +429,7 @@ class VetControllerUnitTest {
 
 
         Mockito.verify(vetService, times(1))
-                .getVetByVetId(VET_ID);
+                .getVetByVetId(VET_ID, false);
     }
 
     @Test
@@ -545,14 +564,14 @@ class VetControllerUnitTest {
     @Test
     void deleteVet() {
         when(vetService.deleteVetByVetId(anyString()))
-                .thenReturn((Mono.empty()));
+                .thenReturn((Mono.just(vetResponseDTO)));
 
         client
                 .delete()
                 .uri("/vets/" + VET_ID)
                 .accept(APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isNoContent();
+                .expectStatus().isOk();
 
         Mockito.verify(vetService, times(1))
                 .deleteVetByVetId(VET_ID);
@@ -792,28 +811,7 @@ class VetControllerUnitTest {
                 .getPhotoByVetId(VET_ID);
     }
 
-    // test add photo
- /*   @Test
-    void addPhotoByVetId() {
-        Photo photo = buildPhoto();
-        Resource photoResource = buildPhotoData(photo);
 
-        when(photoService.insertPhotoOfVet(anyString(), anyString(), any(Mono.class)))
-                .thenReturn(Mono.just(photoResource));
-
-        client.post()
-                .uri("/vets/{vetId}/photos/{photoName}", VET_ID, photo.getFilename())
-                .bodyValue(photoResource) // Use the Resource here
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isCreated()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody();
-
-        Mockito.verify(photoService, times(1))
-                .insertPhotoOfVet(anyString(), anyString(), any(Mono.class));
-    }
-*/
     @Test
     void updatePhotoByVetId() {
         PhotoRequestDTO photoRequest = PhotoRequestDTO.builder()
@@ -968,6 +966,7 @@ class VetControllerUnitTest {
                         "        }")
                 .specialties(new HashSet<>())
                 .active(false)
+                .photo(null)
                 .build();
     }
     private VetResponseDTO buildVetResponseDTO2() {
@@ -987,6 +986,7 @@ class VetControllerUnitTest {
                         "        }")
                 .specialties(new HashSet<>())
                 .active(true)
+                .photo(null)
                 .build();
     }
 
@@ -1114,40 +1114,6 @@ class VetControllerUnitTest {
                 .build();
     }
 
- /*   @Test
-    void addPhoto_ShouldReturnBadRequest_WhenRequestIsMalformed() throws IOException {
-        // Create MultiValueMap for multipart/form-data body
-        MultiValueMap<String, HttpEntity<?>> body = new LinkedMultiValueMap<>();
-
-        // Add an empty file (simulating malformed input)
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.IMAGE_JPEG);
-
-        // Create an HttpEntity representing a multipart file part with no content
-        HttpEntity<byte[]> emptyFilePart = new HttpEntity<>(null, headers);
-        body.add("file", emptyFilePart);
-
-        // Perform the POST request
-        client.post()
-                .uri("/vets/{vetId}/photos/{photoName}", VET_ID, PHOTO_NAME)
-                .contentType(MediaType.MULTIPART_FORM_DATA)
-                .body(BodyInserters.fromMultipartData(body)) // Proper multipart data insertion
-                .exchange()
-                .expectStatus().isBadRequest()   // Expect 400 Bad Request
-                .expectBody()
-                .consumeWith(response -> {
-                    // Optional: Check the error message in the response
-                    String responseBody = new String(response.getResponseBody());
-                    assertTrue(responseBody.contains("Bad Request"),
-                            "Expected 'bad request' error message");
-                });
-
-        // Ensure the service is not called due to invalid request
-        Mockito.verify(photoService, times(0))
-                .insertPhotoOfVet(anyString(), anyString(), any(Mono.class));
-    }
-
-*/
 
     @Test
     void whenGetAllAlbumsByVetId_thenReturnAlbums() {

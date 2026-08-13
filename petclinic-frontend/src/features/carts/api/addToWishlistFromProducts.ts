@@ -27,6 +27,18 @@ export function useAddToWishlist(): UseAddToWishlistReturnType {
       return false;
     }
 
+    const normalizedProductId = productId?.trim();
+    if (!normalizedProductId) {
+      console.error('Invalid product identifier');
+      return false;
+    }
+
+    const coercedQuantity = Number.isFinite(quantity)
+      ? Number(quantity)
+      : Number.parseInt(String(quantity ?? ''), 10);
+    const wishlistQuantity =
+      coercedQuantity > 0 ? Math.floor(coercedQuantity) : 1;
+
     try {
       const cartId = await fetchUserCart(user.userId);
       if (!cartId) {
@@ -34,11 +46,12 @@ export function useAddToWishlist(): UseAddToWishlistReturnType {
         return false;
       }
 
-      // was http://localhost:8080/api/v2/gateway/carts/${cartId}/products/${productId}/quantity/${quantity}
       await axiosInstance.post(
-        `/carts/${cartId}/products/${productId}/quantity/${quantity}`,
-        undefined,
-        { useV2: false }
+        `/carts/${encodeURIComponent(cartId)}/wishlist`,
+        {
+          productId: normalizedProductId,
+          quantity: wishlistQuantity,
+        }
       );
       return true;
     } catch (error) {

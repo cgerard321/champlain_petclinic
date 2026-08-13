@@ -34,5 +34,4 @@ public interface VisitRepo extends ReactiveMongoRepository<Visit, String> {
 
     Flux<Visit> findByPractitionerIdAndVisitDateBetween(String practitionerId, LocalDateTime startDate, LocalDateTime endDate);
 
-
 }

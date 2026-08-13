@@ -2,8 +2,16 @@ import { useEffect, useState } from 'react';
 import { useUser } from '@/context/UserContext';
 import CountUp from 'react-countup';
 import axiosInstance from '@/shared/api/axiosInstance';
+import { Currency, convertCurrency } from './utils/convertCurrency';
 
-export default function CurrentBalance(): JSX.Element {
+interface CurrentBalanceProps {
+  currency: Currency;
+}
+
+export default function CurrentBalance(
+  props: CurrentBalanceProps
+): JSX.Element {
+  const { currency } = props;
   const { user } = useUser();
   const [currentBalance, setCurrentBalance] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -48,6 +56,11 @@ export default function CurrentBalance(): JSX.Element {
     };
   }, [user.userId]);
 
+  const displayBalance =
+    currentBalance !== null
+      ? convertCurrency(currentBalance, 'CAD', currency)
+      : 0;
+
   return (
     <div
       style={{
@@ -65,17 +78,13 @@ export default function CurrentBalance(): JSX.Element {
         <p>{error}</p>
       ) : (
         <h1 style={{ fontSize: '2rem', color: '#4caf50' }}>
-          {currentBalance !== null ? (
-            <CountUp
-              start={0}
-              end={currentBalance}
-              duration={2}
-              prefix="$"
-              decimals={2}
-            />
-          ) : (
-            '$0.00'
-          )}
+          <CountUp
+            start={0}
+            end={displayBalance}
+            duration={2}
+            prefix={currency === 'CAD' ? 'CAD $' : 'USD $'}
+            decimals={2}
+          />
         </h1>
       )}
     </div>

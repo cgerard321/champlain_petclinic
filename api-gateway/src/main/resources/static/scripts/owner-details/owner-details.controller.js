@@ -52,11 +52,6 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
         .then(function (resp) {
             vm.owner = resp.data;
             console.log(vm.owner);
-
-            vm.owner.pets.forEach(function (pet) {
-                pet.isActive = pet.isActive === "true";
-            });
-
         })
         .catch(function (error) {
             console.error('Error fetching owner data:', error);
@@ -108,6 +103,10 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
                 return response.data;
             });
             console.log("Pet Array:", vm.pets);
+
+            vm.pets.forEach(function (pet) {
+                pet.isActive = pet.isActive === "true";
+            });
         })
         .catch(function (error) {
             console.error('Error fetching pet data:', error);
@@ -171,7 +170,7 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
                   });
                  */
 
-                vm.owner.pets = vm.owner.pets.filter(function (pet) {
+                vm.pets = vm.pets.filter(function (pet) {
                     return pet.petId !== petId;
                 });
 

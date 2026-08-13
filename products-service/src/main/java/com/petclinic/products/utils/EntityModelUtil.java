@@ -3,13 +3,11 @@ package com.petclinic.products.utils;
 import com.petclinic.products.datalayer.images.Image;
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductBundle;
+import com.petclinic.products.datalayer.products.ProductTypeDb;
 import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.presentationlayer.images.ImageRequestModel;
 import com.petclinic.products.presentationlayer.images.ImageResponseModel;
-import com.petclinic.products.presentationlayer.products.ProductBundleRequestModel;
-import com.petclinic.products.presentationlayer.products.ProductBundleResponseModel;
-import com.petclinic.products.presentationlayer.products.ProductRequestModel;
-import com.petclinic.products.presentationlayer.products.ProductResponseModel;
+import com.petclinic.products.presentationlayer.products.*;
 import com.petclinic.products.presentationlayer.ratings.RatingRequestModel;
 import com.petclinic.products.presentationlayer.ratings.RatingResponseModel;
 import org.springframework.beans.BeanUtils;
@@ -104,6 +102,19 @@ public class EntityModelUtil {
                 .bundleDescription(requestModel.getBundleDescription())
                 .productIds(requestModel.getProductIds())
                 .bundlePrice(requestModel.getBundlePrice())
+                .build();
+    }
+
+    public static ProductTypeResponseModel toProductTypeResponseModel(ProductTypeDb productType) {
+        return ProductTypeResponseModel.builder()
+                .productTypeId(productType.getProductTypeId())
+                .typeName(productType.getTypeName())
+                .build();
+    }
+    public static ProductTypeDb toProductTypeEntity(ProductTypeRequestModel productTypeRequestModel) {
+        return ProductTypeDb.builder()
+                .productTypeId(generateUUIDString())
+                .typeName(productTypeRequestModel.getTypeName())
                 .build();
     }
 }

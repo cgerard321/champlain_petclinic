@@ -4,41 +4,21 @@ import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
 import com.petclinic.bffapigateway.dtos.Bills.PaymentRequestDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
-import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
 import com.petclinic.bffapigateway.dtos.Bills.*;
-
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import reactor.core.publisher.Mono;
-
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.reactive.server.WebTestClient;
-
 import org.springframework.web.server.ResponseStatusException;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -67,11 +47,11 @@ public class CustomerBillControllerUnitTest {
     @Test
     public void downloadBillPdf_ShouldReturnPdfFile() {
         // Arrange: Mock the service to return a PDF byte array
-        when(billServiceClient.downloadBillPdf("1", "1234")).thenReturn(Mono.just(pdfContent));
+        when(billServiceClient.downloadBillPdf("1", "1234", "CAD")).thenReturn(Mono.just(pdfContent));
 
         // Act & Assert: Verify the PDF response
         webTestClient.get()
-                .uri(baseBillUrl + "/1234/pdf")
+                .uri("/api/v2/gateway/customers/1/bills/1234/pdf?currency=CAD")
                 .accept(MediaType.APPLICATION_PDF)
                 .exchange()
                 .expectStatus().isOk()
@@ -84,19 +64,19 @@ public class CustomerBillControllerUnitTest {
                 });
     }
 
-    // @Test
-    // public void downloadBillPdf_InvalidCustomer_ShouldReturnUnauthorized() {
-    //     // Arrange: Mock the service to return an error for invalid access
-    //     when(billServiceClient.downloadBillPdf("invalid-customer-id", "1234"))
-    //             .thenReturn(Mono.error(new RuntimeException("Unauthorized")));
+    @Test
+    public void downloadBillPdf_InvalidCustomer_ShouldReturnInternalServerError() {
+        // Arrange: Mock the service to return an error for invalid access
+        when(billServiceClient.downloadBillPdf("invalid-id", "1234", "CAD"))
+                .thenReturn(Mono.error(new RuntimeException("Unauthorized")));
 
-    //     // Act & Assert: Verify the unauthorized status
-    //     webTestClient.get()
-    //             .uri(baseBillUrl + "/invalid-id/bills/1234/pdf")
-    //             .accept(MediaType.APPLICATION_PDF)
-    //             .exchange()
-    //             .expectStatus().isUnauthorized();
-    // }
+        // Act & Assert: Verify the error status (controller returns 500 on error)
+        webTestClient.get()
+                .uri("/api/v2/gateway/customers/invalid-id/bills/1234/pdf?currency=CAD")
+                .accept(MediaType.APPLICATION_PDF)
+                .exchange()
+                .expectStatus().is5xxServerError();
+    }
 
     @Test
     public void getCurrentBalance_ShouldReturnBalance() {
@@ -134,10 +114,12 @@ public class CustomerBillControllerUnitTest {
         mockResponse.setBillId("1");
         mockResponse.setBillStatus(BillStatus.PAID);
 
-        when(billServiceClient.payBill("cust-1", "1", paymentRequestDTO)).thenReturn(Mono.just(mockResponse));
+        when(billServiceClient.payBill("cust-1", "1", paymentRequestDTO,"dummy-jwt-token"))
+                .thenReturn(Mono.just(mockResponse));
 
         webTestClient.post()
                 .uri("/api/v2/gateway/customers/{customerId}/bills/{billId}/pay", "cust-1", "1")
+                .cookie("Bearer", "dummy-jwt-token")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(paymentRequestDTO)
                 .exchange()
@@ -148,41 +130,43 @@ public class CustomerBillControllerUnitTest {
                     assertThat(bill.getBillStatus()).isEqualTo(BillStatus.PAID);
                 });
 
-        verify(billServiceClient, times(1)).payBill("cust-1", "1", paymentRequestDTO);
+        verify(billServiceClient, times(1)).payBill("cust-1", "1", paymentRequestDTO,"dummy-jwt-token");
     }
 
     @Test
     void payBill_InvalidPaymentDetails() {
         PaymentRequestDTO invalidRequest = new PaymentRequestDTO("123", "12", "99/99");
 
-        when(billServiceClient.payBill("cust-1", "1", invalidRequest))
+        when(billServiceClient.payBill("cust-1", "1", invalidRequest,"dummy-jwt-token"))
                 .thenReturn(Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid payment details")));
 
         webTestClient.post()
                 .uri("/api/v2/gateway/customers/{customerId}/bills/{billId}/pay", "cust-1", "1")
+                .cookie("Bearer", "dummy-jwt-token")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(invalidRequest)
                 .exchange()
                 .expectStatus().isBadRequest();
 
-        verify(billServiceClient, times(1)).payBill("cust-1", "1", invalidRequest);
+        verify(billServiceClient, times(1)).payBill("cust-1", "1", invalidRequest,"dummy-jwt-token");
     }
 
     @Test
     void payBill_BillNotFound() {
         PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
 
-        when(billServiceClient.payBill("cust-1", "does-not-exist", paymentRequestDTO))
+        when(billServiceClient.payBill("cust-1", "does-not-exist", paymentRequestDTO,"dummy-jwt-token"))
                 .thenReturn(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Bill not found")));
 
         webTestClient.post()
                 .uri("/api/v2/gateway/customers/{customerId}/bills/{billId}/pay", "cust-1", "does-not-exist")
+                .cookie("Bearer", "dummy-jwt-token")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(paymentRequestDTO)
                 .exchange()
                 .expectStatus().isNotFound();
 
-        verify(billServiceClient, times(1)).payBill("cust-1", "does-not-exist", paymentRequestDTO);
+        verify(billServiceClient, times(1)).payBill("cust-1", "does-not-exist", paymentRequestDTO,"dummy-jwt-token");
     }
 
 }

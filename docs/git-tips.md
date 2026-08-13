@@ -70,19 +70,19 @@ git remote add upstream https://github.com/cgerard321/champlain_petclinic.git
 ```
 Christine@DESKTOP-2VF5PQD MINGW64 /e/champlain_petclinic (main)
 ```
-- If it says main, great. Skip this next line. If not, type:
+- If it says main, great. Skip this next line. If not, type the following to 'checkout' origin's main branch:
 ```
 git checkout main
 ```
 
-- This will simply transfer us to our origin's main branch
-- Next, we will want to update our local project with any code our fellow devs have pushed while we were gone. To do this we must first 'download' the code using the following command:
+- Next, we will want to update our local project with any code our fellow devs have pushed while we were gone. 
+- To do this we must first 'download' the code using the following command:
 
 ```
-git fetch origin main
+git fetch origin --all
 ```
-
-- We are telling git to download the latest stuff from the main branch on our remote remote
+- Usually, you would want to 'download' changes from all branches, but if you only need to fetch changes from main or from a specific branch, then replace `--all` with either `main` or `your_branch_name`
+- We are telling git to download the latest stuff from the main branch on our remote
 - Then we want to actually start our story fresh with that code, so we will reset our local environment with that newly fetched code:
 
 ```
@@ -90,7 +90,6 @@ git reset --hard origin/main
 ```
 
 - It is also important to note this will reset any uncommited changes you've made, so keep that in mind. If you are following along and not starting a story from scratch, you might want to rebase instead. More info on rebasing can be found in the 'useful git commands' section
-
 - Now we will want to make a new branch to start working on our feature or bug fix. Simply type:
 
 ```

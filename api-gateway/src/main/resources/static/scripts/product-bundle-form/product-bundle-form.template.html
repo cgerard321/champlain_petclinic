@@ -1,0 +1,80 @@
+<div class="container d-flex justify-content-center mt-5">
+    <div class="card shadow-sm p-4" style="max-width: 800px; width: 100%;">
+        <h4 class="mb-4 text-center">Add New Product Bundle</h4>
+
+        <div class="p-3 formColor m-0">
+            <form id="bundleForm" class="form-horizontal" ng-submit="$ctrl.submitBundleForm()">
+
+                <!-- Bundle Name -->
+                <div class="form-group mb-3">
+                    <label class="control-label" for="bundleName">Bundle Name</label>
+                    <input class="form-control"
+                           id="bundleName"
+                           ng-model="$ctrl.bundle.bundleName"
+                           type="text"
+                           placeholder="Enter bundle name"
+                           required />
+                </div>
+
+                <!-- Description -->
+                <div class="form-group mb-3">
+                    <label class="control-label" for="bundleDescription">Description</label>
+                    <textarea class="form-control"
+                              id="bundleDescription"
+                              ng-model="$ctrl.bundle.bundleDescription"
+                              rows="3"
+                              placeholder="Enter description"
+                              required></textarea>
+                </div>
+
+                <!-- Product Checkbox List -->
+                <div class="form-group mb-3">
+                    <label class="control-label">Select Products</label>
+                    <div class="product-checkbox-container p-2" style="max-height: 250px; overflow-y: auto; border: 1px solid #ddd; border-radius: 6px;">
+                        <div class="form-check mb-2" ng-repeat="p in $ctrl.allProducts track by p.productId">
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   id="product_{{p.productId}}"
+                                   ng-model="p.selected"
+                                   ng-change="$ctrl.updateSelectedProducts()" />
+                            <label class="form-check-label" for="product_{{p.productId}}">
+                                {{p.productName}} — ${{p.productSalePrice | number:2}}
+                            </label>
+                        </div>
+                    </div>
+                    <small class="form-text text-muted">Select one or more products to include in the bundle.</small>
+                </div>
+
+                <!-- Original Total -->
+                <div class="form-group mb-3">
+                    <label class="control-label" for="originalTotalPrice">Original Total Price</label>
+                    <input class="form-control"
+                           id="originalTotalPrice"
+                           ng-model="$ctrl.bundle.originalTotalPrice"
+                           type="number"
+                           readonly />
+                </div>
+
+                <!-- Bundle Price -->
+                <div class="form-group mb-3">
+                    <label class="control-label" for="bundlePrice">Bundle Price</label>
+                    <input class="form-control"
+                           id="bundlePrice"
+                           ng-model="$ctrl.bundle.bundlePrice"
+                           type="number"
+                           step="0.01"
+                           min="0.01"
+                           placeholder="Enter discounted bundle price"
+                           required />
+                </div>
+
+                <!-- Submit -->
+                <div class="text-center mt-4">
+                    <button class="btn btn-primary px-4" type="submit">Submit</button>
+                    <button class="btn btn-secondary px-4 ms-2" type="button" ui-sref="productBundleList">Cancel</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>

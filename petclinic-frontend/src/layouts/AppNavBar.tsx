@@ -30,6 +30,9 @@ export function NavBar(): JSX.Element {
   const [navbarOpen, setNavbarOpen] = useState(false);
   const [cartLoading, setCartLoading] = useState(false);
 
+  const hasStaffVisits = isAdmin || isVet || isReceptionist;
+  //  const showVetVisitsDropdown = isVet;
+
   const logoutUser = (): void => {
     // Client-side logout only. Keep API calls out of navbar
     try {
@@ -60,8 +63,8 @@ export function NavBar(): JSX.Element {
       const { cartId: resolvedId } = await refreshFromAPI();
       if (resolvedId) {
         navigate(AppRoutePaths.UserCart.replace(':cartId', resolvedId));
-        // if no active cart, redirect to shop
       } else {
+        // if no active cart, redirect to shop
         navigate(AppRoutePaths.Products);
       }
     } catch (e) {
@@ -78,9 +81,11 @@ export function NavBar(): JSX.Element {
         <Navbar.Brand as={Link} to={AppRoutePaths.Home}>
           {clinic.name}
         </Navbar.Brand>
-        <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={toggleNavbar}>
-          <span className="navbar-toggler-icon"></span>
-        </Navbar.Toggle>
+        <Navbar.Toggle
+          aria-controls="basic-navbar-nav"
+          onClick={toggleNavbar}
+        />
+
         <Navbar.Collapse
           id="basic-navbar-nav"
           className={navbarOpen ? 'show' : ''}
@@ -89,6 +94,9 @@ export function NavBar(): JSX.Element {
             <Nav.Link as={Link} to={AppRoutePaths.Home}>
               Home
             </Nav.Link>
+            {
+              // check if user is logged in
+            }
             {user.userId && (
               <>
                 {(isAdmin || isVet) && (
@@ -134,20 +142,59 @@ export function NavBar(): JSX.Element {
                       Bills
                     </Nav.Link>
                   )}
-                {!isAdmin && !isInventoryManager && (
-                  <Nav.Link as={Link} to={AppRoutePaths.CustomerVisits}>
-                    Visits
-                  </Nav.Link>
+                {isOwner && !hasStaffVisits && (
+                  <NavDropdown title="Visits" id="owner-visits-dropdown">
+                    <NavDropdown.Item
+                      as={Link}
+                      to={AppRoutePaths.CustomerVisits}
+                    >
+                      List View
+                    </NavDropdown.Item>
+                    <NavDropdown.Item
+                      as={Link}
+                      to={AppRoutePaths.CustomerVisitsCalendar}
+                    >
+                      Calendar View
+                    </NavDropdown.Item>
+                  </NavDropdown>
                 )}
                 {isAdmin && (
                   <Nav.Link as={Link} to={AppRoutePaths.AdminBills}>
                     Bills
                   </Nav.Link>
                 )}
-                {(isAdmin || isVet) && (
-                  <Nav.Link as={Link} to={AppRoutePaths.Visits}>
-                    Visits
-                  </Nav.Link>
+                {(isAdmin || isReceptionist) && (
+                  <NavDropdown title="Visits" id="staff-visits-dropdown">
+                    <NavDropdown.Item as={Link} to={AppRoutePaths.Visits}>
+                      List View
+                    </NavDropdown.Item>
+                    <NavDropdown.Item
+                      as={Link}
+                      to={AppRoutePaths.VisitsCalendar}
+                    >
+                      Calendar View
+                    </NavDropdown.Item>
+                  </NavDropdown>
+                )}
+                {isVet && (
+                  <NavDropdown title="Visits" id="vet-visits-dropdown">
+                    <NavDropdown.Item as={Link} to={AppRoutePaths.Visits}>
+                      List View
+                    </NavDropdown.Item>
+                    <NavDropdown.Item
+                      as={Link}
+                      to={AppRoutePaths.VisitsCalendar}
+                    >
+                      Calendar View
+                    </NavDropdown.Item>
+                    <NavDropdown.Divider />
+                    <NavDropdown.Item
+                      as={Link}
+                      to={AppRoutePaths.CustomerVisits}
+                    >
+                      My Schedule
+                    </NavDropdown.Item>
+                  </NavDropdown>
                 )}
                 {(isInventoryManager || isAdmin) && (
                   <Nav.Link as={Link} to={AppRoutePaths.Inventories}>
@@ -164,18 +211,14 @@ export function NavBar(): JSX.Element {
                     Promos
                   </Nav.Link>
                 )}
-                {
-                  <Nav.Link as={Link} to={AppRoutePaths.Products}>
-                    Shop
-                  </Nav.Link>
-                }
-
+                <Nav.Link as={Link} to={AppRoutePaths.Products}>
+                  Shop
+                </Nav.Link>
                 {isAdmin && (
                   <Nav.Link as={Link} to={AppRoutePaths.Carts}>
                     Carts
                   </Nav.Link>
                 )}
-
                 {isOwner && (
                   <Nav.Link
                     href="#"
@@ -203,7 +246,7 @@ export function NavBar(): JSX.Element {
           </Nav>
           <Nav className="ms-auto">
             {user.userId ? (
-              <NavDropdown title={`${user.username}`} id="user-dropdown">
+              <NavDropdown title={user.username} id="user-dropdown">
                 {isOwner && (
                   <NavDropdown.Item
                     as={Link}

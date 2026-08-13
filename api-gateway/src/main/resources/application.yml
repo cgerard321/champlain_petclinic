@@ -1,3 +1,4 @@
+---
 server.port: 7000
 
 server:
@@ -49,7 +50,6 @@ spring:
   config:
     activate:
       on-profile: docker
-
 
 server.port: 8080
 
@@ -103,7 +103,6 @@ spring:
     activate:
       on-profile: prod
 
-
 server.port: 8080
 
 server:
@@ -147,4 +146,3 @@ logging:
 
 frontend:
   url: https://petclinic.benmusicgeek.synology.me
-

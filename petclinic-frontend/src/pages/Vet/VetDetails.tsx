@@ -2,21 +2,55 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import './VetDetails.css';
-import axiosInstance from '@/shared/api/axiosInstance';
 import DeleteVetPhoto from '@/pages/Vet/DeleteVetPhoto.tsx';
 import UpdateVetEducation from '@/pages/Vet/UpdateVetEducation';
 import AddEducation from '@/pages/Vet/AddEducation.tsx';
 import DeleteVetEducation from '@/pages/Vet/DeleteVetEducation';
 import { Workday } from '@/features/veterinarians/models/Workday.ts';
+import { VetRequestModel } from '@/features/veterinarians/models/VetRequestModel';
 import UpdateVet from '@/pages/Vet/UpdateVet.tsx';
+import WorkInformationModal from '@/pages/Vet/WorkInformationModal';
 import UploadAlbumPhoto from '@/features/veterinarians/api/UploadAlbumPhoto';
 import { getAlbumsByVetId } from '@/features/veterinarians/api/getAlbumByVetId.ts';
 import { fetchVetPhoto } from '@/features/veterinarians/api/fetchPhoto';
-import {
-  IsInventoryManager,
-  IsOwner,
-  IsReceptionist,
-} from '@/context/UserContext';
+import { fetchVet } from '@/features/veterinarians/api/fetchVetDetails.ts';
+import { IsOwner, IsVet, IsAdmin, useUser } from '@/context/UserContext';
+import { getOwner } from '@/features/customers/api/getOwner';
+import { deleteVetRating } from '@/features/veterinarians/api/deleteVetRating';
+import AddVetRatingModal from '@/pages/Vet/AddVetRatingModal';
+import { format } from 'date-fns';
+import { fetchVetRatings } from '@/features/veterinarians/api/fetchVetRatings';
+import { fetchEducationDetails } from '@/features/veterinarians/api/fetchEducationDetails';
+import { updateVetProfilePhoto } from '@/features/veterinarians/api/updateVetProfilePhoto';
+import { deleteAlbumPhoto } from '@/features/veterinarians/api/deleteAlbumPhoto';
+import { addSpecialty } from '@/features/veterinarians/api/addSpecialty';
+import { deleteSpecialty } from '@/features/veterinarians/api/deleteSpecialty';
+
+const WORKDAY_DISPLAY_ORDER: string[] = [
+  Workday.Monday,
+  Workday.Tuesday,
+  Workday.Wednesday,
+  Workday.Thursday,
+  Workday.Friday,
+  Workday.Saturday,
+  Workday.Sunday,
+];
+
+const sortWorkdayStrings = (days: string[] = []): string[] => {
+  const orderMap = new Map<string, number>();
+  WORKDAY_DISPLAY_ORDER.forEach((day, index) => orderMap.set(day, index));
+  return days
+    .filter(Boolean)
+    .slice()
+    .sort((a, b) => {
+      const indexA = orderMap.get(a) ?? Number.MAX_SAFE_INTEGER;
+      const indexB = orderMap.get(b) ?? Number.MAX_SAFE_INTEGER;
+      return indexA - indexB;
+    });
+};
+
+const mapToWorkdayEnum = (day: string): Workday | null =>
+  WORKDAY_DISPLAY_ORDER.includes(day) ? (day as Workday) : null;
 
 interface VetResponseType {
   vetId: string;
@@ -30,23 +64,6 @@ interface VetResponseType {
   workHoursJson: string;
   active: boolean;
   specialties: { specialtyId: string; name: string }[];
-}
-
-interface VetRequestModel {
-  vetId: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phoneNumber: string;
-  resume: string;
-  workday: Workday[];
-  workHoursJson: string;
-  active: boolean;
-  specialties: { specialtyId: string; name: string }[];
-  photoDefault: boolean;
-  username: string;
-  password: string;
-  vetBillId: string;
 }
 
 interface AlbumPhotoType {
@@ -74,11 +91,28 @@ interface RatingResponseType {
   customerName: string;
 }
 
+const formatRatingDate = (rateDate?: string): string => {
+  if (!rateDate) {
+    return 'No date available';
+  }
+
+  try {
+    const parsedDate = new Date(rateDate);
+    if (Number.isNaN(parsedDate.getTime())) {
+      return rateDate;
+    }
+    return format(parsedDate, 'yyyy-MM-dd');
+  } catch {
+    return rateDate;
+  }
+};
+
 export default function VetDetails(): JSX.Element {
   const { vetId } = useParams<{ vetId: string }>();
-  const isInventoryManager = IsInventoryManager();
+  const { user } = useUser();
   const isOwner = IsOwner();
-  const isReceptionist = IsReceptionist();
+  const isVet = IsVet();
+  const isAdmin = IsAdmin();
   const [vet, setVet] = useState<VetResponseType | null>(null);
   const [education, setEducation] = useState<EducationResponseType[] | null>(
     null
@@ -86,27 +120,56 @@ export default function VetDetails(): JSX.Element {
   const [photo, setPhoto] = useState<string | null>(null);
   const [isDefaultPhoto, setIsDefaultPhoto] = useState(false);
   const [albumPhotos, setAlbumPhotos] = useState<AlbumPhotoType[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false); // To handle form visibility
-  const [specialtyId, setSpecialtyId] = useState('');
   const [specialtyName, setSpecialtyName] = useState('');
   const [enlargedPhoto, setEnlargedPhoto] = useState<string | null>(null);
   const [formVisible, setFormVisible] = useState<boolean>(false);
+  const [isRatingModalOpen, setIsRatingModalOpen] = useState<boolean>(false);
+  const [isWorkInfoModalOpen, setIsWorkInfoModalOpen] =
+    useState<boolean>(false);
+  const [workInfoVet, setWorkInfoVet] = useState<VetRequestModel | null>(null);
+
+  // Confirm-delete modal state
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingPhotoId, setPendingPhotoId] = useState<number | null>(null);
+  const canManageVet = isVet || isAdmin; // Only allow Vets and Admins to manage vet details
+
+  const [notification, setNotification] = useState<{
+    show: boolean;
+    message: string;
+    type: 'success' | 'error';
+  }>({
+    show: false,
+    message: '',
+    type: 'success',
+  });
 
   const [selectedEducation, setSelectedEducation] =
     useState<EducationResponseType | null>(null);
   const [ratings, setRatings] = useState<RatingResponseType[] | null>(null);
   const [selectedVet, setSelectedVet] = useState<VetRequestModel | null>(null);
+  const [currentCustomerName, setCurrentCustomerName] = useState<string>('');
+  const canSubmitReview = Boolean(user.userId) && isOwner;
+  const orderedWorkdays = vet ? sortWorkdayStrings(vet.workday ?? []) : [];
+
+  const showNotification = (
+    message: string,
+    type: 'success' | 'error'
+  ): void => {
+    setNotification({ show: true, message, type });
+    setTimeout(() => {
+      setNotification({ show: false, message: '', type: 'success' });
+    }, 3000);
+  };
+
   const refreshVetDetails = useCallback(async (): Promise<void> => {
     try {
-      const response = await axiosInstance.get<VetResponseType>(
-        `/vets/${vetId}`,
-        {
-          useV2: false,
-        }
-      );
-      setVet(response.data);
+      if (!vetId)
+        throw new Error('Vet ID is required for fetching vet details');
+      const vetData = await fetchVet(vetId);
+      setVet(vetData);
     } catch (error) {
       console.error('Failed to fetch vet details:', error);
       setError('Failed to fetch vet details');
@@ -131,7 +194,9 @@ export default function VetDetails(): JSX.Element {
     email: vet.email,
     phoneNumber: vet.phoneNumber,
     resume: vet.resume,
-    workday: vet.workday.map(day => day as Workday),
+    workday: vet.workday
+      .map(mapToWorkdayEnum)
+      .filter((day): day is Workday => day !== undefined),
     workHoursJson: vet.workHoursJson,
     active: vet.active,
     specialties: vet.specialties,
@@ -141,20 +206,58 @@ export default function VetDetails(): JSX.Element {
     vetBillId: vet.vetBillId,
   });
 
-  useEffect(() => {
-    const fetchVetRatings = async (): Promise<void> => {
-      try {
-        const response = await axiosInstance.get<RatingResponseType[]>(
-          `/vets/${vetId}/ratings`,
-          { useV2: true }
-        );
-        setRatings(response.data);
-      } catch (error) {
-        setError('Failed to fetch vet ratings');
-      }
-    };
-    fetchVetRatings();
+  const openWorkInfoModal = (): void => {
+    if (!vet) return;
+    setWorkInfoVet(mapVetResponseToRequest(vet));
+    setIsWorkInfoModalOpen(true);
+  };
+
+  const handleCloseWorkInfoModal = (): void => {
+    setIsWorkInfoModalOpen(false);
+    setWorkInfoVet(null);
+  };
+
+  const handleWorkInfoSuccess = (): void => {
+    showNotification('Work information updated successfully!', 'success');
+    void refreshVetDetails();
+  };
+
+  const fetchRatings = useCallback(async (): Promise<void> => {
+    if (!vetId) return;
+    try {
+      const ratingsData = await fetchVetRatings(vetId);
+      setRatings(ratingsData ?? []);
+    } catch (error) {
+      console.error('Failed to fetch vet ratings:', error);
+      setError('Failed to fetch vet ratings');
+      setRatings([]);
+    }
   }, [vetId]);
+  const requestDeleteAlbumPhoto = (photoId: number): void => {
+    setPendingPhotoId(photoId);
+    setConfirmOpen(true);
+  };
+
+  const confirmDelete = (): void => {
+    if (pendingPhotoId != null) {
+      void handleDeleteAlbumPhoto(pendingPhotoId);
+    }
+    setConfirmOpen(false);
+    setPendingPhotoId(null);
+  };
+
+  const cancelDelete = (): void => {
+    setConfirmOpen(false);
+    setPendingPhotoId(null);
+  };
+
+  useEffect(() => {
+    void fetchRatings();
+  }, [fetchRatings]);
+
+  const handleRatingSubmitSuccess = useCallback((): void => {
+    void fetchRatings();
+  }, [fetchRatings]);
 
   useEffect(() => {
     const fetchPhoto = async (): Promise<void> => {
@@ -173,12 +276,41 @@ export default function VetDetails(): JSX.Element {
     fetchPhoto();
   }, [vetId]);
 
+  useEffect(() => {
+    const fetchCurrentCustomerName = async (): Promise<void> => {
+      try {
+        if (user.userId) {
+          const ownerResponse = await getOwner(user.userId);
+          const customerName = `${ownerResponse.data.firstName} ${ownerResponse.data.lastName}`;
+          setCurrentCustomerName(customerName);
+        }
+      } catch (error) {
+        console.error('Failed to fetch customer name:', error);
+        setCurrentCustomerName('');
+      }
+    };
+
+    fetchCurrentCustomerName();
+  }, [user.userId]);
+
   const handleEducationDeleted = (deletedEducationId: string): void => {
     setEducation(prevEducation =>
       prevEducation
         ? prevEducation.filter(edu => edu.educationId !== deletedEducationId)
         : null
     );
+  };
+
+  const handleRatingDeleted = async (): Promise<void> => {
+    try {
+      if (vetId) {
+        await deleteVetRating(vetId);
+        await fetchRatings();
+      }
+    } catch (error) {
+      console.error('Error deleting rating:', error);
+      setError('Failed to delete rating');
+    }
   };
 
   const handlePhotoDeleted = (): void => {
@@ -189,35 +321,27 @@ export default function VetDetails(): JSX.Element {
   useEffect(() => {
     const fetchVetDetails = async (): Promise<void> => {
       try {
-        const response = await axiosInstance.get<VetResponseType>(
-          `/vets/${vetId}`,
-          {
-            useV2: false,
-          }
-        );
-        setVet(response.data);
+        if (!vetId) throw new Error('Vet ID undefined');
+        const vetData = await fetchVet(vetId);
+        setVet(vetData);
       } catch (error) {
         setError('Failed to fetch vet details');
       }
     };
 
-    const fetchEducationDetails = async (): Promise<void> => {
+    const fetchEducation = async (): Promise<void> => {
       try {
-        const response = await axiosInstance.get<EducationResponseType[]>(
-          `/vets/${vetId}/educations`,
-          {
-            useV2: false,
-          }
-        );
-        setEducation(response.data);
+        if (!vetId) throw new Error('Vet ID undefined');
+        const educationData = await fetchEducationDetails(vetId);
+        setEducation(educationData);
       } catch (error) {
         setError('Failed to fetch education details');
       }
     };
 
     fetchVetDetails().then(async () => {
-      await fetchEducationDetails();
-      await loadAlbumPhotos(); // ⬅ add this
+      await fetchEducation();
+      await loadAlbumPhotos();
       setLoading(false);
     });
   }, [vetId, loadAlbumPhotos]);
@@ -239,19 +363,7 @@ export default function VetDetails(): JSX.Element {
     setIsDefaultPhoto(false); // Set to false because a new photo is uploaded
 
     try {
-      const { data: blob } = await axiosInstance.put(
-        `/vets/${vetId}/photo/${encodeURIComponent(file.name)}`,
-        file,
-        {
-          params: { useV2: false },
-          headers: {
-            'Content-Type': file.type || 'application/octet-stream',
-            Accept: 'image/*',
-          },
-          responseType: 'blob',
-        }
-      );
-
+      const blob = await updateVetProfilePhoto(vetId!, file);
       const url = URL.createObjectURL(blob);
       setPhoto(url);
       setIsDefaultPhoto(false);
@@ -261,13 +373,9 @@ export default function VetDetails(): JSX.Element {
   };
   const handleDeleteAlbumPhoto = async (photoId: number): Promise<void> => {
     try {
-      await axiosInstance.delete(`/vets/${vetId}/albums/${photoId}`, {
-        useV2: true, // <-- go through BFF v2
-      });
+      await deleteAlbumPhoto(vetId!, photoId);
 
-      setAlbumPhotos(
-        prev => prev.filter(photo => photo.id !== photoId) // number vs number
-      );
+      setAlbumPhotos(prev => prev.filter(photo => photo.id !== photoId));
     } catch (error) {
       setError('Failed to delete album photo');
     }
@@ -369,53 +477,39 @@ export default function VetDetails(): JSX.Element {
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const handleAddSpecialty = async () => {
     const specialtyDTO = {
-      specialtyId,
+      specialtyId: '', // Will be generated by backend
       name: specialtyName,
     };
 
     try {
-      await axiosInstance.post(`/vets/${vetId}/specialties`, specialtyDTO, {
-        useV2: false,
-      });
-      alert('Specialty added successfully!');
+      await addSpecialty(vetId!, specialtyDTO);
+      showNotification('Specialty added successfully!', 'success');
       setIsFormOpen(false); // Close form on success
-      setSpecialtyId(''); // Clear fields
-      setSpecialtyName('');
+      setSpecialtyName(''); // Clear fields
 
-      // Update the vet data after adding the specialty
-      setVet(prevVet =>
-        prevVet
-          ? {
-              ...prevVet,
-              specialties: [...prevVet.specialties, specialtyDTO], // Update specialties locally
-            }
-          : null
-      );
+      if (vetId) {
+        const updatedVetData = await fetchVet(vetId);
+        setVet(updatedVetData);
+      }
     } catch (error) {
-      setError('Failed to add specialty');
+      showNotification('Failed to add specialty', 'error');
+      console.error('Failed to add specialty:', error);
     }
   };
 
   const handleDeleteSpecialty = async (specialtyId: string): Promise<void> => {
     try {
-      // Make a DELETE request to the API
-      await axiosInstance.delete(`/vets/${vetId}/specialties/${specialtyId}`, {
-        useV2: false,
-      });
+      await deleteSpecialty(vetId!, specialtyId);
+      showNotification('Specialty deleted successfully!', 'success');
 
-      // Update the vet data after deleting the specialty
-      setVet(prevVet =>
-        prevVet
-          ? {
-              ...prevVet,
-              specialties: prevVet.specialties.filter(
-                specialty => specialty.specialtyId !== specialtyId
-              ), // Remove the deleted specialty from the local state
-            }
-          : null
-      );
+      // Refresh the vet data to get the updated specialties list
+      if (vetId) {
+        const updatedVetData = await fetchVet(vetId);
+        setVet(updatedVetData);
+      }
     } catch (error) {
-      setError('Failed to delete specialty');
+      console.error('Failed to delete specialty:', error);
+      showNotification('Failed to delete specialty', 'error');
     }
   };
 
@@ -444,7 +538,7 @@ export default function VetDetails(): JSX.Element {
               onChange={handleUpdateVetProfilePhoto}
               accept="image/*"
             />
-            {!isInventoryManager && !isOwner && !isReceptionist && (
+            {canManageVet && (
               <>
                 {!isDefaultPhoto && (
                   <DeleteVetPhoto
@@ -473,7 +567,18 @@ export default function VetDetails(): JSX.Element {
         )}
 
         <section className="vet-ratings-info">
-          <h2>Ratings</h2>
+          <div className="vet-ratings-header">
+            <h2>Ratings</h2>
+            {canSubmitReview && (
+              <button
+                className="add-rating-button"
+                onClick={() => setIsRatingModalOpen(true)}
+                type="button"
+              >
+                Write a Review
+              </button>
+            )}
+          </div>
           {ratings && ratings.length > 0 ? (
             ratings.map((rating, index) => (
               <div key={index} className="rating-card">
@@ -492,8 +597,28 @@ export default function VetDetails(): JSX.Element {
                 </p>
                 <p>
                   <strong>Rate Date:</strong>{' '}
-                  {rating.rateDate || 'No date available'}
+                  {formatRatingDate(rating.rateDate)}
                 </p>
+                {(currentCustomerName &&
+                  rating.customerName === currentCustomerName) ||
+                isAdmin ? (
+                  <button
+                    onClick={handleRatingDeleted}
+                    className="delete-rating-button"
+                    style={{
+                      backgroundColor: '#dc3545',
+                      color: 'white',
+                      border: 'none',
+                      padding: '8px 16px',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      marginTop: '10px',
+                      fontSize: '14px',
+                    }}
+                  >
+                    {isAdmin ? 'Delete Rating' : 'Delete My Rating'}
+                  </button>
+                ) : null}
                 <hr />
               </div>
             ))
@@ -501,6 +626,13 @@ export default function VetDetails(): JSX.Element {
             <p>No ratings available</p>
           )}
         </section>
+        {isRatingModalOpen && canSubmitReview && vetId && (
+          <AddVetRatingModal
+            vetId={vetId}
+            onClose={() => setIsRatingModalOpen(false)}
+            onSubmitSuccess={handleRatingSubmitSuccess}
+          />
+        )}
 
         {vet && (
           <>
@@ -522,100 +654,123 @@ export default function VetDetails(): JSX.Element {
             </section>
 
             <section className="work-info">
-              <h2>Work Information</h2>
-              <p>
-                <strong>Resume:</strong> {vet.resume}
-              </p>
-              <p>
-                <strong>Workdays:</strong>
-                {vet.workday && vet.workday.length > 0 ? (
-                  <ul>
-                    {vet.workday.map((workday, index) => (
-                      <li key={index}>{workday}</li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p>No workdays available</p>
+              <div className="work-info-header">
+                <h2>Work Information</h2>
+                {canManageVet && (
+                  <button
+                    type="button"
+                    className="btn-edit-work-info"
+                    onClick={openWorkInfoModal}
+                  >
+                    Edit Work Information
+                  </button>
                 )}
-              </p>
-              <p>
-                <strong>Work Hours:</strong>{' '}
-                {renderWorkHours(vet.workHoursJson)}
-              </p>
-              <p>
-                <strong>Active:</strong> {vet.active ? 'Yes' : 'No'}
-              </p>
+              </div>
+              <div className="work-info-content">
+                <p>
+                  <strong>Resume:</strong> {vet.resume}
+                </p>
+                <div className="work-info-row">
+                  <strong>Workdays:</strong>
+                  {orderedWorkdays.length > 0 ? (
+                    <div className="workday-tags">
+                      {orderedWorkdays.map(day => (
+                        <span key={day} className="workday-tag">
+                          {day}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="workday-empty">No workdays available</span>
+                  )}
+                </div>
+                <div className="work-info-row">
+                  <strong>Work Hours:</strong>
+                  {renderWorkHours(vet.workHoursJson)}
+                </div>
+                <p>
+                  <strong>Active:</strong> {vet.active ? 'Yes' : 'No'}
+                </p>
+              </div>
             </section>
 
             <section className="specialties-info">
               <h2>Specialties</h2>
               {vet.specialties && vet.specialties.length > 0 ? (
-                <ul>
+                <div className="specialties-list">
                   {vet.specialties.map((specialty, index) => (
-                    <li key={index}>
-                      {specialty.name}
-                      {!isInventoryManager && !isOwner && !isReceptionist && (
+                    <div key={index} className="specialty-item">
+                      <span className="specialty-name">{specialty.name}</span>
+                      {canManageVet && (
                         <button
+                          className="btn-delete-specialty"
                           onClick={() =>
                             handleDeleteSpecialty(specialty.specialtyId)
                           }
+                          title="Delete this specialty"
                         >
                           Delete
                         </button>
                       )}
-                    </li>
+                    </div>
                   ))}
-                </ul>
+                </div>
               ) : (
-                <p>No specialties available</p>
+                <p className="no-specialties">No specialties available</p>
               )}
 
               {/* Button to open the form */}
-              {!isInventoryManager && !isOwner && !isReceptionist && (
-                <button onClick={() => setIsFormOpen(true)}>
-                  Add Specialty
+              {canManageVet && (
+                <button
+                  className="btn-add-specialty"
+                  onClick={() => setIsFormOpen(true)}
+                >
+                  + Add Specialty
                 </button>
               )}
 
               {/* Conditionally render the form */}
               {isFormOpen && (
-                <div className="specialty-form-popup">
-                  <form
-                    onSubmit={e => {
-                      e.preventDefault();
-                      handleAddSpecialty();
-                    }}
+                <div
+                  className="specialty-form-overlay"
+                  onClick={() => setIsFormOpen(false)}
+                >
+                  <div
+                    className="specialty-form-popup"
+                    onClick={e => e.stopPropagation()}
                   >
-                    <div>
-                      <label htmlFor="specialtyId">Specialty ID:</label>
-                      <input
-                        type="text"
-                        id="specialtyId"
-                        value={specialtyId}
-                        onChange={e => setSpecialtyId(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="specialtyName">Specialty Name:</label>
-                      <input
-                        type="text"
-                        id="specialtyName"
-                        value={specialtyName}
-                        onChange={e => setSpecialtyName(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <button type="submit">Submit</button>
-                      <button
-                        type="button"
-                        onClick={() => setIsFormOpen(false)}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </form>
+                    <h3>Add New Specialty</h3>
+                    <form
+                      onSubmit={e => {
+                        e.preventDefault();
+                        handleAddSpecialty();
+                      }}
+                    >
+                      <div className="form-group">
+                        <label htmlFor="specialtyName">Specialty Name:</label>
+                        <input
+                          type="text"
+                          id="specialtyName"
+                          value={specialtyName}
+                          onChange={e => setSpecialtyName(e.target.value)}
+                          placeholder="Enter specialty name"
+                          required
+                        />
+                      </div>
+                      <div className="form-buttons">
+                        <button type="submit" className="btn-submit">
+                          Add
+                        </button>
+                        <button
+                          type="button"
+                          className="btn-cancel"
+                          onClick={() => setIsFormOpen(false)}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  </div>
                 </div>
               )}
             </section>
@@ -640,7 +795,7 @@ export default function VetDetails(): JSX.Element {
                     <p>
                       <strong>End Date:</strong> {edu.endDate}
                     </p>
-                    {!isInventoryManager && !isOwner && !isReceptionist && (
+                    {canManageVet && (
                       <>
                         <div
                           style={{ marginBottom: '20px', textAlign: 'right' }}
@@ -687,7 +842,7 @@ export default function VetDetails(): JSX.Element {
                 <div>
                   <p>No education details available</p>
 
-                  {!isInventoryManager && !isOwner && !isReceptionist && (
+                  {canManageVet && (
                     <div style={{ marginBottom: '20px', textAlign: 'right' }}>
                       <button
                         onClick={() => setFormVisible(prev => !prev)}
@@ -707,38 +862,30 @@ export default function VetDetails(): JSX.Element {
                   )}
                 </div>
               )}
-              {!isInventoryManager &&
-                !isOwner &&
-                !isReceptionist &&
-                selectedEducation &&
-                vetId && (
-                  <UpdateVetEducation
-                    vetId={vetId}
-                    education={selectedEducation}
-                    educationId={selectedEducation.educationId}
-                    onClose={() => setSelectedEducation(null)}
-                  />
-                )}
+              {(isVet || isAdmin) && selectedEducation && vetId && (
+                <UpdateVetEducation
+                  vetId={vetId}
+                  education={selectedEducation}
+                  educationId={selectedEducation.educationId}
+                  onClose={() => setSelectedEducation(null)}
+                />
+              )}
             </section>
 
             {/* Only show album photos section if:
                 1. There are photos to display, OR
-                2. User is admin (not inventory manager, owner, or receptionist) */}
-            {(albumPhotos.length > 0 ||
-              (!isInventoryManager && !isOwner && !isReceptionist)) && (
+                2. User is vet or admin */}
+            {(albumPhotos.length > 0 || isVet || isAdmin) && (
               <section className="album-photos">
                 <div className="d-flex justify-content-between align-items-center">
                   <h2>Album Photos</h2>
 
-                  {vetId &&
-                    !isInventoryManager &&
-                    !isOwner &&
-                    !isReceptionist && (
-                      <UploadAlbumPhoto
-                        vetId={vetId}
-                        onUploadComplete={loadAlbumPhotos}
-                      />
-                    )}
+                  {vetId && (isVet || isAdmin) && (
+                    <UploadAlbumPhoto
+                      vetId={vetId}
+                      onUploadComplete={loadAlbumPhotos}
+                    />
+                  )}
                 </div>
 
                 {albumPhotos.length > 0 ? (
@@ -758,7 +905,7 @@ export default function VetDetails(): JSX.Element {
                           alt={`Album Photo ${photo.id}`}
                           className="album-photo-thumbnail"
                         />
-                        {!isInventoryManager && !isOwner && !isReceptionist && (
+                        {(isVet || isAdmin) && (
                           <button
                             style={{
                               backgroundColor: '#f93142ff',
@@ -767,7 +914,7 @@ export default function VetDetails(): JSX.Element {
                             className="delete-photo-button"
                             onClick={e => {
                               e.stopPropagation();
-                              void handleDeleteAlbumPhoto(photo.id);
+                              requestDeleteAlbumPhoto(photo.id);
                             }}
                           >
                             Delete Image
@@ -785,10 +932,114 @@ export default function VetDetails(): JSX.Element {
         )}
       </div>
 
+      {workInfoVet && (
+        <WorkInformationModal
+          show={isWorkInfoModalOpen}
+          vet={workInfoVet}
+          onClose={handleCloseWorkInfoModal}
+          onSuccess={handleWorkInfoSuccess}
+          onError={message => showNotification(message, 'error')}
+        />
+      )}
+
       {/* Modal for enlarged photo */}
       {enlargedPhoto && (
         <div className="photo-modal" onClick={closePhotoModal}>
           <img src={enlargedPhoto} alt="Enlarged Vet Album Photo" />
+        </div>
+      )}
+      {confirmOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.45)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}
+          onClick={cancelDelete}
+        >
+          <div
+            style={{
+              background: '#fff',
+              padding: 20,
+              borderRadius: 12,
+              width: 'min(520px, 92vw)',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.25)',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <h3 style={{ marginTop: 0 }}>Delete this photo?</h3>
+            <p>
+              You&apos;re about to delete{' '}
+              <strong>photo #{pendingPhotoId}</strong>.
+            </p>
+            <p>
+              <strong>Vet:</strong>{' '}
+              {vet ? `${vet.firstName} ${vet.lastName}` : 'Loading...'}
+            </p>
+            <p style={{ fontSize: 13, opacity: 0.85 }}>
+              This can&apos;t be undone. Make sure this is the correct
+              veterinarian profile.
+            </p>
+            <div
+              style={{
+                display: 'flex',
+                gap: 12,
+                justifyContent: 'flex-end',
+                marginTop: 18,
+              }}
+            >
+              <button
+                onClick={cancelDelete}
+                style={{
+                  padding: '8px 14px',
+                  borderRadius: 8,
+                  border: '1px solid #ddd',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                style={{
+                  padding: '8px 14px',
+                  borderRadius: 8,
+                  border: '1px solid #f93142',
+                  background: '#f93142',
+                  color: '#fff',
+                }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Notification Modal */}
+      {notification.show && (
+        <div className="notification-overlay">
+          <div className={`notification-modal ${notification.type}`}>
+            <div className="notification-icon">
+              {notification.type === 'success' ? '✓' : '✕'}
+            </div>
+            <div className="notification-content">
+              <h4>{notification.type === 'success' ? 'Success' : 'Error'}</h4>
+              <p>{notification.message}</p>
+            </div>
+            <button
+              className="notification-close"
+              onClick={() =>
+                setNotification({ show: false, message: '', type: 'success' })
+              }
+              aria-label="Close notification"
+            >
+              ✕
+            </button>
+          </div>
         </div>
       )}
     </div>

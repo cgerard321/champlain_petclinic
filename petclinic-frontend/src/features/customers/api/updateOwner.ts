@@ -7,6 +7,6 @@ export const updateOwner = async (
   owner: OwnerRequestModel
 ): Promise<AxiosResponse<void>> => {
   return await axiosInstance.put<void>(`/owners/${ownerId}`, owner, {
-    useV2: true,
+    useV2: false,
   });
 };

@@ -28,22 +28,19 @@ public class PromoCodeServiceImpl implements PromoCodeService {
     @Override
     public Flux<PromoCodeResponseModel> getAllPromoCodes() {
         return promoRepository.findAll()
-                .map(EntityModelUtil::toPromoCodeResponseModel)
-                .doOnNext(promoCodeResponse -> log.debug("Promo Code: " + promoCodeResponse));
+                .map(EntityModelUtil::toPromoCodeResponseModel);
     }
     @Override
     public Flux<PromoCodeResponseModel> getActivePromos() {
         LocalDateTime currentDateTime = LocalDateTime.now();
         return promoRepository.findAllByExpirationDateGreaterThanEqual(currentDateTime)
-                .map(EntityModelUtil::toPromoCodeResponseModel)
-                .doOnNext(promo -> log.debug("Active Promo: " + promo));
+                .map(EntityModelUtil::toPromoCodeResponseModel);
     }
 
     @Override
     public Mono<PromoCodeResponseModel> getPromoCodeByCode(String promoCode) {
         return promoRepository.findPromoCodeByCode(promoCode)
-                .map(EntityModelUtil::toPromoCodeResponseModel)
-                .doOnNext(promo -> log.debug("Promo: " + promo));
+                .map(EntityModelUtil::toPromoCodeResponseModel);
     }
 
     @Override
@@ -88,4 +85,3 @@ public class PromoCodeServiceImpl implements PromoCodeService {
     }
 
 }
-

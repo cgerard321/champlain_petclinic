@@ -135,5 +135,80 @@ class EmailingControllerIntegrationTest {
                 .expectStatus().isOk(); // Expect 200 OK
     }
 
-    // Additional tests can be added to test error handling and other scenarios
+    @Test
+    void testGetAllEmails_Error() {
+        when(emailingService.getAllEmails()).thenReturn(Flux.error(new RuntimeException("Service error")));
+
+        bindToController(emailingController).build()
+                .get()
+                .uri("/api/v2/gateway/emailing")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Test
+    void testSendTemplate_Error() {
+        String templateName = "testTemplate";
+        String body = "<html>...</html>";
+
+        when(emailingService.addHtmlTemplate(eq(templateName), eq(body)))
+                .thenReturn(Mono.error(new RuntimeException("Service error")));
+
+        bindToController(emailingController).build()
+                .post()
+                .uri("/api/v2/gateway/emailing/template/{templateName}", templateName)
+                .contentType(MediaType.TEXT_HTML)
+                .body(BodyInserters.fromValue(body))
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Test
+    void testSendEmail_Error() {
+        DirectEmailModelRequestDTO requestDTO = new DirectEmailModelRequestDTO(/* initialize fields */);
+
+        when(emailingService.sendEmail(requestDTO))
+                .thenReturn(Mono.error(new RuntimeException("Service error")));
+
+        bindToController(emailingController).build()
+                .post()
+                .uri("/api/v2/gateway/emailing/send")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(requestDTO))
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Test
+    void testSendEmailNotification_Error() {
+        NotificationEmailModelRequestDTO requestDTO = new NotificationEmailModelRequestDTO(/* initialize fields */);
+
+        when(emailingService.sendEmailNotification(requestDTO))
+                .thenReturn(Mono.error(new RuntimeException("Service error")));
+
+        bindToController(emailingController).build()
+                .post()
+                .uri("/api/v2/gateway/emailing/send/notification")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(requestDTO))
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Test
+    void testSendRawEmail_Error() {
+        RawEmailModelRequestDTO requestDTO = new RawEmailModelRequestDTO(/* initialize fields */);
+
+        when(emailingService.sendRawEmail(requestDTO))
+                .thenReturn(Mono.error(new RuntimeException("Service error")));
+
+        bindToController(emailingController).build()
+                .post()
+                .uri("/api/v2/gateway/emailing/send/raw")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(requestDTO))
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }

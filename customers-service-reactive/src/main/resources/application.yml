@@ -1,3 +1,4 @@
+---
 server:
   error:
     include-message: always
@@ -51,10 +52,14 @@ spring:
       host: mongo-customers
       port: 27017
       database: customers
-      username: root
-      password: password
+      username: ${DB_USER}
+      password: ${DB_PASSWORD}
       authentication-database: admin
-
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus
 app:
   files-service:
     host: files-service

@@ -3,13 +3,13 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
-import com.petclinic.bffapigateway.dtos.Bills.PaymentRequestDTO;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +36,6 @@ public class BillController {
         return billService.getBillsByCustomerIdPaginated(customerId, page, size);
     }
 
-
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping()
     public ResponseEntity<Flux<BillResponseDTO>> getAllBillsByPage(
@@ -61,7 +60,6 @@ public class BillController {
         return ResponseEntity.ok().body(billService.getAllBillsByPage(page, size, billId, customerId, ownerFirstName,
                 ownerLastName, visitType, vetId, vetFirstName, vetLastName));
     }
-
     
     @PutMapping(value = "/admin/{billId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<BillResponseDTO>> updateBill(@PathVariable String billId, @RequestBody Mono<BillRequestDTO> billRequestDTO) {
@@ -136,6 +134,22 @@ public class BillController {
                 .thenReturn(ResponseEntity.noContent().build());
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.VET})
+    @GetMapping(value = "/{billId}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    public Mono<ResponseEntity<byte[]>> downloadStaffBillPdf(
+            @PathVariable String billId,
+            @RequestParam(name = "currency", required = false, defaultValue = "CAD") String currency) {
 
-
+        return billService.downloadStaffBillPdf(billId, currency)
+                .map(pdf -> {
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.setContentType(MediaType.APPLICATION_PDF);
+                    headers.setContentDispositionFormData("attachment", "staff-bill-" + billId + ".pdf");
+                    return ResponseEntity.ok().headers(headers).body(pdf);
+                })
+                .onErrorResume(e -> {
+                    log.error("Error downloading staff PDF for billId: {}", billId, e);
+                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+                });
+    }
 }

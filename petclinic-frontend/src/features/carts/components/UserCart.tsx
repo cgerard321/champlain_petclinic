@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useToast } from '@/shared/components/toast/ToastProvider';
 import CartBillingForm, { BillingInfo } from './CartBillingForm';
+import InvoiceComponent, {
+  InvoiceFull as InvoiceFullType,
+  InvoiceItem as InvoiceItemType,
+} from './Invoice';
 import { useNavigate, useParams } from 'react-router-dom';
 import CartItem from './CartItem';
 import { ProductModel } from '../models/ProductModel';
@@ -9,33 +14,37 @@ import { NavBar } from '@/layouts/AppNavBar';
 import { FaShoppingCart } from 'react-icons/fa';
 import ImageContainer from '@/features/products/components/ImageContainer';
 import axiosInstance from '@/shared/api/axiosInstance';
+import getErrorMessage from '@/shared/api/getErrorMessage';
 import { formatPrice } from '../utils/formatPrice';
+import {
+  applyPromo,
+  clearPromo,
+  type CartDetailsModel,
+} from '@/shared/api/cart';
 import {
   IsAdmin,
   IsInventoryManager,
   IsReceptionist,
   IsVet,
+  useUser,
 } from '@/context/UserContext';
 import { AppRoutePaths } from '@/shared/models/path.routes';
-import { getProductByProductId } from '@/features/products/api/getProductByProductId';
 import {
-  bumpCartCountInLS,
   notifyCartChanged,
   setCartCountInLS,
   setCartIdInLS,
 } from '../api/cartEvent';
+import { computeTaxes, formatTaxRate, roundToCents } from '../utils/taxUtils';
 import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
-import axios from 'axios';
-
 interface ProductAPIResponse {
-  productId: number;
-  imageId: string;
+  productId: string;
+  imageId?: string;
   productName: string;
-  productDescription: string;
+  productDescription?: string;
   productSalePrice: number;
-  averageRating: number;
-  quantityInCart: number;
-  productQuantity: number;
+  averageRating?: number;
+  quantityInCart?: number;
+  productQuantity?: number;
 }
 
 interface Invoice {
@@ -45,13 +54,19 @@ interface Invoice {
   quantity: number;
 }
 
-const UserCart = (): JSX.Element => {
-  const { cartId } = useParams<{ cartId: string }>();
+/**
+ * UserCart component displays the user's shopping cart, allowing them to view, update, and remove items,
+ * manage billing information, and proceed to checkout. It also handles displaying invoices and notifications,
+ * and interacts with the backend to fetch and update cart data.
+ */
+const UserCart: React.FC = () => {
   const navigate = useNavigate();
-
+  const { cartId } = useParams<{ cartId?: string }>();
   const { confirm, ConfirmModal } = useConfirmModal();
+  const { user } = useUser();
+  const { showToast } = useToast();
+  const customerId = user?.userId ?? null;
 
-  // state: cart + wishlist
   const [cartItems, setCartItems] = useState<ProductModel[]>([]);
   const [wishlistItems, setWishlistItems] = useState<ProductModel[]>([]);
 
@@ -60,25 +75,117 @@ const UserCart = (): JSX.Element => {
   const [errorMessages, setErrorMessages] = useState<Record<number, string>>(
     {}
   );
-  const [notificationMessage, setNotificationMessage] = useState<string | null>(
-    null
-  );
 
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [showInvoiceModal, setShowInvoiceModal] = useState<boolean>(false);
+  const [lastInvoice, setLastInvoice] = useState<InvoiceFullType | null>(null);
   const [cartItemCount, setCartItemCount] = useState<number>(0);
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] =
     useState<boolean>(false);
   const [showBillingForm, setShowBillingForm] = useState<boolean>(false);
   const [billingInfo, setBillingInfo] = useState<BillingInfo | null>(null);
-  const [checkoutDate, setCheckoutDate] = useState<string | null>(null);
 
-  const [wishlistUpdated, setWishlistUpdated] = useState(false);
   const [voucherCode, setVoucherCode] = useState<string>('');
-  const [discount, setDiscount] = useState<number>(0);
   const [voucherError, setVoucherError] = useState<string | null>(null);
 
   const [movingAll, setMovingAll] = useState<boolean>(false);
+
+  const [promoPercent, setPromoPercent] = useState<number | null>(null);
+
+  const toProductModel = useCallback(
+    (product: ProductAPIResponse): ProductModel => ({
+      productId: String(product.productId ?? ''),
+      imageId: product.imageId ?? '',
+      productName: product.productName,
+      productDescription: product.productDescription ?? '',
+      productSalePrice: product.productSalePrice,
+      averageRating: product.averageRating,
+      quantity:
+        product.quantityInCart && product.quantityInCart > 0
+          ? product.quantityInCart
+          : 1,
+      productQuantity: product.productQuantity ?? 0,
+    }),
+    []
+  );
+
+  const emitCartMessage = useCallback(
+    (serverMessage?: string | null, fallbackMessage?: string) => {
+      const text = (serverMessage ?? '').trim() || fallbackMessage;
+      if (!text) return;
+      const tone = serverMessage?.trim() ? 'info' : 'success';
+      showToast(text, tone);
+    },
+    [showToast]
+  );
+
+  const getStatusCode = useCallback((err: unknown): number | undefined => {
+    return (err as { response?: { status?: number } })?.response?.status;
+  }, []);
+
+  const apiErrorMessage = useCallback(
+    (err: unknown, defaultMessage: string): string => {
+      if (getStatusCode(err) === 404) return 'Cart not found';
+      return getErrorMessage(err, { defaultMessage });
+    },
+    [getStatusCode]
+  );
+
+  const ensureCartId = useCallback((): string | undefined => {
+    if (!cartId) {
+      const message = 'Invalid cart ID';
+      setError(message);
+      showToast(message, 'error');
+      return undefined;
+    }
+    return cartId;
+  }, [cartId, setError, showToast]);
+
+  const syncCartState = useCallback(
+    (
+      cartData: CartDetailsModel | null | undefined,
+      fallbackMessage?: string
+    ) => {
+      if (!cartData) return;
+
+      const normalizedCartItems = Array.isArray(cartData.products)
+        ? cartData.products.map(item =>
+            toProductModel(item as ProductAPIResponse)
+          )
+        : [];
+
+      setCartItems(normalizedCartItems);
+
+      const cartCount = normalizedCartItems.reduce(
+        (acc, item) => acc + (item.quantity ?? 0),
+        0
+      );
+      setCartItemCount(cartCount);
+      setCartCountInLS(cartCount);
+      notifyCartChanged();
+
+      if (cartData.cartId) {
+        setCartIdInLS(cartData.cartId);
+      }
+
+      const normalizedWishlist = Array.isArray(cartData.wishListProducts)
+        ? cartData.wishListProducts.map(item =>
+            toProductModel(item as ProductAPIResponse)
+          )
+        : [];
+      setWishlistItems(normalizedWishlist);
+
+      setPromoPercent(
+        typeof cartData.promoPercent === 'number' ? cartData.promoPercent : null
+      );
+
+      emitCartMessage(
+        typeof cartData.message === 'string' ? cartData.message : undefined,
+        fallbackMessage
+      );
+    },
+    [emitCartMessage, toProductModel]
+  );
 
   // Recent purchases state
   const [recentPurchases, setRecentPurchases] = useState<
@@ -115,56 +222,27 @@ const UserCart = (): JSX.Element => {
     imageId: string;
     quantity: number;
   }): Promise<void> => {
-    if (!cartId) return;
+    const existingCartId = ensureCartId();
+    if (!existingCartId) return;
 
     const quantity = Math.max(1, recentPurchaseQuantities[item.productId] || 1);
 
     try {
-      // Concurrently add items to cart
-      const addPromises = Array.from({ length: quantity }, () =>
-        axiosInstance.post(
-          `/carts/${cartId}/${item.productId}`,
-          {},
-          { useV2: false }
-        )
+      const { data } = await axiosInstance.post<CartDetailsModel>(
+        `/carts/${existingCartId}/products`,
+        {
+          productId: item.productId,
+          quantity,
+        },
+        { useV2: false }
       );
-      await Promise.all(addPromises);
 
-      setNotificationMessage(
-        `${item.productName} (x${quantity}) added to cart!`
-      );
-      notifyCartChanged();
-
-      // Fetch updated cart and update state
-      const { data } = await axiosInstance.get(`/carts/${cartId}`, {
-        useV2: false,
-      });
-      if (Array.isArray(data.products)) {
-        const products: ProductModel[] = data.products.map(
-          (p: ProductAPIResponse) => ({
-            productId: p.productId,
-            imageId: p.imageId,
-            productName: p.productName,
-            productDescription: p.productDescription,
-            productSalePrice: p.productSalePrice,
-            averageRating: p.averageRating,
-            quantity: p.quantityInCart || 1,
-            productQuantity: p.productQuantity,
-          })
-        );
-        setCartItems(products);
-        const updatedCount = products.reduce(
-          (acc, p) => acc + (p.quantity || 0),
-          0
-        );
-        setCartCountInLS(updatedCount);
-      }
+      syncCartState(data, `${item.productName} (x${quantity}) added to cart!`);
     } catch (err: unknown) {
-      const msg =
-        (axios.isAxiosError(err) &&
-          (err.response?.data as { message?: string } | undefined)?.message) ||
-        `Failed to add ${item.productName} to cart.`;
-      setNotificationMessage(msg);
+      showToast(
+        apiErrorMessage(err, `Failed to add ${item.productName} to cart.`),
+        'error'
+      );
     }
   };
 
@@ -207,7 +285,8 @@ const UserCart = (): JSX.Element => {
     imageId: string;
     quantity: number;
   }): Promise<void> => {
-    if (!cartId) return;
+    const existingCartId = ensureCartId();
+    if (!existingCartId) return;
 
     const quantity = Math.max(
       1,
@@ -215,47 +294,20 @@ const UserCart = (): JSX.Element => {
     );
 
     try {
-      for (let i = 0; i < quantity; i += 1) {
-        await axiosInstance.post(
-          `/carts/${cartId}/${item.productId}`,
-          {},
-          { useV2: false }
-        );
-      }
-      setNotificationMessage(
-        `${item.productName} (x${quantity}) added to cart!`
+      const { data } = await axiosInstance.post<CartDetailsModel>(
+        `/carts/${existingCartId}/products`,
+        {
+          productId: item.productId,
+          quantity,
+        },
+        { useV2: false }
       );
-      notifyCartChanged();
-      // Fetch updated cart and update state
-      const { data } = await axiosInstance.get(`/carts/${cartId}`, {
-        useV2: false,
-      });
-      if (Array.isArray(data.products)) {
-        const products: ProductModel[] = data.products.map(
-          (p: ProductAPIResponse) => ({
-            productId: p.productId,
-            imageId: p.imageId,
-            productName: p.productName,
-            productDescription: p.productDescription,
-            productSalePrice: p.productSalePrice,
-            averageRating: p.averageRating,
-            quantity: p.quantityInCart || 1,
-            productQuantity: p.productQuantity,
-          })
-        );
-        setCartItems(products);
-        const updatedCount = products.reduce(
-          (acc, p) => acc + (p.quantity || 0),
-          0
-        );
-        setCartCountInLS(updatedCount);
-      }
+      syncCartState(data, `${item.productName} (x${quantity}) added to cart!`);
     } catch (err: unknown) {
-      const msg =
-        (axios.isAxiosError(err) &&
-          (err.response?.data as { message?: string } | undefined)?.message) ||
-        `Failed to add ${item.productName} to cart.`;
-      setNotificationMessage(msg);
+      showToast(
+        apiErrorMessage(err, `Failed to add ${item.productName} to cart.`),
+        'error'
+      );
     }
   };
 
@@ -269,9 +321,24 @@ const UserCart = (): JSX.Element => {
     (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
     0
   );
-  const tvq = subtotal * 0.09975;
-  const tvc = subtotal * 0.05;
-  const total = subtotal - discount + tvq + tvc;
+
+  const promoDiscount =
+    promoPercent != null ? (subtotal * promoPercent) / 100 : 0;
+  const discountedSubtotal = Math.max(0, subtotal - promoDiscount);
+  const resolvedTaxLines = computeTaxes(
+    discountedSubtotal,
+    billingInfo?.province
+  ).map(line => ({
+    ...line,
+    amount: line.amount ?? roundToCents(discountedSubtotal * line.rate),
+  }));
+  const totalTax = roundToCents(
+    resolvedTaxLines.reduce((acc, line) => acc + (line.amount ?? 0), 0)
+  );
+
+  const effectiveDiscount = promoDiscount;
+
+  const total = roundToCents(discountedSubtotal + totalTax);
 
   const updateCartItemCount = useCallback(() => {
     const count = cartItems.reduce(
@@ -290,55 +357,24 @@ const UserCart = (): JSX.Element => {
       }
 
       try {
-        const { data } = await axiosInstance.get(`/carts/${cartId}`, {
-          useV2: true,
-        });
-
-        if (!Array.isArray(data.products)) {
-          throw new Error('Invalid data format: products should be an array');
-        }
-
-        const products: ProductModel[] = data.products.map(
-          (p: ProductAPIResponse) => ({
-            productId: p.productId,
-            imageId: p.imageId,
-            productName: p.productName,
-            productDescription: p.productDescription,
-            productSalePrice: p.productSalePrice,
-            averageRating: p.averageRating,
-            quantity: p.quantityInCart || 1,
-            productQuantity: p.productQuantity,
-          })
+        const { data } = await axiosInstance.get<CartDetailsModel>(
+          `/carts/${cartId}`,
+          {
+            useV2: false,
+          }
         );
 
-        setCartItems(products);
-        setCartIdInLS(cartId);
-        const countFromFetch = products.reduce(
-          (acc, p) => acc + (p.quantity || 0),
-          0
-        );
-        setCartCountInLS(countFromFetch);
-        const enrichedWishlist = await Promise.all(
-          (data.wishListProducts || []).map(async (item: ProductModel) => {
-            const fullProduct = await getProductByProductId(item.productId);
-            return {
-              ...fullProduct,
-              quantity: item.quantity ?? 1,
-            };
-          })
-        );
-        setWishlistItems(enrichedWishlist);
+        syncCartState(data);
       } catch (err: unknown) {
         console.error(err);
         setError('Failed to fetch cart items');
       } finally {
         setLoading(false);
-        if (wishlistUpdated) setWishlistUpdated(false);
       }
     };
 
     fetchCartItems();
-  }, [cartId, wishlistUpdated]);
+  }, [cartId, syncCartState]);
 
   useEffect(() => {
     updateCartItemCount();
@@ -346,11 +382,15 @@ const UserCart = (): JSX.Element => {
 
   // Fetch recent purchases
   useEffect(() => {
-    if (!cartId) return;
+    if (!customerId) {
+      setRecentPurchases([]);
+      return;
+    }
+
     const fetchRecentPurchases = async (): Promise<void> => {
       try {
         const { data } = await axiosInstance.get(
-          `/carts/${cartId}/recent-purchases`,
+          `/customers/${customerId}/cart/recent-purchases`,
           { useV2: false }
         );
         setRecentPurchases(data || []);
@@ -358,51 +398,77 @@ const UserCart = (): JSX.Element => {
         setRecentPurchases([]);
       }
     };
+
     fetchRecentPurchases();
-  }, [cartId]);
+  }, [customerId]);
 
   // Fetch recommendation purchases
   // Reusable function to fetch recommendation purchases
   const fetchRecommendationPurchases = useCallback(async (): Promise<void> => {
-    if (!cartId) return;
+    if (!customerId) {
+      setRecommendationPurchases([]);
+      return;
+    }
     try {
       const { data } = await axiosInstance.get(
-        `/carts/${cartId}/recommendation-purchases`,
+        `/customers/${customerId}/cart/recommendation-purchases`,
         { useV2: false }
       );
       setRecommendationPurchases(data || []);
     } catch (err) {
       setRecommendationPurchases([]);
     }
-  }, [cartId]);
+  }, [customerId]);
 
   useEffect(() => {
     fetchRecommendationPurchases();
-  }, [cartId, fetchRecommendationPurchases]);
+  }, [fetchRecommendationPurchases]);
 
   const applyVoucherCode = async (): Promise<void> => {
+    const existingCartId = ensureCartId();
+    if (!existingCartId) {
+      setVoucherError('Invalid cart ID');
+      return;
+    }
+    if (!voucherCode.trim()) {
+      setVoucherError('Please enter a promo code.');
+      return;
+    }
+
     try {
       const { data } = await axiosInstance.get(
-        `/promos/validate/${voucherCode}`,
-        { useV2: true }
+        `/carts/promos/validate/${encodeURIComponent(voucherCode.trim())}`,
+        { useV2: false, handleLocally: true }
       );
-      setDiscount((subtotal * data.discount) / 100);
+
+      const percent: number = Number(data?.discount);
+      if (Number.isNaN(percent) || percent < 0 || percent > 100) {
+        setVoucherError('Received invalid discount from server.');
+        return;
+      }
+
+      const updated = await applyPromo(existingCartId, percent);
+
       setVoucherError(null);
-    } catch (err: unknown) {
-      console.error('Error validating voucher code:', err);
-      setVoucherError('Error validating voucher code.');
+      const appliedMessage = `Promo applied${
+        updated?.promoPercent != null
+          ? `: ${updated.promoPercent}%`
+          : `: ${percent}%`
+      }`;
+      syncCartState(updated, appliedMessage);
+    } catch (err) {
+      console.error('Error validating promo code:', err);
+      setVoucherError('Promo code invalid or expired.');
     }
   };
 
   const blockIfReadOnly = useCallback((): boolean => {
     if (isStaff) {
-      setNotificationMessage(
-        'Read-only mode: staff/admin cannot modify carts.'
-      );
+      showToast('Read-only mode: staff/admin cannot modify carts.', 'info');
       return true;
     }
     return false;
-  }, [isStaff, setNotificationMessage]);
+  }, [isStaff, showToast]);
 
   const changeItemQuantity = useCallback(
     async (
@@ -410,10 +476,11 @@ const UserCart = (): JSX.Element => {
       index: number
     ): Promise<void> => {
       if (blockIfReadOnly()) return;
+      const existingCartId = ensureCartId();
+      if (!existingCartId) return;
 
       const newQuantity = Math.max(1, Number(event.target.value));
       const item = cartItems[index];
-      const prevQty = item.quantity || 1;
       if (newQuantity > item.productQuantity) {
         setErrorMessages(prevErrors => ({
           ...prevErrors,
@@ -429,41 +496,37 @@ const UserCart = (): JSX.Element => {
       }
 
       try {
-        const { data } = await axiosInstance.put(
-          `/carts/${cartId}/products/${item.productId}`,
+        const { data } = await axiosInstance.patch<CartDetailsModel>(
+          `/carts/${existingCartId}/products/${item.productId}`,
           { quantity: newQuantity },
           { useV2: false }
         );
 
-        if (data && data.message) {
-          setErrorMessages(prevErrors => ({
-            ...prevErrors,
-            [index]: data.message || 'Failed to update quantity',
-          }));
-
-          if (
-            typeof data.message === 'string' &&
-            data.message.includes('moved to your wishlist')
-          ) {
-            setCartItems(prevItems =>
-              prevItems.filter((_, idx) => idx !== index)
-            );
-            setWishlistItems(prevItems => [...prevItems, item]);
-            setNotificationMessage(data.message);
-            bumpCartCountInLS(-prevQty);
-            notifyCartChanged(); // left cart
+        if (data?.message) {
+          if (data.message.includes('moved to your wishlist')) {
+            setErrorMessages(prevErrors => {
+              const next = { ...prevErrors };
+              delete next[index];
+              return next;
+            });
+            syncCartState(data, data.message);
             return;
           }
-        } else {
-          setCartItems(prev => {
-            const next = [...prev];
-            next[index] = { ...next[index], quantity: newQuantity };
-            return next;
-          });
-          setNotificationMessage('Item quantity updated successfully.');
-          bumpCartCountInLS(newQuantity - prevQty);
-          notifyCartChanged(); // qty changed
+
+          setErrorMessages(prevErrors => ({
+            ...prevErrors,
+            [index]: data.message ?? 'Failed to update quantity',
+          }));
+          syncCartState(data, data.message);
+          return;
         }
+
+        setErrorMessages(prevErrors => {
+          const next = { ...prevErrors };
+          delete next[index];
+          return next;
+        });
+        syncCartState(data, 'Item quantity updated successfully.');
       } catch (err) {
         console.error('Error updating quantity:', err);
         setErrorMessages(prev => ({
@@ -472,13 +535,26 @@ const UserCart = (): JSX.Element => {
         }));
       }
     },
-    [cartItems, cartId, blockIfReadOnly]
+    [cartItems, blockIfReadOnly, ensureCartId, syncCartState]
   );
+
+  const onClearPromo = async (): Promise<void> => {
+    const existingCartId = ensureCartId();
+    if (!existingCartId) return;
+    try {
+      await clearPromo(existingCartId);
+      setPromoPercent(null);
+      showToast('Promo removed.', 'success');
+    } catch (err: unknown) {
+      showToast(apiErrorMessage(err, 'Failed to remove promo.'), 'error');
+    }
+  };
 
   const deleteItem = useCallback(
     async (productId: string, indexToDelete: number): Promise<void> => {
       if (blockIfReadOnly()) return;
-      if (!cartId) return;
+      const existingCartId = ensureCartId();
+      if (!existingCartId) return;
 
       const ok = await confirm({
         title: 'Remove item',
@@ -490,33 +566,38 @@ const UserCart = (): JSX.Element => {
       if (!ok) return;
 
       try {
-        await axiosInstance.delete(`/carts/${cartId}/${productId}`, {
-          useV2: false,
-        });
+        await axiosInstance.delete(
+          `/carts/${existingCartId}/products/${productId}`,
+          {
+            useV2: false,
+          }
+        );
+        // Expect a 204 response here; any errors are handled below.
 
         setCartItems(prev => {
-          const removedQty = prev[indexToDelete]?.quantity || 1;
-          setNotificationMessage('Item removed from cart.');
-          bumpCartCountInLS(-removedQty);
-          return prev.filter((_, idx) => idx !== indexToDelete);
+          const next = prev.filter((_, idx) => idx !== indexToDelete);
+          const nextCount = next.reduce(
+            (acc, cartItem) => acc + (cartItem.quantity || 0),
+            0
+          );
+          setCartItemCount(nextCount);
+          setCartCountInLS(nextCount);
+          notifyCartChanged();
+          return next;
         });
-        notifyCartChanged(); // item removed
+        showToast('Item removed from cart.', 'success');
       } catch (error) {
         console.error('Error deleting item: ', error);
-        setNotificationMessage('Failed to delete item.');
+        showToast(apiErrorMessage(error, 'Failed to delete item.'), 'error');
       }
     },
-    [cartId, blockIfReadOnly, confirm]
+    [apiErrorMessage, blockIfReadOnly, confirm, ensureCartId, showToast]
   );
 
   const clearCart = async (): Promise<void> => {
     if (blockIfReadOnly()) return;
-
-    if (!cartId) {
-      setNotificationMessage('Invalid cart ID');
-
-      return;
-    }
+    const existingCartId = ensureCartId();
+    if (!existingCartId) return;
 
     const ok = await confirm({
       title: 'Clear cart',
@@ -528,108 +609,93 @@ const UserCart = (): JSX.Element => {
     if (!ok) return;
 
     try {
-      await axiosInstance.delete(`/carts/${cartId}/clear`, { useV2: false });
+      await axiosInstance.delete(`/carts/${existingCartId}/products`, {
+        useV2: false,
+      });
       setCartItems([]);
       setCartItemCount(0);
       setCartCountInLS(0);
       notifyCartChanged();
-      setNotificationMessage('Cart has been cleared.');
+      showToast('Cart has been cleared.', 'success');
     } catch (error) {
       console.error('Error clearing cart:', error);
-      setNotificationMessage('Failed to clear cart.');
+      showToast(apiErrorMessage(error, 'Failed to clear cart.'), 'error');
     }
   };
 
   const addToWishlist = async (item: ProductModel): Promise<void> => {
     if (blockIfReadOnly()) return;
 
+    const existingCartId = ensureCartId();
+    if (!existingCartId) return;
+
     try {
       const productId = item.productId;
 
-      const { data } = await axiosInstance.put(
-        `/carts/${cartId}/wishlist/${productId}/toWishList`,
-        {
-          productId: item.productId,
-          imageId: item.imageId,
-          productName: item.productName,
-          productSalePrice: item.productSalePrice,
-        },
+      const normalizedId = productId?.trim();
+      const payload = {
+        productIds: normalizedId ? [normalizedId] : [],
+        direction: 'TO_WISHLIST',
+      };
+
+      const { data } = await axiosInstance.post<CartDetailsModel>(
+        `/carts/${existingCartId}/wishlist-transfers`,
+        payload,
         { useV2: false }
       );
 
-      if (data && data.message) {
-        setNotificationMessage(data.message);
-      } else {
-        setNotificationMessage(
-          `${item.productName} has been added to your wishlist!`
-        );
-      }
-
-      setWishlistItems(prevItems => [...prevItems, item]);
-      setWishlistUpdated(true);
-
-      // Decrement LS count since item left the cart
-      bumpCartCountInLS(-(item.quantity || 1));
-
-      //notify navbar (item moved out of cart)
-      notifyCartChanged();
+      const fallback = `${item.productName} has been added to your wishlist!`;
+      syncCartState(data, fallback);
     } catch (error: unknown) {
       console.error('Error adding to wishlist:', error);
-      alert('Failed to add item to wishlist.');
+      showToast(
+        apiErrorMessage(error, 'Failed to add item to wishlist.'),
+        'error'
+      );
     }
   };
 
   const addToCartFunction = async (item: ProductModel): Promise<void> => {
     if (blockIfReadOnly()) return;
 
+    const existingCartId = ensureCartId();
+    if (!existingCartId) return;
+
     if (item.productQuantity <= 0) {
-      setNotificationMessage(
-        `${item.productName} is out of stock and cannot be added to the cart.`
+      showToast(
+        `${item.productName} is out of stock and cannot be added to the cart.`,
+        'info'
       );
       return;
     }
     try {
       const productId = item.productId;
 
-      const { data } = await axiosInstance.put(
-        `/carts/${cartId}/wishlist/${productId}/toCart`,
-        {
-          productId: item.productId,
-          imageId: item.imageId,
-          productName: item.productName,
-          productSalePrice: item.productSalePrice,
-        },
+      const normalizedId = productId?.trim();
+      const payload = {
+        productIds: normalizedId ? [normalizedId] : [],
+        direction: 'TO_CART',
+      };
+
+      const { data } = await axiosInstance.post<CartDetailsModel>(
+        `/carts/${existingCartId}/wishlist-transfers`,
+        payload,
         { useV2: false }
       );
 
-      if (data && data.message) {
-        setNotificationMessage(data.message);
-      } else {
-        setNotificationMessage(
-          `${item.productName} has been added to your cart!`
-        );
-      }
-
-      setCartItems(prevItems => [...prevItems, item]);
-      setWishlistItems(prevItems =>
-        prevItems.filter(product => product.productId !== item.productId)
-      );
-      setWishlistUpdated(true);
-
-      // Item entered the cart, increment LS count
-      bumpCartCountInLS(item.quantity || 1);
-
-      //notify navbar (item moved into cart)
-      notifyCartChanged();
+      const fallback = `${item.productName} has been added to your cart!`;
+      syncCartState(data, fallback);
     } catch (error: unknown) {
       console.error('Error adding to cart:', error);
-      setNotificationMessage('Failed to add item to cart.');
+      showToast(apiErrorMessage(error, 'Failed to add item to cart.'), 'error');
     }
   };
 
   const removeFromWishlist = async (item: ProductModel): Promise<void> => {
     if (blockIfReadOnly()) return;
-    if (!cartId) return;
+
+    const existingCartId = ensureCartId();
+    if (!existingCartId) return;
 
     const ok = await confirm({
       title: 'Remove from wishlist',
@@ -643,7 +709,7 @@ const UserCart = (): JSX.Element => {
 
     try {
       await axiosInstance.delete(
-        `/carts/${cartId}/wishlist/${item.productId}`,
+        `/carts/${existingCartId}/wishlist/${item.productId}`,
         { useV2: false }
       );
 
@@ -652,58 +718,83 @@ const UserCart = (): JSX.Element => {
       );
     } catch (e) {
       console.error(e);
-      setNotificationMessage('Could not remove item from wishlist.');
+      showToast(
+        apiErrorMessage(e, 'Could not remove item from wishlist.'),
+        'error'
+      );
     }
   };
 
   const moveAllWishlistToCart = async (): Promise<void> => {
     if (blockIfReadOnly()) return;
-    if (!cartId || wishlistItems.length === 0) return;
+    if (wishlistItems.length === 0) return;
+
+    const existingCartId = ensureCartId();
+    if (!existingCartId) return;
+
+    const movableItems = wishlistItems.filter(
+      item => item.productQuantity == null || item.productQuantity > 0
+    );
+    if (movableItems.length === 0) {
+      showToast('All wishlist items are currently out of stock.', 'info');
+      return;
+    }
+
+    const blockedCount = wishlistItems.length - movableItems.length;
 
     const ok = await confirm({
       title: 'Move all from wishlist',
-      message: `Move ${wishlistItems.length} item(s) to your cart?`,
+      message:
+        blockedCount > 0
+          ? `Move ${movableItems.length} in-stock item(s) to your cart? ${blockedCount} item(s) are out of stock and will remain in your wishlist.`
+          : `Move ${movableItems.length} item(s) to your cart?`,
       confirmText: 'Move all',
       cancelText: 'Cancel',
     });
     if (!ok) return;
 
+    const productIds = Array.from(
+      new Set(
+        movableItems
+          .map(item => item.productId)
+          .filter((id): id is string => Boolean(id && id.trim()))
+      )
+    );
+
+    if (productIds.length === 0) {
+      showToast('No wishlist items are eligible to move.', 'info');
+      return;
+    }
+
     setMovingAll(true);
-    setNotificationMessage(null);
 
     try {
-      const res = await axiosInstance.post(
-        `/carts/${cartId}/wishlist/moveAll`,
-        {},
-        { useV2: true, validateStatus: () => true }
+      const payload = {
+        productIds,
+        direction: 'TO_CART' as const,
+      };
+
+      const { data } = await axiosInstance.post<CartDetailsModel>(
+        `/carts/${existingCartId}/wishlist-transfers`,
+        payload,
+        { useV2: false }
       );
 
-      if (res.status >= 200 && res.status < 300) {
-        setWishlistUpdated(true);
-        notifyCartChanged();
-        setNotificationMessage(null);
-      } else {
-        const msg =
-          (res.data &&
-            (res.data.message || res.data.error || res.data.title)) ||
-          `Move All failed (${res.status})`;
-        setNotificationMessage(msg);
-      }
+      const fallback =
+        blockedCount > 0
+          ? `Moved ${movableItems.length} item(s) to your cart. ${blockedCount} item(s) stayed in your wishlist because they are out of stock.`
+          : `Moved ${movableItems.length} item(s) from wishlist to cart.`;
+      syncCartState(data, fallback);
     } catch (e) {
       console.error(e);
-      setNotificationMessage('Unexpected error while moving wishlist items.');
+      showToast(
+        apiErrorMessage(e, 'Unexpected error while moving wishlist items.'),
+        'error'
+      );
     } finally {
       setMovingAll(false);
     }
   };
-
-  useEffect(() => {
-    const saved = localStorage.getItem('invoices');
-    if (saved) setInvoices(JSON.parse(saved));
-  }, []);
-  useEffect(() => {
-    localStorage.setItem('invoices', JSON.stringify(invoices));
-  }, [invoices]);
 
   const handleCheckoutConfirmation = (): void => {
     if (isStaff) {
@@ -716,7 +807,7 @@ const UserCart = (): JSX.Element => {
     setIsCheckoutModalOpen(false);
   };
 
-  const handleCheckout = async (): Promise<void> => {
+  const handleCheckout = async (billing?: BillingInfo): Promise<void> => {
     if (isStaff) return;
 
     if (!cartId) {
@@ -738,7 +829,66 @@ const UserCart = (): JSX.Element => {
         quantity: item.quantity || 1,
       }));
 
-      setInvoices(invoiceItems);
+      const invoiceItemsForFull: InvoiceItemType[] = invoiceItems.map(i => ({
+        productId: i.productId,
+        productName: i.productName,
+        productSalePrice: i.productSalePrice,
+        quantity: i.quantity,
+      }));
+
+      // calculate money values in integer cents to avoid floating point errors
+      const invoiceSubtotalCents = invoiceItemsForFull.reduce(
+        (s, it) => s + Math.round(it.productSalePrice * 100) * it.quantity,
+        0
+      );
+      const invoiceSubtotal = invoiceSubtotalCents / 100;
+      const usedBilling = billing ?? billingInfo ?? null;
+
+      const invoiceTaxLines = computeTaxes(
+        invoiceSubtotal,
+        usedBilling?.province
+      ).map(line => ({
+        ...line,
+        amount: line.amount ?? roundToCents(invoiceSubtotal * line.rate),
+      }));
+      const invoiceTaxCents = invoiceTaxLines.map(line =>
+        Math.round((line.amount ?? 0) * 100)
+      );
+      const invoiceTaxTotalCents = invoiceTaxCents.reduce(
+        (sum, cents) => sum + cents,
+        0
+      );
+      const discountCents = Math.round(effectiveDiscount * 100);
+      const invoiceTotalCents =
+        invoiceSubtotalCents + invoiceTaxTotalCents - discountCents;
+      const invoiceTvq = (invoiceTaxCents[0] ?? 0) / 100;
+      const invoiceTvc =
+        invoiceTaxCents.slice(1).reduce((sum, cents) => sum + cents, 0) / 100;
+      const invoiceTotal = invoiceTotalCents / 100;
+
+      const newInvoice: InvoiceFullType = {
+        invoiceId: `${Date.now()}`,
+        userId: user?.userId || 'anonymous',
+        billing: usedBilling
+          ? {
+              fullName: usedBilling.fullName,
+              email: usedBilling.email,
+              address: usedBilling.address,
+              city: usedBilling.city,
+              province: usedBilling.province,
+              postalCode: usedBilling.postalCode,
+            }
+          : null,
+        date: new Date().toISOString(),
+        items: invoiceItemsForFull,
+        subtotal: invoiceSubtotal,
+        tvq: invoiceTvq,
+        tvc: invoiceTvc,
+        discount: effectiveDiscount,
+        total: invoiceTotal,
+      };
+      setLastInvoice(newInvoice);
+      setShowInvoiceModal(true);
       setCheckoutMessage('Checkout successful! Your order is being processed.');
       setCartItems([]);
       setCartItemCount(0);
@@ -747,18 +897,17 @@ const UserCart = (): JSX.Element => {
       // Reset LS so navbar badge = 0 without API
       setCartCountInLS(0);
 
-      // notify navbar (cart emptied)
-      notifyCartChanged();
-
       // Fetch recent purchases after checkout
-      try {
-        const { data } = await axiosInstance.get(
-          `/carts/${cartId}/recent-purchases`,
-          { useV2: false }
-        );
-        setRecentPurchases(data || []);
-      } catch (err) {
-        // Optionally handle error, but don't block checkout
+      if (customerId) {
+        try {
+          const { data } = await axiosInstance.get(
+            `/customers/${customerId}/cart/recent-purchases`,
+            { useV2: false }
+          );
+          setRecentPurchases(data || []);
+        } catch (err) {
+          // Optionally handle error, but don't block checkout
+        }
       }
 
       // Fetch recommendation purchases after checkout
@@ -822,24 +971,15 @@ const UserCart = (): JSX.Element => {
     recommendationPurchasesList.length === 0 ? ' recommendation-empty' : ''
   }`;
 
+  const hasMovableWishlistItems = wishlistItems.some(
+    item => item.productQuantity == null || item.productQuantity > 0
+  );
+
   return (
     <div>
       <NavBar />
       <ConfirmModal />
       <div className="UserCart-container">
-        {notificationMessage && (
-          <div className="notification-message">
-            {notificationMessage}
-            <button
-              className="close-notification"
-              onClick={() => setNotificationMessage(null)}
-              aria-label="Close notification"
-            >
-              &times;
-            </button>
-          </div>
-        )}
-
         <div className="UserCart-checkout-flex">
           <div className="UserCart">
             <div
@@ -883,7 +1023,7 @@ const UserCart = (): JSX.Element => {
                     addToWishlist={addToWishlist}
                     addToCart={() => {}}
                     isInWishlist={false}
-                    showNotification={setNotificationMessage}
+                    showNotification={message => showToast(message, 'info')}
                   />
                 ))
               ) : (
@@ -938,15 +1078,48 @@ const UserCart = (): JSX.Element => {
                 )}
               </div>
 
+              <div className="voucher-code-section" style={{ marginTop: 12 }}>
+                {promoPercent != null && (
+                  <div
+                    className="voucher-hint"
+                    style={{
+                      marginTop: 6,
+                      display: 'flex',
+                      gap: 8,
+                      alignItems: 'center',
+                    }}
+                  >
+                    <span>Current promo: {promoPercent}%</span>
+                    <button
+                      type="button"
+                      className="cart-button cart-button--outline"
+                      onClick={onClearPromo}
+                    >
+                      Clear
+                    </button>
+                  </div>
+                )}
+              </div>
+
               <div className="CartSummary">
                 <h3>Cart Summary</h3>
                 <p className="summary-item">
                   Subtotal: {formatPrice(subtotal)}
                 </p>
-                <p className="summary-item">TVQ (9.975%): {formatPrice(tvq)}</p>
-                <p className="summary-item">TVC (5%): {formatPrice(tvc)}</p>
+                {resolvedTaxLines.map(line => (
+                  <p key={`${line.name}-${line.rate}`} className="summary-item">
+                    {line.name} ({formatTaxRate(line.rate)}%):{' '}
+                    {formatPrice(line.amount ?? 0)}
+                  </p>
+                ))}
+                {resolvedTaxLines.length > 1 && (
+                  <p className="summary-item">
+                    Total taxes: {formatPrice(totalTax)}
+                  </p>
+                )}
                 <p className="summary-item">
-                  Discount: {formatPrice(discount)}
+                  Discount{promoPercent != null ? ` (${promoPercent}%)` : ''}:{' '}
+                  {formatPrice(effectiveDiscount)}
                 </p>
                 <p className="total-price summary-item">
                   Total: {formatPrice(total)}
@@ -965,73 +1138,20 @@ const UserCart = (): JSX.Element => {
                 <div className="checkout-message">{checkoutMessage}</div>
               )}
 
-              {invoices.length > 0 && (
-                <div className="invoices-section">
-                  <h2>Invoice</h2>
-                  <div className="invoice-summary">
-                    {billingInfo && (
-                      <div className="invoice-client-info">
-                        <h3>Client Information</h3>
-                        <p>
-                          <strong>Name:</strong> {billingInfo.fullName}
-                        </p>
-                        <p>
-                          <strong>Email:</strong> {billingInfo.email}
-                        </p>
-                        <p>
-                          <strong>Address:</strong> {billingInfo.address},{' '}
-                          {billingInfo.city}, {billingInfo.province},{' '}
-                          {billingInfo.postalCode}
-                        </p>
-                      </div>
-                    )}
-                    {checkoutDate && (
-                      <div className="invoice-date">
-                        <strong>Checkout Date/Time:</strong> {checkoutDate}
-                      </div>
-                    )}
-                    <h3>Items</h3>
-                    {invoices.map(inv => (
-                      <div key={inv.productId} className="invoice-card">
-                        <h4>{inv.productName}</h4>
-                        <p>Price: ${inv.productSalePrice.toFixed(2)}</p>
-                        <p>Quantity: {inv.quantity}</p>
-                        <p>
-                          Total: $
-                          {(inv.productSalePrice * inv.quantity).toFixed(2)}
-                        </p>
-                      </div>
-                    ))}
-                    <div className="invoice-taxes">
-                      {(() => {
-                        const invoiceSubtotal = invoices.reduce(
-                          (sum, inv) =>
-                            sum + inv.productSalePrice * inv.quantity,
-                          0
-                        );
-                        const invoiceTvq = invoiceSubtotal * 0.09975;
-                        const invoiceTvc = invoiceSubtotal * 0.05;
-                        const invoiceTotal =
-                          invoiceSubtotal + invoiceTvq + invoiceTvc - discount;
-                        return (
-                          <>
-                            <p>Subtotal: ${invoiceSubtotal.toFixed(2)}</p>
-                            <p>TVQ (9.975%): ${invoiceTvq.toFixed(2)}</p>
-                            <p>TVC (5%): ${invoiceTvc.toFixed(2)}</p>
-                            <p>Discount: -${discount.toFixed(2)}</p>
-                            <h3>Total: ${invoiceTotal.toFixed(2)}</h3>
-                          </>
-                        );
-                      })()}
-                    </div>
-                  </div>
-                </div>
+              {lastInvoice && (
+                <button
+                  className="view-receipt-btn cart-button cart-button--brand cart-button--block"
+                  onClick={() => setShowInvoiceModal(true)}
+                  style={{ marginTop: '1rem' }}
+                  aria-label="View your last receipt"
+                >
+                  View Receipt
+                </button>
               )}
             </div>
           )}
         </div>
 
-        {/* Recent Purchases Section - above Wishlist */}
         <div className="recent-purchases-section cart-panel cart-panel--padded">
           <h2>Recent Purchases</h2>
           <div className="recent-purchases-list cart-scroll-strip">
@@ -1108,13 +1228,15 @@ const UserCart = (): JSX.Element => {
               <button
                 className="cart-button cart-button--accent"
                 onClick={moveAllWishlistToCart}
-                disabled={isStaff || movingAll}
+                disabled={isStaff || movingAll || !hasMovableWishlistItems}
                 aria-busy={movingAll}
-                aria-disabled={isStaff || movingAll}
+                aria-disabled={isStaff || movingAll || !hasMovableWishlistItems}
                 title={
                   isStaff
                     ? 'Read-only: staff/admin cannot move wishlist items'
-                    : 'Move all wishlist items to cart'
+                    : !hasMovableWishlistItems
+                      ? 'All wishlist items are out of stock'
+                      : 'Move all wishlist items to cart'
                 }
               >
                 {movingAll ? 'Moving…' : 'Move All to Cart'}
@@ -1122,13 +1244,14 @@ const UserCart = (): JSX.Element => {
             )}
           </div>
 
-          {/* Wishlist items */}
           <div className="Wishlist-items cart-scroll-strip">
             {wishlistItems.length > 0 ? (
               wishlistItems.map(item => {
                 const isOutOfStock = item.productQuantity <= 0;
+                const wishlistCardClassName = `Wishlist-item cart-card${isOutOfStock ? ' Wishlist-item--out-of-stock' : ''}`;
+
                 return (
-                  <div key={item.productId} className="Wishlist-item cart-card">
+                  <div key={item.productId} className={wishlistCardClassName}>
                     <div className="recent-purchase-image-container">
                       <div className="recent-purchase-image">
                         <ImageContainer imageId={item.imageId} />
@@ -1167,7 +1290,6 @@ const UserCart = (): JSX.Element => {
           </div>
         </div>
 
-        {/* Recommendation Purchases Section */}
         <div className="recommendation-purchases-section cart-panel cart-panel--padded">
           <div className="recommendation-header">
             <h2>Your Recommendations</h2>
@@ -1250,7 +1372,6 @@ const UserCart = (): JSX.Element => {
           </div>
         </div>
 
-        {/* Billing Form Modal */}
         {showBillingForm && (
           <div className="modal-backdrop">
             <div className="modal-content">
@@ -1259,8 +1380,7 @@ const UserCart = (): JSX.Element => {
                 onClose={() => setShowBillingForm(false)}
                 onSubmit={async billing => {
                   setBillingInfo(billing);
-                  setCheckoutDate(new Date().toLocaleString());
-                  await handleCheckout();
+                  await handleCheckout(billing);
                   setShowBillingForm(false);
                 }}
               />
@@ -1272,13 +1392,22 @@ const UserCart = (): JSX.Element => {
           <div className="checkout-modal">
             <h3>Confirm Checkout</h3>
             <p>Are you sure you want to checkout?</p>
-            <button onClick={handleCheckout}>Yes</button>
+            <button onClick={() => handleCheckout()}>Yes</button>
             <button onClick={() => setIsCheckoutModalOpen(false)}>No</button>
           </div>
+        )}
+        {showInvoiceModal && lastInvoice && (
+          <InvoiceComponent
+            invoices={[lastInvoice]}
+            index={0}
+            onIndexChange={() => {}}
+            onClose={() => {
+              setShowInvoiceModal(false);
+            }}
+          />
         )}
       </div>
     </div>
   );
 };
-
 export default UserCart;

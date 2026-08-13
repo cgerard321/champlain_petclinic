@@ -6,8 +6,6 @@ import com.petclinic.authservice.domainclientlayer.Mail.MailService;
 import com.petclinic.authservice.security.JwtTokenUtil;
 import com.petclinic.authservice.datalayer.user.*;
 import org.aspectj.lang.annotation.Before;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -25,7 +23,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @AutoConfigureWebTestClient
@@ -140,7 +137,7 @@ class UserControllerIntegrationTest {
         userRepo.save(userAdmin.get());
 
         UserIDLessUsernameLessDTO userDTO = UserIDLessUsernameLessDTO.builder()
-                .email("admin@admin.com")
+                .emailOrUsername("admin@admin.com")
                 .password("pwd")
                 .build();
 
@@ -157,7 +154,7 @@ class UserControllerIntegrationTest {
                 })
                 .expectBody(UserPasswordLessDTO.class)
                 .value(user -> {
-                    assertEquals(user.getEmail(),(userDTO.getEmail()));
+                    assertEquals(user.getEmail(),(userDTO.getEmailOrUsername()));
                     assertEquals(user.getRoles().size(),1);
                 });
     }
@@ -169,7 +166,7 @@ class UserControllerIntegrationTest {
 
 
         UserIDLessUsernameLessDTO userDTO = UserIDLessUsernameLessDTO.builder()
-                .email("invalidEmail").password("pwd").build();
+                .emailOrUsername("invalidEmail").password("pwd").build();
 
         webTestClient.post()
                 .uri("/users/login")
@@ -225,7 +222,7 @@ class UserControllerIntegrationTest {
         void loginWithInvalidCredentials_ShouldReturnUnauthorized(){
 
                 UserIDLessUsernameLessDTO userDTO = UserIDLessUsernameLessDTO.builder()
-                        .email("admin@admin.com")
+                        .emailOrUsername("admin@admin.com")
                         .password("invalidPassword")
                         .build();
 

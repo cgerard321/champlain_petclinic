@@ -1,11 +1,11 @@
 import axiosInstance from '@/shared/api/axiosInstance.ts';
-import axios from 'axios';
+import { ApiResponse } from '@/shared/models/ApiResponse';
 
 /**
  *
  * @param {string} inventoryId - The ID of the inventory to generate the PDF for.
  */
-const createPdf = async (inventoryId: string): Promise<void> => {
+const createPdf = async (inventoryId: string): Promise<ApiResponse<void>> => {
   try {
     // Send a GET request to the backend to get the PDF as a Blob
     const response = await axiosInstance.get(
@@ -31,28 +31,18 @@ const createPdf = async (inventoryId: string): Promise<void> => {
     // Cleanup: remove the link and revoke the object URL
     link.parentNode?.removeChild(link);
     window.URL.revokeObjectURL(url);
-  } catch (error) {
-    if (!axios.isAxiosError(error)) {
-      throw error instanceof Error ? error : new Error('Failed to create PDF');
-    }
 
-    console.error('[createPdf]', {
-      url: (error.config?.baseURL || '') + (error.config?.url || ''),
-      method: (error.config?.method || '').toUpperCase(),
-      status: error.response?.status,
-      dataReceived: error.response?.data,
-    });
+    return { data: undefined, errorMessage: null };
+  } catch (error: unknown) {
+    const maybeMsg = (error as { response?: { data?: { message?: unknown } } })
+      .response?.data?.message;
 
-    const status = error.response?.status ?? 0;
-    const message =
-      status === 400
-        ? 'Invalid inventory ID. Please check and try again.'
-        : status === 404
-          ? 'Inventory or supplies not found.'
-          : status === 422
-            ? 'No products available to generate PDF.'
-            : 'Failed to create PDF. Please try again later.';
-    throw new Error(message);
+    const errorMessage =
+      typeof maybeMsg === 'string' && maybeMsg.trim()
+        ? maybeMsg.trim()
+        : 'Unable to create PDF. Please try again later.';
+
+    return { data: null, errorMessage };
   }
 };
 

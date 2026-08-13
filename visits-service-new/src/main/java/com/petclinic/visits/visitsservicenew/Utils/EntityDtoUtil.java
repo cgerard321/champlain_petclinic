@@ -71,40 +71,28 @@ public class EntityDtoUtil {
     public Visit toVisitEntity(VisitRequestDTO visitRequestDTO) {
         Visit visit = new Visit();
         BeanUtils.copyProperties(visitRequestDTO, visit);
-        visit.setStatus(Status.UPCOMING);
         return visit;
     }
 
     public static ReviewResponseDTO toReviewResponseDTO(Review review) {
         ReviewResponseDTO reviewResponseDTO  = new ReviewResponseDTO ();
-        BeanUtils.copyProperties(review, reviewResponseDTO);
+            reviewResponseDTO.setReviewId(review.getReviewId());
+            reviewResponseDTO.setOwnerId(review.getOwnerId());
+            reviewResponseDTO.setRating(review.getRating());
+            reviewResponseDTO.setReviewerName(review.getReviewerName());
+            reviewResponseDTO.setReview(review.getReview());
+            reviewResponseDTO.setDateSubmitted(review.getDateSubmitted());
         return reviewResponseDTO;
     }
 
     public static Review toReviewEntity(ReviewRequestDTO reviewRequestDTO){
         return Review.builder()
-                .reviewId(generateReviewIdString())
+                .ownerId(reviewRequestDTO.getOwnerId())
                 .rating(reviewRequestDTO.getRating())
                 .reviewerName(reviewRequestDTO.getReviewerName())
                 .review(reviewRequestDTO.getReview())
                 .dateSubmitted(reviewRequestDTO.getDateSubmitted())
                 .build();
-    }
-
-    /**
-     * Generate a random UUID and returns it. IS NOT ERROR FREE
-     * @return The UUID as a string
-     */
-    public String generateVisitIdString() {
-        return UUID.randomUUID().toString();
-    }
-
-    public static String generateReviewIdString() {
-        return UUID.randomUUID().toString();
-    }
-
-    public static String generateEmergencyIdString() {
-        return UUID.randomUUID().toString();
     }
 
 

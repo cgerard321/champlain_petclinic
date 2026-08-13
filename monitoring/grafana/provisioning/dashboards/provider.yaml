@@ -1,3 +1,4 @@
+---
 apiVersion: 1
 
 providers:
@@ -6,6 +7,6 @@ providers:
     folder: ""
     type: file
     disableDeletion: false
-    editable: true
+    editable: false
     options:
       path: /etc/grafana/provisioning/dashboards

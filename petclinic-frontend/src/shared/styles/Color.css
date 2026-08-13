@@ -1,0 +1,9 @@
+:root {
+  --base-clr: #ffffff;
+  --secondary-clr: #f5f5ff;
+  --hover-clr: #e1e5ef;
+  --active-clr: #d4d4e7;
+  --dark-clr: #212529;
+  --emergency-clr: #ff3c56;
+  --accent-clr: #5e63ff;
+}

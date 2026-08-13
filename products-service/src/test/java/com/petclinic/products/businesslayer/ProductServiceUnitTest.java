@@ -5,9 +5,11 @@ import com.petclinic.products.datalayer.products.DeliveryType;
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductRepository;
 import com.petclinic.products.datalayer.products.ProductType;
+import com.petclinic.products.datalayer.products.ProductStatus;
 import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.datalayer.ratings.RatingRepository;
 import com.petclinic.products.presentationlayer.products.ProductResponseModel;
+import com.petclinic.products.presentationlayer.products.ProductEnumsResponseModel;
 import com.petclinic.products.utils.exceptions.NotFoundException;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
 import org.junit.jupiter.api.Test;
@@ -18,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import java.util.List;
 
 import static com.petclinic.products.datalayer.products.DeliveryType.DELIVERY;
 import static com.petclinic.products.datalayer.products.DeliveryType.PICKUP;
@@ -273,5 +276,22 @@ class ProductServiceUnitTest {
                 .expectError(NotFoundException.class)
                 .verify();
     }
+    @Test
+    public void whenGetProductsEnums_thenReturnProductEnums() {
+        ProductEnumsResponseModel enumsResponseDTO = new ProductEnumsResponseModel(
+                List.of(ProductType.FOOD, ProductType.MEDICATION, ProductType.ACCESSORY, ProductType.EQUIPMENT),
+                List.of(ProductStatus.AVAILABLE, ProductStatus.PRE_ORDER, ProductStatus.OUT_OF_STOCK),
+                List.of(DeliveryType.DELIVERY, DeliveryType.PICKUP, DeliveryType.DELIVERY_AND_PICKUP, DeliveryType.NO_DELIVERY_OPTION)
+        );
 
+        Mono<ProductEnumsResponseModel> result = productService.getProductsEnumValues();
+
+        StepVerifier.create(result)
+                .expectNextMatches(enums ->
+                        enums.getProductStatus().equals(List.of(ProductStatus.AVAILABLE, ProductStatus.PRE_ORDER, ProductStatus.OUT_OF_STOCK)) &&
+                                enums.getProductType().equals(List.of(ProductType.FOOD, ProductType.MEDICATION, ProductType.ACCESSORY, ProductType.EQUIPMENT)) &&
+                                enums.getDeliveryType().equals(List.of(DeliveryType.DELIVERY, DeliveryType.PICKUP, DeliveryType.DELIVERY_AND_PICKUP, DeliveryType.NO_DELIVERY_OPTION))
+                )
+                .verifyComplete();
+    }
 }

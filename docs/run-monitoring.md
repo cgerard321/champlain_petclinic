@@ -22,7 +22,7 @@ The two stacks talk to themselves via dns resolution of their service name.
 1.  Run the following command from the project's ROOT directory:
 
     ```sh
-    docker compose -f docker-compose.yml -f monitoring/docker-compose.yml up --build
+    docker compose -f docker-compose.yml --profile fe -f monitoring/docker-compose.yaml up --build
     ```
 
     _docker-compose if you're on windows and mac_
@@ -30,25 +30,14 @@ The two stacks talk to themselves via dns resolution of their service name.
 2.  If your project is already built
 
     ```sh
-    docker compose -f docker-compose.yml -f monitoring/docker-compose.yml up
+    docker compose -f docker-compose.yml --profile fe -f monitoring/docker-compose.yaml up
     ```
 
     _docker-compose if you're on windows and mac_
 
-### Important Note on Current Implementation
-
-> **Note:** Currently, the monitoring stack is configured to collect metrics only from the **auth service**. The configuration for the remaining services will be implemented in a subsequent sprint.
-
 # Accessing Services
 
-Once the stack is running, you can access the Prometheus and Grafana user interfaces.
-
-## Prometheus UI
-
-1.  You can now access the Prometheus UI by navigating to the following URL in your web browser:
-    [http://localhost:9090](http://localhost:9090)
-
-2.  From the Prometheus UI, you can write and run queries to inspect the collected metrics.
+Once the stack is running, you can access the Grafana user interface.
 
 ## Grafana and Viewing Dashboards
 

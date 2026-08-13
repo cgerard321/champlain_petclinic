@@ -13,6 +13,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import java.util.List;
+import com.petclinic.products.datalayer.products.ProductType;
+import com.petclinic.products.datalayer.products.ProductStatus;
+import com.petclinic.products.datalayer.products.DeliveryType;
+import com.petclinic.products.presentationlayer.products.ProductEnumsResponseModel;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -367,6 +372,29 @@ public class ProductControllerUnitTest {
         verify(productBundleService).deleteProductBundle("bundle1");
     }
 
+    @Test
+    public void whenGetProductEnums_thenReturnEnums() {
+        ProductEnumsResponseModel enumsResponseDTO = new ProductEnumsResponseModel(
+                List.of(ProductType.FOOD, ProductType.MEDICATION, ProductType.ACCESSORY, ProductType.EQUIPMENT),
+                List.of(ProductStatus.AVAILABLE, ProductStatus.PRE_ORDER, ProductStatus.OUT_OF_STOCK),
+                List.of(DeliveryType.DELIVERY, DeliveryType.PICKUP, DeliveryType.DELIVERY_AND_PICKUP, DeliveryType.NO_DELIVERY_OPTION)
+        );
 
+        when(productService.getProductsEnumValues()).thenReturn(Mono.just(enumsResponseDTO));
+
+        webClient.get().uri("/products/enums")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ProductEnumsResponseModel.class)
+                .value(response -> {
+                    assertNotNull(response);
+                    assertEquals(List.of(ProductType.FOOD, ProductType.MEDICATION, ProductType.ACCESSORY, ProductType.EQUIPMENT), response.getProductType());
+                    assertEquals(List.of(ProductStatus.AVAILABLE, ProductStatus.PRE_ORDER, ProductStatus.OUT_OF_STOCK), response.getProductStatus());
+                    assertEquals(List.of(DeliveryType.DELIVERY, DeliveryType.PICKUP, DeliveryType.DELIVERY_AND_PICKUP, DeliveryType.NO_DELIVERY_OPTION), response.getDeliveryType());
+                });
+
+        verify(productService).getProductsEnumValues();
+    }
 
 }

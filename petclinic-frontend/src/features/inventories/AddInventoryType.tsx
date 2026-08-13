@@ -1,18 +1,21 @@
 import { useEffect, useState } from 'react';
 import { InventoryType } from '@/features/inventories/models/InventoryType.ts';
 import addInventoryType from '@/features/inventories/api/addInventoryType.ts';
-import './AddInventoryType.css';
+import styles from './InvProForm.module.css';
+import { createPortal } from 'react-dom';
 
 interface AddInventoryTypeProps {
   show: boolean;
   handleClose: () => void;
   refreshInventoryTypes: () => void;
+  existingTypeNames?: string[];
 }
 
 export default function AddInventoryType({
   show,
   handleClose,
   refreshInventoryTypes,
+  existingTypeNames,
 }: AddInventoryTypeProps): React.ReactElement | null {
   const [type, setType] = useState('');
   const [fieldError, setFieldError] = useState<string>('');
@@ -40,31 +43,37 @@ export default function AddInventoryType({
       setFieldError('Type name must be between 3 and 50 characters.');
       return;
     }
+
+    if (
+      existingTypeNames?.some(
+        n => n.trim().toLowerCase() === trimmed.toLowerCase()
+      )
+    ) {
+      setFieldError('This inventory type already exists.');
+      return;
+    }
+
     setIsSubmitting(true);
 
-    try {
-      const newInventoryType: Omit<InventoryType, 'typeId'> = {
-        type: trimmed,
-      };
-      await addInventoryType(newInventoryType);
-      refreshInventoryTypes(); // Call this function to update the list
-      handleClose();
-    } catch (error) {
-      setFieldError(
-        error instanceof Error
-          ? error.message
-          : 'Failed to add inventory type. Please try again.'
-      );
-    } finally {
+    const payload: Omit<InventoryType, 'typeId'> = { type: trimmed };
+    const { errorMessage } = await addInventoryType(payload);
+
+    if (errorMessage) {
+      setFieldError(errorMessage);
       setIsSubmitting(false);
+      return;
     }
+
+    await refreshInventoryTypes();
+    handleClose();
+    setIsSubmitting(false);
   };
 
   if (!show) return null; // Return null when `show` is false
 
-  return (
-    <div className="overlay">
-      <div className="form-container">
+  return createPortal(
+    <div className={styles.overlay}>
+      <div className={styles['form-container']}>
         <h2>Add Inventory Type</h2>
         <form onSubmit={handleSubmit}>
           <div>
@@ -72,6 +81,7 @@ export default function AddInventoryType({
             <input
               type="text"
               id="type"
+              className={fieldError ? 'invalid animate' : ''}
               value={type}
               onChange={e => {
                 setType(e.target.value);
@@ -82,11 +92,7 @@ export default function AddInventoryType({
               aria-describedby={fieldError ? 'type-error' : undefined}
             />
             {fieldError && (
-              <div
-                id="type-error"
-                className="field-error"
-                style={{ color: 'red', marginTop: 6 }}
-              >
+              <div id="type-error" className="field-error">
                 {fieldError}
               </div>
             )}
@@ -99,6 +105,7 @@ export default function AddInventoryType({
           </button>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

@@ -65,6 +65,18 @@ public class RatingServiceImpl implements RatingService {
     }
 
     @Override
+    public Mono<Void> deleteRatingByVetIdAndCustomerName(String vetId, String customerName) {
+        return vetRepository.findVetByVetId(vetId)
+                .switchIfEmpty(Mono.error(new NotFoundException("vetId not found: " + vetId)))
+                .then(ratingRepository.findAllByVetId(vetId)
+                        .filter(rating -> rating.getCustomerName() != null && rating.getCustomerName().equals(customerName))
+                        .next()
+                        .switchIfEmpty(Mono.error(new NotFoundException("No rating found for customer: " + customerName)))
+                        .flatMap(ratingRepository::delete)
+                );
+    }
+
+    @Override
     public Mono<RatingResponseDTO> addRatingToVet(String vetId, Mono<RatingRequestDTO> ratingRequestDTO) {
         return vetRepository.findVetByVetId(vetId)
                 .switchIfEmpty(Mono.error(new NotFoundException("vetId not found: " + vetId)))
@@ -76,7 +88,8 @@ public class RatingServiceImpl implements RatingService {
                     }
                 }))
                 .map(requestDto -> {
-                    if (requestDto.getPredefinedDescription() != null){
+                    if (requestDto.getPredefinedDescription() != null &&
+                            (requestDto.getRateDescription() == null || requestDto.getRateDescription().isBlank())) {
                         requestDto.setRateDescription(requestDto.getPredefinedDescription().name());
                     }
                     return requestDto;
@@ -158,7 +171,8 @@ public class RatingServiceImpl implements RatingService {
                                 .flatMap(r -> {
                                     if (r.getRateScore() < 1 || r.getRateScore() > 5)
                                         return Mono.error(new InvalidInputException("rateScore should be between 1 and 5" + r.getRateScore()));
-                                    if (r.getPredefinedDescription() != null){
+                                    if (r.getPredefinedDescription() != null &&
+                                            (r.getRateDescription() == null || r.getRateDescription().isBlank())) {
                                         r.setRateDescription(r.getPredefinedDescription().name());
                                     }
                                     return Mono.just(r);

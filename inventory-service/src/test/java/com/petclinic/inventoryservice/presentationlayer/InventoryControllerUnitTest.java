@@ -266,15 +266,15 @@ class InventoryControllerUnitTest {
 
     @Test
     void getProductsInInventory_withValidId_shouldSucceed() {
-        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), null, null, null, null))
+        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), null, null, null, null, null, null))
                 .thenReturn(Flux.fromIterable(productResponseDTOS));
 
         webTestClient.get()
                 .uri("/inventory/{inventoryId}/products", productResponseDTOS.get(1).getInventoryId())
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(ProductResponseDTO.class)
                 .value(responseDTOs -> {
                     assertNotNull(responseDTOs);
@@ -284,16 +284,16 @@ class InventoryControllerUnitTest {
 
     @Test
     void getProductsInInventory_withValidId_andValidProductName_andValidProductPrice_andValidProductQuantity_andValidProductSalePrice_shouldSucceed() {
-        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), "Benzodiazepines", 100.00, 10, 200.00))
+        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), "Benzodiazepines", 100.00, 100.00, 10, 15.99, 15.99))
                 .thenReturn(Flux.fromIterable(productResponseDTOS));
 
         webTestClient.get()
-                .uri("/inventory/{inventoryId}/products?productName={productName}&productPrice={productPrice}&productQuantity={productQuantity}&productSalePrice={productSalePrice}",
-                        productResponseDTOS.get(1).getInventoryId(), "Benzodiazepines", 100.00, 10, 200.00)
-                .accept(MediaType.APPLICATION_JSON)
+                .uri("/inventory/{inventoryId}/products?productName={productName}&minPrice={minPrice}&maxPrice={maxPrice}&productQuantity={productQuantity}&minSalePrice={minSalePrice}&maxSalePrice={maxSalePrice}",
+                        productResponseDTOS.get(1).getInventoryId(), "Benzodiazepines", 100.00, 100.00, 10, 15.99, 15.99)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(ProductResponseDTO.class)
                 .value(responseDTOs -> {
                     assertNotNull(responseDTOs);
@@ -303,16 +303,16 @@ class InventoryControllerUnitTest {
 
     @Test
     void getProductsInInventory_withValidId_andValidProductName_andValidProductPrice_shouldSucceed() {
-        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), "Benzodiazepines", 100.00, null, null))
+        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), "Benzodiazepines", 100.00, 100.00, null, null, null))
                 .thenReturn(Flux.fromIterable(productResponseDTOS));
 
         webTestClient.get()
-                .uri("/inventory/{inventoryId}/products?productName={productName}&productPrice={productPrice}",
-                        productResponseDTOS.get(1).getInventoryId(), "Benzodiazepines", 100.00)
-                .accept(MediaType.APPLICATION_JSON)
+                .uri("/inventory/{inventoryId}/products?productName={productName}&minPrice={minPrice}&maxPrice={maxPrice}",
+                        productResponseDTOS.get(1).getInventoryId(), "Benzodiazepines", 100.00, 100.00)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(ProductResponseDTO.class)
                 .value(responseDTOs -> {
                     assertNotNull(responseDTOs);
@@ -322,16 +322,16 @@ class InventoryControllerUnitTest {
 
     @Test
     void getProductsInInventory_withValidId_andValidProductName_shouldSucceed() {
-        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), "Benzodiazepines", null, null, null))
+        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), "Benzodiazepines", null, null, null, null, null))
                 .thenReturn(Flux.fromIterable(productResponseDTOS));
 
         webTestClient.get()
                 .uri("/inventory/{inventoryId}/products?productName={productName}",
                         productResponseDTOS.get(1).getInventoryId(), "Benzodiazepines")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(ProductResponseDTO.class)
                 .value(responseDTOs -> {
                     assertNotNull(responseDTOs);
@@ -341,16 +341,16 @@ class InventoryControllerUnitTest {
 
     @Test
     void getProductsInInventory_withValidId_andValidProductPrice_andValidProductQuantity_shouldSucceed() {
-        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), null, 100.00, 10, null))
+        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), null, 100.00, 100.00, 10, null, null))
                 .thenReturn(Flux.fromIterable(productResponseDTOS));
 
         webTestClient.get()
-                .uri("/inventory/{inventoryId}/products?productPrice={productPrice}&productQuantity={productQuantity}",
-                        productResponseDTOS.get(1).getInventoryId(), 100.00, 10)
-                .accept(MediaType.APPLICATION_JSON)
+                .uri("/inventory/{inventoryId}/products?minPrice={minPrice}&maxPrice={maxPrice}&productQuantity={productQuantity}",
+                        productResponseDTOS.get(1).getInventoryId(), 100.00, 100.00, 10)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(ProductResponseDTO.class)
                 .value(responseDTOs -> {
                     assertNotNull(responseDTOs);
@@ -360,16 +360,16 @@ class InventoryControllerUnitTest {
 
     @Test
     void getProductsInInventory_withValidId_andValidProductQuantity_shouldSucceed() {
-        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), null, null, 10, null))
+        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), null, null, null, 10, null, null))
                 .thenReturn(Flux.fromIterable(productResponseDTOS));
 
         webTestClient.get()
                 .uri("/inventory/{inventoryId}/products?productQuantity={productQuantity}",
                         productResponseDTOS.get(1).getInventoryId(), 10)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(ProductResponseDTO.class)
                 .value(responseDTOs -> {
                     assertNotNull(responseDTOs);
@@ -379,16 +379,16 @@ class InventoryControllerUnitTest {
 
     @Test
     void getProductsInInventory_withValidId_andValidProductPrice_shouldSucceed() {
-        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), null, 100.00, null, null))
+        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), null, 100.00, 100.00, null, null, null))
                 .thenReturn(Flux.fromIterable(productResponseDTOS));
 
         webTestClient.get()
-                .uri("/inventory/{inventoryId}/products?productPrice={productPrice}",
-                        productResponseDTOS.get(1).getInventoryId(), 100.00)
-                .accept(MediaType.APPLICATION_JSON)
+                .uri("/inventory/{inventoryId}/products?minPrice={minPrice}&maxPrice={maxPrice}",
+                        productResponseDTOS.get(1).getInventoryId(), 100.00, 100.00)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(ProductResponseDTO.class)
                 .value(responseDTOs -> {
                     assertNotNull(responseDTOs);
@@ -398,16 +398,16 @@ class InventoryControllerUnitTest {
 
     @Test
     void getProductsInInventory_withValidId_andValidProductSalePrice_shouldSucceed() {
-        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), null, null, null, 200.00))
+        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), null, null, null, null, 15.99, 15.99))
                 .thenReturn(Flux.fromIterable(productResponseDTOS));
 
         webTestClient.get()
-                .uri("/inventory/{inventoryId}/products?productSalePrice={productSalePrice}",
-                        productResponseDTOS.get(1).getInventoryId(), 200.00)
-                .accept(MediaType.APPLICATION_JSON)
+                .uri("/inventory/{inventoryId}/products?minSalePrice={minSalePrice}&maxSalePrice={maxSalePrice}",
+                        productResponseDTOS.get(1).getInventoryId(), 15.99, 15.99)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(ProductResponseDTO.class)
                 .value(responseDTOs -> {
                     assertNotNull(responseDTOs);
@@ -923,10 +923,10 @@ class InventoryControllerUnitTest {
 
         webTestClient.get()
                 .uri("/inventory/type")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(ProductResponseDTO.class)
                 .value(responseDTOs -> {
                     assertNotNull(responseDTOs);
@@ -1053,6 +1053,8 @@ class InventoryControllerUnitTest {
                 anyString(),
                 Mockito.isNull(),
                 Mockito.isNull(),
+                Mockito.isNull(),
+                Mockito.isNull(),
                 Mockito.isNull()
         )).thenReturn(Flux.fromIterable(productResponseDTOS));
 
@@ -1061,7 +1063,7 @@ class InventoryControllerUnitTest {
                         .path("/inventory/{inventoryId}/products")
                         .queryParam("productName", productName)
                         .build(inventoryId))
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(ProductResponseDTO.class)
@@ -1076,12 +1078,14 @@ class InventoryControllerUnitTest {
                 Mockito.isNull(),
                 Mockito.isNull(),
                 Mockito.isNull(),
+                Mockito.isNull(),
+                Mockito.isNull(),
                 Mockito.isNull()
         )).thenReturn(Flux.fromIterable(productResponseDTOS));
 
         webTestClient.get()
                 .uri("/inventory/{inventoryId}/products", inventoryId)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(ProductResponseDTO.class)
@@ -1449,10 +1453,10 @@ class InventoryControllerUnitTest {
         // Act & Assert
         webTestClient.get()
                 .uri("/inventory/{inventoryId}/products/lowstock", inventoryId)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(ProductResponseDTO.class)
                 .value(products -> {
                     assertNotNull(products);
@@ -1478,10 +1482,10 @@ class InventoryControllerUnitTest {
                 .uri(uriBuilder -> uriBuilder.path("/inventory/{inventoryId}/products/lowstock")
                         .queryParam("threshold", String.valueOf(customThreshold))
                         .build(inventoryId))
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(ProductResponseDTO.class)
                 .value(products -> {
                     assertNotNull(products);
@@ -1508,7 +1512,7 @@ class InventoryControllerUnitTest {
                         .queryParam("productName", productName)
                         .queryParam("productDescription", productDescription)
                         .build(inventoryId))
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(ProductResponseDTO.class)
@@ -1533,7 +1537,7 @@ class InventoryControllerUnitTest {
                         .path("/inventory/{inventoryId}/products/search")
                         .queryParam("productName", productName)
                         .build(inventoryId))
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(ProductResponseDTO.class)
@@ -1558,7 +1562,7 @@ class InventoryControllerUnitTest {
                         .path("/inventory/{inventoryId}/products/search")
                         .queryParam("productDescription", productDescription)
                         .build(inventoryId))
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(ProductResponseDTO.class)
@@ -1581,7 +1585,7 @@ class InventoryControllerUnitTest {
                 .uri(uriBuilder -> uriBuilder
                         .path("/inventory/{inventoryId}/products/search")
                         .build(inventoryId))
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(ProductResponseDTO.class)
@@ -1839,7 +1843,7 @@ class InventoryControllerUnitTest {
                         .queryParam("productDescription", productDescription)
                         .queryParam("status", status)
                         .build(inventoryId))
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(ProductResponseDTO.class)
@@ -1866,7 +1870,7 @@ class InventoryControllerUnitTest {
                         .queryParam("productName", productName)
                         .queryParam("status", status)
                         .build(inventoryId))
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(ProductResponseDTO.class)
@@ -1893,7 +1897,7 @@ class InventoryControllerUnitTest {
                         .queryParam("productDescription", productDescription)
                         .queryParam("status", status)
                         .build(inventoryId))
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(ProductResponseDTO.class)
@@ -1918,7 +1922,7 @@ class InventoryControllerUnitTest {
                         .path("/inventory/{inventoryId}/products/search")
                         .queryParam("status", status)
                         .build(inventoryId))
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(ProductResponseDTO.class)
@@ -1945,7 +1949,7 @@ class InventoryControllerUnitTest {
                         .queryParam("productName", productName)
                         .queryParam("productDescription", productDescription)
                         .build(inventoryId))
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isNoContent();
 
@@ -1968,7 +1972,7 @@ class InventoryControllerUnitTest {
                         .queryParam("productName", productName)
                         .queryParam("productDescription", productDescription)
                         .build(invalidInventoryId))
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isNoContent();
         verify(productInventoryService, times(1))
@@ -1992,7 +1996,7 @@ class InventoryControllerUnitTest {
                         .queryParam("productDescription", productDescription)
                         .queryParam("status", status)
                         .build(inventoryId))
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isNoContent();
 
@@ -2017,7 +2021,7 @@ class InventoryControllerUnitTest {
                         .queryParam("productDescription", productDescription)
                         .queryParam("status", status)
                         .build(invalidInventoryId))
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isNoContent();
         verify(productInventoryService, times(1))
@@ -2039,7 +2043,7 @@ class InventoryControllerUnitTest {
                         .queryParam("productName", productName)
                         .queryParam("status", status)
                         .build(inventoryId))
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isNoContent();
 
@@ -2062,7 +2066,7 @@ class InventoryControllerUnitTest {
                         .queryParam("productName", productName)
                         .queryParam("status", status)
                         .build(invalidInventoryId))
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isNoContent();
         verify(productInventoryService, times(1))
@@ -2084,7 +2088,7 @@ class InventoryControllerUnitTest {
                         .queryParam("productDescription", productDescription)
                         .queryParam("status", status)
                         .build(inventoryId))
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isNoContent();
 
@@ -2107,7 +2111,7 @@ class InventoryControllerUnitTest {
                         .queryParam("productDescription", productDescription)
                         .queryParam("status", status)
                         .build(invalidInventoryId))
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isNoContent();
         verify(productInventoryService, times(1))
@@ -2127,7 +2131,7 @@ class InventoryControllerUnitTest {
                         .path("/inventory/{inventoryId}/products/search")
                         .queryParam("status", status)
                         .build(inventoryId))
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isNoContent();
 
@@ -2148,7 +2152,7 @@ class InventoryControllerUnitTest {
                         .path("/inventory/{inventoryId}/products/search")
                         .queryParam("status", status)
                         .build(invalidInventoryId))
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isNoContent();
         verify(productInventoryService, times(1))
@@ -2166,7 +2170,7 @@ class InventoryControllerUnitTest {
                 .uri(uriBuilder -> uriBuilder
                         .path("/inventory/{inventoryId}/products/search")
                         .build(invalidInventoryId))
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isNoContent();
         verify(productInventoryService, times(1))
@@ -2186,7 +2190,7 @@ class InventoryControllerUnitTest {
                         .path("/inventory/{inventoryId}/products/search")
                         .queryParam("productName", productName)
                         .build(invalidInventoryId))
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isNoContent();
         verify(productInventoryService, times(1))
@@ -2206,7 +2210,7 @@ class InventoryControllerUnitTest {
                         .path("/inventory/{inventoryId}/products/search")
                         .queryParam("productDescription", productDescription)
                         .build(invalidInventoryId))
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isNoContent();
         verify(productInventoryService, times(1))
@@ -2226,7 +2230,7 @@ class InventoryControllerUnitTest {
                         .path("/inventory/{inventoryId}/products/search")
                         .queryParam("productName", productName)
                         .build(inventoryId))
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isNoContent();
 
@@ -2247,7 +2251,7 @@ class InventoryControllerUnitTest {
                         .path("/inventory/{inventoryId}/products/search")
                         .queryParam("productDescription", productDescription)
                         .build(inventoryId))
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isNoContent();
 

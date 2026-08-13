@@ -19,7 +19,7 @@ public class Pet {
     private Date birthDate;
     private String petTypeId;
     private String photoId;
-    private String isActive;
-    private String weight;
+    private String isActive; //Should be a boolean
+    private String weight; //should be a double
 
 }

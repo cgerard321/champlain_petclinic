@@ -198,11 +198,54 @@ public class ProductsServiceClient {
                 .bodyToMono(Void.class);
     }
 
+    public Mono<ProductEnumsResponseDTO> getProductEnumsValues(){
+        return webClient.get()
+                .uri("/enums")
+                .retrieve()
+                .bodyToMono(ProductEnumsResponseDTO.class);
+    }
 
+    public Flux<ProductTypeResponseDTO> getAllProductTypes() {
+        return webClientBuilder.build().get()
+                .uri(productsServiceUrl + "/types")
+                .retrieve()
+                .bodyToFlux(ProductTypeResponseDTO.class);
+    }
 
+    public Mono<ProductTypeResponseDTO> getProductTypeByProductTypeId(final String productTypeId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(productsServiceUrl + "/types/" + productTypeId)
+                .retrieve()
+                .bodyToMono(ProductTypeResponseDTO.class);
+    }
 
+    public Mono<ProductTypeResponseDTO> createProductType(final ProductTypeRequestDTO productTypeRequestDTO) {
+        return webClientBuilder.build()
+                .post()
+                .uri(productsServiceUrl + "/types")
+                .body(Mono.just(productTypeRequestDTO), ProductTypeRequestDTO.class)
+                .retrieve()
+                .bodyToMono(ProductTypeResponseDTO.class);
+    }
 
+    public Mono<ProductTypeResponseDTO> updateProductType(final String productTypeId, ProductTypeRequestDTO productTypeRequestDTO) {
+        return webClientBuilder.build()
+                .put()
+                .uri(productsServiceUrl + "/types/"  + productTypeId)
+                .body(Mono.just(productTypeRequestDTO), ProductTypeRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(ProductTypeResponseDTO.class);
+    }
 
+    public Mono<ProductTypeResponseDTO> deleteProductType(final String productTypeId) {
+        return webClientBuilder.build()
+                .delete()
+                .uri(productsServiceUrl + "/types/"  + productTypeId)
+                .retrieve()
+                .bodyToMono(ProductTypeResponseDTO.class);
+    }
 
 
 

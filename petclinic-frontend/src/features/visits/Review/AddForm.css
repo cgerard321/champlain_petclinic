@@ -143,3 +143,12 @@ button[type='submit']:hover {
   border-color: #1d5fbd;
   color: #fff;
 }
+
+.add-review-form button.submit,
+.add-review-form button.cancel {
+  width: 100%;
+  padding: 10px 20px;
+  font-size: 18px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}

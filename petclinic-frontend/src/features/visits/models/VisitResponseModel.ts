@@ -1,4 +1,5 @@
 import { Status } from '@/features/visits/models/Status.ts';
+import { FileDetails } from '@/shared/models/FileDetails';
 
 export interface VisitResponseModel {
   visitDate: string;
@@ -15,4 +16,7 @@ export interface VisitResponseModel {
   visitId: string;
   visitEndDate: string;
   isEmergency: boolean;
+  ownerFirstName: string;
+  ownerLastName: string;
+  prescriptionFile?: FileDetails;
 }

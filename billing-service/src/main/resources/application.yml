@@ -1,3 +1,4 @@
+---
 server.port: 7004
 
 logging:
@@ -26,10 +27,10 @@ app:
     port: 8090
   auth-service:
     host: auth-service
-    port: 7005
+    port: 8080
   mailer-service:
     host: mailer-service
-    port: 8888
+    port: 8080
 ---
 spring:
   config:
@@ -53,8 +54,8 @@ spring:
       host: mongo-billing
       port: 27017
       database: billings
-      username: root
-      password: password
+      username: ${DB_USER}
+      password: ${DB_PASSWORD}
       authentication-database: admin
 server.port: 8080
 app:
@@ -66,15 +67,19 @@ app:
     port: 8080
   auth-service:
     host: auth-service
-    port: 7005
+    port: 8080
   mailer-service:
     host: mailer-service
-    port: 8888
+    port: 8080
 logging:
   level:
     root: INFO
     com.petclinic: DEBUG
-
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus
 server:
   error:
     include-message: always
@@ -113,4 +118,3 @@ server:
 #  #    initialization-mode: always
 #
 #spring.datasource.hikari.initializationFailTimeout: 60000
-

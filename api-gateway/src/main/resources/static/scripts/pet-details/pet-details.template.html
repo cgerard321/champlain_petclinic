@@ -1,84 +1,106 @@
-<link href="/css/ownerdetail.css" rel="stylesheet" type="text/css"/>
+<link href="/css/pet.css" rel="stylesheet" type="text/css"/>
 
-    <div ng-controller="PetDetailsController" ng-app="ownerDetails" class="d-flex justify-content-center mt-5 mb-5 gap-5">
-        <div class="d-flex flex-column">
-            <div class=" d-flex flex-column p-5 shadow">
+<div class="dashboard-container" ng-controller="PetDetailsController" ng-app="ownerDetails">
+    <div class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Pet Details</h1>
+            <p class="page-subtitle">View and manage pet information</p>
+        </div>
 
-                <h3 class="">Pet Details</h3>
+        <div class="content-wrapper">
+            <div ng-if="!$ctrl.pet" class="empty-state">
+                <div class="empty-state-icon">&#x1F43E;</div>
+                <p class="empty-state-text">No pet found</p>
+            </div>
 
-                <div ng-if="!$ctrl.pet">
-                    <h3>No pet found</h3>
+            <div ng-if="$ctrl.pet" class="details-card">
+                <div class="card-header">
+                    <h2 class="card-title">Pet Information</h2>
+                    <div class="status-badge" ng-class="$ctrl.pet.isActive === 'true' ? 'status-active' : 'status-inactive'">
+                        <span ng-if="$ctrl.pet.isActive === 'true'">&#x2713; Active</span>
+                        <span ng-if="$ctrl.pet.isActive !== 'true'">&#x26A0; Inactive</span>
+                    </div>
                 </div>
 
-
-                <div class="bg-white shadow-sm mt-3 mb-1" style="width: 75px; height: 75px; border-radius: 50px;">
-                    <img style="width: 100%; height: 100%; border-radius: 50px" src="../../images/animaldefault.png"/>
+                <div class="profile-section">
+                    <div class="profile-avatar">
+                        <img src="../../images/animaldefault.png" alt="Pet Avatar"/>
+                    </div>
+                    <h3 class="profile-name">{{$ctrl.pet.name}}</h3>
+                    <p class="profile-type">{{$ctrl.getPetTypeName($ctrl.pet.petTypeId)}}</p>
                 </div>
 
-                <form action="" class="pt-3">
+                <form class="pet-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <input class="form-input" value="{{$ctrl.pet.petId}}" readonly disabled/>
+                            <label class="form-label">Pet ID</label>
+                        </div>
 
-                    <div class="d-flex flex-row gap-3 pt-1">
-                        <div class="d-flex flex-column">
-                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.pet.petId}}" size="50" readonly disabled/>
-                            <label class="inputLabel">Pet Id</label>
+                        <div class="form-group">
+                            <input class="form-input" value="{{$ctrl.pet.ownerId}}" readonly disabled/>
+                            <label class="form-label">Owner ID</label>
+                        </div>
+
+                        <div class="form-group">
+                            <input class="form-input" value="{{$ctrl.pet.name}}" readonly disabled/>
+                            <label class="form-label">Pet Name</label>
+                        </div>
+
+                        <div class="form-group">
+                            <input class="form-input" value="{{$ctrl.getBirthday($ctrl.pet.birthDate)}}" readonly disabled/>
+                            <label class="form-label">Birthday</label>
+                        </div>
+
+                        <div class="form-group">
+                            <input class="form-input" value="{{$ctrl.pet.weight}} kg" readonly disabled/>
+                            <label class="form-label">Weight</label>
+                        </div>
+
+                        <div class="form-group">
+                            <input class="form-input" value="{{$ctrl.getPetTypeName($ctrl.pet.petTypeId)}}" readonly disabled/>
+                            <label class="form-label">Pet Type</label>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <input class="form-input" value="{{$ctrl.pet.isActive === 'true' ? 'Active' : 'Inactive'}}" readonly disabled/>
+                            <label class="form-label">Status</label>
                         </div>
                     </div>
 
-                    <div class="d-flex flex-row gap-3 pt-1">
-                        <div class="d-flex flex-column">
-                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.pet.ownerId}}" size="50" readonly disabled/>
-                            <label class="inputLabel">Owner Id</label>
-                        </div>
-                    </div>
+                    <div class="action-buttons">
+                        <button class="btn-submit" ui-sref="editPet({ownerId: $ctrl.pet.ownerId, petId: $ctrl.pet.petId, method: 'edit'})">
+                            &#x270F; Edit Pet
+                        </button>
+                        <button class="btn-modern btn-status" 
+                                ng-class="$ctrl.pet.isActive === 'true' ? 'inactive' : ''"
+                                ng-click="$ctrl.toggleActiveStatus($ctrl.pet.petId)">
+                            <span ng-if="$ctrl.pet.isActive === 'true'">Deactivate</span>
+                            <span ng-if="$ctrl.pet.isActive !== 'true'">Activate</span>
+                        </button>
+                        <button class="btn-modern btn-delete" ng-click="$ctrl.confirmDeletePet($ctrl.pet.petId)">
+                            Delete Pet
+                        </button>
 
-                    <div class="d-flex flex-row gap-3 pt-1">
-                        <div class="d-flex flex-column">
-                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.pet.name}}" readonly disabled/>
-                            <label class="inputLabel">Name</label>
-                        </div>
-                        <div class="d-flex flex-column">
-                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.getBirthday($ctrl.pet.birthDate)}}" readonly disabled/>
-                            <label class="inputLabel">Birthday</label>
-                        </div>
-                        <div class="d-flex flex-column">
-                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.pet.weight}}" readonly disabled/>
-                            <label class="inputLabel">Weight (KG)</label>
-                        </div>
-                    </div>
-
-                    <div class="d-flex flex-row gap-3 pt-1">
-                        <div class="d-flex flex-column">
-                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.getPetTypeName($ctrl.pet.petTypeId)}}" readonly disabled/>
-                            <label class="inputLabel">Pet Type</label>
-                        </div>
-                        <div class="d-flex flex-column">
-                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.pet.isActive}}" readonly disabled/>
-                            <label class="inputLabel">Active Status</label>
-                        </div>
-                    </div>
-
-                    <div class="d-flex flex-row gap-3 justify-content-end">
-
-                        <div class="border-5 rounded">
-                            <a style="color: rgba(0,0,0,0.5);" class="btn btn-light" ng-model="pet.isActive" ng-click="$ctrl.toggleActiveStatus(pet.petId)">Pet Status</a>
-                        </div>
-
-                        <div>
-                            <a style="color: rgba(0,0,0,0.5);" class="btn btn-light" ui-sref="editPet({ownerId: $ctrl.pet.ownerId, petId: $ctrl.pet.petId, method: 'edit'})">Edit Pet</a><!-- Add more pet details as needed -->
-
-                        </div>
-
-                        <div class="border-5 rounded">
-                            <a style="color: rgba(0,0,0,0.5);" class="btn btn-light" ng-click="$ctrl.deletePet($ctrl.pet.petId)">Delete Pet</a>
-                        </div>
                     </div>
                 </form>
+                <!-- Delete Confirmation Modal -->
+                <div class="custom-delete-modal" ng-if="$ctrl.showDeleteModal">
+                    <div class="custom-delete-modal-content">
+                        <h3>Confirm Delete</h3>
+                        <p>Are you sure you want to delete <strong>{{$ctrl.pet.name}}</strong>?</p>
+                        <div class="modal-buttons">
+                            <button class="btn-submit" ng-click="$ctrl.deletePet()">Yes, Delete</button>
+                            <button class="btn-secondary" ng-click="$ctrl.cancelDelete()">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="info-card">
+                    <p class="info-text">Use the buttons above to manage this pet's status and information</p>
+                </div>
             </div>
         </div>
-        </div>
-
     </div>
-
 </div>
-
-

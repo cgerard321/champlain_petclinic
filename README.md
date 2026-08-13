@@ -3,13 +3,16 @@
 Champlain Final Project 1 420-N52-LA Pet Clinic repo
 
 - [Champlain Pet Clinic](#champlain-pet-clinic)
-  - [Source](#source)
-  - [Getting Started](#getting-started)
-  - [Questions or Issues?](#questions-or-issues)
-  - [Development Notes](#development-notes)
+    - [Source](#source)
+    - [Getting Started](#getting-started)
+    - [Questions or Issues?](#questions-or-issues)
+    - [Development Notes](#development-notes)
 - [Pull Request Guidelines](docs/pull-requests.md)
 - [Git Guidelines](docs/git-tips.md)
 - [React Coding Standards](docs/react-coding-standards.md)
+- [Angular Coding Standards](docs/angular-guidelines.md)
+- [Files Services Usage Standards](docs/files-service-usage.md)
+- [Mailer Service Usage Standards](docs/mailer-service-usage.md)
 - [Playwright Testing](docs/playwright-testing.md)
 - [Java (Spring) Coding Standards](docs/java-coding-standards.md)
 - [API Versioning Guidelines](docs/api-versioning.md)
@@ -53,6 +56,13 @@ If there's tests that are commented out, they need to be fixed. They were likely
 
 ## C4 L2
 
-[See Here](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/cgerard321/champlain_petclinic/main/docs/diagrams/C4/champlain-pet-clinic-ms_C4_L2_container_diagram.puml&fmt=svg)
+[See Here](https://plantuml.benmusicgeek.synology.me/proxy?cache=no&src=https://raw.githubusercontent.com/cgerard321/champlain_petclinic/main/docs/diagrams/C4/champlain-pet-clinic-ms_C4_L2_container_diagram.puml&fmt=svg)
 
-![C4 L2](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/cgerard321/champlain_petclinic/main/docs/diagrams/C4/champlain-pet-clinic-ms_C4_L2_container_diagram.puml&fmt=svg)
+![C4 L2](https://plantuml.benmusicgeek.synology.me/proxy?cache=no&src=https://raw.githubusercontent.com/cgerard321/champlain_petclinic/main/docs/diagrams/C4/champlain-pet-clinic-ms_C4_L2_container_diagram.puml&fmt=svg)
+
+
+## C4 Deployment Diagram
+
+[See Here](https://plantuml.benmusicgeek.synology.me/proxy?cache=no&src=https://raw.githubusercontent.com/cgerard321/champlain_petclinic/main/docs/diagrams/C4/deployment_diagram.puml&fmt=svg)
+
+![C4 Deployment](https://plantuml.benmusicgeek.synology.me/proxy?cache=no&src=https://raw.githubusercontent.com/cgerard321/champlain_petclinic/main/docs/diagrams/C4/deployment_diagram.puml&fmt=svg)

@@ -4,7 +4,6 @@ import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillStatus;
-import com.petclinic.bffapigateway.dtos.Bills.PaymentRequestDTO;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.presentationlayer.v1.BillControllerV1;
 import org.apache.http.HttpStatus;
@@ -17,26 +16,20 @@ import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
 import static com.petclinic.bffapigateway.dtos.Bills.BillStatus.PAID;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
@@ -65,11 +58,11 @@ public class BillsControllerUnitTest {
             .customerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
             .visitType("general")
             .vetId("3")
-            .date(LocalDate.parse("2024-10-11"))
+            .date(LocalDate.now().plusDays(1))
             .amount(new BigDecimal("100.0"))
             .taxedAmount(new BigDecimal("0.0"))
             .billStatus(BillStatus.UNPAID)
-            .dueDate(LocalDate.parse("2024-10-13"))
+            .dueDate(LocalDate.now().plusDays(46))
             .build();
 
     private BillResponseDTO billresponse2 = BillResponseDTO.builder()
@@ -77,23 +70,12 @@ public class BillsControllerUnitTest {
             .customerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
             .visitType("general")
             .vetId("2")
-            .date(LocalDate.parse("2024-10-11"))
+            .date(LocalDate.now().plusDays(1))
             .amount(new BigDecimal("120.0"))
             .taxedAmount(new BigDecimal("10.0"))
             .billStatus(BillStatus.UNPAID)
-            .dueDate(LocalDate.parse("2024-10-13"))
+            .dueDate(LocalDate.now().plusDays(46))
             .build();
-
-    private BillRequestDTO billRequestDTO = BillRequestDTO.builder()
-            .customerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
-            .visitType("general")
-            .vetId("3")
-            .date(LocalDate.parse("2024-10-11"))
-            .amount(new BigDecimal("100.0"))
-            .billStatus(BillStatus.UNPAID)
-            .dueDate(LocalDate.parse("2024-10-13"))
-            .build();
-
 
     @Test
     void shouldGetAllBills() {
@@ -102,8 +84,8 @@ public class BillsControllerUnitTest {
                 .customerId("1")
                 .visitType("Test type")
                 .vetId("1")
-                .date(LocalDate.of(2024,10,1))
-                .dueDate(LocalDate.of(2024,10,30))
+                .date(LocalDate.now().plusDays(1))
+                .dueDate(LocalDate.now().plusDays(30))
                 .billStatus(BillStatus.UNPAID)
                 .amount(new BigDecimal("25.00"))
                 .taxedAmount(BigDecimal.ZERO)
@@ -116,8 +98,8 @@ public class BillsControllerUnitTest {
                 .customerId("2")
                 .visitType("Test type")
                 .vetId("2")
-                .date(LocalDate.of(2024,10,1))
-                .dueDate(LocalDate.of(2024,10,30))
+                .date(LocalDate.now().plusDays(1))
+                .dueDate(LocalDate.now().plusDays(30))
                 .billStatus(BillStatus.UNPAID)
                 .amount(new BigDecimal("27.00"))
                 .taxedAmount(BigDecimal.ZERO)
@@ -143,8 +125,8 @@ public class BillsControllerUnitTest {
                 .customerId("1")
                 .visitType("Test type")
                 .vetId("1")
-                .date(LocalDate.of(2024,10,1))
-                .dueDate(LocalDate.of(2024,10,30))
+                .date(LocalDate.now().plusDays(1))
+                .dueDate(LocalDate.now().plusDays(30))
                 .billStatus(PAID)
                 .amount(new BigDecimal("25.00"))
                 .taxedAmount(BigDecimal.ZERO)
@@ -156,8 +138,8 @@ public class BillsControllerUnitTest {
                 .customerId("2")
                 .visitType("Test type")
                 .vetId("2")
-                .date(LocalDate.of(2024,10,1))
-                .dueDate(LocalDate.of(2024,10,30))
+                .date(LocalDate.now().plusDays(1))
+                .dueDate(LocalDate.now().plusDays(30))
                 .billStatus(PAID)
                 .amount(new BigDecimal("27.00"))
                 .taxedAmount(BigDecimal.ZERO)
@@ -183,8 +165,8 @@ public class BillsControllerUnitTest {
                 .customerId("1")
                 .visitType("Test type")
                 .vetId("1")
-                .date(LocalDate.of(2024,10,1))
-                .dueDate(LocalDate.of(2024,10,30))
+                .date(LocalDate.now().plusDays(1))
+                .dueDate(LocalDate.now().plusDays(30))
                 .billStatus(BillStatus.UNPAID)
                 .amount(new BigDecimal("25.00"))
                 .taxedAmount(BigDecimal.ZERO)
@@ -196,8 +178,8 @@ public class BillsControllerUnitTest {
                 .customerId("2")
                 .visitType("Test type")
                 .vetId("2")
-                .date(LocalDate.of(2024,10,1))
-                .dueDate(LocalDate.of(2024,10,30))
+                .date(LocalDate.now().plusDays(1))
+                .dueDate(LocalDate.now().plusDays(30))
                 .billStatus(BillStatus.UNPAID)
                 .amount(new BigDecimal("27.00"))
                 .taxedAmount(BigDecimal.ZERO)
@@ -223,8 +205,8 @@ public class BillsControllerUnitTest {
                 .customerId("1")
                 .visitType("Test type")
                 .vetId("1")
-                .date(LocalDate.of(2024,10,1))
-                .dueDate(LocalDate.of(2024,10,8))
+                .date(LocalDate.now().minusDays(10))
+                .dueDate(LocalDate.now().minusDays(3))
                 .billStatus(BillStatus.OVERDUE)
                 .amount(new BigDecimal("25.00"))
                 .taxedAmount(BigDecimal.ZERO)
@@ -236,8 +218,8 @@ public class BillsControllerUnitTest {
                 .customerId("2")
                 .visitType("Test type")
                 .vetId("2")
-                .date(LocalDate.of(2024,10,1))
-                .dueDate(LocalDate.of(2024,10,8))
+                .date(LocalDate.now().minusDays(10))
+                .dueDate(LocalDate.now().minusDays(3))
                 .billStatus(BillStatus.OVERDUE)
                 .amount(new BigDecimal("27.00"))
                 .taxedAmount(BigDecimal.ZERO)
@@ -285,9 +267,6 @@ public class BillsControllerUnitTest {
         Mockito.verify(billServiceClient, times(1)).getBillById(billId);
     }
 
-
-
-
     @Test
     public void getBillsByVetId(){
         BillResponseDTO bill = new BillResponseDTO();
@@ -312,6 +291,7 @@ public class BillsControllerUnitTest {
                 });
 
     }
+
     @Test
     void getBillUsingMissingPath(){
         client.get()
@@ -337,32 +317,55 @@ public class BillsControllerUnitTest {
                 .jsonPath("$.message").isEqualTo(null);
     }
 
-
     @Test
-    void createBill(){
+    void createBill() {
+        // Arrange
         BillResponseDTO billResponseDTO = new BillResponseDTO();
         billResponseDTO.setBillId("9");
-        billResponseDTO.setDate(null);
-        billResponseDTO.setAmount(new BigDecimal("600"));
+        billResponseDTO.setCustomerId("12345");
+        billResponseDTO.setVetId("67890");
         billResponseDTO.setVisitType("Adoption");
+        billResponseDTO.setDate(LocalDate.now().plusDays(1)); // Updated to a future date
+        billResponseDTO.setAmount(new BigDecimal("600"));
+        billResponseDTO.setBillStatus(BillStatus.PAID);
+        billResponseDTO.setDueDate(LocalDate.now().plusDays(30)); // Ensure dueDate is also valid
 
         BillRequestDTO billRequestDTO = new BillRequestDTO();
-        billRequestDTO.setDate(null);
-        billRequestDTO.setAmount(new BigDecimal("600"));
+        billRequestDTO.setCustomerId("12345");
+        billRequestDTO.setVetId("67890");
         billRequestDTO.setVisitType("Adoption");
-        when(billServiceClient.createBill(billRequestDTO))
+        billRequestDTO.setDate(LocalDate.now().plusDays(1)); // Updated to a future date
+        billRequestDTO.setAmount(new BigDecimal("600"));
+        billRequestDTO.setBillStatus(BillStatus.PAID);
+        billRequestDTO.setDueDate(LocalDate.now().plusDays(30)); // Ensure dueDate is also valid
+
+        when(billServiceClient.createBill(billRequestDTO, false, "CAD", "JWTToken"))
                 .thenReturn(Mono.just(billResponseDTO));
 
+        // Act & Assert
         client.post()
-                .uri("/api/gateway/bills")
+                .uri(uriBuilder -> uriBuilder
+                        .path("/api/gateway/bills")
+                        .queryParam("sendEmail", false)
+                        .queryParam("currency", "CAD")
+                        .build())
+                .cookie("Bearer", "JWTToken") // Ensure the token is valid
                 .body(Mono.just(billRequestDTO), BillRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody();
+                .expectBody()
+                .jsonPath("$.billId").isEqualTo("9")
+                .jsonPath("$.customerId").isEqualTo("12345")
+                .jsonPath("$.vetId").isEqualTo("67890")
+                .jsonPath("$.visitType").isEqualTo("Adoption")
+                .jsonPath("$.date").isEqualTo(LocalDate.now().plusDays(1).toString()) // Match updated date
+                .jsonPath("$.amount").isEqualTo(600)
+                .jsonPath("$.billStatus").isEqualTo("PAID")
+                .jsonPath("$.dueDate").isEqualTo(LocalDate.now().plusDays(30).toString()); // Match updated dueDate
 
-        assertEquals(billResponseDTO.getBillId(),"9");
+        assertEquals(billResponseDTO.getBillId(), "9");
     }
 
     @Test
@@ -389,7 +392,6 @@ public class BillsControllerUnitTest {
                 .jsonPath("$.message").isEqualTo(null);
     }
 
-
     @Test
     void shouldDeleteBillById(){
         when(billServiceClient.deleteBill("9"))
@@ -414,9 +416,6 @@ public class BillsControllerUnitTest {
                 .expectStatus().isNoContent()
                 .expectBody().isEmpty();
     }
-
-
-
 
     @Test
     void getAllBillsByVetName(){
@@ -475,8 +474,6 @@ public class BillsControllerUnitTest {
 
         Mockito.verify(billServiceClient).archiveBill();
     }
-
-
 
     @Test
     public void whenGetAllBills_thenReturnAllBills(){
@@ -674,7 +671,7 @@ public class BillsControllerUnitTest {
 
         // Act & Assert
         webTestClient.get()
-                .uri(uriBuilder -> uriBuilder.path(baseBillURL)
+                .uri(uriBuilder -> uriBuilder.path(baseBillURL + "/page")
                         .queryParam("page", 0)
                         .queryParam("size", 10)
                         .build())

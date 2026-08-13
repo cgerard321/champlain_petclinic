@@ -175,6 +175,8 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 .verified(true)
                 .build();
 
+
+
         User vet1 = User.builder()
                 .username("Vet1")
                 .userIdentifier(new UserIdentifier("69f852ca-625b-11ee-8c99-0242ac120002"))

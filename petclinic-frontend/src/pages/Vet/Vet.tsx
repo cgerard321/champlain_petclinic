@@ -17,6 +17,8 @@ export default function Vet(): JSX.Element {
   const [formVisible, setFormVisible] = useState<boolean>(false);
   const [isSearchActive, setIsSearchActive] = useState<boolean>(false);
 
+  const [loaded, setLoaded] = useState<boolean>(false);
+
   const fetchAllVets = async (): Promise<void> => {
     try {
       const response = await getAllVets();
@@ -42,8 +44,10 @@ export default function Vet(): JSX.Element {
       setAllVets(vets);
       setResults(vets);
     } catch (err) {
-      console.error('Error fetching all vets:', err);
+      console.error('Error fetching all vets:', (err as Error)?.message ?? err);
       setError('Error fetching all vets.');
+    } finally {
+      setLoaded(true);
     }
   };
 
@@ -90,9 +94,12 @@ export default function Vet(): JSX.Element {
         </button>
         <button onClick={handleClear}>Clear</button>
       </div>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
 
-      {results.length > 0 ? (
+      {/* show error if present (after load) */}
+      {loaded && error && <p style={{ color: 'red' }}>{error}</p>}
+
+      {/* blank until initial load finishes; then render list or "No results" */}
+      {!loaded ? null : results.length > 0 ? (
         <VetCardTable vets={results} onDeleteVet={setResults} />
       ) : (
         <p>No results found.</p>

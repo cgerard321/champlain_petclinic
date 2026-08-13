@@ -15,6 +15,7 @@ import java.util.List;
 public class CartResponseDTO {
     private String cartId;
     private String customerId;
+    private String customerName;
     private List<CartProductResponseDTO> products;
     private List<CartProductResponseDTO> wishListProducts;
 

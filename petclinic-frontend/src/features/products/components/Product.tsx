@@ -1,8 +1,6 @@
 import { JSX, useEffect, useState } from 'react';
 import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
-import { getProductByProductId } from '@/features/products/api/getProductByProductId.tsx';
 import ImageContainer from './ImageContainer';
-import { changeProductQuantity } from '../api/changeProductQuantity';
 import { generatePath, useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import './Product.css';
@@ -11,11 +9,10 @@ import {
   IsInventoryManager,
   IsVet,
   IsReceptionist,
-  useUser,
 } from '@/context/UserContext';
 import { useAddToWishlist } from '@/features/carts/api/addToWishlistFromProducts';
-
-import type { Role } from '@/shared/models/Role';
+import StarRating from './StarRating';
+import { FaHeart, FaRegHeart } from 'react-icons/fa';
 
 export default function Product({
   product,
@@ -26,106 +23,54 @@ export default function Product({
   const isVet = IsVet();
   const isReceptionist = IsReceptionist();
 
-  const { user } = useUser();
-
-  // ---- Rôles utilisateur (simple et lisible) ----
-  const roleNames = new Set<string>();
-  const rolesSet = user?.roles as Set<Role> | undefined;
-
-  if (rolesSet) {
-    for (const role of rolesSet) {
-      roleNames.add(role.name);
-    }
-  }
-
-  const isAdmin = roleNames.has('ADMIN');
-  const isStaff = isAdmin || isInventoryManager || isVet || isReceptionist;
-
-  const [currentProduct, setCurrentProduct] = useState<ProductModel>(product);
+  const [currentProduct] = useState<ProductModel>(product);
   const [selectedProduct, setSelectedProduct] = useState<ProductModel | null>(
     null
   );
-  const [selectedProductForQuantity, setSelectedProductForQuantity] =
-    useState<ProductModel | null>(null);
-  const [quantity, setQuantity] = useState<number>(0);
-  const [, setTooLong] = useState<boolean>(false); //tooLong
-
-  const navigate = useNavigate();
-  const { addToCart } = useAddToCart();
-  const { addToWishlist } = useAddToWishlist();
   const [successMessageCart, setSuccessMessageCart] = useState<string | null>(
     null
   );
   const [successMessageWishlist, setSuccessMessageWishlist] = useState<
     string | null
   >(null);
+  const [, setTooLong] = useState<boolean>(false);
+  const [isWishlisted, setIsWishlisted] = useState(false);
 
-  const handleProductTitleClick = (): void => {
+  const navigate = useNavigate();
+  const { addToCart } = useAddToCart();
+  const { addToWishlist } = useAddToWishlist();
+
+  const handleProductClick = (): void => {
     navigate(
       generatePath(AppRoutePaths.ProductDetails, {
         productId: product.productId,
       })
     );
   };
+
   const getDeliveryTypeLabel = (deliveryType: string): string => {
-    if (deliveryType === 'DELIVERY') {
-      return 'Delivery';
-    } else if (deliveryType === 'PICKUP') {
-      return 'Pickup';
-    } else if (deliveryType === 'DELIVERY_AND_PICKUP') {
-      return 'Delivery & Pickup';
-    } else if (deliveryType === 'NO_DELIVERY_OPTION') {
-      return 'No delivery option';
+    switch (deliveryType) {
+      case 'DELIVERY':
+        return 'Delivery';
+      case 'PICKUP':
+        return 'Pickup';
+      case 'DELIVERY_AND_PICKUP':
+        return 'Delivery & Pickup';
+      case 'NO_DELIVERY_OPTION':
+        return 'No delivery option';
+      default:
+        return 'Unknown Delivery Type';
     }
-    return 'Unknown Delivery Type';
   };
 
   useEffect(() => {
-    if (product.productDescription.length > 100) {
-      setTooLong(true);
-    } else {
-      setTooLong(false);
-    }
+    setTooLong(product.productDescription.length > 100);
   }, [product.productDescription]);
 
-  const handleProductClickForProductQuantity = async (
-    productId: string
-  ): Promise<void> => {
-    try {
-      const product = await getProductByProductId(productId);
-      setSelectedProductForQuantity(product);
-      setQuantity(product.productQuantity);
-    } catch (error) {
-      console.error('Failed to fetch product details:', error);
-    }
-  };
-
-  const handleQuantitySubmit = async (e: React.FormEvent): Promise<void> => {
-    e.preventDefault();
-    if (selectedProductForQuantity) {
-      try {
-        await changeProductQuantity(
-          selectedProductForQuantity.productId,
-          quantity
-        );
-        const updatedProduct = await getProductByProductId(
-          selectedProductForQuantity.productId
-        );
-        setCurrentProduct(updatedProduct);
-        setSelectedProductForQuantity(null); // Close the quantity update form
-      } catch (error) {
-        console.error('Failed to update product quantity:', error);
-      }
-    }
-  };
-
-  const handleBackToList = (): void => {
-    setSelectedProduct(null);
-    setSelectedProductForQuantity(null);
-  };
+  const handleBackToList = (): void => setSelectedProduct(null);
 
   const handleAddToCart = async (): Promise<void> => {
-    const isSuccess = await addToCart(currentProduct.productId);
+    const isSuccess = await addToCart(currentProduct.productId, 1);
     if (isSuccess) {
       setSuccessMessageCart('Product added to cart successfully!');
       setTimeout(() => setSuccessMessageCart(null), 3000);
@@ -136,6 +81,7 @@ export default function Product({
     const isSuccess = await addToWishlist(currentProduct.productId, 1);
     if (isSuccess) {
       setSuccessMessageWishlist('Product added to wishlist successfully!');
+      setIsWishlisted(true); // stays true after adding
       setTimeout(() => setSuccessMessageWishlist(null), 3000);
     }
   };
@@ -146,44 +92,17 @@ export default function Product({
         <h1>{selectedProduct.productName}</h1>
         <p>{selectedProduct.productDescription}</p>
         <p>Price: ${selectedProduct.productSalePrice.toFixed(2)}</p>
-
         <div className="deliveryType-container">
           <p>{getDeliveryTypeLabel(currentProduct.deliveryType)}</p>
         </div>
-
         <button onClick={handleBackToList}>Back to Catalog</button>
       </div>
     );
   }
 
-  if (selectedProductForQuantity) {
-    return (
-      <div>
-        <h3>Change Item Quantity</h3>
-        <h2>{selectedProductForQuantity.productName}</h2>
-        <form onSubmit={handleQuantitySubmit}>
-          <label>
-            Quantity:
-            <input
-              type="number"
-              value={quantity}
-              onChange={e => setQuantity(parseInt(e.target.value))}
-              placeholder="Enter new quantity"
-            />
-          </label>
-          <button type="submit">Update Quantity</button>
-        </form>
-        <button onClick={handleBackToList}>Back to Items</button>
-      </div>
-    );
-  }
-
-  const cartDisabled = isStaff || currentProduct.productQuantity === 0;
-  const wishlistDisabled = isStaff;
-
   return (
     <div
-      className={`card ${
+      className={`card product-card product-card-no-bg ${
         currentProduct.productQuantity === 0
           ? 'out-of-stock'
           : currentProduct.productQuantity < 10
@@ -191,58 +110,60 @@ export default function Product({
             : ''
       }`}
       key={currentProduct.productId}
+      style={{ position: 'relative' }}
     >
-      <ImageContainer imageId={currentProduct.imageId} />
-      <span
-        onClick={() =>
-          handleProductClickForProductQuantity(currentProduct.productId)
-        }
-        className="product-title"
-      ></span>
+      {/* Wishlist Heart Button */}
+      {!isInventoryManager && !isVet && !isReceptionist && (
+        <button
+          className="wishlist-heart-btn"
+          title="Add to Wishlist"
+          onClick={handleAddToWishlist}
+        >
+          {isWishlisted ? (
+            <FaHeart style={{ color: '#e11d48' }} />
+          ) : (
+            <FaRegHeart style={{ color: '#000' }} />
+          )}
+        </button>
+      )}
 
-      <h2 onClick={handleProductTitleClick} className="product-title">
-        {currentProduct.productName}
-      </h2>
-
-      <p>Price: ${currentProduct.productSalePrice.toFixed(2)}</p>
+      <div onClick={handleProductClick} className="product-title">
+        <ImageContainer imageId={currentProduct.imageId} />
+        <h2 className="product-title">{currentProduct.productName}</h2>
+      </div>
 
       <div className="deliveryType-container">
         <p>{getDeliveryTypeLabel(currentProduct.deliveryType)}</p>
       </div>
 
-      <button
-        onClick={cartDisabled ? undefined : handleAddToCart}
-        disabled={cartDisabled}
-        className={`add-to-cart-btn ${cartDisabled ? 'disabled' : ''}`}
-        title={
-          isStaff
-            ? 'Shopping is disabled for staff/admin accounts.'
-            : currentProduct.productQuantity === 0
-              ? 'Out of stock'
-              : 'Add to cart'
-        }
-      >
-        {currentProduct.productQuantity === 0 ? 'Out of Stock' : 'Add to Cart'}
-      </button>
-      {successMessageCart && (
-        <p className="success-message">{successMessageCart}</p>
-      )}
+      <p>Price: ${currentProduct.productSalePrice.toFixed(2)}</p>
 
-      <button
-        onClick={wishlistDisabled ? undefined : handleAddToWishlist}
-        disabled={wishlistDisabled}
-        className={`add-to-wishlist-btn ${wishlistDisabled ? 'disabled' : ''}`}
-        title={
-          isStaff
-            ? 'Shopping is disabled for staff/admin accounts.'
-            : 'Add to wishlist'
-        }
-      >
-        Add to Wishlist
-      </button>
+      <div className="avgrating-container">
+        <StarRating
+          currentRating={currentProduct.averageRating}
+          viewOnly={true}
+        />
+      </div>
 
-      {successMessageWishlist && (
-        <p className="success-message">{successMessageWishlist}</p>
+      {/* Only show Add to Cart for customers */}
+      {!isInventoryManager && !isVet && !isReceptionist && (
+        <>
+          <button
+            className={`add-to-cart-btn${currentProduct.productQuantity === 0 ? ' disabled' : ''}`}
+            onClick={handleAddToCart}
+            disabled={currentProduct.productQuantity === 0}
+          >
+            {currentProduct.productQuantity === 0
+              ? 'Out of Stock'
+              : 'Add to Cart'}
+          </button>
+          {successMessageCart && (
+            <p className="success-message">{successMessageCart}</p>
+          )}
+          {successMessageWishlist && (
+            <p className="success-message">{successMessageWishlist}</p>
+          )}
+        </>
       )}
 
       {currentProduct.productStatus === 'PRE_ORDER' && (

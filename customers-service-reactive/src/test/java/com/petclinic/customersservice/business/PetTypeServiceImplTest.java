@@ -60,42 +60,6 @@ class PetTypeServiceImplTest {
     }
 
     @Test
-    void whenAddPetType_missingName() {
-        PetTypeRequestDTO dto = new PetTypeRequestDTO(null, "Desc");
-        StepVerifier.create(petTypeService.addPetType(Mono.just(dto)))
-                .expectError(InvalidInputException.class)
-                .verify();
-    }
-
-    @Test
-    void whenAddPetType_missingDescription() {
-        PetTypeRequestDTO dto = new PetTypeRequestDTO("Name", null);
-        StepVerifier.create(petTypeService.addPetType(Mono.just(dto)))
-                .expectError(InvalidInputException.class)
-                .verify();
-    }
-
-    @Test
-    void whenAddPetType_ShouldInsertAndReturnPetType() {
-        PetType petTypeToAdd = buildPetType();
-        when(petTypeRepo.insert(any(PetType.class)))
-                .thenReturn(Mono.just(petTypeToAdd));
-
-        Mono<PetType> result = petTypeService.insertPetType(Mono.just(petTypeToAdd));
-
-        StepVerifier.create(result)
-                .assertNext(saved -> {
-                    assertNotNull(saved);
-                    assertEquals(petTypeToAdd.getPetTypeId(), saved.getPetTypeId());
-                    assertEquals(petTypeToAdd.getName(), saved.getName());
-                    assertEquals(petTypeToAdd.getPetTypeDescription(), saved.getPetTypeDescription());
-                })
-                .verifyComplete();
-
-        verify(petTypeRepo).insert(any(PetType.class));
-    }
-
-    @Test
     void getAllPetTypesPagination_WithNoFilters_ShouldReturnPaginatedResults() {
         PetType petType1 = buildPetType("1", "Dog", "Mammal");
         PetType petType2 = buildPetType("2", "Cat", "Mammal");

@@ -1,10 +1,12 @@
-import { FormEvent, useState, useEffect } from 'react';
+import { FormEvent, useState, useEffect, ChangeEvent } from 'react';
 import * as PropTypes from 'prop-types';
 import { addPetForOwner } from '../api/addPetForOwner';
+import { addPetPhoto } from '../api/addPetPhoto';
 import { getPetTypes } from '../api/getPetTypes';
 import { PetRequestModel } from '../models/PetRequestModel';
 import { PetResponseModel } from '../models/PetResponseModel';
 import { PetTypeModel } from '../models/PetTypeModel';
+import defaultProfile from '@/assets/Owners/defaultProfilePicture.png';
 import './customers.css';
 
 interface AddPetModalProps {
@@ -34,6 +36,8 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [petTypes, setPetTypes] = useState<PetTypeModel[]>([]);
   const [isLoadingPetTypes, setIsLoadingPetTypes] = useState(true);
+  const [petPhotoUrl, setPetPhotoUrl] = useState<string>(defaultProfile);
+  const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
 
   useEffect(() => {
     const fetchPetTypes = async (): Promise<void> => {
@@ -67,7 +71,6 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
     const { name, type, value } = e.target;
     if (type === 'date') {
       setDateInputValue(value);
-
       if (value && value.length === 10) {
         const dateValue = new Date(value);
         if (!isNaN(dateValue.getTime())) {
@@ -78,6 +81,14 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
       }
     } else {
       setPet({ ...pet, [name]: value });
+    }
+  };
+
+  const handlePhotoChange = (e: ChangeEvent<HTMLInputElement>): void => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedPhoto(file);
+      setPetPhotoUrl(URL.createObjectURL(file));
     }
   };
 
@@ -101,7 +112,18 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
     try {
       const response = await addPetForOwner(ownerId, pet);
       if (response.status === 201) {
-        onPetAdded(response.data);
+        const newPet = response.data;
+
+        // If a photo was selected, upload it with PATCH /pets/{petId}/photos
+        if (selectedPhoto) {
+          try {
+            await addPetPhoto(newPet.petId, selectedPhoto);
+          } catch (photoError) {
+            console.error('Error uploading pet photo:', photoError);
+          }
+        }
+
+        onPetAdded(newPet);
         handleClose();
       }
     } catch (error) {
@@ -125,6 +147,8 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
     setIsDateInputFocused(false);
     setErrors({});
     setIsSubmitting(false);
+    setPetPhotoUrl(defaultProfile);
+    setSelectedPhoto(null);
     onClose();
   };
 
@@ -139,6 +163,26 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
           <button className="customer-modal-close" onClick={handleClose}>
             &times;
           </button>
+        </div>
+
+        <div className="pet-photo-section">
+          <div className="pet-photo-container">
+            <img
+              src={petPhotoUrl}
+              alt="New pet profile"
+              className="pet-photo"
+            />
+            <div className="file-input-row">
+              <label htmlFor="pet-photo">Upload Photo:</label>
+              <input
+                type="file"
+                id="pet-photo"
+                accept="image/*"
+                onChange={handlePhotoChange}
+                disabled={isSubmitting}
+              />
+            </div>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="add-pet-form">

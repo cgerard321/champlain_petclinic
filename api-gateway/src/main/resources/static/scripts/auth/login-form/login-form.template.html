@@ -1,62 +1,203 @@
-<div style="display: flex; justify-content: center">
-    <div>
-    <h2 class="text-center">Login</h2>
-    <form ng-submit="$ctrl.login()" style="max-width: 25em;justify-content: center">
+<div class="auth-shell">
+    <div class="auth-card" role="dialog" aria-labelledby="auth-title" aria-describedby="auth-desc">
+        <h1 id="auth-title" class="auth-title">Welcome back</h1>
+        <p id="auth-desc" class="auth-subtitle">Sign in to continue</p>
 
-        <div class="alert alert-danger text-center" ng-repeat="error in errorMessages">
-            <a class="close" data-dismiss="alert" aria-label="close" ng-click="clearErrorMessages()">&times;</a>
-            <strong>Error:</strong> {{ error }}
-        </div>
+        <form name="loginForm" novalidate ng-submit="$ctrl.login()" aria-describedby="form-errors">
+            <div id="form-errors" class="auth-alert" ng-repeat="error in errorMessages" role="alert">
+                <button type="button" class="auth-alert__close" ng-click="clearErrorMessages($index)" aria-label="Dismiss error">&times;</button>
+                <strong>Error:</strong> {{ error }}
+            </div>
 
-        <div class="group-form">
-            <label>Email</label>
+            <div class="field" ng-class="{'field--invalid': loginForm.email.$touched && loginForm.email.$invalid}">
+                <label for="email" class="field__label">Email</label>
+                <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        class="field__input"
+                        placeholder="you@example.com"
+                        ng-model="login.email"
+                        required
+                        autocomplete="username"
+                        aria-required="true"
+                />
+                <div class="field__hint" ng-if="loginForm.email.$touched && loginForm.email.$error.required">Email is required.</div>
+                <div class="field__hint" ng-if="loginForm.email.$touched && loginForm.email.$error.email">Please enter a valid email.</div>
+            </div>
 
-            <input id="email" class="form-control" ng-model="login.email" name="email" required/>
+            <div class="field" ng-class="{'field--invalid': loginForm.password.$touched && loginForm.password.$invalid}">
+                <label for="pwd" class="field__label">Password</label>
+                <div class="field__input-wrap">
+                    <input
+                            id="pwd"
+                            name="password"
+                            ng-attr-type="{{$ctrl.showPassword ? 'text' : 'password'}}"
+                            class="field__input field__input--with-btn"
+                            placeholder="••••••••"
+                            ng-model="login.password"
+                            required
+                            autocomplete="current-password"
+                            aria-required="true"
+                    />
+                    <button
+                            type="button"
+                            class="field__btn"
+                            ng-click="$ctrl.togglePassword()"
+                            aria-pressed="{{$ctrl.showPassword}}"
+                            aria-label="{{$ctrl.showPassword ? 'Hide password' : 'Show password'}}">
+                        <span ng-if="!$ctrl.showPassword">Show</span>
+                        <span ng-if="$ctrl.showPassword">Hide</span>
+                    </button>
+                </div>
+                <div class="field__hint" ng-if="loginForm.password.$touched && loginForm.password.$error.required">Password is required.</div>
+            </div>
 
-            <span ng-show="loginForm.email.$error.required" class="help-block">Email is required.</span>
-        </div>
+            <button
+                    id="login-button"
+                    class="btn-primary"
+                    type="submit"
+                    ng-disabled="loginForm.$invalid || $ctrl.loading">
+                <span ng-if="!$ctrl.loading">Sign in</span>
+                <span ng-if="$ctrl.loading">Signing in…</span>
+            </button>
 
-        <div class="group-form">
-            <label>Password</label>
-
-            <input id="pwd" type="password" class="form-control" ng-model="login.password" name="password" required/>
-                <i id="eye" onclick="viewPwd()" style="margin-left: 180px; margin-top: -700px; cursor: pointer" class="bi bi-eye-slash"></i>
-                <script>
-                    function viewPwd(){
-                    const x = document.getElementById("pwd");
-                    if (x.getAttribute("type") === "password"){
-                        x.setAttribute("type", "text");
-                    } else {
-                        x.setAttribute("type", "password");
-                    }
-                }
-            </script>
-
-            <span ng-show="loginForm.password.$error.required" class="help-block">Password is required.</span>
-        </div>
-
-        <div class="group-form d-flex justify-content-center">
-            <button id="button" class="btn btn-default" type="submit">Login</button>
-        </div>
-    </form>
-    <tbody>
-    <tr>
-        <td>
-        <a class="btn p-0 responsive-text" style="color: blue" ui-sref="forgotPwdPost">
-            Forgot Password ?
-        </a>
-        </td>
-    </tr>
-    </tbody>
+            <div class="auth-secondary">
+                <a class="link" href="" ng-click="$ctrl.goForgot()">Forgot password?</a>
+            </div>
+        </form>
     </div>
 </div>
 
-
-
 <style>
+    .auth-shell {
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
 
-    label {
-        font-weight: bold;
+        background:
+                radial-gradient(900px 500px at 10% -20%, rgba(17,24,39,0.02), transparent 60%),
+                radial-gradient(700px 400px at 110% 110%, rgba(17,24,39,0.03), transparent 60%),
+                linear-gradient(180deg, #f6f7fb 0%, #ffffff 100%);
+        color: #111827; /* slate-900 text */
+        -webkit-font-smoothing: antialiased;
+        font-smoothing: antialiased;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
     }
 
+    .auth-card {
+        width: 100%;
+        max-width: 440px;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 32px;
+        box-shadow:
+                0 10px 20px rgba(17, 24, 39, 0.06),
+                0 2px 6px rgba(17, 24, 39, 0.04);
+    }
+
+    .auth-title {
+        margin: 0 0 6px 0;
+        font-size: 1.6rem;
+        line-height: 1.2;
+        font-weight: 700;
+        color: #0f172a;
+        letter-spacing: .2px;
+    }
+    .auth-subtitle {
+        margin: 0 0 22px 0;
+        color: #6b7280;
+    }
+
+    .auth-alert {
+        position: relative;
+        background: #fee2e2;
+        border: 1px solid #fecaca;
+        color: #991b1b;
+        border-radius: 12px;
+        padding: 12px 40px 12px 12px;
+        font-size: .95rem;
+        margin-bottom: 12px;
+    }
+    .auth-alert__close {
+        position: absolute; right: 8px; top: 6px;
+        background: transparent; border: 0; color: #991b1b;
+        font-size: 20px; line-height: 1; cursor: pointer;
+    }
+
+    .field { margin-bottom: 16px; }
+    .field__label {
+        display: block; margin-bottom: 6px;
+        font-weight: 600; color: #111827;
+    }
+
+    .field__input {
+        width: 100%; height: 44px;
+        background: #ffffff;
+        color: #111827;
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+        padding: 0 12px;
+        outline: none;
+        transition: border-color .15s, box-shadow .15s, background .15s;
+    }
+    .field__input::placeholder { color: #9ca3af; }
+    .field__input:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+    }
+
+    .field__input-wrap { position: relative; }
+    .field__input--with-btn { padding-right: 74px; }
+
+    .field__btn {
+        position: absolute; right: 6px; top: 6px; bottom: 6px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 0 12px; cursor: pointer;
+        background: #f3f4f6;
+        color: #374151;
+        font-weight: 600;
+        transition: background .15s, color .15s, border-color .15s;
+    }
+    .field__btn:hover { background: #e5e7eb; color: #111827; }
+
+    .field__hint { margin-top: 6px; font-size: .85rem; color: #b91c1c; }
+
+    .field--invalid .field__input {
+        border-color: #ef4444;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.18);
+    }
+
+    .btn-primary {
+        width: 100%; height: 44px;
+        border: 0; border-radius: 10px;
+        font-weight: 700;
+        background: linear-gradient(90deg, #6366f1, #8b5cf6);
+        color: #ffffff;
+        cursor: pointer;
+        transition: opacity .15s, transform .06s ease;
+    }
+    .btn-primary:hover { opacity: .95; }
+    .btn-primary:active { transform: translateY(1px); }
+    .btn-primary[disabled] { opacity: .6; cursor: not-allowed; }
+
+    .auth-secondary {
+        display: flex; justify-content: flex-end;
+        margin-top: 10px; gap: 8px;
+    }
+    .link {
+        color: #2563eb;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    .link:hover { text-decoration: underline; }
+
+    @media (max-width: 440px) {
+        .auth-card { padding: 24px; }
+        .auth-title { font-size: 1.4rem; }
+    }
 </style>
+

@@ -5,8 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Builder
 @Data
 @AllArgsConstructor
@@ -20,5 +18,4 @@ public class OwnerRequestDTO {
     private String province;
     private String telephone;
     //private List<PetResponseDTO> pets;
-    private String photoId;
 }

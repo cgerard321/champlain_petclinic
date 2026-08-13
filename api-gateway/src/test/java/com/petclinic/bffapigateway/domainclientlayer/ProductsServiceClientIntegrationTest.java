@@ -609,7 +609,124 @@ class ProductsServiceClientIntegrationTest {
                 .verifyComplete();
     }
 
+    @Test
+    void whenGetProductEnums_ThenReturnEnumsValues() throws JsonProcessingException{
+        ProductEnumsResponseDTO responseDTO = new ProductEnumsResponseDTO(
+                List.of(ProductType.FOOD, ProductType.MEDICATION, ProductType.ACCESSORY, ProductType.EQUIPMENT),
+                List.of(ProductStatus.AVAILABLE, ProductStatus.PRE_ORDER, ProductStatus.OUT_OF_STOCK),
+                List.of(DeliveryType.DELIVERY, DeliveryType.PICKUP, DeliveryType.DELIVERY_AND_PICKUP, DeliveryType.NO_DELIVERY_OPTION)
+        );
+
+        mockWebServer.enqueue(new MockResponse()
+                .setBody(objectMapper.writeValueAsString(responseDTO))
+                .addHeader("Content-Type", "application/json")
+        );
+
+        Mono<ProductEnumsResponseDTO> enumsMono = productsServiceClient.getProductEnumsValues();
+
+        StepVerifier.create(enumsMono)
+            .expectNextMatches(enums ->
+                enums.getProductType().equals(List.of(
+                    ProductType.FOOD,
+                    ProductType.MEDICATION,
+                    ProductType.ACCESSORY,
+                    ProductType.EQUIPMENT)) &&
+                enums.getProductStatus().equals(List.of(
+                    ProductStatus.AVAILABLE,
+                    ProductStatus.PRE_ORDER,
+                    ProductStatus.OUT_OF_STOCK)) &&
+                enums.getDeliveryType().equals(List.of(
+                    DeliveryType.DELIVERY,
+                    DeliveryType.PICKUP, DeliveryType.DELIVERY_AND_PICKUP,
+                    DeliveryType.NO_DELIVERY_OPTION))
+    )
+    .verifyComplete();
+    }
 
 
+    @Test
+    void getAllProductTypes_ThenReturnTypeList() {
+
+        mockWebServer.enqueue(new MockResponse()
+                .setBody("data:{\"productTypeId\":\"1\",\"typeName\":\"FOOD\"}\n\n" +
+                        "data:{\"productTypeId\":\"2\",\"typeName\":\"EQUIPMENT\"}\n\n")
+                .setHeader("Content-Type", "text/event-stream")
+        );
+
+        Flux<ProductTypeResponseDTO> typesFlux = productsServiceClient.getAllProductTypes();
+
+        StepVerifier.create(typesFlux)
+                .expectNextMatches(type -> type.getProductTypeId().equals("1") && type.getTypeName().equals("FOOD"))
+                .expectNextMatches(type -> type.getProductTypeId().equals("2") && type.getTypeName().equals("EQUIPMENT"))
+                .verifyComplete();
+    }
+
+
+    @Test
+    void whenGetProductTypeById_thenReturnSingleType() throws JsonProcessingException {
+        ProductTypeResponseDTO typeResponse = new ProductTypeResponseDTO("1", "FOOD");
+
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(typeResponse))
+        );
+
+        Mono<ProductTypeResponseDTO> result = productsServiceClient.getProductTypeByProductTypeId("1");
+
+        StepVerifier.create(result)
+                .expectNextMatches(type -> type.getProductTypeId().equals("1") && type.getTypeName().equals("FOOD"))
+                .verifyComplete();
+    }
+
+
+    @Test
+    void whenAddProductType_thenReturnCreatedType() throws JsonProcessingException {
+        ProductTypeResponseDTO typeResponse = new ProductTypeResponseDTO("3", "ACCESSORY");
+
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(typeResponse))
+        );
+
+        Mono<ProductTypeResponseDTO> result = productsServiceClient.createProductType(new ProductTypeRequestDTO("ACCESSORY"));
+
+        StepVerifier.create(result)
+                .expectNextMatches(type -> type.getProductTypeId().equals("3") && type.getTypeName().equals("ACCESSORY"))
+                .verifyComplete();
+    }
+
+
+    @Test
+    void whenUpdateProductType_thenReturnUpdatedType() throws JsonProcessingException {
+        ProductTypeResponseDTO typeResponse = new ProductTypeResponseDTO("2", "UPDATED_TYPE");
+
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(typeResponse))
+        );
+
+        Mono<ProductTypeResponseDTO> result = productsServiceClient.updateProductType("2", new ProductTypeRequestDTO("UPDATED_TYPE"));
+
+        StepVerifier.create(result)
+                .expectNextMatches(type -> type.getProductTypeId().equals("2") && type.getTypeName().equals("UPDATED_TYPE"))
+                .verifyComplete();
+    }
+
+
+    @Test
+    void whenDeleteProductType_thenReturnDeletedType() throws JsonProcessingException {
+        ProductTypeResponseDTO typeResponse = new ProductTypeResponseDTO("2", "EQUIPMENT");
+
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(typeResponse))
+        );
+
+        Mono<ProductTypeResponseDTO> result = productsServiceClient.deleteProductType("2");
+
+        StepVerifier.create(result)
+                .expectNextMatches(type -> type.getProductTypeId().equals("2") && type.getTypeName().equals("EQUIPMENT"))
+                .verifyComplete();
+    }
 
 }

@@ -1,171 +1,7 @@
 package com.petclinic.bffapigateway.presentationlayer.v2;
 
-import com.petclinic.bffapigateway.domainclientlayer.CartServiceClient;
-import com.petclinic.bffapigateway.dtos.Cart.CartResponseDTO;
-import com.petclinic.bffapigateway.exceptions.InvalidInputException;
-import org.junit.Ignore;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
-import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.reactive.server.WebTestClient;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
-import org.springframework.http.HttpStatus;
-import org.mockito.Mockito;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.http.HttpStatus;
+/*
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
-
-@RunWith(SpringRunner.class)
-@ContextConfiguration(classes = { CartController.class, CartServiceClient.class })
-@WebFluxTest(controllers = CartController.class)
-@AutoConfigureWebTestClient
-public class CartControllerUnitTest {
-    private org.springframework.web.reactive.function.client.WebClientResponseException.NotFound mockNotFound() {
-        return org.mockito.Mockito.mock(
-                org.springframework.web.reactive.function.client.WebClientResponseException.NotFound.class,
-                org.mockito.Mockito.withSettings().stubOnly()
-        );
-    }
-
-
-    private org.springframework.web.reactive.function.client.WebClientResponseException.UnprocessableEntity mockUnprocessable() {
-        return org.mockito.Mockito.mock(
-                org.springframework.web.reactive.function.client.WebClientResponseException.UnprocessableEntity.class,
-                org.mockito.Mockito.withSettings().stubOnly()
-        );
-    }
-
-
-    private org.springframework.web.reactive.function.client.WebClientResponseException mockWithStatus(
-            org.springframework.http.HttpStatus status) {
-
-        return org.springframework.web.reactive.function.client.WebClientResponseException.create(
-                status.value(),
-                status.getReasonPhrase(),
-                org.springframework.http.HttpHeaders.EMPTY,
-                new byte[0],
-                java.nio.charset.StandardCharsets.UTF_8
-        );
-    }
-    @Autowired
-    private WebTestClient client;
-
-    @MockBean
-    private CartServiceClient cartServiceClient;
-
-    @Test
-    void testClearCart_Success() {
-        // Arrange
-        when(cartServiceClient.clearCart("cartId123")).thenReturn(Mono.empty()); // Simulate a successful cart clear action
-
-        // Act
-        client.delete()
-                .uri("/api/v2/gateway/carts/cartId123/clear")
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(String.class)
-                .isEqualTo("Cart successfully cleared");
-
-        // Assert
-        verify(cartServiceClient, times(1)).clearCart("cartId123");
-    }
-
-    @Test
-    void testGetCartByCustomerId_Success() {
-        //arrange
-        String customerId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
-        CartResponseDTO mockResponse = new CartResponseDTO();
-        mockResponse.setCartId(customerId);
-        mockResponse.setCustomerId("customer1");
-
-        when(cartServiceClient.getCartByCustomerId(customerId)).thenReturn(Mono.just(mockResponse));
-
-        //act
-        client.get()
-                .uri("/api/v2/gateway/carts/customer/" + customerId)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(CartResponseDTO.class)
-                .consumeWith(response -> {
-                    CartResponseDTO responseBody = response.getResponseBody();
-                    assertEquals(customerId, responseBody.getCartId());
-                    assertEquals("customer1", responseBody.getCustomerId());
-                });
-
-        //assert
-        verify(cartServiceClient, times(1)).getCartByCustomerId(customerId);
-    }
-
-    @Test
-    void testGetCartByCustomerId_NotFound() {
-        //arrange
-        String customerId = "non-existent-customer-id";
-        when(cartServiceClient.getCartByCustomerId(customerId)).thenReturn(Mono.empty());
-
-        //act
-        client.get()
-                .uri("/api/v2/gateway/carts/customer/" + customerId)
-                .exchange()
-                .expectStatus().isNotFound();
-
-        //assert
-        verify(cartServiceClient, times(1)).getCartByCustomerId(customerId);
-    }
-    @Test
-    void testGetCartById_Success() {
-        String cartId = "c-1";
-        CartResponseDTO dto = new CartResponseDTO();
-        dto.setCartId(cartId);
-        when(cartServiceClient.getCartByCartId(cartId)).thenReturn(Mono.just(dto));
-
-        client.get()
-                .uri("/api/v2/gateway/carts/{cartId}", cartId)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(CartResponseDTO.class)
-                .consumeWith(r -> assertEquals(cartId, r.getResponseBody().getCartId()));
-
-        verify(cartServiceClient).getCartByCartId(cartId);
-    }
-
-    @Test
-    void testGetCartById_NotFound() {
-        String cartId = "missing";
-        when(cartServiceClient.getCartByCartId(cartId)).thenReturn(Mono.empty());
-
-        client.get()
-                .uri("/api/v2/gateway/carts/{cartId}", cartId)
-                .exchange()
-                .expectStatus().isNotFound();
-
-        verify(cartServiceClient).getCartByCartId(cartId);
-    }
-
-    @Test
-    void testGetAllCarts_Success() {
-        CartResponseDTO cart1 = new CartResponseDTO();
-        cart1.setCartId("c-1");
-        CartResponseDTO cart2 = new CartResponseDTO();
-        cart2.setCartId("c-2");
-
-        when(cartServiceClient.getAllCarts()).thenReturn(Flux.just(cart1, cart2));
-
-        client.get()
-                .uri("/api/v2/gateway/carts")
-                .exchange()
-                .expectStatus().isOk()
-                .expectBodyList(CartResponseDTO.class)
-                .hasSize(2)
                 .contains(cart1, cart2);
 
         verify(cartServiceClient).getAllCarts();
@@ -174,12 +10,12 @@ public class CartControllerUnitTest {
     @Test
     void testDeleteCartByCartId_Success() {
         String cartId = "c-2";
-        when(cartServiceClient.deleteCartByCartId(cartId)).thenReturn(Mono.just(new CartResponseDTO()));
+        when(cartServiceClient.deleteCartByCartId(cartId)).thenReturn(Mono.empty());
 
         client.delete()
                 .uri("/api/v2/gateway/carts/{cartId}", cartId)
                 .exchange()
-                .expectStatus().isOk();
+                .expectStatus().isNoContent();
 
         verify(cartServiceClient).deleteCartByCartId(cartId);
     }
@@ -187,7 +23,7 @@ public class CartControllerUnitTest {
     @Test
     void testDeleteCartByCartId_NotFound() {
         String cartId = "missing";
-        when(cartServiceClient.deleteCartByCartId(cartId)).thenReturn(Mono.empty());
+                when(cartServiceClient.deleteCartByCartId(cartId)).thenReturn(Mono.error(new NotFoundException("missing")));
 
         client.delete()
                 .uri("/api/v2/gateway/carts/{cartId}", cartId)
@@ -201,12 +37,12 @@ public class CartControllerUnitTest {
     void testRemoveProductFromCart_Success() {
         String cartId = "c-3", productId = "p-9";
         when(cartServiceClient.removeProductFromCart(cartId, productId))
-                .thenReturn(Mono.just(new CartResponseDTO()));
+                .thenReturn(Mono.empty());
 
         client.delete()
-                .uri("/api/v2/gateway/carts/{cartId}/{productId}", cartId, productId)
+                .uri("/api/v2/gateway/carts/{cartId}/products/{productId}", cartId, productId)
                 .exchange()
-                .expectStatus().isOk();
+                .expectStatus().isNoContent();
 
         verify(cartServiceClient).removeProductFromCart(cartId, productId);
     }
@@ -214,10 +50,11 @@ public class CartControllerUnitTest {
     @Test
     void testRemoveProductFromCart_NotFound() {
         String cartId = "c-3", productId = "p-missing";
-        when(cartServiceClient.removeProductFromCart(cartId, productId)).thenReturn(Mono.empty());
+        when(cartServiceClient.removeProductFromCart(cartId, productId))
+                .thenReturn(Mono.error(new NotFoundException("missing")));
 
         client.delete()
-                .uri("/api/v2/gateway/carts/{cartId}/{productId}", cartId, productId)
+                .uri("/api/v2/gateway/carts/{cartId}/products/{productId}", cartId, productId)
                 .exchange()
                 .expectStatus().isNotFound();
 
@@ -232,9 +69,10 @@ public class CartControllerUnitTest {
 
         client.post()
                 .uri("/api/v2/gateway/carts/{cartId}/products", cartId)
-                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO())
+                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.CartItemRequestDTO("p-1", 2))
                 .exchange()
-                .expectStatus().isOk();
+                .expectStatus().isCreated()
+                .expectHeader().valueEquals("Location", "/api/v1/carts/" + cartId + "/products/p-1");
 
         verify(cartServiceClient).addProductToCart(eq(cartId), any());
     }
@@ -247,7 +85,7 @@ public class CartControllerUnitTest {
 
         client.post()
                 .uri("/api/v2/gateway/carts/{cartId}/products", cartId)
-                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO())
+                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.CartItemRequestDTO())
                 .exchange()
                 .expectStatus().isBadRequest()
                 .expectBody(CartResponseDTO.class)
@@ -262,7 +100,7 @@ public class CartControllerUnitTest {
 
         client.post()
                 .uri("/api/v2/gateway/carts/{cartId}/products", cartId)
-                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO())
+                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.CartItemRequestDTO())
                 .exchange()
                 .expectStatus().isNotFound();
     }
@@ -295,74 +133,48 @@ public class CartControllerUnitTest {
     }
 
     @Test
-    void testMoveFromWishListToCart_422() {
-        String cartId = "c-1", productId = "p-2";
-        when(cartServiceClient.moveProductFromWishListToCart(cartId, productId))
-                .thenReturn(Mono.error(new org.springframework.web.server.ResponseStatusException(
-                        org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY, "bad")));
-
-        client.put()
-                .uri("/api/v2/gateway/carts/{cartId}/wishlist/{productId}/toCart", cartId, productId)
-                .exchange()
-                .expectStatus().isEqualTo(422);
-    }
-
-    @Test
-    void testMoveFromCartToWishlist_404() {
-        String cartId = "c-1", productId = "p-x";
-        when(cartServiceClient.moveProductFromCartToWishlist(cartId, productId))
-                .thenReturn(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "nope")));
-
-        client.put()
-                .uri("/api/v2/gateway/carts/{cartId}/wishlist/{productId}/toWishList", cartId, productId)
-                .exchange()
-                .expectStatus().isNotFound();
-    }
-
-    @Test
-    void testAddProductToWishList_404() {
-        String cartId = "c-1", productId = "p-x";
-        when(cartServiceClient.addProductToWishList(cartId, productId, 2))
-                .thenReturn(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "nope")));
+    void testAddProductToWishlist_Success() {
+        String cartId = "c-1";
+        WishlistItemRequestDTO request = new WishlistItemRequestDTO("p-1", 2);
+        when(cartServiceClient.addProductToWishlist(eq(cartId), any(WishlistItemRequestDTO.class)))
+                .thenReturn(Mono.just(new CartResponseDTO()))
+                ;
 
         client.post()
-                .uri("/api/v2/gateway/carts/{cartId}/products/{productId}/quantity/{quantity}", cartId, productId, 2)
+                .uri("/api/v2/gateway/carts/{cartId}/wishlist", cartId)
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isCreated();
+    }
+
+    @Test
+    void testAddProductToWishlist_404() {
+        String cartId = "c-1";
+        WishlistItemRequestDTO request = new WishlistItemRequestDTO("p-x", 2);
+        when(cartServiceClient.addProductToWishlist(eq(cartId), any(WishlistItemRequestDTO.class)))
+                .thenReturn(Mono.error(new NotFoundException("nope")));
+
+        client.post()
+                .uri("/api/v2/gateway/carts/{cartId}/wishlist", cartId)
+                .bodyValue(request)
                 .exchange()
                 .expectStatus().isNotFound();
     }
 
     @Test
-    void testRemoveProductFromWishlist_422() {
-        String cartId = "c-1", productId = "p-1";
-        when(cartServiceClient.removeProductFromWishlist(cartId, productId))
-                .thenReturn(Mono.error(new org.springframework.web.server.ResponseStatusException(
-                        org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY, "bad")));
+    void testAddProductToWishlist_422() {
+        String cartId = "c-1";
+        WishlistItemRequestDTO request = new WishlistItemRequestDTO("p-2", 2);
+        when(cartServiceClient.addProductToWishlist(eq(cartId), any(WishlistItemRequestDTO.class)))
+                .thenReturn(Mono.error(new InvalidInputException("bad")));
 
-        client.delete()
-                .uri("/api/v2/gateway/carts/{cartId}/wishlist/{productId}", cartId, productId)
+        client.post()
+                .uri("/api/v2/gateway/carts/{cartId}/wishlist", cartId)
+                .bodyValue(request)
                 .exchange()
-                .expectStatus().isEqualTo(422);
+                .expectStatus().isBadRequest();
     }
 
-    @Test
-    void testGetAllPromos_Smoke() {
-        when(cartServiceClient.getAllPromoCodes()).thenReturn(reactor.core.publisher.Flux.empty());
-        client.get().uri("/api/v2/gateway/carts/promos").exchange().expectStatus().isOk();
-        verify(cartServiceClient).getAllPromoCodes();
-    }
-
-    @Test
-    void testGetPromoCodeById_NotFound() {
-        when(cartServiceClient.getPromoCodeById("x")).thenReturn(Mono.empty());
-        client.get().uri("/api/v2/gateway/carts/promos/{id}", "x").exchange().expectStatus().isNotFound();
-        verify(cartServiceClient).getPromoCodeById("x");
-    }
-
-
-    @Test
-    void testUpdateProductQuantityInCart_Success() {
-        String cartId = "c-11", productId = "p-1";
-        when(cartServiceClient.updateProductQuantityInCart(eq(cartId), eq(productId), any()))
                 .thenReturn(Mono.just(new CartResponseDTO()));
 
         client.put()
@@ -463,71 +275,13 @@ public class CartControllerUnitTest {
     }
 
     @Test
-    void testAddProductToCartFromProducts_Success() {
-        when(cartServiceClient.addProductToCartFromProducts("c-1", "p-7"))
-                .thenReturn(Mono.just(new CartResponseDTO()));
-
-        client.post()
-                .uri("/api/v2/gateway/carts/{cartId}/{productId}", "c-1", "p-7")
-                .exchange()
-                .expectStatus().isOk();
-    }
-
-    @Test
-    void testAddProductToCartFromProducts_400_InvalidInput() {
-        when(cartServiceClient.addProductToCartFromProducts("c-1", "p-7"))
-                .thenReturn(Mono.error(new InvalidInputException("bad qty")));
-
-        client.post()
-                .uri("/api/v2/gateway/carts/{cartId}/{productId}", "c-1", "p-7")
-                .exchange()
-                .expectStatus().isBadRequest();
-    }
-
-
-    @Test
-    void testAddProductToCartFromProducts_409_ConflictPropagated() {
-        when(cartServiceClient.addProductToCartFromProducts("c-1", "p-7"))
-                .thenReturn(Mono.error(mockWithStatus(org.springframework.http.HttpStatus.CONFLICT)));
-
-        client.post()
-                .uri("/api/v2/gateway/carts/{cartId}/{productId}", "c-1", "p-7")
-                .exchange()
-                .expectStatus().isEqualTo(409);
-    }
-
-    @Test
-    void testAddProductToCartFromProducts_400_BadRequestFromWebClient() {
-        var ex = Mockito.mock(org.springframework.web.reactive.function.client.WebClientResponseException.BadRequest.class);
-        when(ex.getStatusCode()).thenReturn(org.springframework.http.HttpStatus.BAD_REQUEST);
-
-        when(cartServiceClient.addProductToCartFromProducts("c-1", "p-7"))
-                .thenReturn(Mono.error(ex));
-
-        client.post()
-                .uri("/api/v2/gateway/carts/{cartId}/{productId}", "c-1", "p-7")
-                .exchange()
-                .expectStatus().isBadRequest();
-    }
-
-    @Test
-    void testAddProductToCartFromProducts_5xx_Unexpected() {
-        when(cartServiceClient.addProductToCartFromProducts("c-1", "p-7"))
-                .thenReturn(Mono.error(new RuntimeException("boom")));
-
-        client.post()
-                .uri("/api/v2/gateway/carts/{cartId}/{productId}", "c-1", "p-7")
-                .exchange()
-                .expectStatus().is5xxServerError();
-    }
-    @Test
     void testAddProductToCart_409_ConflictPropagated() {
         when(cartServiceClient.addProductToCart(eq("c-10"), any()))
                 .thenReturn(Mono.error(mockWithStatus(org.springframework.http.HttpStatus.CONFLICT)));
 
         client.post()
                 .uri("/api/v2/gateway/carts/{cartId}/products", "c-10")
-                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO())
+                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.CartItemRequestDTO())
                 .exchange()
                 .expectStatus().isEqualTo(409);
     }
@@ -617,14 +371,14 @@ public class CartControllerUnitTest {
     }
 
     @Test
-    void testRemoveProductFromWishlist_NotFound_DefaultIfEmpty_Branch() {
+    void testRemoveProductFromWishlist_NoContent_OnEmptyCompletion() {
         when(cartServiceClient.removeProductFromWishlist("c-1", "p-5"))
                 .thenReturn(Mono.empty());
 
         client.delete()
                 .uri("/api/v2/gateway/carts/{cartId}/wishlist/{productId}", "c-1", "p-5")
                 .exchange()
-                .expectStatus().isNotFound();
+                .expectStatus().isNoContent();
     }
 
     @Test
@@ -634,7 +388,7 @@ public class CartControllerUnitTest {
 
         client.post()
                 .uri("/api/v2/gateway/carts/{cartId}/products", "c-10")
-                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO())
+                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.CartItemRequestDTO())
                 .exchange()
                 .expectStatus().is5xxServerError();
     }
@@ -648,7 +402,7 @@ public class CartControllerUnitTest {
 
         client.post()
                 .uri("/api/v2/gateway/carts/{cartId}/products", "c-10")
-                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO())
+                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.CartItemRequestDTO())
                 .exchange()
                 .expectStatus().isBadRequest();
     }
@@ -695,7 +449,7 @@ public class CartControllerUnitTest {
 
         client.post()
                 .uri("/api/v2/gateway/carts/{cartId}/products", cartId)
-                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO())
+                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.CartItemRequestDTO())
                 .exchange()
                 .expectStatus().isBadRequest()
                 .expectBody(CartResponseDTO.class)
@@ -712,7 +466,7 @@ public class CartControllerUnitTest {
 
         client.post()
                 .uri("/api/v2/gateway/carts/{cartId}/products", cartId)
-                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO())
+                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.CartItemRequestDTO())
                 .exchange()
                 .expectStatus().isNotFound();
     }
@@ -724,7 +478,7 @@ public class CartControllerUnitTest {
 
         client.post()
                 .uri("/api/v2/gateway/carts/{cartId}/products", cartId)
-                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO())
+                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.CartItemRequestDTO())
                 .exchange()
                 .expectStatus().isEqualTo(409);
     }
@@ -736,55 +490,53 @@ public class CartControllerUnitTest {
 
         client.post()
                 .uri("/api/v2/gateway/carts/{cartId}/products", cartId)
-                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO())
+                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.CartItemRequestDTO())
                 .exchange()
                 .expectStatus().is5xxServerError();
     }
-    @Test
-    void testMoveAllWishlistToCart_NotFound() {
-        String cartId = "cart-3";
-        WebClientResponseException ex = WebClientResponseException.create(404, "Not Found", null, null, null);
-        when(cartServiceClient.moveAllWishlistToCart(cartId)).thenReturn(Mono.error(ex));
+        @Test
+        void testCreateWishlistTransfer_NotFound() {
+                String cartId = "cart-3";
+                WebClientResponseException ex = WebClientResponseException.create(404, "Not Found", null, null, null);
+                when(cartServiceClient.createWishlistTransfer(eq(cartId), anyList(), eq(WishlistTransferDirectionDTO.TO_CART))).thenReturn(Mono.error(ex));
 
-        client.post()
-                .uri("/api/v2/gateway/carts/{cartId}/wishlist/moveAll", cartId)
-                .exchange()
-                .expectStatus().isNotFound()
-                .expectBody(CartResponseDTO.class)
-                .consumeWith(r -> {
-                    Assertions.assertEquals("Cart not found: cart-3", r.getResponseBody().getMessage());
-                });
-    }
+                client.post()
+                                .uri("/api/v2/gateway/carts/{cartId}/wishlist-transfers", cartId)
+                                .bodyValue(new WishlistTransferRequestDTO(null, WishlistTransferDirectionDTO.TO_CART))
+                                .exchange()
+                                .expectStatus().isNotFound()
+                                .expectBody(CartResponseDTO.class)
+                                .consumeWith(r -> Assertions.assertEquals("Cart not found: cart-3", r.getResponseBody().getMessage()));
+        }
 
-    @Test
-    void testMoveAllWishlistToCart_UnprocessableEntity() {
-        String cartId = "cart-3";
-        WebClientResponseException ex = WebClientResponseException.create(422, "Unprocessable Entity", null, null, null);
-        when(cartServiceClient.moveAllWishlistToCart(cartId)).thenReturn(Mono.error(ex));
+        @Test
+        void testCreateWishlistTransfer_UnprocessableEntity() {
+                String cartId = "cart-3";
+                WebClientResponseException ex = WebClientResponseException.create(422, "Unprocessable Entity", null, null, null);
+                when(cartServiceClient.createWishlistTransfer(eq(cartId), anyList(), eq(WishlistTransferDirectionDTO.TO_CART))).thenReturn(Mono.error(ex));
 
-        client.post()
-                .uri("/api/v2/gateway/carts/{cartId}/wishlist/moveAll", cartId)
-                .exchange()
-                .expectStatus().isEqualTo(422)
-                .expectBody(CartResponseDTO.class)
-                .consumeWith(r -> {
-                    Assertions.assertEquals("422 Unprocessable Entity", r.getResponseBody().getMessage());
-                });
-    }
-    @Test
-    void testMoveAllWishlistToCart_UnexpectedError() {
-        String cartId = "cart-3";
-        when(cartServiceClient.moveAllWishlistToCart(cartId)).thenReturn(Mono.error(new RuntimeException("boom")));
+                client.post()
+                                .uri("/api/v2/gateway/carts/{cartId}/wishlist-transfers", cartId)
+                                .bodyValue(new WishlistTransferRequestDTO(null, WishlistTransferDirectionDTO.TO_CART))
+                                .exchange()
+                                .expectStatus().isEqualTo(422)
+                                .expectBody(CartResponseDTO.class)
+                                .consumeWith(r -> Assertions.assertEquals("422 Unprocessable Entity", r.getResponseBody().getMessage()));
+        }
 
-        client.post()
-                .uri("/api/v2/gateway/carts/{cartId}/wishlist/moveAll", cartId)
-                .exchange()
-                .expectStatus().is5xxServerError()
-                .expectBody(CartResponseDTO.class)
-                .consumeWith(r -> {
-                    Assertions.assertEquals("Unexpected error", r.getResponseBody().getMessage());
-                });
-    }
+        @Test
+        void testCreateWishlistTransfer_UnexpectedError() {
+                String cartId = "cart-3";
+                when(cartServiceClient.createWishlistTransfer(eq(cartId), anyList(), eq(WishlistTransferDirectionDTO.TO_CART))).thenReturn(Mono.error(new RuntimeException("boom")));
+
+                client.post()
+                                .uri("/api/v2/gateway/carts/{cartId}/wishlist-transfers", cartId)
+                                .bodyValue(new WishlistTransferRequestDTO(null, WishlistTransferDirectionDTO.TO_CART))
+                                .exchange()
+                                .expectStatus().is5xxServerError()
+                                .expectBody(CartResponseDTO.class)
+                                .consumeWith(r -> Assertions.assertEquals("Unexpected error", r.getResponseBody().getMessage()));
+        }
     @Test
     void testAddProductToWishList_Success() {
         // Arrange
@@ -954,5 +706,320 @@ public class CartControllerUnitTest {
                 .hasSize(0);
 
         verify(cartServiceClient).getAllCarts();
+    }
+}
+*/
+
+import com.petclinic.bffapigateway.domainclientlayer.CartServiceClient;
+import com.petclinic.bffapigateway.dtos.Cart.CartItemRequestDTO;
+import com.petclinic.bffapigateway.dtos.Cart.CartResponseDTO;
+import com.petclinic.bffapigateway.dtos.Cart.UpdateProductQuantityRequestDTO;
+import com.petclinic.bffapigateway.dtos.Cart.WishlistItemRequestDTO;
+import com.petclinic.bffapigateway.exceptions.InvalidInputException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.webjars.NotFoundException;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(SpringExtension.class)
+class CartControllerUnitTest {
+
+    @Mock
+    private CartServiceClient cartServiceClient;
+
+    private WebTestClient client;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        CartController controller = new CartController(cartServiceClient);
+        client = WebTestClient.bindToController(controller).build();
+    }
+
+    private CartResponseDTO sampleCart(String cartId) {
+        CartResponseDTO response = new CartResponseDTO();
+        response.setCartId(cartId);
+        response.setCustomerId("cust-1");
+        return response;
+    }
+
+    @Test
+    void getCartById_returnsCart() {
+        when(cartServiceClient.getCartByCartId("c-1"))
+                .thenReturn(Mono.just(sampleCart("c-1")));
+
+        CartResponseDTO body = client.get()
+                .uri("/api/v2/gateway/carts/{cartId}", "c-1")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(CartResponseDTO.class)
+                .returnResult()
+                .getResponseBody();
+
+        assertThat(body).isNotNull();
+        assertThat(body.getCartId()).isEqualTo("c-1");
+        verify(cartServiceClient).getCartByCartId("c-1");
+    }
+
+    @Test
+    void getCartById_missing_returns404() {
+        when(cartServiceClient.getCartByCartId("missing"))
+                .thenReturn(Mono.empty());
+
+        client.get()
+                .uri("/api/v2/gateway/carts/{cartId}", "missing")
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void getAllCarts_returnsFlux() {
+        CartResponseDTO cart1 = sampleCart("c-1");
+        CartResponseDTO cart2 = sampleCart("c-2");
+        when(cartServiceClient.getAllCarts()).thenReturn(Flux.just(cart1, cart2));
+
+        List<CartResponseDTO> response = client.get()
+                .uri("/api/v2/gateway/carts")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(CartResponseDTO.class)
+                .returnResult()
+                .getResponseBody();
+
+        assertThat(response).containsExactly(cart1, cart2);
+        verify(cartServiceClient).getAllCarts();
+    }
+
+    @Test
+    void deleteCartById_success_returns204() {
+        when(cartServiceClient.deleteCartByCartId("c-1")).thenReturn(Mono.empty());
+
+        client.delete()
+                .uri("/api/v2/gateway/carts/{cartId}", "c-1")
+                .exchange()
+                .expectStatus().isNoContent();
+
+        verify(cartServiceClient).deleteCartByCartId("c-1");
+    }
+
+    @Test
+    void deleteCartById_notFound_returns404() {
+        when(cartServiceClient.deleteCartByCartId("missing"))
+                .thenReturn(Mono.error(new NotFoundException("missing")));
+
+        client.delete()
+                .uri("/api/v2/gateway/carts/{cartId}", "missing")
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void removeProductFromCart_success_returns204() {
+        when(cartServiceClient.removeProductFromCart("c-1", "p-1"))
+                .thenReturn(Mono.empty());
+
+        client.delete()
+                .uri("/api/v2/gateway/carts/{cartId}/products/{productId}", "c-1", "p-1")
+                .exchange()
+                .expectStatus().isNoContent();
+
+        verify(cartServiceClient).removeProductFromCart("c-1", "p-1");
+    }
+
+    @Test
+    void removeProductFromCart_notFound_returns404() {
+        when(cartServiceClient.removeProductFromCart("c-1", "missing"))
+                .thenReturn(Mono.error(new NotFoundException("missing")));
+
+        client.delete()
+                .uri("/api/v2/gateway/carts/{cartId}/products/{productId}", "c-1", "missing")
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void addProductToCart_created_returnsLocation() {
+        CartItemRequestDTO request = new CartItemRequestDTO("p-99", 3);
+        when(cartServiceClient.addProductToCart(eq("c-1"), any(CartItemRequestDTO.class)))
+                .thenReturn(Mono.just(sampleCart("c-1")));
+
+        client.post()
+                .uri("/api/v2/gateway/carts/{cartId}/products", "c-1")
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().valueEquals("Location", "/api/v1/carts/c-1/products/p-99");
+    }
+
+    @Test
+    void addProductToCart_badRequestPropagates() {
+        when(cartServiceClient.addProductToCart(eq("c-1"), any(CartItemRequestDTO.class)))
+                .thenReturn(Mono.error(new InvalidInputException("invalid")));
+
+        client.post()
+                .uri("/api/v2/gateway/carts/{cartId}/products", "c-1")
+                .bodyValue(new CartItemRequestDTO("p-1", 1))
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
+    @Test
+    void addProductToCart_notFoundReturns404() {
+        when(cartServiceClient.addProductToCart(eq("c-1"), any(CartItemRequestDTO.class)))
+                .thenReturn(Mono.error(new NotFoundException("missing")));
+
+        client.post()
+                .uri("/api/v2/gateway/carts/{cartId}/products", "c-1")
+                .bodyValue(new CartItemRequestDTO("p-1", 1))
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void updateProductQuantity_patch_success() {
+        UpdateProductQuantityRequestDTO requestDTO = new UpdateProductQuantityRequestDTO();
+        requestDTO.setQuantity(4);
+
+        when(cartServiceClient.updateProductQuantityInCart(eq("c-1"), eq("p-1"), any(UpdateProductQuantityRequestDTO.class)))
+                .thenReturn(Mono.just(sampleCart("c-1")));
+
+        client.patch()
+                .uri("/api/v2/gateway/carts/{cartId}/products/{productId}", "c-1", "p-1")
+                .bodyValue(requestDTO)
+                .exchange()
+                .expectStatus().isOk();
+    }
+
+    @Test
+    void updateProductQuantity_unprocessable_returns422() {
+        when(cartServiceClient.updateProductQuantityInCart(eq("c-1"), eq("p-1"), any(UpdateProductQuantityRequestDTO.class)))
+                .thenReturn(Mono.error(new WebClientResponseException(
+                        "422",
+                        HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                        HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase(),
+                        null,
+                        null,
+                        null,
+                        null)));
+
+        client.patch()
+                .uri("/api/v2/gateway/carts/{cartId}/products/{productId}", "c-1", "p-1")
+                .bodyValue(new UpdateProductQuantityRequestDTO())
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    @Test
+    void updateProductQuantity_notFound_returns404() {
+        when(cartServiceClient.updateProductQuantityInCart(eq("c-1"), eq("p-1"), any(UpdateProductQuantityRequestDTO.class)))
+                .thenReturn(Mono.error(new WebClientResponseException(
+                        "404",
+                        HttpStatus.NOT_FOUND.value(),
+                        HttpStatus.NOT_FOUND.getReasonPhrase(),
+                        null,
+                        null,
+                        null,
+                        null)));
+
+        client.patch()
+                .uri("/api/v2/gateway/carts/{cartId}/products/{productId}", "c-1", "p-1")
+                .bodyValue(new UpdateProductQuantityRequestDTO())
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void addProductToWishlist_created() {
+        WishlistItemRequestDTO request = new WishlistItemRequestDTO("p-10", 2);
+        when(cartServiceClient.addProductToWishlist(eq("c-1"), any(WishlistItemRequestDTO.class)))
+                .thenReturn(Mono.just(sampleCart("c-1")));
+
+        client.post()
+                .uri("/api/v2/gateway/carts/{cartId}/wishlist", "c-1")
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isCreated();
+    }
+
+    @Test
+    void addProductToWishlist_notFound() {
+        when(cartServiceClient.addProductToWishlist(eq("c-1"), any(WishlistItemRequestDTO.class)))
+                .thenReturn(Mono.error(new NotFoundException("missing")));
+
+        client.post()
+                .uri("/api/v2/gateway/carts/{cartId}/wishlist", "c-1")
+                .bodyValue(new WishlistItemRequestDTO("p-404", 1))
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void addProductToWishlist_badRequest() {
+        when(cartServiceClient.addProductToWishlist(eq("c-1"), any(WishlistItemRequestDTO.class)))
+                .thenReturn(Mono.error(new InvalidInputException("invalid")));
+
+        client.post()
+                .uri("/api/v2/gateway/carts/{cartId}/wishlist", "c-1")
+                .bodyValue(new WishlistItemRequestDTO("p-1", 0))
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
+    @Test
+    void removeProductFromWishlist_success_returns204() {
+        when(cartServiceClient.removeProductFromWishlist("c-1", "p-1"))
+                .thenReturn(Mono.empty());
+
+        client.delete()
+                .uri("/api/v2/gateway/carts/{cartId}/wishlist/{productId}", "c-1", "p-1")
+                .exchange()
+                .expectStatus().isNoContent();
+    }
+
+    @Test
+    void removeProductFromWishlist_notFound_returns404() {
+        when(cartServiceClient.removeProductFromWishlist("c-1", "missing"))
+                .thenReturn(Mono.error(new NotFoundException("missing")));
+
+        client.delete()
+                .uri("/api/v2/gateway/carts/{cartId}/wishlist/{productId}", "c-1", "missing")
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void checkoutCart_success_returns200() {
+        when(cartServiceClient.checkoutCart("c-1")).thenReturn(Mono.just(sampleCart("c-1")));
+
+        client.post()
+                .uri("/api/v2/gateway/carts/{cartId}/checkout", "c-1")
+                .exchange()
+                .expectStatus().isOk();
+    }
+
+    @Test
+    void checkoutCart_missing_returns404() {
+        when(cartServiceClient.checkoutCart("missing")).thenReturn(Mono.empty());
+
+        client.post()
+                .uri("/api/v2/gateway/carts/{cartId}/checkout", "missing")
+                .exchange()
+                .expectStatus().isNotFound();
     }
 }

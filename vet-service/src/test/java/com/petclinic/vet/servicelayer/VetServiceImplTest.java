@@ -3,10 +3,14 @@ package com.petclinic.vet.servicelayer;
 import com.petclinic.vet.businesslayer.photos.PhotoService;
 import com.petclinic.vet.businesslayer.vets.VetService;
 import com.petclinic.vet.dataaccesslayer.photos.PhotoRepository;
+import com.petclinic.vet.dataaccesslayer.vets.Specialty;
 import com.petclinic.vet.dataaccesslayer.vets.Vet;
 import com.petclinic.vet.dataaccesslayer.vets.VetRepository;
+import com.petclinic.vet.domainclientlayer.FilesServiceClient;
+import com.petclinic.vet.presentationlayer.vets.SpecialtyDTO;
 import com.petclinic.vet.presentationlayer.vets.VetRequestDTO;
 import com.petclinic.vet.presentationlayer.vets.VetResponseDTO;
+import com.petclinic.vet.utils.exceptions.NotFoundException;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +25,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -38,6 +43,8 @@ class VetServiceImplTest {
 
     @MockBean
     VetRepository vetRepository;
+    @MockBean
+    FilesServiceClient filesServiceClient;
     //To counter missing bean error
     @MockBean
     ConnectionFactoryInitializer connectionFactoryInitializer;
@@ -73,6 +80,7 @@ class VetServiceImplTest {
                 .verifyComplete();
     }
 
+    // the assertions in the two tests below (create and update) are never actually being run
     @Test
     void createVet() {
         vetService.addVet(Mono.just(vetRequestDTO))
@@ -85,6 +93,7 @@ class VetServiceImplTest {
                     assertEquals(vetDTO1.getWorkday(), vetRequestDTO.getWorkday());
                     assertEquals(vetDTO1.getPhoneNumber(), vetRequestDTO.getPhoneNumber());
                     assertEquals(vetDTO1.getSpecialties(), vetRequestDTO.getSpecialties());
+                    assertEquals("test1", "test2"); // this should fail, but it doesn't
                     return vetDTO1;
                 });
     }
@@ -105,6 +114,7 @@ class VetServiceImplTest {
                     assertEquals(vetDTO1.getWorkday(), vetRequestDTO.getWorkday());
                     assertEquals(vetDTO1.getPhoneNumber(), vetRequestDTO.getPhoneNumber());
                     assertEquals(vetDTO1.getSpecialties(), vetRequestDTO.getSpecialties());
+                    assertEquals("test1", "test2"); // this should fail, but it doesn't
                     return vetDTO1;
                 });
     }
@@ -212,13 +222,17 @@ class VetServiceImplTest {
 
     @Test
     void deleteVet() {
-        when(vetRepository.findVetByVetId(anyString())).thenReturn(Mono.just(vet));
-        when(vetRepository.delete(any())).thenReturn(Mono.empty());
 
-        Mono<Void> deletedVet=vetService.deleteVetByVetId(VET_ID);
+        vet.setActive(true);
+
+        when(vetRepository.findVetByVetId(anyString())).thenReturn(Mono.just(vet));
+        when(vetRepository.save(any())).thenReturn(Mono.just(vet));
+
+        Mono<VetResponseDTO> deletedVet=vetService.deleteVetByVetId(VET_ID);
 
         StepVerifier
                 .create(deletedVet)
+                .expectNextMatches(responseDTO -> !responseDTO.isActive())
                 .verifyComplete();
     }
 
@@ -294,6 +308,144 @@ class VetServiceImplTest {
                 .specialties(new HashSet<>())
                 .active(true)
                 .build();
+    }
+
+    @Test
+    void deleteSpecialtyBySpecialtyId_Success() {
+        String vetId = "test-vet-id";
+        String specialtyId = "test-specialty-id";
+        
+        Specialty specialty = Specialty.builder()
+                .specialtyId(specialtyId)
+                .name("radiology")
+                .build();
+        
+        Set<Specialty> specialties = new HashSet<>();
+        specialties.add(specialty);
+        
+        Vet vet = Vet.builder()
+                .vetId(vetId)
+                .vetBillId("test-bill-id")
+                .firstName("Test")
+                .lastName("Vet")
+                .email("test@vet.com")
+                .phoneNumber("123-456-7890")
+                .specialties(specialties)
+                .build();
+        
+        when(vetRepository.findVetByVetId(vetId)).thenReturn(Mono.just(vet));
+        when(vetRepository.save(any(Vet.class))).thenReturn(Mono.just(vet));
+        
+        StepVerifier.create(vetService.deleteSpecialtiesBySpecialtyId(vetId, specialtyId))
+                .verifyComplete();
+        
+        verify(vetRepository, times(1)).findVetByVetId(vetId);
+        verify(vetRepository, times(1)).save(any(Vet.class));
+    }
+
+    @Test
+    void deleteSpecialtyBySpecialtyId_VetNotFound() {
+        String vetId = "non-existent-vet-id";
+        String specialtyId = "test-specialty-id";
+        
+        when(vetRepository.findVetByVetId(vetId)).thenReturn(Mono.empty());
+        
+        StepVerifier.create(vetService.deleteSpecialtiesBySpecialtyId(vetId, specialtyId))
+                .expectErrorMatches(throwable -> 
+                    throwable instanceof NotFoundException &&
+                    throwable.getMessage().contains("No vet found with vetId: " + vetId))
+                .verify();
+        
+        verify(vetRepository, times(1)).findVetByVetId(vetId);
+        verify(vetRepository, never()).save(any(Vet.class));
+    }
+
+    @Test
+    void deleteSpecialtyBySpecialtyId_SpecialtyNotFound() {
+        String vetId = "test-vet-id";
+        String specialtyId = "non-existent-specialty-id";
+        
+        Specialty specialty = Specialty.builder()
+                .specialtyId("different-specialty-id")
+                .name("radiology")
+                .build();
+        
+        Set<Specialty> specialties = new HashSet<>();
+        specialties.add(specialty);
+        
+        Vet vet = Vet.builder()
+                .vetId(vetId)
+                .vetBillId("test-bill-id")
+                .firstName("Test")
+                .lastName("Vet")
+                .email("test@vet.com")
+                .phoneNumber("123-456-7890")
+                .specialties(specialties)
+                .build();
+        
+        when(vetRepository.findVetByVetId(vetId)).thenReturn(Mono.just(vet));
+        
+        StepVerifier.create(vetService.deleteSpecialtiesBySpecialtyId(vetId, specialtyId))
+                .expectErrorMatches(throwable -> 
+                    throwable instanceof NotFoundException &&
+                    throwable.getMessage().contains("No specialty found with specialtyId: " + specialtyId))
+                .verify();
+        
+        verify(vetRepository, times(1)).findVetByVetId(vetId);
+        verify(vetRepository, never()).save(any(Vet.class));
+    }
+
+    @Test
+    void addSpecialtiesByVetId_Success() {
+        String vetId = "test-vet-id";
+        
+        SpecialtyDTO specialtyDTO = SpecialtyDTO.builder()
+                .specialtyId("")
+                .name("surgery")
+                .build();
+        
+        Vet vet = Vet.builder()
+                .vetId(vetId)
+                .vetBillId("test-bill-id")
+                .firstName("Test")
+                .lastName("Vet")
+                .email("test@vet.com")
+                .phoneNumber("123-456-7890")
+                .specialties(new HashSet<>())
+                .build();
+        
+        when(vetRepository.findVetByVetId(vetId)).thenReturn(Mono.just(vet));
+        when(vetRepository.save(any(Vet.class))).thenReturn(Mono.just(vet));
+        
+        StepVerifier.create(vetService.addSpecialtiesByVetId(vetId, Mono.just(specialtyDTO)))
+                .expectNextMatches(response -> 
+                    response.getVetId().equals(vetId) &&
+                    response.getSpecialties().size() == 1)
+                .verifyComplete();
+        
+        verify(vetRepository, times(1)).findVetByVetId(vetId);
+        verify(vetRepository, times(1)).save(any(Vet.class));
+    }
+
+    @Test
+    void addSpecialtiesByVetId_VetNotFound() {
+        String vetId = "non-existent-vet-id";
+        
+        SpecialtyDTO specialtyDTO = SpecialtyDTO.builder()
+                .specialtyId("")
+                .name("surgery")
+                .build();
+        
+        when(vetRepository.findVetByVetId(vetId)).thenReturn(Mono.empty());
+        
+        StepVerifier.create(vetService.addSpecialtiesByVetId(vetId, Mono.just(specialtyDTO)))
+                .expectErrorMatches(throwable -> 
+                    throwable instanceof NotFoundException &&
+                    throwable.getMessage().contains("Vet not found with id: " + vetId))
+                .verify();
+        
+        verify(vetRepository, times(1)).findVetByVetId(vetId);
+        verify(vetRepository, never()).save(any(Vet.class));
     }
 
 }

@@ -1,3 +1,4 @@
+---
 server.port: 7002
 
 server:
@@ -47,12 +48,13 @@ spring:
 #  password: pc
 
 spring.datasource.hikari.initializationFailTimeout: 60000
-
-
-
 ---
 spring.profiles: docker
-
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus
 spring:
   datasource:
     platform: mysql

@@ -71,7 +71,9 @@ const AllOwners: React.FC = (): JSX.Element => {
     return Object.keys(filter).every(key => {
       if (!filter[key]) return true;
       if (!isKeyOfOwnerResponseModel(key)) return true;
-      return owner[key].toString().includes(filter[key].toString());
+      const ownerValue = owner[key];
+      if (ownerValue === undefined || ownerValue === null) return false;
+      return ownerValue.toString().includes(filter[key].toString());
     });
   });
 

@@ -1,3 +1,4 @@
+---
 server.port: 7001
 server.error.include-message: always
 
@@ -14,6 +15,9 @@ app:
   mailer-service:
     host: localhost
     port: 8888
+  files-service:
+    host: localhost
+    port: 8000
 
 
 logging:
@@ -44,6 +48,11 @@ spring:
       username: root
       password: password
       authentication-database: admin
+
+app:
+  files-service:
+    host: files-service
+    port: 8000
 ---
 spring:
   config:
@@ -54,8 +63,8 @@ spring:
       host: mongo-visits
       port: 27017
       database: visits
-      username: root
-      password: password
+      username: ${DB_USER}
+      password: ${DB_PASSWORD}
       authentication-database: admin
 
 ---
@@ -63,7 +72,11 @@ spring:
   config:
     activate:
       on-profile: docker
-
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus
 app:
   vet-service:
     host: vet-service
@@ -77,6 +90,9 @@ app:
   mailer-service:
     host: mailer-service
     port: 8080
+  files-service:
+    host: files-service
+    port: 8000
 
 logging:
   level:

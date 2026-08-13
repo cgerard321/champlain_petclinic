@@ -18,7 +18,6 @@ public class BillRequestDTO {
     private BillStatus billStatus;
     private LocalDate dueDate;
 
-
     public BillRequestDTO(String customerId, String visitType, String vetId, LocalDate date, BigDecimal amount, BillStatus billStatus, LocalDate dueDate)
  {
         this.customerId = customerId;

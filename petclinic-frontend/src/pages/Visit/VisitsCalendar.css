@@ -1,0 +1,93 @@
+:root {
+  --page-bg-clr: #f0f2f5;
+  --page-accent-clr: #0d6efd;
+  --page-border-clr: #dee2e6;
+  --page-text-clr: #495057;
+  --page-hover-clr: #e9ecef;
+}
+
+.customer-page {
+  --page-accent-clr: #4a90e2;     
+  --page-border-clr: #dee2e6;      
+}
+
+.visits-calendar-page {
+  min-height: 100vh;
+  background-color: var(--page-bg-clr);
+}
+ 
+.visits-calendar-page .page-container {
+  padding: 20px;
+  max-width: 100%;
+}
+ 
+.calendar-navigation {
+  margin-bottom: 20px;
+}
+ 
+.back-to-list-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  font-weight: 500;
+  transition: all 0.2s ease-out;
+  border: 1px solid var(--page-border-clr);
+  background: white;
+  color: var(--page-text-clr);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+ 
+.back-to-list-btn svg {
+  font-size: 16px;
+}
+ 
+.back-to-list-btn:hover {
+  transform: translateX(-2px);
+  box-shadow: -2px 2px 8px rgba(0, 0, 0, 0.1);
+  border-color: var(--page-accent-clr);
+  color: var(--page-accent-clr);
+  background: white;
+}
+
+.back-to-list-btn:active {
+  transform: translateX(-1px);
+}
+
+.customer-page .back-to-list-btn:hover {
+  box-shadow: -2px 2px 8px rgba(74, 144, 226, 0.15);
+}
+ 
+@media (max-width: 768px) {
+  .visits-calendar-page .page-container {
+    padding: 10px;
+  }
+ 
+  .back-to-list-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .calendar-navigation {
+    margin-bottom: 15px;
+  }
+
+  .back-to-list-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+}
+
+@media print {
+  .calendar-navigation {
+    display: none;
+  }
+
+  .visits-calendar-page {
+    background: white;
+  }
+}

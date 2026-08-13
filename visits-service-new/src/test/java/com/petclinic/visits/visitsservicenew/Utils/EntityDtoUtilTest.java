@@ -42,17 +42,6 @@ public class EntityDtoUtilTest {
     String testPetUUID = UUID.randomUUID().toString();
 
     @Test
-    public void testGenerateVisitIdString() {
-        String visitId = entityDtoUtil.generateVisitIdString();
-
-        // Assert that the generated visitId is not null
-        assertNotNull(visitId);
-
-        // Assert that the visitId is in UUID format
-        assertTrue(visitId.matches("^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"));
-    }
-
-    @Test
     public void testToVisitEntity() {
 
         VisitRequestDTO requestDTO = new VisitRequestDTO();

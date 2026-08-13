@@ -95,6 +95,7 @@ public class AuthServiceClient {
                 .bodyToMono(UserDetails.class);
     }
 
+    //TODO username is unique so it should be a mono, not a flux
     public Flux<UserDetails> getUsersByUsername(String jwtToken, String username) {
         return webClientBuilder
                 .baseUrl(authServiceUrl)
@@ -123,85 +124,38 @@ public class AuthServiceClient {
     This shit is beyond cursed, but I do not care. This works, I only spent 6 HOURS OF MY LIFE.
      */
     public Mono<OwnerResponseDTO> createUser(Mono<Register> model) {
-
-        String uuid = UUID.randomUUID().toString();
-
         return model.flatMap(register -> {
-                    register.setUserId(uuid);
-                    return webClientBuilder.build().post()
-                            .uri(authServiceUrl + "/users")
-                            .body(Mono.just(register), Register.class)
-                            .accept(MediaType.APPLICATION_JSON)
-                            .retrieve()
-                            .onStatus(HttpStatusCode::is4xxClientError,
-                                    n -> rethrower.rethrow(n,
-                                            x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
-                            )
-                            .bodyToMono(UserPasswordLessDTO.class)
-                            .flatMap(userDetails -> {
-                                        OwnerRequestDTO ownerRequestDTO = OwnerRequestDTO.builder()
-                                                .firstName(register.getOwner().getFirstName())
-                                                .lastName(register.getOwner().getLastName())
-                                                .address(register.getOwner().getAddress())
-                                                .city(register.getOwner().getCity())
-                                                .province(register.getOwner().getProvince())
-                                                .telephone(register.getOwner().getTelephone())
-                                                .ownerId(uuid)
-                                                .build();
-                                        return customersServiceClient.createOwner(ownerRequestDTO);
-                                    }
-                            );
-                }
-        ).doOnError(throwable -> {
-            log.error("Error creating user: " + throwable.getMessage());
-            customersServiceClient.deleteOwner(uuid);
-        });
+            OwnerRequestDTO ownerRequestDTO = OwnerRequestDTO.builder()
+                    .firstName(register.getOwner().getFirstName())
+                    .lastName(register.getOwner().getLastName())
+                    .address(register.getOwner().getAddress())
+                    .city(register.getOwner().getCity())
+                    .province(register.getOwner().getProvince())
+                    .telephone(register.getOwner().getTelephone())
+                    .build();
 
-    }
+            return customersServiceClient.createOwner(Mono.just(ownerRequestDTO)).flatMap(ownerResponseDTO -> {
+                        register.setUserId(ownerResponseDTO.getOwnerId());
 
-    public Mono<OwnerResponseDTO> createUserUsingV2Endpoint(Mono<Register> model) {
-
-        String uuid = UUID.randomUUID().toString();
-
-        return model.flatMap(register -> {
-            register.setUserId(uuid);
-            return webClientBuilder.build().post()
-                    .uri(authServiceUrl + "/users")
-                    .body(Mono.just(register), Register.class)
-                    .accept(MediaType.APPLICATION_JSON)
-                    .retrieve()
-                    .onStatus(HttpStatusCode::is4xxClientError,
-                            n -> rethrower.rethrow(n,
-                                    x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
-                    )
-                    .bodyToMono(UserPasswordLessDTO.class)
-                    .flatMap(userDetails -> {
-                        Mono<OwnerRequestDTO> ownerRequestDTO = Mono.just(OwnerRequestDTO.builder()
-                                .firstName(register.getOwner().getFirstName())
-                                .lastName(register.getOwner().getLastName())
-                                .address(register.getOwner().getAddress())
-                                .city(register.getOwner().getCity())
-                                .province(register.getOwner().getProvince())
-                                .telephone(register.getOwner().getTelephone())
-                                .ownerId(uuid)
-                                .build());
-
-                        return customersServiceClient.addOwner(ownerRequestDTO)
-                                .flatMap(ownerResponse -> {
-                                    String customerId = ownerResponse.getOwnerId();
-
-                                    //call cartServiceClient and pass customerId as a parameter in the URL
-                                    return cartServiceClient.assignCartToUser(customerId)
-                                            .thenReturn(ownerResponse);
+                        return webClientBuilder.build().post()
+                                .uri(authServiceUrl + "/users")
+                                .body(Mono.just(register), Register.class)
+                                .accept(MediaType.APPLICATION_JSON)
+                                .retrieve()
+                                .onStatus(HttpStatusCode::is4xxClientError,
+                                        n -> rethrower.rethrow(n,
+                                                x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
+                                )
+                                .bodyToMono(UserPasswordLessDTO.class)
+                                .thenReturn(ownerResponseDTO)
+                                .doOnError(throwable -> {
+                                    log.error("Error creating user: " + throwable.getMessage());
+                                    customersServiceClient.deleteOwner(ownerResponseDTO.getOwnerId());
                                 });
-
-                    });
-        }).doOnError(throwable -> {
-            log.error("Error creating user: " + throwable.getMessage());
-            customersServiceClient.deleteOwner(uuid);
+                    }
+            );
         });
     }
-
 
     public Mono<UserPasswordLessDTO> createInventoryMangerUser(Mono<RegisterInventoryManager> registerInventoryManagerMono) {
         String uuid = UUID.randomUUID().toString();
@@ -336,6 +290,7 @@ public class AuthServiceClient {
                 });
     }
 
+    //TODO duplicate
     public Mono<ResponseEntity<UserDetails>> verifyUserUsingV2Endpoint(final String token) {
 
         return webClientBuilder.build()
@@ -477,7 +432,7 @@ public class AuthServiceClient {
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> Mono.error(new GenericHttpException("Error disabling user", HttpStatus.BAD_REQUEST)))
                 .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> Mono.error(new GenericHttpException("Server error", HttpStatus.INTERNAL_SERVER_ERROR)))
-                .bodyToMono(Void.class); 
+                .bodyToMono(Void.class);
     }
     public Mono<Void> enableUser(String userId, String jwtToken) {
         return webClientBuilder.build()

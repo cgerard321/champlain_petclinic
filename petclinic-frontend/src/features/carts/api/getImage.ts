@@ -6,7 +6,7 @@ export async function getImage(imageId: string): Promise<ImageModel> {
     // was http://localhost:8080/api/v2/gateway/images/${imageId}
     const { data } = await axiosInstance.get<ImageModel>(`/images/${imageId}`, {
       responseType: 'json',
-      useV2: true,
+      useV2: false,
     });
     return data;
   } catch (error) {

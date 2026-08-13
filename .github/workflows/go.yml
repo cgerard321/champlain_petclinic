@@ -1,3 +1,4 @@
+---
 name: Go
 
 on:
@@ -18,7 +19,7 @@ jobs:
           go-version: '1.24'
 
       - name: Install Go Swagger CLI
-        run: go install github.com/swaggo/swag/cmd/swag@v1.3.2
+        run: go install github.com/swaggo/swag/cmd/swag@v1.7.9
 
       - name: Swagger
         run: |
@@ -32,13 +33,13 @@ jobs:
           go build -v -o app ./cmd/mailer
           cd -
 
-      - name: Test
+      - name: Test Go Mailer
         run: cd mailer-service && go test -v ./...; cd -
 
       - name: Build
-        run: cd files-service && go build -v -o app; cd -
+        run: cd files-service && go build -v -o app ./cmd/files; cd -
 
-      - name: Test
+      - name: Test files-service
         run: cd files-service && go test -v ./...; cd -
 
       - name: Grant execute perm on cover.sh

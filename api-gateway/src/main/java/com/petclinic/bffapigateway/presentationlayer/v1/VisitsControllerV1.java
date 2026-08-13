@@ -3,11 +3,13 @@ package com.petclinic.bffapigateway.presentationlayer.v1;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
+import com.petclinic.bffapigateway.dtos.Visits.Prescriptions.PrescriptionResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.TimeSlotDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewResponseDTO;
+import com.petclinic.bffapigateway.exceptions.ExistingPrescriptionNotFoundException;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
@@ -37,7 +39,7 @@ public class VisitsControllerV1 {
     ///////////Visits Methods///////////////////
     ///////////////////////////////////////////
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET, Roles.RECEPTIONIST})
     @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public ResponseEntity<Flux<VisitResponseDTO>> getAllVisits(@RequestParam(required = false) String description){
         return ResponseEntity.ok().body(visitsServiceClient.getAllVisits(description));
@@ -51,8 +53,11 @@ public class VisitsControllerV1 {
 
     @SecuredEndpoint(allowedRoles = {Roles.ALL})
     @GetMapping(value = "/{visitId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<VisitResponseDTO>> getVisitByVisitId(@PathVariable String visitId) {
-        return visitsServiceClient.getVisitByVisitId(visitId)
+    public Mono<ResponseEntity<VisitResponseDTO>> getVisitByVisitId(
+            @PathVariable String visitId,
+            @RequestParam(required = false, defaultValue = "false") boolean includePrescription) {
+
+        return visitsServiceClient.getVisitByVisitId(visitId, includePrescription)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
@@ -81,7 +86,7 @@ public class VisitsControllerV1 {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET, Roles.RECEPTIONIST})
     @PutMapping(value = "/{visitId}")
     public Mono<ResponseEntity<VisitResponseDTO>> updateVisitByVisitId(
             @PathVariable String visitId,
@@ -202,7 +207,7 @@ public class VisitsControllerV1 {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
+    @SecuredEndpoint(allowedRoles = {Roles.OWNER, Roles.ADMIN})
     @DeleteMapping(value="/reviews/{reviewId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ReviewResponseDTO>> deleteReview(@PathVariable String reviewId) {
         return Mono.just(reviewId)
@@ -211,6 +216,16 @@ public class VisitsControllerV1 {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.OWNER})
+    @DeleteMapping(value="/owners/{ownerId}/reviews/{reviewId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<ReviewResponseDTO>> deleteCustomerReview(
+            @PathVariable String ownerId,
+            @PathVariable String reviewId) {
+        return visitsServiceClient.deleteReview(reviewId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
@@ -256,6 +271,37 @@ public class VisitsControllerV1 {
     public Mono<ResponseEntity<VetResponseDTO>> getVeterinarianAvailability(@PathVariable String vetId) {
         return visitsServiceClient.getVeterinarianAvailability(vetId)
                 .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+
+    /////////////////////////////////////////////
+    /////////// Prescription Methods ////////////
+    /////////////////////////////////////////////
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @PostMapping(
+            value = "/{visitId}/prescription",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<PrescriptionResponseDTO>> createPrescription(
+            @PathVariable String visitId,
+            @RequestBody Mono<PrescriptionResponseDTO> prescriptionRequest) {
+        return visitsServiceClient.createPrescription(visitId, prescriptionRequest)
+                .map(created -> ResponseEntity.status(HttpStatus.CREATED).body(created))
+                .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()))
+                .onErrorResume(ExistingPrescriptionNotFoundException.class,
+                        e -> Mono.just(ResponseEntity.notFound().build()));
+    }
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET, Roles.OWNER})
+    @GetMapping(value = "/{visitId}/prescription/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    public Mono<ResponseEntity<byte[]>> downloadPrescriptionPdf(
+            @PathVariable String visitId) {
+
+        return visitsServiceClient.downloadPrescriptionPdf(visitId)
+                .map(pdfBytes -> new ResponseEntity<>(pdfBytes, HttpStatus.OK))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 

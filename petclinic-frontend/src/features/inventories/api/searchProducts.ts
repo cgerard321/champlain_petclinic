@@ -1,14 +1,14 @@
 import { ProductModel } from '@/features/inventories/models/ProductModels/ProductModel.ts';
 import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { Status } from '@/features/inventories/models/ProductModels/Status.ts';
-import axios from 'axios';
+import { ApiResponse } from '@/shared/models/ApiResponse';
 
 export async function searchProducts(
   inventoryId: string,
   productName?: string,
   productDescription?: string,
   status?: Status
-): Promise<ProductModel[]> {
+): Promise<ApiResponse<ProductModel[]>> {
   try {
     const queryParams = new URLSearchParams();
     if (productName) queryParams.append('productName', productName);
@@ -21,47 +21,50 @@ export async function searchProducts(
       ? `/inventories/${inventoryId}/products/search?${queryString}`
       : `/inventories/${inventoryId}/products/search`;
 
-    const response = await axiosInstance.get<ProductModel[]>(url, {
+    const response = await axiosInstance.get(url, {
       useV2: false,
+      responseType: 'text',
     });
-    return response.data;
-  } catch (error) {
-    if (!axios.isAxiosError(error)) throw error;
 
-    const status = error.response?.status ?? 0;
-    const payload: unknown = error.response?.data;
-
-    const data =
-      payload && typeof payload === 'object'
-        ? (payload as Record<string, unknown>)
-        : undefined;
-
-    const serverMessage = typeof data?.message === 'string' ? data.message : '';
-
-    switch (status) {
-      case 400: {
-        throw new Error(
-          serverMessage.trim()
-            ? serverMessage
-            : 'Invalid product data. Please review your input and try again.'
-        );
-      }
-      case 404: {
-        throw new Error(
-          serverMessage.trim()
-            ? serverMessage
-            : 'Product resource was not found.'
-        );
-      }
-      case 429: {
-        throw new Error(
-          serverMessage.trim()
-            ? serverMessage
-            : 'Too many requests. Please try again later.'
-        );
-      }
-      default:
-        throw error;
+    const raw = String(response.data ?? '');
+    if (!raw.trim()) {
+      return { data: [], errorMessage: null };
     }
+
+    const items: ProductModel[] = raw
+      .split(/\r?\n\r?\n/)
+      .map(block => {
+        const dataLines = block
+          .split(/\r?\n/)
+          .filter(line => line.startsWith('data:'))
+          .map(line => line.slice(5).trim());
+
+        if (dataLines.length === 0) return null;
+
+        const jsonText = dataLines.join('\n').trim();
+        if (!jsonText || jsonText === '__END__') return null;
+
+        try {
+          const product = JSON.parse(jsonText) as ProductModel;
+          product.productMargin = parseFloat(
+            (product.productSalePrice - product.productPrice).toFixed(2)
+          );
+          return product;
+        } catch (e) {
+          console.error("Can't parse JSON from SSE event:", e, jsonText);
+          return null;
+        }
+      })
+      .filter((x): x is ProductModel => x !== null);
+
+    return { data: items, errorMessage: null };
+  } catch (error: unknown) {
+    const maybeMsg = (error as { response?: { data?: { message?: unknown } } })
+      ?.response?.data?.message;
+    const errorMessage =
+      typeof maybeMsg === 'string' && maybeMsg.trim()
+        ? maybeMsg.trim()
+        : 'Failed to load products. Please try again.';
+    return { data: null, errorMessage };
   }
 }

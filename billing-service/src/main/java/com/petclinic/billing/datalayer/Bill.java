@@ -3,7 +3,6 @@ package com.petclinic.billing.datalayer;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Field;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -16,7 +15,7 @@ public class Bill {
 
     @Id
     private String id;
-    private String billId; //name billUUID for the new billId
+    private String billId;
     private String customerId;
     private String ownerFirstName;
     private String ownerLastName;

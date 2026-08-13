@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Inventory } from './models/Inventory';
 import { getAllInventoryTypes } from '@/features/inventories/api/getAllInventoryTypes.ts';
 import addInventory from '@/features/inventories/api/addInventory.ts';
 import { InventoryType } from '@/features/inventories/models/InventoryType.ts';
-import './AddInventoryForm.css';
+import styles from './InvProForm.module.css';
 
 interface AddInventoryProps {
   showAddInventoryForm: boolean;
   handleInventoryClose: () => void;
   refreshInventoryTypes: () => void;
+  existingInventoryNames?: string[];
 }
 const isHttpUrl = (url: string): boolean => {
   try {
@@ -18,6 +20,37 @@ const isHttpUrl = (url: string): boolean => {
     return false;
   }
 };
+
+// Ensure we have a stable modal root (outside any page-level wrappers like Reveal)
+function getModalRoot(): HTMLElement {
+  let el = document.getElementById('modal-root');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'modal-root';
+    document.body.appendChild(el);
+  }
+  return el;
+}
+
+//Helper
+function mapServerMessageToFieldErrors(
+  msg: string
+): Partial<Record<FieldKey, string>> {
+  const m = msg.toLowerCase();
+
+  if (
+    m.includes('name') &&
+    (m.includes('already exists') || m.includes('duplicate'))
+  ) {
+    return { inventoryName: 'An inventory with this name already exists.' };
+  }
+
+  if (m.includes('image') && m.includes('url')) {
+    return { inventoryImage: 'Must be a valid http/https URL.' };
+  }
+
+  return {};
+}
 
 function buildIventoryFieldErrorMessage(params: {
   inventoryName: string;
@@ -70,6 +103,7 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
   showAddInventoryForm,
   handleInventoryClose,
   refreshInventoryTypes,
+  existingInventoryNames = [],
 }: AddInventoryProps): React.ReactElement | null => {
   const [inventoryName, setInventoryName] = useState<string>('');
   const [inventoryType, setInventoryType] = useState<string>('');
@@ -81,6 +115,7 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
   const [fieldErrors, setFieldErrors] = useState<
     Partial<Record<FieldKey, string>>
   >({});
+  const [formError, setFormError] = useState<string>('');
 
   // Per-field history arrays. Initialize with the initial/current value so there is always a baseline.
   const [history, setHistory] = useState<Record<TextFieldKey, string[]>>({
@@ -96,16 +131,34 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
 
   useEffect(() => {
     async function fetchInventoryTypes(): Promise<void> {
-      try {
-        const types = await getAllInventoryTypes();
-        setInventoryTypes(types);
-      } catch (error) {
-        console.error('Error fetching inventory types:', error);
+      const res = await getAllInventoryTypes();
+      if (res.errorMessage) {
+        setFormError(res.errorMessage);
       }
+      setInventoryTypes(res.data ?? []);
     }
 
     fetchInventoryTypes();
   }, []);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (!showAddInventoryForm) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [showAddInventoryForm]);
+
+  // Inert the app root while modal is open (accessibility)
+  useEffect(() => {
+    if (!showAddInventoryForm) return;
+    const root = document.getElementById('app-root');
+    if (!root) return;
+    root.setAttribute('inert', '');
+    return () => root.removeAttribute('inert');
+  }, [showAddInventoryForm]);
 
   // When form opens, initialize history baseline with current values
   useEffect(() => {
@@ -123,16 +176,14 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showAddInventoryForm]);
 
-  // helper: count words in a string (0 for empty/whitespace-only)
   const countWords = (s: string): number => {
     const trimmed = s.trim();
     if (trimmed === '') return 0;
     return trimmed.split(/\s+/).filter(Boolean).length;
   };
 
-  // helper: push a normalized snapshot for a field
   const pushSnapshot = (field: TextFieldKey, rawValue: string): void => {
-    const normalized = rawValue.trim(); // trim trailing spaces
+    const normalized = rawValue.trim();
     setHistory(prev => {
       const fieldHist = prev[field] ?? [''];
       const lastRecorded = fieldHist[fieldHist.length - 1] ?? '';
@@ -150,7 +201,6 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
     });
   };
 
-  // Save snapshot for field only when the *word count* changed
   const handleFieldChange = (
     field: TextFieldKey,
     setter: React.Dispatch<React.SetStateAction<string>>,
@@ -168,12 +218,10 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
       pushSnapshot(field, value);
     }
 
-    setFieldErrors(prev => ({ ...prev, [field]: undefined })); // clear error on change
-
+    setFieldErrors(prev => ({ ...prev, [field]: undefined }));
     setter(value);
   };
 
-  // Undo handler
   const handleUndo = (): void => {
     const order = [...lastEditedFields];
 
@@ -222,9 +270,10 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
     }
   };
 
-  // Handling form submission
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
+    setFormError('');
+
     const errorsBeforeSubmit = buildIventoryFieldErrorMessage({
       inventoryName,
       inventoryType,
@@ -235,6 +284,17 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
     });
     if (Object.keys(errorsBeforeSubmit).length) {
       setFieldErrors(errorsBeforeSubmit);
+      return;
+    }
+
+    const trimmedName = inventoryName.trim().toLowerCase();
+    if (
+      existingInventoryNames.some(n => n.trim().toLowerCase() === trimmedName)
+    ) {
+      setFieldErrors(prev => ({
+        ...prev,
+        inventoryName: 'An inventory with this name already exists.',
+      }));
       return;
     }
 
@@ -263,43 +323,28 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
       imageUploaded: base64Image,
     };
 
-    try {
-      await addInventory(newInventory as Omit<Inventory, 'inventoryId'>);
-      setInventoryName('');
-      setInventoryType('');
-      setInventoryDescription('');
-      setInventoryImage('');
-      setImageUploaded(null);
-      setFieldErrors({});
-      refreshInventoryTypes();
-      handleInventoryClose();
-    } catch (error) {
-      if (error instanceof Error) {
-        const msg = error.message.toLowerCase();
+    const result = await addInventory(newInventory);
 
-        if (msg.includes('already exists')) {
-          setFieldErrors(prev => ({
-            ...prev,
-            inventoryName:
-              prev.inventoryName ||
-              'An inventory with this name already exists.',
-          }));
-          return;
-        }
-      }
-      const errorsAfter = buildIventoryFieldErrorMessage({
-        inventoryName,
-        inventoryType,
-        inventoryDescription,
-        inventoryImage,
-        inventoryBackupImage,
-        imageUploaded,
-      });
-      if (Object.keys(errorsAfter).length) {
-        setFieldErrors(prev => ({ ...prev, ...errorsAfter }));
+    if (result.errorMessage) {
+      const mapped = mapServerMessageToFieldErrors(result.errorMessage);
+      if (Object.keys(mapped).length) {
+        setFieldErrors(prev => ({ ...prev, ...mapped }));
         return;
       }
+
+      setFormError(result.errorMessage);
+      return;
     }
+
+    setInventoryName('');
+    setInventoryType('');
+    setInventoryDescription('');
+    setInventoryImage('');
+    setInventoryBackupImage('');
+    setImageUploaded(null);
+    setFieldErrors({});
+    refreshInventoryTypes();
+    handleInventoryClose();
   };
 
   if (!showAddInventoryForm) return null;
@@ -334,11 +379,14 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
     return window.btoa(binary);
   }
 
-  return (
-    <div className="overlay">
-      <div className="form-container">
+  // ----- PORTAL RENDER -----
+  return createPortal(
+    <div className={styles.overlay}>
+      <div className={styles['form-container']}>
         <h2>Add Inventory</h2>
         <form onSubmit={handleSubmit}>
+          {/* ... form fields unchanged ... */}
+          {/* Inventory Name */}
           <div>
             <label htmlFor="inventoryName">Inventory Name:</label>
             <input
@@ -367,6 +415,7 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
             )}
           </div>
 
+          {/* Inventory Type */}
           <div>
             <label htmlFor="inventoryType">Inventory Type:</label>
             <select
@@ -401,6 +450,7 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
             )}
           </div>
 
+          {/* Description */}
           <div>
             <label htmlFor="inventoryDescription">Inventory Description:</label>
             <input
@@ -435,6 +485,7 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
             )}
           </div>
 
+          {/* Image URL */}
           <div>
             <label htmlFor="inventoryImage">Inventory Image:</label>
             <input
@@ -462,6 +513,7 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
             )}
           </div>
 
+          {/* Backup Image URL */}
           <div>
             <label htmlFor="inventoryBackupImage">
               Inventory Backup Image:
@@ -497,6 +549,7 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
             )}
           </div>
 
+          {/* Upload */}
           <div>
             <label htmlFor="imageUpload">Upload Image:</label>
             <input
@@ -517,6 +570,15 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
             )}
           </div>
 
+          {formError && (
+            <div
+              className="field-error"
+              style={{ marginTop: 8, marginBottom: 8 }}
+            >
+              {formError}
+            </div>
+          )}
+
           <button type="submit">Add Inventory</button>
           <button
             type="button"
@@ -526,13 +588,13 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
             Cancel
           </button>
 
-          {/* Undo button */}
           <button type="button" className="undo" onClick={handleUndo}>
             Undo
           </button>
         </form>
       </div>
-    </div>
+    </div>,
+    getModalRoot()
   );
 };
 

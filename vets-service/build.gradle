@@ -20,6 +20,7 @@ ext {
 
 dependencies {
     implementation 'io.springfox:springfox-boot-starter:3.0.0' //swagger documentation
+    implementation 'io.micrometer:micrometer-registry-prometheus'
     implementation group: 'io.github.bonigarcia', name: 'selenium-jupiter', version: '3.3.5'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-web'

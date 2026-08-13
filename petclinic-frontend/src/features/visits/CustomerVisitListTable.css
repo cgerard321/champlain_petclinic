@@ -1,0 +1,37 @@
+.cvlt-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.cvlt-modal {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  min-width: 320px;
+  max-width: 90vw;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.cvlt-modal-title {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.cvlt-modal-body {
+  margin: 0 0 16px;
+  color: #333;
+}
+
+.cvlt-modal-actions {
+  text-align: right;
+}
+
+.cvlt-modal-actions .btn {
+  min-width: 80px;
+}

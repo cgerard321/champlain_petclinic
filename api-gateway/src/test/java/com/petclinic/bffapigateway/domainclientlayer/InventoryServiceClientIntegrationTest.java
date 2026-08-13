@@ -98,7 +98,7 @@ class InventoryServiceClientIntegrationTest {
 
         Flux<ProductResponseDTO> productResponseDTOFlux = inventoryServiceClient
                 .getProductsInInventoryByInventoryIdAndProductsField(productResponseDTO.getInventoryId(),
-                        productResponseDTO.getProductName(), productResponseDTO.getProductPrice(), productResponseDTO.getProductQuantity(), productResponseDTO.getProductSalePrice());
+                        productResponseDTO.getProductName(), productResponseDTO.getProductPrice(), null, productResponseDTO.getProductQuantity(), productResponseDTO.getProductSalePrice(), null);
         StepVerifier.create(productResponseDTOFlux)
                 .expectNextCount(1)
                 .verifyComplete();
@@ -200,7 +200,7 @@ class InventoryServiceClientIntegrationTest {
                 .setBody(body));
         final Flux<ProductResponseDTO> productResponseDTOFlux = inventoryServiceClient.
                 getProductsInInventoryByInventoryIdAndProductFieldPagination("1",null,
-                        null,null, Optional.of(0),Optional.of(2));
+                        null,null,null, null, null, Optional.of(0),Optional.of(2));
         Long fluxSize = productResponseDTOFlux.count().block();
         Long predictedSize = (long) 2;
         assertEquals(predictedSize, fluxSize);
@@ -213,7 +213,7 @@ class InventoryServiceClientIntegrationTest {
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                 .setBody(String.valueOf(expected)));
         final Mono<Long> productResponseDTOFlux = inventoryServiceClient.getTotalNumberOfProductsWithRequestParams("1",null,
-                null,null);
+                null,null, null, null, null);
         assertEquals(expected, productResponseDTOFlux.block());
     }
 
@@ -1352,7 +1352,7 @@ class InventoryServiceClientIntegrationTest {
     void getProductsByFilters_404_ShouldMapToProductListNotFoundException() {
         enqueueError(404, "No products match filters");
         StepVerifier.create(inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductsField(
-                        "inv-1", "needle", null, null, null))
+                        "inv-1", "needle", null, null, null, null, null))
                 .expectError(ProductListNotFoundException.class)
                 .verify();
     }
@@ -1361,7 +1361,7 @@ class InventoryServiceClientIntegrationTest {
     void getProductsByFiltersPaginated_404_ShouldMapToProductListNotFoundException() {
         enqueueError(404, "No products");
         StepVerifier.create(inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductFieldPagination(
-                        "inv-1", null, null, null, Optional.of(0), Optional.of(10)))
+                        "inv-1", null, null, null, null, null, null, Optional.of(0), Optional.of(10)))
                 .expectError(ProductListNotFoundException.class)
                 .verify();
     }
@@ -1372,7 +1372,7 @@ class InventoryServiceClientIntegrationTest {
     void getTotalProductsCount_404_ShouldMapToProductListNotFoundException() {
         enqueueError(404, "Inventory not found or empty");
         StepVerifier.create(inventoryServiceClient.getTotalNumberOfProductsWithRequestParams(
-                        "inv-1", null, null, null))
+                        "inv-1", null, null, null, null, null, null))
                 .expectError(ProductListNotFoundException.class)
                 .verify();
     }

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Promo } from '@/features/promos/models/PromoModel.tsx';
 import { useNavigate } from 'react-router-dom';
 import './PromoTable.css';
+import { PromoApi } from '../api/PromoApi';
 
 export default function PromoListTable(): JSX.Element {
   const [promos, setPromos] = useState<Promo[]>([]);
@@ -12,21 +13,7 @@ export default function PromoListTable(): JSX.Element {
 
   const fetchPromos = async (): Promise<void> => {
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/v2/gateway/promos`,
-        {
-          headers: {
-            Accept: 'application/json',
-          },
-          credentials: 'include',
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
+      const data = await PromoApi.fetchActivePromos();
       setPromos(data);
     } catch (err) {
       console.error('Error fetching promos:', err);
@@ -45,32 +32,7 @@ export default function PromoListTable(): JSX.Element {
   };
 
   const handleDelete = async (promoCode: string) => {
-    const confirmed = window.confirm(
-      'Are you sure you want to delete this promo?'
-    );
-
-    if (confirmed) {
-      try {
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/promos/${promoCode}`,
-          {
-            method: 'DELETE',
-            credentials: 'include',
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(
-            `Error deleting promo: ${response.status} ${response.statusText}`
-          );
-        }
-
-        fetchPromos();
-      } catch (err) {
-        console.error('Error deleting promo:', err);
-        setError('Failed to delete promo');
-      }
-    }
+    await PromoApi.deletePromo(promoCode);
   };
 
   if (loading) {

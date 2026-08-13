@@ -15,7 +15,6 @@ scale 0.4
 !include $ICONURL/font-awesome-5/database.puml
 !include $ICONURL/font-awesome-5/user.puml
 
-
 AddElementTag("microService-java", $shape=EightSidedShape(), $bgColor="#6DB33F", $fontColor="black", $legendText="API Java \neight sided")
 AddElementTag("microService-go", $shape=EightSidedShape(), $bgColor="#29BEB0", $fontColor="white", $legendText="API Go \neight sided")
 AddElementTag("microService-c#", $shape=EightSidedShape(), $bgColor="#512bd4", $fontColor="white", $legendText="API C# \neight sided")
@@ -25,7 +24,7 @@ AddElementTag("storage-mongo", $shape=RoundedBoxShape(), $bgColor="#00684A",$bor
 AddElementTag("storage-postgres", $shape=RoundedBoxShape(), $bgColor="#336791",$borderColor="Black", $fontColor="white", $legendText="PostGres Database")
 
 AddElementTag("framework-react", $shape=RoundedBoxShape(), $bgColor="#61DBFB", $fontColor="white", $legendText="React Single-Page Application")
-AddElementTag("framework-angular", $shape=RoundedBoxShape(), $bgColor="#b52e31", $fontColor="white", $legendText=Angular Single-Page Application")
+AddElementTag("framework-angular", $shape=RoundedBoxShape(), $bgColor="#b52e31", $fontColor="white", $legendText="Angular Single-Page Application")
 
 AddElementTag("webApp", $bgColor="#e34f26", $fontColor="white", $legendText="Web Application")
 
@@ -61,6 +60,7 @@ together {
     together {
         Container(employee_app, "Employee Web Application", "HTML, CSS", "Delivers the static Employee-focused content and angular single page application.", $sprite="html5", $tags = "webApp")
         Container(angular_spa, "Angular Single-Page Application", "JavaScript, Angular", "Provides all the Champlain Pet Clinic functionality to employees via their web browser.", $sprite="angular", $tags = "framework-angular")
+        Container(angular20_spa, "New Angular Single-Page Application", "TypeScript, Angular", "Provides all the Champlain Pet Clinic functionality to employees via their web browser.", $sprite="angular", $tags = "framework-angular")
     }
 }
 
@@ -76,9 +76,7 @@ together {
     Container(products_service, "products-service", "Java, Spring Boot", "Provides product management functionality for the online store.", $sprite="spring_original", $tags = "microService-java")
     Container(cart_service, "cart-service", "Java, Spring Boot", "Provides cart management functionality for the online store.", $sprite="spring_original", $tags = "microService-java")
     Container(mailer_service, "mailer-service", "Go", "Provides email functionality for the auth-service.", $sprite="go", $tags = "microService-go")
-    Container(emailing_service, "emailing-service", "C#, ASP.NET Core", "Provides email functionality.", $sprite="dotnetcore", $tags = "microService-c#")
 }
-    together {
         ContainerDb(auth_db, "auth-db", "MySQL 5.7.x", "Stores user information.", $sprite="mysql" , $tags = "storage-mysql")
         ContainerDb(files_db, "files-db", "MySQL 5.7.x", "Stores files information.", $sprite="mysql" , $tags = "storage-mysql")
         ContainerDb(customers_db, "customers-db", "Mongo", "Stores owner, pet, and type information.", $sprite="mongodb", $tags = "storage-mongo")
@@ -89,8 +87,7 @@ together {
         ContainerDb(billing_db, "billing-db", "Mongo", "Stores billing information.", $sprite="mongodb", $tags = "storage-mongo")
         ContainerDb(products_db, "products-db", "Mongo", "Stores product information.", $sprite="mongodb", $tags = "storage-mongo")
         ContainerDb(cart_db, "cart-db", "Mongo", "Stores cart information.", $sprite="mongodb", $tags = "storage-mongo")
-        ContainerDb(emailing_db, "emailing-db", "MySQL 8.0", "Stores email information.", $sprite="mysql", $tags = "storage-mysql")
-    }
+
 }
 
 Rel(customer, client_app, "Visits petclinic.benmusicgeek.synology.me/ using", "HTTPS")
@@ -100,16 +97,23 @@ Rel(inventoryManager, employee_app, "Visits petclinic-backend.benmusicgeek.synol
 Rel(veterinarian, employee_app, "Visits petclinic-backend.benmusicgeek.synology.me/#! using", "HTTPS")
 Rel_R(client_app, react_spa, "Delivers to the customer's web browser")
 Rel_R(employee_app, angular_spa, "Delivers to an employee's web browser")
+Rel_R(employee_app, angular20_spa, "Delivers modern Angular 20 portal to employee's web browser")
 Rel(admin, angular_spa, "views admin_panel and employee specific functionality")
+Rel(admin, angular20_spa, "views modern admin panel with Champlain College branding")
 Rel(receptionist, angular_spa, "assists customers with appointment booking")
+Rel(receptionist, angular20_spa, "uses modern Angular 20 interface for customer assistance")
 Rel(veterinarian, angular_spa, "manages their availability")
+Rel(veterinarian, angular20_spa, "manages availability with modern Angular 20 interface")
 Rel(inventoryManager, angular_spa, "manages medical inventory")
+Rel(inventoryManager, angular20_spa, "manages inventory with modern Angular 20 interface")
 Rel(customer, react_spa, "views online store, veterinarian and appointment booking functionality")
 Rel(react_spa, api_gateway, "Makes API calls to", "JSON/REST/HTTPS")
 Rel(angular_spa, api_gateway, "Makes API calls to", "JSON/REST/HTTPS")
+Rel(angular20_spa, api_gateway, "Makes API calls to", "JSON/REST/HTTPS")
 
 
 Rel(customers_service, files_service, "Makes API calls to", "JSON/REST/HTTPS")
+Rel(visits_service, files_service, "Makes API calls to", "JSON/REST/HTTPS")
 
 Rel(files_service, files_db, "Reads from and writes to", "JDCB/SQL/TCP", $tags="blue-line")
 Rel(files_service, minio, "Makes API calls to", "JSON/REST/HTTPS")
@@ -120,8 +124,6 @@ Rel(inventory_service, inventory_db, "Reads from and writes to", "Mongo/MQL/TCP"
 Rel(api_gateway, vets_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
 Rel(vets_service, vets_vets_db, "Reads from and writes to", "Mongo/MQL/TCP")
 Rel(vets_service, vets_images_db, "Reads from and writes to", "JDCB/SQL/TCP")
-Rel(api_gateway, emailing_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
-Rel(emailing_service, emailing_db, "Makes API calls to", "JSON/REST/HTTPS")
 
 Rel(api_gateway, products_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
 Rel(products_service, products_db, "Reads from and writes to", "Mongo/MQL/TCP")
@@ -129,7 +131,6 @@ Rel(products_service, products_db, "Reads from and writes to", "Mongo/MQL/TCP")
 Rel(api_gateway, auth_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
 Rel(auth_service, mailer_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="blue-line")
 Rel(auth_service, cart_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="blue-line")
-Rel(auth_service, emailing_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="blue-line")
 Rel(auth_service, auth_db, "Reads from and writes to", "JDCB/SQL/TCP", $tags="blue-line")
 Rel(api_gateway, billing_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
 Rel(billing_service, customers_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="red-line")
@@ -140,10 +141,10 @@ Rel(cart_service, products_service, "Makes API calls to", "JSON/REST/HTTPS", $ta
 Rel(cart_service, cart_db, "Reads from and writes to", "Mongo/MQL/TCP", $tags="green-line")
 Rel(api_gateway, visits_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
 Rel(visits_service, visits_db, "Reads from and writes to", "Mongo/MQL/TCP", $tags="orange-line")
-Rel(visits_service, emailing_service, "Reads from and writes to", "Mongo/MQL/TCP", $tags="orange-line")
 Rel(visits_service, auth_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="orange-line")
 Rel(visits_service, customers_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="orange-line")
 Rel(visits_service, vets_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="orange-line")
+Rel(visits_service, billing_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="orange-line")
 
 
 SHOW_LEGEND()

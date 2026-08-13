@@ -26,8 +26,8 @@ export default function RecentlyViewedProducts(): JSX.Element {
   };
 
   return (
-    <div className="recently-viewed-container">
-      <h2>Recently Seen</h2>
+    <div className="products-section-container">
+      <h2 className="section-title">Recently Seen</h2>
       <div className="recently-viewed-flex">
         {recentlyClickedProducts.length > 0 ? (
           recentlyClickedProducts

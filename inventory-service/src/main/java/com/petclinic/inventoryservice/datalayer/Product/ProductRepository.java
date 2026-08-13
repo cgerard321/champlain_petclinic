@@ -45,4 +45,7 @@ public interface ProductRepository extends ReactiveMongoRepository<Product, Stri
     Mono<Boolean> existsByInventoryIdAndProductNameIgnoreCaseAndProductIdNot(
             String inventoryId, String productName, String productId
     );
+
+    Flux<Product> findAllProductsByInventoryIdAndProductPriceBetween(String inventoryId, Double minPrice, Double maxPrice);
+    Flux<Product> findAllProductsByInventoryIdAndProductSalePriceBetween(String inventoryId, Double minSalePrice, Double maxSalePrice);
 }

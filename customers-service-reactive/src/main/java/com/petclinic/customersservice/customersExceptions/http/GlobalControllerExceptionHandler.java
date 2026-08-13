@@ -3,6 +3,7 @@ package com.petclinic.customersservice.customersExceptions.http;
 import com.petclinic.customersservice.customersExceptions.exceptions.BadRequestException;
 import com.petclinic.customersservice.customersExceptions.exceptions.InvalidInputException;
 import com.petclinic.customersservice.customersExceptions.exceptions.NotFoundException;
+import com.petclinic.customersservice.customersExceptions.exceptions.UnprocessableEntityException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -34,6 +35,12 @@ public class GlobalControllerExceptionHandler {
     @ExceptionHandler(BadRequestException.class)
     public HttpErrorInfo handleBadRequestException(ServerHttpRequest request, Exception ex){
         return createHttpErrorInfo(BAD_REQUEST, request, ex);
+    }
+
+    @ResponseStatus(UNPROCESSABLE_ENTITY)
+    @ExceptionHandler(UnprocessableEntityException.class)
+    public HttpErrorInfo handleUnprocessableEntityException(ServerHttpRequest request, Exception ex){
+        return createHttpErrorInfo(UNPROCESSABLE_ENTITY, request, ex);
     }
 
     @ResponseStatus(INTERNAL_SERVER_ERROR)

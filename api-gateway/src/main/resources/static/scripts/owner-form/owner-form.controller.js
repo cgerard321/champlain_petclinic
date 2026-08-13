@@ -1,42 +1,53 @@
 'use strict';
 
-
-
 angular.module('ownerForm')
-    .controller('OwnerFormController', ["$http", '$state', '$stateParams', function ($http, $state, $stateParams) {
+    .controller('OwnerFormController', ["$http", '$state', '$stateParams', '$scope', function ($http, $state, $stateParams, $scope) {
         var self = this;
         var ownerId = $stateParams.ownerId || "";
         var method = $stateParams.method;
 
-        if (!ownerId) {
-            self.owner = {};
-            self.checked = false
-        } else {
+        // Initialize
+        self.owner = {};
+        self.checked = false;
+        self.showModal = false;
+
+        if (ownerId) {
             $http.get("api/gateway/owners/" + ownerId).then(function (resp) {
                 self.owner = resp.data;
             });
-            if(method == 'edit')
-                self.checked = false
-            else
-                self.checked = true
+            if (method !== 'edit') {
+                self.checked = true;
+            }
         }
 
+        // Open confirmation modal
         self.submitOwnerForm = function () {
-            var id = self.owner.ownerId;
-            console.log(self.owner);
+            self.showModal = true;
+        };
+
+        // Cancel modal
+        self.cancelModal = function () {
+            self.showModal = false;
+        };
+
+        // Confirm modal: submit form
+        self.confirmModal = function () {
+            self.showModal = false;
+
             var req;
-            if (id){
-                if(method == 'edit')
-                    req = $http.put("api/gateway/owners/" + id, self.owner);
-                else
-                    req = $http.delete("api/gateway/owners/" + id, self.owner)
-            }
-            else
+            if (self.owner.ownerId) {
+                if (method === 'edit') {
+                    req = $http.put("api/gateway/owners/" + self.owner.ownerId, self.owner);
+                } else {
+                    req = $http.delete("api/gateway/owners/" + self.owner.ownerId);
+                }
+            } else {
                 req = $http.post("api/gateway/owners", self.owner);
+            }
 
             req.then(function () {
                 $state.go('owners');
-            }, function (response) {
+            }).catch(function (response) {
                 var error = response.data;
                 error.errors = error.errors || [];
                 alert(error.error + "\r\n" + error.errors.map(function (e) {
@@ -45,5 +56,3 @@ angular.module('ownerForm')
             });
         };
     }]);
-
-

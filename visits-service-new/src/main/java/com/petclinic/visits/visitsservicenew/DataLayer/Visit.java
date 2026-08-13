@@ -40,4 +40,6 @@ public class Visit {
 
     private Boolean isEmergency;
 
+    private String prescriptionFileId;
+
 }

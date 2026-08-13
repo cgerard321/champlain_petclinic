@@ -35,11 +35,22 @@ public class ProductClient {
                             default -> Mono.error(new IllegalArgumentException("Something went wrong"));
                         })
                 .bodyToMono(ProductResponseModel.class)
-                .map(product -> {
-                    // Mock the stock quantity until the real data is available
-                    product.setProductQuantity(10); // Arbitrary stock level for testing
-                    product.setImageId(product.getImageId());
-                    return product;
-                });
+                .map(this::normalizeInventoryFields);
+    }
+
+    private ProductResponseModel normalizeInventoryFields(ProductResponseModel product) {
+        if (product == null) {
+            return null;
+        }
+
+        if (product.getProductQuantity() == null) {
+            if (product.getProductStock() != null) {
+                product.setProductQuantity(product.getProductStock());
+            } else if (product.getQuantity() != null) {
+                product.setProductQuantity(product.getQuantity());
+            }
+        }
+
+        return product;
     }
 }

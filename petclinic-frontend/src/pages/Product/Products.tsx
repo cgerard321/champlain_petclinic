@@ -1,49 +1,60 @@
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import ProductsList from '@/features/products/ProductsList.tsx';
 import './Products.css';
-import TrendingList from '@/features/products/TrendingList';
-import { useState } from 'react';
+import TrendingList from '@/features/products/TrendingList.tsx';
+import { useState, useMemo } from 'react';
 import ProductSearch from '@/features/products/components/ProductSearch';
 import StarRating from '@/features/products/components/StarRating';
 import { ProductType } from '@/features/products/api/ProductTypeEnum';
 
 export default function Products(): JSX.Element {
   const [searchQuery, setSearchQuery] = useState<string>('');
-
-  // filters
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [minPrice, setMinPrice] = useState<number | undefined>();
-  const [maxPrice, setMaxPrice] = useState<number | undefined>();
-  const [ratingSort, setRatingSort] = useState<string>('default');
-  const [minStars, setMinStars] = useState<number>(0);
-  const [maxStars, setMaxStars] = useState<number>(5);
-  const [deliveryType, setDeliveryType] = useState<string>('');
-  const [productType, setProductType] = useState<string>('');
   const [validationMessage, setValidationMessage] = useState<string>('');
+  const [showSortOptions, setShowSortOptions] = useState(false);
+  const [sortCriteria, setSortCriteria] = useState('default');
+
+  const defaultFilters = useMemo(
+    () => ({
+      minPrice: undefined,
+      maxPrice: undefined,
+      ratingSort: 'default',
+      minStars: 0,
+      maxStars: 5,
+      deliveryType: '',
+      productType: '',
+    }),
+    []
+  );
+
+  const [tempFilters, setTempFilters] = useState(defaultFilters);
+
+  const [appliedFilters, setAppliedFilters] = useState(defaultFilters);
 
   const toggleSidebar = (): void => setIsSidebarOpen(!isSidebarOpen);
   const handleOverlayClick = (): void => setIsSidebarOpen(false);
 
+  const handleSort = (criteria: string): void => {
+    setSortCriteria(criteria);
+    setShowSortOptions(false);
+  };
+
+  const updateTempFilter = (key: string, value: unknown): void => {
+    setTempFilters(prev => ({ ...prev, [key]: value }));
+  };
+
+  const applyFilters = (): void => {
+    setAppliedFilters(tempFilters);
+    setIsSidebarOpen(false);
+  };
+
   const clearFilters = (): void => {
-    setMinPrice(undefined);
-    setMaxPrice(undefined);
-    setRatingSort('default');
-    setMinStars(0);
-    setMaxStars(5);
-    setDeliveryType('');
-    setProductType('');
+    setTempFilters(defaultFilters);
+    setAppliedFilters(defaultFilters);
     setValidationMessage('');
   };
 
-  const filters = {
-    minPrice,
-    maxPrice,
-    ratingSort,
-    minStars,
-    maxStars,
-    deliveryType,
-    productType,
-  };
+  const filters = useMemo(() => appliedFilters, [appliedFilters]);
 
   return (
     <div>
@@ -64,16 +75,14 @@ export default function Products(): JSX.Element {
       </header>
 
       <div className="search-and-filter">
-        {!isSidebarOpen && (
-          <button
-            className="toggle-sidebar-button"
-            onClick={toggleSidebar}
-            aria-expanded={isSidebarOpen}
-            aria-controls="sidebar"
-          >
-            &#9776; Filters
-          </button>
-        )}
+        <button
+          className="toggle-sidebar-button"
+          onClick={toggleSidebar}
+          aria-expanded={isSidebarOpen}
+          aria-controls="products-sidebar"
+        >
+          {'☰ Filters'}
+        </button>
 
         <div className="search-wrapper">
           <ProductSearch
@@ -82,13 +91,37 @@ export default function Products(): JSX.Element {
           />
         </div>
 
-        <button
-          className="toggle-sidebar-button"
-          type="button"
-          aria-label="Sort By"
-        >
-          Sort By
-        </button>
+        <div className="sort-dropdown">
+          <button
+            className="sort-button"
+            type="button"
+            onClick={() => setShowSortOptions(prev => !prev)}
+            aria-haspopup="menu"
+            aria-controls="sort-menu"
+            aria-expanded={showSortOptions}
+          >
+            Sort By
+          </button>
+          {showSortOptions && (
+            <div className="sort-options" role="menu" id="sort-menu">
+              <button role="menuitem" onClick={() => handleSort('default')}>
+                Sort by Default
+              </button>
+              <button role="menuitem" onClick={() => handleSort('rating-desc')}>
+                Rating: High → Low
+              </button>
+              <button role="menuitem" onClick={() => handleSort('rating-asc')}>
+                Rating: Low → High
+              </button>
+              <button role="menuitem" onClick={() => handleSort('price-desc')}>
+                Price: High → Low
+              </button>
+              <button role="menuitem" onClick={() => handleSort('price-asc')}>
+                Price: Low → High
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {isSidebarOpen && (
@@ -96,7 +129,7 @@ export default function Products(): JSX.Element {
       )}
 
       {isSidebarOpen && (
-        <div className={`sidebar ${isSidebarOpen ? 'open' : ''}`} id="sidebar">
+        <div className={`products-sidebar ${isSidebarOpen ? 'open' : ''}`}>
           <button
             className="close-button"
             onClick={toggleSidebar}
@@ -111,9 +144,12 @@ export default function Products(): JSX.Element {
               Min Price:
               <input
                 type="number"
-                value={minPrice ?? ''}
+                value={tempFilters.minPrice ?? ''}
                 onChange={e =>
-                  setMinPrice(e.target.value ? +e.target.value : undefined)
+                  updateTempFilter(
+                    'minPrice',
+                    e.target.value ? +e.target.value : undefined
+                  )
                 }
               />
             </label>
@@ -122,9 +158,12 @@ export default function Products(): JSX.Element {
               Max Price:
               <input
                 type="number"
-                value={maxPrice ?? ''}
+                value={tempFilters.maxPrice ?? ''}
                 onChange={e =>
-                  setMaxPrice(e.target.value ? +e.target.value : undefined)
+                  updateTempFilter(
+                    'maxPrice',
+                    e.target.value ? +e.target.value : undefined
+                  )
                 }
               />
             </label>
@@ -132,8 +171,8 @@ export default function Products(): JSX.Element {
             <label>
               Item Type:
               <select
-                value={productType}
-                onChange={e => setProductType(e.target.value)}
+                value={tempFilters.productType}
+                onChange={e => updateTempFilter('productType', e.target.value)}
               >
                 <option value="">All Item Types</option>
                 {Object.values(ProductType).map(type => (
@@ -147,8 +186,8 @@ export default function Products(): JSX.Element {
             <label>
               Delivery Type:
               <select
-                value={deliveryType}
-                onChange={e => setDeliveryType(e.target.value)}
+                value={tempFilters.deliveryType}
+                onChange={e => updateTempFilter('deliveryType', e.target.value)}
               >
                 <option value="">All Delivery Types</option>
                 <option value="DELIVERY">Delivery</option>
@@ -161,27 +200,18 @@ export default function Products(): JSX.Element {
             <div className="star-rating-container">
               <h2>Filter by Star Rating</h2>
               <StarRating
-                currentRating={minStars}
+                currentRating={tempFilters.minStars}
                 viewOnly={false}
-                updateRating={setMinStars}
+                updateRating={value => updateTempFilter('minStars', value)}
               />
               <StarRating
-                currentRating={maxStars}
+                currentRating={tempFilters.maxStars}
                 viewOnly={false}
-                updateRating={setMaxStars}
+                updateRating={value => updateTempFilter('maxStars', value)}
               />
             </div>
 
-            <select
-              value={ratingSort}
-              onChange={e => setRatingSort(e.target.value)}
-            >
-              <option value="default">Sort by Rating</option>
-              <option value="asc">Low to High</option>
-              <option value="desc">High to Low</option>
-            </select>
-
-            <button onClick={toggleSidebar}>Apply</button>
+            <button onClick={applyFilters}>Apply</button>
             <button onClick={clearFilters}>Clear</button>
             {validationMessage && (
               <span style={{ color: 'red' }}>{validationMessage}</span>
@@ -194,19 +224,13 @@ export default function Products(): JSX.Element {
         view="catalog"
         searchQuery={searchQuery}
         filters={filters}
+        sortCriteria={sortCriteria}
       />
 
       <div className="block">
         <hr />
       </div>
-
-      {!searchQuery && (
-        <div className="trending-list-container-gold">
-          <h2 className="section-header">Trending</h2>
-          <TrendingList />
-        </div>
-      )}
-
+      <TrendingList />
       <div className="block">
         <hr />
       </div>

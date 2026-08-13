@@ -1,15 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 // import axios from 'axios'; wrong axios
 import { ProductModel } from './models/ProductModels/ProductModel';
 import './InventoriesListTable.module.css';
 import './InventoryProducts.css';
 import useSearchProducts from '@/features/inventories/hooks/useSearchProducts.ts';
-import deleteAllProductsFromInventory from './api/deleteAllProductsFromInventory';
 import createPdf from './api/createPdf';
 import ConfirmationModal from '@/features/inventories/ConfirmationModal.tsx';
 import { Status } from '@/features/inventories/models/ProductModels/Status.ts';
 import axiosInstance from '@/shared/api/axiosInstance';
+import AddSupplyToInventory from '@/features/inventories/AddSupplyToInventory';
+import EditInventoryProducts from '@/features/inventories/EditInventoryProducts';
+import MoveInventoryProducts from '@/features/inventories/MoveInventoryProducts';
+import { searchProducts } from './api/searchProducts';
 
 const MAX_QTY = 100;
 
@@ -66,18 +69,25 @@ const InventoryProducts: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editProductId, setEditProductId] = useState<string | null>(null);
+  const [moveOpen, setMoveOpen] = useState(false);
+  const [moveProductId, setMoveProductId] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const handleCreatePdf = async (): Promise<void> => {
-    if (inventoryId) {
-      try {
-        await createPdf(inventoryId);
-      } catch (error) {
-        const msg =
-          error instanceof Error ? error.message : 'Failed to create PDF';
-        alert(msg);
-      }
+    if (!inventoryId || pdfLoading) return;
+    setPdfLoading(true);
+    setError(null);
+
+    const { errorMessage } = await createPdf(inventoryId);
+
+    if (errorMessage) {
+      setError(errorMessage);
     }
+    setPdfLoading(false);
   };
   useEffect(() => {
     if (!inventoryId) return;
@@ -133,34 +143,39 @@ const InventoryProducts: React.FC = () => {
     }
   }, []);
 
-  useEffect(() => {
-    const fetchProducts = async (): Promise<void> => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await axiosInstance.get<ProductModel[]>(
-          `/inventories/${inventoryId}/products/search`,
-          { useV2: false }
-        );
-        const data = Array.isArray(response.data) ? response.data : [];
-        // Calculate profit margin for each product
-        data.forEach(product => {
-          product.productMargin = parseFloat(
-            (product.productSalePrice - product.productPrice).toFixed(2)
-          );
-        });
+  const loadProducts = useCallback(async (): Promise<void> => {
+    if (!inventoryId) return;
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await searchProducts(inventoryId);
+
+      if (result.errorMessage) {
+        setError(result.errorMessage);
+        setProducts([]);
+        setProductList([]);
+        setFilteredProducts([]);
+      } else {
+        const data = result.data ?? [];
         setProducts(data);
         setProductList(data);
         setFilteredProducts(data);
-      } finally {
-        setLoading(false);
       }
-    };
-
-    if (inventoryId) {
-      fetchProducts().catch(err => console.error(err));
+    } catch (err) {
+      console.error('Failed to load products:', err);
+      setError('Failed to load products. Please try again.');
+      setProducts([]);
+      setProductList([]);
+      setFilteredProducts([]);
+    } finally {
+      setLoading(false);
     }
   }, [inventoryId, setProductList]);
+
+  useEffect(() => {
+    void loadProducts();
+  }, [loadProducts]);
 
   const deleteProduct = async (): Promise<void> => {
     if (productToDelete) {
@@ -180,17 +195,6 @@ const InventoryProducts: React.FC = () => {
         setShowConfirmation(false);
         setProductToDelete(null);
       }
-    }
-  };
-
-  const handleDeleteAllProducts = async (): Promise<void> => {
-    try {
-      await deleteAllProductsFromInventory({ inventoryId: inventoryId! });
-      setProducts([]);
-      setFilteredProducts([]);
-      alert('All products deleted successfully.');
-    } catch (err) {
-      setError('Failed to delete all products.');
     }
   };
 
@@ -319,13 +323,13 @@ const InventoryProducts: React.FC = () => {
   }, [productList, productStatus]);
 
   if (loading) return <p>Loading supplies...</p>;
-  if (error) return <p>{error}</p>;
 
   return (
     <div className="inventory-supplies">
       <h2 className="inventory-title">
         Supplies in Inventory: <span>{inventoryName}</span>
       </h2>
+      {error && <p style={{ color: 'red', marginBottom: '1rem' }}>{error}</p>}
       <button
         className="btn btn-secondary"
         onClick={() =>
@@ -337,8 +341,12 @@ const InventoryProducts: React.FC = () => {
         Go Back
       </button>
       <div id="google_translate_element"></div>
-      <button className="btn btn-primary" onClick={handleCreatePdf}>
-        Download PDF
+      <button
+        className="btn btn-primary"
+        onClick={handleCreatePdf}
+        disabled={pdfLoading}
+      >
+        {pdfLoading ? 'Downloading…' : 'Download PDF'}
       </button>
       <div className="products-filtering">
         <div className="filter-by-name">
@@ -381,151 +389,272 @@ const InventoryProducts: React.FC = () => {
           </select>
         </div>
       </div>
-      <table className="table table-striped">
-        <thead>
-          <tr>
-            <th>Supply Id</th>
-            <th>Supply Name</th>
-            <th>Description</th>
-            <th>
-              <span className="th-2line">
-                Sale
-                <br />
-                Price
-              </span>
-            </th>
-            <th>
-              <span className="th-2line">
-                Cost
-                <br />
-                Price
-              </span>
-            </th>
-            <th>
-              <span className="th-2line">
-                Profit
-                <br />
-                Margin
-              </span>
-            </th>
-            <th>Quantity</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredProducts.length > 0 ? (
-            filteredProducts.map((product: ProductModel) => (
-              <tr key={product.productId}>
-                <td>{product.productId}</td>
-                <td>{product.productName}</td>
-                <td>{product.productDescription}</td>
-                <td>${product.productSalePrice}</td>
-                <td>${product.productPrice}</td>
-                <td
-                  style={{
-                    color: product.productMargin >= 0 ? 'green' : 'red',
-                    fontWeight: 'bold',
-                  }}
-                >
-                  ${product.productMargin}
-                </td>
-                <td>{product.productQuantity}</td>
-                <td
-                  style={{
-                    color:
-                      product.status === Status.RE_ORDER
-                        ? '#f4a460'
-                        : product.status === Status.OUT_OF_STOCK
-                          ? 'red'
-                          : product.status === Status.AVAILABLE
-                            ? 'green'
-                            : 'inherit',
-                  }}
-                >
-                  {product.status.replace('_', ' ')}
-                </td>
 
-                <td className="actions-cell">
-                  <div className="actions-group">
-                    <button
-                      onClick={e => {
-                        e.stopPropagation();
-                        navigate(`${product.productId}/edit`);
-                      }}
-                      className="btn btn-warning btn-sm"
-                    >
-                      Edit
-                    </button>
+      {/* Desktop table view (hidden on mobile via CSS) */}
+      <div className="desktop-table-view">
+        <table className="table table-striped">
+          <thead>
+            <tr>
+              <th>Supply Id</th>
+              <th>Supply Name</th>
+              <th>Description</th>
+              <th>
+                <span className="th-2line">
+                  Sale
+                  <br />
+                  Price
+                </span>
+              </th>
+              <th>
+                <span className="th-2line">
+                  Cost
+                  <br />
+                  Price
+                </span>
+              </th>
+              <th>
+                <span className="th-2line">
+                  Profit
+                  <br />
+                  Margin
+                </span>
+              </th>
+              <th>Quantity</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredProducts.length > 0 ? (
+              filteredProducts.map((product: ProductModel) => (
+                <tr key={product.productId}>
+                  <td>{product.productId}</td>
+                  <td>{product.productName}</td>
+                  <td>{product.productDescription}</td>
+                  <td>${product.productSalePrice}</td>
+                  <td>${product.productPrice}</td>
+                  <td
+                    style={{
+                      color: product.productMargin >= 0 ? 'green' : 'red',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    ${product.productMargin}
+                  </td>
+                  <td>{product.productQuantity}</td>
+                  <td
+                    style={{
+                      color:
+                        product.status === Status.RE_ORDER
+                          ? '#f4a460'
+                          : product.status === Status.OUT_OF_STOCK
+                            ? 'red'
+                            : product.status === Status.AVAILABLE
+                              ? 'green'
+                              : 'inherit',
+                    }}
+                  >
+                    {product.status.replace('_', ' ')}
+                  </td>
 
-                    <button
-                      className="btn btn-danger btm-sm"
-                      onClick={() => handleDeleteClick(product.productId)}
-                    >
-                      Delete
-                    </button>
+                  <td className="actions-cell">
+                    <div className="actions-group">
+                      <button
+                        onClick={e => {
+                          e.stopPropagation();
+                          setEditProductId(product.productId);
+                          setEditOpen(true);
+                        }}
+                        className="btn btn-warning btn-sm"
+                      >
+                        Edit
+                      </button>
 
-                    <button
-                      className="btn btn-success btn-sm"
-                      onClick={() =>
-                        addQuantity(product.productId, product.productQuantity)
-                      }
-                      disabled={product.productQuantity >= MAX_QTY}
-                      title={
-                        product.productQuantity >= MAX_QTY
-                          ? 'Max quantity reached'
-                          : ''
-                      }
-                    >
-                      Add Quantity
-                    </button>
+                      <button
+                        className="btn btn-danger btm-sm"
+                        onClick={() => handleDeleteClick(product.productId)}
+                      >
+                        Delete
+                      </button>
 
-                    <button
-                      className="btn btn-info btn-sm"
-                      onClick={() =>
-                        reduceQuantity(
-                          product.productId,
-                          product.productQuantity
-                        )
-                      }
-                      disabled={product.productQuantity <= 0}
-                      title={
-                        product.productQuantity <= 0 ? 'Quantity already 0' : ''
-                      }
-                    >
-                      Reduce Quantity
-                    </button>
+                      <button
+                        className="btn btn-success btn-sm"
+                        onClick={() =>
+                          addQuantity(
+                            product.productId,
+                            product.productQuantity
+                          )
+                        }
+                        disabled={product.productQuantity >= MAX_QTY}
+                        title={
+                          product.productQuantity >= MAX_QTY
+                            ? 'Max quantity reached'
+                            : ''
+                        }
+                      >
+                        Add Quantity
+                      </button>
 
-                    <button
-                      onClick={e => {
-                        e.stopPropagation();
-                        navigate(`${product.productId}`);
-                      }}
-                      className="btn btn-info btn-sm"
-                    >
-                      Move
-                    </button>
-                  </div>
+                      <button
+                        className="btn btn-info btn-sm"
+                        onClick={() =>
+                          reduceQuantity(
+                            product.productId,
+                            product.productQuantity
+                          )
+                        }
+                        disabled={product.productQuantity <= 0}
+                        title={
+                          product.productQuantity <= 0
+                            ? 'Quantity already 0'
+                            : ''
+                        }
+                      >
+                        Reduce Quantity
+                      </button>
+
+                      <button
+                        onClick={e => {
+                          e.stopPropagation();
+                          setMoveProductId(product.productId);
+                          setMoveOpen(true);
+                        }}
+                        className="btn btn-info btn-sm"
+                      >
+                        Move
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={9} style={{ textAlign: 'center' }}>
+                  No products available.
                 </td>
               </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan={7} style={{ textAlign: 'center' }}>
-                No products available.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-      <button
-        className="btn btn-add"
-        onClick={() => navigate(`/inventories/${inventoryId}/products/add`)}
-      >
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile card view (shown only on mobile via CSS) */}
+      <div className="mobile-cards-view">
+        {filteredProducts.length > 0 ? (
+          filteredProducts.map((product: ProductModel) => (
+            <div key={product.productId} className="mobile-product-card">
+              <div className="mobile-card-header">
+                <h3 className="mobile-card-title">{product.productName}</h3>
+                <span
+                  className="mobile-card-status"
+                  data-status={product.status.toLowerCase().replace('_', '-')}
+                >
+                  {product.status.replace('_', ' ')}
+                </span>
+              </div>
+
+              <div className="mobile-card-body">
+                <div className="mobile-card-row">
+                  <span className="mobile-card-label">ID:</span>
+                  <span className="mobile-card-value">{product.productId}</span>
+                </div>
+
+                <div className="mobile-card-row">
+                  <span className="mobile-card-label">Description:</span>
+                  <span className="mobile-card-value">
+                    {product.productDescription}
+                  </span>
+                </div>
+
+                <div className="mobile-card-row">
+                  <span className="mobile-card-label">Sale Price:</span>
+                  <span className="mobile-card-value">
+                    ${product.productSalePrice}
+                  </span>
+                </div>
+
+                <div className="mobile-card-row">
+                  <span className="mobile-card-label">Cost Price:</span>
+                  <span className="mobile-card-value">
+                    ${product.productPrice}
+                  </span>
+                </div>
+
+                <div className="mobile-card-row">
+                  <span className="mobile-card-label">Profit Margin:</span>
+                  <span
+                    className="mobile-card-value mobile-card-margin"
+                    data-positive={product.productMargin >= 0}
+                  >
+                    ${product.productMargin}
+                  </span>
+                </div>
+
+                <div className="mobile-card-row">
+                  <span className="mobile-card-label">Quantity:</span>
+                  <span className="mobile-card-value">
+                    {product.productQuantity}
+                  </span>
+                </div>
+              </div>
+
+              <div className="mobile-card-actions">
+                <button
+                  onClick={() => {
+                    setEditProductId(product.productId);
+                    setEditOpen(true);
+                  }}
+                  className="btn btn-warning btn-sm mobile-action-btn"
+                >
+                  Edit
+                </button>
+
+                <button
+                  className="btn btn-danger btn-sm mobile-action-btn"
+                  onClick={() => handleDeleteClick(product.productId)}
+                >
+                  Delete
+                </button>
+
+                <button
+                  className="btn btn-success btn-sm mobile-action-btn"
+                  onClick={() =>
+                    addQuantity(product.productId, product.productQuantity)
+                  }
+                  disabled={product.productQuantity >= MAX_QTY}
+                >
+                  Add Qty
+                </button>
+
+                <button
+                  className="btn btn-info btn-sm mobile-action-btn"
+                  onClick={() =>
+                    reduceQuantity(product.productId, product.productQuantity)
+                  }
+                  disabled={product.productQuantity <= 0}
+                >
+                  Reduce Qty
+                </button>
+
+                <button
+                  onClick={() => {
+                    setMoveProductId(product.productId);
+                    setMoveOpen(true);
+                  }}
+                  className="btn btn-info btn-sm mobile-action-btn"
+                >
+                  Move
+                </button>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="mobile-no-products">No products available.</div>
+        )}
+      </div>
+
+      <button className="btn btn-add" onClick={() => setAddOpen(true)}>
         Add
-      </button>
-      <button className="btn btn-danger" onClick={handleDeleteAllProducts}>
-        Delete All Products
       </button>
       <ConfirmationModal
         show={showConfirmation}
@@ -533,6 +662,54 @@ const InventoryProducts: React.FC = () => {
         onConfirm={deleteProduct}
         onCancel={cancelDelete}
       />
+      {addOpen && (
+        <AddSupplyToInventory
+          open={addOpen}
+          onClose={() => setAddOpen(false)}
+          inventoryIdProp={inventoryId}
+          existingProductNames={products.map(p => p.productName)}
+          onAdded={() => {
+            setAddOpen(false);
+            void loadProducts(); // refresh table after add
+          }}
+        />
+      )}
+
+      {editOpen && (
+        <EditInventoryProducts
+          open={editOpen}
+          onClose={() => {
+            setEditOpen(false);
+            setEditProductId(null);
+          }}
+          inventoryIdProp={inventoryId}
+          productIdProp={editProductId ?? undefined}
+          existingProductNames={products
+            .filter(p => p.productId !== editProductId)
+            .map(p => p.productName)}
+          onUpdated={() => {
+            setEditOpen(false);
+            setEditProductId(null);
+            void loadProducts(); // refresh table after update
+          }}
+        />
+      )}
+      {moveOpen && moveProductId && (
+        <MoveInventoryProducts
+          open={moveOpen}
+          onClose={() => {
+            setMoveOpen(false);
+            setMoveProductId(null);
+          }}
+          inventoryIdProp={inventoryId!}
+          productIdProp={moveProductId}
+          onMoved={() => {
+            setMoveOpen(false);
+            setMoveProductId(null);
+            void loadProducts();
+          }}
+        />
+      )}
     </div>
   );
 };

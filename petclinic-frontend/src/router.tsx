@@ -20,35 +20,28 @@ import AddingCustomer from '@/pages/Customer/AddingCustomer.tsx';
 import AllOwners from '@/pages/Customer/AllOwners.tsx';
 import CustomerBillingPage from '@/pages/Bills/CustomerBills.tsx';
 import AdminBillingPage from '@/pages/Bills/AdminBill.tsx';
-import EditingVisit from './features/visits/models/EditingVisit';
-import AddingVisit from './features/visits/models/AddingVisit';
 import InternalServerError from '@/pages/Error/InternalServerError.tsx';
 import RequestTimeout from '@/pages/Error/RequestTimeout.tsx';
 import ServiceUnavailable from '@/pages/Error/ServiceUnavailable.tsx';
 import Forbidden from '@/pages/Error/Forbidden.tsx';
 import Unauthorized from '@/pages/Error/Unauthorized.tsx';
 import PageNotFound from '@/pages/Error/PageNotFound.tsx';
-import EditInventory from '@/features/inventories/EditInventory.tsx';
 import { ProtectedRoute } from './shared/components';
 import CustomerDetailsPage from '@/pages/Customer/CustomerDetailsPage.tsx';
 import UpdateCustomerPage from '@/pages/Customer/UpdateCustomerPage.tsx';
-import VisitDetails from './features/visits/visits/VisitByVisitId';
+import VisitDetails from './features/visits/components/VisitByVisitId';
 import CustomerVisits from '@/pages/Visit/CustomerVisits.tsx';
+import VisitsCalendar from '@/pages/Visit/VisitsCalendar.tsx';
 import UpdateOwnerPetPage from '@/pages/Customer/UpdateOwnerPetPage.tsx';
-import EditInventoryProducts from './features/inventories/EditInventoryProducts';
-import AddSupplyToInventory from './features/inventories/AddSupplyToInventory';
 import AllUsers from '@/pages/Users/AllUsers.tsx';
 import ProductDetails from '@/features/products/components/ProductDetails';
-// import ProductsList from '@/features/products/ProductsList.tsx';
 import AddPetPage from '@/pages/Customer/AddPetPage.tsx';
-import EditProduct from './features/products/components/EditProduct';
 import ForgotPassword from '@/pages/User/ForgotPassword.tsx';
 import ResetPassword from '@/pages/User/ResetPassword.tsx';
 import PromoPage from '@/pages/Promos/PromoListPage.tsx';
 import AddPromoPage from '@/pages/Promos/AddPromoPage.tsx';
 import UpdatePromoPage from '@/pages/Promos/UpdatePromoPage.tsx';
 import LowStockProducts from '@/features/inventories/LowStockProducts.tsx';
-import MoveInventoryProducts from '@/features/inventories/MoveInventoryProducts.tsx';
 import ReviewsCustomer from '@/pages/Review/CustomerReviews.tsx';
 import AddReviewsCustomer from '@/pages/Review/CustomerAddReviewForm.tsx';
 import CustomerPromoPage from '@/pages/Promos/CustomerPromoPage.tsx';
@@ -59,43 +52,11 @@ import OwnerBookAppointment from '@/pages/Visit/OwnerBookAppointment.tsx';
 import FAQ from './pages/FAQ/FAQ';
 import ContactPage from './pages/Contact/Contact';
 import PrivacyPolicyPage from './pages/PrivacyPolicy/PrivacyPolicy';
+import CustomerVisitsCalendar from '@/pages/Visit/CustomerVisitsCalendar.tsx';
 
 const router = createBrowserRouter([
   {
     children: [
-      {
-        path: AppRoutePaths.MoveInventoryProducts,
-        element: (
-          <ProtectedRoute>
-            <MoveInventoryProducts />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: AppRoutePaths.EditInventory,
-        element: (
-          <ProtectedRoute>
-            <EditInventory />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: AppRoutePaths.EditInventoryProducts,
-        element: (
-          <ProtectedRoute>
-            <EditInventoryProducts />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: AppRoutePaths.AddSupplyToInventory,
-        element: (
-          <ProtectedRoute>
-            <AddSupplyToInventory />
-          </ProtectedRoute>
-        ),
-      },
-
       {
         path: AppRoutePaths.LowStockProducts,
         element: (
@@ -258,27 +219,35 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      {
-        path: AppRoutePaths.EditProduct,
-        element: (
-          <ProtectedRoute roles={['ADMIN', 'INVENTORY_MANAGER']}>
-            <EditProduct />
-          </ProtectedRoute>
-        ),
-      },
+      // {
+      //   path: AppRoutePaths.EditProduct,
+      //   element: (
+      //     <ProtectedRoute roles={['ADMIN', 'INVENTORY_MANAGER']}>
+      //       <EditProduct />
+      //     </ProtectedRoute>
+      //   ),
+      // },
       {
         path: AppRoutePaths.Visits,
         element: (
-          <ProtectedRoute roles={['ADMIN', 'VET']}>
+          <ProtectedRoute roles={['ADMIN', 'VET', 'RECEPTIONIST']}>
             <Visits />
           </ProtectedRoute>
         ),
       },
       {
-        path: AppRoutePaths.AddVisit,
+        path: AppRoutePaths.VisitsCalendar,
         element: (
-          <ProtectedRoute>
-            <AddingVisit />
+          <ProtectedRoute roles={['ADMIN', 'VET', 'RECEPTIONIST']}>
+            <VisitsCalendar />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.CustomerVisitsCalendar,
+        element: (
+          <ProtectedRoute roles={['OWNER']}>
+            <CustomerVisitsCalendar />
           </ProtectedRoute>
         ),
       },
@@ -367,14 +336,6 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute roles={['ADMIN']}>
             <AllRoles />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: AppRoutePaths.EditVisit,
-        element: (
-          <ProtectedRoute>
-            <EditingVisit />
           </ProtectedRoute>
         ),
       },
