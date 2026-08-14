@@ -1,12 +1,15 @@
 #[macro_use]
 extern crate rocket;
-
 use crate::adapters::input::http::graphql::{routes_graphql, schemas};
 use crate::adapters::input::http::rest::error::register_catchers;
 use crate::adapters::input::http::rest::{routes, routes_docker};
 use bootstrap::stage;
 use rocket::State;
 use rocket_cors::{AllowedOrigins, CorsOptions};
+use tikv_jemallocator::Jemalloc;
+
+// I found this allocator to be more memory efficient than the default one
+#[global_allocator] static GLOBAL: Jemalloc = Jemalloc;
 
 mod shared;
 
