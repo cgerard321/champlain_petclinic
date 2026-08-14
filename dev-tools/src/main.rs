@@ -28,10 +28,10 @@ fn list_endpoints(endpoints: &State<Endpoints>) -> String {
 #[launch]
 fn rocket() -> _ {
     env_logger::init();
-    let prod_url = ["https://petclinic-management-ui.benmusicgeek.synology.me"];
-    let dev_url = ["http://localhost:4200"];
+    let allowed_urls = ["https://petclinic-management-ui.benmusicgeek.synology.me", "http://localhost:4200"];
+    let allowed_urls_regex : [&str; 0] = [];
     let cors = CorsOptions::default()
-        .allowed_origins(AllowedOrigins::some(&prod_url, &dev_url))
+        .allowed_origins(AllowedOrigins::some(&allowed_urls, &allowed_urls_regex))
         .allow_credentials(true)
         .to_cors()
         .expect("Error creating CORS");

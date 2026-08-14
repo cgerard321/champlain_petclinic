@@ -4,7 +4,7 @@ use crate::application::services::auth::params::UserLoginParams;
 use crate::shared::error::{AppError, AppResult};
 use rocket::http::{Cookie, CookieJar, SameSite};
 use rocket::serde::json::Json;
-use rocket::{State, http::Status, post};
+use rocket::{State, http::Status};
 use time::OffsetDateTime;
 use uuid::Uuid;
 

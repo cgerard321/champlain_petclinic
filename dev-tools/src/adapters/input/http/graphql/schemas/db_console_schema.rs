@@ -86,7 +86,7 @@ impl MutationRoot {
         db_name: Option<String>,
     ) -> Result<SqlResultResponseContract> {
         let user_ctx = ctx.data::<UserContext>()?;
-        let sql_console = ctx.data::<Arc<DynSqlConsolePort>>()?;
+        let sql_console = ctx.data::<DynSqlConsolePort>()?;
         let result = sql_console
             .exec_sql_on_service(user_ctx, service, sql, db_name)
             .await?;
@@ -106,7 +106,7 @@ impl MutationRoot {
         db_name: Option<String>,
     ) -> Result<MongoResultResponseContract> {
         let user_ctx = ctx.data::<UserContext>()?;
-        let mongo_console = ctx.data::<Arc<DynMongoConsolePort>>()?;
+        let mongo_console = ctx.data::<DynMongoConsolePort>()?;
         let result = mongo_console
             .exec_mongo_on_service(user_ctx, service, mongo_query, db_name)
             .await?;
