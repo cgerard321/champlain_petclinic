@@ -34,11 +34,11 @@ impl MongoDriverPort for MongoDriver {
             .map_err(|e| AppError::BadRequest(format!("Invalid Mongo command BSON: {}", e)))?;
 
         let res: Document = db_handle.run_command(command_doc).await.map_err(|e| {
-            log::info!("Mongo command failed: {}", e);
+            log::debug!("Mongo command failed: {}", e);
             AppError::BadRequest(format!("Mongo command failed: {}", e))
         })?;
 
-        log::info!("Mongo command executed successfully");
+        log::debug!("Mongo command executed successfully");
 
         // If the response contains a cursor with firstBatch, extract documents
         // This is when we do find() or aggregate()
@@ -74,7 +74,7 @@ impl MongoDriverPort for MongoDriver {
             affected = affected.max(dc);
         }
 
-        log::info!("Mongo command affected {} documents", affected);
+        log::debug!("Mongo command affected {} documents", affected);
         if affected > 0 {
             return Ok(MongoResult {
                 bson: vec![],

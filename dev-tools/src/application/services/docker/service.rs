@@ -32,7 +32,7 @@ impl DockerPort for DockerService {
         view_logs_params: ViewLogsParams,
         user_ctx: UserContext,
     ) -> AppResult<Pin<Box<dyn Stream<Item=Result<DockerLogEntity, AppError>> + Send>>> {
-        log::info!(
+        log::debug!(
             "Streaming logs for container: {}",
             view_logs_params.container_name
         );
@@ -42,9 +42,9 @@ impl DockerPort for DockerService {
             .get_service(&view_logs_params.container_name)
             .await?;
 
-        log::info!("Resolved descriptor: {:?}", desc);
+        log::debug!("Resolved descriptor: {:?}", desc);
         verify_service_or_admin_perms(&user_ctx, &desc)?;
-        log::info!("Access granted");
+        log::debug!("Access granted");
 
         stream_container_logs(&self.docker_api, view_logs_params, &desc).await
     }
@@ -57,13 +57,13 @@ impl DockerPort for DockerService {
         let container_name = restart_params.container_name;
         let container_type = restart_params.container_type;
         let db_name = restart_params.db_name;
-        log::info!("Restarting container: {}", container_name);
+        log::debug!("Restarting container: {}", container_name);
 
         let desc = self.service_repo.get_service(&container_name).await?;
 
-        log::info!("Resolved descriptor: {:?}", desc);
+        log::debug!("Resolved descriptor: {:?}", desc);
         verify_service_or_admin_perms(&user_ctx, &desc)?;
-        log::info!("Access granted");
+        log::debug!("Access granted");
 
         restart_container(&self.docker_api, &desc, &container_type, db_name.as_deref()).await
     }

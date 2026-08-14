@@ -46,21 +46,21 @@ pub fn stage() -> AdHoc {
     AdHoc::on_ignite("SQLx (MySQL)", |rocket| async move {
         let url = std::env::var("DATABASE_URL").expect("Missing DATABASE_URL env var");
         // MySQL
-        log::info!("Connecting to MySQL");
+        log::debug!("Connecting to MySQL");
         let pool = MySqlPoolOptions::new()
             .max_connections(10)
             .connect(&url)
             .await
             .expect("DB connect error");
 
-        log::info!("Connected to MySQL, running migration script");
+        log::debug!("Connected to MySQL, running migration script");
 
         sqlx::migrate!("./src/migrations")
             .run(&pool)
             .await
             .expect("Migrations failed");
 
-        log::info!("Migration script ran successfully");
+        log::debug!("Migration script ran successfully");
 
         if let Err(e) = add_default_roles(&pool).await {
             log::error!("Failed to insert default roles: {e}");

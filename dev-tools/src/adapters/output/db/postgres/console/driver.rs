@@ -26,7 +26,7 @@ impl PostgresDriver {
 #[async_trait]
 impl SqlDriverPort for PostgresDriver {
     async fn execute_query(&self, sql: &str) -> AppResult<SqlResult> {
-        log::info!("Executing query (Postgres): {}", sql);
+        log::debug!("Executing query (Postgres): {}", sql);
 
         let mut stream = sqlx::raw_sql(sql).fetch_many(&self.pool);
 
@@ -43,7 +43,7 @@ impl SqlDriverPort for PostgresDriver {
                 Either::Left(res) => {
                     let affected = res.rows_affected() as i64;
                     total_affected += affected;
-                    log::info!(
+                    log::debug!(
                         "[SQL/Postgres] affected {affected} rows (running total {total_affected})"
                     );
                 }
