@@ -8,7 +8,6 @@ use crate::application::ports::input::mongo_console_port::{DynMongoConsolePort};
 use crate::application::ports::input::sql_console_port::{DynSqlConsolePort};
 use crate::application::services::user_context::UserContext;
 use async_graphql::{Context, Object, Result};
-use std::sync::Arc;
 
 #[Object]
 impl ServiceDbResponseContract {
