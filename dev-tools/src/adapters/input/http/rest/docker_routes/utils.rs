@@ -64,7 +64,7 @@ pub async fn send_logs(
                 match serde_json::to_string(&contract) {
                     Ok(json) => {
                         if socket.send(Message::Text(json)).await.is_err() {
-                            log::info!("WebSocket client disconnected");
+                            log::debug!("WebSocket client disconnected");
                             break;
                         }
                     }

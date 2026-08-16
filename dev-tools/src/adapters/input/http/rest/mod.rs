@@ -15,6 +15,7 @@ pub fn routes() -> Vec<rocket::Route> {
         buckets::read_buckets,
         auth::login,
         auth::logout,
+        auth::check_session,
         users::add_user,
     ]
 }

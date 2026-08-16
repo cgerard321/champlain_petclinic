@@ -26,7 +26,7 @@ impl MySqlDriver {
 #[async_trait]
 impl SqlDriverPort for MySqlDriver {
     async fn execute_query(&self, sql: &str) -> AppResult<SqlResult> {
-        log::info!("Executing query: {}", sql);
+        log::debug!("Executing query: {}", sql);
 
         let mut stream = sqlx::raw_sql(sql).fetch_many(&self.pool);
 
@@ -43,7 +43,7 @@ impl SqlDriverPort for MySqlDriver {
                 Either::Left(res) => {
                     let affected = res.rows_affected() as i64;
                     total_affected += affected;
-                    log::info!("[SQL] affected {affected} rows (running total {total_affected})");
+                    log::debug!("[SQL] affected {affected} rows (running total {total_affected})");
                 }
 
                 Either::Right(row) => {

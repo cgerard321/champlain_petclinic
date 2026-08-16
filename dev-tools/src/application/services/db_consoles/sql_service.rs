@@ -36,13 +36,13 @@ impl SqlConsolePort for SqlConsoleService {
     ) -> AppResult<SqlResult> {
         let desc = self.service_repo.get_service(&service).await?;
 
-        log::info!("Resolved descriptor: {:?}", desc);
+        log::debug!("Resolved descriptor: {:?}", desc);
         verify_service_or_admin_perms(user_ctx, &desc)?;
-        log::info!("Access granted");
+        log::debug!("Access granted");
 
         let db = desc.get_db_by_name_or_default(db_name.as_deref())?;
 
-        log::info!("Resolved db: {:?}", db);
+        log::debug!("Resolved db: {:?}", db);
 
         if db.db_type != DbType::MySQL && db.db_type != DbType::Postgres {
             return Err(AppError::BadRequest(format!(
@@ -51,14 +51,14 @@ impl SqlConsolePort for SqlConsoleService {
             )));
         }
 
-        log::info!("Executing query");
+        log::debug!("Executing query");
 
         let driver = self
             .drivers
             .get(&db.db_host)
             .ok_or_else(|| AppError::BadRequest(format!("Unknown container '{}'", service)))?;
 
-        log::info!("Using driver for db host: {}", db.db_host);
+        log::debug!("Using driver for db host: {}", db.db_host);
         driver.execute_query(&sql).await
     }
 }

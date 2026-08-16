@@ -16,16 +16,19 @@ src/
 │   ├── shared/     → reusable, business-logic-free building blocks
 │   ├── layout/     → the app "shell" (header, sidenav, footer, page frame)
 │   └── features/   → business domains (e.g. visits, bills, customers, products)
-└── testing/    → helpers/mocks/fixtures reused across .spec.ts files (see §7)
+├── environments/   → per-build config (API base URL, etc.)
+└── testing/        → helpers/mocks/fixtures reused across .spec.ts files
+
 ```
 
-| Folder     | Loaded                 | Knows about business logic? | Imported by                                    |
-|------------|------------------------|-----------------------------|------------------------------------------------|
-| `core`     | once, at bootstrap     | Yes (app-wide concerns)     | Only `app.ts` and `app.config.ts`              |
-| `shared`   | anywhere it's used     | No                          | `features`, `layout`                           |
-| `layout`   | once, in the app shell | A little (composes routes)  | `app.ts` only                                  |
-| `features` | lazily, per route      | Yes (that domain only)      | **nothing** — see rules below                  |
-| `testing`  | test runs only         | No (fakes/fixtures only)    | `*.spec.ts` files only — never `app/` (see §7) |
+| Folder         | Loaded                 | Knows about business logic? | Imported by                                          |
+|----------------|------------------------|-----------------------------|------------------------------------------------------|
+| `core`         | once, at bootstrap     | Yes (app-wide concerns)     | Only `app.ts` and `app.config.ts`                    |
+| `shared`       | anywhere it's used     | No                          | `features`, `layout`                                 |
+| `layout`       | once, in the app shell | A little (composes routes)  | `app.ts` only                                        |
+| `features`     | lazily, per route      | Yes (that domain only)      | **nothing** — see rules below                        |
+| `environments` | build time             | No (config values only)     | `core/interceptors/api-base-url-interceptor.ts` only |
+| `testing`      | test runs only         | No (fakes/fixtures only)    | `*.spec.ts` files only — never `app/`                |
 
 ---
 
@@ -149,7 +152,8 @@ features/
 
 ### `<feature>.routes.ts`
 
-- Lives at the root of the feature folder, exports the route config for that feature, normally to be lazy-loaded from `app.routes.ts`:
+- Lives at the root of the feature folder, exports the route config for that feature, normally to be lazy-loaded from
+  `app.routes.ts`:
 
 ```ts
 // app.routes.ts
@@ -197,7 +201,7 @@ Why not allow feature → feature **component** imports?
   components need to live somewhere ownerless and generic — that's what `shared` is for.
 
 **The fix when a feature component is needed elsewhere:** promote it. Strip out anything domain-specific, move it to
-`shared/components/`, and have both features consume the shared version. See §6a below for a worked example.
+`shared/components/`, and have both features consume the shared version. See below for a worked example.
 
 ### Allowed vs. not allowed
 
@@ -230,8 +234,8 @@ Why not allow feature → feature **component** imports?
 
 ### Quick reference table
 
-Reading it: find the row for **where the import starts**, then look at the
-column for **what it's importing**. `✅` = allowed, `❌` = not allowed,
+Reading it: find the row for **where the import starts**, then look at the column for **what it's importing**. `✅` =
+allowed, `❌` = not allowed,
 `—` = doesn't apply (that folder has no such thing to import from/into).
 
 | Importing from ↓ \\ Importing what → |          `core`          |   `shared`    | its own `pages`/`components` |           another feature's `pages`/`components`           | another feature's `services`/`models` |               `layout`                |
@@ -242,7 +246,7 @@ column for **what it's importing**. `✅` = allowed, `❌` = not allowed,
 | `layout`                             |       ✅ (via DI)        |      ✅       |              —               |                             ❌                             |                  ❌                   |             ✅ (internal)             |
 | `app.config.ts`                      | ✅ (registers providers) |       —       |              —               |                             —                              |                   —                   |                   —                   |
 | `app.routes.ts`                      |    ✅ (route guards)     |       —       |              —               | ✅ (lazy `loadChildren` of a feature's `*.routes.ts` only) |                   —                   | ✅ (root route nests under the shell) |
-| `testing/*` (`.spec.ts` files only)  |       ✅ (via DI)        |      ✅       |     ✅ (the spec's own)      |                             —                              |              ✅ (mocked)              |                   —                   |
+| `testing/*` (`.spec.ts` files only)  |       ✅ (via DI)        |      ✅       |     ✅ (the spec's own)      |          — (specs don't share UI across features)          |              ✅ (mocked)              |                   —                   |
 
 The two rules that matter most: **`features/*` → another feature's `pages`/`components` is always ❌.**
 **`features/*` → another feature's `services`/`models` is ✅, but keep it sparing** (see the "smell to watch for" in 6b).
@@ -285,7 +289,7 @@ shared table ever knowing what a `Bill` or a `Visit` is:
 
 ```ts
 // features/bills/pages/bills-list/bills-list.ts
-columns: ColumnDef<Bill> [] = [
+columns: ColumnDef<Bill>[] = [
     {key: 'ownerName', header: 'Owner'},
     {key: 'status', header: 'Status', cellTemplate: this.statusCell},
 ];
@@ -293,7 +297,7 @@ columns: ColumnDef<Bill> [] = [
 
 ```ts
 // features/visits/pages/visit-list/visit-list.ts
-columns: ColumnDef<Visit> [] = [
+columns: ColumnDef<Visit>[] = [
     {key: 'petName', header: 'Pet'},
     {key: 'date', header: 'Date'},
     {key: 'status', header: 'Status', cellTemplate: this.statusCell},
@@ -308,6 +312,7 @@ real `VisitListTable`, wired to the real `VisitsService`, filtered to one vet �
 because there's no domain-agnostic version to extract; the page fundamentally is visits data.
 
 The fix: put the page inside `visits`, not `vets`, since that's where the component and service it needs already live.
+
 ```
 features/
 └── visits/
@@ -319,13 +324,15 @@ features/
     └── services/
         └── visits.service.ts     (already here — no import needed)
 ```
+
 vets reaches it by routing, not importing:
 
 ```html
 <a routerLink="/visits/vet-schedule" [queryParams]="{ vetId: vet.id }">
-View schedule
+    View schedule
 </a>
 ```
+
 No cross-feature import happens at all — vets just links to a URL that visits owns.
 
 ---
@@ -384,11 +391,31 @@ shape. That keeps the page itself simple (one injected dependency) even though m
 
 ---
 
-## 7. `testing/` — shared test utilities
+## 7. `environments/` — per-build configuration
 
-`testing/` sits alongside `app/`, not inside it. It holds things that exist
-purely to make `.spec.ts` files shorter and more consistent — never
-application code, and never anything imported by the app itself at runtime.
+`environments/` sits alongside `app/` and `testing/`, not inside either. It holds the one thing that's meant to differ
+between builds: config values like the API base URL. It never holds application logic.
+
+```
+environments/
+├── environment.ts               # production default — apiUrl: ''
+└── environment.development.ts   # dev — apiUrl: 'http://localhost:4242'
+```
+
+**How it's wired in:** `angular.json`'s `development` build configuration swaps `environment.ts` out for
+`environment.development.ts` via
+`fileReplacements`. Since `ng serve`'s default configuration is
+`development`, this happens automatically — no flags needed. To point at a different backend, either edit `apiUrl` in
+`environment.development.ts`, or add a new `angular.json` configuration with its own `fileReplacements`
+entry and matching `environment.<name>.ts`, then run
+`ng serve --configuration <name>`.
+
+---
+
+## 8. `testing/` — shared test utilities
+
+`testing/` sits alongside `app/`, not inside it. It holds things that exist purely to make `.spec.ts` files shorter and
+more consistent — never application code, and never anything imported by the app itself at runtime.
 
 ```
 testing/
@@ -400,37 +427,36 @@ testing/
 
 **What belongs here:**
 
-- Anything created *only* to be imported by `*.spec.ts` files, and reused by
-  more than one of them. If a mock, fixture, or helper is only ever used by
-  a single spec file, keep it next to that spec instead of promoting it —
-  same "don't move it until it's actually shared" rule as `shared/`.
-- Fakes/mocks for `core` and feature `services/`, so specs don't have to
-  hand-roll a `MockVisitsService` in three different files:
+- Anything created *only* to be imported by `*.spec.ts` files, and reused by more than one of them. If a mock, fixture,
+  or helper is only ever used by a single spec file, keep it next to that spec instead of promoting it — same "don't
+  move it until it's actually shared" rule as `shared/`.
+- Fakes/mocks for `core` and feature `services/`, so specs don't have to hand-roll a `MockVisitsService` in three
+  different files:
 
 ```ts
 // testing/mocks/mock-visits.service.ts
 export class MockVisitsService {
-  getRecentForOwner = jasmine.createSpy().and.returnValue(of([]));
-  getById = jasmine.createSpy().and.returnValue(of(mockVisit));
+    getRecentForOwner = jasmine.createSpy().and.returnValue(of([]));
+    getById = jasmine.createSpy().and.returnValue(of(mockVisit));
 }
 ```
 
 ```ts
 // features/visits/pages/visit-detail/visit-detail.spec.ts
-import { MockVisitsService } from '../../../../testing/mocks/mock-visits.service';
+import {MockVisitsService} from '../../../../testing/mocks/mock-visits.service';
 
 TestBed.configureTestingModule({
-  providers: [{ provide: VisitsService, useClass: MockVisitsService }],
+    providers: [{provide: VisitsService, useClass: MockVisitsService}],
 });
 ```
 
-- Sample domain data (fixtures) so tests across features aren't each
-  inventing their own slightly-different fake `Visit` or `Bill`:
+- Sample domain data (fixtures) so tests across features aren't each inventing their own slightly-different fake `Visit`
+  or `Bill`:
 
 ```ts
 // testing/fixtures/visit.fixture.ts
 export const mockVisit: Visit = {
-  id: 'v1', petName: 'Rex', date: '2026-08-01', status: 'scheduled',
+    id: 'v1', petName: 'Rex', date: '2026-08-01', status: 'scheduled',
 };
 ```
 
@@ -439,20 +465,17 @@ export const mockVisit: Visit = {
 
 **What does not belong here:**
 
-- Real application logic. `testing/` should never be imported by anything
-  in `app/` — only by `*.spec.ts` files. If you find `app/` code importing
-  from `testing/`, that's a sign a fake leaked into production code.
-- Feature-specific test data that only one spec cares about — that stays
-  local to the spec, not promoted to `testing/`.
+- Real application logic. `testing/` should never be imported by anything in `app/` — only by `*.spec.ts` files. If you
+  find `app/` code importing from `testing/`, that's a sign a fake leaked into production code.
+- Feature-specific test data that only one spec cares about — that stays local to the spec, not promoted to `testing/`.
 
-Same promotion logic as `shared/components/`: a mock or fixture starts out
-living next to the one spec that needs it, and only moves to `testing/`
-once a second spec — in the same feature or a different one — needs the
-same thing.
+Same promotion logic as `shared/components/`: a mock or fixture starts out living next to the one spec that needs it,
+and only moves to `testing/`
+once a second spec — in the same feature or a different one — needs the same thing.
 
 ---
 
-## 8. Summary checklist
+## 9. Summary checklist
 
 When adding something new, ask:
 
@@ -465,7 +488,9 @@ When adding something new, ask:
    → `layout/`
 6. **Does a page need data owned by another feature?** → inject that feature's `services/`, never import its `pages/`/
    `components/`
-7. **Is it a mock, fixture, or test helper reused by more than one `.spec.ts` file?** → `testing/<mocks|fixtures|builders>/<name>`
+7. **Is it a mock, fixture, or test helper reused by more than one `.spec.ts` file?** →
+   `testing/<mocks|fixtures|builders>/<name>`
+8. **Is it a value that should differ per build (a host, a flag)?** → `environments/environment.*.ts`
 
 And the hard rules:
 

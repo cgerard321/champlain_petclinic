@@ -38,7 +38,7 @@ impl UsersRepoPort for MySqlUsersRepo {
             ));
         }
 
-        log::info!("Inserting user: {:?}", id);
+        log::debug!("Inserting user: {:?}", id);
         let mut tx = self
             .pool
             .begin()
@@ -63,7 +63,7 @@ impl UsersRepoPort for MySqlUsersRepo {
 
         for role_id in user_roles {
             let rid_str = role_id.as_hyphenated().to_string();
-            log::info!("Inserting role: {} for user: {}", rid_str, user_id);
+            log::debug!("Inserting role: {} for user: {}", rid_str, user_id);
 
             if let Err(e) = sqlx::query(
                 r#"
@@ -86,7 +86,7 @@ impl UsersRepoPort for MySqlUsersRepo {
         Ok(self.get_user_by_id(id).await?)
     }
     async fn get_user_by_id(&self, id: Uuid) -> AppResult<UserEntity> {
-        log::info!("Finding user: {:?}", id);
+        log::debug!("Finding user: {:?}", id);
         let id = Hyphenated::from_uuid(id);
 
         let row: User = sqlx::query_as::<_, User>(
@@ -101,7 +101,7 @@ impl UsersRepoPort for MySqlUsersRepo {
             .await
             .map_err(|e| map_sqlx_err(e, "User"))?;
 
-        log::info!("User found: {:?}", row);
+        log::debug!("User found: {:?}", row);
 
         let mut user = UserEntity::from(row);
 
@@ -113,7 +113,7 @@ impl UsersRepoPort for MySqlUsersRepo {
     }
 
     async fn get_user_auth_by_email_for_login(&self, email: &str) -> AppResult<AuthProjection> {
-        log::info!("Finding user for login: {:}", email);
+        log::debug!("Finding user for login: {:}", email);
         let row: User = sqlx::query_as::<_, User>(
             r#"
         SELECT id, email, display_name, is_active, pass_hash
@@ -126,7 +126,7 @@ impl UsersRepoPort for MySqlUsersRepo {
             .await
             .map_err(|e| map_sqlx_err(e, "User"))?;
 
-        log::info!("User found: {:?}", row);
+        log::debug!("User found: {:?}", row);
 
         Ok(AuthProjection::try_from(row)?)
     }
