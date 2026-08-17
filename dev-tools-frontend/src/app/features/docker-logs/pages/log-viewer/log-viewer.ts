@@ -88,12 +88,13 @@ export class LogViewer implements OnDestroy {
   });
 
   protected readonly statusBadgeVariant = computed<BadgeVariant>(() => {
-    console.log(this.logSocket.status())
     switch (this.logSocket.status().toLocaleLowerCase()) {
       case 'open':
         return 'success';
       case 'connecting':
         return 'warning';
+      case 'error':
+        return 'danger'
       default:
         return 'neutral';
     }
