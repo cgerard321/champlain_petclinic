@@ -1,5 +1,91 @@
-<div class="log-viewer-page">
-  <mat-icon class="placeholder-icon">terminal</mat-icon>
-  <h1>Log reading</h1>
-  <p>WIP.</p>
+<div class="log-viewer">
+  <div class="log-viewer__controls">
+    @if (isLoadingServices()) {
+      <mat-progress-spinner diameter="24" mode="indeterminate" />
+    } @else if (loadError()) {
+      <p class="log-viewer__error">{{ loadError() }}</p>
+    } @else {
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-service">
+        <mat-label>Service</mat-label>
+        <mat-select [formField]="logForm.serviceName" (selectionChange)="onServiceChange($event.value)">
+          @for (service of services(); track service.name) {
+            <mat-option [value]="service.name">{{ service.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      @if (availableDbs().length > 0) {
+        <mat-checkbox
+          class="log-viewer__checkbox"
+          [formField]="logForm.specifyDb"
+          (change)="onSpecifyDbChange($event.checked)"
+        >
+          Specify database
+        </mat-checkbox>
+
+        @if (model().specifyDb) {
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-db">
+            <mat-label>Database</mat-label>
+            <mat-select [formField]="logForm.dbName">
+              @for (db of availableDbs(); track db.dbName) {
+                <mat-option [value]="db.dbName">{{ db.dbName }}</mat-option>
+              }
+            </mat-select>
+            @if (logForm.dbName().touched() && logForm.dbName().invalid()) {
+              <mat-error>{{ logForm.dbName().errors()[0]?.message }}</mat-error>
+            }
+          </mat-form-field>
+        }
+      }
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-lines">
+        <mat-label>Lines</mat-label>
+        <input matInput type="number" [formField]="logForm.numberOfLines" />
+      </mat-form-field>
+
+      <mat-checkbox
+        class="log-viewer__checkbox"
+        [checked]="autoScroll()"
+        (change)="autoScroll.set($event.checked)"
+      >
+        Auto-scroll
+      </mat-checkbox>
+
+      @if (logSocket.status() === 'open' || logSocket.status() === 'connecting') {
+        <button mat-flat-button color="warn" (click)="disconnect()">
+          <mat-icon>stop</mat-icon>
+          Disconnect
+        </button>
+      } @else {
+        <button mat-flat-button color="primary" [disabled]="!selectedService()" (click)="connect()">
+          <mat-icon>play_arrow</mat-icon>
+          Tail logs
+        </button>
+      }
+    }
+  </div>
+
+  <div class="log-viewer__status-bar">
+    <div
+      class="status-badge"
+      [class.status-badge--open]="logSocket.status() === 'open'"
+      [class.status-badge--connecting]="logSocket.status() === 'connecting'"
+    >
+      <span class="status-dot"></span>
+      Status: {{ logSocket.status() }}
+    </div>
+  </div>
+
+  <div #logOutput class="log-viewer__output">
+    @for (line of displayedMessages(); track $index) {
+      <div
+        class="log-viewer__row"
+        [class.log-viewer__row--error]="isErrorLine(line)"
+        [class.log-viewer__row--warning]="isWarningLine(line)"
+      >
+        <span class="log-viewer__line-number">{{ $index + 1 }}</span>
+        <span class="log-viewer__line-text">[{{ line.type_name }}] {{ line.message }}</span>
+      </div>
+    }
+  </div>
 </div>

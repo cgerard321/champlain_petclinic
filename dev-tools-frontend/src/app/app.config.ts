@@ -7,11 +7,13 @@ import { apiBaseUrlInterceptor } from '@core/interceptors/api-base-url-intercept
 import { authInterceptor } from '@core/interceptors/auth-interceptor';
 import { AuthStateService } from '@core/services/auth-state-service';
 import { firstValueFrom } from 'rxjs';
+import { graphqlProviders } from '@core/services/graphql-provider';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
     provideHttpClient(withInterceptors([apiBaseUrlInterceptor, authInterceptor])),
+    ...graphqlProviders,
     provideAppInitializer(() => {
       const authState = inject(AuthStateService);
       return firstValueFrom(authState.checkSession());
