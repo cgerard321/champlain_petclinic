@@ -66,14 +66,9 @@
   </div>
 
   <div class="log-viewer__status-bar">
-    <div
-      class="status-badge"
-      [class.status-badge--open]="logSocket.status() === 'open'"
-      [class.status-badge--connecting]="logSocket.status() === 'connecting'"
-    >
-      <span class="status-dot"></span>
+    <app-status-badge [variant]="statusBadgeVariant()">
       Status: {{ logSocket.status() }}
-    </div>
+    </app-status-badge>
   </div>
 
   <div #logOutput class="log-viewer__output">

@@ -22,6 +22,7 @@ import { applyWhen, form, FormField, required } from '@angular/forms/signals';
 import { DockerServices } from '@features/docker-logs/services/docker-services';
 import { LogService } from '@features/docker-logs/services/docker-logs';
 import { LogViewerFormModel } from '@features/docker-logs/models/log-viewer-form';
+import { BadgeVariant, StatusBadge } from '@shared/components/status-badge/status-badge';
 
 @Component({
   selector: 'app-log-viewer',
@@ -34,6 +35,7 @@ import { LogViewerFormModel } from '@features/docker-logs/models/log-viewer-form
     MatProgressSpinnerModule,
     MatSelectModule,
     FormField,
+    StatusBadge,
   ],
   templateUrl: './log-viewer.html',
   styleUrl: './log-viewer.css',
@@ -83,6 +85,18 @@ export class LogViewer implements OnDestroy {
   protected readonly displayedMessages = computed(() => {
     const limit = Math.max(1, this.model().numberOfLines ?? 200);
     return this.logSocket.messages().slice(-limit);
+  });
+
+  protected readonly statusBadgeVariant = computed<BadgeVariant>(() => {
+    console.log(this.logSocket.status())
+    switch (this.logSocket.status().toLocaleLowerCase()) {
+      case 'open':
+        return 'success';
+      case 'connecting':
+        return 'warning';
+      default:
+        return 'neutral';
+    }
   });
 
   constructor() {
