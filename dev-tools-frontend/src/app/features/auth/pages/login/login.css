@@ -26,8 +26,6 @@
   height: 40px;
 }
 
-.error-message {
-  margin: 0 0 8px;
-  color: #b3261e;
-  font-size: 0.875rem;
+.password-field {
+  margin-top: 8px;
 }
