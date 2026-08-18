@@ -1,0 +1,44 @@
+name: PR Preview - Build & Push Images
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+# Cancel an in-progress build for this PR if a new commit lands before it finishes
+concurrency:
+  group: pr-preview-${{ github.event.number }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-push:
+    runs-on: self-hosted
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - { name: petclinic-frontend,        context: ./petclinic-frontend }
+          - { name: employee-frontend,         context: ./employee-frontend }
+          - { name: api-gateway,               context: ./api-gateway }
+          - { name: visits-service-new,        context: ./visits-service-new }
+          - { name: inventory-service,         context: ./inventory-service }
+          - { name: vet-service,               context: ./vet-service }
+          - { name: customers-service-reactive, context: ./customers-service-reactive }
+          - { name: auth-service,              context: ./auth-service }
+          - { name: billing-service,           context: ./billing-service }
+          - { name: products-service,          context: ./products-service }
+          - { name: cart-service,              context: ./cart-service }
+          - { name: mailer-service,            context: ./mailer-service }
+          - { name: files-service,             context: ./files-service }
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+
+      - name: Build ${{ matrix.service.name }}
+        run: |
+          docker build \
+            -t 192.168.2.115:5000/${{ matrix.service.name }}:pr-${{ github.event.number }} \
+            ${{ matrix.service.context }}
+
+      - name: Push ${{ matrix.service.name }}
+        run: |
+          docker push 192.168.2.115:5000/${{ matrix.service.name }}:pr-${{ github.event.number }}
