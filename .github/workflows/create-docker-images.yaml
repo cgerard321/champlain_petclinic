@@ -16,19 +16,19 @@ jobs:
       fail-fast: false
       matrix:
         service:
-          - { name: petclinic-frontend,        context: ./petclinic-frontend }
-          - { name: employee-frontend,         context: ./employee-frontend }
-          - { name: api-gateway,               context: ./api-gateway }
-          - { name: visits-service-new,        context: ./visits-service-new }
-          - { name: inventory-service,         context: ./inventory-service }
-          - { name: vet-service,               context: ./vet-service }
-          - { name: customers-service-reactive, context: ./customers-service-reactive }
-          - { name: auth-service,              context: ./auth-service }
-          - { name: billing-service,           context: ./billing-service }
-          - { name: products-service,          context: ./products-service }
-          - { name: cart-service,              context: ./cart-service }
-          - { name: mailer-service,            context: ./mailer-service }
-          - { name: files-service,             context: ./files-service }
+          - { name: petclinic-frontend,        context: ./petclinic-frontend, buildArgs: "--build-arg BUILD_MODE=production" }
+          - { name: employee-frontend,         context: ./employee-frontend,  buildArgs: "--build-arg BUILD_MODE=production" }
+          - { name: api-gateway,               context: ./api-gateway,               buildArgs: "" }
+          - { name: visits-service-new,        context: ./visits-service-new,        buildArgs: "" }
+          - { name: inventory-service,         context: ./inventory-service,         buildArgs: "" }
+          - { name: vet-service,               context: ./vet-service,               buildArgs: "" }
+          - { name: customers-service-reactive, context: ./customers-service-reactive, buildArgs: "" }
+          - { name: auth-service,              context: ./auth-service,              buildArgs: "" }
+          - { name: billing-service,           context: ./billing-service,           buildArgs: "" }
+          - { name: products-service,          context: ./products-service,          buildArgs: "" }
+          - { name: cart-service,              context: ./cart-service,              buildArgs: "" }
+          - { name: mailer-service,            context: ./mailer-service,            buildArgs: "" }
+          - { name: files-service,             context: ./files-service,             buildArgs: "" }
     steps:
       - name: Checkout PR branch
         uses: actions/checkout@v4
@@ -36,6 +36,7 @@ jobs:
       - name: Build ${{ matrix.service.name }}
         run: |
           docker build \
+            ${{ matrix.service.buildArgs }} \
             -t 192.168.2.115:5000/${{ matrix.service.name }}:pr-${{ github.event.number }} \
             ${{ matrix.service.context }}
 
