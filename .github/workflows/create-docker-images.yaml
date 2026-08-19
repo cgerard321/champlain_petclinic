@@ -39,6 +39,9 @@ jobs:
           if [ "${{ matrix.service.name }}" = "petclinic-frontend" ]; then
             EXTRA_ARGS="$EXTRA_ARGS --build-arg VITE_BACKEND_URL=https://petdev-${{ github.event.number }}-backend.benmusicgeek.synology.me/api/"
           fi
+          if [ "${{ matrix.service.name }}" = "employee-frontend" ]; then
+            EXTRA_ARGS="$EXTRA_ARGS --build-arg VITE_BACKEND_URL=https://petdev-${{ github.event.number }}-backend.benmusicgeek.synology.me/api/gateway --build-arg VITE_BACKEND_URL_V2=https://petdev-${{ github.event.number }}-backend.benmusicgeek.synology.me/api/v2/gateway"
+          fi
           docker build \
             $EXTRA_ARGS \
             -t 192.168.2.115:5000/${{ matrix.service.name }}:pr-${{ github.event.number }} \
