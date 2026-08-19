@@ -1,12 +1,8 @@
----
 name: PR Preview - Build & Push Images
 
 on:
   pull_request:
-    types:
-      - opened
-      - synchronize
-      - reopened
+    types: [opened, synchronize, reopened]
 
 # Cancel an in-progress build for this PR if a new commit lands before it finishes
 concurrency:
@@ -20,45 +16,19 @@ jobs:
       fail-fast: false
       matrix:
         service:
-          - name: petclinic-frontend
-            context: ./petclinic-frontend
-            buildArgs: "--build-arg BUILD_MODE=production"
-          - name: employee-frontend
-            context: ./employee-frontend
-            buildArgs: "--build-arg BUILD_MODE=production"
-          - name: api-gateway
-            context: ./api-gateway
-            buildArgs: ""
-          - name: visits-service-new
-            context: ./visits-service-new
-            buildArgs: ""
-          - name: inventory-service
-            context: ./inventory-service
-            buildArgs: ""
-          - name: vet-service
-            context: ./vet-service
-            buildArgs: ""
-          - name: customers-service-reactive
-            context: ./customers-service-reactive
-            buildArgs: ""
-          - name: auth-service
-            context: ./auth-service
-            buildArgs: ""
-          - name: billing-service
-            context: ./billing-service
-            buildArgs: ""
-          - name: products-service
-            context: ./products-service
-            buildArgs: ""
-          - name: cart-service
-            context: ./cart-service
-            buildArgs: ""
-          - name: mailer-service
-            context: ./mailer-service
-            buildArgs: ""
-          - name: files-service
-            context: ./files-service
-            buildArgs: ""
+          - { name: petclinic-frontend,        context: ./petclinic-frontend, buildArgs: "--build-arg BUILD_MODE=production" }
+          - { name: employee-frontend,         context: ./employee-frontend,  buildArgs: "--build-arg BUILD_MODE=production" }
+          - { name: api-gateway,               context: ./api-gateway,               buildArgs: "" }
+          - { name: visits-service-new,        context: ./visits-service-new,        buildArgs: "" }
+          - { name: inventory-service,         context: ./inventory-service,         buildArgs: "" }
+          - { name: vet-service,               context: ./vet-service,               buildArgs: "" }
+          - { name: customers-service-reactive, context: ./customers-service-reactive, buildArgs: "" }
+          - { name: auth-service,              context: ./auth-service,              buildArgs: "" }
+          - { name: billing-service,           context: ./billing-service,           buildArgs: "" }
+          - { name: products-service,          context: ./products-service,          buildArgs: "" }
+          - { name: cart-service,              context: ./cart-service,              buildArgs: "" }
+          - { name: mailer-service,            context: ./mailer-service,            buildArgs: "" }
+          - { name: files-service,             context: ./files-service,             buildArgs: "" }
     steps:
       - name: Checkout PR branch
         uses: actions/checkout@v4
@@ -66,20 +36,62 @@ jobs:
       - name: Build ${{ matrix.service.name }}
         run: |
           EXTRA_ARGS="${{ matrix.service.buildArgs }}"
-          PR_NUM="${{ github.event.number }}"
-          BASE_URL="https://petdev-${PR_NUM}-backend.benmusicgeek.synology.me"
           if [ "${{ matrix.service.name }}" = "petclinic-frontend" ]; then
-            EXTRA_ARGS="$EXTRA_ARGS --build-arg VITE_BACKEND_URL=${BASE_URL}/api/"
+            EXTRA_ARGS="$EXTRA_ARGS --build-arg VITE_BACKEND_URL=https://petdev-${{ github.event.number }}-backend.benmusicgeek.synology.me/api/"
           fi
           if [ "${{ matrix.service.name }}" = "employee-frontend" ]; then
-            EXTRA_ARGS="$EXTRA_ARGS --build-arg VITE_BACKEND_URL=${BASE_URL}/api/gateway"
-            EXTRA_ARGS="$EXTRA_ARGS --build-arg VITE_BACKEND_URL_V2=${BASE_URL}/api/v2/gateway"
+            EXTRA_ARGS="$EXTRA_ARGS --build-arg VITE_BACKEND_URL=https://petdev-${{ github.event.number }}-backend.benmusicgeek.synology.me/api/gateway --build-arg VITE_BACKEND_URL_V2=https://petdev-${{ github.event.number }}-backend.benmusicgeek.synology.me/api/v2/gateway"
           fi
           docker build \
             $EXTRA_ARGS \
-            -t 192.168.2.115:5000/${{ matrix.service.name }}:pr-${PR_NUM} \
+            -t 192.168.2.115:5000/${{ matrix.service.name }}:pr-${{ github.event.number }} \
             ${{ matrix.service.context }}
 
       - name: Push ${{ matrix.service.name }}
         run: |
           docker push 192.168.2.115:5000/${{ matrix.service.name }}:pr-${{ github.event.number }}
+
+  comment-preview-links:
+    needs: build-and-push
+    runs-on: self-hosted
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Comment preview URLs on the PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request.number;
+            const body = [
+              "### 🚀 Preview environment",
+              "Images are built and pushed — the environment may take a couple minutes to finish deploying and get a TLS cert on first load.",
+              "",
+              `- **Frontend:** https://petdev-${pr}.benmusicgeek.synology.me`,
+              `- **Employee portal:** https://petdev-${pr}-employee.benmusicgeek.synology.me`,
+              `- **API gateway:** https://petdev-${pr}-backend.benmusicgeek.synology.me`,
+            ].join("\n");
+
+            // Find an existing preview comment (posted by this workflow) and update it,
+            // rather than posting a new one on every push to the PR.
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr,
+            });
+            const existing = comments.data.find(c => c.body.startsWith("### 🚀 Preview environment"));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr,
+                body,
+              });
+            }
