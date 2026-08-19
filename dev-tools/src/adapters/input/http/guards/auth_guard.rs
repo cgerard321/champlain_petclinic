@@ -31,7 +31,7 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
     type Error = ();
 
     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
-        log::info!("Authenticating user");
+        log::debug!("Authenticating user");
 
         let jar = match req.guard::<&CookieJar>().await {
             Outcome::Success(j) => j,
@@ -58,21 +58,21 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
         };
 
         let Some(cookie) = jar.get_private("sid") else {
-            log::info!("No 'sid' cookie: unauthorized");
+            log::debug!("No 'sid' cookie: unauthorized");
             return Outcome::Error((Status::Unauthorized, ()));
         };
 
         let sid = match Uuid::parse_str(cookie.value()) {
             Ok(session_id) => session_id,
             Err(error) => {
-                log::info!("Invalid sid in cookie: {}", error);
+                log::debug!("Invalid sid in cookie: {}", error);
                 return Outcome::Error((Status::Unauthorized, ()));
             }
         };
 
         match port.validate_session(sid).await {
             Ok(user) => {
-                log::info!("User {} authenticated", user.email);
+                log::debug!("User {} authenticated", user.email);
                 let role_ids: HashSet<Uuid> = user
                     .roles
                     .into_iter()
@@ -85,11 +85,11 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
                 })
             }
             Err(AppError::Unauthorized) | Err(AppError::NotFound(_)) => {
-                log::info!("User isn't authenticated");
+                log::debug!("User isn't authenticated");
                 Outcome::Error((Status::Unauthorized, ()))
             }
             Err(AppError::Forbidden) => {
-                log::info!("User is authenticated but not authorized");
+                log::debug!("User is authenticated but not authorized");
                 Outcome::Error((Status::Forbidden, ()))
             }
             Err(error) => {

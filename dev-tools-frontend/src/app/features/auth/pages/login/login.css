@@ -1,0 +1,33 @@
+.login-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 16px;
+  background: #f5f5f5;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 360px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.submit-button {
+  margin-top: 8px;
+  height: 40px;
+}
+
+.error-message {
+  margin: 0 0 8px;
+  color: #b3261e;
+  font-size: 0.875rem;
+}

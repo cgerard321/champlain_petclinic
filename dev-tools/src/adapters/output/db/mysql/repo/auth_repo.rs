@@ -27,7 +27,7 @@ impl AuthRepoPort for MySqlAuthRepo {
         uid: Uuid,
         exp: NaiveDateTime,
     ) -> AppResult<SessionEntity> {
-        log::info!("Inserting session: {:?}", sid);
+        log::debug!("Inserting session: {:?}", sid);
         // I tested and it does not seem to be needed, but for the sake of uniformity I will
         // convert it, and it will also make sure the format is correct.
         let sid = Hyphenated::from_uuid(sid);
@@ -41,17 +41,17 @@ impl AuthRepoPort for MySqlAuthRepo {
             .await
             .map_err(|e| map_sqlx_err(e, "Sessions"))?;
 
-        log::info!("Session inserted");
+        log::debug!("Session inserted");
 
         let session = self.find_session_by_id(Uuid::from(sid)).await?;
 
-        log::info!("Session found: {:?}", session);
+        log::debug!("Session found: {:?}", session);
 
         Ok(session)
     }
 
     async fn find_session_by_id(&self, sid: Uuid) -> AppResult<SessionEntity> {
-        log::info!("Finding session: {:?}", sid);
+        log::debug!("Finding session: {:?}", sid);
         let sid = Hyphenated::from_uuid(sid);
         let row: Option<Session> = sqlx::query_as::<_, Session>(
             "SELECT id, user_id, created_at, expires_at FROM sessions WHERE id = ?",
@@ -65,13 +65,13 @@ impl AuthRepoPort for MySqlAuthRepo {
             return Err(AppError::NotFound("No sessions found".to_string()));
         };
 
-        log::info!("Session found: {:?}", row);
+        log::debug!("Session found: {:?}", row);
 
         Ok(SessionEntity::from(row))
     }
 
     async fn delete_session(&self, sid: Uuid) -> AppResult<()> {
-        log::info!("Deleting session: {:?}", sid);
+        log::debug!("Deleting session: {:?}", sid);
         let sid = Hyphenated::from_uuid(sid);
         sqlx::query("DELETE FROM sessions WHERE id = ?")
             .bind(sid.to_string())
@@ -79,7 +79,7 @@ impl AuthRepoPort for MySqlAuthRepo {
             .await
             .map_err(|e| map_sqlx_err(e, "Sessions"))?;
 
-        log::info!("Session deleted");
+        log::debug!("Session deleted");
         Ok(())
     }
 

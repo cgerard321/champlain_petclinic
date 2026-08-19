@@ -4,7 +4,7 @@ use crate::application::services::auth::params::UserLoginParams;
 use crate::shared::error::{AppError, AppResult};
 use rocket::http::{Cookie, CookieJar, SameSite};
 use rocket::serde::json::Json;
-use rocket::{http::Status, post, State};
+use rocket::{State, http::Status};
 use time::OffsetDateTime;
 use uuid::Uuid;
 
@@ -39,6 +39,17 @@ pub async fn login(
 
     Ok(Status::NoContent)
 }
+
+#[get("/session")]
+pub async fn check_session(jar: &CookieJar<'_>, port: &State<DynAuthPort>) -> AppResult<Status> {
+    let cookie = jar.get_private("sid").ok_or(AppError::Unauthorized)?;
+    let session_id = Uuid::parse_str(cookie.value()).map_err(|_| AppError::Unauthorized)?;
+
+    port.validate_session(session_id).await?;
+
+    Ok(Status::NoContent)
+}
+
 #[post("/logout")]
 pub async fn logout(jar: &CookieJar<'_>, port: &State<DynAuthPort>) -> AppResult<Status> {
     if let Some(cookie) = jar.get_private("sid") {
