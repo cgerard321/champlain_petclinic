@@ -1,8 +1,12 @@
+---
 name: PR Preview - Build & Push Images
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types:
+      - opened
+      - synchronize
+      - reopened
 
 # Cancel an in-progress build for this PR if a new commit lands before it finishes
 concurrency:
@@ -16,19 +20,45 @@ jobs:
       fail-fast: false
       matrix:
         service:
-          - { name: petclinic-frontend,        context: ./petclinic-frontend, buildArgs: "--build-arg BUILD_MODE=production" }
-          - { name: employee-frontend,         context: ./employee-frontend,  buildArgs: "--build-arg BUILD_MODE=production" }
-          - { name: api-gateway,               context: ./api-gateway,               buildArgs: "" }
-          - { name: visits-service-new,        context: ./visits-service-new,        buildArgs: "" }
-          - { name: inventory-service,         context: ./inventory-service,         buildArgs: "" }
-          - { name: vet-service,               context: ./vet-service,               buildArgs: "" }
-          - { name: customers-service-reactive, context: ./customers-service-reactive, buildArgs: "" }
-          - { name: auth-service,              context: ./auth-service,              buildArgs: "" }
-          - { name: billing-service,           context: ./billing-service,           buildArgs: "" }
-          - { name: products-service,          context: ./products-service,          buildArgs: "" }
-          - { name: cart-service,              context: ./cart-service,              buildArgs: "" }
-          - { name: mailer-service,            context: ./mailer-service,            buildArgs: "" }
-          - { name: files-service,             context: ./files-service,             buildArgs: "" }
+          - name: petclinic-frontend
+            context: ./petclinic-frontend
+            buildArgs: "--build-arg BUILD_MODE=production"
+          - name: employee-frontend
+            context: ./employee-frontend
+            buildArgs: "--build-arg BUILD_MODE=production"
+          - name: api-gateway
+            context: ./api-gateway
+            buildArgs: ""
+          - name: visits-service-new
+            context: ./visits-service-new
+            buildArgs: ""
+          - name: inventory-service
+            context: ./inventory-service
+            buildArgs: ""
+          - name: vet-service
+            context: ./vet-service
+            buildArgs: ""
+          - name: customers-service-reactive
+            context: ./customers-service-reactive
+            buildArgs: ""
+          - name: auth-service
+            context: ./auth-service
+            buildArgs: ""
+          - name: billing-service
+            context: ./billing-service
+            buildArgs: ""
+          - name: products-service
+            context: ./products-service
+            buildArgs: ""
+          - name: cart-service
+            context: ./cart-service
+            buildArgs: ""
+          - name: mailer-service
+            context: ./mailer-service
+            buildArgs: ""
+          - name: files-service
+            context: ./files-service
+            buildArgs: ""
     steps:
       - name: Checkout PR branch
         uses: actions/checkout@v4
@@ -36,15 +66,18 @@ jobs:
       - name: Build ${{ matrix.service.name }}
         run: |
           EXTRA_ARGS="${{ matrix.service.buildArgs }}"
+          PR_NUM="${{ github.event.number }}"
+          BASE_URL="https://petdev-${PR_NUM}-backend.benmusicgeek.synology.me"
           if [ "${{ matrix.service.name }}" = "petclinic-frontend" ]; then
-            EXTRA_ARGS="$EXTRA_ARGS --build-arg VITE_BACKEND_URL=https://petdev-${{ github.event.number }}-backend.benmusicgeek.synology.me/api/"
+            EXTRA_ARGS="$EXTRA_ARGS --build-arg VITE_BACKEND_URL=${BASE_URL}/api/"
           fi
           if [ "${{ matrix.service.name }}" = "employee-frontend" ]; then
-            EXTRA_ARGS="$EXTRA_ARGS --build-arg VITE_BACKEND_URL=https://petdev-${{ github.event.number }}-backend.benmusicgeek.synology.me/api/gateway --build-arg VITE_BACKEND_URL_V2=https://petdev-${{ github.event.number }}-backend.benmusicgeek.synology.me/api/v2/gateway"
+            EXTRA_ARGS="$EXTRA_ARGS --build-arg VITE_BACKEND_URL=${BASE_URL}/api/gateway"
+            EXTRA_ARGS="$EXTRA_ARGS --build-arg VITE_BACKEND_URL_V2=${BASE_URL}/api/v2/gateway"
           fi
           docker build \
             $EXTRA_ARGS \
-            -t 192.168.2.115:5000/${{ matrix.service.name }}:pr-${{ github.event.number }} \
+            -t 192.168.2.115:5000/${{ matrix.service.name }}:pr-${PR_NUM} \
             ${{ matrix.service.context }}
 
       - name: Push ${{ matrix.service.name }}
