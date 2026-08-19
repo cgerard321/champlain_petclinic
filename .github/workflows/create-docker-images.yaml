@@ -37,7 +37,7 @@ jobs:
         run: |
           EXTRA_ARGS="${{ matrix.service.buildArgs }}"
           if [ "${{ matrix.service.name }}" = "petclinic-frontend" ]; then
-            EXTRA_ARGS="$EXTRA_ARGS --build-arg VITE_BACKEND_URL=https://petdev-${{ github.event.number }}.benmusicgeek.synology.me/api/"
+            EXTRA_ARGS="$EXTRA_ARGS --build-arg VITE_BACKEND_URL=https://petdev-${{ github.event.number }}-backend.benmusicgeek.synology.me/api/"
           fi
           docker build \
             $EXTRA_ARGS \
