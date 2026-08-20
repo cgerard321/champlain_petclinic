@@ -63,6 +63,16 @@ jobs:
       - name: Checkout PR branch
         uses: actions/checkout@v4
 
+      - name: Compute image tag
+        id: tag
+        run: |
+          # Tag includes the actual commit, not just the PR number — a mutable
+          # per-PR tag (pr-1468) never changes between pushes, so ArgoCD never
+          # sees a diff and never redeploys. This makes every push produce a
+          # genuinely new tag, matching {{head_short_sha}} in the ApplicationSet.
+          SHORT_SHA=$(echo "${{ github.event.pull_request.head.sha }}" | cut -c1-8)
+          echo "tag=pr-${{ github.event.number }}-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+
       - name: Build ${{ matrix.service.name }}
         run: |
           EXTRA_ARGS="${{ matrix.service.buildArgs }}"
@@ -77,12 +87,12 @@ jobs:
           fi
           docker build \
             $EXTRA_ARGS \
-            -t 192.168.2.115:5000/${{ matrix.service.name }}:pr-${PR_NUM} \
+            -t 192.168.2.115:5000/${{ matrix.service.name }}:${{ steps.tag.outputs.tag }} \
             ${{ matrix.service.context }}
 
       - name: Push ${{ matrix.service.name }}
         run: |
-          docker push 192.168.2.115:5000/${{ matrix.service.name }}:pr-${{ github.event.number }}
+          docker push 192.168.2.115:5000/${{ matrix.service.name }}:${{ steps.tag.outputs.tag }}
 
   comment-preview-links:
     needs: build-and-push
