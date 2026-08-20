@@ -70,7 +70,7 @@ jobs:
           # per-PR tag (pr-1468) never changes between pushes, so ArgoCD never
           # sees a diff and never redeploys. This makes every push produce a
           # genuinely new tag, matching {{head_short_sha}} in the ApplicationSet.
-          SHORT_SHA=$(echo "${{ github.event.pull_request.head.sha }}" | cut -c1-7)
+          SHORT_SHA=$(echo "${{ github.event.pull_request.head.sha }}" | cut -c1-8)
           echo "tag=pr-${{ github.event.number }}-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
 
       - name: Build ${{ matrix.service.name }}
