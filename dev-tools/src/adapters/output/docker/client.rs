@@ -19,7 +19,7 @@ impl BollardDockerAPI {
     }
 
     async fn resolve_id(&self, target_name: &str) -> AppResult<String> {
-        log::info!("Resolving container ID for {}", target_name);
+        log::debug!("Resolving container ID for {}", target_name);
 
         let mut filters: HashMap<String, Vec<String>> = HashMap::new();
         filters.insert("name".to_string(), vec![target_name.to_string()]);
@@ -34,7 +34,7 @@ impl BollardDockerAPI {
             .await
             .map_err(map_docker_error)?;
 
-        log::info!("Found {} containers", list.len());
+        log::debug!("Found {} containers", list.len());
 
         // We expect only one container to match the name so we take the first one
         // if we have more, we just ignore the rest since that is probably an
@@ -56,7 +56,7 @@ impl BollardDockerAPI {
             return Ok(container_id);
         }
 
-        log::info!("No containers found");
+        log::debug!("No containers found");
 
         Err(AppError::NotFound(format!(
             "Container not found: {}",
@@ -72,9 +72,9 @@ impl DockerAPIPort for BollardDockerAPI {
         container_name: &str,
         number_of_lines: Option<usize>,
     ) -> AppResult<Pin<Box<dyn Stream<Item=AppResult<DockerLogEntity>> + Send>>> {
-        log::info!("Streaming logs for container: {}", container_name);
+        log::debug!("Streaming logs for container: {}", container_name);
 
-        log::info!("Connected to Docker");
+        log::debug!("Connected to Docker");
 
         let id = BollardDockerAPI::resolve_id(self, container_name).await?;
 

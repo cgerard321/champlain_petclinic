@@ -857,11 +857,13 @@ dependencies = [
  "mongodb",
  "rand_core 0.9.3",
  "rocket",
+ "rocket_cors",
  "rocket_ws",
  "serde",
  "serde_json",
  "sqlx",
  "thiserror 2.0.17",
+ "tikv-jemallocator",
  "time",
  "tokio",
  "uuid",
@@ -2942,6 +2944,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "rocket_cors"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cfac3a1df83f8d4fc96aa41dba3b86c786417b7fc0f52ec76295df2ba781aa69"
+dependencies = [
+ "http 0.2.12",
+ "log",
+ "regex",
+ "rocket",
+ "serde",
+ "serde_derive",
+ "unicase",
+ "unicase_serde",
+ "url",
+]
+
+[[package]]
 name = "rocket_http"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3768,6 +3787,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "tikv-jemalloc-sys"
+version = "0.7.1+5.3.1-0-g81034ce1f1373e37dc865038e1bc8eeecf559ce8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1a2825c78386b4ae0314074867860ba9577875de945f05992c38815cbec327f0"
+dependencies = [
+ "cc",
+ "libc",
+]
+
+[[package]]
+name = "tikv-jemallocator"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "249f09e49ab1609436f34c776e84231bead18d6a955f119f939bdc1d847561bd"
+dependencies = [
+ "libc",
+ "tikv-jemalloc-sys",
+]
+
+[[package]]
 name = "time"
 version = "0.3.44"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4169,6 +4208,22 @@ checksum = "e1b88fcfe09e89d3866a5c11019378088af2d24c3fbd4f0543f96b479ec90697"
 dependencies = [
  "serde",
  "version_check",
+]
+
+[[package]]
+name = "unicase"
+version = "2.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dbc4bc3a9f746d862c45cb89d705aa10f187bb96c76001afab07a0d35ce60142"
+
+[[package]]
+name = "unicase_serde"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6ef53697679d874d69f3160af80bc28de12730a985d57bdf2b47456ccb8b11f1"
+dependencies = [
+ "serde",
+ "unicase",
 ]
 
 [[package]]

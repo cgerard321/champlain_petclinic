@@ -37,9 +37,9 @@ impl MongoConsolePort for MongoConsoleService {
     ) -> AppResult<MongoResult> {
         let desc = self.service_repo.get_service(&service).await?;
 
-        log::info!("Resolved descriptor: {:?}", desc);
+        log::debug!("Resolved descriptor: {:?}", desc);
         verify_service_or_admin_perms(user_ctx, &desc)?;
-        log::info!("Access granted");
+        log::debug!("Access granted");
 
         if desc.dbs.is_none() {
             return Err(AppError::BadRequest(format!(
@@ -57,7 +57,7 @@ impl MongoConsolePort for MongoConsoleService {
             )));
         }
 
-        log::info!("Executing query");
+        log::debug!("Executing query");
 
         self.drivers
             .get(&db.db_host)

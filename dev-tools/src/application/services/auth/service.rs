@@ -44,17 +44,17 @@ impl AuthPort for AuthService {
     }
 
     async fn validate_session(&self, session_id: Uuid) -> AppResult<UserEntity> {
-        log::info!("Validating session {}", session_id);
+        log::debug!("Validating session {}", session_id);
         let session = find_session_by_id(&self.auth_repo, session_id).await?;
 
-        log::info!("Session found: {:?}", session);
+        log::debug!("Session found: {:?}", session);
 
         if session.is_expired() {
-            log::info!("Session {} is expired", session_id);
+            log::debug!("Session {} is expired", session_id);
             return Err(AppError::Unauthorized);
         }
 
-        log::info!("Session {} is valid", session_id);
+        log::debug!("Session {} is valid", session_id);
 
         Ok(self.users_repo.get_user_by_id(session.user_id).await?)
     }
