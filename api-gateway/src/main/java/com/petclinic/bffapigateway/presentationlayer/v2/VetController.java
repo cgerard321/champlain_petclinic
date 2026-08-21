@@ -50,7 +50,7 @@ public class VetController {
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping(value = "/random", produces = MediaType.TEXT_PLAIN_VALUE)
     public String getRandom(){
-        return "Testing again";
+        return "Testing again electric boogaloo";
     }
 
 
