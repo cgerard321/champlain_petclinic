@@ -19,8 +19,9 @@ import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.net.URI;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Collections;
 import java.util.Map;
 
 @RestController
@@ -39,35 +40,35 @@ public class CartControllerV1 {
 
     // Parameter object to configure error mapping (builder pattern)
     public static final class ErrorOptions {
-        final String context;
-        final String cartId;
-        final String productId;
         final boolean includeBadRequestBodyMessage;
         final boolean invalidInputAsUnprocessable;
 
-        public ErrorOptions(Builder b) {
-            this.context = b.context;
-            this.cartId = b.cartId;
-            this.productId = b.productId;
-            this.includeBadRequestBodyMessage = b.includeBadRequestBodyMessage;
-            this.invalidInputAsUnprocessable = b.invalidInputAsUnprocessable;
+        private ErrorOptions(Builder builder) {
+            this.includeBadRequestBodyMessage = builder.includeBadRequestBodyMessage;
+            this.invalidInputAsUnprocessable = builder.invalidInputAsUnprocessable;
         }
 
-        public static Builder builder(String context) { return new Builder(context); }
+        public static Builder builder() {
+            return new Builder();
+        }
 
         public static final class Builder {
-            private final String context;
-            private String cartId;
-            private String productId;
-            public boolean includeBadRequestBodyMessage;
+            private boolean includeBadRequestBodyMessage;
             private boolean invalidInputAsUnprocessable;
 
-            private Builder(String context) { this.context = context; }
-            Builder cartId(String v) { this.cartId = v; return this; }
-            Builder productId(String v) { this.productId = v; return this; }
-            public Builder includeBadRequestBodyMessage(boolean v) { this.includeBadRequestBodyMessage = v; return this; }
-            public Builder invalidInputAsUnprocessable(boolean v) { this.invalidInputAsUnprocessable = v; return this; }
-            public ErrorOptions build() { return new ErrorOptions(this); }
+            public Builder includeBadRequestBodyMessage(boolean value) {
+                this.includeBadRequestBodyMessage = value;
+                return this;
+            }
+
+            public Builder invalidInputAsUnprocessable(boolean value) {
+                this.invalidInputAsUnprocessable = value;
+                return this;
+            }
+
+            public ErrorOptions build() {
+                return new ErrorOptions(this);
+            }
         }
     }
 
@@ -137,6 +138,16 @@ public class CartControllerV1 {
         return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
 
+    private Map<String, Object> buildCartQueryParams(Integer page, Integer size, String customerId, String customerName, Boolean assigned) {
+        Map<String, Object> params = new LinkedHashMap<>();
+        if (page != null) params.put("page", page);
+        if (size != null) params.put("size", size);
+        if (customerId != null && !customerId.isBlank()) params.put("customerId", customerId.trim());
+        if (customerName != null && !customerName.isBlank()) params.put("customerName", customerName.trim());
+        if (assigned != null) params.put("assigned", assigned);
+        return params;
+    }
+
     // --- Endpoints ---
 
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
@@ -145,29 +156,46 @@ public class CartControllerV1 {
         return cartServiceClient.createCart(cartRequestDTO)
                 .map(cart -> ResponseEntity.status(HttpStatus.CREATED).body(cart))
                 .onErrorResume(e -> mapCartErrorWithMessage(e,
-                        ErrorOptions.builder("createCart")
+                        ErrorOptions.builder()
                                 .includeBadRequestBodyMessage(true)
                                 .build()
                 ));
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER, Roles.ADMIN})
-    @GetMapping("/{cartId}/count")
-    public Mono<ResponseEntity<Map<String, Integer>>> getCartItemCount(@PathVariable String cartId) {
-        return cartServiceClient.getCartItemCount(cartId)
-                .map(count -> ResponseEntity.ok(Collections.singletonMap("itemCount", count)))
-                .onErrorResume(e -> mapCartError(e,
-                        ErrorOptions.builder("getCartItemCount")
-                                .cartId(cartId)
-                                .invalidInputAsUnprocessable(true)
-                                .build()
-                ));
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<List<CartResponseDTO>>> getAllCartsAsJson(
+        @RequestParam(value = "page", required = false) Integer page,
+        @RequestParam(value = "size", required = false) Integer size,
+        @RequestParam(value = "customerId", required = false) String customerId,
+        @RequestParam(value = "customerName", required = false) String customerName,
+        @RequestParam(value = "assigned", required = false) Boolean assigned
+    ) {
+    Map<String, Object> queryParams = buildCartQueryParams(page, size, customerId, customerName, assigned);
+
+    return cartServiceClient
+        .getAllCarts(queryParams)
+        .collectList()
+        .map(ResponseEntity::ok)
+        .onErrorResume(e -> mapCartError(
+            e,
+            ErrorOptions.builder()
+                .invalidInputAsUnprocessable(true)
+                .build()
+        ));
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<CartResponseDTO> getAllCarts() {
-        return cartServiceClient.getAllCarts();
+    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<CartResponseDTO> getAllCartsStream(
+        @RequestParam(value = "page", required = false) Integer page,
+        @RequestParam(value = "size", required = false) Integer size,
+        @RequestParam(value = "customerId", required = false) String customerId,
+        @RequestParam(value = "customerName", required = false) String customerName,
+        @RequestParam(value = "assigned", required = false) Boolean assigned
+    ) {
+    Map<String, Object> queryParams = buildCartQueryParams(page, size, customerId, customerName, assigned);
+    return cartServiceClient.getAllCarts(queryParams);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.OWNER, Roles.ADMIN})
@@ -178,211 +206,150 @@ public class CartControllerV1 {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @DeleteMapping(value = "/{cartId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<CartResponseDTO>> deleteCartByCartId(@PathVariable String cartId){
-        return mapToOkOrNotFound(cartServiceClient.deleteCartByCartId(cartId));
+    public Mono<ResponseEntity<Void>> deleteCartByCartId(@PathVariable String cartId){
+    return cartServiceClient.deleteCartByCartId(cartId)
+        .thenReturn(ResponseEntity.noContent().<Void>build())
+        .onErrorResume(e -> this.mapCartError(e,
+            ErrorOptions.builder().build()
+        ));
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
-    @DeleteMapping("/{cartId}/clear")
-    public Mono<ResponseEntity<String>> clearCart(@PathVariable String cartId) {
-        return cartServiceClient.clearCart(cartId)
-                .thenReturn(ResponseEntity.ok("Cart successfully cleared"))
-                .onErrorResume(e -> mapCartError(e,
-                        ErrorOptions.builder("clearCart")
-                                .cartId(cartId)
-                                .build()
-                ));
+    @DeleteMapping("/{cartId}/products")
+    public Mono<ResponseEntity<Void>> deleteAllItemsInCart(@PathVariable String cartId) {
+    return cartServiceClient.deleteAllItemsInCart(cartId)
+        .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+        .onErrorResume(e -> this.mapCartError(e,
+            ErrorOptions.builder()
+                .build()
+        ));
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
-    @DeleteMapping(value = "/{cartId}/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<CartResponseDTO>> removeProductFromCart(@PathVariable String cartId, @PathVariable String productId){
-        return cartServiceClient.removeProductFromCart(cartId, productId)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build())
-                .onErrorResume(e -> mapCartError(e,
-                        ErrorOptions.builder("removeProductFromCart")
-                                .cartId(cartId)
-                                .productId(productId)
-                                .build()
-                ));
+    @DeleteMapping(value = "/{cartId}/products/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<Void>> removeProductFromCart(@PathVariable String cartId, @PathVariable String productId){
+    return cartServiceClient.removeProductFromCart(cartId, productId)
+        .thenReturn(ResponseEntity.noContent().<Void>build())
+        .onErrorResume(e -> this.mapCartError(e,
+            ErrorOptions.builder()
+                .build()
+        ));
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
     @PostMapping("/{cartId}/products")
     public Mono<ResponseEntity<CartResponseDTO>> addProductToCart(
-            @PathVariable String cartId,
-            @RequestBody AddProductRequestDTO requestDTO) {
-        return cartServiceClient.addProductToCart(cartId, requestDTO)
-                .map(ResponseEntity::ok)
-                .onErrorResume(e -> mapCartErrorWithMessage(e,
-                        ErrorOptions.builder("addProductToCart")
-                                .cartId(cartId)
-                                .includeBadRequestBodyMessage(true)
-                                .build()
-                ));
+        @PathVariable String cartId,
+        @RequestBody CartItemRequestDTO requestDTO) {
+    final String requestedProductId = requestDTO != null && requestDTO.getProductId() != null
+        ? requestDTO.getProductId().trim()
+        : null;
+
+    return cartServiceClient.addProductToCart(cartId, requestDTO)
+        .map(cartResponse -> {
+            if (requestedProductId != null && !requestedProductId.isBlank()) {
+            return ResponseEntity.created(URI.create(String.format("/api/gateway/carts/%s/products/%s", cartId, requestedProductId)))
+                .body(cartResponse);
+            }
+            return ResponseEntity.status(HttpStatus.CREATED).body(cartResponse);
+        })
+        .onErrorResume(e -> mapCartErrorWithMessage(e,
+            ErrorOptions.builder()
+                .includeBadRequestBodyMessage(true)
+                .build()
+        ));
+    }
+
+    private Mono<ResponseEntity<CartResponseDTO>> handleQuantityUpdate(String cartId,
+                                    String productId,
+                                    UpdateProductQuantityRequestDTO requestDTO) {
+    return cartServiceClient.updateProductQuantityInCart(cartId, productId, requestDTO)
+        .map(ResponseEntity::ok)
+        .onErrorResume(e -> mapCartError(e,
+            ErrorOptions.builder()
+                .build()
+        ));
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
-    @PutMapping("/{cartId}/products/{productId}")
-    public Mono<ResponseEntity<CartResponseDTO>> updateProductQuantityInCart(@PathVariable String cartId, @PathVariable String productId, @RequestBody UpdateProductQuantityRequestDTO requestDTO) {
-        return cartServiceClient.updateProductQuantityInCart(cartId, productId, requestDTO)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build())
-                .onErrorResume(e -> mapCartError(e,
-                        ErrorOptions.builder("updateProductQuantityInCart")
-                                .cartId(cartId)
-                                .productId(productId)
-                                .build()
-                ));
+    @PatchMapping("/{cartId}/products/{productId}")
+    public Mono<ResponseEntity<CartResponseDTO>> patchProductQuantityInCart(@PathVariable String cartId,
+                                        @PathVariable String productId,
+                                        @RequestBody UpdateProductQuantityRequestDTO requestDTO) {
+    return handleQuantityUpdate(cartId, productId, requestDTO);
     }
-
+    
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
     @PostMapping("/{cartId}/checkout")
     public Mono<ResponseEntity<CartResponseDTO>> checkoutCart(@PathVariable String cartId) {
         return mapToOkOrNotFound(cartServiceClient.checkoutCart(cartId));
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER, Roles.ADMIN})
-    @GetMapping("/customer/{customerId}")
-    public Mono<ResponseEntity<CartResponseDTO>> getCartByCustomerId(@PathVariable String customerId) {
-        return mapToOkOrNotFound(cartServiceClient.getCartByCustomerId(customerId));
-    }
-
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
-    @PutMapping("/{cartId}/wishlist/{productId}/toCart")
-    public Mono<ResponseEntity<CartResponseDTO>> moveProductFromWishListToCart(@PathVariable String cartId, @PathVariable String productId) {
-        return cartServiceClient.moveProductFromWishListToCart(cartId, productId)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build())
-                .onErrorResume(e -> mapCartError(e,
-                        ErrorOptions.builder("moveProductFromWishListToCart")
-                                .cartId(cartId)
-                                .productId(productId)
-                                .build()
-                ));
-    }
+    @PostMapping("/{cartId}/wishlist")
+    public Mono<ResponseEntity<CartResponseDTO>> addProductToWishlist(
+        @PathVariable String cartId,
+        @RequestBody WishlistItemRequestDTO requestDTO) {
 
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
-    @PutMapping("/{cartId}/wishlist/{productId}/toWishList")
-    public Mono<ResponseEntity<CartResponseDTO>> moveProductFromCartToWishlist(@PathVariable String cartId, @PathVariable String productId) {
-        return cartServiceClient.moveProductFromCartToWishlist(cartId, productId)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build())
-                .onErrorResume(e -> mapCartError(e,
-                        ErrorOptions.builder("moveProductFromCartToWishlist")
-                                .cartId(cartId)
-                                .productId(productId)
-                                .build()
-                ));
-    }
-
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
-    @PostMapping("/{cartId}/products/{productId}/quantity/{quantity}")
-    public Mono<ResponseEntity<CartResponseDTO>> addProductToWishList(@PathVariable String cartId, @PathVariable String productId, @PathVariable int quantity) {
-        return cartServiceClient.addProductToWishList(cartId, productId, quantity)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build())
-                .onErrorResume(e -> mapCartError(e,
-                        ErrorOptions.builder("addProductToWishList")
-                                .cartId(cartId)
-                                .productId(productId)
-                                .build()
-                ));
+    return cartServiceClient.addProductToWishlist(cartId, requestDTO)
+        .map(body -> ResponseEntity.status(HttpStatus.CREATED).body(body))
+        .onErrorResume(e -> mapCartErrorWithMessage(
+            e,
+            ErrorOptions.builder()
+                .includeBadRequestBodyMessage(true)
+                .invalidInputAsUnprocessable(false)
+                .build()
+        ));
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
     @DeleteMapping("/{cartId}/wishlist/{productId}")
-    public Mono<ResponseEntity<CartResponseDTO>> removeProductFromWishlist(
-            @PathVariable String cartId,
-            @PathVariable String productId) {
-        return cartServiceClient.removeProductFromWishlist(cartId, productId)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build())
-                .onErrorResume(e -> mapCartError(e,
-                        ErrorOptions.builder("removeProductFromWishlist")
-                                .cartId(cartId)
-                                .productId(productId)
-                                .build()
-                ));
+    public Mono<ResponseEntity<Void>> removeProductFromWishlist(
+        @PathVariable String cartId,
+        @PathVariable String productId) {
+    return cartServiceClient.removeProductFromWishlist(cartId, productId)
+        .thenReturn(ResponseEntity.noContent().<Void>build())
+        .onErrorResume(e -> this.mapCartError(e,
+            ErrorOptions.builder()
+                .build()
+        ));
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
-    @PostMapping("/{cartId}/{productId}")
-    public Mono<ResponseEntity<CartResponseDTO>> addProductToCartFromProducts(
-            @PathVariable String cartId,
-            @PathVariable String productId) {
-        return cartServiceClient.addProductToCartFromProducts(cartId, productId)
-                .map(ResponseEntity::ok)
-                .onErrorResume(e -> mapCartErrorWithMessage(e,
-                        ErrorOptions.builder("addProductToCartFromProducts")
-                                .cartId(cartId)
-                                .productId(productId)
-                                .includeBadRequestBodyMessage(true)
-                                .build()
-                ));
-    }
+    @PostMapping("/{cartId}/wishlist-transfers")
+    public Mono<ResponseEntity<CartResponseDTO>> createWishlistTransfer(
+        @PathVariable String cartId,
+        @RequestBody(required = false) WishlistTransferRequestDTO request) {
 
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
-    @PostMapping("/{cartId}/wishlist/moveAll")
-    public Mono<ResponseEntity<CartResponseDTO>> moveAllWishlistToCart(
-            @PathVariable String cartId) {
+    List<String> productIds = request != null ? request.normalizedProductIds() : List.of();
+    WishlistTransferDirectionDTO direction = request != null
+        ? request.resolvedDirection()
+        : WishlistTransferDirectionDTO.defaultDirection();
 
-        return cartServiceClient.moveAllWishlistToCart(cartId)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build())
-                .onErrorResume(e -> mapCartError(e,
-                        ErrorOptions.builder("moveAllWishlistToCart")
-                                .cartId(cartId)
-                                .build()
-                ));
+    return cartServiceClient.createWishlistTransfer(cartId, productIds, direction)
+        .map(ResponseEntity::ok)
+        .defaultIfEmpty(ResponseEntity.notFound().build())
+        .onErrorResume(e -> mapCartError(e,
+            ErrorOptions.builder()
+                .build()
+        ));
     }
-    @GetMapping("/{cartId}/recent-purchases")
-    public Mono<ResponseEntity<List<CartProductResponseDTO>>> getRecentPurchases(@PathVariable String cartId) {
-        return cartServiceClient.getRecentPurchases(cartId)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-
-    @GetMapping("/{cartId}/recommendation-purchases")
-    public Mono<ResponseEntity<List<CartProductResponseDTO>>> getRecommendationPurchases(@PathVariable String cartId) {
-        return cartServiceClient.getRecommendationPurchases(cartId)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<List<CartResponseDTO>>> getAllCartsAsList() {
-        return cartServiceClient
-                .getAllCarts()
-                .collectList()
-                .map(ResponseEntity::ok)
-                .onErrorResume(e -> mapCartError(
-                        e, ErrorOptions.builder("getAllCartsAsList").build()
-                ));
-    }
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<CartResponseDTO> getAllCartsStream() {
-        return cartServiceClient.getAllCarts();
-    }
-
-
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
     @PutMapping("/{cartId}/promo")
     public Mono<ResponseEntity<CartResponseDTO>> applyPromoToCart(
-            @PathVariable String cartId,
-            @RequestParam("promoPercent") Double promoPercent) {
+        @PathVariable String cartId,
+        @RequestBody(required = false) ApplyPromoRequestDTO promoRequest) {
 
-        return cartServiceClient.applyPromoToCart(cartId, promoPercent)
-                .map(ResponseEntity::ok)
-                .onErrorResume(e -> mapCartErrorWithMessage(
-                        e,
-                        ErrorOptions.builder("applyPromoToCart")
-                                .cartId(cartId)
-                                .includeBadRequestBodyMessage(true)
-                                .build()
-                ));
+    Double promoPercent = promoRequest != null ? promoRequest.getPromoPercent() : null;
+
+    return cartServiceClient.applyPromoToCart(cartId, promoPercent)
+        .map(ResponseEntity::ok)
+        .onErrorResume(e -> mapCartErrorWithMessage(
+            e,
+            ErrorOptions.builder()
+                .includeBadRequestBodyMessage(true)
+                .build()
+        ));
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.OWNER, Roles.ADMIN})
@@ -392,18 +359,18 @@ public class CartControllerV1 {
         return cartServiceClient.validatePromoCode(promoCode)
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> mapCartError(
-                        e, ErrorOptions.builder("validatePromo").build()
+                        e, ErrorOptions.builder().build()
                 ));
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
-    @PutMapping("/{cartId}/promo/clear")
-    public Mono<ResponseEntity<CartResponseDTO>> clearPromo(@PathVariable String cartId) {
-        return cartServiceClient.clearPromo(cartId)
-                .map(ResponseEntity::ok)
-                .onErrorResume(e -> mapCartErrorWithMessage(
-                        e, ErrorOptions.builder("clearPromo").cartId(cartId).build()
-                ));
+    @DeleteMapping("/{cartId}/promo")
+    public Mono<ResponseEntity<Void>> clearPromo(@PathVariable String cartId) {
+    return cartServiceClient.clearPromo(cartId)
+        .thenReturn(ResponseEntity.noContent().<Void>build())
+        .onErrorResume(e -> this.mapCartError(
+            e, ErrorOptions.builder().build()
+        ));
     }
 
 

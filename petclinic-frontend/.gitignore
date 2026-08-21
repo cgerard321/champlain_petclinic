@@ -25,7 +25,6 @@ dist-test
 # Include the plugin and project configuration
 !/.vscode/settings.json
 !/.vscode/extensions.json
-.vscode/
 /test-results/
 /playwright-report/
 /blob-report/

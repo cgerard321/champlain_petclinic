@@ -47,8 +47,8 @@ spring:
       host: mongo-carts
       port: 27017
       database: carts
-      username: root
-      password: password
+      username: ${DB_USER}
+      password: ${DB_PASSWORD}
       authentication-database: admin
 
 server.port: 8080

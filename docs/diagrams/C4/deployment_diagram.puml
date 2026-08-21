@@ -144,13 +144,14 @@ Deployment_Node(cpc, "Proxmox Server", "Proxmox 8.4.14 Server"){
       }
 
       ' -------- ADMIN / TOOLS ----------
-      Deployment_Node(dbgate_node, "dbgate container", "DbGate"){
-        Container(dbgate, "DBGate", "Web admin", "Unified DB admin over MySQL/Postgres/Mongo instances.")
+      Deployment_Node(dev_tools_api_node, "devtools container", "Rust/Rocket"){
+          Container(dev_tools_api, "Dev Tools API", "Rust + Rocket", "Development tools API (internal use only).")
 
-            note right of dbgate
-            Accessible at https://petclinic-admin-db.benmusicgeek.synology.me/
+            note right of dev_tools_api
+            Accessible at https://petclinic-management.benmusicgeek.synology.me/
+
+            Uses REST and GraphQL
             end note
-
       }
 
       ' --------- DATABASES ----------
@@ -236,22 +237,10 @@ System_Ext(smtp_srv, "smtp.gmail.com", "SMTP server", "Sends email (via Mailer S
       Rel(visits_svc,  auth_svc, "Validate tokens", "HTTP/REST", $tags="http")
       Rel(billing_svc, auth_svc, "Validate tokens", "HTTP/REST", $tags="http")
 
-      Rel_U(dbgate, mysql_auth,      "MySQL Driver", "", $tags="admin")
-      Rel_U(dbgate, mysql_files,     "MySQL Driver", "", $tags="admin")
-      Rel_U(dbgate, pg_vet,          "Postgres Driver", "", $tags="admin")
-      Rel_U(dbgate, mongo_vet,       "Mongo Driver", "", $tags="admin")
-      Rel_U(dbgate, mongo_billing,   "Mongo Driver", "", $tags="admin")
-      Rel_U(dbgate, mongo_visits,    "Mongo Driver", "", $tags="admin")
-      Rel_U(dbgate, mongo_customers, "Mongo Driver", "", $tags="admin")
-      Rel_U(dbgate, mongo_inventory, "Mongo Driver", "", $tags="admin")
-      Rel_U(dbgate, mongo_products,  "Mongo Driver", "", $tags="admin")
-      Rel_U(dbgate, mongo_carts,     "Mongo Driver", "", $tags="admin")
-
       Rel_D(rp, bw, "HTTP", "*.benmusicgeek.synology.me", $tags="route")
       Rel_D(bw, petclinic_fe, "HTTP", "petclinic.benmusicgeek.synology.me", $tags="route")
+      Rel_D(bw, employee_fe, "HTTP", "petclinic-emp-portal.benmusicgeek.synology.me", $tags="route")
       Rel_D(bw, api_gateway,  "HTTP", "petclinic-backend.benmusicgeek.synology.me", $tags="route")
-      Rel_D(bw, dbgate,       "HTTP", "petclinic-admin-db.benmusicgeek.synology.me", $tags="route")
-      dbgate --left[hidden]-- bw
       Rel_D(bw, minio_s3,     "HTTP", "petclinic-bucket.benmusicgeek.synology.me", $tags="route")
 
       Rel_D(browser,        ddns, "DNS lookup", "UDP/TCP 53", $tags="dns")
@@ -260,6 +249,18 @@ System_Ext(smtp_srv, "smtp.gmail.com", "SMTP server", "Sends email (via Mailer S
       Rel_D(browser,        rp, "HTTPS", "*.benmusicgeek.synology.me", $tags="https-client")
       Rel_D(mobile_browser, rp, "HTTPS", "*.benmusicgeek.synology.me", $tags="https-client")
 
+      Rel(bw, dev_tools_api, "HTTP","petclinic-management.benmusicgeek.synology.me", $tags="route")
+
+          Rel_U(dev_tools_api, mysql_auth,      "MySQL Driver", "", $tags="admin")
+           Rel_U(dev_tools_api, mysql_files,     "MySQL Driver", "", $tags="admin")
+           Rel_U(dev_tools_api, pg_vet,          "Postgres Driver", "", $tags="admin")
+           Rel_U(dev_tools_api, mongo_vet,       "Mongo Driver", "", $tags="admin")
+           Rel_U(dev_tools_api, mongo_billing,   "Mongo Driver", "", $tags="admin")
+           Rel_U(dev_tools_api, mongo_visits,    "Mongo Driver", "", $tags="admin")
+           Rel_U(dev_tools_api, mongo_customers, "Mongo Driver", "", $tags="admin")
+           Rel_U(dev_tools_api, mongo_inventory, "Mongo Driver", "", $tags="admin")
+           Rel_U(dev_tools_api, mongo_products,  "Mongo Driver", "", $tags="admin")
+           Rel_U(dev_tools_api, mongo_carts,     "Mongo Driver", "", $tags="admin")
 
 SHOW_LEGEND()
 @enduml

@@ -1,5 +1,5 @@
 use crate::application::ports::output::auth_repo_port::DynAuthRepo;
-use crate::core::error::{AppError, AppResult};
+use crate::shared::error::{AppError, AppResult};
 use uuid::Uuid;
 
 pub async fn remove_session(db: &DynAuthRepo, cookie_id: Uuid) -> AppResult<()> {

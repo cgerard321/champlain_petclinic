@@ -4,7 +4,7 @@ Back to [Main page](../README.md)
 
 <!-- TOC -->
 * [Running the project](#running-the-project)
-  * [mailer.env](#mailerenv)
+  * [.env](#env)
   * [Docker Profile (for running with docker-compose with ALL SERVICES)](#docker-profile-for-running-with-docker-compose-with-all-services)
   * [Docker Profile (for running with docker-compose with all services but NO FRONTEND)](#docker-profile-for-running-with-docker-compose-with-all-services-but-no-frontend)
   * [Bring up Frontend](#bring-up-frontend)
@@ -12,8 +12,8 @@ Back to [Main page](../README.md)
 
 Once you have cloned the repo (see the setup instructions below), you need to do the following:
 
-## mailer.env
-In the project's top-level folder, you will need to create a file called mailer.env. It will contain SMTP_PASS property set to the hashed password of the mailing service you will be using.
+## .env
+In the project's top-level folder, you will need to create a file called .env. It will contain SMTP_PASS property set to the hashed password of the mailing service you will be using.
 My students: I'll provide this to you.
 
 

@@ -435,6 +435,32 @@
   gap: 0.5rem;
 }
 
+.Wishlist-item--out-of-stock {
+  border-color: rgba(248, 113, 113, 0.35);
+  box-shadow: 0 12px 26px rgba(248, 113, 113, 0.18);
+}
+
+.wishlist-stock-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #be123c;
+  background: rgba(254, 226, 226, 0.95);
+  border: 1px solid rgba(248, 113, 113, 0.45);
+  box-shadow: 0 8px 20px rgba(248, 113, 113, 0.22);
+  pointer-events: none;
+  z-index: 2;
+}
+
 .voucher-code-section {
   display: flex;
   flex-wrap: wrap;
@@ -525,7 +551,7 @@
 }
 
 .recommendation-purchases-list.recommendation-empty,
-  .recommendation-empty-state {
+.recommendation-empty-state {
   margin: 0;
 }
 

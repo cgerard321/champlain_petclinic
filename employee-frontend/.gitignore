@@ -24,7 +24,6 @@ dist-test
 
 !/.vscode/settings.json
 !/.vscode/extensions.json
-.vscode/
 /test-results/
 /playwright-report/
 /blob-report/

@@ -63,8 +63,8 @@ spring:
       host: mongo-visits
       port: 27017
       database: visits
-      username: root
-      password: password
+      username: ${DB_USER}
+      password: ${DB_PASSWORD}
       authentication-database: admin
 
 ---

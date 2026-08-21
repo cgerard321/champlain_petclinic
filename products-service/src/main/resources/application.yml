@@ -47,8 +47,8 @@ spring:
       host: mongo-products
       port: 27017
       database: products
-      username: root
-      password: password
+      username: ${DB_USER}
+      password: ${DB_PASSWORD}
       authentication-database: admin
 
 server.port: 8080

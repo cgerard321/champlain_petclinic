@@ -1,8 +1,8 @@
 use crate::adapters::output::minio::mappers::file_mapper::PutObjectMap;
 use crate::application::ports::output::file_storage_port::FileStoragePort;
-use crate::core::error::{AppError, AppResult};
 use crate::domain::entities::bucket::BucketEntity;
 use crate::domain::entities::file::FileEntity;
+use crate::shared::error::{AppError, AppResult};
 use bytes::Bytes;
 use futures::StreamExt;
 use minio::s3::creds::StaticProvider;
@@ -20,7 +20,7 @@ pub struct MinioStore {
 
 impl MinioStore {
     pub fn from_env() -> AppResult<Self> {
-        log::info!("Connecting to minio");
+        log::debug!("Connecting to minio");
         let endpoint = env::var("MINIO_URL").map_err(|_| AppError::Internal)?;
         let access_key = env::var("FILE_ACCESS_KEY_ID").map_err(|_| AppError::Internal)?;
         let secret_key = env::var("FILE_SECRET_ACCESS_KEY").map_err(|_| AppError::Internal)?;
@@ -31,7 +31,7 @@ impl MinioStore {
         let client = Client::new(base_url, Some(Box::new(static_provider)), None, None)
             .map_err(|_e| AppError::Internal)?;
 
-        log::info!("Connected to minio");
+        log::debug!("Connected to minio");
 
         Ok(Self { client })
     }
@@ -45,16 +45,16 @@ impl MinioStore {
 #[async_trait]
 impl FileStoragePort for MinioStore {
     async fn list_buckets(&self) -> AppResult<Vec<BucketEntity>> {
-        log::info!("Getting buckets");
+        log::debug!("Getting buckets");
         let resp = self.client().list_buckets().send().await?;
         let buckets: Vec<BucketEntity> = resp.buckets.into_iter().map(Into::into).collect();
 
-        log::info!("Buckets received: {:?}", buckets);
+        log::debug!("Buckets received: {:?}", buckets);
         Ok(buckets)
     }
 
     async fn list_bucket_files(&self, bucket: &str) -> AppResult<Vec<FileEntity>> {
-        log::info!("Getting bucket files");
+        log::debug!("Getting bucket files");
         let mut stream = self
             .client()
             .list_objects(bucket)
@@ -71,7 +71,7 @@ impl FileStoragePort for MinioStore {
             all.extend(page.contents.into_iter().map(Into::into));
         }
 
-        log::info!("Bucket files received: {:?}", all);
+        log::debug!("Bucket files received: {:?}", all);
 
         Ok(all)
     }
@@ -83,7 +83,7 @@ impl FileStoragePort for MinioStore {
         prefix: PathBuf,
         bytes: Vec<u8>,
     ) -> AppResult<FileEntity> {
-        log::info!("Uploading file");
+        log::debug!("Uploading file");
         let clean_prefix = sanitize_prefix(&prefix)?;
 
         let ext = extension.trim().trim_matches('.');

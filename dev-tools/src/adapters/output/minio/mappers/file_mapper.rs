@@ -8,7 +8,6 @@ impl From<ListEntry> for FileEntity {
             name: o.name,
             size: o.size.unwrap_or(0),
             etag: o.etag,
-            version_id: o.version_id,
         }
     }
 }
@@ -24,7 +23,6 @@ impl From<PutObjectMap> for FileEntity {
             name: m.resp.object,
             size: m.size,
             etag: Option::from(m.resp.etag),
-            version_id: m.resp.version_id,
         }
     }
 }

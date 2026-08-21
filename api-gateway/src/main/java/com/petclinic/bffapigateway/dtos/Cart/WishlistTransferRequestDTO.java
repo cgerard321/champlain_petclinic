@@ -1,0 +1,35 @@
+package com.petclinic.bffapigateway.dtos.Cart;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class WishlistTransferRequestDTO {
+
+    private List<String> productIds;
+    private WishlistTransferDirectionDTO direction;
+
+    public List<String> normalizedProductIds() {
+        if (productIds == null || productIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return productIds.stream()
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .filter(id -> !id.isEmpty())
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    public WishlistTransferDirectionDTO resolvedDirection() {
+        return direction == null ? WishlistTransferDirectionDTO.defaultDirection() : direction;
+    }
+}

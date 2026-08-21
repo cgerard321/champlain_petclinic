@@ -1,7 +1,7 @@
 use crate::application::ports::output::file_storage_port::DynFileStorage;
-use crate::core::config;
-use crate::core::error::{AppError, AppResult};
 use crate::domain::entities::file::FileEntity;
+use crate::shared::config;
+use crate::shared::error::{AppError, AppResult};
 use std::path::PathBuf;
 
 pub async fn upload_file(
@@ -26,6 +26,5 @@ pub async fn upload_file(
         name: resp.name,
         size: file_len as u64,
         etag: resp.etag,
-        version_id: resp.version_id,
     })
 }

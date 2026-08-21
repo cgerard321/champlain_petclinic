@@ -12,8 +12,16 @@ spring:
     activate:
       on-profile: default
 
+  # Reactive DB for local/dev
   r2dbc:
     url: r2dbc:h2:mem:///images
+    username: user
+    password: pwd
+
+  # JDBC datasource (used by anything that still relies on JDBC)
+  datasource:
+    url: jdbc:h2:mem:images;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
     username: user
     password: pwd
 
@@ -37,11 +45,21 @@ app:
 
 ---
 # for test
-
 spring:
   config:
     activate:
       on-profile: test
+
+  r2dbc:
+    url: r2dbc:h2:mem:///images
+    username: user
+    password: pwd
+
+  datasource:
+    url: jdbc:h2:mem:images;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: user
+    password: pwd
 
   data:
     mongodb:
@@ -69,6 +87,18 @@ spring:
   config:
     activate:
       on-profile: integration
+
+  r2dbc:
+    url: r2dbc:h2:mem:///images
+    username: user
+    password: pwd
+
+  datasource:
+    url: jdbc:h2:mem:images;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: user
+    password: pwd
+
   data:
     mongodb:
       host: localhost
@@ -77,10 +107,6 @@ spring:
       username: root
       password: password
       authentication-database: admin
-  r2dbc:
-    url: r2dbc:h2:mem:///images
-    username: user
-    password: pwd
 
   # set to 2MB as only file transfers are images which don't need much memory
   codec:
@@ -97,18 +123,27 @@ spring:
     activate:
       on-profile: docker
 
+  # Reactive connection to Postgres in Docker
   r2dbc:
     url: r2dbc:postgresql://postgres-vet:5432/images
-    username: user
-    password: pwd
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+
+  # JDBC datasource so anything using DriverManager/DataSource
+  # also connects as DB_USER instead of the default "user"
+  datasource:
+    url: jdbc:postgresql://postgres-vet:5432/images
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
 
   data:
     mongodb:
       host: mongo-vet
       port: 27017
       database: veterinarians
-      username: root
-      password: password
+      username: ${DB_USER}
+      password: ${DB_PASSWORD}
       authentication-database: admin
 
   # set to 2MB as only file transfers are images which don't need much memory
@@ -125,6 +160,7 @@ management:
     web:
       exposure:
         include: health, prometheus
+
 logging:
   level:
     root: INFO

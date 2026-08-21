@@ -1,0 +1,61 @@
+<div class="login-page">
+  <mat-card class="login-card">
+    <mat-card-header>
+      <mat-card-title>Sign in</mat-card-title>
+      <mat-card-subtitle>Dev Tools</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form class="login-form" (submit)="submit($event)">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" [formField]="loginForm.email" autocomplete="email" />
+          @if (emailError()) {
+            <mat-error>{{ emailError() }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input
+            matInput
+            [formField]="loginForm.password"
+            autocomplete="current-password"
+            [type]="hidePassword() ? 'password' : 'text'"
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            [attr.aria-pressed]="!hidePassword()"
+            aria-label="Toggle password visibility"
+            (click)="togglePasswordVisibility()"
+          >
+            <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          @if (passwordError()) {
+            <mat-error>{{ passwordError() }}</mat-error>
+          }
+        </mat-form-field>
+
+        @if (errorMessage()) {
+          <p class="error-message">{{ errorMessage() }}</p>
+        }
+
+        <button
+          mat-flat-button
+          color="primary"
+          type="submit"
+          class="full-width submit-button"
+          [disabled]="isSubmitting()"
+        >
+          @if (isSubmitting()) {
+            <mat-progress-spinner diameter="20" mode="indeterminate" />
+          } @else {
+            Sign in
+          }
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

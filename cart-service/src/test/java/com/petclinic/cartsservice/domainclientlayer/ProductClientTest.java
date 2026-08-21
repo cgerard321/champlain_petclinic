@@ -49,7 +49,7 @@ public class ProductClientTest {
                         .withHeader("Content-Type", "application/json")
                         .withBody("{\"productId\":\"06a7d573-bcab-4db3-956f-773324b92a88\",\"imageId\":\"12345-image-id\"," +
                                 "\"productName\":\"Dog Food\",\"productDescription\":\"Dog Food\"," +
-                                "\"productSalePrice\":10.0}"));
+                                "\"productSalePrice\":10.0,\"productQuantity\":12}"));
 
         // Test the successful case
         Mono<ProductResponseModel> product = productClient.getProductByProductId(EXISTING_PRODUCT_ID);
@@ -57,7 +57,8 @@ public class ProductClientTest {
         StepVerifier.create(product)
                 .expectNextMatches(response -> response.getProductId().equals(EXISTING_PRODUCT_ID)
                         && response.getImageId().equals(EXISTING_IMAGE_ID)
-                        && response.getProductName().equals("Dog Food"))
+                        && response.getProductName().equals("Dog Food")
+                        && Integer.valueOf(12).equals(response.getProductQuantity()))
                 .verifyComplete();
     }
 

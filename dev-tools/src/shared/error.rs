@@ -1,0 +1,25 @@
+use thiserror::Error;
+
+#[derive(Debug, Error, Clone)]
+pub enum AppError {
+    #[error("Bad request: {0}")]
+    BadRequest(String),
+    #[error("Unauthorized")]
+    Unauthorized,
+    #[error("Forbidden")]
+    Forbidden,
+    #[error("Not found: {0}")]
+    NotFound(String),
+    #[error("Conflict")]
+    Conflict,
+    #[error("Unprocessable entity: {0}")]
+    UnprocessableEntity(String),
+    #[error("Dependency failed")]
+    FailedDependency,
+    #[error("Internal error")]
+    Internal,
+    #[error("Gateway timeout")]
+    GatewayTimeout,
+}
+
+pub type AppResult<T> = Result<T, AppError>;

@@ -1,6 +1,6 @@
-use crate::core::error::AppResult;
 use crate::domain::entities::bucket::BucketEntity;
 use crate::domain::entities::file::FileEntity;
+use crate::shared::error::AppResult;
 use std::path::PathBuf;
 
 #[async_trait::async_trait]
