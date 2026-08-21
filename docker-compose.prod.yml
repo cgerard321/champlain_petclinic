@@ -570,6 +570,19 @@ services:
       mongo-carts:
         condition: service_healthy
 
+  dev-tools-frontend:
+    container_name: dev-tools-frontend
+    build:
+      context: ./dev-tools-frontend
+      dockerfile: Dockerfile
+      args:
+        BUILD_MODE: production
+    ports:
+      - '5200:80'
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
   dev-tools:
     container_name: dev-tools
     build:

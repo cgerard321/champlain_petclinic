@@ -21,14 +21,14 @@ src/
 
 ```
 
-| Folder         | Loaded                 | Knows about business logic? | Imported by                                          |
-|----------------|------------------------|-----------------------------|------------------------------------------------------|
-| `core`         | once, at bootstrap     | Yes (app-wide concerns)     | Only `app.ts` and `app.config.ts`                    |
-| `shared`       | anywhere it's used     | No                          | `features`, `layout`                                 |
-| `layout`       | once, in the app shell | A little (composes routes)  | `app.ts` only                                        |
-| `features`     | lazily, per route      | Yes (that domain only)      | **nothing** — see rules below                        |
-| `environments` | build time             | No (config values only)     | `core/interceptors/api-base-url-interceptor.ts` only |
-| `testing`      | test runs only         | No (fakes/fixtures only)    | `*.spec.ts` files only — never `app/`                |
+| Folder         | Loaded                 | Knows about business logic? | Imported by                           |
+|----------------|------------------------|-----------------------------|---------------------------------------|
+| `core`         | once, at bootstrap     | Yes (app-wide concerns)     | Only `app.ts` and `app.config.ts`     |
+| `shared`       | anywhere it's used     | No                          | `features`, `layout`                  |
+| `layout`       | once, in the app shell | A little (composes routes)  | `app.ts` only                         |
+| `features`     | lazily, per route      | Yes (that domain only)      | **nothing** — see rules below         |
+| `environments` | build time             | No (config values only)     |                                       |
+| `testing`      | test runs only         | No (fakes/fixtures only)    | `*.spec.ts` files only — never `app/` |
 
 ---
 
@@ -289,7 +289,7 @@ shared table ever knowing what a `Bill` or a `Visit` is:
 
 ```ts
 // features/bills/pages/bills-list/bills-list.ts
-columns: ColumnDef<Bill>[] = [
+columns: ColumnDef < Bill > [] = [
     {key: 'ownerName', header: 'Owner'},
     {key: 'status', header: 'Status', cellTemplate: this.statusCell},
 ];
@@ -297,7 +297,7 @@ columns: ColumnDef<Bill>[] = [
 
 ```ts
 // features/visits/pages/visit-list/visit-list.ts
-columns: ColumnDef<Visit>[] = [
+columns: ColumnDef < Visit > [] = [
     {key: 'petName', header: 'Pet'},
     {key: 'date', header: 'Date'},
     {key: 'status', header: 'Status', cellTemplate: this.statusCell},

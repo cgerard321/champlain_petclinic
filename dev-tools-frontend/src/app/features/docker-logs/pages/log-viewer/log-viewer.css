@@ -1,0 +1,109 @@
+.log-viewer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+
+.log-viewer__controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 16px 20px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.field-service {
+  min-width: 220px;
+}
+
+.field-db {
+  min-width: 180px;
+}
+
+.field-lines {
+  width: 110px;
+}
+
+.log-viewer__checkbox {
+  display: flex;
+  align-items: center;
+}
+
+.log-viewer__error {
+  color: #dc2626;
+  font-weight: 500;
+  margin: 0;
+}
+
+.log-viewer__output {
+  background-color: #1e1e2e;
+  color: #cdd6f4;
+  font-family: 'Fira Code', 'JetBrains Mono', Consolas, monospace;
+  font-size: 0.8125rem;
+  padding: 12px 0;
+  border-radius: 8px;
+  max-height: 600px;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.log-viewer__row {
+  display: flex;
+  align-items: flex-start;
+  line-height: 1.4;
+  padding: 1px 16px 1px 0;
+}
+
+.log-viewer__row:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+.log-viewer__line-number {
+  min-width: 48px;
+  padding-right: 16px;
+  color: #6c7086;
+  text-align: right;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.log-viewer__line-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  flex: 1;
+}
+
+.log-viewer__row--error {
+  color: #f38ba8;
+  background-color: rgba(243, 139, 168, 0.1);
+}
+
+.log-viewer__row--error .log-viewer__line-number {
+  color: #f38ba8;
+  opacity: 0.7;
+}
+
+.log-viewer__row--error:hover {
+  background-color: rgba(243, 139, 168, 0.18);
+}
+
+.log-viewer__row--warning {
+  color: #f9e2af;
+  background-color: rgba(249, 226, 175, 0.08);
+}
+
+.log-viewer__row--warning .log-viewer__line-number {
+  color: #f9e2af;
+  opacity: 0.7;
+}
+
+.log-viewer__row--warning:hover {
+  background-color: rgba(249, 226, 175, 0.15);
+}
