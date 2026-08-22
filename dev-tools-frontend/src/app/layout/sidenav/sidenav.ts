@@ -18,6 +18,7 @@ interface NavItem {
 export class Sidenav {
   protected readonly items: NavItem[] = [
     { label: 'Dashboard', route: '/dashboard', icon: 'dashboard' },
-    { label: 'Log reading', route: '/logs', icon: 'terminal' }
+    { label: 'Log reading', route: '/logs', icon: 'terminal' },
+    { label: 'Query console', route: '/db-console', icon: 'data_object' },
   ];
 }

@@ -4,7 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 
-import { AuthStateService } from '@core/services/auth-state-service';
+import { AuthState } from '@core/services/auth-state';
 
 @Component({
   selector: 'app-header',
@@ -13,7 +13,7 @@ import { AuthStateService } from '@core/services/auth-state-service';
   styleUrl: './header.css',
 })
 export class Header {
-  private readonly authState = inject(AuthStateService);
+  private readonly authState = inject(AuthState);
   private readonly router = inject(Router);
 
   protected logout(): void {

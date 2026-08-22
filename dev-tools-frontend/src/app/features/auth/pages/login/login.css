@@ -29,3 +29,7 @@
 .password-field {
   margin-top: 8px;
 }
+
+.error-message {
+  color: var(--mat-sys-error, #b00020);
+}

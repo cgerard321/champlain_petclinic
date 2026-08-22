@@ -1,14 +1,14 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, tap } from 'rxjs';
-import { AuthStateService } from '@core/services/auth-state-service';
+import { AuthState } from '@core/services/auth-state';
 import { LoginRequest } from '@features/auth/models/loginRequest';
 
 
 @Injectable({ providedIn: 'root' })
-export class AuthService {
+export class Auth {
   private readonly http = inject(HttpClient);
-  private readonly authState = inject(AuthStateService);
+  private readonly authState = inject(AuthState);
 
   login(credentials: LoginRequest): Observable<void> {
     return this.http

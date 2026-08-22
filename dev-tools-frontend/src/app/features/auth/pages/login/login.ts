@@ -8,7 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { LoginRequest } from '@features/auth/models/loginRequest';
-import { AuthService } from '@features/auth/services/auth-service';
+import { Auth } from '@features/auth/services/auth';
 
 @Component({
   selector: 'app-login',
@@ -25,7 +25,7 @@ import { AuthService } from '@features/auth/services/auth-service';
   styleUrl: './login.css',
 })
 export class LoginPage {
-  private readonly auth = inject(AuthService);
+  private readonly auth = inject(Auth);
   private readonly router = inject(Router);
 
   protected readonly hidePassword = signal(true);

@@ -20,7 +20,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { applyWhen, form, FormField, required } from '@angular/forms/signals';
 
 import { DockerServices } from '@features/docker-logs/services/docker-services';
-import { LogService } from '@features/docker-logs/services/docker-logs';
+import { DockerLogs } from '@features/docker-logs/services/docker-logs';
 import { LogViewerFormModel } from '@features/docker-logs/models/log-viewer-form';
 import { BadgeVariant, StatusBadge } from '@shared/components/status-badge/status-badge';
 
@@ -42,7 +42,7 @@ import { BadgeVariant, StatusBadge } from '@shared/components/status-badge/statu
 })
 export class LogViewer implements OnDestroy {
   private readonly dockerServices = inject(DockerServices);
-  protected readonly logSocket = inject(LogService);
+  protected readonly logSocket = inject(DockerLogs);
 
   private readonly logOutput = viewChild<ElementRef<HTMLDivElement>>('logOutput');
   protected readonly autoScroll = signal(true);

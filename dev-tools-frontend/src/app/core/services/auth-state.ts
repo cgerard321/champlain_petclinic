@@ -3,7 +3,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { Observable, catchError, map, of, tap } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
-export class AuthStateService {
+export class AuthState {
   private readonly http = inject(HttpClient);
 
   private readonly _isAuthenticated = signal(false);
