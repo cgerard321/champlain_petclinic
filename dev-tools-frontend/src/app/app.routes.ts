@@ -21,6 +21,10 @@ export const routes: Routes = [
         path: 'logs',
         loadChildren: () => import('@features/docker-logs/routes'),
       },
+      {
+        path: 'db-console',
+        loadChildren: () => import('@features/db-consoles/routes'),
+      },
     ],
   },
 ];

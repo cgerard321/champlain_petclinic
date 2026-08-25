@@ -3,7 +3,7 @@ import { environment } from '@environments/environment';
 
 export type WsConnectionStatus = 'idle' | 'connecting' | 'open' | 'closed' | 'error';
 
-export class WsConnectionService {
+export class WsConnection {
   private socket: WebSocket | null = null;
 
   readonly messages = signal<string[]>([]);

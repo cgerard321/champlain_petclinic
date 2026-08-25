@@ -1,0 +1,20 @@
+<div class="mongo-results">
+  <p class="mongo-results__summary">{{ result().affectedCount }} document(s) affected</p>
+
+  @if (columns().length > 0) {
+    <div class="mongo-results__scroll">
+      <table mat-table [dataSource]="rows()" class="mongo-results__table">
+        @for (column of columns(); track column) {
+          <ng-container [matColumnDef]="column">
+            <th mat-header-cell *matHeaderCellDef>{{ column }}</th>
+            <td mat-cell *matCellDef="let row" [appTooltip]="formatCell(row[column])">
+              {{ formatCell(row[column]) }}
+            </td>
+          </ng-container>
+        }
+        <tr mat-header-row *matHeaderRowDef="columns()"></tr>
+        <tr mat-row *matRowDef="let row; columns: columns()"></tr>
+      </table>
+    </div>
+  }
+</div>

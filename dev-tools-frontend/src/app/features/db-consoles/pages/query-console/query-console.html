@@ -1,0 +1,60 @@
+<div class="query-console">
+  <div class="query-console__controls">
+    @if (isLoadingServices()) {
+      <mat-progress-spinner diameter="24" mode="indeterminate" />
+    } @else if (loadError()) {
+      <p class="query-console__error">{{ loadError() }}</p>
+    } @else {
+      <mat-form-field appearance="outline">
+        <mat-label>Service</mat-label>
+        <mat-select [value]="selectedServiceName()" (selectionChange)="onServiceChange($event.value)">
+          @for (service of services(); track service.name) {
+            <mat-option [value]="service.name">{{ service.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      @if (availableDbs().length > 1) {
+        <mat-form-field appearance="outline">
+          <mat-label>Database</mat-label>
+          <mat-select [value]="selectedDbName()" (selectionChange)="onDbChange($event.value)">
+            @for (db of availableDbs(); track db.dbName) {
+              <mat-option [value]="db.dbName">{{ db.dbName }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      } @else if (availableDbs().length === 0 && selectedService()) {
+        <p class="query-console__warning">This service has no databases configured.</p>
+      }
+
+      @if (selectedDb()) {
+        <span class="query-console__language-badge">{{ queryLanguage() }}</span>
+      }
+    }
+  </div>
+
+  <app-query-editor [language]="queryLanguage()" [dialect]="sqlDialect()" [(value)]="queryText" />
+
+  <div class="query-console__actions">
+    <button mat-raised-button color="primary" [disabled]="!canRun() || isRunning()" (click)="run()">
+      @if (isRunning()) {
+        <mat-progress-spinner diameter="18" mode="indeterminate" />
+      } @else {
+        <mat-icon>play_arrow</mat-icon>
+      }
+      Run query
+    </button>
+  </div>
+
+  @if (runError()) {
+    <p class="query-console__error">{{ runError() }}</p>
+  }
+
+  @if (sqlResult()) {
+    <app-sql-results-table [result]="sqlResult()!" />
+  }
+
+  @if (mongoResult()) {
+    <app-mongo-results-table [result]="mongoResult()!" />
+  }
+</div>
