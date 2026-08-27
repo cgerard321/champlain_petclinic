@@ -23,6 +23,7 @@ import { DockerServices } from '@features/docker-logs/services/docker-services';
 import { DockerLogs } from '@features/docker-logs/services/docker-logs';
 import { LogViewerFormModel } from '@features/docker-logs/models/log-viewer-form';
 import { BadgeVariant, StatusBadge } from '@shared/components/status-badge/status-badge';
+import { AuthState } from '@core/services/auth-state';
 
 @Component({
   selector: 'app-log-viewer',
@@ -43,6 +44,7 @@ import { BadgeVariant, StatusBadge } from '@shared/components/status-badge/statu
 export class LogViewer implements OnDestroy {
   private readonly dockerServices = inject(DockerServices);
   protected readonly logSocket = inject(DockerLogs);
+  private readonly auth = inject(AuthState)
 
   private readonly logOutput = viewChild<ElementRef<HTMLDivElement>>('logOutput');
   protected readonly autoScroll = signal(true);
@@ -94,7 +96,7 @@ export class LogViewer implements OnDestroy {
       case 'connecting':
         return 'warning';
       case 'error':
-        return 'danger'
+        return 'danger';
       default:
         return 'neutral';
     }

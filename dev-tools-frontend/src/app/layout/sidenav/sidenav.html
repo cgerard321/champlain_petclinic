@@ -5,4 +5,11 @@
       <span matListItemTitle>{{ item.label }}</span>
     </a>
   }
+
+  @if (authState.isSudo()) {
+    <a mat-list-item routerLink="/admin/users" routerLinkActive="active-link">
+      <mat-icon matListItemIcon>person_add</mat-icon>
+      <span matListItemTitle>Create user</span>
+    </a>
+  }
 </mat-nav-list>
