@@ -1,0 +1,53 @@
+<div class="create-user-page">
+  <mat-card class="create-user-card">
+    <mat-card-header>
+      <mat-card-title>Create user</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form class="create-user-form" (submit)="submit($event)">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" [formField]="createUserForm.email" autocomplete="off" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input matInput type="password" [formField]="createUserForm.password" autocomplete="new-password" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Display name</mat-label>
+          <input matInput [formField]="createUserForm.displayName" autocomplete="off" />
+        </mat-form-field>
+
+        <div class="create-user-roles">
+          <p class="create-user-roles__label">Roles</p>
+          @for (role of roles; track role.id) {
+            <mat-checkbox
+              [checked]="isRoleChecked(role.id)"
+              (change)="toggleRole(role.id, $event.checked)"
+            >
+              {{ role.label }}
+            </mat-checkbox>
+          }
+        </div>
+
+        @if (errorMessage()) {
+          <p class="error-message">{{ errorMessage() }}</p>
+        }
+        @if (successMessage()) {
+          <p class="success-message">{{ successMessage() }}</p>
+        }
+
+        <button mat-flat-button color="primary" type="submit" class="full-width submit-button" [disabled]="isSubmitting()">
+          @if (isSubmitting()) {
+            <mat-progress-spinner diameter="20" mode="indeterminate" />
+          } @else {
+            Create user
+          }
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

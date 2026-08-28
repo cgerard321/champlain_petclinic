@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
+import { AuthState } from '@core/services/auth-state';
 
 interface NavItem {
   label: string;
@@ -16,6 +17,8 @@ interface NavItem {
   styleUrl: './sidenav.css',
 })
 export class Sidenav {
+  protected readonly authState = inject(AuthState);
+
   protected readonly items: NavItem[] = [
     { label: 'Dashboard', route: '/dashboard', icon: 'dashboard' },
     { label: 'Log reading', route: '/logs', icon: 'terminal' },

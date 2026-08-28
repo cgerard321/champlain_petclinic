@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 
 import { authGuard } from '@core/guards/auth/auth-guard';
+import { sudoGuard } from '@core/guards/sudo/sudo-guard';
 
 export const routes: Routes = [
   {
@@ -24,6 +25,11 @@ export const routes: Routes = [
       {
         path: 'db-console',
         loadChildren: () => import('@features/db-consoles/routes'),
+      },
+      {
+        path: 'admin/users',
+        loadChildren: () => import('@features/create-users/routes'),
+        canActivate: [sudoGuard],
       },
     ],
   },
