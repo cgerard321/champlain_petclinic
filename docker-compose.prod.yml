@@ -26,14 +26,6 @@ x-healthchecks:
       retries: 3
       start_period: 15s
 
-  dbgate: &dbgate_hc
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fsS -u CPC_Admin:${DBGATE_PASSWORD} http://localhost:3000/ || exit 1"]
-      interval: 10s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-
   mysql: &mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-u${DB_USER}", "-p${DB_PASSWORD}", "-h", "localhost"]
@@ -474,101 +466,19 @@ services:
   # =========================
   # ADMIN / TOOLING
   # =========================
-  dbgate:
-    <<: *dbgate_hc
-    image: dbgate/dbgate:latest
-    container_name: dbgate
+
+  dev-tools-frontend:
+    container_name: dev-tools-frontend
+    build:
+      context: ./dev-tools-frontend
+      dockerfile: Dockerfile
+      args:
+        BUILD_MODE: production
     ports:
-      - "8030:3000"
-    restart: unless-stopped
-    volumes:
-      - dbgate-data:/root/.dbgate
-    env_file:
-      - .env
+      - '5200:80'
     environment:
-      - BASIC_AUTH=1
-      - LOGIN=CPC_Admin
-      - PASSWORD=${DBGATE_PASSWORD:-change-me}
-      - SKIP_ALL_AUTH=0
-      - ADMIN_PASSWORD=${DBGATE_ADMIN_PASSWORD:-change-me}
-      - CONNECTIONS=mysqlAuth,mysqlFiles,postgresVet,mongoVet,mongoBilling,mongoVisits,mongoCustomers,mongoInventory,mongoProducts,mongoCarts
-
-      # MySQL (auth)
-      - LABEL_mysqlAuth=MySQL auth-db
-      - ENGINE_mysqlAuth=mysql@dbgate-plugin-mysql
-      - SERVER_mysqlAuth=mysql-auth
-      - PORT_mysqlAuth=3306
-      - USER_mysqlAuth=${DB_USER}
-      - PASSWORD_mysqlAuth=${DB_PASSWORD}
-      - DATABASE_mysqlAuth=auth-db
-
-      # MySQL (files)
-      - LABEL_mysqlFiles=MySQL files-db
-      - ENGINE_mysqlFiles=mysql@dbgate-plugin-mysql
-      - SERVER_mysqlFiles=mysql-files
-      - PORT_mysqlFiles=3306
-      - USER_mysqlFiles=${DB_USER}
-      - PASSWORD_mysqlFiles=${DB_PASSWORD}
-      - DATABASE_mysqlFiles=files-db
-
-      # Postgres (vet)
-      - LABEL_postgresVet=Postgres images
-      - ENGINE_postgresVet=postgres@dbgate-plugin-postgres
-      - SERVER_postgresVet=postgres
-      - PORT_postgresVet=5432
-      - USER_postgresVet=${DB_USER}
-      - PASSWORD_postgresVet=${DB_PASSWORD}
-      - DATABASE_postgresVet=images
-
-      # MongoDBs
-      - LABEL_mongoVet=Mongo (vet)
-      - ENGINE_mongoVet=mongo@dbgate-plugin-mongo
-      - URL_mongoVet=mongodb://${DB_USER}:${DB_PASSWORD}@mongo-vet:27017/?authSource=admin
-
-      - LABEL_mongoBilling=Mongo (billing)
-      - ENGINE_mongoBilling=mongo@dbgate-plugin-mongo
-      - URL_mongoBilling=mongodb://${DB_USER}:${DB_PASSWORD}@mongo-billing:27017/?authSource=admin
-
-      - LABEL_mongoVisits=Mongo (visits)
-      - ENGINE_mongoVisits=mongo@dbgate-plugin-mongo
-      - URL_mongoVisits=mongodb://${DB_USER}:${DB_PASSWORD}@mongo-visits:27017/?authSource=admin
-
-      - LABEL_mongoCustomers=Mongo (customers)
-      - ENGINE_mongoCustomers=mongo@dbgate-plugin-mongo
-      - URL_mongoCustomers=mongodb://${DB_USER}:${DB_PASSWORD}@mongo-customers:27017/?authSource=admin
-
-      - LABEL_mongoInventory=Mongo (inventory)
-      - ENGINE_mongoInventory=mongo@dbgate-plugin-mongo
-      - URL_mongoInventory=mongodb://${DB_USER}:${DB_PASSWORD}@mongo-inventory:27017/?authSource=admin
-
-      - LABEL_mongoProducts=Mongo (products)
-      - ENGINE_mongoProducts=mongo@dbgate-plugin-mongo
-      - URL_mongoProducts=mongodb://${DB_USER}:${DB_PASSWORD}@mongo-products:27017/?authSource=admin
-
-      - LABEL_mongoCarts=Mongo (carts)
-      - ENGINE_mongoCarts=mongo@dbgate-plugin-mongo
-      - URL_mongoCarts=mongodb://${DB_USER}:${DB_PASSWORD}@mongo-carts:27017/?authSource=admin
-    depends_on:
-      mysql-auth:
-        condition: service_healthy
-      mysql-files:
-        condition: service_healthy
-      postgres-vet:
-        condition: service_healthy
-      mongo-vet:
-        condition: service_healthy
-      mongo-billing:
-        condition: service_healthy
-      mongo-visits:
-        condition: service_healthy
-      mongo-customers:
-        condition: service_healthy
-      mongo-inventory:
-        condition: service_healthy
-      mongo-products:
-        condition: service_healthy
-      mongo-carts:
-        condition: service_healthy
+      - NODE_ENV=production
+    restart: unless-stopped
 
   dev-tools:
     container_name: dev-tools
@@ -579,7 +489,7 @@ services:
         pkg: dev-tools
     restart: unless-stopped
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/run/docker.sock:/var/run/docker.sock
     env_file:
       - .env
     ports:

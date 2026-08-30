@@ -398,77 +398,33 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${DB_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
 
-  dbgate:
-    <<: *dbgate_hc
-    image: dbgate/dbgate:latest
-    container_name: dbgate
+  dev-tools:
+    build:
+      context: ./dev-tools
+      dockerfile: Dockerfile
+      args:
+        pkg: dev-tools
     ports:
-      - "8030:3000"
-    restart: unless-stopped
+      - "4242:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - MINIO_URL=petclinic-bucket.benmusicgeek.synology.me
+      - DATABASE_URL=mysql://user:pwd@mysql-devtools:3306/devtools-db?ssl-mode=DISABLED
+      - RUST_LOG=debug
+      # In prod these will be in the stack.env file
+      - PASSWORD_PEPPER=Ceramic1-Sultan-Zenith
+      - ROCKET_SECRET_KEY=MEi/s8sSd6sbw+7acSBJv/Fk27+YL+/PAB8YZ25gydE=
+      - DEFAULT_ADMIN_EMAIL=admin@admin.com
+      - DEFAULT_ADMIN_PASSWORD=V1wjft2QXPUKYvLg
     env_file:
       - .env
+
+  mysql-devtools:
+    image: mysql:5.7
+    platform: linux/amd64
     environment:
-      - CONNECTIONS=mysqlAuth,mysqlFiles,postgresVet,mongoVet,mongoBilling,mongoVisits,mongoCustomers,mongoInventory,mongoProducts,mongoCarts
-      - LABEL_mysqlAuth=MySQL auth-db
-      - ENGINE_mysqlAuth=mysql@dbgate-plugin-mysql
-      - SERVER_mysqlAuth=mysql-auth
-      - PORT_mysqlAuth=3306
-      - USER_mysqlAuth=${DB_USER}
-      - PASSWORD_mysqlAuth=${DB_PASSWORD}
-      - DATABASE_mysqlAuth=auth-db
-      - LABEL_mysqlFiles=MySQL files-db
-      - ENGINE_mysqlFiles=mysql@dbgate-plugin-mysql
-      - SERVER_mysqlFiles=mysql-files
-      - PORT_mysqlFiles=3306
-      - USER_mysqlFiles=${DB_USER}
-      - PASSWORD_mysqlFiles=${DB_PASSWORD}
-      - DATABASE_mysqlFiles=files-db
-      - LABEL_postgresVet=Postgres images
-      - ENGINE_postgresVet=postgres@dbgate-plugin-postgres
-      - SERVER_postgresVet=postgres-vet
-      - PORT_postgresVet=5432
-      - USER_postgresVet=${DB_USER}
-      - PASSWORD_postgresVet=${DB_PASSWORD}
-      - DATABASE_postgresVet=images
-      - LABEL_mongoVet=Mongo (vet)
-      - ENGINE_mongoVet=mongo@dbgate-plugin-mongo
-      - URL_mongoVet=mongodb://${DB_USER}:${DB_PASSWORD}@mongo-vet:27017/?authSource=admin
-      - LABEL_mongoBilling=Mongo (billing)
-      - ENGINE_mongoBilling=mongo@dbgate-plugin-mongo
-      - URL_mongoBilling=mongodb://${DB_USER}:${DB_PASSWORD}@mongo-billing:27017/?authSource=admin
-      - LABEL_mongoVisits=Mongo (visits)
-      - ENGINE_mongoVisits=mongo@dbgate-plugin-mongo
-      - URL_mongoVisits=mongodb://${DB_USER}:${DB_PASSWORD}@mongo-visits:27017/?authSource=admin
-      - LABEL_mongoCustomers=Mongo (customers)
-      - ENGINE_mongoCustomers=mongo@dbgate-plugin-mongo
-      - URL_mongoCustomers=mongodb://${DB_USER}:${DB_PASSWORD}@mongo-customers:27017/?authSource=admin
-      - LABEL_mongoInventory=Mongo (inventory)
-      - ENGINE_mongoInventory=mongo@dbgate-plugin-mongo
-      - URL_mongoInventory=mongodb://${DB_USER}:${DB_PASSWORD}@mongo-inventory:27017/?authSource=admin
-      - LABEL_mongoProducts=Mongo (products)
-      - ENGINE_mongoProducts=mongo@dbgate-plugin-mongo
-      - URL_mongoProducts=mongodb://${DB_USER}:${DB_PASSWORD}@mongo-products:27017/?authSource=admin
-      - LABEL_mongoCarts=Mongo (carts)
-      - ENGINE_mongoCarts=mongo@dbgate-plugin-mongo
-      - URL_mongoCarts=mongodb://${DB_USER}:${DB_PASSWORD}@mongo-carts:27017/?authSource=admin
-    depends_on:
-      mysql-auth:
-        condition: service_healthy
-      mysql-files:
-        condition: service_healthy
-      postgres-vet:
-        condition: service_healthy
-      mongo-vet:
-        condition: service_healthy
-      mongo-billing:
-        condition: service_healthy
-      mongo-visits:
-        condition: service_healthy
-      mongo-customers:
-        condition: service_healthy
-      mongo-inventory:
-        condition: service_healthy
-      mongo-products:
-        condition: service_healthy
-      mongo-carts:
-        condition: service_healthy
+      - MYSQL_ROOT_PASSWORD=rootpwd
+      - MYSQL_DATABASE=devtools-db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=pwd
