@@ -1,0 +1,10 @@
+@if (language() === 'mongo') {
+  <div class="query-editor__tips">
+    <span class="query-editor__tips-title">Mongo Examples:</span>
+    <code>{{ '{' }} "find": "vet", "filter": {{ '{' }}{{ '}' }} {{ '}' }}</code>
+    <code>{{ '{' }} "update": "vet", "updates": [{{ '{' }} "q": {{ '{' }} "vetId": "123" {{ '}' }}, "u": {{ '{' }} "$set": {{ '{' }} "firstName": "John" {{ '}' }}{{ '}' }}{{ '}' }}] {{ '}' }}</code>
+    <code>{{ '{' }} "listCollections": 1 {{ '}' }}</code>
+  </div>
+}
+
+<div #editorHost class="query-editor"></div>

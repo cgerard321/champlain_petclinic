@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { email, form, FormField, required } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
@@ -7,8 +7,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { AuthService } from '@features/auth/auth-service';
 import { LoginRequest } from '@features/auth/models/loginRequest';
+import { Auth } from '@features/auth/services/auth';
 
 @Component({
   selector: 'app-login',
@@ -25,29 +25,19 @@ import { LoginRequest } from '@features/auth/models/loginRequest';
   styleUrl: './login.css',
 })
 export class LoginPage {
-  private readonly auth = inject(AuthService);
+  private readonly auth = inject(Auth);
   private readonly router = inject(Router);
 
   protected readonly hidePassword = signal(true);
   protected readonly isSubmitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
 
-  private readonly model = signal<LoginRequest>({ email: '', password: '' });
+  protected readonly model = signal<LoginRequest>({ email: '', password: '' });
 
   protected readonly loginForm = form(this.model, (schemaPath) => {
     required(schemaPath.email, { message: 'Email is required' });
     email(schemaPath.email, { message: 'Enter a valid email address' });
     required(schemaPath.password, { message: 'Password is required' });
-  });
-
-  protected readonly emailError = computed(() => {
-    const field = this.loginForm.email();
-    return field.touched() && field.invalid() ? (field.errors()[0]?.message ?? null) : null;
-  });
-
-  protected readonly passwordError = computed(() => {
-    const field = this.loginForm.password();
-    return field.touched() && field.invalid() ? (field.errors()[0]?.message ?? null) : null;
   });
 
   protected togglePasswordVisibility(): void {
