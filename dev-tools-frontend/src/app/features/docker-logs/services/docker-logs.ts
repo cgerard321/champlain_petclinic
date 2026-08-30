@@ -1,12 +1,12 @@
 import { Injectable, computed } from '@angular/core';
-import { WsConnectionService, WsConnectionStatus } from '@core/services/ws-connection';
+import { WsConnection, WsConnectionStatus } from '@core/services/ws-connection';
 import { LogMessage } from '@features/docker-logs/models/log-message';
 import { TailLogsParams } from '@features/docker-logs/models/tail-log-params';
 
 
 @Injectable({ providedIn: 'root' })
-export class LogService {
-  private readonly ws = new WsConnectionService();
+export class DockerLogs {
+  private readonly ws = new WsConnection();
 
   readonly status = this.ws.status;
 

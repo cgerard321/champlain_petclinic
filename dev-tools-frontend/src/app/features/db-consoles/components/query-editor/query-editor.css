@@ -1,0 +1,35 @@
+.query-editor {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
+  overflow: hidden;
+  min-height: 200px;
+}
+
+.query-editor__tips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  background-color: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+}
+
+.query-editor__tips-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #555;
+}
+
+.query-editor__tips code {
+  font-family: monospace;
+  font-size: 0.75rem;
+  background: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  padding: 2px 6px;
+  color: #333;
+  user-select: all;
+}
