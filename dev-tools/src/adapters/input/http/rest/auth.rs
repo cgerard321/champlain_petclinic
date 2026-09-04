@@ -1,10 +1,12 @@
-use crate::adapters::input::http::rest::contracts::user_contracts::user::UserLoginRequestContract;
+use crate::adapters::input::http::rest::contracts::user_contracts::user::{
+    UserLoginRequestContract, UserResponseContract,
+};
 use crate::application::ports::input::auth_port::DynAuthPort;
 use crate::application::services::auth::params::UserLoginParams;
 use crate::shared::error::{AppError, AppResult};
 use rocket::http::{Cookie, CookieJar, SameSite};
 use rocket::serde::json::Json;
-use rocket::{State, http::Status};
+use rocket::{http::Status, State};
 use time::OffsetDateTime;
 use uuid::Uuid;
 
@@ -41,13 +43,16 @@ pub async fn login(
 }
 
 #[get("/session")]
-pub async fn check_session(jar: &CookieJar<'_>, port: &State<DynAuthPort>) -> AppResult<Status> {
+pub async fn check_session(
+    jar: &CookieJar<'_>,
+    port: &State<DynAuthPort>,
+) -> AppResult<Json<UserResponseContract>> {
     let cookie = jar.get_private("sid").ok_or(AppError::Unauthorized)?;
     let session_id = Uuid::parse_str(cookie.value()).map_err(|_| AppError::Unauthorized)?;
 
-    port.validate_session(session_id).await?;
+    let user = port.validate_session(session_id).await?;
 
-    Ok(Status::NoContent)
+    Ok(Json(UserResponseContract::from(user)))
 }
 
 #[post("/logout")]
