@@ -1,0 +1,19 @@
+# Terraform files to never commit
+*.tfstate
+*.tfstate.*
+*.tfvars
+terraform-env.sh
+.terraform/
+.terraform.lock.hcl
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# Bootstrap directory local state (only for initial bucket creation)
+bootstrap/*.tfstate
+bootstrap/*.tfstate.*
+bootstrap/.terraform/
