@@ -125,14 +125,22 @@ export const getEducation = async (vetId: string) => {
 
 ```typescript
 // DO: Be explicit about API versioning and prefer v1 unless breaking changes needed
-export const updateVetEducation = async (vetId: string, educationId: string, education: EducationRequestModel) => {
-  // Use v1 API explicitly (preferred for backwards compatibility)
-  return await axiosInstance.put(`/vets/${vetId}/educations/${educationId}`, education, { useV2: false });
+export const updateVetEducation = async (vetId: string, educationId: string, education: EducationRequestModel): Promise<ApiResponse<EducationResponseModel>> => {
+  try {
+    const response = await axiosInstance.put(`/vets/${vetId}/educations/${educationId}`, education, { useV2: false });
+    return { data: response.data, errorMessage: null };
+  } catch (error) {
+    return { data: null, errorMessage: 'Unable to update education. Please try again.' };
+  }
 };
 
-export const getEducation = async (vetId: string) => {
-  // Use v1 API explicitly 
-  return await axiosInstance.get(`/vets/${vetId}/education`, { useV2: false });
+export const getEducation = async (vetId: string): Promise<ApiResponse<EducationResponseModel>> => {
+  try {
+    const response = await axiosInstance.get(`/vets/${vetId}/education`, { useV2: false });
+    return { data: response.data, errorMessage: null };
+  } catch (error) {
+    return { data: null, errorMessage: 'Unable to fetch education details. Please try again.' };
+  }
 };
 ```
 
@@ -142,14 +150,22 @@ export const getEducation = async (vetId: string) => {
 // DO: Prefer v1 API for new features unless breaking changes are required
 import axiosInstance from '@/shared/api/axiosInstance';
 
-export const updateVetEducation = async (vetId: string, educationId: string, education: EducationRequestModel) => {
-  // Use v1 API explicitly (preferred approach)
-  return await axiosInstance.put(`/vets/${vetId}/educations/${educationId}`, education, { useV2: false });
+export const updateVetEducation = async (vetId: string, educationId: string, education: EducationRequestModel): Promise<ApiResponse<EducationResponseModel>> => {
+  try {
+    const response = await axiosInstance.put(`/vets/${vetId}/educations/${educationId}`, education, { useV2: false });
+    return { data: response.data, errorMessage: null };
+  } catch (error) {
+    return { data: null, errorMessage: 'Unable to update education. Please try again.' };
+  }
 };
 
-export const getEducation = async (vetId: string) => {
-  // Only use v2 if you need breaking changes that would affect Angular frontend
-  return await axiosInstance.get(`/vet/${vetId}/education`, { useV2: true });
+export const getEducation = async (vetId: string): Promise<ApiResponse<EducationResponseModel>> => {
+  try {
+    const response = await axiosInstance.get(`/vet/${vetId}/education`, { useV2: true });
+    return { data: response.data, errorMessage: null };
+  } catch (error) {
+    return { data: null, errorMessage: 'Unable to fetch education details. Please try again.' };
+  }
 };
 ```
 
@@ -162,6 +178,7 @@ export const getEducation = async (vetId: string) => {
 - **File naming**: Use camelCase for API files (e.g., `getAllVets.ts`, `addInventory.ts`)
 - **Function naming**: Use descriptive verbs (get, add, update, delete, search)
 - **Return types**: Always specify return types and use proper TypeScript generics
+- **Streaming Responses**: Use `responseType: 'stream'` for Server-Sent Events (SSE) or real-time data updates. When using this option, `response.data` will be a `ReadableStream<Uint8Array>` that needs to be processed chunk by chunk. This is useful for live notifications, real-time dashboards, or continuous data feeds from reactive services. See the streaming example below for proper stream handling.
 
 **GOOD Example:**
 
@@ -169,26 +186,98 @@ export const getEducation = async (vetId: string) => {
 import { VetResponseModel } from '@/features/veterinarians/models/VetResponseModel';
 import axiosInstance from '@/shared/api/axiosInstance';
 
-export async function getAllVets(): Promise<VetResponseModel[]> {
+// NOTE: This interface should be defined once in a shared location (e.g., /src/shared/models/ApiResponse.ts) 
+// and imported by all API functions. Do not redefine this interface in every file.
+interface ApiResponse<T> {
+  data: T | null;
+  errorMessage: string | null;
+}
+
+export async function getAllVets(): Promise<ApiResponse<VetResponseModel[]>> {
   try {
-    const response = await axiosInstance.get<VetResponseModel[]>('/vets', {
-      responseType: 'stream'
+    const response = await axiosInstance.get<VetResponseModel[]>('/vets', { useV2: false });
+    return { data: response.data, errorMessage: null };
+  } catch (error) {
+    return { 
+      data: null, 
+      errorMessage: 'Unable to fetch veterinarians. Please try again later.' 
+    };
+  }
+}
+
+// Example with streaming for reactive API endpoints (Spring WebFlux)
+// NOTE: This example is adapted for reactive Spring Boot services that return Flux<T> streams.
+// The reactive services typically emit individual JSON objects separated by newlines.
+export async function getVetsReactiveStream(): Promise<ApiResponse<ReadableStream<Uint8Array>>> {
+  try {
+    const response = await axiosInstance.get('/vets', { 
+      useV2: false,
+      responseType: 'stream',
+      headers: {
+        'Accept': 'application/x-ndjson' // Newline Delimited JSON for reactive streams
+      }
     });
     
-    return response.data
-      .split('data:')
-      .map((payload: string) => {
-        try {
-          if (payload === '') return null;
-          return JSON.parse(payload);
-        } catch (err) {
-          console.error("Can't parse JSON:", err);
-        }
-      })
-      .filter((data?: JSON) => data !== null);
+    // response.data is a ReadableStream when responseType is 'stream'
+    return { data: response.data, errorMessage: null };
   } catch (error) {
-    console.error('Error fetching vets:', error);
-    throw error;
+    return { 
+      data: null, 
+      errorMessage: 'Unable to establish veterinarians reactive stream. Please try again later.' 
+    };
+  }
+}
+
+// Example of processing reactive stream (Spring WebFlux Flux<VetResponseModel>)
+// NOTE: Reactive APIs typically emit individual JSON objects separated by newlines (NDJSON format)
+export async function processReactiveVetsStream(stream: ReadableStream<Uint8Array>, 
+                                              onVetReceived: (vet: VetResponseModel) => void,
+                                              onComplete?: () => void,
+                                              onError?: (error: string) => void): Promise<void> {
+  const reader = stream.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      
+      if (done) {
+        // Process any remaining data in buffer
+        if (buffer.trim()) {
+          try {
+            const vet: VetResponseModel = JSON.parse(buffer.trim());
+            onVetReceived(vet);
+          } catch (parseError) {
+            onError?.(`Failed to parse final vet data: ${parseError}`);
+          }
+        }
+        onComplete?.();
+        break;
+      }
+      
+      // Decode chunk and add to buffer
+      buffer += decoder.decode(value, { stream: true });
+      
+      // Process complete lines (each line is a JSON object from Flux)
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || ''; // Keep incomplete line in buffer
+      
+      for (const line of lines) {
+        if (line.trim()) {
+          try {
+            const vet: VetResponseModel = JSON.parse(line.trim());
+            onVetReceived(vet); // Process each vet as it arrives
+          } catch (parseError) {
+            onError?.(`Failed to parse vet data: ${parseError}`);
+          }
+        }
+      }
+    }
+  } catch (streamError) {
+    onError?.(`Stream processing error: ${streamError}`);
+  } finally {
+    reader.releaseLock();
   }
 }
 ```
@@ -326,11 +415,47 @@ const VetList: React.FC = () => {
 #### Error Handling Best Practices
 
 - Always include try-catch blocks for async operations
-- Use consistent error messages and logging
-- Trust the axios interceptor for system-level error handling
-- Handle business logic errors at the component level
-- Provide meaningful user feedback for local errors
-- Log errors appropriately for debugging
+- Return structured responses with data and error messages instead of throwing errors
+- Let the axios interceptor handle global error responses
+- **Important**: If you use `console.error()` for debugging purposes, remove it before merging into production
+- **Error Property**: Use `errorMessage` instead of `error` to clearly indicate this is a user-friendly message intended to be displayed directly to the client. This is a local error message that components can show to users without additional processing.
+
+**Usage in Components:**
+
+```typescript
+const { data: customers, errorMessage } = await getAllCustomers();
+
+if (errorMessage) {
+  // Display error message directly to user
+  setErrorAlert(errorMessage);
+} else {
+  // Handle success case
+  setCustomers(customers);
+}
+```
+
+**Example:**
+
+```typescript
+// NOTE: This interface should be defined once in a shared location (e.g., /src/shared/models/ApiResponse.ts) 
+// and imported by all API functions. Do not redefine this interface in every file.
+interface ApiResponse<T> {
+  data: T | null;
+  errorMessage: string | null;
+}
+
+export async function createCustomer(customer: CustomerRequestModel): Promise<ApiResponse<CustomerResponseModel>> {
+  try {
+    const response = await axiosInstance.post<CustomerResponseModel>('/customers', customer, { useV2: false });
+    return { data: response.data, errorMessage: null };
+  } catch (error) {
+    return { 
+      data: null, 
+      errorMessage: 'Unable to create customer. Please check your information and try again.' 
+    };
+  }
+}
+```
 
 ### TypeScript Best Practices
 
