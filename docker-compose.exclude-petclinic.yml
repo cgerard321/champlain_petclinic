@@ -1,0 +1,3 @@
+services:
+  petclinicFrontend:
+    profiles: ["exclude-petclinic"]

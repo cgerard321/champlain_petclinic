@@ -1,5 +1,3 @@
-version: "3.9"
-
 x-healthchecks:
   springboot: &springboot
     healthcheck:
@@ -78,7 +76,6 @@ services:
     <<: *react_node
     image: petclinic-frontend
     container_name: petclinic-frontend
-    profiles: ["fe"]
     build:
       context: ./petclinic-frontend
       dockerfile: Dockerfile
@@ -95,7 +92,6 @@ services:
     <<: *angular_node
     image: employee-frontend
     container_name: employee-frontend
-    profiles: ["fe-employee"]
     build:
       context: ./employee-frontend
       dockerfile: Dockerfile
@@ -410,7 +406,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - MINIO_URL=petclinic-bucket.benmusicgeek.synology.me
-      - DATABASE_URL=mysql://user:pwd@mysql-devtools:3306/devtools-db?ssl-mode=DISABLED
+      - DATABASE_URL=mysql://user:[REDACTED]@mysql-devtools:3306/devtools-db?ssl-mode=DISABLED
       - RUST_LOG=debug
       # In prod these will be in the stack.env file
       - PASSWORD_PEPPER=Ceramic1-Sultan-Zenith

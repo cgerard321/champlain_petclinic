@@ -1,0 +1,3 @@
+services:
+  employeeFrontend:
+    profiles: ["exclude-employee"]
