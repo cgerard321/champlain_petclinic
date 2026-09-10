@@ -1,5 +1,3 @@
-version: "3.9"
-
 x-healthchecks:
   springboot: &springboot
     healthcheck:

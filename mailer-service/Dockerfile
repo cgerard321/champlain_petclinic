@@ -1,7 +1,7 @@
 FROM golang:1.24.0 AS builder
 WORKDIR /app/GoMailer
 COPY . .
-RUN go install github.com/swaggo/swag/cmd/swag@v1.16.6
+RUN go install github.com/swaggo/swag/cmd/swag@v1.7.9
 RUN swag init -g cmd/mailer/main.go -o ./docs
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app ./cmd/mailer
 
