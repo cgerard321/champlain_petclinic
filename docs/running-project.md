@@ -5,53 +5,51 @@ Back to [Main page](../README.md)
 <!-- TOC -->
 * [Running the project](#running-the-project)
   * [.env](#env)
-  * [Docker Profile (for running with docker-compose with ALL SERVICES)](#docker-profile-for-running-with-docker-compose-with-all-services)
-  * [Docker Profile (for running with docker-compose with all services but NO FRONTEND)](#docker-profile-for-running-with-docker-compose-with-all-services-but-no-frontend)
+  * [Docker - Run docker-compose with ALL SERVICES and ALL PORTALS](#docker---run-docker-compose-with-all-services-and-all-portals)
+  * [Docker - Run docker-compose and EXCLUDE the Customer Portal](#docker---run-docker-compose-and-exclude-the-customer-portal)
+  * [Docker - Run docker-compose and EXCLUDE the Employee Portal](#docker---run-docker-compose-and-exclude-the-employee-portal)
+  * [Docker - Run docker-compose and EXCLUDE both Portals](#docker---run-docker-compose-and-exclude-both-portals)
   * [Bring up Frontend](#bring-up-frontend)
 <!-- TOC -->
 
 Once you have cloned the repo (see the setup instructions below), you need to do the following:
 
 ## .env
-In the project's top-level folder, you will need to create a file called .env. It will contain SMTP_PASS property set to the hashed password of the mailing service you will be using.
+In the project's top-level folder, you will need to create a file called .env. It will contain many properties used
+by a variety of services.
+
 My students: I'll provide this to you.
 
+Note: you must also add a different `.env` file to the `petclinic-frontend` folder. See [Environment Variables Setup for Frontend Application](environment.md#environment-variables-setup-for-frontend-application).
 
-## Docker Profile (for running with docker-compose with ALL SERVICES)
-Must be used prior to issuing a PR and in Sprint Reviews.
+
+## Docker - Run docker-compose with ALL SERVICES and ALL PORTALS
+Must be used prior to issuing a PR.
 ```
-docker-compose --profile fe build
-docker-compose --profile fe up -d
-docker-compose logs -f
-
-or
-
-docker-compose --profile fe up --build
-```
-
-## Docker Profile (for running with docker-compose with EMPLOYEE FRONTEND)
-For running the employee portal (Angular frontend) with all backend services.
-```
-docker-compose --profile fe-employee build
-docker-compose --profile fe-employee up -d
-docker-compose logs -f
-
-or
-
-docker-compose --profile fe-employee up --build
-```
-
-## Docker Profile (for running with docker-compose with all services but NO FRONTEND)
-This can be used during development to avoid having to rebuild everything whenever you make a change to the frontend.
-```
-docker-compose build
-docker-compose up -d
-docker-compose logs -f
-
-or
-
 docker-compose up --build
 ```
+
+## Docker - Run docker-compose and EXCLUDE the Customer Portal
+For building all backend services AND the Employee Portal. Use this when actively
+working on the **Customer** Portal.
+```
+docker-compose -f docker-compose.yml -f docker-compose.exclude-petclinic.yml up --build
+```
+
+## Docker - Run docker-compose and EXCLUDE the Employee Portal
+For building all backend services AND the Customer Portal. Use this when actively
+working on the **Employee** Portal.
+```
+docker-compose -f docker-compose.yml -f docker-compose.exclude-employee.yml up --build
+```
+
+## Docker - Run docker-compose and EXCLUDE both Portals
+For building all backend services only. Use this when actively
+working on both the **Customer AND Employee** Portals.
+```
+docker-compose -f docker-compose.yml -f docker-compose.exclude-petclinic.yml -f docker-compose.exclude-employee.yml up --build
+```
+
 To learn more about how docker profiles are used in general, I strongly encourage a short read on how docker profiles function [here](https://docs.docker.com/compose/how-tos/profiles/).
 ## Bring up Frontend
 React frontend :
@@ -84,17 +82,4 @@ Running React frontend locally (development mode with auto-refresh):
 cd petclinic-frontend
 npm install
 npm run dev
-```
-In terminal:
-
-Check database contents (did the script run)
-```
-winpty docker-compose exec mysql3 mysql -uuser -p customers-db -e "select * from owners"
-winpty docker-compose exec mysql3 mysql -uuser -p customers-db -e "select * from pets"
-winpty docker-compose exec mysql3 mysql -uuser -p customers-db -e "select * from types"
-```
-When all docker containers are up, test with curl:
-```
-curl localhost:8080/api/gateway/customer/owners | jq
-curl localhost:8080/api/gateway/vet/vets | jq
 ```
