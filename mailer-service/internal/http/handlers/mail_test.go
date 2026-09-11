@@ -26,7 +26,7 @@ func (m *mockService) Send(mm *pkg.Mail) error {
 	m.got = mm
 	// in a real scenario this pushes to a channel
 	// but for the mock we just capture the mail
-	return nil
+	return m.sendErr
 }
 
 func (m *mockService) ProcessEmailJob(job mailsvc.EmailJob) {
@@ -73,6 +73,26 @@ func TestMailHandler_Post_NoMailInContext_Returns400(t *testing.T) {
 
 	if w.Code != http.StatusBadRequest {
 		t.Fatalf("want 400, got %d", w.Code)
+	}
+}
+
+func TestMailHandler_Post_ServiceError_Returns500(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	ms := &mockService{sendErr: http.ErrHandlerTimeout}
+	h := handlers.NewMailHandler(ms)
+
+	r := gin.New()
+	r.Use(mw.UnmarshalMail())
+	r.POST("/mail", h.Post)
+
+	body := []byte(`{"emailSendTo":"a@b.com","emailTitle":"hi","body":"<p>x</p>","senderName":"PetClinic"}`)
+	req := httptest.NewRequest(http.MethodPost, "/mail", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Fatalf("want 500, got %d: %s", w.Code, w.Body.String())
 	}
 }
 
