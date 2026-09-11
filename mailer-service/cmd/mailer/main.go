@@ -8,6 +8,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 
+	_ "mailer-service/docs"
 	"mailer-service/internal/http/handlers"
 	"mailer-service/internal/http/middleware"
 	mailsvc "mailer-service/internal/mailer"
