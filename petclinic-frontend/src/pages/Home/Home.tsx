@@ -56,7 +56,7 @@ export default function Home(): JSX.Element {
   return (
     <div className="home-root">
       <NavBar />
-
+      <h1>Cool title</h1>
       {/* Intro */}
       <header className="intro">
         <div className="intro-inner">
