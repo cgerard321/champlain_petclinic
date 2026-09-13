@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { LoginRequest } from '@features/auth/models/loginRequest';
 import { Auth } from '@features/auth/services/auth';
+import { isApiError } from '@core/models/api-error';
 
 @Component({
   selector: 'app-login',
@@ -59,9 +60,9 @@ export class LoginPage {
         this.isSubmitting.set(false);
         this.router.navigateByUrl('/');
       },
-      error: () => {
+      error: (err: unknown) => {
         this.isSubmitting.set(false);
-        this.errorMessage.set('Invalid email or password.');
+        this.errorMessage.set(isApiError(err) ? err.message : 'Could not reach the server.');
       },
     });
   }

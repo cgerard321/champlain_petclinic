@@ -8,11 +8,12 @@ import { authInterceptor } from '@core/interceptors/auth-interceptor';
 import { AuthState } from '@core/services/auth-state';
 import { firstValueFrom } from 'rxjs';
 import { graphqlProviders } from '@core/services/graphql-provider';
+import { errorInterceptor } from '@core/interceptors/error-interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideHttpClient(withInterceptors([apiBaseUrlInterceptor, authInterceptor])),
+    provideHttpClient(withInterceptors([apiBaseUrlInterceptor, errorInterceptor, authInterceptor])),
     ...graphqlProviders,
     provideAppInitializer(() => {
       const authState = inject(AuthState);

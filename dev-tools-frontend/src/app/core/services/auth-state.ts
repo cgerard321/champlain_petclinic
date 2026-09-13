@@ -4,13 +4,6 @@ import { Observable, catchError, map, of, tap } from 'rxjs';
 import { RoleId } from '@shared/models/roles';
 import { Apollo } from 'apollo-angular';
 
-interface CurrentUserResponse {
-  user_id: string;
-  email: string;
-  display_name: string;
-  roles: string[];
-}
-
 @Injectable({ providedIn: 'root' })
 export class AuthState {
   private readonly http = inject(HttpClient);
@@ -30,13 +23,13 @@ export class AuthState {
     let _ = this.apollo.client.clearStore();
 
     return this.http
-      .post<void>('/logout', {}, { withCredentials: true })
+      .post<void>('/logout', {})
       .pipe(tap(() => this._isAuthenticated.set(false)));
 
   }
 
   checkSession(): Observable<void> {
-    return this.http.get<CurrentUserResponse>('/session', { withCredentials: true }).pipe(
+    return this.http.get<CurrentUserResponse>('/session').pipe(
       tap((user) => {
         this._isAuthenticated.set(true);
         this._roles.set(user.roles);

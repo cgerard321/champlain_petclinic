@@ -30,6 +30,14 @@ src/
 | `environments` | build time             | No (config values only)     |                                       |
 | `testing`      | test runs only         | No (fakes/fixtures only)    | `*.spec.ts` files only — never `app/` |
 
+### Models and accompanying logic
+
+A model file can include small functions that operate only on that model's type (constructors, type guards, mappers)
+— think of it as a class with static methods, not a namespace for unrelated logic.
+The test: would this function be imported without its type? If yes, it isn't a model-accompanying function
+— it's either a service (if it needs DI/state) or belongs closer to whatever it actually operates on.
+**This applies to all models, not just those in `core/models/`**.
+
 ---
 
 ## 2. `core/` — app-wide singletons
@@ -40,7 +48,8 @@ Things that exist exactly once for the whole app and aren't tied to any feature'
 core/
 ├── guards/          # e.g. auth.guard.ts, unsaved-changes.guard.ts
 ├── interceptors/     # e.g. auth.interceptor.ts, error.interceptor.ts
-└── services/         # e.g. auth.service.ts, config.service.ts
+├── services/         # e.g. auth.service.ts, config.service.ts
+└── models/         # e.g. user-model.ts, api-error.ts
 ```
 
 Rule of thumb: if two instances of it existed would cause issues (auth state, HTTP interceptor, global error handler),
@@ -60,7 +69,7 @@ features consume `core` services via DI, not via explicit imports of implementat
 shared/
 ├── components/   # e.g. button, modal, data-table, badge, empty-state
 ├── directives/   # e.g. click-outside, autofocus, tooltip
-├── models/       # generic types: PaginatedResult<T>, ApiError, SortState
+├── models/       # generic types: PaginatedResult<T>, SortState
 └── pipes/        # e.g. truncate, relative-time, file-size
 ```
 
