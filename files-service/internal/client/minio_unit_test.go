@@ -9,6 +9,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/stretchr/testify/assert"
 	container "github.com/testcontainers/testcontainers-go/modules/minio"

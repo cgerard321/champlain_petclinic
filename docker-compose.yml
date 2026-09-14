@@ -1,5 +1,3 @@
-version: "3.9"
-
 x-healthchecks:
   springboot: &springboot
     healthcheck:
@@ -241,6 +239,8 @@ services:
 
   mailer-service:
     build: mailer-service
+    ports:
+      - "8081:8080"        # port exposed for development purposes only
     env_file:
       - .env
     environment:
