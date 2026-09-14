@@ -12,7 +12,7 @@ export class Auth {
 
   login(credentials: LoginRequest): Observable<void> {
     return this.http
-      .post<void>('/login', credentials, { withCredentials: true })
+      .post<void>('/login', credentials)
       .pipe(switchMap(() => this.authState.checkSession()));
   }
 }

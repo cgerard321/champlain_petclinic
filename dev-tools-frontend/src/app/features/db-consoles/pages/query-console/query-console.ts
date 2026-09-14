@@ -17,6 +17,7 @@ import { SqlResult } from '@features/db-consoles/models/sql-result';
 import { MongoResult } from '@features/db-consoles/models/mongo-result';
 import { DbConsole } from '@features/db-consoles/services/db-console';
 import { Observable } from 'rxjs';
+import { extractApiError } from '@core/models/api-error';
 
 
 function resolveQueryLanguage(dbType: string | null | undefined): QueryLanguage {
@@ -58,9 +59,10 @@ export class QueryConsole {
   });
   protected readonly services = computed(() => this.servicesResource.value() ?? []);
   protected readonly isLoadingServices = computed(() => this.servicesResource.isLoading());
-  protected readonly loadError = computed(() =>
-    this.servicesResource.error() ? 'Failed to load monitored services.' : null,
-  );
+  protected readonly loadError = computed(() => {
+    const err = this.servicesResource.error();
+    return err ? (extractApiError(err)?.message ?? 'Failed to load monitored services.') : null;
+  });
 
   protected readonly selectedServiceName = signal<string | null>(null);
   protected readonly selectedDbName = signal<string | null>(null);
@@ -138,7 +140,8 @@ export class QueryConsole {
       },
       error: (err: unknown) => {
         this.isRunning.set(false);
-        this.runError.set(err instanceof Error ? err.message : 'Query failed.');
+        const backendError = extractApiError(err);
+        this.runError.set(backendError?.message ?? 'Query failed. Check your connection.');
       },
     });
   }

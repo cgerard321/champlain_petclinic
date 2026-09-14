@@ -6,9 +6,7 @@ import { catchError, throwError } from 'rxjs';
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
 
-  const withCredentials = req.clone({ withCredentials: true });
-
-  return next(withCredentials).pipe(
+  return next(req).pipe(
     catchError((error: unknown) => {
       if (error instanceof HttpErrorResponse && error.status === 401) {
         router.navigateByUrl('/login');

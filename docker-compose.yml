@@ -1,5 +1,3 @@
-version: "3.9"
-
 x-healthchecks:
   springboot: &springboot
     healthcheck:
@@ -241,6 +239,8 @@ services:
 
   mailer-service:
     build: mailer-service
+    ports:
+      - "8081:8080"        # port exposed for development purposes only
     env_file:
       - .env
     environment:
@@ -270,7 +270,7 @@ services:
         condition: service_healthy
 
   minio:
-    image: minio/minio:RELEASE.2025-04-22T22-12-26Z
+    image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
     command: server --address ":9100" --console-address ":9101" /data
     environment:
       MINIO_ROOT_USER: user
