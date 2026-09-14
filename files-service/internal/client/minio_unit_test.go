@@ -9,7 +9,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/stretchr/testify/assert"
 	container "github.com/testcontainers/testcontainers-go/modules/minio"
@@ -47,7 +46,7 @@ func TestMain(m *testing.M) {
 	ctx = context.Background()
 
 	var err error
-	minioContainer, err := container.Run(ctx, "minio/minio:RELEASE.2024-01-16T16-07-38Z", container.WithUsername("user"), container.WithPassword("password"))
+	minioContainer, err := container.Run(ctx, "quay.io/minio/minio:RELEASE.2024-01-16T16-07-38Z", container.WithUsername("user"), container.WithPassword("password"))
 	if err != nil {
 		panic("failed to start MinIO container: " + err.Error())
 	}
