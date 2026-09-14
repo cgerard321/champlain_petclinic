@@ -8,6 +8,6 @@ export class CreateUsers {
   private readonly http = inject(HttpClient);
 
   createUser(request: CreateUserRequest): Observable<void> {
-    return this.http.post<void>('/users', request, { withCredentials: true });
+    return this.http.post<void>('/users', request);
   }
 }
