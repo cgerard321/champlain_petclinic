@@ -7,7 +7,7 @@ export const useHasRequiredRole = (roles?: string[]): boolean => {
   const hasRequiredRole = useCallback((): boolean => {
     if (!roles) return true; // If no role is specified, everyone can access it
     return roles.some(role =>
-      Array.from(user.roles).some(userRole => userRole.name === role)
+      Array.from(user.roles).some(userRole => userRole === role)
     );
   }, [roles, user.roles]);
 
