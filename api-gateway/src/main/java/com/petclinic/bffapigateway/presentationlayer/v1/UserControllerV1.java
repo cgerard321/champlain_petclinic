@@ -11,10 +11,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.bind.annotation.*;
@@ -157,18 +154,8 @@ public class UserControllerV1 {
     @GetMapping(value = "/jwt", produces = "application/json")
     public Mono<ResponseEntity<ValidateUserTokenResponse>> validateToken(@CookieValue("Bearer") String token) {
         return authServiceClient.validateToken(token)
-                .map(tokenResponseDTO -> {
-                    var body = tokenResponseDTO.getBody();
-                    if (body == null) {
-                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).<ValidateUserTokenResponse>build();
-                    }
-                    return ResponseEntity.ok(ValidateUserTokenResponse.builder()
-                            .userId(body.getUserId())
-                            .username(body.getUsername())
-                            .email(body.getEmail())
-                            .roles(body.getRoles())
-                            .build());
-                })
+                .mapNotNull(HttpEntity::getBody)
+                .map(tokenResponseDTO -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).<ValidateUserTokenResponse>build())
                 .defaultIfEmpty(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
 
     }
