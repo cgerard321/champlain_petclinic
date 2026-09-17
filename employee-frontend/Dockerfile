@@ -33,7 +33,7 @@ COPY --from=build /app/dist/employee-frontend/browser/ /usr/share/nginx/html/
 COPY nginx.conf /etc/nginx/nginx.conf
 
 # Expose port 80 for the NGINX web server
-EXPOSE 80
+EXPOSE 4200
 
 # Command to run NGINX
 CMD ["nginx", "-g", "daemon off;"]
