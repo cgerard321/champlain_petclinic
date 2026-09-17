@@ -1,8 +1,4 @@
 {
-    "recommendations": [
-        "esbenp.prettier-vscode",
-         "dbaeumer.vscode-eslint",
-         "rafapaulin.try-material-icon-theme",
-         "ms-playwright.playwright"
-    ]
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=827846
+  "recommendations": ["angular.ng-template"]
 }

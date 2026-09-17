@@ -1,154 +1,59 @@
-# Angular 20 Employee Frontend
+# EmployeeFrontend
 
-Modern Angular 20 frontend for Champlain Pet Clinic employees.
+This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.8.
 
-## Production Access
+## Development server
 
-**Live Application**: [https://petclinic-emp-portal.benmusicgeek.synology.me/](https://petclinic-emp-portal.benmusicgeek.synology.me/)
-
-## Quick Start
+To start a local development server, run:
 
 ```bash
-npm install
-
-npm run dev
-
-npm run build
+ng serve
 ```
 
-## Tech Stack
+Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
 
-- **Angular 20.3.7** - Latest Angular framework
-- **Vite 7.1.12** - Build tool and dev server
-- **TypeScript 5.9.3** - Type-safe JavaScript
-- **Angular Material 20.2.10** - UI components
-- **Node.js 22.12.0** - Runtime (Docker)
-- **Nginx Alpine** - Production server
+## Code scaffolding
 
-## Project Structure
+Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
 
-```
-src/app/
-├── core/           # Services, guards, interceptors
-│   ├── guards/     # Route guards
-│   ├── interceptors/ # HTTP interceptors
-│   └── services/   # Core services
-├── features/       # Feature components
-├── shared/         # Shared components
-│   ├── api/        # API services
-│   └── components/ # Reusable components
-└── app.component.* # Main component
+```bash
+ng generate component component-name
 ```
 
-## Key Features
+For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
 
-- **Material Design** - Replaced Bootstrap with Angular Material
-- **Standalone Components** - Modern Angular architecture
-
-## Angular Material
-
-### What's Already Set Up
-
-- **Material Theme** - Indigo-pink theme imported
-- **Animations** - Enabled in main.ts
-- **Material Icons** - Google Fonts loaded
-
-### Using Material Components
-
-```typescript
-// Import the module you need
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-
-@Component({
-  imports: [MatSlideToggleModule]
-})
+```bash
+ng generate --help
 ```
 
-```html
-<mat-slide-toggle>Toggle me!</mat-slide-toggle>
+## Building
+
+To build the project run:
+
+```bash
+ng build
 ```
 
-### Adding New Material Components
+This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
 
-```typescript
-// 1. Import the module
-import { MatButtonModule } from '@angular/material/button';
+## Running unit tests
 
-// 2. Add to component imports
-@Component({
-  imports: [MatButtonModule]
-})
+To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+
+```bash
+ng test
 ```
 
-### App-Wide Styling
+## Running end-to-end tests
 
-```scss
-// src/style.css - Global styles
-@import '@angular/material/prebuilt-themes/indigo-pink.css';
+For end-to-end (e2e) testing, run:
 
-body {
-  font-family: 'Roboto', sans-serif;
-  margin: 0;
-  padding: 0;
-}
-
-html,
-body {
-  height: 100%;
-}
+```bash
+ng e2e
 ```
 
-```scss
-// Component-specific styles
-.feature-card {
-  background: #f8f9fa;
-  border-radius: 12px;
-  transition: transform 0.3s ease;
-}
-```
+Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
 
-### More Information
+## Additional Resources
 
-- [Angular Material Documentation](https://material.angular.dev/)
-
-## Development
-
-- **Dev Server**: `npm run dev` (port 4200)
-- **Build**: `npm run build`
-- **Tests**: `playwright test` (E2E tests)
-- **Test Debug**: `playwright test --debug` (Debug mode)
-- **Lint**: `npm run lint`
-- **Lint Fix**: `npm run lint:fix` (Auto-fix linting issues)
-
-## Docker Support
-
-- **Multi-stage build** with Nginx
-- **Port 4200** exposed
-
-## Testing
-
-- **Playwright** E2E testing
-- **Chrome, Firefox, Safari** support
-- **CI/CD ready** configuration
-
-## Migration Plan
-
-This is the setup for the new Angular 20 employee frontend. Each team should be responsible for migrating their own components from the old Angular application to respect all the configuration of the new employee frontend:
-
-### Team Responsibilities
-
-- **Each team** - Responsible for their own component migration
-- **Follow standards** - Use this Angular 20 setup as the standard
-- **Material Design** - Convert Bootstrap components to Angular Material
-- **Standalone components** - Convert to new Angular 20 architecture
-- **Testing** - Update tests to work with new setup
-- **Documentation** - Update component documentation
-
-### Migration Checklist for Each Team
-
-1. **Audit components** - Identify components to migrate
-2. **Update imports** - Convert to standalone components
-3. **Material conversion** - Replace Bootstrap with Material components
-4. **Styling updates** - Apply Material Design theme
-5. **Testing updates** - Update test files
-6. **Documentation** - Update component docs
+For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.

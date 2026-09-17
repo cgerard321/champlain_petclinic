@@ -1,6 +1,5 @@
 import { useState, FormEvent } from 'react';
-import { UserResponseModel } from '@/shared/models/UserResponseModel';
-import { useSetUser } from '@/context/UserContext.tsx';
+import { useUser } from '@/context/UserContext.tsx';
 import axiosInstance from '@/shared/api/axiosInstance';
 import { Link, useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
@@ -24,7 +23,7 @@ const images = [
 
 export default function Login(): JSX.Element {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const setUser = useSetUser();
+  const { checkSession } = useUser();
   const navigate = useNavigate();
   function togglePasswordVisibility(): void {
     const passwordInput = document.getElementById(
@@ -46,9 +45,9 @@ export default function Login(): JSX.Element {
       passwordInput: HTMLInputElement;
     };
 
-    // the try catch is being overwritten by the redirect to /unauthorized so exception handling isnt doing anything for now
     try {
-      const response = await axiosInstance.post<UserResponseModel>(
+      // Login sets the auth cookie server-side; response body no longer needed
+      await axiosInstance.post(
         '/users/login',
         {
           emailOrUsername: formElements.emailInput.value,
@@ -60,10 +59,9 @@ export default function Login(): JSX.Element {
         }
       );
 
-      setUser(response.data);
-      if (response.data.userId !== '') {
-        navigate(AppRoutePaths.Home);
-      }
+      // Pull the authoritative session/user info from the server
+      await checkSession();
+      navigate(AppRoutePaths.Home);
     } catch (error) {
       if (isAxiosError(error)) {
         if (error.response?.status === 401) {

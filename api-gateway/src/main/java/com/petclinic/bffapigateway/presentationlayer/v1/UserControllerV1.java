@@ -25,7 +25,10 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -89,10 +92,9 @@ public class UserControllerV1 {
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<UserDetails> getAllUsers(@CookieValue("Bearer") String auth, @RequestParam Optional<String> username) {
-        if(username.isPresent()) {
+        if (username.isPresent()) {
             return authServiceClient.getUsersByUsername(auth, username.get());
-        }
-        else {
+        } else {
             return authServiceClient.getUsers(auth);
         }
     }
@@ -114,7 +116,7 @@ public class UserControllerV1 {
 
     @Operation()
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @PostMapping(value = "/login",produces = "application/json;charset=utf-8;", consumes = "application/json")
+    @PostMapping(value = "/login", produces = "application/json;charset=utf-8;", consumes = "application/json")
     public Mono<ResponseEntity<UserPasswordLessDTO>> login(@RequestBody Mono<Login> login) throws Exception {
         log.info("Entered controller /login");
         return authServiceClient.login(login);
@@ -147,10 +149,30 @@ public class UserControllerV1 {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @PostMapping(value = "/vets",consumes = "application/json",produces = "application/json")
+    @PostMapping(value = "/vets", consumes = "application/json", produces = "application/json")
     public Mono<ResponseEntity<VetResponseDTO>> insertVet(@RequestBody Mono<RegisterVet> vetDTOMono) {
         return authServiceClient.createVetUser(vetDTOMono)
-                .map(v->ResponseEntity.status(HttpStatus.CREATED).body(v))
+                .map(v -> ResponseEntity.status(HttpStatus.CREATED).body(v))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ALL})
+    @GetMapping(value = "/jwt", produces = "application/json")
+    public Mono<ResponseEntity<ValidateUserTokenResponse>> validateToken(@CookieValue("Bearer") String token) {
+        return authServiceClient.validateToken(token)
+                .map(tokenResponseDTO -> {
+                    var body = tokenResponseDTO.getBody();
+                    if (body == null) {
+                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).<ValidateUserTokenResponse>build();
+                    }
+                    return ResponseEntity.ok(ValidateUserTokenResponse.builder()
+                            .userId(body.getUserId())
+                            .username(body.getUsername())
+                            .email(body.getEmail())
+                            .roles(body.getRoles())
+                            .build());
+                })
+                .defaultIfEmpty(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+
     }
 }

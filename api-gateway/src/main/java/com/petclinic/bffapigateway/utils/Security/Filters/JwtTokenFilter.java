@@ -5,6 +5,7 @@ import com.petclinic.bffapigateway.dtos.Auth.TokenResponseDTO;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import com.petclinic.bffapigateway.utils.Utility;
+import jakarta.annotation.PostConstruct;
 import lombok.Generated;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +24,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 
 @Slf4j
@@ -45,7 +47,14 @@ public class JwtTokenFilter implements WebFilter {
     @Value("${frontend.url}")
     private String frontendOrigin;
 
+    private List<String> allowedOrigins;
 
+    @PostConstruct
+    private void init() {
+        allowedOrigins = Arrays.stream(frontendOrigin.split(","))
+                .map(String::trim)
+                .toList();
+    }
     public JwtTokenFilter(AuthServiceClient authValidationService, JwtTokenUtil jwtTokenUtil, Utility utility) {
         this.authValidationService = authValidationService;
         this.jwtTokenUtil = jwtTokenUtil;
@@ -78,12 +87,14 @@ public class JwtTokenFilter implements WebFilter {
 
         String path = exchange.getRequest().getURI().getPath();
 
-        exchange.getResponse().getHeaders().add("Access-Control-Allow-Origin", frontendOrigin);
+        String requestOrigin = exchange.getRequest().getHeaders().getFirst(HttpHeaders.ORIGIN);
+
+        if (requestOrigin != null && allowedOrigins.contains(requestOrigin)) {
+            exchange.getResponse().getHeaders().add("Access-Control-Allow-Origin", requestOrigin);
+        }
 
         exchange.getResponse().getHeaders().add("Access-Control-Allow-Credentials", "true");
-
         exchange.getResponse().getHeaders().add("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS, PATCH, HEAD");
-
         exchange.getResponse().getHeaders().add("Access-Control-Allow-Headers", "Content-Type");
 
         // todo optimize this
