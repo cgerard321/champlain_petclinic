@@ -1,6 +1,6 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Injectable, inject, signal } from '@angular/core';
-import { Observable, catchError, map, of, tap } from 'rxjs';
+import { inject, Injectable, signal } from '@angular/core';
+import { catchError, map, Observable, of, tap } from 'rxjs';
 import { CurrentUserResponse } from '@core/models/current-user-response';
 
 @Injectable({ providedIn: 'root' })
@@ -16,6 +16,10 @@ export class AuthState {
     return this.http
       .post<void>('/api/gateway/users/logout', {})
       .pipe(tap(() => this._isAuthenticated.set(false)));
+  }
+
+  hasRole(role: string): boolean {
+    return this._roles().includes(role);
   }
 
   checkToken(): Observable<void> {
