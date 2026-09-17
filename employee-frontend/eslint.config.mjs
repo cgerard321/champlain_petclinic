@@ -16,7 +16,7 @@ export default tseslint.config(
     processor: angular.processInlineTemplates,
     languageOptions: {
       parserOptions: {
-        project: ['./tsconfig.json', './tsconfig.spec.json'],
+        project: ['./tsconfig.json', './tsconfig.app.json', './tsconfig.spec.json'],
       },
       globals: {
         browser: true,

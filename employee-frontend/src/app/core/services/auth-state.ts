@@ -16,7 +16,6 @@ export class AuthState {
     return this.http
       .post<void>('/api/gateway/users/logout', {})
       .pipe(tap(() => this._isAuthenticated.set(false)));
-
   }
 
   checkToken(): Observable<void> {

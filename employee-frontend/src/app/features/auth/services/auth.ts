@@ -4,7 +4,6 @@ import { Observable, switchMap, tap } from 'rxjs';
 import { AuthState } from '@core/services/auth-state';
 import { LoginRequest } from '@features/auth/models/loginRequest';
 
-
 @Injectable({ providedIn: 'root' })
 export class Auth {
   private readonly http = inject(HttpClient);
