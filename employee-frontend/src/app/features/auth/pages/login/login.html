@@ -9,7 +9,12 @@
       <form class="login-form" (submit)="submit($event)">
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Username or email</mat-label>
-          <input matInput type="text" [formField]="loginForm.emailOrUsername" autocomplete="username" />
+          <input
+            matInput
+            type="text"
+            [formField]="loginForm.emailOrUsername"
+            autocomplete="username"
+          />
           @if (loginForm.emailOrUsername().touched() && loginForm.emailOrUsername().invalid()) {
             <mat-error>{{ loginForm.emailOrUsername().errors()[0]?.message }}</mat-error>
           }
