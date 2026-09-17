@@ -55,6 +55,7 @@ public class JwtTokenFilter implements WebFilter {
                 .map(String::trim)
                 .toList();
     }
+
     public JwtTokenFilter(AuthServiceClient authValidationService, JwtTokenUtil jwtTokenUtil, Utility utility) {
         this.authValidationService = authValidationService;
         this.jwtTokenUtil = jwtTokenUtil;

@@ -1,8 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthState } from '@core/services/auth-state';
-
-const EMPLOYEE_ROLES = ['ADMIN', 'VET', 'RECEPTIONIST', 'INVENTORY_MANAGER'];
+import { EMPLOYEE_ROLES } from '@shared/models/employee-roles';
 
 export const employeeGuard: CanActivateFn = () => {
   const auth = inject(AuthState);
