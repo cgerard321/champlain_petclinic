@@ -77,13 +77,14 @@ jobs:
         run: |
           EXTRA_ARGS="${{ matrix.service.buildArgs }}"
           PR_NUM="${{ github.event.number }}"
-          BASE_URL="https://petdev-${PR_NUM}-backend.benmusicgeek.synology.me"
+          DOMAIN="benmusicgeek.synology.me"
+          BASE_URL="https://petdev-${PR_NUM}-backend.${DOMAIN}"
           if [ "${{ matrix.service.name }}" = "petclinic-frontend" ]; then
             EXTRA_ARGS="$EXTRA_ARGS --build-arg VITE_BACKEND_URL=${BASE_URL}/api/"
           fi
           if [ "${{ matrix.service.name }}" = "employee-frontend" ]; then
-            EXTRA_ARGS="$EXTRA_ARGS --build-arg VITE_BACKEND_URL=${BASE_URL}/api/gateway"
-            EXTRA_ARGS="$EXTRA_ARGS --build-arg VITE_BACKEND_URL_V2=${BASE_URL}/api/v2/gateway"
+            EXTRA_ARGS="$EXTRA_ARGS --build-arg API_URL=${BASE_URL}"
+            EXTRA_ARGS="$EXTRA_ARGS --build-arg CUSTOMER_PORTAL_URL=https://petdev-${PR_NUM}.${DOMAIN}"
           fi
           docker build \
             $EXTRA_ARGS \
