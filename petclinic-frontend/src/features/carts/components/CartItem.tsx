@@ -40,7 +40,7 @@ const CartItem = ({
   const { user } = useUser();
   const roleNames = new Set<string>();
   const rolesSet = user?.roles;
-  if (rolesSet) for (const r of rolesSet) roleNames.add(r.name);
+  if (rolesSet) for (const r of rolesSet) roleNames.add(r);
 
   const isAdmin = roleNames.has('ADMIN');
   const isStaff =

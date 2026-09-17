@@ -154,12 +154,12 @@ public class UserController {
         TokenResponseDTO tokenResponseDTO = TokenResponseDTO.builder()
                 .token(token)
                 .userId(jwtService.getIdFromToken(token))
+                .username(jwtService.getUsernameFromToken(token))
                 .email(jwtService.getUsernameFromToken(token))
                 .roles(jwtService.getRolesFromToken(token))
                 .build();
 
         return ResponseEntity.ok(tokenResponseDTO);
-
     }
 
     @PatchMapping("/{userId}/disable")

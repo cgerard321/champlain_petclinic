@@ -1,14 +1,42 @@
-// src/context/UserContext.tsx
-import { createContext, useContext, useState, ReactNode } from 'react';
-import { UserResponseModel } from '@/shared/models/UserResponseModel';
+import {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import router from '@/router';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
-import { Role } from '@/shared/models/Role.ts';
+import axiosInstance from '@/shared/api/axiosInstance';
 
-interface UserContextType {
-  user: UserResponseModel;
-  setUser: (user: UserResponseModel) => void;
+export interface ValidateUserTokenResponse {
+  username: string;
+  userId: string;
+  email: string;
+  roles: string[];
 }
+interface CurrentUser {
+  username: string;
+  email: string;
+  userId: string;
+  roles: Set<string>;
+}
+
+interface UserContextType extends CurrentUser {
+  user: CurrentUser;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  checkSession: () => Promise<void>;
+  logout: () => Promise<void>;
+}
+
+const emptyUser: CurrentUser = {
+  username: '',
+  email: '',
+  userId: '',
+  roles: new Set<string>(),
+};
 
 export const UserContext = createContext<UserContextType | undefined>(
   undefined
@@ -19,26 +47,70 @@ export const UserProvider = ({
 }: {
   children: ReactNode;
 }): JSX.Element => {
-  const [user, setUserState] = useState<UserResponseModel>(() => {
-    // Load the initial user from localStorage, if available
-    const storedUser = localStorage.getItem('user');
-    return storedUser
-      ? JSON.parse(storedUser)
-      : {
-          email: '',
-          roles: new Set<Role>(),
-          userId: '',
-          username: '',
-        };
-  });
+  const [user, setUser] = useState<CurrentUser>(emptyUser);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const setUser = (newUser: UserResponseModel): void => {
-    setUserState(newUser);
-    // Save the user to localStorage
-    localStorage.setItem('user', JSON.stringify(newUser));
-  };
+  const checkSession = useCallback(async (): Promise<void> => {
+    try {
+      const response = await axiosInstance.get<ValidateUserTokenResponse>(
+        '/users/jwt',
+        {
+          useV2: false,
+          handleLocally: true,
+        }
+      );
+
+      const data = response.data;
+      setUser({
+        username: data.username,
+        email: data.email,
+        userId: data.userId,
+        roles: new Set<string>(data.roles),
+      });
+      setIsAuthenticated(true);
+    } catch (err) {
+      console.error('[UserProvider] checkSession failed:', err);
+      setUser(emptyUser);
+      setIsAuthenticated(false);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const logout = useCallback(async (): Promise<void> => {
+    try {
+      await axiosInstance.post(
+        '/users/logout',
+        {},
+        {
+          useV2: false,
+          handleLocally: true,
+        }
+      );
+    } catch (err) {
+      console.error('[UserProvider] logout failed:', err);
+    } finally {
+      setUser(emptyUser);
+      setIsAuthenticated(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    checkSession();
+  }, [checkSession]);
+
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider
+      value={{
+        user,
+        ...user,
+        isAuthenticated,
+        isLoading,
+        checkSession,
+        logout,
+      }}
+    >
       {children}
     </UserContext.Provider>
   );
@@ -50,65 +122,38 @@ export const useUser = (): UserContextType => {
   if (!context) {
     router.navigate(AppRoutePaths.Login);
     return {
-      user: { email: '', roles: new Set<Role>(), userId: '', username: '' },
-      setUser: () => {},
+      user: emptyUser,
+      ...emptyUser,
+      isAuthenticated: false,
+      isLoading: false,
+      checkSession: async () => {},
+      logout: async () => {},
     };
   }
   return context;
 };
 
-export const useSetUser = (): ((user: UserResponseModel) => void) => {
-  const context = useContext(UserContext);
-  if (!context) {
-    throw new Error('useSetUser must be used within a UserProvider');
-  }
-
-  return (user: UserResponseModel) => {
-    context.setUser(user);
-    localStorage.setItem('user', JSON.stringify(user)); // Sync with localStorage
-  };
-};
-
 export const IsAdmin = (): boolean => {
-  const context = useUser();
-  return (
-    context.user?.roles !== undefined &&
-    Array.from(context.user.roles).some((role: Role) => role.name === 'ADMIN')
-  );
+  const { roles } = useUser();
+  return Array.from(roles).some(role => role === 'ADMIN');
 };
 
 export const IsReceptionist = (): boolean => {
-  const context = useUser();
-  return (
-    context.user?.roles !== undefined &&
-    Array.from(context.user.roles).some(
-      (role: Role) => role.name === 'RECEPTIONIST'
-    )
-  );
+  const { roles } = useUser();
+  return Array.from(roles).some(role => role === 'RECEPTIONIST');
 };
 
 export const IsOwner = (): boolean => {
-  const context = useUser();
-  return (
-    context.user?.roles !== undefined &&
-    Array.from(context.user.roles).some((role: Role) => role.name === 'OWNER')
-  );
+  const { roles } = useUser();
+  return Array.from(roles).some(role => role === 'OWNER');
 };
 
 export const IsVet = (): boolean => {
-  const context = useUser();
-  return (
-    context.user?.roles !== undefined &&
-    Array.from(context.user.roles).some((role: Role) => role.name === 'VET')
-  );
+  const { roles } = useUser();
+  return Array.from(roles).some(role => role === 'VET');
 };
 
 export const IsInventoryManager = (): boolean => {
-  const context = useUser();
-  return (
-    context.user?.roles !== undefined &&
-    Array.from(context.user.roles).some(
-      (role: Role) => role.name === 'INVENTORY_MANAGER'
-    )
-  );
+  const { roles } = useUser();
+  return Array.from(roles).some(role => role === 'INVENTORY_MANAGER');
 };

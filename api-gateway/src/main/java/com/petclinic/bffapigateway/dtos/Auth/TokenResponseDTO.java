@@ -12,10 +12,9 @@ import java.util.List;
 @NoArgsConstructor
 @Builder(toBuilder = true)
 public class TokenResponseDTO {
-
         private String token;
+        private String username;
         private String userId;
         private String email;
         private List<String> roles;
-
 }

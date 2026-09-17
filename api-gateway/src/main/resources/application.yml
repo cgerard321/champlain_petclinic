@@ -41,7 +41,7 @@ logging:
     com.petclinic: DEBUG
 
 frontend:
-  url: http://localhost:3000
+  url: http://localhost:3000,http://localhost:4200
 
 ---
 spring:
@@ -93,7 +93,7 @@ logging:
     com.petclinic: DEBUG
 
 frontend:
-  url: http://localhost:3000
+  url: http://localhost:3000,http://localhost:4200
 
 ---
 spring:
@@ -145,4 +145,4 @@ logging:
     com.petclinic: DEBUG
 
 frontend:
-  url: https://petclinic.benmusicgeek.synology.me
+  url: https://petclinic.benmusicgeek.synology.me,https://petclinic-emp-portal.benmusicgeek.synology.me

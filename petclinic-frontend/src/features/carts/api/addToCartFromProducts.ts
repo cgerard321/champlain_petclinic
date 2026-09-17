@@ -3,7 +3,6 @@ import { AxiosError } from 'axios';
 import { fetchCartIdByCustomerId } from './getCart';
 import { useUser } from '@/context/UserContext';
 import { bumpCartCountInLS, getCartIdFromLS, setCartIdInLS } from './cartEvent';
-import type { Role } from '@/shared/models/Role';
 
 type UseAddToCartReturnType = {
   addToCart: (productId: string, quantity?: number) => Promise<boolean>;
@@ -75,13 +74,14 @@ export function useAddToCart(): UseAddToCartReturnType {
         ? Math.floor(coercedQuantity)
         : 1;
 
+    // Gotta love all these AI comments in the code :p, use blame to shame
     // ---- Rôles utilisateur (simple et lisible) ----
     const roleNames = new Set<string>();
-    const rolesSet = user?.roles as Set<Role> | undefined; // Set<{ id:number; name:string }>
+    const rolesSet = user?.roles as Set<string> | undefined;
 
     if (rolesSet) {
       for (const role of rolesSet) {
-        roleNames.add(role.name);
+        roleNames.add(role);
       }
     }
 

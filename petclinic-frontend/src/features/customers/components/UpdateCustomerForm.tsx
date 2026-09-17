@@ -15,7 +15,7 @@ import './UpdateCustomerForm.css';
 
 const UpdateCustomerForm: React.FC = (): JSX.Element => {
   const navigate = useNavigate();
-  const { user, setUser } = useUser();
+  const { user, checkSession } = useUser();
   const { validateUsernameField } = useUsernameValidation();
   const [owner, setOwner] = useState<OwnerRequestModel>({
     firstName: '',
@@ -114,10 +114,8 @@ const UpdateCustomerForm: React.FC = (): JSX.Element => {
       if (userDetails && username !== userDetails.username) {
         await updateUsername(user.userId, username);
 
-        setUser({
-          ...user,
-          username: username,
-        });
+        // Refresh the session so context (and navbar, etc.) picks up the new username
+        await checkSession();
       }
 
       navigate(AppRoutePaths.Home);
