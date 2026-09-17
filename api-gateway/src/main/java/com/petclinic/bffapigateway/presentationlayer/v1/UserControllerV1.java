@@ -154,9 +154,13 @@ public class UserControllerV1 {
     @GetMapping(value = "/jwt", produces = "application/json")
     public Mono<ResponseEntity<ValidateUserTokenResponse>> validateToken(@CookieValue("Bearer") String token) {
         return authServiceClient.validateToken(token)
-                .mapNotNull(HttpEntity::getBody)
-                .map(tokenResponseDTO -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).<ValidateUserTokenResponse>build())
-                .defaultIfEmpty(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
-
+                .flatMap(tokenResponseDTO -> Mono.justOrEmpty(tokenResponseDTO.getBody()))
+                .map(body -> ResponseEntity.ok(ValidateUserTokenResponse.builder()
+                        .userId(body.getUserId())
+                        .username(body.getUsername())
+                        .email(body.getEmail())
+                        .roles(body.getRoles())
+                        .build()))
+                .defaultIfEmpty(ResponseEntity.status(HttpStatus.UNAUTHORIZED).<ValidateUserTokenResponse>build());
     }
 }
