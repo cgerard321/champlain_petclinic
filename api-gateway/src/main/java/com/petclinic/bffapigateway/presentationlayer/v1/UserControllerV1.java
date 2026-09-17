@@ -161,6 +161,6 @@ public class UserControllerV1 {
                         .email(body.getEmail())
                         .roles(body.getRoles())
                         .build()))
-                .defaultIfEmpty(ResponseEntity.status(HttpStatus.UNAUTHORIZED).<ValidateUserTokenResponse>build());
+                .defaultIfEmpty(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
     }
 }
