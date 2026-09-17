@@ -111,7 +111,7 @@ jobs:
               "Images are built and pushed — the environment may take a " +
                 "couple minutes to finish deploying and get a TLS cert on load.",
               "",
-              `- **Frontend:** https://petdev-${pr}.${host}`,
+              `- **Customer Portal:** https://petdev-${pr}.${host}`,
               `- **Employee portal:** https://petdev-${pr}-employee.${host}`,
               `- **API gateway:** https://petdev-${pr}-backend.${host}`,
             ].join("\n");
