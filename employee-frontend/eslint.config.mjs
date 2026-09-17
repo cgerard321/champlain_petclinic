@@ -1,21 +1,21 @@
-import js from '@eslint/js';
-import typescript from '@typescript-eslint/eslint-plugin';
-import typescriptParser from '@typescript-eslint/parser';
-import angular from '@angular-eslint/eslint-plugin';
-import angularTemplate from '@angular-eslint/eslint-plugin-template';
-import angularTemplateParser from '@angular-eslint/template-parser';
-import prettier from 'eslint-plugin-prettier';
+import eslint from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import angular from 'angular-eslint';
 import importPlugin from 'eslint-plugin-import';
+import prettierRecommended from 'eslint-plugin-prettier/recommended';
 
-export default [
-  js.configs.recommended,
+export default tseslint.config(
   {
-    files: ['**/*.ts', '**/*.tsx'],
+    files: ['**/*.ts'],
+    extends: [
+      eslint.configs.recommended,
+      ...tseslint.configs.recommended,
+      ...angular.configs.tsRecommended,
+      prettierRecommended,
+    ],
+    processor: angular.processInlineTemplates,
     languageOptions: {
-      parser: typescriptParser,
       parserOptions: {
-        ecmaVersion: 2023,
-        sourceType: 'module',
         project: ['./tsconfig.json', './tsconfig.spec.json'],
       },
       globals: {
@@ -36,18 +36,19 @@ export default [
       },
     },
     plugins: {
-      '@typescript-eslint': typescript,
-      '@angular-eslint': angular,
-      '@angular-eslint/template': angularTemplate,
-      prettier,
       import: importPlugin,
     },
     rules: {
-      ...typescript.configs.recommended.rules,
-      ...angular.configs.recommended.rules,
       'import/prefer-default-export': 'off',
       'no-console': ['error', { allow: ['warn', 'error'] }],
-      'no-unused-vars': 'error',
+      '@angular-eslint/directive-selector': [
+        'error',
+        { type: 'attribute', prefix: 'app', style: 'camelCase' },
+      ],
+      '@angular-eslint/component-selector': [
+        'error',
+        { type: 'element', prefix: 'app', style: 'kebab-case' },
+      ],
       '@typescript-eslint/explicit-function-return-type': ['error', { allowExpressions: true }],
       '@typescript-eslint/naming-convention': [
         'error',
@@ -75,14 +76,11 @@ export default [
   },
   {
     files: ['**/*.html'],
-    languageOptions: {
-      parser: angularTemplateParser,
-    },
-    plugins: {
-      '@angular-eslint/template': angularTemplate,
-    },
-    rules: {
-      ...angularTemplate.configs.recommended.rules,
-    },
+    extends: [
+      ...angular.configs.templateRecommended,
+      ...angular.configs.templateAccessibility,
+      prettierRecommended,
+    ],
+    rules: {},
   },
-];
+);
