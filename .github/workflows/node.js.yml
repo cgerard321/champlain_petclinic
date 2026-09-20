@@ -16,7 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x, 22.x]
+        node-version: [18.x, 20.x, 22.x, 26.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
@@ -41,15 +41,16 @@ jobs:
         run: npm run build
         working-directory: ./petclinic-frontend
 
+      # Angular Frontend (Employee) - only on Node 22.x and 26.x
       - name: Install Angular frontend dependencies
-        if: matrix.node-version != '18.x'
+        if: matrix.node-version == '22.x' || matrix.node-version == '26.x'
         run: npm install
         working-directory: ./employee-frontend
       - name: Run Angular frontend lint
-        if: matrix.node-version != '18.x'
+        if: matrix.node-version == '22.x' || matrix.node-version == '26.x'
         run: npm run lint
         working-directory: ./employee-frontend
       - name: Run Angular frontend build
-        if: matrix.node-version != '18.x'
+        if: matrix.node-version == '22.x' || matrix.node-version == '26.x'
         run: npm run build
         working-directory: ./employee-frontend

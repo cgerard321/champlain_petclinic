@@ -8,9 +8,9 @@ import {
   useUser,
 } from '@/context/UserContext';
 import { AppRoutePaths } from '@/shared/models/path.routes';
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Navbar, Nav, NavDropdown, Container } from 'react-bootstrap';
+import { Container, Nav, Navbar, NavDropdown } from 'react-bootstrap';
 import { FaShoppingCart } from 'react-icons/fa'; // Importing the shopping cart icon
 import './AppNavBar.css';
 
@@ -19,7 +19,7 @@ import { useCart } from '@/context/CartContext';
 import { clinic } from '@/shared/content';
 
 export function NavBar(): JSX.Element {
-  const { user } = useUser();
+  const { user, logout } = useUser();
   const { cartCount, refreshFromAPI } = useCart();
   const navigate = useNavigate();
   const isAdmin = IsAdmin();
@@ -33,17 +33,9 @@ export function NavBar(): JSX.Element {
   const hasStaffVisits = isAdmin || isVet || isReceptionist;
   //  const showVetVisitsDropdown = isVet;
 
-  const logoutUser = (): void => {
-    // Client-side logout only. Keep API calls out of navbar
-    try {
-      localStorage.removeItem('user');
-      localStorage.removeItem('cart:id');
-      localStorage.removeItem('cart:count');
-    } catch {
-      // ignore
-    }
+  const logoutUser = async (): Promise<void> => {
+    await logout();
     navigate(AppRoutePaths.Login);
-    window.location.reload();
   };
 
   const toggleNavbar = (): void => {
@@ -274,7 +266,7 @@ export function NavBar(): JSX.Element {
                   </NavDropdown.Item>
                 )}
                 <NavDropdown.Item
-                  onClick={logoutUser}
+                  onClick={() => void logoutUser()}
                   style={{ cursor: 'pointer' }}
                 >
                   Logout

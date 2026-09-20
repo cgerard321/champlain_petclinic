@@ -24,6 +24,7 @@ import { DockerLogs } from '@features/docker-logs/services/docker-logs';
 import { LogViewerFormModel } from '@features/docker-logs/models/log-viewer-form';
 import { BadgeVariant, StatusBadge } from '@shared/components/status-badge/status-badge';
 import { AuthState } from '@core/services/auth-state';
+import { extractApiError } from '@core/models/api-error';
 
 @Component({
   selector: 'app-log-viewer',
@@ -44,7 +45,7 @@ import { AuthState } from '@core/services/auth-state';
 export class LogViewer implements OnDestroy {
   private readonly dockerServices = inject(DockerServices);
   protected readonly logSocket = inject(DockerLogs);
-  private readonly auth = inject(AuthState)
+  private readonly auth = inject(AuthState);
 
   private readonly logOutput = viewChild<ElementRef<HTMLDivElement>>('logOutput');
   protected readonly autoScroll = signal(true);
@@ -55,9 +56,10 @@ export class LogViewer implements OnDestroy {
 
   protected readonly services = computed(() => this.servicesResource.value() ?? []);
   protected readonly isLoadingServices = computed(() => this.servicesResource.isLoading());
-  protected readonly loadError = computed(() =>
-    this.servicesResource.error() ? 'Failed to load monitored services.' : null,
-  );
+  protected readonly loadError = computed(() => {
+    const err = this.servicesResource.error();
+    return err ? (extractApiError(err)?.message ?? 'Failed to load monitored services.') : null;
+  });
 
   protected readonly model = signal<LogViewerFormModel>({
     serviceName: null,

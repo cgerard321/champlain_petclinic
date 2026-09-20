@@ -1,28 +1,27 @@
 // src/context/CartContext.tsx
 import {
   createContext,
+  ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
   useState,
-  ReactNode,
-  useCallback,
 } from 'react';
 import { useUser } from '@/context/UserContext';
-import { Role } from '@/shared/models/Role';
 import {
-  getCartIdFromLS,
-  setCartIdInLS,
-  getCartCountFromLS,
-  setCartCountInLS,
-  notifyCartChanged,
   CART_CHANGED,
+  getCartCountFromLS,
+  getCartIdFromLS,
+  notifyCartChanged,
+  setCartCountInLS,
+  setCartIdInLS,
 } from '@/features/carts/api/cartEvent';
 import {
-  fetchCartIdByCustomerId,
-  fetchCartDetailsByCartId,
-  fetchCartCountByCartId,
   calculateCartItemsCount,
+  fetchCartCountByCartId,
+  fetchCartDetailsByCartId,
+  fetchCartIdByCustomerId,
 } from '@/features/carts/api/getCart';
 
 interface CartContextType {
@@ -45,20 +44,20 @@ export function CartProvider({
   const [cartId, setCartIdState] = useState<string | null>(getCartIdFromLS());
   const [cartCount, setCartCountState] = useState<number>(getCartCountFromLS());
 
-  const roleList = useMemo<Role[]>(() => {
+  const roleList = useMemo<string[]>(() => {
     const rawRoles = user?.roles;
     if (!rawRoles) return [];
     if (rawRoles instanceof Set) {
-      return Array.from(rawRoles as Set<Role>);
+      return Array.from(rawRoles as Set<string>);
     }
     if (Array.isArray(rawRoles)) {
-      return rawRoles as Role[];
+      return rawRoles as string[];
     }
     return [];
   }, [user?.roles]);
 
   const isOwner = useMemo(
-    () => roleList.some(role => role?.name === 'OWNER'),
+    () => roleList.some(role => role === 'OWNER'),
     [roleList]
   );
 

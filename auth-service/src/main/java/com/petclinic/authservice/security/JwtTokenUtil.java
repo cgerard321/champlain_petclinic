@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -125,14 +126,21 @@ public class JwtTokenUtil implements Serializable {
 
 
     public List<String> getRolesFromToken(String token) {
-        List<String> roles;
         try {
             final Claims claims = getClaimsFromToken(token);
+            Object rolesClaim = claims.get(CLAIM_KEY_ROLES);
 
-            roles = Arrays.asList(claims.get(CLAIM_KEY_ROLES).toString().split(","));
+            if (rolesClaim instanceof List<?> rawList) {
+                return rawList.stream()
+                        .map(String::valueOf)
+                        .collect(Collectors.toList());
+            }
+
+            log.warn("Unexpected type for roles claim: {}", rolesClaim == null ? "null" : rolesClaim.getClass());
+            return Collections.emptyList();
         } catch (Exception e) {
-            roles = null;
+            log.error("Error parsing roles from token", e);
+            return null;
         }
-        return roles;
     }
 }

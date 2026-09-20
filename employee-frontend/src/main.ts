@@ -1,10 +1,5 @@
-import 'zone.js';
-import '@angular/compiler';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { AppComponent } from './app/app.component';
-import { provideHttpClient } from '@angular/common/http';
-import { provideAnimations } from '@angular/platform-browser/animations';
+import { appConfig } from './app/app.config';
+import { App } from './app/app';
 
-bootstrapApplication(AppComponent, {
-  providers: [provideHttpClient(), provideAnimations()],
-}).catch(err => console.error(err));
+bootstrapApplication(App, appConfig).catch((err) => console.error(err));

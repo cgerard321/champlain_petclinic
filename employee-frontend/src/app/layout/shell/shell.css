@@ -1,0 +1,17 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.shell-body {
+  flex: 1 1 auto;
+}
+
+.shell-sidenav {
+  width: 220px;
+}
+
+.shell-content {
+  padding: 24px;
+}

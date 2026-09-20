@@ -8,7 +8,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { email, form, FormField, required } from '@angular/forms/signals';
 import { ASSIGNABLE_ROLES } from '@features/create-users/models/roles';
 import { CreateUsers } from '@features/create-users/services/create-users';
-
+import { isApiError } from '@core/models/api-error';
 
 interface CreateUserFormModel {
   email: string;
@@ -86,9 +86,9 @@ export class CreateUser {
           this.successMessage.set(`User ${email} created.`);
           this.model.set({ email: '', password: '', displayName: '', roleIds: [] });
         },
-        error: () => {
+        error: (err: unknown) => {
           this.isSubmitting.set(false);
-          this.errorMessage.set('Failed to create user.');
+          this.errorMessage.set(isApiError(err) ? err.message : 'Failed to create user.');
         },
       });
   }
