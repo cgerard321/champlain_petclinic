@@ -9,7 +9,7 @@
 | Employee Portal | https://petclinic-emp-portal.benmusicgeek.synology.me/login        | [![Employee Portal Health](https://github.com/DylanBrass/petclinic-monitor/actions/workflows/health-employee-portal.yml/badge.svg)](https://github.com/DylanBrass/petclinic-monitor/actions/workflows/health-employee-portal.yml) |
 | Management UI   | https://petclinic-management-ui.benmusicgeek.synology.me/login     | [![Management UI Health](https://github.com/DylanBrass/petclinic-monitor/actions/workflows/health-management-ui.yml/badge.svg)](https://github.com/DylanBrass/petclinic-monitor/actions/workflows/health-management-ui.yml)       |
 
-## Table of content
+## Table of contents
 
 Champlain Final Project 1 420-N52-LA Pet Clinic repo
 
