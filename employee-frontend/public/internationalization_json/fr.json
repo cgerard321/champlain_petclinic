@@ -1,0 +1,43 @@
+//internationalisation page in french
+//LOUKMANE BESSAM 2430635
+{
+  //different components
+  "navbar": {
+    "brand": "Portail PetClinic",
+    "home": "Accueil",
+    "vets": "Vétérinaires",
+    "owners": "Propriétaires",
+    "pets": "Animaux",
+    "bills": "Factures",
+    "visits": "Visites",
+    "inventory": "Inventaire",
+    "products": "Produits",
+    "admin": "Panneau Admin",
+    "login": "Connexion"
+  },
+
+  "footer": {
+    "brand": "Portail Employé Clinique Vétérinaire",
+    "privacy": "Politique de confidentialité",
+    "terms": "Conditions d'utilisation",
+    "support": "Support",
+    "copyright": "© 2026 Champlain Pet Clinic. Tous droits réservés."
+  },
+  //page connexion
+  "login": {
+    "title": "Connexion",
+    "username": "Nom d'utilisateur",
+    "password": "Mot de passe",
+    "submit": "Se connecter"
+  },
+//error 404
+  "forbidden": {
+    "title": "Accès refusé",
+    "message": "Vous n'avez pas la permission d'accéder à cette page."
+  },
+  //erreur 404
+  "notFound": {
+    "title": "Page introuvable",
+    "message": "La page que vous cherchez n'existe pas."
+  }
+}
