@@ -2,8 +2,8 @@ package com.petclinic.billing.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.billing.datalayer.VetResponseDTO;
-import com.petclinic.billing.exceptions.NotFoundException;
+import com.petclinic.billing.domainclientlayer.DTOs.VetResponseDTO;
+import com.petclinic.billing.exceptionshandling.exceptions.NotFoundException;
 import okhttp3.mockwebserver.MockResponse;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -45,7 +45,7 @@ public class VetClientUnitTest {
     @Test
     public void getVetByVetId_Valid() throws JsonProcessingException {
         String vetId = "123";
-        VetResponseDTO vetResponseDTO = new VetResponseDTO(vetId, "1", "John", "Doe", "email", "1234567890", "resume", true, null);
+        VetResponseDTO vetResponseDTO = new VetResponseDTO(vetId, "1", "John", "Doe", "email", "1234567890"/*, "resume", true, null*/);
 
         mockBackEnd.enqueue(new MockResponse()
                         .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)

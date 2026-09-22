@@ -1,7 +1,10 @@
 package com.petclinic.billing.businesslayer;
 
 import java.math.BigDecimal;
-import com.petclinic.billing.datalayer.*;
+import com.petclinic.billing.dataaccesslayer.*;
+import com.petclinic.billing.presentationlayer.DTOs.BillRequestDTO;
+import com.petclinic.billing.presentationlayer.DTOs.BillResponseDTO;
+import com.petclinic.billing.presentationlayer.DTOs.PaymentRequestDTO;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;

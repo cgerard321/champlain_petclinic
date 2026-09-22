@@ -1,10 +1,10 @@
 package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.businesslayer.BillService;
-import com.petclinic.billing.datalayer.BillResponseDTO;
-import com.petclinic.billing.datalayer.BillStatus;
-import com.petclinic.billing.datalayer.PaymentRequestDTO;
-import com.petclinic.billing.exceptions.InvalidPaymentException;
+import com.petclinic.billing.presentationlayer.DTOs.BillResponseDTO;
+import com.petclinic.billing.dataaccesslayer.BillStatus;
+import com.petclinic.billing.presentationlayer.DTOs.PaymentRequestDTO;
+import com.petclinic.billing.exceptionshandling.exceptions.InvalidPaymentException;
 import lombok.extern.slf4j.Slf4j;
 import java.math.BigDecimal;
 import java.time.LocalDate;

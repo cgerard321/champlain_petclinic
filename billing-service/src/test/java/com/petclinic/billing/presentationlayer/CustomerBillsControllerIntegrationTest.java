@@ -1,12 +1,15 @@
 package com.petclinic.billing.presentationlayer;
 
-import com.petclinic.billing.datalayer.*;
+import com.petclinic.billing.dataaccesslayer.*;
 
 import com.petclinic.billing.domainclientlayer.OwnerClient;
 import com.petclinic.billing.domainclientlayer.Auth.AuthServiceClient;
 import com.petclinic.billing.domainclientlayer.Auth.UserDetails;
 import com.petclinic.billing.domainclientlayer.Mailing.Mail;
 import com.petclinic.billing.domainclientlayer.Mailing.MailService;
+import com.petclinic.billing.presentationlayer.DTOs.BillResponseDTO;
+import com.petclinic.billing.domainclientlayer.DTOs.OwnerResponseDTO;
+import com.petclinic.billing.presentationlayer.DTOs.PaymentRequestDTO;
 import com.petclinic.billing.util.InterestCalculationUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

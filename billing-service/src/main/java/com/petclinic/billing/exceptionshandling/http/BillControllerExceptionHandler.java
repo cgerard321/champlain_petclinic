@@ -1,7 +1,7 @@
-package com.petclinic.billing.http;
+package com.petclinic.billing.exceptionshandling.http;
 
-import com.petclinic.billing.exceptions.InvalidInputException;
-import com.petclinic.billing.exceptions.NotFoundException;
+import com.petclinic.billing.exceptionshandling.exceptions.InvalidInputException;
+import com.petclinic.billing.exceptionshandling.exceptions.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

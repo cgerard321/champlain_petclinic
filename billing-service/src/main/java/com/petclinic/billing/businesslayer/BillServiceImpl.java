@@ -1,15 +1,18 @@
 package com.petclinic.billing.businesslayer;
 
-import com.petclinic.billing.datalayer.*;
+import com.petclinic.billing.dataaccesslayer.*;
 import com.petclinic.billing.domainclientlayer.Auth.AuthServiceClient;
 import com.petclinic.billing.domainclientlayer.Auth.UserDetails;
 import com.petclinic.billing.domainclientlayer.Mailing.Mail;
 import com.petclinic.billing.domainclientlayer.Mailing.MailService;
 import com.petclinic.billing.domainclientlayer.OwnerClient;
 import com.petclinic.billing.domainclientlayer.VetClient;
-import com.petclinic.billing.exceptions.InvalidPaymentException;
-import com.petclinic.billing.exceptions.NotFoundException;
-import com.petclinic.billing.util.EntityDtoUtil;
+import com.petclinic.billing.domainclientlayer.DTOs.OwnerResponseDTO;
+import com.petclinic.billing.domainclientlayer.DTOs.VetResponseDTO;
+import com.petclinic.billing.exceptionshandling.exceptions.InvalidPaymentException;
+import com.petclinic.billing.exceptionshandling.exceptions.NotFoundException;
+import com.petclinic.billing.mapper.EntityDtoUtil;
+import com.petclinic.billing.presentationlayer.DTOs.*;
 import com.petclinic.billing.util.FormatBillUtil;
 import com.petclinic.billing.util.InterestCalculationUtil;
 import com.petclinic.billing.util.PdfGenerator;

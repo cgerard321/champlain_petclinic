@@ -1,4 +1,4 @@
-package com.petclinic.billing.http;
+package com.petclinic.billing.exceptionshandling.http;
 
 import org.springframework.http.HttpStatus;
 

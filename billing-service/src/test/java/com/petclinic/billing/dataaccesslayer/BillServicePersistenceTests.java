@@ -1,4 +1,4 @@
-package com.petclinic.billing.datalayer;
+package com.petclinic.billing.dataaccesslayer;
 
 import com.petclinic.billing.domainclientlayer.Auth.AuthServiceClient;
 import com.petclinic.billing.domainclientlayer.Auth.Rethrower;

@@ -1,7 +1,7 @@
 package com.petclinic.billing.domainclientlayer;
 
-import com.petclinic.billing.datalayer.OwnerResponseDTO;
-import com.petclinic.billing.exceptions.NotFoundException;
+import com.petclinic.billing.domainclientlayer.DTOs.OwnerResponseDTO;
+import com.petclinic.billing.exceptionshandling.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

@@ -1,7 +1,6 @@
 package com.petclinic.billing.domainclientlayer.Auth;
 
-import com.petclinic.billing.domainclientlayer.Auth.Rethrower;
-import com.petclinic.billing.exceptions.GenericHttpException;
+import com.petclinic.billing.exceptionshandling.exceptions.GenericHttpException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

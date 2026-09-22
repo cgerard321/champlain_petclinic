@@ -1,4 +1,4 @@
-package com.petclinic.billing.datalayer;
+package com.petclinic.billing.dataaccesslayer;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.Query;

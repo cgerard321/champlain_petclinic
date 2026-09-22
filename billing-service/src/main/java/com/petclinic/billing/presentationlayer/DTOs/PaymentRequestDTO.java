@@ -1,4 +1,4 @@
-package com.petclinic.billing.datalayer;
+package com.petclinic.billing.presentationlayer.DTOs;
 
 import lombok.*;
 

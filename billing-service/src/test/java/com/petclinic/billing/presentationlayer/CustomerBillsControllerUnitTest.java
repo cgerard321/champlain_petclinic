@@ -2,12 +2,12 @@ package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.domainclientlayer.Auth.AuthServiceClient;
 import com.petclinic.billing.domainclientlayer.Auth.Rethrower;
-import com.petclinic.billing.exceptions.InvalidPaymentException;
-import com.petclinic.billing.exceptions.NotFoundException;
+import com.petclinic.billing.exceptionshandling.exceptions.InvalidPaymentException;
+import com.petclinic.billing.exceptionshandling.exceptions.NotFoundException;
 import com.petclinic.billing.businesslayer.BillService;
-import com.petclinic.billing.datalayer.BillResponseDTO;
-import com.petclinic.billing.datalayer.BillStatus;
-import com.petclinic.billing.datalayer.PaymentRequestDTO;
+import com.petclinic.billing.presentationlayer.DTOs.BillResponseDTO;
+import com.petclinic.billing.dataaccesslayer.BillStatus;
+import com.petclinic.billing.presentationlayer.DTOs.PaymentRequestDTO;
 import com.petclinic.billing.util.InterestCalculationUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

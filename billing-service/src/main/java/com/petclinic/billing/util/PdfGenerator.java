@@ -2,13 +2,11 @@ package com.petclinic.billing.util;
 
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
-import com.petclinic.billing.datalayer.BillResponseDTO;
+import com.petclinic.billing.presentationlayer.DTOs.BillResponseDTO;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
-import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
-import java.util.Locale;
 import java.util.Optional;
 
 import static com.petclinic.billing.util.FormatBillUtil.convertFromCad;

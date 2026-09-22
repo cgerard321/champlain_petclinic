@@ -1,10 +1,11 @@
-package com.petclinic.billing.util;
+package com.petclinic.billing.mapper;
 
-import com.petclinic.billing.datalayer.Bill;
-import com.petclinic.billing.datalayer.BillRequestDTO;
-import com.petclinic.billing.datalayer.BillResponseDTO;
-import com.petclinic.billing.datalayer.BillStatus;
+import com.petclinic.billing.dataaccesslayer.Bill;
+import com.petclinic.billing.presentationlayer.DTOs.BillRequestDTO;
+import com.petclinic.billing.presentationlayer.DTOs.BillResponseDTO;
+import com.petclinic.billing.dataaccesslayer.BillStatus;
 
+import com.petclinic.billing.util.InterestCalculationUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 

@@ -1,8 +1,12 @@
 package com.petclinic.billing.presentationlayer;
 
-import com.petclinic.billing.datalayer.*;
+import com.petclinic.billing.dataaccesslayer.*;
 import com.petclinic.billing.domainclientlayer.OwnerClient;
 import com.petclinic.billing.domainclientlayer.VetClient;
+import com.petclinic.billing.presentationlayer.DTOs.BillRequestDTO;
+import com.petclinic.billing.presentationlayer.DTOs.BillResponseDTO;
+import com.petclinic.billing.domainclientlayer.DTOs.OwnerResponseDTO;
+import com.petclinic.billing.domainclientlayer.DTOs.VetResponseDTO;
 import com.petclinic.billing.util.InterestCalculationUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

@@ -1,8 +1,6 @@
-package com.petclinic.billing.datalayer;
+package com.petclinic.billing.domainclientlayer.DTOs;
 
 import lombok.*;
-
-import java.util.Set;
 
 @Getter
 @Setter
@@ -16,8 +14,8 @@ public class VetResponseDTO {
     private String lastName;
     private String email;
     private String phoneNumber;
-    private String resume;
-    //private Set<Workday> workday;
-    private boolean active;
-    private Set<SpecialtyDTO> specialties;
+//    private String resume;
+//    //private Set<Workday> workday;
+//    private boolean active;
+//    private Set<SpecialtyDTO> specialties;
 }

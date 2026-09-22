@@ -1,9 +1,10 @@
 package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.businesslayer.BillService;
-import com.petclinic.billing.datalayer.*;
+import com.petclinic.billing.dataaccesslayer.*;
+import com.petclinic.billing.presentationlayer.DTOs.BillRequestDTO;
+import com.petclinic.billing.presentationlayer.DTOs.BillResponseDTO;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

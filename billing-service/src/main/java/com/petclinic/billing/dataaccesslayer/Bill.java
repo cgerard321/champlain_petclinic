@@ -1,4 +1,4 @@
-package com.petclinic.billing.datalayer;
+package com.petclinic.billing.dataaccesslayer;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;

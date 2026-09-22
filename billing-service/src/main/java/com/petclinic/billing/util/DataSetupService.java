@@ -2,8 +2,8 @@ package com.petclinic.billing.util;
 
 
 import com.petclinic.billing.businesslayer.BillService;
-import com.petclinic.billing.datalayer.Bill;
-import com.petclinic.billing.datalayer.BillStatus;
+import com.petclinic.billing.dataaccesslayer.Bill;
+import com.petclinic.billing.dataaccesslayer.BillStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;

@@ -1,5 +1,6 @@
-package com.petclinic.billing.datalayer;
+package com.petclinic.billing.presentationlayer.DTOs;
 
+import com.petclinic.billing.dataaccesslayer.BillStatus;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
