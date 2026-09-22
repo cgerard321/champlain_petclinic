@@ -10,8 +10,34 @@ logging:
     root: INFO
     com.petclinic: DEBUG
 
+spring:
+  config:
+    activate:
+      on-profile: default
+
+  data:
+    mongodb:
+      username: root
+      password: password
+      host: localhost
+      port: 27017
+      database: products
+      authentication-database: admin
+      auto-index-creation: true
+
+  r2dbc:
+    url: r2dbc:h2:mem:///products
+    username: user
+    password: pwd
+
+  datasource:
+    url: jdbc:h2:mem:products;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL
+    driver-class-name: org.h2.Driver
+    username: user
+    password: pwd
+
 ---
-# for test
+# tests
 
 spring:
   config:
@@ -23,10 +49,21 @@ spring:
       username: root
       password: password
       host: localhost
-      port: 0
+      port: 27017
       database: products
       authentication-database: admin
       auto-index-creation: true
+
+  r2dbc:
+    url: r2dbc:h2:mem:///products
+    username: user
+    password: pwd
+
+  datasource:
+    url: jdbc:h2:mem:products;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL
+    driver-class-name: org.h2.Driver
+    username: user
+    password: pwd
 
 de:
   flapdoodle:
@@ -35,13 +72,25 @@ de:
         version: 4.4.0
 
 ---
-
+#docker
 spring:
   codec:
     max-in-memory-size: 16MB
   config:
     activate:
       on-profile: docker
+
+  r2dbc:
+    url: r2dbc:postgresql://postgres-products:5432/products
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+
+  datasource:
+    url: jdbc:postgresql://postgres-products:5432/products
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+
   data:
     mongodb:
       host: mongo-products

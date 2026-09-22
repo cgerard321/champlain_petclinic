@@ -240,6 +240,8 @@ services:
     depends_on:
       mongo-products:
         condition: service_healthy
+      postgres-products:
+        condition: service_healthy
 
   cart-service:
     <<: *springboot
@@ -426,6 +428,17 @@ services:
       nofile:
         soft: 64000
         hard: 64000
+
+  postgres-products:
+    <<: *postgres
+    image: postgres
+    container_name: postgres-products
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=products
 
   mongo-products:
     <<: *mongo
