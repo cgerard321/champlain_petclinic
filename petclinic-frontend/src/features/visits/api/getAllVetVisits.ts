@@ -9,6 +9,7 @@ export async function getAllVetVisits(
       responseType: 'stream',
       useV2: false,
     });
+
     return response.data
       .split('data:')
       .map((dataChunk: string) => {

@@ -19,9 +19,18 @@ export class WsConnection {
 
     socket.onopen = () => this.status.set('open');
 
+
+    // Each WebSocket message is appended to an Angular signal
+    // Every message is appended forever
+    // PROBLEM : `WsConnection.messages` still stores every message received. For a busy container,
+    // each new message copies the entire existing array,
+    // which can make the UI slow or appear to stop reacting.
+
+    // FIX : TO DISPLAY ONLY A FEW MESSAGES NOT ALL OF THEM
     socket.onmessage = (event: MessageEvent<string>) => {
       this.messages.update((current) => [...current, event.data]);
     };
+
 
     socket.onerror = () => this.status.set('error');
 

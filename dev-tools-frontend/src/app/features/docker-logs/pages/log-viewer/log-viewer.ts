@@ -86,10 +86,14 @@ export class LogViewer implements OnDestroy {
 
   protected readonly availableDbs = computed(() => this.selectedService()?.dbs ?? []);
 
+
+  // Displays the most recent messages
   protected readonly displayedMessages = computed(() => {
     const limit = Math.max(1, this.model().numberOfLines ?? 200);
     return this.logSocket.messages().slice(-limit);
   });
+
+
 
   protected readonly statusBadgeVariant = computed<BadgeVariant>(() => {
     switch (this.logSocket.status().toLocaleLowerCase()) {

@@ -10,6 +10,8 @@ export class DockerLogs {
 
   readonly status = this.ws.status;
 
+
+  // Raw message is parsed
   readonly messages = computed<LogMessage[]>(() =>
     this.ws.messages().map((raw) => {
       try {
@@ -19,6 +21,8 @@ export class DockerLogs {
       }
     }),
   );
+
+
 
   getLogsStream(params: TailLogsParams): void {
     const path = `/api/v1/services/${encodeURIComponent(params.service)}/actions/fetch/logs/tail`;
