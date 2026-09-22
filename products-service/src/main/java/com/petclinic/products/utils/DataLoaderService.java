@@ -38,17 +38,17 @@ public class DataLoaderService implements CommandLineRunner {
 
     @Autowired
     ProductTypeRepository productTypeRepository;
+
     @Override
     public void run(String... args) throws Exception {
-
         // If the database is not empty, do not load data
         try {
-
-            if (Boolean.TRUE.equals(productRepository.findAll().hasElements().block()))
-            if (Boolean.TRUE.equals(productBundleRepository.findAll().hasElements().block()))
-            if (Boolean.TRUE.equals(imageRepository.findAll().hasElements().block()))
-            if (Boolean.TRUE.equals(ratingRepository.findAll().hasElements().block()))
-            if (Boolean.TRUE.equals(productTypeRepository.findAll().hasElements().block()))
+            if (
+                    Boolean.TRUE.equals(productRepository.findAll().hasElements().block()) ||
+                            Boolean.TRUE.equals(productBundleRepository.findAll().hasElements().block()) ||
+                            Boolean.TRUE.equals(imageRepository.findAll().hasElements().block()) ||
+                            Boolean.TRUE.equals(ratingRepository.findAll().hasElements().block()) ||
+                            Boolean.TRUE.equals(productTypeRepository.findAll().hasElements().block()))
                 return;
 
         } catch (Exception e) {
