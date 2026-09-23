@@ -5,7 +5,6 @@ COPY build.gradle settings.gradle ./
 COPY src ./src
 
 # Use dependencies from past builds to improve build performance
-# Note the addition of id=gradle-auth-cache
 RUN --mount=type=cache,id=gradle-auth-cache,target=/home/gradle/.gradle/caches \
     --mount=type=cache,id=gradle-auth-wrapper,target=/home/gradle/.gradle/wrapper \
     gradle bootJar --no-daemon && \

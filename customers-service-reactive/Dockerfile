@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 gradle:6.9.0 AS builder
+FROM gradle:6.9.0 AS builder
 WORKDIR /usr/src/app
 COPY build.gradle settings.gradle ./
 
