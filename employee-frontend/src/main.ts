@@ -12,23 +12,14 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
 // required for transitions and animations in the app.
 
-import { provideTranslateService } from '@ngx-translate/core';
-
-import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
+// ngx-translate a ete retire (VETS-CPC-1927): c'est un package tiers.
+// On repart avec @angular/localize, le package officiel d'Angular pour le i18n.
 
 bootstrapApplication(AppComponent, //app component inside DOM
     {
   providers: [
     provideHttpClient(),
     provideAnimations(),
-    provideTranslateService({
-      loader: provideTranslateHttpLoader({
-        prefix: '/internationalization_json/',   // folder where the translation files are located
-        suffix: '.json',    // file extension of the translation files
-      }),
-      fallbackLang: 'fr',   // language used when the is a key missing in the choosed language
-      lang: 'fr',           // default active language on startup (on est au quebec !)
-    }),
   ],
 }).catch(err => console.error(err));
 //start application and  .catch() catches and logs any error that occurs during bootstrap.
