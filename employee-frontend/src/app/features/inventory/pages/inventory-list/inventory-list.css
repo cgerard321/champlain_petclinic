@@ -1,0 +1,34 @@
+/*Pretty basic CSS - We can improve it later*/
+.inventory-page {
+  padding: 1.5rem;
+}
+
+.state-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 3rem 0;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.inventory-card-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.inventory-card {
+  height: 100%;
+  cursor: pointer;
+}
+
+.quantity {
+  font-size: 0.875rem;
+  color: rgba(0, 0, 0, 0.6);
+}
