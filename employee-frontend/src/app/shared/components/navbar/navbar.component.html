@@ -1,21 +1,36 @@
 <header class="header">
-  <nav class="navbar">
-    <div class="nav-brand">
-      <span class="brand-text">PetClinic Portal</span>
-    </div>
-    <div class="nav-links">
-      <a href="#" class="nav-link">Home</a>
-      <a href="#" class="nav-link">Veterinarians</a>
-      <a href="#" class="nav-link">Owners</a>
-      <a href="#" class="nav-link">Pets</a>
-      <a href="#" class="nav-link">Bills</a>
-      <a href="#" class="nav-link">Visits</a>
-      <a href="#" class="nav-link">Inventory</a>
-      <a href="#" class="nav-link">Products</a>
-      <a href="#" class="nav-link">Admin Panel</a>
-    </div>
-    <div class="nav-actions">
-      <button class="btn-primary">Login</button>
-    </div>
-  </nav>
+    <nav class="navbar">
+
+        <div class="nav-brand">
+            <span class="brand-text" i18n="@@navbar.brand">Portail PetClinic</span>
+        </div>
+
+        <!-- Liens de navigation principaux -->
+        <div class="nav-links">
+            <!-- Chaque lien a son propre identifiant i18n unique (@@navbar.xxx)
+                 pour que ng extract-i18n génère une entrée séparée par lien -->
+            <a href="#" class="nav-link" i18n="@@navbar.home">Accueil</a>
+            <a href="#" class="nav-link" i18n="@@navbar.vets">Vétérinaires</a>
+            <a href="#" class="nav-link" i18n="@@navbar.owners">Propriétaires</a>
+            <a href="#" class="nav-link" i18n="@@navbar.pets">Animaux</a>
+            <a href="#" class="nav-link" i18n="@@navbar.bills">Factures</a>
+            <a href="#" class="nav-link" i18n="@@navbar.visits">Visites</a>
+            <a href="#" class="nav-link" i18n="@@navbar.inventory">Inventaire</a>
+            <a href="#" class="nav-link" i18n="@@navbar.products">Produits</a>
+            <a href="#" class="nav-link" i18n="@@navbar.admin">Panneau Admin</a>
+        </div>
+
+        <div class="nav-actions">
+            <button class="btn-primary" i18n="@@navbar.login">Connexion</button>
+
+            <!-- Sélecteur de langue manuel -->
+            <div class="lang-switcher">
+                <!-- (click)="switchLang('fr')" : appelle une méthode du composant
+                     pour changer la langue active vers le français -->
+                <button (click)="switchLang('fr')">FR</button>
+                <button (click)="switchLang('en')">EN</button>
+            </div>
+        </div>
+
+    </nav>
 </header>
