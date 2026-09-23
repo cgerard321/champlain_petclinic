@@ -1,4 +1,4 @@
-FROM gradle:6.9.0 AS builder
+FROM --platform=linux/amd64 gradle:6.9.0 AS builder
 WORKDIR /usr/src/app
 COPY build.gradle settings.gradle ./
 
@@ -7,7 +7,7 @@ COPY src ./src
 RUN gradle bootJar --no-daemon && \
     mv build/libs/*.jar build/libs/application.jar
 
-FROM eclipse-temurin:17-jre-alpine
+FROM amazoncorretto:17-alpine
 
 RUN apk add --no-cache curl && \
     addgroup -S spring && \

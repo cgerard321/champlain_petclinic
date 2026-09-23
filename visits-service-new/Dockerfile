@@ -4,10 +4,13 @@ COPY build.gradle settings.gradle ./
 
 COPY src ./src
 
-RUN gradle bootJar --no-daemon && \
+# Note the addition of id=gradle-auth-cache
+RUN --mount=type=cache,id=gradle-visits-new-cache,target=/home/gradle/.gradle/caches \
+    --mount=type=cache,id=gradle-visits-new-wrapper,target=/home/gradle/.gradle/wrapper \
+    gradle bootJar --no-daemon && \
     mv build/libs/*.jar build/libs/application.jar
 
-FROM eclipse-temurin:17-jre-alpine
+FROM amazoncorretto:17-alpine
 
 RUN apk add --no-cache curl && \
     addgroup -S spring && \
