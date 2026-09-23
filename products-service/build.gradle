@@ -39,7 +39,7 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     compileOnly "org.mapstruct:mapstruct-processor:${mapstructVersion}"
     annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}", "org.projectlombok:lombok:${lombokVersion}", "org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}"
-    runtimeOnly 'com.h2database:h2'
+    implementation 'com.h2database:h2'
     runtimeOnly 'io.r2dbc:r2dbc-h2:1.0.0.RELEASE'
     testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 

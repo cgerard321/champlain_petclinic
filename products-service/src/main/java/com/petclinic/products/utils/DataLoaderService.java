@@ -458,7 +458,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .subscribe();
 
         Flux.just(productType1, productType2, productType3, productType4)
-                .flatMap(s -> productTypeRepository.insert(Mono.just(s))
+                .flatMap(s -> productTypeRepository.save(s)
                         .log(s.toString()))
                 .subscribe();
     }

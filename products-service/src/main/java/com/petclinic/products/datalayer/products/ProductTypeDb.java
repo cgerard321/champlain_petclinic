@@ -4,10 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.relational.core.mapping.Table;
 
-@Document(collection = "product-types")
+import java.time.Instant;
+
+@Table("product-types")
 @Data
 @Builder
 @NoArgsConstructor
@@ -18,5 +23,11 @@ public class ProductTypeDb {
     private String id;
     private String productTypeId;
     private String typeName;
+
+    @CreatedDate
+    private Instant createdAt;
+
+    @LastModifiedDate
+    private Instant updatedAt;
 }
 
