@@ -12,22 +12,15 @@ import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.Instant;
 
-@Table("product-types")
+@Table("product_types")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductTypeDb {
-
     @Id
     private String id;
     private String productTypeId;
     private String typeName;
-
-    @CreatedDate
-    private Instant createdAt;
-
-    @LastModifiedDate
-    private Instant updatedAt;
 }
 

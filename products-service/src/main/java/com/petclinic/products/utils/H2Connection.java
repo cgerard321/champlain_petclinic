@@ -9,12 +9,12 @@ import org.h2.tools.Server;
 
 import java.sql.SQLException;
 
-// this is used to create a tcp connection to connect to the dev h2 db during dev
+// this is used to create a tcp connection to connect to the h2 db during dev
 @Component
 @Profile("default")
 public class H2Connection {
     private Server webServer;
-    
+
     @EventListener(ContextRefreshedEvent.class)
     public void start() throws SQLException {
         webServer = Server.createTcpServer("-tcpPort", "9092").start();

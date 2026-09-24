@@ -41,6 +41,8 @@ public class DataLoaderService implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        // TODO: Uncomment this after migration (I dont have mongo on my computer so the service nevers starts if this is active
+        /*
         // If the database is not empty, do not load data
         try {
             if (
@@ -48,13 +50,14 @@ public class DataLoaderService implements CommandLineRunner {
                             Boolean.TRUE.equals(productBundleRepository.findAll().hasElements().block()) ||
                             Boolean.TRUE.equals(imageRepository.findAll().hasElements().block()) ||
                             Boolean.TRUE.equals(ratingRepository.findAll().hasElements().block()) ||
-                            Boolean.TRUE.equals(productTypeRepository.findAll().hasElements().block()))
+                            Boolean.TRUE.equals(productTypeRepository.findAll().hasElements().block())) {
+                System.out.println("Database not empty, skipping data loading");
                 return;
-
+            }
         } catch (Exception e) {
             System.out.println("Error checking if products exist: " + e.getMessage());
             return;
-        }
+        }*/
 
         Product product1 = Product.builder()
                 .productId("06a7d573-bcab-4db3-956f-773324b92a80")
@@ -434,7 +437,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .subscribe();
 
         Flux.just(product1, product2, product3, product4, product5, product6, product7, product8)
-                .flatMap(s -> productRepository.insert(Mono.just(s))
+                .flatMap(s -> productRepository.save(s)
                         .log(s.toString()))
                 .subscribe();
 
