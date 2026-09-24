@@ -5,9 +5,9 @@ import com.petclinic.billing.domainclientlayer.Auth.Rethrower;
 import com.petclinic.billing.exceptionshandling.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptionshandling.exceptions.NotFoundException;
 import com.petclinic.billing.businesslayer.BillService;
-import com.petclinic.billing.presentationlayer.DTOs.BillResponseDTO;
+import com.petclinic.billing.presentationlayer.models.BillResponseModel;
 import com.petclinic.billing.dataaccesslayer.BillStatus;
-import com.petclinic.billing.presentationlayer.DTOs.PaymentRequestDTO;
+import com.petclinic.billing.presentationlayer.models.PaymentRequestModel;
 import com.petclinic.billing.util.InterestCalculationUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +44,7 @@ public class CustomerBillsControllerUnitTest {
 
     @Test
     void getBillsByCustomerId_shouldSucceed() {
-        BillResponseDTO billResponse = buildBillResponseDTO();
+        BillResponseModel billResponse = buildBillResponseDTO();
 
         when(billService.getBillsByCustomerId(anyString())).thenReturn(Flux.just(billResponse));
 
@@ -53,7 +53,7 @@ public class CustomerBillsControllerUnitTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBodyList(BillResponseDTO.class)
+                .expectBodyList(BillResponseModel.class)
                 .consumeWith(response -> {
                     assert response.getResponseBody() != null;
                     assert response.getResponseBody().size() == 1;
@@ -72,7 +72,7 @@ public class CustomerBillsControllerUnitTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBodyList(BillResponseDTO.class)
+                .expectBodyList(BillResponseModel.class)
                 .hasSize(0);
 
         verify(billService, times(1)).getBillsByCustomerId("nonExistentCustomer");
@@ -112,8 +112,8 @@ public class CustomerBillsControllerUnitTest {
         verify(billService, times(1)).calculateCurrentBalance(invalidCustomerId);
     }
 
-    private BillResponseDTO buildBillResponseDTO() {
-        return BillResponseDTO.builder()
+    private BillResponseModel buildBillResponseDTO() {
+        return BillResponseModel.builder()
                 .billId("1")
                 .customerId("custId")
                 .vetId("vetId")
@@ -128,9 +128,9 @@ public class CustomerBillsControllerUnitTest {
         String customerId = "cust-123";
         String billId = "bill-456";
         String jwtToken = "fake-cookie-token";
-        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/25");
+        PaymentRequestModel paymentRequest = new PaymentRequestModel("1234567812345678", "123", "12/25");
 
-        BillResponseDTO billResponse = BillResponseDTO.builder()
+        BillResponseModel billResponse = BillResponseModel.builder()
                 .billId(billId)
                 .customerId(customerId)
                 .billStatus(BillStatus.PAID)
@@ -147,7 +147,7 @@ public class CustomerBillsControllerUnitTest {
                 .bodyValue(paymentRequest)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(BillResponseDTO.class)
+                .expectBody(BillResponseModel.class)
                 .consumeWith(response -> {
                     assert response.getResponseBody() != null;
                     assertEquals(BillStatus.PAID, response.getResponseBody().getBillStatus());
@@ -161,7 +161,7 @@ public class CustomerBillsControllerUnitTest {
         String customerId = "cust-123";
         String billId = "bill-456";
         String jwtToken = "fake-cookie-token";
-        PaymentRequestDTO invalidPayment = new PaymentRequestDTO("123", "12", "12");
+        PaymentRequestModel invalidPayment = new PaymentRequestModel("123", "12", "12");
 
         when(billService.processPayment(customerId, billId, invalidPayment, jwtToken))
                 .thenReturn(Mono.error(new InvalidPaymentException("Invalid payment details")));
@@ -182,7 +182,7 @@ public class CustomerBillsControllerUnitTest {
         String customerId = "cust-123";
         String billId = "bill-404";
         String jwtToken = "fake-cookie-token";
-        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/25");
+        PaymentRequestModel paymentRequest = new PaymentRequestModel("1234567812345678", "123", "12/25");
 
         when(billService.processPayment(customerId, billId, paymentRequest, jwtToken))
                 .thenReturn(Mono.error(new NotFoundException("Bill not found")));
@@ -206,7 +206,7 @@ public class CustomerBillsControllerUnitTest {
                 LocalDate currentDate = LocalDate.now();
                 BigDecimal calculatedInterest = InterestCalculationUtil.calculateCompoundInterest(amount, dueDate, currentDate);
                 
-                BillResponseDTO overdueBill = BillResponseDTO.builder()
+                BillResponseModel overdueBill = BillResponseModel.builder()
                         .billId("overdue-1")
                         .customerId("custId")
                         .amount(amount)
@@ -221,7 +221,7 @@ public class CustomerBillsControllerUnitTest {
                         .accept(MediaType.APPLICATION_JSON)
                         .exchange()
                         .expectStatus().isOk()
-                        .expectBodyList(BillResponseDTO.class)
+                        .expectBodyList(BillResponseModel.class)
                         .consumeWith(response -> {
                                 assert response.getResponseBody() != null;
                                 // Compare using doubleValue to avoid BigDecimal precision issues (1.50 vs 1.5)
@@ -235,7 +235,7 @@ public class CustomerBillsControllerUnitTest {
         String customerId = "cust-1";
 
         // Prepare test DTO
-        BillResponseDTO bill = BillResponseDTO.builder()
+        BillResponseModel bill = BillResponseModel.builder()
                 .customerId(customerId)
                 .amount(new BigDecimal("100.00"))
                 .build();
@@ -253,10 +253,10 @@ public class CustomerBillsControllerUnitTest {
                         .build(customerId))
                 .exchange()
                 .expectStatus().isOk()
-                .expectBodyList(BillResponseDTO.class)
+                .expectBodyList(BillResponseModel.class)
                 .hasSize(1)
                 .consumeWith(resp -> {
-                    BillResponseDTO responseBill = resp.getResponseBody().get(0);
+                    BillResponseModel responseBill = resp.getResponseBody().get(0);
                     assertNotNull(responseBill);
                     assertEquals(customerId, responseBill.getCustomerId());
                     assertTrue(responseBill.getAmount().compareTo(new BigDecimal("100.00")) == 0,
@@ -290,7 +290,7 @@ public class CustomerBillsControllerUnitTest {
         String customerId = "cust-3";
         LocalDate start = LocalDate.now().minusDays(10);
         LocalDate end = LocalDate.now();
-        BillResponseDTO bill = BillResponseDTO.builder()
+        BillResponseModel bill = BillResponseModel.builder()
                 .customerId(customerId)
                 .build();
 
@@ -305,7 +305,7 @@ public class CustomerBillsControllerUnitTest {
                         .build(customerId))
                 .exchange()
                 .expectStatus().isOk()
-                .expectBodyList(BillResponseDTO.class)
+                .expectBodyList(BillResponseModel.class)
                 .hasSize(1);
     }
 }

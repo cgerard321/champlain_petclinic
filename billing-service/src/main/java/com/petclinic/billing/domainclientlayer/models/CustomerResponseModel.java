@@ -1,4 +1,4 @@
-package com.petclinic.billing.domainclientlayer.DTOs;
+package com.petclinic.billing.domainclientlayer.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class OwnerResponseDTO {
+public class CustomerResponseModel {
 
     private String ownerId;
     private String firstName;

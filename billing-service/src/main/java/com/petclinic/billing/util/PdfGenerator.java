@@ -2,7 +2,7 @@ package com.petclinic.billing.util;
 
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
-import com.petclinic.billing.presentationlayer.DTOs.BillResponseDTO;
+import com.petclinic.billing.presentationlayer.models.BillResponseModel;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
@@ -14,7 +14,7 @@ import static com.petclinic.billing.util.FormatBillUtil.formatCurrency;
 
 public class PdfGenerator {
 
-    public static byte[] generateBillPdf(BillResponseDTO bill, String currency) throws DocumentException {
+    public static byte[] generateBillPdf(BillResponseModel bill, String currency) throws DocumentException {
         Document document = new Document(PageSize.A4, 50, 50, 50, 50);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         PdfWriter.getInstance(document, byteArrayOutputStream);

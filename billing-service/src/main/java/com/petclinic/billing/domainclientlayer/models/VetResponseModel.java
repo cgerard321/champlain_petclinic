@@ -1,4 +1,4 @@
-package com.petclinic.billing.domainclientlayer.DTOs;
+package com.petclinic.billing.domainclientlayer.models;
 
 import lombok.*;
 
@@ -7,7 +7,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class VetResponseDTO {
+public class VetResponseModel {
     private String vetId;
     private String vetBillId;
     private String firstName;

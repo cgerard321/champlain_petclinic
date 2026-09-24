@@ -1,9 +1,9 @@
 package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.businesslayer.BillService;
-import com.petclinic.billing.presentationlayer.DTOs.BillResponseDTO;
+import com.petclinic.billing.presentationlayer.models.BillResponseModel;
 import com.petclinic.billing.dataaccesslayer.BillStatus;
-import com.petclinic.billing.presentationlayer.DTOs.PaymentRequestDTO;
+import com.petclinic.billing.presentationlayer.models.PaymentRequestModel;
 import com.petclinic.billing.exceptionshandling.exceptions.InvalidPaymentException;
 import lombok.extern.slf4j.Slf4j;
 import java.math.BigDecimal;
@@ -32,19 +32,19 @@ public class CustomerBillsController {
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<BillResponseDTO> getBillsByCustomerId(@PathVariable("customerId") String customerId) {
+    public Flux<BillResponseModel> getBillsByCustomerId(@PathVariable("customerId") String customerId) {
         return billService.getBillsByCustomerId(customerId);
     }
 
     @GetMapping(value = "/status", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<BillResponseDTO> getBillsByStatus(@PathVariable("customerId") String customerId,
-                                                  @RequestParam("status") BillStatus status) {
+    public Flux<BillResponseModel> getBillsByStatus(@PathVariable("customerId") String customerId,
+                                                    @RequestParam("status") BillStatus status) {
         return billService.getBillsByCustomerIdAndStatus(customerId, status);
     }
 
     @GetMapping(value = "/{billId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<BillResponseDTO> getBillDetails(@PathVariable("customerId") String customerId,
-                                                @PathVariable("billId") String billId) {
+    public Mono<BillResponseModel> getBillDetails(@PathVariable("customerId") String customerId,
+                                                  @PathVariable("billId") String billId) {
         return billService.getBillByCustomerIdAndBillId(customerId, billId);
     }
 
@@ -72,10 +72,10 @@ public class CustomerBillsController {
     }
 
     @PostMapping("/{billId}/pay")
-    public Mono<ResponseEntity<BillResponseDTO>> payBill(
+    public Mono<ResponseEntity<BillResponseModel>> payBill(
             @PathVariable String customerId,
             @PathVariable String billId,
-            @RequestBody PaymentRequestDTO paymentRequest,
+            @RequestBody PaymentRequestModel paymentRequest,
             @CookieValue("Bearer") String jwtToken) {
         return billService.processPayment(customerId, billId, paymentRequest,jwtToken)
                 .map(ResponseEntity::ok)
@@ -87,7 +87,7 @@ public class CustomerBillsController {
     }
 
     @GetMapping(value = "/filter-by-amount", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<BillResponseDTO> getBillsByAmountRange(
+    public Flux<BillResponseModel> getBillsByAmountRange(
             @PathVariable("customerId") String customerId,
             @RequestParam("minAmount") BigDecimal minAmount,
             @RequestParam("maxAmount") BigDecimal maxAmount) {
@@ -95,7 +95,7 @@ public class CustomerBillsController {
     }
 
     @GetMapping(value = "/filter-by-due-date", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<BillResponseDTO> getBillsByDueDateRange(
+    public Flux<BillResponseModel> getBillsByDueDateRange(
             @PathVariable("customerId") String customerId,
             @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
@@ -104,7 +104,7 @@ public class CustomerBillsController {
     }
 
     @GetMapping(value = "/filter-by-date", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<BillResponseDTO> getBillsByCustomerIdAndDateRange(
+    public Flux<BillResponseModel> getBillsByCustomerIdAndDateRange(
             @PathVariable("customerId") String customerId,
             @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {

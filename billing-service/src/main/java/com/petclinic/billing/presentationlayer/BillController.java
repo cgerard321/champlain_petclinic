@@ -2,8 +2,8 @@ package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.businesslayer.BillService;
 import com.petclinic.billing.dataaccesslayer.*;
-import com.petclinic.billing.presentationlayer.DTOs.BillRequestDTO;
-import com.petclinic.billing.presentationlayer.DTOs.BillResponseDTO;
+import com.petclinic.billing.presentationlayer.models.BillRequestModel;
+import com.petclinic.billing.presentationlayer.models.BillResponseModel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
@@ -28,10 +28,10 @@ public class BillController {
     }
 
     @PostMapping("/bills")
-    public Mono<ResponseEntity<BillResponseDTO>> createBill(@RequestBody Mono<BillRequestDTO> billDTO,
-                                                            @RequestParam(defaultValue = "false") boolean sendEmail,
-                                                            @RequestParam(defaultValue = "CAD", required = false) String currency,
-                                                            @CookieValue("Bearer") String jwtToken
+    public Mono<ResponseEntity<BillResponseModel>> createBill(@RequestBody Mono<BillRequestModel> billDTO,
+                                                              @RequestParam(defaultValue = "false") boolean sendEmail,
+                                                              @RequestParam(defaultValue = "CAD", required = false) String currency,
+                                                              @CookieValue("Bearer") String jwtToken
     ) {
         return billDTO
                 .flatMap(dto -> {
@@ -83,12 +83,12 @@ public class BillController {
 
     // Read Bill //
     @GetMapping(value = "/bills/{billId}")
-    public Mono<BillResponseDTO> getBillByBillId(@PathVariable String billId) {
+    public Mono<BillResponseModel> getBillByBillId(@PathVariable String billId) {
         return billService.getBillByBillId(billId);
     }
 
     @GetMapping(value = "/bills", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getAllBills() {
+    public Flux<BillResponseModel> getAllBills() {
         return billService.getAllBills();
     }
 
@@ -116,7 +116,7 @@ public class BillController {
 //    }
 
     @GetMapping("/bills")
-    public Flux<BillResponseDTO> getAllBillsByPage(
+    public Flux<BillResponseModel> getAllBillsByPage(
             @RequestParam Optional<Integer> page,
             @RequestParam Optional<Integer> size,
             @RequestParam(required = false) String billId,
@@ -154,50 +154,50 @@ public class BillController {
 
 
     @GetMapping(value = "/bills/owner/{ownerFirstName}/{ownerLastName}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getAllBillsByOwnerName(@PathVariable String ownerFirstName, @PathVariable String ownerLastName) {
+    public Flux<BillResponseModel> getAllBillsByOwnerName(@PathVariable String ownerFirstName, @PathVariable String ownerLastName) {
         return billService.getAllBillsByOwnerName(ownerFirstName, ownerLastName);
     }
 
     @GetMapping(value = "/bills/vet/{vetFirstName}/{vetLastName}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getAllBillsByVetName(@PathVariable String vetFirstName, @PathVariable String vetLastName) {
+    public Flux<BillResponseModel> getAllBillsByVetName(@PathVariable String vetFirstName, @PathVariable String vetLastName) {
         return billService.getAllBillsByVetName(vetFirstName, vetLastName);
     }
 
     @GetMapping(value = "/bills/visitType/{visitType}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getAllBillsByVisitType(@PathVariable String visitType) {
+    public Flux<BillResponseModel> getAllBillsByVisitType(@PathVariable String visitType) {
         return billService.getAllBillsByVisitType(visitType);
     }
 
     @GetMapping(value = "/bills/paid", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getAllPaidBills() {
+    public Flux<BillResponseModel> getAllPaidBills() {
         return billService.getAllBillsByStatus(BillStatus.PAID);
     }
 
     @GetMapping(value = "/bills/unpaid", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getAllUnpaidBills() {
+    public Flux<BillResponseModel> getAllUnpaidBills() {
         return billService.getAllBillsByStatus(BillStatus.UNPAID);
     }
 
     @GetMapping(value = "/bills/overdue", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getAllOverdueBills() {
+    public Flux<BillResponseModel> getAllOverdueBills() {
         return billService.getAllBillsByStatus(BillStatus.OVERDUE);
     }
 
     @PutMapping(value = "/bills/{billId}")
-    public Mono<ResponseEntity<BillResponseDTO>> updateBill(@PathVariable String billId, @RequestBody Mono<BillRequestDTO> billRequestDTO) {
+    public Mono<ResponseEntity<BillResponseModel>> updateBill(@PathVariable String billId, @RequestBody Mono<BillRequestModel> billRequestDTO) {
         return billService.updateBill(billId, billRequestDTO)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @GetMapping(value = "/bills/customer/{customerId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getBillsByCustomerId(@PathVariable("customerId") String customerId) {
+    public Flux<BillResponseModel> getBillsByCustomerId(@PathVariable("customerId") String customerId) {
         return billService.getBillsByCustomerId(customerId);
     }
 
 
     @GetMapping(value = "/bills/vet/{vetId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getBillsByVetId(@PathVariable("vetId") String vetId) {
+    public Flux<BillResponseModel> getBillsByVetId(@PathVariable("vetId") String vetId) {
         return billService.getBillsByVetId(vetId);
     }
 
@@ -228,7 +228,7 @@ public class BillController {
     }
 
     @GetMapping(value = "/bills/month", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getBillsByMonth(
+    public Flux<BillResponseModel> getBillsByMonth(
             @RequestParam int year,
             @RequestParam int month) {
         if (year < 0 || month < 1 || month > 12) {
@@ -247,7 +247,7 @@ public class BillController {
     @GetMapping("/bills/{billId}/interest")
     public Mono<BigDecimal> getInterest(@PathVariable String billId) {
         return billService.getBillByBillId(billId)
-                .map(BillResponseDTO::getInterest);
+                .map(BillResponseModel::getInterest);
     }
     @GetMapping("/bills/{billId}/total")
     public Mono<BigDecimal> getTotal(@PathVariable String billId) {

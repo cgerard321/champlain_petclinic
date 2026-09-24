@@ -1,4 +1,4 @@
-package com.petclinic.billing.presentationlayer.DTOs;
+package com.petclinic.billing.presentationlayer.models;
 
 import com.petclinic.billing.dataaccesslayer.BillStatus;
 import lombok.*;
@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BillResponseDTO {
+public class BillResponseModel {
 
     private String billId;
     private String customerId;

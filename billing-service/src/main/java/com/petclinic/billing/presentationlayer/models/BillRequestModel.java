@@ -1,4 +1,4 @@
-package com.petclinic.billing.presentationlayer.DTOs;
+package com.petclinic.billing.presentationlayer.models;
 
 import com.petclinic.billing.dataaccesslayer.BillStatus;
 import lombok.*;
@@ -9,7 +9,7 @@ import java.time.LocalDate;
 @ToString
 @Builder
 @NoArgsConstructor
-public class BillRequestDTO {
+public class BillRequestModel {
 
     private String customerId;
     private String visitType;
@@ -19,7 +19,7 @@ public class BillRequestDTO {
     private BillStatus billStatus;
     private LocalDate dueDate;
 
-    public BillRequestDTO(String customerId, String visitType, String vetId, LocalDate date, BigDecimal amount, BillStatus billStatus, LocalDate dueDate)
+    public BillRequestModel(String customerId, String visitType, String vetId, LocalDate date, BigDecimal amount, BillStatus billStatus, LocalDate dueDate)
  {
         this.customerId = customerId;
         this.visitType = visitType;

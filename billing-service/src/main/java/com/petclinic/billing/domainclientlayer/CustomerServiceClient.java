@@ -1,6 +1,6 @@
 package com.petclinic.billing.domainclientlayer;
 
-import com.petclinic.billing.domainclientlayer.DTOs.OwnerResponseDTO;
+import com.petclinic.billing.domainclientlayer.models.CustomerResponseModel;
 import com.petclinic.billing.exceptionshandling.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -11,17 +11,17 @@ import reactor.core.publisher.Mono;
 import java.rmi.ServerException;
 
 @Service
-public class OwnerClient {
+public class CustomerServiceClient {
     private final WebClient webClient;
-    private final String ownerClientServiceBaseURL;
+    private final String customerServiceClientBaseURL;
 
-    OwnerClient(@Value("${app.customers-service.host}") String ownerServiceHost,
-                @Value("${app.customers-service.port}") String ownerServicePort) {
-        ownerClientServiceBaseURL = "http://" + ownerServiceHost + ":" + ownerServicePort + "/owners";
+    CustomerServiceClient(@Value("${app.customers-service.host}") String ownerServiceHost,
+                          @Value("${app.customers-service.port}") String ownerServicePort) {
+        customerServiceClientBaseURL = "http://" + ownerServiceHost + ":" + ownerServicePort + "/owners";
         this.webClient = WebClient.builder()
-                .baseUrl(ownerClientServiceBaseURL).build();
+                .baseUrl(customerServiceClientBaseURL).build();
     }
-    public Mono<OwnerResponseDTO> getOwnerByOwnerId(final String ownerId) {
+    public Mono<CustomerResponseModel> getOwnerByOwnerId(final String ownerId) {
         return this.webClient
                 .get()
                 .uri("/{ownerId}", ownerId)
@@ -36,6 +36,6 @@ public class OwnerClient {
                 .onStatus(HttpStatus::is5xxServerError, serverResponse ->
                         Mono.error(new ServerException("Server error for ownerId: " + ownerId))
                 )
-                .bodyToMono(OwnerResponseDTO.class);
+                .bodyToMono(CustomerResponseModel.class);
     }
 }

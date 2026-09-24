@@ -2,7 +2,7 @@ package com.petclinic.billing.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.billing.domainclientlayer.DTOs.VetResponseDTO;
+import com.petclinic.billing.domainclientlayer.models.VetResponseModel;
 import com.petclinic.billing.exceptionshandling.exceptions.NotFoundException;
 import okhttp3.mockwebserver.MockResponse;
 import org.junit.jupiter.api.AfterAll;
@@ -20,9 +20,9 @@ import okhttp3.mockwebserver.MockWebServer;
 import java.io.IOException;
 import java.rmi.ServerException;
 
-public class VetClientUnitTest {
+public class VetServiceClientUnitTest {
 
-    private VetClient vetClient;
+    private VetServiceClient vetServiceClient;
     private static MockWebServer mockBackEnd;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -35,7 +35,7 @@ public class VetClientUnitTest {
     }
     @BeforeEach
     public void initialize(){
-        vetClient = new VetClient("localhost", String.valueOf(mockBackEnd.getPort()));
+        vetServiceClient = new VetServiceClient("localhost", String.valueOf(mockBackEnd.getPort()));
     }
     @AfterAll
     static void tearDown() throws IOException {
@@ -45,14 +45,14 @@ public class VetClientUnitTest {
     @Test
     public void getVetByVetId_Valid() throws JsonProcessingException {
         String vetId = "123";
-        VetResponseDTO vetResponseDTO = new VetResponseDTO(vetId, "1", "John", "Doe", "email", "1234567890"/*, "resume", true, null*/);
+        VetResponseModel vetResponseModel = new VetResponseModel(vetId, "1", "John", "Doe", "email", "1234567890"/*, "resume", true, null*/);
 
         mockBackEnd.enqueue(new MockResponse()
                         .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .setBody(objectMapper.writeValueAsString(vetResponseDTO))
+                        .setBody(objectMapper.writeValueAsString(vetResponseModel))
         );
 
-        Mono<VetResponseDTO> result = vetClient.getVetByVetId(vetId);
+        Mono<VetResponseModel> result = vetServiceClient.getVetByVetId(vetId);
         StepVerifier.create(result)
                 .expectNextMatches(response -> response.getVetId().equals(vetId) &&
                         response.getFirstName().equals("John") &&
@@ -68,7 +68,7 @@ public class VetClientUnitTest {
                         .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .setResponseCode(404)
                         .addHeader("Content-Type", "application/json"));
-        Mono<VetResponseDTO> result = vetClient.getVetByVetId(invalidId);
+        Mono<VetResponseModel> result = vetServiceClient.getVetByVetId(invalidId);
 
         StepVerifier.create(result)
                 .expectErrorMatches(throwable -> throwable instanceof NotFoundException && throwable.getMessage().equals("Vet not found with vetId: " + invalidId))
@@ -84,7 +84,7 @@ public class VetClientUnitTest {
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .addHeader("Content-Type", "application/json"));
 
-        Mono<VetResponseDTO> result = vetClient.getVetByVetId(vetId);
+        Mono<VetResponseModel> result = vetServiceClient.getVetByVetId(vetId);
 
         StepVerifier.create(result)
                 .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Client error for vetId: " + vetId))
@@ -100,7 +100,7 @@ public class VetClientUnitTest {
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .addHeader("Content-Type", "application/json"));
 
-        Mono<VetResponseDTO> result = vetClient.getVetByVetId(vetId);
+        Mono<VetResponseModel> result = vetServiceClient.getVetByVetId(vetId);
 
         StepVerifier.create(result)
                 .expectErrorMatches(throwable -> throwable instanceof ServerException && throwable.getMessage().equals("Server error for vetId: " + vetId))

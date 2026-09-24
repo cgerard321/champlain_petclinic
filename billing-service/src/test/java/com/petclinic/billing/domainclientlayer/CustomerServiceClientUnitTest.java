@@ -2,7 +2,7 @@ package com.petclinic.billing.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.billing.domainclientlayer.DTOs.OwnerResponseDTO;
+import com.petclinic.billing.domainclientlayer.models.CustomerResponseModel;
 import com.petclinic.billing.exceptionshandling.exceptions.NotFoundException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -20,9 +20,9 @@ import reactor.test.StepVerifier;
 import java.io.IOException;
 import java.rmi.ServerException;
 
-public class OwnerClientUnitTest {
+public class CustomerServiceClientUnitTest {
 
-    private OwnerClient ownerClient;
+    private CustomerServiceClient customerServiceClient;
     private static MockWebServer mockBackEnd;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -37,7 +37,7 @@ public class OwnerClientUnitTest {
 
     @BeforeEach
     public void initialize() {
-        ownerClient = new OwnerClient("localhost", String.valueOf(mockBackEnd.getPort()));
+        customerServiceClient = new CustomerServiceClient("localhost", String.valueOf(mockBackEnd.getPort()));
     }
 
     @AfterAll
@@ -48,14 +48,14 @@ public class OwnerClientUnitTest {
     @Test
     public void getOwnerByOwnerId_Valid() throws JsonProcessingException {
         String ownerId = "123";
-        OwnerResponseDTO ownerResponseDTO = new OwnerResponseDTO(ownerId, "John", "Doe", "address", "city", "514"/*, "string", null, null*/);
+        CustomerResponseModel customerResponseModel = new CustomerResponseModel(ownerId, "John", "Doe", "address", "city", "514"/*, "string", null, null*/);
 
         mockBackEnd.enqueue(new MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(objectMapper.writeValueAsString(ownerResponseDTO))
+                .setBody(objectMapper.writeValueAsString(customerResponseModel))
         );
 
-        Mono<OwnerResponseDTO> ownerResponseDTOMono = ownerClient.getOwnerByOwnerId(ownerId);
+        Mono<CustomerResponseModel> ownerResponseDTOMono = customerServiceClient.getOwnerByOwnerId(ownerId);
 
         StepVerifier.create(ownerResponseDTOMono)
                 .expectNextMatches(ownerResponseDTO1 -> ownerResponseDTO1.getOwnerId().equals(ownerId))
@@ -71,7 +71,7 @@ public class OwnerClientUnitTest {
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .addHeader("Content-Type", "application/json"));
 
-        Mono<OwnerResponseDTO> result = ownerClient.getOwnerByOwnerId(invalidId);
+        Mono<CustomerResponseModel> result = customerServiceClient.getOwnerByOwnerId(invalidId);
 
         StepVerifier.create(result)
                 .expectErrorMatches(throwable -> throwable instanceof NotFoundException && throwable.getMessage().equals("Owner not found with ownerId: " + invalidId))
@@ -87,7 +87,7 @@ public class OwnerClientUnitTest {
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .addHeader("Content-Type", "application/json"));
 
-        Mono<OwnerResponseDTO> result = ownerClient.getOwnerByOwnerId(ownerId);
+        Mono<CustomerResponseModel> result = customerServiceClient.getOwnerByOwnerId(ownerId);
 
         StepVerifier.create(result)
                 .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Client error for ownerId: " + ownerId))
@@ -103,7 +103,7 @@ public class OwnerClientUnitTest {
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .addHeader("Content-Type", "application/json"));
 
-        Mono<OwnerResponseDTO> result = ownerClient.getOwnerByOwnerId(ownerId);
+        Mono<CustomerResponseModel> result = customerServiceClient.getOwnerByOwnerId(ownerId);
 
         StepVerifier.create(result)
                 .expectErrorMatches(throwable -> throwable instanceof ServerException && throwable.getMessage().equals("Server error for ownerId: " + ownerId))

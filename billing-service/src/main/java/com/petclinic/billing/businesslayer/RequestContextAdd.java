@@ -1,9 +1,9 @@
 package com.petclinic.billing.businesslayer;
 
 import com.petclinic.billing.dataaccesslayer.Bill;
-import com.petclinic.billing.presentationlayer.DTOs.BillRequestDTO;
-import com.petclinic.billing.domainclientlayer.DTOs.OwnerResponseDTO;
-import com.petclinic.billing.domainclientlayer.DTOs.VetResponseDTO;
+import com.petclinic.billing.domainclientlayer.models.CustomerResponseModel;
+import com.petclinic.billing.presentationlayer.models.BillRequestModel;
+import com.petclinic.billing.domainclientlayer.models.VetResponseModel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,12 +13,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class RequestContextAdd {
 
-    private BillRequestDTO billRequestDTO;
+    private BillRequestModel billRequestModel;
     private Bill bill;
-    private VetResponseDTO vetDTO;
-    private OwnerResponseDTO ownerResponseDTO;
+    private VetResponseModel vetDTO;
+    private CustomerResponseModel customerResponseModel;
 
-    public RequestContextAdd(BillRequestDTO billRequestDTO) {
-        this.billRequestDTO = billRequestDTO;
+    public RequestContextAdd(BillRequestModel billRequestModel) {
+        this.billRequestModel = billRequestModel;
     }
 }
