@@ -230,22 +230,28 @@ public class BillServiceImpl implements BillService{
 
     @Override
     public Mono<BillResponseDTO> updateBill(String billId, Mono<BillRequestDTO> billRequestDTO) {
-        return billRequestDTO
-                .flatMap(r -> billRepository.findByBillId(billId)
-                        .flatMap(existingBill -> {
-                            existingBill.setCustomerId(r.getCustomerId());
-                            existingBill.setVisitType(r.getVisitType());
-                            existingBill.setVetId(r.getVetId());
-                            existingBill.setDate(r.getDate());
-                            existingBill.setBillStatus(r.getBillStatus());
-                            existingBill.setAmount(r.getAmount());
-                            existingBill.setDueDate(r.getDueDate());
+        return billRequestDTO.flatMap(r -> {
+            if (r.getDueDate() == null) {
+                return Mono.error(new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Due date is required"
+                ));
+            }
 
-                            return billRepository.save(existingBill);
-                        })
-                        .map(EntityDtoUtil::toBillResponseDto)
-                );
+            return billRepository.findByBillId(billId)
+                    .flatMap(existingBill -> {
+                        existingBill.setCustomerId(r.getCustomerId());
+                        existingBill.setVisitType(r.getVisitType());
+                        existingBill.setVetId(r.getVetId());
+                        existingBill.setDate(r.getDate());
+                        existingBill.setBillStatus(r.getBillStatus());
+                        existingBill.setAmount(r.getAmount());
+                        existingBill.setDueDate(r.getDueDate());
 
+                        return billRepository.save(existingBill);
+                    })
+                    .map(EntityDtoUtil::toBillResponseDto);
+        });
     }
 
     @Override

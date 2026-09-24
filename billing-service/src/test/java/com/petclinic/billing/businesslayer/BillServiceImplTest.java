@@ -667,6 +667,30 @@ public class BillServiceImplTest {
     }
 
     @Test
+    void updateBillWithNullDueDateReturnsBadRequest() {
+        String billId = "validBillId";
+        BillRequestDTO request = buildBillRequestDTO();
+        request.setDueDate(null);
+
+        Mono<BillResponseDTO> result =
+                billService.updateBill(billId, Mono.just(request));
+
+        StepVerifier.create(result)
+                .expectErrorSatisfies(error -> {
+                    assertTrue(error instanceof ResponseStatusException);
+
+                    ResponseStatusException exception =
+                            (ResponseStatusException) error;
+
+                    assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+                    assertEquals("Due date is required", exception.getReason());
+                })
+                .verify();
+
+        verify(repo, never()).save(any(Bill.class));
+    }
+
+    @Test
     public void test_getBillByNonExistentBillId() {
         String nonExistentBillId = "nonExistentId";
 
