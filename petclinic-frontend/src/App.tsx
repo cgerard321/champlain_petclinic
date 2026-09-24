@@ -6,11 +6,5 @@ function App(): JSX.Element {
   return <RouterProvider router={router} />;
 }
 
-
 export default App;
-// export default function App(){
-//   const { t }  = useTranslation();
-//   return (<div>
-//     <h1>{t('welcomeMessage')}</h1>
-//   </div>)
-// }
+
