@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
-import { Home } from '@features/home/pages/home';
+import { Home } from './pages/home';
 
-export default [{ path: '', component: Home }] satisfies Routes;
+export default [
+  { path: '', component: Home }
+] as Routes;

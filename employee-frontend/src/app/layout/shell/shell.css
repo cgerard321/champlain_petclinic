@@ -1,17 +1,27 @@
 :host {
+  display: block;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.app-layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background-color: #f8fafc;
+}
+
+.main-wrapper {
+  flex: 1;
   display: flex;
   flex-direction: column;
   height: 100vh;
+  overflow-y: auto;
 }
 
-.shell-body {
-  flex: 1 1 auto;
-}
-
-.shell-sidenav {
-  width: 220px;
-}
-
-.shell-content {
-  padding: 24px;
+.content-body {
+  flex: 1;
+  padding: 1.5rem;
 }
