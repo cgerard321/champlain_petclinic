@@ -189,7 +189,7 @@ class BillControllerUnitTest {
 
     @Test
     void getAllBillsByOwnerName() {
-        when(billService.getAllBillsByOwnerName(anyString(), anyString())).thenReturn(Flux.just(responseDTO));
+        when(billService.getAllBillsByCustomerName(anyString(), anyString())).thenReturn(Flux.just(responseDTO));
 
         client.get()
                 .uri("/bills/owner/" + responseDTO.getOwnerFirstName() + "/" + responseDTO.getOwnerLastName())
@@ -203,7 +203,7 @@ class BillControllerUnitTest {
                     Assertions.assertNotNull(billResponseModels);
                 });
 
-        Mockito.verify(billService, times(1)).getAllBillsByOwnerName(responseDTO.getOwnerFirstName(), responseDTO.getOwnerLastName());
+        Mockito.verify(billService, times(1)).getAllBillsByCustomerName(responseDTO.getOwnerFirstName(), responseDTO.getOwnerLastName());
     }
 
     @Test

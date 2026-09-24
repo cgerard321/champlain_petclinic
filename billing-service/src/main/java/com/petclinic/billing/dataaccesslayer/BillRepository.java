@@ -40,7 +40,7 @@ public interface BillRepository extends ReactiveMongoRepository<Bill, String> {
 
     Mono<Bill> findByCustomerIdAndBillId(String customerId, String billId);
 
-    Flux<Bill> findAllByArchiveFalse();
+    Flux<Bill> findAllByIsArchivedFalse();
 
     Flux<Bill> findAllByDateBefore(LocalDate date);
 

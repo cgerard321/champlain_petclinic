@@ -23,8 +23,8 @@ public interface BillService {
     Flux<BillResponseModel> getAllBillsByPage(Pageable pageable,
                                               String billId,
                                               String customerId,
-                                              String ownerFirstName,
-                                              String ownerLastName,
+                                              String customerFirstName,
+                                              String customerLastName,
                                               String visitType,
                                               String vetId,
                                               String vetFirstName,
@@ -32,14 +32,14 @@ public interface BillService {
 
     Mono<Long> getNumberOfBillsWithFilters(String billId,
                                            String customerId,
-                                           String ownerFirstName,
-                                           String ownerLastName,
+                                           String customerFirstName,
+                                           String customerLastName,
                                            String visitType,
                                            String vetId,
                                            String vetFirstName,
                                            String vetLastName);
 
-    Flux<BillResponseModel> getAllBillsByOwnerName(String ownerFirstName, String ownerLastName);
+    Flux<BillResponseModel> getAllBillsByCustomerName(String customerFirstName, String customerLastName);
 
     Flux<BillResponseModel> getAllBillsByVetName(String vetFirstName, String vetLastName);
 
@@ -58,8 +58,7 @@ public interface BillService {
 
     Mono<Void> deleteAllBills();
 
-
-    Mono<Void> setInterestExempt(String billId, boolean exempt);
+    Mono<Void> setInterestExempt(String billId, boolean isExempt);
 
     Mono<BigDecimal> getInterest(String billId, BigDecimal amount, int overdueMonths);
 

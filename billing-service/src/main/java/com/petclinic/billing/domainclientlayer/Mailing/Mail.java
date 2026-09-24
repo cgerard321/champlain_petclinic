@@ -19,6 +19,6 @@ public class Mail {
     private String body;
     private String footer;
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private String correspondantName;
+    private String correspondentName;
     private String senderName;
 }

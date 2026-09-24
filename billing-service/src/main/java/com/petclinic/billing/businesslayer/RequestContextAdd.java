@@ -15,7 +15,7 @@ public class RequestContextAdd {
 
     private BillRequestModel billRequestModel;
     private Bill bill;
-    private VetResponseModel vetDTO;
+    private VetResponseModel vetResponseModel;
     private CustomerResponseModel customerResponseModel;
 
     public RequestContextAdd(BillRequestModel billRequestModel) {

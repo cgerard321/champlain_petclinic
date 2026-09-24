@@ -17,13 +17,13 @@ import java.util.UUID;
 @Slf4j
 public class BillMapper {
 
-    public static BillResponseModel toBillResponseDto(Bill bill){
+    public static BillResponseModel toBillResponseModel(Bill bill){
         BillResponseModel billResponseModel =new BillResponseModel();
         //BeanUtils.copyProperties(bill,billResponseDTO);
         billResponseModel.setBillId(bill.getBillId());
         billResponseModel.setCustomerId(bill.getCustomerId());
-        billResponseModel.setOwnerFirstName(bill.getOwnerFirstName());
-        billResponseModel.setOwnerLastName(bill.getOwnerLastName());
+        billResponseModel.setOwnerFirstName(bill.getCustomerFirstName());
+        billResponseModel.setOwnerLastName(bill.getCustomerLastName());
         billResponseModel.setVisitType(bill.getVisitType());
         billResponseModel.setVetId(bill.getVetId());
         billResponseModel.setVetFirstName(bill.getVetFirstName());
@@ -56,7 +56,7 @@ public class BillMapper {
         }
         
         billResponseModel.setTimeRemaining(timeRemaining(bill));
-        billResponseModel.setArchive(bill.getArchive());
+        billResponseModel.setArchive(bill.getIsArchived());
 
         log.info("Mapped BillResponseDTO: {}", billResponseModel);
 
@@ -66,8 +66,8 @@ public class BillMapper {
     public static Bill toBillEntity(BillRequestModel billRequestModel){
         Bill bill = new Bill();
         BeanUtils.copyProperties(billRequestModel,bill);
-        if (bill.getArchive() == null) {
-            bill.setArchive(false);
+        if (bill.getIsArchived() == null) {
+            bill.setIsArchived(false);
         }
         return bill;
     }

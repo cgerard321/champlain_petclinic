@@ -92,8 +92,8 @@ public class BillServiceImplTest {
         Bill bill1 = Bill.builder()
                 .billId("billId-1")
                 .customerId("customerId-1")
-                .ownerFirstName("ownerFirstName1")
-                .ownerLastName("ownerLastName1")
+                .customerFirstName("ownerFirstName1")
+                .customerLastName("ownerLastName1")
                 .visitType("operation")
                 .vetId("vetId1")
                 .vetFirstName("vetFirstName1")
@@ -106,8 +106,8 @@ public class BillServiceImplTest {
         Bill bill2 = Bill.builder()
                 .billId("billId-2")
                 .customerId("customerId-2")
-                .ownerFirstName("ownerFirstName2")
-                .ownerLastName("ownerLastName2")
+                .customerFirstName("ownerFirstName2")
+                .customerLastName("ownerLastName2")
                 .visitType("general")
                 .vetId("vetId2")
                 .vetFirstName("vetFirstName2")
@@ -120,8 +120,8 @@ public class BillServiceImplTest {
         Bill bill3 = Bill.builder()
                 .billId("billId-3")
                 .customerId("customerId-3")
-                .ownerFirstName("ownerFirstName3")
-                .ownerLastName("ownerLastName3")
+                .customerFirstName("ownerFirstName3")
+                .customerLastName("ownerLastName3")
                 .visitType("injury")
                 .vetId("vetId3")
                 .vetFirstName("vetFirstName3")
@@ -200,13 +200,13 @@ public class BillServiceImplTest {
         String ownerLastName = "Doe";
 
         Bill billEntity = buildBill();
-        billEntity.setOwnerFirstName(ownerFirstName);
-        billEntity.setOwnerLastName(ownerLastName);
+        billEntity.setCustomerFirstName(ownerFirstName);
+        billEntity.setCustomerLastName(ownerLastName);
 
         when(repo.findAll()).thenReturn(Flux.just(billEntity));
 
 
-        Flux<BillResponseModel> result = billService.getAllBillsByOwnerName(ownerFirstName, ownerLastName);
+        Flux<BillResponseModel> result = billService.getAllBillsByCustomerName(ownerFirstName, ownerLastName);
 
 
         StepVerifier.create(result)
@@ -274,7 +274,7 @@ public class BillServiceImplTest {
         when(repo.findAll()).thenReturn(Flux.empty());
 
 
-        Flux<BillResponseModel> result = billService.getAllBillsByOwnerName(ownerFirstName, ownerLastName);
+        Flux<BillResponseModel> result = billService.getAllBillsByCustomerName(ownerFirstName, ownerLastName);
 
 
         StepVerifier.create(result)
@@ -347,7 +347,7 @@ public class BillServiceImplTest {
         CustomerResponseModel ownerResponse = new CustomerResponseModel();
         ownerResponse.setFirstName("Alice");
         ownerResponse.setLastName("Smith");
-        Mockito.when(customerServiceClient.getOwnerByOwnerId("owner-456"))
+        Mockito.when(customerServiceClient.getCustomerByCustomerId("owner-456"))
                 .thenReturn(Mono.just(ownerResponse));
 
         // Mock AuthServiceClient response
@@ -377,7 +377,7 @@ public class BillServiceImplTest {
 
         // Verify mock interactions
         verify(vetServiceClient).getVetByVetId("vet-123");
-        verify(customerServiceClient).getOwnerByOwnerId("owner-456");
+        verify(customerServiceClient).getCustomerByCustomerId("owner-456");
     }
 
     @Test
@@ -400,7 +400,7 @@ public class BillServiceImplTest {
         CustomerResponseModel ownerResponse = new CustomerResponseModel();
         ownerResponse.setFirstName("Alice");
         ownerResponse.setLastName("Smith");
-        Mockito.when(customerServiceClient.getOwnerByOwnerId("owner-456"))
+        Mockito.when(customerServiceClient.getCustomerByCustomerId("owner-456"))
                 .thenReturn(Mono.just(ownerResponse));
 
         // Mock AuthServiceClient response
@@ -462,7 +462,7 @@ public class BillServiceImplTest {
         CustomerResponseModel ownerResponse = new CustomerResponseModel();
         ownerResponse.setFirstName("Alice");
         ownerResponse.setLastName("Smith");
-        Mockito.when(customerServiceClient.getOwnerByOwnerId("owner-456"))
+        Mockito.when(customerServiceClient.getCustomerByCustomerId("owner-456"))
                 .thenReturn(Mono.just(ownerResponse));
 
         Bill existingBill = new Bill();
@@ -595,8 +595,8 @@ public class BillServiceImplTest {
     public void test_getBillByCustomerId() {
         // Arrange
         Bill billEntity = buildBill();
-        billEntity.setOwnerFirstName("John");
-        billEntity.setOwnerLastName("Doe");
+        billEntity.setCustomerFirstName("John");
+        billEntity.setCustomerLastName("Doe");
 
         String CUSTOMER_ID = billEntity.getCustomerId();
 
@@ -605,7 +605,7 @@ public class BillServiceImplTest {
         mockOwner.setFirstName("John");
         mockOwner.setLastName("Doe");
 
-        when(customerServiceClient.getOwnerByOwnerId(CUSTOMER_ID)).thenReturn(Mono.just(mockOwner));
+        when(customerServiceClient.getCustomerByCustomerId(CUSTOMER_ID)).thenReturn(Mono.just(mockOwner));
         when(repo.findByCustomerId(CUSTOMER_ID)).thenReturn(Flux.just(billEntity));
 
         // Act
@@ -722,7 +722,7 @@ public class BillServiceImplTest {
         // Arrange
         String nonExistentCustomerId = "nonExistentId";
 
-        when(customerServiceClient.getOwnerByOwnerId(nonExistentCustomerId))
+        when(customerServiceClient.getCustomerByCustomerId(nonExistentCustomerId))
                 .thenReturn(Mono.empty()); // Simulate missing owner
 
         // Act
@@ -736,7 +736,7 @@ public class BillServiceImplTest {
                                 throwable.getMessage().contains("Customer ID does not exist"))
                 .verify();
 
-        verify(customerServiceClient, times(1)).getOwnerByOwnerId(nonExistentCustomerId);
+        verify(customerServiceClient, times(1)).getCustomerByCustomerId(nonExistentCustomerId);
         verify(repo, never()).findByCustomerId(anyString()); // should never call repo
     }
 
@@ -745,8 +745,8 @@ public class BillServiceImplTest {
     Bill mockBill = Bill.builder()
             .billId("billId-1")
             .customerId("customerId-1")
-            .ownerFirstName("John")
-            .ownerLastName("Doe")
+            .customerFirstName("John")
+            .customerLastName("Doe")
             .visitType("General")
             .vetId("vetId-1")
             .amount(new BigDecimal(100.0))
@@ -1095,8 +1095,8 @@ public void testGenerateBillPdf_BillNotFound() {
         Bill b1 = buildBill();
         b1.setBillId("B-1");
         b1.setCustomerId("C-1");
-        b1.setOwnerFirstName("Alice");
-        b1.setOwnerLastName("Smith");
+        b1.setCustomerFirstName("Alice");
+        b1.setCustomerLastName("Smith");
         b1.setVisitType("ANNUAL");
         b1.setVetId("V-1");
         b1.setVetFirstName("Jenny");
@@ -1105,8 +1105,8 @@ public void testGenerateBillPdf_BillNotFound() {
         Bill b2 = buildBill();
         b2.setBillId("B-2");
         b2.setCustomerId("C-1");
-        b2.setOwnerFirstName("Alice");
-        b2.setOwnerLastName("Smith");
+        b2.setCustomerFirstName("Alice");
+        b2.setCustomerLastName("Smith");
         b2.setVisitType("ANNUAL");
         b2.setVetId("V-1");
         b2.setVetFirstName("Jenny");
@@ -1115,8 +1115,8 @@ public void testGenerateBillPdf_BillNotFound() {
         Bill b3 = buildBill();
         b3.setBillId("B-3");
         b3.setCustomerId("C-2");
-        b3.setOwnerFirstName("Bob");
-        b3.setOwnerLastName("Jones");
+        b3.setCustomerFirstName("Bob");
+        b3.setCustomerLastName("Jones");
         b3.setVisitType("SURGERY");
         b3.setVetId("V-2");
         b3.setVetFirstName("Tom");
@@ -1145,8 +1145,8 @@ public void testGenerateBillPdf_BillNotFound() {
         Bill b1 = buildBill();
         b1.setBillId("B-10");
         b1.setCustomerId("C-10");
-        b1.setOwnerFirstName("Alice");
-        b1.setOwnerLastName("Smith");
+        b1.setCustomerFirstName("Alice");
+        b1.setCustomerLastName("Smith");
         b1.setVisitType("ANNUAL");
         b1.setVetId("V-10");
         b1.setVetFirstName("Jenny");
@@ -1155,8 +1155,8 @@ public void testGenerateBillPdf_BillNotFound() {
         Bill b2 = buildBill();
         b2.setBillId("B-11");
         b2.setCustomerId("C-11");
-        b2.setOwnerFirstName("Bob");
-        b2.setOwnerLastName("Jones");
+        b2.setCustomerFirstName("Bob");
+        b2.setCustomerLastName("Jones");
         b2.setVisitType("SURGERY");
         b2.setVetId("V-11");
         b2.setVetFirstName("Tom");
@@ -1327,7 +1327,7 @@ public void testGenerateBillPdf_BillNotFound() {
             .amount(amount)
             .billStatus(BillStatus.OVERDUE)
             .dueDate(dueDate)
-            .interestExempt(false)
+            .isInterestExempt(false)
             .build();
 
         when(repo.findByBillId(billId)).thenReturn(Mono.just(overdueBill));
@@ -1355,7 +1355,7 @@ public void testGenerateBillPdf_BillNotFound() {
             .billId(billId)
             .amount(amount)
             .billStatus(BillStatus.OVERDUE)
-            .interestExempt(true)
+            .isInterestExempt(true)
             .build();
 
         when(repo.findByBillId(billId)).thenReturn(Mono.just(exemptBill));
@@ -1379,7 +1379,7 @@ public void testGenerateBillPdf_BillNotFound() {
             .billId(billId)
             .amount(amount)
             .billStatus(BillStatus.UNPAID)
-            .interestExempt(false)
+            .isInterestExempt(false)
             .build();
 
         when(repo.findByBillId(billId)).thenReturn(Mono.just(unpaidBill));
@@ -1405,7 +1405,7 @@ public void testGenerateBillPdf_BillNotFound() {
             .amount(amount)
             .billStatus(BillStatus.OVERDUE)
             .dueDate(dueDate)
-            .interestExempt(false)
+            .isInterestExempt(false)
             .build();
 
         when(repo.findByBillId(billId)).thenReturn(Mono.just(overdueBill));
@@ -1434,7 +1434,7 @@ public void testGenerateBillPdf_BillNotFound() {
             .billId(billId)
             .amount(amount)
             .billStatus(BillStatus.OVERDUE)
-            .interestExempt(true)
+            .isInterestExempt(true)
             .build();
 
         when(repo.findByBillId(billId)).thenReturn(Mono.just(exemptBill));
@@ -1458,14 +1458,14 @@ public void testGenerateBillPdf_BillNotFound() {
             .billId(billId)
             .amount(new BigDecimal("100.00"))
             .interest(originalInterest)
-            .interestExempt(false)
+            .isInterestExempt(false)
             .build();
 
         Bill savedBill = Bill.builder()
             .billId(billId)
             .amount(new BigDecimal("100.00"))
             .interest(BigDecimal.ZERO)
-            .interestExempt(true)
+            .isInterestExempt(true)
             .build();
 
         when(repo.findByBillId(billId)).thenReturn(Mono.just(bill));
@@ -1494,14 +1494,14 @@ public void testGenerateBillPdf_BillNotFound() {
             .billId(billId)
             .amount(new BigDecimal("100.00"))
             .interest(BigDecimal.ZERO)
-            .interestExempt(true)
+            .isInterestExempt(true)
             .build();
 
         Bill savedBill = Bill.builder()
             .billId(billId)
             .amount(new BigDecimal("100.00"))
             .interest(BigDecimal.ZERO)
-            .interestExempt(false) 
+            .isInterestExempt(false)
             .build();
 
         when(repo.findByBillId(billId)).thenReturn(Mono.just(bill));
@@ -1687,8 +1687,8 @@ public void testGenerateBillPdf_BillNotFound() {
         Bill overdueBill = Bill.builder()
             .billId("overdue-test-id")
             .customerId("customer-1")
-            .ownerFirstName("John")
-            .ownerLastName("Doe")
+            .customerFirstName("John")
+            .customerLastName("Doe")
             .visitType("Surgery")
             .vetId("vet-1")
             .vetFirstName("Dr. Jane")
@@ -1697,16 +1697,16 @@ public void testGenerateBillPdf_BillNotFound() {
             .amount(amount)
             .billStatus(BillStatus.OVERDUE)
             .dueDate(dueDate)
-            .interestExempt(false)
+            .isInterestExempt(false)
             .interest(new BigDecimal("5.00"))
             .build();
 
-        BillResponseModel dto = BillMapper.toBillResponseDto(overdueBill);
+        BillResponseModel dto = BillMapper.toBillResponseModel(overdueBill);
         
         assertEquals(overdueBill.getBillId(), dto.getBillId());
         assertEquals(overdueBill.getCustomerId(), dto.getCustomerId());
-        assertEquals(overdueBill.getOwnerFirstName(), dto.getOwnerFirstName());
-        assertEquals(overdueBill.getOwnerLastName(), dto.getOwnerLastName());
+        assertEquals(overdueBill.getCustomerFirstName(), dto.getOwnerFirstName());
+        assertEquals(overdueBill.getCustomerLastName(), dto.getOwnerLastName());
         assertEquals(overdueBill.getVisitType(), dto.getVisitType());
         assertEquals(overdueBill.getVetId(), dto.getVetId());
         assertEquals(overdueBill.getVetFirstName(), dto.getVetFirstName());
@@ -1736,8 +1736,8 @@ public void testGenerateBillPdf_BillNotFound() {
         Bill paidBill = Bill.builder()
             .billId("paid-test-id")
             .customerId("customer-2")
-            .ownerFirstName("Alice")
-            .ownerLastName("Johnson")
+            .customerFirstName("Alice")
+            .customerLastName("Johnson")
             .visitType("Checkup")
             .vetId("vet-2")
             .vetFirstName("Dr. Bob")
@@ -1746,11 +1746,11 @@ public void testGenerateBillPdf_BillNotFound() {
             .amount(amount)
             .billStatus(BillStatus.PAID)
             .dueDate(dueDate)
-            .interestExempt(false)
+            .isInterestExempt(false)
             .interest(storedInterest)
             .build();
 
-        BillResponseModel dto = BillMapper.toBillResponseDto(paidBill);
+        BillResponseModel dto = BillMapper.toBillResponseModel(paidBill);
         
         assertEquals(paidBill.getBillId(), dto.getBillId());
         assertEquals(paidBill.getCustomerId(), dto.getCustomerId());
@@ -1773,10 +1773,10 @@ public void testGenerateBillPdf_BillNotFound() {
             .amount(amount)
             .billStatus(BillStatus.UNPAID)
             .dueDate(dueDate)
-            .interestExempt(false)
+            .isInterestExempt(false)
             .build();
 
-        BillResponseModel dto = BillMapper.toBillResponseDto(unpaidBill);
+        BillResponseModel dto = BillMapper.toBillResponseModel(unpaidBill);
         
         assertEquals(BigDecimal.ZERO.setScale(2), dto.getInterest().setScale(2));
         
@@ -1797,10 +1797,10 @@ public void testGenerateBillPdf_BillNotFound() {
             .amount(amount)
             .billStatus(BillStatus.OVERDUE)
             .dueDate(dueDate)
-            .interestExempt(true) // Exempt from interest
+            .isInterestExempt(true) // Exempt from interest
             .build();
 
-        BillResponseModel dto = BillMapper.toBillResponseDto(exemptBill);
+        BillResponseModel dto = BillMapper.toBillResponseModel(exemptBill);
         
         assertEquals(BigDecimal.ZERO.setScale(2), dto.getInterest().setScale(2));
         assertTrue(dto.isInterestExempt());
@@ -1816,10 +1816,10 @@ public void testGenerateBillPdf_BillNotFound() {
             .billStatus(BillStatus.UNPAID)
             .dueDate(LocalDate.now().plusDays(10))
             .amount(null)
-            .interestExempt(false)
+            .isInterestExempt(false)
             .build();
 
-        BillResponseModel dto = BillMapper.toBillResponseDto(billWithNullAmount);
+        BillResponseModel dto = BillMapper.toBillResponseModel(billWithNullAmount);
         
         assertNull(dto.getAmount());
         assertEquals(BigDecimal.ZERO.setScale(2), dto.getInterest().setScale(2));
@@ -1883,7 +1883,7 @@ public void testGenerateBillPdf_BillNotFound() {
             .amount(amount)
             .billStatus(BillStatus.PAID)
             .dueDate(overdueDate)
-            .interestExempt(false)
+            .isInterestExempt(false)
             .interest(storedInterest)
             .build();
         
@@ -1894,7 +1894,7 @@ public void testGenerateBillPdf_BillNotFound() {
             .amount(amount)
             .billStatus(BillStatus.OVERDUE)
             .dueDate(overdueDate)
-            .interestExempt(false)
+            .isInterestExempt(false)
             .build();
         
         BigDecimal overdueInterest = InterestCalculationUtil.calculateInterest(overdueBill);
@@ -1904,7 +1904,7 @@ public void testGenerateBillPdf_BillNotFound() {
             .amount(amount)
             .billStatus(BillStatus.UNPAID)
             .dueDate(overdueDate)
-            .interestExempt(false)
+            .isInterestExempt(false)
             .build();
         
         BigDecimal unpaidOverdueInterest = InterestCalculationUtil.calculateInterest(unpaidOverdueBill);
@@ -1914,7 +1914,7 @@ public void testGenerateBillPdf_BillNotFound() {
             .amount(amount)
             .billStatus(BillStatus.UNPAID)
             .dueDate(LocalDate.now().plusDays(10))
-            .interestExempt(false)
+            .isInterestExempt(false)
             .build();
         
         BigDecimal unpaidNotDueInterest = InterestCalculationUtil.calculateInterest(unpaidNotDueBill);
@@ -1930,7 +1930,7 @@ public void testGenerateBillPdf_BillNotFound() {
             .amount(amount)
             .billStatus(BillStatus.OVERDUE)
             .dueDate(overdueDate)
-            .interestExempt(false)
+            .isInterestExempt(false)
             .build();
         
         BigDecimal totalOwed = InterestCalculationUtil.calculateTotalAmountOwed(overdueBill);
@@ -2021,7 +2021,7 @@ public void testGenerateBillPdf_BillNotFound() {
             .amount(amount)
             .billStatus(BillStatus.OVERDUE)
             .dueDate(dueDate)
-            .interestExempt(false)
+            .isInterestExempt(false)
             .build();
 
         when(repo.findByBillId("integration-test-id")).thenReturn(Mono.just(overdueBill));
@@ -2063,7 +2063,7 @@ public void testGenerateBillPdf_BillNotFound() {
         assertEquals("Pet Clinic - Payment Confirmation", result.getEmailTitle());
         assertEquals("default", result.getTemplateName());
         assertEquals("Pet Clinic confirmation email", result.getHeader());
-        assertEquals("testuser", result.getCorrespondantName());
+        assertEquals("testuser", result.getCorrespondentName());
         assertEquals("ChamplainPetClinic@gmail.com", result.getSenderName());
     }
 
@@ -2185,8 +2185,8 @@ public void testGenerateBillPdf_BillNotFound() {
         Bill mockBill = Bill.builder()
                 .billId("billId-2")
                 .customerId("customerId-2")
-                .ownerFirstName("Jane")
-                .ownerLastName("Smith")
+                .customerFirstName("Jane")
+                .customerLastName("Smith")
                 .visitType("Surgery")
                 .vetId("vetId-2")
                 .amount(new BigDecimal(250.0))
@@ -2245,7 +2245,7 @@ public void testGenerateBillPdf_BillNotFound() {
         CustomerResponseModel ownerResponse = new CustomerResponseModel();
         ownerResponse.setFirstName("Alice");
         ownerResponse.setLastName("Smith");
-        when(customerServiceClient.getOwnerByOwnerId("owner-456")).thenReturn(Mono.just(ownerResponse));
+        when(customerServiceClient.getCustomerByCustomerId("owner-456")).thenReturn(Mono.just(ownerResponse));
 
         // Mock user details (correct order for parameters)
         UserDetails userDetails = UserDetails.builder()
@@ -2261,8 +2261,8 @@ public void testGenerateBillPdf_BillNotFound() {
         billEntity.setBillId("generated-id");
         billEntity.setVetFirstName("John");
         billEntity.setVetLastName("Doe");
-        billEntity.setOwnerFirstName("Alice");
-        billEntity.setOwnerLastName("Smith");
+        billEntity.setCustomerFirstName("Alice");
+        billEntity.setCustomerLastName("Smith");
         billEntity.setAmount(new BigDecimal("100.00"));
         billEntity.setInterest(BigDecimal.ZERO);
 

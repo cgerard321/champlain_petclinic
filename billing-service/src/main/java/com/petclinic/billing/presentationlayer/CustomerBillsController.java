@@ -36,16 +36,16 @@ public class CustomerBillsController {
         return billService.getBillsByCustomerId(customerId);
     }
 
-    @GetMapping(value = "/status", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<BillResponseModel> getBillsByStatus(@PathVariable("customerId") String customerId,
-                                                    @RequestParam("status") BillStatus status) {
-        return billService.getBillsByCustomerIdAndStatus(customerId, status);
-    }
-
     @GetMapping(value = "/{billId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<BillResponseModel> getBillDetails(@PathVariable("customerId") String customerId,
                                                   @PathVariable("billId") String billId) {
         return billService.getBillByCustomerIdAndBillId(customerId, billId);
+    }
+
+    @GetMapping(value = "/status", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<BillResponseModel> getBillsByStatus(@PathVariable("customerId") String customerId,
+                                                    @RequestParam("status") BillStatus status) {
+        return billService.getBillsByCustomerIdAndStatus(customerId, status);
     }
 
     @GetMapping(value = "/{billId}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
@@ -71,21 +71,6 @@ public class CustomerBillsController {
         return billService.calculateCurrentBalance(customerId);
     }
 
-    @PostMapping("/{billId}/pay")
-    public Mono<ResponseEntity<BillResponseModel>> payBill(
-            @PathVariable String customerId,
-            @PathVariable String billId,
-            @RequestBody PaymentRequestModel paymentRequest,
-            @CookieValue("Bearer") String jwtToken) {
-        return billService.processPayment(customerId, billId, paymentRequest,jwtToken)
-                .map(ResponseEntity::ok)
-                        .onErrorResume(InvalidPaymentException.class,
-                                e -> Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).build()))
-                        .onErrorResume(ResponseStatusException.class,
-                                e -> Mono.just(ResponseEntity.status(e.getStatus()).build()));
-
-    }
-
     @GetMapping(value = "/filter-by-amount", produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<BillResponseModel> getBillsByAmountRange(
             @PathVariable("customerId") String customerId,
@@ -109,5 +94,19 @@ public class CustomerBillsController {
             @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         return billService.getBillsByCustomerIdAndDateRange(customerId, startDate, endDate);
+    }
+
+    @PostMapping("/{billId}/pay")
+    public Mono<ResponseEntity<BillResponseModel>> payBill(
+            @PathVariable String customerId,
+            @PathVariable String billId,
+            @RequestBody PaymentRequestModel paymentRequest,
+            @CookieValue("Bearer") String jwtToken) {
+        return billService.processPayment(customerId, billId, paymentRequest,jwtToken)
+                .map(ResponseEntity::ok)
+                .onErrorResume(InvalidPaymentException.class,
+                        e -> Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).build()))
+                .onErrorResume(ResponseStatusException.class,
+                        e -> Mono.just(ResponseEntity.status(e.getStatus()).build()));
     }
 }

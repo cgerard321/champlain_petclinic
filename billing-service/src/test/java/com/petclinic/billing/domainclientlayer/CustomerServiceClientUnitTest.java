@@ -55,7 +55,7 @@ public class CustomerServiceClientUnitTest {
                 .setBody(objectMapper.writeValueAsString(customerResponseModel))
         );
 
-        Mono<CustomerResponseModel> ownerResponseDTOMono = customerServiceClient.getOwnerByOwnerId(ownerId);
+        Mono<CustomerResponseModel> ownerResponseDTOMono = customerServiceClient.getCustomerByCustomerId(ownerId);
 
         StepVerifier.create(ownerResponseDTOMono)
                 .expectNextMatches(ownerResponseDTO1 -> ownerResponseDTO1.getOwnerId().equals(ownerId))
@@ -71,7 +71,7 @@ public class CustomerServiceClientUnitTest {
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .addHeader("Content-Type", "application/json"));
 
-        Mono<CustomerResponseModel> result = customerServiceClient.getOwnerByOwnerId(invalidId);
+        Mono<CustomerResponseModel> result = customerServiceClient.getCustomerByCustomerId(invalidId);
 
         StepVerifier.create(result)
                 .expectErrorMatches(throwable -> throwable instanceof NotFoundException && throwable.getMessage().equals("Owner not found with ownerId: " + invalidId))
@@ -87,7 +87,7 @@ public class CustomerServiceClientUnitTest {
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .addHeader("Content-Type", "application/json"));
 
-        Mono<CustomerResponseModel> result = customerServiceClient.getOwnerByOwnerId(ownerId);
+        Mono<CustomerResponseModel> result = customerServiceClient.getCustomerByCustomerId(ownerId);
 
         StepVerifier.create(result)
                 .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Client error for ownerId: " + ownerId))
@@ -103,7 +103,7 @@ public class CustomerServiceClientUnitTest {
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .addHeader("Content-Type", "application/json"));
 
-        Mono<CustomerResponseModel> result = customerServiceClient.getOwnerByOwnerId(ownerId);
+        Mono<CustomerResponseModel> result = customerServiceClient.getCustomerByCustomerId(ownerId);
 
         StepVerifier.create(result)
                 .expectErrorMatches(throwable -> throwable instanceof ServerException && throwable.getMessage().equals("Server error for ownerId: " + ownerId))

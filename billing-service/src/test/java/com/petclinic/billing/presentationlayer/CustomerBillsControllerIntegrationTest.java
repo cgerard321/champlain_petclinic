@@ -77,8 +77,8 @@ public class CustomerBillsControllerIntegrationTest {
     @Test
     void getBillsByCustomerId_shouldSucceed() {
         Bill bill = buildBill();
-        bill.setOwnerFirstName("John");   // <-- set this
-        bill.setOwnerLastName("Doe");     // <-- set this
+        bill.setCustomerFirstName("John");   // <-- set this
+        bill.setCustomerLastName("Doe");     // <-- set this
 
         Publisher<Bill> setup = billRepository.deleteAll().thenMany(billRepository.save(bill));
 
@@ -87,7 +87,7 @@ public class CustomerBillsControllerIntegrationTest {
         owner.setFirstName("John");
         owner.setLastName("Doe");
 
-        when(customerServiceClient.getOwnerByOwnerId(bill.getCustomerId()))
+        when(customerServiceClient.getCustomerByCustomerId(bill.getCustomerId()))
                 .thenReturn(Mono.just(owner));
 
         StepVerifier.create(setup)
@@ -220,7 +220,7 @@ public class CustomerBillsControllerIntegrationTest {
                                 .amount(new BigDecimal(150.0))
                                 .billStatus(BillStatus.UNPAID)
                                 .dueDate(LocalDate.now().plusDays(20))
-                                .archive(false)
+                                .isArchived(false)
                                 .build();
         }
 
@@ -231,14 +231,14 @@ public class CustomerBillsControllerIntegrationTest {
                 return Bill.builder()
                                 .billId("1")
                                 .customerId("custId")
-                                .ownerFirstName("John")
-                                .ownerLastName("Doe")
+                                .customerFirstName("John")
+                                .customerLastName("Doe")
                                 .vetId("vetId")
                                 .visitType("surgery")
                                 .date(date)
                                 .amount(new BigDecimal("150.00"))
                                 .billStatus(BillStatus.UNPAID)
-                                .archive(false)
+                                .isArchived(false)
                                 .build();
         }
 
@@ -329,15 +329,15 @@ public class CustomerBillsControllerIntegrationTest {
         return Bill.builder()
                 .billId("staffBill-1")
                 .customerId("custId")
-                .ownerFirstName("John")
-                .ownerLastName("Doe")
+                .customerFirstName("John")
+                .customerLastName("Doe")
                 .vetId("vetId")
                 .visitType("surgery")
                 .date(date)
                 .dueDate(date.plusDays(15))
                 .amount(new BigDecimal("150.00"))
                 .billStatus(BillStatus.UNPAID)
-                .archive(false)
+                .isArchived(false)
                 .build();
     }
 

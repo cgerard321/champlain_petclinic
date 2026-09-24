@@ -200,7 +200,7 @@ class BillControllerIntegrationTest {
         owner.setLastName("Smith");
 
         when(vetServiceClient.getVetByVetId("vet-1")).thenReturn(Mono.just(vet));
-        when(customerServiceClient.getOwnerByOwnerId("cust-1")).thenReturn(Mono.just(owner));
+        when(customerServiceClient.getCustomerByCustomerId("cust-1")).thenReturn(Mono.just(owner));
 
         String testJwtToken = "test-jwt-token";
 
@@ -228,7 +228,7 @@ class BillControllerIntegrationTest {
 
         // Verify mock interactions
         verify(vetServiceClient).getVetByVetId("vet-1");
-        verify(customerServiceClient).getOwnerByOwnerId("cust-1");
+        verify(customerServiceClient).getCustomerByCustomerId("cust-1");
     }
 
     @Test
@@ -286,8 +286,8 @@ class BillControllerIntegrationTest {
     void getBillByCustomerId() {
 
         Bill billEntity = buildBill();
-        billEntity.setOwnerFirstName("John");
-        billEntity.setOwnerLastName("Doe");
+        billEntity.setCustomerFirstName("John");
+        billEntity.setCustomerLastName("Doe");
 
         // Mock the OwnerClient call
         CustomerResponseModel owner = new CustomerResponseModel();
@@ -295,7 +295,7 @@ class BillControllerIntegrationTest {
         owner.setFirstName("John");
         owner.setLastName("Doe");
 
-        when(customerServiceClient.getOwnerByOwnerId(billEntity.getCustomerId()))
+        when(customerServiceClient.getCustomerByCustomerId(billEntity.getCustomerId()))
                 .thenReturn(Mono.just(owner));
 
         Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(billEntity));
@@ -722,7 +722,7 @@ class BillControllerIntegrationTest {
                 .amount(new BigDecimal(100.0))
                 .billStatus(BillStatus.OVERDUE)
                 .dueDate(dueDate)
-                .archive(false)
+                .isArchived(false)
                 .build();
     }
 
@@ -741,7 +741,7 @@ class BillControllerIntegrationTest {
                 .amount(new BigDecimal(100.0))
                 .billStatus(BillStatus.UNPAID)
                 .dueDate(dueDate)
-                .archive(false)
+                .isArchived(false)
                 .build();
     }
 

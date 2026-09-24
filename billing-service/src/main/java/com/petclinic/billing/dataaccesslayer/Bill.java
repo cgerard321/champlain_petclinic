@@ -17,8 +17,8 @@ public class Bill {
     private String id;
     private String billId;
     private String customerId;
-    private String ownerFirstName;
-    private String ownerLastName;
+    private String customerFirstName;
+    private String customerLastName;
     private String visitType;
     private String vetId;
     private String vetFirstName;
@@ -30,7 +30,7 @@ public class Bill {
     private BillStatus billStatus;
     private LocalDate dueDate;
     @Builder.Default
-    private boolean interestExempt = false;
-    @Field("archive")
-    private Boolean archive = false;
+    private boolean isInterestExempt = false;
+    @Field("archived")
+    private Boolean isArchived = false;
 }
