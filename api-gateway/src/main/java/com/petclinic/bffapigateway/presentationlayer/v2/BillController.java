@@ -73,7 +73,6 @@ public class BillController {
 
     }
 
-
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "/admin/month", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getBillsByMonth(
@@ -85,19 +84,6 @@ public class BillController {
 
         return billService.getBillsByMonth(year, month);
     }
-
-    //moved to CustomerBillController
-//    @IsUserSpecific(idToMatch = {"customerId"})
-//    @PostMapping("/customer/{customerId}/bills/{billId}/pay")
-//    public Mono<ResponseEntity<String>> payBill(
-//            @PathVariable("customerId") String customerId,
-//            @PathVariable("billId") String billId,
-//            @RequestBody PaymentRequestDTO paymentRequestDTO) {
-//        return billService.payBill(customerId, billId, paymentRequestDTO)
-//                .map(response -> ResponseEntity.ok(response))
-//                .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().body("Payment failed: " + e.getMessage())));
-//    }
-
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "/admin/{billId}/interest")
     public Mono<ResponseEntity<Double>> getInterest(@PathVariable String billId) {
