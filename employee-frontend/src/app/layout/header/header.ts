@@ -19,4 +19,15 @@ export class Header {
   protected logout(): void {
     this.authState.logout().subscribe(() => this.router.navigateByUrl('/login'));
   }
+
+  // VETS-CPC-1927: on sauvegarde le choix puis on recharge la page pour que
+  // le provideAppInitializer (app.config.ts) recharge les bonnes traductions
+  // AVANT que l'app ne re-bootstrap
+  protected switchLang(lang: string): void {
+    if (localStorage.getItem('lang') === lang) {
+      return;
+    }
+    localStorage.setItem('lang', lang);
+    location.reload();
+  }
 }
