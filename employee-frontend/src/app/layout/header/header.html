@@ -1,6 +1,16 @@
 <mat-toolbar color="primary">
   <span class="title">Title here or image</span>
   <span class="spacer"></span>
+
+  <!-- VETS-CPC-1927: selecteur de langue manuel, seul ajout de ce ticket au header
+       (le reste du header/navbar appartient a CPC-1971) -->
+  <div class="lang-switcher">
+    <!-- (click)="switchLang('fr')" : appelle une methode du composant pour
+         changer la langue active. FR/EN ne sont pas traduits (codes de langue). -->
+    <button mat-button (click)="switchLang('fr')">FR</button>
+    <button mat-button (click)="switchLang('en')">EN</button>
+  </div>
+
   <button mat-icon-button aria-label="Log out" (click)="logout()">
     <mat-icon>logout</mat-icon>
   </button>
