@@ -47,7 +47,7 @@ public class CustomerBillControllerIntegrationTest {
         mockServerConfigBillService.registerPayBillEndpoint();
 
         mockServerConfigAuthService = new MockServerConfigAuthService();
-        mockServerConfigAuthService.registerValidateTokenForOwnerEndpoint();
+        mockServerConfigAuthService.registerValidateTokenForCustomerOneEndpoint();
     }
     @AfterAll
     public void stopMockServer() {
@@ -129,24 +129,37 @@ public class CustomerBillControllerIntegrationTest {
     // }
 
     // doest work
-//    @Test
-//    public void testPayBill_ValidRequest_ShouldReturnOk() {
-//        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/23");
-//
-//        webTestClient.post()
-//                .uri("/api/v2/gateway/customers/{customerId}/bills/{billId}/pay", "1", "1234")
-//                .cookie("Bearer", MockServerConfigAuthService.jwtTokenForValidOwnerId)
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .bodyValue(paymentRequest)
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-//                .expectBody(BillResponseDTO.class)
-//                .consumeWith(response -> {
-//                    BillResponseDTO billResponse = response.getResponseBody();
-//                    assertNotNull(billResponse);
-//                });
-//    }
+    @Test
+    public void testPayBill_ValidRequest_ShouldReturnOk() {
+        PaymentRequestDTO paymentRequest =
+                new PaymentRequestDTO(
+                        "1234567812345678",
+                        "123",
+                        "12/23"
+                );
+
+        webTestClient.post()
+                .uri(
+                        "/api/v2/gateway/customers/{customerId}/bills/{billId}/pay",
+                        "1",
+                        "1234"
+                )
+                .cookie(
+                        "Bearer",
+                        "valid-test-token-for-customer-one"
+                )
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(paymentRequest)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(BillResponseDTO.class)
+                .consumeWith(response -> {
+                    BillResponseDTO billResponse = response.getResponseBody();
+                    assertNotNull(billResponse);
+                });
+    }
 //
 //    @Test
 //    public void testPayBill_InvalidCustomer_ShouldReturnNotFound() {

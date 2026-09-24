@@ -129,33 +129,27 @@ public class MockServerConfigBillService {
     }
 
     public void registerPayBillEndpoint() {
-        // success case
         mockServerClient_BillService
                 .when(
                         request()
                                 .withMethod("POST")
-                                .withPath("/api/v2/gateway/customers/1/bills/1234/pay")
+                                .withPath("/bills/customer/1/bills/1234/pay")
                 )
                 .respond(
                         response()
                                 .withStatusCode(200)
                                 .withHeader("Content-Type", "application/json")
-                                .withBody("{\"billId\":\"1234\",\"customerId\":\"1\",\"billStatus\":\"PAID\"}")
-                );
-
-        // invalid customer case
-        mockServerClient_BillService
-                .when(
-                        request()
-                                .withMethod("POST")
-                                .withPath("/api/v2/gateway/customers/invalid-id/bills/1234/pay")
-                )
-                .respond(
-                        response()
-                                .withStatusCode(404)
-                                .withHeader("Content-Type", "application/json")
-                                .withBody("{\"error\":\"Customer not found\"}")
-                );
+                                .withBody(
+                                        "{\"billId\":\"1234\"," +
+                                                "\"customerId\":\"1\"," +
+                                                "\"visitType\":\"general\"," +
+                                                "\"vetId\":\"2\"," +
+                                                "\"date\":\"2026-09-21\"," +
+                                                "\"amount\":100," +
+                                                "\"taxedAmount\":10.0," +
+                                                "\"billStatus\":\"PAID\"," +
+                                                "\"dueDate\":\"2026-11-06\"}"
+                                ));
     }
 
     public void registerDownloadStaffBillPdfEndpoint() {

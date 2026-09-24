@@ -73,6 +73,24 @@ public class MockServerConfigAuthService {
                                 .withBody(json("{\"token\":\"valid-test-token\",\"userId\":\"invalid-owner-id\",\"roles\":[\"OWNER\"]}"))
                 );
     }
+    public void registerValidateTokenForCustomerOneEndpoint() {
+        mockServerClient_AuthService
+                .when(
+                        request()
+                                .withMethod("POST")
+                                .withPath("/users/validate-token")
+                                .withCookie("Bearer", "valid-test-token-for-customer-one")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withBody(json(
+                                        "{\"token\":\"valid-test-token-for-customer-one\"," +
+                                                "\"userId\":\"1\"," +
+                                                "\"roles\":[\"OWNER\"]}"
+                                ))
+                );
+    }
 
     public void registerValidateTokenForAdminEndpoint() {
         mockServerClient_AuthService
