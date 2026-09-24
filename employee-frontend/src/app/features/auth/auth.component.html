@@ -1,1 +1,33 @@
-<!-- TODO: To be migrated -->
+<div class="auth-page">
+
+    <mat-card class="auth-card">
+
+
+        <h1 i18n="@@login.title">Connexion</h1>
+
+        <!-- Reactive form bound to loginForm (defined in the .ts file)
+             (ngSubmit) triggers onSubmit() when the form is submitted -->
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label i18n="@@login.username">Nom d'utilisateur</mat-label>
+                <input matInput formControlName="username" type="text" />
+            </mat-form-field>
+
+            <!-- Password field -->
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label i18n="@@login.password">Mot de passe</mat-label>
+                <!-- type="password" masks the characters typed on screen -->
+                <input matInput formControlName="password" type="password" />
+            </mat-form-field>
+
+            <!-- Form submit button
+                 mat-raised-button + color="primary": Material's raised style, primary color
+                 type="submit": triggers (ngSubmit) on the parent form -->
+            <button mat-raised-button color="primary" type="submit" i18n="@@login.submit">
+                Se connecter
+            </button>
+
+        </form>
+    </mat-card>
+</div>

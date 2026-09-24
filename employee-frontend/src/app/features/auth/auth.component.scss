@@ -1,1 +1,75 @@
-/* TODO: To be migrated */
+//this page is made by AI for better design -Loukmane Bessam 2430635
+//
+//
+// ===== Auth page layout =====
+.auth-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  padding: 1.5rem;
+  background: radial-gradient(
+          circle at 50% 0%,
+          rgba(15, 82, 87, 0.06),
+          transparent 60%
+  );
+}
+
+// ===== Card =====
+.auth-card {
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 380px;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 82, 87, 0.12);
+  box-shadow: 0 4px 24px rgba(15, 41, 43, 0.06);
+  background: #ffffff;
+}
+
+// ===== Title =====
+.auth-card h1 {
+  margin: 0 0 1.75rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #0f2b2d;
+  text-align: left;
+}
+
+// ===== Form fields =====
+.full-width {
+  width: 100%;
+  margin-bottom: 0.25rem;
+}
+
+// Recolor Material's outline + label to match the brand accent on focus
+::ng-deep .auth-card {
+  .mat-mdc-form-field {
+    --mdc-outlined-text-field-focus-outline-color: #0f5257;
+    --mdc-outlined-text-field-focus-label-text-color: #0f5257;
+  }
+}
+
+// ===== Submit button =====
+.auth-card button[type='submit'] {
+  width: 100%;
+  margin-top: 0.5rem;
+  height: 44px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  border-radius: 8px;
+}
+
+// Override Material's default primary if it doesn't already match your palette
+::ng-deep .auth-card button[type='submit'].mat-primary {
+  --mdc-filled-button-container-color: #0f5257;
+}
+
+// ===== Responsive tweak =====
+@media (max-width: 420px) {
+  .auth-card {
+    padding: 2rem 1.5rem;
+    box-shadow: none;
+    border: none;
+  }
+}
