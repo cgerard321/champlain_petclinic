@@ -1,17 +1,35 @@
+<!--
+  //Loukmane Bessam 2430635
+  Footer component (employee portal)
+  i18n: French is the source language, written directly in this template.
+  Each translatable element has an i18n="@@id" attribute. The English text for
+  each id lives in /internationalization_json/en.json and is loaded at startup
+  by main.ts (loadTranslations()) when the saved language is 'en'.
+-->
 <footer class="footer">
-  <div class="container">
-    <div class="footer-content">
-      <div class="footer-brand">
-        <span>PetClinic Employee Portal</span>
-      </div>
-      <div class="footer-links">
-        <a href="#" class="footer-link">Privacy Policy</a>
-        <a href="#" class="footer-link">Terms of Service</a>
-        <a href="#" class="footer-link">Support</a>
-      </div>
-      <div class="footer-copyright">
-        <p>&copy; 2025 Champlain Pet Clinic. All rights reserved.</p>
-      </div>
+    <div class="container">
+        <div class="footer-content">
+
+            <!--portal name -->
+            <div class="footer-brand">
+                <span i18n="@@footer.brand">Portail Employé Clinique Vétérinaire</span>
+            </div>
+
+            <!-- Footer navigation links.
+@@ is for id footer. is for module
+after that its the key example .privacy
+ -->
+            <div class="footer-links">
+                <a href="#" class="footer-link" i18n="@@footer.privacy">Politique de confidentialité</a>
+                <a href="#" class="footer-link" i18n="@@footer.terms">Conditions d'utilisation</a>
+                <a href="#" class="footer-link" i18n="@@footer.support">Support</a>
+            </div>
+
+
+            <div class="footer-copyright">
+                <p i18n="@@footer.copyright">&copy; 2026 Champlain Pet Clinic. Tous droits réservés.</p>
+            </div>
+
+        </div>
     </div>
-  </div>
 </footer>
