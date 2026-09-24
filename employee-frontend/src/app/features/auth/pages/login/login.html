@@ -1,14 +1,14 @@
 <div class="login-page">
   <mat-card class="login-card">
     <mat-card-header>
-      <mat-card-title>Sign in</mat-card-title>
+      <mat-card-title i18n="@@login.title">Connexion</mat-card-title>
       <mat-card-subtitle>This will need to change, only a dummy</mat-card-subtitle>
     </mat-card-header>
 
     <mat-card-content>
       <form class="login-form" (submit)="submit($event)">
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Username or email</mat-label>
+          <mat-label i18n="@@login.username">Nom d'utilisateur ou courriel</mat-label>
           <input
             matInput
             type="text"
@@ -21,7 +21,7 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width password-field">
-          <mat-label>Password</mat-label>
+          <mat-label i18n="@@login.password">Mot de passe</mat-label>
           <input
             matInput
             [formField]="loginForm.password"
@@ -57,7 +57,7 @@
           @if (isSubmitting()) {
             <mat-progress-spinner diameter="20" mode="indeterminate" />
           } @else {
-            Sign in
+            <ng-container i18n="@@login.submit">Se connecter</ng-container>
           }
         </button>
       </form>
