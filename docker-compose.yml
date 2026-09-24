@@ -35,14 +35,6 @@ x-healthchecks:
       retries: 10
       start_period: 10s
 
-  dbgate: &dbgate_hc
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:3000/"]
-      interval: 10s
-      timeout: 3s
-      retries: 10
-      start_period: 10s
-
   mysql: &mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-u${DB_USER}", "-p${DB_PASSWORD}", "-h", "localhost"]
@@ -270,7 +262,7 @@ services:
         condition: service_healthy
 
   minio:
-    image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
+    image: cgr.dev/chainguard/minio@sha256:bd014394a80898e68c149f2311fdf8d5a2c2f3bb2c33b9327ae6d02b4b065ae1
     command: server --address ":9100" --console-address ":9101" /data
     environment:
       MINIO_ROOT_USER: user
