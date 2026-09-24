@@ -1,13 +1,16 @@
-FROM gradle:7.4-jdk17 AS builder
+FROM gradle:8.3-jdk17 AS builder
 WORKDIR /usr/src/app
 COPY build.gradle settings.gradle ./
 
 COPY src ./src
 
-RUN gradle bootJar --no-daemon && \
+# Use dependencies from past builds to improve build performance
+RUN --mount=type=cache,id=gradle-auth-cache,target=/home/gradle/.gradle/caches,uid=1000,gid=1000 \
+    --mount=type=cache,id=gradle-auth-wrapper,target=/home/gradle/.gradle/wrapper \
+    gradle bootJar --no-daemon && \
     mv build/libs/*.jar build/libs/application.jar
 
-FROM eclipse-temurin:17-jre-alpine
+FROM amazoncorretto:17-alpine
 
 RUN apk add --no-cache curl && \
     addgroup -S spring && \
