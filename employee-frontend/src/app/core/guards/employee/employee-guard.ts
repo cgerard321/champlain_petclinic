@@ -1,5 +1,6 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
+
 import { AuthState } from '@core/services/auth-state';
 import { EMPLOYEE_ROLES } from '@shared/models/roles';
 
