@@ -2,8 +2,8 @@ import { Component } from '@angular/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { RouterOutlet } from '@angular/router';
 
-import { Header } from '../header/header';
-import { Sidenav } from '../sidenav/sidenav';
+import { Header } from '@layout/header/header';
+import { Sidenav } from '@layout/sidenav/sidenav';
 
 @Component({
   selector: 'app-shell',

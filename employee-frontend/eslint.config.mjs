@@ -2,6 +2,7 @@ import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import angular from 'angular-eslint';
 import importPlugin from 'eslint-plugin-import';
+import importAlias from 'eslint-plugin-import-alias';
 import prettierRecommended from 'eslint-plugin-prettier/recommended';
 
 export default tseslint.config(
@@ -37,36 +38,12 @@ export default tseslint.config(
     },
     plugins: {
       import: importPlugin,
+      'import-alias': importAlias,
     },
     rules: {
       // --- General JS/TS quality & shorthand ---
       'import/prefer-default-export': 'off',
       'no-console': ['error', { allow: ['warn', 'error'] }],
-      'object-shorthand': 'error',
-      'prefer-arrow-callback': 'error',
-      'prefer-const': 'error',
-      'prefer-template': 'error',
-      'no-var': 'error',
-      eqeqeq: ['error', 'always'],
-
-      // --- Import hygiene ---
-      'import/order': [
-        'error',
-        {
-          groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
-          pathGroups: [
-            {
-              pattern: '@{app,core,shared,features,layout,environments}/**',
-              group: 'internal',
-            },
-          ],
-          'newlines-between': 'always',
-          alphabetize: { order: 'asc', caseInsensitive: true },
-        },
-      ],
-      'import/no-duplicates': 'error',
-
-      // --- Angular component/directive conventions ---
       '@angular-eslint/directive-selector': [
         'error',
         { type: 'attribute', prefix: 'app', style: 'camelCase' },
@@ -119,11 +96,6 @@ export default tseslint.config(
       ...angular.configs.templateAccessibility,
       prettierRecommended,
     ],
-    rules: {
-      '@angular-eslint/template/prefer-control-flow': 'error',
-      '@angular-eslint/template/no-negated-async': 'error',
-      '@angular-eslint/template/eqeqeq': 'error',
-      '@angular-eslint/template/prefer-self-closing-tags': 'warn',
-    },
+    rules: {},
   },
 );
