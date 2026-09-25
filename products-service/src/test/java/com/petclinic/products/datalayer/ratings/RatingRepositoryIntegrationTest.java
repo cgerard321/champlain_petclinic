@@ -1,9 +1,10 @@
 package com.petclinic.products.datalayer.ratings;
 
+import com.petclinic.products.utils.PostgresTestContainerBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
 import org.springframework.test.context.ActiveProfiles;
 import reactor.test.StepVerifier;
 
@@ -11,21 +12,21 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@DataMongoTest
+@DataR2dbcTest
 @ActiveProfiles("test")
-class RatingRepositoryIntegrationTest {
+class RatingRepositoryIntegrationTest extends PostgresTestContainerBase {
     @Autowired
     private RatingRepository ratingRepository;
 
     @BeforeEach
-    public void setupDB(){
+    public void setupDB() {
         StepVerifier.create(ratingRepository.deleteAll())
                 .expectNextCount(0)
                 .verifyComplete();
     }
 
     @Test
-    void whenRatingsFoundByProductId_thenReturnRatings(){
+    void whenRatingsFoundByProductId_thenReturnRatings() {
         String productId = UUID.randomUUID().toString();
         String customerId1 = UUID.randomUUID().toString();
         String customerId2 = UUID.randomUUID().toString();
@@ -70,7 +71,7 @@ class RatingRepositoryIntegrationTest {
     }
 
     @Test
-    public void whenRatingFoundByCustomerAndProduct_thenReturnRating(){
+    public void whenRatingFoundByCustomerAndProduct_thenReturnRating() {
         String productId = UUID.randomUUID().toString();
         String customerId = UUID.randomUUID().toString();
 
@@ -103,7 +104,7 @@ class RatingRepositoryIntegrationTest {
     }
 
     @Test
-    public void whenProductDeleted_deleteAllRatings(){
+    public void whenProductDeleted_deleteAllRatings() {
         String productId = UUID.randomUUID().toString();
         String customerId1 = UUID.randomUUID().toString();
         String customerId2 = UUID.randomUUID().toString();

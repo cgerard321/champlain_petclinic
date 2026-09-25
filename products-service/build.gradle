@@ -19,6 +19,7 @@ ext {
     mapstructVersion = "1.5.3.Final"
     lombokVersion = "1.18.26"
     lombokMapstructBindingVersion = "0.2.0"
+    set('testcontainers.version', '1.21.4')
 }
 
 repositories {
@@ -28,24 +29,34 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
     implementation 'io.micrometer:micrometer-registry-prometheus'
-    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
     implementation "org.mapstruct:mapstruct:${mapstructVersion}"
     implementation 'org.postgresql:postgresql'
-    implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+    //implementation 'com.h2database:h2'
+    compileOnly 'org.springframework.boot:spring-boot-testcontainers'
+    compileOnly 'org.testcontainers:postgresql'
+    developmentOnly 'org.springframework.boot:spring-boot-testcontainers:3.3.13'
+    developmentOnly 'org.testcontainers:postgresql'
+    developmentOnly 'org.testcontainers:r2dbc'
 
     runtimeOnly 'org.postgresql:r2dbc-postgresql'
+    //runtimeOnly 'io.r2dbc:r2dbc-h2:1.0.0.RELEASE'
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     compileOnly "org.mapstruct:mapstruct-processor:${mapstructVersion}"
     annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}", "org.projectlombok:lombok:${lombokVersion}", "org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}"
-    implementation 'com.h2database:h2'
-    runtimeOnly 'io.r2dbc:r2dbc-h2:1.0.0.RELEASE'
     testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+
+    //testImplementation 'org.testcontainers:junit-jupiter'
+
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers:3.3.13'
+    testImplementation 'org.testcontainers:postgresql'
+    testImplementation 'org.testcontainers:r2dbc'
+    testImplementation 'org.testcontainers:junit-jupiter'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'
-    testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring30x:4.9.2'
     testImplementation("org.mock-server:mockserver-netty:5.13.0")
     testImplementation("org.mock-server:mockserver-client-java:5.13.0")
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

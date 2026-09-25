@@ -4,7 +4,7 @@
 x-healthchecks:
   springboot: &springboot
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/actuator/health || curl -fsS http://localhost:8080/health"]
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:8080/actuator/health || curl -fsS http://localhost:8080/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -12,7 +12,7 @@ x-healthchecks:
 
   react-node: &react_node
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:3000/ || true"]
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:3000/ || true" ]
       interval: 10s
       timeout: 10s
       retries: 3
@@ -20,7 +20,7 @@ x-healthchecks:
 
   angular-node: &angular_node
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:4200/ || true"]
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:4200/ || true" ]
       interval: 10s
       timeout: 10s
       retries: 3
@@ -28,7 +28,7 @@ x-healthchecks:
 
   mysql: &mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-u${DB_USER}", "-p${DB_PASSWORD}", "-h", "localhost"]
+      test: [ "CMD", "mysqladmin", "ping", "-u${DB_USER}", "-p${DB_PASSWORD}", "-h", "localhost" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -36,7 +36,7 @@ x-healthchecks:
 
   postgres: &postgres
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d images -h localhost"]
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d images -h localhost" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -238,8 +238,6 @@ services:
       - .env
     restart: unless-stopped
     depends_on:
-      mongo-products:
-        condition: service_healthy
       postgres-products:
         condition: service_healthy
 
@@ -431,32 +429,19 @@ services:
 
   postgres-products:
     <<: *postgres
-    image: postgres
+    image: postgres:17
     container_name: postgres-products
+    hostname: postgres
     env_file:
       - .env
     environment:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=products
-
-  mongo-products:
-    <<: *mongo
-    image: mongo:7.0
-    container_name: mongo-products
-    env_file:
-      - .env
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=${DB_USER}
-      - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD}
     volumes:
-      - mongo-products-data:/data/db
-      - mongo-products-config:/data/configdb
+      - postgres-products-data:/var/lib/postgresql/data
     restart: unless-stopped
-    ulimits:
-      nofile:
-        soft: 64000
-        hard: 64000
+
 
   mongo-carts:
     <<: *mongo
@@ -543,6 +528,7 @@ volumes:
   mongo-carts-data:
   mongo-carts-config:
   postgres-vet-data:
+  postgres-products-data:
   mysql-files-data:
   dbgate-data:
   mysql-devtools-data:

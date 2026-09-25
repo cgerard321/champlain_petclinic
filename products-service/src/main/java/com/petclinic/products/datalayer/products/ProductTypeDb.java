@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.Instant;
@@ -19,7 +18,7 @@ import java.time.Instant;
 @AllArgsConstructor
 public class ProductTypeDb {
     @Id
-    private String id;
+    private long id;
     private String productTypeId;
     private String typeName;
 }

@@ -2,18 +2,22 @@ package com.petclinic.products.presentationlayer.products;
 
 import com.petclinic.products.businesslayer.products.ProductBundleService;
 import com.petclinic.products.businesslayer.products.ProductService;
+import com.petclinic.products.utils.PostgresTestContainerBase;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
 import com.petclinic.products.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
 import java.util.List;
+
 import com.petclinic.products.datalayer.products.ProductType;
 import com.petclinic.products.datalayer.products.ProductStatus;
 import com.petclinic.products.datalayer.products.DeliveryType;
@@ -26,7 +30,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @WebFluxTest(controllers = ProductController.class)
-public class ProductControllerUnitTest {
+public class ProductControllerUnitTest extends PostgresTestContainerBase {
     @MockBean
     private ProductService productService;
 
@@ -38,7 +42,7 @@ public class ProductControllerUnitTest {
 
     @Test
     public void whenGetAllProductsThenReturnProducts() {
-        ProductResponseModel  productResponseModel1 = ProductResponseModel.builder()
+        ProductResponseModel productResponseModel1 = ProductResponseModel.builder()
                 .productId("ae2d3af7-f2a2-407f-ad31-ca7d8220cb7a")
                 .productName("Bird Cage")
                 .productDescription("Spacious cage for small birds like parakeets")
@@ -46,14 +50,14 @@ public class ProductControllerUnitTest {
                 .averageRating(0.0)
                 .build();
 
-        ProductResponseModel  productResponseModel2 = ProductResponseModel.builder()
+        ProductResponseModel productResponseModel2 = ProductResponseModel.builder()
                 .productId("baee7cd2-b67a-449f-b262-91f45dde8a6d")
                 .productName("Flea Collar")
                 .productDescription("Flea and tick prevention for small dogs")
                 .productSalePrice(9.99)
                 .averageRating(0.0)
                 .build();
-        when(productService.getAllProducts(null,null,null,null,null,null,null)).thenReturn(Flux.just(productResponseModel1, productResponseModel2));
+        when(productService.getAllProducts(null, null, null, null, null, null, null)).thenReturn(Flux.just(productResponseModel1, productResponseModel2));
 
         webClient.get().uri("/products")
                 .accept(MediaType.TEXT_EVENT_STREAM)
@@ -62,12 +66,13 @@ public class ProductControllerUnitTest {
                 .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
                 .expectBodyList(ProductResponseModel.class);
 
-        verify(productService).getAllProducts(null,null,null,null,null,null,null);
+        verify(productService).getAllProducts(null, null, null, null, null, null, null);
     }
+
     @Test
     public void whenNoProductsExist_thenReturnEmptyList() {
 
-        when(productService.getAllProducts(null,null,null,null,null,null,null)).thenReturn(Flux.empty());
+        when(productService.getAllProducts(null, null, null, null, null, null, null)).thenReturn(Flux.empty());
 
         webClient.get().uri("/products")
                 .accept(MediaType.TEXT_EVENT_STREAM)
@@ -80,7 +85,7 @@ public class ProductControllerUnitTest {
                     assertEquals(0, productResponseModel.size());
                 });
 
-        verify(productService).getAllProducts(null,null,null,null,null,null,null);
+        verify(productService).getAllProducts(null, null, null, null, null, null, null);
     }
 
     @Test

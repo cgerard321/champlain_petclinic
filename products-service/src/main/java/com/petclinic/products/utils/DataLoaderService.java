@@ -7,16 +7,12 @@ import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.datalayer.ratings.RatingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -41,8 +37,6 @@ public class DataLoaderService implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // TODO: Uncomment this after migration (I dont have mongo on my computer so the service nevers starts if this is active
-        /*
         // If the database is not empty, do not load data
         try {
             if (
@@ -57,7 +51,7 @@ public class DataLoaderService implements CommandLineRunner {
         } catch (Exception e) {
             System.out.println("Error checking if products exist: " + e.getMessage());
             return;
-        }*/
+        }
 
         Product product1 = Product.builder()
                 .productId("06a7d573-bcab-4db3-956f-773324b92a80")
@@ -432,7 +426,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .build();
 
         Flux.just(bundle1, bundle2, bundle3)
-                .flatMap(s -> productBundleRepository.insert(Mono.just(s))
+                .flatMap(s -> productBundleRepository.save(s)
                         .log(s.toString()))
                 .subscribe();
 
@@ -451,12 +445,12 @@ public class DataLoaderService implements CommandLineRunner {
                         rating1prod7, rating2prod7,
                         rating1prod8, rating2prod8
                 )
-                .flatMap(s -> ratingRepository.insert(Mono.just(s))
+                .flatMap(s -> ratingRepository.save(s)
                         .log(s.toString()))
                 .subscribe();
 
         Flux.just(image1, image2, image3, image4, image5, image6, image7, image8)
-                .flatMap(s -> imageRepository.insert(Mono.just(s))
+                .flatMap(s -> imageRepository.save(s)
                         .log(s.toString()))
                 .subscribe();
 

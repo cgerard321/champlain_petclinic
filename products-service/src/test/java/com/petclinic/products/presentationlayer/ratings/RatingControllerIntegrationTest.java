@@ -4,11 +4,10 @@ import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductRepository;
 import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.datalayer.ratings.RatingRepository;
-import com.petclinic.products.presentationlayer.products.ProductResponseModel;
 import com.petclinic.products.utils.EntityModelUtil;
+import com.petclinic.products.utils.PostgresTestContainerBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -22,13 +21,14 @@ import reactor.test.StepVerifier;
 
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {"spring.data.mongodb.port= 0"})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 //@TestInstance(TestInstance.Lifecycle.PER_METHOD)
 @AutoConfigureWebTestClient
-class RatingControllerIntegrationTest {
+class RatingControllerIntegrationTest extends PostgresTestContainerBase {
     @Autowired
     WebTestClient webClient;
 
@@ -86,7 +86,7 @@ class RatingControllerIntegrationTest {
             .build();
 
     @BeforeEach
-    public void setupDB(){
+    public void setupDB() {
         Publisher<Product> productSetup = productRepository.deleteAll()
                 .thenMany(Flux.just(product1, product2))
                 .flatMap(productRepository::save);
@@ -103,7 +103,7 @@ class RatingControllerIntegrationTest {
     }
 
     @Test
-    public void whenGetRatingsForProduct_thenReturnRatings(){
+    public void whenGetRatingsForProduct_thenReturnRatings() {
         webClient.get()
                 .uri("/ratings/" + product1.getProductId())
                 .exchange()
@@ -117,7 +117,7 @@ class RatingControllerIntegrationTest {
     }
 
     @Test
-    public void whenGetRatingsForNotFoundProduct_thenReturnNotFoundProduct(){
+    public void whenGetRatingsForNotFoundProduct_thenReturnNotFoundProduct() {
         webClient.get()
                 .uri("/ratings/" + UNFOUND_PRODUCT_ID)
                 .exchange()
@@ -128,7 +128,7 @@ class RatingControllerIntegrationTest {
     }
 
     @Test
-    public void whenGetRatingsForInvalidProduct_thenReturnInvalidProduct(){
+    public void whenGetRatingsForInvalidProduct_thenReturnInvalidProduct() {
         webClient.get()
                 .uri("/ratings/" + INVALID_PRODUCT_ID)
                 .exchange()
@@ -139,7 +139,7 @@ class RatingControllerIntegrationTest {
     }
 
     @Test
-    public void whenGetRatingForProductByCustomer_thenReturnRating(){
+    public void whenGetRatingForProductByCustomer_thenReturnRating() {
         webClient.get()
                 .uri("/ratings/" + product1.getProductId() + "/" + rating1Prod1.getCustomerId())
                 .exchange()
@@ -150,7 +150,7 @@ class RatingControllerIntegrationTest {
     }
 
     @Test
-    public void whenGetRatingForValidProductInvalidCustomer_thenReturnInvalidCustomer(){
+    public void whenGetRatingForValidProductInvalidCustomer_thenReturnInvalidCustomer() {
         webClient.get()
                 .uri("/ratings/" + product1.getProductId() + "/" + INVALID_USER_ID)
                 .exchange()
@@ -161,7 +161,7 @@ class RatingControllerIntegrationTest {
     }
 
     @Test
-    public void whenGetRatingForInvalidProductValidCustomer_thenReturnInvalidProduct(){
+    public void whenGetRatingForInvalidProductValidCustomer_thenReturnInvalidProduct() {
         webClient.get()
                 .uri("/ratings/" + INVALID_PRODUCT_ID + "/" + rating1Prod1.getCustomerId())
                 .exchange()
@@ -171,8 +171,8 @@ class RatingControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("Provided product id is invalid: " + INVALID_PRODUCT_ID);
     }
 
-//    @Test
-    public void whenAddRatingForProductByCustomer_thenReturnRating(){
+    //    @Test
+    public void whenAddRatingForProductByCustomer_thenReturnRating() {
         RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
                 .review("It's great")
                 .rating((byte) 5)
@@ -251,7 +251,7 @@ class RatingControllerIntegrationTest {
 //    }
 
     @Test
-    public void whenAddNullRating_thenReturnInvalidInput(){
+    public void whenAddNullRating_thenReturnInvalidInput() {
         RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
                 .review("It's great")
                 .rating(null)
@@ -325,7 +325,7 @@ class RatingControllerIntegrationTest {
 //    }
 
     @Test
-    public void whenAddRatingForProductWithExistingCustomer_thenReturnRatingAlreadyExists(){
+    public void whenAddRatingForProductWithExistingCustomer_thenReturnRatingAlreadyExists() {
         RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
                 .rating((byte) 5)
                 .build();
@@ -383,7 +383,7 @@ class RatingControllerIntegrationTest {
     // }
 
     @Test
-    public void whenAddRatingForProductWithInvalidCustomer_thenReturnInvalidCustomer(){
+    public void whenAddRatingForProductWithInvalidCustomer_thenReturnInvalidCustomer() {
         RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
                 .rating((byte) 5)
                 .build();
@@ -404,7 +404,7 @@ class RatingControllerIntegrationTest {
     }
 
     @Test
-    public void whenAddRatingForInvalidProduct_thenReturnInvalidProduct(){
+    public void whenAddRatingForInvalidProduct_thenReturnInvalidProduct() {
         RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
                 .rating((byte) 5)
                 .build();
@@ -425,7 +425,7 @@ class RatingControllerIntegrationTest {
     }
 
     @Test
-    public void whenAddRatingForNotFoundProduct_thenReturnNotFoundProduct(){
+    public void whenAddRatingForNotFoundProduct_thenReturnNotFoundProduct() {
         RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
                 .rating((byte) 5)
                 .build();
@@ -499,7 +499,7 @@ class RatingControllerIntegrationTest {
     // }
 
     @Test
-    public void whenUpdateWithLongReview_thenReturnInvalidInput(){
+    public void whenUpdateWithLongReview_thenReturnInvalidInput() {
         RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
                 .rating((byte) 5)
                 .review("It's great".repeat(200))
@@ -521,7 +521,7 @@ class RatingControllerIntegrationTest {
     }
 
     @Test
-    public void whenUpdateWithNullRating_thenReturnInvalidInput(){
+    public void whenUpdateWithNullRating_thenReturnInvalidInput() {
         RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
                 .rating(null)
                 .review("It's great")
@@ -543,7 +543,7 @@ class RatingControllerIntegrationTest {
     }
 
     @Test
-    public void whenUpdateWithInvalidRatingForProduct_thenReturnInvalidRating(){
+    public void whenUpdateWithInvalidRatingForProduct_thenReturnInvalidRating() {
         RatingRequestModel ratingRequestModel1 = RatingRequestModel.builder()
                 .rating((byte) 6)
                 .build();
@@ -615,7 +615,7 @@ class RatingControllerIntegrationTest {
 //    }
 
     @Test
-    public void whenUpdateRatingForProductWithInvalidCustomer_thenReturnInvalidCustomer(){
+    public void whenUpdateRatingForProductWithInvalidCustomer_thenReturnInvalidCustomer() {
         RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
                 .rating((byte) 5)
                 .build();
@@ -632,7 +632,7 @@ class RatingControllerIntegrationTest {
     }
 
     @Test
-    public void whenUpdateRatingForInvalidProduct_thenReturnInvalidProduct(){
+    public void whenUpdateRatingForInvalidProduct_thenReturnInvalidProduct() {
         RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
                 .rating((byte) 5)
                 .build();
@@ -649,7 +649,7 @@ class RatingControllerIntegrationTest {
     }
 
     @Test
-    public void whenUpdateRatingForNotFoundProduct_thenReturnNotFoundProduct(){
+    public void whenUpdateRatingForNotFoundProduct_thenReturnNotFoundProduct() {
         RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
                 .rating((byte) 5)
                 .build();
@@ -666,7 +666,7 @@ class RatingControllerIntegrationTest {
     }
 
     @Test
-    public void whenDeleteRating_thenReturnRating(){
+    public void whenDeleteRating_thenReturnRating() {
         webClient.delete()
                 .uri("/ratings/" + product1.getProductId() + "/" + rating1Prod1.getCustomerId())
                 .exchange()
@@ -681,7 +681,7 @@ class RatingControllerIntegrationTest {
     }
 
     @Test
-    public void whenDeleteRatingWithInvalidCustomer_thenReturnInvalidCustomer(){
+    public void whenDeleteRatingWithInvalidCustomer_thenReturnInvalidCustomer() {
         webClient.delete()
                 .uri("/ratings/" + product1.getProductId() + "/" + INVALID_USER_ID)
                 .exchange()
@@ -696,7 +696,7 @@ class RatingControllerIntegrationTest {
     }
 
     @Test
-    public void whenDeleteRatingForInvalidProduct_thenReturnInvalidProduct(){
+    public void whenDeleteRatingForInvalidProduct_thenReturnInvalidProduct() {
         webClient.delete()
                 .uri("/ratings/" + INVALID_PRODUCT_ID + "/" + rating1Prod1.getCustomerId())
                 .exchange()

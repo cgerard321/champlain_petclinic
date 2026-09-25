@@ -1,16 +1,17 @@
 package com.petclinic.products.businesslayer.products;
 
 import com.petclinic.products.datalayer.products.*;
-import com.petclinic.products.presentationlayer.products.*;
-import com.petclinic.products.utils.exceptions.*;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-
 import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.datalayer.ratings.RatingRepository;
+import com.petclinic.products.presentationlayer.products.*;
 import com.petclinic.products.utils.EntityModelUtil;
+import com.petclinic.products.utils.exceptions.InvalidAmountException;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
+import com.petclinic.products.utils.exceptions.NotFoundException;
+import com.petclinic.products.utils.exceptions.ProductInBundleConflictException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -30,7 +31,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductTypeRepository productTypeRepository;
 
     public ProductServiceImpl(ProductRepository productRepository, RatingRepository ratingRepository
-    , ProductBundleRepository productBundleRepository, ProductBundleService productBundleService, ProductTypeRepository productTypeRepository) {
+            , ProductBundleRepository productBundleRepository, ProductBundleService productBundleService, ProductTypeRepository productTypeRepository) {
         this.productRepository = productRepository;
         this.ratingRepository = ratingRepository;
         this.productBundleRepository = productBundleRepository;
@@ -43,7 +44,7 @@ public class ProductServiceImpl implements ProductService {
                 .map(Rating::getRating)
                 .collectList()
                 .flatMap(ratings -> {
-                    if(ratings.isEmpty()){
+                    if (ratings.isEmpty()) {
                         product.setAverageRating(0.0);
                         return Mono.just(product);
                     }
@@ -60,7 +61,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Flux<ProductResponseModel> getAllProducts(Double minPrice, Double maxPrice, Double minRating, Double maxRating, String sort,String deliveryType, String productType) {
+    public Flux<ProductResponseModel> getAllProducts(Double minPrice, Double maxPrice, Double minRating, Double maxRating, String sort, String deliveryType, String productType) {
         if (sort != null && !Arrays.asList("asc", "desc", "default").contains(sort.toLowerCase())) {
             throw new InvalidInputException("Invalid sort parameter: " + sort);
         }
@@ -92,8 +93,8 @@ public class ProductServiceImpl implements ProductService {
                     }
                 })
                 //Filter productType
-                .filter(product->{
-                    if(productType == null || productType.trim().isEmpty()){
+                .filter(product -> {
+                    if (productType == null || productType.trim().isEmpty()) {
                         return true;
                     }
                     return product.getProductType().toString().equalsIgnoreCase(productType);
@@ -264,7 +265,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
 
-
     @Scheduled(cron = "0 0 0 * * ?") // Runs daily at midnight
     public Mono<Void> patchProductStatus() {
         return productRepository.findAll()
@@ -283,7 +283,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Mono<ProductEnumsResponseModel> getProductsEnumValues(){
+    public Mono<ProductEnumsResponseModel> getProductsEnumValues() {
         ProductEnumsResponseModel response = ProductEnumsResponseModel.builder()
                 .productStatus(Arrays.asList(ProductStatus.values()))
                 .productType(Arrays.asList(ProductType.values()))
@@ -296,52 +296,52 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Flux<ProductTypeResponseModel> getAllProductTypes() {
         return productTypeRepository.findAll()
-            .map(EntityModelUtil::toProductTypeResponseModel);
+                .map(EntityModelUtil::toProductTypeResponseModel);
     }
 
 
     @Override
     public Mono<ProductTypeResponseModel> getProductTypeByProductTypeId(String productTypeId) {
         return productTypeRepository.findByProductTypeId(productTypeId)
-            .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("ProductType id was not found: " + productTypeId))))
-            .map(EntityModelUtil::toProductTypeResponseModel);
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("ProductType id was not found: " + productTypeId))))
+                .map(EntityModelUtil::toProductTypeResponseModel);
     }
 
     @Override
     public Mono<ProductTypeResponseModel> addProductType(Mono<ProductTypeRequestModel> productTypeRequestModel) {
         return productTypeRequestModel
-            .map(request -> {
-                request.setTypeName(request.getTypeName().toUpperCase());
-                return EntityModelUtil.toProductTypeEntity(request);
-            })
-            .flatMap(productTypeRepository::save)
-            .map(EntityModelUtil::toProductTypeResponseModel);
+                .map(request -> {
+                    request.setTypeName(request.getTypeName().toUpperCase());
+                    return EntityModelUtil.toProductTypeEntity(request);
+                })
+                .flatMap(productTypeRepository::save)
+                .map(EntityModelUtil::toProductTypeResponseModel);
     }
 
     @Override
     public Mono<ProductTypeResponseModel> updateProductTypeByProductTypeId(String productTypeId, Mono<ProductTypeRequestModel> productTypeRequestModel) {
         return productTypeRepository.findByProductTypeId(productTypeId)
-            .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("ProductType id was not found: " + productTypeId))))
-            .flatMap(found -> productTypeRequestModel
-                .map(EntityModelUtil::toProductTypeEntity)
-                .map(entity -> {
-                    entity.setId(found.getId());
-                    entity.setProductTypeId(found.getProductTypeId());
-                    entity.setTypeName(entity.getTypeName().toUpperCase());
-                    return entity;
-                })
-                .flatMap(productTypeRepository::save))
-            .map(EntityModelUtil::toProductTypeResponseModel);
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("ProductType id was not found: " + productTypeId))))
+                .flatMap(found -> productTypeRequestModel
+                        .map(EntityModelUtil::toProductTypeEntity)
+                        .map(entity -> {
+                            entity.setId(found.getId());
+                            entity.setProductTypeId(found.getProductTypeId());
+                            entity.setTypeName(entity.getTypeName().toUpperCase());
+                            return entity;
+                        })
+                        .flatMap(productTypeRepository::save))
+                .map(EntityModelUtil::toProductTypeResponseModel);
     }
 
     @Override
     public Mono<ProductTypeResponseModel> deleteProductTypeByProductTypeId(String productTypeId) {
         return productTypeRepository.findByProductTypeId(productTypeId)
-            .switchIfEmpty(Mono.error(new NotFoundException("ProductType id was not found: " + productTypeId)))
-            .flatMap(existingProductType ->
-                productTypeRepository.delete(existingProductType)
-                .thenReturn(EntityModelUtil.toProductTypeResponseModel(existingProductType))
-            );
+                .switchIfEmpty(Mono.error(new NotFoundException("ProductType id was not found: " + productTypeId)))
+                .flatMap(existingProductType ->
+                        productTypeRepository.delete(existingProductType)
+                                .thenReturn(EntityModelUtil.toProductTypeResponseModel(existingProductType))
+                );
     }
 
-    }
+}
