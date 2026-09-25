@@ -27,6 +27,8 @@ class RatingControllerV1IntegrationTest {
 
     private final String jwtToken = "valid-test-token-for-valid-owner-id";
 
+    private final String CSRF_TOKEN = "csrfToken";
+
     @RegisterExtension
     static WireMockExtension ratingMock = WireMockExtension.newInstance()
             .options(WireMockConfiguration.options().port(7007))
@@ -120,6 +122,8 @@ class RatingControllerV1IntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .cookie("Bearer", jwtToken)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
                 .bodyValue("{\"rating\": 2}")
                 .exchange()
                 .expectStatus().isUnauthorized()
@@ -153,6 +157,8 @@ class RatingControllerV1IntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .cookie("Bearer", jwtToken)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
                 .bodyValue("{\"rating\": 3}")
                 .exchange()
                 .expectStatus().isCreated()
@@ -186,6 +192,8 @@ class RatingControllerV1IntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .cookie("Bearer", jwtToken)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
                 .bodyValue("{\"rating\": 4}")
                 .exchange()
                 .expectStatus().isOk()
@@ -219,6 +227,8 @@ class RatingControllerV1IntegrationTest {
                 .uri("/api/gateway/ratings/{productId}", productId)
                 .accept(MediaType.APPLICATION_JSON)
                 .cookie("Bearer", jwtToken)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()

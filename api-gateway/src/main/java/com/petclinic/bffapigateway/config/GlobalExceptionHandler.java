@@ -54,14 +54,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(401).body(new HttpErrorInfo(401,ex.getMessage()));
     }
 
-
     @ExceptionHandler(value = InvalidTokenException.class)
     public ResponseEntity<HttpErrorInfo> invalidTokenException(InvalidTokenException ex) {
 
         return ResponseEntity.status(498)
                 .body(new HttpErrorInfo(498, ex.getMessage()));
     }
-
 
     @ExceptionHandler(value = NotFoundException.class)
     public ResponseEntity<HttpErrorInfo> runtimeException(RuntimeException ex) {
