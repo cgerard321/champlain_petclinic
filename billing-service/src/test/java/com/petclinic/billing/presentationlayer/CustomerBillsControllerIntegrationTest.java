@@ -82,13 +82,13 @@ public class CustomerBillsControllerIntegrationTest {
 
         Publisher<Bill> setup = billRepository.deleteAll().thenMany(billRepository.save(bill));
 
-        CustomerResponseModel owner = new CustomerResponseModel();
-        owner.setOwnerId(bill.getCustomerId());
-        owner.setFirstName("John");
-        owner.setLastName("Doe");
+        CustomerResponseModel customer = new CustomerResponseModel();
+        customer.setOwnerId(bill.getCustomerId());
+        customer.setFirstName("John");
+        customer.setLastName("Doe");
 
         when(customerServiceClient.getCustomerByCustomerId(bill.getCustomerId()))
-                .thenReturn(Mono.just(owner));
+                .thenReturn(Mono.just(customer));
 
         StepVerifier.create(setup)
                 .expectNextCount(1)

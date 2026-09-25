@@ -92,8 +92,8 @@ public class BillServiceImplTest {
         Bill bill1 = Bill.builder()
                 .billId("billId-1")
                 .customerId("customerId-1")
-                .customerFirstName("ownerFirstName1")
-                .customerLastName("ownerLastName1")
+                .customerFirstName("customerFirstName1")
+                .customerLastName("customerLastName1")
                 .visitType("operation")
                 .vetId("vetId1")
                 .vetFirstName("vetFirstName1")
@@ -106,8 +106,8 @@ public class BillServiceImplTest {
         Bill bill2 = Bill.builder()
                 .billId("billId-2")
                 .customerId("customerId-2")
-                .customerFirstName("ownerFirstName2")
-                .customerLastName("ownerLastName2")
+                .customerFirstName("customerFirstName2")
+                .customerLastName("customerLastName2")
                 .visitType("general")
                 .vetId("vetId2")
                 .vetFirstName("vetFirstName2")
@@ -120,8 +120,8 @@ public class BillServiceImplTest {
         Bill bill3 = Bill.builder()
                 .billId("billId-3")
                 .customerId("customerId-3")
-                .customerFirstName("ownerFirstName3")
-                .customerLastName("ownerLastName3")
+                .customerFirstName("customerFirstName3")
+                .customerLastName("customerLastName3")
                 .visitType("injury")
                 .vetId("vetId3")
                 .vetFirstName("vetFirstName3")
@@ -134,7 +134,7 @@ public class BillServiceImplTest {
 
         Pageable pageable = PageRequest.of(0, 2);
 
-        // Mock the repository to return a Flux of owners
+        // Mock the repository to return a Flux of customers
         when(repo.findAll()).thenReturn(Flux.just(bill1, bill2, bill3));
         when(repo.findAllBillsByBillStatus(BillStatus.UNPAID)).thenReturn(Flux.empty());
 
@@ -196,24 +196,24 @@ public class BillServiceImplTest {
     @Test
     public void test_getBillsByOwnerName() {
 
-        String ownerFirstName = "John";
-        String ownerLastName = "Doe";
+        String customerFirstName = "John";
+        String customerLastName = "Doe";
 
         Bill billEntity = buildBill();
-        billEntity.setCustomerFirstName(ownerFirstName);
-        billEntity.setCustomerLastName(ownerLastName);
+        billEntity.setCustomerFirstName(customerFirstName);
+        billEntity.setCustomerLastName(customerLastName);
 
         when(repo.findAll()).thenReturn(Flux.just(billEntity));
 
 
-        Flux<BillResponseModel> result = billService.getAllBillsByCustomerName(ownerFirstName, ownerLastName);
+        Flux<BillResponseModel> result = billService.getAllBillsByCustomerName(customerFirstName, customerLastName);
 
 
         StepVerifier.create(result)
                 .consumeNextWith(bill -> {
                     assertNotNull(bill);
-                    assertEquals(ownerFirstName, bill.getCustomerFirstName());
-                    assertEquals(ownerLastName, bill.getCustomerLastName());
+                    assertEquals(customerFirstName, bill.getCustomerFirstName());
+                    assertEquals(customerLastName, bill.getCustomerLastName());
                 })
                 .verifyComplete();
     }
@@ -268,20 +268,20 @@ public class BillServiceImplTest {
     @Test
     public void test_getBillsByOwnerName_notFound() {
 
-        String ownerFirstName = "Nonexistent";
-        String ownerLastName = "Person";
+        String customerFirstName = "Nonexistent";
+        String customerLastName = "Person";
 
         when(repo.findAll()).thenReturn(Flux.empty());
 
 
-        Flux<BillResponseModel> result = billService.getAllBillsByCustomerName(ownerFirstName, ownerLastName);
+        Flux<BillResponseModel> result = billService.getAllBillsByCustomerName(customerFirstName, customerLastName);
 
 
         StepVerifier.create(result)
                 .consumeErrorWith(error -> {
                     assertNotNull(error);
                     assertTrue(error instanceof NotFoundException);
-                    assertEquals("No bills found for the given owner name", error.getMessage());
+                    assertEquals("No bills found for the given customer name", error.getMessage());
                 })
                 .verify();
     }
@@ -333,7 +333,7 @@ public class BillServiceImplTest {
         BillRequestModel billDTO = new BillRequestModel();
         billDTO.setBillStatus(BillStatus.PAID);
         billDTO.setVetId("vet-123");
-        billDTO.setCustomerId("owner-456");
+        billDTO.setCustomerId("customer-456");
         billDTO.setDueDate(LocalDate.now().plusDays(30));
 
         // Mock VetClient response
@@ -344,16 +344,16 @@ public class BillServiceImplTest {
                 .thenReturn(Mono.just(vetResponse));
 
         // Mock OwnerClient response
-        CustomerResponseModel ownerResponse = new CustomerResponseModel();
-        ownerResponse.setFirstName("Alice");
-        ownerResponse.setLastName("Smith");
-        Mockito.when(customerServiceClient.getCustomerByCustomerId("owner-456"))
-                .thenReturn(Mono.just(ownerResponse));
+        CustomerResponseModel customerResponse = new CustomerResponseModel();
+        customerResponse.setFirstName("Alice");
+        customerResponse.setLastName("Smith");
+        Mockito.when(customerServiceClient.getCustomerByCustomerId("customer-456"))
+                .thenReturn(Mono.just(customerResponse));
 
         // Mock AuthServiceClient response
         UserDetails userDetails = new UserDetails();
-        userDetails.setUserId("owner-456");
-        Mockito.when(authClient.getUserById("owner-456", "JWTToken"))
+        userDetails.setUserId("customer-456");
+        Mockito.when(authClient.getUserById("customer-456", "JWTToken"))
                 .thenReturn(Mono.just(userDetails)); // Ensure a non-null Mono is returned
 
         // Mock repository insert
@@ -377,7 +377,7 @@ public class BillServiceImplTest {
 
         // Verify mock interactions
         verify(vetServiceClient).getVetByVetId("vet-123");
-        verify(customerServiceClient).getCustomerByCustomerId("owner-456");
+        verify(customerServiceClient).getCustomerByCustomerId("customer-456");
     }
 
     @Test
@@ -386,7 +386,7 @@ public class BillServiceImplTest {
         BillRequestModel billDTO = new BillRequestModel();
         billDTO.setBillStatus(BillStatus.PAID);
         billDTO.setVetId("vet-123");
-        billDTO.setCustomerId("owner-456");
+        billDTO.setCustomerId("customer-456");
         billDTO.setDueDate(LocalDate.now().plusDays(30));
 
         // Mock VetClient response
@@ -397,20 +397,20 @@ public class BillServiceImplTest {
                 .thenReturn(Mono.just(vetResponse));
 
         // Mock OwnerClient response
-        CustomerResponseModel ownerResponse = new CustomerResponseModel();
-        ownerResponse.setFirstName("Alice");
-        ownerResponse.setLastName("Smith");
-        Mockito.when(customerServiceClient.getCustomerByCustomerId("owner-456"))
-                .thenReturn(Mono.just(ownerResponse));
+        CustomerResponseModel customerResponse = new CustomerResponseModel();
+        customerResponse.setFirstName("Alice");
+        customerResponse.setLastName("Smith");
+        Mockito.when(customerServiceClient.getCustomerByCustomerId("customer-456"))
+                .thenReturn(Mono.just(customerResponse));
 
         // Mock AuthServiceClient response
         UserDetails userDetails = UserDetails.builder()
-                .userId("owner-456")
+                .userId("customer-456")
                 .username("alice.smith")
                 .email("alice.smith@example.com")
                 .roles(Set.of())
                 .build();
-        Mockito.when(authClient.getUserById("owner-456", "JWTToken"))
+        Mockito.when(authClient.getUserById("customer-456", "JWTToken"))
                 .thenReturn(Mono.just(userDetails));
 
         Bill existingBill = new Bill();
@@ -448,7 +448,7 @@ public class BillServiceImplTest {
         BillRequestModel billDTO = new BillRequestModel();
         billDTO.setBillStatus(BillStatus.PAID);
         billDTO.setVetId("vet-123");
-        billDTO.setCustomerId("owner-456");
+        billDTO.setCustomerId("customer-456");
         billDTO.setDueDate(LocalDate.now().plusDays(30));
 
         // Mock VetClient response
@@ -459,11 +459,11 @@ public class BillServiceImplTest {
                 .thenReturn(Mono.just(vetResponse));
 
         // Mock OwnerClient response
-        CustomerResponseModel ownerResponse = new CustomerResponseModel();
-        ownerResponse.setFirstName("Alice");
-        ownerResponse.setLastName("Smith");
-        Mockito.when(customerServiceClient.getCustomerByCustomerId("owner-456"))
-                .thenReturn(Mono.just(ownerResponse));
+        CustomerResponseModel customerResponse = new CustomerResponseModel();
+        customerResponse.setFirstName("Alice");
+        customerResponse.setLastName("Smith");
+        Mockito.when(customerServiceClient.getCustomerByCustomerId("customer-456"))
+                .thenReturn(Mono.just(customerResponse));
 
         Bill existingBill = new Bill();
         existingBill.setBillId("duplicateID");
@@ -487,7 +487,7 @@ public class BillServiceImplTest {
         // Arrange
         BillRequestModel billDTO = new BillRequestModel();
         billDTO.setVetId("vet-123");
-        billDTO.setCustomerId("owner-456");
+        billDTO.setCustomerId("customer-456");
         billDTO.setDueDate(LocalDate.now().plusDays(30));
 
         // Act + Assert
@@ -505,7 +505,7 @@ public class BillServiceImplTest {
     void createBill_missingVetId_shouldReturnError() {
         // Arrange
         BillRequestModel billDTO = new BillRequestModel();
-        billDTO.setCustomerId("owner-456");
+        billDTO.setCustomerId("customer-456");
         billDTO.setBillStatus(BillStatus.PAID);
         billDTO.setDueDate(LocalDate.now().plusDays(30));
 
@@ -723,7 +723,7 @@ public class BillServiceImplTest {
         String nonExistentCustomerId = "nonExistentId";
 
         when(customerServiceClient.getCustomerByCustomerId(nonExistentCustomerId))
-                .thenReturn(Mono.empty()); // Simulate missing owner
+                .thenReturn(Mono.empty()); // Simulate missing customer
 
         // Act
         Flux<BillResponseModel> result = billService.getBillsByCustomerId(nonExistentCustomerId);
@@ -2230,7 +2230,7 @@ public void testGenerateBillPdf_BillNotFound() {
         BillRequestModel billDTO = new BillRequestModel();
         billDTO.setBillStatus(BillStatus.PAID);
         billDTO.setVetId("vet-123");
-        billDTO.setCustomerId("owner-456");
+        billDTO.setCustomerId("customer-456");
         billDTO.setAmount(new BigDecimal("100.00")); // required field per controller
         billDTO.setDate(LocalDate.now());
         billDTO.setDueDate(LocalDate.now().plusDays(30));
@@ -2241,19 +2241,19 @@ public void testGenerateBillPdf_BillNotFound() {
         vetResponse.setLastName("Doe");
         when(vetServiceClient.getVetByVetId("vet-123")).thenReturn(Mono.just(vetResponse));
 
-        // Mock owner info
-        CustomerResponseModel ownerResponse = new CustomerResponseModel();
-        ownerResponse.setFirstName("Alice");
-        ownerResponse.setLastName("Smith");
-        when(customerServiceClient.getCustomerByCustomerId("owner-456")).thenReturn(Mono.just(ownerResponse));
+        // Mock customer info
+        CustomerResponseModel customerResponse = new CustomerResponseModel();
+        customerResponse.setFirstName("Alice");
+        customerResponse.setLastName("Smith");
+        when(customerServiceClient.getCustomerByCustomerId("customer-456")).thenReturn(Mono.just(customerResponse));
 
         // Mock user details (correct order for parameters)
         UserDetails userDetails = UserDetails.builder()
                 .email("test@example.com")
                 .username("Alice Smith")
-                .userId("owner-456")
+                .userId("customer-456")
                 .build();
-        when(authClient.getUserById(eq("jwtToken"), eq("owner-456")))
+        when(authClient.getUserById(eq("jwtToken"), eq("customer-456")))
                 .thenReturn(Mono.just(userDetails));
 
         // Mock repo behavior

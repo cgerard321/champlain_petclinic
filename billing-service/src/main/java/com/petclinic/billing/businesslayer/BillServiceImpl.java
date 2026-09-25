@@ -68,20 +68,20 @@ public class BillServiceImpl implements BillService{
 
 //    @Override
 //    public Flux<BillResponseDTO> getAllBillsByPage(Pageable pageable, String billId, String customerId,
-//                                                   String ownerFirstName, String ownerLastName, String visitType,
+//                                                   String customerFirstName, String customerLastName, String visitType,
 //                                                   String vetId, String vetFirstName, String vetLastName) {
 //        Predicate<Bill> filterCriteria = bill ->
 //                (billId == null || bill.getBillId().equals(billId)) &&
 //                        (customerId == null || bill.getCustomerId().equals(customerId)) &&
-//                        (ownerFirstName == null || bill.getOwnerFirstName().equals(ownerFirstName)) &&
-//                        (ownerLastName == null || bill.getOwnerLastName().equals(ownerLastName)) &&
+//                        (customerFirstName == null || bill.getOwnerFirstName().equals(customerFirstName)) &&
+//                        (customerLastName == null || bill.getOwnerLastName().equals(customerLastName)) &&
 //                        (visitType == null || bill.getVisitType().equals(visitType)) &&
 //                        (vetId == null || bill.getVetId().equals(vetId)) &&
 //                        (vetFirstName == null || bill.getVetFirstName().equals(vetFirstName)) &&
 //                        (vetLastName == null || bill.getVetLastName().equals(vetLastName));
 //
 //
-//        if(billId == null && customerId == null && ownerFirstName == null && ownerLastName == null && visitType == null
+//        if(billId == null && customerId == null && customerFirstName == null && customerLastName == null && visitType == null
 //                && vetId == null && vetFirstName == null && vetLastName == null){
 //            return billRepository.findAll()
 //                    .map(EntityDtoUtil::toBillResponseDto)
@@ -143,7 +143,7 @@ public class BillServiceImpl implements BillService{
         return billRepository.findAll()
                 .filter(bill -> (customerFirstName == null || bill.getCustomerFirstName().equals(customerFirstName)) &&
                         (customerLastName == null || bill.getCustomerLastName().equals(customerLastName)))
-                .switchIfEmpty(Flux.error(new NotFoundException("No bills found for the given owner name")))
+                .switchIfEmpty(Flux.error(new NotFoundException("No bills found for the given customer name")))
                 .map(BillMapper::toBillResponseModel);
     }
 
@@ -184,24 +184,24 @@ public class BillServiceImpl implements BillService{
                     }
                     // Fetch Vet and Owner details
                     Mono<VetResponseModel> vetMono = vetServiceClient.getVetByVetId(dto.getVetId());
-                    Mono<CustomerResponseModel> ownerMono = customerServiceClient.getCustomerByCustomerId(dto.getCustomerId())
+                    Mono<CustomerResponseModel> customerMono = customerServiceClient.getCustomerByCustomerId(dto.getCustomerId())
                             .switchIfEmpty(Mono.error(new ResponseStatusException(
                                     HttpStatus.BAD_REQUEST, "Customer ID does not exist"
                             )));
 
-                    return Mono.zip(vetMono, ownerMono, Mono.just(dto));
+                    return Mono.zip(vetMono, customerMono, Mono.just(dto));
                 })
                 .flatMap(tuple -> {
                     VetResponseModel vet = tuple.getT1();
-                    CustomerResponseModel owner = tuple.getT2();
+                    CustomerResponseModel customer = tuple.getT2();
                     BillRequestModel dto = tuple.getT3();
 
                     // Map to Bill entity and set names
                     Bill bill = BillMapper.toBillEntity(dto);
                     bill.setVetFirstName(vet.getFirstName());
                     bill.setVetLastName(vet.getLastName());
-                    bill.setCustomerFirstName(owner.getFirstName());
-                    bill.setCustomerLastName(owner.getLastName());
+                    bill.setCustomerFirstName(customer.getFirstName());
+                    bill.setCustomerLastName(customer.getLastName());
 
                     // Generate unique short ID safely
                     return generateUniqueBillId(bill, 1)
@@ -301,9 +301,9 @@ public class BillServiceImpl implements BillService{
 //                        .doOnNext(rc::setVetDTO)
 //                        .thenReturn(rc);
 //    }
-//    private Mono<RequestContextAdd> ownerRequestResponse(RequestContextAdd rc) {
+//    private Mono<RequestContextAdd> customerRequestResponse(RequestContextAdd rc) {
 //        return
-//                this.ownerClient.getOwnerByOwnerId(rc.getBillRequestDTO().getCustomerId())
+//                this.customerClient.getOwnerByOwnerId(rc.getBillRequestDTO().getCustomerId())
 //                        .doOnNext(rc::setOwnerResponseDTO)
 //                        .thenReturn(rc);
 //    }
@@ -446,17 +446,17 @@ public class BillServiceImpl implements BillService{
 
     @Override
     public Flux<BillResponseModel> getBillsByCustomerId(String customerId) {
-        // Fetch the owner info first
-        Mono<CustomerResponseModel> ownerMono = customerServiceClient.getCustomerByCustomerId(customerId)
+        // Fetch the customer info first
+        Mono<CustomerResponseModel> customerMono = customerServiceClient.getCustomerByCustomerId(customerId)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Customer ID does not exist"
                 )));
 
-        return ownerMono.flatMapMany(owner ->
+        return customerMono.flatMapMany(customer ->
                 billRepository.findByCustomerId(customerId)
-                        // Only return bills where first/last name match the owner record
-                        .filter(bill -> bill.getCustomerFirstName().equals(owner.getFirstName())
-                                && bill.getCustomerLastName().equals(owner.getLastName()))
+                        // Only return bills where first/last name match the customer record
+                        .filter(bill -> bill.getCustomerFirstName().equals(customer.getFirstName())
+                                && bill.getCustomerLastName().equals(customer.getLastName()))
                         .map(BillMapper::toBillResponseModel)
         );
     }

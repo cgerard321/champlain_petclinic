@@ -195,12 +195,12 @@ class BillControllerIntegrationTest {
         vet.setFirstName("John");
         vet.setLastName("Doe");
 
-        CustomerResponseModel owner = new CustomerResponseModel();
-        owner.setFirstName("Alice");
-        owner.setLastName("Smith");
+        CustomerResponseModel customer = new CustomerResponseModel();
+        customer.setFirstName("Alice");
+        customer.setLastName("Smith");
 
         when(vetServiceClient.getVetByVetId("vet-1")).thenReturn(Mono.just(vet));
-        when(customerServiceClient.getCustomerByCustomerId("cust-1")).thenReturn(Mono.just(owner));
+        when(customerServiceClient.getCustomerByCustomerId("cust-1")).thenReturn(Mono.just(customer));
 
         String testJwtToken = "test-jwt-token";
 
@@ -221,8 +221,8 @@ class BillControllerIntegrationTest {
                 .jsonPath("$.billId").isNotEmpty()
                 .jsonPath("$.vetFirstName").isEqualTo("John")
                 .jsonPath("$.vetLastName").isEqualTo("Doe")
-                .jsonPath("$.ownerFirstName").isEqualTo("Alice")
-                .jsonPath("$.ownerLastName").isEqualTo("Smith")
+                .jsonPath("$.customerFirstName").isEqualTo("Alice")
+                .jsonPath("$.customerLastName").isEqualTo("Smith")
                 .jsonPath("$.billStatus").isEqualTo("PAID")
                 .jsonPath("$.amount").isEqualTo(100.00);
 
@@ -290,13 +290,13 @@ class BillControllerIntegrationTest {
         billEntity.setCustomerLastName("Doe");
 
         // Mock the OwnerClient call
-        CustomerResponseModel owner = new CustomerResponseModel();
-        owner.setOwnerId(billEntity.getCustomerId());
-        owner.setFirstName("John");
-        owner.setLastName("Doe");
+        CustomerResponseModel customer = new CustomerResponseModel();
+        customer.setOwnerId(billEntity.getCustomerId());
+        customer.setFirstName("John");
+        customer.setLastName("Doe");
 
         when(customerServiceClient.getCustomerByCustomerId(billEntity.getCustomerId()))
-                .thenReturn(Mono.just(owner));
+                .thenReturn(Mono.just(customer));
 
         Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(billEntity));
 
