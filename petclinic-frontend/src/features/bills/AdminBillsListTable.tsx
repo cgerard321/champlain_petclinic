@@ -59,21 +59,22 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
 
   // helper that forwards the current local filter state into the paginated API
   const callGetBillsListWithFilters = useCallback(
-    async (page = 0, size = 10): Promise<void> => {
-      await getBillsList(
-        page,
-        size,
-        undefined, // billId
-        filter.customerId || undefined,
-        filter.firstName || undefined,
-        filter.lastName || undefined,
-        filter.visitType || undefined,
-        undefined, // vetId
-        filter.vetFirstName || undefined,
-        filter.vetLastName || undefined
-      );
-    },
-    [getBillsList, filter]
+      async (page = 0, size = 10): Promise<void> => {
+        await getBillsList(
+            page,
+            size,
+            undefined, // billId
+            filter.customerId || undefined,
+            filter.firstName || undefined,
+            filter.lastName || undefined,
+            filter.visitType || undefined,
+            undefined, // vetId
+            filter.vetFirstName || undefined,
+            filter.vetLastName || undefined,
+            showArchivedBills
+        );
+      },
+      [getBillsList, filter, showArchivedBills]
   );
   const [filterYear, setFilterYear] = useState(new Date().getFullYear());
   const [filterMonth, setFilterMonth] = useState(new Date().getMonth() + 1);
@@ -117,10 +118,8 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
   }, []);
 
   useEffect(() => {
-    if (!selectedFilter) {
-      callGetBillsListWithFilters(currentPage, 10);
-    }
-  }, [currentPage, callGetBillsListWithFilters, selectedFilter]);
+    callGetBillsListWithFilters(currentPage, 10);
+  }, [currentPage, callGetBillsListWithFilters]);
 
   useEffect(() => {
     const callArchiveBills = async (): Promise<void> => {
@@ -192,6 +191,11 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
     if (!status) {
       callGetBillsListWithFilters(currentPage, 10);
     }
+  };
+
+  const handleArchiveToggle = (): void => {
+    setCurrentPage(0);
+    setShowArchivedBills(prev => !prev);
   };
 
   const handleOwnerNameChange = async (
@@ -506,18 +510,18 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
             {activeSection === 'create' ? 'Close Create' : 'Create'}
           </button>
           <button
-            className={`archive-btn ${showArchivedBills ? 'active' : ''}`}
-            onClick={() => setShowArchivedBills(prev => !prev)}
+              className={`archive-btn ${showArchivedBills ? 'active' : ''}`}
+              onClick={handleArchiveToggle}
           >
             {showArchivedBills ? 'Hide Archived' : 'Show Archived'}
           </button>
         </div>
 
-        <div style={{ marginTop: '12px' }}>
+        <div style={{marginTop: '12px'}}>
           <div
-            className="currency-dropdown"
-            tabIndex={0}
-            onBlur={() => setCurrencyOpen(false)}
+              className="currency-dropdown"
+              tabIndex={0}
+              onBlur={() => setCurrencyOpen(false)}
           >
             <button
               type="button"
