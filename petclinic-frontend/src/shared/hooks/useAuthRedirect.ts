@@ -5,13 +5,12 @@ import { useUser } from '@/context/UserContext';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 
 export const useAuthRedirect = (): void => {
-  const { user } = useUser();
+  const { user, isLoading } = useUser();
   const navigate = useNavigate();
-  // const setUser = useContext(UserContext)?.setUser;
 
   useEffect(() => {
-    if (user.userId === '') {
+    if (!isLoading && user.userId === '') {
       navigate(AppRoutePaths.Login);
     }
-  }, [user, navigate]);
+  }, [user, isLoading, navigate]);
 };
