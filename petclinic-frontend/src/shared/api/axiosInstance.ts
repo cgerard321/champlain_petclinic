@@ -29,6 +29,9 @@ const createAxiosInstance = (): AxiosInstance => {
     headers: {
       'Content-Type': 'application/json',
     },
+    xsrfCookieName: 'XSRF-TOKEN',
+    xsrfHeaderName: 'X-XSRF-TOKEN',
+    withXSRFToken: true,
   });
 
   // Request interceptor (no changes needed here)

@@ -138,8 +138,10 @@ public class UserController {
 
             HashMap<String, Object> userAndToken = userService.login(login);
             ResponseCookie token = (ResponseCookie) userAndToken.get("token");
+            ResponseCookie csrfCookie = (ResponseCookie) userAndToken.get("csrfToken");
             User loggedInUser = (User) userAndToken.get("user");
             response.setHeader(HttpHeaders.SET_COOKIE, token.toString());
+            response.setHeader(HttpHeaders.SET_COOKIE, csrfCookie.toString());
             UserPasswordLessDTO testUser = userMapper.modelToIDLessPasswordLessDTO(loggedInUser);
             return ResponseEntity.ok()
                     .body(testUser);

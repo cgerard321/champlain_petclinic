@@ -303,10 +303,17 @@ public class UserServiceImpl implements UserService {
                     .sameSite("Lax")
                     .build();
 
-
+            ResponseCookie csrfCookie = ResponseCookie.from("XSRF-TOKEN", UUID.randomUUID().toString())
+                    .httpOnly(false)
+                    .secure(true)
+                    .maxAge(Duration.ofHours(1))
+                    .path("/")
+                    .sameSite("Lax")
+                    .build();
 
             return new HashMap<>() {{
                 put("token", token);
+                put("csrfToken", csrfCookie);
                 put("user", loggedInUser);
             }};
         }
