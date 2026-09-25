@@ -5,7 +5,7 @@ import './index.css';
 import { UserProvider } from '@/context/UserContext.tsx';
 import { CartProvider } from '@/context/CartContext.tsx';
 import { ToastProvider } from '@/shared/components/toast/ToastProvider.tsx';
-
+import './utils/i18n';
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ToastProvider>
