@@ -1,0 +1,2 @@
+cd employee-frontend
+npx lint-staged
