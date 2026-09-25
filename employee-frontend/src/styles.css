@@ -1,15 +1,17 @@
 /* src/styles.css */
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
 
-html, body {
+html,
+body {
   height: 100%;
   margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
   background-color: #f8fafc;
 }
 
 /* Global sanity check for SVGs and Images */
-svg, img {
+svg,
+img {
   max-width: 100%;
   height: auto;
 }

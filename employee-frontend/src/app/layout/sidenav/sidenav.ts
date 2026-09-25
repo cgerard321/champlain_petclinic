@@ -18,9 +18,9 @@ interface NavItem {
   styleUrl: './sidenav.css',
 })
 export class Sidenav {
-  protected readonly authState: any = inject(AuthState);
+  protected readonly authState: AuthState = inject(AuthState);
 
-  protected employeeName: string = this.getInitialName();
+  protected employeeName: string = this.authState.userName();
 
   protected readonly items: NavItem[] = [
     { label: 'Dashboard', route: '/home', icon: 'dashboard' },
@@ -31,25 +31,8 @@ export class Sidenav {
     { label: 'Settings', route: '/settings', icon: 'settings' },
   ];
 
-  private getInitialName(): string {
-    if (typeof this.authState.user === 'function') {
-      return this.authState.user()?.name || 'Sarah Jenkins';
-    }
-    return this.authState.user?.name || 'Sarah Jenkins';
-  }
-
   protected applyNameChange(): void {
     if (!this.employeeName.trim()) return;
-
-    if (typeof this.authState.setUserName === 'function') {
-      this.authState.setUserName(this.employeeName);
-    } else if (typeof this.authState.setUser === 'function') {
-      const currentUser = typeof this.authState.user === 'function' ? this.authState.user() : this.authState.user;
-      this.authState.setUser({ ...currentUser, name: this.employeeName });
-    } else if (typeof this.authState.user === 'function' && typeof this.authState.user.set === 'function') {
-      this.authState.user.set({ ...this.authState.user(), name: this.employeeName });
-    } else if (this.authState.user) {
-      this.authState.user.name = this.employeeName;
-    }
+    this.authState.setUserName(this.employeeName);
   }
 }

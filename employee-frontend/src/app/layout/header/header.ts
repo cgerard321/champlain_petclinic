@@ -7,17 +7,14 @@ import { AuthState } from '@core/services/auth-state';
   selector: 'app-header',
   imports: [MatIconModule],
   templateUrl: './header.html',
-  styleUrl: './header.css'
+  styleUrl: './header.css',
 })
 export class Header {
-  protected readonly authState: any = inject(AuthState);
+  protected readonly authState: AuthState = inject(AuthState);
   private router = inject(Router);
 
   get currentName(): string {
-    if (typeof this.authState.user === 'function') {
-      return this.authState.user()?.name || 'Sarah Jenkins';
-    }
-    return this.authState.user?.name || 'Sarah Jenkins';
+    return this.authState.userName();
   }
 
   get initials(): string {
@@ -33,8 +30,6 @@ export class Header {
   protected logout(): void {
     if (typeof this.authState.logout === 'function') {
       this.authState.logout();
-    } else if (typeof this.authState.clear === 'function') {
-      this.authState.clear();
     }
     this.router.navigate(['/login']);
   }
