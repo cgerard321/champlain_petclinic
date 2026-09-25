@@ -10,9 +10,11 @@ export class Auth {
   private readonly authState = inject(AuthState);
 
   login(credentials: LoginRequest): Observable<void> {
-    return this.http.post<void>('/api/gateway/users/login', credentials).pipe(
-      switchMap(() => this.authState.checkToken()),
-      map(() => undefined),
-    );
+    return this.http
+      .post<void>('/api/gateway/users/login', credentials)
+      .pipe(
+        switchMap(() => this.authState.checkToken()),
+        map(() => undefined)
+      );
   }
 }
