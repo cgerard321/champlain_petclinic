@@ -125,13 +125,13 @@ public class BillControllerV1 {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
-    @GetMapping(value = "/bills-count")
+    @GetMapping(value = "/count")
     public Mono<Long> getTotalNumberOfBills(){
         return billServiceClient.getTotalNumberOfBills();
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
-    @GetMapping(value = "/bills-filtered-count")
+    @GetMapping(value = "/filtered-count")
     public Mono<Long> getTotalNumberOfBillsWithFilters (@RequestParam(required = false) String billId,
                                                         @RequestParam(required = false) String customerId,
                                                         @RequestParam(required = false) String ownerFirstName,

@@ -135,13 +135,13 @@ public class BillController {
     }
 
     // Bills/Filters
-    @GetMapping("/bills/bills-count")
+    @GetMapping("/bills/count")
     public Mono<ResponseEntity<Long>> getTotalNumberOfBills() {
         return billService.getAllBills().count()
                 .map(response -> ResponseEntity.status(HttpStatus.OK).body(response));
     }
 
-    @GetMapping("/bills/bills-filtered-count")
+    @GetMapping("/bills/filtered-count")
     public Mono<Long> getNumberOfBillsWithFilters(@RequestParam(required = false) String billId,
                                                   @RequestParam(required = false) String customerId,
                                                   @RequestParam(required = false) String customerFirstName,

@@ -120,7 +120,7 @@ public class BillServiceClient {
     //to be changed
     public Mono<Long> getTotalNumberOfBills() {
         return webClientBuilder.build().get()
-                .uri(billServiceUrl + "/bills-count")
+                .uri(billServiceUrl + "/count")
                 .retrieve()
                 .bodyToMono(Long.class);
     }
@@ -128,7 +128,7 @@ public class BillServiceClient {
     public Mono<Long> getTotalNumberOfBillsWithFilters(String billId, String customerId,
                                                        String ownerFirstName, String ownerLastName, String visitType,
                                                        String vetId, String vetFirstName, String vetLastName){
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(billServiceUrl + "/bills-filtered-count");
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(billServiceUrl + "/filtered-count");
 
         // Add query parameters conditionally if they are not null or empty
         if (billId != null && !billId.isEmpty()) {
