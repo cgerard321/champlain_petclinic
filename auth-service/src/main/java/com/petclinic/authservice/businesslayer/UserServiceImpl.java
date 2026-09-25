@@ -1,6 +1,5 @@
 /**
  * Created by IntelliJ IDEA.
- * <p>
  * User: @Fube
  * Date: 2021-10-14
  * Ticket: feat(AUTH-CPC-388)
