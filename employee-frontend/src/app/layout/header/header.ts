@@ -20,3 +20,4 @@ export class Header {
     this.authState.logout().subscribe(() => this.router.navigateByUrl('/login'));
   }
 }
+const x = {y:y}

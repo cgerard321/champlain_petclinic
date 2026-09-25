@@ -11,7 +11,7 @@
     "lint:fix": "eslint src --fix",
     "lint:style": "stylelint \"src/**/*.{css,scss}\"",
     "lint:style:fix": "stylelint \"src/**/*.{css,scss}\" --fix",
-    "prepare": "husky"
+    "prepare": "cd .. && husky employee-frontend/.husky"
   },
   "private": true,
   "packageManager": "npm@12.0.2",
