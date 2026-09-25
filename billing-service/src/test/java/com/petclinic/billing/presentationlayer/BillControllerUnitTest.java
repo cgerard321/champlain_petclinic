@@ -192,7 +192,7 @@ class BillControllerUnitTest {
         when(billService.getAllBillsByCustomerName(anyString(), anyString())).thenReturn(Flux.just(responseDTO));
 
         client.get()
-                .uri("/bills/owner/" + responseDTO.getOwnerFirstName() + "/" + responseDTO.getOwnerLastName())
+                .uri("/bills/owner/" + responseDTO.getCustomerFirstName() + "/" + responseDTO.getCustomerLastName())
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
@@ -203,7 +203,7 @@ class BillControllerUnitTest {
                     Assertions.assertNotNull(billResponseModels);
                 });
 
-        Mockito.verify(billService, times(1)).getAllBillsByCustomerName(responseDTO.getOwnerFirstName(), responseDTO.getOwnerLastName());
+        Mockito.verify(billService, times(1)).getAllBillsByCustomerName(responseDTO.getCustomerFirstName(), responseDTO.getCustomerLastName());
     }
 
     @Test
@@ -342,8 +342,8 @@ class BillControllerUnitTest {
                 .interest(new BigDecimal(0.00))
                 .billStatus(BillStatus.PAID)
                 .dueDate(dueDate)
-                .ownerFirstName("John")
-                .ownerLastName("Doe")
+                .customerFirstName("John")
+                .customerLastName("Doe")
                 .vetFirstName("Jane") // Set valid vetFirstName
                 .vetLastName("Smith") // Set valid vetLastName
                 .build();

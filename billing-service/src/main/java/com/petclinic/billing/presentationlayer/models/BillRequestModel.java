@@ -9,6 +9,7 @@ import java.time.LocalDate;
 @ToString
 @Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class BillRequestModel {
 
     private String customerId;
@@ -19,15 +20,4 @@ public class BillRequestModel {
     private BillStatus billStatus;
     private LocalDate dueDate;
 
-    public BillRequestModel(String customerId, String visitType, String vetId, LocalDate date, BigDecimal amount, BillStatus billStatus, LocalDate dueDate)
- {
-        this.customerId = customerId;
-        this.visitType = visitType;
-        this.vetId = vetId;
-        this.date = date;
-        this.amount = amount;
-        this.billStatus = billStatus;
-        this.dueDate = dueDate;
-
-    }
 }

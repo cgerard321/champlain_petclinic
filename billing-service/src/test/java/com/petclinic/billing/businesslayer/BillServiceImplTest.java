@@ -212,8 +212,8 @@ public class BillServiceImplTest {
         StepVerifier.create(result)
                 .consumeNextWith(bill -> {
                     assertNotNull(bill);
-                    assertEquals(ownerFirstName, bill.getOwnerFirstName());
-                    assertEquals(ownerLastName, bill.getOwnerLastName());
+                    assertEquals(ownerFirstName, bill.getCustomerFirstName());
+                    assertEquals(ownerLastName, bill.getCustomerLastName());
                 })
                 .verifyComplete();
     }
@@ -371,7 +371,7 @@ public class BillServiceImplTest {
                 .expectNextMatches(response ->
                         response.getBillId() != null &&
                                 response.getVetFirstName().equals("John") &&
-                                response.getOwnerFirstName().equals("Alice")
+                                response.getCustomerFirstName().equals("Alice")
                 )
                 .verifyComplete();
 
@@ -432,7 +432,7 @@ public class BillServiceImplTest {
                         response.getBillId() != null &&
                                 response.getBillId().length() == 10 &&
                                 response.getVetFirstName().equals("John") &&
-                                response.getOwnerFirstName().equals("Alice") &&
+                                response.getCustomerFirstName().equals("Alice") &&
                                 response.getBillStatus().equals(BillStatus.PAID) &&
                                 response.getDueDate() != null
                 )
@@ -1705,8 +1705,8 @@ public void testGenerateBillPdf_BillNotFound() {
         
         assertEquals(overdueBill.getBillId(), dto.getBillId());
         assertEquals(overdueBill.getCustomerId(), dto.getCustomerId());
-        assertEquals(overdueBill.getCustomerFirstName(), dto.getOwnerFirstName());
-        assertEquals(overdueBill.getCustomerLastName(), dto.getOwnerLastName());
+        assertEquals(overdueBill.getCustomerFirstName(), dto.getCustomerFirstName());
+        assertEquals(overdueBill.getCustomerLastName(), dto.getCustomerLastName());
         assertEquals(overdueBill.getVisitType(), dto.getVisitType());
         assertEquals(overdueBill.getVetId(), dto.getVetId());
         assertEquals(overdueBill.getVetFirstName(), dto.getVetFirstName());
@@ -2282,7 +2282,7 @@ public void testGenerateBillPdf_BillNotFound() {
                 .expectNextMatches(response ->
                         response.getBillId().equals("generated-id") &&
                                 response.getVetFirstName().equals("John") &&
-                                response.getOwnerFirstName().equals("Alice") &&
+                                response.getCustomerFirstName().equals("Alice") &&
                                 response.getBillStatus().equals(BillStatus.PAID) &&
                                 response.getDueDate() != null
                 )

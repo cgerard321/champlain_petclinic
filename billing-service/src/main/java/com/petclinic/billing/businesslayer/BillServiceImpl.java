@@ -419,8 +419,8 @@ public class BillServiceImpl implements BillService{
         BillResponseModel convertedBill = BillResponseModel.builder()
                 .billId(bill.getBillId())
                 .customerId(bill.getCustomerId())
-                .ownerFirstName(bill.getOwnerFirstName())
-                .ownerLastName(bill.getOwnerLastName())
+                .customerFirstName(bill.getCustomerFirstName())
+                .customerLastName(bill.getCustomerLastName())
                 .visitType(bill.getVisitType())
                 .vetId(bill.getVetId())
                 .vetFirstName(bill.getVetFirstName())
@@ -433,7 +433,7 @@ public class BillServiceImpl implements BillService{
                 .dueDate(bill.getDueDate())
                 .timeRemaining(bill.getTimeRemaining())
                 .archive(bill.getArchive())
-                .interestExempt(bill.isInterestExempt())
+                .isInterestExempt(bill.isInterestExempt())
                 .build();
 
         return generateReceiptEmail(user, convertedBill, currency);

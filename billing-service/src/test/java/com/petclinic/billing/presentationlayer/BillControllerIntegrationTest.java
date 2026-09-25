@@ -614,8 +614,8 @@ class BillControllerIntegrationTest {
                         .amount(bill.getAmount())
                         .billStatus(bill.getBillStatus())
                         .dueDate(bill.getDueDate())
-                        .ownerFirstName("John")
-                        .ownerLastName("Doe")
+                        .customerFirstName("John")
+                        .customerLastName("Doe")
                         .vetFirstName("Jane")
                         .vetLastName("Smith")
                         .build());

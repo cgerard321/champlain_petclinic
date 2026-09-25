@@ -53,8 +53,8 @@ public class PdfGenerator {
         partyTable.setWidthPercentage(100);
         partyTable.setSpacingAfter(15);
 
-        String ownerName = (Optional.ofNullable(bill.getOwnerFirstName()).orElse("") + " "
-                + Optional.ofNullable(bill.getOwnerLastName()).orElse("")).trim();
+        String ownerName = (Optional.ofNullable(bill.getCustomerFirstName()).orElse("") + " "
+                + Optional.ofNullable(bill.getCustomerLastName()).orElse("")).trim();
 
         addMetaCell(partyTable, "Owner:", (ownerName.isEmpty() ? "N/A" : ownerName));
         addMetaCell(partyTable, "Vet:", Optional.ofNullable(bill.getVetFirstName()).orElse("") + " "

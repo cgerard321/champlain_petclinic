@@ -22,8 +22,8 @@ public class BillMapper {
         //BeanUtils.copyProperties(bill,billResponseDTO);
         billResponseModel.setBillId(bill.getBillId());
         billResponseModel.setCustomerId(bill.getCustomerId());
-        billResponseModel.setOwnerFirstName(bill.getCustomerFirstName());
-        billResponseModel.setOwnerLastName(bill.getCustomerLastName());
+        billResponseModel.setCustomerFirstName(bill.getCustomerFirstName());
+        billResponseModel.setCustomerLastName(bill.getCustomerLastName());
         billResponseModel.setVisitType(bill.getVisitType());
         billResponseModel.setVetId(bill.getVetId());
         billResponseModel.setVetFirstName(bill.getVetFirstName());
