@@ -3,6 +3,8 @@ package com.petclinic.bffapigateway.utils.Security.Filters;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import com.petclinic.bffapigateway.utils.Utility;
+import lombok.Generated;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpCookie;
@@ -21,7 +23,9 @@ import java.util.Set;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 @Order(1)
+@Generated
 public class CsrfFilter implements WebFilter {
 
     private static final String CSRF_COOKIE_NAME = "XSRF-TOKEN";
@@ -32,16 +36,12 @@ public class CsrfFilter implements WebFilter {
     private static final Set<HttpMethod> SAFE_METHODS = Set.of(
             HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS, HttpMethod.TRACE);
 
-    public CsrfFilter(Utility utility) {
-        this.utility = utility;
-    }
-
     @Override
     @NonNull
     public Mono<Void> filter(ServerWebExchange exchange, @NonNull WebFilterChain chain) {
         HttpMethod method = exchange.getRequest().getMethod();
         String path = exchange.getRequest().getURI().getPath();
-
+        log.info("URI Path seen by CsrfFilter: {}", exchange.getRequest().getURI().getPath());
         HandlerMethod handler = utility.getHandler(exchange);
         boolean isExluded = false;
 
