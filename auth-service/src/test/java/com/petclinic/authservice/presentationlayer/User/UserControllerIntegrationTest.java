@@ -16,6 +16,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.test.web.reactive.server.EntityExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -141,28 +142,37 @@ class UserControllerIntegrationTest {
                 .password("pwd")
                 .build();
 
-
-        webTestClient.post()
+        EntityExchangeResult<UserPasswordLessDTO> result = webTestClient.post()
                 .uri("/users/login")
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(userDTO)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().exists(HttpHeaders.SET_COOKIE)
-                .expectHeader().value(HttpHeaders.SET_COOKIE,s -> {
-                    assert s.contains("Bearer");
-                })
-                .expectHeader().exists(HttpHeaders.SET_COOKIE2)
-                .expectHeader().value(HttpHeaders.SET_COOKIE2,s -> {
-                    assert s.contains("XSRF-TOKEN");
-                })
                 .expectBody(UserPasswordLessDTO.class)
-                .value(user -> {
-                    assertEquals(user.getEmail(),(userDTO.getEmailOrUsername()));
-                    assertEquals(1, user.getRoles().size());
-                });
-    }
+                .returnResult();
 
+        List<String> cookies = result.getResponseHeaders().get(HttpHeaders.SET_COOKIE);
+        assertNotNull(cookies, "Expected Set-Cookie headers to be present");
+
+        assertTrue(cookies.stream().anyMatch(c -> c.contains("Bearer")),
+                "Expected a Bearer auth cookie");
+        assertTrue(cookies.stream().anyMatch(c -> c.contains("XSRF-TOKEN")),
+                "Expected an XSRF-TOKEN CSRF cookie");
+
+        String bearerCookie = cookies.stream().filter(c -> c.contains("Bearer")).findFirst().orElseThrow();
+        String csrfCookie = cookies.stream().filter(c -> c.contains("XSRF-TOKEN")).findFirst().orElseThrow();
+
+        assertTrue(bearerCookie.toLowerCase().contains("httponly"),
+                "Auth cookie should be HttpOnly");
+        assertTrue(!csrfCookie.toLowerCase().contains("httponly"),
+                "CSRF cookie must NOT be HttpOnly - frontend JS needs to read it");
+
+        UserPasswordLessDTO user = result.getResponseBody();
+        assertNotNull(user);
+        assertEquals(user.getEmail(), userDTO.getEmailOrUsername());
+        assertEquals(1, user.getRoles().size());
+    }
 
     @Test
     void userLoginWithInvalidCredentials_ShouldReturnNotFoundUser(){

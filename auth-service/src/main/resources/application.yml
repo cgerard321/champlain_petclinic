@@ -26,7 +26,8 @@ frontend:
   url: http://localhost:8080/api/v2/gateway
 customer-frontend:
   url: http://localhost:3000
-
+cookie:
+  domain: localhost
 
 ---
 # for test
