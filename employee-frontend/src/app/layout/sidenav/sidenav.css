@@ -1,3 +1,127 @@
+:host {
+  display: block;
+  width: 250px;
+  height: 100%;
+  background-color: #1e293b;
+  color: #f8fafc;
+}
+
+.sidenav-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+/* Brand Header */
+.brand-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.5rem 1.5rem 0.5rem;
+}
+
+.brand-icon {
+  width: 40px;
+  height: 40px;
+  background-color: #2563eb;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+}
+
+.brand-title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #ffffff;
+}
+
+.brand-subtitle {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+/* Nav Menu */
+.nav-list {
+  flex: 1;
+  padding-top: 0 !important;
+}
+
+.nav-item {
+  border-radius: 12px !important;
+  margin-bottom: 4px;
+  color: #cbd5e1 !important;
+}
+
+.nav-item:hover {
+  background-color: #334155 !important;
+}
+
 .active-link {
-  background: rgba(0, 0, 0, 0.06);
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+}
+
+.active-link .nav-icon {
+  color: #ffffff !important;
+}
+
+.nav-icon {
+  color: #94a3b8;
+}
+
+.nav-label {
+  font-weight: 500;
+}
+
+/* Prototype Controls */
+.prototype-controls {
+  background-color: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 0.85rem;
+  font-size: 0.75rem;
+}
+
+.controls-title {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  margin-bottom: 0.5rem;
+}
+
+.controls-label {
+  display: block;
+  color: #cbd5e1;
+  margin-bottom: 0.25rem;
+}
+
+.controls-input {
+  width: 100%;
+  background-color: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  padding: 0.35rem 0.5rem;
+  color: #ffffff;
+  box-sizing: border-box;
+  margin-bottom: 0.5rem;
+}
+
+.controls-button {
+  width: 100%;
+  background-color: #334155;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.controls-button:hover {
+  background-color: #475569;
 }

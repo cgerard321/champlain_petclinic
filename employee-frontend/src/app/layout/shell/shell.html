@@ -1,11 +1,12 @@
-<app-header></app-header>
+<div class="app-layout">
+  <!-- Left Side Navigation -->
+  <app-sidenav></app-sidenav>
 
-<mat-sidenav-container class="shell-body">
-  <mat-sidenav mode="side" opened class="shell-sidenav">
-    <app-sidenav></app-sidenav>
-  </mat-sidenav>
-
-  <mat-sidenav-content class="shell-content">
-    <router-outlet></router-outlet>
-  </mat-sidenav-content>
-</mat-sidenav-container>
+  <!-- Right Main Area -->
+  <div class="main-wrapper">
+    <app-header></app-header>
+    <main class="content-body">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

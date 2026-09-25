@@ -9,8 +9,19 @@ export class AuthState {
 
   private readonly _isAuthenticated = signal(false);
   readonly isAuthenticated = this._isAuthenticated.asReadonly();
+
   private readonly _roles = signal<string[]>([]);
   readonly roles = this._roles.asReadonly();
+
+  // Signal for local/prototype employee name state
+  private readonly _userName = signal<string>('Sarah Jenkins');
+  readonly userName = this._userName.asReadonly();
+
+  setUserName(name: string): void {
+    if (name && name.trim()) {
+      this._userName.set(name.trim());
+    }
+  }
 
   logout(): Observable<void> {
     return this.http
