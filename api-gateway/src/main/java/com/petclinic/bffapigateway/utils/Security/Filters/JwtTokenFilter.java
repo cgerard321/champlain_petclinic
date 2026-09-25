@@ -97,7 +97,7 @@ public class JwtTokenFilter implements WebFilter {
 
         exchange.getResponse().getHeaders().add("Access-Control-Allow-Credentials", "true");
         exchange.getResponse().getHeaders().add("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS, PATCH, HEAD");
-        exchange.getResponse().getHeaders().add("Access-Control-Allow-Headers", "Content-Type, X-XSRF-TOKEN");        exchange
+        exchange.getResponse().getHeaders().add("Access-Control-Allow-Headers", "Content-Type, X-XSRF-TOKEN");
 
         // todo optimize this
         if (exchange.getRequest().getMethod().equals(HttpMethod.OPTIONS)
