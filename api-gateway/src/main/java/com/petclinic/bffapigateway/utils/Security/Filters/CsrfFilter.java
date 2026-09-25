@@ -40,26 +40,31 @@ public class CsrfFilter implements WebFilter {
     @NonNull
     public Mono<Void> filter(ServerWebExchange exchange, @NonNull WebFilterChain chain) {
 
-        if (exchange.getAttribute("whitelisted") != null && exchange.getAttribute("whitelisted") instanceof Boolean) {
-            if((boolean) exchange.getAttribute("whitelisted")) {
-                return chain.filter(exchange);
-            }
+        Boolean whitelisted = exchange.getAttribute("whitelisted");
+        if (Boolean.TRUE.equals(whitelisted)) {
+            return chain.filter(exchange);
         }
 
         HttpMethod method = exchange.getRequest().getMethod();
+
+        if (SAFE_METHODS.contains(method)) {
+            return chain.filter(exchange);
+        }
+
         String path = exchange.getRequest().getURI().getPath();
-        log.info("URI Path seen by CsrfFilter: {}", exchange.getRequest().getURI().getPath());
+        log.info("URI Path seen by CsrfFilter: {}", path);
+
         HandlerMethod handler = utility.getHandler(exchange);
-        boolean isExluded = false;
+        boolean isExcluded = false;
 
         if (handler.getMethod().getAnnotation(SecuredEndpoint.class) != null) {
             if (Arrays.asList(handler.getMethod().getAnnotation(SecuredEndpoint.class).allowedRoles())
                     .contains(Roles.ANONYMOUS)) {
-                isExluded = true;
+                isExcluded = true;
             }
         }
 
-        if (SAFE_METHODS.contains(method) || isExluded) {
+        if (isExcluded) {
             return chain.filter(exchange);
         }
 

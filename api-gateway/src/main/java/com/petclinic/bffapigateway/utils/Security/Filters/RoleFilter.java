@@ -25,7 +25,7 @@ import java.util.List;
 @Generated
 public class RoleFilter implements WebFilter {
 
-   private final Utility utility;
+    private final Utility utility;
 
     public RoleFilter(Utility utility) {
         this.utility = utility;
@@ -35,23 +35,16 @@ public class RoleFilter implements WebFilter {
     @SuppressWarnings("NullableProblems")
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-
-
-        if (exchange.getAttribute("whitelisted") != null && exchange.getAttribute("whitelisted") instanceof Boolean) {
-            if ((boolean) exchange.getAttribute("whitelisted")) {
-                return chain.filter(exchange);
-            }
+        Boolean whitelisted = exchange.getAttribute("whitelisted");
+        if (Boolean.TRUE.equals(whitelisted)) {
+            return chain.filter(exchange);
         }
 
-
         HandlerMethod handler = utility.getHandler(exchange);
-
-
 
         if (handler.getMethod().getAnnotation(SecuredEndpoint.class) == null || Arrays.stream(handler.getMethod().getAnnotation(SecuredEndpoint.class).allowedRoles()).anyMatch(role -> role == Roles.ALL)) {
             return chain.filter(exchange);
         }
-
 
         List<Roles> rolesAllowed = List.of(handler.getMethod().getAnnotation(SecuredEndpoint.class).allowedRoles());
 
@@ -60,6 +53,7 @@ public class RoleFilter implements WebFilter {
         if (rolesAllowed.isEmpty()) {
             return chain.filter(exchange);
         }
+
         TokenResponseDTO tokenResponseDTO = exchange.getAttribute("tokenValues");
 
         if (tokenResponseDTO == null) {
@@ -68,14 +62,11 @@ public class RoleFilter implements WebFilter {
 
         List<String> roles = tokenResponseDTO.getRoles();
 
-
         log.debug("Roles: {}", roles);
-
 
         if (roles == null) {
             return Mono.error(new ForbiddenAccessException("No roles attached to token"));
         }
-
 
         for (String role : roles) {
             role = role.replace("[", "").replace("]", "").replace(",", "").trim();
