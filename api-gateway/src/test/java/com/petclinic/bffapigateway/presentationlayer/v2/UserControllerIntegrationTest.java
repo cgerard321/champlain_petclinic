@@ -15,6 +15,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 
@@ -30,6 +31,8 @@ class UserControllerIntegrationTest {
     private WebTestClient webTestClient;
 
     private MockServerConfigAuthService mockServerConfigAuthService;
+
+    private static final String CSRF_TOKEN = UUID.randomUUID().toString();
 
     @BeforeAll
     public void startMockServer() {
@@ -98,6 +101,8 @@ class UserControllerIntegrationTest {
         webTestClient.patch()
                 .uri("/api/v2/gateway/users/e6248486-d3df-47a5-b2e0-84d31c47533a")
                 .cookie("Bearer", MockServerConfigAuthService.jwtTokenForValidAdmin)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(requestModel), RolesChangeRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
@@ -163,6 +168,8 @@ class UserControllerIntegrationTest {
 
         webTestClient.patch()
                 .uri("/api/v2/gateway/users/{userId}/username", userId)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON)
                 .cookie("Bearer", MockServerConfigAuthService.jwtTokenForValidAdmin)
                 .bodyValue(newUsername)

@@ -11,6 +11,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
+import java.util.UUID;
+
 import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -26,6 +28,8 @@ class OwnerControllerIntegrationTest {
     private MockServerConfigCustomersService mockServerConfigCustomersService;
 
     private MockServerConfigAuthService mockServerConfigAuthService;
+
+    private static final String CSRF_TOKEN = UUID.randomUUID().toString();
 
     @BeforeAll
     public void startMockServer() {
@@ -66,6 +70,8 @@ class OwnerControllerIntegrationTest {
         webTestClient.delete()
                 .uri("/api/v2/gateway/owners/{ownerId}", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
                 .cookie("Bearer", "valid-test-token-for-valid-admin")
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()  // Now we expect a 200 OK response, not 204 NO_CONTENT
@@ -90,6 +96,8 @@ class OwnerControllerIntegrationTest {
         webTestClient.delete()
                 .uri("/api/v2/gateway/owners/{ownerId}", invalidOwnerId)
                 .cookie("Bearer", jwtTokenForValidAdmin)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(422);
@@ -102,6 +110,8 @@ class OwnerControllerIntegrationTest {
         webTestClient.delete()
                 .uri("/api/v2/gateway/owners/{ownerId}", validLengthOwnerId)
                 .cookie("Bearer", jwtTokenForValidAdmin)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isBadRequest();

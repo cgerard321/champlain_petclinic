@@ -8,6 +8,7 @@ import com.petclinic.bffapigateway.dtos.Vets.VetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import com.petclinic.bffapigateway.presentationlayer.v1.UserControllerV1;
+import com.petclinic.bffapigateway.utils.Security.Filters.CsrfFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.IsUserFilter;
@@ -55,7 +56,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
         },
         excludeFilters = @ComponentScan.Filter(
                 type = FilterType.ASSIGNABLE_TYPE,
-                classes = {JwtTokenFilter.class, RoleFilter.class, IsUserFilter.class}
+                classes = {JwtTokenFilter.class, RoleFilter.class, IsUserFilter.class, CsrfFilter.class}
         )
 )
 @AutoConfigureWebTestClient

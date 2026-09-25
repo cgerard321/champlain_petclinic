@@ -14,6 +14,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.util.UUID;
+
 import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.jwtTokenForValidAdmin;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -27,6 +29,8 @@ class RoleControllerIntegrationTest {
     private WebTestClient webTestClient;
 
     private MockServerConfigAuthService mockServerConfigAuthService;
+
+    private static String CSRF_TOKEN = UUID.randomUUID().toString();
 
     @BeforeAll
     public void startMockServer() {
@@ -80,6 +84,8 @@ class RoleControllerIntegrationTest {
         Mono<Role> result = webTestClient.post()
                 .uri("/api/v2/gateway/roles")
                 .cookie("Bearer", jwtTokenForValidAdmin)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(roleRequestModel), RoleRequestModel.class)
                 .accept(MediaType.APPLICATION_JSON)

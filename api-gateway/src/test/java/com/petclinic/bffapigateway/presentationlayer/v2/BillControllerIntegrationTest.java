@@ -20,6 +20,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -34,6 +35,8 @@ public class BillControllerIntegrationTest {
     private WebTestClient webTestClient;
     private MockServerConfigBillService mockServerConfigBillService;
     private MockServerConfigAuthService mockServerConfigAuthService;
+
+    private static final String CSRF_TOKEN = UUID.randomUUID().toString();
 
     @BeforeAll
     public void startMockServer() {
@@ -90,6 +93,8 @@ public class BillControllerIntegrationTest {
                 .post()
                 .uri("/api/gateway/bills")
                 .cookie("Bearer", jwtTokenForValidAdmin)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(billRequestDTO), BillRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
@@ -165,6 +170,8 @@ public class BillControllerIntegrationTest {
                         .put()
                         .uri("/api/v2/gateway/bills/admin/{billId}", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
                         .cookie("Bearer", jwtTokenForValidAdmin)
+                        .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                        .header("X-XSRF-TOKEN", CSRF_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .body(Mono.just(updatedRequestDTO), BillRequestDTO.class)
                         .accept(MediaType.APPLICATION_JSON)
@@ -209,6 +216,8 @@ public class BillControllerIntegrationTest {
                 .put()
                 .uri("/api/v2/gateway/bills/admin/{billId}", invalidBillId)
                 .cookie("Bearer", jwtTokenForValidAdmin)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(updatedRequestDTO), BillRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)

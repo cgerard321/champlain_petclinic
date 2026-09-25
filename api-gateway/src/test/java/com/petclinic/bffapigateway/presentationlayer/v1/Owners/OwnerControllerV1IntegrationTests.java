@@ -19,6 +19,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import java.util.List;
+import java.util.UUID;
 import static com.petclinic.bffapigateway.presentationlayer.v1.mockservers.MockServerConfigAuthService.jwtTokenForValidAdmin;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -38,6 +39,8 @@ public class OwnerControllerV1IntegrationTests {
     private final String OWNER_BASE_PATH = "/api/gateway/owners";
     private final String OWNER_ID = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a";
     private final String PET_ID = "pet-id-456";
+
+    private static final String CSRF_TOKEN = UUID.randomUUID().toString();
 
     // DTOs matching the mock server expectations
     OwnerRequestDTO ownerUpdateRequest = OwnerRequestDTO.builder()
@@ -142,6 +145,8 @@ public class OwnerControllerV1IntegrationTests {
         webTestClient.delete()
                 .uri(OWNER_BASE_PATH + "/{ownerId}", OWNER_ID)
                 .cookie("Bearer", jwtTokenForValidAdmin)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
                 .exchange()
                 .expectStatus().isNotFound();
     }
@@ -175,6 +180,8 @@ public class OwnerControllerV1IntegrationTests {
         webTestClient.delete()
                 .uri(OWNER_BASE_PATH + "/{ownerId}/pets/{petId}", OWNER_ID, PET_ID)
                 .cookie("Bearer", jwtTokenForValidAdmin)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
                 .exchange()
                 .expectStatus().isNotFound();
     }
@@ -182,7 +189,7 @@ public class OwnerControllerV1IntegrationTests {
     @Test
     void whenGetOwnerWithPhotoIntegration_thenReturnOwnerWithPhoto() {
         mockServerConfigCustomersService.clearExpectationsForOwner(OWNER_ID);
-        
+
         String mockOwnerJson = """
             {
                 "ownerId": "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a",
@@ -210,12 +217,12 @@ public class OwnerControllerV1IntegrationTests {
                 .single();
 
         StepVerifier.create(result)
-                .expectNextMatches(owner -> 
-                    owner.getOwnerId().equals("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a") &&
-                    owner.getFirstName().equals("John") &&
-                    owner.getLastName().equals("Doe") &&
-                    owner.getPhoto() != null &&
-                    owner.getPhoto().getFileType().equals("image/png"))
+                .expectNextMatches(owner ->
+                        owner.getOwnerId().equals("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a") &&
+                                owner.getFirstName().equals("John") &&
+                                owner.getLastName().equals("Doe") &&
+                                owner.getPhoto() != null &&
+                                owner.getPhoto().getFileType().equals("image/png"))
                 .verifyComplete();
     }
 
@@ -237,12 +244,14 @@ public class OwnerControllerV1IntegrationTests {
         petResponseDTO.setPetId(PET_ID);
         petResponseDTO.setName("Test Pet");
         petResponseDTO.setPhoto(null);
-        
+
         mockServerConfigCustomersService.registerDeletePetPhotoEndpoint(PET_ID, petResponseDTO);
 
         webTestClient.patch()
                 .uri(OWNER_BASE_PATH + "/{ownerId}/pets/{petId}/photo", OWNER_ID, PET_ID)
                 .cookie("Bearer", jwtTokenForValidAdmin)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -262,6 +271,8 @@ public class OwnerControllerV1IntegrationTests {
         webTestClient.patch()
                 .uri(OWNER_BASE_PATH + "/{ownerId}/pets/{petId}/photo", OWNER_ID, PET_ID)
                 .cookie("Bearer", jwtTokenForValidAdmin)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound();
@@ -271,6 +282,8 @@ public class OwnerControllerV1IntegrationTests {
     void whenDeletePetPhotoForOwnerIntegration_withoutAuth_thenReturnUnauthorized() {
         webTestClient.patch()
                 .uri(OWNER_BASE_PATH + "/{ownerId}/pets/{petId}/photo", OWNER_ID, PET_ID)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isUnauthorized();

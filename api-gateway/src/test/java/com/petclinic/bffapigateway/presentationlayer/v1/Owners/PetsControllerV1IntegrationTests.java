@@ -39,6 +39,8 @@ class PetsControllerV1IntegrationTests {
     private final String OWNER_ID = "ownerId-100";
     private final Date BIRTH_DATE = new Date(2023, 1, 1);
 
+    private final String CSRF_TOKEN = "csrfToken";
+
     @BeforeEach
     public void startMockServer() {
         mockServerConfigCustomersService = new MockServerConfigCustomersService();
@@ -152,6 +154,8 @@ class PetsControllerV1IntegrationTests {
         webTestClient.put()
                 .uri(PET_PATH + "/{petId}", nonExistentId)
                 .cookie("Bearer", jwtTokenForValidAdmin)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(updateRequest), PetRequestDTO.class)
                 .exchange()

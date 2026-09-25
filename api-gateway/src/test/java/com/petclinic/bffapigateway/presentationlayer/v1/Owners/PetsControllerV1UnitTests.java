@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.presentationlayer.v1.Owners;
 
 import com.petclinic.bffapigateway.presentationlayer.v1.PetControllerV1;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
+import com.petclinic.bffapigateway.utils.Security.Filters.CsrfFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.IsUserFilter;
@@ -35,7 +36,7 @@ import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
         controllers = {PetControllerV1.class},
         excludeFilters = @ComponentScan.Filter(
                 type = FilterType.ASSIGNABLE_TYPE,
-                classes = {JwtTokenFilter.class, RoleFilter.class, IsUserFilter.class}
+                classes = {JwtTokenFilter.class, RoleFilter.class, IsUserFilter.class, CsrfFilter.class}
         )
 )
 @AutoConfigureWebTestClient
