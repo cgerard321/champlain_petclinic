@@ -7,3 +7,5 @@ export const HOME_ROUTES: Routes = [
     component: Home,
   },
 ];
+
+export const routes = HOME_ROUTES;

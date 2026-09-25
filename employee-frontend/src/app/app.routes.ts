@@ -25,8 +25,8 @@ export const routes: Routes = [
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'home' },
       {
-        path: 'home',
-        loadChildren: () => import('@features/home/routes'),
+        path: '',
+        loadChildren: () => import('@features/home/routes').then((m) => m.routes),
       },
     ],
   },
