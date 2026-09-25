@@ -134,7 +134,7 @@ export default tseslint.config(
       '@angular-eslint/template/prefer-self-closing-tags': 'warn',
       '@angular-eslint/template/no-inline-styles': [
         'error',
-        { 'style-attribute': true, 'style-binding': false },
+        { allowNgStyle: true, allowBindToStyle: true },
       ],
     },
   },
