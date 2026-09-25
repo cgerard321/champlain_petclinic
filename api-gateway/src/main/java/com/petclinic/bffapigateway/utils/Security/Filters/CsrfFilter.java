@@ -21,7 +21,7 @@ import java.util.Set;
 
 @Slf4j
 @Component
-@Order(0)
+@Order(1)
 public class CsrfFilter implements WebFilter {
 
     private static final String CSRF_COOKIE_NAME = "XSRF-TOKEN";

@@ -30,7 +30,7 @@ import java.util.Objects;
 
 @Slf4j
 @Component
-@Order(1)
+@Order(2)
 @Generated
 public class JwtTokenFilter implements WebFilter {
 

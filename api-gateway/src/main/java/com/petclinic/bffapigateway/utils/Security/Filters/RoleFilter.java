@@ -21,7 +21,7 @@ import java.util.List;
 
 @Slf4j
 @Component
-@Order(2)
+@Order(3)
 @Generated
 public class RoleFilter implements WebFilter {
 

@@ -28,7 +28,7 @@ import java.util.Map;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@Order(3)
+@Order(4)
 @Generated
 public class IsUserFilter implements WebFilter {
 
