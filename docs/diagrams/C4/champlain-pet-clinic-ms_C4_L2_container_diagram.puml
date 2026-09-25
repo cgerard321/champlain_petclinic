@@ -85,7 +85,7 @@ together {
         ContainerDb(vets_images_db, "vets-images-db", "Postgres", "Stores veterinarian image information.", $sprite="postgresql", $tags = "storage-postgres")
         ContainerDb(visits_db, "visits-db", "Mongo", "Stores visits information.", $sprite="mongodb", $tags = "storage-mongo")
         ContainerDb(billing_db, "billing-db", "Mongo", "Stores billing information.", $sprite="mongodb", $tags = "storage-mongo")
-        ContainerDb(products_db, "products-db", "Mongo", "Stores product information.", $sprite="mongodb", $tags = "storage-mongo")
+        ContainerDb(products_db, "products-db", "Postgres", "Stores product information.", $sprite="postgresql", $tags = "storage-postgres")
         ContainerDb(cart_db, "cart-db", "Mongo", "Stores cart information.", $sprite="mongodb", $tags = "storage-mongo")
 
 }
