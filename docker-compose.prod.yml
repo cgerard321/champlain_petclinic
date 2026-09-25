@@ -4,7 +4,7 @@
 x-healthchecks:
   springboot: &springboot
     healthcheck:
-      test: [ "CMD-SHELL", "curl -fsS http://localhost:8080/actuator/health || curl -fsS http://localhost:8080/health" ]
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/actuator/health || curl -fsS http://localhost:8080/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -12,7 +12,7 @@ x-healthchecks:
 
   react-node: &react_node
     healthcheck:
-      test: [ "CMD-SHELL", "curl -fsS http://localhost:3000/ || true" ]
+      test: ["CMD-SHELL", "curl -fsS http://localhost:3000/ || true"]
       interval: 10s
       timeout: 10s
       retries: 3
@@ -20,7 +20,7 @@ x-healthchecks:
 
   angular-node: &angular_node
     healthcheck:
-      test: [ "CMD-SHELL", "curl -fsS http://localhost:4200/ || true" ]
+      test: ["CMD-SHELL", "curl -fsS http://localhost:4200/ || true"]
       interval: 10s
       timeout: 10s
       retries: 3
@@ -36,7 +36,7 @@ x-healthchecks:
 
   postgres: &postgres
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d images -h localhost" ]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d images -h localhost"]
       interval: 10s
       timeout: 5s
       retries: 5

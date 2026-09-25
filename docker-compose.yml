@@ -13,7 +13,7 @@ x-healthchecks:
 
   react-node: &react_node
     healthcheck:
-      test: [ "CMD-SHELL", "curl -fsS http://localhost:3000/ || true" ]
+      test: ["CMD-SHELL", "curl -fsS http://localhost:3000/ || true"]
       interval: 10s
       timeout: 3s
       retries: 10
@@ -21,7 +21,7 @@ x-healthchecks:
 
   angular-node: &angular_node
     healthcheck:
-      test: [ "CMD-SHELL", "curl -fsS http://localhost:4200/ || true" ]
+      test: ["CMD-SHELL", "curl -fsS http://localhost:4200/ || true"]
       interval: 10s
       timeout: 3s
       retries: 10
@@ -29,7 +29,7 @@ x-healthchecks:
 
   nginx: &nginx
     healthcheck:
-      test: [ "CMD-SHELL", "nc -z localhost 80" ]
+      test: ["CMD-SHELL", "nc -z localhost 80"]
       interval: 10s
       timeout: 3s
       retries: 10
@@ -37,7 +37,7 @@ x-healthchecks:
 
   dbgate: &dbgate_hc
     healthcheck:
-      test: [ "CMD-SHELL", "curl -fsS http://localhost:3000/" ]
+      test: ["CMD-SHELL", "curl -fsS http://localhost:3000/"]
       interval: 10s
       timeout: 3s
       retries: 10
@@ -53,7 +53,7 @@ x-healthchecks:
 
   postgres: &postgres
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d images -h localhost" ]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d images -h localhost"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -76,7 +76,7 @@ services:
     <<: *react_node
     image: petclinic-frontend
     container_name: petclinic-frontend
-    profiles: [ "fe" ]
+    profiles: ["fe"]
     build:
       context: ./petclinic-frontend
       dockerfile: Dockerfile
@@ -93,7 +93,7 @@ services:
     <<: *angular_node
     image: employee-frontend
     container_name: employee-frontend
-    profiles: [ "fe-employee" ]
+    profiles: ["fe-employee"]
     build:
       context: ./employee-frontend
       dockerfile: Dockerfile
