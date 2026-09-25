@@ -3,6 +3,8 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
@@ -14,28 +16,18 @@
     "target": "ES2022",
     "module": "preserve",
     "paths": {
-      "@shared/*": [
-        "./src/app/shared/*"
-      ],
-      "@core/*": [
-        "./src/app/core/*"
-      ],
-      "@features/*": [
-        "./src/app/features/*"
-      ],
-      "@app/*": [
-        "./src/app/*"
-      ],
-      "@layout/*": [
-        "./src/app/layout/*"
-      ],
-      "@environments/*": [
-        "./src/environments/*"
-      ]
+      "@shared/*": ["./src/app/shared/*"],
+      "@core/*": ["./src/app/core/*"],
+      "@features/*": ["./src/app/features/*"],
+      "@app/*": ["./src/app/*"],
+      "@layout/*": ["./src/app/layout/*"],
+      "@environments/*": ["./src/environments/*"],
+      "@layout/*": ["./src/app/layout/*"]
     }
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
+    "strictTemplates": true,
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true
   },
