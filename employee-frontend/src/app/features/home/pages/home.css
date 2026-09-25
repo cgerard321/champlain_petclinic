@@ -1,0 +1,25 @@
+.home-container {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.home-header h1 {
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.home-header p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.welcome-card {
+  max-width: 600px;
+  background-color: #ffffff;
+  border-radius: 8px;
+}

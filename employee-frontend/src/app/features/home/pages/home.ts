@@ -1,12 +1,11 @@
-import { Component, inject } from '@angular/core';
-import { AuthState } from '@core/services/auth-state';
+import { Component } from '@angular/core';
+import { MatCardModule } from '@angular/material/card';
 
 @Component({
-  imports: [],
   selector: 'app-home',
-  styleUrl: './home.css',
+  standalone: true,
+  imports: [MatCardModule],
   templateUrl: './home.html',
+  styleUrl: './home.css',
 })
-export class Home {
-  protected auth = inject(AuthState);
-}
+export class Home {}

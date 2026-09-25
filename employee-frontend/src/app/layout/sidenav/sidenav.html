@@ -1,8 +1,20 @@
-<mat-nav-list>
-  @for (item of items; track item.route) {
-    <a mat-list-item [routerLink]="item.route" routerLinkActive="active-link">
-      <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
-      <span matListItemTitle>{{ item.label }}</span>
-    </a>
-  }
-</mat-nav-list>
+<div class="sidenav-wrapper">
+  <div class="brand-header">
+    <div class="brand-icon">
+      <mat-icon>pets</mat-icon>
+    </div>
+    <div class="brand-text">
+      <div class="brand-title">Pet Clinic</div>
+      <div class="brand-subtitle">Veterinary Care</div>
+    </div>
+  </div>
+
+  <mat-nav-list class="nav-list">
+    @for (item of items; track item.route) {
+      <a mat-list-item [routerLink]="item.route" routerLinkActive="active-link" class="nav-item">
+        <mat-icon matListItemIcon class="nav-icon">{{ item.icon }}</mat-icon>
+        <span matListItemTitle class="nav-label">{{ item.label }}</span>
+      </a>
+    }
+  </mat-nav-list>
+</div>
