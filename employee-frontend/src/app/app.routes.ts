@@ -30,7 +30,7 @@ export const routes: Routes = [
       },
       {
         path: 'inventory',
-        canActivate: [authGuard(EMPLOYEE_ROLES)], // Checks that only the employees can access this page
+        canActivate: [authGuard(EMPLOYEE_ROLES)],
         loadChildren: () => import('@features/inventory/routes'),
       },
     ],

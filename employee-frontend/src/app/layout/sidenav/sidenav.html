@@ -1,5 +1,4 @@
 <mat-nav-list>
-  <!--I changed "items" to be a signal, so I had to make it so it was called like a functions-->
   @for (item of items(); track item.route) {
     <a mat-list-item [routerLink]="item.route" routerLinkActive="active-link">
       <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>

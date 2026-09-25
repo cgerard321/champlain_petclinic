@@ -20,7 +20,6 @@ interface NavItem {
 export class Sidenav {
   protected readonly authState = inject(AuthState);
 
-  // While I was here, I made "items" into a signal in accordance with Angular best practices
   protected readonly items = computed<NavItem[]>(() => {
     const items = [
       { label: 'Home', route: '/home', icon: 'home' },
@@ -28,7 +27,6 @@ export class Sidenav {
       { label: 'Dummy #2', route: '/dummy2', icon: 'settings' },
     ];
 
-    // Only shows the inventory option if the user is an employee
     if (EMPLOYEE_ROLES.some((role) => this.authState.hasRole(role))) {
       items.push({ label: 'Inventory', route: '/inventory', icon: 'inventory_2' });
     }
