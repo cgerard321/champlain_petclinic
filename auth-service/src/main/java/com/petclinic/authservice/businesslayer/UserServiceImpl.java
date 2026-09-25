@@ -300,7 +300,7 @@ public class UserServiceImpl implements UserService {
                     .secure(true)
                     .maxAge(Duration.ofHours(1))
                     .path("/")
-                    .sameSite("None")
+                    .sameSite("Lax")
                     .build();
 
 
