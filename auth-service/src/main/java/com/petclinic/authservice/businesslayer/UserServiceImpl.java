@@ -1,6 +1,6 @@
 /**
  * Created by IntelliJ IDEA.
- *
+ * <p>
  * User: @Fube
  * Date: 2021-10-14
  * Ticket: feat(AUTH-CPC-388)
@@ -53,15 +53,18 @@ public class UserServiceImpl implements UserService {
     private final AuthenticationManager authenticationManager;
     private final String salt = BCrypt.gensalt(10);
 
+    @Value("${cookie.domain}")
+    private String cookieDomain;
 
     @Value("${frontend.url}")
     private String gatewayOrigin;
+
     @Override
     public List<UserDetails> findAllWithoutPage() {
         return userMapper.modelToDetailsList(userRepo.findAll());
     }
 
-@Override
+    @Override
     public List<UserDetails> getAllUsers() {
         List<User> users = userRepo.findAll();
         return userMapper.modelToDetailsList(users);
@@ -70,54 +73,54 @@ public class UserServiceImpl implements UserService {
     @Override
     public User createUser(@Valid UserIDLessRoleLessDTO userIDLessDTO) {
 
-            final Optional<User> byEmail = userRepo.findByEmail(userIDLessDTO.getEmail());
-            final Optional<User> byUsername = userRepo.findByUsername(userIDLessDTO.getUsername());
+        final Optional<User> byEmail = userRepo.findByEmail(userIDLessDTO.getEmail());
+        final Optional<User> byUsername = userRepo.findByUsername(userIDLessDTO.getUsername());
 
-            if (byEmail.isPresent()) {
-                throw new EmailAlreadyExistsException(
-                        format("User with e-mail %s already exists", userIDLessDTO.getEmail()));
-            }
+        if (byEmail.isPresent()) {
+            throw new EmailAlreadyExistsException(
+                    format("User with e-mail %s already exists", userIDLessDTO.getEmail()));
+        }
 
-            if (byUsername.isPresent()) {
-                throw new IllegalArgumentException(
-                        format("User with username %s already exists", userIDLessDTO.getUsername()));
-            }
+        if (byUsername.isPresent()) {
+            throw new IllegalArgumentException(
+                    format("User with username %s already exists", userIDLessDTO.getUsername()));
+        }
 
-            User user = userMapper.idLessRoleLessDTOToModel(userIDLessDTO);
+        User user = userMapper.idLessRoleLessDTOToModel(userIDLessDTO);
 
-            if (userIDLessDTO.getDefaultRole() == null|| userIDLessDTO.getDefaultRole().isEmpty()){
+        if (userIDLessDTO.getDefaultRole() == null || userIDLessDTO.getDefaultRole().isEmpty()) {
             log.info("No default role provided, setting default role to OWNER");
             Optional<Role> role = roleRepo.findById(3L);
             Set<Role> roleSet = new HashSet<>();
             role.ifPresent(roleSet::add);
             user.setRoles(roleSet);
-            }else{
-                log.info("Default role provided, setting default role to {}", userIDLessDTO.getDefaultRole());
-                Role role = roleRepo.findRoleByName(userIDLessDTO.getDefaultRole());
-                Set<Role> roleSet = new HashSet<>();
-                if(role == null)
-                    throw new NotFoundException("No role with name: " + userIDLessDTO.getDefaultRole());
-                roleSet.add(role);
-                user.setRoles(roleSet);
-            }
-            user.setUserIdentifier(new UserIdentifier(userIDLessDTO.getUserId()));
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        } else {
+            log.info("Default role provided, setting default role to {}", userIDLessDTO.getDefaultRole());
+            Role role = roleRepo.findRoleByName(userIDLessDTO.getDefaultRole());
+            Set<Role> roleSet = new HashSet<>();
+            if (role == null)
+                throw new NotFoundException("No role with name: " + userIDLessDTO.getDefaultRole());
+            roleSet.add(role);
+            user.setRoles(roleSet);
+        }
+        user.setUserIdentifier(new UserIdentifier(userIDLessDTO.getUserId()));
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-            log.info("Sending email to {}...", userIDLessDTO.getEmail());
+        log.info("Sending email to {}...", userIDLessDTO.getEmail());
 
-            //Commented out the New emailing service and replaced it with the old emailing service as I implemented the new one but was told by Christine to revert back to the old one
-            mailService.sendMail(generateVerificationMail(user));  //Old
-            //generateVerificationMailWithNewEmailingService(user);          //New
+        //Commented out the New emailing service and replaced it with the old emailing service as I implemented the new one but was told by Christine to revert back to the old one
+        mailService.sendMail(generateVerificationMail(user));  //Old
+        //generateVerificationMailWithNewEmailingService(user);          //New
 
-            log.info("Email sent to {}", userIDLessDTO.getEmail());
+        log.info("Email sent to {}", userIDLessDTO.getEmail());
 
-            //////////////////////////////////////// BROKEN CODE -> Cart decided to add a code the create a cart and DIDN'T TEST IT! Turns out it breaks everything when trying to sign up :)
-            //////////////////////////////////////// So I commented it out and notified the one who initially wrote this piece of code, the error should be fixed in a future pull request
+        //////////////////////////////////////// BROKEN CODE -> Cart decided to add a code the create a cart and DIDN'T TEST IT! Turns out it breaks everything when trying to sign up :)
+        //////////////////////////////////////// So I commented it out and notified the one who initially wrote this piece of code, the error should be fixed in a future pull request
 //            User savedUser = userRepo.save(user);
-            //CartResponse cartResponse = cartService.createCart(new CartRequest(savedUser.getUserIdentifier().getUserId()));
-            ////////////////////////////////////////
+        //CartResponse cartResponse = cartService.createCart(new CartRequest(savedUser.getUserIdentifier().getUserId()));
+        ////////////////////////////////////////
 
-            return userRepo.save(user);
+        return userRepo.save(user);
     }
 
     @Override
@@ -258,7 +261,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public HashMap<String,Object> login(UserIDLessUsernameLessDTO login) throws IncorrectPasswordException {
+    public HashMap<String, Object> login(UserIDLessUsernameLessDTO login) throws IncorrectPasswordException {
         User loggedInUser;
         //Create two variables to test if we can find by email or username
         //If the methods dont find anything they return null
@@ -267,11 +270,9 @@ public class UserServiceImpl implements UserService {
         User emailLogin = getUserByEmail(login.getEmailOrUsername());
         if (usernameLogin == null) {
             loggedInUser = emailLogin;
-        }
-        else {
+        } else {
             loggedInUser = usernameLogin;
         }
-
 
 
         if (loggedInUser == null) {
@@ -303,21 +304,25 @@ public class UserServiceImpl implements UserService {
                     .sameSite("Lax")
                     .build();
 
-            ResponseCookie csrfCookie = ResponseCookie.from("XSRF-TOKEN", UUID.randomUUID().toString())
+            ResponseCookie.ResponseCookieBuilder csrfCookieBuilder = ResponseCookie.from("XSRF-TOKEN", UUID.randomUUID().toString())
                     .httpOnly(false)
                     .secure(true)
                     .maxAge(Duration.ofHours(1))
                     .path("/")
-                    .sameSite("Lax")
-                    .build();
+                    .sameSite("Lax");
+
+            if (cookieDomain != null && !cookieDomain.isBlank()) {
+                csrfCookieBuilder.domain(cookieDomain);
+            }
+
+            ResponseCookie csrfCookie = csrfCookieBuilder.build();
 
             return new HashMap<>() {{
                 put("token", token);
                 put("csrfToken", csrfCookie);
                 put("user", loggedInUser);
             }};
-        }
-        catch (BadCredentialsException e){
+        } catch (BadCredentialsException e) {
             throw new IncorrectPasswordException("Incorrect username or password for user: " + login.getEmailOrUsername());
         }
     }
@@ -329,8 +334,7 @@ public class UserServiceImpl implements UserService {
         String token = UUID.randomUUID().toString();
         try {
             getUserByEmail(email);
-        }
-        catch(RuntimeException e){
+        } catch (RuntimeException e) {
             throw new NotFoundException("Could not find any customer with the email " + email);
         }
 
@@ -339,7 +343,7 @@ public class UserServiceImpl implements UserService {
 
             // why :-;
             // String resetPasswordLink =  "http://localhost:8080/#!/reset_password/" + token;
-            String resetPasswordLink =  userResetPwdRequestModel.getUrl() + token;
+            String resetPasswordLink = userResetPwdRequestModel.getUrl() + token;
             sendEmailForgotPassword(email, resetPasswordLink);
         } catch (Exception ex) {
             throw new NotFoundException(ex.getMessage());
@@ -350,12 +354,12 @@ public class UserServiceImpl implements UserService {
     public void updateResetPasswordToken(String token, String email) {
         Optional<User> user = userRepo.findByEmail(email);
         if (user.isPresent()) {
-            if(tokenRepository.findResetPasswordTokenByUserIdentifier(user.get().getId()) != null){
+            if (tokenRepository.findResetPasswordTokenByUserIdentifier(user.get().getId()) != null) {
                 tokenRepository.delete(tokenRepository.findResetPasswordTokenByUserIdentifier(user.get().getId()));
             }
 
             //Hash the tokens
-            ResetPasswordToken resetPasswordToken = new ResetPasswordToken(user.get().getId(), BCrypt.hashpw(token,salt));
+            ResetPasswordToken resetPasswordToken = new ResetPasswordToken(user.get().getId(), BCrypt.hashpw(token, salt));
             tokenRepository.save(resetPasswordToken);
         } else {
             throw new NotFoundException("Could not find any customer with the email " + email);
@@ -371,8 +375,8 @@ public class UserServiceImpl implements UserService {
         }
 
         final Calendar cal = Calendar.getInstance();
-        Optional<User> user =userRepo.findById(resetPasswordToken.getUserIdentifier());
-        if(resetPasswordToken.getExpiryDate().after(cal.getTime()) && user.isPresent())
+        Optional<User> user = userRepo.findById(resetPasswordToken.getUserIdentifier());
+        if (resetPasswordToken.getExpiryDate().after(cal.getTime()) && user.isPresent())
             return userMapper.modelToPasswordLessDTO(user.get());
         else
             throw new IllegalArgumentException("Token is expired (in getByResetPasswordToken()");
@@ -384,7 +388,7 @@ public class UserServiceImpl implements UserService {
 
         final Calendar cal = Calendar.getInstance();
         ResetPasswordToken resetPasswordToken = tokenRepository.findResetPasswordTokenByToken(BCrypt.hashpw(token, salt));
-        if(resetPasswordToken.getExpiryDate().before(cal.getTime())){
+        if (resetPasswordToken.getExpiryDate().before(cal.getTime())) {
             throw new IllegalArgumentException("Token expired");
         }
 
@@ -392,13 +396,13 @@ public class UserServiceImpl implements UserService {
         Optional<User> user = userRepo.findById(resetPasswordToken.getUserIdentifier());
 
 
-        if(user.isPresent()) {
+        if (user.isPresent()) {
 
             user.get().setPassword(encodedPassword);
 
             userRepo.save(user.get());
             tokenRepository.delete(resetPasswordToken);
-        }else
+        } else
             throw new NotFoundException("Could not find any customer with the token " + token);
 
 
@@ -411,8 +415,6 @@ public class UserServiceImpl implements UserService {
         UserPasswordLessDTO userResponseModel = getByResetPasswordToken(token);
 
 
-
-
         if (userResponseModel == null) {
             throw new InvalidInputException("Invalid token");
         } else {
@@ -421,7 +423,7 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    public void sendEmailForgotPassword(String recipientEmail, String link){
+    public void sendEmailForgotPassword(String recipientEmail, String link) {
 
 
         Mail newMail = new Mail(
@@ -442,7 +444,7 @@ public class UserServiceImpl implements UserService {
     public UserPasswordLessDTO updateUserRole(String userId, RolesChangeRequestDTO roles, String token) {
         User existingUser = userRepo.findUserByUserIdentifier_UserId(userId);
 
-        if(existingUser == null) {
+        if (existingUser == null) {
             throw new NotFoundException("No user was found with id : " + userId);
         }
 
@@ -451,13 +453,12 @@ public class UserServiceImpl implements UserService {
             throw new InvalidRequestException("You can't change your own roles !");
 
 
-
         existingUser.setId(existingUser.getId());
         existingUser.setUserIdentifier(new UserIdentifier(userId));
 
         Set<Role> newRoles = new HashSet<>();
-        for (String role:
-             roles.getRoles()) {
+        for (String role :
+                roles.getRoles()) {
             Role newRole = roleRepo.findRoleByName(role);
             if (newRole == null)
                 throw new NotFoundException("Role was not found with name : " + newRole);
@@ -469,6 +470,7 @@ public class UserServiceImpl implements UserService {
 
         return userMapper.modelToPasswordLessDTO(userRepo.save(existingUser));
     }
+
     public User getUserByUserId(String userId) {
         return userRepo.findOptionalUserByUserIdentifier_UserId(userId)
                 .orElseThrow(() -> new NotFoundException("No user with userId: " + userId));
@@ -494,7 +496,7 @@ public class UserServiceImpl implements UserService {
     public String updateUserUsername(String userId, String username, String token) {
         User existingUser = userRepo.findUserByUserIdentifier_UserId(userId);
 
-        if(existingUser == null) {
+        if (existingUser == null) {
             throw new NotFoundException("No user was found with id : " + userId);
         }
         username = username.replace("{\"username\":\"", "");
@@ -506,7 +508,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserbyUsername(String username) throws NotFoundException {
-      return userRepo.findByUsername(username).orElse(null);
+        return userRepo.findByUsername(username).orElse(null);
     }
 
 }

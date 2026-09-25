@@ -176,7 +176,8 @@ frontend:
   url: https://petclinic-backend.benmusicgeek.synology.me/api/v2/gateway
 customer-frontend:
   url: https://petclinic.benmusicgeek.synology.me/
-
+cookie:
+  domain: .benmusicgeek.synology.me
 ---
 server.port: 8080
 
