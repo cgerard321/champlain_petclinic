@@ -2,6 +2,7 @@ import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import angular from 'angular-eslint';
 import importPlugin from 'eslint-plugin-import';
+import importAlias from 'eslint-plugin-import-alias';
 import prettierRecommended from 'eslint-plugin-prettier/recommended';
 
 export default tseslint.config(
@@ -37,6 +38,7 @@ export default tseslint.config(
     },
     plugins: {
       import: importPlugin,
+      'import-alias': importAlias,
     },
     rules: {
       // --- General JS/TS quality & shorthand ---
@@ -65,6 +67,12 @@ export default tseslint.config(
         },
       ],
       'import/no-duplicates': 'error',
+      'import-alias/import-alias': [
+        'error',
+        {
+          relativeDepth: 0,
+        },
+      ],
 
       // --- Angular component/directive conventions ---
       '@angular-eslint/directive-selector': [
@@ -124,6 +132,10 @@ export default tseslint.config(
       '@angular-eslint/template/no-negated-async': 'error',
       '@angular-eslint/template/eqeqeq': 'error',
       '@angular-eslint/template/prefer-self-closing-tags': 'warn',
+      '@angular-eslint/template/no-inline-styles': [
+        'error',
+        { 'style-attribute': true, 'style-binding': false },
+      ],
     },
   },
 );
