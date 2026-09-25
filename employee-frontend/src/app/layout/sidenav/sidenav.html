@@ -23,12 +23,8 @@
   <!-- Prototype Controls Footer -->
   <div class="prototype-controls">
     <div class="controls-title">PROTOTYPE CONTROLS</div>
-    <label class="controls-label">Logged-in Employee:</label>
-    <input
-      type="text"
-      [(ngModel)]="employeeName"
-      class="controls-input"
-    />
+    <label for="employeeNameInput" class="controls-label">Logged-in Employee:</label>
+    <input id="employeeNameInput" type="text" [(ngModel)]="employeeName" class="controls-input" />
     <button (click)="applyNameChange()" class="controls-button">Apply Name Change</button>
   </div>
 </div>
