@@ -60,7 +60,7 @@ public class CsrfFilter implements WebFilter {
         String cookieToken = cookie != null ? cookie.getValue() : null;
         String headerToken = exchange.getRequest().getHeaders().getFirst(CSRF_HEADER_NAME);
 
-        if (cookieToken == null || headerToken == null || !cookieToken.equals(headerToken)) {
+        if (cookieToken == null || !cookieToken.equals(headerToken)) {
             log.warn("CSRF check failed for {} {}", method, path);
             exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
             return exchange.getResponse().writeWith(Mono.just(
