@@ -152,10 +152,14 @@ class UserControllerIntegrationTest {
                 .expectHeader().value(HttpHeaders.SET_COOKIE,s -> {
                     assert s.contains("Bearer");
                 })
+                .expectHeader().exists(HttpHeaders.SET_COOKIE2)
+                .expectHeader().value(HttpHeaders.SET_COOKIE2,s -> {
+                    assert s.contains("XSRF-TOKEN");
+                })
                 .expectBody(UserPasswordLessDTO.class)
                 .value(user -> {
                     assertEquals(user.getEmail(),(userDTO.getEmailOrUsername()));
-                    assertEquals(user.getRoles().size(),1);
+                    assertEquals(1, user.getRoles().size());
                 });
     }
 
