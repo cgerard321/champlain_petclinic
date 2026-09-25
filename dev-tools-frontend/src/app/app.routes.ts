@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';
+import git { Routes } from '@angular/router';
 
 import { authGuard } from '@core/guards/auth/auth-guard';
 import { sudoGuard } from '@core/guards/sudo/sudo-guard';

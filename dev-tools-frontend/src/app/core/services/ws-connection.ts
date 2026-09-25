@@ -9,34 +9,51 @@ export class WsConnection {
   readonly messages = signal<string[]>([]);
   readonly status = signal<WsConnectionStatus>('idle');
 
-  connect(path: string, params?: Record<string, string | number | undefined>): void {
+  connect(
+    path: string,
+    params?: Record<string, string | number | undefined>,
+    maxMessages = 200,
+  ): void {
     this.disconnect();
     this.messages.set([]);
     this.status.set('connecting');
 
     const socket = new WebSocket(this.buildUrl(path, params));
+    const messageLimit =
+      Number.isFinite(maxMessages) && maxMessages > 0
+        ? Math.floor(maxMessages)
+        : 200;
     this.socket = socket;
 
-    socket.onopen = () => this.status.set('open');
-
-
-    // Each WebSocket message is appended to an Angular signal
-    // Every message is appended forever
-    // PROBLEM : `WsConnection.messages` still stores every message received. For a busy container,
-    // each new message copies the entire existing array,
-    // which can make the UI slow or appear to stop reacting.
-
-    // FIX : TO DISPLAY ONLY A FEW MESSAGES NOT ALL OF THEM
-    socket.onmessage = (event: MessageEvent<string>) => {
-      this.messages.update((current) => [...current, event.data]);
+    socket.onopen = () => {
+      if (this.socket === socket) {
+        this.status.set('open');
+      }
     };
 
+    socket.onmessage = (event: MessageEvent<string>) => {
+      if (this.socket !== socket) {
+        return;
+      }
 
-    socket.onerror = () => this.status.set('error');
+      this.messages.update((current) => {
+        const next = [...current, event.data];
+        return next.slice(-messageLimit);
+      });
+    };
+
+    socket.onerror = () => {
+      if (this.socket === socket) {
+        this.status.set('error');
+      }
+    };
 
     socket.onclose = () => {
-      if (this.status() !== 'error') {
-        this.status.set('closed');
+      if (this.socket === socket) {
+        this.socket = null;
+        if (this.status() !== 'error') {
+          this.status.set('closed');
+        }
       }
     };
   }
@@ -77,4 +94,3 @@ export class WsConnection {
     return apiUrl.replace(/^http/, 'ws');
   }
 }
-
