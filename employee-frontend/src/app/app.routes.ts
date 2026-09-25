@@ -3,7 +3,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from '@core/guards/auth/auth-guard';
 import { employeeGuard } from '@core/guards/employee/employee-guard';
 import { customerRedirectGuard } from '@core/guards/customers/customer-redirect';
-import { Roles } from '@shared/models/roles';
+import { Roles, EMPLOYEE_ROLES } from '@shared/models/roles';
 
 export const routes: Routes = [
   {
@@ -27,6 +27,11 @@ export const routes: Routes = [
       {
         path: 'home',
         loadChildren: () => import('@features/home/routes'),
+      },
+      {
+        path: 'inventory',
+        canActivate: [authGuard(EMPLOYEE_ROLES)], // Checks that only the employees can access this page
+        loadChildren: () => import('@features/inventory/routes'),
       },
     ],
   },

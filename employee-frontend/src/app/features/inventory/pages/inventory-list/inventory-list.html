@@ -1,0 +1,49 @@
+<div class="inventory-page">
+  <!--Title of the page-->
+  <h1>Inventory</h1>
+
+  @if (isLoading()) {
+    <!--Displays a loading screen while the page loads-->
+    <div class="state-container">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading inventories…</p>
+    </div>
+  } @else if (errorMessage()) {
+    <!--Displays an error page if an error occurs somewhere-->
+    <div class="state-container">
+        <mat-icon color="warn">error_outline</mat-icon>
+        <p>{{ errorMessage() }}</p>
+    </div>
+  } @else if (inventories().length === 0) {
+    <!--Displays special page if no inventories are found-->
+    <div class="state-container">
+        <mat-icon>inventory_2</mat-icon>
+        <p>No inventories found.</p>
+    </div>
+  } @else {
+    <!--Displays the inventory page if all goes right-->
+    <div class="inventory-grid">
+        <!--Creates a card for each inventory and places them all in a grid-->
+        @for (inventory of inventories(); track inventory.inventoryId) {
+            <a class="inventory-card-link" [routerLink]="['/inventory', inventory.inventoryId, 'supplies']">
+                <mat-card appearance="outlined" class="inventory-card">
+                    <mat-card-header>
+                        <mat-card-title>{{ inventory.inventoryName }}</mat-card-title>
+                        <mat-card-subtitle>{{ inventory.inventoryType }}</mat-card-subtitle>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <p>{{ inventory.inventoryDescription }}</p>
+                        <p class="quantity">
+                            @if (quantityFor(inventory.inventoryId) !== null) {
+                                {{ quantityFor(inventory.inventoryId) }} items in stock
+                            } @else {
+                                Quantity unavailable
+                            }
+                        </p>
+                    </mat-card-content>
+                </mat-card>
+            </a>
+        }
+    </div>
+  }
+</div>
