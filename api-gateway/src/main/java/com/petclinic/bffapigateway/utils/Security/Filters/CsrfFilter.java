@@ -24,7 +24,7 @@ import java.util.Set;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@Order(1)
+@Order(4)
 @Generated
 public class CsrfFilter implements WebFilter {
 
@@ -39,6 +39,13 @@ public class CsrfFilter implements WebFilter {
     @Override
     @NonNull
     public Mono<Void> filter(ServerWebExchange exchange, @NonNull WebFilterChain chain) {
+
+        if (exchange.getAttribute("whitelisted") != null && exchange.getAttribute("whitelisted") instanceof Boolean) {
+            if((boolean) exchange.getAttribute("whitelisted")) {
+                return chain.filter(exchange);
+            }
+        }
+
         HttpMethod method = exchange.getRequest().getMethod();
         String path = exchange.getRequest().getURI().getPath();
         log.info("URI Path seen by CsrfFilter: {}", exchange.getRequest().getURI().getPath());
