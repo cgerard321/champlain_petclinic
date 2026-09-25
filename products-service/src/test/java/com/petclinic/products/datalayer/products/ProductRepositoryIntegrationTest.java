@@ -1,30 +1,31 @@
 package com.petclinic.products.datalayer.products;
 
+import com.petclinic.products.utils.PostgresTestContainerBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
 import org.springframework.test.context.ActiveProfiles;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@DataMongoTest
+@DataR2dbcTest
 @ActiveProfiles("test")
-class ProductRepositoryIntegrationTest {
+class ProductRepositoryIntegrationTest extends PostgresTestContainerBase {
     @Autowired
     private ProductRepository productRepository;
 
     @BeforeEach
-    public void setupDB(){
+    public void setupDB() {
         StepVerifier.create(productRepository.deleteAll())
                 .expectNextCount(0)
                 .verifyComplete();
     }
+
     //Helper method to create a product
     private Product createProduct(String productName, String productDescription, Double productSalePrice, Double averageRating) {
         return Product.builder()
@@ -69,7 +70,7 @@ class ProductRepositoryIntegrationTest {
                 .productSalePrice(30.00)
                 .averageRating(7.00)
                 .build();
-        StepVerifier.create(productRepository.saveAll(Flux.just(product1,product2,product3)))
+        StepVerifier.create(productRepository.saveAll(Flux.just(product1, product2, product3)))
                 .expectNextCount(3)
                 .verifyComplete();
         StepVerifier.create(productRepository.findAll())
@@ -79,8 +80,8 @@ class ProductRepositoryIntegrationTest {
                 .verifyComplete();
 
 
-
     }
+
     @Test
     void whenNoProductsExist_thenReturnEmpty() {
 
@@ -95,7 +96,7 @@ class ProductRepositoryIntegrationTest {
 
 
     @Test
-    void whenFoundProduct_thenReturnProduct(){
+    void whenFoundProduct_thenReturnProduct() {
         String id = UUID.randomUUID().toString();
         Product product = Product.builder()
                 .productId(id)
@@ -120,7 +121,7 @@ class ProductRepositoryIntegrationTest {
     }
 
     @Test
-    void whenProductNotFound_thenEmptyMono(){
+    void whenProductNotFound_thenEmptyMono() {
         String productId = UUID.randomUUID().toString();
         StepVerifier
                 .create(productRepository.findProductByProductId(productId))
@@ -130,7 +131,7 @@ class ProductRepositoryIntegrationTest {
     }
 
     @Test
-    void whenProductCreated_thenReturnProduct(){
+    void whenProductCreated_thenReturnProduct() {
         String id = UUID.randomUUID().toString();
         Product product = Product.builder()
                 .productId(id)
@@ -149,7 +150,7 @@ class ProductRepositoryIntegrationTest {
     }
 
     @Test
-    public void whenProductUpdated_thenReturnUpdatedProduct(){
+    public void whenProductUpdated_thenReturnUpdatedProduct() {
         String id = UUID.randomUUID().toString();
         Product product = Product.builder()
                 .productId(id)
@@ -202,6 +203,7 @@ class ProductRepositoryIntegrationTest {
                 })
                 .verifyComplete();
     }
+
     @Test
     public void testUpdateDeliveryType() {
         String id = UUID.randomUUID().toString();
@@ -276,7 +278,7 @@ class ProductRepositoryIntegrationTest {
 
 
     @Test
-    void whenProductDeleted_thenMonoVoid(){
+    void whenProductDeleted_thenMonoVoid() {
         String id = UUID.randomUUID().toString();
         Product product = Product.builder()
                 .productId(id)
@@ -352,7 +354,6 @@ class ProductRepositoryIntegrationTest {
                 .expectNextCount(0)
                 .verifyComplete();
     }
-
 
 
 }

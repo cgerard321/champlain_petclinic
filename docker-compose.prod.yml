@@ -238,7 +238,7 @@ services:
       - .env
     restart: unless-stopped
     depends_on:
-      mongo-products:
+      postgres-products:
         condition: service_healthy
 
   cart-service:
@@ -427,23 +427,21 @@ services:
         soft: 64000
         hard: 64000
 
-  mongo-products:
-    <<: *mongo
-    image: mongo:7.0
-    container_name: mongo-products
+  postgres-products:
+    <<: *postgres
+    image: postgres:17
+    container_name: postgres-products
+    hostname: postgres
     env_file:
       - .env
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=${DB_USER}
-      - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=products
     volumes:
-      - mongo-products-data:/data/db
-      - mongo-products-config:/data/configdb
+      - postgres-products-data:/var/lib/postgresql/data
     restart: unless-stopped
-    ulimits:
-      nofile:
-        soft: 64000
-        hard: 64000
+
 
   mongo-carts:
     <<: *mongo
@@ -530,6 +528,7 @@ volumes:
   mongo-carts-data:
   mongo-carts-config:
   postgres-vet-data:
+  postgres-products-data:
   mysql-files-data:
   dbgate-data:
   mysql-devtools-data:

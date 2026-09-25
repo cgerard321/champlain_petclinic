@@ -35,6 +35,14 @@ x-healthchecks:
       retries: 10
       start_period: 10s
 
+  dbgate: &dbgate_hc
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:3000/"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
   mysql: &mysql
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -P 3306 -u${DB_USER} -p${DB_PASSWORD}"]
@@ -214,7 +222,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
-      mongo-products:
+      postgres-products:
         condition: service_healthy
 
   cart-service:
@@ -371,16 +379,16 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${DB_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
 
-  mongo-products:
-    <<: *mongo
-    image: mongo
-    container_name: mongo-products
-    restart: always
+  postgres-products:
+    <<: *postgres
+    image: postgres
+    container_name: postgres-products
     env_file:
       - .env
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${DB_USER}
-      MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=products
 
   mongo-carts:
     <<: *mongo

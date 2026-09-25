@@ -4,6 +4,7 @@ import com.petclinic.products.businesslayer.products.ProductService;
 import com.petclinic.products.datalayer.products.*;
 import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.datalayer.ratings.RatingRepository;
+import com.petclinic.products.utils.PostgresTestContainerBase;
 import com.petclinic.products.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
@@ -28,10 +29,10 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port=0"})
+@SpringBootTest(webEnvironment = RANDOM_PORT)
 @ActiveProfiles("test")
 @AutoConfigureWebTestClient
-class ProductControllerIntegrationTest {
+class ProductControllerIntegrationTest extends PostgresTestContainerBase {
 
     @Autowired
     private WebTestClient webTestClient;

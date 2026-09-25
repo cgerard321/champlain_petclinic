@@ -2,6 +2,7 @@ package com.petclinic.products.presentationlayer.images;
 
 import com.petclinic.products.datalayer.images.Image;
 import com.petclinic.products.datalayer.images.ImageRepository;
+import com.petclinic.products.utils.PostgresTestContainerBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
@@ -25,10 +26,10 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port=0"})
+@SpringBootTest(webEnvironment = RANDOM_PORT)
 @ActiveProfiles("test")
 @AutoConfigureWebTestClient
-class ImageControllerIntegrationTest {
+class ImageControllerIntegrationTest extends PostgresTestContainerBase {
 
     @Autowired
     private WebTestClient webTestClient;

@@ -14,17 +14,17 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
-public class RatingServiceImpl implements RatingService{
+public class RatingServiceImpl implements RatingService {
     private RatingRepository ratingRepository;
     private ProductRepository productRepository;
 
-    public RatingServiceImpl(RatingRepository ratingRepository, ProductRepository productRepository){
+    public RatingServiceImpl(RatingRepository ratingRepository, ProductRepository productRepository) {
         this.ratingRepository = ratingRepository;
         this.productRepository = productRepository;
     }
 
     @Override
-    public Flux<RatingResponseModel> getAllRatingsForProductId(String productId){
+    public Flux<RatingResponseModel> getAllRatingsForProductId(String productId) {
         return productRepository.findProductByProductId(productId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Product id not found: " + productId)))
                 .thenMany(ratingRepository.findRatingsByProductId(productId)
@@ -98,8 +98,9 @@ public class RatingServiceImpl implements RatingService{
                 .switchIfEmpty(Mono.error(new NotFoundException("Product id not found: " + productId)))
                 .then(ratingRepository.findRatingByCustomerIdAndProductId(customerId, productId)
                         .switchIfEmpty(Mono.error(new NotFoundException("Rating not found with associated customerId " + customerId + " and productId " + productId)))
-                        .flatMap(rating -> ratingRepository.delete(rating)
-                                .then(Mono.just(rating))
+                        .flatMap(rating ->
+                                ratingRepository.delete(rating)
+                                        .then(Mono.just(rating))
                         )
                         .map(EntityModelUtil::toRatingResponseModel)
                 );

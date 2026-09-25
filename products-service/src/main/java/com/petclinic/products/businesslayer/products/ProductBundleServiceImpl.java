@@ -1,4 +1,5 @@
 package com.petclinic.products.businesslayer.products;
+
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductBundle;
 import com.petclinic.products.datalayer.products.ProductBundleRepository;
@@ -11,28 +12,32 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
 @Service
 @RequiredArgsConstructor
 public class ProductBundleServiceImpl implements ProductBundleService {
     private final ProductBundleRepository bundleRepository;
     private final ProductRepository productRepository;
+
     @Override
     public Flux<ProductBundleResponseModel> getAllProductBundles() {
         return bundleRepository.findAll()
                 .map(EntityModelUtil::toProductBundleResponseModel);
     }
+
     @Override
     public Mono<ProductBundleResponseModel> getProductBundleById(String bundleId) {
         return bundleRepository.findByBundleId(bundleId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Bundle not found: " + bundleId)))
                 .map(EntityModelUtil::toProductBundleResponseModel);
     }
+
     @Override
     public Mono<ProductBundleResponseModel> createProductBundle(Mono<ProductBundleRequestModel> requestModel) {
         return requestModel
                 .flatMap(request -> {
                     // Calculate original total price
-                    return productRepository.findAllById(request.getProductIds())
+                    return productRepository.findAllByProductIdIn(request.getProductIds())
                             .collectList()
                             .flatMap(products -> {
                                 if (products.size() != request.getProductIds().size()) {
@@ -54,6 +59,7 @@ public class ProductBundleServiceImpl implements ProductBundleService {
                 })
                 .map(EntityModelUtil::toProductBundleResponseModel);
     }
+
     @Override
     public Mono<ProductBundleResponseModel> updateProductBundle(String bundleId, Mono<ProductBundleRequestModel> requestModel) {
         return bundleRepository.findByBundleId(bundleId)
@@ -65,7 +71,7 @@ public class ProductBundleServiceImpl implements ProductBundleService {
                             existingBundle.setProductIds(request.getProductIds());
                             existingBundle.setBundlePrice(request.getBundlePrice());
                             // Recalculate original total price
-                            return productRepository.findAllById(request.getProductIds())
+                            return productRepository.findAllByProductIdIn(request.getProductIds())
                                     .collectList()
                                     .flatMap(products -> {
                                         if (products.size() != request.getProductIds().size()) {
@@ -80,6 +86,7 @@ public class ProductBundleServiceImpl implements ProductBundleService {
                         }))
                 .map(EntityModelUtil::toProductBundleResponseModel);
     }
+
     @Override
     public Mono<Void> deleteProductBundle(String bundleId) {
         return bundleRepository.findByBundleId(bundleId)
@@ -93,7 +100,9 @@ public class ProductBundleServiceImpl implements ProductBundleService {
                 .switchIfEmpty(Flux.error(new NotFoundException("No Bundles found with product: " + productId)))
                 .collectList()
                 .flatMapMany(bundles -> {
-                    if (bundles.isEmpty()) { return Flux.empty(); }
+                    if (bundles.isEmpty()) {
+                        return Flux.empty();
+                    }
 
                     var deletedBundles = bundles.stream()
                             .map(EntityModelUtil::toProductBundleResponseModel)
