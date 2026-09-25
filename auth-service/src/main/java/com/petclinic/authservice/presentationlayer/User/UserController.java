@@ -140,8 +140,8 @@ public class UserController {
             ResponseCookie token = (ResponseCookie) userAndToken.get("token");
             ResponseCookie csrfCookie = (ResponseCookie) userAndToken.get("csrfToken");
             User loggedInUser = (User) userAndToken.get("user");
-            response.setHeader(HttpHeaders.SET_COOKIE, token.toString());
-            response.setHeader(HttpHeaders.SET_COOKIE, csrfCookie.toString());
+            response.addHeader(HttpHeaders.SET_COOKIE, token.toString());
+            response.addHeader(HttpHeaders.SET_COOKIE, csrfCookie.toString());
             UserPasswordLessDTO testUser = userMapper.modelToIDLessPasswordLessDTO(loggedInUser);
             return ResponseEntity.ok()
                     .body(testUser);
