@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable, switchMap } from 'rxjs';
+
 import { AuthState } from '@core/services/auth-state';
 import { LoginRequest } from '@features/auth/models/loginRequest';
 

@@ -1,5 +1,4 @@
 import { Component, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
 import { required, form, FormField } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -7,9 +6,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { Router } from '@angular/router';
+
+import { isApiError } from '@core/models/api-error';
 import { LoginRequest } from '@features/auth/models/loginRequest';
 import { Auth } from '@features/auth/services/auth';
-import { isApiError } from '@core/models/api-error';
 
 @Component({
   selector: 'app-login',
