@@ -5,7 +5,24 @@ angular.module('productUpdateForm')
         "$http", "$state", "$stateParams",
         function ($http, $state, $stateParams) {
             var self = this;
-            var productId = $stateParams.productId;
+            var productId;
+
+            self.isModal = false;
+
+            self.$onInit = function () {
+                self.isModal = angular.isFunction(self.modalClose) && angular.isFunction(self.modalDismiss);
+                var resolvedProductId = self.resolve && self.resolve.productId;
+                productId = angular.isDefined(resolvedProductId) ? resolvedProductId : $stateParams.productId;
+                loadProduct();
+            };
+
+            self.close = function () {
+                if (self.isModal) {
+                    self.modalDismiss();
+                } else {
+                    $state.go('productList');
+                }
+            };
 
             // dropdown lists
             self.deliveryType   = ["DELIVERY", "PICKUP", "DELIVERY_AND_PICKUP", "NO_DELIVERY_OPTION"];
@@ -17,32 +34,34 @@ angular.module('productUpdateForm')
 
             //console.log("ProductId: " + productId);
 
-            // Load product by ID
-            $http.get('/api/gateway/products/' + productId).then(function (resp) {
-                self.product = resp.data;
+            function loadProduct() {
+                // Load product by ID
+                $http.get('/api/gateway/products/' + productId).then(function (resp) {
+                    self.product = resp.data;
 
-                if (self.product.isUnlisted === undefined || self.product.isUnlisted === null) {
-                    self.product.isUnlisted = false;
-                }
+                    if (self.product.isUnlisted === undefined || self.product.isUnlisted === null) {
+                        self.product.isUnlisted = false;
+                    }
 
-                // fetch current image (for preview)
-                if (self.product.imageId) {
-                    $http.get('api/gateway/images/' + self.product.imageId)
-                        .then(function (imageResp) {
-                            if (imageResp.data === "") {
-                                //console.log("no image found");
-                                alert("No image found for this product");
-                                return;
-                            }
-                            self.product.imageData = imageResp.data.imageData;
-                            self.product.imageType = imageResp.data.imageType;
-                        })
-                        .catch(function (err) {
-                            //console.error("Error fetching image: ", err);
-                            alert("Failed to load image data.");
-                        });
-                }
-            });
+                    // fetch current image (for preview)
+                    if (self.product.imageId) {
+                        $http.get('api/gateway/images/' + self.product.imageId)
+                            .then(function (imageResp) {
+                                if (imageResp.data === "") {
+                                    //console.log("no image found");
+                                    alert("No image found for this product");
+                                    return;
+                                }
+                                self.product.imageData = imageResp.data.imageData;
+                                self.product.imageType = imageResp.data.imageType;
+                            })
+                            .catch(function (err) {
+                                //console.error("Error fetching image: ", err);
+                                alert("Failed to load image data.");
+                            });
+                    }
+                });
+            }
 
             // Handle file selection from <input type="file">
             self.onFileSelected = function(files) {
@@ -114,10 +133,14 @@ angular.module('productUpdateForm')
                     return;
                 }
 
-                $http.put('/api/gateway/products/' + productId, data)
+                    $http.put('/api/gateway/products/' + productId, data)
                     .then(function (response) {
                         //console.log("Product updated:", response);
-                        $state.go('productList');
+                        if (self.isModal) {
+                            self.modalClose({$value: response.data});
+                        } else {
+                            $state.go('productList');
+                        }
                     }, function (response) {
                         var error = response.data;
                         error.errors = error.errors || [];

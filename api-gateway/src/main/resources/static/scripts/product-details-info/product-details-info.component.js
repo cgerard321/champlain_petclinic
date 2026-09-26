@@ -4,6 +4,11 @@
 angular.module('productDetailsInfo')
     .component('productDetailsInfo', {
         templateUrl: 'scripts/product-details-info/product-details-info.template.html',
-        controller: 'ProductDetailsInfoController'
+        controller: 'ProductDetailsInfoController',
+        bindings: {
+            resolve: '<',
+            modalClose: '&close',
+            modalDismiss: '&dismiss'
+        }
     });
 

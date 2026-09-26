@@ -1,8 +1,22 @@
 'use strict';
 
 angular.module('productForm')
-    .controller('ProductFormController', ["$http", '$state', '$stateParams', function ($http, $state, $stateParams) {
+    .controller('ProductFormController', ["$http", '$state', function ($http, $state) {
         var self = this;
+
+        self.isModal = false;
+
+        self.$onInit = function () {
+            self.isModal = angular.isFunction(self.modalClose) && angular.isFunction(self.modalDismiss);
+        };
+
+        self.close = function () {
+            if (self.isModal) {
+                self.modalDismiss();
+            } else {
+                $state.go('productList');
+            }
+        };
 
         // Dropdown values
         self.deliveryType   = ["DELIVERY", "PICKUP", "DELIVERY_AND_PICKUP", "NO_DELIVERY_OPTION"];
@@ -78,7 +92,11 @@ angular.module('productForm')
             $http.post('/api/gateway/products', data)
                 .then(function (response) {
                     //console.log('Product created:', response.data);
-                    $state.go('productList');
+                    if (self.isModal) {
+                        self.modalClose({$value: response.data});
+                    } else {
+                        $state.go('productList');
+                    }
                 }, function (response) {
                     var error = response.data;
                     error.errors = error.errors || [];

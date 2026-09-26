@@ -4,6 +4,7 @@ import com.petclinic.bffapigateway.config.GlobalExceptionHandler;
 import com.petclinic.bffapigateway.domainclientlayer.ProductsServiceClient;
 import com.petclinic.bffapigateway.dtos.Products.DeliveryType;
 import com.petclinic.bffapigateway.dtos.Products.ProductRequestDTO;
+import com.petclinic.bffapigateway.dtos.Products.ProductQuantityRequest;
 import com.petclinic.bffapigateway.dtos.Products.ProductResponseDTO;
 import com.petclinic.bffapigateway.presentationlayer.v2.ProductController;
 import org.junit.jupiter.api.Test;
@@ -426,6 +427,50 @@ class ProductControllerUnitTest {
                     assertNotNull(response);
                     assertTrue(response.contains("minPrice cannot be greater than maxPrice"));
                 });
+    }
+
+    @Test
+    void whenGetProductById_thenReturnProductOrNotFound() {
+        when(productsServiceClient.getProductByProductId(productResponse1.getProductId()))
+                .thenReturn(Mono.just(productResponse1));
+
+        webTestClient.get().uri(baseInventoryURL + "/{id}", productResponse1.getProductId())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ProductResponseDTO.class)
+                .isEqualTo(productResponse1);
+
+        when(productsServiceClient.getProductByProductId("missing")).thenReturn(Mono.empty());
+        webTestClient.get().uri(baseInventoryURL + "/missing")
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void quantityAndRequestCountEndpoints_delegateToClient() {
+        String id = productResponse1.getProductId();
+        when(productsServiceClient.requestCount(id)).thenReturn(Mono.empty());
+        when(productsServiceClient.decreaseProductQuantity(id)).thenReturn(Mono.empty());
+        when(productsServiceClient.changeProductQuantity(id, 4)).thenReturn(Mono.empty());
+
+        webTestClient.patch().uri(baseInventoryURL + "/{id}", id)
+                .exchange().expectStatus().isNoContent();
+        webTestClient.patch().uri(baseInventoryURL + "/{id}/decrease", id)
+                .exchange().expectStatus().isNoContent();
+        webTestClient.patch().uri(baseInventoryURL + "/{id}/quantity", id)
+                .bodyValue(new ProductQuantityRequest(4))
+                .exchange().expectStatus().isNoContent();
+    }
+
+    @Test
+    void getProductsByType_delegatesToClient() {
+        when(productsServiceClient.getProductsByType("FOOD")).thenReturn(Flux.just(productResponse1));
+
+        webTestClient.get().uri(baseInventoryURL + "/filter/FOOD")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseDTO.class)
+                .hasSize(1);
     }
 
 }

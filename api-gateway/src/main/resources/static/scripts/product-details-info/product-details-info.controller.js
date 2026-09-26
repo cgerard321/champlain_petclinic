@@ -4,30 +4,47 @@ angular.module('productDetailsInfo')
     .controller('ProductDetailsInfoController', ["$http", '$state', '$stateParams', function ($http, $state, $stateParams) {
         var self = this;
         self.product = {}; // Initialize self.product
-        var productId = $stateParams.productId;
 
-        $http.get('/api/gateway/products/' + productId)
-            .then(function (resp) {
-                // Handle the response data for the specific product
-                var product = resp.data;
-                //console.log("Product found:", product);
-                self.product = product; // Update the product data in your controller
+        self.isModal = false;
 
-                //fetch image
-                $http.get('api/gateway/images/' + product.imageId).then(function (imageResp){
-                            if(imageResp.data === ""){
-                               console.log("no image found");
-                               return;
-                            }
-                               self.product.imageData = imageResp.data.imageData;
-                               self.product.imageType = imageResp.data.imageType;
-                            })
-                               .catch(function (err) {
-                               console.error("Error fetching image: ", err);
-                            });
-            })
-            .catch(function (error) {
-                // Handle errors if the product is not found or other issues
-                console.error("Error fetching product:", error);
-            });
+        self.$onInit = function () {
+            self.isModal = angular.isFunction(self.modalClose) && angular.isFunction(self.modalDismiss);
+            var resolvedProductId = self.resolve && self.resolve.productId;
+            loadProduct(angular.isDefined(resolvedProductId) ? resolvedProductId : $stateParams.productId);
+        };
+
+        self.close = function () {
+            if (self.isModal) {
+                self.modalDismiss();
+            } else {
+                $state.go('productList');
+            }
+        };
+
+        function loadProduct(productId) {
+            $http.get('/api/gateway/products/' + productId)
+                .then(function (resp) {
+                    // Handle the response data for the specific product
+                    var product = resp.data;
+                    //console.log("Product found:", product);
+                    self.product = product; // Update the product data in your controller
+
+                    //fetch image
+                    $http.get('api/gateway/images/' + product.imageId).then(function (imageResp){
+                                if(imageResp.data === ""){
+                                   console.log("no image found");
+                                   return;
+                                }
+                                   self.product.imageData = imageResp.data.imageData;
+                                   self.product.imageType = imageResp.data.imageType;
+                                })
+                                   .catch(function (err) {
+                                   console.error("Error fetching image: ", err);
+                                });
+                })
+                .catch(function (error) {
+                    // Handle errors if the product is not found or other issues
+                    console.error("Error fetching product:", error);
+                });
+        }
     }]);

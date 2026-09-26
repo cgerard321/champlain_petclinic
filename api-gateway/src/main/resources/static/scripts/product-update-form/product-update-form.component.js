@@ -4,5 +4,10 @@
 angular.module('productUpdateForm')
     .component('productUpdateForm', {
         templateUrl: 'scripts/product-update-form/product-update-form.template.html',
-        controller: 'ProductUpdateFormController'
+        controller: 'ProductUpdateFormController',
+        bindings: {
+            resolve: '<',
+            modalClose: '&close',
+            modalDismiss: '&dismiss'
+        }
     });

@@ -118,6 +118,56 @@ angular.module('productList')
             });
         };
 
+        $scope.openAddProductModal = function () {
+            var modal = $uibModal.open({
+                component: 'productForm',
+                size: 'lg',
+                windowClass: 'product-add-modal',
+                backdrop: true,
+                keyboard: true
+            });
+
+            modal.result.then(function () {
+                fetchProductList(self.lastParams.productSalePrice, self.lastParams.productType, self.lastParams.averageRating);
+            }, angular.noop);
+        };
+
+        $scope.openProductDetailsModal = function (productId) {
+            var modal = $uibModal.open({
+                component: 'productDetailsInfo',
+                size: 'lg',
+                windowClass: 'product-details-modal',
+                backdrop: true,
+                keyboard: true,
+                resolve: {
+                    productId: function () {
+                        return productId;
+                    }
+                }
+            });
+
+            modal.result.then(angular.noop, angular.noop);
+        };
+
+        $scope.openProductUpdateModal = function (productId) {
+            var modal = $uibModal.open({
+                component: 'productUpdateForm',
+                size: 'lg',
+                windowClass: 'product-update-modal',
+                backdrop: true,
+                keyboard: true,
+                resolve: {
+                    productId: function () {
+                        return productId;
+                    }
+                }
+            });
+
+            modal.result.then(function () {
+                fetchProductList(self.lastParams.productSalePrice, self.lastParams.productType, self.lastParams.averageRating);
+            }, angular.noop);
+        };
+
         $scope.clearQueries = function (){
             self.lastParams.productSalePrice = '';
 

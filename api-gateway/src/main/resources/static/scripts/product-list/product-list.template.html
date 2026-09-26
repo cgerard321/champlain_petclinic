@@ -43,7 +43,8 @@
         </button>
 
         <button class="btn btn-success"
-                ui-sref="productAdd">
+                type="button"
+                ng-click="openAddProductModal()">
             Add Product
         </button>
 
@@ -131,7 +132,8 @@
 
 
         <td>
-            <a class="btn btn-info" href="#!/products/{{product.productId}}" title="Details">
+            <a class="btn btn-info" href="#!/products/{{product.productId}}"
+               ng-click="$event.preventDefault(); openProductDetailsModal(product.productId)" title="Details">
                 <lord-icon
                         src="https://cdn.lordicon.com/jnzhohhs.json"
                         trigger="hover"
@@ -142,7 +144,8 @@
         </td>
 
 
-        <td><a ui-sref="updateProduct({productId: product.productId})" title="Edit">
+        <td><a href="#!/products/{{product.productId}}"
+               ng-click="$event.preventDefault(); openProductUpdateModal(product.productId)" title="Edit">
             <button class="add-bundle-button btn btn-warning">
 
                 <lord-icon

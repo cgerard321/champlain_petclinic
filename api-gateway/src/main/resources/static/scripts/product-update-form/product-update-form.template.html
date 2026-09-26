@@ -1,13 +1,94 @@
-<div class="container d-flex justify-content-center mt-5">
-    <div class="card shadow-sm p-4" style="max-width: 600px; width: 100%;">
-        <h4 class="mb-4 text-center">Update Product</h4>
+<style>
+    .product-update-modal.modal {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        margin: 0 !important;
+        transform: none !important;
+        background: transparent !important;
+        color: inherit !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+        overflow-x: hidden;
+        overflow-y: auto;
+        z-index: 1055 !important;
+    }
+
+    .product-update-modal .modal-dialog {
+        display: block;
+        width: 100%;
+        max-width: 600px;
+        min-height: 0;
+        margin: 0 auto;
+        transform: none !important;
+    }
+
+    .product-update-modal .modal-content {
+        opacity: 1;
+        visibility: visible;
+        max-height: calc(100vh - 2rem);
+        overflow-y: auto;
+    }
+
+    .product-update-modal .modal-header {
+        position: relative;
+        padding-right: 3rem;
+    }
+
+    .product-update-modal .modal-header .close {
+        display: block !important;
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        z-index: 1;
+        width: 2rem;
+        height: 2rem;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: #212529;
+        font-size: 1.75rem;
+        line-height: 1;
+        opacity: 1 !important;
+        cursor: pointer;
+    }
+
+    @media (min-width: 576px) {
+        .product-update-modal .modal-content {
+            max-height: calc(100vh - 3.5rem);
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .product-update-modal .modal-dialog {
+            max-width: calc(100% - 1rem);
+        }
+    }
+</style>
+
+<div ng-class="$ctrl.isModal ? 'product-update-modal-content' : 'container d-flex justify-content-center mt-5'">
+    <div ng-if="$ctrl.isModal" class="modal-header">
+        <h4 class="modal-title">Update Product</h4>
+        <button type="button" class="close" aria-label="Close" ng-click="$ctrl.close()">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
+    <div ng-class="$ctrl.isModal ? 'modal-body' : 'card shadow-sm p-4'" style="max-width: 600px; width: 100%;">
+        <h4 ng-if="!$ctrl.isModal" class="mb-4 text-center">Update Product</h4>
         <div class="p-3 formColor m-0">
             <form id="productUpdateForm" class="form-horizontal" enctype="multipart/form-data" ng-submit="$ctrl.submitProductUpdateForm()">
                 <div class="row">
                     <div class="form-group mb-3">
-                        <img ng-if="product.imageData"
-                             ng-src="data:{{product.imageType}};base64,{{product.imageData}}"
-                             alt="{{product.productName}}"
+                        <img ng-if="$ctrl.product.imageData"
+                             ng-src="data:{{$ctrl.product.imageType}};base64,{{$ctrl.product.imageData}}"
+                             alt="{{$ctrl.product.productName}}"
                              width="120">
                     </div>
                     <div class="form-group mb-3">
@@ -95,6 +176,7 @@
                     <div class="owner marg col-sm-6">
                         <button id="newBtn" class="btn btn-primary px-4" type="submit">Submit</button>
                     </div>
+                </div>
                 </div>
             </form>
         </div>
