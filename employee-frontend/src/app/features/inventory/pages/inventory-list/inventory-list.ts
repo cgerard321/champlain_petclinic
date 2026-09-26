@@ -1,12 +1,12 @@
 import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Subscription, timer, switchMap } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { InventoryService } from '@features/inventory/services/inventory-service';
 import { Inventory } from '@features/inventory/models/inventory.model';
-import { isApiError } from '@core/models/api-error';
+import { isApiError, ApiError } from '@core/models/api-error';
 
 @Component({
   imports: [RouterLink, MatCardModule, MatIconModule, MatProgressSpinnerModule],
@@ -16,28 +16,34 @@ import { isApiError } from '@core/models/api-error';
 })
 export class InventoryList implements OnInit, OnDestroy {
   private readonly inventoryService = inject(InventoryService);
-  private pollSubscription?: Subscription; // A subscription represents a disposable value, such as the exectution of an Observable
+  private pollSubscription?: Subscription;
 
   protected readonly inventories = signal<Inventory[]>([]);
   protected readonly quantities = signal<Record<string, number | null>>({});
   protected readonly isLoading = signal(true);
-  protected readonly errorMessage = signal<string | null>(null);
+  protected readonly errorMessage = signal<ApiError | null>(null);
 
   ngOnInit(): void {
-    this.pollSubscription = timer(0, 15_000)
-      .pipe(switchMap(() => this.inventoryService.getInventories()))
-      .subscribe({
-        next: (inventories) => {
-          this.inventories.set(inventories);
-          this.isLoading.set(false);
-          this.errorMessage.set(null);
-          this.loadQuantities(inventories);
-        },
-        error: (err: unknown) => {
-          this.isLoading.set(false);
-          this.errorMessage.set(isApiError(err) ? err.message : 'Could not load inventories.');
-        },
-      });
+    this.pollSubscription = this.inventoryService.getInventories().subscribe({
+      next: (item) => {
+        this.isLoading.set(false);
+        this.inventories.update((current) => {
+          const idx = current.findIndex((inv) => inv.inventoryId === item.inventoryId);
+          if (idx === -1) return [...current, item];
+          const copy = [...current];
+          copy[idx] = item;
+          return copy;
+        });
+        this.loadQuantities([item]);
+      },
+      error: (err: unknown) => {
+        this.isLoading.set(false);
+        this.errorMessage.set(
+          isApiError(err) ? err : { code: 'UNKNOWN', message: 'Failed to load inventories.' },
+        );
+      },
+      complete: () => this.isLoading.set(false),
+    });
   }
 
   ngOnDestroy(): void {
