@@ -74,7 +74,7 @@ public class CustomerServiceClientUnitTest {
         Mono<CustomerResponseModel> result = customerServiceClient.getCustomerByCustomerId(invalidId);
 
         StepVerifier.create(result)
-                .expectErrorMatches(throwable -> throwable instanceof NotFoundException && throwable.getMessage().equals("Owner not found with ownerId: " + invalidId))
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException && throwable.getMessage().equals("Customer not found with customerId: " + invalidId))
                 .verify();
     }
 
