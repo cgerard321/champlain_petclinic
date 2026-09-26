@@ -1,10 +1,10 @@
-<link href="/css/owner.css" rel="stylesheet" type="text/css"/>
+<link href="/css/customer.css" rel="stylesheet" type="text/css"/>
 
 <div class="dashboard-container" ng-controller="OwnerDetailsController" ng-app="ownerDetails">
     <div class="main-content">
         <div class="page-header">
             <h1 class="page-title">Owner Details</h1>
-            <p class="page-subtitle">View and manage owner information and their pets</p>
+            <p class="page-subtitle">View and manage customer information and their pets</p>
         </div>
 
         <div class="content-wrapper">
@@ -14,10 +14,10 @@
                     <div class="card-header">
                         <h2 class="card-title">Owner Information</h2>
                         <div class="action-buttons">
-                            <a class="btn-modern btn-edit" ui-sref="ownerEdit({ ownerId: $ctrl.owner.ownerId, method: 'edit' })">
+                            <a class="btn-modern btn-edit" ui-sref="ownerEdit({ ownerId: $ctrl.customer.ownerId, method: 'edit' })">
                                 &#x270F; Edit
                             </a>
-                            <a class="btn-modern btn-delete" ui-sref="ownerEdit({ ownerId: $ctrl.owner.ownerId, method: 'delete' })">
+                            <a class="btn-modern btn-delete" ui-sref="ownerEdit({ ownerId: $ctrl.customer.ownerId, method: 'delete' })">
                                 &#x1F5D1; Delete
                             </a>
                         </div>
@@ -27,43 +27,43 @@
                         <div class="profile-avatar">
                             <img src="../../images/default-user-icon.png" alt="Owner Avatar"/>
                         </div>
-                        <h3 class="profile-name">{{$ctrl.owner.firstName}} {{$ctrl.owner.lastName}}</h3>
+                        <h3 class="profile-name">{{$ctrl.customer.firstName}} {{$ctrl.customer.lastName}}</h3>
                     </div>
 
-                    <form class="owner-form">
+                    <form class="customer-form">
                         <div class="form-grid">
                             <div class="form-group full-width">
-                                <input class="form-input" value="{{$ctrl.owner.ownerId}}" readonly disabled/>
+                                <input class="form-input" value="{{$ctrl.customer.ownerId}}" readonly disabled/>
                                 <label class="form-label">Owner ID</label>
                             </div>
 
                             <div class="form-group">
-                                <input class="form-input" value="{{$ctrl.owner.firstName}}" readonly disabled/>
+                                <input class="form-input" value="{{$ctrl.customer.firstName}}" readonly disabled/>
                                 <label class="form-label">First Name</label>
                             </div>
 
                             <div class="form-group">
-                                <input class="form-input" value="{{$ctrl.owner.lastName}}" readonly disabled/>
+                                <input class="form-input" value="{{$ctrl.customer.lastName}}" readonly disabled/>
                                 <label class="form-label">Last Name</label>
                             </div>
 
                             <div class="form-group">
-                                <input class="form-input" value="{{$ctrl.owner.address}}" readonly disabled/>
+                                <input class="form-input" value="{{$ctrl.customer.address}}" readonly disabled/>
                                 <label class="form-label">Address</label>
                             </div>
 
                             <div class="form-group">
-                                <input class="form-input" value="{{$ctrl.owner.city}}" readonly disabled/>
+                                <input class="form-input" value="{{$ctrl.customer.city}}" readonly disabled/>
                                 <label class="form-label">City</label>
                             </div>
 
                             <div class="form-group">
-                                <input class="form-input" value="{{$ctrl.owner.province}}" readonly disabled/>
+                                <input class="form-input" value="{{$ctrl.customer.province}}" readonly disabled/>
                                 <label class="form-label">Province</label>
                             </div>
 
                             <div class="form-group">
-                                <input class="form-input" value="{{$ctrl.owner.telephone}}" readonly disabled/>
+                                <input class="form-input" value="{{$ctrl.customer.telephone}}" readonly disabled/>
                                 <label class="form-label">Phone Number</label>
                             </div>
                         </div>
@@ -74,7 +74,7 @@
                 <div class="details-card">
                     <div class="card-header">
                         <h2 class="card-title pets-title">Pets</h2>
-                        <a class="btn-add-pet" ui-sref="petRegister({ownerId: $ctrl.owner.ownerId})">
+                        <a class="btn-add-pet" ui-sref="petRegister({ownerId: $ctrl.customer.ownerId})">
                             &#x2795; Add Pet
                         </a>
                     </div>

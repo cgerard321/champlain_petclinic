@@ -72,7 +72,7 @@ class PetServiceImplTest {
     @Test
     void findPetByPetId() {
 
-        //Owner owner = buildOwner();
+        //Customer owner = buildOwner();
         Pet pet = buildPet();
         String PET_ID = pet.getId();
         when(repo.findPetByPetId(PET_ID)).thenReturn(Mono.just(pet));
@@ -255,10 +255,10 @@ class PetServiceImplTest {
                 .build();
     }
 
-    private Owner buildOwner() {
-        return Owner.builder()
+    private Customer buildCustomer() {
+        return Customer.builder()
                 .id("44")
-                .ownerId("ownerId-123")
+                .customerId("customerId-123")
                 .firstName("FirstName")
                 .lastName("LastName")
                 .address("Test address")

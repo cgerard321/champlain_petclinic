@@ -1,4 +1,4 @@
-<link href="/css/owner.css" rel="stylesheet" type="text/css"/>
+<link href="/css/customer.css" rel="stylesheet" type="text/css"/>
 
 <div class="dashboard-container" ng-app="ownerList" ng-controller="OwnerListController">
     <div class="main-content">
@@ -61,7 +61,7 @@
             </div>
 
             <div class="table-card">
-                <table id="owner" class="table table-modern">
+                <table id="customer" class="table table-modern">
                     <thead>
                         <tr>
                             <th>Owner ID</th>
@@ -73,17 +73,17 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="owner in $ctrl.owners">
+                        <tr ng-repeat="customer in $ctrl.owners">
                             <td>
-                                <a class="link-modern" ui-sref="ownerDetails({ ownerId: owner.ownerId })">
-                                    {{owner.ownerId}}
+                                <a class="link-modern" ui-sref="ownerDetails({ ownerId: customer.ownerId })">
+                                    {{customer.ownerId}}
                                 </a>
                             </td>
-                            <td class="responsive-text">{{owner.firstName}} {{owner.lastName}}</td>
-                            <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{owner.address}}</td>
-                            <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{owner.city}}</td>
-                            <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{owner.province}}</td>
-                            <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{owner.telephone}}</td>
+                            <td class="responsive-text">{{customer.firstName}} {{customer.lastName}}</td>
+                            <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{customer.address}}</td>
+                            <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{customer.city}}</td>
+                            <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{customer.province}}</td>
+                            <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{customer.telephone}}</td>
                         </tr>
                     </tbody>
                 </table>

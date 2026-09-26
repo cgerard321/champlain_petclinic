@@ -22,7 +22,7 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/api/v2/gateway/owners")
+@RequestMapping("/api/v2/gateway/customers")
 @Validated
 public class OwnerController {
 
@@ -33,12 +33,12 @@ public class OwnerController {
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @DeleteMapping(value = "/{ownerId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<OwnerResponseDTO>> deleteOwner(@PathVariable String ownerId) {
-        return Mono.just(ownerId)
+    @DeleteMapping(value = "/{customerId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<OwnerResponseDTO>> deleteCustomer(@PathVariable String customerId) {
+        return Mono.just(customerId)
                 .filter(id -> id.length() == 36)
-                .switchIfEmpty(Mono.defer(() -> Mono.error(new InvalidInputException("Provided owner id invalid" + ownerId))))
-                .flatMap(customersServiceClient::deleteOwner)
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new InvalidInputException("Provided owner id invalid" + customerId))))
+                .flatMap(customersServiceClient::deleteCustomer)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }

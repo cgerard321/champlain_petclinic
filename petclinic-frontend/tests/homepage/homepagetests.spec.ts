@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test';
 
+// eslint-disable-next-line playwright/require-top-level-describe
 test('See Vet Details from Homepage', async ({ page }) => {
-//Authenticate as admin
+  //Authenticate as admin
 await page.goto('http://localhost:3000/users/login');
 await page.getByPlaceholder('Enter your email').fill('admin@admin.com');
 await page.getByPlaceholder('Enter your password').fill('pwd');

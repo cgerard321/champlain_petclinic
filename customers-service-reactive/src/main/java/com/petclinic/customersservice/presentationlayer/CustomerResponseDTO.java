@@ -1,21 +1,20 @@
 package com.petclinic.customersservice.presentationlayer;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.petclinic.customersservice.domainclientlayer.FileResponseDTO;
+import lombok.*;
 
-@Builder
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class OwnerRequestDTO {
+public class CustomerResponseDTO {
 
+    private String customerId;
     private String firstName;
     private String lastName;
     private String address;
     private String city;
     private String province;
     private String telephone;
-    //private List<PetResponseDTO> pets;
+    private FileResponseDTO photo;
 }

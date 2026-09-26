@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 
+// eslint-disable-next-line playwright/require-top-level-describe
 test('Admin View Vet Details from VetPage', async ({ page }) => {
   //Authenticate as admin
   await page.goto('http://localhost:3000/users/login');
@@ -27,6 +28,7 @@ test('Admin View Vet Details from VetPage', async ({ page }) => {
   await page.close();
 });
 
+// eslint-disable-next-line playwright/require-top-level-describe
 test.fixme('Admin Delete Vet', async ({ page }) => {
   //Authenticate as admin
   await page.goto('http://localhost:3000/users/login');
@@ -61,6 +63,7 @@ test.fixme('Admin Delete Vet', async ({ page }) => {
     .locator(
       'div.card-container > div:nth-child(1) > div.card-content > div > button'
     )
+    // eslint-disable-next-line playwright/no-force-option
     .click({ force: true });
 
   page.on('dialog', async dialog => {

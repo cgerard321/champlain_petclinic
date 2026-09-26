@@ -1,7 +1,7 @@
 import { PetResponseModel } from '@/features/customers/models/PetResponseModel.ts';
 
-export interface OwnerModel {
-  ownerId: string;
+export interface CustomerModel {
+  customerId: string;
   firstName: string;
   lastName: string;
   address: string;

@@ -1,7 +1,7 @@
 package com.petclinic.customersservice.util;
 
 import com.petclinic.customersservice.customersExceptions.ApplicationExceptions;
-import com.petclinic.customersservice.presentationlayer.OwnerRequestDTO;
+import com.petclinic.customersservice.presentationlayer.CustomerRequestDTO;
 import com.petclinic.customersservice.presentationlayer.PetRequestDTO;
 import com.petclinic.customersservice.presentationlayer.PetTypeRequestDTO;
 import reactor.core.publisher.Mono;
@@ -15,26 +15,26 @@ import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
 public class Validator {
-    public static UnaryOperator<Mono<OwnerRequestDTO>> validateOwner() {
-        return ownerRequest -> ownerRequest
-                .filter(hasStringValue(OwnerRequestDTO::getFirstName))
+    public static UnaryOperator<Mono<CustomerRequestDTO>> validateCustomer() {
+        return customerRequest -> customerRequest
+                .filter(hasStringValue(CustomerRequestDTO::getFirstName))
                 .switchIfEmpty(ApplicationExceptions.missingOwnerFirstName())
-                .filter(hasStringValue(OwnerRequestDTO::getLastName))
-                .switchIfEmpty(ApplicationExceptions.missingOwnerLastName())
-                .filter(hasStringValue(OwnerRequestDTO::getAddress))
-                .switchIfEmpty(ApplicationExceptions.missingOwnerAddress())
-                .filter(hasStringValue(OwnerRequestDTO::getCity))
-                .switchIfEmpty(ApplicationExceptions.missingOwnerCity())
-                .filter(hasStringValue(OwnerRequestDTO::getProvince))
-                .switchIfEmpty(ApplicationExceptions.missingOwnerProvince())
+                .filter(hasStringValue(CustomerRequestDTO::getLastName))
+                .switchIfEmpty(ApplicationExceptions.missingCustomerLastName())
+                .filter(hasStringValue(CustomerRequestDTO::getAddress))
+                .switchIfEmpty(ApplicationExceptions.missingCustomerAddress())
+                .filter(hasStringValue(CustomerRequestDTO::getCity))
+                .switchIfEmpty(ApplicationExceptions.missingCustomerCity())
+                .filter(hasStringValue(CustomerRequestDTO::getProvince))
+                .switchIfEmpty(ApplicationExceptions.missingCustomerProvince())
                 .filter(validPhoneNumber())
-                .switchIfEmpty(ApplicationExceptions.invalidOwnerPhoneNumber());
+                .switchIfEmpty(ApplicationExceptions.invalidCustomerPhoneNumber());
     }
 
     public static UnaryOperator<Mono<PetRequestDTO>> validatePet() {
         return petRequest -> petRequest
                 .filter(hasValidId(PetRequestDTO::getOwnerId))
-                .switchIfEmpty(ApplicationExceptions.invalidOwnerId())
+                .switchIfEmpty(ApplicationExceptions.invalidCustomerId())
                 .filter(hasStringValue(PetRequestDTO::getName))
                 .switchIfEmpty(ApplicationExceptions.missingPetName())
                 .filter(hasValidId(PetRequestDTO::getPetTypeId))
@@ -60,8 +60,8 @@ public class Validator {
         };
     }
 
-    public static Predicate<OwnerRequestDTO> validPhoneNumber(){
-        return ownerRequestDTO -> Objects.nonNull(ownerRequestDTO.getTelephone()) && ownerRequestDTO.getTelephone().matches("^[0-9]{10}$");
+    public static Predicate<CustomerRequestDTO> validPhoneNumber(){
+        return customerRequestDTO -> Objects.nonNull(customerRequestDTO.getTelephone()) && customerRequestDTO.getTelephone().matches("^[0-9]{10}$");
     }
 
     public static <T> Predicate<T> hasValidId(Function<T, String> getter) {

@@ -1,7 +1,7 @@
 package com.petclinic.customersservice.presentationlayer;
 
-import com.petclinic.customersservice.business.OwnerService;
-import com.petclinic.customersservice.data.Owner;
+import com.petclinic.customersservice.business.CustomerService;
+import com.petclinic.customersservice.data.Customer;
 import com.petclinic.customersservice.domainclientlayer.FileResponseDTO;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -21,55 +21,55 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-public class OwnerControllerUnitTest {
+public class CustomerControllerUnitTest {
 
     @Mock
-    private OwnerService ownerService;
+    private CustomerService customerService;
 
     @InjectMocks
-    private OwnerController ownerController;
+    private CustomerController customerController;
 
-    private final String TEST_OWNER_ID = "f9b46d32-0951-420b-afe6-22a738d97d9b";
-    private Owner mockOwner;
+    private final String testCustomerId = "f9b46d32-0951-420b-afe6-22a738d97d9b";
+    private Customer mockCustomer;
 
     @BeforeEach
     void setUp() throws Exception {
         MockitoAnnotations.openMocks(this).close();
 
-        mockOwner = new Owner();
-        mockOwner.setOwnerId(TEST_OWNER_ID);
-        mockOwner.setFirstName("John");
-        mockOwner.setPhotoId("11aef324-15b4-409d-8078-86d22e38cde4");
+        mockCustomer = new Customer();
+        mockCustomer.setCustomerId(testCustomerId);
+        mockCustomer.setFirstName("John");
+        mockCustomer.setPhotoId("11aef324-15b4-409d-8078-86d22e38cde4");
     }
 
     @Test
-    void getOwnerByOwnerId_ShouldReturnOwnerWithoutPhoto_WhenIncludePhotoFalse() {
-        OwnerResponseDTO mockResponse = new OwnerResponseDTO();
-        mockResponse.setOwnerId(TEST_OWNER_ID);
+    void getCustomerByCustomerId_ShouldReturnCustomerWithoutPhoto_WhenIncludePhotoFalse() {
+        CustomerResponseDTO mockResponse = new CustomerResponseDTO();
+        mockResponse.setCustomerId(testCustomerId);
         mockResponse.setFirstName("John");
 
-        doReturn(Mono.just(mockResponse)).when(ownerService).getOwnerByOwnerId(TEST_OWNER_ID, false);
+        doReturn(Mono.just(mockResponse)).when(customerService).getCustomerByCustomerId(testCustomerId, false);
 
-        Mono<ResponseEntity<OwnerResponseDTO>> result = ownerController.getOwnerByOwnerId(TEST_OWNER_ID, false);
+        Mono<ResponseEntity<CustomerResponseDTO>> result = customerController.getCustomerByCustomerId(testCustomerId, false);
 
         StepVerifier.create(result)
                 .consumeNextWith(response -> {
                     assertEquals(HttpStatus.OK, response.getStatusCode());
                     assertNotNull(response.getBody());
-                    OwnerResponseDTO body = response.getBody();
+                    CustomerResponseDTO body = response.getBody();
                     assertNotNull(body);
-                    assertEquals(TEST_OWNER_ID, body.getOwnerId());
+                    assertEquals(testCustomerId, body.getCustomerId());
                     assertEquals("John", body.getFirstName());
                 })
                 .verifyComplete();
-        verify(ownerService, times(1)).getOwnerByOwnerId(TEST_OWNER_ID, false);
+        verify(customerService, times(1)).getCustomerByCustomerId(testCustomerId, false);
     }
 
     @Test
-    void getOwnerByOwnerId_ShouldReturnOwnerWithPhoto_WhenIncludePhotoTrue() {
+    void getCustomerByCustomerId_ShouldReturnCustomerWithPhoto_WhenIncludePhotoTrue() {
         byte[] imageData = "custom-image-data".getBytes();
-        OwnerResponseDTO mockResponse = new OwnerResponseDTO();
-        mockResponse.setOwnerId(TEST_OWNER_ID);
+        CustomerResponseDTO mockResponse = new CustomerResponseDTO();
+        mockResponse.setCustomerId(testCustomerId);
         mockResponse.setFirstName("John");
         FileResponseDTO photo = FileResponseDTO.builder()
                 .fileData(imageData)
@@ -77,31 +77,31 @@ public class OwnerControllerUnitTest {
                 .build();
         mockResponse.setPhoto(photo);
 
-        doReturn(Mono.just(mockResponse)).when(ownerService).getOwnerByOwnerId(TEST_OWNER_ID, true);
+        doReturn(Mono.just(mockResponse)).when(customerService).getCustomerByCustomerId(testCustomerId, true);
 
-        Mono<ResponseEntity<OwnerResponseDTO>> result = ownerController.getOwnerByOwnerId(TEST_OWNER_ID, true);
+        Mono<ResponseEntity<CustomerResponseDTO>> result = customerController.getCustomerByCustomerId(testCustomerId, true);
 
         StepVerifier.create(result)
                 .consumeNextWith(response -> {
                     assertEquals(HttpStatus.OK, response.getStatusCode());
                     assertNotNull(response.getBody());
-                    OwnerResponseDTO body = response.getBody();
+                    CustomerResponseDTO body = response.getBody();
                     assertNotNull(body);
-                    assertEquals(TEST_OWNER_ID, body.getOwnerId());
+                    assertEquals(testCustomerId, body.getCustomerId());
                     assertEquals("John", body.getFirstName());
                     assertNotNull(body.getPhoto());
                     assertEquals(imageData, body.getPhoto().getFileData());
                     assertEquals("image/jpeg", body.getPhoto().getFileType());
                 })
                 .verifyComplete();
-        verify(ownerService, times(1)).getOwnerByOwnerId(TEST_OWNER_ID, true);
+        verify(customerService, times(1)).getCustomerByCustomerId(testCustomerId, true);
     }
 
     @Test
-    void getOwnerByOwnerId_ShouldReturnNotFound_WhenOwnerNotFound() {
-        doReturn(Mono.empty()).when(ownerService).getOwnerByOwnerId(TEST_OWNER_ID, false);
+    void getCustomerByCustomerId_ShouldReturnNotFound_WhenCustomerNotFound() {
+        doReturn(Mono.empty()).when(customerService).getCustomerByCustomerId(testCustomerId, false);
 
-        Mono<ResponseEntity<OwnerResponseDTO>> result = ownerController.getOwnerByOwnerId(TEST_OWNER_ID, false);
+        Mono<ResponseEntity<CustomerResponseDTO>> result = customerController.getCustomerByCustomerId(testCustomerId, false);
 
         StepVerifier.create(result)
                 .consumeNextWith(response -> {
@@ -111,7 +111,7 @@ public class OwnerControllerUnitTest {
     }
 
     @Test
-    void updateOwnerPhoto_ShouldReturnUpdatedOwner() {
+    void updateCustomerPhoto_ShouldReturnUpdatedCustomer() {
         com.petclinic.customersservice.domainclientlayer.FileRequestDTO photoRequest = 
             com.petclinic.customersservice.domainclientlayer.FileRequestDTO.builder()
                 .fileName("profile-photo.jpg")
@@ -119,8 +119,8 @@ public class OwnerControllerUnitTest {
                 .fileData("base64data".getBytes())
                 .build();
 
-        OwnerResponseDTO mockResponse = new OwnerResponseDTO();
-        mockResponse.setOwnerId(TEST_OWNER_ID);
+        CustomerResponseDTO mockResponse = new CustomerResponseDTO();
+        mockResponse.setCustomerId(testCustomerId);
         mockResponse.setFirstName("John");
         FileResponseDTO photo = FileResponseDTO.builder()
                 .fileId("photo-456")
@@ -130,54 +130,54 @@ public class OwnerControllerUnitTest {
         mockResponse.setPhoto(photo);
 
         doReturn(Mono.just(mockResponse))
-            .when(ownerService)
-            .updateOwnerPhoto(org.mockito.ArgumentMatchers.eq(TEST_OWNER_ID), org.mockito.ArgumentMatchers.any(com.petclinic.customersservice.domainclientlayer.FileRequestDTO.class));
+            .when(customerService)
+            .updateCustomerPhoto(org.mockito.ArgumentMatchers.eq(testCustomerId), org.mockito.ArgumentMatchers.any(com.petclinic.customersservice.domainclientlayer.FileRequestDTO.class));
 
-        Mono<ResponseEntity<OwnerResponseDTO>> result = ownerController.updateOwnerPhoto(TEST_OWNER_ID, Mono.just(photoRequest));
+        Mono<ResponseEntity<CustomerResponseDTO>> result = customerController.updateCustomerPhoto(testCustomerId, Mono.just(photoRequest));
 
         StepVerifier.create(result)
             .consumeNextWith(response -> {
                 assertEquals(HttpStatus.OK, response.getStatusCode());
                 assertNotNull(response.getBody());
-                OwnerResponseDTO body = response.getBody();
+                CustomerResponseDTO body = response.getBody();
                 if (body != null) {
-                    assertEquals(TEST_OWNER_ID, body.getOwnerId());
+                    assertEquals(testCustomerId, body.getCustomerId());
                     assertNotNull(body.getPhoto());
                     assertEquals("photo-456", body.getPhoto().getFileId());
                 }
             })
             .verifyComplete();
-        verify(ownerService, times(1)).updateOwnerPhoto(org.mockito.ArgumentMatchers.eq(TEST_OWNER_ID), org.mockito.ArgumentMatchers.any(com.petclinic.customersservice.domainclientlayer.FileRequestDTO.class));
+        verify(customerService, times(1)).updateCustomerPhoto(org.mockito.ArgumentMatchers.eq(testCustomerId), org.mockito.ArgumentMatchers.any(com.petclinic.customersservice.domainclientlayer.FileRequestDTO.class));
     }
 
     @Test
-    void whenDeleteOwnerPhoto_thenReturnOk() {
-        OwnerResponseDTO mockResponse = new OwnerResponseDTO();
-        mockResponse.setOwnerId(TEST_OWNER_ID);
+    void whenDeleteCustomerPhoto_thenReturnOk() {
+        CustomerResponseDTO mockResponse = new CustomerResponseDTO();
+        mockResponse.setCustomerId(testCustomerId);
         mockResponse.setFirstName("John");
 
-        doReturn(Mono.just(mockResponse)).when(ownerService).deleteOwnerPhoto(TEST_OWNER_ID);
+        doReturn(Mono.just(mockResponse)).when(customerService).deleteCustomerPhoto(testCustomerId);
 
-        Mono<ResponseEntity<OwnerResponseDTO>> result = ownerController.deleteOwnerPhoto(TEST_OWNER_ID);
+        Mono<ResponseEntity<CustomerResponseDTO>> result = customerController.deleteCustomerPhoto(testCustomerId);
 
         StepVerifier.create(result)
                 .consumeNextWith(response -> {
                     assertEquals(HttpStatus.OK, response.getStatusCode());
                     assertNotNull(response.getBody());
-                    assertEquals(TEST_OWNER_ID, response.getBody().getOwnerId());
+                    assertEquals(testCustomerId, response.getBody().getCustomerId());
                     // Verify the photo is gone
                     assertNull(response.getBody().getPhoto());
                 })
                 .verifyComplete();
 
-        verify(ownerService, times(1)).deleteOwnerPhoto(TEST_OWNER_ID);
+        verify(customerService, times(1)).deleteCustomerPhoto(testCustomerId);
     }
 
     @Test
-    void whenDeleteOwnerPhoto_ShouldReturnNotFound_ifOwnerNotFound() {
-        doReturn(Mono.empty()).when(ownerService).deleteOwnerPhoto(TEST_OWNER_ID);
+    void whenDeleteCustomerPhoto_ShouldReturnNotFound_ifCustomerNotFound() {
+        doReturn(Mono.empty()).when(customerService).deleteCustomerPhoto(testCustomerId);
 
-        Mono<ResponseEntity<OwnerResponseDTO>> result = ownerController.deleteOwnerPhoto(TEST_OWNER_ID);
+        Mono<ResponseEntity<CustomerResponseDTO>> result = customerController.deleteCustomerPhoto(testCustomerId);
 
         StepVerifier.create(result)
                 .consumeNextWith(response -> {
@@ -185,7 +185,7 @@ public class OwnerControllerUnitTest {
                 })
                 .verifyComplete();
 
-        verify(ownerService, times(1)).deleteOwnerPhoto(TEST_OWNER_ID);
+        verify(customerService, times(1)).deleteCustomerPhoto(testCustomerId);
     }
 }
 

@@ -1,12 +1,12 @@
 import { AxiosResponse } from 'axios';
 import axiosInstance from '@/shared/api/axiosInstance';
-import { OwnerResponseModel } from '../models/OwnerResponseModel';
+import { CustomerResponseModel } from '../models/CustomerResponseModel.ts';
 import { FileDetails } from '@/shared/models/FileDetails';
 
-export const uploadOwnerPhoto = async (
-  ownerId: string,
+export const uploadCustomerPhoto = async (
+  customerId: string,
   file: File
-): Promise<AxiosResponse<OwnerResponseModel>> => {
+): Promise<AxiosResponse<CustomerResponseModel>> => {
   const fileData = await convertFileToBase64(file);
 
   const photoRequest: FileDetails = {
@@ -15,8 +15,8 @@ export const uploadOwnerPhoto = async (
     fileData: fileData,
   };
 
-  return await axiosInstance.patch<OwnerResponseModel>(
-    `/owners/${ownerId}/photo`,
+  return await axiosInstance.patch<CustomerResponseModel>(
+    `/customers/${customerId}/photo`,
     photoRequest,
     {
       useV2: false,

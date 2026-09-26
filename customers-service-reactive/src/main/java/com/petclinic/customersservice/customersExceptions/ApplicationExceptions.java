@@ -5,8 +5,8 @@ import com.petclinic.customersservice.customersExceptions.exceptions.Unprocessab
 import reactor.core.publisher.Mono;
 
 public class ApplicationExceptions {
-    public static <T> Mono<T> ownerNotFound(String ownerId) {
-        return Mono.error(new InvalidInputException("Owner with id: " + ownerId + " is not found"));
+    public static <T> Mono<T> customerNotFound(String customerId) {
+        return Mono.error(new InvalidInputException("Customer with id: " + customerId + " is not found"));
     }
 
     public static <T> Mono<T> petNotFound(String petId) {
@@ -17,12 +17,12 @@ public class ApplicationExceptions {
         return Mono.error(new InvalidInputException("PetType with id: " + petTypeId + " is not found"));
     }
 
-    public static <T> Mono<T> invalidOwnerId(String ownerId) {
-        return Mono.error(new InvalidInputException("Owner id: " + ownerId + " is invalid"));
+    public static <T> Mono<T> invalidCustomerId(String customerId) {
+        return Mono.error(new InvalidInputException("Customer id: " + customerId + " is invalid"));
     }
 
-    public static <T> Mono<T> invalidOwnerId() {
-        return Mono.error(new InvalidInputException("Owner id is invalid"));
+    public static <T> Mono<T> invalidCustomerId() {
+        return Mono.error(new InvalidInputException("Customer id is invalid"));
     }
 
     public static <T> Mono<T> invalidPetId(String petId) {
@@ -41,23 +41,23 @@ public class ApplicationExceptions {
         return Mono.error(new UnprocessableEntityException("first name is required"));
     }
 
-    public static <T> Mono<T> missingOwnerLastName() {
+    public static <T> Mono<T> missingCustomerLastName() {
         return Mono.error(new UnprocessableEntityException("last name is required"));
     }
 
-    public static <T> Mono<T> missingOwnerAddress() {
+    public static <T> Mono<T> missingCustomerAddress() {
         return Mono.error(new UnprocessableEntityException("Address is required"));
     }
 
-    public static <T> Mono<T> missingOwnerCity() {
+    public static <T> Mono<T> missingCustomerCity() {
         return Mono.error(new UnprocessableEntityException("City is required"));
     }
 
-    public static <T> Mono<T> missingOwnerProvince() {
+    public static <T> Mono<T> missingCustomerProvince() {
         return Mono.error(new UnprocessableEntityException("Province is required"));
     }
 
-    public static <T> Mono<T> invalidOwnerPhoneNumber() {
+    public static <T> Mono<T> invalidCustomerPhoneNumber() {
         return Mono.error(new UnprocessableEntityException("Phone number must be 10 digits"));
     }
 

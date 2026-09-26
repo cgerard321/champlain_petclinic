@@ -1,7 +1,7 @@
 package com.petclinic.customersservice.presentationlayer;
 
-import com.petclinic.customersservice.data.Owner;
-import com.petclinic.customersservice.data.OwnerRepo;
+import com.petclinic.customersservice.data.Customer;
+import com.petclinic.customersservice.data.CustomerRepo;
 import com.petclinic.customersservice.domainclientlayer.FilesServiceClient;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
@@ -12,7 +12,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 import org.springframework.web.util.UriComponentsBuilder;
@@ -23,21 +22,21 @@ import java.nio.charset.StandardCharsets;
 
 @SpringBootTest
 @AutoConfigureWebTestClient
-class OwnerControllerIntegrationTest {
+class CustomerControllerIntegrationTest {
 
     @Autowired
     private WebTestClient client;
 
     @Autowired
-    private OwnerRepo repo;
+    private CustomerRepo repo;
 
     @MockBean
     private FilesServiceClient filesServiceClient;
 
-    private Owner buildOwner() {
-        return Owner.builder()
+    private Customer buildCustomer() {
+        return Customer.builder()
                 .id("55")
-                .ownerId("ownerId-123")
+                .customerId("customerId-123")
                 .firstName("FirstName")
                 .lastName("LastName")
                 .address("Test address")
@@ -47,10 +46,10 @@ class OwnerControllerIntegrationTest {
                 .build();
     }
 
-    private Owner buildOwner2() {
-        return Owner.builder()
+    private Customer buildCustomer2() {
+        return Customer.builder()
                 .id("56")
-                .ownerId("ownerId-456")
+                .customerId("customerId-456")
                 .firstName("FirstName2")
                 .lastName("LastName2")
                 .address("Test address2")
@@ -60,9 +59,9 @@ class OwnerControllerIntegrationTest {
                 .build();
     }
 
-    private Owner buildOwner3(String firstName, String ownerId) {
-        return Owner.builder()
-                .ownerId(ownerId)
+    private Customer buildCustomerId(String firstName, String customerId) {
+        return Customer.builder()
+                .customerId(customerId)
                 .firstName(firstName)
                 .lastName("Doe")
                 .address("123 Main St")
@@ -72,24 +71,24 @@ class OwnerControllerIntegrationTest {
                 .build();
     }
 
-    Owner ownerEntity = buildOwner();
+    Customer customerEntity = buildCustomer();
 
-    Owner ownerEntity2 = buildOwner2();
+    Customer customerEntity2 = buildCustomer2();
 
-    String OWNER_ID = ownerEntity.getId();
+    String customerId = customerEntity.getId();
 
-    String PUBLIC_OWNER_ID = ownerEntity.getOwnerId();
+    String publicCustomerId = customerEntity.getCustomerId();
 
-    Owner owner1 = buildOwner3("Billy","ownerId_1");
+    Customer customer1 = buildCustomerId("Billy","customerId_1");
 
     @Test
-    void deleteOwnerByOwnerId() {
+    void deleteCustomerbyCustomerId() {
 
         StepVerifier.create(repo.deleteAll()).verifyComplete();
 
-        Owner ownerEntity = Owner.builder()
-                .id("9")
-                .ownerId("a6e0e5b0-5f60-45f0-8ac7-becd8b330486")
+        Customer customerEntity = Customer.builder()
+                .id("23")
+                .customerId("a6e0e5b0-5f60-45f0-8ac7-becd8b330486")
                 .firstName("FirstName")
                 .lastName("LastName")
                 .address("Test address")
@@ -98,11 +97,11 @@ class OwnerControllerIntegrationTest {
                 .telephone("telephone")
                 .build();
 
-        StepVerifier.create(repo.save(ownerEntity))
-                .expectNextMatches(saved -> saved.getOwnerId().equals("a6e0e5b0-5f60-45f0-8ac7-becd8b330486"))
+        StepVerifier.create(repo.save(customerEntity))
+                .expectNextMatches(saved -> saved.getCustomerId().equals("a6e0e5b0-5f60-45f0-8ac7-becd8b330486"))
                 .verifyComplete();
 
-        client.delete().uri("/owners/a6e0e5b0-5f60-45f0-8ac7-becd8b330486")
+        client.delete().uri("/customers/a6e0e5b0-5f60-45f0-8ac7-becd8b330486")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -110,27 +109,27 @@ class OwnerControllerIntegrationTest {
     }
 
     @Test
-    void deleteNonExistentOwnerByOwnerId() {
+    void deleteNonExistentCustomerByCustomerId() {
 
         StepVerifier.create(repo.deleteAll()).verifyComplete();
 
 
-        String nonExistentOwnerId = "a6e0e5b0-5f60-45f0-8ac7-becd8b330486";
+        String nonExistentCustomerId = "a6e0e5b0-5f60-45f0-8ac7-becd8b330486";
 
-        client.delete().uri("/owners/" + nonExistentOwnerId)
+        client.delete().uri("/customers/" + nonExistentCustomerId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound()
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("Course id not found: " + nonExistentOwnerId);
+                .jsonPath("$.message").isEqualTo("Customer id not found: " + nonExistentCustomerId);
     }
 
 
 
     @Test
-    void getTotalNumberOfOwners(){
-        Owner owner1 = Owner.builder()
-                .ownerId("ownerId-11")
+    void getTotalNumberOfCustomers(){
+        Customer customer1 = Customer.builder()
+                .customerId("customerId-11")
                 .firstName("FirstName1")
                 .lastName("LastName1")
                 .address("Test address1")
@@ -139,10 +138,10 @@ class OwnerControllerIntegrationTest {
                 .telephone("telephone1")
                 .build();
 
-        StepVerifier.create(repo.deleteAll().thenMany(repo.save(owner1))).expectNextCount(1).verifyComplete();
+        StepVerifier.create(repo.deleteAll().thenMany(repo.save(customer1))).expectNextCount(1).verifyComplete();
 
         client.get()
-                .uri("/owners/owners-count")
+                .uri("/customers/customers-count")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(Long.class)
@@ -154,10 +153,10 @@ class OwnerControllerIntegrationTest {
     }
 
     @Test
-    void getOwnersPagination() {
+    void getCustomersPagination() {
 
-        Owner owner1 = Owner.builder()
-                .ownerId("ownerId-11")
+        Customer customer1 = Customer.builder()
+                .customerId("customerId-11")
                 .firstName("FirstName1")
                 .lastName("LastName1")
                 .address("Test address1")
@@ -169,16 +168,16 @@ class OwnerControllerIntegrationTest {
         int page = 0;
         int size = 1;
 
-        StepVerifier.create(repo.deleteAll().thenMany(repo.save(owner1))).expectNextCount(1).verifyComplete();
-        StepVerifier.create(repo.save(owner1)).expectNextCount(1).verifyComplete();
+        StepVerifier.create(repo.deleteAll().thenMany(repo.save(customer1))).expectNextCount(1).verifyComplete();
+        StepVerifier.create(repo.save(customer1)).expectNextCount(1).verifyComplete();
 
         client.get()
-                .uri("/owners/owners-pagination?page="+page+"&size="+size)
+                .uri("/customers/customers-pagination?page="+page+"&size="+size)
                 .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
                 .acceptCharset(StandardCharsets.UTF_8)
                 .exchange().expectStatus().isOk()
                 .expectHeader().valueEquals("Content-Type","text/event-stream;charset=UTF-8")
-                .expectBodyList(OwnerResponseDTO.class)
+                .expectBodyList(CustomerResponseDTO.class)
                 .value((list) -> {
                     assertNotNull(list);
                     assertEquals(size,list.size());
@@ -187,14 +186,14 @@ class OwnerControllerIntegrationTest {
     }
 
     @Test
-    void getTotalNumberOfOwnersWithFilters1_shouldSucceed(){
+    void getTotalNumberOfCustomersWithFilters1_shouldSucceed(){
 
         String firstName = "FirstName1";
         String city = "test city1";
 
 
-        Owner owner1 = Owner.builder()
-                .ownerId("ownerId-1")
+        Customer customer1 = Customer.builder()
+                .customerId("customerId-1")
                 .firstName("FirstName1")
                 .lastName("LastName1")
                 .address("Test address1")
@@ -204,10 +203,10 @@ class OwnerControllerIntegrationTest {
                 .photoId(null)
                 .build();
 
-        StepVerifier.create(repo.deleteAll().thenMany(repo.save(owner1))).expectNextCount(1).verifyComplete();
+        StepVerifier.create(repo.deleteAll().thenMany(repo.save(customer1))).expectNextCount(1).verifyComplete();
 
         client.get()
-                .uri("/owners/owners-filtered-count?&firstName="+firstName+"&city="+city)
+                .uri("/customers/customers-filtered-count?&firstName="+firstName+"&city="+city)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(Long.class)
@@ -218,14 +217,14 @@ class OwnerControllerIntegrationTest {
     }
 
     @Test
-    void getTotalNumberOfOwnersWithFilters2_shouldSucceed(){
+    void getTotalNumberOfCustomersWithFilters2_shouldSucceed(){
 
         String firstName = "FirstName2";
-        String ownerId = "ownerId-2";
+        String customerId = "customerId-2";
 
 
-        Owner owner1 = Owner.builder()
-                .ownerId("ownerId-2")
+        Customer customer1 = Customer.builder()
+                .customerId("customerId-2")
                 .firstName("FirstName2")
                 .lastName("LastName2")
                 .address("Test address2")
@@ -234,10 +233,10 @@ class OwnerControllerIntegrationTest {
                 .telephone("telephone2")
                 .build();
 
-        StepVerifier.create(repo.deleteAll().thenMany(repo.save(owner1))).expectNextCount(1).verifyComplete();
+        StepVerifier.create(repo.deleteAll().thenMany(repo.save(customer1))).expectNextCount(1).verifyComplete();
 
         client.get()
-                .uri("/owners/owners-filtered-count?&firstName="+firstName+"&ownerId="+ownerId)
+                .uri("/customers/customers-filtered-count?&firstName="+firstName+"&customerId="+customerId)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(Long.class)
@@ -248,17 +247,17 @@ class OwnerControllerIntegrationTest {
     }
 
     @Test
-    void getTotalNumberOfOwnersWithFilters3_shouldSucceed(){
+    void getTotalNumberOfCustomersWithFilters3_shouldSucceed(){
 
         String firstName = "FirstName3";
-        String ownerId = "ownerId-3";
+        String customerId = "customerId-3";
         String lastname = "LastName3";
         String city = "test city3";
         String telephone = "telephone3";
 
 
-        Owner owner1 = Owner.builder()
-                .ownerId("ownerId-3")
+        Customer customer1 = Customer.builder()
+                .customerId("customerId-3")
                 .firstName("FirstName3")
                 .lastName("LastName3")
                 .address("Test address3")
@@ -267,11 +266,11 @@ class OwnerControllerIntegrationTest {
                 .telephone("telephone3")
                 .build();
 
-        StepVerifier.create(repo.deleteAll().thenMany(repo.save(owner1))).expectNextCount(1).verifyComplete();
+        StepVerifier.create(repo.deleteAll().thenMany(repo.save(customer1))).expectNextCount(1).verifyComplete();
 
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("/owners/owners-filtered-count");
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("/customers/customers-filtered-count");
 
-        builder.queryParam("ownerId", ownerId);
+        builder.queryParam("customerId", customerId);
         builder.queryParam("firstName", firstName);
         builder.queryParam("lastName",lastname);
         builder.queryParam("city", city);
@@ -291,40 +290,40 @@ class OwnerControllerIntegrationTest {
 
 
     @Test
-    void getOwnerByOwnerId() {
-        Publisher<Owner> setup = repo.deleteAll().thenMany(repo.save(ownerEntity));
+    void getCustomerByCustomerId() {
+        Publisher<Customer> setup = repo.deleteAll().thenMany(repo.save(customerEntity));
         StepVerifier.create(setup).expectNextCount(1).verifyComplete();
-        client.get().uri("/owners/" + PUBLIC_OWNER_ID)
+        client.get().uri("/customers/" + publicCustomerId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange().expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(OwnerResponseDTO.class)
-                .value(ownerResponseDTO -> {
-                    assertNotNull(ownerResponseDTO);
-                    assertEquals(ownerResponseDTO.getOwnerId(),ownerEntity.getOwnerId());
-                    assertEquals(ownerResponseDTO.getFirstName(),ownerEntity.getFirstName());
-                    assertEquals(ownerResponseDTO.getLastName(),ownerEntity.getLastName());
-                    assertEquals(ownerResponseDTO.getAddress(),ownerEntity.getAddress());
-                    assertEquals(ownerResponseDTO.getCity(),ownerEntity.getCity());
-                    assertEquals(ownerResponseDTO.getProvince(),ownerEntity.getProvince());
-                    assertEquals(ownerResponseDTO.getTelephone(),ownerEntity.getTelephone());
+                .expectBody(CustomerResponseDTO.class)
+                .value(customerResponseDTO -> {
+                    assertNotNull(customerResponseDTO);
+                    assertEquals(customerResponseDTO.getCustomerId(), customerEntity.getCustomerId());
+                    assertEquals(customerResponseDTO.getFirstName(), customerEntity.getFirstName());
+                    assertEquals(customerResponseDTO.getLastName(), customerEntity.getLastName());
+                    assertEquals(customerResponseDTO.getAddress(), customerEntity.getAddress());
+                    assertEquals(customerResponseDTO.getCity(), customerEntity.getCity());
+                    assertEquals(customerResponseDTO.getProvince(), customerEntity.getProvince());
+                    assertEquals(customerResponseDTO.getTelephone(), customerEntity.getTelephone());
                 });
 
     }
 
     @Test
-    void updateOwnerByOwnerId() {
-        // Setup a unique owner for this test
-        String testOwnerId = "1b747de5-f242-4182-ae92-2b6937b982a2";
-        Owner existingOwner = buildOwner3("OldFirst", testOwnerId);
-        existingOwner.setId("1");
+    void updateCustomerByCustomerId() {
+        // Setup a unique customer for this test
+        String testCustomerId = "1b747de5-f242-4182-ae92-2b6937b982a2";
+        Customer existingCustomer = buildCustomerId("OldFirst", testCustomerId);
+        existingCustomer.setId("1");
 
-        // 1. Save the existing owner
-        Publisher<Owner> setup = repo.deleteAll().then(repo.save(existingOwner));
+        // 1. Save the existing customer
+        Publisher<Customer> setup = repo.deleteAll().then(repo.save(existingCustomer));
         StepVerifier.create(setup).expectNextCount(1).verifyComplete();
 
         // 2. Prepare the update DTO (assuming a full request DTO is needed)
-        OwnerRequestDTO updateDTO = new OwnerRequestDTO();
+        CustomerRequestDTO updateDTO = new CustomerRequestDTO();
         updateDTO.setFirstName("NewFirstName");
         updateDTO.setLastName("NewLastName");
         updateDTO.setAddress("New Address");
@@ -335,57 +334,57 @@ class OwnerControllerIntegrationTest {
 
         // 3. Make the PUT request
         client.put()
-                .uri("/owners/" + testOwnerId)
+                .uri("/customers/" + testCustomerId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(Mono.just(updateDTO), OwnerRequestDTO.class)
+                .body(Mono.just(updateDTO), CustomerRequestDTO.class)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 // 4. Assert the response contents
-                .expectBody(OwnerResponseDTO.class)
+                .expectBody(CustomerResponseDTO.class)
                 .value(responseDTO -> {
                     assertNotNull(responseDTO);
-                    assertEquals(testOwnerId, responseDTO.getOwnerId());
+                    assertEquals(testCustomerId, responseDTO.getCustomerId());
                     assertEquals("NewFirstName", responseDTO.getFirstName());
                     assertEquals("New City", responseDTO.getCity());
                 });
 
         // 5. Verify the update persisted (optional but robust)
-        Mono<Owner> checkOwner = repo.findOwnerByOwnerId(testOwnerId);
-        StepVerifier.create(checkOwner)
-                .expectNextMatches(owner ->
-                        owner.getFirstName().equals("NewFirstName") &&
-                                owner.getCity().equals("New City")
+        Mono<Customer> checkCustomer = repo.findCustomerByCustomerId(testCustomerId);
+        StepVerifier.create(checkCustomer)
+                .expectNextMatches(customer ->
+                        customer.getFirstName().equals("NewFirstName") &&
+                                customer.getCity().equals("New City")
                 )
                 .verifyComplete();
     }
 
     @Test
-    void whenDeleteOwnerPhoto_withValidId_ShouldReturnOkAndRemovePhotoId() {
-        String TEST_OWNER_ID = "delete-photo-id-789";
+    void whenDeleteCustomerPhoto_withValidId_ShouldReturnOkAndRemovePhotoId() {
+        String testCustomerId = "delete-photo-id-789";
         String TEST_PHOTO_ID = "photo-to-delete-456";
 
-        Owner ownerWithPhoto = buildOwner3("TestOwner", TEST_OWNER_ID);
-        ownerWithPhoto.setPhotoId(TEST_PHOTO_ID);
+        Customer customerWithPhoto = buildCustomerId("TestCustomer", testCustomerId);
+        customerWithPhoto.setPhotoId(TEST_PHOTO_ID);
 
-        Publisher<Owner> setup = repo.deleteAll().then(repo.save(ownerWithPhoto));
+        Publisher<Customer> setup = repo.deleteAll().then(repo.save(customerWithPhoto));
         StepVerifier.create(setup).expectNextCount(1).verifyComplete();
 
         when(filesServiceClient.deleteFile(TEST_PHOTO_ID)).thenReturn(Mono.empty());
 
-        client.delete().uri("/owners/" + TEST_OWNER_ID + "/photo")
+        client.delete().uri("/customers/" + testCustomerId + "/photo")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.ownerId").isEqualTo(TEST_OWNER_ID)
+                .jsonPath("$.customerId").isEqualTo(testCustomerId)
                 .jsonPath("$.photoId").doesNotExist()
                 .jsonPath("$.photo").doesNotExist();
 
-        Mono<Owner> checkOwner = repo.findOwnerByOwnerId(TEST_OWNER_ID);
-        StepVerifier.create(checkOwner)
-                .expectNextMatches(owner -> owner.getPhotoId() == null)
+        Mono<Customer> checkCustomer = repo.findCustomerByCustomerId(testCustomerId);
+        StepVerifier.create(checkCustomer)
+                .expectNextMatches(customer -> customer.getPhotoId() == null)
                 .verifyComplete();
 
         verify(filesServiceClient).deleteFile(TEST_PHOTO_ID);

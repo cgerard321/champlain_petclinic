@@ -1,5 +1,5 @@
-export interface OwnerRequestModel {
-  ownerId: string;
+export interface CustomerRequestModel {
+  customerId: string;
   firstName: string;
   lastName: string;
   address: string;

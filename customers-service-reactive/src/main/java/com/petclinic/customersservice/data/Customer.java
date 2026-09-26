@@ -8,11 +8,11 @@ import org.springframework.data.annotation.Id;
 @Builder
 @Getter
 @AllArgsConstructor
-public class Owner {
+public class Customer {
 
     @Id
     private String id;
-    private String ownerId; // public id
+    private String customerId; // public id
     private String firstName;
     private String lastName;
     private String address;

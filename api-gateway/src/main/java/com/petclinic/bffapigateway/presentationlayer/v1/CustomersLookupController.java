@@ -19,7 +19,7 @@ public class CustomersLookupController {
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.OWNER, Roles.VET})
     @GetMapping("/{customerId}")
     public Mono<ResponseEntity<OwnerResponseDTO>> getCustomerById(@PathVariable String customerId) {
-        return customersServiceClient.getOwner(customerId)
+        return customersServiceClient.getCustomer(customerId)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }

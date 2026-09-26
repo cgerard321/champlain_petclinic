@@ -23,14 +23,14 @@ import java.util.Optional;
 @RestController()
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/api/gateway/owners")
+@RequestMapping("/api/gateway/customers")
 public class OwnerControllerV1 {
     private final CustomersServiceClient customersServiceClient;
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET,Roles.RECEPTIONIST})
     @GetMapping(value = "", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<OwnerResponseDTO> getAllOwners() {
-        return customersServiceClient.getAllOwners();
+    public Flux<OwnerResponseDTO> getAllCustomers() {
+        return customersServiceClient.getAllCustomers();
 
     }
 
@@ -43,10 +43,10 @@ public class OwnerControllerV1 {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET,Roles.RECEPTIONIST})
-    @GetMapping(value = "/owners-pagination", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<OwnerResponseDTO> getOwnersByPagination(@RequestParam Optional<Integer> page,
+    @GetMapping(value = "/customers-pagination", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<OwnerResponseDTO> getCustomersByPagination(@RequestParam Optional<Integer> page,
                                                         @RequestParam Optional<Integer> size,
-                                                        @RequestParam(required = false) String ownerId,
+                                                        @RequestParam(required = false) String customerId,
                                                         @RequestParam(required = false) String firstName,
                                                         @RequestParam(required = false) String lastName,
                                                         @RequestParam(required = false) String phoneNumber,
@@ -60,34 +60,34 @@ public class OwnerControllerV1 {
             size = Optional.of(5);
         }
 
-        return customersServiceClient.getOwnersByPagination(page,size,ownerId,firstName,lastName,phoneNumber,city);
+        return customersServiceClient.getCustomersByPagination(page,size,customerId,firstName,lastName,phoneNumber,city);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET,Roles.RECEPTIONIST})
-    @GetMapping(value = "/owners-count")
-    public Mono<Long> getTotalNumberOfOwners(){
-        return customersServiceClient.getTotalNumberOfOwners();
+    @GetMapping(value = "/customers-count")
+    public Mono<Long> getTotalNumberOfCustomers(){
+        return customersServiceClient.getTotalNumberOfCustomers();
     }
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET,Roles.RECEPTIONIST})
-    @GetMapping(value = "/owners-filtered-count")
-    public Mono<Long> getTotalNumberOfOwnersWithFilters (
-            @RequestParam(required = false) String ownerId,
+    @GetMapping(value = "/customers-filtered-count")
+    public Mono<Long> getTotalNumberOfCustomersWithFilters (
+            @RequestParam(required = false) String customerId,
             @RequestParam(required = false) String firstName,
             @RequestParam(required = false) String lastName,
             @RequestParam(required = false) String phoneNumber,
             @RequestParam(required = false) String city)
     {
-        return customersServiceClient.getTotalNumberOfOwnersWithFilters(ownerId,firstName,lastName,phoneNumber,city);
+        return customersServiceClient.getTotalNumberOfCustomersWithFilters(customerId,firstName,lastName,phoneNumber,city);
     }
 
 
 
-    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN,Roles.RECEPTIONIST})
-    @GetMapping(value = "/{ownerId}")
-    public Mono<ResponseEntity<OwnerResponseDTO>> getOwnerDetails(final @PathVariable String ownerId, @RequestParam(required = false, defaultValue = "false") boolean includePhoto) {
-        return customersServiceClient.getOwner(ownerId, includePhoto)
+    @IsUserSpecific(idToMatch = {"customerId"}, bypassRoles = {Roles.ADMIN,Roles.RECEPTIONIST})
+    @GetMapping(value = "/detail/{customerId}")
+    public Mono<ResponseEntity<OwnerResponseDTO>> getCustomerDetails(final @PathVariable String customerId, @RequestParam(required = false, defaultValue = "false") boolean includePhoto) {
+        return customersServiceClient.getCustomer(customerId, includePhoto)
                 .map(ownerResponseDTO -> ResponseEntity.status(HttpStatus.OK).body(ownerResponseDTO))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
@@ -122,9 +122,9 @@ public class OwnerControllerV1 {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @DeleteMapping(value = "/{ownerId}")
-    public Mono<ResponseEntity<OwnerResponseDTO>> deleteOwner(@PathVariable String ownerId){
-        return customersServiceClient.deleteOwner(ownerId).then(Mono.just(ResponseEntity.noContent().<OwnerResponseDTO>build()))
+    @DeleteMapping(value = "/{customerId}")
+    public Mono<ResponseEntity<OwnerResponseDTO>> deleteCustomer(@PathVariable String customerId){
+        return customersServiceClient.deleteCustomer(customerId).then(Mono.just(ResponseEntity.noContent().<OwnerResponseDTO>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 

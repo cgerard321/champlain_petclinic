@@ -150,7 +150,7 @@ public class AuthServiceClient {
                                 .thenReturn(ownerResponseDTO)
                                 .doOnError(throwable -> {
                                     log.error("Error creating user: " + throwable.getMessage());
-                                    customersServiceClient.deleteOwner(ownerResponseDTO.getOwnerId());
+                                    customersServiceClient.deleteCustomer(ownerResponseDTO.getOwnerId());
                                 });
                     }
             );

@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
-import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseModel';
-import './AllOwners.css';
+import { CustomerResponseModel } from '@/features/customers/models/CustomerResponseModel.ts';
+import './AllCustomers.css';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import { Link } from 'react-router-dom';
-import { getAllOwners } from '@/features/customers/api/getAllOwners.ts';
-import { deleteOwner } from '@/features/customers/api/deleteOwner';
+import { getAllCustomers } from '@/features/customers/api/getAllCustomers.ts';
+import { deleteCustomer } from '@/features/customers/api/deleteCustomer.ts';
 import { IsVet } from '@/context/UserContext';
 
-const AllOwners: React.FC = (): JSX.Element => {
+const AllCustomers: React.FC = (): JSX.Element => {
   interface FilterModel {
     [key: string]: string;
     firstName: string;
@@ -19,7 +19,7 @@ const AllOwners: React.FC = (): JSX.Element => {
   }
 
   const isVet = IsVet();
-  const [owners, setOwners] = useState<OwnerResponseModel[]>([]);
+  const [customers, setCustomers] = useState<CustomerResponseModel[]>([]);
   const [filter, setFilter] = useState<FilterModel>({
     firstName: '',
     lastName: '',
@@ -32,31 +32,33 @@ const AllOwners: React.FC = (): JSX.Element => {
   const [isFilterVisible, setFilterVisible] = useState(true);
 
   useEffect(() => {
-    const getOwners = async (): Promise<void> => {
-      const fetchedOwners = await getAllOwners();
-      setOwners(fetchedOwners);
+    const getCustomers = async (): Promise<void> => {
+      const fetchedCustomers = await getAllCustomers();
+      setCustomers(fetchedCustomers);
     };
 
-    getOwners();
+    getCustomers();
   }, []);
 
-  const handleDelete = async (ownerId: string): Promise<void> => {
+  const handleDelete = async (customerId: string): Promise<void> => {
     const confirmDelete = window.confirm(
-      'Are you sure you want to delete this owner?'
+      'Are you sure you want to delete this customer?'
     );
 
     if (confirmDelete) {
-      await deleteOwner(ownerId);
-      setOwners(owners.filter(owner => owner.ownerId !== ownerId));
-      alert('Owner deleted successfully.');
+      await deleteCustomer(customerId);
+      setCustomers(
+        customers.filter(customer => customer.customerId !== customerId)
+      );
+      alert('Customer deleted successfully.');
     } else {
-      alert('Owner deletion canceled.');
+      alert('Customer deletion canceled.');
     }
   };
 
-  function isKeyOfOwnerResponseModel(
+  function isKeyOfCustomerResponseModel(
     key: string
-  ): key is keyof OwnerResponseModel {
+  ): key is keyof CustomerResponseModel {
     return [
       'firstName',
       'lastName',
@@ -67,13 +69,13 @@ const AllOwners: React.FC = (): JSX.Element => {
     ].includes(key);
   }
 
-  const filteredOwners = owners.filter(owner => {
+  const filteredCustomers = customers.filter(customer => {
     return Object.keys(filter).every(key => {
       if (!filter[key]) return true;
-      if (!isKeyOfOwnerResponseModel(key)) return true;
-      const ownerValue = owner[key];
-      if (ownerValue === undefined || ownerValue === null) return false;
-      return ownerValue.toString().includes(filter[key].toString());
+      if (!isKeyOfCustomerResponseModel(key)) return true;
+      const customerValue = customer[key];
+      if (customerValue === undefined || customerValue === null) return false;
+      return customerValue.toString().includes(filter[key].toString());
     });
   });
 
@@ -81,8 +83,8 @@ const AllOwners: React.FC = (): JSX.Element => {
     <div>
       <NavBar />
 
-      <div className="owners-container">
-        <h1>Owners</h1>
+      <div className="customers-container">
+        <h1>Customers</h1>
 
         {isFilterVisible && (
           <div className="filter-container">
@@ -147,7 +149,7 @@ const AllOwners: React.FC = (): JSX.Element => {
         <table>
           <thead>
             <tr>
-              <th>Owner Id</th>
+              <th>Customer Id</th>
               <th>First Name</th>
               <th>Last Name</th>
               <th>Address</th>
@@ -158,24 +160,24 @@ const AllOwners: React.FC = (): JSX.Element => {
             </tr>
           </thead>
           <tbody>
-            {filteredOwners.map(owner => (
-              <tr key={owner.ownerId}>
+            {filteredCustomers.map(customer => (
+              <tr key={customer.customerId}>
                 <td>
-                  <Link to={`/customers/${owner.ownerId}`}>
-                    {owner.ownerId}
+                  <Link to={`/customers/${customer.customerId}`}>
+                    {customer.customerId}
                   </Link>
                 </td>
-                <td>{owner.firstName}</td>
-                <td>{owner.lastName}</td>
-                <td>{owner.address}</td>
-                <td>{owner.city}</td>
-                <td>{owner.province}</td>
-                <td>{owner.telephone}</td>
+                <td>{customer.firstName}</td>
+                <td>{customer.lastName}</td>
+                <td>{customer.address}</td>
+                <td>{customer.city}</td>
+                <td>{customer.province}</td>
+                <td>{customer.telephone}</td>
                 <td>
                   {!isVet && (
                     <button
                       className="btn btn-danger"
-                      onClick={() => handleDelete(owner.ownerId)}
+                      onClick={() => handleDelete(customer.customerId)}
                       title="Delete"
                       style={{ backgroundColor: 'red', color: 'white' }}
                     >
@@ -202,4 +204,4 @@ const AllOwners: React.FC = (): JSX.Element => {
   );
 };
 
-export default AllOwners;
+export default AllCustomers;

@@ -1,4 +1,4 @@
-export interface OwnerRequestModel {
+export interface CustomerRequestModel {
   firstName: string;
   lastName: string;
   address: string;

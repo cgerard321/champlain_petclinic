@@ -379,9 +379,9 @@ public class BFFApiGatewayController {
                                                              @CookieValue("Bearer") String jwt){
         return authServiceClient.validateToken(jwt)
                 .switchIfEmpty(Mono.error(new InvalidCredentialsException("Invalid credentials")))
-                .flatMap(tokenResponse -> customersServiceClient.getOwner(tokenResponse.getBody().getUserId(), false))
-                .flatMap(owner -> {
-                    String customerName = owner.getFirstName() + " " + owner.getLastName();
+                .flatMap(tokenResponse -> customersServiceClient.getCustomer(tokenResponse.getBody().getUserId(), false))
+                .flatMap(customer -> {
+                    String customerName = customer.getFirstName() + " " + customer.getLastName();
                     return vetsServiceClient.deleteRatingByCustomerName(vetId, customerName);
                 })
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))

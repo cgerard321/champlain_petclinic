@@ -1,22 +1,22 @@
-<link href="/css/owner.css" rel="stylesheet" type="text/css"/>
+<link href="/css/customer.css" rel="stylesheet" type="text/css"/>
 
 <div class="dashboard-container">
     <div class="main-content">
         <div class="page-header">
             <h1 class="page-title">Edit Owner</h1>
-            <p class="page-subtitle">Update owner information and details</p>
+            <p class="page-subtitle">Update customer information and details</p>
         </div>
 
         <div class="content-wrapper">
             <div class="form-card">
                 <div class="form-header">
                     <h2 class="form-title">Owner Information</h2>
-                    <p class="form-subtitle">Update the owner's personal details</p>
+                    <p class="form-subtitle">Update the customer's personal details</p>
                 </div>
 
                 <div ng-if="$ctrl.checked" class="warning-section">
                     <div class="warning-icon">&#x26A0;</div>
-                    <p class="warning-text">This owner is currently disabled and cannot be edited.</p>
+                    <p class="warning-text">This customer is currently disabled and cannot be edited.</p>
                 </div>
 
                 <form id="ownerForm" ng-submit="$ctrl.submitOwnerForm()">
@@ -24,7 +24,7 @@
                         <div class="form-group">
                             <label class="form-label">First Name</label>
                             <input class="form-input" 
-                                   ng-model="$ctrl.owner.firstName" 
+                                   ng-model="$ctrl.customer.firstName"
                                    name="firstName"
                                    ng-disabled="$ctrl.checked" 
                                    maxlength="50" 
@@ -37,7 +37,7 @@
                         <div class="form-group">
                             <label class="form-label">Last Name</label>
                             <input class="form-input" 
-                                   ng-model="$ctrl.owner.lastName" 
+                                   ng-model="$ctrl.customer.lastName"
                                    name="lastName"
                                    ng-disabled="$ctrl.checked" 
                                    maxlength="50" 
@@ -50,7 +50,7 @@
                         <div class="form-group full-width">
                             <label class="form-label">Address</label>
                             <input class="form-input" 
-                                   ng-model="$ctrl.owner.address" 
+                                   ng-model="$ctrl.customer.address"
                                    name="address"
                                    ng-disabled="$ctrl.checked" 
                                    maxlength="50" 
@@ -63,7 +63,7 @@
                         <div class="form-group">
                             <label class="form-label">City</label>
                             <input class="form-input" 
-                                   ng-model="$ctrl.owner.city" 
+                                   ng-model="$ctrl.customer.city"
                                    name="city"
                                    ng-disabled="$ctrl.checked" 
                                    maxlength="50" 
@@ -76,7 +76,7 @@
                         <div class="form-group">
                             <label class="form-label">Province</label>
                             <input class="form-input" 
-                                   ng-model="$ctrl.owner.province" 
+                                   ng-model="$ctrl.customer.province"
                                    name="province"
                                    ng-disabled="$ctrl.checked" 
                                    maxlength="50" 
@@ -89,7 +89,7 @@
                         <div class="form-group full-width">
                             <label class="form-label">Telephone</label>
                             <input class="form-input" 
-                                   ng-model="$ctrl.owner.telephone" 
+                                   ng-model="$ctrl.customer.telephone"
                                    name="telephone"
                                    ng-disabled="$ctrl.checked" 
                                    maxlength="50" 
@@ -111,15 +111,15 @@
                     <div class="modal-card">
                         <h3 class="modal-title">Confirm Owner Update</h3>
                         <p class="modal-text">
-                            Are you sure you want to proceed with the following owner details?
+                            Are you sure you want to proceed with the following customer details?
                         </p>
                         <ul class="modal-details">
-                            <li><strong>First Name:</strong> {{$ctrl.owner.firstName}}</li>
-                            <li><strong>Last Name:</strong> {{$ctrl.owner.lastName}}</li>
-                            <li><strong>Address:</strong> {{$ctrl.owner.address}}</li>
-                            <li><strong>City:</strong> {{$ctrl.owner.city}}</li>
-                            <li><strong>Province:</strong> {{$ctrl.owner.province}}</li>
-                            <li><strong>Telephone:</strong> {{$ctrl.owner.telephone}}</li>
+                            <li><strong>First Name:</strong> {{$ctrl.customer.firstName}}</li>
+                            <li><strong>Last Name:</strong> {{$ctrl.customer.lastName}}</li>
+                            <li><strong>Address:</strong> {{$ctrl.customer.address}}</li>
+                            <li><strong>City:</strong> {{$ctrl.customer.city}}</li>
+                            <li><strong>Province:</strong> {{$ctrl.customer.province}}</li>
+                            <li><strong>Telephone:</strong> {{$ctrl.customer.telephone}}</li>
                         </ul>
                         <div class="modal-actions">
                             <button class="btn-cancel" ng-click="$ctrl.cancelModal()">Cancel</button>

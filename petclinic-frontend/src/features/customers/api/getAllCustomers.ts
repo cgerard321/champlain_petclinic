@@ -1,8 +1,8 @@
 import axiosInstance from '@/shared/api/axiosInstance.ts';
-import { OwnerResponseModel } from '../models/OwnerResponseModel';
+import { CustomerResponseModel } from '../models/CustomerResponseModel.ts';
 
-export async function getAllOwners(): Promise<OwnerResponseModel[]> {
-  const response = await axiosInstance.get('/owners', {
+export async function getAllCustomers(): Promise<CustomerResponseModel[]> {
+  const response = await axiosInstance.get('/customers', {
     responseType: 'text',
     useV2: false,
   });
