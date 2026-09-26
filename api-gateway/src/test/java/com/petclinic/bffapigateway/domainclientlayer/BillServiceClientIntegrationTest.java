@@ -1008,7 +1008,7 @@ class BillServiceClientIntegrationTest {
 
         RecordedRequest request = server.takeRequest();
         assertEquals("GET", request.getMethod());
-        assertTrue(request.getPath().endsWith("/bills-count"));
+        assertTrue(request.getPath().endsWith("/count"));
     }
 
     @Test
@@ -1030,7 +1030,7 @@ class BillServiceClientIntegrationTest {
 
         RecordedRequest request = server.takeRequest();
         assertEquals("GET", request.getMethod());
-        assertTrue(request.getPath().contains("/bills-filtered-count"));
+        assertTrue(request.getPath().contains("/filtered-count"));
         assertTrue(request.getPath().contains("billId=1"));
         assertTrue(request.getPath().contains("customerId=123"));
         assertTrue(request.getPath().contains("ownerFirstName=John"));
@@ -1060,7 +1060,7 @@ class BillServiceClientIntegrationTest {
 
         RecordedRequest request = server.takeRequest();
         assertEquals("GET", request.getMethod());
-        assertTrue(request.getPath().contains("/bills-filtered-count"));
+        assertTrue(request.getPath().contains("/filtered-count"));
         assertTrue(request.getPath().contains("customerId=123"));
         assertTrue(request.getPath().contains("ownerLastName=Doe"));
         assertFalse(request.getPath().contains("billId="));
