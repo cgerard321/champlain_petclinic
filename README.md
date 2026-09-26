@@ -1,5 +1,16 @@
 # Champlain Pet Clinic
 
+## Service Status
+
+| Service         | Endpoint                                                           | Status                                                                                                                                                                                                                            |
+|-----------------|--------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Customer Portal | https://petclinic.benmusicgeek.synology.me/                        | [![Customer Portal Health](https://github.com/DylanBrass/petclinic-monitor/actions/workflows/health-customer-portal.yml/badge.svg)](https://github.com/DylanBrass/petclinic-monitor/actions/workflows/health-customer-portal.yml) |
+| Backend API     | https://petclinic-backend.benmusicgeek.synology.me/actuator/health | [![Backend API Health](https://github.com/DylanBrass/petclinic-monitor/actions/workflows/health-backend-api.yml/badge.svg)](https://github.com/DylanBrass/petclinic-monitor/actions/workflows/health-backend-api.yml)             |
+| Employee Portal | https://petclinic-emp-portal.benmusicgeek.synology.me/login        | [![Employee Portal Health](https://github.com/DylanBrass/petclinic-monitor/actions/workflows/health-employee-portal.yml/badge.svg)](https://github.com/DylanBrass/petclinic-monitor/actions/workflows/health-employee-portal.yml) |
+| Management UI   | https://petclinic-management-ui.benmusicgeek.synology.me/login     | [![Management UI Health](https://github.com/DylanBrass/petclinic-monitor/actions/workflows/health-management-ui.yml/badge.svg)](https://github.com/DylanBrass/petclinic-monitor/actions/workflows/health-management-ui.yml)       |
+
+## Table of contents
+
 Champlain Final Project 1 420-N52-LA Pet Clinic repo
 
 - [Champlain Pet Clinic](#champlain-pet-clinic)

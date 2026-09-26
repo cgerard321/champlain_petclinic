@@ -1,6 +1,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { catchError, map, Observable, of, tap } from 'rxjs';
+
 import { CurrentUserResponse } from '@core/models/current-user-response';
 
 @Injectable({ providedIn: 'root' })
