@@ -1,34 +1,89 @@
-/*Pretty basic CSS - We can improve it later*/
 .inventory-page {
-  padding: 1.5rem;
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.inventory-page h1 {
+  margin: 0 0 1.5rem;
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 .state-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 300px;
   padding: 3rem 0;
   color: rgba(0, 0, 0, 0.6);
+  text-align: center;
 }
 
 .inventory-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.25rem;
+  width: 100%;
 }
 
 .inventory-card-link {
+  display: block;
+  min-width: 0;
+  aspect-ratio: 1 / 1;
   text-decoration: none;
   color: inherit;
 }
 
 .inventory-card {
+  width: 100%;
   height: 100%;
+  box-sizing: border-box;
   cursor: pointer;
+
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.inventory-card:hover {
+  transform: translateY(-6px) scale(1.015);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.inventory-card mat-card-header {
+  padding: 1.25rem 1.25rem 0;
+}
+
+.inventory-card mat-card-content {
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - 5rem);
+  box-sizing: border-box;
+  padding: 1rem 1.25rem 1.25rem;
+}
+
+.inventory-card mat-card-title {
+  font-size: 1.25rem;
+  line-height: 1.3;
+}
+
+.inventory-card mat-card-subtitle {
+  margin-top: 0.35rem;
+  font-weight: 600;
+}
+
+.inventory-card mat-card-content p:first-child {
+  margin-top: 0;
+  line-height: 1.5;
 }
 
 .quantity {
+  margin-top: auto;
+  padding-top: 1rem;
   font-size: 0.875rem;
   color: rgba(0, 0, 0, 0.6);
 }
