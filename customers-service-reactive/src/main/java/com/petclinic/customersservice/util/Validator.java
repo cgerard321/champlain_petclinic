@@ -18,7 +18,7 @@ public class Validator {
     public static UnaryOperator<Mono<CustomerRequestDTO>> validateCustomer() {
         return customerRequest -> customerRequest
                 .filter(hasStringValue(CustomerRequestDTO::getFirstName))
-                .switchIfEmpty(ApplicationExceptions.missingOwnerFirstName())
+                .switchIfEmpty(ApplicationExceptions.missingCustomerFirstName())
                 .filter(hasStringValue(CustomerRequestDTO::getLastName))
                 .switchIfEmpty(ApplicationExceptions.missingCustomerLastName())
                 .filter(hasStringValue(CustomerRequestDTO::getAddress))

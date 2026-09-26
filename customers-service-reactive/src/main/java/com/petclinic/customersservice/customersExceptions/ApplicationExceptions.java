@@ -37,7 +37,7 @@ public class ApplicationExceptions {
         return Mono.error(new InvalidInputException("PetType id is invalid"));
     }
 
-    public static <T> Mono<T> missingOwnerFirstName() {
+    public static <T> Mono<T> missingCustomerFirstName() {
         return Mono.error(new UnprocessableEntityException("first name is required"));
     }
 
