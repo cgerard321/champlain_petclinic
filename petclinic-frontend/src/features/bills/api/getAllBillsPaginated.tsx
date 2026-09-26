@@ -27,9 +27,9 @@ export async function getAllBillsPaginated(
   if (vetFirstName) params.vetFirstName = vetFirstName;
   if (vetLastName) params.vetLastName = vetLastName;
 
-  const response = await axiosInstance.get<Bill[]>('/bills/paginated', {
+  const response = await axiosInstance.get<Bill[]>('/bills/page', {
     params,
-    useV2: true,
+    useV2: false,
   });
 
   return response.data;
