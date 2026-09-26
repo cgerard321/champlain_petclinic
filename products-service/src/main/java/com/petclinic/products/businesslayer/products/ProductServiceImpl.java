@@ -1,6 +1,9 @@
 package com.petclinic.products.businesslayer.products;
 
 import com.petclinic.products.datalayer.products.*;
+import com.petclinic.products.domainclientlayer.FileRequestDTO;
+import com.petclinic.products.domainclientlayer.FileResponseDTO;
+import com.petclinic.products.domainclientlayer.FilesServiceClient;
 import com.petclinic.products.presentationlayer.products.*;
 import com.petclinic.products.utils.exceptions.*;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -28,14 +31,16 @@ public class ProductServiceImpl implements ProductService {
     private final ProductBundleRepository productBundleRepository;
     private final ProductBundleService productBundleService;
     private final ProductTypeRepository productTypeRepository;
+    private final FilesServiceClient filesServiceClient;
 
     public ProductServiceImpl(ProductRepository productRepository, RatingRepository ratingRepository
-    , ProductBundleRepository productBundleRepository, ProductBundleService productBundleService, ProductTypeRepository productTypeRepository) {
+    , ProductBundleRepository productBundleRepository, ProductBundleService productBundleService, ProductTypeRepository productTypeRepository, FilesServiceClient filesServiceClient) {
         this.productRepository = productRepository;
         this.ratingRepository = ratingRepository;
         this.productBundleRepository = productBundleRepository;
         this.productBundleService = productBundleService;
         this.productTypeRepository = productTypeRepository;
+        this.filesServiceClient = filesServiceClient;
     }
 
     private Mono<Product> getAverageRating(Product product) {
@@ -112,35 +117,97 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
-    public Mono<ProductResponseModel> getProductByProductId(String productId) {
+    public Mono<ProductResponseModel> getProductByProductId(
+            String productId, boolean includeImage) {
+
         return productRepository.findProductByProductId(productId)
-                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Product id was not found: " + productId))))
+                .switchIfEmpty(Mono.error(
+                        new NotFoundException(
+                                "Product id was not found: " + productId)))
                 .flatMap(this::getAverageRating)
-                .map(EntityModelUtil::toProductResponseModel);
+                .flatMap(product -> {
+                    ProductResponseModel response =
+                            EntityModelUtil.toProductResponseModel(product);
+
+                    if (!includeImage
+                            || product.getImageId() == null
+                            || product.getImageId().isBlank()) {
+                        return Mono.just(response);
+                    }
+
+                    return filesServiceClient.getFile(product.getImageId())
+                            .switchIfEmpty(Mono.error(
+                                    new FailedDependencyException(
+                                            "Files Service returned no file")))
+                            .map(file -> {
+                                response.setImage(file);
+                                return response;
+                            });
+                });
     }
 
     @Override
-    public Mono<ProductResponseModel> addProduct(Mono<ProductRequestModel> productRequestModel) {
-        return productRequestModel
-                .filter(product -> product.getProductSalePrice() > 0)
-                .switchIfEmpty(Mono.error(new InvalidAmountException("Product sale price must be greater than 0")))
-                .map(request -> {
+    public Mono<ProductResponseModel> addProduct(
+            Mono<ProductRequestModel> productRequestModel) {
 
+        return productRequestModel
+                .filter(request -> request.getProductSalePrice() != null
+                        && request.getProductSalePrice() > 0)
+                .switchIfEmpty(Mono.error(new InvalidAmountException(
+                        "Product sale price must be greater than 0")))
+                .flatMap(request -> {
                     Product product = EntityModelUtil.toProductEntity(request);
 
+                    // Only trust an ID returned by the Files Service.
+                    product.setImageId(null);
 
                     LocalDate today = LocalDate.now();
-                    if (product.getReleaseDate() != null && product.getReleaseDate().isAfter(today)) {
-                        product.setProductStatus(ProductStatus.PRE_ORDER);
-                    } else {
-                        product.setProductStatus(ProductStatus.AVAILABLE);
+                    product.setProductStatus(
+                            product.getReleaseDate() != null
+                                    && product.getReleaseDate().isAfter(today)
+                                    ? ProductStatus.PRE_ORDER
+                                    : ProductStatus.AVAILABLE);
+
+                    // Creating a product without an image still works.
+                    if (request.getImage() == null) {
+                        return getAverageRating(product)
+                                .flatMap(productRepository::save)
+                                .map(EntityModelUtil::toProductResponseModel);
                     }
 
-                    return product;
-                })
-                .flatMap(this::getAverageRating)
-                .flatMap(productRepository::save)
-                .map(EntityModelUtil::toProductResponseModel);
+                    return filesServiceClient.addFile(request.getImage())
+                            .switchIfEmpty(Mono.error(
+                                    new FailedDependencyException(
+                                            "Files Service returned no file")))
+                            .flatMap(file -> {
+                                product.setImageId(file.getFileId());
+
+                                return getAverageRating(product)
+                                        .flatMap(productRepository::save)
+                                        .onErrorResume(saveError ->
+                                                filesServiceClient
+                                                        .deleteFile(file.getFileId())
+                                                        .onErrorResume(cleanupError -> {
+                                                            log.error(
+                                                                    "Failed to clean up file {}",
+                                                                    file.getFileId(),
+                                                                    cleanupError);
+                                                            saveError.addSuppressed(
+                                                                    cleanupError);
+                                                            return Mono.empty();
+                                                        })
+                                                        .then(Mono.<Product>error(
+                                                                saveError)))
+                                        .map(savedProduct -> {
+                                            ProductResponseModel response =
+                                                    EntityModelUtil
+                                                            .toProductResponseModel(
+                                                                    savedProduct);
+                                            response.setImage(file);
+                                            return response;
+                                        });
+                            });
+                });
     }
 
     @Override
@@ -150,6 +217,7 @@ public class ProductServiceImpl implements ProductService {
                 .flatMap(found -> productRequestModel
                         .map(EntityModelUtil::toProductEntity)
                         .doOnNext(entity -> entity.setId(found.getId()))
+                        .doOnNext(entity -> entity.setImageId(found.getImageId()))
                         .doOnNext(entity -> entity.setProductId(found.getProductId())))
                 .flatMap(this::getAverageRating)
                 .flatMap(productRepository::save)
@@ -344,4 +412,83 @@ public class ProductServiceImpl implements ProductService {
             );
     }
 
+
+    //this allows existing prodcuts to update their images to the new file system
+    @Override
+    public Mono<ProductResponseModel> updateProductImage(
+            String productId, FileRequestDTO image) {
+
+        return productRepository.findProductByProductId(productId)
+                .switchIfEmpty(Mono.error(
+                        new NotFoundException(
+                                "Product id was not found: " + productId)))
+                .flatMap(product -> {
+                    if (product.getImageId() == null
+                            || product.getImageId().isBlank()) {
+                        return uploadProductImage(product, image);
+                    }
+
+                    return productRepository.existsByImageIdAndProductIdNot(
+                                    product.getImageId(), productId)
+                            .flatMap(shared -> {
+                                if (shared) {
+                                    return uploadProductImage(product, image);
+                                }
+
+                                return filesServiceClient
+                                        .updateFile(product.getImageId(), image)
+                                        .switchIfEmpty(Mono.error(
+                                                new FailedDependencyException(
+                                                        "Files Service returned no file")))
+                                        .map(file -> toResponseWithImage(product, file));
+                            });
+                });
     }
+
+    private Mono<ProductResponseModel> uploadProductImage(
+            Product product, FileRequestDTO image) {
+
+        // Upload a new file for a product with no image or a shared image.
+        return filesServiceClient.addFile(image)
+                .switchIfEmpty(Mono.error(
+                        new FailedDependencyException(
+                                "Files Service returned no file")))
+                .flatMap(file -> {
+                    // Store only the returned file ID on the product.
+                    product.setImageId(file.getFileId());
+
+                    return productRepository.save(product)
+                            .onErrorResume(saveError ->
+                                    // Remove the uploaded file if saving fails,
+                                    // so it is not left without a product reference.
+                                    filesServiceClient.deleteFile(file.getFileId())
+                                            .onErrorResume(cleanupError -> {
+                                                // Log cleanup failure while preserving
+                                                // the original save error.
+                                                log.error(
+                                                        "Failed to clean up file {}",
+                                                        file.getFileId(),
+                                                        cleanupError);
+                                                saveError.addSuppressed(cleanupError);
+                                                return Mono.empty();
+                                            })
+                                            .then(Mono.<Product>error(saveError)))
+                            .map(saved -> toResponseWithImage(saved, file));
+                });
+    }
+
+    private ProductResponseModel toResponseWithImage(
+            Product product, FileResponseDTO file) {
+
+        // Map the stored product fields to the response.
+        ProductResponseModel response =
+                EntityModelUtil.toProductResponseModel(product);
+
+        // Include file content in the response without storing it on the entity.
+        response.setImage(file);
+        return response;
+    }
+
+
+
+}

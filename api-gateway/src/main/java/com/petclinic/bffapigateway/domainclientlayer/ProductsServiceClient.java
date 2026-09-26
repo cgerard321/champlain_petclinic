@@ -69,10 +69,16 @@ public class ProductsServiceClient {
                 });
     }
 
-    public Mono<ProductResponseDTO> getProductByProductId(final String productId) {
+    public Mono<ProductResponseDTO> getProductByProductId(
+            String productId, boolean includeImage) {
+
         return webClientBuilder.build()
                 .get()
-                .uri(productsServiceUrl + "/" + productId)
+                .uri(
+                        productsServiceUrl
+                                + "/{productId}?includeImage={includeImage}",
+                        productId,
+                        includeImage)
                 .retrieve()
                 .bodyToMono(ProductResponseDTO.class);
     }

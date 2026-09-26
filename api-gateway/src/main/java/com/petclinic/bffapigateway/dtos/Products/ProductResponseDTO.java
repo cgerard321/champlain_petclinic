@@ -1,5 +1,6 @@
 package com.petclinic.bffapigateway.dtos.Products;
 
+import com.petclinic.bffapigateway.dtos.Files.FileDetails;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,4 +26,5 @@ public class ProductResponseDTO {
     private ProductType productType;
     private ProductStatus productStatus;
     private DeliveryType deliveryType;
+    private FileDetails image;
 }

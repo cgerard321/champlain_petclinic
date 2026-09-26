@@ -1,4 +1,4 @@
-package com.petclinic.customersservice.domainclientlayer;
+package com.petclinic.products.domainclientlayer;
 
 import lombok.*;
 

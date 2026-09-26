@@ -1,8 +1,9 @@
-package com.petclinic.customersservice.domainclientlayer;
+package com.petclinic.products.domainclientlayer;
 
-import com.petclinic.customersservice.customersExceptions.exceptions.BadRequestException;
-import com.petclinic.customersservice.customersExceptions.exceptions.FailedDependencyException;
-import com.petclinic.customersservice.customersExceptions.exceptions.UnprocessableEntityException;
+
+import com.petclinic.products.utils.exceptions.BadRequestException;
+import com.petclinic.products.utils.exceptions.FailedDependencyException;
+import com.petclinic.products.utils.exceptions.UnprocessableEntityException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -20,7 +21,7 @@ public class FilesServiceClient {
 
     public FilesServiceClient(WebClient.Builder webClientBuilder, @Value("${app.files-service.host}") String filesServiceHost, @Value("${app.files-service.port}") String filesServicePort) {
         this.webClientBuilder = webClientBuilder;
-        filesServiceUrl = "http://" + filesServiceHost + ":" + filesServicePort + "/files/";
+        filesServiceUrl = "http://" + filesServiceHost + ":" + filesServicePort + "/files";
     }
 
     public Mono<FileResponseDTO> getFile(String fileId) {
@@ -41,13 +42,16 @@ public class FilesServiceClient {
 
         return webClientBuilder.build()
                 .post()
-                .uri(filesServiceUrl)
+                .uri(filesServiceUrl + "/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(fileDetails))
                 .retrieve()
                 .onStatus(HttpStatus.UNPROCESSABLE_ENTITY::equals, resp -> Mono.error(new UnprocessableEntityException("Unprocessable File Request Model")))
                 .onStatus(HttpStatus.BAD_REQUEST::equals, resp -> Mono.error(new BadRequestException("Invalid File Request Model")))
-                .onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, resp -> Mono.error(new FailedDependencyException("Failed to add file from Files Service")))
+                .onStatus(
+                status -> status.is5xxServerError(),
+                response -> Mono.error(
+                        new FailedDependencyException("Failed to upload file")))
                 .bodyToMono(FileResponseDTO.class)
                 .doOnSuccess(response -> log.info("Successfully received response from Files Service, fileId: {}",
                         response != null ? response.getFileId() : "null"))

@@ -24,6 +24,8 @@ public interface ProductRepository extends ReactiveMongoRepository<Product, Stri
     Flux<Product> findByProductSalePriceLessThanEqual(Double maxPrice);
     Flux<Product> findProductsByProductType(String productType);
     List<Product> findByProductType(ProductType productType);
+    Mono<Boolean> existsByImageIdAndProductIdNot(
+            String imageId, String productId);
 
 
 }

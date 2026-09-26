@@ -55,8 +55,11 @@ public class ProductControllerV1 {
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping(value = "{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<ProductResponseDTO>> getProductByProductId(@PathVariable String productId) {
-        return productsServiceClient.getProductByProductId(productId)
+    public Mono<ResponseEntity<ProductResponseDTO>> getProductByProductId(
+            @PathVariable String productId,
+            @RequestParam(defaultValue = "false") boolean includeImage) {
+
+        return productsServiceClient.getProductByProductId(productId, includeImage)
                 .map(product -> ResponseEntity.status(HttpStatus.OK).body(product))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }

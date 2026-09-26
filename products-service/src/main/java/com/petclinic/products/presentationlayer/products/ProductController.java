@@ -4,6 +4,7 @@ import com.petclinic.products.businesslayer.products.ProductBundleService;
 import com.petclinic.products.businesslayer.products.ProductService;
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductType;
+import com.petclinic.products.domainclientlayer.FileRequestDTO;
 import com.petclinic.products.utils.EntityModelUtil;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,12 +43,14 @@ public class ProductController {
         return productService.getAllProducts(minPrice, maxPrice, minRating, maxRating, sort,deliveryType,productType);
     }
 
-    @GetMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<ProductResponseModel>> getProductByProductId(@PathVariable String productId) {
-        return Mono.just(productId)
-                .filter(id -> id.length() == 36)
-                .switchIfEmpty(Mono.error(new InvalidInputException("Provided product id is invalid: " + productId)))
-                .flatMap(productService::getProductByProductId)
+    @GetMapping(
+            value = "/{productId}",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<ProductResponseModel>> getProductByProductId(
+            @PathVariable String productId,
+            @RequestParam(defaultValue = "false") boolean includeImage) {
+
+        return productService.getProductByProductId(productId, includeImage)
                 .map(ResponseEntity::ok);
     }
 
@@ -83,6 +86,27 @@ public class ProductController {
                 .flatMap(id -> productService.patchListingStatus(id, productRequestModel))
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+
+    //updating images to the new file system
+    @PatchMapping(
+            value = "/{productId}/image",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<ProductResponseModel>> updateProductImage(
+            @PathVariable String productId,
+            @RequestBody FileRequestDTO image) {
+
+        return Mono.just(productId)
+                // Keep the existing product ID validation convention.
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(Mono.error(
+                        new InvalidInputException(
+                                "Provided product id is invalid: " + productId)))
+                // Delegate file handling to the business service.
+                .flatMap(id -> productService.updateProductImage(id, image))
+                .map(ResponseEntity::ok);
     }
 
     @DeleteMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
