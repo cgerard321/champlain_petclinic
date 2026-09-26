@@ -105,8 +105,8 @@ public class BillControllerV1 {
             @RequestParam Optional<Integer> size,
             @RequestParam(required = false) String billId,
             @RequestParam(required = false) String customerId,
-            @RequestParam(required = false) String ownerFirstName,
-            @RequestParam(required = false) String ownerLastName,
+            @RequestParam(required = false) String customerFirstName,
+            @RequestParam(required = false) String customerLastName,
             @RequestParam(required = false) String visitType,
             @RequestParam(required = false) String vetId,
             @RequestParam(required = false) String vetFirstName,
@@ -120,7 +120,7 @@ public class BillControllerV1 {
             size = Optional.of(10);
         }
 
-        return billServiceClient.getAllBillsByPage(page, size, billId, customerId, ownerFirstName, ownerLastName,
+        return billServiceClient.getAllBillsByPage(page, size, billId, customerId, customerFirstName, customerLastName,
                 visitType, vetId, vetFirstName, vetLastName);
     }
 
@@ -134,14 +134,14 @@ public class BillControllerV1 {
     @GetMapping(value = "/filtered-count")
     public Mono<Long> getTotalNumberOfBillsWithFilters (@RequestParam(required = false) String billId,
                                                         @RequestParam(required = false) String customerId,
-                                                        @RequestParam(required = false) String ownerFirstName,
-                                                        @RequestParam(required = false) String ownerLastName,
+                                                        @RequestParam(required = false) String customerFirstName,
+                                                        @RequestParam(required = false) String customerLastName,
                                                         @RequestParam(required = false) String visitType,
                                                         @RequestParam(required = false) String vetId,
                                                         @RequestParam(required = false) String vetFirstName,
                                                         @RequestParam(required = false) String vetLastName)
     {
-        return billServiceClient.getTotalNumberOfBillsWithFilters(billId, customerId, ownerFirstName, ownerLastName, visitType,
+        return billServiceClient.getTotalNumberOfBillsWithFilters(billId, customerId, customerFirstName, customerLastName, visitType,
                 vetId, vetFirstName, vetLastName);
     }
 

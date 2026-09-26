@@ -43,8 +43,8 @@ public class BillController {
             @RequestParam Optional<Integer> size,
             @RequestParam(required = false) String billId,
             @RequestParam(required = false) String customerId,
-            @RequestParam(required = false) String ownerFirstName,
-            @RequestParam(required = false) String ownerLastName,
+            @RequestParam(required = false) String customerFirstName,
+            @RequestParam(required = false) String customerLastName,
             @RequestParam(required = false) String visitType,
             @RequestParam(required = false) String vetId,
             @RequestParam(required = false) String vetFirstName,
@@ -57,8 +57,8 @@ public class BillController {
         if (size.isEmpty()) {
             size = Optional.of(10);
         }
-        return ResponseEntity.ok().body(billService.getAllBillsByPage(page, size, billId, customerId, ownerFirstName,
-                ownerLastName, visitType, vetId, vetFirstName, vetLastName));
+        return ResponseEntity.ok().body(billService.getAllBillsByPage(page, size, billId, customerId, customerFirstName,
+                customerLastName, visitType, vetId, vetFirstName, vetLastName));
     }
     
     @PutMapping(value = "/admin/{billId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
