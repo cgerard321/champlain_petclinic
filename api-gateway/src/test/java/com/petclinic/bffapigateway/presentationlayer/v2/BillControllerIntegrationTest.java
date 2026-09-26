@@ -39,6 +39,7 @@ public class BillControllerIntegrationTest {
     public void startMockServer() {
         mockServerConfigBillService = new MockServerConfigBillService();
         mockServerConfigBillService.registerGetAllBillsEndpoint();
+        mockServerConfigBillService.registerGetAllBillsPaginatedEndpoint();
         mockServerConfigBillService.registerCreateBillEndpoint();
         mockServerConfigBillService.registerUpdateBillEndpoint();
         mockServerConfigBillService.registerPayBillEndpoint();

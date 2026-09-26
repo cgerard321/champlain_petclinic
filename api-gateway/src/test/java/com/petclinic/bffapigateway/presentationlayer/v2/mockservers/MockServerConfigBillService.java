@@ -29,6 +29,28 @@ public class MockServerConfigBillService {
                 .when(
                         request()
                                 .withMethod("GET")
+                                .withPath("/bills"),
+                        Times.unlimited()
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withBody(json(response))
+                                .withHeader("Content-Type", "application/json")
+                );
+    }
+
+    public void registerGetAllBillsPaginatedEndpoint() {
+
+        String response = "["
+                + "{\"billId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361b\",\"customerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"visitType\":\"general\",\"vetId\":\"2\",\"date\":\"" + java.time.LocalDate.now().plusDays(1) + "\",\"amount\":\"120\",\"taxedAmount\":\"0.0\", \"billStatus\":\"UNPAID\", \"dueDate\":\"" + java.time.LocalDate.now().plusDays(46) + "\"},"
+                + "{\"billId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"customerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"visitType\":\"general\",\"vetId\":\"2\",\"date\":\"" + java.time.LocalDate.now().plusDays(1) + "\",\"amount\":\"100\",\"taxedAmount\":\"10.0\", \"billStatus\":\"UNPAID\", \"dueDate\":\"" + java.time.LocalDate.now().plusDays(46) + "\"}"
+                + "]";
+
+        mockServerClient_BillService
+                .when(
+                        request()
+                                .withMethod("GET")
                                 .withPath("/bills/paginated")
                                 .withQueryStringParameters(
                                         Parameter.param("page", "[0-9]+"), // Expecting digit characters for page

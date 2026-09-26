@@ -37,6 +37,12 @@ public class BillController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> getAllBills() {
+        return billService.getAllBills();
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping("/paginated")
     public ResponseEntity<Flux<BillResponseDTO>> getAllBillsByPage(
             @RequestParam Optional<Integer> page,
