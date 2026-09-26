@@ -1,7 +1,7 @@
 package com.petclinic.billing.domainclientlayer;
 
-import com.petclinic.billing.datalayer.VetResponseDTO;
-import com.petclinic.billing.exceptions.NotFoundException;
+import com.petclinic.billing.domainclientlayer.models.VetResponseModel;
+import com.petclinic.billing.exceptionshandling.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -11,17 +11,17 @@ import reactor.core.publisher.Mono;
 import java.rmi.ServerException;
 
 @Service
-public class VetClient {
+public class VetServiceClient {
     private final WebClient webClient;
     private final String vetClientServiceBaseURL;
-    VetClient(@Value("${app.vet-service.host}") String vetServiceHost,
-              @Value("${app.vet-service.port}") String vetServicePort) {
+    VetServiceClient(@Value("${app.vet-service.host}") String vetServiceHost,
+                     @Value("${app.vet-service.port}") String vetServicePort) {
         vetClientServiceBaseURL = "http://" + vetServiceHost + ":" + vetServicePort + "/vets";
         this.webClient = WebClient.builder()
                 .baseUrl(vetClientServiceBaseURL)
                 .build();
     }
-    public Mono<VetResponseDTO> getVetByVetId(final String vetId) {
+    public Mono<VetResponseModel> getVetByVetId(final String vetId) {
         return this.webClient
                 .get()
                 .uri("/{vetId}", vetId)
@@ -36,6 +36,6 @@ public class VetClient {
                 .onStatus(HttpStatus::is5xxServerError, serverResponse ->
                         Mono.error(new ServerException("Server error for vetId: " + vetId))
                 )
-                .bodyToMono(VetResponseDTO.class);
+                .bodyToMono(VetResponseModel.class);
     }
 }

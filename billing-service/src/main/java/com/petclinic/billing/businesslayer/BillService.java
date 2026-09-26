@@ -1,7 +1,10 @@
 package com.petclinic.billing.businesslayer;
 
 import java.math.BigDecimal;
-import com.petclinic.billing.datalayer.*;
+import com.petclinic.billing.dataaccesslayer.*;
+import com.petclinic.billing.presentationlayer.models.BillRequestModel;
+import com.petclinic.billing.presentationlayer.models.BillResponseModel;
+import com.petclinic.billing.presentationlayer.models.PaymentRequestModel;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -9,54 +12,53 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.time.LocalDate;
 public interface BillService {
-    Mono<BillResponseDTO> getBillByBillId(String billId);
+    Mono<BillResponseModel> getBillByBillId(String billId);
 
-    Flux<BillResponseDTO> getAllBillsByStatus(BillStatus status);
+    Flux<BillResponseModel> getAllBillsByStatus(BillStatus status);
 
     Mono<Bill>CreateBillForDB(Mono<Bill> bill);
 
-    Flux<BillResponseDTO> getAllBills();
+    Flux<BillResponseModel> getAllBills();
 
-    Flux<BillResponseDTO> getAllBillsByPage(Pageable pageable,
-                                            String billId,
-                                            String customerId,
-                                            String ownerFirstName,
-                                            String ownerLastName,
-                                            String visitType,
-                                            String vetId,
-                                            String vetFirstName,
-                                            String vetLastName);
+    Flux<BillResponseModel> getAllBillsByPage(Pageable pageable,
+                                              String billId,
+                                              String customerId,
+                                              String customerFirstName,
+                                              String customerLastName,
+                                              String visitType,
+                                              String vetId,
+                                              String vetFirstName,
+                                              String vetLastName);
 
     Mono<Long> getNumberOfBillsWithFilters(String billId,
                                            String customerId,
-                                           String ownerFirstName,
-                                           String ownerLastName,
+                                           String customerFirstName,
+                                           String customerLastName,
                                            String visitType,
                                            String vetId,
                                            String vetFirstName,
                                            String vetLastName);
 
-    Flux<BillResponseDTO> getAllBillsByOwnerName(String ownerFirstName, String ownerLastName);
+    Flux<BillResponseModel> getAllBillsByCustomerName(String customerFirstName, String customerLastName);
 
-    Flux<BillResponseDTO> getAllBillsByVetName(String vetFirstName, String vetLastName);
+    Flux<BillResponseModel> getAllBillsByVetName(String vetFirstName, String vetLastName);
 
-    Flux<BillResponseDTO> getAllBillsByVisitType(String visitType);
+    Flux<BillResponseModel> getAllBillsByVisitType(String visitType);
 
-    Mono<BillResponseDTO> createBill(@RequestBody Mono<BillRequestDTO> model, boolean sendEmail, String currency, String jwtToken);
+    Mono<BillResponseModel> createBill(@RequestBody Mono<BillRequestModel> model, boolean sendEmail, String currency, String jwtToken);
 
     Mono<Void> deleteBill(@RequestParam(value = "billId", required = true) String billId);
 
-    Flux<BillResponseDTO> getBillsByVetId(@RequestParam(value = "vetId", required = true) String vetId);
+    Flux<BillResponseModel> getBillsByVetId(@RequestParam(value = "vetId", required = true) String vetId);
 
     Flux<Void> deleteBillsByVetId(@RequestParam(value="vetId", required = true) String vetId);
     Flux<Void> deleteBillsByCustomerId(@RequestParam(value="customerId", required = true)String customerId);
 
-    Mono<BillResponseDTO> updateBill(String billId, Mono<BillRequestDTO> billRequestDTO);
+    Mono<BillResponseModel> updateBill(String billId, Mono<BillRequestModel> billRequestDTO);
 
     Mono<Void> deleteAllBills();
 
-
-    Mono<Void> setInterestExempt(String billId, boolean exempt);
+    Mono<Void> setInterestExempt(String billId, boolean isExempt);
 
     Mono<BigDecimal> getInterest(String billId, BigDecimal amount, int overdueMonths);
 
@@ -65,7 +67,7 @@ public interface BillService {
     Flux<Bill> archiveBill();
 
     // Method to fetch bills by month
-    Flux<BillResponseDTO> getBillsByMonth(int year, int month);
+    Flux<BillResponseModel> getBillsByMonth(int year, int month);
 
     // Method to check and update bills that are past due date from UNPAID to OVERDUE
     Mono<Void> updateOverdueBills();
@@ -73,29 +75,29 @@ public interface BillService {
 
 ///////////////// Used by both BillController and CustomerBillsController /////////////////////
 
-    Flux<BillResponseDTO> getBillsByCustomerId(@RequestParam(value = "customerId", required = true) String customerId);
+    Flux<BillResponseModel> getBillsByCustomerId(@RequestParam(value = "customerId", required = true) String customerId);
 
 
 //////////////// Used by CustomerBillsController only ///////////////////////////////////////////
 
     // Fetch a specific bill for a customer
-    Mono<BillResponseDTO> getBillByCustomerIdAndBillId(String customerId, String billId);
+    Mono<BillResponseModel> getBillByCustomerIdAndBillId(String customerId, String billId);
 
     // Fetch filtered bills by status
-    Flux<BillResponseDTO> getBillsByCustomerIdAndStatus(String customerId, BillStatus status);
+    Flux<BillResponseModel> getBillsByCustomerIdAndStatus(String customerId, BillStatus status);
 
     // Method to generate the bill PDF
     Mono<byte[]> generateBillPdf(String customerId, String billId, String currency);
 
     Mono<BigDecimal> calculateCurrentBalance(String customerId);
 
-    Mono<BillResponseDTO> processPayment(String customerId, String billId, PaymentRequestDTO paymentRequestDTO, String jwtToken);
+    Mono<BillResponseModel> processPayment(String customerId, String billId, PaymentRequestModel paymentRequestModel, String jwtToken);
 
-    Flux<BillResponseDTO> getBillsByAmountRange(String customerId, BigDecimal minAmount, BigDecimal maxAmount);
+    Flux<BillResponseModel> getBillsByAmountRange(String customerId, BigDecimal minAmount, BigDecimal maxAmount);
 
-    Flux<BillResponseDTO> getBillsByDueDateRange(String customerId, LocalDate startDate, LocalDate endDate);
+    Flux<BillResponseModel> getBillsByDueDateRange(String customerId, LocalDate startDate, LocalDate endDate);
 
-    Flux<BillResponseDTO> getBillsByCustomerIdAndDateRange(String customerId, LocalDate startDate, LocalDate endDate);
+    Flux<BillResponseModel> getBillsByCustomerIdAndDateRange(String customerId, LocalDate startDate, LocalDate endDate);
 
      Mono<byte[]> generateStaffBillPdf(String billId, String currency);
 

@@ -1,7 +1,7 @@
 package com.petclinic.billing.util;
 
-import com.petclinic.billing.datalayer.Bill;
-import com.petclinic.billing.datalayer.BillStatus;
+import com.petclinic.billing.dataaccesslayer.Bill;
+import com.petclinic.billing.dataaccesslayer.BillStatus;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

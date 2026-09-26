@@ -2,8 +2,8 @@ package com.petclinic.billing.util;
 
 
 import com.petclinic.billing.businesslayer.BillService;
-import com.petclinic.billing.datalayer.Bill;
-import com.petclinic.billing.datalayer.BillStatus;
+import com.petclinic.billing.dataaccesslayer.Bill;
+import com.petclinic.billing.dataaccesslayer.BillStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
@@ -43,8 +43,8 @@ public class DataSetupService implements CommandLineRunner {
         Bill b1 = Bill.builder()
                 .billId(UUID.randomUUID().toString())
                 .customerId("f470653d-05c5-4c45-b7a0-7d70f003d2ac")
-                .ownerFirstName("George")
-                .ownerLastName("Franklin")
+                .customerFirstName("George")
+                .customerLastName("Franklin")
                 .visitType("Regular")
                 .vetId("1")
                 .vetFirstName("John")
@@ -55,14 +55,14 @@ public class DataSetupService implements CommandLineRunner {
                 .interest(BigDecimal.ZERO)
                 .billStatus(BillStatus.OVERDUE)
                 .dueDate(LocalDate.of(2024, 3, 31))
-                .archive(false)
+                .isArchived(false)
                 .build();
 
         Bill b2 = Bill.builder()
                 .billId(UUID.randomUUID().toString())
                 .customerId("f470653d-05c5-4c45-b7a0-7d70f003d2ac")
-                .ownerFirstName("Harold")
-                .ownerLastName("Davis")
+                .customerFirstName("Harold")
+                .customerLastName("Davis")
                 .visitType("Regular")
                 .vetId("1")
                 .vetFirstName("John")
@@ -73,14 +73,14 @@ public class DataSetupService implements CommandLineRunner {
                 .interest(BigDecimal.ZERO)
                 .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.of(2024, 4, 30))
-                .archive(false)
+                .isArchived(false)
                 .build();
 
         Bill b3 = Bill.builder()
                 .billId(UUID.randomUUID().toString())
                 .customerId("f470653d-05c5-4c45-b7a0-7d70f003d2ac")
-                .ownerFirstName("George")
-                .ownerLastName("Franklin")
+                .customerFirstName("George")
+                .customerLastName("Franklin")
                 .visitType("Regular")
                 .vetId("1")
                 .vetFirstName("John")
@@ -91,14 +91,14 @@ public class DataSetupService implements CommandLineRunner {
                 .interest(BigDecimal.ZERO)
                 .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.of(2024, 5, 31))
-                .archive(false)
+                .isArchived(false)
                 .build();
 
         Bill b4 = Bill.builder()
                 .billId(UUID.randomUUID().toString())
                 .customerId("f470653d-05c5-4c45-b7a0-7d70f003d2ac")
-                .ownerFirstName("Carlos")
-                .ownerLastName("Esteban")
+                .customerFirstName("Carlos")
+                .customerLastName("Esteban")
                 .visitType("Regular")
                 .vetId("2")
                 .vetFirstName("Linda")
@@ -109,14 +109,14 @@ public class DataSetupService implements CommandLineRunner {
                 .interest(BigDecimal.ZERO)
                 .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.of(2024, 6, 30))
-                .archive(false)
+                .isArchived(false)
                 .build();
 
         Bill b5 = Bill.builder()
                 .billId(UUID.randomUUID().toString())
                 .customerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
-                .ownerFirstName("Betty")
-                .ownerLastName("Davis")
+                .customerFirstName("Betty")
+                .customerLastName("Davis")
                 .visitType("Regular")
                 .vetId("2")
                 .vetFirstName("Linda")
@@ -127,14 +127,14 @@ public class DataSetupService implements CommandLineRunner {
                 .interest(BigDecimal.ZERO)
                 .billStatus(BillStatus.UNPAID)
                 .dueDate(LocalDate.of(2024, 11, 30))
-                .archive(false)
+                .isArchived(false)
                 .build();
 
         Bill b6 = Bill.builder()
                 .billId(UUID.randomUUID().toString())
                 .customerId("3f59dca2-903e-495c-90c3-7f4d01f3a2aa")
-                .ownerFirstName("Jean")
-                .ownerLastName("Coleman")
+                .customerFirstName("Jean")
+                .customerLastName("Coleman")
                 .visitType("Regular")
                 .vetId("3")
                 .vetFirstName("John")
@@ -145,14 +145,14 @@ public class DataSetupService implements CommandLineRunner {
                 .interest(BigDecimal.ZERO)
                 .billStatus(BillStatus.UNPAID)
                 .dueDate(LocalDate.of(2024, 8, 30))
-                .archive(false)
+                .isArchived(false)
                 .build();
 
         Bill b7 = Bill.builder()
                 .billId(UUID.randomUUID().toString())
                 .customerId("3f59dca2-903e-495c-90c3-7f4d01f3a2aa")
-                .ownerFirstName("Edurado")
-                .ownerLastName("Rodriguez")
+                .customerFirstName("Edurado")
+                .customerLastName("Rodriguez")
                 .visitType("Regular")
                 .vetId("4")
                 .vetFirstName("Henry")
@@ -163,14 +163,14 @@ public class DataSetupService implements CommandLineRunner {
                 .interest(BigDecimal.ZERO)
                 .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.of(2024, 9, 30))
-                .archive(false)
+                .isArchived(false)
                 .build();
 
         Bill b8 = Bill.builder()
                 .billId(UUID.randomUUID().toString())
                 .customerId("a6e0e5b0-5f60-45f0-8ac7-becd8b330486")
-                .ownerFirstName("Harold")
-                .ownerLastName("Davis")
+                .customerFirstName("Harold")
+                .customerLastName("Davis")
                 .visitType("Regular")
                 .vetId("5")
                 .vetFirstName("Sharon")
@@ -181,14 +181,14 @@ public class DataSetupService implements CommandLineRunner {
                 .interest(BigDecimal.ZERO)
                 .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.of(2024, 4, 30))
-                .archive(false)
+                .isArchived(false)
                 .build();
 
         Bill b9 = Bill.builder()
                 .billId(UUID.randomUUID().toString())
                 .customerId("a6e0e5b0-5f60-45f0-8ac7-becd8b330486")
-                .ownerFirstName("Harold")
-                .ownerLastName("Davis")
+                .customerFirstName("Harold")
+                .customerLastName("Davis")
                 .visitType("Emergency")
                 .vetId("5")
                 .vetFirstName("Sharon")
@@ -199,14 +199,14 @@ public class DataSetupService implements CommandLineRunner {
                 .interest(BigDecimal.ZERO)
                 .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.of(2024, 5, 31))
-                .archive(false)
+                .isArchived(false)
                 .build();
 
         Bill b10 = Bill.builder()
                 .billId(UUID.randomUUID().toString())
                 .customerId("c6a0fb9d-fc6f-4c21-95fc-4f5e7311d0e2")
-                .ownerFirstName("Peter")
-                .ownerLastName("McTavish")
+                .customerFirstName("Peter")
+                .customerLastName("McTavish")
                 .visitType("Regular")
                 .vetId("5")
                 .vetFirstName("Helen")
@@ -217,14 +217,14 @@ public class DataSetupService implements CommandLineRunner {
                 .interest(BigDecimal.ZERO)
                 .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.of(2024, 6, 30))
-                .archive(false)
+                .isArchived(false)
                 .build();
 
         Bill b11 = Bill.builder()
                 .billId(UUID.randomUUID().toString())
                 .customerId("b3d09eab-4085-4b2d-a121-78a0a2f9e501")
-                .ownerFirstName("Jean")
-                .ownerLastName("Black")
+                .customerFirstName("Jean")
+                .customerLastName("Black")
                 .visitType("Emergency")
                 .vetId("5")
                 .vetFirstName("Henry")
@@ -235,14 +235,14 @@ public class DataSetupService implements CommandLineRunner {
                 .interest(BigDecimal.ZERO)
                 .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.of(2024, 8, 30))
-                .archive(false)
+                .isArchived(false)
                 .build();
 
         Bill b12 = Bill.builder()
                 .billId(UUID.randomUUID().toString())
                 .customerId("5fe81e29-1f1d-4f9d-b249-8d3e0cc0b7dd")
-                .ownerFirstName("Jeff")
-                .ownerLastName("Black")
+                .customerFirstName("Jeff")
+                .customerLastName("Black")
                 .visitType("Regular")
                 .vetId("2")
                 .vetFirstName("Rafael")
@@ -253,14 +253,14 @@ public class DataSetupService implements CommandLineRunner {
                 .interest(BigDecimal.ZERO)
                 .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.of(2024, 8, 30))
-                .archive(false)
+                .isArchived(false)
                 .build();
 
         Bill b13 = Bill.builder()
                 .billId(UUID.randomUUID().toString())
                 .customerId("48f9945a-4ee0-4b0b-9b44-3da829a0f0f7")
-                .ownerFirstName("Maria")
-                .ownerLastName("Escobito")
+                .customerFirstName("Maria")
+                .customerLastName("Escobito")
                 .visitType("Regular")
                 .vetId("2")
                 .vetFirstName("James")
@@ -271,14 +271,14 @@ public class DataSetupService implements CommandLineRunner {
                 .interest(BigDecimal.ZERO)
                 .billStatus(BillStatus.UNPAID)
                 .dueDate(LocalDate.of(2024, 11, 30))
-                .archive(false)
+                .isArchived(false)
                 .build();
 
         Bill b14 = Bill.builder()
                 .billId(UUID.randomUUID().toString())
                 .customerId("9f6accd1-e943-4322-932e-199d93824317")
-                .ownerFirstName("David")
-                .ownerLastName("Schroeder")
+                .customerFirstName("David")
+                .customerLastName("Schroeder")
                 .visitType("Regular")
                 .vetId("2")
                 .vetFirstName("James")
@@ -289,14 +289,14 @@ public class DataSetupService implements CommandLineRunner {
                 .interest(BigDecimal.ZERO)
                 .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.of(2024, 4, 30))
-                .archive(false)
+                .isArchived(false)
                 .build();
 
         Bill b15 = Bill.builder()
                 .billId(UUID.randomUUID().toString())
                 .customerId("7c0d42c2-0c2d-41ce-bd9c-6ca67478956f")
-                .ownerFirstName("Carlos")
-                .ownerLastName("Esteban")
+                .customerFirstName("Carlos")
+                .customerLastName("Esteban")
                 .visitType("Regular")
                 .vetId("2")
                 .vetFirstName("James")
@@ -307,7 +307,7 @@ public class DataSetupService implements CommandLineRunner {
                 .interest(BigDecimal.ZERO)
                 .billStatus(BillStatus.UNPAID)
                 .dueDate(LocalDate.of(2024, 11, 30))
-                .archive(false)
+                .isArchived(false)
                 .build();
 
         Flux.just(b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12, b13, b14, b15)

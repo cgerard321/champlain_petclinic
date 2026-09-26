@@ -694,7 +694,7 @@ public class BillsControllerUnitTest {
 
         // Act & Assert
         webTestClient.get()
-                .uri(baseBillURL + "/bills-count")
+                .uri(baseBillURL + "/count")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -713,11 +713,11 @@ public class BillsControllerUnitTest {
 
         // Act & Assert
         webTestClient.get()
-                .uri(uriBuilder -> uriBuilder.path(baseBillURL + "/bills-filtered-count")
+                .uri(uriBuilder -> uriBuilder.path(baseBillURL + "/filtered-count")
                         .queryParam("billId", "1")
                         .queryParam("customerId", "123")
-                        .queryParam("ownerFirstName", "John")
-                        .queryParam("ownerLastName", "Doe")
+                        .queryParam("customerFirstName", "John")
+                        .queryParam("customerLastName", "Doe")
                         .queryParam("visitType", "Checkup")
                         .queryParam("vetId", "456")
                         .queryParam("vetFirstName", "Jane")

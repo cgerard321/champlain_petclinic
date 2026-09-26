@@ -1,12 +1,15 @@
 package com.petclinic.billing.presentationlayer;
 
-import com.petclinic.billing.datalayer.*;
+import com.petclinic.billing.dataaccesslayer.*;
 
-import com.petclinic.billing.domainclientlayer.OwnerClient;
+import com.petclinic.billing.domainclientlayer.CustomerServiceClient;
 import com.petclinic.billing.domainclientlayer.Auth.AuthServiceClient;
 import com.petclinic.billing.domainclientlayer.Auth.UserDetails;
+import com.petclinic.billing.domainclientlayer.models.CustomerResponseModel;
 import com.petclinic.billing.domainclientlayer.Mailing.Mail;
 import com.petclinic.billing.domainclientlayer.Mailing.MailService;
+import com.petclinic.billing.presentationlayer.models.BillResponseModel;
+import com.petclinic.billing.presentationlayer.models.PaymentRequestModel;
 import com.petclinic.billing.util.InterestCalculationUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,7 +50,7 @@ public class CustomerBillsControllerIntegrationTest {
         private WebTestClient client;
 
         @MockBean
-        private OwnerClient ownerClient;
+        private CustomerServiceClient customerServiceClient;
 
 
         @Autowired
@@ -74,18 +77,18 @@ public class CustomerBillsControllerIntegrationTest {
     @Test
     void getBillsByCustomerId_shouldSucceed() {
         Bill bill = buildBill();
-        bill.setOwnerFirstName("John");   // <-- set this
-        bill.setOwnerLastName("Doe");     // <-- set this
+        bill.setCustomerFirstName("John");   // <-- set this
+        bill.setCustomerLastName("Doe");     // <-- set this
 
         Publisher<Bill> setup = billRepository.deleteAll().thenMany(billRepository.save(bill));
 
-        OwnerResponseDTO owner = new OwnerResponseDTO();
-        owner.setOwnerId(bill.getCustomerId());
-        owner.setFirstName("John");
-        owner.setLastName("Doe");
+        CustomerResponseModel customer = new CustomerResponseModel();
+        customer.setCustomerId(bill.getCustomerId());
+        customer.setFirstName("John");
+        customer.setLastName("Doe");
 
-        when(ownerClient.getOwnerByOwnerId(bill.getCustomerId()))
-                .thenReturn(Mono.just(owner));
+        when(customerServiceClient.getCustomerByCustomerId(bill.getCustomerId()))
+                .thenReturn(Mono.just(customer));
 
         StepVerifier.create(setup)
                 .expectNextCount(1)
@@ -175,7 +178,7 @@ public class CustomerBillsControllerIntegrationTest {
 
         billRepository.deleteAll().then(billRepository.save(bill)).block();
 
-        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/25");
+        PaymentRequestModel paymentRequest = new PaymentRequestModel("1234567812345678", "123", "12/25");
 
         client.post()
                 .uri("/bills/customer/{customerId}/bills/{billId}/pay", bill.getCustomerId(), bill.getBillId())
@@ -184,7 +187,7 @@ public class CustomerBillsControllerIntegrationTest {
                 .bodyValue(paymentRequest)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(BillResponseDTO.class)
+                .expectBody(BillResponseModel.class)
                 .consumeWith(response -> {
                     assert response.getResponseBody() != null;
                     assertEquals(BillStatus.PAID, response.getResponseBody().getBillStatus());
@@ -196,7 +199,7 @@ public class CustomerBillsControllerIntegrationTest {
 
     @Test
     void payBill_NonExistentBill_ShouldReturnNotFound() {
-        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/25");
+        PaymentRequestModel paymentRequest = new PaymentRequestModel("1234567812345678", "123", "12/25");
 
         client.post()
                 .uri("/bills/customer/{customerId}/bills/{billId}/pay", "cust-404", "bill-404")
@@ -217,7 +220,7 @@ public class CustomerBillsControllerIntegrationTest {
                                 .amount(new BigDecimal(150.0))
                                 .billStatus(BillStatus.UNPAID)
                                 .dueDate(LocalDate.now().plusDays(20))
-                                .archive(false)
+                                .isArchived(false)
                                 .build();
         }
 
@@ -228,14 +231,14 @@ public class CustomerBillsControllerIntegrationTest {
                 return Bill.builder()
                                 .billId("1")
                                 .customerId("custId")
-                                .ownerFirstName("John")
-                                .ownerLastName("Doe")
+                                .customerFirstName("John")
+                                .customerLastName("Doe")
                                 .vetId("vetId")
                                 .visitType("surgery")
                                 .date(date)
                                 .amount(new BigDecimal("150.00"))
                                 .billStatus(BillStatus.UNPAID)
-                                .archive(false)
+                                .isArchived(false)
                                 .build();
         }
 
@@ -326,15 +329,15 @@ public class CustomerBillsControllerIntegrationTest {
         return Bill.builder()
                 .billId("staffBill-1")
                 .customerId("custId")
-                .ownerFirstName("John")
-                .ownerLastName("Doe")
+                .customerFirstName("John")
+                .customerLastName("Doe")
                 .vetId("vetId")
                 .visitType("surgery")
                 .date(date)
                 .dueDate(date.plusDays(15))
                 .amount(new BigDecimal("150.00"))
                 .billStatus(BillStatus.UNPAID)
-                .archive(false)
+                .isArchived(false)
                 .build();
     }
 

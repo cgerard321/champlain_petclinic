@@ -75,7 +75,7 @@ public class BillServiceClient {
 //    }
 
 //    public Flux<BillResponseDTO> getAllBillsByPage(Optional<Integer> page, Optional<Integer> size, String billId, String customerId,
-//                                                    String ownerFirstName, String ownerLastName, String visitType,
+//                                                    String customerFirstName, String customerLastName, String visitType,
 //                                                    String vetId, String vetFirstName, String vetLastName) {
 //
 //        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(billServiceUrl + "/bills-pagination");
@@ -90,11 +90,11 @@ public class BillServiceClient {
 //        if (customerId != null && !customerId.isEmpty()) {
 //            builder.queryParam("customerId", customerId);
 //        }
-//        if (ownerFirstName != null && !ownerFirstName.isEmpty()) {
-//            builder.queryParam("ownerFirstName", ownerFirstName);
+//        if (customerFirstName != null && !customerFirstName.isEmpty()) {
+//            builder.queryParam("customerFirstName", customerFirstName);
 //        }
-//        if (ownerLastName != null && !ownerLastName.isEmpty()) {
-//            builder.queryParam("ownerLastName", ownerLastName);
+//        if (customerLastName != null && !customerLastName.isEmpty()) {
+//            builder.queryParam("customerLastName", customerLastName);
 //        }
 //        if (visitType != null && !visitType.isEmpty()) {
 //            builder.queryParam("visitType", visitType);
@@ -120,15 +120,15 @@ public class BillServiceClient {
     //to be changed
     public Mono<Long> getTotalNumberOfBills() {
         return webClientBuilder.build().get()
-                .uri(billServiceUrl + "/bills-count")
+                .uri(billServiceUrl + "/count")
                 .retrieve()
                 .bodyToMono(Long.class);
     }
 
     public Mono<Long> getTotalNumberOfBillsWithFilters(String billId, String customerId,
-                                                       String ownerFirstName, String ownerLastName, String visitType,
+                                                       String customerFirstName, String customerLastName, String visitType,
                                                        String vetId, String vetFirstName, String vetLastName){
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(billServiceUrl + "/bills-filtered-count");
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(billServiceUrl + "/filtered-count");
 
         // Add query parameters conditionally if they are not null or empty
         if (billId != null && !billId.isEmpty()) {
@@ -137,11 +137,11 @@ public class BillServiceClient {
         if (customerId != null && !customerId.isEmpty()) {
             builder.queryParam("customerId", customerId);
         }
-        if (ownerFirstName != null && !ownerFirstName.isEmpty()) {
-            builder.queryParam("ownerFirstName", ownerFirstName);
+        if (customerFirstName != null && !customerFirstName.isEmpty()) {
+            builder.queryParam("customerFirstName", customerFirstName);
         }
-        if (ownerLastName != null && !ownerLastName.isEmpty()) {
-            builder.queryParam("ownerLastName", ownerLastName);
+        if (customerLastName != null && !customerLastName.isEmpty()) {
+            builder.queryParam("customerLastName", customerLastName);
         }
         if (visitType != null && !visitType.isEmpty()) {
             builder.queryParam("visitType", visitType);
@@ -184,12 +184,12 @@ public class BillServiceClient {
                 .bodyToFlux(BillResponseDTO.class);
     }
 
-    public Flux<BillResponseDTO> getBillsByOwnerName(final String ownerFirstName, final String ownerLastName) {
+    public Flux<BillResponseDTO> getBillsByOwnerName(final String customerFirstName, final String customerLastName) {
         return webClientBuilder.build().get()
-                .uri(billServiceUrl + "/owner/{ownerFirstName}/{ownerLastName}", ownerFirstName, ownerLastName)
+                .uri(billServiceUrl + "/owner/{customerFirstName}/{customerLastName}", customerFirstName, customerLastName)
                 .retrieve()
                 .bodyToFlux(BillResponseDTO.class)
-                .switchIfEmpty(Flux.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "No bills found for owner: " + ownerFirstName + " " + ownerLastName)));
+                .switchIfEmpty(Flux.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "No bills found for owner: " + customerFirstName + " " + customerLastName)));
     }
 
     public Flux<BillResponseDTO> getBillsByVetName(final String vetFirstName, final String vetLastName) {
@@ -276,7 +276,7 @@ public class BillServiceClient {
 
 //    public Flux<BillResponseDTO> getAllBillsByPage(Optional<Integer> page, Optional<Integer> size,
 //                                                   String billId, String customerId,
-//                                                   String ownerFirstName, String ownerLastName,
+//                                                   String customerFirstName, String customerLastName,
 //                                                   String visitType, String vetId,
 //                                                   String vetFirstName, String vetLastName) {
 //        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(billServiceUrl + "/bills-pagination");
@@ -286,8 +286,8 @@ public class BillServiceClient {
 //
 //        if (billId != null && !billId.isEmpty()) builder.queryParam("billId", billId);
 //        if (customerId != null && !customerId.isEmpty()) builder.queryParam("customerId", customerId);
-//        if (ownerFirstName != null && !ownerFirstName.isEmpty()) builder.queryParam("ownerFirstName", ownerFirstName);
-//        if (ownerLastName != null && !ownerLastName.isEmpty()) builder.queryParam("ownerLastName", ownerLastName);
+//        if (customerFirstName != null && !customerFirstName.isEmpty()) builder.queryParam("customerFirstName", customerFirstName);
+//        if (customerLastName != null && !customerLastName.isEmpty()) builder.queryParam("customerLastName", customerLastName);
 //        if (visitType != null && !visitType.isEmpty()) builder.queryParam("visitType", visitType);
 //        if (vetId != null && !vetId.isEmpty()) builder.queryParam("vetId", vetId);
 //        if (vetFirstName != null && !vetFirstName.isEmpty()) builder.queryParam("vetFirstName", vetFirstName);
@@ -302,7 +302,7 @@ public class BillServiceClient {
 
     public Flux<BillResponseDTO> getAllBillsByPage(Optional<Integer> page, Optional<Integer> size,
                                                    String billId, String customerId,
-                                                   String ownerFirstName, String ownerLastName,
+                                                   String customerFirstName, String customerLastName,
                                                    String visitType, String vetId,
                                                    String vetFirstName, String vetLastName) {
 
@@ -311,8 +311,8 @@ public class BillServiceClient {
                 .queryParam("size", size.orElse(10))
                 .queryParamIfPresent("billId", Optional.ofNullable(billId))
                 .queryParamIfPresent("customerId", Optional.ofNullable(customerId))
-                .queryParamIfPresent("ownerFirstName", Optional.ofNullable(ownerFirstName))
-                .queryParamIfPresent("ownerLastName", Optional.ofNullable(ownerLastName))
+                .queryParamIfPresent("customerFirstName", Optional.ofNullable(customerFirstName))
+                .queryParamIfPresent("customerLastName", Optional.ofNullable(customerLastName))
                 .queryParamIfPresent("visitType", Optional.ofNullable(visitType))
                 .queryParamIfPresent("vetId", Optional.ofNullable(vetId))
                 .queryParamIfPresent("vetFirstName", Optional.ofNullable(vetFirstName))
@@ -509,6 +509,4 @@ public class BillServiceClient {
                 .doOnSuccess(pdf -> log.info("Staff bill PDF retrieved for billId: {}", billId))
                 .doOnError(e -> log.error("Failed to retrieve staff PDF for billId: {}", billId, e));
     }
-
-
 }

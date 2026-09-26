@@ -1,24 +1,21 @@
-package com.petclinic.billing.datalayer;
+package com.petclinic.billing.presentationlayer.models;
 
+import com.petclinic.billing.dataaccesslayer.BillStatus;
 import lombok.*;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Field;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
-@Getter
+@ToString
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class Bill {
+@AllArgsConstructor
+public class BillResponseModel {
 
-    @Id
-    private String id;
     private String billId;
     private String customerId;
-    private String ownerFirstName;
-    private String ownerLastName;
+    private String customerFirstName;
+    private String customerLastName;
     private String visitType;
     private String vetId;
     private String vetFirstName;
@@ -29,8 +26,7 @@ public class Bill {
     private BigDecimal interest;
     private BillStatus billStatus;
     private LocalDate dueDate;
-    @Builder.Default
-    private boolean interestExempt = false;
-    @Field("archive")
-    private Boolean archive = false;
+    private Long timeRemaining;
+    private Boolean archive;
+    private boolean isInterestExempt;
 }

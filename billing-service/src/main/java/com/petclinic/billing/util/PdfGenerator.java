@@ -2,13 +2,11 @@ package com.petclinic.billing.util;
 
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
-import com.petclinic.billing.datalayer.BillResponseDTO;
+import com.petclinic.billing.presentationlayer.models.BillResponseModel;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
-import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
-import java.util.Locale;
 import java.util.Optional;
 
 import static com.petclinic.billing.util.FormatBillUtil.convertFromCad;
@@ -16,7 +14,7 @@ import static com.petclinic.billing.util.FormatBillUtil.formatCurrency;
 
 public class PdfGenerator {
 
-    public static byte[] generateBillPdf(BillResponseDTO bill, String currency) throws DocumentException {
+    public static byte[] generateBillPdf(BillResponseModel bill, String currency) throws DocumentException {
         Document document = new Document(PageSize.A4, 50, 50, 50, 50);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         PdfWriter.getInstance(document, byteArrayOutputStream);
@@ -55,8 +53,8 @@ public class PdfGenerator {
         partyTable.setWidthPercentage(100);
         partyTable.setSpacingAfter(15);
 
-        String ownerName = (Optional.ofNullable(bill.getOwnerFirstName()).orElse("") + " "
-                + Optional.ofNullable(bill.getOwnerLastName()).orElse("")).trim();
+        String ownerName = (Optional.ofNullable(bill.getCustomerFirstName()).orElse("") + " "
+                + Optional.ofNullable(bill.getCustomerLastName()).orElse("")).trim();
 
         addMetaCell(partyTable, "Owner:", (ownerName.isEmpty() ? "N/A" : ownerName));
         addMetaCell(partyTable, "Vet:", Optional.ofNullable(bill.getVetFirstName()).orElse("") + " "

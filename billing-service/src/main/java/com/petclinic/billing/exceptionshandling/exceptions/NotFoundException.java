@@ -1,4 +1,4 @@
-package com.petclinic.billing.exceptions;
+package com.petclinic.billing.exceptionshandling.exceptions;
 
 import org.springframework.web.bind.annotation.ResponseStatus;
 

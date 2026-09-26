@@ -1,5 +1,6 @@
 package com.petclinic.billing.exceptions;
 
+import com.petclinic.billing.exceptionshandling.exceptions.InvalidInputException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -69,13 +69,13 @@ angular.module('billHistory')
             vm.totalPages = 1;
 
             vm.baseURL = "api/gateway/bills/bills-pagination";
-            vm.baseURLforTotalNumberOfBillsByFiltering = "api/gateway/bills/bills-filtered-count";
+            vm.baseURLforTotalNumberOfBillsByFiltering = "api/gateway/bills/filtered-count";
             vm.searchActive = false;
 
             loadDefaultData();
 
             function loadTotalItemForDefaultData() {
-                return $http.get('api/gateway/bills/bills-count')
+                return $http.get('api/gateway/bills/count')
                     .then(function (resp) { return resp.data; });
             }
             function loadDefaultData() {

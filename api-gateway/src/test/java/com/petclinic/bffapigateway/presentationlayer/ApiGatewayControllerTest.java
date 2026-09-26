@@ -32,19 +32,13 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.codec.multipart.FilePart;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.webjars.NotFoundException;
@@ -1160,8 +1154,8 @@ class ApiGatewayControllerTest {
 
         BillResponseDTO bill = new BillResponseDTO();
         bill.setBillId("1");
-        bill.setOwnerFirstName(ownerFirstName);
-        bill.setOwnerLastName(ownerLastName);
+        bill.setCustomerFirstName(ownerFirstName);
+        bill.setCustomerLastName(ownerLastName);
 
         when(billServiceClient.getBillsByOwnerName(ownerFirstName, ownerLastName))
                 .thenReturn(Flux.just(bill));

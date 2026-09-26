@@ -1,4 +1,4 @@
-package com.petclinic.billing.exceptions;
+package com.petclinic.billing.exceptionshandling.exceptions;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

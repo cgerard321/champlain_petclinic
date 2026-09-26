@@ -43,8 +43,8 @@ public class BillController {
             @RequestParam Optional<Integer> size,
             @RequestParam(required = false) String billId,
             @RequestParam(required = false) String customerId,
-            @RequestParam(required = false) String ownerFirstName,
-            @RequestParam(required = false) String ownerLastName,
+            @RequestParam(required = false) String customerFirstName,
+            @RequestParam(required = false) String customerLastName,
             @RequestParam(required = false) String visitType,
             @RequestParam(required = false) String vetId,
             @RequestParam(required = false) String vetFirstName,
@@ -57,8 +57,8 @@ public class BillController {
         if (size.isEmpty()) {
             size = Optional.of(10);
         }
-        return ResponseEntity.ok().body(billService.getAllBillsByPage(page, size, billId, customerId, ownerFirstName,
-                ownerLastName, visitType, vetId, vetFirstName, vetLastName));
+        return ResponseEntity.ok().body(billService.getAllBillsByPage(page, size, billId, customerId, customerFirstName,
+                customerLastName, visitType, vetId, vetFirstName, vetLastName));
     }
     
     @PutMapping(value = "/admin/{billId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -73,7 +73,6 @@ public class BillController {
 
     }
 
-
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "/admin/month", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getBillsByMonth(
@@ -85,19 +84,6 @@ public class BillController {
 
         return billService.getBillsByMonth(year, month);
     }
-
-    //moved to CustomerBillController
-//    @IsUserSpecific(idToMatch = {"customerId"})
-//    @PostMapping("/customer/{customerId}/bills/{billId}/pay")
-//    public Mono<ResponseEntity<String>> payBill(
-//            @PathVariable("customerId") String customerId,
-//            @PathVariable("billId") String billId,
-//            @RequestBody PaymentRequestDTO paymentRequestDTO) {
-//        return billService.payBill(customerId, billId, paymentRequestDTO)
-//                .map(response -> ResponseEntity.ok(response))
-//                .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().body("Payment failed: " + e.getMessage())));
-//    }
-
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "/admin/{billId}/interest")
     public Mono<ResponseEntity<Double>> getInterest(@PathVariable String billId) {

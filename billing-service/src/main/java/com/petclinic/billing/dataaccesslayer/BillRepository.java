@@ -1,4 +1,4 @@
-package com.petclinic.billing.datalayer;
+package com.petclinic.billing.dataaccesslayer;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.Query;
@@ -40,7 +40,7 @@ public interface BillRepository extends ReactiveMongoRepository<Bill, String> {
 
     Mono<Bill> findByCustomerIdAndBillId(String customerId, String billId);
 
-    Flux<Bill> findAllByArchiveFalse();
+    Flux<Bill> findAllByIsArchivedFalse();
 
     Flux<Bill> findAllByDateBefore(LocalDate date);
 

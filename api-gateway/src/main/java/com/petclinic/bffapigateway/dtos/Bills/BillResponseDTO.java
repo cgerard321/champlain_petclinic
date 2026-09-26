@@ -15,8 +15,8 @@ public class BillResponseDTO {
 
     private String billId;
     private String customerId;
-    private String ownerFirstName;
-    private String ownerLastName;
+    private String customerFirstName;
+    private String customerLastName;
     private String visitType;
     private String vetId;
     private String vetFirstName;
@@ -28,6 +28,6 @@ public class BillResponseDTO {
     private BillStatus billStatus;
     private LocalDate dueDate;
     private Long timeRemaining;
-    private boolean interestExempt;
+    private boolean isInterestExempt;
     private Boolean archive;
 }

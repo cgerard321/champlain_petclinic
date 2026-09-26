@@ -1,11 +1,12 @@
 package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.businesslayer.BillService;
-import com.petclinic.billing.datalayer.*;
+import com.petclinic.billing.dataaccesslayer.*;
 import com.petclinic.billing.domainclientlayer.Auth.AuthServiceClient;
 import com.petclinic.billing.domainclientlayer.Auth.Rethrower;
-import com.petclinic.billing.exceptions.InvalidPaymentException;
-import com.petclinic.billing.exceptions.NotFoundException;
+import com.petclinic.billing.exceptionshandling.exceptions.NotFoundException;
+import com.petclinic.billing.presentationlayer.models.BillRequestModel;
+import com.petclinic.billing.presentationlayer.models.BillResponseModel;
 import com.petclinic.billing.util.InterestCalculationUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -34,9 +35,9 @@ import java.util.List;
 @WebFluxTest(controllers = BillController.class)
 class BillControllerUnitTest {
 
-    private BillResponseDTO responseDTO = buildBillResponseDTO();
-    private BillResponseDTO unpaidResponseDTO = buildUnpaidBillResponseDTO();
-    private BillResponseDTO overdueResponseDTO = buildBillOverdueResponseDTO();
+    private BillResponseModel responseDTO = buildBillResponseDTO();
+    private BillResponseModel unpaidResponseDTO = buildUnpaidBillResponseDTO();
+    private BillResponseModel overdueResponseDTO = buildBillOverdueResponseDTO();
     private final String BILL_ID_OK = responseDTO.getBillId();
     private final String CUSTOMER_ID_OK = responseDTO.getCustomerId();
     private final String VET_ID_OK = responseDTO.getVetId();
@@ -82,10 +83,10 @@ class BillControllerUnitTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
-                .expectBodyList(BillResponseDTO.class)
+                .expectBodyList(BillResponseModel.class)
                 .consumeWith(response -> {
-                    List<BillResponseDTO> billResponseDTOS = response.getResponseBody();
-                    Assertions.assertNotNull(billResponseDTOS);
+                    List<BillResponseModel> billResponseModels = response.getResponseBody();
+                    Assertions.assertNotNull(billResponseModels);
                 });
         Mockito.verify(billService, times(1)).getAllBills();
     }
@@ -100,10 +101,10 @@ class BillControllerUnitTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
-                .expectBodyList(BillResponseDTO.class)
+                .expectBodyList(BillResponseModel.class)
                 .consumeWith(response -> {
-                    List<BillResponseDTO> billResponseDTOS = response.getResponseBody();
-                    Assertions.assertNotNull(billResponseDTOS);
+                    List<BillResponseModel> billResponseModels = response.getResponseBody();
+                    Assertions.assertNotNull(billResponseModels);
                 });
 
         Mockito.verify(billService, times(1)).getAllBillsByStatus(BillStatus.PAID);
@@ -119,10 +120,10 @@ class BillControllerUnitTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
-                .expectBodyList(BillResponseDTO.class)
+                .expectBodyList(BillResponseModel.class)
                 .consumeWith(response -> {
-                    List<BillResponseDTO> billResponseDTOS = response.getResponseBody();
-                    Assertions.assertNotNull(billResponseDTOS);
+                    List<BillResponseModel> billResponseModels = response.getResponseBody();
+                    Assertions.assertNotNull(billResponseModels);
                 });
 
         Mockito.verify(billService, times(1)).getAllBillsByStatus(BillStatus.UNPAID);
@@ -138,10 +139,10 @@ class BillControllerUnitTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
-                .expectBodyList(BillResponseDTO.class)
+                .expectBodyList(BillResponseModel.class)
                 .consumeWith(response -> {
-                    List<BillResponseDTO> billResponseDTOS = response.getResponseBody();
-                    Assertions.assertNotNull(billResponseDTOS);
+                    List<BillResponseModel> billResponseModels = response.getResponseBody();
+                    Assertions.assertNotNull(billResponseModels);
                 });
 
         Mockito.verify(billService, times(1)).getAllBillsByStatus(BillStatus.OVERDUE);
@@ -158,10 +159,10 @@ class BillControllerUnitTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
-                .expectBodyList(BillResponseDTO.class)
+                .expectBodyList(BillResponseModel.class)
                 .consumeWith(response -> {
-                    List<BillResponseDTO> billResponseDTOS = response.getResponseBody();
-                    Assertions.assertNotNull(billResponseDTOS);
+                    List<BillResponseModel> billResponseModels = response.getResponseBody();
+                    Assertions.assertNotNull(billResponseModels);
                 });
         Mockito.verify(billService, times(1)).getBillsByCustomerId(CUSTOMER_ID_OK);
     }
@@ -177,10 +178,10 @@ class BillControllerUnitTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
-                .expectBodyList(BillResponseDTO.class)
+                .expectBodyList(BillResponseModel.class)
                 .consumeWith(response -> {
-                    List<BillResponseDTO> billResponseDTOS = response.getResponseBody();
-                    Assertions.assertNotNull(billResponseDTOS);
+                    List<BillResponseModel> billResponseModels = response.getResponseBody();
+                    Assertions.assertNotNull(billResponseModels);
                 });
 
         Mockito.verify(billService, times(1)).getBillsByVetId(VET_ID_OK);
@@ -188,21 +189,21 @@ class BillControllerUnitTest {
 
     @Test
     void getAllBillsByOwnerName() {
-        when(billService.getAllBillsByOwnerName(anyString(), anyString())).thenReturn(Flux.just(responseDTO));
+        when(billService.getAllBillsByCustomerName(anyString(), anyString())).thenReturn(Flux.just(responseDTO));
 
         client.get()
-                .uri("/bills/owner/" + responseDTO.getOwnerFirstName() + "/" + responseDTO.getOwnerLastName())
+                .uri("/bills/owner/" + responseDTO.getCustomerFirstName() + "/" + responseDTO.getCustomerLastName())
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
-                .expectBodyList(BillResponseDTO.class)
+                .expectBodyList(BillResponseModel.class)
                 .consumeWith(response -> {
-                    List<BillResponseDTO> billResponseDTOS = response.getResponseBody();
-                    Assertions.assertNotNull(billResponseDTOS);
+                    List<BillResponseModel> billResponseModels = response.getResponseBody();
+                    Assertions.assertNotNull(billResponseModels);
                 });
 
-        Mockito.verify(billService, times(1)).getAllBillsByOwnerName(responseDTO.getOwnerFirstName(), responseDTO.getOwnerLastName());
+        Mockito.verify(billService, times(1)).getAllBillsByCustomerName(responseDTO.getCustomerFirstName(), responseDTO.getCustomerLastName());
     }
 
     @Test
@@ -215,10 +216,10 @@ class BillControllerUnitTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
-                .expectBodyList(BillResponseDTO.class)
+                .expectBodyList(BillResponseModel.class)
                 .consumeWith(response -> {
-                    List<BillResponseDTO> billResponseDTOS = response.getResponseBody();
-                    Assertions.assertNotNull(billResponseDTOS);
+                    List<BillResponseModel> billResponseModels = response.getResponseBody();
+                    Assertions.assertNotNull(billResponseModels);
                 });
 
         Mockito.verify(billService, times(1)).getAllBillsByVetName(responseDTO.getVetFirstName(), responseDTO.getVetLastName());
@@ -237,12 +238,12 @@ class BillControllerUnitTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
-                .expectBodyList(BillResponseDTO.class)
+                .expectBodyList(BillResponseModel.class)
                 .consumeWith(response -> {
-                    List<BillResponseDTO> billResponseDTOS = response.getResponseBody();
-                    Assertions.assertNotNull(billResponseDTOS);
-                    Assertions.assertFalse(billResponseDTOS.isEmpty());
-                    Assertions.assertEquals(visitType, billResponseDTOS.get(0).getVisitType());
+                    List<BillResponseModel> billResponseModels = response.getResponseBody();
+                    Assertions.assertNotNull(billResponseModels);
+                    Assertions.assertFalse(billResponseModels.isEmpty());
+                    Assertions.assertEquals(visitType, billResponseModels.get(0).getVisitType());
                 });
 
         Mockito.verify(billService, times(1)).getAllBillsByVisitType(visitType);
@@ -321,7 +322,7 @@ class BillControllerUnitTest {
     }
 
 
-    private BillResponseDTO buildBillResponseDTO() {
+    private BillResponseModel buildBillResponseDTO() {
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
         LocalDate date = calendar.getTime().toInstant()
@@ -330,7 +331,7 @@ class BillControllerUnitTest {
 
         LocalDate dueDate = LocalDate.of(2022, Month.OCTOBER, 15);
 
-        return BillResponseDTO.builder()
+        return BillResponseModel.builder()
                 .billId("BillUUID")
                 .customerId("1")
                 .vetId("1")
@@ -341,14 +342,14 @@ class BillControllerUnitTest {
                 .interest(new BigDecimal(0.00))
                 .billStatus(BillStatus.PAID)
                 .dueDate(dueDate)
-                .ownerFirstName("John")
-                .ownerLastName("Doe")
+                .customerFirstName("John")
+                .customerLastName("Doe")
                 .vetFirstName("Jane") // Set valid vetFirstName
                 .vetLastName("Smith") // Set valid vetLastName
                 .build();
     }
 
-    private BillResponseDTO buildUnpaidBillResponseDTO(){
+    private BillResponseModel buildUnpaidBillResponseDTO(){
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
@@ -358,10 +359,10 @@ class BillControllerUnitTest {
 
         LocalDate dueDate = LocalDate.of(2022, Month.OCTOBER, 5);
 
-        return BillResponseDTO.builder().billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).billStatus(BillStatus.UNPAID).dueDate(dueDate).build();
+        return BillResponseModel.builder().billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).billStatus(BillStatus.UNPAID).dueDate(dueDate).build();
     }
 
-    private BillResponseDTO buildBillOverdueResponseDTO(){
+    private BillResponseModel buildBillOverdueResponseDTO(){
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
@@ -371,7 +372,7 @@ class BillControllerUnitTest {
 
         LocalDate dueDate = LocalDate.of(2022, Month.AUGUST, 15);
 
-        return BillResponseDTO.builder().billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).billStatus(BillStatus.OVERDUE).dueDate(dueDate).build();
+        return BillResponseModel.builder().billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).billStatus(BillStatus.OVERDUE).dueDate(dueDate).build();
     }
 
     @Test
@@ -386,7 +387,7 @@ class BillControllerUnitTest {
                         .build())
                 .exchange()
                 .expectStatus().isOk()
-                .expectBodyList(BillResponseDTO.class)
+                .expectBodyList(BillResponseModel.class)
                 .hasSize(1);  // Checking that the response body has exactly 1 element
 
         Mockito.verify(billService, times(1))
@@ -408,7 +409,7 @@ class BillControllerUnitTest {
                         .build())
                 .exchange()
                 .expectStatus().isOk()
-                .expectBodyList(BillResponseDTO.class)
+                .expectBodyList(BillResponseModel.class)
                 .hasSize(1);  // Checking that the response body has exactly 1 element
 
         // Verifying the correct method calls with correct argument order
@@ -431,7 +432,7 @@ class BillControllerUnitTest {
     @Test
     void whenPostingBillWithNoBillStatus_thenReturnsCreated() {
         // Arrange
-        BillRequestDTO validBill = BillRequestDTO.builder()
+        BillRequestModel validBill = BillRequestModel.builder()
                 .customerId("C001")
                 .visitType("Checkup")
                 .vetId("V100")
@@ -441,7 +442,7 @@ class BillControllerUnitTest {
                 .dueDate(LocalDate.now().plusDays(10))
                 .build();
 
-        BillResponseDTO mockResponse = BillResponseDTO.builder()
+        BillResponseModel mockResponse = BillResponseModel.builder()
                 .billId("mock-bill-id")
                 .customerId("C001")
                 .visitType("Checkup")
@@ -469,7 +470,7 @@ class BillControllerUnitTest {
                 .exchange()
                 .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(BillResponseDTO.class)
+                .expectBody(BillResponseModel.class)
                 .value(response -> {
                     assertThat(response.getBillStatus()).isEqualTo(BillStatus.UNPAID);
                     assertThat(response.getCustomerId()).isEqualTo("C001");
@@ -522,7 +523,7 @@ class BillControllerUnitTest {
         @Test
         void getInterest_WithValidBillId_ShouldReturnInterestAmount() {
                 BigDecimal expectedInterest = new BigDecimal("5.50");
-                BillResponseDTO billWithInterest = buildBillResponseDTO();
+                BillResponseModel billWithInterest = buildBillResponseDTO();
                 billWithInterest.setInterest(expectedInterest);
 
                 when(billService.getBillByBillId(BILL_ID_OK)).thenReturn(Mono.just(billWithInterest));
@@ -541,7 +542,7 @@ class BillControllerUnitTest {
 
         @Test
         void getInterest_WithZeroInterest_ShouldReturnZero() {
-                BillResponseDTO billWithZeroInterest = buildBillResponseDTO();
+                BillResponseModel billWithZeroInterest = buildBillResponseDTO();
                 billWithZeroInterest.setInterest(BigDecimal.ZERO);
 
                 when(billService.getBillByBillId(BILL_ID_OK)).thenReturn(Mono.just(billWithZeroInterest));
@@ -580,7 +581,7 @@ class BillControllerUnitTest {
                 BigDecimal interest = new BigDecimal("5.50");
                 BigDecimal expectedTotal = amount.add(interest); // 105.50
 
-                BillResponseDTO billWithInterest = buildBillResponseDTO();
+                BillResponseModel billWithInterest = buildBillResponseDTO();
                 billWithInterest.setAmount(amount);
                 billWithInterest.setInterest(interest);
 
@@ -604,7 +605,7 @@ class BillControllerUnitTest {
                 BigDecimal interest = BigDecimal.ZERO;
                 BigDecimal expectedTotal = amount; // 100.00
 
-                BillResponseDTO billWithZeroInterest = buildBillResponseDTO();
+                BillResponseModel billWithZeroInterest = buildBillResponseDTO();
                 billWithZeroInterest.setAmount(amount);
                 billWithZeroInterest.setInterest(interest);
 
@@ -646,7 +647,7 @@ class BillControllerUnitTest {
                 BigDecimal expectedInterest = InterestCalculationUtil.calculateCompoundInterest(amount, dueDate, LocalDate.now());
                 BigDecimal expectedTotal = amount.add(expectedInterest);
 
-                BillResponseDTO overdueBill = buildBillOverdueResponseDTO();
+                BillResponseModel overdueBill = buildBillOverdueResponseDTO();
                 overdueBill.setAmount(amount);
                 overdueBill.setInterest(expectedInterest);
 

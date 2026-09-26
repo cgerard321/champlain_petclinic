@@ -1,25 +1,23 @@
-package com.petclinic.billing.datalayer;
+package com.petclinic.billing.domainclientlayer.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class OwnerResponseDTO {
+public class CustomerResponseModel {
 
-    private String ownerId;
+    private String customerId;
     private String firstName;
     private String lastName;
     private String address;
     private String city;
     private String telephone;
-    private String photoId;
-    private Photo photo;
-    private List<PetDTO> pets;
+//    private String photoId;
+//    private Photo photo;
+//    private List<PetDTO> pets;
 }
