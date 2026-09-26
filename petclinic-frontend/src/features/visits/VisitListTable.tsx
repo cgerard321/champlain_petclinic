@@ -68,12 +68,21 @@ export default function VisitListTable(): JSX.Element {
   }
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const getVisits = async (): Promise<void> => {
       try {
-        const fetchedVisits = await getAllVisits();
-        setVisits(fetchedVisits);
-        setDisplayedVisits(fetchedVisits);
+        const fetchedVisits: Visit[] = [];
+
+        // Add each visit as soon as it arrives instead of waiting for the full stream.
+        for await (const visit of getAllVisits(controller.signal)) {
+          fetchedVisits.push(visit);
+          setVisits([...fetchedVisits]);
+          setDisplayedVisits([...fetchedVisits]);
+        }
       } catch (error) {
+        if (controller.signal.aborted) return;
+
         console.error('Error fetching visits:', error);
         const message =
           error instanceof Error
@@ -82,7 +91,10 @@ export default function VisitListTable(): JSX.Element {
         setError(`Failed to fetch visits: ${message}`);
       }
     };
+
     getVisits();
+
+    return () => controller.abort();
   }, []);
 
   // Sort visits: emergency visits first, then by VisitDate

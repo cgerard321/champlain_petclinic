@@ -42,21 +42,34 @@ export default function CalendarView(): JSX.Element {
   const [error, setError] = useState<string>('');
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchVisits = async (): Promise<void> => {
       setIsLoading(true);
       setError('');
 
       try {
-        let fetchedVisits: Visit[] = [];
+        let visitStream: AsyncGenerator<Visit>;
 
         if (isAdmin || isReceptionist) {
-          fetchedVisits = await getAllVisits();
+          visitStream = getAllVisits(controller.signal);
         } else if (isVet && user?.userId) {
-          fetchedVisits = await getVisitsForPractitioner(user.userId);
+          visitStream = getVisitsForPractitioner(user.userId, controller.signal);
+        } else {
+          setVisits([]);
+          return;
         }
 
-        setVisits(fetchedVisits);
+        const fetchedVisits: Visit[] = [];
+
+        // Keep the calendar reactive while the stream is still arriving.
+        for await (const visit of visitStream) {
+          fetchedVisits.push(visit);
+          setVisits([...fetchedVisits]);
+        }
       } catch (err) {
+        if (controller.signal.aborted) return;
+
         console.error('Error fetching visits:', err);
         setError('Failed to load visits. Please try again.');
       } finally {
@@ -65,6 +78,8 @@ export default function CalendarView(): JSX.Element {
     };
 
     fetchVisits();
+
+    return () => controller.abort();
   }, [isAdmin, isVet, isReceptionist, user?.userId]);
 
   useEffect(() => {

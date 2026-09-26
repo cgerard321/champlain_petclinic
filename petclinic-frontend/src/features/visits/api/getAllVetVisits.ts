@@ -1,27 +1,14 @@
-import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { VisitResponseModel } from '../models/VisitResponseModel';
+import { readSseStream } from '@/shared/api/readSseStream';
 
-export async function getAllVetVisits(
-  vetId: string
-): Promise<VisitResponseModel[]> {
-  try {
-    const response = await axiosInstance.get(`/visits/vets/${vetId}/visits`, {
-      responseType: 'stream',
-      useV2: false,
-    });
+const backendUrl = import.meta.env.VITE_BACKEND_URL.replace(/\/$/, '');
 
-    return response.data
-      .split('data:')
-      .map((dataChunk: string) => {
-        try {
-          if (dataChunk === '') return null;
-          return JSON.parse(dataChunk);
-        } catch (err) {
-          console.error('Could not parse JSON: ' + err);
-        }
-      })
-      .filter((data?: JSON) => data !== null);
-  } catch (error) {
-    throw error;
-  }
+export function getAllVetVisits(
+  vetId: string,
+  signal?: AbortSignal
+): AsyncGenerator<VisitResponseModel> {
+  return readSseStream<VisitResponseModel>(
+    `${backendUrl}/gateway/visits/vets/${encodeURIComponent(vetId)}/visits`,
+    signal
+  );
 }

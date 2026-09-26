@@ -91,21 +91,23 @@ export default function CustomerVisitListTable(): JSX.Element {
   useEffect(() => {
     if (!user.userId) return;
 
+    const controller = new AbortController();
+
     const fetchVisits = async (): Promise<void> => {
       try {
-        let visitData;
-        if (isVet) {
-          visitData = await getAllVetVisits(user.userId);
-        } else {
-          visitData = await getAllOwnerVisits(user.userId);
-        }
+        const fetchedVisits: Visit[] = [];
+        const visitStream = isVet
+          ? getAllVetVisits(user.userId, controller.signal)
+          : getAllOwnerVisits(user.userId, controller.signal);
 
-        if (Array.isArray(visitData)) {
-          setVisits(visitData);
-        } else {
-          console.error('Fetched data is not an array', visitData);
+        // Update the list after every event received from the server.
+        for await (const visit of visitStream) {
+          fetchedVisits.push(visit);
+          setVisits([...fetchedVisits]);
         }
       } catch (err) {
+        if (controller.signal.aborted) return;
+
         if (err instanceof Error) {
           setError(`Failed to fetch visits: ${err.message}`);
         } else {
@@ -115,6 +117,8 @@ export default function CustomerVisitListTable(): JSX.Element {
     };
 
     fetchVisits();
+
+    return () => controller.abort();
   }, [user.userId, isVet]);
 
   const showAlert = (
