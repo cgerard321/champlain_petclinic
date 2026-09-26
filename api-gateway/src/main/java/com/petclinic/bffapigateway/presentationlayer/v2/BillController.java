@@ -37,7 +37,7 @@ public class BillController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping()
+    @GetMapping("/paginated")
     public ResponseEntity<Flux<BillResponseDTO>> getAllBillsByPage(
             @RequestParam Optional<Integer> page,
             @RequestParam Optional<Integer> size,

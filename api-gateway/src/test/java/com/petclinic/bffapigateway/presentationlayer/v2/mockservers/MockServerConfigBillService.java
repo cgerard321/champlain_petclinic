@@ -29,7 +29,7 @@ public class MockServerConfigBillService {
                 .when(
                         request()
                                 .withMethod("GET")
-                                .withPath("/bills")
+                                .withPath("/bills/paginated")
                                 .withQueryStringParameters(
                                         Parameter.param("page", "[0-9]+"), // Expecting digit characters for page
                                         Parameter.param("size", "[0-9]+")  // Expecting digit characters for size

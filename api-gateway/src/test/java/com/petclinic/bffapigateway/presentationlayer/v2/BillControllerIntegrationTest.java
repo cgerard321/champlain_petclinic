@@ -119,7 +119,7 @@ public class BillControllerIntegrationTest {
     @Test
     void whenGetAllBillsByPageAsAdmin_thenReturnPaginatedBills() {
         webTestClient.get()
-                .uri(uriBuilder -> uriBuilder.path("/api/v2/gateway/bills")
+                .uri(uriBuilder -> uriBuilder.path("/api/v2/gateway/bills/paginated")
                         .queryParam("page", "1")
                         .queryParam("size", "10")
                         .build())
@@ -137,7 +137,7 @@ public class BillControllerIntegrationTest {
     @Test
     void whenGetAllBillsByPageWithInvalidRole_thenUnauthorized() {
         webTestClient.get()
-                .uri(uriBuilder -> uriBuilder.path("/api/v2/gateway/bills")
+                .uri(uriBuilder -> uriBuilder.path("/api/v2/gateway/bills/paginated")
                         .queryParam("page", "1")
                         .queryParam("size", "10")
                         .build())
