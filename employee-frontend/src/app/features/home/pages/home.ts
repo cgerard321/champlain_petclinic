@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
+
+import { AuthState } from '@core/services/auth-state';
 
 @Component({
   selector: 'app-home',
@@ -8,4 +10,6 @@ import { MatCardModule } from '@angular/material/card';
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
-export class Home {}
+export class Home {
+  protected readonly authState = inject(AuthState);
+}
