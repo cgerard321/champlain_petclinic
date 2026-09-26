@@ -1,4 +1,4 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
@@ -20,17 +20,15 @@ interface NavItem {
 export class Sidenav {
   protected readonly authState = inject(AuthState);
 
-  protected readonly items = computed<NavItem[]>(() => {
-    const items = [
-      { label: 'Home', route: '/home', icon: 'home' },
-      { label: 'Dummy #1', route: '/dummy1', icon: 'download' },
-      { label: 'Dummy #2', route: '/dummy2', icon: 'settings' },
-    ];
+  protected readonly items: NavItem[] = [
+    { label: 'Home', route: '/home', icon: 'home' },
+    { label: 'Dummy #1', route: '/dummy1', icon: 'download' },
+    { label: 'Dummy #2', route: '/dummy2', icon: 'settings' },
+  ];
 
+  constructor() {
     if (EMPLOYEE_ROLES.some((role) => this.authState.hasRole(role))) {
-      items.push({ label: 'Inventory', route: '/inventory', icon: 'inventory_2' });
+      this.items.push({ label: 'Inventory', route: '/inventory', icon: 'inventory_2' });
     }
-
-    return items;
-  });
+  }
 }

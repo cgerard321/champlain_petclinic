@@ -19,7 +19,7 @@
       <mat-icon>inventory_2</mat-icon>
       <p>No inventories found.</p>
     </div>
-  } @else if (inventories().length > 0){
+  } @else if (inventories().length > 0) {
     <!--Displays the inventory page if all goes right-->
     <div class="inventory-grid">
       @for (inventory of inventories(); track inventory.inventoryId) {
