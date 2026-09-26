@@ -83,7 +83,7 @@ public class CustomerBillsControllerIntegrationTest {
         Publisher<Bill> setup = billRepository.deleteAll().thenMany(billRepository.save(bill));
 
         CustomerResponseModel customer = new CustomerResponseModel();
-        customer.setOwnerId(bill.getCustomerId());
+        customer.setCustomerId(bill.getCustomerId());
         customer.setFirstName("John");
         customer.setLastName("Doe");
 

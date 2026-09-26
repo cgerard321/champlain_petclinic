@@ -46,7 +46,7 @@ public class CustomerServiceClientUnitTest {
     }
 
     @Test
-    public void getOwnerByOwnerId_Valid() throws JsonProcessingException {
+    public void getCustomerByCustomerId_Valid() throws JsonProcessingException {
         String customerId = "123";
         CustomerResponseModel customerResponseModel = new CustomerResponseModel(customerId, "John", "Doe", "address", "city", "514"/*, "string", null, null*/);
 
@@ -58,12 +58,12 @@ public class CustomerServiceClientUnitTest {
         Mono<CustomerResponseModel> customerResponseDTOMono = customerServiceClient.getCustomerByCustomerId(customerId);
 
         StepVerifier.create(customerResponseDTOMono)
-                .expectNextMatches(customerResponseDTO1 -> customerResponseDTO1.getOwnerId().equals(customerId))
+                .expectNextMatches(customerResponseDTO1 -> customerResponseDTO1.getCustomerId().equals(customerId))
                 .verifyComplete();
     }
 
     @Test
-    public void getOwnerByOwnerId_Invalid() {
+    public void getCustomerByCustomerId_Invalid() {
         String invalidId = "00000000";
 
         mockBackEnd.enqueue(new MockResponse()
@@ -74,12 +74,12 @@ public class CustomerServiceClientUnitTest {
         Mono<CustomerResponseModel> result = customerServiceClient.getCustomerByCustomerId(invalidId);
 
         StepVerifier.create(result)
-                .expectErrorMatches(throwable -> throwable instanceof NotFoundException && throwable.getMessage().equals("Owner not found with customerId: " + invalidId))
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException && throwable.getMessage().equals("Owner not found with ownerId: " + invalidId))
                 .verify();
     }
 
     @Test
-    public void getOwnerByOwnerId_ClientError() {
+    public void getCustomerByCustomerId_ClientError() {
         String customerId = "000";
 
         mockBackEnd.enqueue(new MockResponse()
@@ -95,7 +95,7 @@ public class CustomerServiceClientUnitTest {
     }
 
     @Test
-    public void getOwnerByOwnerId_ServerError() {
+    public void getCustomerByCustomerId_ServerError() {
         String customerId = "000";
 
         mockBackEnd.enqueue(new MockResponse()

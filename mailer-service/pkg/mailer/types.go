@@ -7,6 +7,6 @@ type Mail struct {
 	Header        string `json:"Header" example:"Your appointment is booked"`
 	Body          string `json:"Body" example:"<p>Your appointment has been confirmed for tomorrow at 2:00 PM.</p>"`
 	Footer        string `json:"Footer" example:"Thank you for choosing PetClinic."`
-	Correspondent string `json:"CorrespondantName" example:"Dr. Taylor"`
+	Correspondent string `json:"CorrespondentName" example:"Dr. Taylor"`
 	SenderName    string `json:"SenderName" example:"PetClinic"`
 }

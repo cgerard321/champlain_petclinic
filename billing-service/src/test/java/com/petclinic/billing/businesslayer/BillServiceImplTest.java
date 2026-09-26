@@ -601,7 +601,7 @@ public class BillServiceImplTest {
         String CUSTOMER_ID = billEntity.getCustomerId();
 
         CustomerResponseModel mockOwner = new CustomerResponseModel();
-        mockOwner.setOwnerId(CUSTOMER_ID);
+        mockOwner.setCustomerId(CUSTOMER_ID);
         mockOwner.setFirstName("John");
         mockOwner.setLastName("Doe");
 

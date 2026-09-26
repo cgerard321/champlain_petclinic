@@ -291,7 +291,7 @@ class BillControllerIntegrationTest {
 
         // Mock the OwnerClient call
         CustomerResponseModel customer = new CustomerResponseModel();
-        customer.setOwnerId(billEntity.getCustomerId());
+        customer.setCustomerId(billEntity.getCustomerId());
         customer.setFirstName("John");
         customer.setLastName("Doe");
 

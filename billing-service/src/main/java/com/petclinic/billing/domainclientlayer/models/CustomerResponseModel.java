@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CustomerResponseModel {
 
-    private String ownerId;
+    private String customerId;
     private String firstName;
     private String lastName;
     private String address;
