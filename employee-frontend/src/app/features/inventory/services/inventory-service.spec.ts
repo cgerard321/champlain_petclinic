@@ -30,7 +30,7 @@ describe('InventoryService', () => {
 
     // Assert
     service.getInventories().subscribe((result) => {
-      expect(result).toEqual([inventory]);
+      expect(result).toEqual(inventory);
     });
 
     const request = http.expectOne('/api/gateway/inventories');
