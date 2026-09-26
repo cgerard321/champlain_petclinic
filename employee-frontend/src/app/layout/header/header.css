@@ -1,7 +1,35 @@
 .title {
   font-weight: 500;
+  color: rgb(5 73 52);
+  padding-right: 20px;
 }
 
 .spacer {
   flex: 1 1 auto;
+}
+
+.horizontal-list {
+  display: flex;
+  flex-direction: row;
+  gap: 18px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.horizontal-list a {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+
+.active-link {
+  background: rgb(0 0 0 / 6%);
+}
+
+
+mat-toolbar {
+  background-color: #c2daae;
 }

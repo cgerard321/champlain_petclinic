@@ -21,7 +21,6 @@ export class Sidenav {
   protected readonly authState = inject(AuthState);
 
   protected readonly items: NavItem[] = [
-    { label: 'Home', route: '/home', icon: 'home' },
     { label: 'Dummy #1', route: '/dummy1', icon: 'download' },
     { label: 'Dummy #2', route: '/dummy2', icon: 'settings' },
   ];
