@@ -114,7 +114,7 @@ public class BillController {
 //        return SERVICE.getAllBillsByPage(pageable, billId, customerId, ownerFirstName, ownerLastName, visitType, vetId, vetFirstName, vetLastName);
 //    }
 
-    @GetMapping("/bills")
+    @GetMapping("/bills/paginated")
     public Flux<BillResponseDTO> getAllBillsByPage(
             @RequestParam Optional<Integer> page,
             @RequestParam Optional<Integer> size,

@@ -39,6 +39,7 @@ public class BillControllerIntegrationTest {
     public void startMockServer() {
         mockServerConfigBillService = new MockServerConfigBillService();
         mockServerConfigBillService.registerGetAllBillsEndpoint();
+        mockServerConfigBillService.registerGetAllBillsPaginatedEndpoint();
         mockServerConfigBillService.registerCreateBillEndpoint();
         mockServerConfigBillService.registerUpdateBillEndpoint();
         mockServerConfigBillService.registerPayBillEndpoint();
@@ -119,7 +120,7 @@ public class BillControllerIntegrationTest {
     @Test
     void whenGetAllBillsByPageAsAdmin_thenReturnPaginatedBills() {
         webTestClient.get()
-                .uri(uriBuilder -> uriBuilder.path("/api/v2/gateway/bills")
+                .uri(uriBuilder -> uriBuilder.path("/api/v2/gateway/bills/paginated")
                         .queryParam("page", "1")
                         .queryParam("size", "10")
                         .build())
@@ -137,7 +138,7 @@ public class BillControllerIntegrationTest {
     @Test
     void whenGetAllBillsByPageWithInvalidRole_thenUnauthorized() {
         webTestClient.get()
-                .uri(uriBuilder -> uriBuilder.path("/api/v2/gateway/bills")
+                .uri(uriBuilder -> uriBuilder.path("/api/v2/gateway/bills/paginated")
                         .queryParam("page", "1")
                         .queryParam("size", "10")
                         .build())
@@ -220,7 +221,7 @@ public class BillControllerIntegrationTest {
     @Test
     void whenGetBillsByMonthAsAdmin_thenReturnBills() {
         webTestClient.get()
-                .uri(uriBuilder -> uriBuilder.path("/api/v2/gateway/bills")
+                .uri(uriBuilder -> uriBuilder.path("/api/v2/gateway/bills/paginated")
                         .queryParam("month", "10")
                         .queryParam("year", "2024")
                         .build())
