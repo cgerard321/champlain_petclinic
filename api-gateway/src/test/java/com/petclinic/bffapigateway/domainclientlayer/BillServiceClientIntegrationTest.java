@@ -1033,8 +1033,8 @@ class BillServiceClientIntegrationTest {
         assertTrue(request.getPath().contains("/filtered-count"));
         assertTrue(request.getPath().contains("billId=1"));
         assertTrue(request.getPath().contains("customerId=123"));
-        assertTrue(request.getPath().contains("ownerFirstName=John"));
-        assertTrue(request.getPath().contains("ownerLastName=Doe"));
+        assertTrue(request.getPath().contains("customerFirstName=John"));
+        assertTrue(request.getPath().contains("customerLastName=Doe"));
         assertTrue(request.getPath().contains("visitType=Checkup"));
         assertTrue(request.getPath().contains("vetId=456"));
         assertTrue(request.getPath().contains("vetFirstName=Jane"));
@@ -1062,7 +1062,7 @@ class BillServiceClientIntegrationTest {
         assertEquals("GET", request.getMethod());
         assertTrue(request.getPath().contains("/filtered-count"));
         assertTrue(request.getPath().contains("customerId=123"));
-        assertTrue(request.getPath().contains("ownerLastName=Doe"));
+        assertTrue(request.getPath().contains("customerLastName=Doe"));
         assertFalse(request.getPath().contains("billId="));
         assertFalse(request.getPath().contains("visitType="));
     }

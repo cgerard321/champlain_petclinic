@@ -509,6 +509,4 @@ public class BillServiceClient {
                 .doOnSuccess(pdf -> log.info("Staff bill PDF retrieved for billId: {}", billId))
                 .doOnError(e -> log.error("Failed to retrieve staff PDF for billId: {}", billId, e));
     }
-
-
 }
