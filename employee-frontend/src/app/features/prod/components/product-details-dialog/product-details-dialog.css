@@ -1,0 +1,58 @@
+:host {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.details-content {
+  box-sizing: border-box;
+  max-height: 70vh;
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.product-image {
+  display: block;
+  max-height: 220px;
+  max-width: 100%;
+  object-fit: contain;
+  margin: 0 auto 16px;
+}
+
+h3 {
+  margin-top: 0;
+}
+
+dl {
+  margin: 20px 0 0;
+}
+
+dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 5px 0;
+}
+
+dt {
+  font-weight: 600;
+}
+
+dd {
+  margin: 0;
+  text-align: right;
+}
+
+.state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 160px;
+}
+
+.error-message {
+  color: var(--mat-sys-error, #b00020);
+}

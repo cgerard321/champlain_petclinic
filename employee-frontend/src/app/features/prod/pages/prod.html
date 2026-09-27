@@ -29,6 +29,7 @@
     <div class="product-grid">
       @for (product of products(); track product.productId) {
         <mat-card class="product-card">
+          <app-product-thumbnail [imageId]="product.imageId" [alt]="product.productName" />
           <mat-card-header>
             <mat-card-title>{{ product.productName }}</mat-card-title>
             <mat-card-subtitle>{{ product.productType }}</mat-card-subtitle>
@@ -42,6 +43,16 @@
               <div><dt>Delivery</dt><dd>{{ product.deliveryType.replace('_', ' ') }}</dd></div>
             </dl>
           </mat-card-content>
+          <mat-card-actions align="end">
+            <button mat-stroked-button type="button" (click)="openProductDetails(product.productId)">
+              Details
+            </button>
+            @if (canManageProducts()) {
+              <button mat-flat-button color="primary" type="button" (click)="openProductUpdate(product)">
+                Update
+              </button>
+            }
+          </mat-card-actions>
         </mat-card>
       }
     </div>

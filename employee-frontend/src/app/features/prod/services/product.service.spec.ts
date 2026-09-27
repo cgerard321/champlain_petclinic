@@ -73,4 +73,23 @@ describe('ProductService', () => {
     expect(request.request.method).toBe('GET');
     request.flush({ productType: [], productStatus: [], deliveryType: [] });
   });
+
+  it('updates a product with JSON', () => {
+    const requestBody = {
+      productName: 'Updated food',
+      productDescription: 'Updated description',
+      productSalePrice: 12,
+      productQuantity: 8,
+      isUnlisted: false,
+      productType: ProductType.FOOD,
+      deliveryType: DeliveryType.DELIVERY,
+    };
+
+    service.updateProduct('product-1', requestBody).subscribe();
+
+    const request = http.expectOne('/api/gateway/products/product-1');
+    expect(request.request.method).toBe('PUT');
+    expect(request.request.body).toEqual(requestBody);
+    request.flush({ ...requestBody, productId: 'product-1', productStatus: ProductStatus.AVAILABLE });
+  });
 });

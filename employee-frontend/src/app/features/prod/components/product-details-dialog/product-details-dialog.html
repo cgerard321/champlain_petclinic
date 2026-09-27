@@ -1,0 +1,37 @@
+<h2 mat-dialog-title>Product Details</h2>
+
+<mat-dialog-content class="details-content">
+  @if (isLoading()) {
+    <div class="state" role="status">
+      <mat-progress-spinner diameter="40" mode="indeterminate" />
+      <span>Loading product...</span>
+    </div>
+  } @else if (errorMessage()) {
+    <p class="error-message" role="alert">{{ errorMessage() }}</p>
+  } @else if (product(); as currentProduct) {
+    @if (image(); as currentImage) {
+      <img
+        class="product-image"
+        [src]="'data:' + currentImage.imageType + ';base64,' + currentImage.imageData"
+        [alt]="currentProduct.productName"
+      />
+    }
+    <h3>{{ currentProduct.productName }}</h3>
+    <p>{{ currentProduct.productDescription }}</p>
+    <dl>
+      <div><dt>Price</dt><dd>{{ currentProduct.productSalePrice | currency }}</dd></div>
+      <div><dt>Quantity</dt><dd>{{ currentProduct.productQuantity }}</dd></div>
+      <div><dt>Type</dt><dd>{{ currentProduct.productType }}</dd></div>
+      <div><dt>Status</dt><dd>{{ currentProduct.productStatus }}</dd></div>
+      <div><dt>Delivery</dt><dd>{{ currentProduct.deliveryType.replace('_', ' ') }}</dd></div>
+      <div><dt>Listed</dt><dd>{{ currentProduct.isUnlisted ? 'No' : 'Yes' }}</dd></div>
+      @if (currentProduct.averageRating !== undefined) {
+        <div><dt>Average rating</dt><dd>{{ currentProduct.averageRating }}</dd></div>
+      }
+    </dl>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close type="button">Close</button>
+</mat-dialog-actions>

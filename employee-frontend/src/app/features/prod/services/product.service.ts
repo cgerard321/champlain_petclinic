@@ -39,6 +39,10 @@ export class ProductService {
     return this.http.post<Product>('/api/gateway/products', request);
   }
 
+  updateProduct(productId: string, request: ProductRequest): Observable<Product> {
+    return this.http.put<Product>(`/api/gateway/products/${productId}`, request);
+  }
+
   getProductEnums(): Observable<ProductEnums> {
     return this.http.get<ProductEnums>('/api/gateway/products/enums');
   }
