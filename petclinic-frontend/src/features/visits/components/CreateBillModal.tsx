@@ -75,7 +75,8 @@ export default function CreateBillModal({
           const match = ownersList.find(
             o => o.firstName === ownerFirstName && o.lastName === ownerLastName
           );
-          if (match) setForm(prev => ({ ...prev, customerId: match.customerId }));
+          if (match)
+            setForm(prev => ({ ...prev, customerId: match.customerId }));
         }
 
         // try to preselect vet id if provided or by name

@@ -20,48 +20,48 @@ public class MockServerConfigCustomersService {
         this.clientAndServer = ClientAndServer.startClientAndServer(CUSTOMERS_SERVICE_SERVER_PORT);
     }
 
-    public void registerUpdateOwnerEndpoint() {
+    public void registerUpdateCustomerEndpoint() {
         mockServerClient_CustomersService
                 .when(
                         request()
                                 .withMethod("PUT")
-                                .withPath("/owners/" + "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+                                .withPath("/customers/" + "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
                                 .withBody(json("{\"firstName\":\"Betty\",\"lastName\":\"Davis\",\"address\":\"638 Cardinal Ave.\",\"city\":\"Sun Prairie\",\"province\":\"Quebec\",\"telephone\":\"6085551749\"}"))
                 )
                 .respond(
                         response()
                                 .withStatusCode(200)
-                                .withBody(json("{\"ownerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"firstName\":\"Betty\",\"lastName\":\"Davis\",\"address\":\"638 Cardinal Ave.\",\"city\":\"Sun Prairie\",\"province\":\"Quebec\",\"telephone\":\"6085551749\",\"pets\":null}"))
+                                .withBody(json("{\"customerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"firstName\":\"Betty\",\"lastName\":\"Davis\",\"address\":\"638 Cardinal Ave.\",\"city\":\"Sun Prairie\",\"province\":\"Quebec\",\"telephone\":\"6085551749\",\"pets\":null}"))
                 );
     }
 
-    public void registerAddOwnerEndpoint() {
+    public void registerAddCustomerEndpoint() {
         mockServerClient_CustomersService
                 .when(
                         request()
                                 .withMethod("POST")
-                                .withPath("/owners")
+                                .withPath("/customers")
                                 .withBody(json("{\"firstName\":\"Betty\",\"lastName\":\"Davis\",\"address\":\"638 Cardinal Ave.\",\"city\":\"Sun Prairie\",\"province\":\"Quebec\",\"telephone\":\"6085551749\"}"))
                 )
                 .respond(
                         response()
                                 .withStatusCode(201)
-                                .withBody(json("{\"ownerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"firstName\":\"Betty\",\"lastName\":\"Davis\",\"address\":\"638 Cardinal Ave.\",\"city\":\"Sun Prairie\",\"province\":\"Quebec\",\"telephone\":\"6085551749\",\"pets\":null}"))
+                                .withBody(json("{\"customerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"firstName\":\"Betty\",\"lastName\":\"Davis\",\"address\":\"638 Cardinal Ave.\",\"city\":\"Sun Prairie\",\"province\":\"Quebec\",\"telephone\":\"6085551749\",\"pets\":null}"))
                 );
     }
 
-    public void registerGetAllOwnersEndpoint() {
+    public void registerGetAllCustomersEndpoint() {
         String responseBody = "["
-                + "{\"ownerId\":\"owner1\",\"firstName\":\"John\",\"lastName\":\"Does\",\"address\":\"123 Main St\",\"city\":\"Springfield\",\"province\":\"Chicago\",\"telephone\":\"1234567890\"},"
-                + "{\"ownerId\":\"owner2\",\"firstName\":\"Jane\",\"lastName\":\"Doew\",\"address\":\"456 Maple St\",\"city\":\"Shelbyville\",\"province\":\"Illinois\",\"telephone\":\"0987654321\"},"
-                + "{\"ownerId\":\"owner3\",\"firstName\":\"Jim\",\"lastName\":\"Doee\",\"address\":\"789 Oak St\",\"city\":\"Capital City\",\"province\":\"Longueuil\",\"telephone\":\"1122334455\"}"
+                + "{\"customerId\":\"customer1\",\"firstName\":\"John\",\"lastName\":\"Does\",\"address\":\"123 Main St\",\"city\":\"Springfield\",\"province\":\"Chicago\",\"telephone\":\"1234567890\"},"
+                + "{\"customerId\":\"customer2\",\"firstName\":\"Jane\",\"lastName\":\"Doew\",\"address\":\"456 Maple St\",\"city\":\"Shelbyville\",\"province\":\"Illinois\",\"telephone\":\"0987654321\"},"
+                + "{\"customerId\":\"customer3\",\"firstName\":\"Jim\",\"lastName\":\"Doee\",\"address\":\"789 Oak St\",\"city\":\"Capital City\",\"province\":\"Longueuil\",\"telephone\":\"1122334455\"}"
                 + "]";
 
         mockServerClient_CustomersService
                 .when(
                         request()
                                 .withMethod("GET")
-                                .withPath("/owners")
+                                .withPath("/customers")
                 )
                 .respond(
                         response()
@@ -70,36 +70,36 @@ public class MockServerConfigCustomersService {
                 );
     }
 
-    public void registerDeleteOwnerEndpoint() {
-        CustomerResponseDTO ownerResponse = new CustomerResponseDTO();
-        ownerResponse.setCustomerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a");
-        ownerResponse.setFirstName("Betty");
-        ownerResponse.setLastName("Davis");
-        ownerResponse.setAddress("638 Cardinal Ave.");
-        ownerResponse.setCity("Sun Prairie");
-        ownerResponse.setProvince("Quebec");
-        ownerResponse.setTelephone("6085551749");
+    public void registerDeleteCustomerEndpoint() {
+        CustomerResponseDTO customerResponseDTO = new CustomerResponseDTO();
+        customerResponseDTO.setCustomerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a");
+        customerResponseDTO.setFirstName("Betty");
+        customerResponseDTO.setLastName("Davis");
+        customerResponseDTO.setAddress("638 Cardinal Ave.");
+        customerResponseDTO.setCity("Sun Prairie");
+        customerResponseDTO.setProvince("Quebec");
+        customerResponseDTO.setTelephone("6085551749");
 
         mockServerClient_CustomersService
                 .when(
                         request()
                                 .withMethod("DELETE")
-                                .withPath("/owners/e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+                                .withPath("/customers/e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
                 )
                 .respond(
                         response()
                                 .withStatusCode(200)  // Change to 200 OK since we are returning a response body
-                                .withBody(json(ownerResponse))  // Return the CustomerResponseDTO as JSON
+                                .withBody(json(customerResponseDTO))  // Return the CustomerResponseDTO as JSON
                                 .withHeader("Content-Type", "application/json")
                 );
     }
 
-    public void registerDeleteOwnerEmptyResponseEndpoint() {
+    public void registerDeleteCustomerEmptyResponseEndpoint() {
         mockServerClient_CustomersService
                 .when(
                         request()
                                 .withMethod("DELETE")
-                                .withPath("/owners/12345678-1234-1234-1234-123456789012")
+                                .withPath("/customers/12345678-1234-1234-1234-123456789012")
                 )
                 .respond(
                         response()
@@ -108,9 +108,9 @@ public class MockServerConfigCustomersService {
                 );
     }
 
-    public void registerGetOwnerByIdEndpoint() {
-        String ownerResponseJson = "{"
-                + "\"ownerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\","
+    public void registerGetCustomerByIdEndpoint() {
+        String customerResponseJson = "{"
+                + "\"customerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\","
                 + "\"firstName\":\"Betty\","
                 + "\"lastName\":\"Davis\","
                 + "\"address\":\"638 Cardinal Ave.\","
@@ -124,12 +124,12 @@ public class MockServerConfigCustomersService {
                 .when(
                         request()
                                 .withMethod("GET")
-                                .withPath("/owners/e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+                                .withPath("/customers/e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
                 )
                 .respond(
                         response()
                                 .withStatusCode(200)
-                                .withBody(json(ownerResponseJson))
+                                .withBody(json(customerResponseJson))
                                 .withHeader("Content-Type", "application/json")
                 );
     }
@@ -174,7 +174,7 @@ public class MockServerConfigCustomersService {
                 .respond(
                         response()
                                 .withStatusCode(200)
-                                .withBody(json("{\"petId\":\"53163352-8398-4513-bdff-b7715c056d1d\",\"name\":\"Buddy\",\"birthDate\":\"1999-11-01T00:00:00.000+00:00\",\"petTypeId\":\"1\",\"isActive\":\"true\",\"weight\":\"1.3\",\"ownerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\"}"))
+                                .withBody(json("{\"petId\":\"53163352-8398-4513-bdff-b7715c056d1d\",\"name\":\"Buddy\",\"birthDate\":\"1999-11-01T00:00:00.000+00:00\",\"petTypeId\":\"1\",\"isActive\":\"true\",\"weight\":\"1.3\",\"customerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\"}"))
                                 .withHeader("Content-Type", "application/json")
                 );
     }
@@ -184,9 +184,9 @@ public class MockServerConfigCustomersService {
             this.clientAndServer.stop();
     }
 
-    public void registerUpdatePetEndpoint(String petId, String ownerId, String newName) {
-        String responseBody = String.format("{\"petId\":\"%s\",\"name\":\"%s\",\"birthDate\":\"2025-10-23T00:00:00.000+00:00\",\"petTypeId\":\"1\",\"isActive\":\"true\",\"weight\":\"5.0\",\"ownerId\":\"%s\"}",
-                petId, newName, ownerId);
+    public void registerUpdatePetEndpoint(String petId, String customerId, String newName) {
+        String responseBody = String.format("{\"petId\":\"%s\",\"name\":\"%s\",\"birthDate\":\"2025-10-23T00:00:00.000+00:00\",\"petTypeId\":\"1\",\"isActive\":\"true\",\"weight\":\"5.0\",\"customerId\":\"%s\"}",
+                petId, newName, customerId);
 
         mockServerClient_CustomersService
                 .when(

@@ -18,7 +18,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @ActiveProfiles("test")
 @AutoConfigureWebTestClient
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class OwnerControllerIntegrationTest {
+class CustomerControllerIntegrationTest {
 
     @Autowired
     private WebTestClient webTestClient;
@@ -30,12 +30,12 @@ class OwnerControllerIntegrationTest {
     @BeforeAll
     public void startMockServer() {
         mockServerConfigCustomersService = new MockServerConfigCustomersService();
-        mockServerConfigCustomersService.registerUpdateOwnerEndpoint();
-        mockServerConfigCustomersService.registerAddOwnerEndpoint();
-        mockServerConfigCustomersService.registerGetAllOwnersEndpoint();
-        mockServerConfigCustomersService.registerDeleteOwnerEndpoint();
-        mockServerConfigCustomersService.registerDeleteOwnerEmptyResponseEndpoint();
-        mockServerConfigCustomersService.registerGetOwnerByIdEndpoint();
+        mockServerConfigCustomersService.registerUpdateCustomerEndpoint();
+        mockServerConfigCustomersService.registerAddCustomerEndpoint();
+        mockServerConfigCustomersService.registerGetAllCustomersEndpoint();
+        mockServerConfigCustomersService.registerDeleteCustomerEndpoint();
+        mockServerConfigCustomersService.registerDeleteCustomerEmptyResponseEndpoint();
+        mockServerConfigCustomersService.registerGetCustomerByIdEndpoint();
 
         mockServerConfigAuthService = new MockServerConfigAuthService();
         mockServerConfigAuthService.registerValidateTokenForOwnerEndpoint();
@@ -51,44 +51,44 @@ class OwnerControllerIntegrationTest {
     }
     
     @Test
-    public void whenDeleteOwner_asAdmin_thenReturnOwnerResponse() {
+    public void whenDeleteCustomer_asAdmin_thenReturnCustomerResponse() {
         // Mock data to simulate the CustomerResponseDTO
-        CustomerResponseDTO expectedOwner = new CustomerResponseDTO();
-        expectedOwner.setCustomerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a");
-        expectedOwner.setFirstName("Betty");
-        expectedOwner.setLastName("Davis");
-        expectedOwner.setAddress("638 Cardinal Ave.");
-        expectedOwner.setCity("Sun Prairie");
-        expectedOwner.setProvince("Quebec");
-        expectedOwner.setTelephone("6085551749");
+        CustomerResponseDTO expectedCustomer = new CustomerResponseDTO();
+        expectedCustomer.setCustomerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a");
+        expectedCustomer.setFirstName("Betty");
+        expectedCustomer.setLastName("Davis");
+        expectedCustomer.setAddress("638 Cardinal Ave.");
+        expectedCustomer.setCity("Sun Prairie");
+        expectedCustomer.setProvince("Quebec");
+        expectedCustomer.setTelephone("6085551749");
 
         // Perform the DELETE request and expect CustomerResponseDTO in the body
         webTestClient.delete()
-                .uri("/api/v2/gateway/owners/{ownerId}", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+                .uri("/api/v2/gateway/customers/{customerId}", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
                 .cookie("Bearer", "valid-test-token-for-valid-admin")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()  // Now we expect a 200 OK response, not 204 NO_CONTENT
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody(CustomerResponseDTO.class)
-                .value(ownerResponse -> {
-                    assertThat(ownerResponse.getCustomerId()).isEqualTo(expectedOwner.getCustomerId());
-                    assertThat(ownerResponse.getFirstName()).isEqualTo(expectedOwner.getFirstName());
-                    assertThat(ownerResponse.getLastName()).isEqualTo(expectedOwner.getLastName());
-                    assertThat(ownerResponse.getAddress()).isEqualTo(expectedOwner.getAddress());
-                    assertThat(ownerResponse.getCity()).isEqualTo(expectedOwner.getCity());
-                    assertThat(ownerResponse.getProvince()).isEqualTo(expectedOwner.getProvince());
-                    assertThat(ownerResponse.getTelephone()).isEqualTo(expectedOwner.getTelephone());
+                .value(customerResponseDTO -> {
+                    assertThat(customerResponseDTO.getCustomerId()).isEqualTo(expectedCustomer.getCustomerId());
+                    assertThat(customerResponseDTO.getFirstName()).isEqualTo(expectedCustomer.getFirstName());
+                    assertThat(customerResponseDTO.getLastName()).isEqualTo(expectedCustomer.getLastName());
+                    assertThat(customerResponseDTO.getAddress()).isEqualTo(expectedCustomer.getAddress());
+                    assertThat(customerResponseDTO.getCity()).isEqualTo(expectedCustomer.getCity());
+                    assertThat(customerResponseDTO.getProvince()).isEqualTo(expectedCustomer.getProvince());
+                    assertThat(customerResponseDTO.getTelephone()).isEqualTo(expectedCustomer.getTelephone());
                 });
     }
 
 
     @Test
-    void whenDeleteOwner_withInvalidOwnerIdLength_thenReturnUnprocessableEntity() {
-        String invalidOwnerId = "short-id";
+    void whenDeleteCustomer_withInvalidCustomerIdLength_thenReturnUnprocessableEntity() {
+        String invalidCustomerId = "short-id";
 
         webTestClient.delete()
-                .uri("/api/v2/gateway/owners/{ownerId}", invalidOwnerId)
+                .uri("/api/v2/gateway/customers/{customerId}", invalidCustomerId)
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -96,11 +96,11 @@ class OwnerControllerIntegrationTest {
     }
 
     @Test
-    void whenDeleteOwner_withNonExistentOwner_thenReturnBadRequest() {
-        String validLengthOwnerId = "12345678-1234-1234-1234-123456789012";
+    void whenDeleteCustomer_withNonExistentCustomer_thenReturnBadRequest() {
+        String validLengthCustomerId = "12345678-1234-1234-1234-123456789012";
 
         webTestClient.delete()
-                .uri("/api/v2/gateway/owners/{ownerId}", validLengthOwnerId)
+                .uri("/api/v2/gateway/customers/{customerId}", validLengthCustomerId)
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
