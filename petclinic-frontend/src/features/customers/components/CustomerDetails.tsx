@@ -51,9 +51,12 @@ const CustomerDetails: FC = () => {
       }
 
       // Fetch pets by customer ID
-      const petsResponse = await axiosInstance.get(`/pets/customers/${ownerId}/pets`, {
-        useV2: false,
-      });
+      const petsResponse = await axiosInstance.get(
+        `/pets/customers/${ownerId}/pets`,
+        {
+          useV2: false,
+        }
+      );
 
       let petsData: PetResponseModel[] = [];
       if (typeof petsResponse.data === 'string') {
@@ -250,9 +253,12 @@ const CustomerDetails: FC = () => {
         setIsDisabled(false);
       }
 
-      const petsResponse = await axiosInstance.get(`/pets/customers/${ownerId}/pets`, {
-        useV2: false,
-      });
+      const petsResponse = await axiosInstance.get(
+        `/pets/customers/${ownerId}/pets`,
+        {
+          useV2: false,
+        }
+      );
 
       let petsData: PetResponseModel[] = [];
       if (typeof petsResponse.data === 'string') {

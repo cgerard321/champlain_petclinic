@@ -19,7 +19,10 @@ const petTypeOptions: { [key: string]: string } = {
 
 const UpdatePetForm: React.FC = (): JSX.Element => {
   const navigate = useNavigate();
-  const { customerId, petId } = useParams<{ customerId: string; petId: string }>();
+  const { customerId, petId } = useParams<{
+    customerId: string;
+    petId: string;
+  }>();
   const [pet, setPet] = useState<PetResponseModel | null>(null);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [successMessage, setSuccessMessage] = useState<string>('');

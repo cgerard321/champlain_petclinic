@@ -171,7 +171,7 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
     }
   }, [petId, customerId, isOpen]);
 
-  const handleChange  = (
+  const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ): void => {
     const { name, type, value } = e.target;

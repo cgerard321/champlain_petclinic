@@ -7,5 +7,7 @@ export const addPetForCustomer = async (
   customerId: string,
   pet: PetRequestModel
 ): Promise<AxiosResponse<PetResponseModel>> => {
-  return axiosInstance.post(`/pets/customers/${customerId}/pets`, pet, { useV2: false });
+  return axiosInstance.post(`/pets/customers/${customerId}/pets`, pet, {
+    useV2: false,
+  });
 };
