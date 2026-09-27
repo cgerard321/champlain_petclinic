@@ -47,7 +47,7 @@ public class CustomerBillControllerIntegrationTest {
         mockServerConfigBillService.registerPayBillEndpoint();
 
         mockServerConfigAuthService = new MockServerConfigAuthService();
-        mockServerConfigAuthService.registerValidateTokenForCustomerOneEndpoint();
+        mockServerConfigAuthService.registerValidateTokenForCustomerEndpoint();
     }
     @AfterAll
     public void stopMockServer() {
@@ -146,7 +146,7 @@ public class CustomerBillControllerIntegrationTest {
                 )
                 .cookie(
                         "Bearer",
-                        MockServerConfigAuthService.jwtTokenForValidCustomerOneId
+                        MockServerConfigAuthService.jwtTokenForValidCustomerId
                 )
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
