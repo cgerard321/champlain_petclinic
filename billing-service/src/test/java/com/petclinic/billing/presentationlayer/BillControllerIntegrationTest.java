@@ -220,7 +220,9 @@ class BillControllerIntegrationTest {
                 .jsonPath("$.ownerFirstName").isEqualTo("Alice")
                 .jsonPath("$.ownerLastName").isEqualTo("Smith")
                 .jsonPath("$.billStatus").isEqualTo("PAID")
-                .jsonPath("$.amount").isEqualTo(100.00);
+                .jsonPath("$.amount").isEqualTo(100.00)
+                .jsonPath("$.qstAmount").isEqualTo(9.98)
+                .jsonPath("$.gstAmount").isEqualTo(5.00);
 
         // Verify mock interactions
         verify(vetClient).getVetByVetId("vet-1");

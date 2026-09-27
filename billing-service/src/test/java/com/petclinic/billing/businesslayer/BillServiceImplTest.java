@@ -12,6 +12,7 @@ import com.petclinic.billing.exceptions.NotFoundException;
 import com.petclinic.billing.util.EntityDtoUtil;
 import com.petclinic.billing.util.FormatBillUtil;
 import com.petclinic.billing.util.InterestCalculationUtil;
+import com.petclinic.billing.util.TaxCalculationUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -332,6 +333,7 @@ public class BillServiceImplTest {
         billDTO.setVetId("vet-123");
         billDTO.setCustomerId("owner-456");
         billDTO.setDueDate(LocalDate.now().plusDays(30));
+        billDTO.setAmount(new BigDecimal(100));
 
         // Mock VetClient response
         VetResponseDTO vetResponse = new VetResponseDTO();
@@ -368,7 +370,9 @@ public class BillServiceImplTest {
                 .expectNextMatches(response ->
                         response.getBillId() != null &&
                                 response.getVetFirstName().equals("John") &&
-                                response.getOwnerFirstName().equals("Alice")
+                                response.getOwnerFirstName().equals("Alice") &&
+                                response.getQstAmount().equals(new BigDecimal("9.98")) &&
+                                response.getGstAmount().equals(new BigDecimal("5.00"))
                 )
                 .verifyComplete();
 
@@ -385,6 +389,7 @@ public class BillServiceImplTest {
         billDTO.setVetId("vet-123");
         billDTO.setCustomerId("owner-456");
         billDTO.setDueDate(LocalDate.now().plusDays(30));
+        billDTO.setAmount(new BigDecimal("100"));
 
         // Mock VetClient response
         VetResponseDTO vetResponse = new VetResponseDTO();
@@ -431,7 +436,9 @@ public class BillServiceImplTest {
                                 response.getVetFirstName().equals("John") &&
                                 response.getOwnerFirstName().equals("Alice") &&
                                 response.getBillStatus().equals(BillStatus.PAID) &&
-                                response.getDueDate() != null
+                                response.getDueDate() != null &&
+                                response.getQstAmount().equals(new BigDecimal("9.98")) &&
+                                response.getGstAmount().equals(new BigDecimal("5.00"))
                 )
                 .verifyComplete();
 
@@ -1715,11 +1722,12 @@ public void testGenerateBillPdf_BillNotFound() {
         assertEquals(overdueBill.isInterestExempt(), dto.isInterestExempt());
         
         BigDecimal expectedInterest = InterestCalculationUtil.calculateCompoundInterest(amount, dueDate, LocalDate.now());
+        BigDecimal expectedTaxes = TaxCalculationUtil.calculateTotalTaxes(amount);
         assertEquals(expectedInterest, dto.getInterest());
         assertTrue(dto.getInterest().compareTo(BigDecimal.ZERO) > 0);
         
-        BigDecimal expectedTaxedAmount = amount.add(expectedInterest).setScale(2, RoundingMode.HALF_UP);
-        assertEquals(expectedTaxedAmount, dto.getTaxedAmount());
+        BigDecimal expectedTaxedAmount = amount.add(expectedInterest).add(expectedTaxes).setScale(2, RoundingMode.HALF_UP);
+        assertEquals(expectedTaxedAmount, dto.getTotalAmount());
         
         assertEquals(0, dto.getTimeRemaining());
     }
@@ -1729,6 +1737,7 @@ public void testGenerateBillPdf_BillNotFound() {
         LocalDate dueDate = LocalDate.now().minusMonths(1);
         BigDecimal amount = new BigDecimal("150.00");
         BigDecimal storedInterest = new BigDecimal("12.50");
+        BigDecimal expectedTaxes = TaxCalculationUtil.calculateTotalTaxes(amount);
         
         Bill paidBill = Bill.builder()
             .billId("paid-test-id")
@@ -1755,14 +1764,15 @@ public void testGenerateBillPdf_BillNotFound() {
         
         assertEquals(storedInterest, dto.getInterest());
         
-        BigDecimal expectedTaxedAmount = amount.add(storedInterest).setScale(2, RoundingMode.HALF_UP);
-        assertEquals(expectedTaxedAmount, dto.getTaxedAmount());
+        BigDecimal expectedTotalAmount = amount.add(storedInterest).add(expectedTaxes).setScale(2, RoundingMode.HALF_UP);
+        assertEquals(expectedTotalAmount, dto.getTotalAmount());
     }
 
     @Test
     void test_EntityDtoUtil_ToBillResponseDto_WithUnpaidBill_ShouldHaveZeroInterest() {
         LocalDate dueDate = LocalDate.now().plusDays(15);
         BigDecimal amount = new BigDecimal("75.00");
+        BigDecimal taxes = TaxCalculationUtil.calculateTotalTaxes(amount);
         
         Bill unpaidBill = Bill.builder()
             .billId("unpaid-test-id")
@@ -1775,9 +1785,9 @@ public void testGenerateBillPdf_BillNotFound() {
 
         BillResponseDTO dto = EntityDtoUtil.toBillResponseDto(unpaidBill);
         
-        assertEquals(BigDecimal.ZERO.setScale(2), dto.getInterest().setScale(2));
+        assertEquals(BigDecimal.ZERO, dto.getInterest());
         
-        assertEquals(amount.setScale(2, RoundingMode.HALF_UP), dto.getTaxedAmount());
+        assertEquals(amount.add(taxes).setScale(2, RoundingMode.HALF_UP), dto.getTotalAmount());
         
         assertTrue(dto.getTimeRemaining() > 0);
         assertEquals(15, dto.getTimeRemaining());
@@ -1787,7 +1797,8 @@ public void testGenerateBillPdf_BillNotFound() {
     void test_EntityDtoUtil_ToBillResponseDto_WithInterestExemptBill_ShouldHaveZeroInterest() {
         LocalDate dueDate = LocalDate.now().minusMonths(1);
         BigDecimal amount = new BigDecimal("200.00");
-        
+        BigDecimal taxes = TaxCalculationUtil.calculateTotalTaxes(amount);
+
         Bill exemptBill = Bill.builder()
             .billId("exempt-test-id")
             .customerId("customer-4")
@@ -1799,10 +1810,10 @@ public void testGenerateBillPdf_BillNotFound() {
 
         BillResponseDTO dto = EntityDtoUtil.toBillResponseDto(exemptBill);
         
-        assertEquals(BigDecimal.ZERO.setScale(2), dto.getInterest().setScale(2));
+        assertEquals(BigDecimal.ZERO, dto.getInterest());
         assertTrue(dto.isInterestExempt());
         
-        assertEquals(amount.setScale(2, RoundingMode.HALF_UP), dto.getTaxedAmount());
+        assertEquals(amount.add(taxes).setScale(2, RoundingMode.HALF_UP), dto.getTotalAmount());
     }
 
     @Test
@@ -1820,7 +1831,7 @@ public void testGenerateBillPdf_BillNotFound() {
         
         assertNull(dto.getAmount());
         assertEquals(BigDecimal.ZERO.setScale(2), dto.getInterest().setScale(2));
-        assertEquals(BigDecimal.ZERO.setScale(2), dto.getTaxedAmount().setScale(2));
+        assertEquals(BigDecimal.ZERO.setScale(2), dto.getTotalAmount().setScale(2));
     }
 
     @Test
@@ -2025,7 +2036,8 @@ public void testGenerateBillPdf_BillNotFound() {
         when(repo.findAllBillsByBillStatus(BillStatus.UNPAID)).thenReturn(Flux.empty());
 
         
-        Mono<BillResponseDTO> result = billService.getBillByBillId("integration-test-id");        StepVerifier.create(result)
+        Mono<BillResponseDTO> result = billService.getBillByBillId("integration-test-id");
+        StepVerifier.create(result)
             .consumeNextWith(dto -> {
                 assertEquals(overdueBill.getBillId(), dto.getBillId());
                 assertEquals(overdueBill.getCustomerId(), dto.getCustomerId());
@@ -2034,9 +2046,11 @@ public void testGenerateBillPdf_BillNotFound() {
                 
                 BigDecimal expectedInterest = InterestCalculationUtil.calculateInterest(overdueBill);
                 assertEquals(expectedInterest, dto.getInterest());
+
+                BigDecimal expectedTaxes = TaxCalculationUtil.calculateTotalTaxes(overdueBill.getAmount());
                 
-                BigDecimal expectedTaxedAmount = amount.add(expectedInterest).setScale(2, RoundingMode.HALF_UP);
-                assertEquals(expectedTaxedAmount, dto.getTaxedAmount());
+                BigDecimal expectedTotalAmount = amount.add(expectedInterest).add(expectedTaxes).setScale(2, RoundingMode.HALF_UP);
+                assertEquals(expectedTotalAmount, dto.getTotalAmount());
             })
             .verifyComplete();
     }
