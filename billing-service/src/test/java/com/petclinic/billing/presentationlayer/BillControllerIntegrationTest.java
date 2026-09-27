@@ -2,11 +2,11 @@ package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.dataaccesslayer.*;
 import com.petclinic.billing.domainclientlayer.CustomerServiceClient;
-import com.petclinic.billing.domainclientlayer.models.CustomerResponseModel;
+import com.petclinic.billing.domainclientlayer.dtos.CustomerResponseDTO;
 import com.petclinic.billing.domainclientlayer.VetServiceClient;
-import com.petclinic.billing.presentationlayer.models.BillRequestModel;
-import com.petclinic.billing.presentationlayer.models.BillResponseModel;
-import com.petclinic.billing.domainclientlayer.models.VetResponseModel;
+import com.petclinic.billing.presentationlayer.dtos.BillRequestDTO;
+import com.petclinic.billing.presentationlayer.dtos.BillResponseDTO;
+import com.petclinic.billing.domainclientlayer.dtos.VetResponseDTO;
 import com.petclinic.billing.util.InterestCalculationUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -182,7 +182,7 @@ class BillControllerIntegrationTest {
     @Test
     void createBill_ShouldReturnCreatedBillWithVetAndOwner() {
         // Arrange
-        BillRequestModel billRequest = new BillRequestModel();
+        BillRequestDTO billRequest = new BillRequestDTO();
         billRequest.setBillStatus(BillStatus.PAID);
         billRequest.setVetId("vet-1");
         billRequest.setCustomerId("cust-1");
@@ -191,11 +191,11 @@ class BillControllerIntegrationTest {
         billRequest.setDueDate(LocalDate.now().plusDays(10));
 
         // Mock Vet + Owner service responses
-        VetResponseModel vet = new VetResponseModel();
+        VetResponseDTO vet = new VetResponseDTO();
         vet.setFirstName("John");
         vet.setLastName("Doe");
 
-        CustomerResponseModel customer = new CustomerResponseModel();
+        CustomerResponseDTO customer = new CustomerResponseDTO();
         customer.setFirstName("Alice");
         customer.setLastName("Smith");
 
@@ -213,7 +213,7 @@ class BillControllerIntegrationTest {
                         .build())
                 .contentType(MediaType.APPLICATION_JSON)
                 .cookie("Bearer", testJwtToken)
-                .body(Mono.just(billRequest), BillRequestModel.class)
+                .body(Mono.just(billRequest), BillRequestDTO.class)
                 .exchange()
                 .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -290,7 +290,7 @@ class BillControllerIntegrationTest {
         billEntity.setCustomerLastName("Doe");
 
         // Mock the OwnerClient call
-        CustomerResponseModel customer = new CustomerResponseModel();
+        CustomerResponseDTO customer = new CustomerResponseDTO();
         customer.setCustomerId(billEntity.getCustomerId());
         customer.setFirstName("John");
         customer.setLastName("Doe");
@@ -486,7 +486,7 @@ class BillControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBodyList(BillResponseModel.class)
+                .expectBodyList(BillResponseDTO.class)
                 .hasSize(5);
     }
 
@@ -515,7 +515,7 @@ class BillControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBodyList(BillResponseModel.class)
+                .expectBodyList(BillResponseDTO.class)
                 .hasSize(0);
     }
 
@@ -594,7 +594,7 @@ class BillControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
-                .expectBodyList(BillResponseModel.class)
+                .expectBodyList(BillResponseDTO.class)
                 .hasSize(5);
     }
 
@@ -604,8 +604,8 @@ class BillControllerIntegrationTest {
 
         repo.save(billEntity).block();
 
-        Publisher<BillResponseModel> setup = repo.findByBillId(billEntity.getBillId())
-                .map(bill -> BillResponseModel.builder()
+        Publisher<BillResponseDTO> setup = repo.findByBillId(billEntity.getBillId())
+                .map(bill -> BillResponseDTO.builder()
                         .billId(bill.getBillId())
                         .customerId(bill.getCustomerId())
                         .vetId(bill.getVetId())
@@ -642,8 +642,8 @@ class BillControllerIntegrationTest {
 
         repo.save(billEntity).block();
 
-        Publisher<BillResponseModel> setup = repo.findByBillId(billEntity.getBillId())
-                .map(bill -> BillResponseModel.builder()
+        Publisher<BillResponseDTO> setup = repo.findByBillId(billEntity.getBillId())
+                .map(bill -> BillResponseDTO.builder()
                         .billId(bill.getBillId())
                         .customerId(bill.getCustomerId())
                         .vetId(bill.getVetId())
@@ -677,8 +677,8 @@ class BillControllerIntegrationTest {
 
         repo.save(billEntity).block();
 
-        Publisher<BillResponseModel> setup = repo.findByBillId(billEntity.getBillId())
-                .map(bill -> BillResponseModel.builder()
+        Publisher<BillResponseDTO> setup = repo.findByBillId(billEntity.getBillId())
+                .map(bill -> BillResponseDTO.builder()
                         .billId(bill.getBillId())
                         .customerId(bill.getCustomerId())
                         .vetId(bill.getVetId())

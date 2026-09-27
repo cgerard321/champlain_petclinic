@@ -1,6 +1,6 @@
 package com.petclinic.billing.domainclientlayer;
 
-import com.petclinic.billing.domainclientlayer.models.CustomerResponseModel;
+import com.petclinic.billing.domainclientlayer.dtos.CustomerResponseDTO;
 import com.petclinic.billing.exceptionshandling.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -21,7 +21,7 @@ public class CustomerServiceClient {
         this.webClient = WebClient.builder()
                 .baseUrl(customerServiceClientBaseURL).build();
     }
-    public Mono<CustomerResponseModel> getCustomerByCustomerId(final String customerId) {
+    public Mono<CustomerResponseDTO> getCustomerByCustomerId(final String customerId) {
         return this.webClient
                 .get()
                 .uri("/{ownerId}", customerId)
@@ -36,6 +36,6 @@ public class CustomerServiceClient {
                 .onStatus(HttpStatus::is5xxServerError, serverResponse ->
                         Mono.error(new ServerException("Server error for customerId: " + customerId))
                 )
-                .bodyToMono(CustomerResponseModel.class);
+                .bodyToMono(CustomerResponseDTO.class);
     }
 }

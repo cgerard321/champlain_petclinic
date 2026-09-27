@@ -1,8 +1,8 @@
 package com.petclinic.billing.mapper;
 
 import com.petclinic.billing.dataaccesslayer.Bill;
-import com.petclinic.billing.presentationlayer.models.BillRequestModel;
-import com.petclinic.billing.presentationlayer.models.BillResponseModel;
+import com.petclinic.billing.presentationlayer.dtos.BillRequestDTO;
+import com.petclinic.billing.presentationlayer.dtos.BillResponseDTO;
 import com.petclinic.billing.dataaccesslayer.BillStatus;
 
 import com.petclinic.billing.util.InterestCalculationUtil;
@@ -17,23 +17,23 @@ import java.util.UUID;
 @Slf4j
 public class BillMapper {
 
-    public static BillResponseModel toBillResponseModel(Bill bill){
-        BillResponseModel billResponseModel =new BillResponseModel();
+    public static BillResponseDTO toBillResponseModel(Bill bill){
+        BillResponseDTO billResponseDTO =new BillResponseDTO();
         //BeanUtils.copyProperties(bill,billResponseDTO);
-        billResponseModel.setBillId(bill.getBillId());
-        billResponseModel.setCustomerId(bill.getCustomerId());
-        billResponseModel.setCustomerFirstName(bill.getCustomerFirstName());
-        billResponseModel.setCustomerLastName(bill.getCustomerLastName());
-        billResponseModel.setVisitType(bill.getVisitType());
-        billResponseModel.setVetId(bill.getVetId());
-        billResponseModel.setVetFirstName(bill.getVetFirstName());
-        billResponseModel.setVetLastName(bill.getVetLastName());
-        billResponseModel.setDate(bill.getDate());
-        billResponseModel.setAmount(bill.getAmount());
-        billResponseModel.setTaxedAmount(bill.getTaxedAmount());
-        billResponseModel.setBillStatus(bill.getBillStatus());
-        billResponseModel.setDueDate(bill.getDueDate());
-        billResponseModel.setInterestExempt(bill.isInterestExempt());
+        billResponseDTO.setBillId(bill.getBillId());
+        billResponseDTO.setCustomerId(bill.getCustomerId());
+        billResponseDTO.setCustomerFirstName(bill.getCustomerFirstName());
+        billResponseDTO.setCustomerLastName(bill.getCustomerLastName());
+        billResponseDTO.setVisitType(bill.getVisitType());
+        billResponseDTO.setVetId(bill.getVetId());
+        billResponseDTO.setVetFirstName(bill.getVetFirstName());
+        billResponseDTO.setVetLastName(bill.getVetLastName());
+        billResponseDTO.setDate(bill.getDate());
+        billResponseDTO.setAmount(bill.getAmount());
+        billResponseDTO.setTaxedAmount(bill.getTaxedAmount());
+        billResponseDTO.setBillStatus(bill.getBillStatus());
+        billResponseDTO.setDueDate(bill.getDueDate());
+        billResponseDTO.setInterestExempt(bill.isInterestExempt());
         
         // Use stored interest value if available, otherwise calculate
         BigDecimal interest;
@@ -44,28 +44,28 @@ public class BillMapper {
         } else {
             interest = InterestCalculationUtil.calculateInterest(bill);
         }
-        billResponseModel.setInterest(interest);
+        billResponseDTO.setInterest(interest);
         
         // Calculate final amount
         if (bill.getAmount() != null) {
             BigDecimal totalWithInterest = bill.getAmount().add(interest);
-            billResponseModel.setTaxedAmount(totalWithInterest.setScale(2, java.math.RoundingMode.HALF_UP));
+            billResponseDTO.setTaxedAmount(totalWithInterest.setScale(2, java.math.RoundingMode.HALF_UP));
         } else {
             // If amount is null, set taxedAmount to just the interest (or zero if no interest)
-            billResponseModel.setTaxedAmount(interest.setScale(2, java.math.RoundingMode.HALF_UP));
+            billResponseDTO.setTaxedAmount(interest.setScale(2, java.math.RoundingMode.HALF_UP));
         }
         
-        billResponseModel.setTimeRemaining(timeRemaining(bill));
-        billResponseModel.setArchive(bill.getIsArchived());
+        billResponseDTO.setTimeRemaining(timeRemaining(bill));
+        billResponseDTO.setArchive(bill.getIsArchived());
 
-        log.info("Mapped BillResponseDTO: {}", billResponseModel);
+        log.info("Mapped BillResponseDTO: {}", billResponseDTO);
 
-        return billResponseModel;
+        return billResponseDTO;
     }
 
-    public static Bill toBillEntity(BillRequestModel billRequestModel){
+    public static Bill toBillEntity(BillRequestDTO billRequestDTO){
         Bill bill = new Bill();
-        BeanUtils.copyProperties(billRequestModel,bill);
+        BeanUtils.copyProperties(billRequestDTO,bill);
         if (bill.getIsArchived() == null) {
             bill.setIsArchived(false);
         }

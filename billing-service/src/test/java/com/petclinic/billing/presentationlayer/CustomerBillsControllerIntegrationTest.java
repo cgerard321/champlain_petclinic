@@ -5,11 +5,11 @@ import com.petclinic.billing.dataaccesslayer.*;
 import com.petclinic.billing.domainclientlayer.CustomerServiceClient;
 import com.petclinic.billing.domainclientlayer.Auth.AuthServiceClient;
 import com.petclinic.billing.domainclientlayer.Auth.UserDetails;
-import com.petclinic.billing.domainclientlayer.models.CustomerResponseModel;
+import com.petclinic.billing.domainclientlayer.dtos.CustomerResponseDTO;
 import com.petclinic.billing.domainclientlayer.Mailing.Mail;
 import com.petclinic.billing.domainclientlayer.Mailing.MailService;
-import com.petclinic.billing.presentationlayer.models.BillResponseModel;
-import com.petclinic.billing.presentationlayer.models.PaymentRequestModel;
+import com.petclinic.billing.presentationlayer.dtos.BillResponseDTO;
+import com.petclinic.billing.presentationlayer.dtos.PaymentRequestDTO;
 import com.petclinic.billing.util.InterestCalculationUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -82,7 +82,7 @@ public class CustomerBillsControllerIntegrationTest {
 
         Publisher<Bill> setup = billRepository.deleteAll().thenMany(billRepository.save(bill));
 
-        CustomerResponseModel customer = new CustomerResponseModel();
+        CustomerResponseDTO customer = new CustomerResponseDTO();
         customer.setCustomerId(bill.getCustomerId());
         customer.setFirstName("John");
         customer.setLastName("Doe");
@@ -178,7 +178,7 @@ public class CustomerBillsControllerIntegrationTest {
 
         billRepository.deleteAll().then(billRepository.save(bill)).block();
 
-        PaymentRequestModel paymentRequest = new PaymentRequestModel("1234567812345678", "123", "12/25");
+        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/25");
 
         client.post()
                 .uri("/bills/customer/{customerId}/bills/{billId}/pay", bill.getCustomerId(), bill.getBillId())
@@ -187,7 +187,7 @@ public class CustomerBillsControllerIntegrationTest {
                 .bodyValue(paymentRequest)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(BillResponseModel.class)
+                .expectBody(BillResponseDTO.class)
                 .consumeWith(response -> {
                     assert response.getResponseBody() != null;
                     assertEquals(BillStatus.PAID, response.getResponseBody().getBillStatus());
@@ -199,7 +199,7 @@ public class CustomerBillsControllerIntegrationTest {
 
     @Test
     void payBill_NonExistentBill_ShouldReturnNotFound() {
-        PaymentRequestModel paymentRequest = new PaymentRequestModel("1234567812345678", "123", "12/25");
+        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/25");
 
         client.post()
                 .uri("/bills/customer/{customerId}/bills/{billId}/pay", "cust-404", "bill-404")

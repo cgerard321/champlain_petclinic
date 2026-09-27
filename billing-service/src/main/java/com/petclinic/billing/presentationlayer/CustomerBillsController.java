@@ -1,9 +1,9 @@
 package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.businesslayer.BillService;
-import com.petclinic.billing.presentationlayer.models.BillResponseModel;
+import com.petclinic.billing.presentationlayer.dtos.BillResponseDTO;
 import com.petclinic.billing.dataaccesslayer.BillStatus;
-import com.petclinic.billing.presentationlayer.models.PaymentRequestModel;
+import com.petclinic.billing.presentationlayer.dtos.PaymentRequestDTO;
 import com.petclinic.billing.exceptionshandling.exceptions.InvalidPaymentException;
 import lombok.extern.slf4j.Slf4j;
 import java.math.BigDecimal;
@@ -32,19 +32,19 @@ public class CustomerBillsController {
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<BillResponseModel> getBillsByCustomerId(@PathVariable("customerId") String customerId) {
+    public Flux<BillResponseDTO> getBillsByCustomerId(@PathVariable("customerId") String customerId) {
         return billService.getBillsByCustomerId(customerId);
     }
 
     @GetMapping(value = "/{billId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<BillResponseModel> getBillDetails(@PathVariable("customerId") String customerId,
-                                                  @PathVariable("billId") String billId) {
+    public Mono<BillResponseDTO> getBillDetails(@PathVariable("customerId") String customerId,
+                                                @PathVariable("billId") String billId) {
         return billService.getBillByCustomerIdAndBillId(customerId, billId);
     }
 
     @GetMapping(value = "/status", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<BillResponseModel> getBillsByStatus(@PathVariable("customerId") String customerId,
-                                                    @RequestParam("status") BillStatus status) {
+    public Flux<BillResponseDTO> getBillsByStatus(@PathVariable("customerId") String customerId,
+                                                  @RequestParam("status") BillStatus status) {
         return billService.getBillsByCustomerIdAndStatus(customerId, status);
     }
 
@@ -72,7 +72,7 @@ public class CustomerBillsController {
     }
 
     @GetMapping(value = "/filter-by-amount", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<BillResponseModel> getBillsByAmountRange(
+    public Flux<BillResponseDTO> getBillsByAmountRange(
             @PathVariable("customerId") String customerId,
             @RequestParam("minAmount") BigDecimal minAmount,
             @RequestParam("maxAmount") BigDecimal maxAmount) {
@@ -80,7 +80,7 @@ public class CustomerBillsController {
     }
 
     @GetMapping(value = "/filter-by-due-date", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<BillResponseModel> getBillsByDueDateRange(
+    public Flux<BillResponseDTO> getBillsByDueDateRange(
             @PathVariable("customerId") String customerId,
             @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
@@ -89,7 +89,7 @@ public class CustomerBillsController {
     }
 
     @GetMapping(value = "/filter-by-date", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<BillResponseModel> getBillsByCustomerIdAndDateRange(
+    public Flux<BillResponseDTO> getBillsByCustomerIdAndDateRange(
             @PathVariable("customerId") String customerId,
             @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
@@ -97,10 +97,10 @@ public class CustomerBillsController {
     }
 
     @PostMapping("/{billId}/pay")
-    public Mono<ResponseEntity<BillResponseModel>> payBill(
+    public Mono<ResponseEntity<BillResponseDTO>> payBill(
             @PathVariable String customerId,
             @PathVariable String billId,
-            @RequestBody PaymentRequestModel paymentRequest,
+            @RequestBody PaymentRequestDTO paymentRequest,
             @CookieValue("Bearer") String jwtToken) {
         return billService.processPayment(customerId, billId, paymentRequest,jwtToken)
                 .map(ResponseEntity::ok)

@@ -2,7 +2,7 @@ package com.petclinic.billing.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.billing.domainclientlayer.models.CustomerResponseModel;
+import com.petclinic.billing.domainclientlayer.dtos.CustomerResponseDTO;
 import com.petclinic.billing.exceptionshandling.exceptions.NotFoundException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -48,14 +48,14 @@ public class CustomerServiceClientUnitTest {
     @Test
     public void getCustomerByCustomerId_Valid() throws JsonProcessingException {
         String customerId = "123";
-        CustomerResponseModel customerResponseModel = new CustomerResponseModel(customerId, "John", "Doe", "address", "city", "514"/*, "string", null, null*/);
+        CustomerResponseDTO customerResponseDTO = new CustomerResponseDTO(customerId, "John", "Doe", "address", "city", "514"/*, "string", null, null*/);
 
         mockBackEnd.enqueue(new MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(objectMapper.writeValueAsString(customerResponseModel))
+                .setBody(objectMapper.writeValueAsString(customerResponseDTO))
         );
 
-        Mono<CustomerResponseModel> customerResponseDTOMono = customerServiceClient.getCustomerByCustomerId(customerId);
+        Mono<CustomerResponseDTO> customerResponseDTOMono = customerServiceClient.getCustomerByCustomerId(customerId);
 
         StepVerifier.create(customerResponseDTOMono)
                 .expectNextMatches(customerResponseDTO1 -> customerResponseDTO1.getCustomerId().equals(customerId))
@@ -71,7 +71,7 @@ public class CustomerServiceClientUnitTest {
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .addHeader("Content-Type", "application/json"));
 
-        Mono<CustomerResponseModel> result = customerServiceClient.getCustomerByCustomerId(invalidId);
+        Mono<CustomerResponseDTO> result = customerServiceClient.getCustomerByCustomerId(invalidId);
 
         StepVerifier.create(result)
                 .expectErrorMatches(throwable -> throwable instanceof NotFoundException && throwable.getMessage().equals("Customer not found with customerId: " + invalidId))
@@ -87,7 +87,7 @@ public class CustomerServiceClientUnitTest {
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .addHeader("Content-Type", "application/json"));
 
-        Mono<CustomerResponseModel> result = customerServiceClient.getCustomerByCustomerId(customerId);
+        Mono<CustomerResponseDTO> result = customerServiceClient.getCustomerByCustomerId(customerId);
 
         StepVerifier.create(result)
                 .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Client error for customerId: " + customerId))
@@ -103,7 +103,7 @@ public class CustomerServiceClientUnitTest {
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .addHeader("Content-Type", "application/json"));
 
-        Mono<CustomerResponseModel> result = customerServiceClient.getCustomerByCustomerId(customerId);
+        Mono<CustomerResponseDTO> result = customerServiceClient.getCustomerByCustomerId(customerId);
 
         StepVerifier.create(result)
                 .expectErrorMatches(throwable -> throwable instanceof ServerException && throwable.getMessage().equals("Server error for customerId: " + customerId))

@@ -2,7 +2,7 @@ package com.petclinic.billing.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.billing.domainclientlayer.models.VetResponseModel;
+import com.petclinic.billing.domainclientlayer.dtos.VetResponseDTO;
 import com.petclinic.billing.exceptionshandling.exceptions.NotFoundException;
 import okhttp3.mockwebserver.MockResponse;
 import org.junit.jupiter.api.AfterAll;
@@ -45,14 +45,14 @@ public class VetServiceClientUnitTest {
     @Test
     public void getVetByVetId_Valid() throws JsonProcessingException {
         String vetId = "123";
-        VetResponseModel vetResponseModel = new VetResponseModel(vetId, "1", "John", "Doe", "email", "1234567890"/*, "resume", true, null*/);
+        VetResponseDTO vetResponseDTO = new VetResponseDTO(vetId, "1", "John", "Doe", "email", "1234567890"/*, "resume", true, null*/);
 
         mockBackEnd.enqueue(new MockResponse()
                         .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .setBody(objectMapper.writeValueAsString(vetResponseModel))
+                        .setBody(objectMapper.writeValueAsString(vetResponseDTO))
         );
 
-        Mono<VetResponseModel> result = vetServiceClient.getVetByVetId(vetId);
+        Mono<VetResponseDTO> result = vetServiceClient.getVetByVetId(vetId);
         StepVerifier.create(result)
                 .expectNextMatches(response -> response.getVetId().equals(vetId) &&
                         response.getFirstName().equals("John") &&
@@ -68,7 +68,7 @@ public class VetServiceClientUnitTest {
                         .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .setResponseCode(404)
                         .addHeader("Content-Type", "application/json"));
-        Mono<VetResponseModel> result = vetServiceClient.getVetByVetId(invalidId);
+        Mono<VetResponseDTO> result = vetServiceClient.getVetByVetId(invalidId);
 
         StepVerifier.create(result)
                 .expectErrorMatches(throwable -> throwable instanceof NotFoundException && throwable.getMessage().equals("Vet not found with vetId: " + invalidId))
@@ -84,7 +84,7 @@ public class VetServiceClientUnitTest {
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .addHeader("Content-Type", "application/json"));
 
-        Mono<VetResponseModel> result = vetServiceClient.getVetByVetId(vetId);
+        Mono<VetResponseDTO> result = vetServiceClient.getVetByVetId(vetId);
 
         StepVerifier.create(result)
                 .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Client error for vetId: " + vetId))
@@ -100,7 +100,7 @@ public class VetServiceClientUnitTest {
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .addHeader("Content-Type", "application/json"));
 
-        Mono<VetResponseModel> result = vetServiceClient.getVetByVetId(vetId);
+        Mono<VetResponseDTO> result = vetServiceClient.getVetByVetId(vetId);
 
         StepVerifier.create(result)
                 .expectErrorMatches(throwable -> throwable instanceof ServerException && throwable.getMessage().equals("Server error for vetId: " + vetId))

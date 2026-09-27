@@ -1,4 +1,4 @@
-package com.petclinic.billing.presentationlayer.models;
+package com.petclinic.billing.presentationlayer.dtos;
 
 import lombok.*;
 
@@ -8,7 +8,7 @@ import lombok.*;
 @Builder
 @Setter
 @Getter
-public class PaymentRequestModel {
+public class PaymentRequestDTO {
     private String cardNumber;
     private String cvv;
     private String expirationDate;
