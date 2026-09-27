@@ -72,6 +72,7 @@ class UserControllerV1UnitTest {
     private final String EXISTING_USER_ID_1 = "be08dfa1-25d4-4352-92df-5dc37c2464c7";
     private final String EXISTING_USER_ID_2 = "be08dfa1-25d4-4352-92df-5dc37c2464c7";
     private final String NON_EXISTING_USER_ID = "be08dfa1-25d4-4352-92df-5dc37c246md8";
+    private final List<String> ROLES_LIST = List.of("OWNER");
 
     private final String UPDATED_USERNAME = "updatedTestUser";
 
@@ -545,6 +546,65 @@ class UserControllerV1UnitTest {
 
         Mockito.verify(authServiceClient, times(1))
                 .createVetUser(any(Mono.class));
+    }
+
+    @Test
+    @DisplayName("Given a valid token with a body, /jwt should return 200 with user info")
+    void whenValidateToken_withBody_thenReturnOk() {
+        TokenResponseDTO tokenResponseDTO = TokenResponseDTO.builder()
+                .userId(EXISTING_USER_ID_1)
+                .username(USER_DETAILS_1.getUsername())
+                .email(USER_DETAILS_1.getEmail())
+                .roles(ROLES_LIST)
+                .build();
+
+        when(authServiceClient.validateToken(TOKEN))
+                .thenReturn(Mono.just(ResponseEntity.ok(tokenResponseDTO)));
+
+        client.get()
+                .uri("/api/gateway/users/jwt")
+                .cookie("Bearer", TOKEN)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ValidateUserTokenResponse.class)
+                .value(res -> {
+                    assertEquals(EXISTING_USER_ID_1, res.getUserId());
+                    assertEquals(USER_DETAILS_1.getUsername(), res.getUsername());
+                    assertEquals(USER_DETAILS_1.getEmail(), res.getEmail());
+                    assertEquals(ROLES_LIST, res.getRoles());
+                });
+
+        verify(authServiceClient).validateToken(TOKEN);
+    }
+
+    @Test
+    @DisplayName("Given a response entity with a null body, /jwt should return 401")
+    void whenValidateToken_withNullBody_thenReturnUnauthorized() {
+        when(authServiceClient.validateToken(TOKEN))
+                .thenReturn(Mono.just(ResponseEntity.ok(null)));
+
+        client.get()
+                .uri("/api/gateway/users/jwt")
+                .cookie("Bearer", TOKEN)
+                .exchange()
+                .expectStatus().isUnauthorized();
+
+        verify(authServiceClient).validateToken(TOKEN);
+    }
+
+    @Test
+    @DisplayName("Given an empty Mono from auth service, /jwt should return 401")
+    void whenValidateToken_withEmptyMono_thenReturnUnauthorized() {
+        when(authServiceClient.validateToken(TOKEN))
+                .thenReturn(Mono.empty());
+
+        client.get()
+                .uri("/api/gateway/users/jwt")
+                .cookie("Bearer", TOKEN)
+                .exchange()
+                .expectStatus().isUnauthorized();
+
+        verify(authServiceClient).validateToken(TOKEN);
     }
 
     //    @Test
