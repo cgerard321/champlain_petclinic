@@ -1,7 +1,7 @@
-package com.petclinic.bffapigateway.presentationlayer.v1.Owners;
+package com.petclinic.bffapigateway.presentationlayer.v1.Customers;
 
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.CustomerRequestDTO;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.CustomerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.presentationlayer.v1.mockservers.MockServerConfigCustomersService;
 import com.petclinic.bffapigateway.presentationlayer.v1.mockservers.MockServerConfigAuthService;
@@ -15,7 +15,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import java.util.List;
@@ -27,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @ActiveProfiles("test")
 @AutoConfigureWebTestClient
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class OwnerControllerV1IntegrationTests {
+public class CustomerControllerV1IntegrationTests {
 
     @Autowired
     private WebTestClient webTestClient;
@@ -35,12 +34,12 @@ public class OwnerControllerV1IntegrationTests {
     private MockServerConfigCustomersService mockServerConfigCustomersService;
     private MockServerConfigAuthService mockServerConfigAuthService;
 
-    private final String OWNER_BASE_PATH = "/api/gateway/owners";
-    private final String OWNER_ID = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a";
+    private final String CUSTOMER_BASE_PATH = "/api/gateway/customers";
+    private final String CUSTOMER_ID = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a";
     private final String PET_ID = "pet-id-456";
 
     // DTOs matching the mock server expectations
-    OwnerRequestDTO ownerUpdateRequest = OwnerRequestDTO.builder()
+    CustomerRequestDTO customerUpdateRequest = CustomerRequestDTO.builder()
             .firstName("Betty")
             .lastName("Davis")
             .address("638 Cardinal Ave.")
@@ -49,8 +48,8 @@ public class OwnerControllerV1IntegrationTests {
             .telephone("6085551749")
             .build();
 
-    OwnerResponseDTO petOwnerResponse = OwnerResponseDTO.builder()
-            .ownerId(OWNER_ID)
+    CustomerResponseDTO petOwnerResponse = CustomerResponseDTO.builder()
+            .customerId(CUSTOMER_ID)
             .firstName("Betty")
             .lastName("Davis")
             .address("638 Cardinal Ave.")
@@ -62,7 +61,7 @@ public class OwnerControllerV1IntegrationTests {
     PetResponseDTO petResponse = PetResponseDTO.builder()
             .petId(PET_ID)
             .name("Buster")
-            .ownerId(OWNER_ID)
+            .ownerId(CUSTOMER_ID)
             .petTypeId("pt-1")
             .build();
 
@@ -70,11 +69,11 @@ public class OwnerControllerV1IntegrationTests {
     @BeforeEach
     public void startMockServer() {
         mockServerConfigCustomersService = new MockServerConfigCustomersService();
-        mockServerConfigCustomersService.registerGetAllOwnersEndpoint();
-        mockServerConfigCustomersService.registerGetOwnerByIdEndpoint();
-        mockServerConfigCustomersService.registerUpdateOwnerEndpoint();
-        mockServerConfigCustomersService.registerDeleteOwnerEndpoint();
-        mockServerConfigCustomersService.registerGetPetForOwnerEndpoint(OWNER_ID, PET_ID, petResponse);
+        mockServerConfigCustomersService.registerGetAllCustomersEndpoint();
+        mockServerConfigCustomersService.registerGetCustomerByIdEndpoint();
+        mockServerConfigCustomersService.registerUpdateCustomerEndpoint();
+        mockServerConfigCustomersService.registerDeleteCustomerEndpoint();
+        mockServerConfigCustomersService.registerGetPetForOwnerEndpoint(CUSTOMER_ID, PET_ID, petResponse);
 
         mockServerConfigAuthService = new MockServerConfigAuthService();
         mockServerConfigAuthService.registerValidateTokenForAdminEndpoint();
@@ -87,60 +86,60 @@ public class OwnerControllerV1IntegrationTests {
     }
 
     @Test
-    void whenGetAllOwners_WithValidClient_thenReturnResult() {
+    void whenGetAllCustomers_WithValidClient_thenReturnResult() {
 
-        Mono<List<OwnerResponseDTO>> result = webTestClient.get()
-                .uri(OWNER_BASE_PATH)
+        Mono<List<CustomerResponseDTO>> result = webTestClient.get()
+                .uri(CUSTOMER_BASE_PATH)
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.valueOf("text/event-stream;charset=UTF-8"))
-                .returnResult(OwnerResponseDTO.class)
+                .returnResult(CustomerResponseDTO.class)
                 .getResponseBody()
                 .collectList()
                 .single();
 
         StepVerifier
                 .create(result)
-                .expectNextMatches(ownerResponseDTOS -> {
-                    assertNotNull(ownerResponseDTOS);
-                    assertThat(ownerResponseDTOS.size()).isEqualTo(3);
-                    assertThat(ownerResponseDTOS.get(0).getFirstName()).isEqualTo("John");
+                .expectNextMatches(customerResponseDTOS -> {
+                    assertNotNull(customerResponseDTOS);
+                    assertThat(customerResponseDTOS.size()).isEqualTo(3);
+                    assertThat(customerResponseDTOS.get(0).getFirstName()).isEqualTo("John");
                     return true;
                 })
                 .verifyComplete();
     }
 
     @Test
-    void whenGetOwnerDetails_withValidId_thenReturnOwner() {
-        Mono<OwnerResponseDTO> result = webTestClient.get()
-                .uri(OWNER_BASE_PATH + "/{ownerId}", OWNER_ID)
+    void whenGetCustomerDetails_withValidId_thenReturnCustomer() {
+        Mono<CustomerResponseDTO> result = webTestClient.get()
+                .uri(CUSTOMER_BASE_PATH + "/{customerId}", CUSTOMER_ID)
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .returnResult(OwnerResponseDTO.class)
+                .returnResult(CustomerResponseDTO.class)
                 .getResponseBody()
                 .single();
 
         StepVerifier
                 .create(result)
-                .expectNextMatches(owner -> {
-                    assertNotNull(owner);
-                    assertThat(owner.getOwnerId()).isEqualTo(OWNER_ID);
-                    assertThat(owner.getFirstName()).isEqualTo("Betty");
+                .expectNextMatches(customer -> {
+                    assertNotNull(customer);
+                    assertThat(customer.getCustomerId()).isEqualTo(CUSTOMER_ID);
+                    assertThat(customer.getFirstName()).isEqualTo("Betty");
                     return true;
                 })
                 .verifyComplete();
     }
 
     @Test
-    void whenDeleteOwner_withValidId_thenReturnNoContent() {
+    void whenDeleteCustomer_withValidId_thenReturnNoContent() {
 
         webTestClient.delete()
-                .uri(OWNER_BASE_PATH + "/{ownerId}", OWNER_ID)
+                .uri(CUSTOMER_BASE_PATH + "/{customerId}", CUSTOMER_ID)
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .exchange()
                 .expectStatus().isNotFound();
@@ -149,7 +148,7 @@ public class OwnerControllerV1IntegrationTests {
     @Test
     void whenGetPet_withValidOwnerAndPetId_thenReturnPet() {
         Mono<PetResponseDTO> result = webTestClient.get()
-                .uri(OWNER_BASE_PATH + "/{ownerId}/pets/{petId}", OWNER_ID, PET_ID)
+                .uri(CUSTOMER_BASE_PATH + "/{ownerId}/pets/{petId}", CUSTOMER_ID, PET_ID)
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -173,19 +172,19 @@ public class OwnerControllerV1IntegrationTests {
     @Test
     void whenDeletePet_withValidOwnerAndPetId_thenReturnNotFound() {
         webTestClient.delete()
-                .uri(OWNER_BASE_PATH + "/{ownerId}/pets/{petId}", OWNER_ID, PET_ID)
+                .uri(CUSTOMER_BASE_PATH + "/{ownerId}/pets/{petId}", CUSTOMER_ID, PET_ID)
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .exchange()
                 .expectStatus().isNotFound();
     }
 
     @Test
-    void whenGetOwnerWithPhotoIntegration_thenReturnOwnerWithPhoto() {
-        mockServerConfigCustomersService.clearExpectationsForOwner(OWNER_ID);
+    void whenGetCustomerWithPhotoIntegration_thenReturnCustomerWithPhoto() {
+        mockServerConfigCustomersService.clearExpectationsForCustomer(CUSTOMER_ID);
         
-        String mockOwnerJson = """
+        String mockCustomerJson = """
             {
-                "ownerId": "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a",
+                "customerId": "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a",
                 "firstName": "John",
                 "lastName": "Doe",
                 "photo": {
@@ -196,35 +195,35 @@ public class OwnerControllerV1IntegrationTests {
                 }
             }
             """;
-        mockServerConfigCustomersService.registerGetOwnerWithPhotoEndpoint(OWNER_ID, mockOwnerJson);
+        mockServerConfigCustomersService.registerGetCustomerWithPhotoEndpoint(CUSTOMER_ID, mockCustomerJson);
 
-        Mono<OwnerResponseDTO> result = webTestClient.get()
-                .uri(OWNER_BASE_PATH + "/{ownerId}?includePhoto=true", OWNER_ID)
+        Mono<CustomerResponseDTO> result = webTestClient.get()
+                .uri(CUSTOMER_BASE_PATH + "/detail/{customerId}?includePhoto=true", CUSTOMER_ID)
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .returnResult(OwnerResponseDTO.class)
+                .returnResult(CustomerResponseDTO.class)
                 .getResponseBody()
                 .single();
 
         StepVerifier.create(result)
-                .expectNextMatches(owner -> 
-                    owner.getOwnerId().equals("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a") &&
-                    owner.getFirstName().equals("John") &&
-                    owner.getLastName().equals("Doe") &&
-                    owner.getPhoto() != null &&
-                    owner.getPhoto().getFileType().equals("image/png"))
+                .expectNextMatches(customer ->
+                    customer.getCustomerId().equals("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a") &&
+                    customer.getFirstName().equals("John") &&
+                    customer.getLastName().equals("Doe") &&
+                    customer.getPhoto() != null &&
+                    customer.getPhoto().getFileType().equals("image/png"))
                 .verifyComplete();
     }
 
     @Test
-    void whenGetOwnerPhotoIntegrationNotFound_thenReturn404() {
-        mockServerConfigCustomersService.registerGetOwnerPhotoEndpoint(OWNER_ID, null);
+    void whenGetCustomerPhotoIntegrationNotFound_thenReturn404() {
+        mockServerConfigCustomersService.registerGetCustomerPhotoEndpoint(CUSTOMER_ID, null);
 
         webTestClient.get()
-                .uri(OWNER_BASE_PATH + "/{ownerId}/photos", OWNER_ID)
+                .uri(CUSTOMER_BASE_PATH + "/{customerId}/photos", CUSTOMER_ID)
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .accept(MediaType.IMAGE_PNG)
                 .exchange()
@@ -241,7 +240,7 @@ public class OwnerControllerV1IntegrationTests {
         mockServerConfigCustomersService.registerDeletePetPhotoEndpoint(PET_ID, petResponseDTO);
 
         webTestClient.patch()
-                .uri(OWNER_BASE_PATH + "/{ownerId}/pets/{petId}/photo", OWNER_ID, PET_ID)
+                .uri(CUSTOMER_BASE_PATH + "/{ownerId}/pets/{petId}/photo", CUSTOMER_ID, PET_ID)
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -260,7 +259,7 @@ public class OwnerControllerV1IntegrationTests {
         mockServerConfigCustomersService.registerDeletePetPhotoEndpoint(PET_ID, null);
 
         webTestClient.patch()
-                .uri(OWNER_BASE_PATH + "/{ownerId}/pets/{petId}/photo", OWNER_ID, PET_ID)
+                .uri(CUSTOMER_BASE_PATH + "/{ownerId}/pets/{petId}/photo", CUSTOMER_ID, PET_ID)
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -270,7 +269,7 @@ public class OwnerControllerV1IntegrationTests {
     @Test
     void whenDeletePetPhotoForOwnerIntegration_withoutAuth_thenReturnUnauthorized() {
         webTestClient.patch()
-                .uri(OWNER_BASE_PATH + "/{ownerId}/pets/{petId}/photo", OWNER_ID, PET_ID)
+                .uri(CUSTOMER_BASE_PATH + "/{ownerId}/pets/{petId}/photo", CUSTOMER_ID, PET_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isUnauthorized();

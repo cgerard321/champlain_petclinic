@@ -1,6 +1,6 @@
 package com.petclinic.bffapigateway.presentationlayer.v2;
 
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.CustomerResponseDTO;
 import com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService;
 import com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigCustomersService;
 import org.junit.jupiter.api.*;
@@ -52,9 +52,9 @@ class OwnerControllerIntegrationTest {
     
     @Test
     public void whenDeleteOwner_asAdmin_thenReturnOwnerResponse() {
-        // Mock data to simulate the OwnerResponseDTO
-        OwnerResponseDTO expectedOwner = new OwnerResponseDTO();
-        expectedOwner.setOwnerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a");
+        // Mock data to simulate the CustomerResponseDTO
+        CustomerResponseDTO expectedOwner = new CustomerResponseDTO();
+        expectedOwner.setCustomerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a");
         expectedOwner.setFirstName("Betty");
         expectedOwner.setLastName("Davis");
         expectedOwner.setAddress("638 Cardinal Ave.");
@@ -62,7 +62,7 @@ class OwnerControllerIntegrationTest {
         expectedOwner.setProvince("Quebec");
         expectedOwner.setTelephone("6085551749");
 
-        // Perform the DELETE request and expect OwnerResponseDTO in the body
+        // Perform the DELETE request and expect CustomerResponseDTO in the body
         webTestClient.delete()
                 .uri("/api/v2/gateway/owners/{ownerId}", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
                 .cookie("Bearer", "valid-test-token-for-valid-admin")
@@ -70,9 +70,9 @@ class OwnerControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isOk()  // Now we expect a 200 OK response, not 204 NO_CONTENT
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(OwnerResponseDTO.class)
+                .expectBody(CustomerResponseDTO.class)
                 .value(ownerResponse -> {
-                    assertThat(ownerResponse.getOwnerId()).isEqualTo(expectedOwner.getOwnerId());
+                    assertThat(ownerResponse.getCustomerId()).isEqualTo(expectedOwner.getCustomerId());
                     assertThat(ownerResponse.getFirstName()).isEqualTo(expectedOwner.getFirstName());
                     assertThat(ownerResponse.getLastName()).isEqualTo(expectedOwner.getLastName());
                     assertThat(ownerResponse.getAddress()).isEqualTo(expectedOwner.getAddress());

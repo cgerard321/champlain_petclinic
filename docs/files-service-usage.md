@@ -199,7 +199,7 @@ Good Example from Customer-Service's Controller:
     @GetMapping("/{ownerId}")
     public Mono<ResponseEntity<OwnerResponseDTO>> getOwnerByOwnerId(@PathVariable String ownerId, @RequestParam(required = false, defaultValue = "false") boolean includePhoto) {
         return ownerService.getOwnerByOwnerId(ownerId, includePhoto)
-                .map(ownerResponseDTO -> ResponseEntity.status(HttpStatus.OK).body(ownerResponseDTO))
+                .map(customerResponseDTO -> ResponseEntity.status(HttpStatus.OK).body(customerResponseDTO))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 ```
@@ -273,7 +273,7 @@ Good Example from Customer Api-gateway Controller:
     @GetMapping(value = "/{ownerId}")
     public Mono<ResponseEntity<OwnerResponseDTO>> getOwnerDetails(final @PathVariable String ownerId, @RequestParam(required = false) boolean includeImage) {
         return customersServiceClient.getOwner(ownerId, includeImage)
-                .map(ownerResponseDTO -> ResponseEntity.status(HttpStatus.OK).body(ownerResponseDTO))
+                .map(customerResponseDTO -> ResponseEntity.status(HttpStatus.OK).body(customerResponseDTO))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 ```

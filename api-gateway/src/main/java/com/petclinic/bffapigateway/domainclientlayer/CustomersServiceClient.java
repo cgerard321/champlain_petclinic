@@ -1,8 +1,8 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.CustomerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Files.FileDetails;
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.CustomerRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,32 +34,32 @@ public class CustomersServiceClient {
         customersServiceUrl = "http://" + customersServiceHost + ":" + customersServicePort;
     }
 
-    public Mono<OwnerResponseDTO> getCustomer(final String customerId) {
+    public Mono<CustomerResponseDTO> getCustomer(final String customerId) {
         return webClientBuilder.build().get()
                 .uri(customersServiceUrl + "/customers/" + customerId)
                 .retrieve()
-                .bodyToMono(OwnerResponseDTO.class);
+                .bodyToMono(CustomerResponseDTO.class);
     }
 
-    public Mono<OwnerResponseDTO> getCustomer(final String customerId, boolean includePhoto) {
+    public Mono<CustomerResponseDTO> getCustomer(final String customerId, boolean includePhoto) {
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(customersServiceUrl + "/customers/" + customerId);
         builder.queryParam("includePhoto", includePhoto);
         
         return webClientBuilder.build().get()
                 .uri(builder.build().toUri())
                 .retrieve()
-                .bodyToMono(OwnerResponseDTO.class);
+                .bodyToMono(CustomerResponseDTO.class);
     }
 
-    public Flux<OwnerResponseDTO> getAllCustomers() {
+    public Flux<CustomerResponseDTO> getAllCustomers() {
         return webClientBuilder.build().get()
                 .uri(customersServiceUrl + "/customers")
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
-                .bodyToFlux(OwnerResponseDTO.class);
+                .bodyToFlux(CustomerResponseDTO.class);
     }
 
-    public Flux<OwnerResponseDTO> getCustomersByPagination(Optional<Integer> page, Optional<Integer> size, String customerId, String firstName, String lastName, String phoneNumber, String city) {
+    public Flux<CustomerResponseDTO> getCustomersByPagination(Optional<Integer> page, Optional<Integer> size, String customerId, String firstName, String lastName, String phoneNumber, String city) {
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(customersServiceUrl + "/customers/customers-pagination");
 
@@ -88,7 +88,7 @@ public class CustomersServiceClient {
                 .uri(builder.build().toUri())
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
-                .bodyToFlux(OwnerResponseDTO.class);
+                .bodyToFlux(CustomerResponseDTO.class);
     }
 
     public Mono<Long> getTotalNumberOfCustomers(){
@@ -99,7 +99,7 @@ public class CustomersServiceClient {
     }
 
     public Mono<Long> getTotalNumberOfCustomersWithFilters(String customerId, String firstName, String lastName, String phoneNumber, String city){
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(customersServiceUrl + "/owners/owners-filtered-count");
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(customersServiceUrl + "/customers/customers-filtered-count");
 
         // Add query parameters conditionally if they are not null or empty
         if (customerId != null && !customerId.isEmpty()) {
@@ -126,32 +126,32 @@ public class CustomersServiceClient {
     }
 
 
-    public Mono<OwnerResponseDTO> updateOwner(String ownerId, Mono<OwnerRequestDTO> ownerRequestDTO) {
-        return ownerRequestDTO.flatMap(requestDTO ->
+    public Mono<CustomerResponseDTO> updateCustomer(String customerId, Mono<CustomerRequestDTO> customerRequestDTOMono) {
+        return customerRequestDTOMono.flatMap(requestDTO ->
                 webClientBuilder.build()
                         .put()
-                        .uri(customersServiceUrl + "/owners/" + ownerId)
+                        .uri(customersServiceUrl + "/customers/" + customerId)
                         .body(BodyInserters.fromValue(requestDTO))
                         .retrieve()
-                        .bodyToMono(OwnerResponseDTO.class)
+                        .bodyToMono(CustomerResponseDTO.class)
         );
     }
 
-    public Flux<OwnerResponseDTO> createOwners() {
+    public Flux<CustomerResponseDTO> createCustomers() {
         return webClientBuilder.build().post()
                 .uri(customersServiceUrl)
                 .accept(MediaType.APPLICATION_JSON)
-                .retrieve().bodyToFlux(OwnerResponseDTO.class);
+                .retrieve().bodyToFlux(CustomerResponseDTO.class);
     }
 
-    public Mono<OwnerResponseDTO> createOwner(Mono<OwnerRequestDTO> model) {
+    public Mono<CustomerResponseDTO> createCustomer(Mono<CustomerRequestDTO> model) {
         return model.flatMap(requestDTO ->
                 webClientBuilder.build()
                         .post()
-                        .uri(customersServiceUrl + "/owners")
+                        .uri(customersServiceUrl + "/customers")
                         .bodyValue(requestDTO)
                         .retrieve()
-                        .bodyToMono(OwnerResponseDTO.class)
+                        .bodyToMono(CustomerResponseDTO.class)
         );
     }
 
@@ -243,11 +243,11 @@ public class CustomersServiceClient {
     }
 
 
-    public Mono<OwnerResponseDTO> deleteCustomer(final String customerId) {
+    public Mono<CustomerResponseDTO> deleteCustomer(final String customerId) {
         return webClientBuilder.build().delete()
                 .uri(customersServiceUrl +"/customers/"+ customerId)
                 .retrieve()
-                .bodyToMono(OwnerResponseDTO.class);
+                .bodyToMono(CustomerResponseDTO.class);
     }
 
 
@@ -372,19 +372,19 @@ public class CustomersServiceClient {
                 .bodyToMono(Long.class);
     }
 
-    public Mono<OwnerResponseDTO> updateOwnerPhoto(String ownerId, Mono<FileDetails> photoMono) {
+    public Mono<CustomerResponseDTO> updateCustomerPhoto(String customerId, Mono<FileDetails> photoMono) {
         return webClientBuilder.build().patch()
-                .uri(customersServiceUrl + "/owners/" + ownerId + "/photo")
+                .uri(customersServiceUrl + "/customers/" + customerId + "/photo")
                 .body(photoMono, FileDetails.class)
                 .retrieve()
-                .bodyToMono(OwnerResponseDTO.class);
+                .bodyToMono(CustomerResponseDTO.class);
     }
-    public Mono<OwnerResponseDTO> deleteOwnerPhoto(String ownerId) {
+    public Mono<CustomerResponseDTO> deleteCustomerPhoto(String customerId) {
         return webClientBuilder.build()
                 .delete()
-                .uri(customersServiceUrl + "/owners/" + ownerId + "/photo")
+                .uri(customersServiceUrl + "/customers/" + customerId + "/photo")
                 .retrieve()
-                .bodyToMono(OwnerResponseDTO.class);
+                .bodyToMono(CustomerResponseDTO.class);
     }
 
     public Mono<PetResponseDTO> addPetPhoto(String petId, Mono<FileDetails> photoMono) {

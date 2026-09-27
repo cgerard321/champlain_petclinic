@@ -9,7 +9,7 @@
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public class OwnerRequestDTO {
+    public class CustomerRequestDTO {
 
         private String firstName;
         private String lastName;

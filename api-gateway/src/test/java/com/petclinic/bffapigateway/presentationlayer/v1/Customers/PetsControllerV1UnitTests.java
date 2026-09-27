@@ -1,4 +1,4 @@
-package com.petclinic.bffapigateway.presentationlayer.v1.Owners;
+package com.petclinic.bffapigateway.presentationlayer.v1.Customers;
 
 import com.petclinic.bffapigateway.presentationlayer.v1.PetControllerV1;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;

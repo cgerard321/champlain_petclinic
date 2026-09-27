@@ -1,20 +1,17 @@
 package com.petclinic.bffapigateway.dtos.CustomerDTOs;
 
 import com.petclinic.bffapigateway.dtos.Files.FileDetails;
-import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class OwnerResponseDTO {
-    private String ownerId;
+public class CustomerResponseDTO {
+    private String customerId;
     private String firstName;
     private String lastName;
     private String address;
