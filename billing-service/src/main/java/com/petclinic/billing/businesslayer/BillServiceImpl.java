@@ -171,7 +171,6 @@ public class BillServiceImpl implements BillService{
                                 HttpStatus.BAD_REQUEST, "Bill status is required"
                         ));
                     }
-
                     if (dto.getVetId() == null || dto.getVetId().isEmpty()) {
                         return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vet ID is required"));
                     }
@@ -199,6 +198,7 @@ public class BillServiceImpl implements BillService{
                     bill.setVetLastName(vet.getLastName());
                     bill.setOwnerFirstName(owner.getFirstName());
                     bill.setOwnerLastName(owner.getLastName());
+
 
                     // Generate unique short ID safely
                     return generateUniqueBillId(bill, 1)

@@ -29,10 +29,15 @@ public class EntityDtoUtil {
         billResponseDTO.setVetLastName(bill.getVetLastName());
         billResponseDTO.setDate(bill.getDate());
         billResponseDTO.setAmount(bill.getAmount());
-        billResponseDTO.setTaxedAmount(bill.getTaxedAmount());
+        billResponseDTO.setTaxedAmount(TaxCalculationUtil.calculateTotalTaxes(bill.getAmount()));
+        billResponseDTO.setGstAmount(TaxCalculationUtil.calculateGST(bill.getAmount()));
+        billResponseDTO.setQstAmount(TaxCalculationUtil.calculateQST(bill.getAmount()));
         billResponseDTO.setBillStatus(bill.getBillStatus());
         billResponseDTO.setDueDate(bill.getDueDate());
         billResponseDTO.setInterestExempt(bill.isInterestExempt());
+
+        //Taxes
+        BigDecimal taxesTotal = TaxCalculationUtil.calculateTotalTaxes(bill.getAmount());
         
         // Use stored interest value if available, otherwise calculate
         BigDecimal interest;
@@ -44,16 +49,15 @@ public class EntityDtoUtil {
             interest = InterestCalculationUtil.calculateInterest(bill);
         }
         billResponseDTO.setInterest(interest);
-        
+
         // Calculate final amount
         if (bill.getAmount() != null) {
             BigDecimal totalWithInterest = bill.getAmount().add(interest);
-            billResponseDTO.setTaxedAmount(totalWithInterest.setScale(2, java.math.RoundingMode.HALF_UP));
+            billResponseDTO.setTotalAmount(taxesTotal.add(totalWithInterest.setScale(2, java.math.RoundingMode.HALF_UP)));
         } else {
-            // If amount is null, set taxedAmount to just the interest (or zero if no interest)
-            billResponseDTO.setTaxedAmount(interest.setScale(2, java.math.RoundingMode.HALF_UP));
+            // If amount is null, set totalAmount to just the interest (or zero if no interest)
+            billResponseDTO.setTotalAmount(taxesTotal.add(interest.setScale(2, java.math.RoundingMode.HALF_UP)));
         }
-        
         billResponseDTO.setTimeRemaining(timeRemaining(bill));
         billResponseDTO.setArchive(bill.getArchive());
 
