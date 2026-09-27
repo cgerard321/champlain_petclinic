@@ -136,7 +136,7 @@ class PetTypesControllerV1IntegrationTests {
                 .verifyComplete();
     }
 
-    //For Alexandra : I don't know what is wrong with this test please fix it during your 1953 ticket, this is not my jurisdiction
+    //TODO For Alexandra : I don't know what is wrong with this test please fix it during your 1953 ticket, this is not my jurisdiction
 //    @Test
 //    void whenGetAllPetTypes_withServiceFail_thenReturn500() {
 //        mockServerConfigCustomersService.registerGetPetTypesEndpoint_500();

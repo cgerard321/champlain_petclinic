@@ -1,10 +1,10 @@
 <link href="/css/customer.css" rel="stylesheet" type="text/css"/>
 
-<div class="dashboard-container" ng-app="ownerList" ng-controller="OwnerListController">
+<div class="dashboard-container" ng-app="customerList" ng-controller="CustomerListController">
     <div class="main-content">
         <div class="page-header">
-            <h1 class="page-title">Current Owners</h1>
-            <p class="page-subtitle">Manage and view all pet owners in the system</p>
+            <h1 class="page-title">Current Customers</h1>
+            <p class="page-subtitle">Manage and view all pet customers in the system</p>
         </div>
 
         <div class="content-wrapper">
@@ -12,7 +12,7 @@
                 <div class="filters-header">
                     <div class="filters-title">Search & Filter</div>
                     <div class="action-buttons">
-                        <button class="btn-modern btn-search" ng-click="$ctrl.searchOwnersByPaginationAndFilters()">
+                        <button class="btn-modern btn-search" ng-click="$ctrl.searchCustomersByPaginationAndFilters()">
                             &#x1F50D; Search
                         </button>
                         <button class="btn-modern btn-reset" ng-click="$ctrl.clearInputAndResetDefaultData()">
@@ -23,8 +23,8 @@
 
                 <div class="filters-grid">
                     <div class="filter-group">
-                        <input id="ownerIdInput" type="text" class="filter-input" placeholder="Enter Owner ID...">
-                        <label class="filter-label">Owner ID</label>
+                        <input id="customerIdInput" type="text" class="filter-input" placeholder="Enter Customer ID...">
+                        <label class="filter-label">Customer ID</label>
                     </div>
 
                     <div class="filter-group">
@@ -61,10 +61,11 @@
             </div>
 
             <div class="table-card">
+                <!-- Bad id should be fixed at some point -->
                 <table id="customer" class="table table-modern">
                     <thead>
                         <tr>
-                            <th>Owner ID</th>
+                            <th>Customer ID</th>
                             <th>Full Name</th>
                             <th class="d-none d-sm-table-cell d-md-table-cell">Address</th>
                             <th class="d-none d-sm-table-cell d-md-table-cell">City</th>
@@ -73,10 +74,10 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="customer in $ctrl.owners">
+                        <tr ng-repeat="customer in $ctrl.customers">
                             <td>
-                                <a class="link-modern" ui-sref="ownerDetails({ ownerId: customer.ownerId })">
-                                    {{customer.ownerId}}
+                                <a class="link-modern" ui-sref="customerDetails({ customerId: customer.customerId })">
+                                    {{customer.customerId}}
                                 </a>
                             </td>
                             <td class="responsive-text">{{customer.firstName}} {{customer.lastName}}</td>

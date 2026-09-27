@@ -1,13 +1,13 @@
-angular.module('ownerDetails')
-    .controller('OwnerDetailsController', OwnerDetailsController);
+angular.module('customerDetails')
+    .controller('CustomerDetailsController', CustomerDetailsController);
 
-OwnerDetailsController.$inject = ['$http', '$state', '$stateParams', '$scope', '$timeout', '$q'];
+CustomerDetailsController.$inject = ['$http', '$state', '$stateParams', '$scope', '$timeout', '$q'];
 
-function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $q) {
+function CustomerDetailsController($http, $state, $stateParams, $scope, $timeout, $q) {
     var vm = this; // Use 'vm' (short for ViewModel) instead of 'self'
 
     // Initialize properties
-    vm.owner = {};
+    vm.customer = {};
     vm.pet = {};
     vm.pets = [];
 
@@ -47,18 +47,18 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
     };
 
 
-    // Fetch owner data
-    $http.get('api/gateway/owners/' + $stateParams.ownerId)
+    // Fetch customer data
+    $http.get('api/gateway/customers/' + $stateParams.customerId)
         .then(function (resp) {
-            vm.owner = resp.data;
-            console.log(vm.owner);
+            vm.customer = resp.data;
+            console.log(vm.customer);
         })
         .catch(function (error) {
-            console.error('Error fetching owner data:', error);
+            console.error('Error fetching customer data:', error);
         });
 
     // Fetch associated pets and their details
-    $http.get(`api/gateway/owners/${$stateParams.ownerId}/pets`)
+    $http.get(`api/gateway/customers/${$stateParams.customerId}/pets`)
         .then(function (response) {
             // Split the response by newline characters to get individual pet objects
             var petResponses = response.data.split('\n');
@@ -165,8 +165,8 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
             .then(function (resp) {
                 console.log("Pet deleted successfully");
 
-                /*  $http.get('api/gateway/owners/' + $stateParams.ownerId).then(function (resp) {
-                      self.owner = resp.data;
+                /*  $http.get('api/gateway/customers/' + $stateParams.customerId).then(function (resp) {
+                      self.customer = resp.data;
                   });
                  */
 

@@ -1203,7 +1203,7 @@ class ApiGatewayControllerTest {
     String VISIT_ID = buildVisitResponseDTO().getVisitId();
 
 
-//todo fix
+//TODO for VIST  team verify the use of these test
     /*@Test
     void shouldCreateAVisitWithOwnerInfo(){
         String ownerId = "1";

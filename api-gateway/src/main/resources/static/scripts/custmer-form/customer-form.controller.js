@@ -1,19 +1,19 @@
 'use strict';
 
-angular.module('ownerForm')
-    .controller('OwnerFormController', ["$http", '$state', '$stateParams', '$scope', function ($http, $state, $stateParams, $scope) {
+angular.module('customerForm')
+    .controller('CustomerFormController', ["$http", '$state', '$stateParams', '$scope', function ($http, $state, $stateParams, $scope) {
         var self = this;
-        var ownerId = $stateParams.ownerId || "";
+        var customerId = $stateParams.customerId || "";
         var method = $stateParams.method;
 
         // Initialize
-        self.owner = {};
+        self.customer = {};
         self.checked = false;
         self.showModal = false;
 
-        if (ownerId) {
-            $http.get("api/gateway/owners/" + ownerId).then(function (resp) {
-                self.owner = resp.data;
+        if (customerId) {
+            $http.get("api/gateway/customers/" + customerId).then(function (resp) {
+                self.customer = resp.data;
             });
             if (method !== 'edit') {
                 self.checked = true;
@@ -21,7 +21,7 @@ angular.module('ownerForm')
         }
 
         // Open confirmation modal
-        self.submitOwnerForm = function () {
+        self.submitCustomerForm = function () {
             self.showModal = true;
         };
 
@@ -35,18 +35,18 @@ angular.module('ownerForm')
             self.showModal = false;
 
             var req;
-            if (self.owner.ownerId) {
+            if (self.customer.customerId) {
                 if (method === 'edit') {
-                    req = $http.put("api/gateway/owners/" + self.owner.ownerId, self.owner);
+                    req = $http.put("api/gateway/customers/" + self.customer.customerId, self.customer);
                 } else {
-                    req = $http.delete("api/gateway/owners/" + self.owner.ownerId);
+                    req = $http.delete("api/gateway/customers/" + self.customer.customerId);
                 }
             } else {
-                req = $http.post("api/gateway/owners", self.owner);
+                req = $http.post("api/gateway/customers", self.customer);
             }
 
             req.then(function () {
-                $state.go('owners');
+                $state.go('customers');
             }).catch(function (response) {
                 var error = response.data;
                 error.errors = error.errors || [];

@@ -1,23 +1,23 @@
 <link href="/css/customer.css" rel="stylesheet" type="text/css"/>
 
-<div class="dashboard-container" ng-controller="OwnerDetailsController" ng-app="ownerDetails">
+<div class="dashboard-container" ng-controller="CustomerDetailsController" ng-app="customerDetails">
     <div class="main-content">
         <div class="page-header">
-            <h1 class="page-title">Owner Details</h1>
+            <h1 class="page-title">Customer Details</h1>
             <p class="page-subtitle">View and manage customer information and their pets</p>
         </div>
 
         <div class="content-wrapper">
             <div class="details-grid">
-                <!-- Owner Information Card -->
+                <!-- Customer Information Card -->
                 <div class="details-card">
                     <div class="card-header">
-                        <h2 class="card-title">Owner Information</h2>
+                        <h2 class="card-title">Customer Information</h2>
                         <div class="action-buttons">
-                            <a class="btn-modern btn-edit" ui-sref="ownerEdit({ ownerId: $ctrl.customer.ownerId, method: 'edit' })">
+                            <a class="btn-modern btn-edit" ui-sref="customerEdit({ customerId: $ctrl.customer.customerId, method: 'edit' })">
                                 &#x270F; Edit
                             </a>
-                            <a class="btn-modern btn-delete" ui-sref="ownerEdit({ ownerId: $ctrl.customer.ownerId, method: 'delete' })">
+                            <a class="btn-modern btn-delete" ui-sref="customerEdit({ customerId: $ctrl.customer.customerId, method: 'delete' })">
                                 &#x1F5D1; Delete
                             </a>
                         </div>
@@ -25,7 +25,7 @@
 
                     <div class="profile-section">
                         <div class="profile-avatar">
-                            <img src="../../images/default-user-icon.png" alt="Owner Avatar"/>
+                            <img src="../../images/default-user-icon.png" alt="Customer Avatar"/>
                         </div>
                         <h3 class="profile-name">{{$ctrl.customer.firstName}} {{$ctrl.customer.lastName}}</h3>
                     </div>
@@ -33,8 +33,8 @@
                     <form class="customer-form">
                         <div class="form-grid">
                             <div class="form-group full-width">
-                                <input class="form-input" value="{{$ctrl.customer.ownerId}}" readonly disabled/>
-                                <label class="form-label">Owner ID</label>
+                                <input class="form-input" value="{{$ctrl.customer.customerId}}" readonly disabled/>
+                                <label class="form-label">Customer ID</label>
                             </div>
 
                             <div class="form-group">
@@ -74,7 +74,7 @@
                 <div class="details-card">
                     <div class="card-header">
                         <h2 class="card-title pets-title">Pets</h2>
-                        <a class="btn-add-pet" ui-sref="petRegister({ownerId: $ctrl.customer.ownerId})">
+                        <a class="btn-add-pet" ui-sref="petRegister({customerId: $ctrl.customer.customerId})">
                             &#x2795; Add Pet
                         </a>
                     </div>

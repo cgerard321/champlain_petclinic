@@ -6,10 +6,10 @@
     border-bottom: 1.5px solid rgba(0,0,0,0.1);
     color: #2f2b2b;
 }
-.ownerRow{
+.customerRow{
     display: flex;
 }
-.ownerCol{
+.customerCol{
     flex: .35;
     padding: 1em;
 }
@@ -18,7 +18,7 @@
     border-top: 1px solid rgba(143,143,143,.30);
 }
 
-.ownerDetailContainer {
+.customerDetailContainer {
     background-Color:white;
     border-radius: 10px;
     width: 550px

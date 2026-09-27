@@ -35,6 +35,7 @@ public class MockServerConfigCustomersService {
                 );
     }
 
+    //TODO Change name
     public void registerAddCustomerEndpoint() {
         mockServerClient_CustomersService
                 .when(

@@ -1,6 +1,6 @@
 "use strict";
 
-angular.module("ownerList").controller("OwnerListController", [
+angular.module("customerList").controller("CustomerListController", [
   "$http",
   "$stateParams",
   "$scope",
@@ -13,7 +13,7 @@ angular.module("ownerList").controller("OwnerListController", [
     /*------------------------------------------------------------*/
     vm.currentPageOnSite = parseInt(vm.currentPage) + 1;
     /*------------------------------------------------------------*/
-    vm.ownerId = null;
+    vm.customerId = null;
     vm.firstName = null;
     vm.lastName = null;
     vm.phoneNumber = null;
@@ -22,15 +22,15 @@ angular.module("ownerList").controller("OwnerListController", [
     /*------------------------------------------------------------*/
     vm.searchActive = false;
     /*------------------------------------------------------------*/
-    vm.baseURL = "api/gateway/owners/owners-pagination";
-    vm.baseURLforTotalNumberOfOwnersByFiltering =
-      "api/gateway/owners/owners-filtered-count";
+    vm.baseURL = "api/gateway/customers/customers-pagination";
+    vm.baseURLforTotalNumberOfCustomersByFiltering =
+      "api/gateway/customers/customers-filtered-count";
 
     // Initial data load
     loadDefaultData();
 
     function loadTotalItemForDefaultData() {
-      return $http.get("api/gateway/owners/owners-count").then(function (resp) {
+      return $http.get("api/gateway/customers/customers-count").then(function (resp) {
         console.log(resp);
         return resp.data;
       });
@@ -44,21 +44,21 @@ angular.module("ownerList").controller("OwnerListController", [
     }
 
     function loadDefaultData() {
-      // $state.transitionTo('owners', { page: vm.currentPage, size: vm.pageSize}, { notify: false });
+      // $state.transitionTo('customers', { page: vm.currentPage, size: vm.pageSize}, { notify: false });
 
       if (!vm.searchActive) {
         loadTotalItemForDefaultData().then(function (totalItems) {
           vm.totalItems = totalItems;
           vm.totalPages = Math.ceil(vm.totalItems / parseInt(vm.pageSize));
           fetch(
-            "api/gateway/owners/owners-pagination?page=" +
+            "api/gateway/customers/customers-pagination?page=" +
               vm.currentPage +
               "&size=" +
               vm.pageSize
           )
             .then((response) => response.text())
             .then((text) => {
-              vm.owners = text
+              vm.customers = text
                 .split("data:")
                 .map((payload) => {
                   try {
@@ -78,14 +78,14 @@ angular.module("ownerList").controller("OwnerListController", [
       }
     }
 
-    vm.searchOwnersByPaginationAndFilters = function (
+    vm.searchCustomersByPaginationAndFilters = function (
       currentPage = 0,
       prevOrNextPressed = false
     ) {
       vm.selectedSize = document.getElementById("sizeInput").value;
 
       if (!prevOrNextPressed) {
-        vm.ownerId = document.getElementById("ownerIdInput").value;
+        vm.customerId = document.getElementById("customerIdInput").value;
         vm.firstName = document.getElementById("firstNameInput").value;
         vm.lastName = document.getElementById("lastNameInput").value;
         vm.phoneNumber = document.getElementById("phoneNumberInput").value;
@@ -93,7 +93,7 @@ angular.module("ownerList").controller("OwnerListController", [
 
         if (
           checkIfAllInputFieldsAreEmptyOrNull(
-            vm.ownerId,
+            vm.customerId,
             vm.firstName,
             vm.lastName,
             vm.phoneNumber,
@@ -112,7 +112,7 @@ angular.module("ownerList").controller("OwnerListController", [
 
       var searchURL = vm.baseURL + "?page=" + currentPage.toString();
       var loadTotalNumberOfDataURL =
-        vm.baseURLforTotalNumberOfOwnersByFiltering + "?";
+        vm.baseURLforTotalNumberOfCustomersByFiltering + "?";
 
       if (vm.selectedSize) {
         searchURL += "&size=" + vm.selectedSize;
@@ -121,9 +121,9 @@ angular.module("ownerList").controller("OwnerListController", [
         searchURL += "&size=" + vm.pageSize;
       }
 
-      if (vm.ownerId) {
-        searchURL += "&ownerId=" + vm.ownerId;
-        loadTotalNumberOfDataURL += "&ownerId=" + vm.ownerId;
+      if (vm.customerId) {
+        searchURL += "&customerId=" + vm.customerId;
+        loadTotalNumberOfDataURL += "&customerId=" + vm.customerId;
       }
 
       if (vm.firstName) {
@@ -158,7 +158,7 @@ angular.module("ownerList").controller("OwnerListController", [
       fetch(searchURL)
         .then((response) => response.text())
         .then((text) => {
-          vm.owners = text
+          vm.customers = text
             .split("data:")
             .map((payload) => {
               try {
@@ -177,7 +177,7 @@ angular.module("ownerList").controller("OwnerListController", [
     };
 
     function checkIfAllInputFieldsAreEmptyOrNull(
-      ownerId,
+      customerId,
       firstName,
       lastName,
       phoneNumber,
@@ -185,7 +185,7 @@ angular.module("ownerList").controller("OwnerListController", [
       selectedSize
     ) {
       return (
-        (ownerId === null || ownerId === "") &&
+        (customerId === null || customerId === "") &&
         (firstName === null || firstName === "") &&
         (lastName === null || lastName === "") &&
         (phoneNumber === null || phoneNumber === "") &&
@@ -195,7 +195,7 @@ angular.module("ownerList").controller("OwnerListController", [
     }
 
     vm.clearInputAndResetDefaultData = function () {
-      var ownerId = document.getElementById("ownerIdInput");
+      var customerId = document.getElementById("customerIdInput");
       var firstNameInput = document.getElementById("firstNameInput");
       var lastNameInput = document.getElementById("lastNameInput");
       var phoneNumberInput = document.getElementById("phoneNumberInput");
@@ -204,7 +204,7 @@ angular.module("ownerList").controller("OwnerListController", [
 
       firstNameInput.value = "";
       lastNameInput.value = "";
-      ownerId.value = "";
+      customerId.value = "";
       phoneNumberInput.value = "";
       cityInput.value = "";
       sizeInput.selectedIndex = 0;
@@ -212,7 +212,7 @@ angular.module("ownerList").controller("OwnerListController", [
       vm.currentPage = 0;
       vm.pageSize = 5;
 
-      vm.ownerId = null;
+      vm.customerId = null;
       vm.firstName = null;
       vm.lastName = null;
       vm.phoneNumber = null;
@@ -233,7 +233,7 @@ angular.module("ownerList").controller("OwnerListController", [
         updateCurrentPageOnSite();
 
         if (vm.searchActive) {
-          vm.searchOwnersByPaginationAndFilters(currentPageInt, true);
+          vm.searchCustomersByPaginationAndFilters(currentPageInt, true);
         } else {
           loadDefaultData();
         }
@@ -247,7 +247,7 @@ angular.module("ownerList").controller("OwnerListController", [
         updateCurrentPageOnSite();
 
         if (vm.searchActive) {
-          vm.searchOwnersByPaginationAndFilters(currentPageInt, true);
+          vm.searchCustomersByPaginationAndFilters(currentPageInt, true);
         } else {
           loadDefaultData();
         }

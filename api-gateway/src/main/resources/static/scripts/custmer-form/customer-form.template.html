@@ -3,14 +3,14 @@
 <div class="dashboard-container">
     <div class="main-content">
         <div class="page-header">
-            <h1 class="page-title">Edit Owner</h1>
+            <h1 class="page-title">Edit Customer</h1>
             <p class="page-subtitle">Update customer information and details</p>
         </div>
 
         <div class="content-wrapper">
             <div class="form-card">
                 <div class="form-header">
-                    <h2 class="form-title">Owner Information</h2>
+                    <h2 class="form-title">Customer Information</h2>
                     <p class="form-subtitle">Update the customer's personal details</p>
                 </div>
 
@@ -19,7 +19,7 @@
                     <p class="warning-text">This customer is currently disabled and cannot be edited.</p>
                 </div>
 
-                <form id="ownerForm" ng-submit="$ctrl.submitOwnerForm()">
+                <form id="customerForm" ng-submit="$ctrl.submitCustomerForm()">
                     <div class="form-grid">
                         <div class="form-group">
                             <label class="form-label">First Name</label>
@@ -31,7 +31,7 @@
                                    pattern="^[\x20-\x7F]+$" 
                                    required 
                                    placeholder="Enter first name..."/>
-                            <span ng-show="ownerForm.firstName.$error.required" class="error-message">First name is required.</span>
+                            <span ng-show="customerForm.firstName.$error.required" class="error-message">First name is required.</span>
                         </div>
 
                         <div class="form-group">
@@ -44,7 +44,7 @@
                                    pattern="^[\x20-\x7F]+$" 
                                    required 
                                    placeholder="Enter last name..."/>
-                            <span ng-show="ownerForm.lastName.$error.required" class="error-message">Last name is required.</span>
+                            <span ng-show="customerForm.lastName.$error.required" class="error-message">Last name is required.</span>
                         </div>
 
                         <div class="form-group full-width">
@@ -57,7 +57,7 @@
                                    pattern="^[\x20-\x7F]+$" 
                                    required 
                                    placeholder="Enter address..."/>
-                            <span ng-show="ownerForm.address.$error.required" class="error-message">Address is required.</span>
+                            <span ng-show="customerForm.address.$error.required" class="error-message">Address is required.</span>
                         </div>
 
                         <div class="form-group">
@@ -70,7 +70,7 @@
                                    pattern="^[\x20-\x7F]+$" 
                                    required 
                                    placeholder="Enter city..."/>
-                            <span ng-show="ownerForm.city.$error.required" class="error-message">City is required.</span>
+                            <span ng-show="customerForm.city.$error.required" class="error-message">City is required.</span>
                         </div>
 
                         <div class="form-group">
@@ -83,7 +83,7 @@
                                    pattern="^[\x20-\x7F]+$" 
                                    required 
                                    placeholder="Enter province..."/>
-                            <span ng-show="ownerForm.province.$error.required" class="error-message">Province is required.</span>
+                            <span ng-show="customerForm.province.$error.required" class="error-message">Province is required.</span>
                         </div>
 
                         <div class="form-group full-width">
@@ -96,20 +96,20 @@
                                    pattern="^[\x20-\x7F]+$" 
                                    required 
                                    placeholder="Enter telephone number..."/>
-                            <span ng-show="ownerForm.telephone.$error.required" class="error-message">Telephone is required.</span>
+                            <span ng-show="customerForm.telephone.$error.required" class="error-message">Telephone is required.</span>
                         </div>
                     </div>
 
                     <div class="form-actions">
-                        <button class="btn-submit" type="submit" ng-disabled="ownerForm.$invalid || $ctrl.checked">
-                            Update Owner
+                        <button class="btn-submit" type="submit" ng-disabled="customerForm.$invalid || $ctrl.checked">
+                            Update Customer
                         </button>
                     </div>
                 </form>
                 <!-- Confirmation Modal -->
                 <div class="modal-backdrop" ng-show="$ctrl.showModal">
                     <div class="modal-card">
-                        <h3 class="modal-title">Confirm Owner Update</h3>
+                        <h3 class="modal-title">Confirm Customer Update</h3>
                         <p class="modal-text">
                             Are you sure you want to proceed with the following customer details?
                         </p>

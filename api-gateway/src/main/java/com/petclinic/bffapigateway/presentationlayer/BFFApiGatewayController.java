@@ -210,6 +210,7 @@ public class BFFApiGatewayController {
 //            String endDate = dates.get(1);
 //            return visitsServiceClient.getVisitsByPractitionerIdAndMonth(practitionerId, startDate, endDate);
 //        }
+    //TODO Delete?
 //        private Function<Visits, CustomerResponseDTO> addVisitsToOwner(CustomerResponseDTO owner) {
 //            return visits -> {
 //                owner.getPets()

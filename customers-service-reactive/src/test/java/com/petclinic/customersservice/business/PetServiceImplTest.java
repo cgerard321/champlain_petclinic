@@ -69,10 +69,12 @@ class PetServiceImplTest {
                 .verifyComplete();
     }
 
+//TODO Check if these tests can be deleted
+
     @Test
     void findPetByPetId() {
 
-        //Customer owner = buildOwner();
+        //Owner owner = buildOwner();
         Pet pet = buildPet();
         String PET_ID = pet.getId();
         when(repo.findPetByPetId(PET_ID)).thenReturn(Mono.just(pet));
