@@ -5,32 +5,25 @@
   --sage-200: #dce8d2;
   --sage-300: #c7d9b2;
   --sage-400: #afc79a;
-
   --forest-700: #244b3f;
   --forest-800: #1c3d33;
   --forest-900: #16332b;
-
   --cream: #fffdf8;
-  --white: #ffffff;
-
+  --white: #fff;
   --text-primary: #263832;
   --text-secondary: #66766d;
   --text-muted: #7d8982;
-
-  --border: rgba(36, 75, 63, 0.14);
-  --border-strong: rgba(36, 75, 63, 0.22);
-
+  --border: rgb(36 75 63 / 14%);
+  --border-strong: rgb(36 75 63 / 22%);
   --shadow-sm:
-    0 2px 6px rgba(28, 61, 51, 0.06),
-    0 1px 2px rgba(28, 61, 51, 0.05);
-
+    0 2px 6px rgb(28 61 51 / 6%),
+    0 1px 2px rgb(28 61 51 / 5%);
   --shadow-md:
-    0 10px 25px rgba(28, 61, 51, 0.10),
-    0 3px 8px rgba(28, 61, 51, 0.06);
-
+    0 10px 25px rgb(28 61 51 / 10%),
+    0 3px 8px rgb(28 61 51 / 6%);
   --shadow-lg:
-    0 18px 40px rgba(28, 61, 51, 0.14),
-    0 6px 14px rgba(28, 61, 51, 0.08);
+    0 18px 40px rgb(28 61 51 / 14%),
+    0 6px 14px rgb(28 61 51 / 8%);
 
   display: block;
   min-height: 100%;
@@ -43,18 +36,16 @@
   min-height: calc(100vh - 94px);
   margin: 0 auto;
   padding: 2.5rem 2rem 4rem;
-
   color: var(--text-primary);
-
   background:
     radial-gradient(
       circle at 100% 0%,
-      rgba(199, 217, 178, 0.28),
+      rgb(199 217 178 / 28%),
       transparent 30rem
     ),
     radial-gradient(
       circle at 0% 100%,
-      rgba(199, 217, 178, 0.16),
+      rgb(199 217 178 / 16%),
       transparent 28rem
     );
 }
@@ -62,12 +53,9 @@
 
 .inventory-page h1 {
   position: relative;
-
   margin: 0 0 2rem;
   padding-bottom: 1rem;
-
   color: var(--forest-700);
-
   font-size: clamp(1.8rem, 3vw, 2.35rem);
   font-weight: 700;
   line-height: 1.15;
@@ -77,16 +65,12 @@
 /* Decorative line underneath the "Inventory" title */
 .inventory-page h1::after {
   content: "";
-
   position: absolute;
   left: 0;
   bottom: 0;
-
   width: 58px;
   height: 4px;
-
   border-radius: 999px;
-
   background: linear-gradient(
     90deg,
     var(--forest-700),
@@ -97,47 +81,36 @@
 
 .state-container {
   position: relative;
-
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-
   min-height: 320px;
   padding: 3rem;
-
   overflow: hidden;
-
   border: 1px solid var(--border);
   border-radius: 20px;
-
   color: var(--text-secondary);
   text-align: center;
-
   background:
     linear-gradient(
       145deg,
-      rgba(255, 255, 255, 0.96),
-      rgba(247, 250, 243, 0.96)
+      rgb(255 255 255 / 96%),
+      rgb(247 250 243 / 96%)
     );
-
   box-shadow: var(--shadow-sm);
 }
 
 /* Decorative background shape */
 .state-container::before {
   content: "";
-
   position: absolute;
   top: -90px;
   right: -70px;
-
   width: 220px;
   height: 220px;
-
   border-radius: 50%;
-
-  background: rgba(199, 217, 178, 0.25);
+  background: rgb(199 217 178 / 25%);
 }
 
 
@@ -152,9 +125,7 @@
 .state-container mat-icon {
   width: 48px;
   height: 48px;
-
   margin-bottom: 0.5rem;
-
   color: var(--forest-700);
   font-size: 48px;
 }
@@ -162,7 +133,6 @@
 
 .state-container p {
   margin: 0;
-
   font-size: 0.95rem;
   font-weight: 500;
 }
@@ -170,54 +140,39 @@
 
 .inventory-grid {
   display: grid;
-
   grid-template-columns: repeat(4, minmax(0, 1fr));
-
   gap: 1.5rem;
-
   width: 100%;
 }
 
 
 .inventory-card-link {
   position: relative;
-
   display: block;
   min-width: 0;
-
   aspect-ratio: 1 / 1;
-
   color: inherit;
   text-decoration: none;
-
   outline: none;
 }
 
 
 .inventory-card {
   position: relative;
-
   width: 100%;
   height: 100%;
-
   box-sizing: border-box;
-
   overflow: hidden;
-
   cursor: pointer;
-
   border: 1px solid var(--border) !important;
   border-radius: 18px !important;
-
   background:
     linear-gradient(
       145deg,
       var(--white) 0%,
       var(--cream) 100%
     ) !important;
-
   box-shadow: var(--shadow-sm);
-
   transition:
     transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
     box-shadow 220ms ease,
@@ -228,46 +183,34 @@
 /* Decorative green accent at the top of every card */
 .inventory-card::before {
   content: "";
-
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-
   height: 5px;
-
   background: linear-gradient(
     90deg,
     var(--forest-700),
     var(--sage-400)
   );
-
   opacity: 0.9;
-
   transition:
     height 220ms ease,
     opacity 220ms ease;
 }
 
 
-/* Soft decorative circle */
+/* Decorative circle */
 .inventory-card::after {
   content: "";
-
   position: absolute;
-
   width: 150px;
   height: 150px;
-
   top: -85px;
   right: -75px;
-
   border-radius: 50%;
-
-  background: rgba(199, 217, 178, 0.25);
-
+  background: rgb(199 217 178 / 25%);
   pointer-events: none;
-
   transition:
     transform 300ms ease,
     background 300ms ease;
@@ -276,9 +219,7 @@
 
 .inventory-card-link:hover .inventory-card {
   transform: translateY(-7px);
-
-  border-color: rgba(36, 75, 63, 0.28) !important;
-
+  border-color: rgb(36 75 63 / 28%) !important;
   box-shadow: var(--shadow-lg);
 }
 
@@ -291,15 +232,13 @@
 
 .inventory-card-link:hover .inventory-card::after {
   transform: scale(1.25);
-
-  background: rgba(199, 217, 178, 0.38);
+  background: rgb(199 217 178 38%);
 }
 
 
 .inventory-card-link:focus-visible .inventory-card {
-  outline: 3px solid rgba(36, 75, 63, 0.22);
+  outline: 3px solid rgb(36 75 63 / 22%);
   outline-offset: 4px;
-
   border-color: var(--forest-700) !important;
 }
 
@@ -312,15 +251,12 @@
 .inventory-card mat-card-header {
   position: relative;
   z-index: 1;
-
   padding: 1.5rem 1.5rem 0;
 }
 
 .inventory-card mat-card-title {
   max-width: 90%;
-
   color: var(--forest-700);
-
   font-size: 1.3rem;
   font-weight: 700;
   line-height: 1.3;
@@ -329,13 +265,10 @@
 
 .inventory-card mat-card-subtitle {
   margin-top: 0.4rem;
-
   color: #74836f;
-
   font-size: 0.78rem;
   font-weight: 700;
   line-height: 1.3;
-
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -343,23 +276,17 @@
 .inventory-card mat-card-content {
   position: relative;
   z-index: 1;
-
   display: flex;
   flex-direction: column;
-
   height: calc(100% - 5rem);
-
   box-sizing: border-box;
-
   padding: 1.25rem 1.5rem 1.5rem;
 }
 
 
 .inventory-card mat-card-content p:first-child {
   margin: 0;
-
   color: var(--text-secondary);
-
   font-size: 0.93rem;
   line-height: 1.65;
 }
@@ -368,31 +295,22 @@
   display: flex;
   align-items: center;
   gap: 0.55rem;
-
   margin-top: auto;
   padding-top: 1.25rem;
-
   color: var(--forest-700);
-
   font-size: 0.84rem;
   font-weight: 700;
-
   letter-spacing: 0.01em;
 }
 
 /* Small indicator dot */
 .quantity::before {
   content: "";
-
   flex: 0 0 auto;
-
   width: 8px;
   height: 8px;
-
   border-radius: 50%;
-
   background: var(--sage-400);
-
   box-shadow:
-    0 0 0 4px rgba(199, 217, 178, 0.32);
+    0 0 0 4px rgb(199 217 178 / 32%);
 }

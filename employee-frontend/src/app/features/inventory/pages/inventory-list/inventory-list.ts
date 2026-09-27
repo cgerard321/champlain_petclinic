@@ -17,7 +17,8 @@ import { InventoryService } from '@features/inventory/services/inventory-service
 })
 export class InventoryList implements OnInit, OnDestroy {
   private readonly inventoryService = inject(InventoryService);
-  private pollSubscription?: Subscription;
+  private inventorySubscription?: Subscription;
+  private readonly quantitySubscriptions = new Set<Subscription>();
 
   protected readonly inventories = signal<Inventory[]>([]);
   protected readonly quantities = signal<Record<string, number | null>>({});
@@ -25,17 +26,23 @@ export class InventoryList implements OnInit, OnDestroy {
   protected readonly errorMessage = signal<ApiError | null>(null);
 
   ngOnInit(): void {
-    this.pollSubscription = this.inventoryService.getInventories().subscribe({
+    this.inventorySubscription = this.inventoryService.getInventories().subscribe({
       next: (item) => {
         this.isLoading.set(false);
+        this.errorMessage.set(null);
+
         this.inventories.update((current) => {
           const idx = current.findIndex((inv) => inv.inventoryId === item.inventoryId);
+
+          // If the inventory is new, add it to the list
           if (idx === -1) return [...current, item];
-          const copy = [...current];
-          copy[idx] = item;
-          return copy;
+
+          // If the inventory already exists, replace it
+          const updated = [...current];
+          updated[idx] = item;
+          return updated;
         });
-        this.loadQuantities([item]);
+        this.loadQuantities(item.inventoryId);
       },
       error: (err: unknown) => {
         this.isLoading.set(false);
@@ -48,22 +55,30 @@ export class InventoryList implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.pollSubscription?.unsubscribe();
+    this.inventorySubscription?.unsubscribe();
+    this.quantitySubscriptions.forEach((subscription) => {
+      subscription.unsubscribe();
+    });
   }
 
   protected quantityFor(inventoryId: string): number | null {
     return this.quantities()[inventoryId] ?? null;
   }
 
-  private loadQuantities(inventories: Inventory[]): void {
-    inventories.forEach((inventory) => {
-      this.inventoryService.getQuantity(inventory.inventoryId).subscribe({
-        next: (quantity) =>
-          this.quantities.update((current) => ({ ...current, [inventory.inventoryId]: quantity })),
+  private loadQuantities(inventoryId: string): void {
+    this.quantities.update((current) => ({ ...current, [inventoryId]: null }));
 
-        error: () =>
-          this.quantities.update((current) => ({ ...current, [inventory.inventoryId]: null })),
-      });
+    const subscription = this.inventoryService.getQuantity(inventoryId).subscribe({
+      next: (quantity) => {
+        this.quantities.update((current) => ({ ...current, [inventoryId]: quantity }));
+      },
+      error: () => {
+        this.quantities.update((current) => ({ ...current, [inventoryId]: null }));
+      },
+      complete: () => {
+        this.quantitySubscriptions.delete(subscription);
+      },
     });
+    this.quantitySubscriptions.add(subscription);
   }
 }

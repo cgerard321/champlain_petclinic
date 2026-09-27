@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { SseClient } from 'ngx-sse-client';
-import { Observable } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { Observable, timer } from 'rxjs';
+import { filter, map, repeat, retry } from 'rxjs/operators';
 
 import { Inventory } from '@features/inventory/models/inventory.model';
 
@@ -18,6 +18,12 @@ export class InventoryService {
       .pipe(
         filter((event): event is MessageEvent => event.type !== 'error'),
         map((event) => JSON.parse((event as MessageEvent).data) as Inventory),
+
+        // Reconnect after an SSE error.
+        retry({ count: Infinity, delay: () => timer(5000) }),
+
+        // Reconnect if the SSE observable completes.
+        repeat({ delay: () => timer(5000) }),
       );
   }
 
