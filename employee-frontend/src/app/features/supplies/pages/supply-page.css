@@ -23,7 +23,7 @@
   overflow-x: auto;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  background: #ffffff;
+  background: #fff;
 }
 
 table {
@@ -66,7 +66,7 @@ tbody tr:last-child td {
 
 .status-badge.re-order {
   background: #6899d8;
-  color: #ffffff;
+  color: #fff;
 }
 
 .status-badge.out-of-stock {
@@ -78,18 +78,19 @@ tbody tr:last-child td {
   padding: 24px;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  background: #ffffff;
+  background: #fff;
 }
 
 .error-message {
-  color: #ffffff;
+  color: #fff;
 }
+
 .add-supply-button {
   padding: 10px 18px;
   border: none;
   border-radius: 999px;
   background: #6899d8;
-  color: #ffffff;
+  color: #fff;
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
@@ -103,7 +104,7 @@ tbody tr:last-child td {
   padding: 20px;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  background: #ffffff;
+  background: #fff;
 }
 
 .supply-form h2 {
@@ -149,7 +150,7 @@ tbody tr:last-child td {
   border: none;
   border-radius: 999px;
   background: #6899d8;
-  color: #ffffff;
+  color: #fff;
   font-size: 0.70rem;
   font-weight: 600;
   cursor: pointer;
@@ -164,7 +165,7 @@ tbody tr:last-child td {
   border: none;
   border-radius: 999px;
   background: #6899d8;
-  color: #ffffff;
+  color: #fff;
   font-size: 0.70rem;
   font-weight: 600;
   cursor: pointer;
