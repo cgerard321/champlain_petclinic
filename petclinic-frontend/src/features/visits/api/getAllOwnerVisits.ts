@@ -7,7 +7,7 @@ const backendUrl = import.meta.env.VITE_BACKEND_URL.replace(/\/$/, '');
 export function getAllOwnerVisits(
   //   requesting ownerId
   ownerId: string,
-  // optional --> can cancel an ongoing async operation
+  // optional --> can cancel an ongoing async operation (if user changes page)
   signal?: AbortSignal
 ): AsyncGenerator<VisitResponseModel> {
   // remove whitespaces from ownerId
