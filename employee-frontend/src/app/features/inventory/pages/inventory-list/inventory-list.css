@@ -19,7 +19,7 @@
   gap: 0.75rem;
   min-height: 300px;
   padding: 3rem 0;
-  color: rgba(0, 0, 0, 0.6);
+  color: rgb(0 0 0 / 60%);
   text-align: center;
 }
 
@@ -43,7 +43,6 @@
   height: 100%;
   box-sizing: border-box;
   cursor: pointer;
-
   transition:
     transform 180ms ease,
     box-shadow 180ms ease;
@@ -51,7 +50,7 @@
 
 .inventory-card:hover {
   transform: translateY(-6px) scale(1.015);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 20px rgb(0 0 0 / 15%);
 }
 
 .inventory-card mat-card-header {
@@ -85,5 +84,5 @@
   margin-top: auto;
   padding-top: 1rem;
   font-size: 0.875rem;
-  color: rgba(0, 0, 0, 0.6);
+  color: rgb(0 0 0 / 60%);
 }
