@@ -128,7 +128,7 @@ public class CustomerBillControllerIntegrationTest {
     // .expectStatus().isNotFound();
     // }
 
-    // doest work
+
     @Test
     public void testPayBill_ValidRequest_ShouldReturnOk() {
         PaymentRequestDTO paymentRequest =
@@ -146,7 +146,7 @@ public class CustomerBillControllerIntegrationTest {
                 )
                 .cookie(
                         "Bearer",
-                        "valid-test-token-for-customer-one"
+                        MockServerConfigAuthService.jwtTokenForValidCustomerOneId
                 )
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)

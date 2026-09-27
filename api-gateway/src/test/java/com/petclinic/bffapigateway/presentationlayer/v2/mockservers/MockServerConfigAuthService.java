@@ -25,7 +25,8 @@ public class MockServerConfigAuthService {
 
     public static final String jwtTokenForInvalidVetId = "valid-test-token-for-invalid-vet-id";
 
-
+    public static final String jwtTokenForValidCustomerOneId = "valid-test-token-for-customer-one";
+    
     public MockServerConfigAuthService() {
         this.clientAndServer = ClientAndServer.startClientAndServer(AUTH_SERVICE_SERVER_PORT);
     }
@@ -79,7 +80,7 @@ public class MockServerConfigAuthService {
                         request()
                                 .withMethod("POST")
                                 .withPath("/users/validate-token")
-                                .withCookie("Bearer", "valid-test-token-for-customer-one")
+                                .withCookie("Bearer", jwtTokenForValidCustomerOneId)
                 )
                 .respond(
                         response()
