@@ -129,6 +129,7 @@ public class MockServerConfigBillService {
     }
 
     public void registerPayBillEndpoint() {
+        // success case
         mockServerClient_BillService
                 .when(
                         request()
@@ -149,7 +150,22 @@ public class MockServerConfigBillService {
                                                 "\"taxedAmount\":10.0," +
                                                 "\"billStatus\":\"PAID\"," +
                                                 "\"dueDate\":\"2026-11-06\"}"
-                                ));
+                                )
+                );
+
+        // invalid customer case
+        mockServerClient_BillService
+                .when(
+                        request()
+                                .withMethod("POST")
+                                .withPath("/bills/customer/invalid-id/bills/1234/pay")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(404)
+                                .withHeader("Content-Type", "application/json")
+                                .withBody("{\"error\":\"Customer not found\"}")
+                );
     }
 
     public void registerDownloadStaffBillPdfEndpoint() {
