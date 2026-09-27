@@ -1,8 +1,8 @@
 export interface Bill {
   billId: string;
   customerId: string;
-  ownerFirstName: string;
-  ownerLastName: string;
+  customerFirstName: string;
+  customerLastName: string;
   visitType: string;
   vetId: string;
   vetFirstName: string;
@@ -14,6 +14,6 @@ export interface Bill {
   billStatus: string;
   dueDate: string;
   timeRemaining: number;
-  interestExempt: boolean;
+  isInterestExempt: boolean;
   archive: boolean;
 }

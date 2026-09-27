@@ -282,11 +282,11 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
       const ownerLast = filter.lastName?.trim();
       const matchesOwner =
         (!ownerFirst ||
-          (bill.ownerFirstName || '')
+          (bill.customerFirstName || '')
             .toLowerCase()
             .includes(ownerFirst.toLowerCase())) &&
         (!ownerLast ||
-          (bill.ownerLastName || '')
+          (bill.customerLastName || '')
             .toLowerCase()
             .includes(ownerLast.toLowerCase()));
 
@@ -969,8 +969,8 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                   <strong>Customer ID:</strong> {searchedBill.customerId}
                 </p>
                 <p>
-                  <strong>Owner Name:</strong> {searchedBill.ownerFirstName}{' '}
-                  {searchedBill.ownerLastName}
+                  <strong>Owner Name:</strong> {searchedBill.customerFirstName}{' '}
+                  {searchedBill.customerLastName}
                 </p>
                 <p>
                   <strong>Visit Type:</strong> {searchedBill.visitType}
@@ -993,7 +993,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                 </p>
                 <div style={{ marginTop: '16px' }}>
                   <strong>Interest Exempt:</strong>{' '}
-                  {searchedBill.interestExempt ? 'Yes' : 'No'}
+                  {searchedBill.isInterestExempt ? 'Yes' : 'No'}
                 </div>
               </div>
             </div>
@@ -1018,7 +1018,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                           <div className="billField">
                             <strong>Owner:</strong>
                             <span className="billValue">
-                              {bill.ownerFirstName} {bill.ownerLastName}
+                              {bill.customerFirstName} {bill.customerLastName}
                             </span>
                           </div>
                           <div className="billField">
@@ -1109,8 +1109,8 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                   <strong>Customer ID:</strong> {detailBill.customerId}
                 </p>
                 <p>
-                  <strong>Owner Name:</strong> {detailBill.ownerFirstName}{' '}
-                  {detailBill.ownerLastName}
+                  <strong>Owner Name:</strong> {detailBill.customerFirstName}{' '}
+                  {detailBill.customerLastName}
                 </p>
                 <p>
                   <strong>Visit Type:</strong> {detailBill.visitType}
@@ -1155,12 +1155,12 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                   <strong>Interest Exempt:</strong>
                   <InterestExemptToggle
                     billId={detailBill.billId}
-                    isExempt={detailBill.interestExempt || false}
+                    isExempt={detailBill.isInterestExempt || false}
                     onToggleComplete={() => {
                       callGetBillsListWithFilters(currentPage, 10);
                       setDetailBill({
                         ...detailBill,
-                        interestExempt: !detailBill.interestExempt,
+                        isInterestExempt: !detailBill.isInterestExempt,
                       });
                     }}
                     variant="simple"
