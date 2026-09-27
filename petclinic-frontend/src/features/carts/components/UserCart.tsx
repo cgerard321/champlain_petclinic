@@ -5,7 +5,7 @@ import InvoiceComponent, {
   InvoiceFull as InvoiceFullType,
   InvoiceItem as InvoiceItemType,
 } from './Invoice';
-import { useNavigate, useParams } from 'react-router-dom';
+import {generatePath, useNavigate, useParams} from 'react-router-dom';
 import CartItem from './CartItem';
 import { ProductModel } from '../models/ProductModel';
 import './cart-shared.css';
@@ -108,6 +108,14 @@ const UserCart: React.FC = () => {
     }),
     []
   );
+
+  const redirectToProductPageOnClick = (productId: string): void => {
+    navigate(
+        generatePath(AppRoutePaths.ProductDetails, {
+          productId,
+        })
+    );
+  };
 
   const emitCartMessage = useCallback(
     (serverMessage?: string | null, fallbackMessage?: string) => {
@@ -1162,7 +1170,7 @@ const UserCart: React.FC = () => {
                   className="recent-purchase-card cart-card"
                 >
                   <div className="recent-purchase-image-container">
-                    <div className="recent-purchase-image">
+                    <div onClick={() => redirectToProductPageOnClick(item.productId)} className="recent-purchase-image">
                       <ImageContainer imageId={item.imageId} />
                     </div>
                   </div>
@@ -1253,7 +1261,7 @@ const UserCart: React.FC = () => {
                 return (
                   <div key={item.productId} className={wishlistCardClassName}>
                     <div className="recent-purchase-image-container">
-                      <div className="recent-purchase-image">
+                      <div onClick={() => redirectToProductPageOnClick(item.productId)} className="recent-purchase-image">
                         <ImageContainer imageId={item.imageId} />
                       </div>
                     </div>
@@ -1305,7 +1313,7 @@ const UserCart: React.FC = () => {
                   className="recommendation-purchase-card cart-card"
                 >
                   <div className="recent-purchase-image-container">
-                    <div className="recent-purchase-image">
+                    <div onClick={() => redirectToProductPageOnClick(item.productId)} className="recent-purchase-image">
                       <ImageContainer imageId={item.imageId} />
                     </div>
                   </div>
