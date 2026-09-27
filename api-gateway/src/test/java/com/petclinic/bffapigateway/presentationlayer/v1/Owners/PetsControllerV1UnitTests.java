@@ -92,7 +92,7 @@ class PetsControllerV1UnitTests {
 
     @Test
     void whenGetPetByPetId_thenReturnPet() {
-        String ownerId = "valid-owner-id";
+        String customerId = "valid-customer-id";
         String petId = "petId-123";
         boolean includePhoto = false;
 
@@ -103,13 +103,13 @@ class PetsControllerV1UnitTests {
         expectedResponse.setPetTypeId("5");
         expectedResponse.setWeight("10.5");
         expectedResponse.setIsActive("true");
-        expectedResponse.setOwnerId(ownerId);
+        expectedResponse.setCustomerId(customerId);
 
         when(customersServiceClient.getPetByPetId(petId, includePhoto))
                 .thenReturn(Mono.just(expectedResponse));
 
         client.get()
-                .uri("/api/gateway/pets/owners/{ownerId}/pets/{petId}", ownerId, petId)
+                .uri("/api/gateway/pets/customers/{customer Id}/pets/{petId}", customerId, petId)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -141,9 +141,9 @@ class PetsControllerV1UnitTests {
     }
 
     @Test
-    void whenUpdatePetForOwner_thenReturnUpdatedPet() {
+    void whenUpdatePetForCustomer_thenReturnUpdatedPet() {
         String petId = "petId-123";
-        String ownerId = "ownerId-456";
+        String customerId = "customerId-456";
 
         PetRequestDTO petRequest = new PetRequestDTO();
         petRequest.setName("Updated Fluffy");
@@ -164,7 +164,7 @@ class PetsControllerV1UnitTests {
                 .thenReturn(Mono.just(expectedResponse));
 
         client.put()
-                .uri("/api/gateway/pets/owners/{ownerId}/pets/{petId}", ownerId, petId)
+                .uri("/api/gateway/pets/customers/{customerId}/pets/{petId}", customerId, petId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(petRequest))
                 .exchange()
@@ -182,9 +182,9 @@ class PetsControllerV1UnitTests {
     }
 
     @Test
-    void whenGetPetForOwner_thenReturnPet() {
+    void whenGetPetForCustomer_thenReturnPet() {
         String petId = "petId-123";
-        String ownerId = "ownerId-456";
+        String customerId = "customerId-456";
 
         PetResponseDTO expectedResponse = new PetResponseDTO();
         expectedResponse.setPetId(petId);
@@ -198,7 +198,7 @@ class PetsControllerV1UnitTests {
                 .thenReturn(Mono.just(expectedResponse));
 
         client.get()
-                .uri("/api/gateway/pets/owners/{ownerId}/pets/{petId}", ownerId, petId)
+                .uri("/api/gateway/pets/customers/{customerId}/pets/{petId}", customerId, petId)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -576,8 +576,8 @@ class PetsControllerV1UnitTests {
     }
 
     @Test
-    void whenUpdatePetForOwner_withNonExistentPet_thenReturnNotFound() {
-        String ownerId = "owner-123";
+    void whenUpdatePetForCustomer_withNonExistentPet_thenReturnNotFound() {
+        String customerId = "customer-123";
         String petId = "non-existent-pet";
 
         PetRequestDTO petRequest = new PetRequestDTO();
@@ -591,7 +591,7 @@ class PetsControllerV1UnitTests {
                 .thenReturn(Mono.empty());
 
         client.put()
-                .uri("/api/gateway/pets/owners/{ownerId}/pets/{petId}", ownerId, petId)
+                .uri("/api/gateway/pets/customers/{customerId}/pets/{petId}", customerId, petId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(petRequest))
                 .exchange()

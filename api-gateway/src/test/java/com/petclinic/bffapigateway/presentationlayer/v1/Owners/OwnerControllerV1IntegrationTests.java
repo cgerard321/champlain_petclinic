@@ -62,7 +62,7 @@ public class OwnerControllerV1IntegrationTests {
     PetResponseDTO petResponse = PetResponseDTO.builder()
             .petId(PET_ID)
             .name("Buster")
-            .ownerId(OWNER_ID)
+            .customerId(OWNER_ID)
             .petTypeId("pt-1")
             .build();
 

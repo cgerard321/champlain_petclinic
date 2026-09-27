@@ -18,7 +18,7 @@ interface EditPetModalProps {
   isOpen: boolean;
   onClose: () => void;
   petId: string;
-  ownerId: string;
+  customerId: string;
   onPetUpdated?: (updatedPet?: PetResponseModel) => void;
   onPetDeleted?: () => void;
 }
@@ -27,7 +27,7 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
   isOpen,
   onClose,
   petId,
-  ownerId,
+  customerId,
   onPetUpdated,
   onPetDeleted,
 }): JSX.Element => {
@@ -130,7 +130,7 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
         setSuccessMessage('');
         setErrors({});
         try {
-          const response = await getPet(petId, ownerId);
+          const response = await getPet(petId, customerId);
           const petData: PetResponseModel = response.data;
           setPet({
             ...petData,
@@ -169,9 +169,9 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
       fetchPetData();
       fetchPetTypes();
     }
-  }, [petId, ownerId, isOpen]);
+  }, [petId, customerId, isOpen]);
 
-  const handleChange = (
+  const handleChange  = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ): void => {
     const { name, type, value } = e.target;
@@ -211,7 +211,7 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
     setIsSubmitting(true);
     try {
       const petRequest: PetRequestModel = {
-        ownerId,
+        customerId,
         name: pet.name,
         petTypeId: pet.petTypeId,
         isActive: pet.isActive ? 'true' : 'false',

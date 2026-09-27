@@ -200,7 +200,7 @@ const ProfilePage = (): JSX.Element => {
 
         try {
           const petsResponse = await axiosInstance.get(
-            `/owners/${user.userId}/pets`,
+            `/pets/customers/${user.userId}/pets`,
             { useV2: false }
           );
 
@@ -240,7 +240,7 @@ const ProfilePage = (): JSX.Element => {
           }
         } catch (petsError) {
           console.warn(
-            'Error fetching pets, setting owner without pets:',
+            'Error fetching pets, setting customer without pets:',
             petsError
           );
           if (isMounted) {
@@ -551,7 +551,7 @@ const ProfilePage = (): JSX.Element => {
 
           <div className="customers-pets-section">
             <div className="customers-pets-header">
-              <h3>Owner Pets</h3>
+              <h3>Customer Pets</h3>
               <button
                 className="customers-add-pet-button"
                 onClick={handleAddPet}
@@ -651,7 +651,7 @@ const ProfilePage = (): JSX.Element => {
       </div>
 
       <AddPetModal
-        ownerId={user.userId}
+        customerId={user.userId}
         isOpen={isAddPetModalOpen}
         onClose={handleCloseAddPetModal}
         onPetAdded={handlePetAdded}
@@ -661,7 +661,7 @@ const ProfilePage = (): JSX.Element => {
         isOpen={isEditPetModalOpen}
         onClose={handleCloseEditPetModal}
         petId={selectedPetId}
-        ownerId={user.userId}
+        customerId={user.userId}
         onPetUpdated={handlePetUpdated}
         onPetDeleted={handlePetDeleted}
       />

@@ -42,7 +42,7 @@ public class EntityDTOUtil {
     public static PetResponseDTO toPetResponseDTO(Pet pet) {
         PetResponseDTO dto = new PetResponseDTO();
         dto.setPetId(pet.getPetId());
-        dto.setOwnerId(pet.getOwnerId());
+        dto.setCustomerId(pet.getCustomerId());
         dto.setPetTypeId(pet.getPetTypeId());
         dto.setName(pet.getName());
         dto.setBirthDate(pet.getBirthDate());
@@ -54,7 +54,7 @@ public class EntityDTOUtil {
     public static Pet toPet(PetRequestDTO petRequestDTO) {
         Pet pet = new Pet();
         pet.setPetId(UUID.randomUUID().toString());
-        pet.setOwnerId(petRequestDTO.getOwnerId());
+        pet.setCustomerId(petRequestDTO.getCustomerId());
         pet.setPetTypeId(petRequestDTO.getPetTypeId());
         pet.setName(petRequestDTO.getName());
         pet.setBirthDate(petRequestDTO.getBirthDate());

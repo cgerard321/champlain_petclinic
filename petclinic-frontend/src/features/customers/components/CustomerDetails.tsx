@@ -50,8 +50,8 @@ const CustomerDetails: FC = () => {
         setIsDisabled(false);
       }
 
-      // Fetch pets by owner ID
-      const petsResponse = await axiosInstance.get(`/owners/${ownerId}/pets`, {
+      // Fetch pets by customer ID
+      const petsResponse = await axiosInstance.get(`/pets/customers/${ownerId}/pets`, {
         useV2: false,
       });
 
@@ -250,7 +250,7 @@ const CustomerDetails: FC = () => {
         setIsDisabled(false);
       }
 
-      const petsResponse = await axiosInstance.get(`/owners/${ownerId}/pets`, {
+      const petsResponse = await axiosInstance.get(`/pets/customers/${ownerId}/pets`, {
         useV2: false,
       });
 
@@ -379,9 +379,9 @@ const CustomerDetails: FC = () => {
           </p>
         </div>
 
-        {/* Owner Pets */}
+        {/* Customer Pets */}
         <div className="section owner-pets">
-          <h3>Owner Pets</h3>
+          <h3>Customer Pets</h3>
           {pets && pets.length > 0 ? (
             <ul>
               {pets.map(pet => (
@@ -479,7 +479,7 @@ const CustomerDetails: FC = () => {
       </div>
 
       <AddPetModal
-        ownerId={ownerId || ''}
+        customerId={ownerId || ''}
         isOpen={isAddPetModalOpen}
         onClose={handleCloseAddPetModal}
         onPetAdded={handlePetAdded}
@@ -489,7 +489,7 @@ const CustomerDetails: FC = () => {
         isOpen={isEditPetModalOpen}
         onClose={handleCloseEditPetModal}
         petId={selectedPetId}
-        ownerId={ownerId || ''}
+        customerId={ownerId || ''}
         onPetUpdated={handlePetUpdated}
         onPetDeleted={handlePetDeleted}
       />

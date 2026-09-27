@@ -190,7 +190,14 @@ public class CustomersServiceClient {
 
     public Flux<PetResponseDTO> getPetsByOwnerId(final String ownerId) {
         return webClientBuilder.build().get()
-                .uri(customersServiceUrl + "/pets/owner/" + ownerId +"/pets")
+                .uri(customersServiceUrl + "/pets/customers/" + ownerId + "/pets")
+                .retrieve()
+                .bodyToFlux(PetResponseDTO.class);
+    }
+
+    public Flux<PetResponseDTO> getPetsByCustomerId(final String customerId) {
+        return webClientBuilder.build().get()
+                .uri(customersServiceUrl + "/pets/customers/" + customerId +"/pets")
                 .retrieve()
                 .bodyToFlux(PetResponseDTO.class);
     }
@@ -309,10 +316,20 @@ public class CustomersServiceClient {
         );
     }
 
+    // Dylan before you ask yes this looks cursed BUTTTT we need the old Owner method so old code doesn't explode while pets use Customer now
     public Mono<PetResponseDTO> createPetForOwner(String ownerId, PetRequestDTO petRequest) {
         return webClientBuilder.build()
                 .post()
-                .uri(customersServiceUrl + "/pets/owners/" + ownerId + "/pets")
+                .uri(customersServiceUrl + "/pets/customers/" + ownerId + "/pets")
+                .body(BodyInserters.fromValue(petRequest))
+                .retrieve()
+                .bodyToMono(PetResponseDTO.class);
+    }
+
+    public Mono<PetResponseDTO> createPetForCustomer(String customerId, PetRequestDTO petRequest) {
+        return webClientBuilder.build()
+                .post()
+                .uri(customersServiceUrl + "/pets/customers/" + customerId + "/pets")
                 .body(BodyInserters.fromValue(petRequest))
                 .retrieve()
                 .bodyToMono(PetResponseDTO.class);

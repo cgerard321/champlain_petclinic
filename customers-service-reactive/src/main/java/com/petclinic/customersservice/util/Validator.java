@@ -33,7 +33,7 @@ public class Validator {
 
     public static UnaryOperator<Mono<PetRequestDTO>> validatePet() {
         return petRequest -> petRequest
-                .filter(hasValidId(PetRequestDTO::getOwnerId))
+                .filter(hasValidId(PetRequestDTO::getCustomerId))
                 .switchIfEmpty(ApplicationExceptions.invalidOwnerId())
                 .filter(hasStringValue(PetRequestDTO::getName))
                 .switchIfEmpty(ApplicationExceptions.missingPetName())
