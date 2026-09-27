@@ -124,7 +124,12 @@ public class VisitServiceImpl implements VisitService {
                 status = Status.COMPLETED;
                 break;
         }
-        return repo.findAllByStatus(statusString)
+        return repo.findAllByStatus(Status.UPCOMING.name())
+                .filter(visit -> visit.getVisitEndDate() != null
+                        && visit.getVisitEndDate().isBefore(LocalDateTime.now()))
+                .doOnNext(visit -> visit.setStatus(Status.COMPLETED))
+                .flatMap(repo::save)
+                .thenMany(repo.findAllByStatus(status.name()))
                 .flatMap(entityDtoUtil::toVisitResponseDTO);
     }
 
