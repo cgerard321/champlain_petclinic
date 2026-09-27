@@ -4,10 +4,13 @@ COPY build.gradle settings.gradle ./
 
 COPY src ./src
 
-RUN gradle bootJar --no-daemon && \
+# cache dependencies to speed up subsequent builds
+RUN --mount=type=cache,id=gradle-api-gateway-cache,target=/home/gradle/.gradle/caches,uid=1000,gid=1000 \
+    --mount=type=cache,id=gradle-api-gateway-wrapper,target=/home/gradle/.gradle/wrapper \
+    gradle bootJar --no-daemon && \
     mv build/libs/*.jar build/libs/application.jar
 
-FROM eclipse-temurin:17-jre-alpine
+FROM amazoncorretto:17-alpine
 
 RUN apk add --no-cache curl && \
     addgroup -S spring && \
