@@ -1,0 +1,76 @@
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { TestBed } from '@angular/core/testing';
+
+import {
+  DeliveryType,
+  Product,
+  ProductStatus,
+  ProductType,
+} from '@features/prod/models/product.model';
+import { ProductService } from './product.service';
+
+describe('ProductService', () => {
+  let service: ProductService;
+  let http: HttpTestingController;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [ProductService, provideHttpClient(), provideHttpClientTesting()],
+    });
+    service = TestBed.inject(ProductService);
+    http = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => http.verify());
+
+  it('parses data records from the Product SSE response', () => {
+    const product: Product = {
+      productId: 'product-1',
+      productName: 'Dog food',
+      productDescription: 'Food',
+      productSalePrice: 10,
+      productQuantity: 5,
+      isUnlisted: false,
+      productType: ProductType.FOOD,
+      productStatus: ProductStatus.AVAILABLE,
+      deliveryType: DeliveryType.DELIVERY,
+    };
+    let result: Product[] | undefined;
+
+    service.getProducts().subscribe((products) => (result = products));
+
+    const request = http.expectOne('/api/gateway/products');
+    expect(request.request.responseType).toBe('text');
+    request.flush(`data:${JSON.stringify(product)}\n\ndata:${JSON.stringify({ ...product, productId: 'product-2' })}\n\n`);
+
+    expect(result?.map((item) => item.productId)).toEqual(['product-1', 'product-2']);
+  });
+
+  it('creates a product with JSON', () => {
+    const requestBody = {
+      productName: 'Dog food',
+      productDescription: 'Food',
+      productSalePrice: 10,
+      productQuantity: 5,
+      isUnlisted: false,
+      productType: ProductType.FOOD,
+      deliveryType: DeliveryType.DELIVERY,
+    };
+
+    service.createProduct(requestBody).subscribe();
+
+    const request = http.expectOne('/api/gateway/products');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual(requestBody);
+    request.flush({ ...requestBody, productId: 'product-1', productStatus: ProductStatus.AVAILABLE });
+  });
+
+  it('loads product enums', () => {
+    service.getProductEnums().subscribe();
+
+    const request = http.expectOne('/api/gateway/products/enums');
+    expect(request.request.method).toBe('GET');
+    request.flush({ productType: [], productStatus: [], deliveryType: [] });
+  });
+});
