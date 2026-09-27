@@ -9,51 +9,25 @@ export class WsConnection {
   readonly messages = signal<string[]>([]);
   readonly status = signal<WsConnectionStatus>('idle');
 
-  connect(
-    path: string,
-    params?: Record<string, string | number | undefined>,
-    maxMessages = 200,
-  ): void {
+  connect(path: string, params?: Record<string, string | number | undefined>): void {
     this.disconnect();
     this.messages.set([]);
     this.status.set('connecting');
 
     const socket = new WebSocket(this.buildUrl(path, params));
-    const messageLimit =
-      Number.isFinite(maxMessages) && maxMessages > 0
-        ? Math.floor(maxMessages)
-        : 200;
     this.socket = socket;
 
-    socket.onopen = () => {
-      if (this.socket === socket) {
-        this.status.set('open');
-      }
-    };
+    socket.onopen = () => this.status.set('open');
 
     socket.onmessage = (event: MessageEvent<string>) => {
-      if (this.socket !== socket) {
-        return;
-      }
-
-      this.messages.update((current) => {
-        const next = [...current, event.data];
-        return next.slice(-messageLimit);
-      });
+      this.messages.update((current) => [...current, event.data]);
     };
 
-    socket.onerror = () => {
-      if (this.socket === socket) {
-        this.status.set('error');
-      }
-    };
+    socket.onerror = () => this.status.set('error');
 
     socket.onclose = () => {
-      if (this.socket === socket) {
-        this.socket = null;
-        if (this.status() !== 'error') {
-          this.status.set('closed');
-        }
+      if (this.status() !== 'error') {
+        this.status.set('closed');
       }
     };
   }
@@ -94,3 +68,4 @@ export class WsConnection {
     return apiUrl.replace(/^http/, 'ws');
   }
 }
+
