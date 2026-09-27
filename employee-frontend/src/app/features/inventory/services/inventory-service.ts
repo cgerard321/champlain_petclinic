@@ -1,8 +1,9 @@
-import { SseClient } from 'ngx-sse-client';
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
+import { SseClient } from 'ngx-sse-client';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
+
 import { Inventory } from '@features/inventory/models/inventory.model';
 
 @Injectable({ providedIn: 'root' })

@@ -4,7 +4,7 @@
   @if (isLoading()) {
     <!--Displays a loading screen while the page loads-->
     <div class="state-container">
-      <mat-spinner diameter="40"></mat-spinner>
+      <mat-spinner diameter="40" />
       <p>Loading inventories…</p>
     </div>
   } @else if (errorMessage(); as err) {

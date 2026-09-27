@@ -3,8 +3,9 @@ import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 
-import { InventoryList } from './inventory-list';
 import { InventoryService } from '@features/inventory/services/inventory-service';
+
+import { InventoryList } from './inventory-list';
 
 describe('InventoryList', () => {
   let fixture: ComponentFixture<InventoryList>;

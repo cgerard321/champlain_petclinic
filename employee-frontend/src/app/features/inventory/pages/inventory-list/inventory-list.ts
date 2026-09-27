@@ -1,12 +1,13 @@
 import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { Subscription } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { InventoryService } from '@features/inventory/services/inventory-service';
-import { Inventory } from '@features/inventory/models/inventory.model';
+import { RouterLink } from '@angular/router';
+import { Subscription } from 'rxjs';
+
 import { isApiError, ApiError } from '@core/models/api-error';
+import { Inventory } from '@features/inventory/models/inventory.model';
+import { InventoryService } from '@features/inventory/services/inventory-service';
 
 @Component({
   imports: [RouterLink, MatCardModule, MatIconModule, MatProgressSpinnerModule],
