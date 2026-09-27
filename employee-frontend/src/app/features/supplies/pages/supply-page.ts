@@ -2,11 +2,11 @@ import { CurrencyPipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormField, form, min, required, submit } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
-import { AuthState } from '@core/services/auth-state';
-import { Roles } from '@shared/models/roles';
 
+import { AuthState } from '@core/services/auth-state';
 import { Supply } from '@features/supplies/models/supply';
 import { SupplyService } from '@features/supplies/services/supply-service';
+import { Roles } from '@shared/models/roles';
 
 @Component({
   imports: [CurrencyPipe, FormField],

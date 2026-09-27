@@ -4,10 +4,10 @@ import { of, Subject, throwError } from 'rxjs';
 import { vi } from 'vitest';
 
 import { AuthState } from '@core/services/auth-state';
-import { Roles } from '@shared/models/roles';
 import { Status } from '@features/supplies/models/status';
 import { Supply } from '@features/supplies/models/supply';
 import { SupplyService } from '@features/supplies/services/supply-service';
+import { Roles } from '@shared/models/roles';
 
 import { SupplyPage } from './supply-page';
 
