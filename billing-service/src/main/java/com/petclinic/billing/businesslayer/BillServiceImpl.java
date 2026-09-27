@@ -26,6 +26,8 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.UUID;
 import java.util.function.Predicate;
+import com.petclinic.billing.exceptions.CustomerNotFoundException;
+import com.petclinic.billing.exceptions.VetNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -180,11 +182,23 @@ public class BillServiceImpl implements BillService{
                         return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer ID is required"));
                     }
                     // Fetch Vet and Owner details
-                    Mono<VetResponseDTO> vetMono = vetClient.getVetByVetId(dto.getVetId());
-                    Mono<OwnerResponseDTO> ownerMono = ownerClient.getOwnerByOwnerId(dto.getCustomerId())
-                            .switchIfEmpty(Mono.error(new ResponseStatusException(
-                                    HttpStatus.BAD_REQUEST, "Customer ID does not exist"
-                            )));
+//                    Mono<VetResponseDTO> vetMono = vetClient.getVetByVetId(dto.getVetId());
+//                    Mono<OwnerResponseDTO> ownerMono = ownerClient.getOwnerByOwnerId(dto.getCustomerId())
+//                            .switchIfEmpty(Mono.error(new ResponseStatusException(
+//                                    HttpStatus.BAD_REQUEST, "Customer ID does not exist"
+//                            )));
+                    //WHAT I ADDED INSTEAD FOR EXCEPTION
+                    Mono<VetResponseDTO> vetMono =
+                            vetClient.getVetByVetId(dto.getVetId())
+                                    .switchIfEmpty(Mono.error(
+                                            new VetNotFoundException(dto.getVetId())
+                                    ));
+
+                    Mono<OwnerResponseDTO> ownerMono =
+                            ownerClient.getOwnerByOwnerId(dto.getCustomerId())
+                                    .switchIfEmpty(Mono.error(
+                                            new CustomerNotFoundException(dto.getCustomerId())
+                                    ));
 
                     return Mono.zip(vetMono, ownerMono, Mono.just(dto));
                 })
@@ -444,10 +458,16 @@ public class BillServiceImpl implements BillService{
     @Override
     public Flux<BillResponseDTO> getBillsByCustomerId(String customerId) {
         // Fetch the owner info first
-        Mono<OwnerResponseDTO> ownerMono = ownerClient.getOwnerByOwnerId(customerId)
-                .switchIfEmpty(Mono.error(new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Customer ID does not exist"
-                )));
+//        Mono<OwnerResponseDTO> ownerMono = ownerClient.getOwnerByOwnerId(customerId)
+//                .switchIfEmpty(Mono.error(new ResponseStatusException(
+//                        HttpStatus.NOT_FOUND, "Customer ID does not exist"
+//                )));
+
+        Mono<OwnerResponseDTO> ownerMono =
+                ownerClient.getOwnerByOwnerId(customerId)
+                        .switchIfEmpty(Mono.error(
+                                new CustomerNotFoundException(customerId)
+                        ));
 
         return ownerMono.flatMapMany(owner ->
                 billRepository.findByCustomerId(customerId)
