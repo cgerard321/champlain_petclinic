@@ -1,25 +1,46 @@
 import { useEffect, useState } from 'react';
+import { FileDetails } from '@/shared/models/FileDetails';
 import { getImage } from '../api/getImage';
 import './Image.css';
 import { ProductModel } from '../models/ProductModels/ProductModel';
 
 interface ImageContainerProps {
+  image?: FileDetails | null;
   imageId?: string;
   imageUrl?: string;
   product?: ProductModel;
 }
 
 export default function ImageContainer({
+  image,
   imageId,
   imageUrl,
 }: ImageContainerProps): JSX.Element {
-  const [imageName, setImageName] = useState<string | null>(null);
-  const [imageType, setImageType] = useState<string | null>(null);
-  const [imageData, setImageData] = useState<string | null>(null);
+  const [imageName, setImageName] = useState<string | null>(
+    image?.fileName ?? null
+  );
+  const [imageType, setImageType] = useState<string | null>(
+    image?.fileType ?? null
+  );
+  const [imageData, setImageData] = useState<string | null>(
+    image?.fileData ?? null
+  );
 
   useEffect(() => {
     async function loadImage(): Promise<void> {
-      if (!imageId) return;
+      if (image?.fileData) {
+        setImageName(image.fileName);
+        setImageType(image.fileType);
+        setImageData(image.fileData);
+        return;
+      }
+
+      if (!imageId) {
+        setImageName(null);
+        setImageType(null);
+        setImageData(null);
+        return;
+      }
 
       try {
         const image = await getImage(imageId);
@@ -32,7 +53,7 @@ export default function ImageContainer({
       }
     }
     loadImage();
-  }, [imageId]);
+  }, [image, imageId]);
 
   return (
     <div className="image-container">

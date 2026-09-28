@@ -3,6 +3,7 @@ package com.petclinic.products.domainclientlayer;
 
 import com.petclinic.products.utils.exceptions.BadRequestException;
 import com.petclinic.products.utils.exceptions.FailedDependencyException;
+import com.petclinic.products.utils.exceptions.FileNotFoundInFilesServiceException;
 import com.petclinic.products.utils.exceptions.UnprocessableEntityException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -70,7 +71,11 @@ public class FilesServiceClient {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(fileDetails))
                 .retrieve()
-                .onStatus(HttpStatus.NOT_FOUND::equals, resp -> Mono.error(new FailedDependencyException("Failed to update file from Files Service")))
+                .onStatus(
+                        HttpStatus.NOT_FOUND::equals,
+                        response -> Mono.error(
+                                new FileNotFoundInFilesServiceException(
+                                        "File was not found in Files Service")))
                 .onStatus(HttpStatus.UNPROCESSABLE_ENTITY::equals, resp -> Mono.error(new UnprocessableEntityException("Unprocessable File Request Model")))
                 .onStatus(HttpStatus.BAD_REQUEST::equals, resp -> Mono.error(new BadRequestException("Invalid File Request Model")))
                 .onStatus(HttpStatusCode::isError, resp -> Mono.error(new FailedDependencyException("Failed to update file from Files Service")))

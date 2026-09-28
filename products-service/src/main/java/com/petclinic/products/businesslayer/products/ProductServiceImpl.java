@@ -461,7 +461,10 @@ public class ProductServiceImpl implements ProductService {
                                         .switchIfEmpty(Mono.error(
                                                 new FailedDependencyException(
                                                         "Files Service returned no file")))
-                                        .map(file -> toResponseWithImage(product, file));
+                                        .map(file -> toResponseWithImage(product, file))
+                                        .onErrorResume(
+                                                FileNotFoundInFilesServiceException.class,
+                                                error -> uploadProductImage(product, image));
                             });
                 });
     }

@@ -97,7 +97,7 @@ const ProductBundle: React.FC<ProductBundleProps> = ({ bundle }) => {
               }
             }}
           >
-            <ImageContainer imageId={product.imageId} />
+            <ImageContainer image={product.image} imageId={product.imageId} />
             <div className="product-details">
               <p>{product.productName}</p>
               <p>Price: ${product.productSalePrice.toFixed(2)}</p>

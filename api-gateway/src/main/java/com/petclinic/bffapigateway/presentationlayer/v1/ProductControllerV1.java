@@ -6,6 +6,7 @@ import com.petclinic.bffapigateway.dtos.Files.FileDetails;
 import com.petclinic.bffapigateway.dtos.Products.*;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -80,7 +81,8 @@ public class ProductControllerV1 {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<ProductResponseDTO>> addProduct(@RequestBody ProductRequestDTO productRequestDTO) {
+    public Mono<ResponseEntity<ProductResponseDTO>> addProduct(
+            @Valid @RequestBody ProductRequestDTO productRequestDTO) {
         return productsServiceClient.createProduct(productRequestDTO)
                 .map(product -> ResponseEntity.status(HttpStatus.CREATED).body(product))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
@@ -103,7 +105,7 @@ public class ProductControllerV1 {
             produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ProductResponseDTO>> updateProductImage(
             @PathVariable String productId,
-            @RequestBody FileDetails image) {
+            @Valid @RequestBody FileDetails image) {
 
         return productsServiceClient.updateProductImage(productId, image)
                 .map(ResponseEntity::ok);

@@ -2,6 +2,7 @@ package com.petclinic.products.presentationlayer.products;
 
 import com.petclinic.products.businesslayer.products.ProductBundleService;
 import com.petclinic.products.businesslayer.products.ProductService;
+import com.petclinic.products.domainclientlayer.FileRequestDTO;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
 import com.petclinic.products.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.Assertions;
@@ -35,6 +36,24 @@ public class ProductControllerUnitTest {
 
     @Autowired
     private WebTestClient webClient;
+
+    @Test
+    void updateProductImageWithMissingFileFieldsReturnsBadRequest() {
+        FileRequestDTO invalidImage = FileRequestDTO.builder()
+                .fileName("")
+                .fileType(" ")
+                .fileData(new byte[0])
+                .build();
+
+        webClient.patch()
+                .uri("/products/06a7d573-bcab-4db3-956f-773324b92a80/image")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(invalidImage)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        verifyNoInteractions(productService);
+    }
 
     @Test
     public void whenGetAllProductsThenReturnProducts() {

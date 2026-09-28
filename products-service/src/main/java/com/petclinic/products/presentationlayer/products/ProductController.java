@@ -7,6 +7,7 @@ import com.petclinic.products.datalayer.products.ProductType;
 import com.petclinic.products.domainclientlayer.FileRequestDTO;
 import com.petclinic.products.utils.EntityModelUtil;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -71,7 +72,8 @@ public class ProductController {
     }
 
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<ProductResponseModel>> addProduct(@RequestBody Mono<ProductRequestModel> productRequestModel) {
+    public Mono<ResponseEntity<ProductResponseModel>> addProduct(
+            @Valid @RequestBody Mono<ProductRequestModel> productRequestModel) {
         return productService.addProduct(productRequestModel)
                 .map(c -> ResponseEntity.status(HttpStatus.CREATED).body(c))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
@@ -107,7 +109,7 @@ public class ProductController {
             produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ProductResponseModel>> updateProductImage(
             @PathVariable String productId,
-            @RequestBody FileRequestDTO image) {
+            @Valid @RequestBody FileRequestDTO image) {
 
         return Mono.just(productId)
                 // Keep the existing product ID validation convention.
