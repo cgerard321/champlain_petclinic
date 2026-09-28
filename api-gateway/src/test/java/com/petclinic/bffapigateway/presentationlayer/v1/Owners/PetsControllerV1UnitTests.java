@@ -235,11 +235,11 @@ class PetsControllerV1UnitTests {
     }
 
     @Test
-    void whenDeletePet_withOldOwnerRoute_thenReturnNotFound() {
+    void whenDeletePet_withOldCustomerRoute_thenReturnNotFound() {
         String petId = "petId-123";
 
         client.delete()
-                .uri("/api/gateway/owners/pets/{petId}", petId)
+                .uri("/api/gateway/customers/pets/{petId}", petId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound();

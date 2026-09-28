@@ -19,7 +19,6 @@ import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,9 +42,9 @@ public class PetServiceUnitTest {
         String customerId = "valid-customer-id";
         PetRequestDTO petRequest = buildPetRequestDTO();
         Pet savedPet = buildPetFromRequest(petRequest, customerId);
-        OwnerResponseDTO ownerResponse = buildOwnerResponseDTO();
+        OwnerResponseDTO customerResponse = buildCustomerResponseDTO();
 
-        when(ownerService.getOwnerByOwnerId(customerId, false)).thenReturn(Mono.just(ownerResponse));
+        when(ownerService.getOwnerByOwnerId(customerId, false)).thenReturn(Mono.just(customerResponse));
         when(repo.save(any(Pet.class))).thenReturn(Mono.just(savedPet));
 
         Mono<PetResponseDTO> result = petService.createPetForCustomer(customerId, Mono.just(petRequest));
@@ -111,9 +110,9 @@ public class PetServiceUnitTest {
                 .build();
     }
 
-    private OwnerResponseDTO buildOwnerResponseDTO() {
+    private OwnerResponseDTO buildCustomerResponseDTO() {
         return OwnerResponseDTO.builder()
-                .ownerId("valid-owner-id")
+                .ownerId("valid-customer-id")
                 .firstName("John")
                 .lastName("Doe")
                 .address("123 Main St")

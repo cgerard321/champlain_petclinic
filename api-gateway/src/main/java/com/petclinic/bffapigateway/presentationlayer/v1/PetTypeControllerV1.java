@@ -70,7 +70,7 @@ public class PetTypeControllerV1 {
             @RequestBody Mono<PetTypeRequestDTO> petTypeRequestMono) {
         return petTypeRequestMono.flatMap(petTypeRequestDTO ->
                 customersServiceClient.updatePetType(petTypeId, Mono.just(petTypeRequestDTO))
-                        .map(updatedOwner -> ResponseEntity.ok().body(updatedOwner))
+                        .map(updatedCustomer -> ResponseEntity.ok().body(updatedCustomer))
                         .defaultIfEmpty(ResponseEntity.notFound().build())
         );
     }

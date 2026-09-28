@@ -172,7 +172,7 @@ public class OwnerControllerV1IntegrationTests {
     @Test
     void whenDeletePet_withOldOwnerRoute_thenReturnNotFound() {
         webTestClient.delete()
-                .uri(OWNER_BASE_PATH + "/{ownerId}/pets/{petId}", OWNER_ID, PET_ID)
+                .uri(OWNER_BASE_PATH + "/{customerId}/pets/{petId}", OWNER_ID, PET_ID)
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .exchange()
                 .expectStatus().isNotFound();

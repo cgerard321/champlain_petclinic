@@ -5,15 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.*;
-import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
-import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -27,8 +24,6 @@ import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.when;
-import static reactor.core.publisher.Mono.just;
 
 public class CustomerServiceClientIntegrationTest {
 
@@ -454,7 +449,7 @@ public class CustomerServiceClientIntegrationTest {
     }
 
     @Test
-    void whenGetPetByOwnerIdAndPetId_thenReturnPet() throws Exception {
+    void whenGetPetByCustomerIdAndPetId_thenReturnPet() throws Exception {
         final String body = mapper.writeValueAsString(TEST_PET);
 
         prepareResponse(response -> response
@@ -475,7 +470,7 @@ public class CustomerServiceClientIntegrationTest {
     //The endpoints were brought back to their original names, although they were previously modified.
     //Since it would require another new ticket to change them back, they will remain as is for these tests and will have to be updated in another ticket yet again
     @Test
-    void whenGetPetsByOwnerId_thenReturnPetsFlux() throws Exception {
+    void whenGetPetsByCustomerId_thenReturnPetsFlux() throws Exception {
         List<PetResponseDTO> list = List.of(TEST_PET, TEST_PET);
         final String body = mapper.writeValueAsString(list);
 
