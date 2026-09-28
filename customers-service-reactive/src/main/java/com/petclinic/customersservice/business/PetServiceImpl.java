@@ -110,7 +110,7 @@ public class PetServiceImpl implements PetService {
 
 
     @Override
-    public Mono<PetResponseDTO> createPetForOwner(String ownerId, Mono<PetRequestDTO> petRequestDTO) {
+    public Mono<PetResponseDTO> createPetForCustomer(String customerId, Mono<PetRequestDTO> petRequestDTO) {
         return petRequestDTO
                 .flatMap(requestDTO -> {
                     return customerService.getCustomerByCustomerId(customerId, false)

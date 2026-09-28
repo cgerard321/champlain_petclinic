@@ -66,7 +66,7 @@ public class PetServiceUnitTest {
         String nonExistingCustomerId = "non-existent-customer-id";
         PetRequestDTO petRequest = buildPetRequestDTO();
 
-        when(petService.getPetById(nonExistingCustomerId,false)).thenReturn(Mono.empty());
+        when(customerService.getCustomerByCustomerId(nonExistingCustomerId, false)).thenReturn(Mono.empty());
 
         Mono<PetResponseDTO> result = petService.createPetForCustomer(nonExistingCustomerId, Mono.just(petRequest));
 
