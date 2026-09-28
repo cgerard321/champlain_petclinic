@@ -14,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.method.HandlerMethod;
@@ -82,9 +83,9 @@ public class JwtTokenFilter implements WebFilter {
         AUTH_WHITELIST.put("/health", "/health");
     }
 
-    @SuppressWarnings("NullableProblems")
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+    @NonNull
+    public Mono<Void> filter(ServerWebExchange exchange, @NonNull WebFilterChain chain) {
 
         String path = exchange.getRequest().getURI().getPath();
 
@@ -96,7 +97,7 @@ public class JwtTokenFilter implements WebFilter {
 
         exchange.getResponse().getHeaders().add("Access-Control-Allow-Credentials", "true");
         exchange.getResponse().getHeaders().add("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS, PATCH, HEAD");
-        exchange.getResponse().getHeaders().add("Access-Control-Allow-Headers", "Content-Type");
+        exchange.getResponse().getHeaders().add("Access-Control-Allow-Headers", "Content-Type, X-XSRF-TOKEN");
 
         // todo optimize this
         if (exchange.getRequest().getMethod().equals(HttpMethod.OPTIONS)

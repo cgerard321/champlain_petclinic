@@ -26,7 +26,9 @@ public class MockServerConfigAuthService {
     public static final String jwtTokenForInvalidVetId = "valid-test-token-for-invalid-vet-id";
 
     public static final String jwtTokenForValidCustomerId = "valid-test-token-for-customer-one";
-    
+
+    public static final String csrfTokenForValidCustomerId = "valid-csrf-token-for-customer-one";
+
     public MockServerConfigAuthService() {
         this.clientAndServer = ClientAndServer.startClientAndServer(AUTH_SERVICE_SERVER_PORT);
     }

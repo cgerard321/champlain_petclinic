@@ -17,6 +17,8 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import java.util.Date;
+import java.util.UUID;
+
 import static com.petclinic.bffapigateway.presentationlayer.v1.mockservers.MockServerConfigAuthService.jwtTokenForValidAdmin;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -38,6 +40,8 @@ class PetsControllerV1IntegrationTests {
     private final String PET_ID = "petId-400";
     private final String CUSTOMER_ID = "customerId-100";
     private final Date BIRTH_DATE = new Date(2023, 1, 1);
+
+    private static String CSRF_TOKEN = UUID.randomUUID().toString();
 
     @BeforeEach
     public void startMockServer() {
@@ -152,6 +156,8 @@ class PetsControllerV1IntegrationTests {
         webTestClient.put()
                 .uri(PET_PATH + "/{petId}", nonExistentId)
                 .cookie("Bearer", jwtTokenForValidAdmin)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(updateRequest), PetRequestDTO.class)
                 .exchange()

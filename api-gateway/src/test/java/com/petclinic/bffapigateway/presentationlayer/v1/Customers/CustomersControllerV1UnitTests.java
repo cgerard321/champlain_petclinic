@@ -9,6 +9,7 @@ import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.presentationlayer.v1.CustomerControllerV1;
 import com.petclinic.bffapigateway.presentationlayer.v1.CustomersLookupController;
 import com.petclinic.bffapigateway.presentationlayer.v1.PetControllerV1;
+import com.petclinic.bffapigateway.utils.Security.Filters.CsrfFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.IsUserFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter;
@@ -45,7 +46,7 @@ import static org.mockito.Mockito.*;
         },
         excludeFilters = @ComponentScan.Filter(
                 type = FilterType.ASSIGNABLE_TYPE,
-                classes = {JwtTokenFilter.class, RoleFilter.class, IsUserFilter.class}
+                classes = {JwtTokenFilter.class, RoleFilter.class, IsUserFilter.class, CsrfFilter.class}
         )
 )
 @AutoConfigureWebTestClient

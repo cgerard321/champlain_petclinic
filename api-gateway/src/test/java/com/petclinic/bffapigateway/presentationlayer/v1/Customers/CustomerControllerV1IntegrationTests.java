@@ -18,6 +18,8 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import java.util.List;
+import java.util.UUID;
+
 import static com.petclinic.bffapigateway.presentationlayer.v1.mockservers.MockServerConfigAuthService.jwtTokenForValidAdmin;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -37,6 +39,8 @@ public class CustomerControllerV1IntegrationTests {
     private final String CUSTOMER_BASE_PATH = "/api/gateway/customers";
     private final String CUSTOMER_ID = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a";
     private final String PET_ID = "pet-id-456";
+
+    private static final String CSRF_TOKEN = UUID.randomUUID().toString();
 
     // DTOs matching the mock server expectations
     CustomerRequestDTO customerUpdateRequest = CustomerRequestDTO.builder()
@@ -242,6 +246,8 @@ public class CustomerControllerV1IntegrationTests {
         webTestClient.patch()
                 .uri("/api/gateway/pets/{petId}/photo", PET_ID)
                 .cookie("Bearer", jwtTokenForValidAdmin)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -261,6 +267,8 @@ public class CustomerControllerV1IntegrationTests {
         webTestClient.patch()
                 .uri("/api/gateway/pets/{petId}/photo", PET_ID)
                 .cookie("Bearer", jwtTokenForValidAdmin)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound();
