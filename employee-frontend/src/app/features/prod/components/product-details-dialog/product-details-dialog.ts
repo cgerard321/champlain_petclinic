@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { isApiError } from '@core/models/api-error';
@@ -15,7 +16,7 @@ interface ProductDetailsData {
 
 @Component({
   selector: 'app-product-details-dialog',
-  imports: [CurrencyPipe, MatDialogModule, MatProgressSpinnerModule],
+  imports: [CurrencyPipe, MatDialogModule, MatIconModule, MatProgressSpinnerModule],
   templateUrl: './product-details-dialog.html',
   styleUrl: './product-details-dialog.css',
 })
