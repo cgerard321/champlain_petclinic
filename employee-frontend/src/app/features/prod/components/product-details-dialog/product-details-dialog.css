@@ -40,8 +40,7 @@
   gap: 12px;
   max-height: min(68vh, 680px);
   min-width: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden auto;
   padding: 8px 24px 20px;
   width: 100%;
 }
@@ -102,7 +101,7 @@ mat-dialog-actions {
   width: 100%;
 }
 
-@media (max-width: 560px) {
+@media (width <= 560px) {
   .dialog-header,
   .details-content,
   mat-dialog-actions {

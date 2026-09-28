@@ -46,8 +46,7 @@ mat-dialog-content {
   gap: 12px;
   max-height: min(68vh, 680px);
   min-width: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden auto;
   padding: 8px 24px 20px;
   width: 100%;
 }
@@ -98,7 +97,7 @@ mat-dialog-actions {
   color: var(--mat-sys-error, #b00020);
 }
 
-@media (max-width: 560px) {
+@media (width <= 560px) {
   .two-column {
     grid-template-columns: 1fr;
   }

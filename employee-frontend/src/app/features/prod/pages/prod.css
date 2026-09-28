@@ -62,7 +62,7 @@ dd {
   flex-direction: column;
 }
 
-@media (max-width: 560px) {
+@media (width <= 560px) {
   .product-page {
     padding: 16px;
   }
