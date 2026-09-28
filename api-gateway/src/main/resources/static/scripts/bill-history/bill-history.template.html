@@ -92,7 +92,7 @@
         <tr ng-repeat="bill in ($ctrl.getRows() | filter: $ctrl.visitTypePredicate) track by $index">
             <td>{{bill.billId || bill.id}}</td>
 
-            <td>{{ getCustomerDetails ? getCustomerDetails(bill.customerId) : (bill.owner || 'Unknown Owner') }}</td>
+            <td>{{ getCustomerDetails ? getCustomerDetails(bill.customerId) : (bill.customer || 'Unknown Owner') }}</td>
 
             <td>
                 <a class="btn btn-sm btn-outline-secondary"
