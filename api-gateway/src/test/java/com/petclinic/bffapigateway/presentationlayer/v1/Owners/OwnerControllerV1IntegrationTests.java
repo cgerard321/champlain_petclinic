@@ -74,8 +74,7 @@ public class OwnerControllerV1IntegrationTests {
         mockServerConfigCustomersService.registerGetOwnerByIdEndpoint();
         mockServerConfigCustomersService.registerUpdateOwnerEndpoint();
         mockServerConfigCustomersService.registerDeleteOwnerEndpoint();
-        mockServerConfigCustomersService.registerGetPetForOwnerEndpoint(OWNER_ID, PET_ID, petResponse);
-
+        mockServerConfigCustomersService.registerGetPetByIdEndpoint(PET_ID, petResponse);
         mockServerConfigAuthService = new MockServerConfigAuthService();
         mockServerConfigAuthService.registerValidateTokenForAdminEndpoint();
     }
@@ -147,9 +146,9 @@ public class OwnerControllerV1IntegrationTests {
     }
 
     @Test
-    void whenGetPet_withValidOwnerAndPetId_thenReturnPet() {
+    void whenGetPet_withValidCustomerAndPetId_thenReturnPet() {
         Mono<PetResponseDTO> result = webTestClient.get()
-                .uri(OWNER_BASE_PATH + "/{ownerId}/pets/{petId}", OWNER_ID, PET_ID)
+                .uri("/api/gateway/pets/customers/{customerId}/pets/{petId}", OWNER_ID, PET_ID)
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -171,7 +170,7 @@ public class OwnerControllerV1IntegrationTests {
     }
 
     @Test
-    void whenDeletePet_withValidOwnerAndPetId_thenReturnNotFound() {
+    void whenDeletePet_withOldOwnerRoute_thenReturnNotFound() {
         webTestClient.delete()
                 .uri(OWNER_BASE_PATH + "/{ownerId}/pets/{petId}", OWNER_ID, PET_ID)
                 .cookie("Bearer", jwtTokenForValidAdmin)
@@ -232,7 +231,7 @@ public class OwnerControllerV1IntegrationTests {
     }
 
     @Test
-    void whenDeletePetPhotoForOwnerIntegration_thenReturnOk() {
+    void whenDeletePetPhotoForCustomerIntegration_thenReturnOk() {
         PetResponseDTO petResponseDTO = new PetResponseDTO();
         petResponseDTO.setPetId(PET_ID);
         petResponseDTO.setName("Test Pet");
@@ -241,7 +240,7 @@ public class OwnerControllerV1IntegrationTests {
         mockServerConfigCustomersService.registerDeletePetPhotoEndpoint(PET_ID, petResponseDTO);
 
         webTestClient.patch()
-                .uri(OWNER_BASE_PATH + "/{ownerId}/pets/{petId}/photo", OWNER_ID, PET_ID)
+                .uri("/api/gateway/pets/{petId}/photo", PET_ID)
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -256,11 +255,11 @@ public class OwnerControllerV1IntegrationTests {
     }
 
     @Test
-    void whenDeletePetPhotoForOwnerIntegration_withNonExistentPet_thenReturnNotFound() {
+    void whenDeletePetPhotoForCustomerIntegration_withNonExistentPet_thenReturnNotFound() {
         mockServerConfigCustomersService.registerDeletePetPhotoEndpoint(PET_ID, null);
 
         webTestClient.patch()
-                .uri(OWNER_BASE_PATH + "/{ownerId}/pets/{petId}/photo", OWNER_ID, PET_ID)
+                .uri("/api/gateway/pets/{petId}/photo", PET_ID)
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -268,9 +267,9 @@ public class OwnerControllerV1IntegrationTests {
     }
 
     @Test
-    void whenDeletePetPhotoForOwnerIntegration_withoutAuth_thenReturnUnauthorized() {
+    void whenDeletePetPhotoForCustomerIntegration_withoutAuth_thenReturnUnauthorized() {
         webTestClient.patch()
-                .uri(OWNER_BASE_PATH + "/{ownerId}/pets/{petId}/photo", OWNER_ID, PET_ID)
+                .uri("/api/gateway/pets/{petId}/photo", PET_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isUnauthorized();

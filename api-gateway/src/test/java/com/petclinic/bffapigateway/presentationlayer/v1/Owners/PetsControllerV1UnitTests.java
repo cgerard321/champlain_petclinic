@@ -128,8 +128,11 @@ class PetsControllerV1UnitTests {
     void whenDeletePet_thenReturnNoContent() {
         String petId = "petId-123";
 
+        PetResponseDTO deletedPet = new PetResponseDTO();
+        deletedPet.setPetId(petId);
+
         when(customersServiceClient.deletePetByPetId(petId))
-                .thenReturn(Mono.empty());
+                .thenReturn(Mono.just(deletedPet));
 
         client.delete()
                 .uri("/api/gateway/pets/{petId}", petId)
@@ -214,7 +217,7 @@ class PetsControllerV1UnitTests {
     }
 
     @Test
-    void whenCreatePet_withoutOwnerId_thenReturnNotFound() {
+    void whenCreatePet_withoutCustomerId_thenReturnNotFound() {
         PetRequestDTO petRequest = new PetRequestDTO();
         petRequest.setName("Fluffy");
         petRequest.setBirthDate(birthDate);
@@ -222,7 +225,7 @@ class PetsControllerV1UnitTests {
         petRequest.setIsActive("true");
 
         client.post()
-                .uri("/api/gateway/owners/pets")
+                .uri("/api/gateway/pets/customers/pets")
                 .bodyValue(petRequest)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -232,7 +235,7 @@ class PetsControllerV1UnitTests {
     }
 
     @Test
-    void whenDeletePet_withoutOwnerId_thenReturnNotFound() {
+    void whenDeletePet_withOldOwnerRoute_thenReturnNotFound() {
         String petId = "petId-123";
 
         client.delete()
@@ -245,44 +248,43 @@ class PetsControllerV1UnitTests {
     }
 
     @Test
-    void whenDeletePet_withoutPetId_thenReturnNotFound() {
-        String ownerId = "ownerId-20";
+    void whenDeletePet_withoutPetId_thenReturnMethodNotAllowed() {
 
         client.delete()
-                .uri("/api/gateway/owners/{ownerId}/pets", ownerId)
+                .uri("/api/gateway/pets")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(HttpStatus.NOT_FOUND);
+                .expectStatus().isEqualTo(HttpStatus.METHOD_NOT_ALLOWED);
 
         verifyNoInteractions(customersServiceClient);
     }
 
     @Test
     void whenCreatePet_withInvalidJson_thenReturnBadRequest() {
-        String ownerId = "ownerId-12345";
+        String customerId = "customerId-12345";
         String invalidJson = "{\"name\": }";
 
         client.post()
-                .uri("/api/gateway/owners/{ownerId}/pets", ownerId)
+                .uri("/api/gateway/pets/customers/{customerId}/pets", customerId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(invalidJson)
                 .exchange()
                 .expectStatus().is4xxClientError();
 
-        verify(customersServiceClient, never()).createPetForOwner(any(), any());
+        verify(customersServiceClient, never()).createPetForCustomer(any(), any());
     }
 
     @Test
     void whenCreatePet_withEmptyBody_thenReturnBadRequest() {
-        String ownerId = "ownerId-12345";
+        String customerId = "customerId-12345";
 
         client.post()
-                .uri("/api/gateway/owners/{ownerId}/pets", ownerId)
+                .uri("/api/gateway/pets/customers/{customerId}/pets", customerId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().is4xxClientError();
 
-        verify(customersServiceClient, never()).createPetForOwner(any(), any());
+        verify(customersServiceClient, never()).createPetForCustomer(any(), any());
     }
 
     @Test

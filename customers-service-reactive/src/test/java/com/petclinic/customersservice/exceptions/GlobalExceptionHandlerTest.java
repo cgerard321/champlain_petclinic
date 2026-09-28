@@ -88,7 +88,7 @@ class GlobalExceptionHandlerTest {
         try {
             // Arrange
             NotFoundException exception = new NotFoundException("Pet type not found with id: non-existent-id");
-            ServerHttpRequest request = MockServerHttpRequest.get("/owners/petTypes/pet-types-pagination").build();
+            ServerHttpRequest request = MockServerHttpRequest.get("/customers/petTypes/pet-types-pagination").build();
 
             // Act
             HttpErrorInfo result = exceptionHandler.handleNotFoundException(request, exception);
@@ -96,7 +96,7 @@ class GlobalExceptionHandlerTest {
             // Assert
             assertNotNull(result);
             assertEquals(HttpStatus.NOT_FOUND, result.getHttpStatus());
-            assertEquals("/owners/petTypes/pet-types-pagination", result.getPath());
+            assertEquals("/customers/petTypes/pet-types-pagination", result.getPath());
             assertEquals("Pet type not found with id: non-existent-id", result.getMessage());
             assertNotNull(result.getTimestamp());
 
@@ -110,7 +110,7 @@ class GlobalExceptionHandlerTest {
         try {
             // Arrange
             InvalidInputException exception = new InvalidInputException("Invalid page size: -1");
-            ServerHttpRequest request = MockServerHttpRequest.get("/owners/petTypes/pet-types-pagination").build();
+            ServerHttpRequest request = MockServerHttpRequest.get("/customers/petTypes/pet-types-pagination").build();
 
             // Act
             HttpErrorInfo result = exceptionHandler.handleInvalidInputException(request, exception);
@@ -118,7 +118,7 @@ class GlobalExceptionHandlerTest {
             // Assert
             assertNotNull(result);
             assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, result.getHttpStatus());
-            assertEquals("/owners/petTypes/pet-types-pagination", result.getPath());
+            assertEquals("/customers/petTypes/pet-types-pagination", result.getPath());
             assertEquals("Invalid page size: -1", result.getMessage());
             assertNotNull(result.getTimestamp());
 
@@ -132,7 +132,7 @@ class GlobalExceptionHandlerTest {
         try {
             // Arrange
             NotFoundException exception = new NotFoundException("No pet types found");
-            ServerHttpRequest request = MockServerHttpRequest.get("/owners/petTypes/pet-types-count").build();
+            ServerHttpRequest request = MockServerHttpRequest.get("/customers/petTypes/pet-types-count").build();
 
             // Act
             HttpErrorInfo result = exceptionHandler.handleNotFoundException(request, exception);
@@ -140,7 +140,7 @@ class GlobalExceptionHandlerTest {
             // Assert
             assertNotNull(result);
             assertEquals(HttpStatus.NOT_FOUND, result.getHttpStatus());
-            assertEquals("/owners/petTypes/pet-types-count", result.getPath());
+            assertEquals("/customers/petTypes/pet-types-count", result.getPath());
             assertEquals("No pet types found", result.getMessage());
             assertNotNull(result.getTimestamp());
 
@@ -154,7 +154,7 @@ class GlobalExceptionHandlerTest {
         try {
             // Arrange
             InvalidInputException exception = new InvalidInputException("Invalid filter parameters");
-            ServerHttpRequest request = MockServerHttpRequest.get("/owners/petTypes/pet-types-filtered-count").build();
+            ServerHttpRequest request = MockServerHttpRequest.get("/customers/petTypes/pet-types-filtered-count").build();
 
             // Act
             HttpErrorInfo result = exceptionHandler.handleInvalidInputException(request, exception);
@@ -162,7 +162,7 @@ class GlobalExceptionHandlerTest {
             // Assert
             assertNotNull(result);
             assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, result.getHttpStatus());
-            assertEquals("/owners/petTypes/pet-types-filtered-count", result.getPath());
+            assertEquals("/customers/petTypes/pet-types-filtered-count", result.getPath());
             assertEquals("Invalid filter parameters", result.getMessage());
             assertNotNull(result.getTimestamp());
 

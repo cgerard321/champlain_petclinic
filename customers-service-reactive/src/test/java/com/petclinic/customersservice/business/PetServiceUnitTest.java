@@ -82,7 +82,7 @@ public class PetServiceUnitTest {
         return Pet.builder()
                 .petId("a-very-valid-pet-id")
                 .name("Cookie")
-                .customerId("a-very-valid-owner-id")
+                .customerId("a-very-valid-customer-id")
                 .petTypeId("1")
                 .birthDate(new Date())
                 .isActive("true")

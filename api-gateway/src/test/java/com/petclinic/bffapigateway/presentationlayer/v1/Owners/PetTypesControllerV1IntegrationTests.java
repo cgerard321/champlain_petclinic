@@ -32,8 +32,8 @@ class PetTypesControllerV1IntegrationTests {
     private MockServerConfigCustomersService mockServerConfigCustomersService;
     private MockServerConfigAuthService mockServerConfigAuthService;
 
-    private final String PET_TYPE_PATH = "/api/gateway/owners/petTypes";
-    private final String PET_TYPE_COUNT_PATH = "/api/gateway/owners/petTypes/pet-types-filtered-count";
+    private final String PET_TYPE_PATH = "/api/gateway/customers/petTypes";
+    private final String PET_TYPE_COUNT_PATH = "/api/gateway/customers/petTypes/pet-types-filtered-count";
 
     @BeforeEach
     public void startMockServer() {
@@ -143,7 +143,7 @@ class PetTypesControllerV1IntegrationTests {
         webTestClient.get()
                 .uri(PET_TYPE_PATH)
                 .cookie("Bearer", jwtTokenForValidAdmin)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
                 .exchange()
                 .expectStatus().is5xxServerError();
     }

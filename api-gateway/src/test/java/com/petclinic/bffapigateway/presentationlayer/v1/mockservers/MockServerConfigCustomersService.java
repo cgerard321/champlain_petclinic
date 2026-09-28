@@ -148,7 +148,7 @@ public class MockServerConfigCustomersService {
                 .when(
                         request()
                                 .withMethod("DELETE")
-                                .withPath("/pet/" + petId)
+                                .withPath("/pets/" + petId)
                 )
                 .respond(
                         response()
@@ -165,7 +165,7 @@ public class MockServerConfigCustomersService {
                 .when(
                         request()
                                 .withMethod("GET")
-                                .withPath("/owners/petTypes")
+                                .withPath("/customers/petTypes")
                 )
                 .respond(
                         response()
@@ -181,7 +181,7 @@ public class MockServerConfigCustomersService {
                 .when(
                         request()
                                 .withMethod("GET")
-                                .withPath("/owners/petTypes")
+                                .withPath("/customers/petTypes")
                 )
                 .respond(
                         response()
@@ -196,7 +196,7 @@ public class MockServerConfigCustomersService {
                 .when(
                         request()
                                 .withMethod("GET")
-                                .withPath("/owners/petTypes/pet-types-filtered-count")
+                                .withPath("/customers/petTypes/pet-types-filtered-count")
                                 .withQueryStringParameter(param("name", "Dog"))
                                 .withQueryStringParameter(param("petTypeId", "pt-1"))
                 )
@@ -215,7 +215,7 @@ public class MockServerConfigCustomersService {
                 .when(
                         request()
                                 .withMethod("GET")
-                                .withPath("/owners/petTypes/pet-types-filtered-count")
+                                .withPath("/customers/petTypes/pet-types-filtered-count")
                 )
                 .respond(
                         response()
@@ -229,7 +229,7 @@ public class MockServerConfigCustomersService {
                 .when(
                         request()
                                 .withMethod("GET")
-                                .withPath("/owners/petTypes")
+                                .withPath("/customers/petTypes")
                 )
                 .respond(
                         response()
@@ -244,7 +244,7 @@ public class MockServerConfigCustomersService {
                 .when(
                         request()
                                 .withMethod("GET")
-                                .withPath("/owners/petTypes/" + petTypeId)
+                                .withPath("/customers/petTypes/" + petTypeId)
                 )
                 .respond(
                         response()

@@ -126,7 +126,7 @@ public class PetControllerUnitTest {
         return PetResponseDTO.builder()
                 .petId("generated-pet-id")
                 .name("Buddy")
-                .customerId("valid-owner-id")
+                .customerId("valid-customer-id")
                 .petTypeId("2")
                 .birthDate(new Date())
                 .weight("15.5")
