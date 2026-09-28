@@ -1171,10 +1171,10 @@ const UserCart: React.FC = () => {
                 >
                   <div className="recent-purchase-image-container">
                     <div
-                        onClick={()=>
+                      onClick={() =>
                         redirectToProductPageOnClick(item.productId)
-                    }
-                    className="recent-purchase-image"
+                      }
+                      className="recent-purchase-image"
                     >
                       <ImageContainer imageId={item.imageId} />
                     </div>
@@ -1267,9 +1267,9 @@ const UserCart: React.FC = () => {
                   <div key={item.productId} className={wishlistCardClassName}>
                     <div className="recent-purchase-image-container">
                       <div
-                          onClick={() =>
-                              redirectToProductPageOnClick(item.productId)
-                          }
+                        onClick={() =>
+                          redirectToProductPageOnClick(item.productId)
+                        }
                         className="recent-purchase-image"
                       >
                         <ImageContainer imageId={item.imageId} />
@@ -1324,10 +1324,10 @@ const UserCart: React.FC = () => {
                 >
                   <div className="recent-purchase-image-container">
                     <div
-                        onClick={()=>
+                        onClick={() =>
                         redirectToProductPageOnClick(item.productId)
                       }
-                        className="recent-purchase-image"
+                      className="recent-purchase-image"
                     >
                       <ImageContainer imageId={item.imageId} />
                     </div>

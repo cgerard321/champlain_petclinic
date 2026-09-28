@@ -45,9 +45,9 @@ const CartItem = ({
   //make cart items redirect to product page when clicked on
   const handleCartItemOnClick = (): void => {
     navigate(
-        generatePath(AppRoutePaths.ProductDetails,{
-      productId: item.productId,
-    })
+      generatePath(AppRoutePaths.ProductDetails, {
+        productId: item.productId,
+      })
     );
   };
   const rolesSet = user?.roles;
