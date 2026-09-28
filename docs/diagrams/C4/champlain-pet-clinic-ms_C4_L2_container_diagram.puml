@@ -79,7 +79,7 @@ together {
 }
         ContainerDb(auth_db, "auth-db", "MySQL 5.7.x", "Stores user information.", $sprite="mysql" , $tags = "storage-mysql")
         ContainerDb(files_db, "files-db", "MySQL 5.7.x", "Stores files information.", $sprite="mysql" , $tags = "storage-mysql")
-        ContainerDb(customers_db, "customers-db", "Mongo", "Stores owner, pet, and type information.", $sprite="mongodb", $tags = "storage-mongo")
+        ContainerDb(customers_db, "customers-db", "Mongo", "Stores customer, pet, and type information.", $sprite="mongodb", $tags = "storage-mongo")
         ContainerDb(inventory_db, "inventory-db", "Mongo", "Stores medical inventory information.", $sprite="mongodb", $tags = "storage-mongo")
         ContainerDb(vets_vets_db, "vets-db", "Mongo", "Stores veterinarian information.", $sprite="mongodb", $tags = "storage-mongo")
         ContainerDb(vets_images_db, "vets-images-db", "Postgres", "Stores veterinarian image information.", $sprite="postgresql", $tags = "storage-postgres")
