@@ -532,6 +532,52 @@ class BillServiceClientIntegrationTest {
     }
 
     @Test
+    void getAllBillsStream_WithFilters_ReturnsStreamedResults() throws Exception {
+
+        String responseBody =
+                "data:" + mapper.writeValueAsString(billResponseDTO) + "\n\n" +
+                        "data:" + mapper.writeValueAsString(billResponseDTO2) + "\n\n" +
+                        "data:" + mapper.writeValueAsString(billResponseDTO3) + "\n\n";
+
+        prepareResponse(response -> response
+                .setResponseCode(200)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_EVENT_STREAM_VALUE)
+                .setBody(responseBody)
+        );
+
+        Flux<BillResponseDTO> result = billServiceClient.getAllBillsStream(
+                "1",
+                "123",
+                "John",
+                "Doe",
+                "Check up",
+                "456",
+                "Jane",
+                "Smith"
+        );
+
+        StepVerifier.create(result)
+                .expectNext(billResponseDTO)
+                .expectNext(billResponseDTO2)
+                .expectNext(billResponseDTO3)
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+
+        assertEquals("GET", request.getMethod());
+        assertTrue(request.getPath().contains("/bills/stream"));
+        assertTrue(request.getPath().contains("billId=1"));
+        assertTrue(request.getPath().contains("customerId=123"));
+        assertTrue(request.getPath().contains("ownerFirstName=John"));
+        assertTrue(request.getPath().contains("ownerLastName=Doe"));
+        assertTrue(request.getPath().contains("visitType=Check%20up"));
+        assertTrue(request.getPath().contains("vetId=456"));
+        assertTrue(request.getPath().contains("vetFirstName=Jane"));
+        assertTrue(request.getPath().contains("vetLastName=Smith"));
+        assertTrue(request.getHeader("Accept").contains(MediaType.TEXT_EVENT_STREAM_VALUE));
+    }
+
+    @Test
     void whenGetBillsByMonth_thenReturnsResults() throws Exception {
         List<BillResponseDTO> billResponses = Arrays.asList(billResponseDTO, billResponseDTO2);
         String jsonResponse = mapper.writeValueAsString(billResponses);

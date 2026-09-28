@@ -119,6 +119,27 @@ public class BillsControllerUnitTest {
     }
 
     @Test
+    void shouldGetAllBillsStream() {
+        when(billServiceClient.getAllBillsStream(
+                null, null, null, null, null, null, null, null))
+                .thenReturn(Flux.just(billresponse, billresponse2));
+
+        webTestClient.get()
+                .uri(baseBillURL + "/stream")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(
+                        MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
+                .expectBodyList(BillResponseDTO.class)
+                .hasSize(2)
+                .contains(billresponse, billresponse2);
+
+        verify(billServiceClient, times(1)).getAllBillsStream(
+                null, null, null, null, null, null, null, null);
+    }
+
+    @Test
     void shouldGetAllPaidBills() {
         BillResponseDTO billResponseDTO = BillResponseDTO.builder()
                 .billId("BillUUID")

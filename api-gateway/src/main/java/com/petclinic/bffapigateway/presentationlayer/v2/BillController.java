@@ -60,6 +60,29 @@ public class BillController {
         return ResponseEntity.ok().body(billService.getAllBillsByPage(page, size, billId, customerId, ownerFirstName,
                 ownerLastName, visitType, vetId, vetFirstName, vetLastName));
     }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> getAllBillsStream(
+            @RequestParam(required = false) String billId,
+            @RequestParam(required = false) String customerId,
+            @RequestParam(required = false) String ownerFirstName,
+            @RequestParam(required = false) String ownerLastName,
+            @RequestParam(required = false) String visitType,
+            @RequestParam(required = false) String vetId,
+            @RequestParam(required = false) String vetFirstName,
+            @RequestParam(required = false) String vetLastName) {
+
+        return billService.getAllBillsStream(
+                billId,
+                customerId,
+                ownerFirstName,
+                ownerLastName,
+                visitType,
+                vetId,
+                vetFirstName,
+                vetLastName);
+    }
     
     @PutMapping(value = "/admin/{billId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<BillResponseDTO>> updateBill(@PathVariable String billId, @RequestBody Mono<BillRequestDTO> billRequestDTO) {

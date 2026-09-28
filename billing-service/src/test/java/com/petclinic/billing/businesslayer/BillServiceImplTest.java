@@ -149,6 +149,67 @@ public class BillServiceImplTest {
     }
 
     @Test
+    void getAllBillsStream_ShouldReturnAllMatchingResults() {
+
+        Bill bill1 = Bill.builder()
+                .billId("billId-1")
+                .customerId("customerId-1")
+                .ownerFirstName("ownerFirstName1")
+                .ownerLastName("ownerLastName1")
+                .visitType("operation")
+                .vetId("vetId1")
+                .vetFirstName("vetFirstName1")
+                .vetLastName("vetLastName1")
+                .date(LocalDate.of(2024, 10, 1))
+                .dueDate(LocalDate.of(2024, 10, 30))
+                .amount(new BigDecimal("100.00"))
+                .billStatus(BillStatus.UNPAID)
+                .build();
+
+        Bill bill2 = Bill.builder()
+                .billId("billId-2")
+                .customerId("customerId-2")
+                .ownerFirstName("ownerFirstName2")
+                .ownerLastName("ownerLastName2")
+                .visitType("general")
+                .vetId("vetId2")
+                .vetFirstName("vetFirstName2")
+                .vetLastName("vetLastName2")
+                .date(LocalDate.of(2024, 10, 1))
+                .dueDate(LocalDate.of(2024, 10, 30))
+                .amount(new BigDecimal("150.00"))
+                .billStatus(BillStatus.PAID)
+                .build();
+
+        Bill bill3 = Bill.builder()
+                .billId("billId-3")
+                .customerId("customerId-3")
+                .ownerFirstName("ownerFirstName3")
+                .ownerLastName("ownerLastName3")
+                .visitType("injury")
+                .vetId("vetId3")
+                .vetFirstName("vetFirstName3")
+                .vetLastName("vetLastName3")
+                .date(LocalDate.of(2024, 10, 1))
+                .dueDate(LocalDate.of(2024, 10, 30))
+                .amount(new BigDecimal("200.00"))
+                .billStatus(BillStatus.OVERDUE)
+                .build();
+
+        when(repo.findAll()).thenReturn(Flux.just(bill1, bill2, bill3));
+        when(repo.findAllBillsByBillStatus(BillStatus.UNPAID)).thenReturn(Flux.empty());
+
+        Flux<BillResponseDTO> bills = billService.getAllBillsStream(
+                null, null, null, null, null, null, null, null);
+
+        StepVerifier.create(bills)
+                .expectNextMatches(bill -> bill.getBillId().equals("billId-1"))
+                .expectNextMatches(bill -> bill.getBillId().equals("billId-2"))
+                .expectNextMatches(bill -> bill.getBillId().equals("billId-3"))
+                .verifyComplete();
+    }
+
+    @Test
     public void test_getAllBillsByPaidStatus() {
         BillStatus status = BillStatus.PAID; // Change this to the desired status
 

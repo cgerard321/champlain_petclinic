@@ -111,6 +111,26 @@ private final String baseBillURL = "/api/v2/gateway/bills";
                 Optional.of(5), null, null, null, null, null,
                 null, null, null);
     }
+    @Test
+    public void whenGetAllBillsStream_ThenReturnStreamedBills() {
+        when(billServiceClient.getAllBillsStream(
+                null, null, null, null, null, null, null, null))
+                .thenReturn(Flux.just(billresponse, billresponse2));
+
+        webTestClient.get()
+                .uri(baseBillURL + "/stream")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(
+                        MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
+                .expectBodyList(BillResponseDTO.class)
+                .hasSize(2)
+                .contains(billresponse, billresponse2);
+
+        verify(billServiceClient, times(1)).getAllBillsStream(
+                null, null, null, null, null, null, null, null);
+    }
 
     @Test
     public void whenGetAllBillsByPageWithInvalidParameters_ThenReturnBadRequest() {
