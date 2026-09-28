@@ -1129,10 +1129,28 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                     : `USD $${convertCurrency(detailBill.amount, 'CAD', 'USD').toFixed(2)}`}
                 </p>
                 <p>
-                  <strong>Taxed Amount:</strong>{' '}
+                  <strong>GST (5%):</strong>{' '}
                   {currency === 'CAD'
-                    ? `CAD $${detailBill.taxedAmount.toFixed(2)}`
-                    : `USD $${convertCurrency(detailBill.taxedAmount, 'CAD', 'USD').toFixed(2)}`}
+                      ? `CAD $${detailBill.gstAmount.toFixed(2)}`
+                      : `USD $${convertCurrency(detailBill.gstAmount, 'CAD', 'USD').toFixed(2)}`}
+                </p>
+                <p>
+                  <strong>QST (9.975%):</strong>{' '}
+                  {currency === 'CAD'
+                      ? `CAD $${detailBill.qstAmount.toFixed(2)}`
+                      : `USD $${convertCurrency(detailBill.qstAmount, 'CAD', 'USD').toFixed(2)}`}
+                </p>
+                <p>
+                  <strong>Total Taxes:</strong>{' '}
+                  {currency === 'CAD'
+                      ? `CAD $${detailBill.taxedAmount.toFixed(2)}`
+                      : `USD $${convertCurrency(detailBill.taxedAmount, 'CAD', 'USD').toFixed(2)}`}
+                </p>
+                <p>
+                  <strong>Total Amount:</strong>{' '}
+                  {currency === 'CAD'
+                    ? `CAD $${detailBill.totalAmount.toFixed(2)}`
+                    : `USD $${convertCurrency(detailBill.totalAmount, 'CAD', 'USD').toFixed(2)}`}
                 </p>
                 <p>
                   <strong>Status:</strong>{' '}
