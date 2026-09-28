@@ -5,7 +5,6 @@ import com.petclinic.products.datalayer.products.ProductRepository;
 import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.datalayer.ratings.RatingRepository;
 import com.petclinic.products.presentationlayer.ratings.RatingRequestModel;
-import com.petclinic.products.presentationlayer.ratings.RatingResponseModel;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
 import com.petclinic.products.utils.exceptions.NotFoundException;
 import com.petclinic.products.utils.exceptions.RatingAlreadyExists;
@@ -20,8 +19,10 @@ import reactor.test.StepVerifier;
 
 import java.util.UUID;
 
-import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class RatingServiceUnitTest {
