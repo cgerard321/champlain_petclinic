@@ -4,6 +4,7 @@ import { of } from 'rxjs';
 
 import { ImageService } from '@features/prod/services/image.service';
 import { ProductService } from '@features/prod/services/product.service';
+
 import { ProductDetailsDialog } from './product-details-dialog';
 
 describe('ProductDetailsDialog', () => {

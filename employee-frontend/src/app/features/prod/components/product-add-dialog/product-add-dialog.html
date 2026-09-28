@@ -1,6 +1,12 @@
 <div class="dialog-header">
   <h2 mat-dialog-title class="dialog-title">Add Product</h2>
-  <button class="dialog-close-button" mat-icon-button mat-dialog-close type="button" aria-label="Close Add Product dialog">
+  <button
+    class="dialog-close-button"
+    mat-icon-button
+    mat-dialog-close
+    type="button"
+    aria-label="Close Add Product dialog"
+  >
     <mat-icon>close</mat-icon>
   </button>
 </div>
@@ -18,7 +24,9 @@
     <mat-form-field appearance="outline">
       <mat-label>Description</mat-label>
       <textarea matInput rows="4" [formField]="productForm.productDescription"></textarea>
-      @if (productForm.productDescription().touched() && productForm.productDescription().invalid()) {
+      @if (
+        productForm.productDescription().touched() && productForm.productDescription().invalid()
+      ) {
         <mat-error>{{ productForm.productDescription().errors()[0]?.message }}</mat-error>
       }
     </mat-form-field>
@@ -61,7 +69,13 @@
     </mat-form-field>
 
     <label class="file-label" for="product-image">Product image</label>
-    <input class="file-input" id="product-image" type="file" accept="image/jpeg,image/jpg,image/png" (change)="selectFile($event)" />
+    <input
+      class="file-input"
+      id="product-image"
+      type="file"
+      accept="image/jpeg,image/jpg,image/png"
+      (change)="selectFile($event)"
+    />
     @if (selectedFile(); as file) {
       <span class="file-name">{{ file.name }}</span>
     }

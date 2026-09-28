@@ -37,18 +37,39 @@
           <mat-card-content>
             <p>{{ product.productDescription }}</p>
             <dl>
-              <div><dt>Price</dt><dd>{{ product.productSalePrice | currency }}</dd></div>
-              <div><dt>Quantity</dt><dd>{{ product.productQuantity }}</dd></div>
-              <div><dt>Status</dt><dd>{{ product.productStatus }}</dd></div>
-              <div><dt>Delivery</dt><dd>{{ product.deliveryType.replace('_', ' ') }}</dd></div>
+              <div>
+                <dt>Price</dt>
+                <dd>{{ product.productSalePrice | currency }}</dd>
+              </div>
+              <div>
+                <dt>Quantity</dt>
+                <dd>{{ product.productQuantity }}</dd>
+              </div>
+              <div>
+                <dt>Status</dt>
+                <dd>{{ product.productStatus }}</dd>
+              </div>
+              <div>
+                <dt>Delivery</dt>
+                <dd>{{ product.deliveryType.replace('_', ' ') }}</dd>
+              </div>
             </dl>
           </mat-card-content>
           <mat-card-actions align="end">
-            <button mat-stroked-button type="button" (click)="openProductDetails(product.productId)">
+            <button
+              mat-stroked-button
+              type="button"
+              (click)="openProductDetails(product.productId)"
+            >
               Details
             </button>
             @if (canManageProducts()) {
-              <button mat-flat-button color="primary" type="button" (click)="openProductUpdate(product)">
+              <button
+                mat-flat-button
+                color="primary"
+                type="button"
+                (click)="openProductUpdate(product)"
+              >
                 Update
               </button>
             }

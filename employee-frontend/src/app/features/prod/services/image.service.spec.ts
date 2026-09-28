@@ -28,7 +28,12 @@ describe('ImageService', () => {
     expect(request.request.body).toBeInstanceOf(FormData);
     expect((request.request.body as FormData).get('imageName')).toBe('product.png');
     expect((request.request.body as FormData).get('imageType')).toBe('image/png');
-    request.flush({ imageId: 'image-1', imageName: 'product.png', imageType: 'image/png', imageData: 'aW1hZ2U=' });
+    request.flush({
+      imageId: 'image-1',
+      imageName: 'product.png',
+      imageType: 'image/png',
+      imageData: 'aW1hZ2U=',
+    });
   });
 
   it('retrieves an image by id', () => {
@@ -36,6 +41,11 @@ describe('ImageService', () => {
 
     const request = http.expectOne('/api/gateway/images/image-1');
     expect(request.request.method).toBe('GET');
-    request.flush({ imageId: 'image-1', imageName: 'product.png', imageType: 'image/png', imageData: 'aW1hZ2U=' });
+    request.flush({
+      imageId: 'image-1',
+      imageName: 'product.png',
+      imageType: 'image/png',
+      imageData: 'aW1hZ2U=',
+    });
   });
 });

@@ -8,6 +8,7 @@ import {
   ProductStatus,
   ProductType,
 } from '@features/prod/models/product.model';
+
 import { ProductService } from './product.service';
 
 describe('ProductService', () => {
@@ -42,7 +43,9 @@ describe('ProductService', () => {
 
     const request = http.expectOne('/api/gateway/products');
     expect(request.request.responseType).toBe('text');
-    request.flush(`data:${JSON.stringify(product)}\n\ndata:${JSON.stringify({ ...product, productId: 'product-2' })}\n\n`);
+    request.flush(
+      `data:${JSON.stringify(product)}\n\ndata:${JSON.stringify({ ...product, productId: 'product-2' })}\n\n`,
+    );
 
     expect(result?.map((item) => item.productId)).toEqual(['product-1', 'product-2']);
   });
@@ -63,7 +66,11 @@ describe('ProductService', () => {
     const request = http.expectOne('/api/gateway/products');
     expect(request.request.method).toBe('POST');
     expect(request.request.body).toEqual(requestBody);
-    request.flush({ ...requestBody, productId: 'product-1', productStatus: ProductStatus.AVAILABLE });
+    request.flush({
+      ...requestBody,
+      productId: 'product-1',
+      productStatus: ProductStatus.AVAILABLE,
+    });
   });
 
   it('loads product enums', () => {
@@ -90,6 +97,10 @@ describe('ProductService', () => {
     const request = http.expectOne('/api/gateway/products/product-1');
     expect(request.request.method).toBe('PUT');
     expect(request.request.body).toEqual(requestBody);
-    request.flush({ ...requestBody, productId: 'product-1', productStatus: ProductStatus.AVAILABLE });
+    request.flush({
+      ...requestBody,
+      productId: 'product-1',
+      productStatus: ProductStatus.AVAILABLE,
+    });
   });
 });

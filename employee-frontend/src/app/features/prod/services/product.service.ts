@@ -52,9 +52,7 @@ export class ProductService {
     const records = payload.split(/\r?\n\r?\n/);
 
     for (const record of records) {
-      const dataLine = record
-        .split(/\r?\n/)
-        .find((line) => line.trimStart().startsWith('data:'));
+      const dataLine = record.split(/\r?\n/).find((line) => line.trimStart().startsWith('data:'));
 
       if (!dataLine) {
         continue;

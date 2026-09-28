@@ -4,6 +4,7 @@ import { of } from 'rxjs';
 
 import { ImageService } from '@features/prod/services/image.service';
 import { ProductService } from '@features/prod/services/product.service';
+
 import { ProductAddDialog } from './product-add-dialog';
 
 describe('ProductAddDialog', () => {
@@ -12,7 +13,10 @@ describe('ProductAddDialog', () => {
       imports: [ProductAddDialog],
       providers: [
         { provide: MatDialogRef, useValue: { close: () => undefined } },
-        { provide: ProductService, useValue: { createProduct: () => of({ productId: 'product-1' }) } },
+        {
+          provide: ProductService,
+          useValue: { createProduct: () => of({ productId: 'product-1' }) },
+        },
         { provide: ImageService, useValue: { uploadImage: () => of({ imageId: 'image-1' }) } },
       ],
     }).compileComponents();

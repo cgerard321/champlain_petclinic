@@ -1,6 +1,12 @@
 <div class="dialog-header">
   <h2 mat-dialog-title>Update Product</h2>
-  <button class="dialog-close-button" mat-icon-button mat-dialog-close type="button" aria-label="Close Update Product dialog">
+  <button
+    class="dialog-close-button"
+    mat-icon-button
+    mat-dialog-close
+    type="button"
+    aria-label="Close Update Product dialog"
+  >
     <mat-icon>close</mat-icon>
   </button>
 </div>
@@ -53,7 +59,13 @@
     </mat-form-field>
 
     <label class="file-label" for="update-product-image">Replace product image</label>
-    <input class="file-input" id="update-product-image" type="file" accept="image/jpeg,image/jpg,image/png" (change)="selectFile($event)" />
+    <input
+      class="file-input"
+      id="update-product-image"
+      type="file"
+      accept="image/jpeg,image/jpg,image/png"
+      (change)="selectFile($event)"
+    />
     @if (selectedFile(); as file) {
       <span class="file-name">{{ file.name }}</span>
     }

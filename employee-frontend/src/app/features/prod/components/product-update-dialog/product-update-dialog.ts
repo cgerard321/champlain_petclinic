@@ -1,15 +1,14 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
+import { form, FormField, required } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
-import { form, FormField, required } from '@angular/forms/signals';
 
 import { isApiError } from '@core/models/api-error';
-import { ImageService } from '@features/prod/services/image.service';
 import {
   DeliveryType,
   Product,
@@ -17,6 +16,7 @@ import {
   ProductRequest,
   ProductType,
 } from '@features/prod/models/product.model';
+import { ImageService } from '@features/prod/services/image.service';
 import { ProductService } from '@features/prod/services/product.service';
 
 interface ProductUpdateData {

@@ -1,6 +1,5 @@
-import { Component } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
 import { TestBed } from '@angular/core/testing';
+import { MatDialog } from '@angular/material/dialog';
 import { of } from 'rxjs';
 
 import {
@@ -10,10 +9,8 @@ import {
   ProductType,
 } from '@features/prod/models/product.model';
 import { ProductService } from '@features/prod/services/product.service';
-import { Prod } from './prod';
 
-@Component({ template: '' })
-class EmptyHost {}
+import { Prod } from './prod';
 
 describe('Prod', () => {
   const product: Product = {

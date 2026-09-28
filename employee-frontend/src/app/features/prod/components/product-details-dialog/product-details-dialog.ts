@@ -1,5 +1,5 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -44,7 +44,9 @@ export class ProductDetailsDialog implements OnInit {
       },
       error: (error: unknown) => {
         this.isLoading.set(false);
-        this.errorMessage.set(isApiError(error) ? error.message : 'Could not load product details.');
+        this.errorMessage.set(
+          isApiError(error) ? error.message : 'Could not load product details.',
+        );
       },
     });
   }

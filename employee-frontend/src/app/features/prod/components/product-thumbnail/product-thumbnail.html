@@ -1,7 +1,5 @@
 @if (imageSrc(); as source) {
   <img class="product-thumbnail" [src]="source" [alt]="alt()" />
 } @else {
-  <div class="product-thumbnail-placeholder" aria-label="No product image available">
-    No image
-  </div>
+  <div class="product-thumbnail-placeholder" aria-label="No product image available">No image</div>
 }

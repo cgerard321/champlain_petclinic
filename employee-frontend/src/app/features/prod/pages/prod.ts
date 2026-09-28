@@ -1,27 +1,34 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
-import { AuthState } from '@core/services/auth-state';
 import { isApiError } from '@core/models/api-error';
-import { Roles } from '@shared/models/roles';
-import { Product } from '@features/prod/models/product.model';
+import { AuthState } from '@core/services/auth-state';
 import { ProductAddDialog } from '@features/prod/components/product-add-dialog/product-add-dialog';
 import { ProductDetailsDialog } from '@features/prod/components/product-details-dialog/product-details-dialog';
-import { ProductUpdateDialog } from '@features/prod/components/product-update-dialog/product-update-dialog';
 import { ProductThumbnail } from '@features/prod/components/product-thumbnail/product-thumbnail';
+import { ProductUpdateDialog } from '@features/prod/components/product-update-dialog/product-update-dialog';
+import { Product } from '@features/prod/models/product.model';
 import { ProductService } from '@features/prod/services/product.service';
+import { Roles } from '@shared/models/roles';
 
 @Component({
-  imports: [CurrencyPipe, MatButtonModule, MatCardModule, MatDialogModule, MatProgressSpinnerModule, ProductThumbnail],
+  imports: [
+    CurrencyPipe,
+    MatButtonModule,
+    MatCardModule,
+    MatDialogModule,
+    MatProgressSpinnerModule,
+    ProductThumbnail,
+  ],
   selector: 'app-prod',
   styleUrl: './prod.css',
   templateUrl: './prod.html',
 })
-export class Prod {
+export class Prod implements OnInit {
   private readonly auth = inject(AuthState);
   private readonly productService = inject(ProductService);
   private readonly dialog = inject(MatDialog);

@@ -2,9 +2,10 @@ import { TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { of } from 'rxjs';
 
+import { DeliveryType, ProductStatus, ProductType } from '@features/prod/models/product.model';
 import { ImageService } from '@features/prod/services/image.service';
 import { ProductService } from '@features/prod/services/product.service';
-import { DeliveryType, ProductStatus, ProductType } from '@features/prod/models/product.model';
+
 import { ProductUpdateDialog } from './product-update-dialog';
 
 describe('ProductUpdateDialog', () => {
@@ -29,7 +30,12 @@ describe('ProductUpdateDialog', () => {
           },
         },
         { provide: MatDialogRef, useValue: { close: () => undefined } },
-        { provide: ProductService, useValue: { getProductEnums: () => of({ productType: [], productStatus: [], deliveryType: [] }) } },
+        {
+          provide: ProductService,
+          useValue: {
+            getProductEnums: () => of({ productType: [], productStatus: [], deliveryType: [] }),
+          },
+        },
         { provide: ImageService, useValue: { uploadImage: () => of({ imageId: 'image-1' }) } },
       ],
     }).compileComponents();
