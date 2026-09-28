@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import BasicModal from '@/shared/components/BasicModal';
 import { BillRequestModel } from '@/features/bills/models/BillRequestModel';
 import { addBill } from '@/features/bills/api/addBill';
-import { getAllOwners } from '@/features/customers/api/getAllOwners';
+import { getAllCustomers } from '@/features/customers/api/getAllCustomers.ts';
 import { getAllVets } from '@/features/veterinarians/api/getAllVets';
-import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseModel';
+import { CustomerResponseModel } from '@/features/customers/models/CustomerResponseModel.ts';
 import { VetResponseModel } from '@/features/veterinarians/models/VetResponseModel';
 import {
   Currency,
@@ -43,7 +43,7 @@ export default function CreateBillModal({
   visitDate,
   onCreated,
 }: CreateBillModalProps): JSX.Element {
-  const [owners, setOwners] = useState<OwnerResponseModel[]>([]);
+  const [owners, setOwners] = useState<CustomerResponseModel[]>([]);
   const [vets, setVets] = useState<VetResponseModel[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -65,7 +65,7 @@ export default function CreateBillModal({
   useEffect(() => {
     const fetch = async (): Promise<void> => {
       try {
-        const ownersList = await getAllOwners();
+        const ownersList = await getAllCustomers();
         setOwners(ownersList || []);
         const vetsList = await getAllVets();
         setVets(vetsList || []);
@@ -75,7 +75,8 @@ export default function CreateBillModal({
           const match = ownersList.find(
             o => o.firstName === ownerFirstName && o.lastName === ownerLastName
           );
-          if (match) setForm(prev => ({ ...prev, customerId: match.ownerId }));
+          if (match)
+            setForm(prev => ({ ...prev, customerId: match.customerId }));
         }
 
         // try to preselect vet id if provided or by name
@@ -205,7 +206,7 @@ export default function CreateBillModal({
           >
             <option value="">Select Customer</option>
             {owners.map(o => (
-              <option key={o.ownerId} value={o.ownerId}>
+              <option key={o.customerId} value={o.customerId}>
                 {o.firstName} {o.lastName}
               </option>
             ))}

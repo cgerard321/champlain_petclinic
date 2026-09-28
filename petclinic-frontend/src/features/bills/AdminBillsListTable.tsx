@@ -1,10 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Bill } from '@/features/bills/models/Bill.ts';
-import { getAllOwners } from '@/features/customers/api/getAllOwners';
+import { getAllCustomers } from '@/features/customers/api/getAllCustomers.ts';
 import { getAllVets } from '@/features/veterinarians/api/getAllVets';
 import { BillRequestModel } from './models/BillRequestModel';
 import { addBill } from './api/addBill';
-import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseModel';
+import { CustomerResponseModel } from '@/features/customers/models/CustomerResponseModel.ts';
 import { VetResponseModel } from '@/features/veterinarians/models/VetResponseModel';
 import useGetAllBillsPaginated from '@/features/bills/hooks/useGetAllBillsPaginated.ts';
 import './AdminBillsListTable.css';
@@ -91,7 +91,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
     billStatus: '',
     dueDate: '',
   });
-  const [owners, setOwners] = useState<OwnerResponseModel[]>([]);
+  const [owners, setOwners] = useState<CustomerResponseModel[]>([]);
   const [vets, setVets] = useState<VetResponseModel[]>([]);
   const [detailBill, setDetailBill] = useState<Bill | null>(null);
   const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
@@ -107,7 +107,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
 
   const fetchOwnersAndVets = useCallback(async (): Promise<void> => {
     try {
-      const ownersList = await getAllOwners();
+      const ownersList = await getAllCustomers();
       const vetsList = await getAllVets();
       setOwners(ownersList);
       setVets(vetsList);
@@ -688,7 +688,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                     <option value="">All Owners</option>
                     {owners.map(owner => (
                       <option
-                        key={owner.ownerId}
+                        key={owner.customerId}
                         value={`${owner.firstName} ${owner.lastName}`}
                       >
                         {owner.firstName} {owner.lastName}
@@ -791,7 +791,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                     >
                       <option value="">Select Customer</option>
                       {owners.map(owner => (
-                        <option key={owner.ownerId} value={owner.ownerId}>
+                        <option key={owner.customerId} value={owner.customerId}>
                           {owner.firstName} {owner.lastName}
                         </option>
                       ))}

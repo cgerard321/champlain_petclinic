@@ -1,35 +1,25 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
 import com.petclinic.bffapigateway.domainclientlayer.*;
-import com.petclinic.bffapigateway.dtos.Auth.*;
 import com.petclinic.bffapigateway.exceptions.InvalidCredentialsException;
-import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.Bills.PaymentRequestDTO;
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
-import com.petclinic.bffapigateway.dtos.Pets.*;
 import com.petclinic.bffapigateway.dtos.Vets.*;
-import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
-import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewResponseDTO;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import com.petclinic.bffapigateway.utils.VetsEntityDtoUtil;
-import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.http.codec.multipart.FilePart;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * @author Maciej Szarlinski
@@ -220,7 +210,8 @@ public class BFFApiGatewayController {
 //            String endDate = dates.get(1);
 //            return visitsServiceClient.getVisitsByPractitionerIdAndMonth(practitionerId, startDate, endDate);
 //        }
-//        private Function<Visits, OwnerResponseDTO> addVisitsToOwner(OwnerResponseDTO owner) {
+    //TODO Delete?
+//        private Function<Visits, CustomerResponseDTO> addVisitsToOwner(CustomerResponseDTO owner) {
 //            return visits -> {
 //                owner.getPets()
 //                        .forEach(pet -> pet.getVisits()
@@ -379,9 +370,9 @@ public class BFFApiGatewayController {
                                                              @CookieValue("Bearer") String jwt){
         return authServiceClient.validateToken(jwt)
                 .switchIfEmpty(Mono.error(new InvalidCredentialsException("Invalid credentials")))
-                .flatMap(tokenResponse -> customersServiceClient.getOwner(tokenResponse.getBody().getUserId(), false))
-                .flatMap(owner -> {
-                    String customerName = owner.getFirstName() + " " + owner.getLastName();
+                .flatMap(tokenResponse -> customersServiceClient.getCustomer(tokenResponse.getBody().getUserId(), false))
+                .flatMap(customer -> {
+                    String customerName = customer.getFirstName() + " " + customer.getLastName();
                     return vetsServiceClient.deleteRatingByCustomerName(vetId, customerName);
                 })
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))

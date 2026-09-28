@@ -2,8 +2,8 @@ package com.petclinic.bffapigateway.presentationlayer.v1.Users;
 
 import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.Auth.*;
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.CustomerRequestDTO;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.CustomerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
@@ -89,13 +89,13 @@ class UserControllerV1UnitTest {
             .email("test2@example.com")
             .build();
 
-    private final OwnerRequestDTO OWNER_REQUEST_MODEL = OwnerRequestDTO.builder()
+    private final CustomerRequestDTO OWNER_REQUEST_MODEL = CustomerRequestDTO.builder()
             .firstName("Ric")
             .lastName("Danon")
             .build();
 
-    private final OwnerResponseDTO OWNER_RESPONSE_MODEL = OwnerResponseDTO.builder()
-            .ownerId(EXISTING_USER_ID_1)
+    private final CustomerResponseDTO OWNER_RESPONSE_MODEL = CustomerResponseDTO.builder()
+            .customerId(EXISTING_USER_ID_1)
             .firstName("Ric")
             .lastName("Danon")
             .build();
@@ -443,9 +443,9 @@ class UserControllerV1UnitTest {
                 .exchange()
                 .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(OwnerResponseDTO.class)
+                .expectBody(CustomerResponseDTO.class)
                 .value(dto->{
-                    assertNotNull(dto.getOwnerId());
+                    assertNotNull(dto.getCustomerId());
                     Assert.assertEquals(dto.getFirstName(), OWNER_RESPONSE_MODEL.getFirstName());
                     Assert.assertEquals(dto.getLastName(), OWNER_RESPONSE_MODEL.getLastName());
                     Assert.assertEquals(dto.getAddress(), OWNER_RESPONSE_MODEL.getAddress());
