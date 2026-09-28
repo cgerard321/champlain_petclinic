@@ -1,6 +1,6 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Observable, timer } from 'rxjs';
+import { Observable, throwError, timer } from 'rxjs';
 import { filter, map, retry } from 'rxjs/operators';
 
 import { SseClient } from '@core/services/sse-client';
@@ -13,15 +13,17 @@ export class InventoryService {
   private readonly baseUrl = '/api/gateway/inventories';
 
   getInventories(): Observable<Inventory> {
-    return this.sse
-      .stream(this.baseUrl, { keepAlive: false, responseType: 'event' }, {}, 'GET')
-      .pipe(
-        filter((event): event is MessageEvent => event.type !== 'error'),
-        map((event) => JSON.parse((event as MessageEvent).data) as Inventory),
-
-        // Reconnect after an SSE error.
-        retry({ count: Infinity, delay: () => timer(5000) }),
-      );
+    return this.sse.stream(this.baseUrl, { keepAlive: false }).pipe(
+      filter((event): event is MessageEvent => event.type !== 'error'),
+      map((event) => JSON.parse(event.data) as Inventory),
+      retry({
+        count: 5,
+        delay: (error: unknown) =>
+          error instanceof HttpErrorResponse && error.status === 0
+            ? timer(5000)
+            : throwError(() => error),
+      }),
+    );
   }
 
   getQuantity(inventoryId: string): Observable<number> {
