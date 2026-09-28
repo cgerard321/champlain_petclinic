@@ -1,0 +1,282 @@
+"use strict";
+
+angular.module("customerList").controller("CustomerListController", [
+  "$http",
+  "$stateParams",
+  "$scope",
+  "$state",
+  function ($http, $stateParams, $scope, $state) {
+    var vm = this;
+    /*------------------------------------------------------------*/
+    vm.currentPage = $stateParams.page || 0;
+    vm.pageSize = $stateParams.size || 5;
+    /*------------------------------------------------------------*/
+    vm.currentPageOnSite = parseInt(vm.currentPage) + 1;
+    /*------------------------------------------------------------*/
+    vm.customerId = null;
+    vm.firstName = null;
+    vm.lastName = null;
+    vm.phoneNumber = null;
+    vm.city = null;
+    vm.selectedSize = null;
+    /*------------------------------------------------------------*/
+    vm.searchActive = false;
+    /*------------------------------------------------------------*/
+    vm.baseURL = "api/gateway/customers/customers-pagination";
+    vm.baseURLforTotalNumberOfCustomersByFiltering =
+      "api/gateway/customers/customers-filtered-count";
+
+    // Initial data load
+    loadDefaultData();
+
+    function loadTotalItemForDefaultData() {
+      return $http.get("api/gateway/customers/customers-count").then(function (resp) {
+        console.log(resp);
+        return resp.data;
+      });
+    }
+
+    function loadTotalItemForSearchData(searchURL) {
+      return $http.get(searchURL).then(function (resp) {
+        console.log(resp);
+        return resp.data;
+      });
+    }
+
+    function loadDefaultData() {
+      // $state.transitionTo('customers', { page: vm.currentPage, size: vm.pageSize}, { notify: false });
+
+      if (!vm.searchActive) {
+        loadTotalItemForDefaultData().then(function (totalItems) {
+          vm.totalItems = totalItems;
+          vm.totalPages = Math.ceil(vm.totalItems / parseInt(vm.pageSize));
+          fetch(
+            "api/gateway/customers/customers-pagination?page=" +
+              vm.currentPage +
+              "&size=" +
+              vm.pageSize
+          )
+            .then((response) => response.text())
+            .then((text) => {
+              vm.customers = text
+                .split("data:")
+                .map((payload) => {
+                  try {
+                    if (payload.trim() === "") return null;
+                    return JSON.parse(payload);
+                  } catch (err) {
+                    console.error("Can't parse JSON: " + err);
+                    return null;
+                  }
+                })
+                .filter((data) => data !== null);
+              $scope.$apply();
+            });
+
+          updateCurrentPageOnSite();
+        });
+      }
+    }
+
+    vm.searchCustomersByPaginationAndFilters = function (
+      currentPage = 0,
+      prevOrNextPressed = false
+    ) {
+      vm.selectedSize = document.getElementById("sizeInput").value;
+
+      if (!prevOrNextPressed) {
+        vm.customerId = document.getElementById("customerIdInput").value;
+        vm.firstName = document.getElementById("firstNameInput").value;
+        vm.lastName = document.getElementById("lastNameInput").value;
+        vm.phoneNumber = document.getElementById("phoneNumberInput").value;
+        vm.city = document.getElementById("cityInput").value;
+
+        if (
+          checkIfAllInputFieldsAreEmptyOrNull(
+            vm.customerId,
+            vm.firstName,
+            vm.lastName,
+            vm.phoneNumber,
+            vm.city,
+            vm.selectedSize
+          )
+        ) {
+          alert(
+            "Oops! It seems like you forgot to enter any filter criteria. Please provide some filter input to continue."
+          );
+          return;
+        }
+      }
+
+      vm.searchActive = true;
+
+      var searchURL = vm.baseURL + "?page=" + currentPage.toString();
+      var loadTotalNumberOfDataURL =
+        vm.baseURLforTotalNumberOfCustomersByFiltering + "?";
+
+      if (vm.selectedSize) {
+        searchURL += "&size=" + vm.selectedSize;
+        vm.pageSize = vm.selectedSize;
+      } else {
+        searchURL += "&size=" + vm.pageSize;
+      }
+
+      if (vm.customerId) {
+        searchURL += "&customerId=" + vm.customerId;
+        loadTotalNumberOfDataURL += "&customerId=" + vm.customerId;
+      }
+
+      if (vm.firstName) {
+        searchURL += "&firstName=" + vm.firstName;
+        loadTotalNumberOfDataURL += "&firstName=" + vm.firstName;
+      }
+
+      if (vm.lastName) {
+        searchURL += "&lastName=" + vm.lastName;
+        loadTotalNumberOfDataURL += "&lastName=" + vm.lastName;
+      }
+
+      if (vm.phoneNumber) {
+        searchURL += "&phoneNumber=" + vm.phoneNumber;
+        loadTotalNumberOfDataURL += "&phoneNumber=" + vm.phoneNumber;
+      }
+
+      if (vm.city) {
+        searchURL += "&city=" + vm.city;
+        loadTotalNumberOfDataURL += "&city=" + vm.city;
+      }
+
+      console.log(searchURL);
+
+      loadTotalItemForSearchData(loadTotalNumberOfDataURL).then(function (
+        totalItems
+      ) {
+        vm.totalItems = totalItems;
+        vm.totalPages = Math.ceil(vm.totalItems / parseInt(vm.pageSize));
+      });
+
+      fetch(searchURL)
+        .then((response) => response.text())
+        .then((text) => {
+          vm.customers = text
+            .split("data:")
+            .map((payload) => {
+              try {
+                if (payload.trim() === "") return null;
+                return JSON.parse(payload);
+              } catch (err) {
+                console.error("Can't parse JSON: " + err);
+                return null;
+              }
+            })
+            .filter((data) => data !== null);
+          $scope.$apply();
+        });
+
+      updateCurrentPageOnSite();
+    };
+
+    function checkIfAllInputFieldsAreEmptyOrNull(
+      customerId,
+      firstName,
+      lastName,
+      phoneNumber,
+      city,
+      selectedSize
+    ) {
+      return (
+        (customerId === null || customerId === "") &&
+        (firstName === null || firstName === "") &&
+        (lastName === null || lastName === "") &&
+        (phoneNumber === null || phoneNumber === "") &&
+        (city === null || city === "") &&
+        (selectedSize === null || selectedSize === "")
+      );
+    }
+
+    vm.clearInputAndResetDefaultData = function () {
+      var customerId = document.getElementById("customerIdInput");
+      var firstNameInput = document.getElementById("firstNameInput");
+      var lastNameInput = document.getElementById("lastNameInput");
+      var phoneNumberInput = document.getElementById("phoneNumberInput");
+      var cityInput = document.getElementById("cityInput");
+      var sizeInput = document.getElementById("sizeInput");
+
+      firstNameInput.value = "";
+      lastNameInput.value = "";
+      customerId.value = "";
+      phoneNumberInput.value = "";
+      cityInput.value = "";
+      sizeInput.selectedIndex = 0;
+
+      vm.currentPage = 0;
+      vm.pageSize = 5;
+
+      vm.customerId = null;
+      vm.firstName = null;
+      vm.lastName = null;
+      vm.phoneNumber = null;
+      vm.city = null;
+      vm.selectedSize = null;
+
+      vm.searchActive = false;
+
+      loadDefaultData();
+
+      alert("All filters have been cleared successfully.");
+    };
+
+    vm.goNextPage = function () {
+      if (parseInt(vm.currentPage) + 1 < vm.totalPages) {
+        var currentPageInt = parseInt(vm.currentPage) + 1;
+        vm.currentPage = currentPageInt.toString();
+        updateCurrentPageOnSite();
+
+        if (vm.searchActive) {
+          vm.searchCustomersByPaginationAndFilters(currentPageInt, true);
+        } else {
+          loadDefaultData();
+        }
+      }
+    };
+
+    vm.goPreviousPage = function () {
+      if (vm.currentPage - 1 >= 0) {
+        var currentPageInt = parseInt(vm.currentPage) - 1;
+        vm.currentPage = currentPageInt.toString();
+        updateCurrentPageOnSite();
+
+        if (vm.searchActive) {
+          vm.searchCustomersByPaginationAndFilters(currentPageInt, true);
+        } else {
+          loadDefaultData();
+        }
+      }
+    };
+
+    function updateCurrentPageOnSite() {
+      vm.currentPageOnSite = parseInt(vm.currentPage) + 1;
+      console.log(vm.currentPage);
+    }
+
+    function StringBuilder() {
+      // Initialize an empty array to store the string parts
+      this.strings = [];
+
+      // Add a string to the array
+      this.append = function (str) {
+        this.strings.push(str);
+      };
+
+      // Convert the array to a single string and return it
+      this.toString = function () {
+        return this.strings.join("");
+      };
+
+      // Clear the contents of the string builder
+      this.clear = function () {
+        this.strings = [];
+      };
+    }
+  },
+]);
