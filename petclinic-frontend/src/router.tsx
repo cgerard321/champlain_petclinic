@@ -17,7 +17,7 @@ import CartPage from '@/pages/Carts/Cart.tsx';
 import UpdateBillPage from '@/pages/Bills/UpdateBill.tsx';
 import UserCart from '@/features/carts/components/UserCart.tsx';
 import AddingCustomer from '@/pages/Customer/AddingCustomer.tsx';
-import AllOwners from '@/pages/Customer/AllOwners.tsx';
+import AllCustomers from '@/pages/Customer/AllCustomers.tsx';
 import CustomerBillingPage from '@/pages/Bills/CustomerBills.tsx';
 import AdminBillingPage from '@/pages/Bills/AdminBill.tsx';
 import InternalServerError from '@/pages/Error/InternalServerError.tsx';
@@ -167,7 +167,7 @@ const router = createBrowserRouter([
         path: AppRoutePaths.AllCustomers,
         element: (
           <ProtectedRoute roles={['ADMIN', 'VET']}>
-            <AllOwners />
+            <AllCustomers />
           </ProtectedRoute>
         ),
       },
