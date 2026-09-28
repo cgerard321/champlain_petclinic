@@ -27,7 +27,7 @@ const provincesOfCanada = [
 ];
 
 const AdminUpdateCustomerForm: FC = () => {
-  const { ownerId } = useParams<{ ownerId: string }>();
+  const { customerId } = useParams<{ customerId: string }>();
   const navigate = useNavigate();
   const { validateUsernameField } = useUsernameValidation();
   const [formData, setFormData] = useState<CustomerRequestModel>({
@@ -45,36 +45,36 @@ const AdminUpdateCustomerForm: FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    const fetchOwnerData = async (): Promise<void> => {
-      if (!ownerId) {
-        console.error('Owner id is undefined');
+    const fetchCustomerData = async (): Promise<void> => {
+      if (!customerId) {
+        console.error('Customer id is undefined');
         return;
       }
 
       try {
-        const response = await getCustomer(ownerId);
-        const ownerData: CustomerResponseModel = response.data;
-        setFormData(ownerData);
+        const response = await getCustomer(customerId);
+        const customerData: CustomerResponseModel = response.data;
+        setFormData(customerData);
       } catch (error) {
-        console.error('Error fetching owner data:', error);
+        console.error('Error fetching customer data:', error);
       }
     };
 
     const fetchUserData = async (): Promise<void> => {
-      if (!ownerId) {
-        console.error('Owner id is undefined');
+      if (!customerId) {
+        console.error('Customer id is undefined');
         return;
       }
 
       try {
-        const response = await getUserDetails(ownerId);
+        const response = await getUserDetails(customerId);
         const userData: UserDetailsModel = response.data;
         setUserDetails(userData);
         setUsername(userData.username);
       } catch (error) {
         console.error('Error fetching user data:', error);
         setUserDetails({
-          userId: ownerId,
+          userId: customerId,
           username: 'Unknown',
           email: '',
           roles: [],
@@ -85,13 +85,13 @@ const AdminUpdateCustomerForm: FC = () => {
       }
     };
 
-    fetchOwnerData().catch(error =>
-      console.error('Error in fetchOwnerData:', error)
+    fetchCustomerData().catch(error =>
+      console.error('Error in fetchCustomerData:', error)
     );
     fetchUserData().catch(error =>
       console.error('Error in fetchUserData:', error)
     );
-  }, [ownerId]);
+  }, [customerId]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -146,30 +146,30 @@ const AdminUpdateCustomerForm: FC = () => {
     if (!(await validate())) return;
 
     try {
-      if (!ownerId) {
-        console.error('Owner id is undefined');
+      if (!customerId) {
+        console.error('Customer id is undefined');
         return;
       }
 
-      await updateCustomer(ownerId, formData);
+      await updateCustomer(customerId, formData);
 
       if (userDetails && username !== userDetails.username) {
-        await updateUsername(ownerId, username);
+        await updateUsername(customerId, username);
       }
 
       setIsModalOpen(true);
     } catch (error) {
-      console.error('Error updating owner:', error);
+      console.error('Error updating customer:', error);
     }
   };
 
   const closeModal = (): void => {
     setIsModalOpen(false);
-    navigate(`/customers/${ownerId}`);
+    navigate(`/customers/${customerId}`);
   };
 
   const handleBack = (): void => {
-    navigate(`/customers/${ownerId}`);
+    navigate(`/customers/${customerId}`);
   };
 
   return (

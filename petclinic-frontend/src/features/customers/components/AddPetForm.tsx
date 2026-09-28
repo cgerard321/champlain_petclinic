@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { FormEvent, useState } from 'react';
-import { addPetForOwner } from '../api/addPetForOwner';
+import { addPetForCustomer } from '../api/addPetForCustomer.ts';
 import { PetRequestModel } from '../models/PetRequestModel';
 import { useNavigate, useParams } from 'react-router-dom';
 import './customers.css';
@@ -16,9 +16,9 @@ const petTypeOptions: { [key: string]: string } = {
 
 const AddPetForm: React.FC = (): JSX.Element => {
   const navigate = useNavigate();
-  const { ownerId } = useParams<{ ownerId: string }>();
+  const { customerId } = useParams<{ customerId: string }>();
   const [pet, setPet] = useState<PetRequestModel>({
-    ownerId: ownerId || '',
+    customerId: customerId || '',
     name: '',
     birthDate: new Date(),
     petTypeId: '',
@@ -65,9 +65,9 @@ const AddPetForm: React.FC = (): JSX.Element => {
     event: FormEvent<HTMLFormElement>
   ): Promise<void> => {
     event.preventDefault();
-    if (!validate() || !ownerId) return;
+    if (!validate() || !customerId) return;
     try {
-      const response = await addPetForOwner(ownerId, pet);
+      const response = await addPetForCustomer(customerId, pet);
       if (response.status === 201) {
         setSuccessMessage('Pet added successfully!');
         setIsAddModalOpen(true);
@@ -81,7 +81,7 @@ const AddPetForm: React.FC = (): JSX.Element => {
 
   const closeAddModal = (): void => {
     setIsAddModalOpen(false);
-    navigate(`/customers/${ownerId}`);
+    navigate(`/customers/${customerId}`);
   };
 
   return (
@@ -150,7 +150,7 @@ const AddPetForm: React.FC = (): JSX.Element => {
           </button>
           <button
             type="button"
-            onClick={() => navigate(`/customers/${ownerId}`)}
+            onClick={() => navigate(`/customers/${customerId}`)}
             className="button-base secondary-button mt-2"
           >
             Cancel

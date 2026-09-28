@@ -1508,7 +1508,7 @@ class ApiGatewayControllerTest {
         VisitResponseDTO visitResponseDTO4 = VisitResponseDTO.builder().visitId("visitId4").petId("petId2").build();
         VisitResponseDTO visitResponseDTO5 = VisitResponseDTO.builder().visitId("visitId5").petId("petId1").build();
 
-        Mockito.when(customersServiceClient.getPetsByOwnerId(anyString())).thenReturn(Flux.just(petResponseDTO1, petResponseDTO2));
+        Mockito.when(customersServiceClient.getPetsByCustomerId(anyString())).thenReturn(Flux.just(petResponseDTO1, petResponseDTO2));
 
         Mockito.when(visitsServiceClient.getVisitsForPet(petResponseDTO1.getPetId())).thenReturn(Flux.just(visitResponseDTO1, visitResponseDTO2, visitResponseDTO5));
         Mockito.when(visitsServiceClient.getVisitsForPet(petResponseDTO2.getPetId())).thenReturn(Flux.just(visitResponseDTO3, visitResponseDTO4));
