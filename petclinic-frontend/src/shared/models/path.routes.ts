@@ -29,6 +29,7 @@ export enum AppRoutePaths {
   FAQ = '/faq',
   Privacy = '/privacy',
   Contact = '/contact',
+  EnvironmentInfo = '/environment-check',
   Forbidden = '/forbidden',
   Products = '/products',
   Visits = '/visits',

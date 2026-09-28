@@ -53,6 +53,7 @@ import FAQ from './pages/FAQ/FAQ';
 import ContactPage from './pages/Contact/Contact';
 import PrivacyPolicyPage from './pages/PrivacyPolicy/PrivacyPolicy';
 import CustomerVisitsCalendar from '@/pages/Visit/CustomerVisitsCalendar.tsx';
+import EnvironmentInfoPage from '@/pages/Environment/EnvironmentInfo';
 
 const router = createBrowserRouter([
   {
@@ -408,6 +409,10 @@ const router = createBrowserRouter([
   {
     path: AppRoutePaths.Contact,
     element: <ContactPage />,
+  },
+  {
+    path: AppRoutePaths.EnvironmentInfo,
+    element: <EnvironmentInfoPage />,
   },
   {
     path: AppRoutePaths.Home,
