@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { getOwner } from '@/features/customers/api/getOwner';
+import { getCustomer } from '@/features/customers/api/getCustomer.ts';
 import { getPetTypes } from '@/features/customers/api/getPetTypes';
 import { getUserDetails } from '@/features/customers/api/getUserDetails';
-import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseModel.ts';
+import { CustomerResponseModel } from '@/features/customers/models/CustomerResponseModel.ts';
 import { PetResponseModel } from '@/features/customers/models/PetResponseModel.ts';
 import { PetTypeModel } from '@/features/customers/models/PetTypeModel';
 import { UserDetailsModel } from '@/features/customers/models/UserDetailsModel';
@@ -21,8 +21,8 @@ import {
   getPetTypeImage, // ✅ added
 } from '@/features/customers/utils/petTypeMapping';
 import { deletePet } from '@/features/customers/api/deletePet';
-import defaultProfile from '@/assets/Owners/defaultProfilePicture.png';
-import { deleteOwnerPhoto } from '@/features/customers/api/deleteOwnerPhoto.ts';
+import defaultProfile from '@/assets/Customers/defaultProfilePicture.png';
+import { deleteCustomerPhoto } from '@/features/customers/api/deleteCustomerPhoto.ts';
 import { deletePetPhoto } from '@/features/customers/api/deletePetPhoto';
 import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
 
@@ -30,7 +30,7 @@ const ProfilePage = (): JSX.Element => {
   const [profilePicUrl, setProfilePicUrl] = useState<string>('');
   const { user } = useUser();
   const [petImageUrls, setPetImageUrls] = useState<Record<string, string>>({});
-  const [owner, setOwner] = useState<OwnerResponseModel | null>(null);
+  const [customer, setCustomer] = useState<CustomerResponseModel | null>(null);
   const [userDetails, setUserDetails] = useState<UserDetailsModel | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -105,12 +105,12 @@ const ProfilePage = (): JSX.Element => {
       if (!user.userId) return;
 
       try {
-        const ownerResponse = await getOwner(user.userId, true);
-        const ownerData = ownerResponse.data;
+        const customerResponse = await getCustomer(user.userId, true);
+        const customerData = customerResponse.data;
 
-        if (ownerData.photo && ownerData.photo.fileData) {
-          const base64Data = ownerData.photo.fileData;
-          const contentType = ownerData.photo.fileType || 'image/png';
+        if (customerData.photo && customerData.photo.fileData) {
+          const base64Data = customerData.photo.fileData;
+          const contentType = customerData.photo.fileType || 'image/png';
           const byteCharacters = atob(base64Data);
           const byteNumbers = new Array(byteCharacters.length);
           for (let i = 0; i < byteCharacters.length; i++) {
@@ -129,7 +129,7 @@ const ProfilePage = (): JSX.Element => {
         }
       } catch (err) {
         console.warn(
-          'Failed to fetch owner profile picture, using local default',
+          'Failed to fetch customer profile picture, using local default',
           err
         );
         if (isMounted) {
@@ -193,10 +193,10 @@ const ProfilePage = (): JSX.Element => {
   useEffect(() => {
     let isMounted = true;
 
-    const fetchOwnerData = async (): Promise<void> => {
+    const fetchCustomerData = async (): Promise<void> => {
       try {
-        const ownerResponse = await getOwner(user.userId);
-        const ownerData = ownerResponse.data;
+        const customerResponse = await getCustomer(user.userId);
+        const customerData = customerResponse.data;
 
         try {
           const petsResponse = await axiosInstance.get(
@@ -233,8 +233,8 @@ const ProfilePage = (): JSX.Element => {
 
           if (isMounted) {
             setPetImageUrls(newPetImageUrls);
-            setOwner({
-              ...ownerData,
+            setCustomer({
+              ...customerData,
               pets: petsData,
             });
           }
@@ -244,21 +244,21 @@ const ProfilePage = (): JSX.Element => {
             petsError
           );
           if (isMounted) {
-            setOwner({
-              ...ownerData,
+            setCustomer({
+              ...customerData,
               pets: [],
             });
           }
         }
       } catch (error) {
         if (isMounted) {
-          setError('Error fetching owner data');
+          setError('Error fetching customer data');
         }
-        console.error('Error fetching owner data:', error);
+        console.error('Error fetching customer data:', error);
       }
     };
 
-    fetchOwnerData();
+    fetchCustomerData();
 
     return () => {
       isMounted = false;
@@ -286,10 +286,10 @@ const ProfilePage = (): JSX.Element => {
   };
 
   const handlePetAdded = (newPet: PetResponseModel): void => {
-    if (owner) {
-      setOwner({
-        ...owner,
-        pets: [...(owner.pets || []), newPet],
+    if (customer) {
+      setCustomer({
+        ...customer,
+        pets: [...(customer.pets || []), newPet],
       });
     }
   };
@@ -306,12 +306,12 @@ const ProfilePage = (): JSX.Element => {
     if (!user.userId) return;
 
     try {
-      const ownerResponse = await getOwner(user.userId, true);
-      const ownerData = ownerResponse.data;
+      const customerResponse = await getCustomer(user.userId, true);
+      const customerData = customerResponse.data;
 
-      if (ownerData.photo && ownerData.photo.fileData) {
-        const base64Data = ownerData.photo.fileData;
-        const contentType = ownerData.photo.fileType || 'image/png';
+      if (customerData.photo && customerData.photo.fileData) {
+        const base64Data = customerData.photo.fileData;
+        const contentType = customerData.photo.fileType || 'image/png';
         const byteCharacters = atob(base64Data);
         const byteNumbers = new Array(byteCharacters.length);
         for (let i = 0; i < byteCharacters.length; i++) {
@@ -334,7 +334,7 @@ const ProfilePage = (): JSX.Element => {
 
   const handleDeletePhoto = async (): Promise<void> => {
     try {
-      await deleteOwnerPhoto(user.userId);
+      await deleteCustomerPhoto(user.userId);
       if (profilePicUrl) URL.revokeObjectURL(profilePicUrl);
       setProfilePicUrl('');
       setIsDeletePhotoModalOpen(false);
@@ -363,10 +363,10 @@ const ProfilePage = (): JSX.Element => {
 
     try {
       await deletePet(petId);
-      if (owner) {
-        setOwner({
-          ...owner,
-          pets: owner.pets?.filter(pet => pet.petId !== petId) || [],
+      if (customer) {
+        setCustomer({
+          ...customer,
+          pets: customer.pets?.filter(pet => pet.petId !== petId) || [],
         });
       }
       // eslint-disable-next-line no-console
@@ -377,28 +377,28 @@ const ProfilePage = (): JSX.Element => {
     }
   };
 
-  const fetchOwnerData = async (): Promise<void> => {
+  const fetchCustomerData = async (): Promise<void> => {
     if (!user.userId) return;
     try {
-      const ownerResponse = await getOwner(user.userId);
-      const ownerData = ownerResponse.data;
-      if (ownerData.pets && ownerData.pets.length > 0) {
-        setOwner(ownerData);
+      const customerResponse = await getCustomer(user.userId);
+      const customerData = customerResponse.data;
+      if (customerData.pets && customerData.pets.length > 0) {
+        setCustomer(customerData);
       } else {
-        setOwner({ ...ownerData, pets: [] });
+        setCustomer({ ...customerData, pets: [] });
       }
     } catch (error) {
-      setError('Error fetching owner data');
-      console.error('Error fetching owner data:', error);
+      setError('Error fetching customer data');
+      console.error('Error fetching customer data:', error);
     }
   };
 
   const handlePetUpdated = (updatedPet?: PetResponseModel): void => {
     if (updatedPet) {
-      setOwner(prevOwner => {
-        if (!prevOwner || !prevOwner.pets) return prevOwner;
+      setCustomer(prevCustomer => {
+        if (!prevCustomer || !prevCustomer.pets) return prevCustomer;
 
-        const updatedPets = prevOwner.pets.map(pet =>
+        const updatedPets = prevCustomer.pets.map(pet =>
           pet.petId === updatedPet.petId
             ? {
                 ...updatedPet,
@@ -409,21 +409,21 @@ const ProfilePage = (): JSX.Element => {
             : pet
         );
 
-        return { ...prevOwner, pets: updatedPets };
+        return { ...prevCustomer, pets: updatedPets };
       });
     } else {
-      fetchOwnerData();
+      fetchCustomerData();
     }
   };
 
   const handlePetDeleted = (): void => {
-    fetchOwnerData();
+    fetchCustomerData();
   };
 
   const handleDeletePetPhoto = async (petId: string): Promise<void> => {
     if (!user.userId) return;
 
-    const pet = owner?.pets?.find(p => p.petId === petId);
+    const pet = customer?.pets?.find(p => p.petId === petId);
     if (!pet) return;
 
     const confirmed = await confirm({
@@ -447,11 +447,11 @@ const ProfilePage = (): JSX.Element => {
         [petId]: getPetTypeImage(pet.petTypeId, petTypes),
       }));
 
-      if (owner) {
-        const updatedPets = owner.pets.map(p =>
+      if (customer) {
+        const updatedPets = customer.pets.map(p =>
           p.petId === petId ? { ...p, photo: undefined } : p
         );
-        setOwner({ ...owner, pets: updatedPets });
+        setCustomer({ ...customer, pets: updatedPets });
       }
     } catch (error) {
       console.error('Error deleting pet photo:', error);
@@ -479,7 +479,7 @@ const ProfilePage = (): JSX.Element => {
   };
 
   if (error) return <p>{error}</p>;
-  if (!owner) return <p>Loading...</p>;
+  if (!customer) return <p>Loading...</p>;
 
   return (
     <div>
@@ -521,7 +521,7 @@ const ProfilePage = (): JSX.Element => {
               </div>
             </div>
             <h1>
-              {owner.firstName} {owner.lastName}&apos;s Profile
+              {customer.firstName} {customer.lastName}&apos;s Profile
             </h1>
           </div>
 
@@ -530,22 +530,22 @@ const ProfilePage = (): JSX.Element => {
               <strong>Username:</strong> {userDetails?.username || 'Loading...'}
             </p>
             <p>
-              <strong>First Name:</strong> {owner.firstName}
+              <strong>First Name:</strong> {customer.firstName}
             </p>
             <p>
-              <strong>Last Name:</strong> {owner.lastName}
+              <strong>Last Name:</strong> {customer.lastName}
             </p>
             <p>
-              <strong>Address:</strong> {owner.address}
+              <strong>Address:</strong> {customer.address}
             </p>
             <p>
-              <strong>City:</strong> {owner.city}
+              <strong>City:</strong> {customer.city}
             </p>
             <p>
-              <strong>Province:</strong> {owner.province}
+              <strong>Province:</strong> {customer.province}
             </p>
             <p>
-              <strong>Telephone:</strong> {owner.telephone}
+              <strong>Telephone:</strong> {customer.telephone}
             </p>
           </div>
 
@@ -560,9 +560,9 @@ const ProfilePage = (): JSX.Element => {
               </button>
             </div>
 
-            {owner.pets && owner.pets.length > 0 ? (
+            {customer.pets && customer.pets.length > 0 ? (
               <div className="customers-pets-list">
-                {owner.pets.map((pet: PetResponseModel) => (
+                {customer.pets.map((pet: PetResponseModel) => (
                   <div key={pet.petId} className="customers-pet-card">
                     <div className="customers-pet-card-content">
                       <img
@@ -651,7 +651,7 @@ const ProfilePage = (): JSX.Element => {
       </div>
 
       <AddPetModal
-        ownerId={user.userId}
+        customerId={user.userId}
         isOpen={isAddPetModalOpen}
         onClose={handleCloseAddPetModal}
         onPetAdded={handlePetAdded}
@@ -661,7 +661,7 @@ const ProfilePage = (): JSX.Element => {
         isOpen={isEditPetModalOpen}
         onClose={handleCloseEditPetModal}
         petId={selectedPetId}
-        ownerId={user.userId}
+        customerId={user.userId}
         onPetUpdated={handlePetUpdated}
         onPetDeleted={handlePetDeleted}
       />
@@ -669,7 +669,7 @@ const ProfilePage = (): JSX.Element => {
       <UploadPhotoModal
         isOpen={isUploadPhotoModalOpen}
         onClose={handleCloseUploadPhotoModal}
-        ownerId={user.userId}
+        customerId={user.userId}
         onPhotoUploaded={handlePhotoUploaded}
       />
       <UploadPetPhotoModal

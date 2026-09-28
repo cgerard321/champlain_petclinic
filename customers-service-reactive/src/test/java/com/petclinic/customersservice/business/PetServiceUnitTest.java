@@ -5,7 +5,7 @@ import com.petclinic.customersservice.data.Pet;
 import com.petclinic.customersservice.data.PetRepo;
 import com.petclinic.customersservice.presentationlayer.PetRequestDTO;
 import com.petclinic.customersservice.presentationlayer.PetResponseDTO;
-import com.petclinic.customersservice.presentationlayer.OwnerResponseDTO;
+import com.petclinic.customersservice.presentationlayer.CustomerResponseDTO;
 import com.petclinic.customersservice.domainclientlayer.FilesServiceClient;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -19,7 +19,6 @@ import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,7 +28,7 @@ public class PetServiceUnitTest {
     private PetRepo repo;
 
     @Mock
-    private OwnerService ownerService;
+    private CustomerService customerService;
 
     @Mock
     private FilesServiceClient filesServiceClient;
@@ -43,9 +42,9 @@ public class PetServiceUnitTest {
         String ownerId = "valid-owner-id";
         PetRequestDTO petRequest = buildPetRequestDTO();
         Pet savedPet = buildPetFromRequest(petRequest, ownerId);
-        OwnerResponseDTO ownerResponse = buildOwnerResponseDTO();
+        CustomerResponseDTO ownerResponse = buildOwnerResponseDTO();
 
-        when(ownerService.getOwnerByOwnerId(ownerId, false)).thenReturn(Mono.just(ownerResponse));
+        when(customerService.getCustomerByCustomerId(ownerId, false)).thenReturn(Mono.just(ownerResponse));
         when(repo.save(any(Pet.class))).thenReturn(Mono.just(savedPet));
 
         Mono<PetResponseDTO> result = petService.createPetForOwner(ownerId, Mono.just(petRequest));
@@ -67,14 +66,14 @@ public class PetServiceUnitTest {
         String nonExistingOwnerId = "non-existent-owner-id";
         PetRequestDTO petRequest = buildPetRequestDTO();
 
-        when(ownerService.getOwnerByOwnerId(nonExistingOwnerId,false)).thenReturn(Mono.empty());
+        when(customerService.getCustomerByCustomerId(nonExistingOwnerId,false)).thenReturn(Mono.empty());
 
         Mono<PetResponseDTO> result = petService.createPetForOwner(nonExistingOwnerId, Mono.just(petRequest));
 
         StepVerifier
                 .create(result)
                 .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
-                        throwable.getMessage().equals("Owner not found with id: " + nonExistingOwnerId))
+                        throwable.getMessage().equals("Customer not found with id: " + nonExistingOwnerId))
                 .verify();
     }
 
@@ -111,9 +110,9 @@ public class PetServiceUnitTest {
                 .build();
     }
 
-    private OwnerResponseDTO buildOwnerResponseDTO() {
-        return OwnerResponseDTO.builder()
-                .ownerId("valid-owner-id")
+    private CustomerResponseDTO buildOwnerResponseDTO() {
+        return CustomerResponseDTO.builder()
+                .customerId("valid-customer-id")
                 .firstName("John")
                 .lastName("Doe")
                 .address("123 Main St")
