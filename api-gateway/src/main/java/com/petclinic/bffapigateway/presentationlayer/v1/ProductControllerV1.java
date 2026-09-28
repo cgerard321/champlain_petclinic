@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.presentationlayer.v1;
 
 
 import com.petclinic.bffapigateway.domainclientlayer.ProductsServiceClient;
+import com.petclinic.bffapigateway.dtos.Files.FileDetails;
 import com.petclinic.bffapigateway.dtos.Products.*;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
@@ -33,7 +34,8 @@ public class ProductControllerV1 {
             @RequestParam(required = false) Double maxRating,
             @RequestParam(required = false) String sort,
             @RequestParam(required = false) String deliveryType,
-            @RequestParam(required = false) String productType
+            @RequestParam(required = false) String productType,
+            @RequestParam(defaultValue = "false") boolean includeImage
     ){
         if ((minPrice != null && minPrice < 0) || (maxPrice != null && maxPrice < 0) ||
                 (minRating != null && minRating < 0) || (maxRating != null && maxRating < 0)) {
@@ -48,7 +50,14 @@ public class ProductControllerV1 {
             return Flux.error(new IllegalArgumentException("minRating cannot be greater than maxRating"));
         }
 
-        return productsServiceClient.getAllProducts(minPrice, maxPrice, minRating, maxRating, sort, deliveryType, productType);
+        if (includeImage) {
+            return productsServiceClient.getAllProducts(
+                    minPrice, maxPrice, minRating, maxRating, sort, deliveryType,
+                    productType, true);
+        }
+        return productsServiceClient.getAllProducts(
+                minPrice, maxPrice, minRating, maxRating, sort, deliveryType,
+                productType);
 
     }
 
@@ -59,7 +68,11 @@ public class ProductControllerV1 {
             @PathVariable String productId,
             @RequestParam(defaultValue = "false") boolean includeImage) {
 
-        return productsServiceClient.getProductByProductId(productId, includeImage)
+        Mono<ProductResponseDTO> productResponse = includeImage
+                ? productsServiceClient.getProductByProductId(productId, true)
+                : productsServiceClient.getProductByProductId(productId);
+
+        return productResponse
                 .map(product -> ResponseEntity.status(HttpStatus.OK).body(product))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
@@ -81,6 +94,35 @@ public class ProductControllerV1 {
         return productsServiceClient.updateProduct(productId, productRequestDTO)
                 .map(product -> ResponseEntity.status(HttpStatus.OK).body(product))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @PatchMapping(
+            value = "/{productId}/image",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<ProductResponseDTO>> updateProductImage(
+            @PathVariable String productId,
+            @RequestBody FileDetails image) {
+
+        return productsServiceClient.updateProductImage(productId, image)
+                .map(ResponseEntity::ok);
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @DeleteMapping(value = "/{productId}/image", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<ProductResponseDTO>> deleteProductImage(
+            @PathVariable String productId) {
+        return productsServiceClient.deleteProductImage(productId)
+                .map(ResponseEntity::ok);
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ALL})
+    @GetMapping(value = "/filter/{productType}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<ProductResponseDTO> getProductsByType(
+            @PathVariable String productType,
+            @RequestParam(defaultValue = "false") boolean includeImage) {
+        return productsServiceClient.getProductsByType(productType, includeImage);
     }
 
 

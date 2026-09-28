@@ -12,8 +12,12 @@ import java.util.List;
 public interface ProductService {
 
     Flux<ProductResponseModel> getAllProducts(Double minPrice, Double maxPrice,Double minRating, Double maxRating, String sort,String deliveryType,String productType);
+    default Mono<ProductResponseModel> getProductByProductId(String productId) {
+        return getProductByProductId(productId, false);
+    }
     Mono<ProductResponseModel> getProductByProductId(
             String productId, boolean includeImage);
+    Mono<ProductResponseModel> includeImage(ProductResponseModel product);
     Mono<ProductResponseModel> addProduct(Mono<ProductRequestModel> productRequestModel);
     Mono<ProductResponseModel> updateProductByProductId(String productId, Mono<ProductRequestModel> productRequestModel);
     Mono<ProductResponseModel> patchListingStatus(String productId, Mono<ProductRequestModel> productRequestModel);
@@ -37,4 +41,5 @@ public interface ProductService {
 
     Mono<ProductResponseModel> updateProductImage(
             String productId, FileRequestDTO image);
+    Mono<ProductResponseModel> deleteProductImage(String productId);
 }

@@ -6,6 +6,7 @@ import com.petclinic.products.domainclientlayer.FileResponseDTO;
 import com.petclinic.products.domainclientlayer.FilesServiceClient;
 import com.petclinic.products.presentationlayer.products.*;
 import com.petclinic.products.utils.exceptions.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +33,9 @@ public class ProductServiceImpl implements ProductService {
     private final ProductBundleService productBundleService;
     private final ProductTypeRepository productTypeRepository;
     private final FilesServiceClient filesServiceClient;
+
+    @Value("${app.files-service.default-image-ids:}")
+    private String defaultImageIds = "";
 
     public ProductServiceImpl(ProductRepository productRepository, RatingRepository ratingRepository
     , ProductBundleRepository productBundleRepository, ProductBundleService productBundleService, ProductTypeRepository productTypeRepository, FilesServiceClient filesServiceClient) {
@@ -147,6 +151,19 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public Mono<ProductResponseModel> includeImage(ProductResponseModel product) {
+        if (product.getImageId() == null || product.getImageId().isBlank()) {
+            return Mono.just(product);
+        }
+
+        return filesServiceClient.getFile(product.getImageId())
+                .map(file -> {
+                    product.setImage(file);
+                    return product;
+                });
+    }
+
+    @Override
     public Mono<ProductResponseModel> addProduct(
             Mono<ProductRequestModel> productRequestModel) {
 
@@ -258,7 +275,10 @@ public class ProductServiceImpl implements ProductService {
                                             : productBundleService.deleteAllProductBundlesByProductId(found.getProductId()).then();
 
                                     return deleteBundles
-                                            .then(ratingRepository.deleteRatingsByProductId(found.getProductId()).then())
+                                            .then(ratingRepository.deleteRatingsByProductId(
+                                                    found.getProductId()).then())
+                                            // Clean up the owned image before deleting the product.
+                                            .then(Mono.defer(() -> deleteOwnedProductImage(found)))
                                             .then(productRepository.delete(found))
                                             .thenReturn(found);
                                 })
@@ -413,7 +433,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
 
-    //this allows existing prodcuts to update their images to the new file system
+    // Allows an existing product to add or replace its image in the Files Service.
     @Override
     public Mono<ProductResponseModel> updateProductImage(
             String productId, FileRequestDTO image) {
@@ -424,7 +444,8 @@ public class ProductServiceImpl implements ProductService {
                                 "Product id was not found: " + productId)))
                 .flatMap(product -> {
                     if (product.getImageId() == null
-                            || product.getImageId().isBlank()) {
+                            || product.getImageId().isBlank()
+                            || isDefaultImage(product.getImageId())) {
                         return uploadProductImage(product, image);
                     }
 
@@ -443,6 +464,20 @@ public class ProductServiceImpl implements ProductService {
                                         .map(file -> toResponseWithImage(product, file));
                             });
                 });
+    }
+
+    @Override
+    public Mono<ProductResponseModel> deleteProductImage(String productId) {
+        return productRepository.findProductByProductId(productId)
+                .switchIfEmpty(Mono.error(
+                        new NotFoundException(
+                                "Product id was not found: " + productId)))
+                .flatMap(product -> deleteOwnedProductImage(product)
+                        .then(Mono.defer(() -> {
+                            product.setImageId(null);
+                            return productRepository.save(product);
+                        })))
+                .map(EntityModelUtil::toProductResponseModel);
     }
 
     private Mono<ProductResponseModel> uploadProductImage(
@@ -487,6 +522,34 @@ public class ProductServiceImpl implements ProductService {
         // Include file content in the response without storing it on the entity.
         response.setImage(file);
         return response;
+    }
+
+    private Mono<Void> deleteOwnedProductImage(Product product) {
+        String imageId = product.getImageId();
+
+        // Products without an image need no file cleanup.
+        if (imageId == null || imageId.isBlank() || isDefaultImage(imageId)) {
+            return Mono.empty();
+        }
+
+        return productRepository
+                .existsByImageIdAndProductIdNot(
+                        imageId, product.getProductId())
+                .flatMap(shared -> {
+                    // Keep files that another product still references.
+                    if (shared) {
+                        return Mono.empty();
+                    }
+
+                    return filesServiceClient.deleteFile(imageId);
+                });
+    }
+
+    private boolean isDefaultImage(String imageId) {
+        return Arrays.stream(defaultImageIds.split(","))
+                .map(String::trim)
+                .filter(id -> !id.isEmpty())
+                .anyMatch(imageId::equals);
     }
 
 

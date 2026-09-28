@@ -27,4 +27,22 @@ public class ProductResponseDTO {
     private ProductStatus productStatus;
     private DeliveryType deliveryType;
     private FileDetails image;
+
+    public ProductResponseDTO(
+            String productId,
+            String imageId,
+            String productName,
+            String productDescription,
+            Double productSalePrice,
+            Double averageRating,
+            Integer requestCount,
+            Integer productQuantity,
+            Boolean isUnlisted,
+            ProductType productType,
+            ProductStatus productStatus,
+            DeliveryType deliveryType) {
+        this(productId, imageId, productName, productDescription,
+                productSalePrice, averageRating, requestCount, productQuantity,
+                isUnlisted, productType, productStatus, deliveryType, null);
+    }
 }

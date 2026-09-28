@@ -38,9 +38,13 @@ public class ProductController {
             @RequestParam(required = false) Double maxRating,
             @RequestParam(required = false) String sort,
             @RequestParam(required = false) String deliveryType,
-            @RequestParam(required = false) String productType) {
+            @RequestParam(required = false) String productType,
+            @RequestParam(defaultValue = "false") boolean includeImage) {
 
-        return productService.getAllProducts(minPrice, maxPrice, minRating, maxRating, sort,deliveryType,productType);
+        Flux<ProductResponseModel> products = productService.getAllProducts(
+                minPrice, maxPrice, minRating, maxRating, sort, deliveryType, productType);
+
+        return includeImage ? products.concatMap(productService::includeImage) : products;
     }
 
     @GetMapping(
@@ -50,7 +54,14 @@ public class ProductController {
             @PathVariable String productId,
             @RequestParam(defaultValue = "false") boolean includeImage) {
 
-        return productService.getProductByProductId(productId, includeImage)
+        return Mono.just(productId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(Mono.error(
+                        new InvalidInputException(
+                                "Provided product id is invalid: " + productId)))
+                .flatMap(id -> includeImage
+                        ? productService.getProductByProductId(id, true)
+                        : productService.getProductByProductId(id))
                 .map(ResponseEntity::ok);
     }
 
@@ -109,6 +120,21 @@ public class ProductController {
                 .map(ResponseEntity::ok);
     }
 
+    @DeleteMapping(
+            value = "/{productId}/image",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<ProductResponseModel>> deleteProductImage(
+            @PathVariable String productId) {
+
+        return Mono.just(productId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(Mono.error(
+                        new InvalidInputException(
+                                "Provided product id is invalid: " + productId)))
+                .flatMap(productService::deleteProductImage)
+                .map(ResponseEntity::ok);
+    }
+
     @DeleteMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ProductResponseModel>> deleteProduct(@PathVariable String productId,
                                                                     @RequestParam(name = "cascadeBundles", defaultValue = "false") boolean cascadeBundles) {
@@ -120,8 +146,11 @@ public class ProductController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
     @GetMapping(value = "/filter/{productType}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<ProductResponseModel> getProductsByType(@PathVariable String productType) {
-        return productService.getProductsByType(productType);
+    public Flux<ProductResponseModel> getProductsByType(
+            @PathVariable String productType,
+            @RequestParam(defaultValue = "false") boolean includeImage) {
+        Flux<ProductResponseModel> products = productService.getProductsByType(productType);
+        return includeImage ? products.concatMap(productService::includeImage) : products;
     }
     @PatchMapping(value = "/{productId}/decrease")
     public Mono<ResponseEntity<Void>> decreaseProductQuantity(@PathVariable String productId) {
