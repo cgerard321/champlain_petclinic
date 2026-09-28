@@ -28,6 +28,36 @@ export const routes: Routes = [
         path: 'home',
         loadChildren: () => import('@features/home/routes'),
       },
+
+      {
+        path: 'vets',
+        loadChildren: () => import('@features/vets/routes'),
+      },
+
+      {
+        path: 'cust',
+        loadChildren: () => import('@features/cust/routes'),
+      },
+
+      {
+        path: 'bill',
+        loadChildren: () => import('@features/bill/routes'),
+      },
+
+      {
+        path: 'vist',
+        loadChildren: () => import('@features/vist/routes'),
+      },
+
+      {
+        path: 'invt',
+        loadChildren: () => import('@features/invt/routes'),
+      },
+
+      {
+        path: 'prod',
+        loadChildren: () => import('@features/prod/routes'),
+      },
     ],
   },
   { path: '**', redirectTo: 'error/not-found' },
