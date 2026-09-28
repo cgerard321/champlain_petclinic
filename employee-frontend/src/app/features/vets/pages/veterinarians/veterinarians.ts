@@ -6,5 +6,4 @@ import { Component } from '@angular/core';
   templateUrl: './veterinarians.html',
   styleUrl: './veterinarians.css',
 })
-
 export class Veterinarians {}

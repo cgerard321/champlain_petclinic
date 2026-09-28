@@ -18,9 +18,8 @@ export const routes: Routes = [
     loadComponent: () => import('@layout/shell/shell').then((m) => m.Shell),
     canActivate: [authGuard(), customerRedirectGuard, employeeGuard],
     children: [
-    { path: '', pathMatch: 'full', redirectTo: 'home' },
+      { path: '', pathMatch: 'full', redirectTo: 'home' },
       {
-<<<<<<< HEAD
         path: 'home',
         loadChildren: () => import('@features/home/routes'),
       },
@@ -56,16 +55,5 @@ export const routes: Routes = [
       },
     ],
   },
-=======
-      path: 'home',
-      loadChildren: () => import('@features/home/routes'),
-    },
-    {
-      path: 'vets',
-      loadChildren: () => import('@features/vets/routes'),
-    },
-  ],
-    },
->>>>>>> d25f1a0f (feat(VETS-CPC-1978): add veterinarians placeholder page)
   { path: '**', redirectTo: 'error/not-found' },
 ];
