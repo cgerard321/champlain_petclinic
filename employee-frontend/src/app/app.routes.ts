@@ -50,8 +50,8 @@ export const routes: Routes = [
       },
 
       {
-        path: 'invt',
-        loadChildren: () => import('@features/inventory/routes'),
+        path: 'inventories',
+        loadChildren: () => import('@features/inventories/routes'),
       },
 
       {

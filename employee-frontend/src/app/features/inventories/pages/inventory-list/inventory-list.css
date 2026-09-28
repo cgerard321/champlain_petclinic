@@ -1,0 +1,46 @@
+/* Changes how the grid displays when the user's screen is smaller */
+@media (max-width: 1200px) {
+  .inventory-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1000px) {
+  .inventory-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .inventory-page {
+    padding: 2rem 1rem 3rem;
+  }
+
+  .inventory-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .inventory-card-link {
+    aspect-ratio: auto;
+    min-height: 240px;
+  }
+}
+
+@media (max-width: 500px) {
+  .inventory-page {
+    padding: 1.5rem 0.75rem 2.5rem;
+  }
+
+  .inventory-card mat-card-header {
+    padding: 1.25rem 1.25rem 0;
+  }
+
+  .inventory-card mat-card-content {
+    padding: 1rem 1.25rem 1.25rem;
+  }
+
+  .inventory-card mat-card-title {
+    font-size: 1.15rem;
+  }
+}

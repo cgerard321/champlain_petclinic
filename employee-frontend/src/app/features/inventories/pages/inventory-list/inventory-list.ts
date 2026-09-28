@@ -6,13 +6,13 @@ import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 
 import { isApiError, ApiError } from '@core/models/api-error';
-import { Inventory } from '@features/inventory/models/inventory.model';
-import { InventoryService } from '@features/inventory/services/inventory-service';
+import { Inventory } from '@features/inventories/models/inventory.model';
+import { InventoryService } from '@features/inventories/services/inventory-service';
 
 @Component({
   imports: [RouterLink, MatCardModule, MatIconModule, MatProgressSpinnerModule],
   selector: 'app-inventory-list',
-  styleUrl: './inventory-list.css',
+  styleUrls: ['../../inventories.css', './inventory-list.css'],
   templateUrl: './inventory-list.html',
 })
 export class InventoryList implements OnInit, OnDestroy {

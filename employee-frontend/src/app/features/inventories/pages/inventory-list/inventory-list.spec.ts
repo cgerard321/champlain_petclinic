@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 
-import { InventoryService } from '@features/inventory/services/inventory-service';
+import { InventoryService } from '@features/inventories/services/inventory-service';
 
 import { InventoryList } from './inventory-list';
 

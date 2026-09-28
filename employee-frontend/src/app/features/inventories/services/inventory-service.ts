@@ -4,7 +4,7 @@ import { SseClient } from 'ngx-sse-client';
 import { Observable, timer } from 'rxjs';
 import { filter, map, repeat, retry } from 'rxjs/operators';
 
-import { Inventory } from '@features/inventory/models/inventory.model';
+import { Inventory } from '@features/inventories/models/inventory.model';
 
 @Injectable({ providedIn: 'root' })
 export class InventoryService {
@@ -21,9 +21,6 @@ export class InventoryService {
 
         // Reconnect after an SSE error.
         retry({ count: Infinity, delay: () => timer(5000) }),
-
-        // Reconnect if the SSE observable completes.
-        repeat({ delay: () => timer(5000) }),
       );
   }
 
