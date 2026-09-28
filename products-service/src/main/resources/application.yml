@@ -10,45 +10,46 @@ logging:
     root: INFO
     com.petclinic: DEBUG
 
+spring:
+  sql:
+    init:
+      mode: always
+  config:
+    activate:
+      on-profile: default
+
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/products
+    username: user
+    password: pwd
+
 ---
-# for test
+# tests
 
 spring:
+  sql:
+    init:
+      mode: always
   config:
     activate:
       on-profile: test
 
-  data:
-    mongodb:
-      username: root
-      password: password
-      host: localhost
-      port: 0
-      database: products
-      authentication-database: admin
-      auto-index-creation: true
-
-de:
-  flapdoodle:
-    mongodb:
-      embedded:
-        version: 4.4.0
-
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/products
+    username: user
+    password: pwd
 ---
-
+#docker
 spring:
   codec:
     max-in-memory-size: 16MB
   config:
     activate:
       on-profile: docker
-  data:
-    mongodb:
-      host: mongo-products
-      port: 27017
-      database: products
-      username: ${DB_USER}
-      password: ${DB_PASSWORD}
-      authentication-database: admin
+
+  r2dbc:
+    url: r2dbc:postgresql://postgres-products:5432/products
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
 
 server.port: 8080
