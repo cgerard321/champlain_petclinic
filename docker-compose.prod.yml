@@ -523,8 +523,6 @@ volumes:
   mongo-customers-config:
   mongo-inventory-data:
   mongo-inventory-config:
-  mongo-products-data:
-  mongo-products-config:
   mongo-carts-data:
   mongo-carts-config:
   postgres-vet-data:

@@ -35,14 +35,6 @@ x-healthchecks:
       retries: 10
       start_period: 10s
 
-  dbgate: &dbgate_hc
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:3000/"]
-      interval: 10s
-      timeout: 3s
-      retries: 10
-      start_period: 10s
-
   mysql: &mysql
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -P 3306 -u${DB_USER} -p${DB_PASSWORD}"]

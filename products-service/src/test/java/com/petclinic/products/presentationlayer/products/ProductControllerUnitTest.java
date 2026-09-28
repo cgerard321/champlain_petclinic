@@ -2,13 +2,14 @@ package com.petclinic.products.presentationlayer.products;
 
 import com.petclinic.products.businesslayer.products.ProductBundleService;
 import com.petclinic.products.businesslayer.products.ProductService;
+import com.petclinic.products.datalayer.products.DeliveryType;
+import com.petclinic.products.datalayer.products.ProductStatus;
+import com.petclinic.products.datalayer.products.ProductType;
 import com.petclinic.products.utils.PostgresTestContainerBase;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
-import com.petclinic.products.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -17,11 +18,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
-
-import com.petclinic.products.datalayer.products.ProductType;
-import com.petclinic.products.datalayer.products.ProductStatus;
-import com.petclinic.products.datalayer.products.DeliveryType;
-import com.petclinic.products.presentationlayer.products.ProductEnumsResponseModel;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
