@@ -214,7 +214,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
-      mongo-products:
+      postgres-products:
         condition: service_healthy
 
   cart-service:
@@ -371,16 +371,16 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${DB_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
 
-  mongo-products:
-    <<: *mongo
-    image: mongo
-    container_name: mongo-products
-    restart: always
+  postgres-products:
+    <<: *postgres
+    image: postgres
+    container_name: postgres-products
     env_file:
       - .env
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${DB_USER}
-      MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=products
 
   mongo-carts:
     <<: *mongo

@@ -1,17 +1,17 @@
 import { FormEvent, useState, useRef } from 'react';
 import * as PropTypes from 'prop-types';
-import { uploadOwnerPhoto } from '../api/uploadOwnerPhoto';
+import { uploadCustomerPhoto } from '../api/uploadCustomerPhoto.ts';
 import './customers.css';
 
 interface UploadPhotoModalProps {
-  ownerId: string;
+  customerId: string;
   isOpen: boolean;
   onClose: () => void;
   onPhotoUploaded: () => void;
 }
 
 const UploadPhotoModal: React.FC<UploadPhotoModalProps> = ({
-  ownerId,
+  customerId,
   isOpen,
   onClose,
   onPhotoUploaded,
@@ -62,7 +62,7 @@ const UploadPhotoModal: React.FC<UploadPhotoModalProps> = ({
     setErrors({});
 
     try {
-      await uploadOwnerPhoto(ownerId, selectedFile);
+      await uploadCustomerPhoto(customerId, selectedFile);
       onPhotoUploaded();
       onClose();
       setSelectedFile(null);
@@ -182,7 +182,7 @@ const UploadPhotoModal: React.FC<UploadPhotoModalProps> = ({
 };
 
 UploadPhotoModal.propTypes = {
-  ownerId: PropTypes.string.isRequired,
+  customerId: PropTypes.string.isRequired,
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onPhotoUploaded: PropTypes.func.isRequired,

@@ -1,17 +1,17 @@
 import * as React from 'react';
 import { FormEvent, useState } from 'react';
-import { addOwner } from '@/features/customers/api/addOwner.ts';
+import { addCustomer } from '@/features/customers/api/addCustomer.ts';
 import { useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import '@/features/customers/components/UpdateCustomerForm.css';
-import { OwnerModel } from '@/features/customers/models/OwnerModel.ts';
+import { CustomerModel } from '@/features/customers/models/CustomerModel.ts';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import './AddingCustomer.css';
 
 const AddingCustomer: React.FC = (): JSX.Element => {
   const navigate = useNavigate();
-  const [owner, setOwner] = useState<OwnerModel>({
-    ownerId: '',
+  const [customer, setCustomer] = useState<CustomerModel>({
+    customerId: '',
     firstName: '',
     lastName: '',
     address: '',
@@ -24,17 +24,17 @@ const AddingCustomer: React.FC = (): JSX.Element => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
-    setOwner({ ...owner, [name]: value });
+    setCustomer({ ...customer, [name]: value });
   };
 
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
-    if (!owner.firstName) newErrors.firstName = 'First name is required';
-    if (!owner.lastName) newErrors.lastName = 'Last name is required';
-    if (!owner.address) newErrors.address = 'Address is required';
-    if (!owner.city) newErrors.city = 'City is required';
-    if (!owner.province) newErrors.province = 'Province is required';
-    if (!owner.telephone) newErrors.telephone = 'Telephone is required';
+    if (!customer.firstName) newErrors.firstName = 'First name is required';
+    if (!customer.lastName) newErrors.lastName = 'Last name is required';
+    if (!customer.address) newErrors.address = 'Address is required';
+    if (!customer.city) newErrors.city = 'City is required';
+    if (!customer.province) newErrors.province = 'Province is required';
+    if (!customer.telephone) newErrors.telephone = 'Telephone is required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -46,11 +46,11 @@ const AddingCustomer: React.FC = (): JSX.Element => {
     if (!validate()) return;
 
     try {
-      const response = await addOwner(owner);
+      const response = await addCustomer(customer);
       if (response.status === 201) {
         navigate(AppRoutePaths.Home);
       } else {
-        console.error('Failed to add owner');
+        console.error('Failed to add customer');
       }
     } catch (error) {
       console.error('Error:', error);
@@ -67,7 +67,7 @@ const AddingCustomer: React.FC = (): JSX.Element => {
           <input
             type="text"
             name="firstName"
-            value={owner.firstName}
+            value={customer.firstName}
             onChange={handleChange}
           />
           {errors.firstName && (
@@ -78,7 +78,7 @@ const AddingCustomer: React.FC = (): JSX.Element => {
           <input
             type="text"
             name="lastName"
-            value={owner.lastName}
+            value={customer.lastName}
             onChange={handleChange}
           />
           {errors.lastName && <span className="error">{errors.lastName}</span>}
@@ -87,7 +87,7 @@ const AddingCustomer: React.FC = (): JSX.Element => {
           <input
             type="text"
             name="address"
-            value={owner.address}
+            value={customer.address}
             onChange={handleChange}
           />
           {errors.address && <span className="error">{errors.address}</span>}
@@ -96,7 +96,7 @@ const AddingCustomer: React.FC = (): JSX.Element => {
           <input
             type="text"
             name="city"
-            value={owner.city}
+            value={customer.city}
             onChange={handleChange}
           />
           {errors.city && <span className="error">{errors.city}</span>}
@@ -105,7 +105,7 @@ const AddingCustomer: React.FC = (): JSX.Element => {
           <input
             type="text"
             name="province"
-            value={owner.province}
+            value={customer.province}
             onChange={handleChange}
           />
           {errors.province && <span className="error">{errors.province}</span>}
@@ -114,7 +114,7 @@ const AddingCustomer: React.FC = (): JSX.Element => {
           <input
             type="text"
             name="telephone"
-            value={owner.telephone}
+            value={customer.telephone}
             onChange={handleChange}
           />
           {errors.telephone && (
