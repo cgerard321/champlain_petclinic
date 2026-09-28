@@ -45,7 +45,7 @@ export const routes: Routes = [
       },
 
       {
-        path: 'inventories',
+        path: 'invt',
         loadChildren: () => import('@features/inventories/routes'),
       },
 

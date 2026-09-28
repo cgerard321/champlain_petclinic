@@ -27,7 +27,7 @@ export class Header {
     { label: 'Customers', route: '/cust' },
     { label: 'Bills', route: '/bill' },
     { label: 'Visits', route: '/vist' },
-    { label: 'Inventory', route: '/inventories' },
+    { label: 'Inventory', route: '/invt' },
     { label: 'Products', route: '/prod' },
   ];
 
