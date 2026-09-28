@@ -410,7 +410,7 @@ public class CustomerServiceClientIntegrationTest {
     @Test
     void whenAddPet_thenReturnCreatedPet() throws Exception {
         PetRequestDTO requestDTO = PetRequestDTO.builder().customerId(CUSTOMER_ID).name("New Pet").petTypeId("1").build();
-        PetResponseDTO responseDTO = PetResponseDTO.builder().petId("new-pet-id").customerId(OWNER_ID).name("New Pet").petTypeId("1").build();
+        PetResponseDTO responseDTO = PetResponseDTO.builder().petId("new-pet-id").customerId(CUSTOMER_ID).name("New Pet").petTypeId("1").build();
 
         server.enqueue(new MockResponse()
                 .setResponseCode(201)

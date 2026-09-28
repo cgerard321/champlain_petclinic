@@ -69,18 +69,13 @@ public class CustomerControllerV1IntegrationTests {
     @BeforeEach
     public void startMockServer() {
         mockServerConfigCustomersService = new MockServerConfigCustomersService();
-        mockServerConfigCustomersService.registerGetAllOwnersEndpoint();
-        mockServerConfigCustomersService.registerGetOwnerByIdEndpoint();
-        mockServerConfigCustomersService.registerUpdateOwnerEndpoint();
-        mockServerConfigCustomersService.registerDeleteOwnerEndpoint();
+        mockServerConfigAuthService = new MockServerConfigAuthService();
         mockServerConfigCustomersService.registerGetPetByIdEndpoint(PET_ID, petResponse);
         mockServerConfigCustomersService.registerGetAllCustomersEndpoint();
         mockServerConfigCustomersService.registerGetCustomerByIdEndpoint();
         mockServerConfigCustomersService.registerUpdateCustomerEndpoint();
         mockServerConfigCustomersService.registerDeleteCustomerEndpoint();
         mockServerConfigCustomersService.registerGetPetForOwnerEndpoint(CUSTOMER_ID, PET_ID, petResponse);
-
-        mockServerConfigAuthService = new MockServerConfigAuthService();
         mockServerConfigAuthService.registerValidateTokenForAdminEndpoint();
     }
 
@@ -153,8 +148,7 @@ public class CustomerControllerV1IntegrationTests {
     @Test
     void whenGetPet_withValidCustomerAndPetId_thenReturnPet() {
         Mono<PetResponseDTO> result = webTestClient.get()
-                .uri("/api/gateway/pets/customers/{customerId}/pets/{petId}", OWNER_ID, PET_ID)
-                .uri(CUSTOMER_BASE_PATH + "/{ownerId}/pets/{petId}", CUSTOMER_ID, PET_ID)
+                .uri("/api/gateway/pets/customers/{customerId}/pets/{petId}", CUSTOMER_ID, PET_ID)
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -178,7 +172,7 @@ public class CustomerControllerV1IntegrationTests {
     @Test
     void whenDeletePet_withOldOwnerRoute_thenReturnNotFound() {
         webTestClient.delete()
-                .uri(CUSTOMER_BASE_PATH + "/{customerId}/pets/{petId}", OWNER_ID, PET_ID)
+                .uri(CUSTOMER_BASE_PATH + "/{customerId}/pets/{petId}", CUSTOMER_ID, PET_ID)
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .exchange()
                 .expectStatus().isNotFound();
@@ -246,7 +240,7 @@ public class CustomerControllerV1IntegrationTests {
         mockServerConfigCustomersService.registerDeletePetPhotoEndpoint(PET_ID, petResponseDTO);
 
         webTestClient.patch()
-                .uri(CUSTOMER_BASE_PATH + "/{ownerId}/pets/{petId}/photo", CUSTOMER_ID, PET_ID)
+                .uri("/api/gateway/pets/{petId}/photo", PET_ID)
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
