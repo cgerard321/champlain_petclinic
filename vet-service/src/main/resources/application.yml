@@ -137,6 +137,7 @@ spring:
     username: ${DB_USER}
     password: ${DB_PASSWORD}
 
+
   data:
     mongodb:
       host: mongo-vet
