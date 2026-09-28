@@ -2,18 +2,15 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.CustomerRequestDTO;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.CustomerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.*;
-import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
-import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -27,8 +24,6 @@ import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.when;
-import static reactor.core.publisher.Mono.just;
 
 public class CustomerServiceClientIntegrationTest {
 
@@ -38,11 +33,11 @@ public class CustomerServiceClientIntegrationTest {
 
     private ObjectMapper mapper;
 
-    private final String OWNER_ID = "c5cfab77-68cd-4c46-adeb-97c12f029b2e";
+    private final String CUSTOMER_ID = "c5cfab77-68cd-4c46-adeb-97c12f029b2e";
     private final String PET_ID = "e8ab4a03-c404-4f79-adc4-f377341c9c7b";
     private final String PET_TYPE_ID = "eb2a88fa-296a-45c2-8947-37d61ae99e01";
 
-    private final OwnerRequestDTO TEST_OWNER = OwnerRequestDTO.builder()
+    private final CustomerRequestDTO TEST_CUSTOMER = CustomerRequestDTO.builder()
             .firstName("John")
             .lastName("Smith")
             .address("456 Elm")
@@ -58,8 +53,8 @@ public class CustomerServiceClientIntegrationTest {
             .build();
 
 
-    private final OwnerResponseDTO TEST_OWNER_RESPONSE = OwnerResponseDTO.builder()
-            .ownerId(OWNER_ID)
+    private final CustomerResponseDTO TEST_CUSTOMER_RESPONSE = CustomerResponseDTO.builder()
+            .customerId(CUSTOMER_ID)
             .firstName("John")
             .lastName("Smith")
             .address("456 Elm")
@@ -77,7 +72,7 @@ public class CustomerServiceClientIntegrationTest {
 
     Date date = new Date(20221010);
     private final PetResponseDTO TEST_PET = PetResponseDTO.builder()
-            .ownerId(OWNER_ID)
+            .ownerId(CUSTOMER_ID)
             .petId(PET_ID)
             .name("Cat")
             .birthDate(date)
@@ -106,56 +101,56 @@ public class CustomerServiceClientIntegrationTest {
     }
 
     @Test
-    void insertOwner() throws JsonProcessingException {
+    void insertCustomer() throws JsonProcessingException {
 
-        final String body = mapper.writeValueAsString(mapper.convertValue(TEST_OWNER, OwnerResponseDTO.class));
+        final String body = mapper.writeValueAsString(mapper.convertValue(TEST_CUSTOMER, CustomerResponseDTO.class));
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setBody(body));
 
-        final OwnerResponseDTO ownerResponseDTO = customersServiceClient.createOwner(Mono.just(TEST_OWNER)).block();
+        final CustomerResponseDTO customerResponseDTO = customersServiceClient.createCustomer(Mono.just(TEST_CUSTOMER)).block();
 
-        assertEquals(ownerResponseDTO.getFirstName(),TEST_OWNER.getFirstName());
-        assertEquals(ownerResponseDTO.getLastName(),TEST_OWNER.getLastName());
-        assertEquals(ownerResponseDTO.getAddress(),TEST_OWNER.getAddress());
-        assertEquals(ownerResponseDTO.getCity(),TEST_OWNER.getCity());
-        assertEquals(ownerResponseDTO.getProvince(),TEST_OWNER.getProvince());
-        assertEquals(ownerResponseDTO.getTelephone(),TEST_OWNER.getTelephone());
-        //assertEquals(ownerResponseDTO.getImageId(),TEST_OWNER.getImageId());
+        assertEquals(customerResponseDTO.getFirstName(), TEST_CUSTOMER.getFirstName());
+        assertEquals(customerResponseDTO.getLastName(), TEST_CUSTOMER.getLastName());
+        assertEquals(customerResponseDTO.getAddress(), TEST_CUSTOMER.getAddress());
+        assertEquals(customerResponseDTO.getCity(), TEST_CUSTOMER.getCity());
+        assertEquals(customerResponseDTO.getProvince(), TEST_CUSTOMER.getProvince());
+        assertEquals(customerResponseDTO.getTelephone(), TEST_CUSTOMER.getTelephone());
+        //assertEquals(customerResponseDTO.getImageId(),TEST_CUSTOMER.getImageId());
     }
 
 
     @Test
-    void getOwnerByOwnerId() throws JsonProcessingException{
-        final String body = mapper.writeValueAsString(mapper.convertValue(TEST_OWNER_RESPONSE, OwnerResponseDTO.class));
+    void getCustomerByCustomerId() throws JsonProcessingException{
+        final String body = mapper.writeValueAsString(mapper.convertValue(TEST_CUSTOMER_RESPONSE, CustomerResponseDTO.class));
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setBody(body));
 
-        final OwnerResponseDTO ownerResponseDTO = customersServiceClient.getOwner(OWNER_ID).block();
+        final CustomerResponseDTO customerResponseDTO = customersServiceClient.getCustomer(CUSTOMER_ID).block();
 
-        assertEquals(ownerResponseDTO.getOwnerId(), OWNER_ID);
+        assertEquals(customerResponseDTO.getCustomerId(), CUSTOMER_ID);
     }
 
     @Test
-    void getAllOwners() throws JsonProcessingException {
-        Flux<OwnerResponseDTO> owners = Flux.just(TEST_OWNER_RESPONSE);
+    void getAllCustomers() throws JsonProcessingException {
+        Flux<CustomerResponseDTO> customers = Flux.just(TEST_CUSTOMER_RESPONSE);
 
-        final String body = mapper.writeValueAsString(owners.collectList().block());
+        final String body = mapper.writeValueAsString(customers.collectList().block());
 
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setBody(body));
 
-        final OwnerResponseDTO firstOwnerFromFlux = customersServiceClient.getAllOwners().blockFirst();
+        final CustomerResponseDTO firstCustomerFromFlux = customersServiceClient.getAllCustomers().blockFirst();
 
-        assertEquals(firstOwnerFromFlux.getOwnerId(), OWNER_ID);
+        assertEquals(firstCustomerFromFlux.getCustomerId(), CUSTOMER_ID);
     }
 
     @Test
-    void getOwnersByPagination() throws JsonProcessingException {
-       OwnerResponseDTO TEST_OWNER1 = OwnerResponseDTO.builder()
-                .ownerId("c43d8638-1641-4b3c-87ae-3dda51a898de")
+    void getCustomersByPagination() throws JsonProcessingException {
+       CustomerResponseDTO TEST_CUSTOMER1 = CustomerResponseDTO.builder()
+                .customerId("c43d8638-1641-4b3c-87ae-3dda51a898de")
                .firstName("Test")
                .lastName("Test")
                .address("Test")
@@ -163,8 +158,8 @@ public class CustomerServiceClientIntegrationTest {
                .province("Test")
                .telephone("1234567890")
                 .build();
-        OwnerResponseDTO TEST_OWNER2 = OwnerResponseDTO.builder()
-                .ownerId("75b1701f-4d3d-4ba0-a8a1-3c3ab3ad67ac")
+        CustomerResponseDTO TEST_CUSTOMER2 = CustomerResponseDTO.builder()
+                .customerId("75b1701f-4d3d-4ba0-a8a1-3c3ab3ad67ac")
                 .firstName("Test")
                 .lastName("Test")
                 .address("Test")
@@ -173,9 +168,9 @@ public class CustomerServiceClientIntegrationTest {
                 .telephone("1234567890")
                 .build();
 
-        Flux<OwnerResponseDTO> owners = Flux.just(TEST_OWNER1,TEST_OWNER2);
+        Flux<CustomerResponseDTO> customers = Flux.just(TEST_CUSTOMER1,TEST_CUSTOMER2);
 
-        final String body = mapper.writeValueAsString(owners.collectList().block());
+        final String body = mapper.writeValueAsString(customers.collectList().block());
 
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
@@ -184,9 +179,9 @@ public class CustomerServiceClientIntegrationTest {
         Optional<Integer> page = Optional.of(0);
         Optional<Integer> size =  Optional.of(2);
 
-        final Flux<OwnerResponseDTO> ownersFlux = customersServiceClient.getOwnersByPagination(page,size,null,null,null,null,null);
+        final Flux<CustomerResponseDTO> customersFlux = customersServiceClient.getCustomersByPagination(page,size,null,null,null,null,null);
 
-        Long fluxSize = ownersFlux.count().block();
+        Long fluxSize = customersFlux.count().block();
         Long predictedSize = (long) size.get();
 
 
@@ -194,10 +189,10 @@ public class CustomerServiceClientIntegrationTest {
     }
 
     @Test
-    void getAllOwnersByPaginationWithFiltersApplied() throws JsonProcessingException {
-        Flux<OwnerResponseDTO> owners = Flux.just(TEST_OWNER_RESPONSE);
+    void getAllCustomersByPaginationWithFiltersApplied() throws JsonProcessingException {
+        Flux<CustomerResponseDTO> customers = Flux.just(TEST_CUSTOMER_RESPONSE);
 
-        final String body = mapper.writeValueAsString(owners.collectList().block());
+        final String body = mapper.writeValueAsString(customers.collectList().block());
 
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
@@ -205,14 +200,14 @@ public class CustomerServiceClientIntegrationTest {
 
         Optional<Integer> page = Optional.of(0);
         Optional<Integer> size =  Optional.of(1);
-        final OwnerResponseDTO owner = customersServiceClient.getOwnersByPagination(page,size,OWNER_ID,TEST_OWNER.getFirstName(),TEST_OWNER.getLastName(),TEST_OWNER.getTelephone(),TEST_OWNER.getCity()).blockFirst();
+        final CustomerResponseDTO customer = customersServiceClient.getCustomersByPagination(page,size, CUSTOMER_ID, TEST_CUSTOMER.getFirstName(), TEST_CUSTOMER.getLastName(), TEST_CUSTOMER.getTelephone(), TEST_CUSTOMER.getCity()).blockFirst();
 
-        assertEquals(OWNER_ID, owner.getOwnerId());
-        assertEquals(TEST_OWNER.getCity(), owner.getCity());
+        assertEquals(CUSTOMER_ID, customer.getCustomerId());
+        assertEquals(TEST_CUSTOMER.getCity(), customer.getCity());
     }
 
     @Test
-    void getTotalNumberOfOwners() {
+    void getTotalNumberOfCustomers() {
         // Simulate the expected total count
         long expectedCount = 0;
 
@@ -221,13 +216,13 @@ public class CustomerServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(String.valueOf(expectedCount)));
 
-        final Mono<Long> response = customersServiceClient.getTotalNumberOfOwners();
+        final Mono<Long> response = customersServiceClient.getTotalNumberOfCustomers();
 
         assertEquals(expectedCount,response.block());
     }
 
     @Test
-    void getTotalNumberOfOwnersWithFilters() {
+    void getTotalNumberOfCustomersWithFilters() {
         // Simulate the expected total count
         long expectedCount = 0;
 
@@ -236,13 +231,13 @@ public class CustomerServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(String.valueOf(expectedCount)));
 
-        final Mono<Long> response = customersServiceClient.getTotalNumberOfOwnersWithFilters(null,null,null,null,null);
+        final Mono<Long> response = customersServiceClient.getTotalNumberOfCustomersWithFilters(null,null,null,null,null);
 
         assertEquals(expectedCount,response.block());
     }
 
     @Test
-    void getTotalNumberOfOwnersWithFilters_UnknownValue_ShouldReturnZeroOwners() {
+    void getTotalNumberOfCustomersWithFilters_UnknownValue_ShouldReturnZeroCustomers() {
         // Simulate the expected total count
         long expectedCount = 0;
 
@@ -251,13 +246,13 @@ public class CustomerServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(String.valueOf(expectedCount)));
 
-        String ownerId = "unknown";
+        String customerId = "unknown";
         String firstName = "unknown";
         String lastName = "unknown";
         String city = "unknown";
         String phoneNumber = "unknown";
 
-        final Mono<Long> response = customersServiceClient.getTotalNumberOfOwnersWithFilters(ownerId,firstName,lastName,phoneNumber,city);
+        final Mono<Long> response = customersServiceClient.getTotalNumberOfCustomersWithFilters(customerId,firstName,lastName,phoneNumber,city);
 
         assertEquals(expectedCount,response.block());
     }
@@ -309,29 +304,29 @@ public class CustomerServiceClientIntegrationTest {
 
 
     @Test
-    void testUpdateOwner() throws Exception {
-        // Mock the external service's response when updating the owner
-        OwnerRequestDTO requestDTO = new OwnerRequestDTO();
+    void testUpdateCustomer() throws Exception {
+        // Mock the external service's response when updating the customer
+        CustomerRequestDTO requestDTO = new CustomerRequestDTO();
         requestDTO.setFirstName("UpdatedFirstName");
         requestDTO.setLastName("UpdatedLastName");
 
-        OwnerResponseDTO updatedOwnerResponse = new OwnerResponseDTO();
-        updatedOwnerResponse.setOwnerId("ownerId-123");
-        updatedOwnerResponse.setFirstName("UpdatedFirstName");
-        updatedOwnerResponse.setLastName("UpdatedLastName");
+        CustomerResponseDTO updatedCustomerResponse = new CustomerResponseDTO();
+        updatedCustomerResponse.setCustomerId("customerId-123");
+        updatedCustomerResponse.setFirstName("UpdatedFirstName");
+        updatedCustomerResponse.setLastName("UpdatedLastName");
 
         server.enqueue(new MockResponse()
                 .setResponseCode(200)
                 .setHeader("Content-Type", "application/json")
-                .setBody(mapper.writeValueAsString(updatedOwnerResponse)));
+                .setBody(mapper.writeValueAsString(updatedCustomerResponse)));
 
-        Mono<OwnerResponseDTO> responseMono = customersServiceClient.updateOwner("ownerId-123", Mono.just(requestDTO));
+        Mono<CustomerResponseDTO> responseMono = customersServiceClient.updateCustomer("customerId-123", Mono.just(requestDTO));
 
-        OwnerResponseDTO responseDTO = responseMono.block(); // Blocking for simplicity
+        CustomerResponseDTO responseDTO = responseMono.block(); // Blocking for simplicity
 
-        assertEquals(updatedOwnerResponse.getOwnerId(), responseDTO.getOwnerId());
-        assertEquals(updatedOwnerResponse.getFirstName(), responseDTO.getFirstName());
-        assertEquals(updatedOwnerResponse.getLastName(), responseDTO.getLastName());
+        assertEquals(updatedCustomerResponse.getCustomerId(), responseDTO.getCustomerId());
+        assertEquals(updatedCustomerResponse.getFirstName(), responseDTO.getFirstName());
+        assertEquals(updatedCustomerResponse.getLastName(), responseDTO.getLastName());
     }
 
 
@@ -414,8 +409,8 @@ public class CustomerServiceClientIntegrationTest {
     }
     @Test
     void whenAddPet_thenReturnCreatedPet() throws Exception {
-        PetRequestDTO requestDTO = PetRequestDTO.builder().ownerId(OWNER_ID).name("New Pet").petTypeId("1").build();
-        PetResponseDTO responseDTO = PetResponseDTO.builder().petId("new-pet-id").ownerId(OWNER_ID).name("New Pet").petTypeId("1").build();
+        PetRequestDTO requestDTO = PetRequestDTO.builder().ownerId(CUSTOMER_ID).name("New Pet").petTypeId("1").build();
+        PetResponseDTO responseDTO = PetResponseDTO.builder().petId("new-pet-id").ownerId(CUSTOMER_ID).name("New Pet").petTypeId("1").build();
 
         server.enqueue(new MockResponse()
                 .setResponseCode(201)
@@ -434,22 +429,22 @@ public class CustomerServiceClientIntegrationTest {
 
     @Test
     void whenCreatePetForOwner_thenReturnCreatedPet() throws Exception {
-        PetRequestDTO requestDTO = PetRequestDTO.builder().ownerId(OWNER_ID).name("New Owner Pet").petTypeId("1").build();
-        PetResponseDTO responseDTO = PetResponseDTO.builder().petId("new-owner-pet-id").ownerId(OWNER_ID).name("New Owner Pet").petTypeId("1").build();
+        PetRequestDTO requestDTO = PetRequestDTO.builder().ownerId(CUSTOMER_ID).name("New Owner Pet").petTypeId("1").build();
+        PetResponseDTO responseDTO = PetResponseDTO.builder().petId("new-owner-pet-id").ownerId(CUSTOMER_ID).name("New Owner Pet").petTypeId("1").build();
 
         server.enqueue(new MockResponse()
                 .setResponseCode(201)
                 .setHeader("Content-Type", "application/json")
                 .setBody(mapper.writeValueAsString(responseDTO)));
 
-        Mono<PetResponseDTO> result = customersServiceClient.createPetForOwner(OWNER_ID, requestDTO);
+        Mono<PetResponseDTO> result = customersServiceClient.createPetForOwner(CUSTOMER_ID, requestDTO);
 
         StepVerifier.create(result)
-                .expectNextMatches(r -> r.getName().equals("New Owner Pet") && r.getOwnerId().equals(OWNER_ID))
+                .expectNextMatches(r -> r.getName().equals("New Owner Pet") && r.getOwnerId().equals(CUSTOMER_ID))
                 .verifyComplete();
 
         RecordedRequest request = server.takeRequest();
-        assertEquals("/pets/owners/" + OWNER_ID + "/pets", request.getPath());
+        assertEquals("/pets/owners/" + CUSTOMER_ID + "/pets", request.getPath());
         assertEquals("POST", request.getMethod());
     }
 
@@ -461,14 +456,14 @@ public class CustomerServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(body));
 
-        Mono<PetResponseDTO> result = customersServiceClient.getPet(OWNER_ID, PET_ID);
+        Mono<PetResponseDTO> result = customersServiceClient.getPet(CUSTOMER_ID, PET_ID);
 
         StepVerifier.create(result)
-                .expectNextMatches(r -> r.getPetId().equals(PET_ID) && r.getOwnerId().equals(OWNER_ID))
+                .expectNextMatches(r -> r.getPetId().equals(PET_ID) && r.getOwnerId().equals(CUSTOMER_ID))
                 .verifyComplete();
 
         RecordedRequest request = server.takeRequest();
-        assertEquals("/owners/" + OWNER_ID + "/pets/" + PET_ID, request.getPath());
+        assertEquals("/owners/" + CUSTOMER_ID + "/pets/" + PET_ID, request.getPath());
     }
 //Some of these tests, including this one don't use proper endpoints
     // /pet/owner/{ownerId}/pets should never be an endpoint. Due to circonstances outside the customer team's control
@@ -483,14 +478,14 @@ public class CustomerServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(body));
 
-        Flux<PetResponseDTO> result = customersServiceClient.getPetsByOwnerId(OWNER_ID);
+        Flux<PetResponseDTO> result = customersServiceClient.getPetsByOwnerId(CUSTOMER_ID);
 
         StepVerifier.create(result)
                 .expectNextCount(2)
                 .verifyComplete();
 
         RecordedRequest request = server.takeRequest();
-        assertEquals("/pets/owner/" + OWNER_ID + "/pets", request.getPath()); //worse naming for an endpoint ever
+        assertEquals("/pets/owner/" + CUSTOMER_ID + "/pets", request.getPath()); //worse naming for an endpoint ever
     }
 
     @Test
@@ -612,10 +607,10 @@ public class CustomerServiceClientIntegrationTest {
     }
 
     @Test
-    void whenGetOwnerWithPhoto_thenReturnOwnerWithPhotoData() throws Exception {
-        String mockOwnerJson = """
+    void whenGetCustomerWithPhoto_thenReturnCustomerWithPhotoData() throws Exception {
+        String mockCustomerJson = """
             {
-                "ownerId": "ownerId-123",
+                "customerId": "customerId-123",
                 "firstName": "aaa",
                 "lastName": "bbb",
                 "photo": {
@@ -630,29 +625,29 @@ public class CustomerServiceClientIntegrationTest {
         server.enqueue(new MockResponse()
                 .setResponseCode(200)
                 .setHeader("Content-Type", "application/json")
-                .setBody(mockOwnerJson));
+                .setBody(mockCustomerJson));
 
-        Mono<OwnerResponseDTO> result = customersServiceClient.getOwner(OWNER_ID, true);
+        Mono<CustomerResponseDTO> result = customersServiceClient.getCustomer(CUSTOMER_ID, true);
 
         StepVerifier.create(result)
-                .expectNextMatches(owner -> 
-                    owner.getOwnerId().equals("ownerId-123") &&
-                    owner.getFirstName().equals("aaa") &&
-                    owner.getLastName().equals("bbb") &&
-                    owner.getPhoto() != null &&
-                    owner.getPhoto().getFileType().equals("image/jpeg"))
+                .expectNextMatches(customerResponseDTO ->
+                    customerResponseDTO.getCustomerId().equals("customerId-123") &&
+                    customerResponseDTO.getFirstName().equals("aaa") &&
+                    customerResponseDTO.getLastName().equals("bbb") &&
+                    customerResponseDTO.getPhoto() != null &&
+                    customerResponseDTO.getPhoto().getFileType().equals("image/jpeg"))
                 .verifyComplete();
 
         RecordedRequest request = server.takeRequest();
-        assertEquals("/owners/" + OWNER_ID + "?includePhoto=true", request.getPath());
+        assertEquals("/customers/" + CUSTOMER_ID + "?includePhoto=true", request.getPath());
         assertEquals("GET", request.getMethod());
     }
 
     @Test
-    void whenGetOwnerWithoutPhoto_thenReturnOwnerWithoutPhotoData() throws Exception {
-        String mockOwnerJson = """
+    void whenGetCustomerWithoutPhoto_thenReturnCustomerWithoutPhotoData() throws Exception {
+        String mockCustomerJson = """
             {
-                "ownerId": "ownerId-123",
+                "customerId": "customerId-123",
                 "firstName": "aaa",
                 "lastName": "bbb"
             }
@@ -661,38 +656,38 @@ public class CustomerServiceClientIntegrationTest {
         server.enqueue(new MockResponse()
                 .setResponseCode(200)
                 .setHeader("Content-Type", "application/json")
-                .setBody(mockOwnerJson));
+                .setBody(mockCustomerJson));
 
-        Mono<OwnerResponseDTO> result = customersServiceClient.getOwner(OWNER_ID, false);
+        Mono<CustomerResponseDTO> result = customersServiceClient.getCustomer(CUSTOMER_ID, false);
 
         StepVerifier.create(result)
-                .expectNextMatches(owner -> 
-                    owner.getOwnerId().equals("ownerId-123") &&
-                    owner.getFirstName().equals("aaa") &&
-                    owner.getLastName().equals("bbb") &&
-                    owner.getPhoto() == null)
+                .expectNextMatches(customerResponseDTO ->
+                    customerResponseDTO.getCustomerId().equals("customerId-123") &&
+                    customerResponseDTO.getFirstName().equals("aaa") &&
+                    customerResponseDTO.getLastName().equals("bbb") &&
+                    customerResponseDTO.getPhoto() == null)
                 .verifyComplete();
 
         RecordedRequest request = server.takeRequest();
-        assertEquals("/owners/" + OWNER_ID + "?includePhoto=false", request.getPath());
+        assertEquals("/customers/" + CUSTOMER_ID + "?includePhoto=false", request.getPath());
         assertEquals("GET", request.getMethod());
     }
 
     @Test
-    void whenAddOwner_thenReturnCreatedOwner() throws Exception {
-        OwnerRequestDTO requestDTO = OwnerRequestDTO.builder()
+    void whenAddCustomer_thenReturnCreatedCustomer() throws Exception {
+        CustomerRequestDTO requestDTO = CustomerRequestDTO.builder()
                 .firstName("New")
-                .lastName("Owner")
+                .lastName("Customer")
                 .address("123 Street")
                 .city("City")
                 .province("Province")
                 .telephone("1234567890")
                 .build();
 
-        OwnerResponseDTO responseDTO = OwnerResponseDTO.builder()
-                .ownerId("new-owner-id")
+        CustomerResponseDTO responseDTO = CustomerResponseDTO.builder()
+                .customerId("new-customer-id")
                 .firstName("New")
-                .lastName("Owner")
+                .lastName("Customer")
                 .build();
 
         server.enqueue(new MockResponse()
@@ -700,23 +695,23 @@ public class CustomerServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(mapper.writeValueAsString(responseDTO)));
 
-        Mono<OwnerResponseDTO> result = customersServiceClient.createOwner(Mono.just(requestDTO));
+        Mono<CustomerResponseDTO> result = customersServiceClient.createCustomer(Mono.just(requestDTO));
 
         StepVerifier.create(result)
-                .expectNextMatches(r -> r.getOwnerId().equals("new-owner-id"))
+                .expectNextMatches(r -> r.getCustomerId().equals("new-customer-id"))
                 .verifyComplete();
 
         RecordedRequest request = server.takeRequest();
-        assertEquals("/owners", request.getPath());
+        assertEquals("/customers", request.getPath());
         assertEquals("POST", request.getMethod());
     }
 
     @Test
-    void whenDeleteOwner_thenReturnDeletedOwner() throws Exception {
-        OwnerResponseDTO responseDTO = OwnerResponseDTO.builder()
-                .ownerId(OWNER_ID)
+    void whenDeleteCustomer_thenReturnDeletedCustomer() throws Exception {
+        CustomerResponseDTO responseDTO = CustomerResponseDTO.builder()
+                .customerId(CUSTOMER_ID)
                 .firstName("Deleted")
-                .lastName("Owner")
+                .lastName("Customer")
                 .build();
 
         server.enqueue(new MockResponse()
@@ -724,14 +719,14 @@ public class CustomerServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(mapper.writeValueAsString(responseDTO)));
 
-        Mono<OwnerResponseDTO> result = customersServiceClient.deleteOwner(OWNER_ID);
+        Mono<CustomerResponseDTO> result = customersServiceClient.deleteCustomer(CUSTOMER_ID);
 
         StepVerifier.create(result)
-                .expectNextMatches(r -> r.getOwnerId().equals(OWNER_ID))
+                .expectNextMatches(r -> r.getCustomerId().equals(CUSTOMER_ID))
                 .verifyComplete();
 
         RecordedRequest request = server.takeRequest();
-        assertEquals("/owners/" + OWNER_ID, request.getPath());
+        assertEquals("/customers/" + CUSTOMER_ID, request.getPath());
         assertEquals("DELETE", request.getMethod());
     }
 
@@ -810,15 +805,15 @@ public class CustomerServiceClientIntegrationTest {
     }
 
     @Test
-    void whenCreateOwners_thenReturnOwnersList() throws Exception {
-        List<OwnerResponseDTO> owners = List.of(TEST_OWNER_RESPONSE);
+    void whenCreateCustomers_thenReturnCustomersList() throws Exception {
+        List<CustomerResponseDTO> customerResponseDTOS = List.of(TEST_CUSTOMER_RESPONSE);
 
         server.enqueue(new MockResponse()
                 .setResponseCode(200)
                 .setHeader("Content-Type", "application/json")
-                .setBody(mapper.writeValueAsString(owners)));
+                .setBody(mapper.writeValueAsString(customerResponseDTOS)));
 
-        Flux<OwnerResponseDTO> result = customersServiceClient.createOwners();
+        Flux<CustomerResponseDTO> result = customersServiceClient.createCustomers();
 
         StepVerifier.create(result)
                 .expectNextCount(1)
