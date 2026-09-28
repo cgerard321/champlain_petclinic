@@ -282,12 +282,6 @@ public class CartServiceImpl implements CartService {
                 });
     }
 
-    // this function was never used and could be harmful since it does not check null, does not account promo codes and ignore taxes
-    // private double calculateTotal(List<CartProduct> products) {
-    //     return products.stream()
-    //             .mapToDouble(product -> product.getProductSalePrice() * product.getQuantityInCart())
-    //             .sum();
-    // }
 
     @Override
     public Mono<CartResponseModel> assignCartToCustomer(String customerId) {
