@@ -299,7 +299,7 @@ shared table ever knowing what a `Bill` or a `Visit` is:
 ```ts
 // features/bills/pages/bills-list/bills-list.ts
 columns: ColumnDef < Bill > [] = [
-    {key: 'ownerName', header: 'Owner'},
+    {key: 'ownerName', header: 'Customer'},
     {key: 'status', header: 'Status', cellTemplate: this.statusCell},
 ];
 ```
@@ -348,7 +348,7 @@ No cross-feature import happens at all — vets just links to a URL that visits 
 
 ### 6b. A page aggregates multiple features (e.g. a customer detail page)
 
-`features/customers/pages/customer-detail` needs to show an owner's profile, plus their recent visits and outstanding
+`features/customers/pages/customer-detail` needs to show an customer's profile, plus their recent visits and outstanding
 bills. That's three domains on one screen.
 
 Give the aggregating page its own feature-local components, and let it depend on the *services* of the other features —
@@ -429,7 +429,7 @@ more consistent — never application code, and never anything imported by the a
 ```
 testing/
 ├── mocks/          # e.g. mock-visits.service.ts, mock-auth.service.ts
-├── fixtures/        # e.g. visit.fixture.ts, owner.fixture.ts (sample data)
+├── fixtures/        # e.g. visit.fixture.ts, customer.fixture.ts (sample data)
 ├── builders/         # e.g. visit-builder.ts (fluent test-data builders)
 └── test-utils.ts     # e.g. renderWithProviders(), a shared TestBed setup helper
 ```

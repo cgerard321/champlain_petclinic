@@ -3,8 +3,8 @@ package com.petclinic.bffapigateway.domainclientlayer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Auth.*;
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.CustomerRequestDTO;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.CustomerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.Workday;
@@ -13,7 +13,6 @@ import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Rethrower;
 import com.petclinic.bffapigateway.utils.Security.Variables.SecurityConst;
 import com.petclinic.bffapigateway.utils.Utility;
-import org.mockito.ArgumentMatchers;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import lombok.RequiredArgsConstructor;
@@ -90,7 +89,7 @@ public class AuthServiceClientIntegrationTest {
             .username("username")
             .password("password")
             .email("email")
-            .owner(OwnerRequestDTO.builder()
+            .owner(CustomerRequestDTO.builder()
                     .firstName("firstName")
                     .lastName("lastName")
                     .address("address")
@@ -198,8 +197,8 @@ public class AuthServiceClientIntegrationTest {
     @Test
     @DisplayName("Given valid register information, register user")
     void valid_register(){
-        OwnerResponseDTO ownerResponseDTO = OwnerResponseDTO.builder()
-                .ownerId("e6196574-8213-44c3-b642-e374a7e79a53")
+        CustomerResponseDTO customerResponseDTO = CustomerResponseDTO.builder()
+                .customerId("e6196574-8213-44c3-b642-e374a7e79a53")
                 .firstName("firstName")
                 .lastName("lastName")
                 .address("address")
@@ -214,14 +213,14 @@ public class AuthServiceClientIntegrationTest {
 
         server.enqueue(mockResponse);
 
-        when(customersServiceClient.createOwner(any(Mono.class)))
-                .thenReturn(Mono.just(ownerResponseDTO));
+        when(customersServiceClient.createCustomer(any(Mono.class)))
+                .thenReturn(Mono.just(customerResponseDTO));
 
 
-        Mono<OwnerResponseDTO> block = authServiceClient.createUser(Mono.just(USER_REGISTER));
+        Mono<CustomerResponseDTO> block = authServiceClient.createUser(Mono.just(USER_REGISTER));
 
         StepVerifier.create(block)
-                .expectNext(ownerResponseDTO)
+                .expectNext(customerResponseDTO)
                 .verifyComplete();
     }
 
@@ -859,16 +858,16 @@ public class AuthServiceClientIntegrationTest {
     }
 
     @Test
-    @DisplayName("Should create user with successful owner creation")
-    void shouldCreateUserWithOwnerCreation() throws Exception {
+    @DisplayName("Should create user with successful customer creation")
+    void shouldCreateUserWithCustomerCreation() throws Exception {
         UserPasswordLessDTO userResponse = UserPasswordLessDTO.builder()
                 .userId("user123")
                 .email("user@example.com")
                 .username("testuser")
                 .build();
 
-        OwnerResponseDTO ownerResponse = OwnerResponseDTO.builder()
-                .ownerId("user123")
+        CustomerResponseDTO customerResponseDTO = CustomerResponseDTO.builder()
+                .customerId("user123")
                 .firstName("John")
                 .lastName("Doe")
                 .address("123 Main St")
@@ -886,13 +885,13 @@ public class AuthServiceClientIntegrationTest {
 
         server.enqueue(mockResponse);
 
-        when(customersServiceClient.createOwner(any(Mono.class))).thenReturn(Mono.just(ownerResponse));
-        when(customersServiceClient.deleteOwner(any())).thenReturn(Mono.empty());
+        when(customersServiceClient.createCustomer(any(Mono.class))).thenReturn(Mono.just(customerResponseDTO));
+        when(customersServiceClient.deleteCustomer(any())).thenReturn(Mono.empty());
 
-        Mono<OwnerResponseDTO> result = authServiceClient.createUser(Mono.just(USER_REGISTER));
+        Mono<CustomerResponseDTO> result = authServiceClient.createUser(Mono.just(USER_REGISTER));
 
         StepVerifier.create(result)
-                .expectNextMatches(owner -> owner.getOwnerId().equals("user123"))
+                .expectNextMatches(customerResponseDTO1 -> customerResponseDTO1.getCustomerId().equals("user123"))
                 .verifyComplete();
     }
 
@@ -968,8 +967,8 @@ public class AuthServiceClientIntegrationTest {
 
         when(rethrower.rethrow(any(ClientResponse.class), any())).thenThrow(new GenericHttpException("Invalid registration data", HttpStatus.BAD_REQUEST));
 
-        Mono<OwnerResponseDTO> result = authServiceClient.createUser(Mono.just(USER_REGISTER));
-        when(customersServiceClient.createOwner(any(Mono.class)))
+        Mono<CustomerResponseDTO> result = authServiceClient.createUser(Mono.just(USER_REGISTER));
+        when(customersServiceClient.createCustomer(any(Mono.class)))
                 .thenReturn(Mono.error(new GenericHttpException("Invalid registration data", HttpStatus.BAD_REQUEST)));
 
         StepVerifier.create(result)
@@ -995,10 +994,10 @@ public class AuthServiceClientIntegrationTest {
 
         server.enqueue(mockResponse);
 
-        when(customersServiceClient.createOwner(any(Mono.class))).thenReturn(Mono.error(new RuntimeException("Service error")));
-        when(customersServiceClient.deleteOwner(any())).thenReturn(Mono.empty());
+        when(customersServiceClient.createCustomer(any(Mono.class))).thenReturn(Mono.error(new RuntimeException("Service error")));
+        when(customersServiceClient.deleteCustomer(any())).thenReturn(Mono.empty());
 
-        Mono<OwnerResponseDTO> result = authServiceClient.createUser(Mono.just(USER_REGISTER));
+        Mono<CustomerResponseDTO> result = authServiceClient.createUser(Mono.just(USER_REGISTER));
 
         StepVerifier.create(result)
                 .verifyError(RuntimeException.class);
