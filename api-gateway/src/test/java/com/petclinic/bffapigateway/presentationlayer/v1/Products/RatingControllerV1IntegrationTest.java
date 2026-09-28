@@ -27,7 +27,7 @@ class RatingControllerV1IntegrationTest {
 
     private final String jwtToken = "valid-test-token-for-valid-owner-id";
 
-    private final String CSRF_TOKEN = "csrfToken";
+    private static String CSRF_TOKEN = UUID.randomUUID().toString();
 
     @RegisterExtension
     static WireMockExtension ratingMock = WireMockExtension.newInstance()

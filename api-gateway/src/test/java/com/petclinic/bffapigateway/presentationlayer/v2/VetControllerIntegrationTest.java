@@ -43,7 +43,7 @@ class VetControllerIntegrationTest {
 
     private MockServerConfigAuthService mockServerConfigAuthService;
 
-    private final String CSRF_TOKEN = "csrfToken";
+    private static final String CSRF_TOKEN = UUID.randomUUID().toString();
 
     @BeforeAll
     public void startMockServer() {
