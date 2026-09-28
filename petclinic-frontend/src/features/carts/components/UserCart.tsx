@@ -111,8 +111,8 @@ const UserCart: React.FC = () => {
 
   const redirectToProductPageOnClick = (productId: string): void => {
     navigate(
-      generatePath(AppRoutePaths.ProductDetails,{
-      productId,
+      generatePath(AppRoutePaths.ProductDetails, {
+        productId,
       })
     );
   };
@@ -1169,13 +1169,12 @@ const UserCart: React.FC = () => {
                   key={item.productId}
                   className="recent-purchase-card cart-card"
                 >
-                  <div
-                      className="recent-purchase-image-container">
+                  <div className="recent-purchase-image-container">
                     <div
-                        onClick={() =>
+                        onClick={()=>
                         redirectToProductPageOnClick(item.productId)
-                        }
-                         className="recent-purchase-image"
+                    }
+                    className="recent-purchase-image"
                     >
                       <ImageContainer imageId={item.imageId} />
                     </div>
@@ -1270,8 +1269,8 @@ const UserCart: React.FC = () => {
                       <div
                           onClick={() =>
                               redirectToProductPageOnClick(item.productId)
-                                  }
-                          className="recent-purchase-image"
+                          }
+                        className="recent-purchase-image"
                       >
                         <ImageContainer imageId={item.imageId} />
                       </div>
@@ -1325,10 +1324,10 @@ const UserCart: React.FC = () => {
                 >
                   <div className="recent-purchase-image-container">
                     <div
-                        onClick={() =>
+                        onClick={()=>
                         redirectToProductPageOnClick(item.productId)
-                        }
-                         className="recent-purchase-image"
+                      }
+                        className="recent-purchase-image"
                     >
                       <ImageContainer imageId={item.imageId} />
                     </div>

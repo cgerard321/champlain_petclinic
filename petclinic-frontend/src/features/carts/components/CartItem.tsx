@@ -44,9 +44,11 @@ const CartItem = ({
   const navigate = useNavigate();
   //make cart items redirect to product page when clicked on
   const handleCartItemOnClick = (): void => {
-    navigate(generatePath(AppRoutePaths.ProductDetails,{
-      productId:item.productId,
-    }));
+    navigate(
+        generatePath(AppRoutePaths.ProductDetails,{
+      productId: item.productId,
+    })
+    );
   };
   const rolesSet = user?.roles;
   if (rolesSet) for (const r of rolesSet) roleNames.add(r);
