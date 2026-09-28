@@ -148,6 +148,8 @@ public class CustomerBillControllerIntegrationTest {
                         "Bearer",
                         MockServerConfigAuthService.jwtTokenForValidCustomerId
                 )
+                .cookie("XSRF-TOKEN", MockServerConfigAuthService.csrfTokenForValidCustomerId)
+                .header("X-XSRF-TOKEN", MockServerConfigAuthService.csrfTokenForValidCustomerId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(paymentRequest)

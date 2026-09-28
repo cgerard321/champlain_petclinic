@@ -72,7 +72,7 @@ public class CustomerServiceClientIntegrationTest {
 
     Date date = new Date(20221010);
     private final PetResponseDTO TEST_PET = PetResponseDTO.builder()
-            .ownerId(CUSTOMER_ID)
+            .customerId(CUSTOMER_ID)
             .petId(PET_ID)
             .name("Cat")
             .birthDate(date)
@@ -375,7 +375,7 @@ public class CustomerServiceClientIntegrationTest {
                 .verifyComplete();
 
         RecordedRequest recorded = server.takeRequest();
-        assertEquals("/owners/petTypes", recorded.getPath());
+        assertEquals("/customers/petTypes", recorded.getPath());
         assertEquals("POST", recorded.getMethod());
     }
 
@@ -384,7 +384,7 @@ public class CustomerServiceClientIntegrationTest {
         // Given
         String petId = "123";
         PetRequestDTO petRequestDTO = PetRequestDTO.builder()
-                .ownerId("owner1")
+                .customerId("customer1")
                 .name("Buddy")
                 .petTypeId("dog")
                 .build();
@@ -409,8 +409,8 @@ public class CustomerServiceClientIntegrationTest {
     }
     @Test
     void whenAddPet_thenReturnCreatedPet() throws Exception {
-        PetRequestDTO requestDTO = PetRequestDTO.builder().ownerId(CUSTOMER_ID).name("New Pet").petTypeId("1").build();
-        PetResponseDTO responseDTO = PetResponseDTO.builder().petId("new-pet-id").ownerId(CUSTOMER_ID).name("New Pet").petTypeId("1").build();
+        PetRequestDTO requestDTO = PetRequestDTO.builder().customerId(CUSTOMER_ID).name("New Pet").petTypeId("1").build();
+        PetResponseDTO responseDTO = PetResponseDTO.builder().petId("new-pet-id").customerId(CUSTOMER_ID).name("New Pet").petTypeId("1").build();
 
         server.enqueue(new MockResponse()
                 .setResponseCode(201)
@@ -428,28 +428,28 @@ public class CustomerServiceClientIntegrationTest {
     }
 
     @Test
-    void whenCreatePetForOwner_thenReturnCreatedPet() throws Exception {
-        PetRequestDTO requestDTO = PetRequestDTO.builder().ownerId(CUSTOMER_ID).name("New Owner Pet").petTypeId("1").build();
-        PetResponseDTO responseDTO = PetResponseDTO.builder().petId("new-owner-pet-id").ownerId(CUSTOMER_ID).name("New Owner Pet").petTypeId("1").build();
+    void whenCreatePetForCustomer_thenReturnCreatedPet() throws Exception {
+        PetRequestDTO requestDTO = PetRequestDTO.builder().customerId(CUSTOMER_ID).name("New Customer Pet").petTypeId("1").build();
+        PetResponseDTO responseDTO = PetResponseDTO.builder().petId("new-customer-pet-id").customerId(CUSTOMER_ID).name("New Customer Pet").petTypeId("1").build();
 
         server.enqueue(new MockResponse()
                 .setResponseCode(201)
                 .setHeader("Content-Type", "application/json")
                 .setBody(mapper.writeValueAsString(responseDTO)));
 
-        Mono<PetResponseDTO> result = customersServiceClient.createPetForOwner(CUSTOMER_ID, requestDTO);
+        Mono<PetResponseDTO> result = customersServiceClient.createPetForCustomer(CUSTOMER_ID, requestDTO);
 
         StepVerifier.create(result)
-                .expectNextMatches(r -> r.getName().equals("New Owner Pet") && r.getOwnerId().equals(CUSTOMER_ID))
+                .expectNextMatches(r -> r.getName().equals("New Customer Pet") && r.getCustomerId().equals(CUSTOMER_ID))
                 .verifyComplete();
 
         RecordedRequest request = server.takeRequest();
-        assertEquals("/pets/owners/" + CUSTOMER_ID + "/pets", request.getPath());
+        assertEquals("/pets/customers/" + CUSTOMER_ID + "/pets", request.getPath());
         assertEquals("POST", request.getMethod());
     }
 
     @Test
-    void whenGetPetByOwnerIdAndPetId_thenReturnPet() throws Exception {
+    void whenGetPetByCustomerIdAndPetId_thenReturnPet() throws Exception {
         final String body = mapper.writeValueAsString(TEST_PET);
 
         prepareResponse(response -> response
@@ -459,18 +459,18 @@ public class CustomerServiceClientIntegrationTest {
         Mono<PetResponseDTO> result = customersServiceClient.getPet(CUSTOMER_ID, PET_ID);
 
         StepVerifier.create(result)
-                .expectNextMatches(r -> r.getPetId().equals(PET_ID) && r.getOwnerId().equals(CUSTOMER_ID))
+                .expectNextMatches(r -> r.getPetId().equals(PET_ID) && r.getCustomerId().equals(CUSTOMER_ID))
                 .verifyComplete();
 
         RecordedRequest request = server.takeRequest();
-        assertEquals("/owners/" + CUSTOMER_ID + "/pets/" + PET_ID, request.getPath());
+        assertEquals("/pets/customers/" + CUSTOMER_ID + "/pets/" + PET_ID, request.getPath());
     }
 //Some of these tests, including this one don't use proper endpoints
     // /pet/owner/{ownerId}/pets should never be an endpoint. Due to circonstances outside the customer team's control
     //The endpoints were brought back to their original names, although they were previously modified.
     //Since it would require another new ticket to change them back, they will remain as is for these tests and will have to be updated in another ticket yet again
     @Test
-    void whenGetPetsByOwnerId_thenReturnPetsFlux() throws Exception {
+    void whenGetPetsByCustomerId_thenReturnPetsFlux() throws Exception {
         List<PetResponseDTO> list = List.of(TEST_PET, TEST_PET);
         final String body = mapper.writeValueAsString(list);
 
@@ -478,14 +478,14 @@ public class CustomerServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(body));
 
-        Flux<PetResponseDTO> result = customersServiceClient.getPetsByOwnerId(CUSTOMER_ID);
+        Flux<PetResponseDTO> result = customersServiceClient.getPetsByCustomerId(CUSTOMER_ID);
 
         StepVerifier.create(result)
                 .expectNextCount(2)
                 .verifyComplete();
 
         RecordedRequest request = server.takeRequest();
-        assertEquals("/pets/owner/" + CUSTOMER_ID + "/pets", request.getPath()); //worse naming for an endpoint ever
+        assertEquals("/pets/customers/" + CUSTOMER_ID + "/pets", request.getPath()); //worse naming for an endpoint ever
     }
 
     @Test
@@ -524,7 +524,7 @@ public class CustomerServiceClientIntegrationTest {
                 .verifyComplete();
 
         RecordedRequest request = server.takeRequest();
-        assertEquals("/owners/petTypes/" + PET_TYPE_ID, request.getPath());
+        assertEquals("/customers/petTypes/" + PET_TYPE_ID, request.getPath());
         assertEquals("PUT", request.getMethod());
     }
 
@@ -538,7 +538,7 @@ public class CustomerServiceClientIntegrationTest {
 
         RecordedRequest request = server.takeRequest();
 
-        assertEquals("/owners/petTypes/" + PET_TYPE_ID, request.getPath());
+        assertEquals("/customers/petTypes/" + PET_TYPE_ID, request.getPath());
         assertEquals("DELETE", request.getMethod());
     }
 
@@ -561,7 +561,7 @@ public class CustomerServiceClientIntegrationTest {
                 .verifyComplete();
 
         RecordedRequest request = server.takeRequest();
-         assertEquals("/owners/petTypes/pet-types-pagination?page=0&size=10&petTypeId=eb2a88fa-296a-45c2-8947-37d61ae99e01&name=Dog", request.getPath());
+         assertEquals("/customers/petTypes/pet-types-pagination?page=0&size=10&petTypeId=eb2a88fa-296a-45c2-8947-37d61ae99e01&name=Dog", request.getPath());
     }
 
     @Test
@@ -579,7 +579,7 @@ public class CustomerServiceClientIntegrationTest {
                 .verifyComplete();
 
         RecordedRequest request = server.takeRequest();
-        assertEquals("/owners/petTypes/pet-types-count", request.getPath());
+        assertEquals("/customers/petTypes/pet-types-count", request.getPath());
     }
 
     @Test
@@ -597,7 +597,7 @@ public class CustomerServiceClientIntegrationTest {
                 .verifyComplete();
 
         RecordedRequest request = server.takeRequest();
-        assertEquals("/owners/petTypes/pet-types-filtered-count?petTypeId=eb2a88fa-296a-45c2-8947-37d61ae99e01&name=Dog", request.getPath());
+        assertEquals("/customers/petTypes/pet-types-filtered-count?petTypeId=eb2a88fa-296a-45c2-8947-37d61ae99e01&name=Dog", request.getPath());
     }
 
     private void prepareResponse(Consumer<MockResponse> consumer) {
@@ -762,7 +762,7 @@ public class CustomerServiceClientIntegrationTest {
                 .verifyComplete();
 
         RecordedRequest request = server.takeRequest();
-        assertEquals("/owners/petTypes/" + PET_TYPE_ID, request.getPath());
+        assertEquals("/customers/petTypes/" + PET_TYPE_ID, request.getPath());
         assertEquals("DELETE", request.getMethod());
     }
 
@@ -780,7 +780,7 @@ public class CustomerServiceClientIntegrationTest {
                 .verifyComplete();
 
         RecordedRequest request = server.takeRequest();
-        assertEquals("/owners/petTypes/" + PET_TYPE_ID, request.getPath());
+        assertEquals("/customers/petTypes/" + PET_TYPE_ID, request.getPath());
         assertEquals("GET", request.getMethod());
     }
 
@@ -800,7 +800,7 @@ public class CustomerServiceClientIntegrationTest {
                 .verifyComplete();
 
         RecordedRequest request = server.takeRequest();
-        assertEquals("/owners/petTypes", request.getPath());
+        assertEquals("/customers/petTypes", request.getPath());
         assertEquals("GET", request.getMethod());
     }
 
