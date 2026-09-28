@@ -66,14 +66,26 @@ export class InventoryList implements OnInit, OnDestroy {
   }
 
   private loadQuantities(inventoryId: string): void {
-    this.quantities.update((current) => ({ ...current, [inventoryId]: null }));
+    // Initializes the quantity the first time the inventory is loaded
+    // Otherwise, keeps displaying the existing value
+    if (!(inventoryId in this.quantities())) {
+      this.quantities.update((current) => ({
+        ...current,
+        [inventoryId]: null,
+      }));
+    }
 
     const subscription = this.inventoryService.getQuantity(inventoryId).subscribe({
       next: (quantity) => {
         this.quantities.update((current) => ({ ...current, [inventoryId]: quantity }));
       },
       error: () => {
-        this.quantities.update((current) => ({ ...current, [inventoryId]: null }));
+        if (!(inventoryId in this.quantities())) {
+          this.quantities.update((current) => ({
+            ...current,
+            [inventoryId]: null,
+          }));
+        }
       },
       complete: () => {
         this.quantitySubscriptions.delete(subscription);

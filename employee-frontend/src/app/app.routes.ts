@@ -3,7 +3,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from '@core/guards/auth/auth-guard';
 import { customerRedirectGuard } from '@core/guards/customers/customer-redirect';
 import { employeeGuard } from '@core/guards/employee/employee-guard';
-import { Roles, EMPLOYEE_ROLES } from '@shared/models/roles';
+import { Roles } from '@shared/models/roles';
 
 export const routes: Routes = [
   {
@@ -28,10 +28,35 @@ export const routes: Routes = [
         path: 'home',
         loadChildren: () => import('@features/home/routes'),
       },
+
       {
-        path: 'inventory',
-        canActivate: [authGuard(EMPLOYEE_ROLES)],
+        path: 'vets',
+        loadChildren: () => import('@features/vets/routes'),
+      },
+
+      {
+        path: 'cust',
+        loadChildren: () => import('@features/cust/routes'),
+      },
+
+      {
+        path: 'bill',
+        loadChildren: () => import('@features/bill/routes'),
+      },
+
+      {
+        path: 'vist',
+        loadChildren: () => import('@features/vist/routes'),
+      },
+
+      {
+        path: 'invt',
         loadChildren: () => import('@features/inventory/routes'),
+      },
+
+      {
+        path: 'prod',
+        loadChildren: () => import('@features/prod/routes'),
       },
     ],
   },
