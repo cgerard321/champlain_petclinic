@@ -32,8 +32,8 @@ class PetTypesControllerV1IntegrationTests {
     private MockServerConfigCustomersService mockServerConfigCustomersService;
     private MockServerConfigAuthService mockServerConfigAuthService;
 
-    private final String PET_TYPE_PATH = "/api/gateway/owners/petTypes";
-    private final String PET_TYPE_COUNT_PATH = "/api/gateway/owners/petTypes/pet-types-filtered-count";
+    private final String PET_TYPE_PATH = "/api/gateway/customers/petTypes";
+    private final String PET_TYPE_COUNT_PATH = "/api/gateway/customers/petTypes/pet-types-filtered-count";
 
     @BeforeEach
     public void startMockServer() {
@@ -136,18 +136,17 @@ class PetTypesControllerV1IntegrationTests {
                 .verifyComplete();
     }
 
-    //TODO For Alexandra : I don't know what is wrong with this test please fix it during your 1953 ticket, this is not my jurisdiction
-//    @Test
-//    void whenGetAllPetTypes_withServiceFail_thenReturn500() {
-//        mockServerConfigCustomersService.registerGetPetTypesEndpoint_500();
-//
-//        webTestClient.get()
-//                .uri(PET_TYPE_PATH)
-//                .cookie("Bearer", jwtTokenForValidAdmin)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .exchange()
-//                .expectStatus().is5xxServerError();
-//    }
+    @Test
+    void whenGetAllPetTypes_withServiceFail_thenReturn500() {
+        mockServerConfigCustomersService.registerGetPetTypesEndpoint_500();
+
+        webTestClient.get()
+                .uri(PET_TYPE_PATH)
+                .cookie("Bearer", jwtTokenForValidAdmin)
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .exchange()
+                .expectStatus().is5xxServerError();
+    }
 
     @Test
     void whenGetTotalNumberOfPetTypes_withServiceFail_thenReturn500Error() {

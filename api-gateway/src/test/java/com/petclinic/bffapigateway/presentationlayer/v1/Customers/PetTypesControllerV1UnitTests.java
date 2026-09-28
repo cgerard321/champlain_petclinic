@@ -58,7 +58,7 @@ public class PetTypesControllerV1UnitTests {
         when(customersServiceClient.getAllPetTypes()).thenReturn(Flux.just(petType));
 
         client.get()
-                .uri("/api/gateway/owners/petTypes")
+                .uri("/api/gateway/customers/petTypes")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(PetTypeResponseDTO.class)
@@ -76,7 +76,7 @@ public class PetTypesControllerV1UnitTests {
                 .thenReturn(Flux.empty());
 
         client.get()
-                .uri("/api/gateway/owners/petTypes")
+                .uri("/api/gateway/customers/petTypes")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(PetTypeResponseDTO.class)
@@ -97,7 +97,7 @@ public class PetTypesControllerV1UnitTests {
                 .thenReturn(Mono.just(petType));
 
         client.get()
-                .uri("/api/gateway/owners/petTypes/{petTypeId}", petTypeId)
+                .uri("/api/gateway/customers/petTypes/{petTypeId}", petTypeId)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(PetTypeResponseDTO.class)
@@ -117,7 +117,7 @@ public class PetTypesControllerV1UnitTests {
                 .thenReturn(Mono.empty());
 
         client.get()
-                .uri("/api/gateway/owners/petTypes/{petTypeId}", petTypeId)
+                .uri("/api/gateway/customers/petTypes/{petTypeId}", petTypeId)
                 .exchange()
                 .expectStatus().isNotFound();
 
@@ -139,7 +139,7 @@ public class PetTypesControllerV1UnitTests {
                 .thenReturn(Mono.just(responseDTO));
 
         client.post()
-                .uri("/api/gateway/owners/petTypes")
+                .uri("/api/gateway/customers/petTypes")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(requestDTO))
                 .exchange()
@@ -163,7 +163,7 @@ public class PetTypesControllerV1UnitTests {
                 .thenReturn(Mono.empty());
 
         client.post()
-                .uri("/api/gateway/owners/petTypes")
+                .uri("/api/gateway/customers/petTypes")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(requestDTO))
                 .exchange()
@@ -188,7 +188,7 @@ public class PetTypesControllerV1UnitTests {
                 .thenReturn(Mono.just(responseDTO));
 
         client.put()
-                .uri("/api/gateway/owners/petTypes/{petTypeId}", petTypeId)
+                .uri("/api/gateway/customers/petTypes/{petTypeId}", petTypeId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(requestDTO))
                 .exchange()
@@ -213,7 +213,7 @@ public class PetTypesControllerV1UnitTests {
                 .thenReturn(Mono.empty());
 
         client.put()
-                .uri("/api/gateway/owners/petTypes/{petTypeId}", petTypeId)
+                .uri("/api/gateway/customers/petTypes/{petTypeId}", petTypeId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(requestDTO))
                 .exchange()
@@ -230,7 +230,7 @@ public class PetTypesControllerV1UnitTests {
                 .thenReturn(Mono.empty());
 
         client.delete()
-                .uri("/api/gateway/owners/petTypes/{petTypeId}", petTypeId)
+                .uri("/api/gateway/customers/petTypes/{petTypeId}", petTypeId)
                 .exchange()
                 .expectStatus().isOk();
 
@@ -245,7 +245,7 @@ public class PetTypesControllerV1UnitTests {
                 .thenReturn(Mono.empty());
 
         client.delete()
-                .uri("/api/gateway/owners/petTypes/{petTypeId}", petTypeId)
+                .uri("/api/gateway/customers/petTypes/{petTypeId}", petTypeId)
                 .exchange()
                 .expectStatus().isOk();
 
@@ -264,7 +264,7 @@ public class PetTypesControllerV1UnitTests {
                 .thenReturn(Flux.just(petType));
 
         client.get()
-                .uri("/api/gateway/owners/petTypes/pet-types-pagination?page=0&size=5")
+                .uri("/api/gateway/customers/petTypes/pet-types-pagination?page=0&size=5")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(PetTypeResponseDTO.class)
@@ -295,7 +295,7 @@ public class PetTypesControllerV1UnitTests {
                 .thenReturn(Flux.just(petType));
 
         client.get()
-                .uri(uriBuilder -> uriBuilder.path("/api/gateway/owners/petTypes/pet-types-pagination")
+                .uri(uriBuilder -> uriBuilder.path("/api/gateway/customers/petTypes/pet-types-pagination")
                         .queryParam("page", page)
                         .queryParam("size", size)
                         .queryParam("petTypeId", petTypeIdParam)
@@ -320,7 +320,7 @@ public class PetTypesControllerV1UnitTests {
                 .thenReturn(Flux.empty());
 
         client.get()
-                .uri(uriBuilder -> uriBuilder.path("/api/gateway/owners/petTypes/pet-types-pagination")
+                .uri(uriBuilder -> uriBuilder.path("/api/gateway/customers/petTypes/pet-types-pagination")
                         .queryParam("name", nameParam)
                         .build())
                 .exchange()
@@ -339,7 +339,7 @@ public class PetTypesControllerV1UnitTests {
                 .thenReturn(Mono.just(expectedCount));
 
         client.get()
-                .uri("/api/gateway/owners/petTypes/pet-types-count")
+                .uri("/api/gateway/customers/petTypes/pet-types-count")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(Long.class)
@@ -355,7 +355,7 @@ public class PetTypesControllerV1UnitTests {
                 .thenReturn(Mono.just(expectedCount));
 
         client.get()
-                .uri("/api/gateway/owners/petTypes/pet-types-filtered-count?name=Dog")
+                .uri("/api/gateway/customers/petTypes/pet-types-filtered-count?name=Dog")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(Long.class)
@@ -373,7 +373,7 @@ public class PetTypesControllerV1UnitTests {
                 .thenReturn(Mono.just(expectedCount));
 
         client.get()
-                .uri("/api/gateway/owners/petTypes/pet-types-filtered-count")
+                .uri("/api/gateway/customers/petTypes/pet-types-filtered-count")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(Long.class)

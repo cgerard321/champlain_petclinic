@@ -36,9 +36,9 @@ class PetsControllerV1IntegrationTests {
     private MockServerConfigAuthService mockServerConfigAuthService;
 
     private final String PET_PATH = "/api/gateway/pets";
-    private final String OWNER_PET_PATH = "/api/gateway/pets/owners/{ownerId}/pets/{petId}";
+    private final String CUSTOMER_PET_PATH = "/api/gateway/pets/customers/{customerId}/pets/{petId}";
     private final String PET_ID = "petId-400";
-    private final String OWNER_ID = "ownerId-100";
+    private final String CUSTOMER_ID = "customerId-100";
     private final Date BIRTH_DATE = new Date(2023, 1, 1);
 
     private static String CSRF_TOKEN = UUID.randomUUID().toString();
@@ -79,13 +79,13 @@ class PetsControllerV1IntegrationTests {
 
     @Test
     void whenGetPetByPetId_WithValidClient_thenReturnPet() {
-        final String OWNER_ID = "test-owner-id";
+        final String CUSTOMER_ID = "test-customer-id";
         PetResponseDTO expectedPet = buildPetResponseDTO();
 
         mockServerConfigCustomersService.registerGetPetByIdEndpoint(PET_ID, expectedPet);
 
         Mono<PetResponseDTO> result = webTestClient.get()
-                .uri(PET_PATH + "/owners/{ownerId}/pets/{petId}", OWNER_ID, PET_ID)
+                .uri(PET_PATH + "/customers/{customerId}/pets/{petId}", CUSTOMER_ID, PET_ID)
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -107,14 +107,14 @@ class PetsControllerV1IntegrationTests {
     }
 
     @Test
-    void whenGetPetForOwner_WithValidClient_thenReturnPet() {
+    void whenGetPetForCustomer_WithValidClient_thenReturnPet() {
         PetResponseDTO expectedPet = buildPetResponseDTO();
 
         mockServerConfigCustomersService.registerGetPetByIdEndpoint(PET_ID, expectedPet);
 
 
         Mono<PetResponseDTO> result = webTestClient.get()
-                .uri(OWNER_PET_PATH, OWNER_ID, PET_ID)
+                .uri(CUSTOMER_PET_PATH, CUSTOMER_ID, PET_ID)
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()

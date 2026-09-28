@@ -1,6 +1,6 @@
 import { FormEvent, useState, useEffect, ChangeEvent } from 'react';
 import * as PropTypes from 'prop-types';
-import { addPetForOwner } from '../api/addPetForOwner';
+import { addPetForCustomer } from '../api/addPetForCustomer.ts';
 import { addPetPhoto } from '../api/addPetPhoto';
 import { getPetTypes } from '../api/getPetTypes';
 import { PetRequestModel } from '../models/PetRequestModel';
@@ -23,7 +23,7 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
   onPetAdded,
 }): JSX.Element | null => {
   const [pet, setPet] = useState<PetRequestModel>({
-    ownerId: customerId,
+    customerId,
     name: '',
     birthDate: new Date(),
     petTypeId: '',
@@ -110,7 +110,7 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
     if (!validate()) return;
     setIsSubmitting(true);
     try {
-      const response = await addPetForOwner(customerId, pet);
+      const response = await addPetForCustomer(customerId, pet);
       if (response.status === 201) {
         const newPet = response.data;
 
@@ -136,7 +136,7 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
 
   const handleClose = (): void => {
     setPet({
-      ownerId: customerId,
+      customerId,
       name: '',
       birthDate: new Date(),
       petTypeId: '',

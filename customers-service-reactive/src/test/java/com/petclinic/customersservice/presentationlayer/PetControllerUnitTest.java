@@ -33,15 +33,15 @@ public class PetControllerUnitTest {
 
 
     @Test
-    void whenCreatePetForOwner_withValidRequest_thenReturnCreatedPet() {
-        String ownerId = "valid-owner-id";
+    void whenCreatePetForCustomer_withValidRequest_thenReturnCreatedPet() {
+        String customerId = "valid-customer-id";
         PetRequestDTO petRequest = buildPetRequestDTO();
         PetResponseDTO expectedResponse = buildPetResponseDTO();
 
-        when(petService.createPetForOwner(anyString(), any(Mono.class))).thenReturn(Mono.just(expectedResponse));
+        when(petService.createPetForCustomer(anyString(), any(Mono.class))).thenReturn(Mono.just(expectedResponse));
 
         webTestClient.post()
-                .uri("/pets/owners/{ownerId}/pets", ownerId)
+                .uri("/pets/customers/{customerId}/pets", customerId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(petRequest)
                 .exchange()
@@ -49,25 +49,25 @@ public class PetControllerUnitTest {
                 .expectBody(PetResponseDTO.class)
                 .isEqualTo(expectedResponse);
 
-        verify(petService).createPetForOwner(anyString(), any(Mono.class));
+        verify(petService).createPetForCustomer(anyString(), any(Mono.class));
     }
 
     @Test
-    void whenCreatePetForOwner_withInvalidOwner_thenReturnBadRequest() {
-        String invalidOwnerId = "invalid-owner-id";
+    void whenCreatePetForCustomer_withInvalidCustomer_thenReturnBadRequest() {
+        String invalidCustomerId = "invalid-customer-id";
         PetRequestDTO petRequest = buildPetRequestDTO();
 
-        when(petService.createPetForOwner(anyString(), any(Mono.class)))
-                .thenReturn(Mono.error(new NotFoundException("Customer not found with id: " + invalidOwnerId)));
+        when(petService.createPetForCustomer(anyString(), any(Mono.class)))
+                .thenReturn(Mono.error(new NotFoundException("Customer not found with id: " + invalidCustomerId)));
 
         webTestClient.post()
-                .uri("/pets/owners/{ownerId}/pets", invalidOwnerId)
+                .uri("/pets/customers/{customerId}/pets", invalidCustomerId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(petRequest)
                 .exchange()
                 .expectStatus().isNotFound();
 
-        verify(petService).createPetForOwner(anyString(), any(Mono.class));
+        verify(petService).createPetForCustomer(anyString(), any(Mono.class));
     }
 
     @Test
@@ -105,7 +105,7 @@ public class PetControllerUnitTest {
         return Pet.builder()
                 .petId("c947af59-c389-416e-86d8-7f6132476590")
                 .name("Cookie")
-                .ownerId("a0ebbe09-e555-4256-aa1a-525b32c37a31")
+                .customerId("a0ebbe09-e555-4256-aa1a-525b32c37a31")
                 .petTypeId("1")
                 .birthDate(new Date())
                 .isActive("true")
@@ -126,7 +126,7 @@ public class PetControllerUnitTest {
         return PetResponseDTO.builder()
                 .petId("generated-pet-id")
                 .name("Buddy")
-                .ownerId("valid-owner-id")
+                .customerId("valid-customer-id")
                 .petTypeId("2")
                 .birthDate(new Date())
                 .weight("15.5")
