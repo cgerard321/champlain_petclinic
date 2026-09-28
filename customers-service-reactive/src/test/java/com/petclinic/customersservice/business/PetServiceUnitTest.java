@@ -5,7 +5,7 @@ import com.petclinic.customersservice.data.Pet;
 import com.petclinic.customersservice.data.PetRepo;
 import com.petclinic.customersservice.presentationlayer.PetRequestDTO;
 import com.petclinic.customersservice.presentationlayer.PetResponseDTO;
-import com.petclinic.customersservice.presentationlayer.OwnerResponseDTO;
+import com.petclinic.customersservice.presentationlayer.CustomerResponseDTO;
 import com.petclinic.customersservice.domainclientlayer.FilesServiceClient;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -28,7 +28,7 @@ public class PetServiceUnitTest {
     private PetRepo repo;
 
     @Mock
-    private OwnerService ownerService;
+    private CustomerService customerService;
 
     @Mock
     private FilesServiceClient filesServiceClient;
@@ -42,9 +42,9 @@ public class PetServiceUnitTest {
         String customerId = "valid-customer-id";
         PetRequestDTO petRequest = buildPetRequestDTO();
         Pet savedPet = buildPetFromRequest(petRequest, customerId);
-        OwnerResponseDTO customerResponse = buildCustomerResponseDTO();
+        CustomerResponseDTO customerResponse = buildCustomerResponseDTO();
 
-        when(ownerService.getOwnerByOwnerId(customerId, false)).thenReturn(Mono.just(customerResponse));
+        when(customerService.getCustomerByCustomerId(customerId, false)).thenReturn(Mono.just(customerResponse));
         when(repo.save(any(Pet.class))).thenReturn(Mono.just(savedPet));
 
         Mono<PetResponseDTO> result = petService.createPetForCustomer(customerId, Mono.just(petRequest));
@@ -66,7 +66,7 @@ public class PetServiceUnitTest {
         String nonExistingCustomerId = "non-existent-customer-id";
         PetRequestDTO petRequest = buildPetRequestDTO();
 
-        when(ownerService.getOwnerByOwnerId(nonExistingCustomerId,false)).thenReturn(Mono.empty());
+        when(petService.getPetById(nonExistingCustomerId,false)).thenReturn(Mono.empty());
 
         Mono<PetResponseDTO> result = petService.createPetForCustomer(nonExistingCustomerId, Mono.just(petRequest));
 
@@ -110,9 +110,9 @@ public class PetServiceUnitTest {
                 .build();
     }
 
-    private OwnerResponseDTO buildCustomerResponseDTO() {
-        return OwnerResponseDTO.builder()
-                .ownerId("valid-customer-id")
+    private CustomerResponseDTO buildCustomerResponseDTO() {
+        return CustomerResponseDTO.builder()
+                .customerId("valid-customer-id")
                 .firstName("John")
                 .lastName("Doe")
                 .address("123 Main St")

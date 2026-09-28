@@ -1,15 +1,15 @@
 import { useRef, useState } from 'react';
 import * as PropTypes from 'prop-types';
-import { uploadOwnerPhoto } from '../api/uploadOwnerPhoto';
+import { uploadCustomerPhoto } from '../api/uploadCustomerPhoto.ts';
 
 interface UploadProfilePhotoProps {
-  ownerId: string;
+  customerId: string;
   onPhotoUploaded: () => void;
   disabled?: boolean;
 }
 
 const UploadProfilePhoto: React.FC<UploadProfilePhotoProps> = ({
-  ownerId,
+  customerId,
   onPhotoUploaded,
   disabled = false,
 }) => {
@@ -34,7 +34,7 @@ const UploadProfilePhoto: React.FC<UploadProfilePhotoProps> = ({
 
     setIsUploading(true);
     try {
-      await uploadOwnerPhoto(ownerId, file);
+      await uploadCustomerPhoto(customerId, file);
       onPhotoUploaded();
     } catch (error) {
       console.error('Error uploading photo:', error);
@@ -83,7 +83,7 @@ const UploadProfilePhoto: React.FC<UploadProfilePhotoProps> = ({
 };
 
 UploadProfilePhoto.propTypes = {
-  ownerId: PropTypes.string.isRequired,
+  customerId: PropTypes.string.isRequired,
   onPhotoUploaded: PropTypes.func.isRequired,
   disabled: PropTypes.bool,
 };

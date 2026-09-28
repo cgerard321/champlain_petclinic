@@ -24,7 +24,7 @@ public class PetServiceImpl implements PetService {
     PetRepo petRepo;
 
     @Autowired
-    OwnerService ownerService;
+    CustomerService customerService;
 
     @Autowired
     FilesServiceClient filesServiceClient;
@@ -110,10 +110,10 @@ public class PetServiceImpl implements PetService {
 
 
     @Override
-    public Mono<PetResponseDTO> createPetForCustomer(String customerId, Mono<PetRequestDTO> petRequestDTO) {
+    public Mono<PetResponseDTO> createPetForOwner(String ownerId, Mono<PetRequestDTO> petRequestDTO) {
         return petRequestDTO
                 .flatMap(requestDTO -> {
-                    return ownerService.getOwnerByOwnerId(customerId, false)
+                    return customerService.getCustomerByCustomerId(customerId, false)
                             .switchIfEmpty(Mono.error(new NotFoundException("Customer not found with id: " + customerId)))
                             .then(Mono.just(requestDTO));
                 })

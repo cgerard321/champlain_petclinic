@@ -9,7 +9,7 @@ import { addPetPhoto } from '../api/addPetPhoto';
 import { PetResponseModel } from '../models/PetResponseModel';
 import { PetRequestModel } from '../models/PetRequestModel';
 import { PetTypeModel } from '../models/PetTypeModel';
-import defaultProfile from '@/assets/Owners/defaultProfilePicture.png';
+import defaultProfile from '@/assets/Customers/defaultProfilePicture.png';
 import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
 import axiosInstance from '@/shared/api/axiosInstance';
 import './customers.css';

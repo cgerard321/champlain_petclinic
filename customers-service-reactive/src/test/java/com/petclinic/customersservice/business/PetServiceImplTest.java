@@ -69,6 +69,8 @@ class PetServiceImplTest {
                 .verifyComplete();
     }
 
+//TODO Check if these tests can be deleted
+
     @Test
     void findPetByPetId() {
 
@@ -255,10 +257,10 @@ class PetServiceImplTest {
                 .build();
     }
 
-    private Owner buildOwner() {
-        return Owner.builder()
+    private Customer buildCustomer() {
+        return Customer.builder()
                 .id("44")
-                .ownerId("ownerId-123")
+                .customerId("customerId-123")
                 .firstName("FirstName")
                 .lastName("LastName")
                 .address("Test address")

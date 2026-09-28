@@ -6,7 +6,7 @@ import { getPetTypes } from '../api/getPetTypes';
 import { PetRequestModel } from '../models/PetRequestModel';
 import { PetResponseModel } from '../models/PetResponseModel';
 import { PetTypeModel } from '../models/PetTypeModel';
-import defaultProfile from '@/assets/Owners/defaultProfilePicture.png';
+import defaultProfile from '@/assets/Customers/defaultProfilePicture.png';
 import './customers.css';
 
 interface AddPetModalProps {

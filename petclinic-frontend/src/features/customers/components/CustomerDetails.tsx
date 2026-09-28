@@ -1,28 +1,28 @@
 import { FC, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axiosInstance from '@/shared/api/axiosInstance';
-import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseModel';
+import { CustomerResponseModel } from '@/features/customers/models/CustomerResponseModel.ts';
 import { PetResponseModel } from '@/features/customers/models/PetResponseModel';
 import { PetTypeModel } from '@/features/customers/models/PetTypeModel';
 import { UserDetailsModel } from '@/features/customers/models/UserDetailsModel';
 import { Bill } from '@/features/bills/models/Bill';
-import { getOwner } from '../api/getOwner';
+import { getCustomer } from '../api/getCustomer.ts';
 import { getPetTypes } from '../api/getPetTypes';
 import { getPetTypeName } from '../utils/petTypeMapping';
 import './CustomerDetails.css';
-import { deleteOwner } from '../api/deleteOwner';
+import { deleteCustomer } from '../api/deleteCustomer.ts';
 import { IsVet } from '@/context/UserContext';
 import EditPetModal from './EditPetModal';
 import AddPetModal from './AddPetModal';
-import defaultProfile from '@/assets/Owners/defaultProfilePicture.png';
+import defaultProfile from '@/assets/Customers/defaultProfilePicture.png';
 
 const CustomerDetails: FC = () => {
-  const { ownerId } = useParams<{ ownerId: string }>();
+  const { customerId } = useParams<{ customerId: string }>();
   const navigate = useNavigate();
   const isVet = IsVet();
 
   const [isDisabled, setIsDisabled] = useState<boolean>(false);
-  const [owner, setOwner] = useState<OwnerResponseModel | null>(null);
+  const [customer, setCustomer] = useState<CustomerResponseModel | null>(null);
   const [userDetails, setUserDetails] = useState<UserDetailsModel | null>(null);
   const [pets, setPets] = useState<PetResponseModel[]>([]);
   const [petImageUrls, setPetImageUrls] = useState<Record<string, string>>({});
@@ -34,13 +34,13 @@ const CustomerDetails: FC = () => {
   const [selectedPetId, setSelectedPetId] = useState<string>('');
 
   useEffect(() => {
-    const fetchOwnerDetails = async (): Promise<void> => {
-      //ownerId can't be undefied here so it is ok to assert it.
-      const ownerResponse = await getOwner(ownerId!);
-      setOwner(ownerResponse.data);
+    const fetchCustomerDetails = async (): Promise<void> => {
+      //customerId can't be undefied here so it is ok to assert it.
+      const customerResponse = await getCustomer(customerId!);
+      setCustomer(customerResponse.data);
 
       try {
-        const userResponse = await axiosInstance.get(`/users/${ownerId}`, {
+        const userResponse = await axiosInstance.get(`/users/${customerId}`, {
           useV2: false,
         });
         setUserDetails(userResponse.data);
@@ -52,7 +52,7 @@ const CustomerDetails: FC = () => {
 
       // Fetch pets by customer ID
       const petsResponse = await axiosInstance.get(
-        `/pets/customers/${ownerId}/pets`,
+        `/pets/customers/${customerId}/pets`,
         {
           useV2: false,
         }
@@ -88,7 +88,7 @@ const CustomerDetails: FC = () => {
       setPets(petsData);
 
       const billsResponse = await axiosInstance.get(
-        `/bills/customer/${ownerId}`,
+        `/bills/customer/${customerId}`,
         { useV2: false }
       );
 
@@ -122,13 +122,13 @@ const CustomerDetails: FC = () => {
       setLoading(false);
     };
 
-    if (ownerId) {
-      fetchOwnerDetails();
+    if (customerId) {
+      fetchCustomerDetails();
     }
-  }, [ownerId]);
+  }, [customerId]);
 
   const handleEditClick = (): void => {
-    navigate(`/customers/${ownerId}/edit`);
+    navigate(`/customers/${customerId}/edit`);
   };
 
   const handleBackClick = (): void => {
@@ -176,17 +176,17 @@ const CustomerDetails: FC = () => {
     }
   };
 
-  const handleDelete = async (ownerId: string): Promise<void> => {
+  const handleDelete = async (customerId: string): Promise<void> => {
     const confirmDelete = window.confirm(
-      'Are you sure you want to delete this owner?'
+      'Are you sure you want to delete this customer?'
     );
 
     if (confirmDelete) {
-      await deleteOwner(ownerId);
-      alert('Owner deleted successfully.');
+      await deleteCustomer(customerId);
+      alert('Customer deleted successfully.');
       navigate('/customers');
     } else {
-      alert('Owner deletion canceled.');
+      alert('Customer deletion canceled.');
     }
   };
 
@@ -194,8 +194,8 @@ const CustomerDetails: FC = () => {
     return <p>Loading...</p>;
   }
 
-  if (!owner) {
-    return <p>No owner found.</p>;
+  if (!customer) {
+    return <p>No customer found.</p>;
   }
 
   const calculateAge = (birthDate: Date): number => {
@@ -212,12 +212,12 @@ const CustomerDetails: FC = () => {
 
     if (confirmAction) {
       if (isDisabled) {
-        await axiosInstance.patch(`/users/${ownerId}/enable`, {
+        await axiosInstance.patch(`/users/${customerId}/enable`, {
           useV2: true,
         });
         alert('User account enabled successfully.');
       } else {
-        await axiosInstance.patch(`/users/${ownerId}/disable`, {
+        await axiosInstance.patch(`/users/${customerId}/disable`, {
           useV2: true,
         });
         alert('User account disabled successfully.');
@@ -237,15 +237,15 @@ const CustomerDetails: FC = () => {
   };
 
   //eliminated code duplication
-  const fetchOwnerDetails = async (): Promise<void> => {
-    if (!ownerId) return;
+  const fetchCustomerDetail = async (): Promise<void> => {
+    if (!customerId) return;
 
     try {
-      const ownerResponse = await getOwner(ownerId);
-      setOwner(ownerResponse.data);
+      const customerResponse = await getCustomer(customerId);
+      setCustomer(customerResponse.data);
 
       try {
-        const userResponse = await axiosInstance.get(`/users/${ownerId}`, {
+        const userResponse = await axiosInstance.get(`/users/${customerId}`, {
           useV2: false,
         });
         setIsDisabled(userResponse.data.disabled);
@@ -254,7 +254,7 @@ const CustomerDetails: FC = () => {
       }
 
       const petsResponse = await axiosInstance.get(
-        `/pets/customers/${ownerId}/pets`,
+        `/pets/customers/${customerId}/pets`,
         {
           useV2: false,
         }
@@ -290,7 +290,7 @@ const CustomerDetails: FC = () => {
       setPets(petsData);
 
       const billsResponse = await axiosInstance.get(
-        `/bills/customer/${ownerId}`,
+        `/bills/customer/${customerId}`,
         { useV2: false }
       );
 
@@ -319,7 +319,7 @@ const CustomerDetails: FC = () => {
       setBills(billsData);
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching owner details:', error);
+      console.error('Error fetching customer details:', error);
       setLoading(false);
     }
   };
@@ -337,56 +337,56 @@ const CustomerDetails: FC = () => {
   };
 
   const handlePetUpdated = (): void => {
-    fetchOwnerDetails();
+    fetchCustomerDetail();
   };
 
   const handlePetDeleted = (): void => {
-    fetchOwnerDetails();
+    fetchCustomerDetail();
   };
 
   return (
     <div className="customer-details-card">
       <h2>
         {' '}
-        Customer Details for {owner.firstName} {owner.lastName}{' '}
+        Customer Details for {customer.firstName} {customer.lastName}{' '}
       </h2>
 
       <div className="customer-details-container">
-        {/* Owner Info */}
-        <div className="section owner-info">
-          <h3>Owner Info</h3>
+        {/* Customer Info */}
+        <div className="section customer-info">
+          <h3>Customer Info</h3>
           <p>
             <strong>Username: </strong>
             {userDetails?.username || 'Loading...'}
           </p>
           <p>
             <strong>First Name: </strong>
-            {owner.firstName}
+            {customer.firstName}
           </p>
           <p>
             <strong>Last Name: </strong>
-            {owner.lastName}
+            {customer.lastName}
           </p>
           <p>
             <strong>Address: </strong>
-            {owner.address}
+            {customer.address}
           </p>
           <p>
             <strong>City: </strong>
-            {owner.city}
+            {customer.city}
           </p>
           <p>
             <strong>Province: </strong>
-            {owner.province}
+            {customer.province}
           </p>
           <p>
             <strong>Telephone: </strong>
-            {owner.telephone}
+            {customer.telephone}
           </p>
         </div>
 
         {/* Customer Pets */}
-        <div className="section owner-pets">
+        <div className="section customer-pets">
           <h3>Customer Pets</h3>
           {pets && pets.length > 0 ? (
             <ul>
@@ -434,9 +434,9 @@ const CustomerDetails: FC = () => {
           )}
         </div>
 
-        {/* Owner Bills */}
-        <div className="section owner-bills">
-          <h3>Owner Bills</h3>
+        {/* Customer Bills */}
+        <div className="section customer-bills">
+          <h3>Customer Bills</h3>
           {Array.isArray(bills) && bills.length > 0 ? (
             <ul>
               {bills.map(bill => (
@@ -459,7 +459,7 @@ const CustomerDetails: FC = () => {
           Edit Customer
         </button>
         <button className="customer-details-button" onClick={handleBackClick}>
-          Back to All Owners
+          Back to All Customers
         </button>
         <button className="add-pet-button" onClick={handleAddPet}>
           Add New Pet
@@ -467,11 +467,11 @@ const CustomerDetails: FC = () => {
         {!isVet && (
           <button
             className="btn btn-danger"
-            onClick={() => handleDelete(owner.ownerId)}
+            onClick={() => handleDelete(customer.customerId)}
             title="Delete"
             style={{ backgroundColor: 'red', color: 'white' }}
           >
-            Delete Owner
+            Delete Customer
           </button>
         )}
         {userDetails && (
@@ -485,7 +485,7 @@ const CustomerDetails: FC = () => {
       </div>
 
       <AddPetModal
-        customerId={ownerId || ''}
+        customerId={customerId || ''}
         isOpen={isAddPetModalOpen}
         onClose={handleCloseAddPetModal}
         onPetAdded={handlePetAdded}
@@ -495,7 +495,7 @@ const CustomerDetails: FC = () => {
         isOpen={isEditPetModalOpen}
         onClose={handleCloseEditPetModal}
         petId={selectedPetId}
-        customerId={ownerId || ''}
+        customerId={customerId || ''}
         onPetUpdated={handlePetUpdated}
         onPetDeleted={handlePetDeleted}
       />

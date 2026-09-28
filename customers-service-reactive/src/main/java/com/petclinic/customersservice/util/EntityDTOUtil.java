@@ -1,12 +1,8 @@
 package com.petclinic.customersservice.util;
 
-import com.petclinic.customersservice.data.PetRepo;
-import com.petclinic.customersservice.data.PetType;
+import com.petclinic.customersservice.data.*;
 import com.petclinic.customersservice.presentationlayer.*;
-import com.petclinic.customersservice.data.Owner;
-import com.petclinic.customersservice.data.Pet;
 import lombok.Generated;
-import org.springframework.beans.BeanUtils;
 
 import java.util.UUID;
 
@@ -15,28 +11,28 @@ public class EntityDTOUtil {
     @Generated
     public EntityDTOUtil(){}
 
-    public static OwnerResponseDTO toOwnerResponseDTO(Owner owner) {
-        OwnerResponseDTO dto = new OwnerResponseDTO();
-        dto.setOwnerId(owner.getOwnerId());
-        dto.setFirstName(owner.getFirstName());
-        dto.setLastName(owner.getLastName());
-        dto.setCity(owner.getCity());
-        dto.setAddress(owner.getAddress());
-        dto.setProvince(owner.getProvince());
-        dto.setTelephone(owner.getTelephone());
+    public static CustomerResponseDTO toCustomerReponseDTO(Customer customer) {
+        CustomerResponseDTO dto = new CustomerResponseDTO();
+        dto.setCustomerId(customer.getCustomerId());
+        dto.setFirstName(customer.getFirstName());
+        dto.setLastName(customer.getLastName());
+        dto.setCity(customer.getCity());
+        dto.setAddress(customer.getAddress());
+        dto.setProvince(customer.getProvince());
+        dto.setTelephone(customer.getTelephone());
         return dto;
     }
 
-    public static Owner toOwner(OwnerRequestDTO ownerRequestDTO) {
-        Owner owner = new Owner();
-        owner.setOwnerId(UUID.randomUUID().toString());
-        owner.setFirstName(ownerRequestDTO.getFirstName());
-        owner.setLastName(ownerRequestDTO.getLastName());
-        owner.setCity(ownerRequestDTO.getCity());
-        owner.setAddress(ownerRequestDTO.getAddress());
-        owner.setProvince(ownerRequestDTO.getProvince());
-        owner.setTelephone(ownerRequestDTO.getTelephone());
-        return owner;
+    public static Customer toCustomer(CustomerRequestDTO customerRequestDTO) {
+        Customer customer = new Customer();
+        customer.setCustomerId(UUID.randomUUID().toString());
+        customer.setFirstName(customerRequestDTO.getFirstName());
+        customer.setLastName(customerRequestDTO.getLastName());
+        customer.setCity(customerRequestDTO.getCity());
+        customer.setAddress(customerRequestDTO.getAddress());
+        customer.setProvince(customerRequestDTO.getProvince());
+        customer.setTelephone(customerRequestDTO.getTelephone());
+        return customer;
     }
 
     public static PetResponseDTO toPetResponseDTO(Pet pet) {

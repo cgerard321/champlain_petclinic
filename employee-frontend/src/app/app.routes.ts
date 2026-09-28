@@ -3,7 +3,6 @@ import { Routes } from '@angular/router';
 import { authGuard } from '@core/guards/auth/auth-guard';
 import { customerRedirectGuard } from '@core/guards/customers/customer-redirect';
 import { employeeGuard } from '@core/guards/employee/employee-guard';
-import { Roles } from '@shared/models/roles';
 
 export const routes: Routes = [
   {
@@ -17,11 +16,7 @@ export const routes: Routes = [
   {
     path: '',
     loadComponent: () => import('@layout/shell/shell').then((m) => m.Shell),
-    canActivate: [
-      authGuard([Roles.admin, Roles.receptionist]),
-      customerRedirectGuard,
-      employeeGuard,
-    ],
+    canActivate: [authGuard(), customerRedirectGuard, employeeGuard],
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'home' },
       {
