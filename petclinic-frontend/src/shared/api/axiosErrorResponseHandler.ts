@@ -37,12 +37,14 @@ export default function axiosErrorResponseHandler(
   const redirectPath = errorPageRedirects[statusCode];
 
   if (redirectPath) {
-    console.error(
-      `Redirecting to ${redirectPath} due to a server error:`,
-      error
-    );
-    // Use window.location for hard redirects on critical errors
-    if (typeof window !== 'undefined') {
+    if (
+      typeof window !== 'undefined' &&
+      window.location.pathname !== redirectPath
+    ) {
+      console.error(
+        `Redirecting to ${redirectPath} due to a server error:`,
+        error
+      );
       window.location.href = redirectPath;
     }
   } else {

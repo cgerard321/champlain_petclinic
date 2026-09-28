@@ -1,4 +1,4 @@
-import { OwnerRequestModel } from './OwnerRequestModel';
+import { CustomerRequestModel } from './CustomerRequestModel.ts';
 
 export interface Register {
   userId: string;
@@ -6,5 +6,5 @@ export interface Register {
   username: string;
   password: string;
   defaultRole?: string;
-  owner: OwnerRequestModel;
+  owner: CustomerRequestModel;
 }

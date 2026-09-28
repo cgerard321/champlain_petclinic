@@ -51,11 +51,32 @@ public class PetControllerV1 {
                 .map(e -> ResponseEntity.status(HttpStatus.CREATED).body(e))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+    @IsUserSpecific(idToMatch = {"customerId"}, bypassRoles = {Roles.ADMIN, Roles.VET, Roles.RECEPTIONIST})
+    @GetMapping(value = "/customers/{customerId}/pets", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<PetResponseDTO> getPetsByCustomerId(@PathVariable String customerId) {
+        return customersServiceClient.getPetsByCustomerId(customerId);
+    }
 
-    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN, Roles.VET})
-    @GetMapping("/owners/{ownerId}/pets/{petId}")
-    public Mono<ResponseEntity<PetResponseDTO>> getPetForOwner(
-            @PathVariable String ownerId,
+    @IsUserSpecific(idToMatch = {"customerId"}, bypassRoles = {Roles.ADMIN, Roles.VET, Roles.RECEPTIONIST})
+    @PostMapping(
+            value = "/customers/{customerId}/pets",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public Mono<ResponseEntity<PetResponseDTO>> createPetForCustomer(
+            @PathVariable String customerId,
+            @RequestBody PetRequestDTO petRequest) {
+
+        return customersServiceClient.createPetForCustomer(customerId, petRequest)
+                .map(pet -> ResponseEntity.status(HttpStatus.CREATED).body(pet))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+
+    @IsUserSpecific(idToMatch = {"customerId"}, bypassRoles = {Roles.ADMIN, Roles.VET})
+    @GetMapping("/customers/{customerId}/pets/{petId}")
+    public Mono<ResponseEntity<PetResponseDTO>> getPetForCustomer(
+            @PathVariable String customerId,
             @PathVariable String petId,
             @RequestParam(required = false, defaultValue = "false") boolean includePhoto) {
         return customersServiceClient.getPetByPetId(petId, includePhoto)
@@ -73,10 +94,10 @@ public class PetControllerV1 {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN, Roles.VET,Roles.RECEPTIONIST})
-    @PutMapping("/owners/{ownerId}/pets/{petId}")
-    public Mono<ResponseEntity<PetResponseDTO>> updatePetForOwner(
-            @PathVariable String ownerId,
+    @IsUserSpecific(idToMatch = {"customerId"}, bypassRoles = {Roles.ADMIN, Roles.VET,Roles.RECEPTIONIST})
+    @PutMapping("/customers/{customerId}/pets/{petId}")
+    public Mono<ResponseEntity<PetResponseDTO>> updatePetForCustomer(
+            @PathVariable String customerId,
             @PathVariable String petId,
             @RequestBody Mono<PetRequestDTO> petRequestDTO) {
         return customersServiceClient.updatePet(petRequestDTO, petId)
