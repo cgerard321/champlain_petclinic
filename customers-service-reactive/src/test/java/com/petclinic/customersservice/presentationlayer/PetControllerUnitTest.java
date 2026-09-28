@@ -58,7 +58,7 @@ public class PetControllerUnitTest {
         PetRequestDTO petRequest = buildPetRequestDTO();
 
         when(petService.createPetForOwner(anyString(), any(Mono.class)))
-                .thenReturn(Mono.error(new NotFoundException("Owner not found with id: " + invalidOwnerId)));
+                .thenReturn(Mono.error(new NotFoundException("Customer not found with id: " + invalidOwnerId)));
 
         webTestClient.post()
                 .uri("/pets/owners/{ownerId}/pets", invalidOwnerId)

@@ -1,11 +1,11 @@
 import { useEffect, useState, FC } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getOwner } from '../api/getOwner';
-import { updateOwner } from '../api/updateOwner';
+import { getCustomer } from '../api/getCustomer.ts';
+import { updateCustomer } from '../api/updateCustomer.ts';
 import { getUserDetails } from '../api/getUserDetails';
 import { updateUsername } from '../api/updateUsername';
-import { OwnerRequestModel } from '../models/OwnerRequestModel';
-import { OwnerResponseModel } from '../models/OwnerResponseModel';
+import { CustomerRequestModel } from '../models/CustomerRequestModel.ts';
+import { CustomerResponseModel } from '../models/CustomerResponseModel.ts';
 import { UserDetailsModel } from '../models/UserDetailsModel';
 import { useUsernameValidation } from '../hooks/useUsernameValidation';
 import './UpdateCustomerForm.css';
@@ -30,7 +30,7 @@ const AdminUpdateCustomerForm: FC = () => {
   const { ownerId } = useParams<{ ownerId: string }>();
   const navigate = useNavigate();
   const { validateUsernameField } = useUsernameValidation();
-  const [formData, setFormData] = useState<OwnerRequestModel>({
+  const [formData, setFormData] = useState<CustomerRequestModel>({
     firstName: '',
     lastName: '',
     address: '',
@@ -52,8 +52,8 @@ const AdminUpdateCustomerForm: FC = () => {
       }
 
       try {
-        const response = await getOwner(ownerId);
-        const ownerData: OwnerResponseModel = response.data;
+        const response = await getCustomer(ownerId);
+        const ownerData: CustomerResponseModel = response.data;
         setFormData(ownerData);
       } catch (error) {
         console.error('Error fetching owner data:', error);
@@ -151,7 +151,7 @@ const AdminUpdateCustomerForm: FC = () => {
         return;
       }
 
-      await updateOwner(ownerId, formData);
+      await updateCustomer(ownerId, formData);
 
       if (userDetails && username !== userDetails.username) {
         await updateUsername(ownerId, username);
