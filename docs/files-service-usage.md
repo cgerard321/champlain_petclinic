@@ -189,7 +189,7 @@ Do not map the file field automatically. The fileResponseDTO should be set manua
 
 Since files can be heavy and won't always be used, we add a request parameter to say if we want or not the file.
 
-We are not making a new endpoint in this case to get a file because the owner's photo will never be needed without the other details about him.
+We are not making a new endpoint in this case to get a file because the customer's photo will never be needed without the other details about him.
 This should be the general rule, do not make a new endpoint as you would simply make it so that you have to make 2 HTTP GET calls to get all the information you need instead of one.
 Using a request parameter with a default value to false makes it backwards compatible.
 
@@ -199,7 +199,7 @@ Good Example from Customer-Service's Controller:
     @GetMapping("/{ownerId}")
     public Mono<ResponseEntity<OwnerResponseDTO>> getOwnerByOwnerId(@PathVariable String ownerId, @RequestParam(required = false, defaultValue = "false") boolean includePhoto) {
         return ownerService.getOwnerByOwnerId(ownerId, includePhoto)
-                .map(ownerResponseDTO -> ResponseEntity.status(HttpStatus.OK).body(ownerResponseDTO))
+                .map(customerResponseDTO -> ResponseEntity.status(HttpStatus.OK).body(customerResponseDTO))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 ```
@@ -216,12 +216,12 @@ Good Example from Customer-Service's ServiceImplement:
     @Override
     public Mono<OwnerResponseDTO> getOwnerByOwnerId(String ownerId, boolean includePhoto) {
         return ownerRepo.findOwnerByOwnerId(ownerId)
-                .switchIfEmpty(Mono.error(new NotFoundException("Owner not found with id: " + ownerId)))
-                .flatMap(owner -> {
-                    OwnerResponseDTO dto = EntityDTOUtil.toOwnerResponseDTO(owner);
+                .switchIfEmpty(Mono.error(new NotFoundException("Customer not found with id: " + ownerId)))
+                .flatMap(customer -> {
+                    OwnerResponseDTO dto = EntityDTOUtil.toOwnerResponseDTO(customer);
     
-                    if (includePhoto && owner.getPhotoId() != null) {
-                        return filesServiceClient.getFileById(owner.getPhotoId())
+                    if (includePhoto && customer.getPhotoId() != null) {
+                        return filesServiceClient.getFileById(customer.getPhotoId())
                                 .map(fileDetails -> {
                                     dto.setPhoto(fileDetails);
                                     return dto;
@@ -273,7 +273,7 @@ Good Example from Customer Api-gateway Controller:
     @GetMapping(value = "/{ownerId}")
     public Mono<ResponseEntity<OwnerResponseDTO>> getOwnerDetails(final @PathVariable String ownerId, @RequestParam(required = false) boolean includeImage) {
         return customersServiceClient.getOwner(ownerId, includeImage)
-                .map(ownerResponseDTO -> ResponseEntity.status(HttpStatus.OK).body(ownerResponseDTO))
+                .map(customerResponseDTO -> ResponseEntity.status(HttpStatus.OK).body(customerResponseDTO))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 ```
@@ -290,11 +290,11 @@ This approach is the simplest and only requires to update the addEntity of your 
 Good Example from Customer Service Implement:
 ```java
     @Override
-    public Mono<OwnerResponseDTO> addOwner(Mono<OwnerRequestDTO> ownerRequestDTO) {
-        return ownerRequestDTO
+    public Mono<OwnerResponseDTO> addOwner(Mono<OwnerRequestDTO> customerRequestDTO) {
+        return customerRequestDTO
                 .flatMap(this::validateRequestDTO)
                 .flatMap(ownerRequest -> {
-                    Owner owner = EntityDTOUtil.toOwner(ownerRequest);
+                    Owner customer = EntityDTOUtil.toOwner(ownerRequest);
                     Mono<FileDetails> photoMono;
     
                     if (ownerRequest.getPhoto() != null) {
@@ -307,12 +307,12 @@ Good Example from Customer Service Implement:
                             .defaultIfEmpty(null)
                             .flatMap(photo -> {
                                 if (photo != null) {
-                                    owner.setPhotoId(photo.getFileId());
+                                    customer.setPhotoId(photo.getFileId());
                                 } else {
-                                    owner.setPhotoId(null);
+                                    customer.setPhotoId(null);
                                 }
     
-                                return ownerRepo.save(owner)
+                                return ownerRepo.save(customer)
                                         .map(savedOwner -> {
                                             OwnerResponseDTO dto = EntityDTOUtil.toOwnerResponseDTO(savedOwner);
                                             dto.setPhoto(photo);
@@ -338,15 +338,15 @@ Good Example from Customer Service Implement:
     @Override
     public Mono<OwnerResponseDTO> updateOwnerPhoto(String ownerId, FileRequestDTO photo) {
         return ownerRepo.findOwnerByOwnerId(ownerId)
-                .switchIfEmpty(Mono.error(new NotFoundException("Owner not found with id: " + ownerId)))
-                .flatMap(existingOwner -> {
+                .switchIfEmpty(Mono.error(new NotFoundException("Customer not found with id: " + ownerId)))
+                .flatMap(existingCustomer -> {
                     Mono<FileResponseDTO> fileOperation;
 
-                    if (existingOwner.getPhotoId() != null && !existingOwner.getPhotoId().isEmpty()) {
-                        fileOperation = filesServiceClient.updateFile(existingOwner.getPhotoId(), photo)
+                    if (existingCustomer.getPhotoId() != null && !existingCustomer.getPhotoId().isEmpty()) {
+                        fileOperation = filesServiceClient.updateFile(existingCustomer.getPhotoId(), photo)
                                 .onErrorResume(e -> {
                                     log.warn("Photo file {} not found or error updating, creating new file instead: {}", 
-                                            existingOwner.getPhotoId(), e.getMessage());
+                                            existingCustomer.getPhotoId(), e.getMessage());
                                     return filesServiceClient.addFile(photo);
                                 });
                     } else {
@@ -355,8 +355,8 @@ Good Example from Customer Service Implement:
 
                     return fileOperation
                             .flatMap(fileResp -> {
-                                existingOwner.setPhotoId(fileResp.getFileId());
-                                return ownerRepo.save(existingOwner)
+                                existingCustomer.setPhotoId(fileResp.getFileId());
+                                return ownerRepo.save(existingCustomer)
                                         .map(savedOwner -> {
                                             OwnerResponseDTO dto = EntityDTOUtil.toOwnerResponseDTO(savedOwner);
                                             dto.setPhoto(fileResp);
@@ -398,34 +398,34 @@ Good Example from Customer Service Implement:
 
 ```java
     @Override
-    public Mono<OwnerResponseDTO> updateOwner(Mono<OwnerRequestDTO> ownerRequestDTO, String ownerId) {
+    public Mono<OwnerResponseDTO> updateOwner(Mono<OwnerRequestDTO> customerRequestDTO, String ownerId) {
         return ownerRepo.findOwnerByOwnerId(ownerId)
-                .switchIfEmpty(Mono.error(new NotFoundException("Owner not found with id: " + ownerId)))
-                .flatMap(existingOwner ->
-                        ownerRequestDTO.flatMap(requestDTO -> {
+                .switchIfEmpty(Mono.error(new NotFoundException("Customer not found with id: " + ownerId)))
+                .flatMap(existingCustomer ->
+                        customerRequestDTO.flatMap(requestDTO -> {
                             Mono<String> fileIdMono;
     
-                            if (existingOwner.getPhotoId() != null && requestDTO.getPhoto() != null) {
-                                fileIdMono = filesServiceClient.updateFile(existingOwner.getPhotoId(), requestDTO.getPhoto()).thenReturn(existingOwner.getPhotoId());
+                            if (existingCustomer.getPhotoId() != null && requestDTO.getPhoto() != null) {
+                                fileIdMono = filesServiceClient.updateFile(existingCustomer.getPhotoId(), requestDTO.getPhoto()).thenReturn(existingCustomer.getPhotoId());
                             } else if (requestDTO.getPhoto() != null) {
                                 fileIdMono = filesServiceClient.addFile(requestDTO.getPhoto()).map(FileResponseDTO::getFileId);
-                            } else if (existingOwner.getPhotoId() != null) {
-                                fileIdMono = filesServiceClient.deleteFile(existingOwner.getPhotoId()).thenReturn(null);
+                            } else if (existingCustomer.getPhotoId() != null) {
+                                fileIdMono = filesServiceClient.deleteFile(existingCustomer.getPhotoId()).thenReturn(null);
                             } else {
-                                fileIdMono = Mono.justOrEmpty(existingOwner.getPhotoId());
+                                fileIdMono = Mono.justOrEmpty(existingCustomer.getPhotoId());
                             }
     
                             return fileIdMono
                                     .defaultIfEmpty(null)
                                     .map(fileId -> {
-                                        existingOwner.setFirstName(requestDTO.getFirstName());
-                                        existingOwner.setLastName(requestDTO.getLastName());
-                                        existingOwner.setAddress(requestDTO.getAddress());
-                                        existingOwner.setCity(requestDTO.getCity());
-                                        existingOwner.setProvince(requestDTO.getProvince());
-                                        existingOwner.setTelephone(requestDTO.getTelephone());
-                                        existingOwner.setPhotoId(fileId);
-                                        return existingOwner;
+                                        existingCustomer.setFirstName(requestDTO.getFirstName());
+                                        existingCustomer.setLastName(requestDTO.getLastName());
+                                        existingCustomer.setAddress(requestDTO.getAddress());
+                                        existingCustomer.setCity(requestDTO.getCity());
+                                        existingCustomer.setProvince(requestDTO.getProvince());
+                                        existingCustomer.setTelephone(requestDTO.getTelephone());
+                                        existingCustomer.setPhotoId(fileId);
+                                        return existingCustomer;
                                     });
                         })
                 )
@@ -471,7 +471,7 @@ Make sure that you are using the shared component, do not make a new one.
 ```ts
 import {FileDetails} from "@/shared/models/FileDetails.ts"
 
-export interface OwnerResponseModel {
+export interface CustomerResponseModel {
     ownerId: string;
     firstName: string;
     lastName: string;
