@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { SseClient } from 'ngx-sse-client';
 import { Observable, timer } from 'rxjs';
-import { filter, map, repeat, retry } from 'rxjs/operators';
+import { filter, map, retry } from 'rxjs/operators';
 
 import { Inventory } from '@features/inventories/models/inventory.model';
 
