@@ -1324,7 +1324,7 @@ const UserCart: React.FC = () => {
                 >
                   <div className="recent-purchase-image-container">
                     <div
-                        onClick={() =>
+                      onClick={() =>
                         redirectToProductPageOnClick(item.productId)
                       }
                       className="recent-purchase-image"
