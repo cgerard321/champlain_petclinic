@@ -260,9 +260,10 @@ public class VisitServiceImpl implements VisitService {
     @Override
     public Mono<Void> deleteAllCancelledVisits() {
         return repo.findAllByStatus("CANCELLED")
+                .switchIfEmpty(Flux.error(
+                        new NotFoundException("No cancelled visits were found")
+                ))
                 .collectList()
-                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("No cancelled visits were found")))
-                )
                 .flatMap(repo::deleteAll);
     }
 
