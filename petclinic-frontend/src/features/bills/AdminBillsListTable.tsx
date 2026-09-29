@@ -1131,7 +1131,8 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                 <p>
                   <strong>GST (5%):</strong>{' '}
                   {currency === 'CAD'
-                    ? `CAD $${detailBill.gstAmount.toFixed(2)}` : `USD $${convertCurrency(detailBill.gstAmount, 'CAD', 'USD').toFixed(2)}`}
+                    ? `CAD $${detailBill.gstAmount.toFixed(2)}`
+                    : `USD $${convertCurrency(detailBill.gstAmount, 'CAD', 'USD').toFixed(2)}`}
                 </p>
                 <p>
                   <strong>QST (9.975%):</strong>{' '}
