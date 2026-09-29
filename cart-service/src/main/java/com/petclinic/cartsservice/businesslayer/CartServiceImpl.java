@@ -256,7 +256,7 @@ public class CartServiceImpl implements CartService {
                     cart.setRecentPurchases(updatedRecentPurchases);
 
                     // --- Recommendation Purchases Logic ---
-                    return Flux.fromIterable(updatedRecentPurchases)
+                    return Flux.fromIterable(products)
                             .map(CartProduct::getProductId)
                             .flatMap(productClient::getProductByProductId)
                             .filter(product -> product.getProductType() != null)
