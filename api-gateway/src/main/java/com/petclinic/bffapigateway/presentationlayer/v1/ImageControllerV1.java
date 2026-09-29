@@ -21,7 +21,7 @@ public class ImageControllerV1 {
 
     private final ImageServiceClient imageServiceClient;
 
-    @SecuredEndpoint(allowedRoles = {Roles.ALL})
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping(value = "{imageId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ImageResponseDTO>> getImage(@PathVariable String imageId) {
         return Mono.just(imageId)

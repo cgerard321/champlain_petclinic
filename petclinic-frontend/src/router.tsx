@@ -213,11 +213,7 @@ const router = createBrowserRouter([
       },
       {
         path: AppRoutePaths.Products,
-        element: (
-          <ProtectedRoute>
-            <Products />
-          </ProtectedRoute>
-        ),
+        element: <Products />,
       },
       // {
       //   path: AppRoutePaths.EditProduct,
@@ -365,11 +361,7 @@ const router = createBrowserRouter([
       },
       {
         path: AppRoutePaths.ProductDetails,
-        element: (
-          <ProtectedRoute>
-            <ProductDetails />
-          </ProtectedRoute>
-        ),
+        element: <ProductDetails />,
       },
     ],
   },
