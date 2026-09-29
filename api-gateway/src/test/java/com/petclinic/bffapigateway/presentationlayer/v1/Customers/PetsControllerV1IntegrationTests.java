@@ -17,6 +17,8 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import java.util.Date;
+import java.util.UUID;
+
 import static com.petclinic.bffapigateway.presentationlayer.v1.mockservers.MockServerConfigAuthService.jwtTokenForValidAdmin;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -34,10 +36,12 @@ class PetsControllerV1IntegrationTests {
     private MockServerConfigAuthService mockServerConfigAuthService;
 
     private final String PET_PATH = "/api/gateway/pets";
-    private final String OWNER_PET_PATH = "/api/gateway/pets/owners/{ownerId}/pets/{petId}";
+    private final String CUSTOMER_PET_PATH = "/api/gateway/pets/customers/{customerId}/pets/{petId}";
     private final String PET_ID = "petId-400";
-    private final String OWNER_ID = "ownerId-100";
+    private final String CUSTOMER_ID = "customerId-100";
     private final Date BIRTH_DATE = new Date(2023, 1, 1);
+
+    private static String CSRF_TOKEN = UUID.randomUUID().toString();
 
     @BeforeEach
     public void startMockServer() {
@@ -75,13 +79,13 @@ class PetsControllerV1IntegrationTests {
 
     @Test
     void whenGetPetByPetId_WithValidClient_thenReturnPet() {
-        final String OWNER_ID = "test-owner-id";
+        final String CUSTOMER_ID = "test-customer-id";
         PetResponseDTO expectedPet = buildPetResponseDTO();
 
         mockServerConfigCustomersService.registerGetPetByIdEndpoint(PET_ID, expectedPet);
 
         Mono<PetResponseDTO> result = webTestClient.get()
-                .uri(PET_PATH + "/owners/{ownerId}/pets/{petId}", OWNER_ID, PET_ID)
+                .uri(PET_PATH + "/customers/{customerId}/pets/{petId}", CUSTOMER_ID, PET_ID)
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -103,14 +107,14 @@ class PetsControllerV1IntegrationTests {
     }
 
     @Test
-    void whenGetPetForOwner_WithValidClient_thenReturnPet() {
+    void whenGetPetForCustomer_WithValidClient_thenReturnPet() {
         PetResponseDTO expectedPet = buildPetResponseDTO();
 
         mockServerConfigCustomersService.registerGetPetByIdEndpoint(PET_ID, expectedPet);
 
 
         Mono<PetResponseDTO> result = webTestClient.get()
-                .uri(OWNER_PET_PATH, OWNER_ID, PET_ID)
+                .uri(CUSTOMER_PET_PATH, CUSTOMER_ID, PET_ID)
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -152,6 +156,8 @@ class PetsControllerV1IntegrationTests {
         webTestClient.put()
                 .uri(PET_PATH + "/{petId}", nonExistentId)
                 .cookie("Bearer", jwtTokenForValidAdmin)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(updateRequest), PetRequestDTO.class)
                 .exchange()

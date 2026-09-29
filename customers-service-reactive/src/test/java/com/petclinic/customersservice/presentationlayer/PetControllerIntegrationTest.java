@@ -122,7 +122,7 @@ class PetControllerIntegrationTest {
                 .jsonPath("$.petId").isEqualTo(petEntity.getPetId())
                 .jsonPath("$.name").isEqualTo(petEntity.getName())
                 .jsonPath("$.petTypeId").isEqualTo(petEntity.getPetTypeId())
-                .jsonPath("$.ownerId").isEqualTo(petEntity.getOwnerId())
+                .jsonPath("$.customerId").isEqualTo(petEntity.getCustomerId())
 //                .jsonPath("$.photoId").isEqualTo(petEntity.getPhotoId())
                 .jsonPath("$.isActive").isEqualTo(petEntity.getIsActive());
     }
@@ -139,7 +139,7 @@ class PetControllerIntegrationTest {
                 .expectBody()
                 .jsonPath("$.name").isEqualTo(petEntity.getName())
                 .jsonPath("$.petTypeId").isEqualTo(petEntity.getPetTypeId())
-                .jsonPath("$.ownerId").isEqualTo(petEntity.getOwnerId())
+                .jsonPath("$.customerId").isEqualTo(petEntity.getCustomerId())
                 .jsonPath("$.weight").isEqualTo(petEntity.getWeight())
 //                .jsonPath("$.photoId").isEqualTo(petEntity.getPhotoId())
                 .jsonPath("$.isActive").isEqualTo(petEntity.getIsActive());
@@ -208,7 +208,7 @@ class PetControllerIntegrationTest {
                 .petId("de92af81-0135-4cd8-8cda-343f681728a3")
                 .name("leonardo")
                 .birthDate(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()))
-                .ownerId("54c76b87-e598-4f26-ac63-dcb8a9571b08")
+                .customerId("54c76b87-e598-4f26-ac63-dcb8a9571b08")
                 .petTypeId("f24969bc-0009-4f02-99c9-9db426d872f3")
                 .photoId("dd10e169-5d5c-4610-9d6e-62825a594795")
                 .weight("5.0")
@@ -220,7 +220,7 @@ class PetControllerIntegrationTest {
         return PetRequestDTO.builder()
                 .name("leonardo")
                 .birthDate(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()))
-                .ownerId("54c76b87-e598-4f26-ac63-dcb8a9571b08")
+                .customerId("54c76b87-e598-4f26-ac63-dcb8a9571b08")
                 .petTypeId("f24969bc-0009-4f02-99c9-9db426d872f3")
                 .weight("5.0")
                 .isActive("true")

@@ -32,7 +32,7 @@ import UpdateCustomerPage from '@/pages/Customer/UpdateCustomerPage.tsx';
 import VisitDetails from './features/visits/components/VisitByVisitId';
 import CustomerVisits from '@/pages/Visit/CustomerVisits.tsx';
 import VisitsCalendar from '@/pages/Visit/VisitsCalendar.tsx';
-import UpdateOwnerPetPage from '@/pages/Customer/UpdateOwnerPetPage.tsx';
+import UpdateCustomerPetPage from '@/pages/Customer/UpdateCustomerPetPage.tsx';
 import AllUsers from '@/pages/Users/AllUsers.tsx';
 import ProductDetails from '@/features/products/components/ProductDetails';
 import AddPetPage from '@/pages/Customer/AddPetPage.tsx';
@@ -213,11 +213,7 @@ const router = createBrowserRouter([
       },
       {
         path: AppRoutePaths.Products,
-        element: (
-          <ProtectedRoute>
-            <Products />
-          </ProtectedRoute>
-        ),
+        element: <Products />,
       },
       // {
       //   path: AppRoutePaths.EditProduct,
@@ -343,7 +339,7 @@ const router = createBrowserRouter([
         path: AppRoutePaths.UpdatePet,
         element: (
           <ProtectedRoute roles={['ADMIN', 'VET', 'OWNER']}>
-            <UpdateOwnerPetPage />
+            <UpdateCustomerPetPage />
           </ProtectedRoute>
         ),
       },
@@ -365,11 +361,7 @@ const router = createBrowserRouter([
       },
       {
         path: AppRoutePaths.ProductDetails,
-        element: (
-          <ProtectedRoute>
-            <ProductDetails />
-          </ProtectedRoute>
-        ),
+        element: <ProductDetails />,
       },
     ],
   },
