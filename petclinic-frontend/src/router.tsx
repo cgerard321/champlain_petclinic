@@ -53,8 +53,13 @@ import FAQ from './pages/FAQ/FAQ';
 import ContactPage from './pages/Contact/Contact';
 import PrivacyPolicyPage from './pages/PrivacyPolicy/PrivacyPolicy';
 import CustomerVisitsCalendar from '@/pages/Visit/CustomerVisitsCalendar.tsx';
+import {I18nTestPage} from "@/features/customers/components/I18nTestPage.tsx";
 
 const router = createBrowserRouter([
+  {
+    path: '/i18n-test',
+    element: <I18nTestPage />,
+  },
   {
     children: [
       {

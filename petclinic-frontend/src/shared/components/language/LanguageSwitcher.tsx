@@ -11,27 +11,29 @@ export function LanguageSwitcher(): JSX.Element {
   const currentLang = i18n.language || 'en';
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="d-flex align-items-center gap-2">
       <button
+        type="button"
         onClick={() => changeLanguage('en')}
-        className={`px-2 py-1 rounded test-sm font-medium transition ${
+        className={`btn btn-sm ${
           currentLang.startsWith('en')
-            ? 'bg-blue-600 text-white'
-            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            ? 'btn-primary'
+            : 'btn-outline-secondary'
         }`}
       >
         EN
       </button>
 
       <button
+        type="button"
         onClick={() => changeLanguage('fr')}
-        className={`px-2 py-1 rounded test-sm font-medium transition ${
+        className={`btn btn-sm ${
           currentLang.startsWith('fr')
-            ? 'bg-blue-600 text-white'
-            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            ? 'btn-primary' 
+              : 'btn-outline-secondary'
         }`}
       >
-        Fr
+        FR
       </button>
     </div>
   );
