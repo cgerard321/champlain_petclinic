@@ -5,17 +5,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.relational.core.mapping.Table;
 
-@Document(collection = "product-types")
+@Table("product_types")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductTypeDb {
-
     @Id
-    private String id;
+    private long id;
     private String productTypeId;
     private String typeName;
 }

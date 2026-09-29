@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+
 import { App } from './app';
 
 describe('App', () => {
@@ -9,8 +10,11 @@ describe('App', () => {
   });
 
   it('should create the app', () => {
+    // Arrange
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance;
+
+    // Assert
     expect(app).toBeTruthy();
   });
 

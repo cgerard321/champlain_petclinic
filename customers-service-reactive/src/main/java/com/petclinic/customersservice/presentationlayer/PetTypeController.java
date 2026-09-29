@@ -20,7 +20,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/owners/petTypes")
+@RequestMapping("/customers/petTypes")
 public class PetTypeController {
 
     @Autowired

@@ -47,7 +47,7 @@ func TestMain(m *testing.M) {
 	ctx = context.Background()
 
 	var err error
-	minioContainer, err := container.Run(ctx, "quay.io/minio/minio:RELEASE.2024-01-16T16-07-38Z", container.WithUsername("user"), container.WithPassword("password"))
+	minioContainer, err := container.Run(ctx, "cgr.dev/chainguard/minio@sha256:bd014394a80898e68c149f2311fdf8d5a2c2f3bb2c33b9327ae6d02b4b065ae1", container.WithUsername("user"), container.WithPassword("password"))
 	if err != nil {
 		panic("failed to start MinIO container: " + err.Error())
 	}

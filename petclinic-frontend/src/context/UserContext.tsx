@@ -143,7 +143,7 @@ export const IsReceptionist = (): boolean => {
   return Array.from(roles).some(role => role === 'RECEPTIONIST');
 };
 
-export const IsOwner = (): boolean => {
+export const IsCustomer = (): boolean => {
   const { roles } = useUser();
   return Array.from(roles).some(role => role === 'OWNER');
 };

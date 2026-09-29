@@ -1,0 +1,81 @@
+<section class="product-page">
+  <div class="product-header">
+    <div>
+      <h1>Products</h1>
+      <p>Manage products available to the clinic.</p>
+    </div>
+    @if (canManageProducts()) {
+      <button mat-flat-button color="primary" type="button" (click)="openAddProduct()">
+        Add Product
+      </button>
+    }
+  </div>
+
+  @if (isLoading()) {
+    <div class="state-container" role="status">
+      <mat-progress-spinner mode="indeterminate" diameter="40" />
+      <span>Loading products...</span>
+    </div>
+  } @else if (errorMessage()) {
+    <div class="state-container error-message" role="alert">
+      <p>{{ errorMessage() }}</p>
+      <button mat-stroked-button type="button" (click)="loadProducts()">Try again</button>
+    </div>
+  } @else if (products().length === 0) {
+    <div class="state-container">
+      <p>No products found.</p>
+    </div>
+  } @else {
+    <div class="product-grid">
+      @for (product of products(); track product.productId) {
+        <mat-card class="product-card">
+          <app-product-thumbnail [imageId]="product.imageId" [alt]="product.productName" />
+          <mat-card-header>
+            <mat-card-title>{{ product.productName }}</mat-card-title>
+            <mat-card-subtitle>{{ product.productType }}</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <p>{{ product.productDescription }}</p>
+            <dl>
+              <div>
+                <dt>Price</dt>
+                <dd>{{ product.productSalePrice | currency }}</dd>
+              </div>
+              <div>
+                <dt>Quantity</dt>
+                <dd>{{ product.productQuantity }}</dd>
+              </div>
+              <div>
+                <dt>Status</dt>
+                <dd>{{ product.productStatus }}</dd>
+              </div>
+              <div>
+                <dt>Delivery</dt>
+                <dd>{{ product.deliveryType.replace('_', ' ') }}</dd>
+              </div>
+            </dl>
+          </mat-card-content>
+          <mat-card-actions align="end">
+            <button
+              mat-stroked-button
+              type="button"
+              (click)="openProductDetails(product.productId)"
+            >
+              Details
+            </button>
+            @if (canManageProducts()) {
+              <button
+                mat-flat-button
+                color="primary"
+                type="button"
+                (click)="openProductUpdate(product)"
+              >
+                Update
+              </button>
+            }
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
+  }
+</section>
