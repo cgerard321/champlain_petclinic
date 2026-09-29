@@ -86,7 +86,6 @@ public class BillServiceImplTest {
 
     @Test
     void getBillsByPage_ShouldSucceed() {
-
         Bill bill1 = Bill.builder()
                 .billId("billId-1")
                 .customerId("customerId-1")
@@ -99,6 +98,9 @@ public class BillServiceImplTest {
                 .date(LocalDate.of(2024, 10, 1))
                 .dueDate(LocalDate.of(2024, 10, 30))
                 .amount(new BigDecimal("100.00"))
+                .gstAmount(new BigDecimal("5.00"))
+                .qstAmount(new BigDecimal("9.98"))
+                .taxedAmount(new BigDecimal("114.98"))
                 .billStatus(BillStatus.UNPAID)
                 .build();
         Bill bill2 = Bill.builder()
@@ -113,6 +115,9 @@ public class BillServiceImplTest {
                 .date(LocalDate.of(2024, 10, 1))
                 .dueDate(LocalDate.of(2024, 10, 30))
                 .amount(new BigDecimal("150.00"))
+                .gstAmount(new BigDecimal("7.50"))
+                .qstAmount(new BigDecimal("14.96"))
+                .taxedAmount(new BigDecimal("172.46"))
                 .billStatus(BillStatus.PAID)
                 .build();
         Bill bill3 = Bill.builder()
@@ -127,6 +132,9 @@ public class BillServiceImplTest {
                 .date(LocalDate.of(2024, 10, 1))
                 .dueDate(LocalDate.of(2024, 10, 30))
                 .amount(new BigDecimal("200.00"))
+                .gstAmount(new BigDecimal("10.00"))
+                .qstAmount(new BigDecimal("19.95"))
+                .taxedAmount(new BigDecimal("229.95"))
                 .billStatus(BillStatus.OVERDUE)
                 .build();
 
@@ -754,6 +762,9 @@ public class BillServiceImplTest {
             .visitType("General")
             .vetId("vetId-1")
             .amount(new BigDecimal(100.0))
+            .gstAmount(new BigDecimal("5.00"))
+            .qstAmount(new BigDecimal("9.98"))
+            .taxedAmount(new BigDecimal("114.98"))
             .billStatus(BillStatus.PAID)
             .date(LocalDate.now())
             .dueDate(LocalDate.now().plusDays(15))
@@ -812,7 +823,21 @@ public void testGenerateBillPdf_BillNotFound() {
 
         LocalDate dueDate = LocalDate.of(2022, Month.OCTOBER, 15);
 
-        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).billStatus(BillStatus.PAID).dueDate(dueDate).build();
+        return Bill.builder()
+                .id("Id")
+                .billId("BillUUID")
+                .customerId("1")
+                .vetId("1")
+                .visitType("Test Type")
+                .date(date)
+                .amount(new BigDecimal("13.37"))
+                .gstAmount(new BigDecimal("0.67"))
+                .qstAmount(new BigDecimal("1.33"))
+                .taxedAmount(new BigDecimal("15.37"))
+                .totalAmount(new BigDecimal("28.74"))
+                .billStatus(BillStatus.PAID)
+                .dueDate(dueDate)
+                .build();
     }
 
     private Bill buildUnpaidBill() {
@@ -825,7 +850,20 @@ public void testGenerateBillPdf_BillNotFound() {
 
         LocalDate dueDate = LocalDate.of(2022, Month.OCTOBER, 5);
 
-        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).billStatus(BillStatus.UNPAID).dueDate(dueDate).build();
+        return Bill.builder()
+                .id("Id")
+                .billId("BillUUID")
+                .customerId("1")
+                .vetId("1")
+                .visitType("Test Type")
+                .date(date)
+                .amount(new BigDecimal("13.37"))
+                .gstAmount(new BigDecimal("0.67"))
+                .qstAmount(new BigDecimal("1.33"))
+                .taxedAmount(new BigDecimal("15.37"))
+                .totalAmount(new BigDecimal("28.74"))
+                .billStatus(BillStatus.UNPAID)
+                .dueDate(dueDate).build();
 
     }
 
@@ -839,7 +877,21 @@ public void testGenerateBillPdf_BillNotFound() {
 
         LocalDate dueDate = LocalDate.of(2022, Month.AUGUST, 15);
 
-        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).billStatus(BillStatus.OVERDUE).dueDate(dueDate).build();
+        return Bill.builder()
+                .id("Id")
+                .billId("BillUUID")
+                .customerId("1")
+                .vetId("1")
+                .visitType("Test Type")
+                .date(date)
+                .amount(new BigDecimal("13.37"))
+                .gstAmount(new BigDecimal("0.67"))
+                .qstAmount(new BigDecimal("1.33"))
+                .taxedAmount(new BigDecimal("15.37"))
+                .totalAmount(new BigDecimal("28.74"))
+                .billStatus(BillStatus.OVERDUE)
+                .dueDate(dueDate)
+                .build();
     }
 
 
@@ -1687,6 +1739,7 @@ public void testGenerateBillPdf_BillNotFound() {
     void test_EntityDtoUtil_ToBillResponseDto_WithOverdueBill_ShouldCalculateFreshInterest() {
         LocalDate dueDate = LocalDate.now().minusMonths(2);
         BigDecimal amount = new BigDecimal("100.00");
+        BigDecimal taxes = TaxCalculationUtil.calculateTotalTaxes(amount);
         
         Bill overdueBill = Bill.builder()
             .billId("overdue-test-id")
@@ -1699,6 +1752,7 @@ public void testGenerateBillPdf_BillNotFound() {
             .vetLastName("Smith")
             .date(LocalDate.now().minusDays(70))
             .amount(amount)
+            .taxedAmount(taxes)
             .billStatus(BillStatus.OVERDUE)
             .dueDate(dueDate)
             .interestExempt(false)
@@ -1717,20 +1771,21 @@ public void testGenerateBillPdf_BillNotFound() {
         assertEquals(overdueBill.getVetLastName(), dto.getVetLastName());
         assertEquals(overdueBill.getDate(), dto.getDate());
         assertEquals(overdueBill.getAmount(), dto.getAmount());
+        assertEquals(overdueBill.getTaxedAmount(), dto.getTaxedAmount());
         assertEquals(overdueBill.getBillStatus(), dto.getBillStatus());
         assertEquals(overdueBill.getDueDate(), dto.getDueDate());
         assertEquals(overdueBill.isInterestExempt(), dto.isInterestExempt());
         
         BigDecimal expectedInterest = InterestCalculationUtil.calculateCompoundInterest(amount, dueDate, LocalDate.now());
-        BigDecimal expectedTaxes = TaxCalculationUtil.calculateTotalTaxes(amount);
+
 
         assertEquals(expectedInterest, dto.getInterest());
         assertTrue(dto.getInterest().compareTo(BigDecimal.ZERO) > 0);
         
-        BigDecimal expectedTaxedAmount = amount.add(expectedInterest).add(expectedTaxes).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal expectedTaxedAmount = taxes.add(expectedInterest).setScale(2, RoundingMode.HALF_UP);
         assertEquals(expectedTaxedAmount, dto.getTotalAmount());
         
-        assertEquals(0, dto.getTimeRemaining());
+        assertEquals(0L, dto.getTimeRemaining());
     }
 
     @Test
@@ -1738,6 +1793,7 @@ public void testGenerateBillPdf_BillNotFound() {
         LocalDate dueDate = LocalDate.now().minusMonths(1);
         BigDecimal amount = new BigDecimal("150.00");
         BigDecimal storedInterest = new BigDecimal("12.50");
+        BigDecimal taxes = TaxCalculationUtil.calculateTotalTaxes(amount);
 
         
         Bill paidBill = Bill.builder()
@@ -1757,7 +1813,6 @@ public void testGenerateBillPdf_BillNotFound() {
             .interest(storedInterest)
             .build();
 
-        BigDecimal expectedTaxes = TaxCalculationUtil.calculateTotalTaxes(amount);
 
         BillResponseDTO dto = EntityDtoUtil.toBillResponseDto(paidBill);
         
@@ -1767,7 +1822,7 @@ public void testGenerateBillPdf_BillNotFound() {
         
         assertEquals(storedInterest, dto.getInterest());
         
-        BigDecimal expectedTotalAmount = amount.add(storedInterest).add(expectedTaxes).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal expectedTotalAmount = taxes.add(storedInterest).setScale(2, RoundingMode.HALF_UP);
         assertEquals(expectedTotalAmount, dto.getTotalAmount());
     }
 
@@ -1775,6 +1830,7 @@ public void testGenerateBillPdf_BillNotFound() {
     void test_EntityDtoUtil_ToBillResponseDto_WithUnpaidBill_ShouldHaveZeroInterest() {
         LocalDate dueDate = LocalDate.now().plusDays(15);
         BigDecimal amount = new BigDecimal("75.00");
+        BigDecimal taxes = TaxCalculationUtil.calculateTotalTaxes(amount);
 
         
         Bill unpaidBill = Bill.builder()
@@ -1786,12 +1842,11 @@ public void testGenerateBillPdf_BillNotFound() {
             .interestExempt(false)
             .build();
 
-        BigDecimal taxes = TaxCalculationUtil.calculateTotalTaxes(amount);
         BillResponseDTO dto = EntityDtoUtil.toBillResponseDto(unpaidBill);
         
         assertEquals(BigDecimal.ZERO, dto.getInterest());
         
-        assertEquals(amount.add(taxes).setScale(2, RoundingMode.HALF_UP), dto.getTotalAmount());
+        assertEquals(taxes.add(dto.getInterest()).setScale(2, RoundingMode.HALF_UP), dto.getTotalAmount());
         
         assertTrue(dto.getTimeRemaining() > 0);
         assertEquals(15, dto.getTimeRemaining());
@@ -1801,24 +1856,25 @@ public void testGenerateBillPdf_BillNotFound() {
     void test_EntityDtoUtil_ToBillResponseDto_WithInterestExemptBill_ShouldHaveZeroInterest() {
         LocalDate dueDate = LocalDate.now().minusMonths(1);
         BigDecimal amount = new BigDecimal("200.00");
-
+        BigDecimal taxes = TaxCalculationUtil.calculateTotalTaxes(amount);
 
         Bill exemptBill = Bill.builder()
             .billId("exempt-test-id")
             .customerId("customer-4")
             .amount(amount)
+            .taxedAmount(taxes)
             .billStatus(BillStatus.OVERDUE)
             .dueDate(dueDate)
             .interestExempt(true) // Exempt from interest
             .build();
 
-        BigDecimal taxes = TaxCalculationUtil.calculateTotalTaxes(amount);
+
         BillResponseDTO dto = EntityDtoUtil.toBillResponseDto(exemptBill);
         
         assertEquals(BigDecimal.ZERO, dto.getInterest());
         assertTrue(dto.isInterestExempt());
         
-        assertEquals(amount.add(taxes).setScale(2, RoundingMode.HALF_UP), dto.getTotalAmount());
+        assertEquals(taxes.add(dto.getInterest().setScale(2, RoundingMode.HALF_UP)), dto.getTotalAmount());
     }
 
     @Test
@@ -2054,7 +2110,7 @@ public void testGenerateBillPdf_BillNotFound() {
 
                 BigDecimal expectedTaxes = TaxCalculationUtil.calculateTotalTaxes(amount);
                 
-                BigDecimal expectedTotalAmount = amount.add(expectedInterest).add(expectedTaxes).setScale(2, RoundingMode.HALF_UP);
+                BigDecimal expectedTotalAmount = expectedTaxes.add(expectedInterest).setScale(2, RoundingMode.HALF_UP);
                 assertEquals(expectedTotalAmount, dto.getTotalAmount());
             })
             .verifyComplete();
@@ -2089,6 +2145,9 @@ public void testGenerateBillPdf_BillNotFound() {
         Bill bill = Bill.builder()
                 .customerId(customerId)
                 .amount(new BigDecimal("100.00"))
+                .gstAmount(new BigDecimal("5.00"))
+                .qstAmount(new BigDecimal("9.98"))
+                .taxedAmount(new BigDecimal("114.98"))
                 .dueDate(LocalDate.now().plusDays(10)) // <--- add this!
                 .build();
 
@@ -2128,6 +2187,9 @@ public void testGenerateBillPdf_BillNotFound() {
                 .date(LocalDate.now().minusDays(2))
                 .dueDate(LocalDate.now().plusDays(2)) // <-- required for due date test
                 .amount(new BigDecimal("200.00"))
+                .gstAmount(new BigDecimal("10.00"))
+                .qstAmount(new BigDecimal("19.95"))
+                .taxedAmount(new BigDecimal("229.95"))
                 .billStatus(BillStatus.UNPAID)
                 .build();
 
@@ -2167,6 +2229,9 @@ public void testGenerateBillPdf_BillNotFound() {
                 .date(LocalDate.now().minusDays(5))
                 .dueDate(LocalDate.now().plusDays(10)) // <-- prevent NPE
                 .amount(new BigDecimal("100.00"))
+                .gstAmount(new BigDecimal("5.00"))
+                .qstAmount(new BigDecimal("9.98"))
+                .taxedAmount(new BigDecimal("114.98"))
                 .billStatus(BillStatus.UNPAID)
                 .build();
 
@@ -2205,7 +2270,10 @@ public void testGenerateBillPdf_BillNotFound() {
                 .ownerLastName("Smith")
                 .visitType("Surgery")
                 .vetId("vetId-2")
-                .amount(new BigDecimal(250.0))
+                .amount(new BigDecimal("250.0"))
+                .gstAmount(new BigDecimal("12.50"))
+                .qstAmount(new BigDecimal("24.94"))
+                .taxedAmount(new BigDecimal("287.44"))
                 .billStatus(BillStatus.PAID)
                 .date(LocalDate.now())
                 .dueDate(LocalDate.now().plusDays(10))
@@ -2238,7 +2306,6 @@ public void testGenerateBillPdf_BillNotFound() {
                         throwable.getMessage().equals("Bill not found for given ID"))
                 .verify();
     }
-
 
     @Test
     void createBill_sendEmail_shouldSendReceiptEmail() {

@@ -430,7 +430,20 @@ class BillControllerIntegrationTest {
 
         LocalDate dueDate = LocalDate.of(2022,Month.OCTOBER,15);
 
-        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).billStatus(BillStatus.PAID).dueDate(dueDate).build();
+        return Bill.builder()
+                .id("Id")
+                .billId("BillUUID")
+                .customerId("1")
+                .vetId("1")
+                .visitType("Test Type")
+                .date(date)
+                .amount(new BigDecimal("13.37"))
+                .gstAmount(new BigDecimal("0.67"))
+                .qstAmount(new BigDecimal("1.33"))
+                .taxedAmount(new BigDecimal("15.37"))
+                .billStatus(BillStatus.PAID)
+                .dueDate(dueDate)
+                .build();
     }
 
     private Bill buildUnpaidBill(){
@@ -443,7 +456,19 @@ class BillControllerIntegrationTest {
 
         LocalDate dueDate = LocalDate.of(2022, Month.OCTOBER, 5);
 
-        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).billStatus(BillStatus.UNPAID).dueDate(dueDate).build();
+        return Bill.builder()
+                .id("Id")
+                .billId("BillUUID")
+                .customerId("1")
+                .vetId("1")
+                .visitType("Test Type")
+                .date(date)
+                .amount(new BigDecimal("13.37"))
+                .gstAmount(new BigDecimal("0.67"))
+                .qstAmount(new BigDecimal("1.33"))
+                .taxedAmount(new BigDecimal("15.37"))
+                .billStatus(BillStatus.UNPAID)
+                .dueDate(dueDate).build();
     }
 
     private Bill buildOverdueBill(){
@@ -456,7 +481,19 @@ class BillControllerIntegrationTest {
 
         LocalDate dueDate = LocalDate.of(2022, Month.AUGUST, 15);
 
-        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).billStatus(BillStatus.OVERDUE).dueDate(dueDate).build();
+        return Bill.builder()
+                .id("Id")
+                .billId("BillUUID")
+                .customerId("1")
+                .vetId("1")
+                .visitType("Test Type")
+                .date(date)
+                .amount(new BigDecimal(13.37))
+                .gstAmount(new BigDecimal("0.67"))
+                .qstAmount(new BigDecimal("1.33"))
+                .taxedAmount(new BigDecimal("15.37"))
+                .billStatus(BillStatus.OVERDUE)
+                .dueDate(dueDate).build();
     }
 
     @Test
@@ -469,7 +506,10 @@ class BillControllerIntegrationTest {
                     .vetId("1")
                     .visitType("Routine Check")
                     .date(LocalDate.now())
-                    .amount(new BigDecimal(100.0))
+                    .amount(new BigDecimal("100.0"))
+                    .gstAmount(new BigDecimal("5.00"))
+                    .qstAmount(new BigDecimal("9.98"))
+                    .taxedAmount(new BigDecimal("114.98"))
                     .billStatus(BillStatus.PAID)
                     .dueDate(LocalDate.now().plusDays(30))
                     .build()).block();
@@ -577,7 +617,10 @@ class BillControllerIntegrationTest {
                     .vetId("1")
                     .visitType("Routine Check")
                     .date(LocalDate.of(2022, 9, i))
-                    .amount(new BigDecimal(100.0))
+                    .amount(new BigDecimal("100.0"))
+                    .gstAmount(new BigDecimal("5.00"))
+                    .qstAmount(new BigDecimal("9.98"))
+                    .taxedAmount(new BigDecimal("114.98"))
                     .billStatus(BillStatus.PAID)
                     .dueDate(LocalDate.of(2022, 9, i).plusDays(30))
                     .build()).block();
@@ -717,7 +760,10 @@ class BillControllerIntegrationTest {
                 .vetId("1")
                 .visitType("Test Type")
                 .date(date)
-                .amount(new BigDecimal(100.0))
+                .amount(new BigDecimal("100.0"))
+                .gstAmount(new BigDecimal("5.00"))
+                .qstAmount(new BigDecimal("9.98"))
+                .taxedAmount(new BigDecimal("114.98"))
                 .billStatus(BillStatus.OVERDUE)
                 .dueDate(dueDate)
                 .archive(false)
@@ -736,7 +782,10 @@ class BillControllerIntegrationTest {
                 .vetId("1")
                 .visitType("Test Type")
                 .date(date)
-                .amount(new BigDecimal(100.0))
+                .amount(new BigDecimal("100.0"))
+                .gstAmount(new BigDecimal("5.00"))
+                .qstAmount(new BigDecimal("9.98"))
+                .taxedAmount(new BigDecimal("114.98"))
                 .billStatus(BillStatus.UNPAID)
                 .dueDate(dueDate)
                 .archive(false)

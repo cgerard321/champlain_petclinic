@@ -1141,13 +1141,13 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                       : `USD $${convertCurrency(detailBill.qstAmount, 'CAD', 'USD').toFixed(2)}`}
                 </p>
                 <p>
-                  <strong>Total Taxes:</strong>{' '}
+                  <strong>Total with Tax:</strong>{' '}
                   {currency === 'CAD'
                       ? `CAD $${detailBill.taxedAmount.toFixed(2)}`
                       : `USD $${convertCurrency(detailBill.taxedAmount, 'CAD', 'USD').toFixed(2)}`}
                 </p>
                 <p>
-                  <strong>Total Amount:</strong>{' '}
+                  <strong>Total with Interest:</strong>{' '}
                   {currency === 'CAD'
                     ? `CAD $${detailBill.totalAmount.toFixed(2)}`
                     : `USD $${convertCurrency(detailBill.totalAmount, 'CAD', 'USD').toFixed(2)}`}
