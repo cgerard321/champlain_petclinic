@@ -230,7 +230,8 @@ public class CartServiceImpl implements CartService {
 
                     String invoiceId = UUID.randomUUID().toString();
                     List<CartProduct> products = cart.getProducts();
-                    double total = calculateTotal(products);
+                    // this is the correct way to get the total do not use calculateTotal
+                    double total = EntityModelUtil.toCartResponseModel(cart, products).getTotal();
 
                     // --- Recent Purchases Logic ---
                     List<CartProduct> updatedRecentPurchases = cart.getRecentPurchases() != null
@@ -276,6 +277,7 @@ public class CartServiceImpl implements CartService {
                 });
     }
 
+
     private CartProduct toCartProduct(ProductResponseModel product) {
         return CartProduct.builder()
                 .productId(product.getProductId())
@@ -287,11 +289,6 @@ public class CartServiceImpl implements CartService {
                 .build();
     }
 
-    private double calculateTotal(List<CartProduct> products) {
-        return products.stream()
-                .mapToDouble(product -> product.getProductSalePrice() * product.getQuantityInCart())
-                .sum();
-    }
 
     @Override
     public Mono<CartResponseModel> assignCartToCustomer(String customerId) {

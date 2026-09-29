@@ -66,7 +66,6 @@ pub fn stage() -> AdHoc {
             log::error!("Failed to insert default roles: {e}");
         }
 
-
         // Default services
         if let Err(e) = add_default_services(&pool).await {
             log::error!("Failed to insert default services: {e}");
@@ -121,7 +120,6 @@ pub fn stage() -> AdHoc {
             docker_api.clone(),
             dyn_service_repo.clone(),
         ));
-
 
         // SQL Console
         let drivers = build_sql_drivers_from_services(dyn_service_repo.clone()).await;
@@ -278,20 +276,20 @@ async fn add_default_roles(pool: &MySqlPool) -> Result<(), sqlx::Error> {
         (?, 'BILLING_SERVICE_DEV',    'Billing Service Dev');
     "#,
     )
-        .bind(&sudo)
-        .bind(&admin)
-        .bind(&reader)
-        .bind(&editor)
-        .bind(&auth_service_dev)
-        .bind(&vet_service_dev)
-        .bind(&visits_service_dev)
-        .bind(&customers_service_dev)
-        .bind(&products_service_dev)
-        .bind(&cart_service_dev)
-        .bind(&inventory_service_dev)
-        .bind(&billing_service_dev)
-        .execute(pool)
-        .await?;
+    .bind(&sudo)
+    .bind(&admin)
+    .bind(&reader)
+    .bind(&editor)
+    .bind(&auth_service_dev)
+    .bind(&vet_service_dev)
+    .bind(&visits_service_dev)
+    .bind(&customers_service_dev)
+    .bind(&products_service_dev)
+    .bind(&cart_service_dev)
+    .bind(&inventory_service_dev)
+    .bind(&billing_service_dev)
+    .execute(pool)
+    .await?;
     Ok(())
 }
 
@@ -426,8 +424,8 @@ async fn add_default_services(pool: &MySqlPool) -> Result<(), sqlx::Error> {
             "products",
             "DB_USER",
             "DB_PASSWORD",
-            "mongo-products",
-            "MONGO",
+            "postgres-products",
+            "POSTGRES",
         ),
         (
             "cart-service",
@@ -461,14 +459,14 @@ async fn add_default_services(pool: &MySqlPool) -> Result<(), sqlx::Error> {
              (service_docker_service, db_name, db_user_env, db_password_env, db_host, db_type)
              VALUES (?, ?, ?, ?, ?, ?)",
         )
-            .bind(service)
-            .bind(db_name)
-            .bind(user_env)
-            .bind(pass_env)
-            .bind(host)
-            .bind(db_type)
-            .execute(pool)
-            .await?;
+        .bind(service)
+        .bind(db_name)
+        .bind(user_env)
+        .bind(pass_env)
+        .bind(host)
+        .bind(db_type)
+        .execute(pool)
+        .await?;
     }
 
     Ok(())
