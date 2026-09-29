@@ -9,10 +9,7 @@ import com.petclinic.billing.domainclientlayer.OwnerClient;
 import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
-import com.petclinic.billing.util.EntityDtoUtil;
-import com.petclinic.billing.util.FormatBillUtil;
-import com.petclinic.billing.util.InterestCalculationUtil;
-import com.petclinic.billing.util.PdfGenerator;
+import com.petclinic.billing.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -39,7 +36,7 @@ public class BillServiceImpl implements BillService{
     private final MailService mailService;
 
 
-   @Override
+    @Override
     public Mono<BillResponseDTO> getBillByBillId(String billUUID) {
         return updateOverdueBills()
             .then(billRepository.findByBillId(billUUID))
@@ -199,10 +196,9 @@ public class BillServiceImpl implements BillService{
                     bill.setOwnerFirstName(owner.getFirstName());
                     bill.setOwnerLastName(owner.getLastName());
 
-
-                    // Generate unique short ID safely
-                    return generateUniqueBillId(bill, 1)
-                            .then(Mono.defer(() -> billRepository.insert(bill)));
+                    return addTaxesToBill(bill).flatMap(newbill ->
+                            generateUniqueBillId(newbill, 1)
+                                    .then(Mono.defer(() -> billRepository.insert(newbill))));
                 })
                 .flatMap(billResponse -> {
                     if (sendEmail) {
@@ -241,7 +237,7 @@ public class BillServiceImpl implements BillService{
                             existingBill.setAmount(r.getAmount());
                             existingBill.setDueDate(r.getDueDate());
 
-                            return billRepository.save(existingBill);
+                            return addTaxesToBill(existingBill).flatMap(newbill -> billRepository.save(existingBill));
                         })
                         .map(EntityDtoUtil::toBillResponseDto)
                 );
@@ -633,6 +629,21 @@ public class BillServiceImpl implements BillService{
                 .then()
                 .doOnSuccess(unused -> log.info("Completed overdue bills update check"))
                 .doOnError(error -> log.error("Error updating overdue bills: {}", error.getMessage(), error));
+    }
+
+    @Override
+    public Mono<Bill> addTaxesToBill(Bill bill){
+        BigDecimal amount = bill.getAmount();
+
+        BigDecimal gst = TaxCalculationUtil.calculateGST(amount);
+        BigDecimal qst = TaxCalculationUtil.calculateQST(amount);
+        BigDecimal totalTaxes = TaxCalculationUtil.calculateTotalTaxes(amount);
+
+        bill.setGstAmount(gst);
+        bill.setQstAmount(qst);
+        bill.setTaxedAmount(totalTaxes);
+
+        return Mono.just(bill);
     }
 
 }

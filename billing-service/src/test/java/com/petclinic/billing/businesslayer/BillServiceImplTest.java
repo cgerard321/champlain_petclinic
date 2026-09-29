@@ -1723,6 +1723,7 @@ public void testGenerateBillPdf_BillNotFound() {
         
         BigDecimal expectedInterest = InterestCalculationUtil.calculateCompoundInterest(amount, dueDate, LocalDate.now());
         BigDecimal expectedTaxes = TaxCalculationUtil.calculateTotalTaxes(amount);
+
         assertEquals(expectedInterest, dto.getInterest());
         assertTrue(dto.getInterest().compareTo(BigDecimal.ZERO) > 0);
         
@@ -1737,7 +1738,7 @@ public void testGenerateBillPdf_BillNotFound() {
         LocalDate dueDate = LocalDate.now().minusMonths(1);
         BigDecimal amount = new BigDecimal("150.00");
         BigDecimal storedInterest = new BigDecimal("12.50");
-        BigDecimal expectedTaxes = TaxCalculationUtil.calculateTotalTaxes(amount);
+
         
         Bill paidBill = Bill.builder()
             .billId("paid-test-id")
@@ -1756,6 +1757,8 @@ public void testGenerateBillPdf_BillNotFound() {
             .interest(storedInterest)
             .build();
 
+        BigDecimal expectedTaxes = TaxCalculationUtil.calculateTotalTaxes(amount);
+
         BillResponseDTO dto = EntityDtoUtil.toBillResponseDto(paidBill);
         
         assertEquals(paidBill.getBillId(), dto.getBillId());
@@ -1772,7 +1775,7 @@ public void testGenerateBillPdf_BillNotFound() {
     void test_EntityDtoUtil_ToBillResponseDto_WithUnpaidBill_ShouldHaveZeroInterest() {
         LocalDate dueDate = LocalDate.now().plusDays(15);
         BigDecimal amount = new BigDecimal("75.00");
-        BigDecimal taxes = TaxCalculationUtil.calculateTotalTaxes(amount);
+
         
         Bill unpaidBill = Bill.builder()
             .billId("unpaid-test-id")
@@ -1783,6 +1786,7 @@ public void testGenerateBillPdf_BillNotFound() {
             .interestExempt(false)
             .build();
 
+        BigDecimal taxes = TaxCalculationUtil.calculateTotalTaxes(amount);
         BillResponseDTO dto = EntityDtoUtil.toBillResponseDto(unpaidBill);
         
         assertEquals(BigDecimal.ZERO, dto.getInterest());
@@ -1797,7 +1801,7 @@ public void testGenerateBillPdf_BillNotFound() {
     void test_EntityDtoUtil_ToBillResponseDto_WithInterestExemptBill_ShouldHaveZeroInterest() {
         LocalDate dueDate = LocalDate.now().minusMonths(1);
         BigDecimal amount = new BigDecimal("200.00");
-        BigDecimal taxes = TaxCalculationUtil.calculateTotalTaxes(amount);
+
 
         Bill exemptBill = Bill.builder()
             .billId("exempt-test-id")
@@ -1808,6 +1812,7 @@ public void testGenerateBillPdf_BillNotFound() {
             .interestExempt(true) // Exempt from interest
             .build();
 
+        BigDecimal taxes = TaxCalculationUtil.calculateTotalTaxes(amount);
         BillResponseDTO dto = EntityDtoUtil.toBillResponseDto(exemptBill);
         
         assertEquals(BigDecimal.ZERO, dto.getInterest());
@@ -2047,7 +2052,7 @@ public void testGenerateBillPdf_BillNotFound() {
                 BigDecimal expectedInterest = InterestCalculationUtil.calculateInterest(overdueBill);
                 assertEquals(expectedInterest, dto.getInterest());
 
-                BigDecimal expectedTaxes = TaxCalculationUtil.calculateTotalTaxes(overdueBill.getAmount());
+                BigDecimal expectedTaxes = TaxCalculationUtil.calculateTotalTaxes(amount);
                 
                 BigDecimal expectedTotalAmount = amount.add(expectedInterest).add(expectedTaxes).setScale(2, RoundingMode.HALF_UP);
                 assertEquals(expectedTotalAmount, dto.getTotalAmount());
@@ -2276,6 +2281,7 @@ public void testGenerateBillPdf_BillNotFound() {
         billEntity.setOwnerLastName("Smith");
         billEntity.setAmount(new BigDecimal("100.00"));
         billEntity.setInterest(BigDecimal.ZERO);
+        billEntity.setTaxedAmount(BigDecimal.ZERO);
 
         when(repo.findById(anyString())).thenReturn(Mono.empty());
         when(repo.findAllBillsByBillStatus(any())).thenReturn(Flux.empty());
