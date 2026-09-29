@@ -34,7 +34,7 @@
   margin: 20px 0;
 }
 
-.error-container input {
+.error-container button {
   display: inline-block;
   margin-top: 20px;
   padding: 10px 20px;
@@ -50,7 +50,7 @@
   cursor: pointer;
 }
 
-.error-container input:hover {
+.error-container button:hover {
   background-color: #ff3b2f;
   transform: scale(1.05);
 }
