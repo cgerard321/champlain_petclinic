@@ -192,12 +192,16 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
   };
 
   const validate = (): boolean => {
+    if (!pet) return false;
     const newErrors: { [key: string]: string } = {};
     if (!pet?.name?.trim()) newErrors.name = 'Pet name is required';
+    if (pet.name.trim().length > 20) newErrors.name = 'Pet name cannot be longer than 20 characters';
     if (!pet?.weight?.trim()) newErrors.weight = 'Weight is required';
     if (!pet?.petTypeId) newErrors.petTypeId = 'Pet type is required';
     if (pet?.weight && parseFloat(pet.weight) <= 0)
       newErrors.weight = 'Weight must be greater than 0';
+    if (parseFloat(pet.weight) > 100)
+      newErrors.weight = 'Weight cannot be greater than 100 kg';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
