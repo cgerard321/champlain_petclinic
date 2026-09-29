@@ -230,7 +230,8 @@ public class CartServiceImpl implements CartService {
 
                     String invoiceId = UUID.randomUUID().toString();
                     List<CartProduct> products = cart.getProducts();
-                    double total = calculateTotal(products);
+                    // this is the correct way to get the total do not use calculateTotal
+                    double total = EntityModelUtil.toCartResponseModel(cart, products).getTotal();
 
                     // --- Recent Purchases Logic ---
                     List<CartProduct> updatedRecentPurchases = cart.getRecentPurchases() != null
@@ -280,11 +281,13 @@ public class CartServiceImpl implements CartService {
                             .then(Mono.just(new CartResponseModel(invoiceId, cartId, products, total)));
                 });
     }
-    private double calculateTotal(List<CartProduct> products) {
-        return products.stream()
-                .mapToDouble(product -> product.getProductSalePrice() * product.getQuantityInCart())
-                .sum();
-    }
+
+    // this function was never used and could be harmful since it does not check null, does not account promo codes and ignore taxes
+    // private double calculateTotal(List<CartProduct> products) {
+    //     return products.stream()
+    //             .mapToDouble(product -> product.getProductSalePrice() * product.getQuantityInCart())
+    //             .sum();
+    // }
 
     @Override
     public Mono<CartResponseModel> assignCartToCustomer(String customerId) {

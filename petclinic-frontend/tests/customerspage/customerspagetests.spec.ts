@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 
+// eslint-disable-next-line playwright/require-top-level-describe
 test('Admin Add new customer', async ({ page }) => {
   //Authenticate as admin
   await page.goto('http://localhost:3000/users/login');
@@ -13,7 +14,7 @@ test('Admin Add new customer', async ({ page }) => {
   // End of authentication steps.
 
   // Go to Add Customer page
-  await page.locator('#owners-dropdown').click();
+  await page.locator('#customers-dropdown').click();
   await page.getByRole('link', { name: 'Add Customer' }).click();
 
   await page.waitForURL('http://localhost:3000/customer/add');
@@ -38,12 +39,12 @@ test('Admin Add new customer', async ({ page }) => {
 
   //This code should be changed once page is fixed.
   // Go to Customers List page
-  await page.locator('#owners-dropdown').click();
+  await page.locator('#customers-dropdown').click();
   await page.getByRole('link', { name: 'Customers List' }).click();
 
   //check that we have been routed to the correct page
   await page.waitForURL('http://localhost:3000/customers');
-  await expect(page.locator('.owners-container')).toContainText('Owners');
+  await expect(page.locator('.customers-container')).toContainText('Customers');
 
   //check that customer has been added to customer list
   await expect(page.locator('tbody')).toContainText('Christine');
@@ -52,6 +53,7 @@ test('Admin Add new customer', async ({ page }) => {
   await page.close();
 });
 
+// eslint-disable-next-line playwright/require-top-level-describe
 test('Get User By Id works and connected customer link works and right info', async ({
   page,
 }) => {
@@ -65,13 +67,13 @@ test('Get User By Id works and connected customer link works and right info', as
   await page.getByRole('link', { name: 'Users List' }).click();
   await page.getByRole('link', { name: 'e6c7398e-8ac4-4e10-9ee0-' }).click();
   await expect(
-    page.getByRole('heading', { name: 'User Details for Owner2' })
+    page.getByRole('heading', { name: 'User Details for Customer2' })
   ).toBeVisible();
   await expect(page.getByText('User ID: e6c7398e-8ac4-4e10-')).toBeVisible();
   await expect(page.getByText('Email: betty@email.com')).toBeVisible();
   await expect(page.getByText('Verified: Yes')).toBeVisible();
   await expect(page.getByText('Roles: OWNER')).toBeVisible();
-  await page.getByRole('button', { name: 'Connected Owner Info' }).click();
+  await page.getByRole('button', { name: 'Connected Customer Info' }).click();
   await expect(
     page.getByRole('heading', { name: 'Customer Details for Betty' })
   ).toBeVisible();
@@ -80,6 +82,7 @@ test('Get User By Id works and connected customer link works and right info', as
   await page.close();
 });
 
+// eslint-disable-next-line playwright/require-top-level-describe
 test('Admin Edit Customer', async ({ page }) => {
   await page.goto('http://localhost:3000/users/login');
   await page.getByPlaceholder('Enter your email').click();
