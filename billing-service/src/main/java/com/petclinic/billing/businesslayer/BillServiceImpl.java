@@ -536,19 +536,6 @@ public class BillServiceImpl implements BillService{
                             .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Bill not found")))
 
                             // 3. If the bill exists, calculate and preserve the interest, then set status to PAID.
-//                            .flatMap(bill -> {
-//                                // Calculate and preserve the interest before changing status
-//                                BigDecimal interestAtPayment = InterestCalculationUtil.calculateInterest(bill);
-//                                bill.setInterest(interestAtPayment);
-//                                bill.setBillStatus(BillStatus.PAID);
-//
-//                                //Generate confirmation email and Send email
-//                                mailService.sendMail(generateConfirmationEmail(user));
-//
-//                                // 4. Save the updated bill back into the repository.
-//                                return billRepository.save(bill);
-//                            })
-
 
 
                             .flatMap(bill -> {
