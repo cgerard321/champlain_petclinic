@@ -1,8 +1,7 @@
 package com.petclinic.bffapigateway.dtos.Auth;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.CustomerRequestDTO;
 import com.petclinic.bffapigateway.utils.Security.Annotations.PasswordStrengthCheck;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import lombok.AllArgsConstructor;
@@ -30,5 +29,5 @@ public class Register {
     private final String defaultRole = Roles.OWNER.toString();
     @PasswordStrengthCheck
     private String password;
-    private OwnerRequestDTO owner;
+    private CustomerRequestDTO owner;
 }

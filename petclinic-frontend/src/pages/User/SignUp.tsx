@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { FormEvent, useState } from 'react';
-import { OwnerRequestModel } from '@/shared/models/OwnerRequestModel';
+import { CustomerRequestModel } from '@/shared/models/CustomerRequestModel.ts';
 import { Register } from '@/shared/models/RegisterModel';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import axiosInstance from '@/shared/api/axiosInstance';
@@ -16,8 +16,8 @@ const SignUp: React.FC = (): JSX.Element => {
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
 
-  const [owner, setOwner] = useState<OwnerRequestModel>({
-    ownerId: '',
+  const [owner, setOwner] = useState<CustomerRequestModel>({
+    customerId: '',
     firstName: '',
     lastName: '',
     address: '',
@@ -129,7 +129,7 @@ const SignUp: React.FC = (): JSX.Element => {
     Object.keys(owner).forEach(key => {
       const error = validateField(
         key,
-        owner[key as keyof OwnerRequestModel] as string
+        owner[key as keyof CustomerRequestModel] as string
       );
       if (error) {
         errors[key] = error;

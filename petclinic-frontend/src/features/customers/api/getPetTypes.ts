@@ -2,7 +2,7 @@ import axiosInstance from '@/shared/api/axiosInstance';
 import { PetTypeModel } from '@/features/customers/models/PetTypeModel';
 
 export const getPetTypes = async (): Promise<PetTypeModel[]> => {
-  const response = await axiosInstance.get('/owners/petTypes', {
+  const response = await axiosInstance.get('/customers/petTypes', {
     useV2: false,
   });
 
