@@ -114,7 +114,6 @@ public class UserControllerV1 {
     public Mono<ResponseEntity<UserPasswordLessDTO>> login(@RequestBody Mono<Login> login) throws Exception {
         log.info("Entered controller /login");
         return authServiceClient.login(login);
-
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})

@@ -3,9 +3,11 @@ import axiosInstance from '@/shared/api/axiosInstance';
 import { PetRequestModel } from '@/features/customers/models/PetRequestModel';
 import { PetResponseModel } from '@/features/customers/models/PetResponseModel';
 
-export const addPetForOwner = async (
-  ownerId: string,
+export const addPetForCustomer = async (
+  customerId: string,
   pet: PetRequestModel
 ): Promise<AxiosResponse<PetResponseModel>> => {
-  return axiosInstance.post(`/owners/${ownerId}/pets`, pet, { useV2: false });
+  return axiosInstance.post(`/pets/customers/${customerId}/pets`, pet, {
+    useV2: false,
+  });
 };

@@ -2,7 +2,7 @@ import { FC } from 'react';
 import UpdatePetForm from '@/features/customers/components/UpdatePetForm.tsx';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 
-const UpdateOwnerPetPage: FC = (): JSX.Element => {
+const UpdateCustomerPetPage: FC = (): JSX.Element => {
   return (
     <div>
       <NavBar />
@@ -10,4 +10,4 @@ const UpdateOwnerPetPage: FC = (): JSX.Element => {
     </div>
   );
 };
-export default UpdateOwnerPetPage;
+export default UpdateCustomerPetPage;

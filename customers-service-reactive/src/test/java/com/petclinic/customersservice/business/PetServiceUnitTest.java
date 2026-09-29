@@ -38,23 +38,23 @@ public class PetServiceUnitTest {
 
 
     @Test
-    void whenCreatePetForOwner_withValidOwnerAndPetRequest_thenReturnPetResponseDTO() {
-        String ownerId = "valid-owner-id";
+    void whenCreatePetForCustomer_withValidCustomerAndPetRequest_thenReturnPetResponseDTO() {
+        String customerId = "valid-customer-id";
         PetRequestDTO petRequest = buildPetRequestDTO();
-        Pet savedPet = buildPetFromRequest(petRequest, ownerId);
-        CustomerResponseDTO ownerResponse = buildOwnerResponseDTO();
+        Pet savedPet = buildPetFromRequest(petRequest, customerId);
+        CustomerResponseDTO customerResponse = buildCustomerResponseDTO();
 
-        when(customerService.getCustomerByCustomerId(ownerId, false)).thenReturn(Mono.just(ownerResponse));
+        when(customerService.getCustomerByCustomerId(customerId, false)).thenReturn(Mono.just(customerResponse));
         when(repo.save(any(Pet.class))).thenReturn(Mono.just(savedPet));
 
-        Mono<PetResponseDTO> result = petService.createPetForOwner(ownerId, Mono.just(petRequest));
+        Mono<PetResponseDTO> result = petService.createPetForCustomer(customerId, Mono.just(petRequest));
 
         StepVerifier
                 .create(result)
                 .consumeNextWith(createdPet -> {
                     assertEquals(savedPet.getName(), createdPet.getName());
                     assertEquals(savedPet.getPetTypeId(), createdPet.getPetTypeId());
-                    assertEquals(savedPet.getOwnerId(), createdPet.getOwnerId());
+                    assertEquals(savedPet.getCustomerId(), createdPet.getCustomerId());
                     assertEquals(savedPet.getWeight(), createdPet.getWeight());
                     assertEquals("true", createdPet.getIsActive());
                 })
@@ -62,18 +62,18 @@ public class PetServiceUnitTest {
     }
 
     @Test
-    void whenCreatePetForOwner_withNonExistingOwner_thenReturnNotFoundException() {
-        String nonExistingOwnerId = "non-existent-owner-id";
+    void whenCreatePetForCustomer_withNonExistingCustomer_thenReturnNotFoundException() {
+        String nonExistingCustomerId = "non-existent-customer-id";
         PetRequestDTO petRequest = buildPetRequestDTO();
 
-        when(customerService.getCustomerByCustomerId(nonExistingOwnerId,false)).thenReturn(Mono.empty());
+        when(customerService.getCustomerByCustomerId(nonExistingCustomerId, false)).thenReturn(Mono.empty());
 
-        Mono<PetResponseDTO> result = petService.createPetForOwner(nonExistingOwnerId, Mono.just(petRequest));
+        Mono<PetResponseDTO> result = petService.createPetForCustomer(nonExistingCustomerId, Mono.just(petRequest));
 
         StepVerifier
                 .create(result)
                 .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
-                        throwable.getMessage().equals("Customer not found with id: " + nonExistingOwnerId))
+                        throwable.getMessage().equals("Customer not found with id: " + nonExistingCustomerId))
                 .verify();
     }
 
@@ -81,7 +81,7 @@ public class PetServiceUnitTest {
         return Pet.builder()
                 .petId("a-very-valid-pet-id")
                 .name("Cookie")
-                .ownerId("a-very-valid-owner-id")
+                .customerId("a-very-valid-customer-id")
                 .petTypeId("1")
                 .birthDate(new Date())
                 .isActive("true")
@@ -98,11 +98,11 @@ public class PetServiceUnitTest {
                 .build();
     }
 
-    private Pet buildPetFromRequest(PetRequestDTO request, String ownerId) {
+    private Pet buildPetFromRequest(PetRequestDTO request, String customerId) {
         return Pet.builder()
                 .petId("generated-pet-id")
                 .name(request.getName())
-                .ownerId(ownerId)
+                .customerId(customerId)
                 .petTypeId(request.getPetTypeId())
                 .birthDate(request.getBirthDate())
                 .weight(request.getWeight())
@@ -110,7 +110,7 @@ public class PetServiceUnitTest {
                 .build();
     }
 
-    private CustomerResponseDTO buildOwnerResponseDTO() {
+    private CustomerResponseDTO buildCustomerResponseDTO() {
         return CustomerResponseDTO.builder()
                 .customerId("valid-customer-id")
                 .firstName("John")
