@@ -6,9 +6,9 @@
 
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { SseClientSubscriber } from '@core/services/sse-client-subscriber';
 import { Observable } from 'rxjs';
 
+import { SseClientSubscriber } from '@core/internal/sse-client-subscriber';
 import { defaultSseOptions, SseOptions } from '@core/models/sse-options';
 import { defaultRequestOptions, SseRequestOptions } from '@core/models/sse-request-options';
 
