@@ -18,10 +18,15 @@ export class InventoryService {
       map((event) => JSON.parse(event.data) as Inventory),
       retry({
         count: 5,
-        delay: (error: unknown) =>
-          error instanceof HttpErrorResponse && error.status === 0
-            ? timer(5000)
-            : throwError(() => error),
+        delay: (error: unknown) => {
+          const err = error as { code?: number; status?: number };
+          const isNetworkError =
+            error instanceof HttpErrorResponse
+              ? error.status === 0
+              : err?.code === 0 || err?.status === 0;
+
+          return isNetworkError ? timer(5000) : throwError(() => error);
+        },
       }),
     );
   }

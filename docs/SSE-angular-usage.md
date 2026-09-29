@@ -45,21 +45,24 @@ export class InventoryService {
   private readonly baseUrl = '/api/gateway/inventories';
 
   getInventories(): Observable<Inventory> {
-    return this.sse.stream(this.baseUrl, { keepAlive: false }).pipe(
-      filter((event): event is MessageEvent => event.type !== 'error'),
-      map((event) => JSON.parse(event.data) as Inventory),
-
-      // Retry only network failures (status 0), up to 5 times.
-      // Any HTTP error (401, 403, 5xx, ...) goes straight to the caller.
-      retry({
-        count: 5,
-        delay: (error: unknown) =>
-          error instanceof HttpErrorResponse && error.status === 0
-            ? timer(5000)
-            : throwError(() => error),
-      }),
-    );
-  }
+      return this.sse.stream(this.baseUrl, { keepAlive: false }).pipe(
+          filter((event): event is MessageEvent => event.type !== 'error'),
+          map((event) => JSON.parse(event.data) as Inventory),
+          // Retry only network failures (status 0), up to 5 times.
+          // Any HTTP error (401, 403, 5xx, ...) goes straight to the caller.
+          retry({
+              count: 5,
+              delay: (error: unknown) => {
+                  // We try to cast it to get the error code or the status
+                  const err = error as { code?: number; status?: number };
+                  const isNetworkError =
+                      error instanceof HttpErrorResponse
+                          ? error.status === 0
+                          : err?.code === 0 || err?.status === 0;
+                  return isNetworkError ? timer(5000) : throwError(() => error);
+                  },
+          }),
+      )
 
   getQuantity(inventoryId: string): Observable<number> {
     return this.http.get<number>(`${this.baseUrl}/${inventoryId}/productquantity`);
@@ -108,23 +111,23 @@ ngOnInit(): void {
 sse.stream(url, options?, requestOptions?, method = 'GET')
 ```
 
-| Param | Type | Description |
-|---|---|---|
-| `url` | `string` | Endpoint (relative URLs get the API base URL). |
-| `options` | `Partial<SseOptions>` | Stream behaviour, see below. |
-| `requestOptions` | `SseRequestOptions` | `headers`, `params`, `body`, `context`, `withCredentials`. |
-| `method` | `string` | HTTP method. Use `'POST'` with `requestOptions.body` if the endpoint needs it. |
+| Param            | Type                  | Description                                                                    |
+|------------------|-----------------------|--------------------------------------------------------------------------------|
+| `url`            | `string`              | Endpoint (relative URLs get the API base URL).                                 |
+| `options`        | `Partial<SseOptions>` | Stream behaviour, see below.                                                   |
+| `requestOptions` | `SseRequestOptions`   | `headers`, `params`, `body`, `context`, `withCredentials`.                     |
+| `method`         | `string`              | HTTP method. Use `'POST'` with `requestOptions.body` if the endpoint needs it. |
 
 The return type depends on `responseType`: `Observable<Event>` for `'event'`, `Observable<string>` for `'text'`.
 
 ### `SseOptions`
 
-| Option | Default | Description |
-|---|---|---|
-| `keepAlive` | `true` | Reconnect automatically after the response ends or a recoverable error. Set `false` for finite streams that end after sending data. |
-| `reconnectionDelay` | `3000` | Milliseconds to wait before reconnecting (only with `keepAlive`). |
-| `responseType` | `'event'` | `'event'` emits `MessageEvent`s (plus `ErrorEvent`s). `'text'` emits only the message `data` string. |
-| `maxBufferLength` | `5_242_880` | Characters received before the connection is transparently recycled (see [Long-lived streams](#long-lived-streams)). `0` disables. |
+| Option              | Default     | Description                                                                                                                         |
+|---------------------|-------------|-------------------------------------------------------------------------------------------------------------------------------------|
+| `keepAlive`         | `true`      | Reconnect automatically after the response ends or a recoverable error. Set `false` for finite streams that end after sending data. |
+| `reconnectionDelay` | `3000`      | Milliseconds to wait before reconnecting (only with `keepAlive`).                                                                   |
+| `responseType`      | `'event'`   | `'event'` emits `MessageEvent`s (plus `ErrorEvent`s). `'text'` emits only the message `data` string.                                |
+| `maxBufferLength`   | `5_242_880` | Characters received before the connection is transparently recycled (see [Long-lived streams](#long-lived-streams)). `0` disables.  |
 
 ---
 
@@ -160,12 +163,12 @@ Messages with empty `data` are ignored.
 
 ## Reconnection and errors
 
-| Situation | `keepAlive: true` (default) | `keepAlive: false` |
-|---|---|---|
-| Server closes the response normally | Emits an `ErrorEvent` ("Server response ended, will reconnect in …ms"), waits `reconnectionDelay`, reconnects | Observable **completes** |
-| Network failure (status `0`) | Emits an `ErrorEvent`, reconnects after the delay | Emits an `ErrorEvent`, then the Observable **errors** |
-| HTTP error (4xx/5xx) or `ApiError` from `errorInterceptor` | Emits an `ErrorEvent` (with `status`), then the Observable **errors**, with no reconnect | Same |
-| `401` | `authInterceptor` navigates to `/login`, then the Observable errors | Same |
+| Situation                                                  | `keepAlive: true` (default)                                                                                   | `keepAlive: false`                                    |
+|------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|-------------------------------------------------------|
+| Server closes the response normally                        | Emits an `ErrorEvent` ("Server response ended, will reconnect in …ms"), waits `reconnectionDelay`, reconnects | Observable **completes**                              |
+| Network failure (status `0`)                               | Emits an `ErrorEvent`, reconnects after the delay                                                             | Emits an `ErrorEvent`, then the Observable **errors** |
+| HTTP error (4xx/5xx) or `ApiError` from `errorInterceptor` | Emits an `ErrorEvent` (with `status`), then the Observable **errors**, with no reconnect                      | Same                                                  |
+| `401`                                                      | `authInterceptor` navigates to `/login`, then the Observable errors                                           | Same                                                  |
 
 The error you receive in `subscribe({ error })` is whatever your interceptors produced: an `ApiError` when the backend returned a `message`, otherwise the original `HttpErrorResponse`. Use `isApiError()` from `core/models/api-error` to tell them apart.
 
