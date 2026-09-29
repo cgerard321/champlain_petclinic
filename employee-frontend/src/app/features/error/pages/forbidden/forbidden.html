@@ -3,8 +3,10 @@
     <h1>401</h1>
     <p>Sorry, you do not have permission to access this page or resource.</p>
 
-    <form (submit)="handleAction($event)"> <!-- Send any non-logged in user to Login instead of homepage-->
-      <input type="submit" [value]="isLoggedIn ? 'Go Back Home' : 'Retry Log In'" />
+    <form (submit)="handleAction($event)">
+      <button type="submit">
+        {{ hasToken ? 'Go Back Home' : 'Retry Log In' }}
+      </button>
     </form>
   </div>
 </div>
