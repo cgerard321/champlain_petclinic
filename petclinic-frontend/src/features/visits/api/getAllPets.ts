@@ -7,9 +7,8 @@ export const getAllPets = async (): Promise<PetResponseModel[]> => {
     const response = await axiosInstance.get('/pets', {
       // set uri to use v1 (as we configured it)
       useV2: false,
-    //   final path : http://localhost:8080/api/gateway/pets
+      //   final path : http://localhost:8080/api/gateway/pets
     });
-
 
     // Handle SSE (Server-Sent Events) stream format
     if (typeof response.data === 'string') {

@@ -17,7 +17,7 @@ export function getAllOwnerVisits(
   return readSseStream<VisitResponseModel>(
     //   constructs sse endpoint (encodeURIConmponents escapces special characters)
     `${backendUrl}/gateway/visits/owners/${encodeURIComponent(cleanOwnerId)}/visits`,
-      // Passes the cancellation signal to the stream reader
+    // Passes the cancellation signal to the stream reader
     signal
   );
 }

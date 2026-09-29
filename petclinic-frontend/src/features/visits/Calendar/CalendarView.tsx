@@ -54,7 +54,10 @@ export default function CalendarView(): JSX.Element {
         if (isAdmin || isReceptionist) {
           visitStream = getAllVisits(controller.signal);
         } else if (isVet && user?.userId) {
-          visitStream = getVisitsForPractitioner(user.userId, controller.signal);
+          visitStream = getVisitsForPractitioner(
+            user.userId,
+            controller.signal
+          );
         } else {
           setVisits([]);
           return;

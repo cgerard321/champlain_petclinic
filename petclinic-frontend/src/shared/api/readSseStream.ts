@@ -45,9 +45,9 @@ export async function* readSseStream<T>(
         const data = event
           // string to array every newline
           .split(/\r?\n/)
-            //   keep only lines that start with data:
+          //   keep only lines that start with data:
           .filter(line => line.startsWith('data:'))
-            //   remove "data:
+          //   remove "data:
           .map(line => line.slice(5).trim())
           //   array to single string
           .join('\n');
