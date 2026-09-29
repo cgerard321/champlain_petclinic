@@ -474,7 +474,7 @@ class BillControllerIntegrationTest {
         }
 
         client.get()
-                .uri(uriBuilder -> uriBuilder.path("/bills")
+                .uri(uriBuilder -> uriBuilder.path("/bills/paginated")
                         .queryParam("page", 1)
                         .queryParam("size", 5)
                         .build())
@@ -503,7 +503,7 @@ class BillControllerIntegrationTest {
         }
 
         client.get()
-                .uri(uriBuilder -> uriBuilder.path("/bills")
+                .uri(uriBuilder -> uriBuilder.path("/bills/paginated")
                         .queryParam("page", 10)
                         .queryParam("size", 5)
                         .build())
@@ -694,7 +694,7 @@ class BillControllerIntegrationTest {
     @Test
     public void whenGetAllBillsByPageAndPageSizeIsInvalid__thenReturnsBadRequest() {
         client.get()
-                .uri(uriBuilder -> uriBuilder.path("/bills")
+                .uri(uriBuilder -> uriBuilder.path("/bills/paginated")
                         .queryParam("page", -1)
                         .queryParam("size", 0)
                         .build())

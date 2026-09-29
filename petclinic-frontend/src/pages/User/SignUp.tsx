@@ -7,6 +7,7 @@ import axiosInstance from '@/shared/api/axiosInstance';
 import { isAxiosError } from 'axios';
 import './SignUp.css';
 import SvgIcon from '@/shared/components/SvgIcon';
+import { provincesOfCanada } from '@/features/customers/utils/provinces';
 
 const SignUp: React.FC = (): JSX.Element => {
   const characterLimit = 60;
@@ -108,7 +109,9 @@ const SignUp: React.FC = (): JSX.Element => {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ): void => {
     const { name, value } = e.target;
     if (name in owner) {
       setOwner({ ...owner, [name]: value });
@@ -261,12 +264,18 @@ const SignUp: React.FC = (): JSX.Element => {
               )}
               <br />
               <label>Province: </label>
-              <input
-                type="text"
+              <select
                 name="province"
                 value={owner.province}
                 onChange={handleChange}
-              />
+              >
+                <option value="">Select Province</option>
+                {provincesOfCanada.map(province => (
+                  <option key={province} value={province}>
+                    {province}
+                  </option>
+                ))}
+              </select>
               {errorMessage.province && (
                 <span className="error">{errorMessage.province}</span>
               )}
