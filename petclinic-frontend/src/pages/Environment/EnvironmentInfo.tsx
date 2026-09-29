@@ -156,32 +156,34 @@ export default function EnvironmentInfo(): JSX.Element {
                     </div>
                   )}
 
-                  <Table bordered size="sm" className="envinfo-table">
-                    <thead>
-                      <tr>
-                        <th style={{ width: '38%' }}>Property</th>
-                        <th>Value</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {state === 'found' && info ? (
-                        toRows(info).map(row => (
-                          <tr key={row.label}>
-                            <td>{row.label}</td>
-                            <td>{row.value}</td>
-                          </tr>
-                        ))
-                      ) : (
+                  <div className="envinfo-table-wrap">
+                    <Table className="envinfo-table">
+                      <thead>
                         <tr>
-                          <td colSpan={2} className="text-center text-muted">
-                            {state === 'loading'
-                              ? 'Contacting the api-gateway...'
-                              : 'No environment data returned by this backend.'}
-                          </td>
+                          <th className="envinfo-col-key">Property</th>
+                          <th className="envinfo-col-value">Value</th>
                         </tr>
-                      )}
-                    </tbody>
-                  </Table>
+                      </thead>
+                      <tbody>
+                        {state === 'found' && info ? (
+                          toRows(info).map(row => (
+                            <tr key={row.label}>
+                              <td className="envinfo-col-key">{row.label}</td>
+                              <td className="envinfo-col-value">{row.value}</td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan={2} className="envinfo-empty">
+                              {state === 'loading'
+                                ? 'Contacting the api-gateway...'
+                                : 'No environment data returned by this backend.'}
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </Table>
+                  </div>
                 </Card.Body>
               </Card>
             </Reveal>

@@ -1,7 +1,17 @@
+/* NOTE: every rule below is scoped under .envinfo-root on purpose.
+   Other pages in this app define unscoped global rules such as
+   `.table th { color: #fff }`, `th, td { padding: 12px }` and
+   `.card button[type='submit'] { min-width: 10rem }`.
+   Those leak into this route and break the layout, so the higher
+   specificity of the descendant selectors here is what keeps this page
+   rendering correctly. */
+
 .envinfo-root {
   background: var(--bg, #ffffff);
   color: var(--text, #0f172a);
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .envinfo-intro {
@@ -12,7 +22,11 @@
       rgba(37, 99, 235, 0.06),
       transparent 60%
     ),
-    radial-gradient(600px 140px at 80% -40px, rgba(234, 179, 8, 0.08), transparent 70%);
+    radial-gradient(
+      600px 140px at 80% -40px,
+      rgba(234, 179, 8, 0.08),
+      transparent 70%
+    );
 }
 
 .envinfo-intro-inner {
@@ -32,18 +46,27 @@
   color: var(--muted, #475569);
 }
 
+/* Let the footer sit at the bottom on short pages */
+.envinfo-root > .container {
+  flex: 1 0 auto;
+  width: 100%;
+}
+
 .envinfo-card {
-  border: 1px solid var(--ring, #eef2f7);
+  background: var(--surface, #ffffff);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(2, 6, 23, 0.06);
 }
 
 .envinfo-summary {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 12px 16px;
   padding-bottom: 16px;
   margin-bottom: 16px;
-  border-bottom: 1px solid var(--ring, #eef2f7);
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .envinfo-summary-item {
@@ -58,8 +81,16 @@
   color: var(--muted, #475569);
 }
 
-.envinfo-summary > .btn {
-  margin-left: auto;
+/* Reset the global `.card button[type='submit'] { min-width: 10rem }` rule */
+.envinfo-root .envinfo-summary > .btn {
+  margin: 0 0 0 auto;
+  min-width: 0;
+  max-width: none;
+  padding: 0.25rem 0.9rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  white-space: nowrap;
+  flex: 0 0 auto;
 }
 
 .envinfo-alert {
@@ -75,23 +106,117 @@
   color: #9a3412;
 }
 
-.envinfo-url {
-  font-size: 0.88rem;
-  color: var(--muted, #475569);
-  margin-bottom: 12px;
-  word-break: break-all;
+.envinfo-alert code {
+  background: rgba(154, 52, 18, 0.08);
+  color: #7c2d12;
+  padding: 1px 5px;
+  border-radius: 4px;
 }
 
-.envinfo-table {
-  margin-bottom: 0;
+/* ------------------------------------------------------------------ */
+/* Table                                                              */
+/* ------------------------------------------------------------------ */
+
+/* The wrapper owns the horizontal overflow so the card never stretches */
+.envinfo-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
 }
 
-.envinfo-table th {
-  background: #f8fafc;
+.envinfo-root .envinfo-table {
+  width: 100% !important;
+  min-width: 0 !important;
+  margin: 0;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+  color: var(--text, #0f172a);
+}
+
+.envinfo-root .envinfo-table thead th {
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  padding: 10px 14px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.envinfo-root .envinfo-table tbody td {
+  font-size: 0.87rem;
+  color: #1e293b;
+  text-align: left;
+  vertical-align: top;
+  padding: 9px 14px;
+  background: transparent;
+  border-bottom: 1px solid #eef2f7;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.envinfo-root .envinfo-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.envinfo-root .envinfo-table tbody tr:nth-child(even) td {
+  background: #fafbfc;
+}
+
+/* Fixed column sizing, overriding the global percentage widths that other
+   pages apply to bare `.table th:nth-child(n)` */
+.envinfo-root .envinfo-table th.envinfo-col-key,
+.envinfo-root .envinfo-table td.envinfo-col-key {
+  width: 34% !important;
+  min-width: 0 !important;
+}
+
+.envinfo-root .envinfo-table th.envinfo-col-value,
+.envinfo-root .envinfo-table td.envinfo-col-value {
+  width: 66% !important;
+  min-width: 0 !important;
+  word-spacing: normal;
+}
+
+.envinfo-root .envinfo-table td.envinfo-col-key {
+  color: #475569;
   font-weight: 600;
 }
 
-.envinfo-table td {
-  font-size: 0.88rem;
-  word-break: break-word;
+.envinfo-root .envinfo-table td.envinfo-col-value {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.82rem;
+}
+
+.envinfo-root .envinfo-table .envinfo-empty {
+  text-align: center;
+  color: var(--muted, #475569);
+  padding: 28px 14px;
+}
+
+@media (max-width: 576px) {
+  .envinfo-intro {
+    padding: 32px 16px 20px;
+  }
+
+  .envinfo-root .envinfo-table th.envinfo-col-key,
+  .envinfo-root .envinfo-table td.envinfo-col-key {
+    width: 45% !important;
+  }
+
+  .envinfo-root .envinfo-table th.envinfo-col-value,
+  .envinfo-root .envinfo-table td.envinfo-col-value {
+    width: 55% !important;
+  }
+
+  .envinfo-root .envinfo-summary > .btn {
+    margin-left: 0;
+    width: 100%;
+  }
 }
