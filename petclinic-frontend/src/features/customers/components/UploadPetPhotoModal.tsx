@@ -2,6 +2,9 @@ import { FormEvent, useState, useRef } from 'react';
 import * as PropTypes from 'prop-types';
 import { addPetPhoto } from '../api/addPetPhoto';
 import './customers.css';
+import { useTranslation } from 'react-i18next';
+
+
 
 interface UploadPetPhotoModalProps {
   isOpen: boolean;
@@ -16,6 +19,7 @@ const UploadPetPhotoModal: React.FC<UploadPetPhotoModalProps> = ({
   onClose,
   onPhotoUploaded,
 }): JSX.Element | null => {
+  const { t } = useTranslation('customers');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const [isUploading, setIsUploading] = useState(false);
@@ -31,12 +35,16 @@ const UploadPetPhotoModal: React.FC<UploadPetPhotoModalProps> = ({
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      setErrors({ file: 'Please select an image file (JPG, PNG, etc.)' });
+      setErrors({
+        file: t('uploadPetPhotoModal.alert.photoRequired'),
+      });
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setErrors({ file: 'File size must be less than 5MB' });
+      setErrors({
+        file: t('uploadPetPhotoModal.alert.photoSize'),
+      });
       return;
     }
 
@@ -52,7 +60,9 @@ const UploadPetPhotoModal: React.FC<UploadPetPhotoModalProps> = ({
     e.preventDefault();
 
     if (!selectedFile) {
-      setErrors({ file: 'Please select a file' });
+      setErrors({
+        file: t('uploadPetPhotoModal.alert.fileRequired'),
+      });
       return;
     }
 
@@ -67,7 +77,9 @@ const UploadPetPhotoModal: React.FC<UploadPetPhotoModalProps> = ({
       setPreviewUrl('');
     } catch (error) {
       console.error('Error uploading pet photo:', error);
-      setErrors({ upload: 'Failed to upload pet photo. Please try again.' });
+      setErrors({
+        upload: t('uploadPetPhotoModal.alert.uploadFailed'),
+      });
     } finally {
       setIsUploading(false);
     }
@@ -88,7 +100,7 @@ const UploadPetPhotoModal: React.FC<UploadPetPhotoModalProps> = ({
     <div className="modal-overlay" onClick={handleClose}>
       <div className="modal-content" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Upload Pet Photo</h2>
+          <h2>{t('uploadPetPhotoModal.title')}</h2>
           <button
             type="button"
             className="close-button"
@@ -102,7 +114,9 @@ const UploadPetPhotoModal: React.FC<UploadPetPhotoModalProps> = ({
         <form onSubmit={handleSubmit} className="modal-body">
           <div className="form-group">
             <div className="file-input-row">
-              <label htmlFor="photo-upload">Select Photo:</label>
+              <label htmlFor="photo-upload">
+                {t('uploadPetPhotoModal.selectPhoto')}
+              </label>
               <div className="file-input-wrapper">
                 <input
                   ref={fileInputRef}
@@ -119,7 +133,7 @@ const UploadPetPhotoModal: React.FC<UploadPetPhotoModalProps> = ({
                   disabled={isUploading}
                   className="file-select-button"
                 >
-                  Choose File
+                  {t('uploadPetPhotoModal.chooseFile')}
                 </button>
                 {selectedFile && (
                   <span className="file-name" title={selectedFile.name}>
@@ -133,11 +147,11 @@ const UploadPetPhotoModal: React.FC<UploadPetPhotoModalProps> = ({
 
           {previewUrl && (
             <div className="form-group">
-              <label>Preview:</label>
+              <label>{t('uploadPetPhotoModal.preview')}</label>
               <div className="image-preview">
                 <img
                   src={previewUrl}
-                  alt="Preview"
+                  alt={t('uploadPetPhotoModal.preview')}
                   style={{
                     maxWidth: '200px',
                     maxHeight: '200px',
@@ -161,14 +175,16 @@ const UploadPetPhotoModal: React.FC<UploadPetPhotoModalProps> = ({
               disabled={isUploading}
               className="cancel-button"
             >
-              Cancel
+              {t('uploadPetPhotoModal.cancelButton')}
             </button>
             <button
               type="submit"
               disabled={!selectedFile || isUploading}
               className={`submit-button ${!selectedFile || isUploading ? 'disabled' : ''}`}
             >
-              {isUploading ? 'Uploading...' : 'Upload Photo'}
+              {isUploading
+                  ? t('uploadPetPhotoModal.uploading')
+                  : t('uploadPetPhotoModal.uploadPhoto')}
             </button>
           </div>
         </form>

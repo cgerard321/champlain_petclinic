@@ -3,7 +3,7 @@ import * as PropTypes from 'prop-types';
 import { addPetPhoto } from '../api/addPetPhoto';
 import { useTranslation } from 'react-i18next';
 
-const { t } = useTranslation('customers');
+
 
 interface UploadPetPhotoProps {
   petId: string;
@@ -16,6 +16,7 @@ const UploadPetPhoto: React.FC<UploadPetPhotoProps> = ({
   onPhotoUploaded,
   disabled = false,
 }) => {
+    const { t } = useTranslation('customers');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
 

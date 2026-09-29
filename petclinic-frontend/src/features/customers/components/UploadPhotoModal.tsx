@@ -2,6 +2,9 @@ import { FormEvent, useState, useRef } from 'react';
 import * as PropTypes from 'prop-types';
 import { uploadCustomerPhoto } from '../api/uploadCustomerPhoto.ts';
 import './customers.css';
+import { useTranslation } from 'react-i18next';
+
+
 
 interface UploadPhotoModalProps {
   customerId: string;
@@ -16,6 +19,7 @@ const UploadPhotoModal: React.FC<UploadPhotoModalProps> = ({
   onClose,
   onPhotoUploaded,
 }): JSX.Element | null => {
+  const { t } = useTranslation('customers');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const [isUploading, setIsUploading] = useState(false);
@@ -31,12 +35,16 @@ const UploadPhotoModal: React.FC<UploadPhotoModalProps> = ({
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      setErrors({ file: 'Please select an image file (JPG, PNG, etc.)' });
+      setErrors({
+        file: t('uploadPhotoModal.errors.invalidFileType'),
+      });
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setErrors({ file: 'File size must be less than 5MB' });
+      setErrors({
+        file: t('uploadPhotoModal.errors.fileTooLarge'),
+      });
       return;
     }
 
@@ -54,7 +62,9 @@ const UploadPhotoModal: React.FC<UploadPhotoModalProps> = ({
     e.preventDefault();
 
     if (!selectedFile) {
-      setErrors({ file: 'Please select a file' });
+      setErrors({
+        file: t('uploadPhotoModal.errors.noFileSelected'),
+      });
       return;
     }
 
@@ -69,7 +79,9 @@ const UploadPhotoModal: React.FC<UploadPhotoModalProps> = ({
       setPreviewUrl('');
     } catch (error) {
       console.error('Error uploading photo:', error);
-      setErrors({ upload: 'Failed to upload photo. Please try again.' });
+      setErrors({
+        upload: t('uploadPhotoModal.errors.uploadFailed'),
+      });
     } finally {
       setIsUploading(false);
     }
@@ -92,7 +104,7 @@ const UploadPhotoModal: React.FC<UploadPhotoModalProps> = ({
     <div className="modal-overlay" onClick={handleClose}>
       <div className="modal-content" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Upload Profile Photo</h2>
+          <h2>{t('uploadPhotoModal.title')}</h2>
           <button
             type="button"
             className="close-button"
@@ -106,7 +118,9 @@ const UploadPhotoModal: React.FC<UploadPhotoModalProps> = ({
         <form onSubmit={handleSubmit} className="modal-body">
           <div className="form-group">
             <div className="file-input-row">
-              <label htmlFor="photo-upload">Select Photo:</label>
+              <label htmlFor="photo-upload">
+                {t('uploadPhotoModal.selectPhoto')}
+              </label>
               <div className="file-input-wrapper">
                 <input
                   ref={fileInputRef}
@@ -123,7 +137,7 @@ const UploadPhotoModal: React.FC<UploadPhotoModalProps> = ({
                   disabled={isUploading}
                   className="file-select-button"
                 >
-                  Choose File
+                  {t('uploadPhotoModal.chooseFile')}
                 </button>
                 {selectedFile && (
                   <span className="file-name" title={selectedFile.name}>
@@ -137,7 +151,7 @@ const UploadPhotoModal: React.FC<UploadPhotoModalProps> = ({
 
           {previewUrl && (
             <div className="form-group">
-              <label>Preview:</label>
+              <label>{t('uploadPhotoModal.preview')}</label>
               <div className="image-preview">
                 <img
                   src={previewUrl}
@@ -165,14 +179,16 @@ const UploadPhotoModal: React.FC<UploadPhotoModalProps> = ({
               disabled={isUploading}
               className="cancel-button"
             >
-              Cancel
+              {t('uploadPhotoModal.cancel')}
             </button>
             <button
               type="submit"
               disabled={!selectedFile || isUploading}
               className={`submit-button ${!selectedFile || isUploading ? 'disabled' : ''}`}
             >
-              {isUploading ? 'Uploading...' : 'Upload Photo'}
+              {isUploading
+                  ? t('uploadPhotoModal.uploading')
+                  : t('uploadPhotoModal.uploadPhoto')}
             </button>
           </div>
         </form>
