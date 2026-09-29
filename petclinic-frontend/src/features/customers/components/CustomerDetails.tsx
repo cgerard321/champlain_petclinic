@@ -52,7 +52,7 @@ const CustomerDetails: FC = () => {
 
       // Fetch pets by customer ID
       const petsResponse = await axiosInstance.get(
-        `/owners/${customerId}/pets`,
+        `/pets/customers/${customerId}/pets`,
         {
           useV2: false,
         }
@@ -254,7 +254,7 @@ const CustomerDetails: FC = () => {
       }
 
       const petsResponse = await axiosInstance.get(
-        `/owners/${customerId}/pets`,
+        `/pets/customers/${customerId}/pets`,
         {
           useV2: false,
         }

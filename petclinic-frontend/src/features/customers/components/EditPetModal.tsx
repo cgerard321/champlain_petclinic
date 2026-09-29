@@ -211,7 +211,7 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
     setIsSubmitting(true);
     try {
       const petRequest: PetRequestModel = {
-        ownerId: customerId,
+        customerId,
         name: pet.name,
         petTypeId: pet.petTypeId,
         isActive: pet.isActive ? 'true' : 'false',

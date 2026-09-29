@@ -87,7 +87,7 @@ class PetServiceImplTest {
                     assertEquals(pet.getName(), foundPet.getName());
                     assertEquals(pet.getPetTypeId(), foundPet.getPetTypeId());
                     assertEquals(pet.getPhotoId(), foundPet.getPhotoId());
-                    assertEquals(pet.getOwnerId(), foundPet.getOwnerId());
+                    assertEquals(pet.getCustomerId(), foundPet.getCustomerId());
                     assertEquals(pet.getBirthDate(), foundPet.getBirthDate());
                 })
                 .verifyComplete();
@@ -100,16 +100,16 @@ class PetServiceImplTest {
                 .name("Pet Name")
                 .photoId("12314151")
                 .birthDate(date)
-                .ownerId("ownerId-123")
+                .customerId("customerId-123")
                 .build();
 
         List<PetResponseDTO> pets = new ArrayList<>();
         pets.add(petResponseDTO);
 
-        Flux<PetResponseDTO> returnAllOwners = Flux.just(petResponseDTO);
+        Flux<PetResponseDTO> returnAllPets = Flux.just(petResponseDTO);
 
         StepVerifier
-                .create(returnAllOwners)
+                .create(returnAllPets)
                 .expectNextMatches(petDto -> petDto.getPetId().equals(petResponseDTO.getPetId()))
                 .expectComplete()
                 .verify();
@@ -118,11 +118,11 @@ class PetServiceImplTest {
  */
 /*
     @Test
-    void findPetsByOwnerId() {
+    void findPetsByCustomerId() {
         Pet pet = buildPet();
-        String OWNER_ID = pet.getOwnerId();
-        when(repo.findAllPetByOwnerId(anyString())).thenReturn(Flux.just(pet));
-        Flux<PetResponseDTO> petFlux = petService.getPetsByOwnerId(OWNER_ID);
+        String CUSTOMER_ID = pet.getCustomerId();
+        when(repo.findAllPetByCustomerId(anyString())).thenReturn(Flux.just(pet));
+        Flux<PetResponseDTO> petFlux = petService.getPetsByCustomerId(CUSTOMER_ID);
         StepVerifier
                 .create(petFlux)
                 .consumeNextWith(foundPet -> {
@@ -130,7 +130,7 @@ class PetServiceImplTest {
                     assertEquals(pet.getName(), foundPet.getName());
                     assertEquals(pet.getPetTypeId(), foundPet.getPetTypeId());
                     assertEquals(pet.getPhotoId(), foundPet.getPhotoId());
-                    assertEquals(pet.getOwnerId(), foundPet.getOwnerId());
+                    assertEquals(pet.getCustomerId(), foundPet.getCustomerId());
                     assertEquals(pet.getBirthDate(), foundPet.getBirthDate());
                     assertEquals(pet.getIsActive(), foundPet.getIsActive());
                 })
@@ -248,7 +248,7 @@ class PetServiceImplTest {
         return Pet.builder()
                 .id("55")
                 .petId("petId-123")
-                .ownerId("ownerId-1234")
+                .customerId("customerId-1234")
                 .name("Test Pet")
                 .birthDate(date)
                 .petTypeId("5")

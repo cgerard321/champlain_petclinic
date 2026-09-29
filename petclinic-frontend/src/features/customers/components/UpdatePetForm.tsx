@@ -19,7 +19,10 @@ const petTypeOptions: { [key: string]: string } = {
 
 const UpdatePetForm: React.FC = (): JSX.Element => {
   const navigate = useNavigate();
-  const { ownerId, petId } = useParams<{ ownerId: string; petId: string }>();
+  const { customerId, petId } = useParams<{
+    customerId: string;
+    petId: string;
+  }>();
   const [pet, setPet] = useState<PetResponseModel | null>(null);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [successMessage, setSuccessMessage] = useState<string>('');
@@ -31,7 +34,7 @@ const UpdatePetForm: React.FC = (): JSX.Element => {
     const fetchPetData = async (): Promise<void> => {
       if (petId) {
         try {
-          const response = await getPet(petId, ownerId);
+          const response = await getPet(petId, customerId);
           const petData: PetResponseModel = response.data;
           setPet({
             ...petData,
@@ -50,7 +53,7 @@ const UpdatePetForm: React.FC = (): JSX.Element => {
     fetchPetData().catch(error =>
       console.error('Error in fetchPetData:', error)
     );
-  }, [petId, ownerId]);
+  }, [petId, customerId]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -85,9 +88,9 @@ const UpdatePetForm: React.FC = (): JSX.Element => {
     event: FormEvent<HTMLFormElement>
   ): Promise<void> => {
     event.preventDefault();
-    if (!validate() || !pet || !ownerId || !petId) return;
+    if (!validate() || !pet || !customerId || !petId) return;
     const petRequestData: PetRequestModel = {
-      ownerId: pet.ownerId,
+      customerId: pet.customerId,
       name: pet.name,
       birthDate: pet.birthDate,
       petTypeId: pet.petTypeId,
@@ -107,11 +110,11 @@ const UpdatePetForm: React.FC = (): JSX.Element => {
   };
 
   const handleDelete = async (): Promise<void> => {
-    if (petId && ownerId) {
+    if (petId && customerId) {
       try {
         const response = await deletePet(petId);
         if (response.status === 200) {
-          navigate(`/customers/${response.data.ownerId}`);
+          navigate(`/customers/${response.data.customerId}`);
         }
       } catch (error) {
         console.error('Error deleting pet:', error);
@@ -121,13 +124,13 @@ const UpdatePetForm: React.FC = (): JSX.Element => {
 
   const handleCancel = (): void => {
     if (pet) {
-      navigate(`/customers/${pet.ownerId}`);
+      navigate(`/customers/${pet.customerId}`);
     }
   };
 
   const closeUpdateModal = (): void => {
     setIsUpdateModalOpen(false);
-    navigate(`/customers/${pet?.ownerId}`);
+    navigate(`/customers/${pet?.customerId}`);
   };
 
   const closeDeleteModal = (): void => {

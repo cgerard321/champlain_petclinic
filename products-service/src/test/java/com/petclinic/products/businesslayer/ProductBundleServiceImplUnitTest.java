@@ -21,7 +21,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -101,7 +102,7 @@ public class ProductBundleServiceImplUnitTest {
 
     @Test
     public void testCreateProductBundle_Success() {
-        when(productRepository.findAllById(productIds)).thenReturn(Flux.fromIterable(products));
+        when(productRepository.findAllByProductIdIn(productIds)).thenReturn(Flux.fromIterable(products));
 
         when(bundleRepository.save(any(ProductBundle.class))).thenAnswer(invocation -> {
             ProductBundle bundle = invocation.getArgument(0);
@@ -113,27 +114,27 @@ public class ProductBundleServiceImplUnitTest {
                 .expectNextMatches(response -> response.getBundleName().equals("Bundle 1"))
                 .verifyComplete();
 
-        verify(productRepository, times(1)).findAllById(productIds);
+        verify(productRepository, times(1)).findAllByProductIdIn(productIds);
         verify(bundleRepository, times(1)).save(any(ProductBundle.class));
     }
 
     @Test
     public void testCreateProductBundle_ProductNotFound() {
-        when(productRepository.findAllById(productIds)).thenReturn(Flux.just(products.get(0)));
+        when(productRepository.findAllByProductIdIn(productIds)).thenReturn(Flux.just(products.get(0)));
 
         StepVerifier.create(productBundleService.createProductBundle(Mono.just(requestModel)))
                 .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
                         throwable.getMessage().equals("One or more products not found"))
                 .verify();
 
-        verify(productRepository, times(1)).findAllById(productIds);
+        verify(productRepository, times(1)).findAllByProductIdIn(productIds);
         verify(bundleRepository, times(0)).save(any(ProductBundle.class));
     }
 
     @Test
     public void testUpdateProductBundle_Success() {
         when(bundleRepository.findByBundleId("bundle1")).thenReturn(Mono.just(existingBundle));
-        when(productRepository.findAllById(productIds)).thenReturn(Flux.fromIterable(products));
+        when(productRepository.findAllByProductIdIn(productIds)).thenReturn(Flux.fromIterable(products));
         when(bundleRepository.save(any(ProductBundle.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
 
         StepVerifier.create(productBundleService.updateProductBundle("bundle1", Mono.just(requestModel)))
@@ -141,7 +142,7 @@ public class ProductBundleServiceImplUnitTest {
                 .verifyComplete();
 
         verify(bundleRepository, times(1)).findByBundleId("bundle1");
-        verify(productRepository, times(1)).findAllById(productIds);
+        verify(productRepository, times(1)).findAllByProductIdIn(productIds);
         verify(bundleRepository, times(1)).save(any(ProductBundle.class));
     }
 
@@ -155,14 +156,14 @@ public class ProductBundleServiceImplUnitTest {
                 .verify();
 
         verify(bundleRepository, times(1)).findByBundleId("bundle1");
-        verify(productRepository, times(0)).findAllById(anyList());
+        verify(productRepository, times(0)).findAllByProductIdIn(anyList());
         verify(bundleRepository, times(0)).save(any(ProductBundle.class));
     }
 
     @Test
     public void testUpdateProductBundle_ProductNotFound() {
         when(bundleRepository.findByBundleId("bundle1")).thenReturn(Mono.just(existingBundle));
-        when(productRepository.findAllById(productIds)).thenReturn(Flux.just(products.get(0)));
+        when(productRepository.findAllByProductIdIn(productIds)).thenReturn(Flux.just(products.get(0)));
 
         StepVerifier.create(productBundleService.updateProductBundle("bundle1", Mono.just(requestModel)))
                 .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
@@ -170,7 +171,7 @@ public class ProductBundleServiceImplUnitTest {
                 .verify();
 
         verify(bundleRepository, times(1)).findByBundleId("bundle1");
-        verify(productRepository, times(1)).findAllById(productIds);
+        verify(productRepository, times(1)).findAllByProductIdIn(productIds);
         verify(bundleRepository, times(0)).save(any(ProductBundle.class));
     }
 

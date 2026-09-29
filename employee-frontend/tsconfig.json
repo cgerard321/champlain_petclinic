@@ -20,7 +20,6 @@
       "@core/*": ["./src/app/core/*"],
       "@features/*": ["./src/app/features/*"],
       "@app/*": ["./src/app/*"],
-      "@layout/*": ["./src/app/layout/*"],
       "@environments/*": ["./src/environments/*"],
       "@layout/*": ["./src/app/layout/*"]
     }
