@@ -16,9 +16,7 @@ export function LanguageSwitcher(): JSX.Element {
         type="button"
         onClick={() => changeLanguage('en')}
         className={`btn btn-sm ${
-          currentLang.startsWith('en')
-            ? 'btn-primary'
-            : 'btn-outline-secondary'
+          currentLang.startsWith('en') ? 'btn-primary' : 'btn-outline-secondary'
         }`}
       >
         EN
@@ -28,9 +26,7 @@ export function LanguageSwitcher(): JSX.Element {
         type="button"
         onClick={() => changeLanguage('fr')}
         className={`btn btn-sm ${
-          currentLang.startsWith('fr')
-            ? 'btn-primary' 
-              : 'btn-outline-secondary'
+          currentLang.startsWith('fr') ? 'btn-primary' : 'btn-outline-secondary'
         }`}
       >
         FR
