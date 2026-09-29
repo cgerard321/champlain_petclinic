@@ -49,6 +49,9 @@ spring:
 ---
 #docker
 spring:
+  sql:
+    init:
+      mode: always
   codec:
     max-in-memory-size: 16MB
   config:
