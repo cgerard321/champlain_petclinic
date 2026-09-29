@@ -466,7 +466,7 @@ public class BillServiceImplTest {
                 .userId("owner-456")
                 .username("alice.smith")
                 .email("alice.smith@example.com")
-                .roles(Set.of())
+                .roles(Collections.emptySet())
                 .build();
         Mockito.when(authClient.getUserById("owner-456", "JWTToken"))
                 .thenReturn(Mono.just(userDetails));
@@ -1006,7 +1006,84 @@ public void testGenerateBillPdf_BillNotFound() {
                 .expectNext(new BigDecimal(0.0))
                 .verifyComplete();
     }
+    //test for the ticket already paid bill
+    @Test
+    void processPayment_AlreadyPaidBill_ShouldReturnError() {
+        String customerId = "customerId-1";
+        String billId = "billId-1";
+        String jwtToken = "Bearer faketoken";
 
+        Bill bill = buildBill();
+        bill.setBillStatus(BillStatus.PAID);
+
+        PaymentRequestDTO paymentRequest =
+                new PaymentRequestDTO(
+                        "1234567812345678",
+                        "123",
+                        "12/30"
+                );
+
+        UserDetails user = new UserDetails();
+        user.setUserId(customerId);
+        user.setUsername("testUser");
+        user.setEmail("test@example.com");
+
+        when(authClient.getUserById(jwtToken, customerId)).thenReturn(Mono.just(user));
+
+        when(repo.findByCustomerIdAndBillId(customerId, billId)).thenReturn(Mono.just(bill));
+
+        StepVerifier.create(
+                        billService.processPayment(
+                                customerId, billId, paymentRequest, jwtToken)
+                )
+                .expectErrorMatches(error -> error instanceof InvalidPaymentException &&
+                                error.getMessage().equals("Bill has already been paid"
+                                )
+                )
+                .verify();
+
+        assertEquals(BillStatus.PAID, bill.getBillStatus());
+
+        verify(repo, never()).save(any(Bill.class));
+        verify(mailService, never()).sendMail(any(Mail.class));
+    }
+    //this test to prove that an OVERDUE bill can also be paid
+    @Test
+    void processPayment_OverdueBill_ShouldBecomePaid() {
+        String customerId = "customerId-1";
+        String billId = "billId-1";
+        String jwtToken = "Bearer faketoken";
+
+        Bill bill = buildBill();
+        bill.setBillStatus(BillStatus.OVERDUE);
+
+        PaymentRequestDTO paymentRequest =
+                new PaymentRequestDTO(
+                        "1234567812345678",
+                        "123",
+                        "12/30");
+
+        UserDetails user = new UserDetails();
+        user.setUserId(customerId);
+        user.setUsername("testUser");
+        user.setEmail("test@example.com");
+
+        when(authClient.getUserById(jwtToken, customerId)).thenReturn(Mono.just(user));
+
+        when(repo.findByCustomerIdAndBillId(customerId, billId)).thenReturn(Mono.just(bill));
+
+        when(mailService.sendMail(any(Mail.class))).thenReturn(null);
+
+        when(repo.save(any(Bill.class)))
+                .thenAnswer(answer -> Mono.just(answer.getArgument(0)));
+        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest, jwtToken))
+                .consumeNextWith(response -> assertEquals(BillStatus.PAID, response.getBillStatus())
+                )
+                .verifyComplete();
+
+        verify(repo).save(bill);
+        verify(mailService).sendMail(any(Mail.class));
+    }
     @Test
     void processPayment_Success() {
 
@@ -1023,10 +1100,8 @@ public void testGenerateBillPdf_BillNotFound() {
         fakeUser.setUsername("fakeUser");
         fakeUser.setEmail("fakeUser@example.com");
 
-        when(authClient.getUserById(anyString(), anyString()))
-                .thenReturn(Mono.just(fakeUser));
-        when(mailService.sendMail(any(Mail.class)))
-                .thenReturn(null);
+        when(authClient.getUserById(anyString(), anyString())).thenReturn(Mono.just(fakeUser));
+        when(mailService.sendMail(any(Mail.class))).thenReturn(null);
 
 
         when(repo.findByCustomerIdAndBillId(customerId, billId)).thenReturn(Mono.just(bill));
