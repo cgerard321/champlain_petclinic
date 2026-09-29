@@ -181,12 +181,12 @@ public class BillServiceImpl implements BillService{
                     }
                     // Fetch Vet and Owner details
                     Mono<VetResponseDTO> vetMono = vetClient.getVetByVetId(dto.getVetId());
-                    Mono<CustomerResponseDTO> ownerMono = customerServiceClient.getCustomerByCustomerId(dto.getCustomerId())
+                    Mono<CustomerResponseDTO> customerMono = customerServiceClient.getCustomerByCustomerId(dto.getCustomerId())
                             .switchIfEmpty(Mono.error(new ResponseStatusException(
                                     HttpStatus.BAD_REQUEST, "Customer ID does not exist"
                             )));
 
-                    return Mono.zip(vetMono, ownerMono, Mono.just(dto));
+                    return Mono.zip(vetMono, customerMono, Mono.just(dto));
                 })
                 .flatMap(tuple -> {
                     VetResponseDTO vet = tuple.getT1();
@@ -444,12 +444,12 @@ public class BillServiceImpl implements BillService{
     @Override
     public Flux<BillResponseDTO> getBillsByCustomerId(String customerId) {
         // Fetch the owner info first
-        Mono<CustomerResponseDTO> ownerMono = customerServiceClient.getCustomerByCustomerId(customerId)
+        Mono<CustomerResponseDTO> customerMono = customerServiceClient.getCustomerByCustomerId(customerId)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Customer ID does not exist"
                 )));
 
-        return ownerMono.flatMapMany(owner ->
+        return customerMono.flatMapMany(owner ->
                 billRepository.findByCustomerId(customerId)
                         // Only return bills where first/last name match the owner record
                         .filter(bill -> bill.getOwnerFirstName().equals(owner.getFirstName())
