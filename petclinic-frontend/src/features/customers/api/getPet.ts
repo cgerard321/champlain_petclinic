@@ -4,11 +4,11 @@ import { AxiosResponse } from 'axios';
 
 export const getPet = async (
   petId: string,
-  ownerId?: string
+  customerId?: string
 ): Promise<AxiosResponse<PetResponseModel>> => {
-  if (ownerId) {
+  if (customerId) {
     return await axiosInstance.get<PetResponseModel>(
-      `/pets/owners/${ownerId}/pets/${petId}`,
+      `/pets/customers/${customerId}/pets/${petId}`,
       {
         useV2: false,
         params: { includePhoto: true },
