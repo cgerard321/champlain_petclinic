@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   IsAdmin,
   IsInventoryManager,
-  IsOwner,
+  IsCustomer,
   IsReceptionist,
   IsVet,
   useUser,
@@ -28,7 +28,7 @@ export function I18nTestNavBar(): JSX.Element {
   const isInventoryManager = IsInventoryManager();
   const isReceptionist = IsReceptionist();
   const isVet = IsVet();
-  const isOwner = IsOwner();
+  const isCustomer = IsCustomer();
   const [navbarOpen, setNavbarOpen] = useState(false);
   const [cartLoading, setCartLoading] = useState(false);
 
@@ -130,7 +130,7 @@ export function I18nTestNavBar(): JSX.Element {
                       {t('nav.bills')}
                     </Nav.Link>
                   )}
-                {isOwner && !hasStaffVisits && (
+                {isCustomer && !hasStaffVisits && (
                   <NavDropdown
                     title={t('nav.visits')}
                     id="owner-visits-dropdown"
@@ -213,7 +213,7 @@ export function I18nTestNavBar(): JSX.Element {
                     {t('nav.carts')}
                   </Nav.Link>
                 )}
-                {isOwner && (
+                {isCustomer && (
                   <Nav.Link
                     href="#"
                     onClick={e => {
@@ -246,7 +246,7 @@ export function I18nTestNavBar(): JSX.Element {
 
             {user?.userId ? (
               <NavDropdown title={user.username} id="user-dropdown">
-                {isOwner && (
+                {isCustomer && (
                   <NavDropdown.Item
                     as={Link}
                     to={AppRoutePaths.CustomerProfile}
@@ -254,7 +254,7 @@ export function I18nTestNavBar(): JSX.Element {
                     {t('nav.profile')}
                   </NavDropdown.Item>
                 )}
-                {isOwner && (
+                {isCustomer && (
                   <NavDropdown.Item
                     as={Link}
                     to={AppRoutePaths.CustomerProfileEdit}
