@@ -1,11 +1,11 @@
 import { PetTypeModel } from '../models/PetTypeModel';
-import snakeImg from '@/assets/Owners/snake.png';
-import catImg from '@/assets/Owners/cat.png';
-import dogImg from '@/assets/Owners/dog.png';
-import lizardImg from '@/assets/Owners/lizard.png';
-import hamsterImg from '@/assets/Owners/hamster.png';
-import birdImg from '@/assets/Owners/bird.png';
-import othersImg from '@/assets/Owners/others.png';
+import snakeImg from '@/assets/Customers/snake.png';
+import catImg from '@/assets/Customers/cat.png';
+import dogImg from '@/assets/Customers/dog.png';
+import lizardImg from '@/assets/Customers/lizard.png';
+import hamsterImg from '@/assets/Customers/hamster.png';
+import birdImg from '@/assets/Customers/bird.png';
+import othersImg from '@/assets/Customers/others.png';
 
 //mapping for existing pets with numeric IDs from DataSetupService
 const legacyPetTypeMapping: { [key: string]: string } = {
