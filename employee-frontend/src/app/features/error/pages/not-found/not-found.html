@@ -1,13 +1,11 @@
 <div class="error-wrapper">
   <div class="error-container">
-
     <h1>404</h1>
 
     <p>Oops! The page you are looking for does not exist.</p>
 
-    <form action="home">
-      <input type="submit" value="Go Back Home" />
+    <form (submit)="handleAction($event)"> <!-- Send any non-logged in user to Login instead of homepage-->
+      <input type="submit" [value]="isLoggedIn ? 'Go Back Home' : 'Retry Log In'" />
     </form>
-
   </div>
 </div>
