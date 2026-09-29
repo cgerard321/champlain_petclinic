@@ -152,7 +152,10 @@ public class ProductServiceImpl implements ProductService {
                             .map(file -> {
                                 response.setImage(file);
                                 return response;
-                            });
+                            })
+                            .onErrorResume(
+                                    FileNotFoundInFilesServiceException.class,
+                                    error -> Mono.just(response));
                 });
     }
 
@@ -166,7 +169,10 @@ public class ProductServiceImpl implements ProductService {
                 .map(file -> {
                     product.setImage(file);
                     return product;
-                });
+                })
+                .onErrorResume(
+                        FileNotFoundInFilesServiceException.class,
+                        error -> Mono.just(product));
     }
 
     @Override

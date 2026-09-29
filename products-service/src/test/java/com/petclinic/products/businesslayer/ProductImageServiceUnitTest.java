@@ -11,6 +11,7 @@ import com.petclinic.products.domainclientlayer.FileRequestDTO;
 import com.petclinic.products.domainclientlayer.FileResponseDTO;
 import com.petclinic.products.domainclientlayer.FilesServiceClient;
 import com.petclinic.products.presentationlayer.products.ProductRequestModel;
+import com.petclinic.products.presentationlayer.products.ProductResponseModel;
 import com.petclinic.products.utils.exceptions.FailedDependencyException;
 import com.petclinic.products.utils.exceptions.FileNotFoundInFilesServiceException;
 import org.junit.jupiter.api.Test;
@@ -101,6 +102,64 @@ class ProductImageServiceUnitTest {
                     assertArrayEquals(file.getFileData(), response.getImage().getFileData());
                 })
                 .verifyComplete();
+    }
+
+    @Test
+    void getLegacyProductKeepsImageIdWhenFileIsMissing() {
+        Product product = productWithImage(FILE_ID);
+
+        when(productRepository.findProductByProductId(PRODUCT_ID))
+                .thenReturn(Mono.just(product));
+        when(ratingRepository.findRatingsByProductId(PRODUCT_ID))
+                .thenReturn(Flux.empty());
+        when(filesServiceClient.getFile(FILE_ID))
+                .thenReturn(Mono.error(new FileNotFoundInFilesServiceException(
+                        "File was not found in Files Service")));
+
+        StepVerifier.create(productService.getProductByProductId(PRODUCT_ID, true))
+                .assertNext(response -> {
+                    assertEquals(FILE_ID, response.getImageId());
+                    assertNull(response.getImage());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void includeImageKeepsLegacyProductWhenFileIsMissing() {
+        ProductResponseModel response = ProductResponseModel.builder()
+                .productId(PRODUCT_ID)
+                .imageId(FILE_ID)
+                .build();
+
+        when(filesServiceClient.getFile(FILE_ID))
+                .thenReturn(Mono.error(new FileNotFoundInFilesServiceException(
+                        "File was not found in Files Service")));
+
+        StepVerifier.create(productService.includeImage(response))
+                .assertNext(result -> {
+                    assertEquals(FILE_ID, result.getImageId());
+                    assertNull(result.getImage());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void getProductPropagatesFilesServiceOutage() {
+        Product product = productWithImage(FILE_ID);
+
+        when(productRepository.findProductByProductId(PRODUCT_ID))
+                .thenReturn(Mono.just(product));
+        when(ratingRepository.findRatingsByProductId(PRODUCT_ID))
+                .thenReturn(Flux.empty());
+        when(filesServiceClient.getFile(FILE_ID))
+                .thenReturn(Mono.error(
+                        new FailedDependencyException("Files Service unavailable")));
+
+        StepVerifier.create(productService.getProductByProductId(PRODUCT_ID, true))
+                .expectErrorMatches(error ->
+                        error instanceof FailedDependencyException
+                                && error.getMessage().equals("Files Service unavailable"))
+                .verify();
     }
 
     @Test

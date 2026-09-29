@@ -5,7 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { isApiError } from '@core/models/api-error';
-import { ImageResponse } from '@features/prod/models/image.model';
+import { FileDetails } from '@features/prod/models/image.model';
 import { Product } from '@features/prod/models/product.model';
 import { ImageService } from '@features/prod/services/image.service';
 import { ProductService } from '@features/prod/services/product.service';
@@ -26,7 +26,7 @@ export class ProductDetailsDialog implements OnInit {
   private readonly imageService = inject(ImageService);
 
   protected readonly product = signal<Product | null>(null);
-  protected readonly image = signal<ImageResponse | null>(null);
+  protected readonly image = signal<FileDetails | null>(null);
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal<string | null>(null);
 
@@ -35,9 +35,17 @@ export class ProductDetailsDialog implements OnInit {
       next: (product) => {
         this.product.set(product);
         this.isLoading.set(false);
-        if (product.imageId) {
+        if (product.image?.fileData) {
+          this.image.set(product.image);
+        } else if (product.imageId) {
           this.imageService.getImage(product.imageId).subscribe({
-            next: (image) => this.image.set(image),
+            next: (image) =>
+              this.image.set({
+                fileId: image.imageId,
+                fileName: image.imageName,
+                fileType: image.imageType,
+                fileData: image.imageData,
+              }),
             error: () => undefined,
           });
         }

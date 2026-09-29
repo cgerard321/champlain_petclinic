@@ -33,7 +33,11 @@ public class FilesServiceClient {
                 .get()
                 .uri(filesServiceUrl + "/{fileId}", fileId)
                 .retrieve()
-                .onStatus(HttpStatus.NOT_FOUND::equals, resp -> Mono.error(new FailedDependencyException("Failed to get file from Files Service")))
+                .onStatus(
+                        HttpStatus.NOT_FOUND::equals,
+                        response -> Mono.error(
+                                new FileNotFoundInFilesServiceException(
+                                        "File was not found in Files Service")))
                 .onStatus(HttpStatus.BAD_REQUEST::equals, resp -> Mono.error(new BadRequestException("Invalid File Request Model")))
                 .onStatus(HttpStatusCode::isError, resp -> Mono.error(new FailedDependencyException("Failed to get file from Files Service")))
                 .bodyToMono(FileResponseDTO.class)
