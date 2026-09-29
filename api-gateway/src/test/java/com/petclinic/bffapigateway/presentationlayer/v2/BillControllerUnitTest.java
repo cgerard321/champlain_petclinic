@@ -96,7 +96,7 @@ private final String baseBillURL = "/api/v2/gateway/bills";
                 .thenReturn(Flux.just(billresponse, billresponse2));
 
         webTestClient.get()
-                .uri(uriBuilder -> uriBuilder.path(baseBillURL)
+                .uri(uriBuilder -> uriBuilder.path(baseBillURL + "/paginated")
                         .queryParam("page", 1)
                         .queryParam("size", 5)
                         .build())
@@ -115,7 +115,7 @@ private final String baseBillURL = "/api/v2/gateway/bills";
     @Test
     public void whenGetAllBillsByPageWithInvalidParameters_ThenReturnBadRequest() {
         webTestClient.get()
-                .uri(uriBuilder -> uriBuilder.path(baseBillURL)
+                .uri(uriBuilder -> uriBuilder.path(baseBillURL + "/paginated")
                         .queryParam("page", -1)
                         .queryParam("size", "invalid")
                         .build())
