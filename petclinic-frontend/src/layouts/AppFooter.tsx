@@ -47,6 +47,9 @@ export function AppFooter(): JSX.Element {
               <li>
                 <Link to="/contact">Contact</Link>
               </li>
+              <li>
+                <Link to="/environment-check">Environment Checker</Link>
+              </li>
             </ul>
           </Col>
 

@@ -282,6 +282,10 @@ export function NavBar(): JSX.Element {
                 </Nav.Link>
               </>
             )}
+
+            <Nav.Link as={Link} to={AppRoutePaths.EnvironmentInfo}>
+              Environment
+            </Nav.Link>
           </Nav>
         </Navbar.Collapse>
       </Container>
