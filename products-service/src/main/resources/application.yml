@@ -64,4 +64,3 @@ spring:
     password: ${DB_PASSWORD}
 
 server.port: 8080
-
