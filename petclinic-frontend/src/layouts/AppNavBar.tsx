@@ -86,6 +86,9 @@ export function NavBar(): JSX.Element {
             <Nav.Link as={Link} to={AppRoutePaths.Home}>
               Home
             </Nav.Link>
+            <Nav.Link as={Link} to={AppRoutePaths.Products}>
+              Shop
+            </Nav.Link>
             {
               // check if user is logged in
             }
@@ -203,9 +206,6 @@ export function NavBar(): JSX.Element {
                     Promos
                   </Nav.Link>
                 )}
-                <Nav.Link as={Link} to={AppRoutePaths.Products}>
-                  Shop
-                </Nav.Link>
                 {isAdmin && (
                   <Nav.Link as={Link} to={AppRoutePaths.Carts}>
                     Carts
