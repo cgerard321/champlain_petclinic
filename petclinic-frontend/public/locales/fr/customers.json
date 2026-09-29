@@ -1,0 +1,8 @@
+{
+  "title": "Détails du client",
+  "subtitle": "Gérez votre profil et vos animaux enregistrés.",
+  "buttons": {
+    "save": "Enregistrer les modifications",
+    "cancel": "Annuler"
+  }
+}
