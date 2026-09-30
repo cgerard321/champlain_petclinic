@@ -5,7 +5,7 @@ import com.petclinic.billing.domainclientlayer.Auth.AuthServiceClient;
 import com.petclinic.billing.domainclientlayer.Auth.UserDetails;
 import com.petclinic.billing.domainclientlayer.Mailing.Mail;
 import com.petclinic.billing.domainclientlayer.Mailing.MailService;
-import com.petclinic.billing.domainclientlayer.OwnerClient;
+import com.petclinic.billing.domainclientlayer.CustomerServiceClient;
 import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
@@ -34,7 +34,7 @@ public class BillServiceImpl implements BillService{
 
     private final BillRepository billRepository;
     private final VetClient vetClient;
-    private final OwnerClient ownerClient;
+    private final CustomerServiceClient customerServiceClient;
     private final AuthServiceClient authClient;
     private final MailService mailService;
 
@@ -207,16 +207,16 @@ public class BillServiceImpl implements BillService{
                     }
                     // Fetch Vet and Owner details
                     Mono<VetResponseDTO> vetMono = vetClient.getVetByVetId(dto.getVetId());
-                    Mono<OwnerResponseDTO> ownerMono = ownerClient.getOwnerByOwnerId(dto.getCustomerId())
+                    Mono<CustomerResponseDTO> customerMono = customerServiceClient.getCustomerByCustomerId(dto.getCustomerId())
                             .switchIfEmpty(Mono.error(new ResponseStatusException(
                                     HttpStatus.BAD_REQUEST, "Customer ID does not exist"
                             )));
 
-                    return Mono.zip(vetMono, ownerMono, Mono.just(dto));
+                    return Mono.zip(vetMono, customerMono, Mono.just(dto));
                 })
                 .flatMap(tuple -> {
                     VetResponseDTO vet = tuple.getT1();
-                    OwnerResponseDTO owner = tuple.getT2();
+                    CustomerResponseDTO owner = tuple.getT2();
                     BillRequestDTO dto = tuple.getT3();
 
                     // Map to Bill entity and set names
@@ -470,12 +470,12 @@ public class BillServiceImpl implements BillService{
     @Override
     public Flux<BillResponseDTO> getBillsByCustomerId(String customerId) {
         // Fetch the owner info first
-        Mono<OwnerResponseDTO> ownerMono = ownerClient.getOwnerByOwnerId(customerId)
+        Mono<CustomerResponseDTO> customerMono = customerServiceClient.getCustomerByCustomerId(customerId)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Customer ID does not exist"
                 )));
 
-        return ownerMono.flatMapMany(owner ->
+        return customerMono.flatMapMany(owner ->
                 billRepository.findByCustomerId(customerId)
                         // Only return bills where first/last name match the owner record
                         .filter(bill -> bill.getOwnerFirstName().equals(owner.getFirstName())
