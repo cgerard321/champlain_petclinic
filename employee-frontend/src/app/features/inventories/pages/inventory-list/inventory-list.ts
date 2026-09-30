@@ -7,10 +7,22 @@ import { Subscription } from 'rxjs';
 import { FormField, form, required, submit } from '@angular/forms/signals';
 
 import { isApiError, ApiError } from '@core/models/api-error';
-import { Inventory, InventoryRequest, INVENTORY_TYPES } from '@features/inventories/models/inventory.model';
+import {
+  Inventory,
+  InventoryRequest,
+  InventoryType,
+  INVENTORY_TYPES,
+} from '@features/inventories/models/inventory.model';
 import { InventoryService } from '@features/inventories/services/inventory-service';
 import { getInventoryPermissions } from '@shared/models/inventory-permissions';
 import { AuthState } from '@core/services/auth-state';
+
+// added — some existing inventories have a type outside the four the
+// dropdown offers (e.g. "Diagnostic Kits"), so when editing one of those
+// this checks whether its current type is even a valid option
+function isInventoryType(value: string): value is InventoryType {
+  return (INVENTORY_TYPES as readonly string[]).includes(value);
+}
 
 @Component({
   imports: [RouterLink, MatCardModule, MatIconModule, MatProgressSpinnerModule, FormField],
@@ -41,9 +53,14 @@ export class InventoryList implements OnInit, OnDestroy {
   protected readonly savingInventory = signal(false);
   protected readonly formError = signal<string | null>(null);
 
-  protected readonly newInventory = signal({
+  protected readonly inventoryTypes = INVENTORY_TYPES;
+
+  // explicit <InventoryRequest> here on purpose — without it, TS narrows
+  // inventoryType down to just 'Bandages' (the literal from the initial
+  // value below) and rejects setting it to any of the other three later
+  protected readonly newInventory = signal<InventoryRequest>({
     inventoryName: '',
-    inventoryType: '',
+    inventoryType: INVENTORY_TYPES[0],
     inventoryDescription: '',
   });
 
@@ -152,7 +169,10 @@ export class InventoryList implements OnInit, OnDestroy {
     this.editingInventoryId.set(inventory.inventoryId);
     this.newInventory.set({
       inventoryName: inventory.inventoryName,
-      inventoryType: inventory.inventoryType,
+      // the drop down  menu
+      inventoryType: isInventoryType(inventory.inventoryType)
+        ? inventory.inventoryType
+        : INVENTORY_TYPES[0],
       inventoryDescription: inventory.inventoryDescription,
     });
     this.showAddForm.set(true);
