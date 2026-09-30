@@ -1,9 +1,13 @@
 import { CurrencyPipe } from '@angular/common';
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { catchError, debounceTime, distinctUntilChanged, EMPTY, Subject, switchMap } from 'rxjs';
 
 import { isApiError } from '@core/models/api-error';
 import { AuthState } from '@core/services/auth-state';
@@ -21,6 +25,8 @@ import { Roles } from '@shared/models/roles';
     MatButtonModule,
     MatCardModule,
     MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
     MatProgressSpinnerModule,
     ProductThumbnail,
   ],
@@ -32,6 +38,8 @@ export class Prod implements OnInit {
   private readonly auth = inject(AuthState);
   private readonly productService = inject(ProductService);
   private readonly dialog = inject(MatDialog);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly productSearch = new Subject<string>();
 
   protected readonly products = signal<Product[]>([]);
   protected readonly isLoading = signal(false);
@@ -42,7 +50,35 @@ export class Prod implements OnInit {
   });
 
   ngOnInit(): void {
+    this.productSearch
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap((productName) => {
+          this.isLoading.set(true);
+          this.errorMessage.set(null);
+          return this.productService
+            .getProducts(productName ? { productName } : {})
+            .pipe(
+              catchError((error: unknown) => {
+                this.isLoading.set(false);
+                this.errorMessage.set(isApiError(error) ? error.message : 'Could not load products.');
+                return EMPTY;
+              }),
+            );
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((products) => {
+        this.products.set(products);
+        this.isLoading.set(false);
+      });
+
     this.loadProducts();
+  }
+
+  protected searchProducts(productName: string): void {
+    this.productSearch.next(productName.trim());
   }
 
   protected loadProducts(): void {

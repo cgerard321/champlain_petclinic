@@ -55,6 +55,14 @@ describe('ProductService', () => {
     expect(result?.map((item) => item.productId)).toEqual(['product-1', 'product-2']);
   });
 
+  it('sends a product name search parameter', () => {
+    service.getProducts({ productName: 'horse saddle' }).subscribe();
+
+    const request = http.expectOne('/api/gateway/products?productName=horse%20saddle');
+    expect(request.request.method).toBe('GET');
+    request.flush('');
+  });
+
   it('creates a product with JSON', () => {
     const requestBody: ProductRequest = {
       productName: 'Dog food',

@@ -161,6 +161,24 @@ class ProductControllerV1UnitTest {
         verify(productsServiceClient, times(1)).getAllProducts(null, null,null,null,null,null,null);
     }
 
+    @Test
+    void getAllProducts_withProductName_thenPassSearchToProductsService() {
+        when(productsServiceClient.getAllProducts(null, null, null, null, null, null, null, "horse"))
+                .thenReturn(Flux.just(productResponseDTO1));
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path(baseProductsURL)
+                        .queryParam("productName", "horse")
+                        .build())
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseDTO.class)
+                .hasSize(1);
+
+        verify(productsServiceClient).getAllProducts(null, null, null, null, null, null, null, "horse");
+    }
+
 //TODO: Rating
     @Test
     void whenGetAllProductsWithValidMinAndMaxRating_thenReturnFluxProductResponseDTO() {
