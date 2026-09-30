@@ -2,7 +2,7 @@ package com.petclinic.billing.businesslayer;
 
 import com.petclinic.billing.datalayer.Bill;
 import com.petclinic.billing.datalayer.BillRequestDTO;
-import com.petclinic.billing.datalayer.OwnerResponseDTO;
+import com.petclinic.billing.datalayer.CustomerResponseDTO;
 import com.petclinic.billing.datalayer.VetResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,7 +16,7 @@ public class RequestContextAdd {
     private BillRequestDTO billRequestDTO;
     private Bill bill;
     private VetResponseDTO vetDTO;
-    private OwnerResponseDTO ownerResponseDTO;
+    private CustomerResponseDTO customerResponseDTO;
 
     public RequestContextAdd(BillRequestDTO billRequestDTO) {
         this.billRequestDTO = billRequestDTO;
