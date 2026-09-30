@@ -38,7 +38,7 @@ class PetTypeRepoTest {
     }
 
     @Test
-    void getAllOwners_shouldSucceed() {
+    void getAllPetTypes_shouldSucceed() {
         PetType petType1= buildPetType();
 
         Publisher<PetType> setup = petTypeRepo.deleteAll().thenMany(petTypeRepo.save(petType1));

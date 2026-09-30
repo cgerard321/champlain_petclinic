@@ -7,8 +7,8 @@ import './AddForm.css';
 import { useUser } from '@/context/UserContext';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 import StarRating from '../../products/components/StarRating';
-import { OwnerResponseModel } from '../../customers/models/OwnerResponseModel';
-import { getOwner } from '../../customers/api/getOwner';
+import { CustomerResponseModel } from '../../customers/models/CustomerResponseModel.ts';
+import { getCustomer } from '../../customers/api/getCustomer.ts';
 
 import { cleanLite, isProfaneLite } from './ReviewProfanity';
 
@@ -39,13 +39,13 @@ const AddCustomerReviewForm: React.FC = (): JSX.Element => {
 
   useEffect(() => {
     if (user?.userId) {
-      getOwner(user.userId)
+      getCustomer(user.userId)
         .then(res => {
-          const data: OwnerResponseModel = res.data;
+          const data: CustomerResponseModel = res.data;
 
           setReview(prev => ({
             ...prev,
-            ownerId: data.ownerId,
+            ownerId: data.customerId,
             reviewerName: `${data.firstName} ${data.lastName}`,
           }));
         })

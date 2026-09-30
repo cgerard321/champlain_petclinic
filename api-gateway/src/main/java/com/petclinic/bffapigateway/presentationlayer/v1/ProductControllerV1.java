@@ -24,7 +24,7 @@ public class ProductControllerV1 {
 
     private final ProductsServiceClient productsServiceClient;
 
-    @SecuredEndpoint(allowedRoles = {Roles.ALL})
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping(value="", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ProductResponseDTO> getAllProducts(
             @RequestParam(required = false) Double minPrice,
@@ -94,14 +94,14 @@ public class ProductControllerV1 {
     //TODO: Product bundle
 
 
-    @SecuredEndpoint(allowedRoles = {Roles.ALL})
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping(value = "/bundles", produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<ProductBundleResponseDTO> getAllProductBundles() {
         return productsServiceClient.getAllProductBundles();
     }
 
 
-    @SecuredEndpoint(allowedRoles = {Roles.ALL})
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping(value = "/bundles/{bundleId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ProductBundleResponseDTO>> getProductBundleById(@PathVariable String bundleId) {
         return productsServiceClient.getProductBundleById(bundleId)

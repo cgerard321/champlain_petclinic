@@ -1,9 +1,8 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.Auth.*;
-import com.petclinic.bffapigateway.dtos.Cart.CartRequestDTO;
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.CustomerRequestDTO;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.CustomerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
 import com.petclinic.bffapigateway.exceptions.*;
@@ -11,19 +10,16 @@ import com.petclinic.bffapigateway.utils.Rethrower;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -123,9 +119,9 @@ public class AuthServiceClient {
     /*
     This shit is beyond cursed, but I do not care. This works, I only spent 6 HOURS OF MY LIFE.
      */
-    public Mono<OwnerResponseDTO> createUser(Mono<Register> model) {
+    public Mono<CustomerResponseDTO> createUser(Mono<Register> model) {
         return model.flatMap(register -> {
-            OwnerRequestDTO ownerRequestDTO = OwnerRequestDTO.builder()
+            CustomerRequestDTO customerRequestDTO = CustomerRequestDTO.builder()
                     .firstName(register.getOwner().getFirstName())
                     .lastName(register.getOwner().getLastName())
                     .address(register.getOwner().getAddress())
@@ -134,8 +130,8 @@ public class AuthServiceClient {
                     .telephone(register.getOwner().getTelephone())
                     .build();
 
-            return customersServiceClient.createOwner(Mono.just(ownerRequestDTO)).flatMap(ownerResponseDTO -> {
-                        register.setUserId(ownerResponseDTO.getOwnerId());
+            return customersServiceClient.createCustomer(Mono.just(customerRequestDTO)).flatMap(customerResponseDTO -> {
+                        register.setUserId(customerResponseDTO.getCustomerId());
 
                         return webClientBuilder.build().post()
                                 .uri(authServiceUrl + "/users")
@@ -147,10 +143,10 @@ public class AuthServiceClient {
                                                 x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
                                 )
                                 .bodyToMono(UserPasswordLessDTO.class)
-                                .thenReturn(ownerResponseDTO)
+                                .thenReturn(customerResponseDTO)
                                 .doOnError(throwable -> {
                                     log.error("Error creating user: " + throwable.getMessage());
-                                    customersServiceClient.deleteOwner(ownerResponseDTO.getOwnerId());
+                                    customersServiceClient.deleteCustomer(customerResponseDTO.getCustomerId());
                                 });
                     }
             );

@@ -3,9 +3,9 @@
     <form id="billForm" class="form-horizontal" enctype="multipart/form-data" ng-submit="$ctrl.submitBillForm()">
         <div class="row">
             <div class="col-sm-6 form-group">
-                <label class="control-label" for="owner">Owner</label>
-                <select class="form-control" name="owner" id="owner" ng-model="$ctrl.bill.customerId" required title="Please select an owner.">
-                    <option ng-repeat="owner in $ctrl.owners | filter:$ctrl.query track by owner.ownerId" value="{{owner.ownerId}}">{{owner.firstName}} {{owner.lastName}}</option>
+                <label class="control-label" for="customer">Owner</label>
+                <select class="form-control" name="customer" id="customer" ng-model="$ctrl.bill.customerId" required title="Please select a customer.">
+                    <option ng-repeat="customer in $ctrl.owners | filter:$ctrl.query track by customer.customerId" value="{{customer.customerId}}">{{customer.firstName}} {{customer.lastName}}</option>
                 </select>
 
             </div>

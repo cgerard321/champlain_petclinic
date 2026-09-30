@@ -116,6 +116,34 @@ public class BillServiceClient {
 //                .bodyToFlux(BillResponseDTO.class);
 //    }
 
+    public Flux<BillResponseDTO> getAllBillsStream(
+            String billId,
+            String customerId,
+            String ownerFirstName,
+            String ownerLastName,
+            String visitType,
+            String vetId,
+            String vetFirstName,
+            String vetLastName) {
+
+        UriComponentsBuilder builder =
+                UriComponentsBuilder.fromUriString(billServiceUrl + "/stream")
+                        .queryParamIfPresent("billId", Optional.ofNullable(billId))
+                        .queryParamIfPresent("customerId", Optional.ofNullable(customerId))
+                        .queryParamIfPresent("ownerFirstName", Optional.ofNullable(ownerFirstName))
+                        .queryParamIfPresent("ownerLastName", Optional.ofNullable(ownerLastName))
+                        .queryParamIfPresent("visitType", Optional.ofNullable(visitType))
+                        .queryParamIfPresent("vetId", Optional.ofNullable(vetId))
+                        .queryParamIfPresent("vetFirstName", Optional.ofNullable(vetFirstName))
+                        .queryParamIfPresent("vetLastName", Optional.ofNullable(vetLastName));
+
+        return webClientBuilder.build()
+                .get()
+                .uri(builder.build().toUri())
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class);
+    }
 
     //to be changed
     public Mono<Long> getTotalNumberOfBills() {
@@ -306,7 +334,7 @@ public class BillServiceClient {
                                                    String visitType, String vetId,
                                                    String vetFirstName, String vetLastName) {
 
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(billServiceUrl)
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(billServiceUrl + "/paginated")
                 .queryParam("page", page.orElse(0))
                 .queryParam("size", size.orElse(10))
                 .queryParamIfPresent("billId", Optional.ofNullable(billId))

@@ -1,17 +1,13 @@
 package com.petclinic.products.businesslayer;
 
 import com.petclinic.products.businesslayer.products.ProductServiceImpl;
-import com.petclinic.products.datalayer.products.DeliveryType;
-import com.petclinic.products.datalayer.products.Product;
-import com.petclinic.products.datalayer.products.ProductRepository;
-import com.petclinic.products.datalayer.products.ProductType;
-import com.petclinic.products.datalayer.products.ProductStatus;
+import com.petclinic.products.datalayer.products.*;
 import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.datalayer.ratings.RatingRepository;
-import com.petclinic.products.presentationlayer.products.ProductResponseModel;
 import com.petclinic.products.presentationlayer.products.ProductEnumsResponseModel;
-import com.petclinic.products.utils.exceptions.NotFoundException;
+import com.petclinic.products.presentationlayer.products.ProductResponseModel;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
+import com.petclinic.products.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,13 +16,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
 import java.util.List;
 
-import static com.petclinic.products.datalayer.products.DeliveryType.DELIVERY;
-import static com.petclinic.products.datalayer.products.DeliveryType.PICKUP;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
