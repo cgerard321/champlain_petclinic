@@ -53,7 +53,7 @@ export class SupplyPage {
   protected readonly columns = computed<TableColumn<Supply>[]>(() => [
     { id: 'name', header: 'Name', template: this.nameCell() },
     { id: 'description', header: 'Description', value: (supply) => supply.productDescription },
-    { id: 'price', header: 'Price', template: this.priceCell() },
+    { id: 'price', header: 'Cost Price', template: this.priceCell() },
     { id: 'quantity', header: 'Quantity', value: (supply) => supply.productQuantity },
     { id: 'status', header: 'Status', template: this.statusCell() },
     ...(this.canManageSupplies()
@@ -71,11 +71,11 @@ export class SupplyPage {
     });
 
     required(path.productPrice, {
-      message: 'Price is required',
+      message: 'Cost price is required',
     });
 
     min(path.productPrice, 0.01, {
-      message: 'Price must be greater than 0',
+      message: 'Cost price must be greater than 0',
     });
 
     required(path.productQuantity, {

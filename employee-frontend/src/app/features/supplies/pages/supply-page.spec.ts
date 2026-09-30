@@ -121,7 +121,7 @@ describe('SupplyPage', () => {
     expect(table.getAttribute('aria-label')).toBe('Supplies in this inventory');
     expect(
       Array.from(table.querySelectorAll('thead th'), (cell) => cell.textContent?.trim()),
-    ).toEqual(['Name', 'Description', 'Price', 'Quantity', 'Status', 'Actions']);
+    ).toEqual(['Name', 'Description', 'Cost Price', 'Quantity', 'Status', 'Actions']);
 
     const rows = table.querySelectorAll('tbody tr');
     expect(rows).toHaveLength(2);
@@ -310,7 +310,7 @@ describe('SupplyPage', () => {
 
     await fixture.whenStable();
 
-    expect(component['supplyForm'].productPrice().errors()[0]?.message).toBe('Price is required');
+    expect(component['supplyForm'].productPrice().errors()[0]?.message).toBe('Cost price is required');
     expect(component['supplyForm'].productQuantity().errors()[0]?.message).toBe(
       'Quantity is required',
     );
