@@ -11,10 +11,12 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -39,6 +41,7 @@ public class DataLoaderService implements CommandLineRunner {
     public void run(String... args) throws Exception {
         // If the database is not empty, do not load data
         try {
+            restoreMissingReferencedLegacyImages();
             if (
                     Boolean.TRUE.equals(productRepository.findAll().hasElements().block()) ||
                             Boolean.TRUE.equals(productBundleRepository.findAll().hasElements().block()) ||
@@ -458,5 +461,78 @@ public class DataLoaderService implements CommandLineRunner {
                 .flatMap(s -> productTypeRepository.save(s)
                         .log(s.toString()))
                 .subscribe();
+    }
+
+    private void restoreMissingReferencedLegacyImages() {
+        Set<String> referencedImageIds = productRepository.findAll()
+                .map(Product::getImageId)
+                .filter(imageId -> imageId != null && !imageId.isBlank())
+                .collectList()
+                .map(Set::copyOf)
+                .block();
+
+        if (referencedImageIds == null || referencedImageIds.isEmpty()) {
+            return;
+        }
+
+        Flux.fromIterable(legacyImageSeeds())
+                .filter(seed -> referencedImageIds.contains(seed.imageId()))
+                .concatMap(seed -> imageRepository.findImageByImageId(seed.imageId())
+                        .switchIfEmpty(Mono.defer(() -> saveLegacyImage(seed))))
+                .then()
+                .block();
+    }
+
+    private Mono<Image> saveLegacyImage(LegacyImageSeed seed) {
+        try {
+            byte[] imageData = new ClassPathResource(seed.resourcePath())
+                    .getContentAsByteArray();
+            Image image = Image.builder()
+                    .imageId(seed.imageId())
+                    .imageName(seed.imageName())
+                    .imageType(seed.imageType())
+                    .imageData(imageData)
+                    .build();
+            return imageRepository.save(image);
+        } catch (Exception error) {
+            return Mono.error(error);
+        }
+    }
+
+    private List<LegacyImageSeed> legacyImageSeeds() {
+        return List.of(
+                new LegacyImageSeed(
+                        "08a5af6b-3501-4157-9a99-1aa82387b9e4",
+                        "dog_food.jpg", "image/jpeg", "images/dog_food.png"),
+                new LegacyImageSeed(
+                        "36b06c01-10f3-4645-9c45-900afc5a8b8a",
+                        "cat_litter.png", "image/png", "images/cat_litter.png"),
+                new LegacyImageSeed(
+                        "be4e60a4-2369-46e8-abee-20c1a8dce3e5",
+                        "flea_collar.jpg", "image/jpeg", "images/flea_collar.png"),
+                new LegacyImageSeed(
+                        "7074e0ef-d041-452f-8a0f-cb9ab20d1fed",
+                        "bird_cage.jpg", "image/jpeg", "images/bird_cage.png"),
+                new LegacyImageSeed(
+                        "392c42d9-9505-4c27-b82e-20351b25d33f",
+                        "aquarium_filter.png", "image/png",
+                        "images/aquarium_filter.png"),
+                new LegacyImageSeed(
+                        "664aa14b-db66-4b25-9d05-f3a9164eb401",
+                        "horse_saddle.jpg", "image/jpeg", "images/horse_saddle.png"),
+                new LegacyImageSeed(
+                        "3377a03f-8105-47d7-8d8a-d89fd170c7e6",
+                        "rabbit_hutch.jpg", "image/jpeg", "images/rabbit_hutch.png"),
+                new LegacyImageSeed(
+                        "c76ed4c1-fc5d-4868-8b39-1bca6b0be368",
+                        "fish_tank_heater.jpg", "image/jpeg",
+                        "images/fish_tank_heater.png"));
+    }
+
+    private record LegacyImageSeed(
+            String imageId,
+            String imageName,
+            String imageType,
+            String resourcePath) {
     }
 }

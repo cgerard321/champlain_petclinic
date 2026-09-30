@@ -39,7 +39,11 @@
     <div class="product-grid">
       @for (product of products(); track product.productId) {
         <mat-card class="product-card">
-          <app-product-thumbnail [imageId]="product.imageId" [alt]="product.productName" />
+          <app-product-thumbnail
+            [image]="product.image"
+            [imageId]="product.imageId"
+            [alt]="product.productName"
+          />
           <mat-card-header>
             <mat-card-title>{{ product.productName }}</mat-card-title>
             <mat-card-subtitle>{{ product.productType }}</mat-card-subtitle>

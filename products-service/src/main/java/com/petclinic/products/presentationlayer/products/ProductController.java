@@ -4,8 +4,10 @@ import com.petclinic.products.businesslayer.products.ProductBundleService;
 import com.petclinic.products.businesslayer.products.ProductService;
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductType;
+import com.petclinic.products.domainclientlayer.FileRequestDTO;
 import com.petclinic.products.utils.EntityModelUtil;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -38,21 +40,33 @@ public class ProductController {
             @RequestParam(required = false) String sort,
             @RequestParam(required = false) String deliveryType,
             @RequestParam(required = false) String productType,
-            @RequestParam(required = false) String productName) {
+            @RequestParam(required = false) String productName,
+            @RequestParam(defaultValue = "false") boolean includeImage) {
 
-        if (productName == null || productName.isBlank()) {
-            return productService.getAllProducts(minPrice, maxPrice, minRating, maxRating, sort, deliveryType, productType);
-        }
+        Flux<ProductResponseModel> products = (productName == null || productName.isBlank())
+                ? productService.getAllProducts(minPrice, maxPrice, minRating, maxRating, sort, deliveryType, productType)
+                : productService.getAllProducts(minPrice, maxPrice, minRating, maxRating, sort, deliveryType, productType, productName);
 
-        return productService.getAllProducts(minPrice, maxPrice, minRating, maxRating, sort, deliveryType, productType, productName);
+        return includeImage
+                ? products.flatMapSequential(productService::includeImage, 8)
+                : products;
     }
 
-    @GetMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<ProductResponseModel>> getProductByProductId(@PathVariable String productId) {
+    @GetMapping(
+            value = "/{productId}",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<ProductResponseModel>> getProductByProductId(
+            @PathVariable String productId,
+            @RequestParam(defaultValue = "false") boolean includeImage) {
+
         return Mono.just(productId)
                 .filter(id -> id.length() == 36)
-                .switchIfEmpty(Mono.error(new InvalidInputException("Provided product id is invalid: " + productId)))
-                .flatMap(productService::getProductByProductId)
+                .switchIfEmpty(Mono.error(
+                        new InvalidInputException(
+                                "Provided product id is invalid: " + productId)))
+                .flatMap(id -> includeImage
+                        ? productService.getProductByProductId(id, true)
+                        : productService.getProductByProductId(id))
                 .map(ResponseEntity::ok);
     }
 
@@ -62,7 +76,8 @@ public class ProductController {
     }
 
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<ProductResponseModel>> addProduct(@RequestBody Mono<ProductRequestModel> productRequestModel) {
+    public Mono<ResponseEntity<ProductResponseModel>> addProduct(
+            @Valid @RequestBody Mono<ProductRequestModel> productRequestModel) {
         return productService.addProduct(productRequestModel)
                 .map(c -> ResponseEntity.status(HttpStatus.CREATED).body(c))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
@@ -90,6 +105,42 @@ public class ProductController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
+
+    //updating images to the new file system
+    @PatchMapping(
+            value = "/{productId}/image",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<ProductResponseModel>> updateProductImage(
+            @PathVariable String productId,
+            @Valid @RequestBody FileRequestDTO image) {
+
+        return Mono.just(productId)
+                // Keep the existing product ID validation convention.
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(Mono.error(
+                        new InvalidInputException(
+                                "Provided product id is invalid: " + productId)))
+                // Delegate file handling to the business service.
+                .flatMap(id -> productService.updateProductImage(id, image))
+                .map(ResponseEntity::ok);
+    }
+
+    @DeleteMapping(
+            value = "/{productId}/image",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<ProductResponseModel>> deleteProductImage(
+            @PathVariable String productId) {
+
+        return Mono.just(productId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(Mono.error(
+                        new InvalidInputException(
+                                "Provided product id is invalid: " + productId)))
+                .flatMap(productService::deleteProductImage)
+                .map(ResponseEntity::ok);
+    }
+
     @DeleteMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ProductResponseModel>> deleteProduct(@PathVariable String productId,
                                                                     @RequestParam(name = "cascadeBundles", defaultValue = "false") boolean cascadeBundles) {
@@ -101,8 +152,13 @@ public class ProductController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
     @GetMapping(value = "/filter/{productType}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<ProductResponseModel> getProductsByType(@PathVariable String productType) {
-        return productService.getProductsByType(productType);
+    public Flux<ProductResponseModel> getProductsByType(
+            @PathVariable String productType,
+            @RequestParam(defaultValue = "false") boolean includeImage) {
+        Flux<ProductResponseModel> products = productService.getProductsByType(productType);
+        return includeImage
+                ? products.flatMapSequential(productService::includeImage, 8)
+                : products;
     }
     @PatchMapping(value = "/{productId}/decrease")
     public Mono<ResponseEntity<Void>> decreaseProductQuantity(@PathVariable String productId) {
