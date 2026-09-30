@@ -69,10 +69,10 @@ const VisitDetails: React.FC<VisitDetailsProps> = ({ visitId }) => {
               visit.status === 'CONFIRMED'
                 ? 'green'
                 : visit.status === 'UPCOMING'
-                  ? 'orange'
+                  ? 'orange' 
                   : visit.status === 'COMPLETED'
-                    ? 'blue'
-                    : 'inherit',
+                    ? 'red'
+                    : 'inherit'
           }}
         >
           {visit.status}

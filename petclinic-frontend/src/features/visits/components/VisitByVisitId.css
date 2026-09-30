@@ -1,18 +1,18 @@
 /* Specific styles for VisitDetails component */
 .visit-details-container {
   width: 80%;
-  margin: 0 auto;
-  background-color: #f4f4f4;
+  margin-top: 10px;
+  background-color: #f7faff;
   padding: 20px;
   border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .visit-details-title {
   text-align: center;
   font-size: 2rem;
   margin-bottom: 20px;
-  color: #333;
+  color: #1565c0;
 }
 
 .visit-info {
@@ -31,12 +31,17 @@
 
 .visit-label {
   font-weight: bold;
-  color: #555;
+  color: #1565c0;
 }
 
 .visit-value {
   color: #333;
 }
+
+/* button{
+  height: 10px;
+  width: 10px;
+} */
 
 /* Mobile responsiveness */
 @media (max-width: 768px) {
@@ -44,3 +49,4 @@
     grid-template-columns: 1fr;
   }
 }
+
