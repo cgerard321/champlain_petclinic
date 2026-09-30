@@ -103,10 +103,7 @@
   } @else {
     <div class="inventory-grid">
       @for (inventory of inventories(); track inventory.inventoryId) {
-        <a
-          class="inventory-card-link"
-          [routerLink]="['/invt', inventory.inventoryId, 'supplies']"
-        >
+        <a class="inventory-card-link" [routerLink]="['/invt', inventory.inventoryId, 'supplies']">
           <mat-card appearance="outlined" class="inventory-card">
             <mat-card-header>
               <mat-card-title>{{ inventory.inventoryName }}</mat-card-title>
