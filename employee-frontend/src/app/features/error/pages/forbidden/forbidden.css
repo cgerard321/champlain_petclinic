@@ -1,70 +1,151 @@
+:host {
+  --sage-50: #f7faf3;
+  --sage-100: #edf3e7;
+  --sage-200: #dce8d2;
+  --sage-300: #c7d9b2;
+  --sage-400: #afc79a;
+  --forest-700: #244b3f;
+  --forest-800: #1c3d33;
+  --forest-900: #16332b;
+  --cream: #fffdf8;
+  --white: #fff;
+  --text-primary: #263832;
+  --text-secondary: #66766d;
+  --border: rgb(36 75 63 / 14%);
+  --shadow-sm:
+    0 2px 6px rgb(28 61 51 / 6%),
+    0 1px 2px rgb(28 61 51 / 5%);
+  --shadow-lg:
+    0 18px 40px rgb(28 61 51 / 14%),
+    0 6px 14px rgb(28 61 51 / 8%);
+
+  display: block;
+  min-height: 100%;
+}
+
 .error-wrapper {
-  background-color: #f0f0f0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  margin: 0;
-  padding: 20px;
+  min-height: calc(100vh - 94px);
+  padding: 2.5rem 2rem;
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgb(199 217 178 / 28%),
+      transparent 30rem
+    ),
+    radial-gradient(
+      circle at 0% 100%,
+      rgb(199 217 178 / 16%),
+      transparent 28rem
+    );
+  box-sizing: border-box;
 }
 
 .error-container {
-  text-align: center;
-  background-color: #fff;
-  padding: 40px;
-  border-radius: 15px;
-  box-shadow: 0 6px 12px rgb(0 0 0 / 10%);
-  max-width: 700px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 550px;
   width: 100%;
-  transition: transform 0.3s;
-  overflow-wrap: break-word;
+  padding: 3.5rem 2.5rem;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  text-align: center;
+  background:
+    linear-gradient(
+      145deg,
+      var(--white) 0%,
+      var(--cream) 100%
+    );
+  box-shadow: var(--shadow-sm);
+}
+
+.error-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(
+    90deg,
+    var(--forest-700),
+    var(--sage-400)
+  );
+}
+
+.error-container::after {
+  content: "";
+  position: absolute;
+  top: -85px;
+  right: -75px;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: rgb(199 217 178 / 25%);
+  pointer-events: none;
 }
 
 .error-container h1 {
-  font-size: 3em;
-  margin: 0;
-  color: #ff6f61;
-  animation: pulse 1.5s infinite;
+  position: relative;
+  z-index: 1;
+  margin: 0 0 1rem;
+  color: var(--forest-700);
+  font-size: clamp(3.5rem, 6vw, 4.5rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
 }
 
 .error-container p {
-  font-size: 1.5em;
-  color: #333;
-  margin: 20px 0;
+  position: relative;
+  z-index: 1;
+  margin: 0 0 2rem;
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  font-weight: 500;
+  line-height: 1.6;
 }
 
 .error-container button {
-  display: inline-block;
-  margin-top: 20px;
-  padding: 10px 20px;
-  background-color: #ff6f61;
-  color: #fff;
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.75rem;
+  background-color: var(--forest-700);
+  color: var(--white);
+  font-size: 0.95rem;
+  font-weight: 600;
   text-decoration: none;
-  border-radius: 5px;
-  transition:
-    background-color 0.3s,
-    transform 0.3s;
+  border-radius: 12px;
   border: none;
-  outline: none;
   cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    background-color 220ms ease,
+    box-shadow 220ms ease;
 }
 
 .error-container button:hover {
-  background-color: #ff3b2f;
-  transform: scale(1.05);
+  background-color: var(--forest-800);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
 }
 
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-  }
+.error-container button:focus-visible {
+  outline: 3px solid rgb(36 75 63 / 22%);
+  outline-offset: 4px;
+}
 
-  50% {
-    transform: scale(1.05);
-  }
-
-  100% {
-    transform: scale(1);
-  }
+.error-container button:active {
+  transform: translateY(0);
 }
