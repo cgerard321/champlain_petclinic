@@ -1,5 +1,7 @@
 package com.petclinic.bffapigateway.dtos.Products;
 
+import com.petclinic.bffapigateway.dtos.Files.FileDetails;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,7 +15,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class ProductRequestDTO {
 
-    private String imageId;
+
     private String productName;
     private String productDescription;
     private Double productSalePrice;
@@ -24,4 +26,7 @@ public class ProductRequestDTO {
     private LocalDate releaseDate;
     private ProductStatus productStatus;
     private DeliveryType deliveryType;
+    @Valid
+    private FileDetails image;
+
 }

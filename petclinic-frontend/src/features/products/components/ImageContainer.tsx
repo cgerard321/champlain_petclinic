@@ -1,25 +1,74 @@
 import { useEffect, useState } from 'react';
+import { FileDetails } from '@/shared/models/FileDetails';
 import { getImage } from '../api/getImage';
+import { getProduct } from '../api/getProduct';
 import './Image.css';
 import { ProductModel } from '../models/ProductModels/ProductModel';
 
 interface ImageContainerProps {
+  image?: FileDetails | null;
   imageId?: string;
+  productId?: string;
   imageUrl?: string;
   product?: ProductModel;
 }
 
 export default function ImageContainer({
+  image,
   imageId,
+  productId,
   imageUrl,
 }: ImageContainerProps): JSX.Element {
-  const [imageName, setImageName] = useState<string | null>(null);
-  const [imageType, setImageType] = useState<string | null>(null);
-  const [imageData, setImageData] = useState<string | null>(null);
+  const [imageName, setImageName] = useState<string | null>(
+    image?.fileName ?? null
+  );
+  const [imageType, setImageType] = useState<string | null>(
+    image?.fileType ?? null
+  );
+  const [imageData, setImageData] = useState<string | null>(
+    image?.fileData ?? null
+  );
 
   useEffect(() => {
+    let cancelled = false;
+
     async function loadImage(): Promise<void> {
-      if (!imageId) return;
+      if (image?.fileData) {
+        if (!cancelled) {
+          setImageName(image.fileName);
+          setImageType(image.fileType);
+          setImageData(image.fileData);
+        }
+        return;
+      }
+
+      if (productId) {
+        try {
+          const product = await getProduct(productId);
+          const currentImage = product.image;
+
+          if (!cancelled) {
+            setImageName(currentImage?.fileName ?? null);
+            setImageType(currentImage?.fileType ?? null);
+            setImageData(currentImage?.fileData ?? null);
+          }
+        } catch (error) {
+          console.error('Error loading product image:', error);
+          if (!cancelled) {
+            setImageName(null);
+            setImageType(null);
+            setImageData(null);
+          }
+        }
+        return;
+      }
+
+      if (!imageId) {
+        setImageName(null);
+        setImageType(null);
+        setImageData(null);
+        return;
+      }
 
       try {
         const image = await getImage(imageId);
@@ -28,11 +77,19 @@ export default function ImageContainer({
         setImageData(image.imageData);
       } catch (error) {
         console.error('Error loading image:', error);
-        throw new Error('Error fetching image');
+        if (!cancelled) {
+          setImageName(null);
+          setImageType(null);
+          setImageData(null);
+        }
       }
     }
     loadImage();
-  }, [imageId]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [image, imageId, productId]);
 
   return (
     <div className="image-container">
