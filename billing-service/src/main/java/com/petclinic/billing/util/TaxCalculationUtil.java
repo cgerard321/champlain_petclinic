@@ -18,7 +18,7 @@ public class TaxCalculationUtil {
         BigDecimal gstAmount = amount.multiply(GOODS_AND_SERVICES_TAX).setScale(2, RoundingMode.HALF_UP);
         BigDecimal qstAmount = amount.multiply(QUEBEC_SALES_TAX).setScale(2, RoundingMode.HALF_UP);
 
-        return amount.add(gstAmount).add(qstAmount);
+        return gstAmount.add(qstAmount);
     }
 
     public static BigDecimal calculateGST(BigDecimal amount){

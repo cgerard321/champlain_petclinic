@@ -334,7 +334,7 @@ class BillControllerIntegrationTest {
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
                 .expectBodyList(Bill.class)
                 .consumeWith(response -> {
                     List<Bill> bills = response.getResponseBody();
@@ -420,7 +420,7 @@ class BillControllerIntegrationTest {
                 .expectBody();
     }
 
-    private Bill buildBill(){
+    private Bill buildBill() {
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
@@ -428,7 +428,7 @@ class BillControllerIntegrationTest {
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate();
 
-        LocalDate dueDate = LocalDate.of(2022,Month.OCTOBER,15);
+        LocalDate dueDate = LocalDate.of(2022, Month.OCTOBER, 15);
 
         return Bill.builder()
                 .id("Id")
@@ -446,7 +446,7 @@ class BillControllerIntegrationTest {
                 .build();
     }
 
-    private Bill buildUnpaidBill(){
+    private Bill buildUnpaidBill() {
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
@@ -471,7 +471,7 @@ class BillControllerIntegrationTest {
                 .dueDate(dueDate).build();
     }
 
-    private Bill buildOverdueBill(){
+    private Bill buildOverdueBill() {
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
@@ -799,25 +799,27 @@ class BillControllerIntegrationTest {
         return Duration.between(LocalDate.now().atStartOfDay(), billEntity.getDueDate().atStartOfDay()).toDays();
     }
 
-        @Test
-        void getBillByValidBillID_Overdue_ShouldReturnInterest() {
-                Bill billEntity = buildOverdueBill();
+    @Test
+    void getBillByValidBillID_Overdue_ShouldReturnInterest() {
+        Bill billEntity = buildOverdueBill();
 
-                Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(billEntity));
+        Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(billEntity));
 
-                StepVerifier.create(setup)
-                        .expectNextCount(1)
-                         .verifyComplete();
+        StepVerifier.create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
 
-                // Use centralized utility for compound interest calculation
-                BigDecimal expectedInterest = InterestCalculationUtil.calculateCompoundInterest(
-                    billEntity.getAmount(), billEntity.getDueDate(), LocalDate.now());                client.get()
-                        .uri("/bills/" + billEntity.getBillId())
-                        .accept(MediaType.APPLICATION_JSON)
-                        .exchange()
-                        .expectStatus().isOk()
-                        .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                        .expectBody()
-                        .jsonPath("$.interest").isEqualTo(expectedInterest);
-}
+        // Use centralized utility for compound interest calculation
+        BigDecimal expectedInterest = InterestCalculationUtil.calculateCompoundInterest(
+                billEntity.getAmount(), billEntity.getDueDate(), LocalDate.now());
+        client.get()
+                .uri("/bills/" + billEntity.getBillId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.interest").isEqualTo(expectedInterest);
+    }
+
 }

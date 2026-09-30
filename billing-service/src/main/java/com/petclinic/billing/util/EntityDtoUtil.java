@@ -35,26 +35,6 @@ public class EntityDtoUtil {
         billResponseDTO.setInterestExempt(bill.isInterestExempt());
 
 
-        if(bill.getGstAmount() == null || bill.getQstAmount() == null){
-            BigDecimal amount = bill.getAmount();
-            BigDecimal taxes = TaxCalculationUtil.calculateTotalTaxes(amount);
-            BigDecimal gst = TaxCalculationUtil.calculateGST(amount);
-            BigDecimal qst = TaxCalculationUtil.calculateQST(amount);
-
-
-            billResponseDTO.setTaxedAmount(taxes);
-            billResponseDTO.setGstAmount(gst);
-            billResponseDTO.setQstAmount(qst);
-        } else if(bill.getAmount() == null){
-            billResponseDTO.setAmount(BigDecimal.ZERO);
-            billResponseDTO.setTaxedAmount(BigDecimal.ZERO);
-            billResponseDTO.setGstAmount(BigDecimal.ZERO);
-            billResponseDTO.setQstAmount(BigDecimal.ZERO);
-        } else {
-            billResponseDTO.setTaxedAmount(bill.getTaxedAmount());
-            billResponseDTO.setGstAmount(bill.getGstAmount());
-            billResponseDTO.setQstAmount(bill.getQstAmount());
-        }
 
         // Use stored interest value if available, otherwise calculate
         BigDecimal interest;
@@ -69,13 +49,30 @@ public class EntityDtoUtil {
 
         // Calculate final amount
         if (bill.getAmount() != null) {
-            BigDecimal totalTaxes = TaxCalculationUtil.calculateTotalTaxes(bill.getAmount());
-            BigDecimal totalWithInterest = totalTaxes.add(interest);
+            if(bill.getGstAmount() == null || bill.getQstAmount() == null || bill.getTaxedAmount() == null){
+                billResponseDTO.setTaxedAmount(BigDecimal.ZERO);
+                billResponseDTO.setGstAmount(BigDecimal.ZERO);
+                billResponseDTO.setQstAmount(BigDecimal.ZERO);
+            } else {
+                billResponseDTO.setTaxedAmount(bill.getTaxedAmount());
+                billResponseDTO.setGstAmount(bill.getGstAmount());
+                billResponseDTO.setQstAmount(bill.getQstAmount());
+            }
+            BigDecimal totalTaxes;
+            if (bill.getTaxedAmount() != null){
+                totalTaxes = bill.getTaxedAmount();
+            } else {
+                totalTaxes = BigDecimal.ZERO;
+            }
+            BigDecimal totalWithInterest = bill.getAmount().add(totalTaxes).add(interest);
             billResponseDTO.setTotalAmount(totalWithInterest.setScale(2, java.math.RoundingMode.HALF_UP));
         } else {
             // If amount is null, set totalAmount to just the interest (or zero if no interest)
+            billResponseDTO.setAmount(BigDecimal.ZERO);
+            billResponseDTO.setGstAmount(BigDecimal.ZERO);
+            billResponseDTO.setQstAmount(BigDecimal.ZERO);
             billResponseDTO.setTaxedAmount(BigDecimal.ZERO);
-            billResponseDTO.setTotalAmount(BigDecimal.ZERO.add(interest.setScale(2, java.math.RoundingMode.HALF_UP)));
+            billResponseDTO.setTotalAmount(interest.setScale(2, java.math.RoundingMode.HALF_UP));
         }
         billResponseDTO.setTimeRemaining(timeRemaining(bill));
         billResponseDTO.setArchive(bill.getArchive());

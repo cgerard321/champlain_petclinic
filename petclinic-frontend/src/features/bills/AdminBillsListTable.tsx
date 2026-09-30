@@ -446,7 +446,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
   };
 
   const formatTotalDue = (bill: Bill): string => {
-    const amount = bill.taxedAmount ?? bill.amount ?? 0;
+    const amount = bill.totalAmount ?? bill.amount ?? 0;
     if (currency === 'CAD') return `CAD $${amount.toFixed(2)}`;
     return `USD $${convertCurrency(amount, 'CAD', 'USD').toFixed(2)}`;
   };
@@ -983,7 +983,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                   <strong>Date:</strong> {searchedBill.date}
                 </p>
                 <p>
-                  <strong>Amount:</strong> {formatTotalDue(searchedBill)}
+                  <strong>Total Amount:</strong> {formatTotalDue(searchedBill)}
                 </p>
                 <p>
                   <strong>Status:</strong> {searchedBill.billStatus}
@@ -1141,7 +1141,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                     : `USD $${convertCurrency(detailBill.qstAmount, 'CAD', 'USD').toFixed(2)}`}
                 </p>
                 <p>
-                  <strong>Total with Tax:</strong>{' '}
+                  <strong>Total Tax:</strong>{' '}
                   {currency === 'CAD'
                     ? `CAD $${detailBill.taxedAmount.toFixed(2)}`
                     : `USD $${convertCurrency(detailBill.taxedAmount, 'CAD', 'USD').toFixed(2)}`}

@@ -656,7 +656,7 @@ export default function BillsListTable({
               <p>
                 <strong>Total Due:</strong>{' '}
                 {currency === 'CAD'
-                  ? `CAD $${detailBill.taxedAmount.toFixed(2)}`
+                  ? `CAD $${detailBill.totalAmount.toFixed(2)}`
                   : `USD $${convertCurrency(detailBill.taxedAmount, 'CAD', 'USD').toFixed(2)}`}
               </p>
               <p>
