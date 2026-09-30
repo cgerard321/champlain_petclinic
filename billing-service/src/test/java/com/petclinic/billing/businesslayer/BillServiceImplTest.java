@@ -208,6 +208,59 @@ public class BillServiceImplTest {
                 .expectNextMatches(bill -> bill.getBillId().equals("billId-3"))
                 .verifyComplete();
     }
+    @Test
+    void getAllBillsStream_WithCustomerIdFilter_ReturnsMatchingBills() {
+        Bill matching = buildBill();
+        matching.setCustomerId("customer-1");
+
+        Bill nonMatching = buildBill();
+        nonMatching.setCustomerId("customer-2");
+
+        when(repo.findAllBillsByBillStatus(BillStatus.UNPAID))
+                .thenReturn(Flux.empty());
+        when(repo.findAll())
+                .thenReturn(Flux.just(matching, nonMatching));
+
+        StepVerifier.create(
+                        billService.getAllBillsStream(
+                                null, "customer-1", null, null,
+                                null, null, null, null))
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+    @Test
+    void getAllBillsStream_WithAllFiltersMatching_ReturnsMatchingBill() {
+        Bill bill = buildBill();
+
+        bill.setBillId("bill-1");
+        bill.setCustomerId("customer-1");
+        bill.setOwnerFirstName("John");
+        bill.setOwnerLastName("Doe");
+        bill.setVisitType("Surgery");
+        bill.setVetId("vet-1");
+        bill.setVetFirstName("Alice");
+        bill.setVetLastName("Smith");
+
+        when(repo.findAllBillsByBillStatus(BillStatus.UNPAID))
+                .thenReturn(Flux.empty());
+
+        when(repo.findAll())
+                .thenReturn(Flux.just(bill));
+
+        StepVerifier.create(
+                        billService.getAllBillsStream(
+                                "bill-1",
+                                "customer-1",
+                                "John",
+                                "Doe",
+                                "Surgery",
+                                "vet-1",
+                                "Alice",
+                                "Smith"))
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
 
     @Test
     public void test_getAllBillsByPaidStatus() {

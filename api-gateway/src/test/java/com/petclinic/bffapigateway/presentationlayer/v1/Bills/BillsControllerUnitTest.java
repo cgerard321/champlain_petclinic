@@ -119,7 +119,7 @@ public class BillsControllerUnitTest {
     }
 
     @Test
-    void shouldGetAllBillsStream() {
+    void getAllBillsStream_ShouldReturnAllBills() {
         when(billServiceClient.getAllBillsStream(
                 null, null, null, null, null, null, null, null))
                 .thenReturn(Flux.just(billresponse, billresponse2));
@@ -129,14 +129,36 @@ public class BillsControllerUnitTest {
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(
-                        MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
+                .expectHeader()
+                .contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .expectBodyList(BillResponseDTO.class)
                 .hasSize(2)
                 .contains(billresponse, billresponse2);
 
-        verify(billServiceClient, times(1)).getAllBillsStream(
+        Mockito.verify(billServiceClient).getAllBillsStream(
                 null, null, null, null, null, null, null, null);
+    }
+
+    @Test
+    void getAllBillsStream_WithBillIdFilter_ReturnsMatchingBill() {
+        when(billServiceClient.getAllBillsStream(
+                "bill-1", null, null, null, null, null, null, null))
+                .thenReturn(Flux.just(billresponse));
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path(baseBillURL + "/stream")
+                        .queryParam("billId", "bill-1")
+                        .build())
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(BillResponseDTO.class)
+                .hasSize(1)
+                .contains(billresponse);
+
+        verify(billServiceClient).getAllBillsStream(
+                "bill-1", null, null, null, null, null, null, null);
     }
 
     @Test

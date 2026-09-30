@@ -576,6 +576,76 @@ class BillServiceClientIntegrationTest {
         assertTrue(request.getPath().contains("vetLastName=Smith"));
         assertTrue(request.getHeader("Accept").contains(MediaType.TEXT_EVENT_STREAM_VALUE));
     }
+    @Test
+    void getAllBillsStream_ShouldReturnAllBills() throws Exception {
+        List<BillResponseDTO> bills = Arrays.asList(
+                billResponseDTO,
+                billResponseDTO2,
+                billResponseDTO3
+        );
+
+        String body = mapper.writeValueAsString(bills);
+
+        prepareResponse(response -> response
+                .setResponseCode(200)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(body));
+
+        Flux<BillResponseDTO> result = billServiceClient.getAllBillsStream(
+                null, null, null, null, null, null, null, null);
+
+        StepVerifier.create(result.collectList())
+                .expectNextMatches(returnedBills ->
+                        returnedBills.size() == 3 &&
+                                returnedBills.stream().anyMatch(bill -> "1".equals(bill.getBillId())) &&
+                                returnedBills.stream().anyMatch(bill -> "2".equals(bill.getBillId())) &&
+                                returnedBills.stream().anyMatch(bill -> "3".equals(bill.getBillId())))
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+
+        assertEquals("GET", request.getMethod());
+        assertEquals("/bills/stream", request.getPath());
+    }
+    @Test
+    void getAllBillsStream_WithFilters_ShouldForwardAllFilters() throws Exception {
+        List<BillResponseDTO> bills = Arrays.asList(billResponseDTO);
+
+        String body = mapper.writeValueAsString(bills);
+
+        prepareResponse(response -> response
+                .setResponseCode(200)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(body));
+
+        Flux<BillResponseDTO> result = billServiceClient.getAllBillsStream(
+                "1",
+                "123",
+                "John",
+                "Doe",
+                "Checkup",
+                "456",
+                "Jane",
+                "Smith"
+        );
+
+        StepVerifier.create(result)
+                .expectNext(billResponseDTO)
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+
+        assertEquals("GET", request.getMethod());
+        assertTrue(request.getPath().contains("/bills/stream"));
+        assertTrue(request.getPath().contains("billId=1"));
+        assertTrue(request.getPath().contains("customerId=123"));
+        assertTrue(request.getPath().contains("ownerFirstName=John"));
+        assertTrue(request.getPath().contains("ownerLastName=Doe"));
+        assertTrue(request.getPath().contains("visitType=Checkup"));
+        assertTrue(request.getPath().contains("vetId=456"));
+        assertTrue(request.getPath().contains("vetFirstName=Jane"));
+        assertTrue(request.getPath().contains("vetLastName=Smith"));
+    }
 
     @Test
     void whenGetBillsByMonth_thenReturnsResults() throws Exception {

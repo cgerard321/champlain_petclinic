@@ -115,7 +115,6 @@ public class BillServiceImpl implements BillService{
                 .take(pageable.getPageSize())
                 .map(EntityDtoUtil::toBillResponseDto);
     }
-
     @Override
     public Flux<BillResponseDTO> getAllBillsStream(
             String billId,
