@@ -5,3 +5,9 @@ export interface Inventory {
   inventoryDescription: string;
   important?: boolean;
 }
+
+export interface InventoryRequest{
+  inventoryName:String;
+  inventoryType:String;
+  inventoryDescription:String;
+}

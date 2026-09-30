@@ -1,7 +1,15 @@
 <div class="inventory-page">
   <h1>Inventory</h1>
 
-  @if (isLoading()) {
+  @if (!can().hasAnyAccess) {
+    <!--Added: Receptionist has no live gateway access to GET "" (the SSE
+        stream). Shown instead of ever opening that connection.-->
+    <div class="state-container">
+      <mat-icon color="warn">block</mat-icon>
+      <p>Inventory access isn't available for your role yet.</p>
+    </div>
+  }
+    @else if (isLoading()) {
     <!--Displays a loading screen while the page loads-->
     <div class="state-container">
       <mat-spinner diameter="40" />

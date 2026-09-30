@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -8,6 +8,8 @@ import { Subscription } from 'rxjs';
 import { isApiError, ApiError } from '@core/models/api-error';
 import { Inventory } from '@features/inventories/models/inventory.model';
 import { InventoryService } from '@features/inventories/services/inventory-service';
+import { getInventoryPermissions } from '@shared/models/inventory-permissions';
+import { AuthState } from '@core/services/auth-state';
 
 @Component({
   imports: [RouterLink, MatCardModule, MatIconModule, MatProgressSpinnerModule],
@@ -25,7 +27,23 @@ export class InventoryList implements OnInit, OnDestroy {
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal<ApiError | null>(null);
 
+  private readonly authState = inject(AuthState);
+  protected readonly can = computed(() => getInventoryPermissions(this.authState.roles()));
+
   ngOnInit(): void {
+
+
+    // Added — Receptionist has no live gateway access to GET "" (the SSE
+    // stream this subscribes to). Don't open the connection at all — that's
+    // the "hidden or disabled in the UI" half of the requirement, on top
+    // of the backend's guaranteed 403 if it were opened anyway.
+    if (!this.can().hasAnyAccess) {
+      this.isLoading.set(false);
+      return;
+    }
+
+
+
     this.inventorySubscription = this.inventoryService.getInventories().subscribe({
       next: (item) => {
         this.isLoading.set(false);
@@ -74,6 +92,15 @@ export class InventoryList implements OnInit, OnDestroy {
         [inventoryId]: null,
       }));
     }
+
+    // Added — GET .../productquantity is ADMIN/INVENTORY_MANAGER only.
+    // Without this guard, VET fires one failed 403 request per item as
+    // it streams in, forever (SSE keeps the connection open, so this is
+    if (!this.can().canViewProductQuantity) {
+      return;
+    }
+
+
 
     const subscription = this.inventoryService.getQuantity(inventoryId).subscribe({
       next: (quantity) => {
