@@ -9,14 +9,12 @@ export const exportVisitsCSV = async (): Promise<void> => {
 
     const url = window.URL.createObjectURL(new Blob([response.data]));
 
-    // Create a temporary anchor element to trigger the download
     const a = document.createElement('a');
     a.href = url;
     a.download = 'visits.csv';
     document.body.appendChild(a);
     a.click();
 
-    // Clean up
     window.URL.revokeObjectURL(url);
     document.body.removeChild(a);
 

@@ -1,27 +1,20 @@
 import axiosInstance from '@/shared/api/axiosInstance';
 import { PetResponseModel } from '@/features/customers/models/PetResponseModel';
 
-// getting backend url
 export const getAllPets = async (): Promise<PetResponseModel[]> => {
   try {
     const response = await axiosInstance.get('/pets', {
-      // set uri to use v1 (as we configured it)
       useV2: false,
-      //   final path : http://localhost:8080/api/gateway/pets
     });
 
-    // Handle SSE (Server-Sent Events) stream format
     if (typeof response.data === 'string') {
-      // take the response data sent by axios and make it in array format, remove empty strings
       const pieces = response.data.split('\n').filter(Boolean);
       const pets: PetResponseModel[] = [];
 
       for (const piece of pieces) {
         if (piece.startsWith('data:')) {
-          // remove the "data:" from the string (cleans the string)
           const petData = piece.slice(5).trim();
           try {
-            // epect valid json syntax
             const pet: PetResponseModel = JSON.parse(petData);
             pets.push(pet);
           } catch (parseError) {
