@@ -24,6 +24,7 @@ import reactor.test.StepVerifier;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -74,6 +75,8 @@ class ProductsServiceClientIntegrationTest {
 
     @Test
     void getAllProducts_withTrimmedProductName_sendsProductNameQueryParameter() throws InterruptedException {
+        while (mockWebServer.takeRequest(0, TimeUnit.MILLISECONDS) != null) { }
+
         mockWebServer.enqueue(new MockResponse()
                 .setBody("")
                 .setHeader("Content-Type", "text/event-stream")
@@ -89,6 +92,8 @@ class ProductsServiceClientIntegrationTest {
 
     @Test
     void getAllProducts_withBlankProductName_doesNotSendProductNameQueryParameter() throws InterruptedException {
+        while (mockWebServer.takeRequest(0, TimeUnit.MILLISECONDS) != null) { }
+
         mockWebServer.enqueue(new MockResponse()
                 .setBody("")
                 .setHeader("Content-Type", "text/event-stream")
