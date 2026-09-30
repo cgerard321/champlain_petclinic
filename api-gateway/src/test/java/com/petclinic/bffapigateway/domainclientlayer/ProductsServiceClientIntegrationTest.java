@@ -71,6 +71,37 @@ class ProductsServiceClientIntegrationTest {
                 .expectNextMatches(product -> product.getProductId().equals("baee7cd2-b67a-449f-b262-91f45dde8a6d") && product.getProductName().equals("Flea Collar"))
                 .verifyComplete();
     }
+
+    @Test
+    void getAllProducts_withTrimmedProductName_sendsProductNameQueryParameter() throws InterruptedException {
+        mockWebServer.enqueue(new MockResponse()
+                .setBody("")
+                .setHeader("Content-Type", "text/event-stream")
+        );
+
+        StepVerifier.create(productsServiceClient.getAllProducts(
+                        null, null, null, null, null, null, null, "  horse  "))
+                .verifyComplete();
+
+        RecordedRequest request = mockWebServer.takeRequest();
+        assertEquals("/products?productName=horse", request.getPath());
+    }
+
+    @Test
+    void getAllProducts_withBlankProductName_doesNotSendProductNameQueryParameter() throws InterruptedException {
+        mockWebServer.enqueue(new MockResponse()
+                .setBody("")
+                .setHeader("Content-Type", "text/event-stream")
+        );
+
+        StepVerifier.create(productsServiceClient.getAllProducts(
+                        null, null, null, null, null, null, null, "   "))
+                .verifyComplete();
+
+        RecordedRequest request = mockWebServer.takeRequest();
+        assertEquals("/products", request.getPath());
+    }
+
     @Test
     void getAllProducts_WithRatingFiltering_ThenReturnFilteredProductList() {
 
