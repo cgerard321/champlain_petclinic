@@ -63,8 +63,6 @@ pub async fn send_logs(
                 let contract: LogResponseContract = entry.into();
                 match serde_json::to_string(&contract) {
                     Ok(json) => {
-
-
                         if socket.send(Message::Text(json)).await.is_err() {
                             log::debug!("WebSocket client disconnected");
                             break;
