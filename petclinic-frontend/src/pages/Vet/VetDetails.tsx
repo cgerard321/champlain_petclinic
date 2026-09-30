@@ -14,8 +14,8 @@ import UploadAlbumPhoto from '@/features/veterinarians/api/UploadAlbumPhoto';
 import { getAlbumsByVetId } from '@/features/veterinarians/api/getAlbumByVetId.ts';
 import { fetchVetPhoto } from '@/features/veterinarians/api/fetchPhoto';
 import { fetchVet } from '@/features/veterinarians/api/fetchVetDetails.ts';
-import { IsOwner, IsVet, IsAdmin, useUser } from '@/context/UserContext';
-import { getOwner } from '@/features/customers/api/getOwner';
+import { IsCustomer, IsVet, IsAdmin, useUser } from '@/context/UserContext';
+import { getCustomer } from '@/features/customers/api/getCustomer.ts';
 import { deleteVetRating } from '@/features/veterinarians/api/deleteVetRating';
 import AddVetRatingModal from '@/pages/Vet/AddVetRatingModal';
 import { format } from 'date-fns';
@@ -110,7 +110,7 @@ const formatRatingDate = (rateDate?: string): string => {
 export default function VetDetails(): JSX.Element {
   const { vetId } = useParams<{ vetId: string }>();
   const { user } = useUser();
-  const isOwner = IsOwner();
+  const isOwner = IsCustomer();
   const isVet = IsVet();
   const isAdmin = IsAdmin();
   const [vet, setVet] = useState<VetResponseType | null>(null);
@@ -280,7 +280,7 @@ export default function VetDetails(): JSX.Element {
     const fetchCurrentCustomerName = async (): Promise<void> => {
       try {
         if (user.userId) {
-          const ownerResponse = await getOwner(user.userId);
+          const ownerResponse = await getCustomer(user.userId);
           const customerName = `${ownerResponse.data.firstName} ${ownerResponse.data.lastName}`;
           setCurrentCustomerName(customerName);
         }

@@ -1,29 +1,29 @@
 import { FormEvent, useState, useEffect, ChangeEvent } from 'react';
 import * as PropTypes from 'prop-types';
-import { addPetForOwner } from '../api/addPetForOwner';
+import { addPetForCustomer } from '../api/addPetForCustomer.ts';
 import { addPetPhoto } from '../api/addPetPhoto';
 import { getPetTypes } from '../api/getPetTypes';
 import { PetRequestModel } from '../models/PetRequestModel';
 import { PetResponseModel } from '../models/PetResponseModel';
 import { PetTypeModel } from '../models/PetTypeModel';
-import defaultProfile from '@/assets/Owners/defaultProfilePicture.png';
+import defaultProfile from '@/assets/Customers/defaultProfilePicture.png';
 import './customers.css';
 
 interface AddPetModalProps {
-  ownerId: string;
+  customerId: string;
   isOpen: boolean;
   onClose: () => void;
   onPetAdded: (pet: PetResponseModel) => void;
 }
 
 const AddPetModal: React.FC<AddPetModalProps> = ({
-  ownerId,
+  customerId,
   isOpen,
   onClose,
   onPetAdded,
 }): JSX.Element | null => {
   const [pet, setPet] = useState<PetRequestModel>({
-    ownerId,
+    customerId,
     name: '',
     birthDate: new Date(),
     petTypeId: '',
@@ -110,7 +110,7 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
     if (!validate()) return;
     setIsSubmitting(true);
     try {
-      const response = await addPetForOwner(ownerId, pet);
+      const response = await addPetForCustomer(customerId, pet);
       if (response.status === 201) {
         const newPet = response.data;
 
@@ -136,7 +136,7 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
 
   const handleClose = (): void => {
     setPet({
-      ownerId,
+      customerId,
       name: '',
       birthDate: new Date(),
       petTypeId: '',
@@ -291,7 +291,7 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
 };
 
 AddPetModal.propTypes = {
-  ownerId: PropTypes.string.isRequired,
+  customerId: PropTypes.string.isRequired,
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onPetAdded: PropTypes.func.isRequired,
