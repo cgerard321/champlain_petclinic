@@ -35,9 +35,10 @@ export class Header {
     this.authState.logout().subscribe(() => this.router.navigateByUrl('/login'));
   }
 
-  // VETS-CPC-1927: on sauvegarde le choix puis on recharge la page pour que
-  // le provideAppInitializer (app.config.ts) recharge les bonnes traductions
-  // AVANT que l'app ne re-bootstrap
+  // VETS-CPC-1927: the choice is persisted, then the page is reloaded so that
+  // loadActiveTranslations (app.config.ts) installs the right catalogue BEFORE the app
+  // bootstraps again. A reload is the simplest way to guarantee that ordering, because
+  // $localize is only substituted for calls evaluated after the translations are loaded.
   protected switchLang(lang: string): void {
     if (localStorage.getItem('lang') === lang) {
       return;
