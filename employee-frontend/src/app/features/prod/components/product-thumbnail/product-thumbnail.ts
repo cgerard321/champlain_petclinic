@@ -1,5 +1,6 @@
 import { Component, effect, inject, input, signal } from '@angular/core';
 
+import { FileDetails } from '@features/prod/models/image.model';
 import { ImageService } from '@features/prod/services/image.service';
 
 @Component({
@@ -11,13 +12,20 @@ export class ProductThumbnail {
   private readonly imageService = inject(ImageService);
 
   readonly imageId = input<string | undefined>();
+  readonly image = input<FileDetails | null | undefined>();
   readonly alt = input('Product image');
   protected readonly imageSrc = signal<string | null>(null);
 
   constructor() {
     effect(() => {
       const imageId = this.imageId();
+      const image = this.image();
       this.imageSrc.set(null);
+
+      if (image?.fileData) {
+        this.imageSrc.set(`data:${image.fileType};base64,${image.fileData}`);
+        return;
+      }
 
       if (!imageId) {
         return;
