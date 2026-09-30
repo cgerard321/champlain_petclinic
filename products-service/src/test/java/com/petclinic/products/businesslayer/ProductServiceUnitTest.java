@@ -171,6 +171,25 @@ class ProductServiceUnitTest {
                 .verifyComplete();
 
     }
+
+    @Test
+    void whenGetAllProductsByProductName_thenReturnCaseInsensitivePartialMatches() {
+        when(productRepository.findByProductNameContainingIgnoreCase("horse"))
+                .thenReturn(Flux.just(product1));
+        when(ratingRepository.findRatingsByProductId(product1.getProductId()))
+                .thenReturn(Flux.empty());
+
+        Flux<ProductResponseModel> result = productService
+                .getAllProducts(null, null, null, null, null, null, null, "  horse  ");
+
+        StepVerifier.create(result)
+                .expectNextMatches(product -> product.getProductId().equals(product1.getProductId()))
+                .verifyComplete();
+
+        verify(productRepository).findByProductNameContainingIgnoreCase("horse");
+        verify(productRepository, never()).findAll();
+    }
+
     @Test
     public void whenGetAllProductsFilteredByDeliveryType_thenReturnFilteredProducts() {
         DeliveryType deliveryType = DeliveryType.DELIVERY;

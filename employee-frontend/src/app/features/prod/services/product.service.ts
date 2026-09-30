@@ -12,6 +12,7 @@ export interface ProductFilters {
   sort?: string;
   deliveryType?: string;
   productType?: string;
+  productName?: string;
 }
 
 @Injectable({ providedIn: 'root' })

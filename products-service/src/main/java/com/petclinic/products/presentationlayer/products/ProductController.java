@@ -37,9 +37,14 @@ public class ProductController {
             @RequestParam(required = false) Double maxRating,
             @RequestParam(required = false) String sort,
             @RequestParam(required = false) String deliveryType,
-            @RequestParam(required = false) String productType) {
+            @RequestParam(required = false) String productType,
+            @RequestParam(required = false) String productName) {
 
-        return productService.getAllProducts(minPrice, maxPrice, minRating, maxRating, sort,deliveryType,productType);
+        if (productName == null || productName.isBlank()) {
+            return productService.getAllProducts(minPrice, maxPrice, minRating, maxRating, sort, deliveryType, productType);
+        }
+
+        return productService.getAllProducts(minPrice, maxPrice, minRating, maxRating, sort, deliveryType, productType, productName);
     }
 
     @GetMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)

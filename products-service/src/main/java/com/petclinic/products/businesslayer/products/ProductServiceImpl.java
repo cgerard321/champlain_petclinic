@@ -62,12 +62,19 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Flux<ProductResponseModel> getAllProducts(Double minPrice, Double maxPrice, Double minRating, Double maxRating, String sort, String deliveryType, String productType) {
+        return getAllProducts(minPrice, maxPrice, minRating, maxRating, sort, deliveryType, productType, null);
+    }
+
+    @Override
+    public Flux<ProductResponseModel> getAllProducts(Double minPrice, Double maxPrice, Double minRating, Double maxRating, String sort, String deliveryType, String productType, String productName) {
         if (sort != null && !Arrays.asList("asc", "desc", "default").contains(sort.toLowerCase())) {
             throw new InvalidInputException("Invalid sort parameter: " + sort);
         }
         Flux<Product> products;
 
-        if (minPrice != null && maxPrice != null) {
+        if (productName != null && !productName.isBlank()) {
+            products = productRepository.findByProductNameContainingIgnoreCase(productName.trim());
+        } else if (minPrice != null && maxPrice != null) {
             products = productRepository.findByProductSalePriceBetween(minPrice, maxPrice);
         } else if (minPrice != null) {
             products = productRepository.findByProductSalePriceGreaterThanEqual(minPrice);
@@ -79,6 +86,9 @@ public class ProductServiceImpl implements ProductService {
 
         return products
                 .flatMap(this::getAverageRating)
+                .filter(product ->
+                        (minPrice == null || product.getProductSalePrice() >= minPrice)
+                                && (maxPrice == null || product.getProductSalePrice() <= maxPrice))
                 .filter(product -> {
                     double avgRating = product.getAverageRating();
                     boolean meetsMinRating = (minRating == null || avgRating >= minRating);

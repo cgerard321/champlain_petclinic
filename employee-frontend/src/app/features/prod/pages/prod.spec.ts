@@ -1,6 +1,7 @@
-import { TestBed } from '@angular/core/testing';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { of } from 'rxjs';
+import { vi } from 'vitest';
 
 import {
   DeliveryType,
@@ -13,6 +14,7 @@ import { ProductService } from '@features/prod/services/product.service';
 import { Prod } from './prod';
 
 describe('Prod', () => {
+  let getProducts: ReturnType<typeof vi.fn>;
   const product: Product = {
     productId: 'product-1',
     productName: 'Dog food',
@@ -26,10 +28,11 @@ describe('Prod', () => {
   };
 
   beforeEach(async () => {
+    getProducts = vi.fn().mockReturnValue(of([product]));
     await TestBed.configureTestingModule({
       imports: [Prod],
       providers: [
-        { provide: ProductService, useValue: { getProducts: () => of([product]) } },
+        { provide: ProductService, useValue: { getProducts } },
         { provide: MatDialog, useValue: { open: () => ({ afterClosed: () => of(undefined) }) } },
       ],
     }).compileComponents();
@@ -45,4 +48,20 @@ describe('Prod', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Dog food');
   });
+
+  it('searches by product name after the debounce period', fakeAsync(() => {
+    const fixture = TestBed.createComponent(Prod);
+    fixture.detectChanges();
+    getProducts.mockClear();
+
+    const input = fixture.nativeElement.querySelector('input[type="search"]');
+    input.value = 'horse';
+    input.dispatchEvent(new Event('input'));
+
+    tick(299);
+    expect(getProducts).not.toHaveBeenCalled();
+
+    tick(1);
+    expect(getProducts).toHaveBeenCalledWith({ productName: 'horse' });
+  }));
 });
