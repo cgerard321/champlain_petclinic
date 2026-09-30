@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 
@@ -13,13 +14,22 @@ interface NavBarItem {
 
 @Component({
   selector: 'app-header',
-  imports: [RouterLink, RouterLinkActive, MatButtonModule, MatIconModule, MatToolbarModule],
+  imports: [
+    RouterLink,
+    RouterLinkActive,
+    MatButtonModule,
+    MatIconModule,
+    MatToolbarModule,
+    MatMenuModule,
+  ],
   templateUrl: './header.html',
   styleUrl: './header.css',
 })
 export class Header {
   private readonly authState = inject(AuthState);
   private readonly router = inject(Router);
+
+  protected readonly username = this.authState.username;
 
   protected readonly navBarItems: NavBarItem[] = [
     { label: 'Home', route: '/home' },
