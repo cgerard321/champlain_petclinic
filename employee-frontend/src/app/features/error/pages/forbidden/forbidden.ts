@@ -13,5 +13,4 @@ export class Forbidden {
     event.preventDefault();
     this.router.navigate(['/home']);
   }
-
 }

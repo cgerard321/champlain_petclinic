@@ -13,5 +13,4 @@ export class NotFound {
     event.preventDefault();
     this.router.navigate(['/home']);
   }
-
 }

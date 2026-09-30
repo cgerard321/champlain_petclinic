@@ -17,5 +17,4 @@ describe('App', () => {
     // Assert
     expect(app).toBeTruthy();
   });
-
 });
