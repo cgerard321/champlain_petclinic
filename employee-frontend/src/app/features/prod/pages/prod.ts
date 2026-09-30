@@ -1,12 +1,12 @@
 import { CurrencyPipe } from '@angular/common';
 import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, debounceTime, distinctUntilChanged, EMPTY, Subject, switchMap } from 'rxjs';
 
 import { isApiError } from '@core/models/api-error';
@@ -58,15 +58,13 @@ export class Prod implements OnInit {
         switchMap((productName) => {
           this.isLoading.set(true);
           this.errorMessage.set(null);
-          return this.productService
-            .getProducts(productName ? { productName } : {})
-            .pipe(
-              catchError((error: unknown) => {
-                this.isLoading.set(false);
-                this.errorMessage.set(isApiError(error) ? error.message : 'Could not load products.');
-                return EMPTY;
-              }),
-            );
+          return this.productService.getProducts(productName ? { productName } : {}).pipe(
+            catchError((error: unknown) => {
+              this.isLoading.set(false);
+              this.errorMessage.set(isApiError(error) ? error.message : 'Could not load products.');
+              return EMPTY;
+            }),
+          );
         }),
         takeUntilDestroyed(this.destroyRef),
       )
