@@ -1804,6 +1804,20 @@ class CartServiceUnitTest {
                 .build();
 
         when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
+
+        ProductResponseModel productResponse = ProductResponseModel.builder()
+                .productId(product1.getProductId())
+                .productName(product1.getProductName())
+                .productDescription(product1.getProductDescription())
+                .productSalePrice(product1.getProductSalePrice())
+                .productType("Food")
+                .build();
+
+        when(productClient.getProductByProductId(anyString()))
+                .thenReturn(Mono.just(productResponse));
+
+        when(productClient.getProductsByType("Food"))
+                .thenReturn(Flux.just(productResponse));
         when(cartRepository.save(any(Cart.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
 
         StepVerifier.create(cartService.checkoutCart(cartId))

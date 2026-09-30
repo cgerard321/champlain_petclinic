@@ -380,7 +380,7 @@ class BillControllerUnitTest {
                 .thenReturn(Flux.just(responseDTO));
 
         client.get()
-                .uri(uriBuilder -> uriBuilder.path("/bills")
+                .uri(uriBuilder -> uriBuilder.path("/bills/paginated")
                         .queryParam("page", 1)
                         .queryParam("size", 10)
                         .build())
