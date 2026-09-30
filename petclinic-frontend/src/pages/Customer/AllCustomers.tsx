@@ -75,10 +75,7 @@ const AllCustomers: React.FC = (): JSX.Element => {
       if (!isKeyOfCustomerResponseModel(key)) return true;
       const customerValue = customer[key];
       if (customerValue === undefined || customerValue === null) return false;
-      return customerValue
-        .toString()
-        .toLowerCase()
-        .includes(filter[key].toLowerCase());
+      return customerValue.toString().includes(filter[key].toString());
     });
   });
 

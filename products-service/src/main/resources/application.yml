@@ -1,11 +1,3 @@
-app:
-  files-service:
-    host: files-service
-    port: 8000
-    # Comma-separated IDs for shared default images that must never be deleted.
-    default-image-ids: ${PRODUCT_DEFAULT_IMAGE_IDS:}
-
-
 ---
 server:
   port: 7007

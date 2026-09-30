@@ -58,12 +58,3 @@ export const validateUsernameAvailability = async (
     }
   }
 };
-export const validateTelephone = (telephone: string): string | null => {
-  if (!telephone.trim()) {
-    return 'Telephone is required';
-  }
-  if (!/^[0-9]{10}$/.test(telephone)) {
-    return 'Telephone must be exactly 10 digits (numbers only)';
-  }
-  return null;
-};

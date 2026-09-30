@@ -9,9 +9,6 @@ import com.petclinic.visits.visitsservicenew.PresentationLayer.Prescriptions.Pre
 import com.petclinic.visits.visitsservicenew.Utils.IdGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -26,7 +23,6 @@ import com.petclinic.visits.visitsservicenew.DomainClientLayer.Mailing.MailServi
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.*;
 import com.petclinic.visits.visitsservicenew.Exceptions.BadRequestException;
 import com.petclinic.visits.visitsservicenew.Exceptions.DuplicateTimeException;
-import com.petclinic.visits.visitsservicenew.Exceptions.InvalidInputException;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
@@ -401,25 +397,33 @@ class VisitServiceImplTest {
         verify(visitRepo, times(0)).insert(any(Visit.class));
     }
 
-    @ParameterizedTest
-    @NullAndEmptySource
-    @ValueSource(strings = {" ", "   "})
-    void testAddVisit_NoDescription(String description) {
+    @Test
+    public void testAddVisit_NoDescription() {
         // Arrange
-        VisitRequestDTO requestDTO = validDto();
-        requestDTO.setDescription(description);
+        VisitRequestDTO requestDTO = buildVisitRequestDTO();
+        Visit visit = buildVisit(requestDTO.getDescription());
+        VisitResponseDTO visitResponseDTO = buildVisitResponseDTO();
+
+        requestDTO.setDescription(null);
+        // Mock the behavior of dependencies
+
         when(petsClient.getPetById(anyString())).thenReturn(Mono.just(petResponseDTO));
         when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(vet));
+        when(entityDtoUtil.toVisitEntity(requestDTO)).thenReturn(visit);
+        when(visitRepo.insert(visit)).thenReturn(Mono.just(visit));
+        when(entityDtoUtil.toVisitResponseDTO(visit)).thenReturn(Mono.just(visitResponseDTO));
 
-        // Act and assert
-        StepVerifier.create(visitService.addVisit(Mono.just(requestDTO)))
-                .expectErrorSatisfies(error -> {
-                    assertTrue(error instanceof InvalidInputException);
-                    assertEquals("Please enter a description for this visit", error.getMessage());
-                })
-                .verify();
+        // Using MockedStatic to stub the static IdGenerator method
+        try (MockedStatic<IdGenerator> mocked = mockStatic(IdGenerator.class)) {
+            mocked.when(IdGenerator::generateVisitId).thenReturn("VIST-2510-2401");
+            // Act
+            Mono<VisitResponseDTO> result = visitService.addVisit(Mono.just(requestDTO));
 
-        verify(visitRepo, never()).insert(any(Visit.class));
+            // Assert
+            StepVerifier.create(result)
+                    .expectError(BadRequestException.class)
+                    .verify();
+        }
     }
 
     @Test

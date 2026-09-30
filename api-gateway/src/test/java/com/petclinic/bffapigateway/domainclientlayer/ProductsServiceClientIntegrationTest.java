@@ -2,13 +2,8 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.bffapigateway.dtos.Files.FileDetails;
 import com.petclinic.bffapigateway.dtos.Products.*;
 import com.petclinic.bffapigateway.dtos.Products.DeliveryType;
-import com.petclinic.bffapigateway.exceptions.BadRequestException;
-import com.petclinic.bffapigateway.exceptions.InvalidInputException;
-import com.petclinic.bffapigateway.exceptions.ProductImageDependencyException;
-import com.petclinic.bffapigateway.exceptions.ProductNotFoundException;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -209,44 +204,6 @@ class ProductsServiceClientIntegrationTest {
                 .verifyComplete();
     }
 
-    @Test
-    void getProductBadRequestUsesTypedException() {
-        mockWebServer.enqueue(new MockResponse().setResponseCode(400));
-
-        StepVerifier.create(productsServiceClient.getProductByProductId("invalid", true))
-                .expectError(BadRequestException.class)
-                .verify();
-    }
-
-    @Test
-    void getProductNotFoundUsesTypedException() {
-        mockWebServer.enqueue(new MockResponse().setResponseCode(404));
-
-        StepVerifier.create(productsServiceClient.getProductByProductId("missing", true))
-                .expectError(ProductNotFoundException.class)
-                .verify();
-    }
-
-    @Test
-    void updateProductImageInvalidInputUsesTypedException() {
-        mockWebServer.enqueue(new MockResponse().setResponseCode(422));
-
-        StepVerifier.create(productsServiceClient.updateProductImage(
-                        "product-id", FileDetails.builder().build()))
-                .expectError(InvalidInputException.class)
-                .verify();
-    }
-
-    @Test
-    void updateProductImageDependencyFailureUsesTypedException() {
-        mockWebServer.enqueue(new MockResponse().setResponseCode(424));
-
-        StepVerifier.create(productsServiceClient.updateProductImage(
-                        "product-id", FileDetails.builder().build()))
-                .expectError(ProductImageDependencyException.class)
-                .verify();
-    }
-
 
 
     @Test
@@ -332,9 +289,8 @@ class ProductsServiceClientIntegrationTest {
                 .addHeader("Content-Type", "application/json"));
 
         Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
-                .patchListingStatus(
-                        productResponseDTO.getProductId(),
-                        ProductRequestDTO.builder().isUnlisted(false).build());
+                .patchListingStatus(productResponseDTO.getProductId(), new ProductRequestDTO(
+                        null, null, null, null, null, null, false, null, null, null,null));
 
         StepVerifier.create(productResponseDTOMono)
                 .expectNextMatches(product -> product.getProductId().equals("productId"))
@@ -349,9 +305,9 @@ class ProductsServiceClientIntegrationTest {
                 .addHeader("Content-Type", "application/json"));
 
         Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
-                .patchListingStatus(
-                        "691e6945-0d4a-4b20-85cc-afd251faccfd",
-                        ProductRequestDTO.builder().isUnlisted(false).build());
+                .patchListingStatus("691e6945-0d4a-4b20-85cc-afd251faccfd", new ProductRequestDTO(
+                        null, null, null, null, null,
+                        null, false, null, null, null,null));
 
         StepVerifier.create(productResponseDTOMono)
                 .expectErrorMatches(throwable -> throwable != null &&
@@ -367,9 +323,8 @@ class ProductsServiceClientIntegrationTest {
                 .addHeader("Content-Type", "application/json"));
 
         Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
-                .patchListingStatus(
-                        "invalid-product-id",
-                        ProductRequestDTO.builder().isUnlisted(false).build());
+                .patchListingStatus("invalid-product-id", new ProductRequestDTO(
+                        null, null, null, null, null, null, false, null, null, null,null));
 
         StepVerifier.create(productResponseDTOMono)
                 .expectErrorMatches(throwable -> throwable != null &&
@@ -385,9 +340,8 @@ class ProductsServiceClientIntegrationTest {
                 .addHeader("Content-Type", "application/json"));
 
         Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
-                .patchListingStatus(
-                        "productId",
-                        ProductRequestDTO.builder().isUnlisted(false).build());
+                .patchListingStatus("productId", new ProductRequestDTO(
+                        null, null, null, null, null, null, false, null, null, null,null));
 
         StepVerifier.create(productResponseDTOMono)
                 .expectErrorMatches(throwable -> throwable != null &&
@@ -403,9 +357,8 @@ class ProductsServiceClientIntegrationTest {
                 .addHeader("Content-Type", "application/json"));
 
         Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
-                .patchListingStatus(
-                        "productId",
-                        ProductRequestDTO.builder().isUnlisted(false).build());
+                .patchListingStatus("productId", new ProductRequestDTO(
+                        null, null, null, null, null, null, false, null, null, null,null));
 
         StepVerifier.create(productResponseDTOMono)
                 .expectErrorMatches(throwable -> throwable != null &&

@@ -21,7 +21,6 @@ export async function getAllProducts(
     params.deliveryType = deliveryType;
   if (productType && productType !== 'default')
     params.productType = productType;
-  params.includeImage = true;
 
   try {
     const response = await axiosInstance.get('/products', {

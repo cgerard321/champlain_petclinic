@@ -2,7 +2,6 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 
-import { FileDetails } from '@features/prod/models/image.model';
 import { Product, ProductEnums, ProductRequest } from '@features/prod/models/product.model';
 
 export interface ProductFilters {
@@ -20,7 +19,7 @@ export class ProductService {
   private readonly http = inject(HttpClient);
 
   getProducts(filters: ProductFilters = {}): Observable<Product[]> {
-    let params = new HttpParams().set('includeImage', 'true');
+    let params = new HttpParams();
     for (const [key, value] of Object.entries(filters)) {
       if (value !== undefined && value !== null && value !== '') {
         params = params.set(key, String(value));
@@ -33,9 +32,7 @@ export class ProductService {
   }
 
   getProduct(productId: string): Observable<Product> {
-    return this.http.get<Product>(`/api/gateway/products/${productId}`, {
-      params: new HttpParams().set('includeImage', 'true'),
-    });
+    return this.http.get<Product>(`/api/gateway/products/${productId}`);
   }
 
   createProduct(request: ProductRequest): Observable<Product> {
@@ -44,10 +41,6 @@ export class ProductService {
 
   updateProduct(productId: string, request: ProductRequest): Observable<Product> {
     return this.http.put<Product>(`/api/gateway/products/${productId}`, request);
-  }
-
-  updateProductImage(productId: string, image: FileDetails): Observable<Product> {
-    return this.http.patch<Product>(`/api/gateway/products/${productId}/image`, image);
   }
 
   getProductEnums(): Observable<ProductEnums> {

@@ -121,24 +121,6 @@ export default tseslint.config(
     },
   },
   {
-    files: ['src/**/*.ts'],
-    ignores: ['src/app/core/**'],
-    rules: {
-      'no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['@core/internal', '@core/internal/**'],
-              message:
-                '`core/internal` is private to `core/`. Use the public core services instead.',
-            },
-          ],
-        },
-      ],
-    },
-  },
-  {
     files: ['**/*.html'],
     extends: [
       ...angular.configs.templateRecommended,

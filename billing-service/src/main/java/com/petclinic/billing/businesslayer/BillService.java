@@ -27,16 +27,6 @@ public interface BillService {
                                             String vetFirstName,
                                             String vetLastName);
 
-    Flux<BillResponseDTO> getAllBillsStream(
-            String billId,
-            String customerId,
-            String ownerFirstName,
-            String ownerLastName,
-            String visitType,
-            String vetId,
-            String vetFirstName,
-            String vetLastName);
-
     Mono<Long> getNumberOfBillsWithFilters(String billId,
                                            String customerId,
                                            String ownerFirstName,

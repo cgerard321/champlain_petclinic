@@ -1,7 +1,3 @@
-# Handle reactive requests in Angular
-
-[See here](./SSE-angular-usage.md)
-
 # Frontend Architecture Guide
 
 This document explains how `dev-tools-frontend` is organized, what goes where, and the import rules that keep features

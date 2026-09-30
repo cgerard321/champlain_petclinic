@@ -12,12 +12,8 @@ import { AppRoutePaths } from '@/shared/models/path.routes';
 import { useUser } from '@/context/UserContext';
 import { useUsernameValidation } from '../hooks/useUsernameValidation';
 import './UpdateCustomerForm.css';
-import { validateTelephone } from '../utils/validation';
-import { useToast } from '@/shared/components/toast/ToastProvider';
-import { provincesOfCanada } from '../utils/provinces';
 
 const UpdateCustomerForm: React.FC = (): JSX.Element => {
-  const { showToast } = useToast();
   const navigate = useNavigate();
   const { user, checkSession } = useUser();
   const { validateUsernameField } = useUsernameValidation();
@@ -71,9 +67,7 @@ const UpdateCustomerForm: React.FC = (): JSX.Element => {
     fetchData();
   }, [user.userId]);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ): void => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
     setCustomer({ ...customer, [name]: value });
   };
@@ -94,9 +88,7 @@ const UpdateCustomerForm: React.FC = (): JSX.Element => {
     if (!customer.address) newErrors.address = 'Address is required';
     if (!customer.city) newErrors.city = 'City is required';
     if (!customer.province) newErrors.province = 'Province is required';
-
-    const telephoneError = validateTelephone(customer.telephone);
-    if (telephoneError) newErrors.telephone = telephoneError;
+    if (!customer.telephone) newErrors.telephone = 'Telephone is required';
 
     const usernameError = await validateUsernameField(
       username,
@@ -126,16 +118,12 @@ const UpdateCustomerForm: React.FC = (): JSX.Element => {
         await checkSession();
       }
 
-      showToast('Profile updated successfully', 'success');
       navigate(AppRoutePaths.Home);
     } catch (error) {
       console.error('Error:', error);
-      showToast(
-        'Could not update your profile. Please check your information and try again.',
-        'error'
-      );
     }
   };
+
   return (
     <div className="update-customer-form">
       <h1>Edit Profile</h1>
@@ -186,18 +174,12 @@ const UpdateCustomerForm: React.FC = (): JSX.Element => {
         {errors.city && <span className="error">{errors.city}</span>}
         <br />
         <label>Province: </label>
-        <select
+        <input
+          type="text"
           name="province"
           value={customer.province}
           onChange={handleChange}
-        >
-          <option value="">Select Province</option>
-          {provincesOfCanada.map(province => (
-            <option key={province} value={province}>
-              {province}
-            </option>
-          ))}
-        </select>
+        />
         {errors.province && <span className="error">{errors.province}</span>}
         <br />
         <label>Telephone: </label>

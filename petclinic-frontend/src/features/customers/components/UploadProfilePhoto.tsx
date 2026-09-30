@@ -1,7 +1,6 @@
 import { useRef, useState } from 'react';
 import * as PropTypes from 'prop-types';
 import { uploadCustomerPhoto } from '../api/uploadCustomerPhoto.ts';
-import { useTranslation } from 'react-i18next';
 
 interface UploadProfilePhotoProps {
   customerId: string;
@@ -14,7 +13,6 @@ const UploadProfilePhoto: React.FC<UploadProfilePhotoProps> = ({
   onPhotoUploaded,
   disabled = false,
 }) => {
-  const { t } = useTranslation('customers');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -25,12 +23,12 @@ const UploadProfilePhoto: React.FC<UploadProfilePhotoProps> = ({
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      alert(t('uploadProfilePhoto.errors.invalidFileType'));
+      alert('Please select an image file (JPG, PNG, etc.)');
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      alert(t('uploadProfilePhoto.errors.fileTooLarge'));
+      alert('File size must be less than 5MB');
       return;
     }
 
@@ -40,7 +38,7 @@ const UploadProfilePhoto: React.FC<UploadProfilePhotoProps> = ({
       onPhotoUploaded();
     } catch (error) {
       console.error('Error uploading photo:', error);
-      alert(t('uploadProfilePhoto.errors.uploadFailed'));
+      alert('Failed to upload photo. Please try again.');
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {
@@ -78,9 +76,7 @@ const UploadProfilePhoto: React.FC<UploadProfilePhotoProps> = ({
           marginTop: '8px',
         }}
       >
-        {isUploading
-          ? t('uploadProfilePhoto.uploading')
-          : t('uploadProfilePhoto.changePhoto')}
+        {isUploading ? 'Uploading...' : 'Change Photo'}
       </button>
     </>
   );

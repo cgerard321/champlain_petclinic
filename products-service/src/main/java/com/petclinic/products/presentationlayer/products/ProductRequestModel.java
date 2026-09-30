@@ -3,8 +3,6 @@ package com.petclinic.products.presentationlayer.products;
 import com.petclinic.products.datalayer.products.DeliveryType;
 import com.petclinic.products.datalayer.products.ProductStatus;
 import com.petclinic.products.datalayer.products.ProductType;
-import com.petclinic.products.domainclientlayer.FileRequestDTO;
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,6 +16,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class ProductRequestModel {
 
+    private String imageId;
     private String productName;
     private String productDescription;
     private Double productSalePrice;
@@ -27,6 +26,4 @@ public class ProductRequestModel {
     private LocalDate releaseDate;
     private ProductStatus productStatus;
     private DeliveryType deliveryType;
-    @Valid
-    private FileRequestDTO image;
 }

@@ -20,7 +20,6 @@ export async function getProductByProductId(
       `/products/${productId}`,
       {
         useV2: false,
-        params: { includeImage: true },
       }
     );
 

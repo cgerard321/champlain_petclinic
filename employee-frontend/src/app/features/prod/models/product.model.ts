@@ -5,8 +5,6 @@ export enum ProductType {
   EQUIPMENT = 'EQUIPMENT',
 }
 
-import { FileDetails } from '@features/prod/models/image.model';
-
 export enum ProductStatus {
   AVAILABLE = 'AVAILABLE',
   PRE_ORDER = 'PRE_ORDER',
@@ -23,7 +21,6 @@ export enum DeliveryType {
 export interface Product {
   productId: string;
   imageId?: string;
-  image?: FileDetails | null;
   productName: string;
   productDescription: string;
   productSalePrice: number;
@@ -38,7 +35,7 @@ export interface Product {
 }
 
 export interface ProductRequest {
-  image?: FileDetails;
+  imageId?: string;
   productName: string;
   productDescription: string;
   productSalePrice: number;

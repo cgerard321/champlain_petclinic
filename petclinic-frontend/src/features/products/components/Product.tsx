@@ -138,10 +138,7 @@ export default function Product({
       )}
 
       <div onClick={handleProductClick} className="product-title">
-        <ImageContainer
-          image={currentProduct.image}
-          imageId={currentProduct.imageId}
-        />
+        <ImageContainer imageId={currentProduct.imageId} />
         <h2 className="product-title">{currentProduct.productName}</h2>
       </div>
 

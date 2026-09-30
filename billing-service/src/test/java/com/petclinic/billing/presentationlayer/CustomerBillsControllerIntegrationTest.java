@@ -2,7 +2,7 @@ package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.datalayer.*;
 
-import com.petclinic.billing.domainclientlayer.CustomerServiceClient;
+import com.petclinic.billing.domainclientlayer.OwnerClient;
 import com.petclinic.billing.domainclientlayer.Auth.AuthServiceClient;
 import com.petclinic.billing.domainclientlayer.Auth.UserDetails;
 import com.petclinic.billing.domainclientlayer.Mailing.Mail;
@@ -47,7 +47,7 @@ public class CustomerBillsControllerIntegrationTest {
         private WebTestClient client;
 
         @MockBean
-        private CustomerServiceClient customerServiceClient;
+        private OwnerClient ownerClient;
 
 
         @Autowired
@@ -79,12 +79,12 @@ public class CustomerBillsControllerIntegrationTest {
 
         Publisher<Bill> setup = billRepository.deleteAll().thenMany(billRepository.save(bill));
 
-        CustomerResponseDTO owner = new CustomerResponseDTO();
-        owner.setCustomerId(bill.getCustomerId());
+        OwnerResponseDTO owner = new OwnerResponseDTO();
+        owner.setOwnerId(bill.getCustomerId());
         owner.setFirstName("John");
         owner.setLastName("Doe");
 
-        when(customerServiceClient.getCustomerByCustomerId(bill.getCustomerId()))
+        when(ownerClient.getOwnerByOwnerId(bill.getCustomerId()))
                 .thenReturn(Mono.just(owner));
 
         StepVerifier.create(setup)

@@ -18,15 +18,21 @@ describe('ImageService', () => {
 
   afterEach(() => http.verify());
 
-  it('converts an image to Files Service details', async () => {
+  it('uploads an image as multipart form data', () => {
     const file = new File(['image'], 'product.png', { type: 'image/png' });
 
-    const result = await service.toFileDetails(file);
+    service.uploadImage(file).subscribe();
 
-    expect(result).toEqual({
-      fileName: 'product.png',
-      fileType: 'image/png',
-      fileData: 'aW1hZ2U=',
+    const request = http.expectOne('/api/gateway/images');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toBeInstanceOf(FormData);
+    expect((request.request.body as FormData).get('imageName')).toBe('product.png');
+    expect((request.request.body as FormData).get('imageType')).toBe('image/png');
+    request.flush({
+      imageId: 'image-1',
+      imageName: 'product.png',
+      imageType: 'image/png',
+      imageData: 'aW1hZ2U=',
     });
   });
 

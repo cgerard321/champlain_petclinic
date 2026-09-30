@@ -256,39 +256,38 @@ public class CartServiceImpl implements CartService {
                     cart.setRecentPurchases(updatedRecentPurchases);
 
                     // --- Recommendation Purchases Logic ---
-                    return Flux.fromIterable(products)
-                            .map(CartProduct::getProductId)
-                            .flatMap(productClient::getProductByProductId)
-                            .filter(product -> product.getProductType() != null)
-                            .map(ProductResponseModel::getProductType)
-                            .distinct()
-                            .flatMap(productClient::getProductsByType)
-                            .distinct(ProductResponseModel::getProductId)
-                            .map(this::toCartProduct)
-                            .collectList()
-                            .flatMap(recommendations -> {
-                                cart.setRecommendationPurchase(recommendations);
-                                cart.setProducts(Collections.emptyList());
+                    // Only recommend products bought 3+ times
+                    Map<String, Integer> purchaseCounts = new HashMap<>();
+                    for (CartProduct p : updatedRecentPurchases) {
+                        purchaseCounts.put(
+                                p.getProductId(),
+                                purchaseCounts.getOrDefault(p.getProductId(), 0) + p.getQuantityInCart()
+                        );
+                    }
+                    List<CartProduct> recommended = new ArrayList<>();
+                    for (CartProduct p : updatedRecentPurchases) {
+                        if (purchaseCounts.get(p.getProductId()) >= 3) {
+                            // Deduplicate by productId
+                            if (recommended.stream().noneMatch(r -> r.getProductId().equals(p.getProductId()))) {
+                                recommended.add(p);
+                            }
+                        }
+                    }
+                    cart.setRecommendationPurchase(recommended);
 
-                                return cartRepository.save(cart)
-                                        .thenReturn(new CartResponseModel(invoiceId, cartId, products, total));
-
-                                    });
+                    // Clear the cart after checkout
+                    cart.setProducts(Collections.emptyList());
+                    return cartRepository.save(cart)
+                            .then(Mono.just(new CartResponseModel(invoiceId, cartId, products, total)));
                 });
     }
 
-
-    private CartProduct toCartProduct(ProductResponseModel product) {
-        return CartProduct.builder()
-                .productId(product.getProductId())
-                .imageId(product.getImageId())
-                .productName(product.getProductName())
-                .productDescription(product.getProductDescription())
-                .productSalePrice(product.getProductSalePrice())
-                .quantityInCart(1)
-                .build();
-    }
-
+    // this function was never used and could be harmful since it does not check null, does not account promo codes and ignore taxes
+    // private double calculateTotal(List<CartProduct> products) {
+    //     return products.stream()
+    //             .mapToDouble(product -> product.getProductSalePrice() * product.getQuantityInCart())
+    //             .sum();
+    // }
 
     @Override
     public Mono<CartResponseModel> assignCartToCustomer(String customerId) {

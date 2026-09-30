@@ -41,11 +41,7 @@ describe('ProductService', () => {
 
     service.getProducts().subscribe((products) => (result = products));
 
-    const request = http.expectOne(
-      (candidate) =>
-        candidate.url === '/api/gateway/products' &&
-        candidate.params.get('includeImage') === 'true',
-    );
+    const request = http.expectOne('/api/gateway/products');
     expect(request.request.responseType).toBe('text');
     request.flush(
       `data:${JSON.stringify(product)}\n\ndata:${JSON.stringify({ ...product, productId: 'product-2' })}\n\n`,
@@ -106,20 +102,5 @@ describe('ProductService', () => {
       productId: 'product-1',
       productStatus: ProductStatus.AVAILABLE,
     });
-  });
-
-  it('updates a product image through the image subresource', () => {
-    const image = {
-      fileName: 'product.png',
-      fileType: 'image/png',
-      fileData: 'aW1hZ2U=',
-    };
-
-    service.updateProductImage('product-1', image).subscribe();
-
-    const request = http.expectOne('/api/gateway/products/product-1/image');
-    expect(request.request.method).toBe('PATCH');
-    expect(request.request.body).toEqual(image);
-    request.flush({ productId: 'product-1', image });
   });
 });

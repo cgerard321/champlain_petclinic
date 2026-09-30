@@ -123,29 +123,6 @@ public class BillControllerV1 {
                 visitType, vetId, vetFirstName, vetLastName);
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getAllBillsStream(
-            @RequestParam(required = false) String billId,
-            @RequestParam(required = false) String customerId,
-            @RequestParam(required = false) String ownerFirstName,
-            @RequestParam(required = false) String ownerLastName,
-            @RequestParam(required = false) String visitType,
-            @RequestParam(required = false) String vetId,
-            @RequestParam(required = false) String vetFirstName,
-            @RequestParam(required = false) String vetLastName) {
-
-        return billServiceClient.getAllBillsStream(
-                billId,
-                customerId,
-                ownerFirstName,
-                ownerLastName,
-                visitType,
-                vetId,
-                vetFirstName,
-                vetLastName);
-    }
-
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
     @GetMapping(value = "/bills-count")
     public Mono<Long> getTotalNumberOfBills(){

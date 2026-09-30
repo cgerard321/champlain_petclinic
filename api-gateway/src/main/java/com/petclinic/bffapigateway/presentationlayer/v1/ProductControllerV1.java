@@ -2,11 +2,9 @@ package com.petclinic.bffapigateway.presentationlayer.v1;
 
 
 import com.petclinic.bffapigateway.domainclientlayer.ProductsServiceClient;
-import com.petclinic.bffapigateway.dtos.Files.FileDetails;
 import com.petclinic.bffapigateway.dtos.Products.*;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -35,8 +33,7 @@ public class ProductControllerV1 {
             @RequestParam(required = false) Double maxRating,
             @RequestParam(required = false) String sort,
             @RequestParam(required = false) String deliveryType,
-            @RequestParam(required = false) String productType,
-            @RequestParam(defaultValue = "false") boolean includeImage
+            @RequestParam(required = false) String productType
     ){
         if ((minPrice != null && minPrice < 0) || (maxPrice != null && maxPrice < 0) ||
                 (minRating != null && minRating < 0) || (maxRating != null && maxRating < 0)) {
@@ -51,29 +48,15 @@ public class ProductControllerV1 {
             return Flux.error(new IllegalArgumentException("minRating cannot be greater than maxRating"));
         }
 
-        if (includeImage) {
-            return productsServiceClient.getAllProducts(
-                    minPrice, maxPrice, minRating, maxRating, sort, deliveryType,
-                    productType, true);
-        }
-        return productsServiceClient.getAllProducts(
-                minPrice, maxPrice, minRating, maxRating, sort, deliveryType,
-                productType);
+        return productsServiceClient.getAllProducts(minPrice, maxPrice, minRating, maxRating, sort, deliveryType, productType);
 
     }
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping(value = "{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<ProductResponseDTO>> getProductByProductId(
-            @PathVariable String productId,
-            @RequestParam(defaultValue = "false") boolean includeImage) {
-
-        Mono<ProductResponseDTO> productResponse = includeImage
-                ? productsServiceClient.getProductByProductId(productId, true)
-                : productsServiceClient.getProductByProductId(productId);
-
-        return productResponse
+    public Mono<ResponseEntity<ProductResponseDTO>> getProductByProductId(@PathVariable String productId) {
+        return productsServiceClient.getProductByProductId(productId)
                 .map(product -> ResponseEntity.status(HttpStatus.OK).body(product))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
@@ -81,8 +64,7 @@ public class ProductControllerV1 {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<ProductResponseDTO>> addProduct(
-            @Valid @RequestBody ProductRequestDTO productRequestDTO) {
+    public Mono<ResponseEntity<ProductResponseDTO>> addProduct(@RequestBody ProductRequestDTO productRequestDTO) {
         return productsServiceClient.createProduct(productRequestDTO)
                 .map(product -> ResponseEntity.status(HttpStatus.CREATED).body(product))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
@@ -96,35 +78,6 @@ public class ProductControllerV1 {
         return productsServiceClient.updateProduct(productId, productRequestDTO)
                 .map(product -> ResponseEntity.status(HttpStatus.OK).body(product))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
-    @PatchMapping(
-            value = "/{productId}/image",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<ProductResponseDTO>> updateProductImage(
-            @PathVariable String productId,
-            @Valid @RequestBody FileDetails image) {
-
-        return productsServiceClient.updateProductImage(productId, image)
-                .map(ResponseEntity::ok);
-    }
-
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
-    @DeleteMapping(value = "/{productId}/image", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<ProductResponseDTO>> deleteProductImage(
-            @PathVariable String productId) {
-        return productsServiceClient.deleteProductImage(productId)
-                .map(ResponseEntity::ok);
-    }
-
-    @SecuredEndpoint(allowedRoles = {Roles.ALL})
-    @GetMapping(value = "/filter/{productType}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<ProductResponseDTO> getProductsByType(
-            @PathVariable String productType,
-            @RequestParam(defaultValue = "false") boolean includeImage) {
-        return productsServiceClient.getProductsByType(productType, includeImage);
     }
 
 

@@ -19,8 +19,6 @@ public interface ProductRepository extends R2dbcRepository<Product, Long> {
     Flux<Product> findProductsByProductType(String productType);
 
     List<Product> findByProductType(ProductType productType);
-    Mono<Boolean> existsByImageIdAndProductIdNot(
-            String imageId, String productId);
 
     Flux<Product> findAllByProductIdIn(List<String> productIds);
 }

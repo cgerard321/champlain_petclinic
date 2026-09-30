@@ -1,10 +1,9 @@
 import { Component, inject } from '@angular/core';
 
 import { AuthState } from '@core/services/auth-state';
-import { ComingSoon } from '@shared/components/coming-soon/coming-soon';
 
 @Component({
-  imports: [ComingSoon],
+  imports: [],
   selector: 'app-bill',
   styleUrl: './bill.css',
   templateUrl: './bill.html',

@@ -2,7 +2,6 @@ package com.petclinic.products.businesslayer.products;
 
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductType;
-import com.petclinic.products.domainclientlayer.FileRequestDTO;
 import com.petclinic.products.presentationlayer.products.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -13,14 +12,8 @@ public interface ProductService {
 
     Flux<ProductResponseModel> getAllProducts(Double minPrice, Double maxPrice, Double minRating, Double maxRating, String sort, String deliveryType, String productType);
 
-    default Mono<ProductResponseModel> getProductByProductId(String productId) {
-        return getProductByProductId(productId, false);
-    }
+    Mono<ProductResponseModel> getProductByProductId(String productId);
 
-    Mono<ProductResponseModel> getProductByProductId(
-            String productId, boolean includeImage);
-
-    Mono<ProductResponseModel> includeImage(ProductResponseModel product);
     Mono<ProductResponseModel> addProduct(Mono<ProductRequestModel> productRequestModel);
 
     Mono<ProductResponseModel> updateProductByProductId(String productId, Mono<ProductRequestModel> productRequestModel);
@@ -50,8 +43,4 @@ public interface ProductService {
     Mono<ProductTypeResponseModel> updateProductTypeByProductTypeId(String productTypeId, Mono<ProductTypeRequestModel> productTypeRequestModel);
 
     Mono<ProductTypeResponseModel> deleteProductTypeByProductTypeId(String productTypeId);
-
-    Mono<ProductResponseModel> updateProductImage(
-            String productId, FileRequestDTO image);
-    Mono<ProductResponseModel> deleteProductImage(String productId);
 }
