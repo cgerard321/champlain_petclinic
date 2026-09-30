@@ -59,5 +59,8 @@ describe('Prod', () => {
 
     tick(1);
     expect(getProducts).toHaveBeenCalledWith({ productName: 'horse' });
+
+    fixture.componentInstance['loadProducts']();
+    expect(getProducts).toHaveBeenLastCalledWith({ productName: 'horse' });
   }));
 });

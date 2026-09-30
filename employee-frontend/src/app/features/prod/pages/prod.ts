@@ -40,6 +40,7 @@ export class Prod implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly destroyRef = inject(DestroyRef);
   private readonly productSearch = new Subject<string>();
+  private readonly searchTerm = signal('');
 
   protected readonly products = signal<Product[]>([]);
   protected readonly isLoading = signal(false);
@@ -78,13 +79,16 @@ export class Prod implements OnInit {
   }
 
   protected searchProducts(productName: string): void {
-    this.productSearch.next(productName.trim());
+    const trimmedProductName = productName.trim();
+    this.searchTerm.set(trimmedProductName);
+    this.productSearch.next(trimmedProductName);
   }
 
   protected loadProducts(): void {
     this.isLoading.set(true);
     this.errorMessage.set(null);
-    this.productService.getProducts().subscribe({
+    const productName = this.searchTerm();
+    this.productService.getProducts(productName ? { productName } : {}).subscribe({
       next: (products) => {
         this.products.set(products);
         this.isLoading.set(false);

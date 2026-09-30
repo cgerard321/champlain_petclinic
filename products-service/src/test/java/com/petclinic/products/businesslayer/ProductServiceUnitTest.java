@@ -215,6 +215,34 @@ class ProductServiceUnitTest {
     }
 
     @Test
+    void whenGetAllProductsByProductNameWithPriceRange_thenReturnProductsWithinPriceRange() {
+        Product productWithinRange = Product.builder()
+                .productId("horse-1")
+                .productName("Horse Saddle")
+                .productSalePrice(199.99)
+                .build();
+        Product productOutsideRange = Product.builder()
+                .productId("horse-2")
+                .productName("Horse Blanket")
+                .productSalePrice(29.99)
+                .build();
+
+        when(productRepository.findByProductNameContainingIgnoreCase("horse"))
+                .thenReturn(Flux.just(productWithinRange, productOutsideRange));
+        when(ratingRepository.findRatingsByProductId("horse-1")).thenReturn(Flux.empty());
+        when(ratingRepository.findRatingsByProductId("horse-2")).thenReturn(Flux.empty());
+
+        Flux<ProductResponseModel> result = productService
+                .getAllProducts(100.0, 250.0, null, null, null, null, null, "horse");
+
+        StepVerifier.create(result)
+                .expectNextMatches(product -> product.getProductId().equals("horse-1"))
+                .verifyComplete();
+
+        verify(productRepository).findByProductNameContainingIgnoreCase("horse");
+    }
+
+    @Test
     public void whenGetAllProductsFilteredByDeliveryType_thenReturnFilteredProducts() {
         DeliveryType deliveryType = DeliveryType.DELIVERY;
 
