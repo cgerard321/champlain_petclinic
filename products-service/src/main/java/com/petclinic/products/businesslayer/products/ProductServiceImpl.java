@@ -146,16 +146,21 @@ public class ProductServiceImpl implements ProductService {
                     }
 
                     return filesServiceClient.getFile(product.getImageId())
-                            .switchIfEmpty(Mono.error(
-                                    new FailedDependencyException(
-                                            "Files Service returned no file")))
                             .map(file -> {
                                 response.setImage(file);
                                 return response;
                             })
-                            .onErrorResume(
-                                    FileNotFoundInFilesServiceException.class,
-                                    error -> Mono.just(response));
+                            .switchIfEmpty(Mono.fromSupplier(() -> {
+                                log.warn("Files Service returned no image for product {}",
+                                        productId);
+                                return response;
+                            }))
+                            .onErrorResume(error -> {
+                                log.warn("Unable to load image for product {}; "
+                                                + "returning product without image",
+                                        productId, error);
+                                return Mono.just(response);
+                            });
                 });
     }
 
@@ -170,9 +175,17 @@ public class ProductServiceImpl implements ProductService {
                     product.setImage(file);
                     return product;
                 })
-                .onErrorResume(
-                        FileNotFoundInFilesServiceException.class,
-                        error -> Mono.just(product));
+                .switchIfEmpty(Mono.fromSupplier(() -> {
+                    log.warn("Files Service returned no image for product {}",
+                            product.getProductId());
+                    return product;
+                }))
+                .onErrorResume(error -> {
+                    log.warn("Unable to load image for product {}; "
+                                    + "returning product without image",
+                            product.getProductId(), error);
+                    return Mono.just(product);
+                });
     }
 
     @Override

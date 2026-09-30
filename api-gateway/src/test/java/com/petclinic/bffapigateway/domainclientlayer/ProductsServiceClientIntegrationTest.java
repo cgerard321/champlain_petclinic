@@ -2,8 +2,13 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petclinic.bffapigateway.dtos.Files.FileDetails;
 import com.petclinic.bffapigateway.dtos.Products.*;
 import com.petclinic.bffapigateway.dtos.Products.DeliveryType;
+import com.petclinic.bffapigateway.exceptions.BadRequestException;
+import com.petclinic.bffapigateway.exceptions.InvalidInputException;
+import com.petclinic.bffapigateway.exceptions.ProductImageDependencyException;
+import com.petclinic.bffapigateway.exceptions.ProductNotFoundException;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -202,6 +207,44 @@ class ProductsServiceClientIntegrationTest {
                 .expectNextMatches(product -> product.getProductId().equals("2") && product.getProductName().equals("Bravo"))
                 .expectNextMatches(product -> product.getProductId().equals("3") && product.getProductName().equals("Charlie"))
                 .verifyComplete();
+    }
+
+    @Test
+    void getProductBadRequestUsesTypedException() {
+        mockWebServer.enqueue(new MockResponse().setResponseCode(400));
+
+        StepVerifier.create(productsServiceClient.getProductByProductId("invalid", true))
+                .expectError(BadRequestException.class)
+                .verify();
+    }
+
+    @Test
+    void getProductNotFoundUsesTypedException() {
+        mockWebServer.enqueue(new MockResponse().setResponseCode(404));
+
+        StepVerifier.create(productsServiceClient.getProductByProductId("missing", true))
+                .expectError(ProductNotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void updateProductImageInvalidInputUsesTypedException() {
+        mockWebServer.enqueue(new MockResponse().setResponseCode(422));
+
+        StepVerifier.create(productsServiceClient.updateProductImage(
+                        "product-id", FileDetails.builder().build()))
+                .expectError(InvalidInputException.class)
+                .verify();
+    }
+
+    @Test
+    void updateProductImageDependencyFailureUsesTypedException() {
+        mockWebServer.enqueue(new MockResponse().setResponseCode(424));
+
+        StepVerifier.create(productsServiceClient.updateProductImage(
+                        "product-id", FileDetails.builder().build()))
+                .expectError(ProductImageDependencyException.class)
+                .verify();
     }
 
 

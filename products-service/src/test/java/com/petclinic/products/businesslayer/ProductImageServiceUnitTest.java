@@ -144,7 +144,7 @@ class ProductImageServiceUnitTest {
     }
 
     @Test
-    void getProductPropagatesFilesServiceOutage() {
+    void getProductReturnsWithoutImageWhenFilesServiceIsUnavailable() {
         Product product = productWithImage(FILE_ID);
 
         when(productRepository.findProductByProductId(PRODUCT_ID))
@@ -156,10 +156,49 @@ class ProductImageServiceUnitTest {
                         new FailedDependencyException("Files Service unavailable")));
 
         StepVerifier.create(productService.getProductByProductId(PRODUCT_ID, true))
-                .expectErrorMatches(error ->
-                        error instanceof FailedDependencyException
-                                && error.getMessage().equals("Files Service unavailable"))
-                .verify();
+                .assertNext(response -> {
+                    assertEquals(FILE_ID, response.getImageId());
+                    assertNull(response.getImage());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void getProductReturnsWithoutImageWhenFilesServiceReturnsEmpty() {
+        Product product = productWithImage(FILE_ID);
+
+        when(productRepository.findProductByProductId(PRODUCT_ID))
+                .thenReturn(Mono.just(product));
+        when(ratingRepository.findRatingsByProductId(PRODUCT_ID))
+                .thenReturn(Flux.empty());
+        when(filesServiceClient.getFile(FILE_ID)).thenReturn(Mono.empty());
+
+        StepVerifier.create(productService.getProductByProductId(PRODUCT_ID, true))
+                .assertNext(response -> {
+                    assertEquals(FILE_ID, response.getImageId());
+                    assertNull(response.getImage());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void includeImageReturnsProductWhenFilesServiceIsUnavailable() {
+        ProductResponseModel response = ProductResponseModel.builder()
+                .productId(PRODUCT_ID)
+                .imageId(FILE_ID)
+                .build();
+
+        when(filesServiceClient.getFile(FILE_ID))
+                .thenReturn(Mono.error(
+                        new FailedDependencyException("Files Service unavailable")));
+
+        StepVerifier.create(productService.includeImage(response))
+                .assertNext(result -> {
+                    assertEquals(PRODUCT_ID, result.getProductId());
+                    assertEquals(FILE_ID, result.getImageId());
+                    assertNull(result.getImage());
+                })
+                .verifyComplete();
     }
 
     @Test

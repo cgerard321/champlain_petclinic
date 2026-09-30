@@ -2,8 +2,10 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.Files.FileDetails;
 import com.petclinic.bffapigateway.dtos.Products.*;
-import com.petclinic.bffapigateway.exceptions.GenericHttpException;
+import com.petclinic.bffapigateway.exceptions.BadRequestException;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
+import com.petclinic.bffapigateway.exceptions.ProductImageDependencyException;
+import com.petclinic.bffapigateway.exceptions.ProductNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -11,6 +13,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -75,9 +78,8 @@ public class ProductsServiceClient {
                 .retrieve()
                 .onStatus(
                         status -> status.value() == 424,
-                        response -> Mono.error(new GenericHttpException(
-                                "Unable to load product images",
-                                HttpStatus.FAILED_DEPENDENCY)))
+                        response -> productError(
+                                response, "Unable to load product images"))
                 .bodyToFlux(ProductResponseDTO.class)
                 .filter(product -> {
                     boolean ratingFilter = (minRating == null || product.getAverageRating() >= minRating)
@@ -105,9 +107,8 @@ public class ProductsServiceClient {
                         status -> status.value() == 400
                                 || status.value() == 404
                                 || status.value() == 424,
-                        response -> Mono.error(new GenericHttpException(
-                                "Unable to load product",
-                                HttpStatus.valueOf(response.statusCode().value()))))
+                        response -> productError(
+                                response, "Unable to load product"))
                 .bodyToMono(ProductResponseDTO.class);
     }
 
@@ -130,9 +131,8 @@ public class ProductsServiceClient {
                                 || status.value() == 404
                                 || status.value() == 422
                                 || status.value() == 424,
-                        response -> Mono.error(new GenericHttpException(
-                                "Unable to delete product image",
-                                HttpStatus.valueOf(response.statusCode().value()))))
+                        response -> productError(
+                                response, "Unable to delete product image"))
                 .bodyToMono(ProductResponseDTO.class);
     }
 
@@ -161,9 +161,8 @@ public class ProductsServiceClient {
                                 || status.value() == 404
                                 || status.value() == 422
                                 || status.value() == 424,
-                        response -> Mono.error(new GenericHttpException(
-                                "Unable to update product image",
-                                HttpStatus.valueOf(response.statusCode().value()))))
+                        response -> productError(
+                                response, "Unable to update product image"))
                 .bodyToMono(ProductResponseDTO.class);
     }
 
@@ -223,10 +222,20 @@ public class ProductsServiceClient {
                 .retrieve()
                 .onStatus(
                         status -> status.value() == 424,
-                        response -> Mono.error(new GenericHttpException(
-                                "Unable to load product images",
-                                HttpStatus.FAILED_DEPENDENCY)))
+                        response -> productError(
+                                response, "Unable to load product images"))
                 .bodyToFlux(ProductResponseDTO.class);
+    }
+
+    private Mono<? extends Throwable> productError(
+            ClientResponse response, String message) {
+        return switch (response.statusCode().value()) {
+            case 400 -> Mono.just(new BadRequestException(message));
+            case 404 -> Mono.just(new ProductNotFoundException(message));
+            case 422 -> Mono.just(new InvalidInputException(message));
+            case 424 -> Mono.just(new ProductImageDependencyException(message));
+            default -> Mono.just(new IllegalStateException(message));
+        };
     }
     public Mono<Void> decreaseProductQuantity(final String productId) {
         return webClientBuilder.build()
