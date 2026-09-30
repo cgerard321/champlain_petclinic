@@ -2,9 +2,11 @@
 import './cart-shared.css';
 import './CartItem.css';
 import { ProductModel } from '../models/ProductModel';
+import { generatePath, useNavigate } from 'react-router-dom';
 import ImageContainer from '@/features/products/components/ImageContainer';
 import { useUser } from '@/context/UserContext';
 import { formatPrice } from '../utils/formatPrice';
+import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 
 interface CartItemProps {
   item: ProductModel;
@@ -39,6 +41,15 @@ const CartItem = ({
   // ---- rôles / read-only staff+admin ----
   const { user } = useUser();
   const roleNames = new Set<string>();
+  const navigate = useNavigate();
+  //make cart items redirect to product page when clicked on
+  const handleCartItemOnClick = (): void => {
+    navigate(
+      generatePath(AppRoutePaths.ProductDetails, {
+        productId: item.productId,
+      })
+    );
+  };
   const rolesSet = user?.roles;
   if (rolesSet) for (const r of rolesSet) roleNames.add(r);
 
@@ -64,8 +75,8 @@ const CartItem = ({
 
   return (
     <div className="CartItem">
-      <div className="cart-item-media">
-        <ImageContainer imageId={item.imageId} />
+      <div onClick={handleCartItemOnClick} className="cart-item-media">
+        <ImageContainer productId={item.productId} imageId={item.imageId} />
       </div>
 
       <div className="cart-item-content">
