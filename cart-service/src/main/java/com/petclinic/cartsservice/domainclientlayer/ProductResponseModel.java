@@ -20,6 +20,7 @@ public class ProductResponseModel {
     private Integer productStock;
     private double averageRating;
     private Integer productQuantity;
+    private String productType;
 
 
 

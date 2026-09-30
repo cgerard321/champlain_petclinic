@@ -1,10 +1,7 @@
 package com.petclinic.products.presentationlayer.ratings;
 
-import com.petclinic.products.businesslayer.products.ProductService;
 import com.petclinic.products.businesslayer.ratings.RatingService;
-import com.petclinic.products.utils.EntityModelUtil;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
-import com.petclinic.products.utils.exceptions.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -12,10 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuple2;
-import reactor.util.function.Tuples;
-
-import javax.print.attribute.standard.Media;
 
 @RestController
 @RequestMapping("/ratings")

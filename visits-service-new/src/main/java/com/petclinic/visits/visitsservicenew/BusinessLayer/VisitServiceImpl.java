@@ -15,6 +15,7 @@ import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetsClient;
 import com.petclinic.visits.visitsservicenew.Exceptions.BadRequestException;
 import com.petclinic.visits.visitsservicenew.Exceptions.DuplicateTimeException;
+import com.petclinic.visits.visitsservicenew.Exceptions.InvalidInputException;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
@@ -442,12 +443,12 @@ public class VisitServiceImpl implements VisitService {
      * Validates if the content of a message is usable to create a new Visit or to modify one
      *
      * @param dto The VisitRequest DTO that will be validated
-     * @return The DTO as Mono or BadRequestException if it doesn't respect the needed format
+     * @return The DTO as Mono or an error if it doesn't respect the needed format
      */
     private Mono<VisitRequestDTO> validateVisitRequest(VisitRequestDTO dto) {
 
         if (dto.getDescription() == null || dto.getDescription().isBlank()) {
-            return Mono.error(new BadRequestException("Please enter a description for this visit"));
+            return Mono.error(new InvalidInputException("Please enter a description for this visit"));
         } else if (dto.getVisitDate() == null) {
             return Mono.error(new BadRequestException("Please choose a date for your appointment"));
         }
