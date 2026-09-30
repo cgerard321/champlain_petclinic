@@ -4,9 +4,9 @@ import { BillRequestModel } from '@/features/bills/models/BillRequestModel.tsx';
 import { getBill, updateBill } from '@/features/bills/api/updateBill.tsx';
 import { Bill } from '@/features/bills/models/Bill.ts';
 import './UpdateBillForm.css';
-import { getAllOwners } from '@/features/customers/api/getAllOwners.ts';
+import { getAllCustomers } from '@/features/customers/api/getAllCustomers.ts';
 import { getAllVets } from '@/features/veterinarians/api/getAllVets.ts';
-import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseModel.ts';
+import { CustomerResponseModel } from '@/features/customers/models/CustomerResponseModel.ts';
 import { VetResponseModel } from '@/features/veterinarians/models/VetResponseModel.ts';
 
 const UpdateBillForm: React.FC = (): JSX.Element => {
@@ -23,11 +23,11 @@ const UpdateBillForm: React.FC = (): JSX.Element => {
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [owners, setOwners] = useState<OwnerResponseModel[]>([]);
+  const [owners, setOwners] = useState<CustomerResponseModel[]>([]);
   const [vets, setVets] = useState<VetResponseModel[]>([]);
 
   const fetchOwnersAndVets = async (): Promise<void> => {
-    const ownersList = await getAllOwners();
+    const ownersList = await getAllCustomers();
     const vetsList = await getAllVets();
     setOwners(ownersList);
     setVets(vetsList);
@@ -114,7 +114,7 @@ const UpdateBillForm: React.FC = (): JSX.Element => {
         >
           <option value="">Select Customer</option>
           {owners.map(owner => (
-            <option key={owner.ownerId} value={owner.ownerId}>
+            <option key={owner.customerId} value={owner.customerId}>
               {owner.firstName} {owner.lastName}
             </option>
           ))}

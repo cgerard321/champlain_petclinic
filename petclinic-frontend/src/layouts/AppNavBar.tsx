@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   IsAdmin,
   IsInventoryManager,
-  IsOwner,
+  IsCustomer,
   IsReceptionist,
   IsVet,
   useUser,
@@ -26,7 +26,7 @@ export function NavBar(): JSX.Element {
   const isInventoryManager = IsInventoryManager();
   const isReceptionist = IsReceptionist();
   const isVet = IsVet();
-  const isOwner = IsOwner();
+  const isCustomer = IsCustomer();
   const [navbarOpen, setNavbarOpen] = useState(false);
   const [cartLoading, setCartLoading] = useState(false);
 
@@ -86,6 +86,9 @@ export function NavBar(): JSX.Element {
             <Nav.Link as={Link} to={AppRoutePaths.Home}>
               Home
             </Nav.Link>
+            <Nav.Link as={Link} to={AppRoutePaths.Products}>
+              Shop
+            </Nav.Link>
             {
               // check if user is logged in
             }
@@ -97,7 +100,7 @@ export function NavBar(): JSX.Element {
                   </Nav.Link>
                 )}
                 {(isAdmin || isVet || isReceptionist) && (
-                  <NavDropdown title="Customers" id="owners-dropdown">
+                  <NavDropdown title="Customers" id="customers-dropdown">
                     {(isAdmin || isVet) && (
                       <NavDropdown.Item
                         as={Link}
@@ -134,8 +137,8 @@ export function NavBar(): JSX.Element {
                       Bills
                     </Nav.Link>
                   )}
-                {isOwner && !hasStaffVisits && (
-                  <NavDropdown title="Visits" id="owner-visits-dropdown">
+                {isCustomer && !hasStaffVisits && (
+                  <NavDropdown title="Visits" id="customer-visits-dropdown">
                     <NavDropdown.Item
                       as={Link}
                       to={AppRoutePaths.CustomerVisits}
@@ -203,15 +206,12 @@ export function NavBar(): JSX.Element {
                     Promos
                   </Nav.Link>
                 )}
-                <Nav.Link as={Link} to={AppRoutePaths.Products}>
-                  Shop
-                </Nav.Link>
                 {isAdmin && (
                   <Nav.Link as={Link} to={AppRoutePaths.Carts}>
                     Carts
                   </Nav.Link>
                 )}
-                {isOwner && (
+                {isCustomer && (
                   <Nav.Link
                     href="#"
                     onClick={e => {
@@ -239,7 +239,7 @@ export function NavBar(): JSX.Element {
           <Nav className="ms-auto">
             {user.userId ? (
               <NavDropdown title={user.username} id="user-dropdown">
-                {isOwner && (
+                {isCustomer && (
                   <NavDropdown.Item
                     as={Link}
                     to={AppRoutePaths.CustomerProfile}
@@ -247,7 +247,7 @@ export function NavBar(): JSX.Element {
                     Profile
                   </NavDropdown.Item>
                 )}
-                {isOwner && (
+                {isCustomer && (
                   <NavDropdown.Item
                     as={Link}
                     to={AppRoutePaths.CustomerProfileEdit}

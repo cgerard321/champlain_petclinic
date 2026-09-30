@@ -7,11 +7,31 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "lint": "eslint src --ext ts --report-unused-disable-directives --max-warnings 0",
-    "lint:fix": "npm run lint -- --fix"
+    "lint": "eslint src --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint src --fix",
+    "lint:style": "stylelint \"src/**/*.{css,scss}\"",
+    "lint:style:fix": "stylelint \"src/**/*.{css,scss}\" --fix",
+    "prepare": "cd .. && husky employee-frontend/.husky"
   },
   "private": true,
   "packageManager": "npm@12.0.2",
+  "lint-staged": {
+    "*.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.html": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{css,scss}": [
+      "stylelint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  },
   "dependencies": {
     "@angular/cdk": "^22.1.7",
     "@angular/common": "^22.1.0",
@@ -32,10 +52,18 @@
     "angular-eslint": "^22.5.0",
     "eslint": "^9.39.5",
     "eslint-config-prettier": "^10.1.8",
+    "eslint-import-resolver-typescript": "^4.4.5",
     "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-import-alias": "^1.2.0",
     "eslint-plugin-prettier": "^5.5.6",
+    "husky": "^9.1.7",
+    "jiti": "^2.7.0",
     "jsdom": "^28.0.0",
+    "lint-staged": "^17.5.1",
     "prettier": "^3.8.1",
+    "stylelint": "^17.15.0",
+    "stylelint-config-prettier-scss": "^1.0.0",
+    "stylelint-config-standard-scss": "^17.0.0",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.70.0",
     "vitest": "^4.0.8"

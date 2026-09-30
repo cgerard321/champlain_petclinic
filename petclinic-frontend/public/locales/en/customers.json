@@ -1,0 +1,9 @@
+
+{
+  "title": "Customer Details",
+  "subtitle": "Manage your customer profile and registered pets.",
+  "buttons": {
+    "save": "Save Changes",
+    "cancel": "Cancel"
+  }
+}

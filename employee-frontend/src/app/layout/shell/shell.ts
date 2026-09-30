@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
 import { MatSidenavModule } from '@angular/material/sidenav';
+import { RouterOutlet } from '@angular/router';
 
-import { Header } from '../header/header';
-import { Sidenav } from '../sidenav/sidenav';
-import { Footer } from '../footer/footer';
+import { Footer } from '@layout/footer/footer';
+import { Header } from '@layout/header/header';
+import { Sidenav } from '@layout/sidenav/sidenav';
 
 @Component({
   selector: 'app-shell',

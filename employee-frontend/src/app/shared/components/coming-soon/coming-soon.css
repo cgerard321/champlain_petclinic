@@ -1,0 +1,26 @@
+.coming-soon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 64px 24px;
+  text-align: center;
+  color: rgb(0 0 0 / 60%);
+}
+
+.coming-soon-icon {
+  width: 48px;
+  height: 48px;
+  font-size: 48px;
+  color: rgb(0 0 0 / 35%);
+}
+
+.coming-soon h1 {
+  margin: 0;
+  font-weight: 500;
+}
+
+.coming-soon p {
+  margin: 0;
+}

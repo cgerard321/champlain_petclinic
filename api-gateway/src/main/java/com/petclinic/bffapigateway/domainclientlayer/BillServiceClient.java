@@ -306,7 +306,7 @@ public class BillServiceClient {
                                                    String visitType, String vetId,
                                                    String vetFirstName, String vetLastName) {
 
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(billServiceUrl)
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(billServiceUrl + "/paginated")
                 .queryParam("page", page.orElse(0))
                 .queryParam("size", size.orElse(10))
                 .queryParamIfPresent("billId", Optional.ofNullable(billId))
