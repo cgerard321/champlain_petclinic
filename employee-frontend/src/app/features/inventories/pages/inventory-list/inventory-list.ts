@@ -4,15 +4,16 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { FormField, form, required, submit } from '@angular/forms/signals';
 
 import { isApiError, ApiError } from '@core/models/api-error';
-import { Inventory } from '@features/inventories/models/inventory.model';
+import { Inventory, InventoryRequest } from '@features/inventories/models/inventory.model';
 import { InventoryService } from '@features/inventories/services/inventory-service';
 import { getInventoryPermissions } from '@shared/models/inventory-permissions';
 import { AuthState } from '@core/services/auth-state';
 
 @Component({
-  imports: [RouterLink, MatCardModule, MatIconModule, MatProgressSpinnerModule],
+  imports: [RouterLink, MatCardModule, MatIconModule, MatProgressSpinnerModule, FormField],
   selector: 'app-inventory-list',
   styleUrls: ['../../inventories.css', './inventory-list.css'],
   templateUrl: './inventory-list.html',
@@ -28,21 +29,37 @@ export class InventoryList implements OnInit, OnDestroy {
   protected readonly errorMessage = signal<ApiError | null>(null);
 
   private readonly authState = inject(AuthState);
+  // this tells the page what the current user is allowed to do (view/create/edit/delete)
   protected readonly can = computed(() => getInventoryPermissions(this.authState.roles()));
 
+  // form + state for the Add/Edit Inventory form
+  // keeping it as a plain inline form for now, not a modal, since the modal
+  // ticket (Lazaro's) is supposed to wrap an existing form, and there wasn't
+  // one yet — this is that form
+  protected readonly showAddForm = signal(false);
+  protected readonly editingInventoryId = signal<string | null>(null);
+  protected readonly savingInventory = signal(false);
+  protected readonly formError = signal<string | null>(null);
+
+  protected readonly newInventory = signal<InventoryRequest>({
+    inventoryName: '',
+    inventoryType: '',
+    inventoryDescription: '',
+  });
+
+  protected readonly inventoryForm = form(this.newInventory, (path) => {
+    required(path.inventoryName, { message: 'Name is required' });
+    required(path.inventoryType, { message: 'Type is required' });
+    required(path.inventoryDescription, { message: 'Description is required' });
+  });
+
   ngOnInit(): void {
-
-
-    // Added — Receptionist has no live gateway access to GET "" (the SSE
-    // stream this subscribes to). Don't open the connection at all — that's
-    // the "hidden or disabled in the UI" half of the requirement, on top
-    // of the backend's guaranteed 403 if it were opened anyway.
+    // receptionist doesn't have access to any inventory data right now (checked
+    // the gateway's @SecuredEndpoint roles), so don't even open the stream for them
     if (!this.can().hasAnyAccess) {
       this.isLoading.set(false);
       return;
     }
-
-
 
     this.inventorySubscription = this.inventoryService.getInventories().subscribe({
       next: (item) => {
@@ -93,14 +110,12 @@ export class InventoryList implements OnInit, OnDestroy {
       }));
     }
 
-    // Added — GET .../productquantity is ADMIN/INVENTORY_MANAGER only.
-    // Without this guard, VET fires one failed 403 request per item as
-    // it streams in, forever (SSE keeps the connection open, so this is
+    // the quantity endpoint only works for admin/inventory manager on the
+    // backend, so don't bother calling it for vet — it would just 403 every
+    // single time an item comes in from the stream
     if (!this.can().canViewProductQuantity) {
       return;
     }
-
-
 
     const subscription = this.inventoryService.getQuantity(inventoryId).subscribe({
       next: (quantity) => {
@@ -119,5 +134,93 @@ export class InventoryList implements OnInit, OnDestroy {
       },
     });
     this.quantitySubscriptions.add(subscription);
+  }
+
+  // form actions below
+
+  protected toggleAddForm(): void {
+    this.showAddForm.update((visible) => !visible);
+    if (!this.showAddForm()) {
+      this.editingInventoryId.set(null);
+      this.formError.set(null);
+    }
+  }
+
+  protected editInventory(inventory: Inventory): void {
+    if (!this.can().canUpdateInventory) return;
+
+    this.editingInventoryId.set(inventory.inventoryId);
+    this.newInventory.set({
+      inventoryName: inventory.inventoryName,
+      inventoryType: inventory.inventoryType,
+      inventoryDescription: inventory.inventoryDescription,
+    });
+    this.showAddForm.set(true);
+  }
+
+  protected saveInventory(event: Event): void {
+    event.preventDefault();
+
+    void submit(this.inventoryForm, async () => {
+      this.savingInventory.set(true);
+      this.formError.set(null);
+
+      const editingId = this.editingInventoryId();
+      const body = this.newInventory();
+
+      const request$ = editingId
+        ? this.inventoryService.updateInventory(editingId, body)
+        : this.inventoryService.createInventory(body);
+
+      request$.subscribe({
+        next: (saved) => {
+          // updating the list right here instead of waiting for the SSE stream
+          // to reconnect (it can take a few seconds), so the change shows up
+          // on screen immediately like the ticket asks for
+          this.inventories.update((current) => {
+            const idx = current.findIndex((inv) => inv.inventoryId === saved.inventoryId);
+            if (idx === -1) return [...current, saved];
+            const updated = [...current];
+            updated[idx] = saved;
+            return updated;
+          });
+
+          this.newInventory.set({
+            inventoryName: '',
+            inventoryType: '',
+            inventoryDescription: '',
+          });
+          this.editingInventoryId.set(null);
+          this.showAddForm.set(false);
+          this.savingInventory.set(false);
+        },
+        error: () => {
+          this.formError.set(
+            editingId ? 'Unable to update inventory.' : 'Unable to create inventory.',
+          );
+          this.savingInventory.set(false);
+        },
+      });
+    });
+  }
+
+  protected deleteInventoryAction(inventory: Inventory): void {
+    if (!this.can().canDeleteInventory) return;
+
+    const confirmed = window.confirm(`Delete ${inventory.inventoryName}?`);
+    if (!confirmed) return;
+
+    this.inventoryService.deleteInventory(inventory.inventoryId).subscribe({
+      next: () => {
+        // same as above, remove it from the list right away instead of
+        // waiting for the stream to catch up
+        this.inventories.update((current) =>
+          current.filter((inv) => inv.inventoryId !== inventory.inventoryId),
+        );
+      },
+      error: () => {
+        this.formError.set('Unable to delete inventory.');
+      },
+    });
   }
 }
