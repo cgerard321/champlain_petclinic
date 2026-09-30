@@ -12,7 +12,7 @@ test('test cancel button visibility', async ({ page }) => {
   await page.goto('http://localhost:3000/customer/visits');
 
 
-  const visitLink = page.locator('table').first();
+  const visitLink = page.locator('table tbody a').first();
   await expect(visitLink).toBeVisible();
   const visitId = await visitLink.innerText();
 
@@ -28,6 +28,7 @@ test('test cancel button visibility', async ({ page }) => {
 
   await expect(page).toHaveURL(`http://localhost:3000/visits/${visit.visitId}`);
 
+  // Wait until React is done with "Loading..." and the status is on the page
   await expect(page.getByText('Visit Details')).toBeVisible();
   await expect(
     page.locator('.visit-field').filter({ hasText: 'Status:' }).locator('.visit-value')
