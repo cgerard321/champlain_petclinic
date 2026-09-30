@@ -228,29 +228,27 @@ class CartServiceUnitTest {
 
 
 
-//     @Test
+     @Test
 
-//     public void whenDeleteCartById_withExistingCart_thenCartIsDeleted() {
-//         // Arrange
-//         String cartId = cart1.getCartId();
-//         when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart1));
-//         when(cartRepository.delete(cart1)).thenReturn(Mono.empty());
-//         when(productClient.getProductByProductId("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223")).thenReturn(Mono.just(product1));
-//         when(productClient.getProductByProductId("d819e4f4-25af-4d33-91e9-2c45f0071606")).thenReturn(Mono.just(product2));
+     public void whenDeleteCartById_withExistingCart_thenCartIsDeleted() {
+         // Arrange
+         String cartId = cart1.getCartId();
+         when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart1));
+         when(cartRepository.delete(cart1)).thenReturn(Mono.empty());
 
-//         // Act
-//         Mono<CartResponseModel> result = cartService.deleteCartByCartId(cartId);
+         // Act
+         Mono<CartResponseModel> result = cartService.deleteCartByCartId(cartId);
 
-//         // Assert
-//         StepVerifier.create(result)
-//                 .expectNextMatches(cartResponseModel ->
-//                     cartResponseModel.getCartId().equals(cart1.getCartId()))
+         // Assert
+         StepVerifier.create(result)
+                 .expectNextMatches(cartResponseModel ->
+                     cartResponseModel.getCartId().equals(cart1.getCartId()))
 
-//                 .verifyComplete();
+                 .verifyComplete();
 
-//         verify(cartRepository, times(1)).findCartByCartId(cartId);
-//         verify(cartRepository, times(1)).delete(cart1);
-//     }
+         verify(cartRepository, times(1)).findCartByCartId(cartId);
+         verify(cartRepository, times(1)).delete(cart1);
+     }
 
 //     @Test
 //     public void whenDeleteCartById_withNonExistentCartId_thenThrowNotFoundException() {
@@ -333,6 +331,116 @@ class CartServiceUnitTest {
         // Verify interactions
         verify(cartRepository, times(1)).findAll();
         verifyNoInteractions(productClient); //no products, so productClient shouldn't be called
+    }
+
+    @Test
+    void getAllCarts_withAssignedFalse_returnsOnlyUnassignedCarts() {
+        Cart unassignedCart = Cart.builder()
+                .cartId("cart-unassigned")
+                .customerId("")
+                .products(new ArrayList<>())
+                .build();
+
+        when(cartRepository.findAll()).thenReturn(Flux.just(cart1, unassignedCart));
+
+        StepVerifier.create(cartService.getAllCarts(CartQueryCriteria.builder()
+                        .assigned(false)
+                        .build()))
+                .assertNext(cartResponseModel -> {
+                    assertEquals("cart-unassigned", cartResponseModel.getCartId());
+                    assertTrue(cartResponseModel.getCustomerId() == null ||
+                            cartResponseModel.getCustomerId().isBlank());
+                    assertTrue(cartResponseModel.getProducts().isEmpty());
+                })
+                .verifyComplete();
+
+        verify(cartRepository, times(1)).findAll();
+        verifyNoInteractions(productClient);
+    }
+
+    @Test
+    void getAllCarts_withAssignedTrue_returnsOnlyAssignedCarts() {
+        Cart unassignedCart = Cart.builder()
+                .cartId("cart-unassigned")
+                .customerId("")
+                .products(new ArrayList<>())
+                .build();
+
+        when(cartRepository.findAll()).thenReturn(Flux.just(cart1, unassignedCart));
+
+        StepVerifier.create(cartService.getAllCarts(CartQueryCriteria.builder()
+                        .assigned(true)
+                        .build()))
+                .assertNext(cartResponseModel -> {
+                    assertEquals("1", cartResponseModel.getCustomerId());
+                    assertEquals(2, cartResponseModel.getProducts().size());
+                    assertEquals("Product1", cartResponseModel.getProducts().get(0).getProductName());
+                    assertEquals("Product2", cartResponseModel.getProducts().get(1).getProductName());
+                })
+                .verifyComplete();
+
+        verify(cartRepository, times(1)).findAll();
+        verifyNoInteractions(productClient);
+    }
+
+    @Test
+    void getAllCarts_withCustomerId_returnsOnlyMatchingCart() {
+        Cart otherCart = Cart.builder()
+                .cartId("cart-2")
+                .customerId("2")
+                .products(new ArrayList<>())
+                .build();
+
+        when(cartRepository.findAll()).thenReturn(Flux.just(cart1, otherCart));
+
+        StepVerifier.create(cartService.getAllCarts(CartQueryCriteria.builder()
+                        .customerId("1")
+                        .build()))
+                .assertNext(cartResponseModel -> {
+                    assertEquals(cart1.getCartId(), cartResponseModel.getCartId());
+                    assertEquals("1", cartResponseModel.getCustomerId());
+                    assertEquals(2, cartResponseModel.getProducts().size());
+                })
+                .verifyComplete();
+
+        verify(cartRepository, times(1)).findAll();
+        verifyNoInteractions(productClient);
+    }
+
+    @Test
+    void getAllCarts_withCustomerName_returnsOnlyMatchingCart() {
+        Cart otherCart = Cart.builder()
+                .cartId("cart-2")
+                .customerId("2")
+                .products(new ArrayList<>())
+                .build();
+
+        CustomerResponseModel customer = new CustomerResponseModel();
+        customer.setCustomerId("1");
+        customer.setFirstName("Bob");
+        customer.setLastName("");
+
+        CustomerResponseModel otherCustomer = new CustomerResponseModel();
+        otherCustomer.setCustomerId("2");
+        otherCustomer.setFirstName("Kevin");
+        otherCustomer.setLastName("");
+
+        when(cartRepository.findAll()).thenReturn(Flux.just(cart1, otherCart));
+        when(customerClient.getCustomerById("1")).thenReturn(Mono.just(customer));
+        when(customerClient.getCustomerById("2")).thenReturn(Mono.just(otherCustomer));
+
+        StepVerifier.create(cartService.getAllCarts(CartQueryCriteria.builder()
+                        .customerName("Bob")
+                        .build()))
+                .assertNext(cartResponseModel -> {
+                    assertEquals(cart1.getCartId(), cartResponseModel.getCartId());
+                    assertEquals("1", cartResponseModel.getCustomerId());
+                    assertEquals(2, cartResponseModel.getProducts().size());
+                })
+                .verifyComplete();
+
+        verify(cartRepository, times(1)).findAll();
+        verifyNoInteractions(productClient);
     }
 
     @Test
@@ -482,6 +590,45 @@ class CartServiceUnitTest {
                     assertEquals(productId, added.getProductId());
                     assertEquals(3, added.getQuantityInCart());
                     assertEquals(0, added.getProductQuantity());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void addProductToWishlist_existingProduct_incrementsWishlistQuantity() {
+        String cartId = "wishlist-cart-allow";
+        String productId = "0e6d3f24-2e7a-4db0-86f2-5920a5fdc9aa";
+
+        Cart cartWithExistingWishlistProduct  = Cart.builder()
+                .cartId(cartId)
+                .customerId("customer-allow")
+                .products(new ArrayList<>())
+                .wishListProducts(new ArrayList<>(List.of(
+                        CartProduct.builder()
+                                .productId(productId)
+                                .productName("Test Product")
+                                .quantityInCart(2)
+                                .productQuantity(5)
+                                .build()
+                )))
+                .build();
+
+        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cartWithExistingWishlistProduct ));
+        when(productClient.getProductByProductId(productId)).thenReturn(Mono.just(ProductResponseModel.builder()
+                .productId(productId)
+                .productName("Test Product")
+                .productQuantity(10)
+                .build()));
+        when(cartRepository.save(any(Cart.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+
+        StepVerifier.create(cartService.addProductToWishlist(cartId, new WishlistItemRequestModel(productId, 3)))
+                .assertNext(response -> {
+                    assertNotNull(response.getWishListProducts());
+                    assertEquals(1, response.getWishListProducts().size());
+                    CartProduct updated = response.getWishListProducts().get(0);
+                    assertEquals(productId, updated.getProductId());
+                    assertEquals(5, updated.getQuantityInCart());
+                    assertEquals(10, updated.getProductQuantity());
                 })
                 .verifyComplete();
     }
@@ -722,6 +869,32 @@ class CartServiceUnitTest {
                                 cartResponse.getProducts().isEmpty()
                 )
                 .verifyComplete();
+    }
+
+    @Test
+    void findCartByCustomerId_withBlankCustomerId_throwsInvalidInput() {
+        String customerId = "  ";
+
+        StepVerifier.create(cartService.findCartByCustomerId(customerId))
+                .expectErrorMatches(error ->
+                        error instanceof InvalidInputException &&
+                                error.getMessage().equals("customerId must not be null or empty"))
+                .verify();
+
+        verify(cartRepository, never()).findCartByCustomerId(anyString());
+        verify(cartRepository, never()).save(any(Cart.class));
+    }
+
+    @Test
+    void findCartByCustomerId_withNullCustomerId_throwsInvalidInput() {
+        StepVerifier.create(cartService.findCartByCustomerId(null))
+                .expectErrorMatches(error ->
+                        error instanceof InvalidInputException &&
+                                error.getMessage().equals("customerId must not be null or empty"))
+                .verify();
+
+        verify(cartRepository, never()).findCartByCustomerId(anyString());
+        verify(cartRepository, never()).save(any(Cart.class));
     }
 
     @Test
@@ -1315,6 +1488,147 @@ class CartServiceUnitTest {
                 })
                 .verifyComplete();
     }
+
+    @Test
+    void testTransferWishlist_ToCart_NoMatchingProductId_throwsNotFound() {
+        String cartId = "cart-2";
+        CartProduct wishItem = CartProduct.builder()
+                .productId("prod-1")
+                .productName("Test Product")
+                .quantityInCart(2)
+                .productSalePrice(10.0)
+                .build();
+        Cart cart = new Cart();
+        cart.setCartId(cartId);
+        cart.setWishListProducts(List.of(wishItem));
+        cart.setProducts(new ArrayList<>());
+
+        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
+
+        StepVerifier.create(cartService.transferWishlist(cartId, List.of("prod-missing"), WishlistTransferDirection.TO_CART))
+                .expectErrorMatches(error ->
+                        error instanceof NotFoundException &&
+                                error.getMessage().equals("No wishlist items matched the requested product IDs."))
+                .verify();
+
+        verify(cartRepository, times(1)).findCartByCartId(cartId);
+        verify(cartRepository, never()).save(any(Cart.class));
+        verifyNoInteractions(productClient);
+    }
+
+    @Test
+    void testTransferWishlist_ToCart_SelectedItemMovesAndUnselectedItemStaysInWishlist() {
+        String cartId = "cart-2";
+        CartProduct wishItem = CartProduct.builder()
+                .productId("prod-1")
+                .productName("Test Product")
+                .quantityInCart(2)
+                .productSalePrice(10.0)
+                .build();
+        CartProduct unselectedWishItem = CartProduct.builder()
+                .productId("prod-2")
+                .productName("Other Product")
+                .quantityInCart(1)
+                .productSalePrice(5.0)
+                .build();
+        Cart cart = new Cart();
+        cart.setCartId(cartId);
+        cart.setWishListProducts(new ArrayList<>(List.of(wishItem, unselectedWishItem)));
+        cart.setProducts(new ArrayList<>());
+
+        when(productClient.getProductByProductId("prod-1")).thenReturn(Mono.just(ProductResponseModel.builder()
+                .productId("prod-1")
+                .productName("Test Product")
+                .productQuantity(10)
+                .build()));
+        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
+        when(cartRepository.save(any()))
+                .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+
+        StepVerifier.create(cartService.transferWishlist(cartId, List.of("prod-1"), WishlistTransferDirection.TO_CART))
+                .assertNext(resp -> {
+                    assertEquals("Moved 2 item(s) from wishlist to cart.", resp.getMessage());
+
+                    assertEquals(1, resp.getProducts().size());
+                    assertEquals("prod-1", resp.getProducts().get(0).getProductId());
+                    assertEquals(2, resp.getProducts().get(0).getQuantityInCart());
+
+                    assertEquals(1, resp.getWishListProducts().size());
+                    assertEquals("prod-2", resp.getWishListProducts().get(0).getProductId());
+                    assertEquals(1, resp.getWishListProducts().get(0).getQuantityInCart());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void testTransferWishlist_ToWishlist_SelectedItemMergesWithExistingWishlistProduct() {
+        String cartId = "cart-2";
+        CartProduct wishItem = CartProduct.builder()
+                .productId("prod-1")
+                .productName("Test Product")
+                .quantityInCart(2)
+                .productSalePrice(10.0)
+                .productQuantity(10)
+                .build();
+        CartProduct existingWishlistItem = CartProduct.builder()
+                .productId("prod-1")
+                .productName("Test Product")
+                .quantityInCart(3)
+                .productSalePrice(10.0)
+                .build();
+        Cart cart = new Cart();
+        cart.setCartId(cartId);
+        cart.setProducts(new ArrayList<>(List.of(wishItem)));
+        cart.setWishListProducts(new ArrayList<>(List.of(existingWishlistItem)));
+
+        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
+        when(cartRepository.save(any())).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+
+        StepVerifier.create(cartService.transferWishlist(cartId, List.of("prod-1"), WishlistTransferDirection.TO_WISHLIST))
+                .assertNext(resp -> {
+                    assertEquals("Moved 2 item(s) from cart to wishlist.", resp.getMessage());
+                    assertTrue(resp.getProducts().isEmpty());
+                    assertEquals(1, resp.getWishListProducts().size());
+                    assertEquals("prod-1", resp.getWishListProducts().get(0).getProductId());
+                    assertEquals(5, resp.getWishListProducts().get(0).getQuantityInCart());
+                    assertEquals(10, resp.getWishListProducts().get(0).getProductQuantity());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void testTransferWishlist_ToCart_PartialStockLeavesRemainderInWishlist() {
+        String cartId = "cart-2";
+        CartProduct wishItem = CartProduct.builder()
+                .productId("prod-1")
+                .productName("Test Product")
+                .quantityInCart(5)
+                .productSalePrice(10.0)
+                .build();
+        Cart cart = new Cart();
+        cart.setCartId(cartId);
+        cart.setWishListProducts(List.of(wishItem));
+        cart.setProducts(new ArrayList<>());
+
+        when(productClient.getProductByProductId("prod-1")).thenReturn(Mono.just(ProductResponseModel.builder()
+                .productId("prod-1")
+                .productName("Test Product")
+                .productQuantity(2)
+                .build()));
+        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
+        when(cartRepository.save(any())).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
+
+        StepVerifier.create(cartService.transferWishlist(cartId, List.of(), WishlistTransferDirection.TO_CART))
+                .assertNext(resp -> {
+                    assertEquals(2, resp.getProducts().get(0).getQuantityInCart());
+                    assertEquals(1, resp.getWishListProducts().size());
+                    assertEquals(3, resp.getWishListProducts().get(0).getQuantityInCart());
+                    assertTrue(resp.getMessage().contains("Moved 2 item(s)"));
+                    assertTrue(resp.getMessage().contains("Skipped 3 item(s)"));
+                })
+                .verifyComplete();
+    }
+
         @Test
         void testTransferWishlist_ToCart_MergeQuantities() {
         String cartId = "cart-3";
