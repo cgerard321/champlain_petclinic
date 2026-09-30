@@ -1,7 +1,7 @@
 package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.datalayer.*;
-import com.petclinic.billing.domainclientlayer.OwnerClient;
+import com.petclinic.billing.domainclientlayer.CustomerServiceClient;
 import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.util.InterestCalculationUtil;
 import org.junit.jupiter.api.Assertions;
@@ -45,7 +45,7 @@ class BillControllerIntegrationTest {
     private VetClient vetClient;
 
     @MockBean
-    private OwnerClient ownerClient;
+    private CustomerServiceClient customerServiceClient;
 
     @BeforeEach
     void setup() {
@@ -191,12 +191,12 @@ class BillControllerIntegrationTest {
         vet.setFirstName("John");
         vet.setLastName("Doe");
 
-        OwnerResponseDTO owner = new OwnerResponseDTO();
+        CustomerResponseDTO owner = new CustomerResponseDTO();
         owner.setFirstName("Alice");
         owner.setLastName("Smith");
 
         when(vetClient.getVetByVetId("vet-1")).thenReturn(Mono.just(vet));
-        when(ownerClient.getOwnerByOwnerId("cust-1")).thenReturn(Mono.just(owner));
+        when(customerServiceClient.getCustomerByCustomerId("cust-1")).thenReturn(Mono.just(owner));
 
         String testJwtToken = "test-jwt-token";
 
@@ -226,7 +226,7 @@ class BillControllerIntegrationTest {
 
         // Verify mock interactions
         verify(vetClient).getVetByVetId("vet-1");
-        verify(ownerClient).getOwnerByOwnerId("cust-1");
+        verify(customerServiceClient).getCustomerByCustomerId("cust-1");
     }
 
     @Test
@@ -288,12 +288,12 @@ class BillControllerIntegrationTest {
         billEntity.setOwnerLastName("Doe");
 
         // Mock the OwnerClient call
-        OwnerResponseDTO owner = new OwnerResponseDTO();
-        owner.setOwnerId(billEntity.getCustomerId());
+        CustomerResponseDTO owner = new CustomerResponseDTO();
+        owner.setCustomerId(billEntity.getCustomerId());
         owner.setFirstName("John");
         owner.setLastName("Doe");
 
-        when(ownerClient.getOwnerByOwnerId(billEntity.getCustomerId()))
+        when(customerServiceClient.getCustomerByCustomerId(billEntity.getCustomerId()))
                 .thenReturn(Mono.just(owner));
 
         Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(billEntity));
