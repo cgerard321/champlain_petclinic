@@ -1,50 +1,63 @@
+/* The supplies page opens from an inventory, so keep its palette aligned with the inventory page. */
+:host {
+  --sage-50: #f7faf3;
+  --sage-400: #afc79a;
+  --forest-700: #244b3f;
+  --forest-800: #1c3d33;
+  --text-primary: #263832;
+  --text-secondary: #66766d;
+  --border: rgb(36 75 63 / 14%);
+  --shadow-sm: 0 2px 6px rgb(28 61 51 / 6%), 0 1px 2px rgb(28 61 51 / 5%);
+
+  display: block;
+}
+
 .supply-page {
+  box-sizing: border-box;
   width: 100%;
+  max-width: 1400px;
+  min-height: calc(100vh - 94px);
+  margin: 0 auto;
+  padding: 2.5rem 2rem 4rem;
+  color: var(--text-primary);
+  background:
+    radial-gradient(circle at 100% 0%, rgb(199 217 178 / 28%), transparent 30rem),
+    radial-gradient(circle at 0% 100%, rgb(199 217 178 / 16%), transparent 28rem);
 }
 
 .page-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 24px;
+  gap: 1rem;
+  margin-bottom: 2rem;
 }
 
 .page-header h1 {
+  position: relative;
   margin: 0;
-  font-size: 2rem;
+  padding-bottom: 1rem;
+  color: var(--forest-700);
+  font-size: clamp(1.8rem, 3vw, 2.35rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+}
+
+.page-header h1::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 58px;
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--forest-700), var(--sage-400));
 }
 
 .page-description {
-  margin: 6px 0 0;
-  color: #616161;
-}
-
-.table-container {
-  overflow-x: auto;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  background: #fff;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th,
-td {
-  padding: 16px;
-  text-align: left;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-th {
-  font-weight: 600;
-  background: #f7f7f7;
-}
-
-tbody tr:last-child td {
-  border-bottom: none;
+  margin: 0.75rem 0 0;
+  color: var(--text-secondary);
 }
 
 .supply-name {
@@ -65,35 +78,61 @@ tbody tr:last-child td {
 }
 
 .status-badge.re-order {
-  background: #6899d8;
-  color: #fff;
+  background: #fff1cc;
+  color: #765000;
 }
 
 .status-badge.out-of-stock {
   background: #ffebee;
-  color: #ffe4e4;
+  color: #b71c1c;
 }
 
 .state-message {
-  padding: 24px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  background: #fff;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: linear-gradient(145deg, #fff, var(--sage-50));
+  box-shadow: var(--shadow-sm);
 }
 
 .error-message {
+  color: #b00020;
+}
+
+.add-supply-button,
+.edit-button,
+.delete-button {
+  border: 0;
+  border-radius: 999px;
   color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 180ms ease;
 }
 
 .add-supply-button {
   padding: 10px 18px;
-  border: none;
-  border-radius: 999px;
-  background: #6899d8;
-  color: #fff;
+  background: var(--forest-700);
   font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
+}
+
+.add-supply-button:hover,
+.edit-button:hover {
+  background: var(--forest-800);
+}
+
+.add-supply-button:focus-visible,
+.edit-button:focus-visible,
+.delete-button:focus-visible,
+.dialog-cancel-button:focus-visible {
+  outline: 3px solid var(--sage-400);
+  outline-offset: 3px;
+}
+
+.add-supply-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .supply-form {
@@ -102,13 +141,15 @@ tbody tr:last-child td {
   max-width: 500px;
   margin-bottom: 24px;
   padding: 20px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
   background: #fff;
+  box-shadow: var(--shadow-sm);
 }
 
 .supply-form h2 {
   margin: 0 0 8px;
+  color: var(--forest-700);
 }
 
 .supply-form label {
@@ -123,7 +164,7 @@ tbody tr:last-child td {
 }
 
 .supply-form input:focus {
-  outline: 2px solid #1976d2;
+  outline: 2px solid var(--forest-700);
   outline-offset: 2px;
 }
 
@@ -134,43 +175,53 @@ tbody tr:last-child td {
 }
 
 .action-buttons {
-  padding : 12px;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
   display: flex;
-  gap: 12px;
+  flex-wrap: wrap;
   align-items: center;
+  gap: 12px;
 }
 
-.edit-button{
+.edit-button,
+.delete-button {
   padding: 10px 18px;
-  border: none;
-  border-radius: 999px;
-  background: #6899d8;
-  color: #fff;
-  font-size: 0.70rem;
-  font-weight: 600;
-  cursor: pointer;
+  font-size: 0.875rem;
 }
 
-.edit-button:hover {
-  background: #1565c0;
+.edit-button {
+  background: var(--forest-700);
 }
 
 .delete-button {
+  background: #b71c1c;
+}
+
+.delete-button:hover {
+  background: #8e0000;
+}
+
+.dialog-cancel-button {
   padding: 10px 18px;
-  border: none;
+  border: 1px solid var(--forest-700);
   border-radius: 999px;
-  background: #6899d8;
-  color: #fff;
-  font-size: 0.70rem;
+  background: transparent;
+  color: var(--forest-700);
+  font: inherit;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
 }
 
-.delete-button:hover {
-  background: #b71c1c;
+.dialog-cancel-button:hover {
+  background: var(--sage-50);
+}
+
+@media (width <= 700px) {
+  .supply-page {
+    padding: 2rem 1rem 3rem;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }

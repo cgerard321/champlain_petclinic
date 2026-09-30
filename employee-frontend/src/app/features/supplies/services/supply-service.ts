@@ -1,25 +1,28 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import { SseClient } from 'ngx-sse-client';
+import { filter, map, Observable, toArray } from 'rxjs';
 
 import { Supply } from '@features/supplies/models/supply';
 
 @Injectable({ providedIn: 'root' })
 export class SupplyService {
   private readonly http = inject(HttpClient);
+  private readonly sse = inject(SseClient);
 
   getSupplies(inventoryId: string): Observable<Supply[]> {
-    return this.http
-      .get(`/api/gateway/inventories/${inventoryId}/products`, {
-        responseType: 'text',
-      })
+    // This endpoint returns a finite SSE snapshot; collect it before giving the page one Supply[] to display.
+    return this.sse
+      .stream(
+        `/api/gateway/inventories/${inventoryId}/products`,
+        { keepAlive: false, responseType: 'event' },
+        {},
+        'GET',
+      )
       .pipe(
-        map((response) =>
-          response
-            .split('\n')
-            .filter((line) => line.startsWith('data:'))
-            .map((line) => JSON.parse(line.substring(5)) as Supply),
-        ),
+        filter((event): event is MessageEvent => event.type !== 'error'),
+        map((event) => JSON.parse(event.data) as Supply),
+        toArray(),
       );
   }
 

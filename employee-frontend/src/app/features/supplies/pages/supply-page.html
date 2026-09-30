@@ -6,7 +6,11 @@
     </div>
 
     @if (canManageSupplies) {
-      <button type="button" class="add-supply-button" (click)="toggleAddForm()">
+      <button
+        type="button"
+        class="add-supply-button"
+        (click)="showAddForm() ? cancelAddForm() : openAddForm()"
+      >
         {{ showAddForm() ? 'Cancel' : 'Add Supply' }}
       </button>
     }
@@ -88,6 +92,10 @@
     </form>
   }
 
+  @if (deleteError()) {
+    <p class="field-error" role="alert">{{ deleteError() }}</p>
+  }
+
   @if (loading()) {
     <p class="state-message">Loading supplies...</p>
   } @else if (error()) {
@@ -95,68 +103,49 @@
   } @else if (supplies().length === 0) {
     <p class="state-message">No supplies found for this inventory.</p>
   } @else {
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th scope="col">Name</th>
-            <th scope="col">Description</th>
-            <th scope="col">Price</th>
-            <th scope="col">Quantity</th>
-            <th scope="col">Status</th>
-
-            @if (canManageSupplies) {
-              <th scope="col">Actions</th>
-            }
-          </tr>
-        </thead>
-
-        <tbody>
-          @for (supply of supplies(); track supply.productId) {
-            <tr>
-              <td class="supply-name">
-                {{ supply.productName }}
-              </td>
-
-              <td>
-                {{ supply.productDescription }}
-              </td>
-
-              <td>
-                {{ supply.productPrice | currency }}
-              </td>
-
-              <td>
-                {{ supply.productQuantity }}
-              </td>
-
-              <td>
-                <span
-                  class="status-badge"
-                  [class.available]="supply.status === 'AVAILABLE'"
-                  [class.re-order]="supply.status === 'RE_ORDER'"
-                  [class.out-of-stock]="supply.status === 'OUT_OF_STOCK'"
-                >
-                  {{ formatStatus(supply.status) }}
-                </span>
-              </td>
-
-              @if (canManageSupplies) {
-                <td>
-                  <div class="action-buttons">
-                    <button type="button" class="edit-button" (click)="editSupply(supply)">
-                      Edit
-                    </button>
-                    <button type="button" class="delete-button" (click)="deleteSupply(supply)">
-                      Delete
-                    </button>
-                  </div>
-                </td>
-              }
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+    <app-table
+      label="Supplies in this inventory"
+      [rows]="supplies()"
+      [columns]="columns()"
+      [rowId]="supplyRowId"
+    />
   }
 </section>
+
+<ng-template #nameCell let-supply>
+  <span class="supply-name">{{ supply.productName }}</span>
+</ng-template>
+
+<ng-template #priceCell let-supply>
+  {{ supply.productPrice | currency }}
+</ng-template>
+
+<ng-template #statusCell let-supply>
+  <span
+    class="status-badge"
+    [class.available]="supply.status === 'AVAILABLE'"
+    [class.re-order]="supply.status === 'RE_ORDER'"
+    [class.out-of-stock]="supply.status === 'OUT_OF_STOCK'"
+  >
+    {{ formatStatus(supply.status) }}
+  </span>
+</ng-template>
+
+<ng-template #actionsCell let-supply>
+  <div class="action-buttons">
+    <button type="button" class="edit-button" (click)="editSupply(supply)">Edit</button>
+    <button type="button" class="delete-button" (click)="deleteSupply(supply)">Delete</button>
+  </div>
+</ng-template>
+<ng-template #deleteDialog let-supply>
+  <h2 mat-dialog-title>Delete supply</h2>
+
+  <mat-dialog-content>
+    Are you sure you want to delete {{ supply.productName }}?
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button type="button" class="dialog-cancel-button" [mat-dialog-close]="false">Cancel</button>
+    <button type="button" class="delete-button" [mat-dialog-close]="true">Delete</button>
+  </mat-dialog-actions>
+</ng-template>

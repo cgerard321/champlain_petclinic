@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { of, Subject, throwError } from 'rxjs';
 import { vi } from 'vitest';
@@ -14,6 +15,7 @@ import { SupplyPage } from './supply-page';
 describe('SupplyPage', () => {
   let fixture: ComponentFixture<SupplyPage>;
   let component: SupplyPage;
+  let dialogClosed: Subject<boolean | undefined>;
 
   const inventoryId = 'test-inventory-id';
 
@@ -46,6 +48,9 @@ describe('SupplyPage', () => {
   const updateSupply = vi.fn<SupplyService['updateSupply']>();
   const deleteSupply = vi.fn<SupplyService['deleteSupply']>();
   const hasRole = vi.fn<AuthState['hasRole']>();
+  const openDialog = vi.fn(() => ({
+    afterClosed: () => dialogClosed.asObservable(),
+  }));
 
   const supplyService = {
     getSupplies,
@@ -60,6 +65,7 @@ describe('SupplyPage', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    dialogClosed = new Subject<boolean | undefined>();
 
     getSupplies.mockReturnValue(of([supplyOne, supplyTwo]));
     createSupply.mockReturnValue(of(supplyOne));
@@ -90,7 +96,9 @@ describe('SupplyPage', () => {
           },
         },
       ],
-    }).compileComponents();
+    })
+      .overrideProvider(MatDialog, { useValue: { open: openDialog } })
+      .compileComponents();
 
     fixture = TestBed.createComponent(SupplyPage);
     component = fixture.componentInstance;
@@ -104,6 +112,39 @@ describe('SupplyPage', () => {
 
     expect(component['loading']()).toBe(false);
     expect(component['error']()).toBe(false);
+  });
+
+  it('should render supply data and actions in the shared table for an admin', () => {
+    fixture.detectChanges();
+    const table = fixture.nativeElement.querySelector('table') as HTMLTableElement;
+
+    expect(table.getAttribute('aria-label')).toBe('Supplies in this inventory');
+    expect(
+      Array.from(table.querySelectorAll('thead th'), (cell) => cell.textContent?.trim()),
+    ).toEqual(['Name', 'Description', 'Price', 'Quantity', 'Status', 'Actions']);
+
+    const rows = table.querySelectorAll('tbody tr');
+    expect(rows).toHaveLength(2);
+    expect(rows[0]?.textContent).toContain('Elastic Bandage');
+    expect(rows[0]?.textContent).toContain('Flexible wound support');
+    expect(rows[0]?.textContent).toContain('AVAILABLE');
+    expect(rows[0]?.querySelector('.edit-button')).not.toBeNull();
+    expect(rows[0]?.querySelector('.delete-button')).not.toBeNull();
+  });
+
+  it('should hide supply actions from users without a managing role', () => {
+    hasRole.mockReturnValue(false);
+    const readOnlyFixture = TestBed.createComponent(SupplyPage);
+    readOnlyFixture.detectChanges();
+
+    const table = readOnlyFixture.nativeElement.querySelector('table') as HTMLTableElement;
+    const headers = Array.from(table.querySelectorAll('thead th'), (cell) =>
+      cell.textContent?.trim(),
+    );
+
+    expect(table.querySelector('tbody tr')?.textContent).toContain('Elastic Bandage');
+    expect(headers).not.toContain('Actions');
+    expect(table.querySelector('.action-buttons')).toBeNull();
   });
 
   it('should remain in a loading state until the API responds', () => {
@@ -174,6 +215,9 @@ describe('SupplyPage', () => {
 
     component['newSupply'].set(newSupply);
     component['showAddForm'].set(true);
+    // Simulate a touched field to verify that a successful save clears its validation state.
+    component['supplyForm'].productName().markAsTouched();
+    expect(component['supplyForm'].productName().touched()).toBe(true);
 
     const event = new Event('submit', {
       cancelable: true,
@@ -192,6 +236,7 @@ describe('SupplyPage', () => {
     expect(component['showAddForm']()).toBe(false);
     expect(component['editingSupplyId']()).toBe(null);
     expect(component['addingSupply']()).toBe(false);
+    expect(component['supplyForm'].productName().touched()).toBe(false);
 
     expect(component['newSupply']()).toEqual({
       productName: '',
@@ -200,6 +245,39 @@ describe('SupplyPage', () => {
       productQuantity: 1,
       productSalePrice: 0,
     });
+  });
+
+  it('should not create a supply when numeric fields are empty', async () => {
+    component['newSupply'].set({
+      productName: 'Gauze Pads',
+      productDescription: 'Absorbent wound pads',
+      productPrice: 10,
+      productQuantity: 25,
+      productSalePrice: 16,
+    });
+    component['openAddForm']();
+    fixture.detectChanges();
+
+    for (const id of ['productPrice', 'productQuantity', 'productSalePrice']) {
+      const input = fixture.nativeElement.querySelector(`#${id}`) as HTMLInputElement;
+      input.value = '';
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    await fixture.whenStable();
+
+    expect(component['supplyForm'].productPrice().errors()[0]?.message).toBe('Price is required');
+    expect(component['supplyForm'].productQuantity().errors()[0]?.message).toBe(
+      'Quantity is required',
+    );
+    expect(component['supplyForm'].productSalePrice().errors()[0]?.message).toBe(
+      'Sale price is required',
+    );
+
+    component['addSupply'](new Event('submit', { cancelable: true }));
+    await fixture.whenStable();
+
+    expect(createSupply).not.toHaveBeenCalled();
   });
 
   it('should update the selected supply instead of creating a new one', async () => {
@@ -262,51 +340,75 @@ describe('SupplyPage', () => {
   });
 
   it('should not delete a supply when the user cancels confirmation', () => {
-    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
-
     component['deleteSupply'](supplyOne);
 
-    expect(confirmSpy).toHaveBeenCalledWith(`Delete ${supplyOne.productName}?`);
+    expect(openDialog).toHaveBeenCalledWith(component['deleteDialogTemplate'](), {
+      data: supplyOne,
+      ariaLabel: 'Delete supply',
+    });
+
+    dialogClosed.next(false);
+    dialogClosed.complete();
 
     expect(deleteSupply).not.toHaveBeenCalled();
-
-    confirmSpy.mockRestore();
   });
 
   it('should delete a confirmed supply and reload the list', () => {
-    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
-
     component['deleteSupply'](supplyOne);
+
+    expect(deleteSupply).not.toHaveBeenCalled();
+
+    dialogClosed.next(true);
+    dialogClosed.complete();
 
     expect(deleteSupply).toHaveBeenCalledWith(inventoryId, supplyOne.productId);
 
     expect(getSupplies).toHaveBeenCalledTimes(2);
-
-    confirmSpy.mockRestore();
   });
 
   it('should show an error when deleting a supply fails', () => {
-    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
-
     deleteSupply.mockReturnValue(throwError(() => new Error('Delete failed')));
 
     component['deleteSupply'](supplyOne);
 
-    expect(component['addError']()).toBe('Unable to delete supply.');
+    dialogClosed.next(true);
+    dialogClosed.complete();
 
-    confirmSpy.mockRestore();
+    expect(component['deleteError']()).toBe('Unable to delete supply.');
   });
 
-  it('should toggle the add supply form', () => {
+  it('should open and cancel the add supply form', () => {
     expect(component['showAddForm']()).toBe(false);
 
-    component['toggleAddForm']();
+    component['openAddForm']();
 
     expect(component['showAddForm']()).toBe(true);
 
-    component['toggleAddForm']();
+    component['cancelAddForm']();
 
     expect(component['showAddForm']()).toBe(false);
+  });
+
+  it('should start a blank add form after cancelling an edit', () => {
+    component['editSupply'](supplyOne);
+    component['addError'].set('Unable to update supply.');
+
+    component['cancelAddForm']();
+    component['openAddForm']();
+    fixture.detectChanges();
+
+    expect(component['editingSupplyId']()).toBeNull();
+    expect(component['newSupply']()).toEqual({
+      productName: '',
+      productDescription: '',
+      productPrice: 0,
+      productQuantity: 1,
+      productSalePrice: 0,
+    });
+    expect(component['addError']()).toBe('');
+    expect(fixture.nativeElement.querySelector('.supply-form h2')?.textContent.trim()).toBe(
+      'Add Supply',
+    );
   });
 
   it('should format supply statuses for display', () => {

@@ -1,4 +1,4 @@
-import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
+import { HttpErrorResponse, HttpEventType, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
@@ -52,7 +52,7 @@ describe('SupplyService', () => {
   });
 
   describe('getSupplies', () => {
-    it('should fetch and parse multiple supplies from an SSE response', () => {
+    it('should collect streamed supplies once the SSE response completes', () => {
       let result: Supply[] | undefined;
 
       service.getSupplies(inventoryId).subscribe((supplies) => {
@@ -64,10 +64,17 @@ describe('SupplyService', () => {
       expect(request.request.method).toBe('GET');
       expect(request.request.responseType).toBe('text');
 
-      request.flush(
-        `data:${JSON.stringify(supplyOne)}\n` + `\n` + `data:${JSON.stringify(supplyTwo)}\n`,
-      );
+      const firstEvent = `data:${JSON.stringify(supplyOne)}\n\n`;
 
+      request.event({
+        type: HttpEventType.DownloadProgress,
+        loaded: firstEvent.length,
+        partialText: firstEvent,
+      });
+
+      expect(result).toBeUndefined();
+      // The final response repeats the progress text; the first supply must not be counted twice.
+      request.flush(`${firstEvent}data:${JSON.stringify(supplyTwo)}\n\n`);
       expect(result).toEqual([supplyOne, supplyTwo]);
     });
 
@@ -94,7 +101,9 @@ describe('SupplyService', () => {
 
       const request = http.expectOne(`/api/gateway/inventories/${inventoryId}/products`);
 
-      request.flush(`event:message\n` + `data:${JSON.stringify(supplyOne)}\n` + `retry:1000\n`);
+      request.flush(
+        `: heartbeat\n\nevent:message\ndata:${JSON.stringify(supplyOne)}\nretry:1000\n\n`,
+      );
 
       expect(result).toEqual([supplyOne]);
     });
