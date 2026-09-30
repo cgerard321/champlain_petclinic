@@ -1176,7 +1176,10 @@ const UserCart: React.FC = () => {
                       }
                       className="recent-purchase-image"
                     >
-                      <ImageContainer imageId={item.imageId} />
+                      <ImageContainer
+                        productId={item.productId}
+                        imageId={item.imageId}
+                      />
                     </div>
                   </div>
                   <div className="recent-purchase-name">{item.productName}</div>
@@ -1272,7 +1275,10 @@ const UserCart: React.FC = () => {
                         }
                         className="recent-purchase-image"
                       >
-                        <ImageContainer imageId={item.imageId} />
+                        <ImageContainer
+                          productId={item.productId}
+                          imageId={item.imageId}
+                        />
                       </div>
                     </div>
                     <div className="recent-purchase-name">
@@ -1329,7 +1335,10 @@ const UserCart: React.FC = () => {
                       }
                       className="recent-purchase-image"
                     >
-                      <ImageContainer imageId={item.imageId} />
+                      <ImageContainer
+                        productId={item.productId}
+                        imageId={item.imageId}
+                      />
                     </div>
                   </div>
                   <div className="recommendation-product-name recent-purchase-name">
