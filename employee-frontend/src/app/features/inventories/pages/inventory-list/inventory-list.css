@@ -43,4 +43,29 @@
   .inventory-card mat-card-title {
     font-size: 1.15rem;
   }
+
+.inventory-card-wrapper {
+  position: relative;
+  height: 100%;
+}
+
+.inventory-card-wrapper .inventory-card-link {
+  display: block;
+  height: 100%;
+}
+
+.inventory-card-wrapper .inventory-card {
+  height: 100%;
+}
+
+.inventory-card-wrapper mat-card-header {
+  padding-right: 60px;
+}
+
+.favorite-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+}
 }

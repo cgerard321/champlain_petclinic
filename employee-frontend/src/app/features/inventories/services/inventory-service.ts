@@ -24,7 +24,19 @@ export class InventoryService {
       );
   }
 
+
   getQuantity(inventoryId: string): Observable<number> {
     return this.http.get<number>(`${this.baseUrl}/${inventoryId}/productquantity`);
   }
+
+  //Basicaly the favourite button, it will use the important feature to mark an inventory as favourite
+  updateImportantStatus(inventoryId: string, important: boolean): Observable<void> {
+  return this.http.patch<void>(
+    `${this.baseUrl}/${inventoryId}/important`,
+    { important },
+  );
+}
+
+  
+
 }

@@ -1,9 +1,10 @@
-import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, signal, DestroyRef} from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterLink } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, finalize } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { isApiError, ApiError } from '@core/models/api-error';
 import { Inventory } from '@features/inventories/models/inventory.model';
@@ -19,11 +20,15 @@ export class InventoryList implements OnInit, OnDestroy {
   private readonly inventoryService = inject(InventoryService);
   private inventorySubscription?: Subscription;
   private readonly quantitySubscriptions = new Set<Subscription>();
+  private readonly destroyRef = inject(DestroyRef);
+
 
   protected readonly inventories = signal<Inventory[]>([]);
   protected readonly quantities = signal<Record<string, number | null>>({});
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal<ApiError | null>(null);
+  protected readonly savingFavorites = signal<Record<string, boolean>>({});
+  protected readonly favoriteError = signal<string | null>(null);
 
   ngOnInit(): void {
     this.inventorySubscription = this.inventoryService.getInventories().subscribe({
@@ -64,6 +69,48 @@ export class InventoryList implements OnInit, OnDestroy {
   protected quantityFor(inventoryId: string): number | null {
     return this.quantities()[inventoryId] ?? null;
   }
+
+  protected toggleFavorite(inventory: Inventory): void {
+  const id = inventory.inventoryId;
+
+  if (this.savingFavorites()[id]) return;
+
+  const nextValue = !inventory.important;
+  this.favoriteError.set(null);
+
+  this.savingFavorites.update((current) => ({
+    ...current,
+    [id]: true,
+  }));
+
+  this.inventoryService
+    .updateImportantStatus(id, nextValue)
+    .pipe(
+      takeUntilDestroyed(this.destroyRef),
+      finalize(() => {
+        this.savingFavorites.update((current) => ({
+          ...current,
+          [id]: false,
+        }));
+      }),
+    )
+    .subscribe({
+      next: () => {
+        this.inventories.update((current) =>
+          current.map((item) =>
+            item.inventoryId === id
+              ? { ...item, important: nextValue }
+              : item,
+          ),
+        );
+      },
+      error: () => {
+        this.favoriteError.set(
+          'Could not save your favorite. Please try again.',
+        );
+      },
+    });
+}
 
   private loadQuantities(inventoryId: string): void {
     // Initializes the quantity the first time the inventory is loaded
