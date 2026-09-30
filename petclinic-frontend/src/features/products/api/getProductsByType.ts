@@ -9,6 +9,7 @@ export async function getProductsByType(
       '/products/filter/' + productType,
       {
         useV2: false,
+        params: { includeImage: true },
       }
     );
 

@@ -28,6 +28,7 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
     implementation 'io.micrometer:micrometer-registry-prometheus'
@@ -57,6 +58,7 @@ dependencies {
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:4.11.0'
     testImplementation("org.mock-server:mockserver-netty:5.13.0")
     testImplementation("org.mock-server:mockserver-client-java:5.13.0")
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
