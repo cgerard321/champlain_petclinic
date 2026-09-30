@@ -2,6 +2,8 @@ package com.petclinic.products.businesslayer;
 
 import com.petclinic.products.businesslayer.products.ProductBundleService;
 import com.petclinic.products.businesslayer.products.ProductServiceImpl;
+import com.petclinic.products.datalayer.images.Image;
+import com.petclinic.products.datalayer.images.ImageRepository;
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductBundleRepository;
 import com.petclinic.products.datalayer.products.ProductRepository;
@@ -15,6 +17,7 @@ import com.petclinic.products.presentationlayer.products.ProductResponseModel;
 import com.petclinic.products.utils.exceptions.FailedDependencyException;
 import com.petclinic.products.utils.exceptions.FileNotFoundInFilesServiceException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -28,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -52,10 +56,18 @@ class ProductImageServiceUnitTest {
     @Mock
     private ProductTypeRepository productTypeRepository;
     @Mock
+    private ImageRepository imageRepository;
+    @Mock
     private FilesServiceClient filesServiceClient;
 
     @InjectMocks
     private ProductServiceImpl productService;
+
+    @BeforeEach
+    void setUpLegacyImageLookup() {
+        lenient().when(imageRepository.findImageByImageId(any()))
+                .thenReturn(Mono.empty());
+    }
 
     @Test
     void addProductWithImageUploadsFileAndStoresReturnedFileId() {
@@ -105,23 +117,53 @@ class ProductImageServiceUnitTest {
     }
 
     @Test
-    void getLegacyProductKeepsImageIdWhenFileIsMissing() {
+    void legacyLookupFailureFallsBackToFilesService() {
         Product product = productWithImage(FILE_ID);
+        FileResponseDTO file = fileResponse(FILE_ID);
 
         when(productRepository.findProductByProductId(PRODUCT_ID))
                 .thenReturn(Mono.just(product));
         when(ratingRepository.findRatingsByProductId(PRODUCT_ID))
                 .thenReturn(Flux.empty());
-        when(filesServiceClient.getFile(FILE_ID))
-                .thenReturn(Mono.error(new FileNotFoundInFilesServiceException(
-                        "File was not found in Files Service")));
+        when(imageRepository.findImageByImageId(FILE_ID))
+                .thenReturn(Mono.error(new RuntimeException("legacy lookup failed")));
+        when(filesServiceClient.getFile(FILE_ID)).thenReturn(Mono.just(file));
+
+        StepVerifier.create(productService.getProductByProductId(PRODUCT_ID, true))
+                .assertNext(response ->
+                        assertEquals(FILE_ID, response.getImage().getFileId()))
+                .verifyComplete();
+    }
+
+    @Test
+    void getLegacyProductReturnsImageFromLegacyRepository() {
+        Product product = productWithImage(FILE_ID);
+        Image legacyImage = Image.builder()
+                .imageId(FILE_ID)
+                .imageName("legacy-product.png")
+                .imageType("image/png")
+                .imageData(new byte[]{4, 5, 6})
+                .build();
+
+        when(productRepository.findProductByProductId(PRODUCT_ID))
+                .thenReturn(Mono.just(product));
+        when(ratingRepository.findRatingsByProductId(PRODUCT_ID))
+                .thenReturn(Flux.empty());
+        when(imageRepository.findImageByImageId(FILE_ID))
+                .thenReturn(Mono.just(legacyImage));
 
         StepVerifier.create(productService.getProductByProductId(PRODUCT_ID, true))
                 .assertNext(response -> {
                     assertEquals(FILE_ID, response.getImageId());
-                    assertNull(response.getImage());
+                    assertEquals(FILE_ID, response.getImage().getFileId());
+                    assertEquals("legacy-product.png",
+                            response.getImage().getFileName());
+                    assertArrayEquals(new byte[]{4, 5, 6},
+                            response.getImage().getFileData());
                 })
                 .verifyComplete();
+
+        verify(filesServiceClient, never()).getFile(any());
     }
 
     @Test
@@ -141,6 +183,35 @@ class ProductImageServiceUnitTest {
                     assertNull(result.getImage());
                 })
                 .verifyComplete();
+    }
+
+    @Test
+    void includeImageReturnsLegacyImageWithoutCallingFilesService() {
+        ProductResponseModel response = ProductResponseModel.builder()
+                .productId(PRODUCT_ID)
+                .imageId(FILE_ID)
+                .build();
+        Image legacyImage = Image.builder()
+                .imageId(FILE_ID)
+                .imageName("legacy-product.png")
+                .imageType("image/png")
+                .imageData(new byte[]{4, 5, 6})
+                .build();
+
+        when(imageRepository.findImageByImageId(FILE_ID))
+                .thenReturn(Mono.just(legacyImage));
+
+        StepVerifier.create(productService.includeImage(response))
+                .assertNext(result -> {
+                    assertEquals(FILE_ID, result.getImage().getFileId());
+                    assertEquals("legacy-product.png",
+                            result.getImage().getFileName());
+                    assertArrayEquals(new byte[]{4, 5, 6},
+                            result.getImage().getFileData());
+                })
+                .verifyComplete();
+
+        verify(filesServiceClient, never()).getFile(any());
     }
 
     @Test

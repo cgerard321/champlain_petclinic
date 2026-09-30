@@ -1,5 +1,7 @@
 package com.petclinic.products.businesslayer.products;
 
+import com.petclinic.products.datalayer.images.Image;
+import com.petclinic.products.datalayer.images.ImageRepository;
 import com.petclinic.products.datalayer.products.*;
 import com.petclinic.products.domainclientlayer.FileRequestDTO;
 import com.petclinic.products.domainclientlayer.FileResponseDTO;
@@ -35,6 +37,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductBundleRepository productBundleRepository;
     private final ProductBundleService productBundleService;
     private final ProductTypeRepository productTypeRepository;
+    private final ImageRepository imageRepository;
     private final FilesServiceClient filesServiceClient;
 
     @Value("${app.files-service.default-image-ids:}")
@@ -44,12 +47,14 @@ public class ProductServiceImpl implements ProductService {
                               ProductBundleRepository productBundleRepository,
                               ProductBundleService productBundleService,
                               ProductTypeRepository productTypeRepository,
+                              ImageRepository imageRepository,
                               FilesServiceClient filesServiceClient) {
         this.productRepository = productRepository;
         this.ratingRepository = ratingRepository;
         this.productBundleRepository = productBundleRepository;
         this.productBundleService = productBundleService;
         this.productTypeRepository = productTypeRepository;
+        this.imageRepository = imageRepository;
         this.filesServiceClient = filesServiceClient;
     }
 
@@ -145,22 +150,13 @@ public class ProductServiceImpl implements ProductService {
                         return Mono.just(response);
                     }
 
-                    return filesServiceClient.getFile(product.getImageId())
+                    return loadProductImage(
+                                    product.getImageId(), product.getProductId())
                             .map(file -> {
                                 response.setImage(file);
                                 return response;
                             })
-                            .switchIfEmpty(Mono.fromSupplier(() -> {
-                                log.warn("Files Service returned no image for product {}",
-                                        productId);
-                                return response;
-                            }))
-                            .onErrorResume(error -> {
-                                log.warn("Unable to load image for product {}; "
-                                                + "returning product without image",
-                                        productId, error);
-                                return Mono.just(response);
-                            });
+                            .defaultIfEmpty(response);
                 });
     }
 
@@ -170,22 +166,45 @@ public class ProductServiceImpl implements ProductService {
             return Mono.just(product);
         }
 
-        return filesServiceClient.getFile(product.getImageId())
+        return loadProductImage(product.getImageId(), product.getProductId())
                 .map(file -> {
                     product.setImage(file);
                     return product;
                 })
-                .switchIfEmpty(Mono.fromSupplier(() -> {
-                    log.warn("Files Service returned no image for product {}",
-                            product.getProductId());
-                    return product;
-                }))
+                .defaultIfEmpty(product);
+    }
+
+    private Mono<FileResponseDTO> loadProductImage(
+            String imageId, String productId) {
+        return imageRepository.findImageByImageId(imageId)
+                .map(this::toFileResponse)
                 .onErrorResume(error -> {
-                    log.warn("Unable to load image for product {}; "
-                                    + "returning product without image",
-                            product.getProductId(), error);
-                    return Mono.just(product);
-                });
+                    log.warn("Unable to check legacy image {} for product {}; "
+                                    + "trying Files Service",
+                            imageId, productId, error);
+                    return Mono.empty();
+                })
+                .switchIfEmpty(Mono.defer(() ->
+                        filesServiceClient.getFile(imageId)
+                                .switchIfEmpty(Mono.fromRunnable(() ->
+                                        log.warn("Files Service returned no image "
+                                                        + "for product {}",
+                                                productId)))
+                                .onErrorResume(error -> {
+                                    log.warn("Unable to load image for product {}; "
+                                                    + "returning product without image",
+                                            productId, error);
+                                    return Mono.empty();
+                                })));
+    }
+
+    private FileResponseDTO toFileResponse(Image image) {
+        return FileResponseDTO.builder()
+                .fileId(image.getImageId())
+                .fileName(image.getImageName())
+                .fileType(image.getImageType())
+                .fileData(image.getImageData())
+                .build();
     }
 
     @Override
