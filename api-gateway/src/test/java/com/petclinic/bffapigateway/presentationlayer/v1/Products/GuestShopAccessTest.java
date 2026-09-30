@@ -24,13 +24,15 @@ import static org.mockito.Mockito.*;
 
 @WebFluxTest(controllers = {ProductControllerV1.class, ImageControllerV1.class, RatingControllerV1.class},
         properties = "frontend.url=http://localhost:3000")
-@Import({Utility.class, JwtTokenFilter.class, RoleFilter.class})
+@Import({Utility.class, JwtTokenFilter.class, RoleFilter.class,
+        com.petclinic.bffapigateway.businesslayer.ReviewAuthorService.class})
 class GuestShopAccessTest {
     @Autowired WebTestClient client;
     @MockBean ProductsServiceClient products;
     @MockBean ImageServiceClient images;
     @MockBean RatingsServiceClient ratings;
     @MockBean AuthServiceClient auth;
+    @MockBean CustomersServiceClient customers;
     @MockBean JwtTokenUtil tokens;
 
     @BeforeEach
@@ -53,6 +55,29 @@ class GuestShopAccessTest {
     void guestCanReadShopWithoutToken(String path) {
         client.get().uri("/api/gateway" + path).accept(MediaType.ALL).exchange().expectStatus().isOk();
         verifyNoInteractions(auth);
+    }
+
+    @Test
+    void guestReceivesReviewerProfileWithoutLogin() {
+        when(ratings.getAllRatingsForProductId("sample")).thenReturn(Flux.just(
+                com.petclinic.bffapigateway.dtos.Ratings.RatingResponseModel.builder()
+                        .customerId("reviewer").rating((byte) 5).review("Great").build()));
+        when(auth.getPublicUserProfile("reviewer")).thenReturn(Mono.just(
+                new com.petclinic.bffapigateway.dtos.Auth.PublicUserProfile("ReviewerName")));
+        when(customers.getCustomer("reviewer", true)).thenReturn(Mono.just(
+                com.petclinic.bffapigateway.dtos.CustomerDTOs.CustomerResponseDTO.builder()
+                        .photo(com.petclinic.bffapigateway.dtos.Files.FileDetails.builder()
+                                .fileType("image/png").fileData(new byte[]{1, 2, 3}).build()).build()));
+
+        client.get().uri("/api/gateway/ratings/product/sample").accept(MediaType.TEXT_EVENT_STREAM).exchange()
+                .expectStatus().isOk()
+                .expectBodyList(com.petclinic.bffapigateway.dtos.Ratings.RatingResponseModel.class)
+                .hasSize(1).value(reviews -> {
+                    org.junit.jupiter.api.Assertions.assertEquals("ReviewerName", reviews.get(0).getReviewerUsername());
+                    org.junit.jupiter.api.Assertions.assertEquals("data:image/png;base64,AQID", reviews.get(0).getReviewerPhoto());
+                });
+        verify(auth).getPublicUserProfile("reviewer");
+        verifyNoMoreInteractions(auth);
     }
 
     @Test
