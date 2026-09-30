@@ -32,9 +32,9 @@ public class PetController {
                 .switchIfEmpty(ApplicationExceptions.petNotFound(petId));
     }
 
-    @GetMapping("/owner/{ownerId}/pets")
-    public Flux<PetResponseDTO> getPetsByOwnerId(@PathVariable String ownerId) {
-        return petService.getPetsByOwnerId(ownerId);
+    @GetMapping("/customers/{customerId}/pets")
+    public Flux<PetResponseDTO> getPetsByCustomerId(@PathVariable String customerId) {
+        return petService.getPetsByCustomerId(customerId);
     }
 
     @DeleteMapping("/{petId}")
@@ -84,10 +84,10 @@ public class PetController {
         return petService.getAllPets();
     }
 
-    //This endpoint can also probably be removed, the petRequestDTO already takes an ownerId
-    @PostMapping("/owners/{ownerId}/pets")
-    public Mono<ResponseEntity<PetResponseDTO>> createPetForOwner(@PathVariable String ownerId, @RequestBody PetRequestDTO petRequest) {
-        return petService.createPetForOwner(ownerId, Mono.just(petRequest))
+    //This endpoint can also probably be removed, the petRequestDTO already takes a customerId
+    @PostMapping("/customers/{customerId}/pets")
+    public Mono<ResponseEntity<PetResponseDTO>> createPetForCustomer(@PathVariable String customerId, @RequestBody PetRequestDTO petRequest) {
+        return petService.createPetForCustomer(customerId, Mono.just(petRequest))
                 .map(pet -> ResponseEntity.status(HttpStatus.CREATED).body(pet))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }

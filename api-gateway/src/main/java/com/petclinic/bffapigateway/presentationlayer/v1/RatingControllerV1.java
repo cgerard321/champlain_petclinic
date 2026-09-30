@@ -75,7 +75,7 @@ public class RatingControllerV1 {
         jwtUserCache.clear();
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ALL})
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping(value = "/product/{productId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<RatingResponseModel> getAllRatingsForProductId(@PathVariable String productId){
         return ratingsServiceClient.getAllRatingsForProductId(productId);
