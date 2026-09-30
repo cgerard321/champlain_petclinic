@@ -17,8 +17,7 @@ export class InventoryService {
       .stream(this.baseUrl, { keepAlive: false, responseType: 'event' }, {}, 'GET')
       .pipe(
         filter(
-          (event): event is MessageEvent =>
-            event instanceof MessageEvent && event.type !== 'error',
+          (event): event is MessageEvent => event instanceof MessageEvent && event.type !== 'error',
         ),
         map((event) => JSON.parse(event.data) as Inventory),
         retry({ count: Infinity, delay: () => timer(5000) }),
@@ -44,11 +43,15 @@ export class InventoryService {
   // GETs a single inventory by ID (ADMIN/INVENTORY_MANAGER only, VET excluded)
   getInventoryById(inventoryId: string): Observable<Inventory> {
     return this.sse
-      .stream(`${this.baseUrl}/${inventoryId}`, { keepAlive: false, responseType: 'event' }, {}, 'GET')
+      .stream(
+        `${this.baseUrl}/${inventoryId}`,
+        { keepAlive: false, responseType: 'event' },
+        {},
+        'GET',
+      )
       .pipe(
         filter(
-          (event): event is MessageEvent =>
-            event instanceof MessageEvent && event.type !== 'error',
+          (event): event is MessageEvent => event instanceof MessageEvent && event.type !== 'error',
         ),
         map((event) => JSON.parse(event.data) as Inventory),
         retry({ count: Infinity, delay: () => timer(5000) }),

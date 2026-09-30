@@ -41,7 +41,7 @@ describe('InventoryList', () => {
     deleteInventory,
   };
 
-  function setup(roles: Roles[]) {
+  function setup(roles: Roles[]): Subject<Inventory> {
     vi.clearAllMocks();
 
     const stream = new Subject<Inventory>();
@@ -65,7 +65,6 @@ describe('InventoryList', () => {
 
     return stream;
   }
-
   describe('full-access role (ADMIN / INVENTORY_MANAGER)', () => {
     it('exposes create/update/delete capabilities', () => {
       setup([Roles.admin]);
