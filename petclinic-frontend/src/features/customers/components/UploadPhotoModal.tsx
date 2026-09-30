@@ -4,8 +4,6 @@ import { uploadCustomerPhoto } from '../api/uploadCustomerPhoto.ts';
 import './customers.css';
 import { useTranslation } from 'react-i18next';
 
-
-
 interface UploadPhotoModalProps {
   customerId: string;
   isOpen: boolean;
@@ -187,8 +185,8 @@ const UploadPhotoModal: React.FC<UploadPhotoModalProps> = ({
               className={`submit-button ${!selectedFile || isUploading ? 'disabled' : ''}`}
             >
               {isUploading
-                  ? t('uploadPhotoModal.uploading')
-                  : t('uploadPhotoModal.uploadPhoto')}
+                ? t('uploadPhotoModal.uploading')
+                : t('uploadPhotoModal.uploadPhoto')}
             </button>
           </div>
         </form>

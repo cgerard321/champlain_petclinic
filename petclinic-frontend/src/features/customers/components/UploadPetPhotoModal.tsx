@@ -4,8 +4,6 @@ import { addPetPhoto } from '../api/addPetPhoto';
 import './customers.css';
 import { useTranslation } from 'react-i18next';
 
-
-
 interface UploadPetPhotoModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -183,8 +181,8 @@ const UploadPetPhotoModal: React.FC<UploadPetPhotoModalProps> = ({
               className={`submit-button ${!selectedFile || isUploading ? 'disabled' : ''}`}
             >
               {isUploading
-                  ? t('uploadPetPhotoModal.uploading')
-                  : t('uploadPetPhotoModal.uploadPhoto')}
+                ? t('uploadPetPhotoModal.uploading')
+                : t('uploadPetPhotoModal.uploadPhoto')}
             </button>
           </div>
         </form>

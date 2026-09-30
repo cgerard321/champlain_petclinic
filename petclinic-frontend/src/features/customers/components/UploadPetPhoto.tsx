@@ -3,8 +3,6 @@ import * as PropTypes from 'prop-types';
 import { addPetPhoto } from '../api/addPetPhoto';
 import { useTranslation } from 'react-i18next';
 
-
-
 interface UploadPetPhotoProps {
   petId: string;
   onPhotoUploaded: () => void;
@@ -16,7 +14,7 @@ const UploadPetPhoto: React.FC<UploadPetPhotoProps> = ({
   onPhotoUploaded,
   disabled = false,
 }) => {
-    const { t } = useTranslation('customers');
+  const { t } = useTranslation('customers');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -32,7 +30,7 @@ const UploadPetPhoto: React.FC<UploadPetPhotoProps> = ({
     }
 
     if (file.size > 5 * 1024 * 1024) {
-        alert(t('uploadPetPhoto.errors.fileTooLarge'));
+      alert(t('uploadPetPhoto.errors.fileTooLarge'));
       return;
     }
 
@@ -42,7 +40,7 @@ const UploadPetPhoto: React.FC<UploadPetPhotoProps> = ({
       onPhotoUploaded();
     } catch (error) {
       console.error('Error uploading pet photo:', error);
-        alert(t('uploadPetPhoto.errors.uploadFailed'));
+      alert(t('uploadPetPhoto.errors.uploadFailed'));
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -78,9 +76,9 @@ const UploadPetPhoto: React.FC<UploadPetPhotoProps> = ({
           marginTop: '8px',
         }}
       >
-          {isUploading
-              ? t('uploadPetPhoto.uploading')
-              : t('uploadPetPhoto.addPhoto')}
+        {isUploading
+          ? t('uploadPetPhoto.uploading')
+          : t('uploadPetPhoto.addPhoto')}
       </button>
     </>
   );
