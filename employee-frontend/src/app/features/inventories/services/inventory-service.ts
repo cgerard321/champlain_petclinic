@@ -1,19 +1,12 @@
-import {HttpClient} from '@angular/common/http';
-import {inject, Injectable} from '@angular/core';
-import {SseClient} from 'ngx-sse-client';
-import {Observable, timer} from 'rxjs';
-import {filter, map, retry} from 'rxjs/operators';
-
-import {Inventory, InventoryRequest} from '@features/inventories/models/inventory.model';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Observable, throwError, timer } from 'rxjs';
+import { Observable, timer } from 'rxjs';
 import { filter, map, retry } from 'rxjs/operators';
 
 import { SseClient } from '@core/services/sse-client';
-import { Inventory } from '@features/inventories/models/inventory.model';
+import { Inventory, InventoryRequest } from '@features/inventories/models/inventory.model';
 
-@Injectable({providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class InventoryService {
   private readonly sse = inject(SseClient);
   private readonly http = inject(HttpClient);
@@ -21,13 +14,14 @@ export class InventoryService {
 
   getInventories(): Observable<Inventory> {
     return this.sse
-      .stream(this.baseUrl, {keepAlive: false, responseType: 'event'}, {}, 'GET')
+      .stream(this.baseUrl, { keepAlive: false, responseType: 'event' }, {}, 'GET')
       .pipe(
-        filter((event): event is MessageEvent => event.type !== 'error'),
-        map((event) => JSON.parse((event as MessageEvent).data) as Inventory),
-
-        // Reconnect after an SSE error.
-        retry({count: Infinity, delay: () => timer(5000)}),
+        filter(
+          (event): event is MessageEvent =>
+            event instanceof MessageEvent && event.type !== 'error',
+        ),
+        map((event) => JSON.parse(event.data) as Inventory),
+        retry({ count: Infinity, delay: () => timer(5000) }),
       );
   }
 
@@ -36,36 +30,28 @@ export class InventoryService {
   }
 
   createInventory(body: InventoryRequest): Observable<Inventory> {
-    return this.http.post<Inventory>(
-      this.baseUrl,
-      body
-    );
+    return this.http.post<Inventory>(this.baseUrl, body);
   }
 
-  updateInventory(
-    inventoryId: string,
-    body: InventoryRequest
-  ): Observable<Inventory> {
-    return this.http.put<Inventory>(
-      `${this.baseUrl}/${inventoryId}`,
-      body
-    );
+  updateInventory(inventoryId: string, body: InventoryRequest): Observable<Inventory> {
+    return this.http.put<Inventory>(`${this.baseUrl}/${inventoryId}`, body);
   }
 
   deleteInventory(inventoryId: string): Observable<void> {
-    return this.http.delete<void>(
-      `${this.baseUrl}/${inventoryId}`
-    );
+    return this.http.delete<void>(`${this.baseUrl}/${inventoryId}`);
   }
 
   // GETs a single inventory by ID (ADMIN/INVENTORY_MANAGER only, VET excluded)
   getInventoryById(inventoryId: string): Observable<Inventory> {
     return this.sse
-      .stream(`${this.baseUrl}/${inventoryId}`, {keepAlive: false, responseType: 'event'}, {}, 'GET')
-      .pipe(filter((event): event is MessageEvent => event.type !== 'error'),
-        map((event) => JSON.parse((event as MessageEvent).data) as Inventory),
-
-        retry({count: Infinity, delay: () => timer(5000)})
+      .stream(`${this.baseUrl}/${inventoryId}`, { keepAlive: false, responseType: 'event' }, {}, 'GET')
+      .pipe(
+        filter(
+          (event): event is MessageEvent =>
+            event instanceof MessageEvent && event.type !== 'error',
+        ),
+        map((event) => JSON.parse(event.data) as Inventory),
+        retry({ count: Infinity, delay: () => timer(5000) }),
       );
   }
 }
