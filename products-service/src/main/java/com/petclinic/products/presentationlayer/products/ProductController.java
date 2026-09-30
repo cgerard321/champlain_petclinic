@@ -45,7 +45,9 @@ public class ProductController {
         Flux<ProductResponseModel> products = productService.getAllProducts(
                 minPrice, maxPrice, minRating, maxRating, sort, deliveryType, productType);
 
-        return includeImage ? products.concatMap(productService::includeImage) : products;
+        return includeImage
+                ? products.flatMapSequential(productService::includeImage, 8)
+                : products;
     }
 
     @GetMapping(
@@ -152,7 +154,9 @@ public class ProductController {
             @PathVariable String productType,
             @RequestParam(defaultValue = "false") boolean includeImage) {
         Flux<ProductResponseModel> products = productService.getProductsByType(productType);
-        return includeImage ? products.concatMap(productService::includeImage) : products;
+        return includeImage
+                ? products.flatMapSequential(productService::includeImage, 8)
+                : products;
     }
     @PatchMapping(value = "/{productId}/decrease")
     public Mono<ResponseEntity<Void>> decreaseProductQuantity(@PathVariable String productId) {

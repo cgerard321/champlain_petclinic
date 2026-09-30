@@ -29,24 +29,4 @@ public class ProductRequestDTO {
     @Valid
     private FileDetails image;
 
-    /**
-     * Keeps callers using the previous imageId-based constructor source-compatible.
-     * New requests should provide image content through {@link #image}.
-     */
-    public ProductRequestDTO(
-            String imageId,
-            String productName,
-            String productDescription,
-            Double productSalePrice,
-            Double averageRating,
-            Integer productQuantity,
-            Boolean isUnlisted,
-            ProductType productType,
-            LocalDate releaseDate,
-            ProductStatus productStatus,
-            DeliveryType deliveryType) {
-        this(productName, productDescription, productSalePrice, averageRating,
-                productQuantity, isUnlisted, productType, releaseDate,
-                productStatus, deliveryType, null);
-    }
 }

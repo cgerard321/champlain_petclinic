@@ -332,8 +332,9 @@ class ProductsServiceClientIntegrationTest {
                 .addHeader("Content-Type", "application/json"));
 
         Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
-                .patchListingStatus(productResponseDTO.getProductId(), new ProductRequestDTO(
-                        null, null, null, null, null, null, false, null, null, null,null));
+                .patchListingStatus(
+                        productResponseDTO.getProductId(),
+                        ProductRequestDTO.builder().isUnlisted(false).build());
 
         StepVerifier.create(productResponseDTOMono)
                 .expectNextMatches(product -> product.getProductId().equals("productId"))
@@ -348,9 +349,9 @@ class ProductsServiceClientIntegrationTest {
                 .addHeader("Content-Type", "application/json"));
 
         Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
-                .patchListingStatus("691e6945-0d4a-4b20-85cc-afd251faccfd", new ProductRequestDTO(
-                        null, null, null, null, null,
-                        null, false, null, null, null,null));
+                .patchListingStatus(
+                        "691e6945-0d4a-4b20-85cc-afd251faccfd",
+                        ProductRequestDTO.builder().isUnlisted(false).build());
 
         StepVerifier.create(productResponseDTOMono)
                 .expectErrorMatches(throwable -> throwable != null &&
@@ -366,8 +367,9 @@ class ProductsServiceClientIntegrationTest {
                 .addHeader("Content-Type", "application/json"));
 
         Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
-                .patchListingStatus("invalid-product-id", new ProductRequestDTO(
-                        null, null, null, null, null, null, false, null, null, null,null));
+                .patchListingStatus(
+                        "invalid-product-id",
+                        ProductRequestDTO.builder().isUnlisted(false).build());
 
         StepVerifier.create(productResponseDTOMono)
                 .expectErrorMatches(throwable -> throwable != null &&
@@ -383,8 +385,9 @@ class ProductsServiceClientIntegrationTest {
                 .addHeader("Content-Type", "application/json"));
 
         Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
-                .patchListingStatus("productId", new ProductRequestDTO(
-                        null, null, null, null, null, null, false, null, null, null,null));
+                .patchListingStatus(
+                        "productId",
+                        ProductRequestDTO.builder().isUnlisted(false).build());
 
         StepVerifier.create(productResponseDTOMono)
                 .expectErrorMatches(throwable -> throwable != null &&
@@ -400,8 +403,9 @@ class ProductsServiceClientIntegrationTest {
                 .addHeader("Content-Type", "application/json"));
 
         Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
-                .patchListingStatus("productId", new ProductRequestDTO(
-                        null, null, null, null, null, null, false, null, null, null,null));
+                .patchListingStatus(
+                        "productId",
+                        ProductRequestDTO.builder().isUnlisted(false).build());
 
         StepVerifier.create(productResponseDTOMono)
                 .expectErrorMatches(throwable -> throwable != null &&
