@@ -4,15 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Files.FileDetails;
 import com.petclinic.bffapigateway.dtos.Products.*;
-import com.petclinic.bffapigateway.dtos.Products.DeliveryType;
 import com.petclinic.bffapigateway.exceptions.BadRequestException;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.exceptions.ProductImageDependencyException;
 import com.petclinic.bffapigateway.exceptions.ProductNotFoundException;
-
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,8 +26,6 @@ import reactor.test.StepVerifier;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 class ProductsServiceClientIntegrationTest {
@@ -59,6 +54,7 @@ class ProductsServiceClientIntegrationTest {
     static void tearDown() throws IOException {
         mockWebServer.shutdown();
     }
+
     @Test
     void getAllProducts_ThenReturnProductList() {
 
@@ -69,13 +65,14 @@ class ProductsServiceClientIntegrationTest {
         );
 
 
-        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null,null,null,null,null,null,null);
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null, null, null, null, null, null, null);
 
         StepVerifier.create(productsFlux)
                 .expectNextMatches(product -> product.getProductId().equals("4affcab7-3ab1-4917-a114-2b6301aa5565") && product.getProductName().equals("Rabbit Hutch"))
                 .expectNextMatches(product -> product.getProductId().equals("baee7cd2-b67a-449f-b262-91f45dde8a6d") && product.getProductName().equals("Flea Collar"))
                 .verifyComplete();
     }
+
     @Test
     void getAllProducts_WithRatingFiltering_ThenReturnFilteredProductList() {
 
@@ -90,7 +87,7 @@ class ProductsServiceClientIntegrationTest {
         Double maxRating = 5.0;
 
 
-        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null, null, minRating, maxRating, null,null,null);
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null, null, minRating, maxRating, null, null, null);
 
         // Verify the results
         StepVerifier.create(productsFlux)
@@ -111,7 +108,7 @@ class ProductsServiceClientIntegrationTest {
                 .setHeader("Content-Type", "text/event-stream")
         );
 
-        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null,null,null,null,null,null,null);
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null, null, null, null, null, null, null);
 
         StepVerifier.create(productsFlux)
                 .expectNextCount(0)
@@ -132,15 +129,16 @@ class ProductsServiceClientIntegrationTest {
         Double maxPrice = 80.00;
 
         // Call the method with price filters
-        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(minPrice, maxPrice,null,null,null,null, null);
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(minPrice, maxPrice, null, null, null, null, null);
 
 
-            // Verify the results using StepVerifier
+        // Verify the results using StepVerifier
         StepVerifier.create(productsFlux)
                 .expectNextMatches(product -> product.getProductId().equals("4affcab7-3ab1-4917-a114-2b6301aa5565") && product.getProductSalePrice() >= minPrice && product.getProductSalePrice() <= maxPrice)
                 .expectNextMatches(product -> product.getProductId().equals("baee7cd2-b67a-449f-b262-91f45dde8a6d") && product.getProductSalePrice() >= minPrice && product.getProductSalePrice() <= maxPrice)
                 .verifyComplete();
     }
+
     @Test
     void getAllProducts_WithDeliveryTypeFiltering_ThenReturnFilteredProductList() {
 
@@ -155,7 +153,7 @@ class ProductsServiceClientIntegrationTest {
         String deliveryType = "DELIVERY";
 
 
-        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null, null, null, null, null, deliveryType,null);
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null, null, null, null, null, deliveryType, null);
 
         StepVerifier.create(productsFlux)
                 .expectNextMatches(product -> product.getProductId().equals("1") && product.getDeliveryType() == DeliveryType.DELIVERY)
@@ -177,12 +175,11 @@ class ProductsServiceClientIntegrationTest {
 
         String productType = "EQUIPMENT";
 
-
         Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null, null, null, null, null, null, productType);
 
         StepVerifier.create(productsFlux)
-                .expectNextMatches(product -> product.getProductId().equals("1") && product.getProductType() == ProductType.EQUIPMENT)
-                .expectNextMatches(product -> product.getProductId().equals("2") && product.getProductType() == ProductType.EQUIPMENT)
+                .expectNextMatches(product -> product.getProductId().equals("1") && product.getProductType().equals("EQUIPMENT"))
+                .expectNextMatches(product -> product.getProductId().equals("2") && product.getProductType().equals("EQUIPMENT"))
                 .verifyComplete();
     }
 
@@ -200,7 +197,7 @@ class ProductsServiceClientIntegrationTest {
         );
         String sort = "asc";
 
-        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null, null, null, null, sort, null,null);
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null, null, null, null, sort, null, null);
 
         StepVerifier.create(productsFlux)
                 .expectNextMatches(product -> product.getProductId().equals("1") && product.getProductName().equals("Alpha"))
@@ -248,7 +245,6 @@ class ProductsServiceClientIntegrationTest {
     }
 
 
-
     @Test
     void whenAddProduct_thenReturnProduct() throws JsonProcessingException {
         ProductResponseDTO productResponseDTO = new ProductResponseDTO(
@@ -261,7 +257,8 @@ class ProductsServiceClientIntegrationTest {
                 0,
                 6,
                 false,
-                ProductType.FOOD,
+                "586d0700-57db-4312-b6f1-413b79dd018c",
+                null,
                 ProductStatus.AVAILABLE,
                 DeliveryType.DELIVERY
         );
@@ -291,7 +288,8 @@ class ProductsServiceClientIntegrationTest {
                 0,
                 6,
                 false,
-                ProductType.FOOD,
+                "586d0700-57db-4312-b6f1-413b79dd018c",
+                null,
                 ProductStatus.AVAILABLE,
                 DeliveryType.PICKUP
         );
@@ -321,7 +319,8 @@ class ProductsServiceClientIntegrationTest {
                 0,
                 6,
                 true,
-                ProductType.FOOD,
+                "586d0700-57db-4312-b6f1-413b79dd018c",
+                null,
                 ProductStatus.AVAILABLE,
                 DeliveryType.DELIVERY_AND_PICKUP
         );
@@ -444,7 +443,6 @@ class ProductsServiceClientIntegrationTest {
 //    }
 
 
-
     @Test
     void whenRequestCount_thenSucceed() {
         String productId = "abc123";
@@ -459,8 +457,6 @@ class ProductsServiceClientIntegrationTest {
         StepVerifier.create(resultMono)
                 .verifyComplete();
     }
-
-
 
 
     //----------------------------------------------
@@ -480,11 +476,8 @@ class ProductsServiceClientIntegrationTest {
     }
 
 
-
-
-
     @Test
-    void whenChangeProductQuantity_thenSucceed(){
+    void whenChangeProductQuantity_thenSucceed() {
         String productId = "abc123";
         Integer newQuantity = 10;
 
@@ -499,12 +492,11 @@ class ProductsServiceClientIntegrationTest {
     }
 
 
-
     //--------------------------------------
     //TODO: Bundles
 
     @Test
-    void getAllProductBundles_ThenReturnBundleList(){
+    void getAllProductBundles_ThenReturnBundleList() {
         mockWebServer.enqueue(new MockResponse()
                 .setBody(
                         "data:{\"bundleId\":\"1\"," +
@@ -541,9 +533,8 @@ class ProductsServiceClientIntegrationTest {
     }
 
 
-
     @Test
-    void getProductBundleById_ThenReturnBundle() throws JsonProcessingException{
+    void getProductBundleById_ThenReturnBundle() throws JsonProcessingException {
         ProductBundleResponseDTO responseDTO = new ProductBundleResponseDTO(
                 "1",
                 "Dog Bundle",
@@ -642,7 +633,6 @@ class ProductsServiceClientIntegrationTest {
     }
 
 
-
     @Test
     void whenDeleteProductBundle_thenCompleteSuccessfully() throws JsonProcessingException {
         String bundleId = "1";
@@ -657,9 +647,16 @@ class ProductsServiceClientIntegrationTest {
     }
 
     @Test
-    void whenGetProductEnums_ThenReturnEnumsValues() throws JsonProcessingException{
+    void whenGetProductEnums_ThenReturnEnumsValues() throws JsonProcessingException {
+        List<ProductTypeResponseDTO> productTypes = List.of(
+                new ProductTypeResponseDTO("586d0700-57db-4312-b6f1-413b79dd018c", "FOOD"),
+                new ProductTypeResponseDTO("86627454-970e-41a9-baa6-71ab759bf66c", "MEDICATION"),
+                new ProductTypeResponseDTO("6a247af0-52d9-4179-a5b4-ad4b92e686b1", "ACCESSORY"),
+                new ProductTypeResponseDTO("79c8723a-8df3-495d-8eb0-07d574ff5ae5", "EQUIPMENT")
+        );
+
         ProductEnumsResponseDTO responseDTO = new ProductEnumsResponseDTO(
-                List.of(ProductType.FOOD, ProductType.MEDICATION, ProductType.ACCESSORY, ProductType.EQUIPMENT),
+                productTypes,
                 List.of(ProductStatus.AVAILABLE, ProductStatus.PRE_ORDER, ProductStatus.OUT_OF_STOCK),
                 List.of(DeliveryType.DELIVERY, DeliveryType.PICKUP, DeliveryType.DELIVERY_AND_PICKUP, DeliveryType.NO_DELIVERY_OPTION)
         );
@@ -672,22 +669,18 @@ class ProductsServiceClientIntegrationTest {
         Mono<ProductEnumsResponseDTO> enumsMono = productsServiceClient.getProductEnumsValues();
 
         StepVerifier.create(enumsMono)
-            .expectNextMatches(enums ->
-                enums.getProductType().equals(List.of(
-                    ProductType.FOOD,
-                    ProductType.MEDICATION,
-                    ProductType.ACCESSORY,
-                    ProductType.EQUIPMENT)) &&
-                enums.getProductStatus().equals(List.of(
-                    ProductStatus.AVAILABLE,
-                    ProductStatus.PRE_ORDER,
-                    ProductStatus.OUT_OF_STOCK)) &&
-                enums.getDeliveryType().equals(List.of(
-                    DeliveryType.DELIVERY,
-                    DeliveryType.PICKUP, DeliveryType.DELIVERY_AND_PICKUP,
-                    DeliveryType.NO_DELIVERY_OPTION))
-    )
-    .verifyComplete();
+                .expectNextMatches(enums ->
+                        enums.getProductType().equals(productTypes) &&
+                                enums.getProductStatus().equals(List.of(
+                                        ProductStatus.AVAILABLE,
+                                        ProductStatus.PRE_ORDER,
+                                        ProductStatus.OUT_OF_STOCK)) &&
+                                enums.getDeliveryType().equals(List.of(
+                                        DeliveryType.DELIVERY,
+                                        DeliveryType.PICKUP, DeliveryType.DELIVERY_AND_PICKUP,
+                                        DeliveryType.NO_DELIVERY_OPTION))
+                )
+                .verifyComplete();
     }
 
 

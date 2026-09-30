@@ -14,15 +14,13 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductRequestDTO {
-
-
     private String productName;
     private String productDescription;
     private Double productSalePrice;
     private Double averageRating;
     private Integer productQuantity;
     private Boolean isUnlisted;
-    private ProductType productType;
+    private String productTypeId;
     private LocalDate releaseDate;
     private ProductStatus productStatus;
     private DeliveryType deliveryType;
