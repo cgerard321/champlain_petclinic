@@ -858,11 +858,17 @@ class VisitServiceImplTest {
 
     @Test
     void deleteAllCancelledVisits_noCancelledVisits_shouldThrow() {
-        when(visitRepo.findAllByStatus("CANCELLED")).thenReturn(Flux.empty());
-        when(visitRepo.deleteAll(anyList())).thenReturn(Mono.empty()); // avoid null
+        when(visitRepo.findAllByStatus("CANCELLED"))
+                .thenReturn(Flux.empty());
 
         StepVerifier.create(visitService.deleteAllCancelledVisits())
-                .verifyComplete();
+                .expectErrorMatches(ex ->
+                        ex instanceof NotFoundException &&
+                                ex.getMessage().equals("No cancelled visits were found")
+                )
+                .verify();
+
+        verify(visitRepo, never()).deleteAll(anyList());
     }
 
     private VisitResponseDTO buildVisitResponseDTOWithStatus(Status status) {
