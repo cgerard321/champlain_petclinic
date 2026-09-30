@@ -420,6 +420,20 @@ describe('SupplyPage', () => {
     expect(getSupplies).toHaveBeenCalledTimes(2);
   });
 
+  it('should keep the table visible while refreshing after a deletion', () => {
+    const table = fixture.nativeElement.querySelector('table');
+    const refresh = new Subject<Supply[]>();
+    getSupplies.mockReturnValue(refresh);
+
+    component['deleteSupply'](supplyOne);
+    dialogClosed.next(true);
+    fixture.detectChanges();
+
+    expect(getSupplies).toHaveBeenCalledTimes(2);
+    expect(fixture.nativeElement.querySelector('table')).toBe(table);
+    refresh.complete();
+  });
+
   it('should show an error when deleting a supply fails', () => {
     deleteSupply.mockReturnValue(throwError(() => new Error('Delete failed')));
 

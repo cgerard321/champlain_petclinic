@@ -26,6 +26,7 @@ export class SupplyPage {
   protected readonly inventoryId = this.route.snapshot.paramMap.get('inventoryId');
 
   protected readonly supplies = signal<Supply[]>([]);
+  // Only the initial fetch replaces the table; refreshes keep existing rows visible.
   protected readonly loading = signal(true);
   protected readonly error = signal(false);
   protected readonly addingSupply = signal(false);
@@ -110,7 +111,6 @@ export class SupplyPage {
       return;
     }
 
-    this.loading.set(true);
     this.error.set(false);
 
     this.supplyService.getSupplies(this.inventoryId).subscribe({
