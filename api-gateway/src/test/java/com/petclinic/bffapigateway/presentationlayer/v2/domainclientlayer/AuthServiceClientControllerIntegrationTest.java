@@ -6,8 +6,7 @@ import com.petclinic.bffapigateway.domainclientlayer.CartServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
 import com.petclinic.bffapigateway.dtos.Auth.*;
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.CustomerRequestDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Vets.Workday;
 import com.petclinic.bffapigateway.utils.Security.Variables.SecurityConst;
@@ -24,7 +23,6 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Set;
 
 import static junit.framework.TestCase.assertEquals;
@@ -74,7 +72,7 @@ public class AuthServiceClientControllerIntegrationTest {
             .username("username")
             .password("password")
             .email("email")
-            .owner(OwnerRequestDTO.builder()
+            .owner(CustomerRequestDTO.builder()
                     .firstName("firstName")
                     .lastName("lastName")
                     .address("address")

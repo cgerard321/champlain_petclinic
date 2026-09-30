@@ -50,6 +50,27 @@ public class GlobalControllerExceptionHandler {
         return createHttpErrorInfo(CONFLICT, request, ex);
     }
 
+    @ResponseStatus(BAD_REQUEST)
+    @ExceptionHandler(BadRequestException.class)
+    public HttpErrorInfo handleBadRequestException(
+            ServerHttpRequest request, Exception ex) {
+        return createHttpErrorInfo(BAD_REQUEST, request, ex);
+    }
+
+    @ResponseStatus(UNPROCESSABLE_ENTITY)
+    @ExceptionHandler(UnprocessableEntityException.class)
+    public HttpErrorInfo handleUnprocessableEntityException(
+            ServerHttpRequest request, Exception ex) {
+        return createHttpErrorInfo(UNPROCESSABLE_ENTITY, request, ex);
+    }
+
+    @ResponseStatus(FAILED_DEPENDENCY)
+    @ExceptionHandler(FailedDependencyException.class)
+    public HttpErrorInfo handleFailedDependencyException(
+            ServerHttpRequest request, Exception ex) {
+        return createHttpErrorInfo(FAILED_DEPENDENCY, request, ex);
+    }
+
 
     private HttpErrorInfo createHttpErrorInfo(HttpStatus httpStatus, ServerHttpRequest request, Exception ex) {
         final String path = request.getPath().value();

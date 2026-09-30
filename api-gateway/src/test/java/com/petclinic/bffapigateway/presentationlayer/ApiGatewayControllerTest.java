@@ -5,7 +5,7 @@ import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.Auth.*;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.Bills.PaymentRequestDTO;
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.CustomerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.*;
 import com.petclinic.bffapigateway.dtos.Visits.Status;
@@ -32,19 +32,13 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.codec.multipart.FilePart;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.webjars.NotFoundException;
@@ -177,8 +171,8 @@ class ApiGatewayControllerTest {
                         .roles(List.of("OWNER"))
                         .token("bearer-token")
                         .build())));
-        when(customersServiceClient.getOwner("userId123", false))
-                .thenReturn(Mono.just(OwnerResponseDTO.builder()
+        when(customersServiceClient.getCustomer("userId123", false))
+                .thenReturn(Mono.just(CustomerResponseDTO.builder()
                         .firstName("Test")
                         .lastName("Customer")
                         .build()));
@@ -962,7 +956,7 @@ class ApiGatewayControllerTest {
 
 //    @Test
 //    void getOwnerDetails_withAvailableVisitsService() {
-//        OwnerResponseDTO owner = new OwnerResponseDTO();
+//        CustomerResponseDTO owner = new CustomerResponseDTO();
 //        PetDetails cat = new PetDetails();
 //        cat.setId(20);
 //        cat.setName("Garfield");
@@ -994,7 +988,7 @@ class ApiGatewayControllerTest {
 
     /*@Test
     void getOwnerDetails_withAvailableVisitsService() {
-        OwnerResponseDTO owner = new OwnerResponseDTO();
+        CustomerResponseDTO owner = new CustomerResponseDTO();
         PetResponseDTO cat = new PetResponseDTO();
         cat.setId(20);
         cat.setName("Garfield");
@@ -1209,12 +1203,12 @@ class ApiGatewayControllerTest {
     String VISIT_ID = buildVisitResponseDTO().getVisitId();
 
 
-//todo fix
+//TODO for VIST  team verify the use of these test
     /*@Test
     void shouldCreateAVisitWithOwnerInfo(){
         String ownerId = "1";
         String cookie = "aCookie";
-        OwnerResponseDTO owner = new OwnerResponseDTO();
+        CustomerResponseDTO owner = new CustomerResponseDTO();
         VisitRequestDTO visit = VisitRequestDTO.builder()
                 .visitDate(LocalDateTime.parse("2021-12-12T14:00"))
                 .description("Charle's Richard cat has a paw infection.")
@@ -1514,7 +1508,7 @@ class ApiGatewayControllerTest {
         VisitResponseDTO visitResponseDTO4 = VisitResponseDTO.builder().visitId("visitId4").petId("petId2").build();
         VisitResponseDTO visitResponseDTO5 = VisitResponseDTO.builder().visitId("visitId5").petId("petId1").build();
 
-        Mockito.when(customersServiceClient.getPetsByOwnerId(anyString())).thenReturn(Flux.just(petResponseDTO1, petResponseDTO2));
+        Mockito.when(customersServiceClient.getPetsByCustomerId(anyString())).thenReturn(Flux.just(petResponseDTO1, petResponseDTO2));
 
         Mockito.when(visitsServiceClient.getVisitsForPet(petResponseDTO1.getPetId())).thenReturn(Flux.just(visitResponseDTO1, visitResponseDTO2, visitResponseDTO5));
         Mockito.when(visitsServiceClient.getVisitsForPet(petResponseDTO2.getPetId())).thenReturn(Flux.just(visitResponseDTO3, visitResponseDTO4));

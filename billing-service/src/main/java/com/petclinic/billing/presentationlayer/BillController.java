@@ -114,7 +114,7 @@ public class BillController {
 //        return SERVICE.getAllBillsByPage(pageable, billId, customerId, ownerFirstName, ownerLastName, visitType, vetId, vetFirstName, vetLastName);
 //    }
 
-    @GetMapping("/bills")
+    @GetMapping("/bills/paginated")
     public Flux<BillResponseDTO> getAllBillsByPage(
             @RequestParam Optional<Integer> page,
             @RequestParam Optional<Integer> size,
@@ -133,6 +133,28 @@ public class BillController {
 
         return billService.getAllBillsByPage(PageRequest.of(page.get(), size.get()), billId, customerId,
                 ownerFirstName, ownerLastName, visitType, vetId, vetFirstName, vetLastName);
+    }
+
+    @GetMapping(value = "/bills/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> getAllBillsStream(
+            @RequestParam(required = false) String billId,
+            @RequestParam(required = false) String customerId,
+            @RequestParam(required = false) String ownerFirstName,
+            @RequestParam(required = false) String ownerLastName,
+            @RequestParam(required = false) String visitType,
+            @RequestParam(required = false) String vetId,
+            @RequestParam(required = false) String vetFirstName,
+            @RequestParam(required = false) String vetLastName) {
+
+        return billService.getAllBillsStream(
+                billId,
+                customerId,
+                ownerFirstName,
+                ownerLastName,
+                visitType,
+                vetId,
+                vetFirstName,
+                vetLastName);
     }
 
 
