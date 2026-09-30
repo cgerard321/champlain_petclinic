@@ -93,6 +93,7 @@ class ProductsServiceClientIntegrationTest {
 
         RecordedRequest request = mockWebServer.takeRequest();
         assertEquals("/products?productName=horse", request.getPath());
+        assertEquals("/products?productName=horse&includeImage=false", request.getPath());
     }
 
     @Test
@@ -109,6 +110,7 @@ class ProductsServiceClientIntegrationTest {
                 .verifyComplete();
 
         RecordedRequest request = mockWebServer.takeRequest();
+        assertEquals("/products?includeImage=false", request.getPath());
         assertEquals("/products", request.getPath());
     }
 
