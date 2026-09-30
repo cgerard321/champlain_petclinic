@@ -225,7 +225,9 @@ export default function CustomerVisitListTable(): JSX.Element {
                   key={visit.visitId}
                   className={visit.isEmergency ? 'emergency-visit' : ''}
                 >
-                  <td>{visit.visitId}</td>
+                  <td>
+                    <a href={`/visits/${visit.visitId}`}>{visit.visitId}</a>
+                  </td>
                   <td>{visit.petName}</td>
                   <td>{visit.description}</td>
                   <td>

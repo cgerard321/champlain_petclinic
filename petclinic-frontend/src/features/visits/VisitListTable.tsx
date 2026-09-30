@@ -277,7 +277,7 @@ export default function VisitListTable(): JSX.Element {
           <table>
             <thead>
               <tr>
-                <th>Visit Id</th>
+                <th> Visit Id </th>
                 <th>Pet Name</th>
                 <th>Description</th>
                 <th>Veterinarian</th>
@@ -295,7 +295,9 @@ export default function VisitListTable(): JSX.Element {
                   key={visit.visitId}
                   className={visit.isEmergency ? 'emergency-visit' : ''}
                 >
-                  <td>{visit.visitId}</td>
+                  <td>
+                    <a href={`/visits/${visit.visitId}`}>{visit.visitId}</a>
+                  </td>
                   <td>{visit.petName}</td>
                   <td>{visit.description}</td>
                   <td>
