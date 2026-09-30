@@ -2,17 +2,17 @@ import axiosInstance from '@/shared/api/axiosInstance';
 import { Bill } from '../models/Bill';
 
 export async function getAllBillsPaginated(
-    currentPage: number,
-    listSize: number,
-    billId?: string,
-    customerId?: string,
-    ownerFirstName?: string,
-    ownerLastName?: string,
-    visitType?: string,
-    vetId?: string,
-    vetFirstName?: string,
-    vetLastName?: string,
-    includeArchived = false
+  currentPage: number,
+  listSize: number,
+  billId?: string,
+  customerId?: string,
+  ownerFirstName?: string,
+  ownerLastName?: string,
+  visitType?: string,
+  vetId?: string,
+  vetFirstName?: string,
+  vetLastName?: string,
+  includeArchived = false
 ): Promise<Bill[]> {
   const params: Record<string, string | number | boolean> = {
     page: currentPage,
