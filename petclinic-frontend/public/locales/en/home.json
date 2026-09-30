@@ -1,0 +1,26 @@
+{
+  "nav": {
+    "home": "Home",
+    "vets": "Veterinarians",
+    "customers": "Customers",
+    "customersList": "Customers List",
+    "addCustomer": "Add Customer",
+    "users": "Users",
+    "usersList": "Users List",
+    "rolesList": "Roles List",
+    "bills": "Bills",
+    "visits": "Visits",
+    "listView": "List View",
+    "calendarView": "Calendar View",
+    "mySchedule": "My Schedule",
+    "inventories": "Inventories",
+    "promos": "Promos",
+    "shop": "Shop",
+    "carts": "Carts",
+    "signup": "Signup",
+    "login": "Login",
+    "profile": "Profile",
+    "editProfile": "Edit Profile",
+    "logout": "Logout"
+  }
+}

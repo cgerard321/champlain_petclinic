@@ -1,7 +1,6 @@
 package com.petclinic.bffapigateway.presentationlayer.v2;
 
 import com.petclinic.bffapigateway.dtos.Auth.*;
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +14,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.List;
-import java.util.stream.Collectors;
-
-
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.UUID;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -30,6 +26,8 @@ class UserControllerIntegrationTest {
     private WebTestClient webTestClient;
 
     private MockServerConfigAuthService mockServerConfigAuthService;
+
+    private static String CSRF_TOKEN = UUID.randomUUID().toString();
 
     @BeforeAll
     public void startMockServer() {
@@ -98,6 +96,8 @@ class UserControllerIntegrationTest {
         webTestClient.patch()
                 .uri("/api/v2/gateway/users/e6248486-d3df-47a5-b2e0-84d31c47533a")
                 .cookie("Bearer", MockServerConfigAuthService.jwtTokenForValidAdmin)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(requestModel), RolesChangeRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)

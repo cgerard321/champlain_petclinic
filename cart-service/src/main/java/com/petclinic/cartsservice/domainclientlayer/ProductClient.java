@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -36,6 +37,21 @@ public class ProductClient {
                         })
                 .bodyToMono(ProductResponseModel.class)
                 .map(this::normalizeInventoryFields);
+    }
+
+    public Flux<ProductResponseModel> getProductsByType(String productType) {
+        return webClient.get()
+                .uri("/filter/{productType}", productType)
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::isError,
+                        response -> Mono.error(
+                                new IllegalArgumentException(
+                                        "Unable to retrieve products for type: " + productType
+                                )
+                        )
+                )
+                .bodyToFlux(ProductResponseModel.class);
     }
 
     private ProductResponseModel normalizeInventoryFields(ProductResponseModel product) {
