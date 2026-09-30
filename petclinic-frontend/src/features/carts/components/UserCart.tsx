@@ -1023,6 +1023,7 @@ const UserCart: React.FC = () => {
                     addToWishlist={addToWishlist}
                     addToCart={() => {}}
                     isInWishlist={false}
+                    removeFromWishListByIcon={() => {}} //not sure about the code here yet!!!!!!!!!!!!!!!!!!!!
                     showNotification={message => showToast(message, 'info')}
                   />
                 ))

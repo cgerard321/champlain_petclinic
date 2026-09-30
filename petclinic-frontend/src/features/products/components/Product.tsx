@@ -12,6 +12,7 @@ import {
   IsReceptionist,
 } from '@/context/UserContext';
 import { useAddToWishlist } from '@/features/carts/api/addToWishlistFromProducts';
+import { useRemoveFromWishlistByIcon } from '@/features/carts/api/removeProductFromWishlist';
 import StarRating from './StarRating';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
 
@@ -41,6 +42,7 @@ export default function Product({
   const navigate = useNavigate();
   const { addToCart } = useAddToCart();
   const { addToWishlist } = useAddToWishlist();
+  const { removeFromWishlistByIcon } = useRemoveFromWishlistByIcon();
 
   const handleProductClick = (): void => {
     navigate(
@@ -96,6 +98,20 @@ export default function Product({
     }
   };
 
+  const handleRemoveFromWishlist = async (): Promise<void> => {
+    if (!isAuthenticated) {
+      //might need to take it off because it should have been done when it is added in the wishlist
+      navigate(AppRoutePaths.Login);
+      return;
+    }
+    const isSuccess = await removeFromWishlistByIcon(currentProduct.productId);
+    if (isSuccess) {
+      setSuccessMessageWishlist('Product removed from wishlist successfully!');
+      setIsWishlisted(false); // stays false after removing MAYBE SHOULD REMOVE THE COMMENT?
+      setTimeout(() => setSuccessMessageWishlist(null), 3000);
+    }
+  };
+
   if (selectedProduct) {
     return (
       <div>
@@ -127,7 +143,7 @@ export default function Product({
         <button
           className="wishlist-heart-btn"
           title="Add to Wishlist"
-          onClick={handleAddToWishlist}
+          onClick={handleAddToWishlist || handleRemoveFromWishlist}
         >
           {isWishlisted ? (
             <FaHeart style={{ color: '#e11d48' }} />
