@@ -39,11 +39,11 @@ export interface InventoryPermissions {
 
   // Not strictly CRUD, but tied to the same product level access rule
   canConsumeProduct: boolean;
-/*
-  * Not CRUD, but a real endpoint (GET .../productquantity, ADMIN/INVENTORY_MANAGER
-  * only) that the UI must hide for other roles otherwise the "hidden or disabled
-  * in the UI" criterion isn't met even though the backend still 403s it.
- */
+  /*
+   * Not CRUD, but a real endpoint (GET .../productquantity, ADMIN/INVENTORY_MANAGER
+   * only) that the UI must hide for other roles otherwise the "hidden or disabled
+   * in the UI" criterion isn't met even though the backend still 403s it.
+   */
   canViewProductQuantity: boolean;
 }
 
@@ -68,7 +68,7 @@ const VET_ACCESS: InventoryPermissions = {
   canListInventories: true,
   canListProducts: true,
   canViewInventoryDetail: false, // GET /{id} excludes VET
-  canViewProductDetail: false,   // GET /{id}/products/{pid} excludes VET
+  canViewProductDetail: false, // GET /{id}/products/{pid} excludes VET
   canCreateInventory: false,
   canUpdateInventory: false,
   canDeleteInventory: false,

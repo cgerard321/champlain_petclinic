@@ -1,12 +1,13 @@
 import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { FormField, form, required, submit } from '@angular/forms/signals';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { FormField, form, required, submit } from '@angular/forms/signals';
 
 import { isApiError, ApiError } from '@core/models/api-error';
+import { AuthState } from '@core/services/auth-state';
 import {
   Inventory,
   InventoryRequest,
@@ -15,7 +16,6 @@ import {
 } from '@features/inventories/models/inventory.model';
 import { InventoryService } from '@features/inventories/services/inventory-service';
 import { getInventoryPermissions } from '@shared/models/inventory-permissions';
-import { AuthState } from '@core/services/auth-state';
 
 // added — some existing inventories have a type outside the four the
 // dropdown offers (e.g. "Diagnostic Kits"), so when editing one of those

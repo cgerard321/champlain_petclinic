@@ -32,7 +32,11 @@
       }
 
       <label for="inventoryDescription">Description</label>
-      <input id="inventoryDescription" type="text" [formField]="inventoryForm.inventoryDescription" />
+      <input
+        id="inventoryDescription"
+        type="text"
+        [formField]="inventoryForm.inventoryDescription"
+      />
       @if (
         inventoryForm.inventoryDescription().touched() &&
         inventoryForm.inventoryDescription().invalid()
@@ -112,7 +116,9 @@
                     <button
                       type="button"
                       class="edit-button"
-                      (click)="$event.stopPropagation(); $event.preventDefault(); editInventory(inventory)"
+                      (click)="
+                        $event.stopPropagation(); $event.preventDefault(); editInventory(inventory)
+                      "
                     >
                       Edit
                     </button>
@@ -121,7 +127,11 @@
                     <button
                       type="button"
                       class="delete-button"
-                      (click)="$event.stopPropagation(); $event.preventDefault(); deleteInventoryAction(inventory)"
+                      (click)="
+                        $event.stopPropagation();
+                        $event.preventDefault();
+                        deleteInventoryAction(inventory)
+                      "
                     >
                       Delete
                     </button>
