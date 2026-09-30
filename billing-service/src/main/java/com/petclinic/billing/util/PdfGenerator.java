@@ -79,9 +79,15 @@ public class PdfGenerator {
         // Use CAD as base, convert to requested currency to match FE convertCurrency.ts
         BigDecimal rawAmount   = Optional.ofNullable(bill.getAmount()).orElse(BigDecimal.ZERO);
         BigDecimal rawInterest = Optional.ofNullable(bill.getInterest()).orElse(BigDecimal.ZERO);
+
+        BigDecimal rawTaxes = Optional.ofNullable(bill.getTaxedAmount()).orElse(BigDecimal.ZERO);
+        BigDecimal rawGst = Optional.ofNullable(bill.getGstAmount()).orElse(BigDecimal.ZERO);
+        BigDecimal rawQst = Optional.ofNullable(bill.getQstAmount()).orElse(BigDecimal.ZERO);
+
         // Prefer taxedAmount if present (matches FE where Total Due uses taxedAmount)
-        BigDecimal rawTotal    = Optional.ofNullable(bill.getTaxedAmount())
-                                     .orElse(rawAmount.add(rawInterest));
+        BigDecimal rawTotal    = Optional.ofNullable(bill.getTotalAmount())
+                                     .orElse(rawAmount.add(rawTaxes));
+
 
         BigDecimal subtotal = convertFromCad(rawAmount, currency);
         BigDecimal interest = convertFromCad(rawInterest, currency);
@@ -110,6 +116,15 @@ public class PdfGenerator {
 
         totals.addCell("Subtotal");
         totals.addCell(rightAligned(formatCurrency(subtotal, currency)));
+
+        totals.addCell("GST (5%)");
+        totals.addCell(rightAligned(formatCurrency(rawGst, currency)));
+
+        totals.addCell("QST (9.975%)");
+        totals.addCell(rightAligned(formatCurrency(rawQst, currency)));
+
+        totals.addCell("Total Tax");
+        totals.addCell(rightAligned(formatCurrency(rawTaxes, currency)));
 
         if (interest.compareTo(BigDecimal.ZERO) > 0) {
             totals.addCell("Interest");
