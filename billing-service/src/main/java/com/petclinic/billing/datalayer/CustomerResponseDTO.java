@@ -11,9 +11,9 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class OwnerResponseDTO {
+public class CustomerResponseDTO {
 
-    private String ownerId;
+    private String customerId;
     private String firstName;
     private String lastName;
     private String address;
