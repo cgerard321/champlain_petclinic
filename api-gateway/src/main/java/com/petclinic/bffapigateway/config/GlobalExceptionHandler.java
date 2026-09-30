@@ -68,6 +68,21 @@ public class GlobalExceptionHandler {
                 .body(new HttpErrorInfo(HttpStatus.NOT_FOUND.value(), ex.getMessage()));
     }
 
+    @ExceptionHandler(value = ProductNotFoundException.class)
+    public ResponseEntity<HttpErrorInfo> handleProductNotFoundException(
+            ProductNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new HttpErrorInfo(HttpStatus.NOT_FOUND.value(), ex.getMessage()));
+    }
+
+    @ExceptionHandler(value = ProductImageDependencyException.class)
+    public ResponseEntity<HttpErrorInfo> handleProductImageDependencyException(
+            ProductImageDependencyException ex) {
+        return ResponseEntity.status(HttpStatus.FAILED_DEPENDENCY)
+                .body(new HttpErrorInfo(
+                        HttpStatus.FAILED_DEPENDENCY.value(), ex.getMessage()));
+    }
+
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(WebExchangeBindException.class)
     public Map<String, String> handleValidationExceptions(WebExchangeBindException ex) {

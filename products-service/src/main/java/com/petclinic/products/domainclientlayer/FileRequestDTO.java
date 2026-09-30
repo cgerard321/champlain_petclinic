@@ -1,20 +1,15 @@
-package com.petclinic.bffapigateway.dtos.Files;
+package com.petclinic.products.domainclientlayer;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Builder
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class FileDetails {
-    private String fileId;
+public class FileRequestDTO {
 
     @NotBlank(message = "File name is required")
     private String fileName;
