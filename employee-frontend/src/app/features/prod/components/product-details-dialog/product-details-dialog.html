@@ -23,7 +23,7 @@
     @if (image(); as currentImage) {
       <img
         class="product-image"
-        [src]="'data:' + currentImage.imageType + ';base64,' + currentImage.imageData"
+        [src]="'data:' + currentImage.fileType + ';base64,' + currentImage.fileData"
         [alt]="currentProduct.productName"
       />
     }
