@@ -1,14 +1,16 @@
-import { Component, OnDestroy, OnInit, inject, signal, DestroyRef} from '@angular/core';
+import { Component, computed, OnDestroy, OnInit, inject, signal, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterLink } from '@angular/router';
 import { Subscription, finalize } from 'rxjs';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { isApiError, ApiError } from '@core/models/api-error';
+import { AuthState } from '@core/services/auth-state';
 import { Inventory } from '@features/inventories/models/inventory.model';
 import { InventoryService } from '@features/inventories/services/inventory-service';
+import { Roles } from '@shared/models/roles';
 
 @Component({
   imports: [RouterLink, MatCardModule, MatIconModule, MatProgressSpinnerModule],
@@ -18,10 +20,10 @@ import { InventoryService } from '@features/inventories/services/inventory-servi
 })
 export class InventoryList implements OnInit, OnDestroy {
   private readonly inventoryService = inject(InventoryService);
+  private readonly auth = inject(AuthState);
   private inventorySubscription?: Subscription;
   private readonly quantitySubscriptions = new Set<Subscription>();
   private readonly destroyRef = inject(DestroyRef);
-
 
   protected readonly inventories = signal<Inventory[]>([]);
   protected readonly quantities = signal<Record<string, number | null>>({});
@@ -29,34 +31,17 @@ export class InventoryList implements OnInit, OnDestroy {
   protected readonly errorMessage = signal<ApiError | null>(null);
   protected readonly savingFavorites = signal<Record<string, boolean>>({});
   protected readonly favoriteError = signal<string | null>(null);
+  protected readonly favoritesOnly = signal(false);
+
+  protected readonly canManageFavorites = computed(
+    () => this.auth.hasRole(Roles.admin) || this.auth.hasRole(Roles.inventoryManager),
+  );
+  protected readonly isSavingAnyFavorite = computed(() =>
+    Object.values(this.savingFavorites()).some(Boolean),
+  );
 
   ngOnInit(): void {
-    this.inventorySubscription = this.inventoryService.getInventories().subscribe({
-      next: (item) => {
-        this.isLoading.set(false);
-        this.errorMessage.set(null);
-
-        this.inventories.update((current) => {
-          const idx = current.findIndex((inv) => inv.inventoryId === item.inventoryId);
-
-          // If the inventory is new, add it to the list
-          if (idx === -1) return [...current, item];
-
-          // If the inventory already exists, replace it
-          const updated = [...current];
-          updated[idx] = item;
-          return updated;
-        });
-        this.loadQuantities(item.inventoryId);
-      },
-      error: (err: unknown) => {
-        this.isLoading.set(false);
-        this.errorMessage.set(
-          isApiError(err) ? err : { code: 'UNKNOWN', message: 'Failed to load inventories.' },
-        );
-      },
-      complete: () => this.isLoading.set(false),
-    });
+    this.loadInventories();
   }
 
   ngOnDestroy(): void {
@@ -64,53 +49,105 @@ export class InventoryList implements OnInit, OnDestroy {
     this.quantitySubscriptions.forEach((subscription) => {
       subscription.unsubscribe();
     });
+    this.quantitySubscriptions.clear();
+  }
+
+  protected setFavoritesOnly(checked: boolean): void {
+    if (this.isSavingAnyFavorite()) return;
+
+    this.favoritesOnly.set(checked);
+    this.loadInventories();
   }
 
   protected quantityFor(inventoryId: string): number | null {
     return this.quantities()[inventoryId] ?? null;
   }
 
+  protected isSavingFavorite(inventoryId: string): boolean {
+    return this.savingFavorites()[inventoryId] ?? false;
+  }
+
   protected toggleFavorite(inventory: Inventory): void {
-  const id = inventory.inventoryId;
+    const id = inventory.inventoryId;
 
-  if (this.savingFavorites()[id]) return;
+    if (!this.canManageFavorites() || this.isLoading() || this.isSavingFavorite(id)) return;
 
-  const nextValue = !inventory.important;
-  this.favoriteError.set(null);
+    const nextValue = !inventory.important;
+    this.favoriteError.set(null);
 
-  this.savingFavorites.update((current) => ({
-    ...current,
-    [id]: true,
-  }));
+    this.savingFavorites.update((current) => ({
+      ...current,
+      [id]: true,
+    }));
 
-  this.inventoryService
-    .updateImportantStatus(id, nextValue)
-    .pipe(
-      takeUntilDestroyed(this.destroyRef),
-      finalize(() => {
-        this.savingFavorites.update((current) => ({
-          ...current,
-          [id]: false,
-        }));
-      }),
-    )
-    .subscribe({
-      next: () => {
-        this.inventories.update((current) =>
-          current.map((item) =>
-            item.inventoryId === id
-              ? { ...item, important: nextValue }
-              : item,
-          ),
-        );
-      },
-      error: () => {
-        this.favoriteError.set(
-          'Could not save your favorite. Please try again.',
-        );
-      },
-    });
-}
+    this.inventoryService
+      .updateImportantStatus(id, nextValue)
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => {
+          this.savingFavorites.update((current) => ({
+            ...current,
+            [id]: false,
+          }));
+        }),
+      )
+      .subscribe({
+        next: () => {
+          this.inventories.update((current) => {
+            if (this.favoritesOnly() && !nextValue) {
+              return current.filter((item) => item.inventoryId !== id);
+            }
+
+            return current.map((item) =>
+              item.inventoryId === id ? { ...item, important: nextValue } : item,
+            );
+          });
+        },
+        // The star is only updated on success, so a failed save leaves it as it was.
+        error: () => {
+          this.favoriteError.set(`Could not update the favorite for ${inventory.inventoryName}.`);
+        },
+      });
+  }
+
+  private loadInventories(): void {
+    this.inventorySubscription?.unsubscribe();
+
+    this.quantitySubscriptions.forEach((subscription) => subscription.unsubscribe());
+    this.quantitySubscriptions.clear();
+
+    this.inventories.set([]);
+    this.quantities.set({});
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
+    this.favoriteError.set(null);
+
+    this.inventorySubscription = this.inventoryService
+      .getInventories(this.favoritesOnly())
+      .subscribe({
+        next: (item) => {
+          this.isLoading.set(false);
+
+          this.inventories.update((current) => {
+            const idx = current.findIndex((inv) => inv.inventoryId === item.inventoryId);
+
+            if (idx === -1) return [...current, item];
+            const updated = [...current];
+            updated[idx] = item;
+            return updated;
+          });
+
+          this.loadQuantities(item.inventoryId);
+        },
+        error: (err: unknown) => {
+          this.isLoading.set(false);
+          this.errorMessage.set(
+            isApiError(err) ? err : { code: 'UNKNOWN', message: 'Failed to load inventories.' },
+          );
+        },
+        complete: () => this.isLoading.set(false),
+      });
+  }
 
   private loadQuantities(inventoryId: string): void {
     // Initializes the quantity the first time the inventory is loaded
@@ -122,22 +159,34 @@ export class InventoryList implements OnInit, OnDestroy {
       }));
     }
 
-    const subscription = this.inventoryService.getQuantity(inventoryId).subscribe({
-      next: (quantity) => {
-        this.quantities.update((current) => ({ ...current, [inventoryId]: quantity }));
-      },
-      error: () => {
-        if (!(inventoryId in this.quantities())) {
-          this.quantities.update((current) => ({
-            ...current,
-            [inventoryId]: null,
-          }));
-        }
-      },
-      complete: () => {
-        this.quantitySubscriptions.delete(subscription);
-      },
-    });
-    this.quantitySubscriptions.add(subscription);
+    let subscription = Subscription.EMPTY;
+    const forgetSubscription = (): void => {
+      this.quantitySubscriptions.delete(subscription);
+    };
+
+    subscription = this.inventoryService
+      .getQuantity(inventoryId)
+      .pipe(finalize(forgetSubscription))
+      .subscribe({
+        next: (quantity) => {
+          this.quantities.update((current) => ({ ...current, [inventoryId]: quantity }));
+        },
+        error: () => {
+          if (!(inventoryId in this.quantities())) {
+            this.quantities.update((current) => ({
+              ...current,
+              [inventoryId]: null,
+            }));
+          }
+        },
+      });
+
+    // A synchronous response finishes before the variable above is assigned,
+    // so finalize() could not have removed it yet — only track it if it is still open.
+    if (subscription.closed) {
+      forgetSubscription();
+    } else {
+      this.quantitySubscriptions.add(subscription);
+    }
   }
 }

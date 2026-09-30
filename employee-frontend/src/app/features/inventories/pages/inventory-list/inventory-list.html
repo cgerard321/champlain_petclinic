@@ -1,77 +1,85 @@
 <div class="inventory-page">
   <h1>Inventory</h1>
-  <!-- Shows a failed save without hiding the cards. -->
-@if (favoriteError()) {
-  <p role="alert">{{ favoriteError() }}</p>
-}
+
+  <label class="favorites-filter">
+    <input
+      #favoritesCheckbox
+      type="checkbox"
+      [checked]="favoritesOnly()"
+      [disabled]="isSavingAnyFavorite()"
+      (change)="setFavoritesOnly(favoritesCheckbox.checked)"
+    />
+    Favorites only
+  </label>
+
+  @if (favoriteError(); as saveError) {
+    <p class="favorite-error" role="alert">{{ saveError }}</p>
+  }
 
   @if (isLoading()) {
-    <!--Displays a loading screen while the page loads-->
     <div class="state-container">
       <mat-spinner diameter="40" />
       <p>Loading inventories…</p>
     </div>
   } @else if (errorMessage(); as err) {
-    <!--Displays an error page if an error occurs somewhere-->
     <div class="state-container">
       <mat-icon color="warn">error_outline</mat-icon>
       <p>{{ err.message }}</p>
     </div>
   } @else if (inventories().length === 0) {
-    <!--Displays dedicated page if no inventories are found-->
     <div class="state-container">
       <mat-icon>inventory_2</mat-icon>
-      <p>No inventories found.</p>
+      <p>
+        {{ favoritesOnly() ? 'No favorite inventories found.' : 'No inventories found.' }}
+      </p>
     </div>
-  } @else if (inventories().length > 0) {
-    <!--Displays the inventory page if all goes right-->
+  } @else {
     <div class="inventory-grid">
       @for (inventory of inventories(); track inventory.inventoryId) {
-  <!-- Groups the card and its separate star button. -->
-  <div class="inventory-card-wrapper">
-    <a
-      class="inventory-card-link"
-      [routerLink]="['/invt', inventory.inventoryId, 'supplies']"
-    >
-      <mat-card appearance="outlined" class="inventory-card">
-        <mat-card-header>
-          <mat-card-title>{{ inventory.inventoryName }}</mat-card-title>
-          <mat-card-subtitle>{{ inventory.inventoryType }}</mat-card-subtitle>
-        </mat-card-header>
+        <div class="inventory-card-wrapper">
+          <a
+            class="inventory-card-link"
+            [routerLink]="['/invt', inventory.inventoryId, 'supplies']"
+          >
+            <mat-card appearance="outlined" class="inventory-card">
+              <mat-card-header>
+                <mat-card-title>{{ inventory.inventoryName }}</mat-card-title>
+                <mat-card-subtitle>{{ inventory.inventoryType }}</mat-card-subtitle>
+              </mat-card-header>
 
-        <mat-card-content>
-          <p>{{ inventory.inventoryDescription }}</p>
-          <p class="quantity">
-            @if (quantityFor(inventory.inventoryId) !== null) {
-              {{ quantityFor(inventory.inventoryId) }} items in stock
-            } @else {
-              Quantity unavailable
-            }
-          </p>
-        </mat-card-content>
-      </mat-card>
-    </a>
+              <mat-card-content>
+                <p>{{ inventory.inventoryDescription }}</p>
+                <p class="quantity">
+                  @if (quantityFor(inventory.inventoryId) !== null) {
+                    {{ quantityFor(inventory.inventoryId) }} items in stock
+                  } @else {
+                    Quantity unavailable
+                  }
+                </p>
+              </mat-card-content>
+            </mat-card>
+          </a>
 
-    <!-- Outside the link, so clicking the star won't open the card. -->
-    <button
-      type="button"
-      class="favorite-button"
-      [class.is-favorite]="inventory.important"
-      [disabled]="savingFavorites()[inventory.inventoryId]"
-      [attr.aria-pressed]="!!inventory.important"
-      [attr.aria-label]="
-        (inventory.important ? 'Remove favorite: ' : 'Add favorite: ')
-        + inventory.inventoryName
-      "
-      (click)="toggleFavorite(inventory)"
-    >
-      <!-- Filled star for favorite; outline for unfavorited. -->
-      <mat-icon aria-hidden="true">
-        {{ inventory.important ? 'star' : 'star_border' }}
-      </mat-icon>
-    </button>
-  </div>
-}
+          <button
+            type="button"
+            class="favorite-button"
+            [class.is-favorite]="inventory.important"
+            [disabled]="
+              !canManageFavorites() || isLoading() || isSavingFavorite(inventory.inventoryId)
+            "
+            [attr.aria-pressed]="!!inventory.important"
+            [attr.aria-label]="
+              (inventory.important ? 'Remove favorite: ' : 'Add favorite: ') +
+              inventory.inventoryName
+            "
+            (click)="toggleFavorite(inventory)"
+          >
+            <mat-icon aria-hidden="true">
+              {{ inventory.important ? 'star' : 'star_border' }}
+            </mat-icon>
+          </button>
+        </div>
+      }
     </div>
   }
 </div>
