@@ -322,8 +322,8 @@ public class ProductServiceImpl implements ProductService {
                                             .then(ratingRepository.deleteRatingsByProductId(
                                                     found.getProductId()).then())
                                             // Clean up the owned image before deleting the product.
-                                            .then(Mono.defer(() -> deleteOwnedProductImage(found)))
                                             .then(productRepository.delete(found))
+                                            .then(Mono.defer(() -> deleteOwnedProductImage(found)))
                                             .thenReturn(found);
                                 })
                 )
