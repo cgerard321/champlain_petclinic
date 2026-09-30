@@ -3,6 +3,7 @@
     <h1>Inventory</h1>
 
     @if (can().canCreateInventory) {
+      <!-- only admin/inventory manager get this button -->
       <button type="button" class="add-inventory-button" (click)="toggleAddForm()">
         {{ showAddForm() ? 'Cancel' : 'Add Inventory' }}
       </button>
@@ -10,6 +11,7 @@
   </div>
 
   @if (showAddForm() && (can().canCreateInventory || can().canUpdateInventory)) {
+    <!-- plain inline form for now, not a modal, see the note in inventory-list.ts -->
     <form class="inventory-form" (submit)="saveInventory($event)">
       <h2>{{ editingInventoryId() ? 'Edit Inventory' : 'Add Inventory' }}</h2>
 
@@ -20,17 +22,17 @@
       }
 
       <label for="inventoryType">Type</label>
-      <input id="inventoryType" type="text" [formField]="inventoryForm.inventoryType" />
+      <select id="inventoryType" [formField]="inventoryForm.inventoryType">
+        @for (type of inventoryTypes; track type) {
+          <option [value]="type">{{ type }}</option>
+        }
+      </select>
       @if (inventoryForm.inventoryType().touched() && inventoryForm.inventoryType().invalid()) {
         <p class="field-error">{{ inventoryForm.inventoryType().errors()[0]?.message }}</p>
       }
 
       <label for="inventoryDescription">Description</label>
-      <input
-        id="inventoryDescription"
-        type="text"
-        [formField]="inventoryForm.inventoryDescription"
-      />
+      <input id="inventoryDescription" type="text" [formField]="inventoryForm.inventoryDescription" />
       @if (
         inventoryForm.inventoryDescription().touched() &&
         inventoryForm.inventoryDescription().invalid()
@@ -59,26 +61,31 @@
   }
 
   @if (!can().hasAnyAccess) {
+    <!--receptionist has no inventory access right now, show this instead of loading-->
     <div class="state-container">
       <mat-icon color="warn">block</mat-icon>
       <p>Inventory access isn't available for your role yet.</p>
     </div>
   } @else if (isLoading()) {
+    <!--Displays a loading screen while the page loads-->
     <div class="state-container">
       <mat-spinner diameter="40" />
       <p>Loading inventories…</p>
     </div>
   } @else if (errorMessage(); as err) {
+    <!--Displays an error page if an error occurs somewhere-->
     <div class="state-container">
       <mat-icon color="warn">error_outline</mat-icon>
       <p>{{ err.message }}</p>
     </div>
   } @else if (inventories().length === 0) {
+    <!--Displays dedicated page if no inventories are found-->
     <div class="state-container">
       <mat-icon>inventory_2</mat-icon>
       <p>No inventories found.</p>
     </div>
   } @else if (inventories().length > 0) {
+    <!--Displays the inventory page if all goes right-->
     <div class="inventory-grid">
       @for (inventory of inventories(); track inventory.inventoryId) {
         <a class="inventory-card-link" [routerLink]="['/invt', inventory.inventoryId, 'supplies']">
@@ -97,15 +104,15 @@
                 }
               </p>
 
+              <!-- edit/delete buttons, only shown to roles that can actually use them -->
               @if (can().canUpdateInventory || can().canDeleteInventory) {
                 <div class="inventory-actions">
                   @if (can().canUpdateInventory) {
+                    <!-- stopping the click here so it doesn't also trigger the card's link -->
                     <button
                       type="button"
                       class="edit-button"
-                      (click)="
-                        $event.stopPropagation(); $event.preventDefault(); editInventory(inventory)
-                      "
+                      (click)="$event.stopPropagation(); $event.preventDefault(); editInventory(inventory)"
                     >
                       Edit
                     </button>
@@ -114,11 +121,7 @@
                     <button
                       type="button"
                       class="delete-button"
-                      (click)="
-                        $event.stopPropagation();
-                        $event.preventDefault();
-                        deleteInventoryAction(inventory)
-                      "
+                      (click)="$event.stopPropagation(); $event.preventDefault(); deleteInventoryAction(inventory)"
                     >
                       Delete
                     </button>

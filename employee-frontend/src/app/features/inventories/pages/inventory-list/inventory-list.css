@@ -122,3 +122,11 @@
 .inventory-actions .delete-button {
   background: #b71c1c;
 }
+
+.inventory-form select {
+  padding: 10px;
+  border: 1px solid #bdbdbd;
+  border-radius: 6px;
+  font: inherit;
+  background: #fff;
+}

@@ -1,16 +1,16 @@
 import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
-import { FormField, form, required, submit } from '@angular/forms/signals';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { FormField, form, required, submit } from '@angular/forms/signals';
 
 import { isApiError, ApiError } from '@core/models/api-error';
-import { AuthState } from '@core/services/auth-state';
-import { Inventory, InventoryRequest } from '@features/inventories/models/inventory.model';
+import { Inventory, InventoryRequest, INVENTORY_TYPES } from '@features/inventories/models/inventory.model';
 import { InventoryService } from '@features/inventories/services/inventory-service';
 import { getInventoryPermissions } from '@shared/models/inventory-permissions';
+import { AuthState } from '@core/services/auth-state';
 
 @Component({
   imports: [RouterLink, MatCardModule, MatIconModule, MatProgressSpinnerModule, FormField],
@@ -41,7 +41,7 @@ export class InventoryList implements OnInit, OnDestroy {
   protected readonly savingInventory = signal(false);
   protected readonly formError = signal<string | null>(null);
 
-  protected readonly newInventory = signal<InventoryRequest>({
+  protected readonly newInventory = signal({
     inventoryName: '',
     inventoryType: '',
     inventoryDescription: '',
@@ -187,7 +187,7 @@ export class InventoryList implements OnInit, OnDestroy {
 
           this.newInventory.set({
             inventoryName: '',
-            inventoryType: '',
+            inventoryType: INVENTORY_TYPES[0],
             inventoryDescription: '',
           });
           this.editingInventoryId.set(null);
