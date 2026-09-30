@@ -40,7 +40,7 @@ export function useRemoveFromWishlistByIcon(): UseRemoveFromWishlistReturnType {
       }
 
       await axiosInstance.delete(
-        `/carts/${encodeURIComponent(cartId)}/wishlist`
+        `/carts/${encodeURIComponent(cartId)}/wishlist/${encodeURIComponent(normalizedProductId)}`
       );
       return true;
     } catch (error) {
