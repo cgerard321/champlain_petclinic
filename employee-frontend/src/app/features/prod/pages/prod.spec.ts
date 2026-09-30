@@ -62,6 +62,9 @@ describe('Prod', () => {
 
     fixture.componentInstance['loadProducts']();
     expect(getProducts).toHaveBeenLastCalledWith({ productName: 'horse' });
+
+    fixture.componentInstance['loadProducts']();
+    expect(getProducts).toHaveBeenLastCalledWith({ productName: 'horse' });
   }));
 
   it('reloads all products when the search is cleared', fakeAsync(() => {

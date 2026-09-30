@@ -112,6 +112,7 @@ class ProductsServiceClientIntegrationTest {
         assertEquals("/products?includeImage=false", request.getPath());
     }
 
+
     @Test
     void getAllProducts_WithRatingFiltering_ThenReturnFilteredProductList() {
 
