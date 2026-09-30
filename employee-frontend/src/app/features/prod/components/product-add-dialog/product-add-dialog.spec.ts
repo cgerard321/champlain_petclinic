@@ -17,7 +17,17 @@ describe('ProductAddDialog', () => {
           provide: ProductService,
           useValue: { createProduct: () => of({ productId: 'product-1' }) },
         },
-        { provide: ImageService, useValue: { uploadImage: () => of({ imageId: 'image-1' }) } },
+        {
+          provide: ImageService,
+          useValue: {
+            toFileDetails: () =>
+              Promise.resolve({
+                fileName: 'product.png',
+                fileType: 'image/png',
+                fileData: 'aW1hZ2U=',
+              }),
+          },
+        },
       ],
     }).compileComponents();
   });
