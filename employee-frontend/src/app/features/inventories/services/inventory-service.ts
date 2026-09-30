@@ -29,22 +29,6 @@ export class InventoryService {
         // Reconnect after an SSE error.
         retry({count: Infinity, delay: () => timer(5000)}),
       );
-    return this.sse.stream(this.baseUrl, { keepAlive: false }).pipe(
-      filter((event): event is MessageEvent => event.type !== 'error'),
-      map((event) => JSON.parse(event.data) as Inventory),
-      retry({
-        count: 5,
-        delay: (error: unknown) => {
-          const err = error as { code?: number; status?: number };
-          const isNetworkError =
-            error instanceof HttpErrorResponse
-              ? error.status === 0
-              : err?.code === 0 || err?.status === 0;
-
-          return isNetworkError ? timer(5000) : throwError(() => error);
-        },
-      }),
-    );
   }
 
   getQuantity(inventoryId: string): Observable<number> {
