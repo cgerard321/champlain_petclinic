@@ -55,7 +55,7 @@ export class SupplyPage {
     { id: 'price', header: 'Price', template: this.priceCell() },
     { id: 'quantity', header: 'Quantity', value: (supply) => supply.productQuantity },
     { id: 'status', header: 'Status', template: this.statusCell() },
-    ...(this.canManageSupplies
+    ...(this.canManageSupplies()
       ? [{ id: 'actions', header: 'Actions', template: this.actionsCell() }]
       : []),
   ]);
@@ -94,8 +94,11 @@ export class SupplyPage {
     });
   });
 
-  protected readonly canManageSupplies =
-    this.auth.hasRole(Roles.admin) || this.auth.hasRole(Roles.inventoryManager);
+  protected readonly canManageSupplies = computed(() => {
+    const roles = this.auth.roles();
+    return roles.includes(Roles.admin) || roles.includes(Roles.inventoryManager);
+  });
+
   constructor() {
     this.loadSupplies();
   }
@@ -126,7 +129,7 @@ export class SupplyPage {
     event.preventDefault();
 
     void submit(this.supplyForm, async () => {
-      if (!this.inventoryId) {
+      if (!this.inventoryId || !this.canManageSupplies()) {
         return;
       }
 
@@ -166,6 +169,10 @@ export class SupplyPage {
   }
 
   protected editSupply(supply: Supply): void {
+    if (!this.canManageSupplies()) {
+      return;
+    }
+
     this.editingSupplyId.set(supply.productId);
 
     this.newSupply.set({
@@ -179,6 +186,10 @@ export class SupplyPage {
     this.showAddForm.set(true);
   }
   protected deleteSupply(supply: Supply): void {
+    if (!this.canManageSupplies()) {
+      return;
+    }
+
     this.deleteError.set('');
 
     const inventoryId = this.inventoryId;
@@ -194,7 +205,7 @@ export class SupplyPage {
     });
 
     dialogRef.afterClosed().subscribe((confirmed) => {
-      if (confirmed !== true) {
+      if (confirmed !== true || !this.canManageSupplies()) {
         return;
       }
 
@@ -209,6 +220,10 @@ export class SupplyPage {
     });
   }
   protected openAddForm(): void {
+    if (!this.canManageSupplies()) {
+      return;
+    }
+
     this.showAddForm.set(true);
   }
   protected cancelAddForm(): void {

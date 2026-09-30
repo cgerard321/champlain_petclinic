@@ -5,7 +5,7 @@
       <p class="page-description">View and manage the supplies associated with this inventory.</p>
     </div>
 
-    @if (canManageSupplies) {
+    @if (canManageSupplies()) {
       <button
         type="button"
         class="add-supply-button"
@@ -16,7 +16,7 @@
     }
   </div>
 
-  @if (showAddForm()) {
+  @if (showAddForm() && canManageSupplies()) {
     <form class="supply-form" (submit)="addSupply($event)">
       <h2>
         {{ editingSupplyId() ? 'Edit Supply' : 'Add Supply' }}

@@ -1,3 +1,4 @@
+import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
@@ -47,7 +48,7 @@ describe('SupplyPage', () => {
   const createSupply = vi.fn<SupplyService['createSupply']>();
   const updateSupply = vi.fn<SupplyService['updateSupply']>();
   const deleteSupply = vi.fn<SupplyService['deleteSupply']>();
-  const hasRole = vi.fn<AuthState['hasRole']>();
+  const roles = signal<string[]>([Roles.admin]);
   const openDialog = vi.fn(() => ({
     afterClosed: () => dialogClosed.asObservable(),
   }));
@@ -60,19 +61,18 @@ describe('SupplyPage', () => {
   };
 
   const authState = {
-    hasRole,
+    roles,
   };
 
   beforeEach(async () => {
     vi.clearAllMocks();
     dialogClosed = new Subject<boolean | undefined>();
+    roles.set([Roles.admin]);
 
     getSupplies.mockReturnValue(of([supplyOne, supplyTwo]));
     createSupply.mockReturnValue(of(supplyOne));
     updateSupply.mockReturnValue(of(supplyOne));
     deleteSupply.mockReturnValue(of(void 0));
-
-    hasRole.mockImplementation((role) => role === Roles.admin);
 
     await TestBed.configureTestingModule({
       imports: [SupplyPage],
@@ -132,12 +132,11 @@ describe('SupplyPage', () => {
     expect(rows[0]?.querySelector('.delete-button')).not.toBeNull();
   });
 
-  it('should hide supply actions from users without a managing role', () => {
-    hasRole.mockReturnValue(false);
-    const readOnlyFixture = TestBed.createComponent(SupplyPage);
-    readOnlyFixture.detectChanges();
+  it('should update management controls when roles change without reopening the page', () => {
+    roles.set([]);
+    fixture.detectChanges();
 
-    const table = readOnlyFixture.nativeElement.querySelector('table') as HTMLTableElement;
+    const table = fixture.nativeElement.querySelector('table') as HTMLTableElement;
     const headers = Array.from(table.querySelectorAll('thead th'), (cell) =>
       cell.textContent?.trim(),
     );
@@ -145,6 +144,14 @@ describe('SupplyPage', () => {
     expect(table.querySelector('tbody tr')?.textContent).toContain('Elastic Bandage');
     expect(headers).not.toContain('Actions');
     expect(table.querySelector('.action-buttons')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.add-supply-button')).toBeNull();
+
+    roles.set([Roles.inventoryManager]);
+    fixture.detectChanges();
+
+    expect(table.querySelector('thead')?.textContent).toContain('Actions');
+    expect(table.querySelector('.action-buttons')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.add-supply-button')).not.toBeNull();
   });
 
   it('should remain in a loading state until the API responds', () => {
@@ -173,9 +180,29 @@ describe('SupplyPage', () => {
   });
 
   it('should allow an admin to manage supplies', () => {
-    expect(component['canManageSupplies']).toBe(true);
+    expect(component['canManageSupplies']()).toBe(true);
+  });
 
-    expect(hasRole).toHaveBeenCalledWith(Roles.admin);
+  it('should hide an open form and preserve its draft when management access is removed', () => {
+    component['editSupply'](supplyOne);
+    component['newSupply'].update((draft) => ({ ...draft, productName: 'Updated Bandage' }));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.supply-form')).not.toBeNull();
+
+    roles.set([]);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.supply-form')).toBeNull();
+    expect(component['showAddForm']()).toBe(true);
+    expect(component['editingSupplyId']()).toBe(supplyOne.productId);
+    expect(component['newSupply']().productName).toBe('Updated Bandage');
+
+    roles.set([Roles.admin]);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.supply-form')).not.toBeNull();
+    const nameInput = fixture.nativeElement.querySelector('#productName') as HTMLInputElement;
+    expect(nameInput.value).toBe('Updated Bandage');
+    expect(fixture.nativeElement.querySelector('.add-supply-button')?.textContent.trim()).toBe('Cancel');
   });
 
   it('should populate the form when editing a supply', () => {
@@ -245,6 +272,23 @@ describe('SupplyPage', () => {
       productQuantity: 1,
       productSalePrice: 0,
     });
+  });
+
+  it('should not save a supply after management access is removed', async () => {
+    component['newSupply'].set({
+      productName: 'Gauze Pads',
+      productDescription: 'Absorbent wound pads',
+      productPrice: 10,
+      productQuantity: 25,
+      productSalePrice: 16,
+    });
+
+    roles.set([]);
+    component['addSupply'](new Event('submit', { cancelable: true }));
+    await fixture.whenStable();
+
+    expect(createSupply).not.toHaveBeenCalled();
+    expect(updateSupply).not.toHaveBeenCalled();
   });
 
   it('should not create a supply when numeric fields are empty', async () => {
@@ -348,6 +392,16 @@ describe('SupplyPage', () => {
     });
 
     dialogClosed.next(false);
+    dialogClosed.complete();
+
+    expect(deleteSupply).not.toHaveBeenCalled();
+  });
+
+  it('should not delete after management access is removed while confirmation is open', () => {
+    component['deleteSupply'](supplyOne);
+
+    roles.set([]);
+    dialogClosed.next(true);
     dialogClosed.complete();
 
     expect(deleteSupply).not.toHaveBeenCalled();
