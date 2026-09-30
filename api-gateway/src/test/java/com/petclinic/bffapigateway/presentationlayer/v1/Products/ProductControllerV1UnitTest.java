@@ -163,7 +163,7 @@ class ProductControllerV1UnitTest {
 
     @Test
     void getAllProducts_withProductName_thenPassSearchToProductsService() {
-        when(productsServiceClient.getAllProducts(null, null, null, null, null, null, null, "horse"))
+        when(productsServiceClient.getAllProducts(null, null, null, null, null, null, null, "horse", false))
                 .thenReturn(Flux.just(productResponseDTO1));
 
         webTestClient.get()
@@ -176,7 +176,7 @@ class ProductControllerV1UnitTest {
                 .expectBodyList(ProductResponseDTO.class)
                 .hasSize(1);
 
-        verify(productsServiceClient).getAllProducts(null, null, null, null, null, null, null, "horse");
+        verify(productsServiceClient).getAllProducts(null, null, null, null, null, null, null, "horse", false);
     }
 
 //TODO: Rating
