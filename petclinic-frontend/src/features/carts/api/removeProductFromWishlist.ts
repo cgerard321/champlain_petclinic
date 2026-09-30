@@ -9,7 +9,6 @@ type UseRemoveFromWishlistReturnType = {
 export function useRemoveFromWishlistByIcon(): UseRemoveFromWishlistReturnType {
   const { user } = useUser();
 
-  //have to change the logic here: make sure that there is a cart!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   const fetchUserCart = async (userId: string): Promise<string | null> => {
     try {
       return await fetchCartIdByCustomerId(userId);

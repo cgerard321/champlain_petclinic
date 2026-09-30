@@ -100,15 +100,22 @@ export default function Product({
 
   const handleRemoveFromWishlist = async (): Promise<void> => {
     if (!isAuthenticated) {
-      //might need to take it off because it should have been done when it is added in the wishlist
       navigate(AppRoutePaths.Login);
       return;
     }
     const isSuccess = await removeFromWishlistByIcon(currentProduct.productId);
     if (isSuccess) {
       setSuccessMessageWishlist('Product removed from wishlist successfully!');
-      setIsWishlisted(false); // stays false after removing MAYBE SHOULD REMOVE THE COMMENT?
+      setIsWishlisted(false); // stays false after removing
       setTimeout(() => setSuccessMessageWishlist(null), 3000);
+    }
+  };
+
+  const handleOnClickHeartIcon = (): void => {
+    if (!isWishlisted) {
+      handleAddToWishlist();
+    } else if (isWishlisted) {
+      handleRemoveFromWishlist();
     }
   };
 
@@ -143,7 +150,7 @@ export default function Product({
         <button
           className="wishlist-heart-btn"
           title="Add to Wishlist"
-          onClick={handleAddToWishlist || handleRemoveFromWishlist}
+          onClick={handleOnClickHeartIcon}
         >
           {isWishlisted ? (
             <FaHeart style={{ color: '#e11d48' }} />
