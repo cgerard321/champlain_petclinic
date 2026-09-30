@@ -112,6 +112,32 @@ public class BillServiceImpl implements BillService{
                 .take(pageable.getPageSize())
                 .map(EntityDtoUtil::toBillResponseDto);
     }
+    @Override
+    public Flux<BillResponseDTO> getAllBillsStream(
+            String billId,
+            String customerId,
+            String ownerFirstName,
+            String ownerLastName,
+            String visitType,
+            String vetId,
+            String vetFirstName,
+            String vetLastName) {
+
+        Predicate<Bill> filterCriteria = bill ->
+                (billId == null || bill.getBillId().equals(billId)) &&
+                        (customerId == null || bill.getCustomerId().equals(customerId)) &&
+                        (ownerFirstName == null || bill.getOwnerFirstName().equals(ownerFirstName)) &&
+                        (ownerLastName == null || bill.getOwnerLastName().equals(ownerLastName)) &&
+                        (visitType == null || bill.getVisitType().equals(visitType)) &&
+                        (vetId == null || bill.getVetId().equals(vetId)) &&
+                        (vetFirstName == null || bill.getVetFirstName().equals(vetFirstName)) &&
+                        (vetLastName == null || bill.getVetLastName().equals(vetLastName));
+
+        return updateOverdueBills()
+                .thenMany(billRepository.findAll())
+                .filter(filterCriteria)
+                .map(EntityDtoUtil::toBillResponseDto);
+    }
 
     @Override
     public Mono<Long> getNumberOfBillsWithFilters(String billId, String customerId, String ownerFirstName, String ownerLastName,

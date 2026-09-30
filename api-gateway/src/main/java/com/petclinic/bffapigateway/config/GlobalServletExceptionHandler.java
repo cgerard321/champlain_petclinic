@@ -35,6 +35,10 @@ public class GlobalServletExceptionHandler implements ErrorWebExceptionHandler {
                 status = HttpStatus.UNAUTHORIZED;
             } else if (exClass.equals(ExistingVetNotFoundException.class) || exClass.equals(HandlerIsNullException.class)) {
                 status = HttpStatus.NOT_FOUND;
+            } else if (exClass.equals(ProductNotFoundException.class)) {
+                status = HttpStatus.NOT_FOUND;
+            } else if (exClass.equals(ProductImageDependencyException.class)) {
+                status = HttpStatus.FAILED_DEPENDENCY;
             } else if (exClass.equals(GenericHttpException.class)) {
                 GenericHttpException error = (GenericHttpException) ex;
                 status = error.getHttpStatus();
@@ -46,6 +50,8 @@ public class GlobalServletExceptionHandler implements ErrorWebExceptionHandler {
             }
             else if(exClass.equals(ForbiddenAccessException.class)){
                 status = HttpStatus.FORBIDDEN;
+            } else if (exClass.equals(InvalidInputException.class)) {
+                status = HttpStatus.UNPROCESSABLE_ENTITY;
             } // Handle any other exception types here
             else {
                 log.error("Exception not handled: {}", exClass.getSimpleName());
