@@ -17,24 +17,24 @@
 
       <label for="inventoryName">Name</label>
       <input id="inventoryName" type="text" [formField]="inventoryForm.inventoryName" />
-      @if (inventoryForm.inventoryName().touched() && inventoryForm.inventoryName().invalid()) {
-        <p class="field-error">{{ inventoryForm.inventoryName().errors()[0]?.message }}</p>
+      @if (inventoryForm.inventoryName().touched && inventoryForm.inventoryName().invalid) {
+        <p class="field-error">{{ inventoryForm.inventoryName().errors[0]?.message }}</p>
       }
 
       <label for="inventoryType">Type</label>
       <input id="inventoryType" type="text" [formField]="inventoryForm.inventoryType" />
-      @if (inventoryForm.inventoryType().touched() && inventoryForm.inventoryType().invalid()) {
-        <p class="field-error">{{ inventoryForm.inventoryType().errors()[0]?.message }}</p>
+      @if (inventoryForm.inventoryType().touched && inventoryForm.inventoryType().invalid) {
+        <p class="field-error">{{ inventoryForm.inventoryType().errors[0]?.message }}</p>
       }
 
       <label for="inventoryDescription">Description</label>
       <input id="inventoryDescription" type="text" [formField]="inventoryForm.inventoryDescription" />
       @if (
-        inventoryForm.inventoryDescription().touched() &&
-        inventoryForm.inventoryDescription().invalid()
+        inventoryForm.inventoryDescription().touched &&
+        inventoryForm.inventoryDescription().invalid
       ) {
         <p class="field-error">
-          {{ inventoryForm.inventoryDescription().errors()[0]?.message }}
+          {{ inventoryForm.inventoryDescription().errors[0]?.message }}
         </p>
       }
 
