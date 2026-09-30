@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 
-// VETS-CPC-1927: le footer n'existait pas du tout dans la structure layout/
-// actuelle (contrairement au header/sidenav/shell). Recree ici en minimal,
-// seulement pour satisfaire le critere d'acceptation #4 du ticket i18n.
+// VETS-CPC-1927: the layout/ folder had no footer at all, unlike header, sidenav and shell.
+// Created here as a minimal component, purely to carry the translated strings required by
+// acceptance criterion #4 of the i18n ticket.
 @Component({
   selector: 'app-footer',
   templateUrl: './footer.html',

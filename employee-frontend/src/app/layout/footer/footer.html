@@ -1,8 +1,8 @@
 <!--
-  VETS-CPC-1927: francais = langue source, ecrite directement dans ce template.
-  Chaque element traduisible a un attribut i18n="@@id". Le texte anglais pour
-  chaque id vit dans /i18n/en.json et est charge au demarrage
-  (provideAppInitializer dans app.config.ts) quand la langue sauvegardee est 'en'.
+  VETS-CPC-1927: French is the source locale, written straight into this template.
+  Every translatable element carries an i18n="@@id" attribute. The English text for each id
+  lives in /i18n/en.json and is installed at startup by loadActiveTranslations
+  (app.config.ts) when the saved language is 'en'.
 -->
 <footer class="footer">
   <div class="container">
@@ -11,7 +11,7 @@
         <span i18n="@@footer.brand">Portail Employé Clinique Vétérinaire</span>
       </div>
 
-      <!-- @@ = id, footer = module, puis la cle (ex: .privacy) -->
+      <!-- Id convention: @@ then the module, then the key (e.g. @@footer.privacy) -->
       <div class="footer-links">
         <a href="#" class="footer-link" i18n="@@footer.privacy">Politique de confidentialité</a>
         <a href="#" class="footer-link" i18n="@@footer.terms">Conditions d'utilisation</a>
