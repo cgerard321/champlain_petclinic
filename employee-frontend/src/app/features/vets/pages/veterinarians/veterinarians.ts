@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
-  selector: 'app-vetarians',
-  imports: [],
+  selector: 'app-veterinarians',
+  imports: [MatIconModule],
   templateUrl: './veterinarians.html',
   styleUrl: './veterinarians.css',
 })
