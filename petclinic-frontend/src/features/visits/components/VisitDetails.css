@@ -38,29 +38,27 @@
   color: #333;
 }
 
-.btn-cancel{
-  background-color:  #f44336;
+.btn-cancel {
+  background-color: #f44336;
   color: white;
   height: 39px;
   width: 100px;
 }
 
-.btn-rescheduele{
-  background-color:blue;
+.btn-rescheduele {
+  background-color: blue;
   color: white;
   height: 39px;
   width: 100px;
-
 }
-.btn-rescheduele:hover{
-  background-color:rgb(25, 25, 145);
+.btn-rescheduele:hover {
+  background-color: rgb(25, 25, 145);
   color: white;
   height: 39px;
   width: 100px;
-
 }
 
-.button-visit-details{
+.button-visit-details {
   /* height: 100px;
   width: 200px; */
   margin-top: 10px;

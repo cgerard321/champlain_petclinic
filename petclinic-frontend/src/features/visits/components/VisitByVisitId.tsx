@@ -88,23 +88,25 @@ export default function VisitDetails(): JSX.Element {
         </div>
       </div>
 
-      <div className='button-visit-details'>
+      <div className="button-visit-details">
+        <button
+          className="btn btn-warning"
+          onClick={() => navigate('/customer/visits')}
+          title="Let a review"
+        >
+          Return to visits
+        </button>
 
-      <button
-        className="btn btn-warning"
-        onClick={() => navigate('/customer/visits')}
-        title="Let a review"
-      >
-        Return to visits
-      </button>
-      
-      
-      {(visit.status == 'CONFIRMED' || visit.status == 'UPCOMING')
-       &&(
-        <button className="btn-cancel" onClick={()=>cancelVisit(visit.visitId,(updatedVisit)=> setVisit(updatedVisit) ) }>
+        {(visit.status == 'CONFIRMED' || visit.status == 'UPCOMING') && (
+          <button
+            className="btn-cancel"
+            onClick={() =>
+              cancelVisit(visit.visitId, updatedVisit => setVisit(updatedVisit))
+            }
+          >
             Cancel
           </button>
-      )}
+        )}
       </div>
     </div>
   );
