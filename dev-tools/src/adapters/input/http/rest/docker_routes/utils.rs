@@ -65,7 +65,6 @@ pub async fn send_logs(
                     Ok(json) => {
 
 
-//                         The backend confirms that it sends one JSON object per WebSocket message:
                         if socket.send(Message::Text(json)).await.is_err() {
                             log::debug!("WebSocket client disconnected");
                             break;
