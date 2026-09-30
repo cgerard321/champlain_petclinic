@@ -83,4 +83,21 @@ describe('Prod', () => {
 
     expect(getProducts).toHaveBeenCalledWith({});
   }));
+
+  it('reloads all products when the search is cleared', fakeAsync(() => {
+    const fixture = TestBed.createComponent(Prod);
+    fixture.detectChanges();
+
+    const input = fixture.nativeElement.querySelector('input[type="search"]');
+    input.value = 'horse';
+    input.dispatchEvent(new Event('input'));
+    tick(300);
+    getProducts.mockClear();
+
+    input.value = '';
+    input.dispatchEvent(new Event('input'));
+    tick(300);
+
+    expect(getProducts).toHaveBeenCalledWith({});
+  }));
 });
