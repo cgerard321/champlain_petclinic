@@ -6,6 +6,7 @@ import { AppRoutePaths } from '@/shared/models/path.routes';
 import './Product.css';
 import { useAddToCart } from '@/features/carts/api/addToCartFromProducts.ts';
 import {
+  useUser,
   IsInventoryManager,
   IsVet,
   IsReceptionist,
@@ -19,6 +20,7 @@ export default function Product({
 }: {
   product: ProductModel;
 }): JSX.Element {
+  const { isAuthenticated } = useUser();
   const isInventoryManager = IsInventoryManager();
   const isVet = IsVet();
   const isReceptionist = IsReceptionist();
@@ -70,6 +72,10 @@ export default function Product({
   const handleBackToList = (): void => setSelectedProduct(null);
 
   const handleAddToCart = async (): Promise<void> => {
+    if (!isAuthenticated) {
+      navigate(AppRoutePaths.Login);
+      return;
+    }
     const isSuccess = await addToCart(currentProduct.productId, 1);
     if (isSuccess) {
       setSuccessMessageCart('Product added to cart successfully!');
@@ -78,6 +84,10 @@ export default function Product({
   };
 
   const handleAddToWishlist = async (): Promise<void> => {
+    if (!isAuthenticated) {
+      navigate(AppRoutePaths.Login);
+      return;
+    }
     const isSuccess = await addToWishlist(currentProduct.productId, 1);
     if (isSuccess) {
       setSuccessMessageWishlist('Product added to wishlist successfully!');
