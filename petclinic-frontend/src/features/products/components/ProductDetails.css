@@ -548,3 +548,28 @@
   margin-bottom: 15px;
   font-weight: bold;
 }
+
+.product-review-author {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-right: 4rem;
+  margin-bottom: 0.75rem;
+  overflow-wrap: anywhere;
+  font-weight: 600;
+}
+
+.product-review-author img {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+@media (max-width: 600px) {
+  .reviewsforproduct-container .reviewbox {
+    width: 100%;
+    max-width: calc(100vw - 4.5rem);
+  }
+}
