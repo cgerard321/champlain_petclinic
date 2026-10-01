@@ -7,6 +7,7 @@ import { addBill } from './api/addBill';
 import { CustomerResponseModel } from '@/features/customers/models/CustomerResponseModel.ts';
 import { VetResponseModel } from '@/features/veterinarians/models/VetResponseModel';
 import useGetAllBillsPaginated from '@/features/bills/hooks/useGetAllBillsPaginated.ts';
+import useGetAllBillsStream from '@/features/bills/hooks/useGetAllBillsStream';
 import './AdminBillsListTable.css';
 import { archiveBills } from './api/archiveBills';
 //import { getAllPaidBills } from '@/features/bills/api/getAllPaidBills.tsx';
@@ -39,6 +40,7 @@ interface FilterModel {
 
 export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.Element {
   const [showArchivedBills, setShowArchivedBills] = useState(false);
+  const [showStreamedBills, setShowStreamedBills] = useState(false);
   const [searchId, setSearchId] = useState('');
   const [searchedBill, setSearchedBill] = useState<Bill | null>(null);
   const [selectedOwnerFilter, setSelectedOwnerFilter] = useState('');
@@ -47,6 +49,12 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
   const [error, setError] = useState<string | null>(null);
   const { billsList, getBillsList, setCurrentPage, currentPage, hasMore } =
     useGetAllBillsPaginated();
+  const {
+    bills: streamedBills,
+    loading: streamLoading,
+    error: streamError,
+    getBillsStream,
+  } = useGetAllBillsStream();
 
   const [filter, setFilter] = useState<FilterModel>({
     customerId: '',
@@ -75,6 +83,28 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
     },
     [getBillsList, filter]
   );
+
+  const callGetBillsStream = useCallback(async (): Promise<void> => {
+    await getBillsStream(
+      undefined, // billId
+      filter.customerId || undefined,
+      filter.firstName || undefined,
+      filter.lastName || undefined,
+      filter.visitType || undefined,
+      undefined, // vetId
+      filter.vetFirstName || undefined,
+      filter.vetLastName || undefined
+    );
+  }, [getBillsStream, filter]);
+
+  const handleViewAllBills = async (): Promise<void> => {
+    setShowStreamedBills(true);
+    await callGetBillsStream();
+  };
+
+  const handleBackToPagination = (): void => {
+    setShowStreamedBills(false);
+  };
   const [filterYear, setFilterYear] = useState(new Date().getFullYear());
   const [filterMonth, setFilterMonth] = useState(new Date().getMonth() + 1);
   const [selectedFilter, setSelectedFilter] = useState('');
@@ -261,7 +291,9 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
   };
 
   const getFilteredBills = (): Bill[] => {
-    const billsToFilter = filteredBills || billsList;
+    const billsToFilter = showStreamedBills
+      ? streamedBills
+      : filteredBills || billsList;
     if (!billsToFilter || !Array.isArray(billsToFilter)) {
       return [];
     }
@@ -511,6 +543,19 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
           >
             {showArchivedBills ? 'Hide Archived' : 'Show Archived'}
           </button>
+          {showStreamedBills ? (
+            <button className="archive-btn" onClick={handleBackToPagination}>
+              Back to Pages
+            </button>
+          ) : (
+            <button
+              className="archive-btn"
+              onClick={handleViewAllBills}
+              disabled={streamLoading}
+            >
+              {streamLoading ? 'Loading Bills...' : 'View All Bills'}
+            </button>
+          )}
         </div>
 
         <div style={{ marginTop: '12px' }}>
@@ -1000,8 +1045,8 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
           </div>
         ) : (
           <div>
-            {error ? (
-              <p>{error}</p>
+            {error || streamError ? (
+              <p>{error || streamError}</p>
             ) : (
               <div className="billsListContainer">
                 {getFilteredBills().length === 0 ? (
@@ -1028,7 +1073,6 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                             </span>
                           </div>
                         </div>
-
                         <div className="billColumn rightColumn">
                           <div className="billField">
                             <strong>Total:</strong>
@@ -1036,6 +1080,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                               {formatTotalDue(bill)}
                             </span>
                           </div>
+
                           <div className="billField status">
                             <strong>Status:</strong>
                             <span
@@ -1067,13 +1112,17 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
               </div>
             )}
 
-            <div className="pagination-controls">
-              {currentPage > 0 && (
-                <button onClick={handlePreviousPage}>Previous</button>
-              )}
-              <span> Page {currentPage + 1} </span>
-              {hasMore && <button onClick={handleNextPage}>Next</button>}
-            </div>
+            {!showStreamedBills && (
+              <div className="pagination-controls">
+                {currentPage > 0 && (
+                  <button onClick={handlePreviousPage}>Previous</button>
+                )}
+
+                <span> Page {currentPage + 1} </span>
+
+                {hasMore && <button onClick={handleNextPage}>Next</button>}
+              </div>
+            )}
           </div>
         )}
 
