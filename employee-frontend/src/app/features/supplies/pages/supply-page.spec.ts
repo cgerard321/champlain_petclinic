@@ -221,6 +221,20 @@ describe('SupplyPage', () => {
     expect(component['showAddForm']()).toBe(true);
   });
 
+  it('should clear the previous error and touched state when editing another supply', () => {
+    component['editSupply'](supplyOne);
+    component['addError'].set('Unable to update supply.');
+    component['supplyForm'].productName().markAsTouched();
+    expect(component['supplyForm'].productName().touched()).toBe(true);
+
+    component['editSupply'](supplyTwo);
+
+    expect(component['editingSupplyId']()).toBe(supplyTwo.productId);
+    expect(component['newSupply']().productName).toBe(supplyTwo.productName);
+    expect(component['addError']()).toBe('');
+    expect(component['supplyForm'].productName().touched()).toBe(false);
+  });
+
   it('should create a new supply and reload the supply list', async () => {
     const newSupply = {
       productName: 'Gauze Pads',

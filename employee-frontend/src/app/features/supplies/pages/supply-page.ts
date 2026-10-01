@@ -174,8 +174,10 @@ export class SupplyPage {
     }
 
     this.editingSupplyId.set(supply.productId);
+    this.addError.set('');
 
-    this.newSupply.set({
+    // Reset field interaction state when switching to a different supply.
+    this.supplyForm().reset({
       productName: supply.productName,
       productDescription: supply.productDescription,
       productPrice: supply.productPrice,
