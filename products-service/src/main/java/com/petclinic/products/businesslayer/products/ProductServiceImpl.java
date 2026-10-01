@@ -134,7 +134,7 @@ public class ProductServiceImpl implements ProductService {
                         productList.sort((p1, p2) -> Double.compare(p2.getAverageRating(), p1.getAverageRating()));
                     }
                     return Flux.fromIterable(productList).flatMapSequential(p ->
-                            Mono.just(EntityModelUtil.toProductResponseModel(p, productTypeNames.get(p.getProductTypeId()))));
+                            Mono.just(EntityModelUtil.toProductResponseModel(p, productTypeNames.getOrDefault(p.getProductTypeId(), "Unknown"))));
                 }));
         //.flatMap(this::toResponse));
     }
