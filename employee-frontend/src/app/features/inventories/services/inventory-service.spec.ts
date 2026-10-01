@@ -4,6 +4,8 @@ import { TestBed } from '@angular/core/testing';
 
 import { InventoryService } from './inventory-service';
 
+const API_BASE_URL = '/api/gateway/inventories';
+
 describe('InventoryService', () => {
   let service: InventoryService;
   let http: HttpTestingController;
@@ -20,36 +22,37 @@ describe('InventoryService', () => {
   afterEach(() => http.verify());
 
   it('should fetch inventories from the API', () => {
-    // Arrange
-    const inventory = {
+    const mockInventory = {
       inventoryId: '1',
       inventoryName: 'Main',
       inventoryType: 'Pharmacy',
       inventoryDescription: 'Main inventory',
     };
 
-    // Assert
     service.getInventories().subscribe((result) => {
-      expect(result).toEqual(inventory);
+      expect(result).toEqual(mockInventory);
     });
 
-    const request = http.expectOne('/api/gateway/inventories');
+    // Match request starting with base URL to handle default pagination params
+    const request = http.expectOne((req) => req.url.startsWith(API_BASE_URL));
 
     expect(request.request.method).toBe('GET');
 
-    request.flush(`data: ${JSON.stringify(inventory)}`);
+    request.flush(mockInventory);
   });
 
   it('should fetch the product quantity for an inventory', () => {
-    // Assert
-    service.getQuantity('1').subscribe((result) => {
-      expect(result).toBe(25);
+    const mockInventoryId = '1';
+    const mockQuantity = 25;
+
+    service.getQuantity(mockInventoryId).subscribe((result) => {
+      expect(result).toBe(mockQuantity);
     });
 
-    const request = http.expectOne('/api/gateway/inventories/1/productquantity');
+    const request = http.expectOne(`${API_BASE_URL}/${mockInventoryId}/productquantity`);
 
     expect(request.request.method).toBe('GET');
 
-    request.flush(25);
+    request.flush(mockQuantity);
   });
 });

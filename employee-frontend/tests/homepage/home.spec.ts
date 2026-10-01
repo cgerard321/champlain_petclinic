@@ -1,5 +1,9 @@
 import { test, expect } from '@playwright/test';
 
+// Extracted credentials to avoid hardcoded values in tests
+const TEST_ADMIN_EMAIL = process.env['TEST_ADMIN_EMAIL'] || 'admin@admin.com';
+const TEST_ADMIN_PASSWORD = process.env['TEST_ADMIN_PASSWORD'] || 'pwd';
+
 test.describe('Homepage Tests', () => {
   test('should authenticate and display welcome title, introduction, and clinic logo', async ({ page }) => {
     // 1. Navigate to login route
@@ -10,8 +14,8 @@ test.describe('Homepage Tests', () => {
     const passwordInput = page.locator('input[formcontrolname="password"], input[type="password"], input').nth(1);
     const loginButton = page.locator('button[type="submit"], button:has-text("Login"), button:has-text("Sign in")').first();
 
-    await emailInput.fill('admin@admin.com');
-    await passwordInput.fill('pwd');
+    await emailInput.fill(TEST_ADMIN_EMAIL);
+    await passwordInput.fill(TEST_ADMIN_PASSWORD);
     await loginButton.click();
 
     // 3. Wait for navigation to homepage
@@ -45,8 +49,8 @@ test.describe('Homepage Tests', () => {
     const passwordInput = page.locator('input[formcontrolname="password"], input[type="password"], input').nth(1);
     const loginButton = page.locator('button[type="submit"], button:has-text("Login"), button:has-text("Sign in")').first();
 
-    await emailInput.fill('admin@admin.com');
-    await passwordInput.fill('pwd');
+    await emailInput.fill(TEST_ADMIN_EMAIL);
+    await passwordInput.fill(TEST_ADMIN_PASSWORD);
     await loginButton.click();
 
     await page.waitForURL('**/home');
