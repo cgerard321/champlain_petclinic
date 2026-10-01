@@ -22,6 +22,7 @@ Champlain Final Project 1 420-N52-LA Pet Clinic repo
 - [Git Guidelines](docs/git-tips.md)
 - [React Coding Standards](docs/react-coding-standards.md)
 - [Angular Coding Standards](docs/angular-guidelines.md)
+- [Internationalization — Employee Portal](docs/i18n-angular-usage.md)
 - [Files Services Usage Standards](docs/files-service-usage.md)
 - [Mailer Service Usage Standards](docs/mailer-service-usage.md)
 - [Playwright Testing](docs/playwright-testing.md)

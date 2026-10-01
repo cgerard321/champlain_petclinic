@@ -6,6 +6,9 @@ interface PaymentFormProps {
   billId: string;
   customerId: string;
   billAmount: number;
+  qstAmount?: number;
+  gstAmount?: number;
+  taxedAmount?: number;
   baseAmount?: number;
   interestAmount?: number;
   onPaymentSuccess: () => void;
@@ -23,12 +26,18 @@ const PaymentForm = ({
   customerId,
   billAmount,
   baseAmount,
+  qstAmount,
+  gstAmount,
+  taxedAmount,
   interestAmount,
   onPaymentSuccess,
   onCancel,
 }: PaymentFormProps): JSX.Element => {
   const finalInterestAmount = interestAmount || 0;
   const actualBillAmount = billAmount || baseAmount || 0;
+  const actualTaxedAmount = taxedAmount || 0;
+  const actualGst = gstAmount || 0;
+  const actualQst = qstAmount || 0;
 
   const [formData, setFormData] = useState<PaymentFormData>({
     cardNumber: '',
@@ -160,10 +169,19 @@ const PaymentForm = ({
           <p>
             <strong>Bill ID:</strong> {billId}
           </p>
-          {baseAmount && finalInterestAmount > 0 ? (
+          {baseAmount && finalInterestAmount && actualTaxedAmount > 0 ? (
             <div className="payment-breakdown">
               <p>
                 <strong>Base Amount:</strong> ${baseAmount.toFixed(2)}
+              </p>
+              <p>
+                <strong>GST (5%):</strong> ${actualGst.toFixed(2)}
+              </p>
+              <p>
+                <strong>QST (9.975%):</strong> ${actualQst.toFixed(2)}
+              </p>
+              <p>
+                <strong>Total Tax:</strong> ${actualTaxedAmount.toFixed(2)}
               </p>
               <p>
                 <strong>Interest:</strong> ${finalInterestAmount.toFixed(2)}
