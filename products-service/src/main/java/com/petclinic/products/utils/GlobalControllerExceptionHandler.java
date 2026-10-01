@@ -28,7 +28,7 @@ public class GlobalControllerExceptionHandler {
 
     @ResponseStatus(BAD_REQUEST)
     @ExceptionHandler(RatingAlreadyExists.class)
-    public HttpErrorInfo handleRatingAlreadyExists(ServerHttpRequest request, Exception ex){
+    public HttpErrorInfo handleRatingAlreadyExists(ServerHttpRequest request, Exception ex) {
         return createHttpErrorInfo(BAD_REQUEST, request, ex);
     }
 
@@ -69,6 +69,13 @@ public class GlobalControllerExceptionHandler {
     public HttpErrorInfo handleFailedDependencyException(
             ServerHttpRequest request, Exception ex) {
         return createHttpErrorInfo(FAILED_DEPENDENCY, request, ex);
+    }
+
+    @ResponseStatus(CONFLICT)
+    @ExceptionHandler(ProductTypeInUseException.class)
+    public HttpErrorInfo handleProductTypeInUseException(
+            ServerHttpRequest request, Exception ex) {
+        return createHttpErrorInfo(CONFLICT, request, ex);
     }
 
 

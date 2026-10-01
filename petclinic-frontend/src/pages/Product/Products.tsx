@@ -2,10 +2,11 @@ import { NavBar } from '@/layouts/AppNavBar.tsx';
 import ProductsList from '@/features/products/ProductsList.tsx';
 import './Products.css';
 import TrendingList from '@/features/products/TrendingList.tsx';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import ProductSearch from '@/features/products/components/ProductSearch';
 import StarRating from '@/features/products/components/StarRating';
-import { ProductType } from '@/features/products/api/ProductTypeEnum';
+import { ProductTypeModel } from '@/features/products/models/ProductModels/ProductTypeModel.ts';
+import { getProductTypes } from '@/features/products/api/getProductTypes.ts';
 
 export default function Products(): JSX.Element {
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -13,6 +14,7 @@ export default function Products(): JSX.Element {
   const [validationMessage, setValidationMessage] = useState<string>('');
   const [showSortOptions, setShowSortOptions] = useState(false);
   const [sortCriteria, setSortCriteria] = useState('default');
+  const [productTypes, setProductTypes] = useState<ProductTypeModel[]>([]);
 
   const defaultFilters = useMemo(
     () => ({
@@ -53,6 +55,12 @@ export default function Products(): JSX.Element {
     setAppliedFilters(defaultFilters);
     setValidationMessage('');
   };
+
+  useEffect(() => {
+    getProductTypes()
+      .then(setProductTypes)
+      .catch(() => setProductTypes([]));
+  }, []);
 
   const filters = useMemo(() => appliedFilters, [appliedFilters]);
 
@@ -175,9 +183,10 @@ export default function Products(): JSX.Element {
                 onChange={e => updateTempFilter('productType', e.target.value)}
               >
                 <option value="">All Item Types</option>
-                {Object.values(ProductType).map(type => (
-                  <option key={type} value={type}>
-                    {type.charAt(0).toUpperCase() + type.slice(1).toLowerCase()}
+                {productTypes.map(type => (
+                  <option key={type.typeName} value={type.typeName}>
+                    {type.typeName.charAt(0).toUpperCase() +
+                      type.typeName.slice(1).toLowerCase()}
                   </option>
                 ))}
               </select>

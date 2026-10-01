@@ -37,9 +37,9 @@
     <div class="two-column">
       <mat-form-field appearance="outline">
         <mat-label>Product type</mat-label>
-        <mat-select [formField]="productForm.productType">
-          @for (type of productTypes(); track type) {
-            <mat-option [value]="type">{{ type }}</mat-option>
+        <mat-select [formField]="productForm.productTypeId">
+          @for (type of productTypes(); track type.productTypeId) {
+            <mat-option [value]="type.productTypeId">{{ type.typeName }}</mat-option>
           }
         </mat-select>
       </mat-form-field>

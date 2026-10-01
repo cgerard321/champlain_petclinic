@@ -36,6 +36,7 @@ public class ProductControllerV1 {
             @RequestParam(required = false) String sort,
             @RequestParam(required = false) String deliveryType,
             @RequestParam(required = false) String productType,
+            @RequestParam(required = false) String productName,
             @RequestParam(defaultValue = "false") boolean includeImage
     ){
         if ((minPrice != null && minPrice < 0) || (maxPrice != null && maxPrice < 0) ||
@@ -51,14 +52,15 @@ public class ProductControllerV1 {
             return Flux.error(new IllegalArgumentException("minRating cannot be greater than maxRating"));
         }
 
-        if (includeImage) {
+        if (productName != null && !productName.isBlank()) {
             return productsServiceClient.getAllProducts(
                     minPrice, maxPrice, minRating, maxRating, sort, deliveryType,
-                    productType, true);
+                    productType, productName, includeImage);
         }
-        return productsServiceClient.getAllProducts(
-                minPrice, maxPrice, minRating, maxRating, sort, deliveryType,
-                productType);
+        if (includeImage) {
+            return productsServiceClient.getAllProducts(minPrice, maxPrice, minRating, maxRating, sort, deliveryType, productType, true);
+        }
+        return productsServiceClient.getAllProducts(minPrice, maxPrice, minRating, maxRating, sort, deliveryType, productType);
 
     }
 
@@ -243,7 +245,7 @@ public class ProductControllerV1 {
         return productsServiceClient.getProductEnumsValues();
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ALL})
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping(value="/types", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ProductTypeResponseDTO> getAllProductTypes(){
         return productsServiceClient.getAllProductTypes();
@@ -251,7 +253,7 @@ public class ProductControllerV1 {
     }
 
 
-    @SecuredEndpoint(allowedRoles = {Roles.ALL})
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping(value = "/types/{productTypeId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ProductTypeResponseDTO>> getProductTypeByProductTypeId(@PathVariable String productTypeId) {
         return productsServiceClient.getProductTypeByProductTypeId(productTypeId)
