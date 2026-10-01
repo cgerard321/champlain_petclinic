@@ -1,15 +1,15 @@
 export const validateUsername = (username: string): string | null => {
   if (!username.trim()) {
-    return 'Username is required';
+    return 'validation.usernameRequired';
   }
   if (username.length < 3) {
-    return 'Username must be at least 3 characters long';
+    return 'validation.usernameTooShort';
   }
   if (username.length > 30) {
-    return 'Username must be less than 30 characters';
+    return 'validation.usernameTooLong';
   }
   if (!/^(?=.*[a-zA-Z])[a-zA-Z0-9_]+$/.test(username)) {
-    return 'Username must contain at least one letter and can only contain letters, numbers, and underscores';
+    return 'validation.usernameInvalid';
   }
   return null;
 };
@@ -23,7 +23,7 @@ export const validateUsernameAvailability = async (
     );
     const response = await checkUsernameAvailability(username);
     if (!response.data) {
-      return 'Username is already taken';
+      return 'validation.usernameTaken';
     }
     return null;
   } catch (error: unknown) {
@@ -36,15 +36,15 @@ export const validateUsernameAvailability = async (
     };
 
     if (isAxiosError(error) && error.response?.status === 403) {
-      return 'You do not have permission to check username availability';
+      return 'validation.noPermission';
     } else if (isAxiosError(error) && error.response?.status === 401) {
-      return 'Please log in to check username availability';
+      return 'validation.loginRequired';
     } else if (
       isAxiosError(error) &&
       error.response?.status &&
       error.response.status >= 500
     ) {
-      return 'Server error. Please try again later';
+      return 'validation.serverError';
     } else if (
       (typeof error === 'object' &&
         error !== null &&
@@ -52,9 +52,18 @@ export const validateUsernameAvailability = async (
         (error as { code: string }).code === 'NETWORK_ERROR') ||
       !navigator.onLine
     ) {
-      return 'Network error. Please check your connection';
+      return 'validation.networkError';
     } else {
-      return 'Unable to verify username availability. Please try again';
+      return 'validation.usernameCheckFailed';
     }
   }
+};
+export const validateTelephone = (telephone: string): string | null => {
+  if (!telephone.trim()) {
+    return 'validation.telephoneRequired';
+  }
+  if (!/^[0-9]{10}$/.test(telephone)) {
+    return 'validation.telephoneTenDigits';
+  }
+  return null;
 };

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 
 import { useState } from 'react';
-import DatePicker from 'react-datepicker';
+import DatePickerComponent from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useNavigate } from 'react-router-dom';
 import './FormPromo.css';
@@ -105,7 +105,7 @@ export default function AddPromo(): JSX.Element {
 
       <div className="form-group">
         <label htmlFor="expiration-date">Expiration Date:</label>
-        <DatePicker
+        <DatePickerComponent
           selected={expirationDate}
           onChange={(date: Date | null) => setExpirationDate(date)}
           dateFormat="yyyy-MM-dd"

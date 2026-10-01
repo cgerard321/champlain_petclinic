@@ -10,12 +10,12 @@ public interface PetService {
 
     Mono<PetResponseDTO> addPet(Mono<PetRequestDTO> petMono);
     Mono<PetResponseDTO> getPetById(String Id, boolean includePhoto);
-    Flux<PetResponseDTO> getPetsByOwnerId(String ownerId);
+    Flux<PetResponseDTO> getPetsByCustomerId(String customerId);
     Mono<PetResponseDTO> updatePetByPetId(String petId, Mono<PetRequestDTO> petMono);
     Mono<Void> deletePetByPetId(String petId);
     Mono<PetResponseDTO> updatePetIsActive(String petId, String isActive);
     Flux<PetResponseDTO> getAllPets();
-    Mono<PetResponseDTO> createPetForOwner(String ownerId, Mono<PetRequestDTO> petRequestDTO);
+    Mono<PetResponseDTO> createPetForCustomer(String customerId, Mono<PetRequestDTO> petRequestDTO);
     Mono<PetResponseDTO> addPetPhoto(String petId, FileRequestDTO photo);
     Mono<PetResponseDTO> deletePetPhoto(String petId);
 }

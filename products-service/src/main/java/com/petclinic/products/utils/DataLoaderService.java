@@ -7,7 +7,6 @@ import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.datalayer.ratings.RatingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -15,10 +14,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -38,32 +36,21 @@ public class DataLoaderService implements CommandLineRunner {
 
     @Autowired
     ProductTypeRepository productTypeRepository;
+
     @Override
     public void run(String... args) throws Exception {
-
         // If the database is not empty, do not load data
         try {
-
-            if (Boolean.TRUE.equals(productRepository.findAll().hasElements().block())) {
+            restoreMissingReferencedLegacyImages();
+            if (
+                    Boolean.TRUE.equals(productRepository.findAll().hasElements().block()) ||
+                            Boolean.TRUE.equals(productBundleRepository.findAll().hasElements().block()) ||
+                            Boolean.TRUE.equals(imageRepository.findAll().hasElements().block()) ||
+                            Boolean.TRUE.equals(ratingRepository.findAll().hasElements().block()) ||
+                            Boolean.TRUE.equals(productTypeRepository.findAll().hasElements().block())) {
+                System.out.println("Database not empty, skipping data loading");
                 return;
             }
-
-            if (Boolean.TRUE.equals(productBundleRepository.findAll().hasElements().block())) {
-                return;
-            }
-
-            if (Boolean.TRUE.equals(imageRepository.findAll().hasElements().block())) {
-                return;
-            }
-
-            if (Boolean.TRUE.equals(ratingRepository.findAll().hasElements().block())) {
-                return;
-            }
-
-            if (Boolean.TRUE.equals(productTypeRepository.findAll().hasElements().block())) {
-                return;
-            }
-
         } catch (Exception e) {
             System.out.println("Error checking if products exist: " + e.getMessage());
             return;
@@ -76,7 +63,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Premium dry food for adult dogs")
                 .productSalePrice(45.99)
                 .requestCount(0)
-                .productType(ProductType.FOOD)
+                //.productType(ProductType.FOOD)
                 .productTypeId("586d0700-57db-4312-b6f1-413b79dd018c")
                 .productStatus(ProductStatus.AVAILABLE)
                 .productQuantity(44)
@@ -92,7 +79,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Clumping cat litter with odor control")
                 .productSalePrice(12.99)
                 .requestCount(0)
-                .productType(ProductType.ACCESSORY)
+                //.productType(ProductType.ACCESSORY)
                 .productTypeId("6a247af0-52d9-4179-a5b4-ad4b92e686b1")
                 .productStatus(ProductStatus.AVAILABLE)
                 .productQuantity(3)
@@ -108,7 +95,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Flea and tick prevention for small dogs")
                 .productSalePrice(9.99)
                 .requestCount(0)
-                .productType(ProductType.MEDICATION)
+                //.productType(ProductType.MEDICATION)
                 .productTypeId("86627454-970e-41a9-baa6-71ab759bf66c")
                 .productStatus(ProductStatus.AVAILABLE)
                 .productQuantity(53)
@@ -124,7 +111,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Spacious cage for small birds like parakeets")
                 .productSalePrice(29.99)
                 .requestCount(0)
-                .productType(ProductType.ACCESSORY)
+                //.productType(ProductType.ACCESSORY)
                 .productTypeId("6a247af0-52d9-4179-a5b4-ad4b92e686b1")
                 .productStatus(ProductStatus.AVAILABLE)
                 .productQuantity(8)
@@ -140,7 +127,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Filter system for small to medium-sized aquariums")
                 .productSalePrice(19.99)
                 .requestCount(0)
-                .productType(ProductType.ACCESSORY)
+                //.productType(ProductType.ACCESSORY)
                 .productTypeId("6a247af0-52d9-4179-a5b4-ad4b92e686b1")
                 .productStatus(ProductStatus.AVAILABLE)
                 .productQuantity(14)
@@ -156,7 +143,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Lightweight saddle for riding horses")
                 .productSalePrice(199.99)
                 .requestCount(0)
-                .productType(ProductType.EQUIPMENT)
+                //.productType(ProductType.EQUIPMENT)
                 .productTypeId("79c8723a-8df3-495d-8eb0-07d574ff5ae5")
                 .productStatus(ProductStatus.AVAILABLE)
                 .productQuantity(58)
@@ -172,7 +159,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Outdoor wooden hutch for rabbits")
                 .productSalePrice(79.99)
                 .requestCount(0)
-                .productType(ProductType.ACCESSORY)
+                //.productType(ProductType.ACCESSORY)
                 .productTypeId("6a247af0-52d9-4179-a5b4-ad4b92e686b1")
                 .productStatus(ProductStatus.AVAILABLE)
                 .productQuantity(66)
@@ -188,7 +175,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Submersible heater for tropical fish tanks")
                 .productSalePrice(14.99)
                 .requestCount(0)
-                .productType(ProductType.ACCESSORY)
+                //.productType(ProductType.ACCESSORY)
                 .productTypeId("6a247af0-52d9-4179-a5b4-ad4b92e686b1")
                 .productStatus(ProductStatus.AVAILABLE)
                 .productQuantity(0)
@@ -442,12 +429,12 @@ public class DataLoaderService implements CommandLineRunner {
                 .build();
 
         Flux.just(bundle1, bundle2, bundle3)
-                .flatMap(s -> productBundleRepository.insert(Mono.just(s))
+                .flatMap(s -> productBundleRepository.save(s)
                         .log(s.toString()))
                 .subscribe();
 
         Flux.just(product1, product2, product3, product4, product5, product6, product7, product8)
-                .flatMap(s -> productRepository.insert(Mono.just(s))
+                .flatMap(s -> productRepository.save(s)
                         .log(s.toString()))
                 .subscribe();
 
@@ -461,18 +448,91 @@ public class DataLoaderService implements CommandLineRunner {
                         rating1prod7, rating2prod7,
                         rating1prod8, rating2prod8
                 )
-                .flatMap(s -> ratingRepository.insert(Mono.just(s))
+                .flatMap(s -> ratingRepository.save(s)
                         .log(s.toString()))
                 .subscribe();
 
         Flux.just(image1, image2, image3, image4, image5, image6, image7, image8)
-                .flatMap(s -> imageRepository.insert(Mono.just(s))
+                .flatMap(s -> imageRepository.save(s)
                         .log(s.toString()))
                 .subscribe();
 
         Flux.just(productType1, productType2, productType3, productType4)
-                .flatMap(s -> productTypeRepository.insert(Mono.just(s))
+                .flatMap(s -> productTypeRepository.save(s)
                         .log(s.toString()))
                 .subscribe();
+    }
+
+    private void restoreMissingReferencedLegacyImages() {
+        Set<String> referencedImageIds = productRepository.findAll()
+                .map(Product::getImageId)
+                .filter(imageId -> imageId != null && !imageId.isBlank())
+                .collectList()
+                .map(Set::copyOf)
+                .block();
+
+        if (referencedImageIds == null || referencedImageIds.isEmpty()) {
+            return;
+        }
+
+        Flux.fromIterable(legacyImageSeeds())
+                .filter(seed -> referencedImageIds.contains(seed.imageId()))
+                .concatMap(seed -> imageRepository.findImageByImageId(seed.imageId())
+                        .switchIfEmpty(Mono.defer(() -> saveLegacyImage(seed))))
+                .then()
+                .block();
+    }
+
+    private Mono<Image> saveLegacyImage(LegacyImageSeed seed) {
+        try {
+            byte[] imageData = new ClassPathResource(seed.resourcePath())
+                    .getContentAsByteArray();
+            Image image = Image.builder()
+                    .imageId(seed.imageId())
+                    .imageName(seed.imageName())
+                    .imageType(seed.imageType())
+                    .imageData(imageData)
+                    .build();
+            return imageRepository.save(image);
+        } catch (Exception error) {
+            return Mono.error(error);
+        }
+    }
+
+    private List<LegacyImageSeed> legacyImageSeeds() {
+        return List.of(
+                new LegacyImageSeed(
+                        "08a5af6b-3501-4157-9a99-1aa82387b9e4",
+                        "dog_food.jpg", "image/jpeg", "images/dog_food.png"),
+                new LegacyImageSeed(
+                        "36b06c01-10f3-4645-9c45-900afc5a8b8a",
+                        "cat_litter.png", "image/png", "images/cat_litter.png"),
+                new LegacyImageSeed(
+                        "be4e60a4-2369-46e8-abee-20c1a8dce3e5",
+                        "flea_collar.jpg", "image/jpeg", "images/flea_collar.png"),
+                new LegacyImageSeed(
+                        "7074e0ef-d041-452f-8a0f-cb9ab20d1fed",
+                        "bird_cage.jpg", "image/jpeg", "images/bird_cage.png"),
+                new LegacyImageSeed(
+                        "392c42d9-9505-4c27-b82e-20351b25d33f",
+                        "aquarium_filter.png", "image/png",
+                        "images/aquarium_filter.png"),
+                new LegacyImageSeed(
+                        "664aa14b-db66-4b25-9d05-f3a9164eb401",
+                        "horse_saddle.jpg", "image/jpeg", "images/horse_saddle.png"),
+                new LegacyImageSeed(
+                        "3377a03f-8105-47d7-8d8a-d89fd170c7e6",
+                        "rabbit_hutch.jpg", "image/jpeg", "images/rabbit_hutch.png"),
+                new LegacyImageSeed(
+                        "c76ed4c1-fc5d-4868-8b39-1bca6b0be368",
+                        "fish_tank_heater.jpg", "image/jpeg",
+                        "images/fish_tank_heater.png"));
+    }
+
+    private record LegacyImageSeed(
+            String imageId,
+            String imageName,
+            String imageType,
+            String resourcePath) {
     }
 }

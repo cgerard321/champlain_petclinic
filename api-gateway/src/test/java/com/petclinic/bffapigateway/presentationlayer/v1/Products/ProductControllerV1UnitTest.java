@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.presentationlayer.v1.Products;
 
 import com.petclinic.bffapigateway.config.GlobalExceptionHandler;
 import com.petclinic.bffapigateway.domainclientlayer.ProductsServiceClient;
+import com.petclinic.bffapigateway.dtos.Files.FileDetails;
 import com.petclinic.bffapigateway.dtos.Products.*;
 import com.petclinic.bffapigateway.presentationlayer.v1.ProductControllerV1;
 import org.junit.jupiter.api.Test;
@@ -50,6 +51,25 @@ class ProductControllerV1UnitTest {
 
 
     private final String invalidProductId = "ae2d3af7-f2a2-407f-ad31-ca7d8220cb";
+
+    @Test
+    void updateProductImageWithMissingFileFieldsReturnsBadRequest() {
+        FileDetails invalidImage = FileDetails.builder()
+                .fileName(" ")
+                .fileType("")
+                .fileData(null)
+                .build();
+
+        webTestClient.patch()
+                .uri(baseProductsURL
+                        + "/06a7d573-bcab-4db3-956f-773324b92a80/image")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(invalidImage)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        verifyNoInteractions(productsServiceClient);
+    }
 
     private ProductRequestDTO productRequest1 = ProductRequestDTO.builder()
             .productName("Product 1")
@@ -139,6 +159,24 @@ class ProductControllerV1UnitTest {
                     assertEquals(0, productResponseDTOS.size());
                 });
         verify(productsServiceClient, times(1)).getAllProducts(null, null,null,null,null,null,null);
+    }
+
+    @Test
+    void getAllProducts_withProductName_thenPassSearchToProductsService() {
+        when(productsServiceClient.getAllProducts(null, null, null, null, null, null, null, "horse", false))
+                .thenReturn(Flux.just(productResponseDTO1));
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path(baseProductsURL)
+                        .queryParam("productName", "horse")
+                        .build())
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseDTO.class)
+                .hasSize(1);
+
+        verify(productsServiceClient).getAllProducts(null, null, null, null, null, null, null, "horse", false);
     }
 
 //TODO: Rating
@@ -278,18 +316,18 @@ void whenGetAllProductsWithNegativeMinPrice_thenReturnBadRequest() {
 
     @Test
     void whenGetAllProductsWithValidProductType_thenReturnFilteredProducts() {
-        ProductType productType = ProductType.FOOD;
+        String productType = "ACCESSORY";
 
 
-        productResponseDTO1.setProductType(ProductType.ACCESSORY);
-        productResponseDTO2.setProductType(ProductType.MEDICATION);
+        productResponseDTO1.setProductType("ACCESSORY");
+        productResponseDTO2.setProductType("MEDICATION");
 
-        when(productsServiceClient.getAllProducts(null, null, null, null, null,null, productType.toString()))
+        when(productsServiceClient.getAllProducts(null, null, null, null, null,null, productType))
                 .thenReturn(Flux.just(productResponseDTO1));
 
         webTestClient.get()
                 .uri(uriBuilder -> uriBuilder.path(baseProductsURL)
-                        .queryParam("productType", productType.toString())
+                        .queryParam("productType", productType)
                         .build())
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
@@ -299,10 +337,10 @@ void whenGetAllProductsWithNegativeMinPrice_thenReturnBadRequest() {
                     assertNotNull(productResponseDTOS);
                     assertEquals(1, productResponseDTOS.size());
                     assertEquals(productResponseDTO1.getProductId(), productResponseDTOS.get(0).getProductId());
-                    assertEquals(ProductType.ACCESSORY, productResponseDTOS.get(0).getProductType());
+                    assertEquals("ACCESSORY", productResponseDTOS.get(0).getProductType());
                 });
 
-        verify(productsServiceClient, times(1)).getAllProducts(null, null, null, null, null,null, productType.toString());
+        verify(productsServiceClient, times(1)).getAllProducts(null, null, null, null, null,null, productType);
     }
 
     @Test
@@ -707,7 +745,11 @@ public void whenGetAllProductBundles_thenReturnBundles() {
     @Test
     public void whenGetProductEnums_thenReturnProductEnums() {
         ProductEnumsResponseDTO enumsResponseDTO = new ProductEnumsResponseDTO(
-                List.of(ProductType.FOOD, ProductType.MEDICATION, ProductType.ACCESSORY, ProductType.EQUIPMENT),
+                List.of(
+                        new ProductTypeResponseDTO("586d0700-57db-4312-b6f1-413b79dd018c", "FOOD"),
+                        new ProductTypeResponseDTO("86627454-970e-41a9-baa6-71ab759bf66c", "MEDICATION"),
+                        new ProductTypeResponseDTO("6a247af0-52d9-4179-a5b4-ad4b92e686b1", "ACCESSORY"),
+                        new ProductTypeResponseDTO("79c8723a-8df3-495d-8eb0-07d574ff5ae5", "EQUIPMENT")),
                 List.of(ProductStatus.AVAILABLE, ProductStatus.PRE_ORDER, ProductStatus.OUT_OF_STOCK),
                 List.of(DeliveryType.DELIVERY, DeliveryType.PICKUP, DeliveryType.DELIVERY_AND_PICKUP, DeliveryType.NO_DELIVERY_OPTION)
         );

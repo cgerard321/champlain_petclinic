@@ -1,28 +1,30 @@
 import { FC, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import axiosInstance from '@/shared/api/axiosInstance';
-import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseModel';
+import { CustomerResponseModel } from '@/features/customers/models/CustomerResponseModel.ts';
 import { PetResponseModel } from '@/features/customers/models/PetResponseModel';
 import { PetTypeModel } from '@/features/customers/models/PetTypeModel';
 import { UserDetailsModel } from '@/features/customers/models/UserDetailsModel';
 import { Bill } from '@/features/bills/models/Bill';
-import { getOwner } from '../api/getOwner';
+import { getCustomer } from '../api/getCustomer.ts';
 import { getPetTypes } from '../api/getPetTypes';
 import { getPetTypeName } from '../utils/petTypeMapping';
 import './CustomerDetails.css';
-import { deleteOwner } from '../api/deleteOwner';
+import { deleteCustomer } from '../api/deleteCustomer.ts';
 import { IsVet } from '@/context/UserContext';
 import EditPetModal from './EditPetModal';
 import AddPetModal from './AddPetModal';
-import defaultProfile from '@/assets/Owners/defaultProfilePicture.png';
+import defaultProfile from '@/assets/Customers/defaultProfilePicture.png';
 
 const CustomerDetails: FC = () => {
-  const { ownerId } = useParams<{ ownerId: string }>();
+  const { t } = useTranslation('customers');
+  const { customerId } = useParams<{ customerId: string }>();
   const navigate = useNavigate();
   const isVet = IsVet();
 
   const [isDisabled, setIsDisabled] = useState<boolean>(false);
-  const [owner, setOwner] = useState<OwnerResponseModel | null>(null);
+  const [customer, setCustomer] = useState<CustomerResponseModel | null>(null);
   const [userDetails, setUserDetails] = useState<UserDetailsModel | null>(null);
   const [pets, setPets] = useState<PetResponseModel[]>([]);
   const [petImageUrls, setPetImageUrls] = useState<Record<string, string>>({});
@@ -34,13 +36,13 @@ const CustomerDetails: FC = () => {
   const [selectedPetId, setSelectedPetId] = useState<string>('');
 
   useEffect(() => {
-    const fetchOwnerDetails = async (): Promise<void> => {
-      //ownerId can't be undefied here so it is ok to assert it.
-      const ownerResponse = await getOwner(ownerId!);
-      setOwner(ownerResponse.data);
+    const fetchCustomerDetails = async (): Promise<void> => {
+      //customerId can't be undefied here so it is ok to assert it.
+      const customerResponse = await getCustomer(customerId!);
+      setCustomer(customerResponse.data);
 
       try {
-        const userResponse = await axiosInstance.get(`/users/${ownerId}`, {
+        const userResponse = await axiosInstance.get(`/users/${customerId}`, {
           useV2: false,
         });
         setUserDetails(userResponse.data);
@@ -50,10 +52,13 @@ const CustomerDetails: FC = () => {
         setIsDisabled(false);
       }
 
-      // Fetch pets by owner ID
-      const petsResponse = await axiosInstance.get(`/owners/${ownerId}/pets`, {
-        useV2: false,
-      });
+      // Fetch pets by customer ID
+      const petsResponse = await axiosInstance.get(
+        `/pets/customers/${customerId}/pets`,
+        {
+          useV2: false,
+        }
+      );
 
       let petsData: PetResponseModel[] = [];
       if (typeof petsResponse.data === 'string') {
@@ -85,7 +90,7 @@ const CustomerDetails: FC = () => {
       setPets(petsData);
 
       const billsResponse = await axiosInstance.get(
-        `/bills/customer/${ownerId}`,
+        `/bills/customer/${customerId}`,
         { useV2: false }
       );
 
@@ -119,13 +124,13 @@ const CustomerDetails: FC = () => {
       setLoading(false);
     };
 
-    if (ownerId) {
-      fetchOwnerDetails();
+    if (customerId) {
+      fetchCustomerDetails();
     }
-  }, [ownerId]);
+  }, [customerId]);
 
   const handleEditClick = (): void => {
-    navigate(`/customers/${ownerId}/edit`);
+    navigate(`/customers/${customerId}/edit`);
   };
 
   const handleBackClick = (): void => {
@@ -173,26 +178,26 @@ const CustomerDetails: FC = () => {
     }
   };
 
-  const handleDelete = async (ownerId: string): Promise<void> => {
+  const handleDelete = async (customerId: string): Promise<void> => {
     const confirmDelete = window.confirm(
-      'Are you sure you want to delete this owner?'
+      t('customerDetails.messages.confirmDelete')
     );
 
     if (confirmDelete) {
-      await deleteOwner(ownerId);
-      alert('Owner deleted successfully.');
+      await deleteCustomer(customerId);
+      alert(t('customerDetails.messages.deleteSuccess'));
       navigate('/customers');
     } else {
-      alert('Owner deletion canceled.');
+      alert(t('customerDetails.messages.deleteCanceled'));
     }
   };
 
   if (loading) {
-    return <p>Loading...</p>;
+    return <p>{t('customerDetails.loading')}</p>;
   }
 
-  if (!owner) {
-    return <p>No owner found.</p>;
+  if (!customer) {
+    return <p>{t('customerDetails.notFound')}</p>;
   }
 
   const calculateAge = (birthDate: Date): number => {
@@ -204,20 +209,22 @@ const CustomerDetails: FC = () => {
 
   const handleDisableEnable = async (): Promise<void> => {
     const confirmAction = window.confirm(
-      `Are you sure you want to ${isDisabled ? 'enable' : 'disable'} this user's account?`
+      isDisabled
+        ? t('customerDetails.messages.confirmEnable')
+        : t('customerDetails.messages.confirmDisable')
     );
 
     if (confirmAction) {
       if (isDisabled) {
-        await axiosInstance.patch(`/users/${ownerId}/enable`, {
+        await axiosInstance.patch(`/users/${customerId}/enable`, {
           useV2: true,
         });
-        alert('User account enabled successfully.');
+        alert(t('customerDetails.messages.enableSuccess'));
       } else {
-        await axiosInstance.patch(`/users/${ownerId}/disable`, {
+        await axiosInstance.patch(`/users/${customerId}/disable`, {
           useV2: true,
         });
-        alert('User account disabled successfully.');
+        alert(t('customerDetails.messages.disableSuccess'));
       }
       setIsDisabled(!isDisabled);
     }
@@ -234,15 +241,15 @@ const CustomerDetails: FC = () => {
   };
 
   //eliminated code duplication
-  const fetchOwnerDetails = async (): Promise<void> => {
-    if (!ownerId) return;
+  const fetchCustomerDetail = async (): Promise<void> => {
+    if (!customerId) return;
 
     try {
-      const ownerResponse = await getOwner(ownerId);
-      setOwner(ownerResponse.data);
+      const customerResponse = await getCustomer(customerId);
+      setCustomer(customerResponse.data);
 
       try {
-        const userResponse = await axiosInstance.get(`/users/${ownerId}`, {
+        const userResponse = await axiosInstance.get(`/users/${customerId}`, {
           useV2: false,
         });
         setIsDisabled(userResponse.data.disabled);
@@ -250,9 +257,12 @@ const CustomerDetails: FC = () => {
         setIsDisabled(false);
       }
 
-      const petsResponse = await axiosInstance.get(`/owners/${ownerId}/pets`, {
-        useV2: false,
-      });
+      const petsResponse = await axiosInstance.get(
+        `/pets/customers/${customerId}/pets`,
+        {
+          useV2: false,
+        }
+      );
 
       let petsData: PetResponseModel[] = [];
       if (typeof petsResponse.data === 'string') {
@@ -284,7 +294,7 @@ const CustomerDetails: FC = () => {
       setPets(petsData);
 
       const billsResponse = await axiosInstance.get(
-        `/bills/customer/${ownerId}`,
+        `/bills/customer/${customerId}`,
         { useV2: false }
       );
 
@@ -313,7 +323,7 @@ const CustomerDetails: FC = () => {
       setBills(billsData);
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching owner details:', error);
+      console.error('Error fetching customer details:', error);
       setLoading(false);
     }
   };
@@ -331,84 +341,92 @@ const CustomerDetails: FC = () => {
   };
 
   const handlePetUpdated = (): void => {
-    fetchOwnerDetails();
+    fetchCustomerDetail();
   };
 
   const handlePetDeleted = (): void => {
-    fetchOwnerDetails();
+    fetchCustomerDetail();
   };
 
   return (
     <div className="customer-details-card">
       <h2>
-        {' '}
-        Customer Details for {owner.firstName} {owner.lastName}{' '}
+        {t('customerDetails.heading', {
+          firstName: customer.firstName,
+          lastName: customer.lastName,
+        })}
       </h2>
 
       <div className="customer-details-container">
-        {/* Owner Info */}
-        <div className="section owner-info">
-          <h3>Owner Info</h3>
+        {/* Customer Info */}
+        <div className="section customer-info">
+          <h3>{t('customerDetails.infoTitle')}</h3>
           <p>
-            <strong>Username: </strong>
-            {userDetails?.username || 'Loading...'}
+            <strong>{t('fields.username')} </strong>
+            {userDetails?.username || t('customerDetails.loading')}
           </p>
           <p>
-            <strong>First Name: </strong>
-            {owner.firstName}
+            <strong>{t('fields.firstName')} </strong>
+            {customer.firstName}
           </p>
           <p>
-            <strong>Last Name: </strong>
-            {owner.lastName}
+            <strong>{t('fields.lastName')} </strong>
+            {customer.lastName}
           </p>
           <p>
-            <strong>Address: </strong>
-            {owner.address}
+            <strong>{t('fields.address')} </strong>
+            {customer.address}
           </p>
           <p>
-            <strong>City: </strong>
-            {owner.city}
+            <strong>{t('fields.city')} </strong>
+            {customer.city}
           </p>
           <p>
-            <strong>Province: </strong>
-            {owner.province}
+            <strong>{t('fields.province')} </strong>
+            {customer.province}
           </p>
           <p>
-            <strong>Telephone: </strong>
-            {owner.telephone}
+            <strong>{t('fields.telephone')} </strong>
+            {customer.telephone}
           </p>
         </div>
 
-        {/* Owner Pets */}
-        <div className="section owner-pets">
-          <h3>Owner Pets</h3>
+        {/* Customer Pets */}
+        <div className="section customer-pets">
+          <h3>{t('customerDetails.pets.title')}</h3>
           {pets && pets.length > 0 ? (
             <ul>
               {pets.map(pet => (
                 <li key={pet.petId} className="pet-item">
                   <img
                     src={petImageUrls[pet.petId] || defaultProfile}
-                    alt={`${pet.name} profile`}
+                    alt={t('customerDetails.pets.photoAlt', { name: pet.name })}
                     className="pet-profile-picture"
                   />
                   <div className="pet-details">
                     <div className="pet-info">
-                      <span className="pet-id">Pet ID: {pet.petId}</span>
+                      <span className="pet-id">
+                        {t('customerDetails.pets.petId')} {pet.petId}
+                      </span>
                     </div>
                     <div className="pet-main-info">
                       <span className="pet-name">
-                        <strong>Name:</strong> {pet.name}
+                        <strong>{t('customerDetails.pets.name')}</strong>{' '}
+                        {pet.name}
                       </span>
                       <span className="pet-type">
-                        <strong>Type:</strong>{' '}
+                        <strong>{t('customerDetails.pets.type')}</strong>{' '}
                         {getPetTypeName(pet.petTypeId, petTypes)}
                       </span>
                       <span className="pet-weight">
-                        <strong>Weight:</strong> {pet.weight}kg
+                        <strong>{t('customerDetails.pets.weight')}</strong>{' '}
+                        {pet.weight}kg
                       </span>
                       <span className="pet-age">
-                        <strong>Age:</strong> {calculateAge(pet.birthDate)}{' '}
-                        years
+                        <strong>{t('customerDetails.pets.age')}</strong>{' '}
+                        {t('customerDetails.pets.years', {
+                          count: calculateAge(pet.birthDate),
+                        })}
                       </span>
                     </div>
                     <div className="pet-actions">
@@ -416,7 +434,7 @@ const CustomerDetails: FC = () => {
                         className="edit-pet-button"
                         onClick={() => handleEditPetClick(pet.petId)}
                       >
-                        Edit Pet
+                        {t('customerDetails.pets.editPet')}
                       </button>
                     </div>
                   </div>
@@ -424,48 +442,50 @@ const CustomerDetails: FC = () => {
               ))}
             </ul>
           ) : (
-            <p>No pets found.</p>
+            <p>{t('customerDetails.pets.none')}</p>
           )}
         </div>
 
-        {/* Owner Bills */}
-        <div className="section owner-bills">
-          <h3>Owner Bills</h3>
+        {/* Customer Bills */}
+        <div className="section customer-bills">
+          <h3>{t('customerDetails.bills.title')}</h3>
           {Array.isArray(bills) && bills.length > 0 ? (
             <ul>
               {bills.map(bill => (
                 <li key={bill.billId}>
-                  <strong>Bill ID: </strong>
-                  {bill.billId}, <strong>Amount: </strong>
-                  {bill.amount}, <strong>Date: </strong>
+                  <strong>{t('customerDetails.bills.billId')} </strong>
+                  {bill.billId},{' '}
+                  <strong>{t('customerDetails.bills.amount')} </strong>
+                  {bill.amount},{' '}
+                  <strong>{t('customerDetails.bills.date')} </strong>
                   {bill.date}
                 </li>
               ))}
             </ul>
           ) : (
-            <p>No bills found.</p>
+            <p>{t('customerDetails.bills.none')}</p>
           )}
         </div>
       </div>
 
       <div className="customer-details-buttons">
         <button className="customer-details-button" onClick={handleEditClick}>
-          Edit Customer
+          {t('customerDetails.buttons.edit')}
         </button>
         <button className="customer-details-button" onClick={handleBackClick}>
-          Back to All Owners
+          {t('customerDetails.buttons.back')}
         </button>
         <button className="add-pet-button" onClick={handleAddPet}>
-          Add New Pet
+          {t('customerDetails.buttons.addPet')}
         </button>
         {!isVet && (
           <button
             className="btn btn-danger"
-            onClick={() => handleDelete(owner.ownerId)}
-            title="Delete"
+            onClick={() => handleDelete(customer.customerId)}
+            title={t('customerDetails.buttons.deleteTitle')}
             style={{ backgroundColor: 'red', color: 'white' }}
           >
-            Delete Owner
+            {t('customerDetails.buttons.delete')}
           </button>
         )}
         {userDetails && (
@@ -473,13 +493,15 @@ const CustomerDetails: FC = () => {
             className={`btn ${isDisabled ? 'btn-success' : 'btn-warning'}`}
             onClick={handleDisableEnable}
           >
-            {isDisabled ? 'Enable Account' : 'Disable Account'}
+            {isDisabled
+              ? t('customerDetails.buttons.enable')
+              : t('customerDetails.buttons.disable')}
           </button>
         )}
       </div>
 
       <AddPetModal
-        ownerId={ownerId || ''}
+        customerId={customerId || ''}
         isOpen={isAddPetModalOpen}
         onClose={handleCloseAddPetModal}
         onPetAdded={handlePetAdded}
@@ -489,7 +511,7 @@ const CustomerDetails: FC = () => {
         isOpen={isEditPetModalOpen}
         onClose={handleCloseEditPetModal}
         petId={selectedPetId}
-        ownerId={ownerId || ''}
+        customerId={customerId || ''}
         onPetUpdated={handlePetUpdated}
         onPetDeleted={handlePetDeleted}
       />

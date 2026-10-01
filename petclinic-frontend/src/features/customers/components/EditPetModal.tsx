@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { FormEvent, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getPet } from '../api/getPet';
 import { updatePet } from '../api/updatePet';
 import { deletePet } from '../api/deletePet';
@@ -9,7 +10,7 @@ import { addPetPhoto } from '../api/addPetPhoto';
 import { PetResponseModel } from '../models/PetResponseModel';
 import { PetRequestModel } from '../models/PetRequestModel';
 import { PetTypeModel } from '../models/PetTypeModel';
-import defaultProfile from '@/assets/Owners/defaultProfilePicture.png';
+import defaultProfile from '@/assets/Customers/defaultProfilePicture.png';
 import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
 import axiosInstance from '@/shared/api/axiosInstance';
 import './customers.css';
@@ -18,7 +19,7 @@ interface EditPetModalProps {
   isOpen: boolean;
   onClose: () => void;
   petId: string;
-  ownerId: string;
+  customerId: string;
   onPetUpdated?: (updatedPet?: PetResponseModel) => void;
   onPetDeleted?: () => void;
 }
@@ -27,7 +28,7 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
   isOpen,
   onClose,
   petId,
-  ownerId,
+  customerId,
   onPetUpdated,
   onPetDeleted,
 }): JSX.Element => {
@@ -42,6 +43,7 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [petPhotoUrl, setPetPhotoUrl] = useState<string>('');
   const { confirm, ConfirmModal } = useConfirmModal();
+  const { t } = useTranslation('customers');
 
   const fetchPetPhotoUrl = async (
     petId: string,
@@ -88,11 +90,10 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
     if (!pet) return;
 
     const confirmed = await confirm({
-      title: 'Delete Pet Photo',
-      message:
-        "Are you sure you want to delete this pet's photo? This action cannot be undone.",
-      confirmText: 'Delete',
-      cancelText: 'Cancel',
+      title: t('pets.deletePhotoModal.title'),
+      message: t('pets.deletePhotoModal.message'),
+      confirmText: t('pets.buttons.confirmDelete'),
+      cancelText: t('pets.buttons.cancel'),
       variant: 'danger',
       destructive: true,
     });
@@ -103,10 +104,10 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
       await deletePetPhoto(pet.petId);
       setPetPhotoUrl(defaultProfile);
       setPet(prev => (prev ? { ...prev, photo: undefined } : null));
-      setSuccessMessage('Pet photo deleted successfully!');
+      setSuccessMessage('pets.success.photoDeleted');
     } catch (error) {
       console.error('Error deleting pet photo:', error);
-      setErrors({ submit: 'Failed to delete pet photo. Please try again.' });
+      setErrors({ submit: 'pets.errors.deletePhotoFailed' });
     }
   };
 
@@ -117,10 +118,10 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
       const response = await addPetPhoto(pet.petId, file);
       setPetPhotoUrl(URL.createObjectURL(file));
       setPet(prev => (prev ? { ...prev, photo: response.data.photo } : null));
-      setSuccessMessage('Pet photo added successfully!');
+      setSuccessMessage('pets.success.photoAdded');
     } catch (error) {
       console.error('Error adding pet photo:', error);
-      setErrors({ submit: 'Failed to add pet photo. Please try again.' });
+      setErrors({ submit: 'pets.errors.addPhotoFailed' });
     }
   };
 
@@ -130,7 +131,7 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
         setSuccessMessage('');
         setErrors({});
         try {
-          const response = await getPet(petId, ownerId);
+          const response = await getPet(petId, customerId);
           const petData: PetResponseModel = response.data;
           setPet({
             ...petData,
@@ -169,7 +170,7 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
       fetchPetData();
       fetchPetTypes();
     }
-  }, [petId, ownerId, isOpen]);
+  }, [petId, customerId, isOpen]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -193,11 +194,11 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
 
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
-    if (!pet?.name?.trim()) newErrors.name = 'Pet name is required';
-    if (!pet?.weight?.trim()) newErrors.weight = 'Weight is required';
-    if (!pet?.petTypeId) newErrors.petTypeId = 'Pet type is required';
+    if (!pet?.name?.trim()) newErrors.name = 'pets.errors.nameRequired';
+    if (!pet?.weight?.trim()) newErrors.weight = 'pets.errors.weightRequired';
+    if (!pet?.petTypeId) newErrors.petTypeId = 'pets.errors.typeRequired';
     if (pet?.weight && parseFloat(pet.weight) <= 0)
-      newErrors.weight = 'Weight must be greater than 0';
+      newErrors.weight = 'pets.errors.weightPositive';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -211,7 +212,7 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
     setIsSubmitting(true);
     try {
       const petRequest: PetRequestModel = {
-        ownerId,
+        customerId,
         name: pet.name,
         petTypeId: pet.petTypeId,
         isActive: pet.isActive ? 'true' : 'false',
@@ -220,7 +221,7 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
       };
 
       const updateResponse = await updatePet(petId, petRequest);
-      setSuccessMessage('Pet updated successfully!');
+      setSuccessMessage('pets.success.updated');
 
       if (updateResponse.data) {
         const updatedPetData = {
@@ -241,7 +242,7 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
       setTimeout(() => onClose(), 1500);
     } catch (error) {
       console.error('Error updating pet:', error);
-      setErrors({ submit: 'Failed to update pet. Please try again.' });
+      setErrors({ submit: 'pets.errors.updateFailed' });
     } finally {
       setIsSubmitting(false);
     }
@@ -254,7 +255,7 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
       onClose();
     } catch (error) {
       console.error('Error deleting pet:', error);
-      setErrors({ submit: 'Failed to delete pet. Please try again.' });
+      setErrors({ submit: 'pets.errors.deleteFailed' });
     }
   };
 
@@ -280,15 +281,15 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
           onClick={e => e.stopPropagation()}
         >
           <div className="customer-modal-header">
-            <h2>Pet Not Found</h2>
+            <h2>{t('pets.notFound.title')}</h2>
             <button className="customer-modal-close" onClick={onClose}>
               ×
             </button>
           </div>
-          <p>Pet not found. Please check the pet ID and try again.</p>
+          <p>{t('pets.notFound.message')}</p>
           <div className="form-actions">
             <button onClick={onClose} className="secondary-button">
-              Close
+              {t('pets.buttons.close')}
             </button>
           </div>
         </div>
@@ -303,12 +304,12 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
           onClick={e => e.stopPropagation()}
         >
           <div className="customer-modal-header">
-            <h2>Loading...</h2>
+            <h2>{t('pets.loading.title')}</h2>
             <button className="customer-modal-close" onClick={onClose}>
               ×
             </button>
           </div>
-          <p>Loading pet data...</p>
+          <p>{t('pets.loading.message')}</p>
         </div>
       </div>
     );
@@ -320,7 +321,7 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
         onClick={e => e.stopPropagation()}
       >
         <div className="customer-modal-header">
-          <h2>Edit Pet: {pet.name}</h2>
+          <h2>{t('pets.editTitle', { name: pet.name })}</h2>
           <button className="customer-modal-close" onClick={onClose}>
             ×
           </button>
@@ -330,7 +331,7 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
           <div className="pet-photo-container">
             <img
               src={petPhotoUrl || defaultProfile}
-              alt={`${pet.name} profile`}
+              alt={t('pets.fields.photoAlt', { name: pet.name })}
               className="pet-photo"
             />
             {petPhotoUrl && petPhotoUrl !== defaultProfile && pet.photo ? (
@@ -340,12 +341,12 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
                 className="delete-photo-button"
                 disabled={isSubmitting}
               >
-                Delete Photo
+                {t('pets.buttons.deletePhoto')}
               </button>
             ) : (
               <>
                 <label htmlFor="petPhotoUpload" className="file-select-button">
-                  Add Photo
+                  {t('pets.buttons.addPhoto')}
                 </label>
                 <input
                   id="petPhotoUpload"
@@ -364,7 +365,7 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
 
         <form onSubmit={handleSubmit} className="customer-add-pet-form">
           <div className="form-group">
-            <label>Pet Name *</label>
+            <label>{t('pets.fields.name')} *</label>
             <input
               type="text"
               name="name"
@@ -374,12 +375,12 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
               disabled={isSubmitting}
             />
             {errors.name && (
-              <span className="error-message">{errors.name}</span>
+              <span className="error-message">{t(errors.name)}</span>
             )}
           </div>
 
           <div className="form-group">
-            <label>Pet Type *</label>
+            <label>{t('pets.fields.petType')} *</label>
             <select
               name="petTypeId"
               value={pet.petTypeId}
@@ -387,15 +388,17 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
               className={errors.petTypeId ? 'error-input' : ''}
               disabled={isSubmitting}
             >
-              <option value="">Select a pet type</option>
+              <option value="">{t('pets.selectType')}</option>
               {petTypes.map(type => (
                 <option key={type.petTypeId} value={type.petTypeId}>
-                  {type.name}
+                  {t(`pets.types.${type.name.toLowerCase()}`, {
+                    defaultValue: type.name,
+                  })}
                 </option>
               ))}
             </select>
             {errors.petTypeId && (
-              <span className="error-message">{errors.petTypeId}</span>
+              <span className="error-message">{t(errors.petTypeId)}</span>
             )}
           </div>
 
@@ -408,12 +411,12 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
                 onChange={handleChange}
                 disabled={isSubmitting}
               />
-              Is Active
+              {t('pets.fields.isActive')}
             </label>
           </div>
 
           <div className="form-group">
-            <label>Weight (kg) *</label>
+            <label>{t('pets.fields.weight')} *</label>
             <input
               type="number"
               name="weight"
@@ -425,12 +428,12 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
               disabled={isSubmitting}
             />
             {errors.weight && (
-              <span className="error-message">{errors.weight}</span>
+              <span className="error-message">{t(errors.weight)}</span>
             )}
           </div>
 
           <div className="form-group">
-            <label>Birth Date</label>
+            <label>{t('pets.fields.birthDate')}</label>
             <input
               type="date"
               name="birthDate"
@@ -449,10 +452,10 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
           </div>
 
           {errors.submit && (
-            <div className="error-message">{errors.submit}</div>
+            <div className="error-message">{t(errors.submit)}</div>
           )}
           {successMessage && (
-            <div className="success-message">{successMessage}</div>
+            <div className="success-message">{t(successMessage)}</div>
           )}
 
           <div className="form-actions">
@@ -462,14 +465,16 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
               className="secondary-button"
               disabled={isSubmitting}
             >
-              Cancel
+              {t('pets.buttons.cancel')}
             </button>
             <button
               type="submit"
               className="primary-button"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Updating...' : 'Update Pet'}
+              {isSubmitting
+                ? t('pets.buttons.updating')
+                : t('pets.buttons.update')}
             </button>
             <button
               type="button"
@@ -477,7 +482,7 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
               className="delete-button"
               disabled={isSubmitting}
             >
-              Delete Pet
+              {t('pets.buttons.delete')}
             </button>
           </div>
         </form>
@@ -486,7 +491,7 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
           <div className="customer-modal-overlay">
             <div className="customer-modal-content">
               <div className="customer-modal-header">
-                <h2>Confirm Delete</h2>
+                <h2>{t('pets.deleteModal.title')}</h2>
                 <button
                   className="customer-modal-close"
                   onClick={closeDeleteModal}
@@ -494,16 +499,13 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
                   ×
                 </button>
               </div>
-              <p>
-                Are you sure you want to delete this pet? This action cannot be
-                undone.
-              </p>
+              <p>{t('pets.deleteModal.message')}</p>
               <div className="form-actions">
                 <button onClick={closeDeleteModal} className="secondary-button">
-                  Cancel
+                  {t('pets.buttons.cancel')}
                 </button>
                 <button onClick={handleDelete} className="delete-button">
-                  Delete
+                  {t('pets.buttons.confirmDelete')}
                 </button>
               </div>
             </div>

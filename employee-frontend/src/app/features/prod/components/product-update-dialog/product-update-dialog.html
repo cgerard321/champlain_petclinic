@@ -1,0 +1,90 @@
+<div class="dialog-header">
+  <h2 mat-dialog-title>Update Product</h2>
+  <button
+    class="dialog-close-button"
+    mat-icon-button
+    mat-dialog-close
+    type="button"
+    aria-label="Close Update Product dialog"
+  >
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<form class="product-form" (submit)="submit($event)">
+  <mat-dialog-content>
+    <mat-form-field appearance="outline">
+      <mat-label>Product name</mat-label>
+      <input matInput type="text" [formField]="productForm.productName" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Description</mat-label>
+      <textarea matInput rows="4" [formField]="productForm.productDescription"></textarea>
+    </mat-form-field>
+
+    <div class="two-column">
+      <mat-form-field appearance="outline">
+        <mat-label>Sale price</mat-label>
+        <input matInput type="number" step="0.01" [formField]="productForm.productSalePrice" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Quantity</mat-label>
+        <input matInput type="number" step="1" [formField]="productForm.productQuantity" />
+      </mat-form-field>
+    </div>
+
+    <div class="two-column">
+      <mat-form-field appearance="outline">
+        <mat-label>Product type</mat-label>
+        <mat-select [formField]="productForm.productTypeId">
+          @for (type of productTypes(); track type.productTypeId) {
+            <mat-option [value]="type.productTypeId">{{ type.typeName }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Delivery type</mat-label>
+        <mat-select [formField]="productForm.deliveryType">
+          @for (type of deliveryTypes(); track type) {
+            <mat-option [value]="type">{{ type.replace('_', ' ') }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Release date</mat-label>
+      <input matInput type="date" [formField]="productForm.releaseDate" />
+    </mat-form-field>
+
+    <label class="file-label" for="update-product-image">Replace product image</label>
+    <input
+      class="file-input"
+      id="update-product-image"
+      type="file"
+      accept="image/jpeg,image/jpg,image/png"
+      (change)="selectFile($event)"
+    />
+    @if (selectedFile(); as file) {
+      <span class="file-name">{{ file.name }}</span>
+    }
+    @if (fileError()) {
+      <p class="error-message">{{ fileError() }}</p>
+    }
+    @if (errorMessage()) {
+      <p class="error-message">{{ errorMessage() }}</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" [disabled]="isSubmitting()" (click)="cancel()">Cancel</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="isSubmitting()">
+      @if (isSubmitting()) {
+        <mat-progress-spinner diameter="20" mode="indeterminate" />
+      } @else {
+        Save Product
+      }
+    </button>
+  </mat-dialog-actions>
+</form>

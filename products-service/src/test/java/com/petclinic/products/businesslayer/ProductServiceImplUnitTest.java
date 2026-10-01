@@ -5,7 +5,8 @@ import com.petclinic.products.businesslayer.products.ProductServiceImpl;
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductRepository;
 import com.petclinic.products.datalayer.products.ProductStatus;
-import com.petclinic.products.datalayer.products.ProductType;
+import com.petclinic.products.datalayer.products.ProductTypeDb;
+import com.petclinic.products.datalayer.products.ProductTypeRepository;
 import com.petclinic.products.presentationlayer.products.ProductResponseModel;
 import com.petclinic.products.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
@@ -18,10 +19,9 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Arrays;
 import java.util.Collections;
-
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -33,6 +33,9 @@ class ProductServiceImplUnitTest {
 
     @Mock
     private ProductRepository productRepository;
+
+    @Mock
+    private ProductTypeRepository productTypeRepository;
 
     @InjectMocks
     private ProductServiceImpl productService;
@@ -132,43 +135,54 @@ class ProductServiceImplUnitTest {
         verify(productRepository, never()).save(any(Product.class));
     }
     @Test
-    void shouldReturnProductsWhenProductTypeIsValid() {
+    void shouldReturnProductsWhenProductTypeIdIsValid() {
         // Arrange
+        String foodTypeId = "586d0700-57db-4312-b6f1-413b79dd018c";
+        ProductTypeDb foodType = ProductTypeDb.builder()
+                .productTypeId(foodTypeId)
+                .typeName("FOOD")
+                .build();
+
         Product foodProduct1 = new Product();
         foodProduct1.setProductId("1");
         foodProduct1.setProductName("Dog Food");
-        foodProduct1.setProductType(ProductType.FOOD);
+        foodProduct1.setProductTypeId(foodTypeId);
 
         Product foodProduct2 = new Product();
         foodProduct2.setProductId("2");
         foodProduct2.setProductName("Cat Food");
-        foodProduct2.setProductType(ProductType.FOOD);
+        foodProduct2.setProductTypeId(foodTypeId);
 
-        List<Product> foodProducts = Arrays.asList(foodProduct1, foodProduct2);
-
-        when(productRepository.findByProductType(ProductType.FOOD)).thenReturn(foodProducts);
+        when(productRepository.findProductsByProductTypeId(foodTypeId))
+                .thenReturn(Flux.just(foodProduct1, foodProduct2));
+        when(productTypeRepository.findByProductTypeId(foodTypeId)).thenReturn(Mono.just(foodType));
 
         // Act
-        List<Product> result = productService.getProductsByType(ProductType.FOOD);
+        List<ProductResponseModel> result = productService.getProductsByProductTypeId(foodTypeId)
+                .collectList()
+                .block();
 
         // Assert
         assertEquals(2, result.size());
-        assertEquals(ProductType.FOOD, result.get(0).getProductType());
-        verify(productRepository, times(1)).findByProductType(ProductType.FOOD);
+        assertTrue(result.stream().allMatch(p -> "FOOD".equals(p.getProductType())));
+        verify(productRepository, times(1)).findProductsByProductTypeId(foodTypeId);
     }
 
 
     @Test
-    void shouldReturnEmptyListWhenProductTypeIsInvalid() {
+    void shouldReturnEmptyListWhenProductTypeIdIsInvalid() {
         // Arrange
-        when(productRepository.findByProductType(ProductType.ACCESSORY)).thenReturn(Collections.emptyList());
+        String invalidTypeId = "00000000-0000-0000-0000-000000000000";
+        when(productRepository.findProductsByProductTypeId(invalidTypeId)).thenReturn(Flux.empty());
 
         // Act
-        List<Product> result = productService.getProductsByType(ProductType.ACCESSORY);
+        List<ProductResponseModel> result = productService.getProductsByProductTypeId(invalidTypeId)
+                .collectList()
+                .block();
 
         // Assert
         assertTrue(result.isEmpty());
-        verify(productRepository, times(1)).findByProductType(ProductType.ACCESSORY);
+        verify(productRepository, times(1)).findProductsByProductTypeId(invalidTypeId);
     }
 
 
