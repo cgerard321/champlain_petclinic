@@ -1,6 +1,7 @@
 package com.petclinic.bffapigateway.presentationlayer.v1;
 
 import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
+import com.petclinic.bffapigateway.businesslayer.ReviewAuthorService;
 import com.petclinic.bffapigateway.domainclientlayer.RatingsServiceClient;
 import com.petclinic.bffapigateway.dtos.Ratings.RatingRequestModel;
 import com.petclinic.bffapigateway.dtos.Ratings.RatingResponseModel;
@@ -26,6 +27,7 @@ import java.util.HashMap;
 @Slf4j
 public class RatingControllerV1 {
     private final RatingsServiceClient ratingsServiceClient;
+    private final ReviewAuthorService reviewAuthorService;
     private final AuthServiceClient authServiceClient;
 
     private class UserCache{
@@ -78,7 +80,8 @@ public class RatingControllerV1 {
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping(value = "/product/{productId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<RatingResponseModel> getAllRatingsForProductId(@PathVariable String productId){
-        return ratingsServiceClient.getAllRatingsForProductId(productId);
+        return ratingsServiceClient.getAllRatingsForProductId(productId)
+                .flatMapSequential(rating -> reviewAuthorService.enrich(rating), 4);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ALL})

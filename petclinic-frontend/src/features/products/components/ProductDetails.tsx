@@ -9,6 +9,7 @@ import { updateUserRating } from '../api/updateUserRating';
 import { getProduct } from '../api/getProduct';
 import { deleteUserRating } from '../api/deleteUserRating';
 import './ProductDetails.css';
+import defaultProfile from '@/assets/Customers/defaultProfilePicture.png';
 import StarRating from './StarRating';
 import { RatingModel } from '../models/ProductModels/RatingModel';
 import { getUserRatingsForProduct } from '../api/getUserRatingsForProduct';
@@ -264,7 +265,10 @@ export default function ProductDetails(): JSX.Element {
             ) : (
               <>
                 <div className="productimage-container">
-                  <ImageContainer imageId={currentProduct.imageId} />
+                  <ImageContainer
+                    image={currentProduct.image}
+                    imageId={currentProduct.imageId}
+                  />
                 </div>
                 <div className="productdetails-container">
                   <div
@@ -482,10 +486,28 @@ export default function ProductDetails(): JSX.Element {
                     {productReviews.length > 0 ? (
                       productReviews.map(
                         (rating: RatingModel, index: number) => (
-                          <div key={index} className="reviewbox">
+                          <div
+                            key={rating.customerId || index}
+                            className="reviewbox"
+                          >
+                            <div className="product-review-author">
+                              <img
+                                src={rating.reviewerPhoto || defaultProfile}
+                                alt={`${rating.reviewerUsername || 'Customer'} profile picture`}
+                                onError={event => {
+                                  event.currentTarget.onerror = null;
+                                  event.currentTarget.src = defaultProfile;
+                                }}
+                              />
+                              <span>
+                                {rating.reviewerUsername || 'Customer'}
+                              </span>
+                            </div>
                             {isAuthenticated &&
                               currentUserRating.rating > 0 &&
-                              currentUserRating.review === rating.review &&
+                              !!currentUserRating.customerId &&
+                              currentUserRating.customerId ===
+                                rating.customerId &&
                               !isStaff && (
                                 <div className="review-card-actions">
                                   <button
