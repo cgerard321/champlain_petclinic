@@ -7,7 +7,16 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { catchError, debounceTime, distinctUntilChanged, EMPTY, Subject, switchMap } from 'rxjs';
+import {
+  catchError,
+  debounceTime,
+  distinctUntilChanged,
+  EMPTY,
+  map,
+  merge,
+  Subject,
+  switchMap,
+} from 'rxjs';
 
 import { isApiError } from '@core/models/api-error';
 import { AuthState } from '@core/services/auth-state';
@@ -40,6 +49,7 @@ export class Prod implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly destroyRef = inject(DestroyRef);
   private readonly productSearch = new Subject<string>();
+  private readonly reload = new Subject<void>();
   private readonly searchTerm = signal('');
 
   protected readonly products = signal<Product[]>([]);
@@ -51,10 +61,11 @@ export class Prod implements OnInit {
   });
 
   ngOnInit(): void {
-    this.productSearch
+    merge(
+      this.productSearch.pipe(debounceTime(300), distinctUntilChanged()),
+      this.reload.pipe(map(() => this.searchTerm())),
+    )
       .pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
         switchMap((productName) => {
           this.isLoading.set(true);
           this.errorMessage.set(null);
@@ -83,19 +94,7 @@ export class Prod implements OnInit {
   }
 
   protected loadProducts(): void {
-    this.isLoading.set(true);
-    this.errorMessage.set(null);
-    const productName = this.searchTerm();
-    this.productService.getProducts(productName ? { productName } : {}).subscribe({
-      next: (products) => {
-        this.products.set(products);
-        this.isLoading.set(false);
-      },
-      error: (error: unknown) => {
-        this.isLoading.set(false);
-        this.errorMessage.set(isApiError(error) ? error.message : 'Could not load products.');
-      },
-    });
+    this.reload.next();
   }
 
   protected openAddProduct(): void {
