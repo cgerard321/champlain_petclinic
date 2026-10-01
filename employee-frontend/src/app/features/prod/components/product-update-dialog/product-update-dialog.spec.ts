@@ -40,7 +40,7 @@ describe('ProductUpdateDialog', () => {
                   { productTypeId: '586d0700-57db-4312-b6f1-413b79dd018c', typeName: 'FOOD' },
                 ],
                 productStatus: [],
-                deliveryType: [],
+                deliveryType: ['DELIVERY', 'PICKUP'],
               }),
             updateProduct: () => of({ productId: 'product-1' }),
             updateProductImage: () => of({ productId: 'product-1' }),
@@ -65,4 +65,13 @@ describe('ProductUpdateDialog', () => {
     const fixture = TestBed.createComponent(ProductUpdateDialog);
     expect(fixture.componentInstance).toBeTruthy();
   });
+});
+
+it('loads delivery types from the enums API', () => {
+  const fixture = TestBed.createComponent(ProductUpdateDialog);
+  fixture.detectChanges();
+
+  const component = fixture.componentInstance as any;
+
+  expect(component.deliveryTypes()).toEqual(['DELIVERY', 'PICKUP']);
 });
