@@ -35,10 +35,12 @@ public class ProductController {
             @RequestParam(required = false) String sort,
             @RequestParam(required = false) String deliveryType,
             @RequestParam(required = false) String productType,
+            @RequestParam(required = false) String productName,
             @RequestParam(defaultValue = "false") boolean includeImage) {
 
-        Flux<ProductResponseModel> products = productService.getAllProducts(
-                minPrice, maxPrice, minRating, maxRating, sort, deliveryType, productType);
+        Flux<ProductResponseModel> products = (productName == null || productName.isBlank())
+                ? productService.getAllProducts(minPrice, maxPrice, minRating, maxRating, sort, deliveryType, productType)
+                : productService.getAllProducts(minPrice, maxPrice, minRating, maxRating, sort, deliveryType, productType, productName);
 
         return includeImage
                 ? products.flatMapSequential(productService::includeImage, 8)

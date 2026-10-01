@@ -8,6 +8,7 @@ import reactor.core.publisher.Mono;
 public interface ProductService {
 
     Flux<ProductResponseModel> getAllProducts(Double minPrice, Double maxPrice, Double minRating, Double maxRating, String sort, String deliveryType, String productType);
+    Flux<ProductResponseModel> getAllProducts(Double minPrice, Double maxPrice, Double minRating, Double maxRating, String sort, String deliveryType, String productType, String productName);
 
     default Mono<ProductResponseModel> getProductByProductId(String productId) {
         return getProductByProductId(productId, false);
