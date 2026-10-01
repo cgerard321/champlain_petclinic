@@ -145,6 +145,10 @@
       <p class="favorite-error" role="alert">{{ saveError }}</p>
     }
 
+    @if (deleteError(); as delErr) {
+      <p class="field-error" role="alert">{{ delErr }}</p>
+    }
+
     @if (isLoading()) {
       <div class="state-container">
         <mat-spinner diameter="40" />
