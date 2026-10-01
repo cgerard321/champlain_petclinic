@@ -202,7 +202,9 @@ describe('SupplyPage', () => {
     expect(fixture.nativeElement.querySelector('.supply-form')).not.toBeNull();
     const nameInput = fixture.nativeElement.querySelector('#productName') as HTMLInputElement;
     expect(nameInput.value).toBe('Updated Bandage');
-    expect(fixture.nativeElement.querySelector('.add-supply-button')?.textContent.trim()).toBe('Cancel');
+    expect(fixture.nativeElement.querySelector('.add-supply-button')?.textContent.trim()).toBe(
+      'Cancel',
+    );
   });
 
   it('should populate the form when editing a supply', () => {
@@ -324,7 +326,9 @@ describe('SupplyPage', () => {
 
     await fixture.whenStable();
 
-    expect(component['supplyForm'].productPrice().errors()[0]?.message).toBe('Cost price is required');
+    expect(component['supplyForm'].productPrice().errors()[0]?.message).toBe(
+      'Cost price is required',
+    );
     expect(component['supplyForm'].productQuantity().errors()[0]?.message).toBe(
       'Quantity is required',
     );

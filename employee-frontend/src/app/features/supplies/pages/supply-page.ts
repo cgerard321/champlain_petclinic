@@ -176,7 +176,7 @@ export class SupplyPage {
     this.editingSupplyId.set(supply.productId);
     this.addError.set('');
 
-    // Reset field interaction state when switching to a different supply.
+    // reset() clears touched and dirty state from the previous edit as it loads this supply.
     this.supplyForm().reset({
       productName: supply.productName,
       productDescription: supply.productDescription,
