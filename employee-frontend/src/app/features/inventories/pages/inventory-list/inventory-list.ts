@@ -1,8 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
-import { FormField, form, required, submit } from '@angular/forms/signals';
-import { Component, computed, DestroyRef, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormField, form, required, submit } from '@angular/forms/signals';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -21,14 +20,11 @@ import {
 } from '@features/inventories/models/inventory.model';
 import { InventoryService } from '@features/inventories/services/inventory-service';
 import { getInventoryPermissions } from '@shared/models/inventory-permissions';
+import { Roles } from '@shared/models/roles';
 
-// added — some existing inventories have a type outside the four the
-// dropdown offers (e.g. "Diagnostic Kits"), so when editing one of those
-// this checks whether its current type is even a valid option
 function isInventoryType(value: string): value is InventoryTypeValue {
   return (INVENTORY_TYPES as readonly string[]).includes(value);
 }
-import { Roles } from '@shared/models/roles';
 
 @Component({
   imports: [RouterLink, MatCardModule, MatIconModule, MatProgressSpinnerModule, FormField],
@@ -64,14 +60,8 @@ export class InventoryList implements OnInit, OnDestroy {
     importantOnly: false,
   });
 
-  private readonly authState = inject(AuthState);
-  // this tells the page what the current user is allowed to do (view/create/edit/delete)
-  protected readonly can = computed(() => getInventoryPermissions(this.authState.roles()));
+  protected readonly can = computed(() => getInventoryPermissions(this.auth.roles()));
 
-  // form + state for the Add/Edit Inventory form
-  // keeping it as a plain inline form for now, not a modal, since the modal
-  // ticket (Lazaro's) is supposed to wrap an existing form, and there wasn't
-  // one yet — this is that form
   protected readonly showAddForm = signal(false);
   protected readonly editingInventoryId = signal<string | null>(null);
   protected readonly savingInventory = signal(false);
@@ -79,9 +69,6 @@ export class InventoryList implements OnInit, OnDestroy {
 
   protected readonly inventoryTypesDropdown = INVENTORY_TYPES;
 
-  // explicit <InventoryRequest> here on purpose — without it, TS narrows
-  // inventoryType down to just 'Bandages' (the literal from the initial
-  // value below) and rejects setting it to any of the other three later
   protected readonly newInventory = signal<InventoryRequest>({
     inventoryName: '',
     inventoryType: INVENTORY_TYPES[0],
@@ -93,6 +80,7 @@ export class InventoryList implements OnInit, OnDestroy {
     required(path.inventoryType, { message: 'Type is required' });
     required(path.inventoryDescription, { message: 'Description is required' });
   });
+
   protected readonly canManageFavorites = computed(
     () => this.auth.hasRole(Roles.admin) || this.auth.hasRole(Roles.inventoryManager),
   );
@@ -102,8 +90,6 @@ export class InventoryList implements OnInit, OnDestroy {
   );
 
   ngOnInit(): void {
-    // receptionist doesn't have access to any inventory data right now (checked
-    // the gateway's @SecuredEndpoint roles), so don't even open the stream for them
     if (!this.can().hasAnyAccess) {
       this.isLoading.set(false);
       return;
@@ -192,9 +178,9 @@ export class InventoryList implements OnInit, OnDestroy {
 
     return Boolean(
       filters.inventoryName.trim() ||
-      filters.inventoryType.trim() ||
-      filters.inventoryDescription.trim() ||
-      filters.importantOnly,
+        filters.inventoryType.trim() ||
+        filters.inventoryDescription.trim() ||
+        filters.importantOnly,
     );
   }
 
@@ -240,7 +226,6 @@ export class InventoryList implements OnInit, OnDestroy {
             );
           });
         },
-        // The star is only updated on success, so a failed save leaves it as it was.
         error: () => {
           this.favoriteError.set(`Could not update the favorite for ${inventory.inventoryName}.`);
         },
@@ -369,34 +354,10 @@ export class InventoryList implements OnInit, OnDestroy {
       }));
     }
 
-    // the quantity endpoint only works for admin/inventory manager on the
-    // backend, so don't bother calling it for vet — it would just 403 every
-    // single time an item comes in from the stream
     if (!this.can().canViewProductQuantity) {
       return;
     }
 
-    const subscription = this.inventoryService.getQuantity(inventoryId).subscribe({
-      next: (quantity) => {
-        this.quantities.update((current) => ({
-          ...current,
-          [inventoryId]: quantity,
-        }));
-      },
-      error: () => {
-        if (!(inventoryId in this.quantities())) {
-          this.quantities.update((current) => ({
-            ...current,
-            [inventoryId]: null,
-          }));
-        }
-      },
-      complete: () => {
-        this.quantitySubscriptions.delete(subscription);
-      },
-    });
-
-    this.quantitySubscriptions.add(subscription);
     let subscription = Subscription.EMPTY;
     const forgetSubscription = (): void => {
       this.quantitySubscriptions.delete(subscription);
@@ -419,15 +380,12 @@ export class InventoryList implements OnInit, OnDestroy {
         },
       });
 
-    // Only track the request if it is still open.
     if (subscription.closed) {
       forgetSubscription();
     } else {
       this.quantitySubscriptions.add(subscription);
     }
   }
-
-  // form actions below
 
   protected toggleAddForm(): void {
     this.showAddForm.update((visible) => !visible);
@@ -443,7 +401,6 @@ export class InventoryList implements OnInit, OnDestroy {
     this.editingInventoryId.set(inventory.inventoryId);
     this.newInventory.set({
       inventoryName: inventory.inventoryName,
-      // the drop down  menu
       inventoryType: isInventoryType(inventory.inventoryType)
         ? inventory.inventoryType
         : INVENTORY_TYPES[0],
@@ -468,9 +425,6 @@ export class InventoryList implements OnInit, OnDestroy {
 
       request$.subscribe({
         next: (saved) => {
-          // updating the list right here instead of waiting for the SSE stream
-          // to reconnect (it can take a few seconds), so the change shows up
-          // on screen immediately like the ticket asks for
           this.inventories.update((current) => {
             const idx = current.findIndex((inv) => inv.inventoryId === saved.inventoryId);
             if (idx === -1) return [...current, saved];
@@ -506,8 +460,6 @@ export class InventoryList implements OnInit, OnDestroy {
 
     this.inventoryService.deleteInventory(inventory.inventoryId).subscribe({
       next: () => {
-        // same as above, remove it from the list right away instead of
-        // waiting for the stream to catch up
         this.inventories.update((current) =>
           current.filter((inv) => inv.inventoryId !== inventory.inventoryId),
         );
