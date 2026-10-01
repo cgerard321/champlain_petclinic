@@ -5,3 +5,13 @@ export interface Inventory {
   inventoryDescription: string;
   important?: boolean;
 }
+export interface InventoryFilters {
+  inventoryName: string;
+  inventoryType: string;
+  inventoryDescription: string;
+  importantOnly: boolean;
+}
+export interface InventoryType {
+  typeId: string;
+  type: string;
+}
