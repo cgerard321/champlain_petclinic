@@ -6,7 +6,7 @@ import { useState, useMemo, useEffect } from 'react';
 import ProductSearch from '@/features/products/components/ProductSearch';
 import StarRating from '@/features/products/components/StarRating';
 import { ProductTypeModel } from '@/features/products/models/ProductModels/ProductTypeModel.ts';
-import { getProductTypes } from '@/features/products/api/getProductTypes.ts';
+import { getProductEnums } from '@/features/products/api/getProductEnums';
 
 export default function Products(): JSX.Element {
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -15,6 +15,7 @@ export default function Products(): JSX.Element {
   const [showSortOptions, setShowSortOptions] = useState(false);
   const [sortCriteria, setSortCriteria] = useState('default');
   const [productTypes, setProductTypes] = useState<ProductTypeModel[]>([]);
+  const [deliveryTypes, setDeliveryTypes] = useState<string[]>([]);
 
   const defaultFilters = useMemo(
     () => ({
@@ -56,11 +57,17 @@ export default function Products(): JSX.Element {
     setValidationMessage('');
   };
 
-  useEffect(() => {
-    getProductTypes()
-      .then(setProductTypes)
-      .catch(() => setProductTypes([]));
-  }, []);
+    useEffect(() => {
+        getProductEnums()
+            .then(enums => {
+                setProductTypes(enums.productType);
+                setDeliveryTypes(enums.deliveryType);
+            })
+            .catch(() => {
+                setProductTypes([]);
+                setDeliveryTypes([]);
+            });
+    }, []);
 
   const filters = useMemo(() => appliedFilters, [appliedFilters]);
 
@@ -198,11 +205,16 @@ export default function Products(): JSX.Element {
                 value={tempFilters.deliveryType}
                 onChange={e => updateTempFilter('deliveryType', e.target.value)}
               >
-                <option value="">All Delivery Types</option>
-                <option value="DELIVERY">Delivery</option>
-                <option value="PICKUP">Pickup</option>
-                <option value="DELIVERY_AND_PICKUP">Delivery & Pickup</option>
-                <option value="NO_DELIVERY_OPTION">No Delivery Option</option>
+                  <option value="">All Delivery Types</option>
+                  {deliveryTypes.map(type => (
+                      <option key={type} value={type}>
+                          {type
+                              .toLowerCase()
+                              .split('_')
+                              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                              .join(' ')}
+                      </option>
+                  ))}
               </select>
             </label>
 
