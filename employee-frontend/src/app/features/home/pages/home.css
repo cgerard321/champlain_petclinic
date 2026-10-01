@@ -1,1 +1,133 @@
-/* Placeholder styling */
+.home-container {
+  padding: 32px 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.welcome-card {
+  background: #fff !important;
+  border: 1px solid #e0eae0 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 20px rgb(27 56 43 / 5%) !important;
+  padding: 36px 40px;
+}
+
+.welcome-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+.welcome-text {
+  flex: 1;
+}
+
+.welcome-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: #2e523e;
+  background-color: #e5efe4;
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-bottom: 14px;
+}
+
+.welcome-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: #1b382b;
+  margin: 0 0 12px;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.welcome-description {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #4a6353;
+  margin: 0;
+  max-width: 620px;
+}
+
+/* --- Clinic Logo Emblem --- */
+.logo-wrapper {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand-emblem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #f7faf7;
+  padding: 16px 24px;
+  border-radius: 14px;
+  border: 1px solid #e0eae0;
+  box-shadow: 0 2px 8px rgb(27 56 43 / 4%);
+}
+
+.brand-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #1b382b;
+  letter-spacing: -0.5px;
+}
+
+.brand-highlight {
+  color: #1b382b;
+}
+
+.paw-group {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  color: #3b2d41;
+}
+
+.paw-icon {
+  display: inline-block;
+}
+
+.paw-large {
+  width: 24px;
+  height: 24px;
+  transform: rotate(12deg);
+}
+
+.paw-small {
+  width: 16px;
+  height: 16px;
+  transform: rotate(28deg) translateY(-3px);
+}
+
+/* --- Mobile Responsiveness --- */
+@media (width <= 768px) {
+  .home-container {
+    padding: 16px;
+  }
+
+  .welcome-card {
+    padding: 24px;
+  }
+
+  .welcome-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+  }
+
+  .welcome-title {
+    font-size: 24px;
+  }
+
+  .logo-wrapper {
+    width: 100%;
+    justify-content: center;
+  }
+}

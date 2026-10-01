@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 import com.petclinic.bffapigateway.dtos.Files.FileDetails;
 import com.petclinic.bffapigateway.dtos.Products.*;
 import com.petclinic.bffapigateway.exceptions.BadRequestException;
+import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.exceptions.ProductImageDependencyException;
 import com.petclinic.bffapigateway.exceptions.ProductNotFoundException;
@@ -39,16 +40,36 @@ public class ProductsServiceClient {
 
     }
 
-    public Flux<ProductResponseDTO> getAllProducts(Double minPrice, Double maxPrice,Double minRating, Double maxRating, String sort,String deliveryType, String productType) {
+    public Flux<ProductResponseDTO> getAllProducts(
+            Double minPrice, Double maxPrice, Double minRating, Double maxRating,
+            String sort, String deliveryType, String productType) {
         return getAllProducts(
                 minPrice, maxPrice, minRating, maxRating, sort, deliveryType,
-                productType, false);
+                productType, null, false);
+    }
+
+    public Flux<ProductResponseDTO> getAllProducts(
+            Double minPrice, Double maxPrice, Double minRating, Double maxRating,
+            String sort, String deliveryType, String productType,
+            String productName) {
+        return getAllProducts(
+                minPrice, maxPrice, minRating, maxRating, sort, deliveryType,
+                productType, productName, false);
     }
 
     public Flux<ProductResponseDTO> getAllProducts(
             Double minPrice, Double maxPrice, Double minRating, Double maxRating,
             String sort, String deliveryType, String productType,
             boolean includeImage) {
+        return getAllProducts(
+                minPrice, maxPrice, minRating, maxRating, sort, deliveryType,
+                productType, null, includeImage);
+    }
+
+    public Flux<ProductResponseDTO> getAllProducts(
+            Double minPrice, Double maxPrice, Double minRating, Double maxRating,
+            String sort, String deliveryType, String productType,
+            String productName, boolean includeImage) {
         return webClient.get()
                 .uri(uriBuilder -> {
                     if (minPrice != null) {
@@ -71,6 +92,9 @@ public class ProductsServiceClient {
                     }
                     if (productType != null) {
                         uriBuilder.queryParam("productType", productType);
+                    }
+                    if (productName != null && !productName.isBlank()) {
+                        uriBuilder.queryParam("productName", productName.trim());
                     }
                     uriBuilder.queryParam("includeImage", includeImage);
                     return uriBuilder.build();
@@ -208,7 +232,7 @@ public class ProductsServiceClient {
                 .bodyToMono(Void.class);
 
     }
-    public Flux<ProductResponseDTO> getProductsByType(final String type){
+    public Flux<ProductResponseDTO> getProductsByType(final String type) {
         return getProductsByType(type, false);
     }
 
@@ -336,6 +360,11 @@ public class ProductsServiceClient {
                 .delete()
                 .uri(productsServiceUrl + "/types/"  + productTypeId)
                 .retrieve()
+                .onStatus(
+                        status -> status.value() == 409,
+                        response -> Mono.error(new GenericHttpException(
+                                "Cannot delete product type that is still used by products",
+                                HttpStatus.CONFLICT)))
                 .bodyToMono(ProductTypeResponseDTO.class);
     }
 

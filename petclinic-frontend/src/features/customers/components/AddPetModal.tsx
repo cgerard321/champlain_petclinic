@@ -1,4 +1,5 @@
 import { FormEvent, useState, useEffect, ChangeEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import * as PropTypes from 'prop-types';
 import { addPetForCustomer } from '../api/addPetForCustomer.ts';
 import { addPetPhoto } from '../api/addPetPhoto';
@@ -22,6 +23,7 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
   onClose,
   onPetAdded,
 }): JSX.Element | null => {
+  const { t } = useTranslation('customers');
   const [pet, setPet] = useState<PetRequestModel>({
     customerId,
     name: '',
@@ -94,11 +96,11 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
 
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
-    if (!pet.name.trim()) newErrors.name = 'Pet name is required';
-    if (!pet.weight.trim()) newErrors.weight = 'Weight is required';
-    if (!pet.petTypeId) newErrors.petTypeId = 'Pet type is required';
+    if (!pet.name.trim()) newErrors.name = 'pets.errors.nameRequired';
+    if (!pet.weight.trim()) newErrors.weight = 'pets.errors.weightRequired';
+    if (!pet.petTypeId) newErrors.petTypeId = 'pets.errors.typeRequired';
     if (parseFloat(pet.weight) <= 0)
-      newErrors.weight = 'Weight must be greater than 0';
+      newErrors.weight = 'pets.errors.weightPositive';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -128,7 +130,7 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
       }
     } catch (error) {
       console.error('Error adding pet:', error);
-      setErrors({ submit: 'Failed to add pet. Please try again.' });
+      setErrors({ submit: 'pets.errors.addFailed' });
     } finally {
       setIsSubmitting(false);
     }
@@ -159,7 +161,7 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
         onClick={e => e.stopPropagation()}
       >
         <div className="customer-modal-header">
-          <h2>Add New Pet</h2>
+          <h2>{t('pets.addTitle')}</h2>
           <button className="customer-modal-close" onClick={handleClose}>
             &times;
           </button>
@@ -169,11 +171,11 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
           <div className="pet-photo-container">
             <img
               src={petPhotoUrl}
-              alt="New pet profile"
+              alt={t('pets.fields.newPhotoAlt')}
               className="pet-photo"
             />
             <div className="file-input-row">
-              <label htmlFor="pet-photo">Upload Photo:</label>
+              <label htmlFor="pet-photo">{t('pets.fields.uploadPhoto')}</label>
               <input
                 type="file"
                 id="pet-photo"
@@ -187,7 +189,7 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
 
         <form onSubmit={handleSubmit} className="add-pet-form">
           <div className="form-group">
-            <label>Pet Name *</label>
+            <label>{t('pets.fields.name')} *</label>
             <input
               type="text"
               name="name"
@@ -197,12 +199,12 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
               disabled={isSubmitting}
             />
             {errors.name && (
-              <span className="error-message">{errors.name}</span>
+              <span className="error-message">{t(errors.name)}</span>
             )}
           </div>
 
           <div className="form-group">
-            <label>Pet Type *</label>
+            <label>{t('pets.fields.petType')} *</label>
             <select
               name="petTypeId"
               value={pet.petTypeId}
@@ -212,22 +214,24 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
             >
               <option value="">
                 {isLoadingPetTypes
-                  ? 'Loading pet types...'
-                  : 'Select a pet type'}
+                  ? t('pets.loadingTypes')
+                  : t('pets.selectType')}
               </option>
               {petTypes.map(type => (
                 <option key={type.petTypeId} value={type.petTypeId}>
-                  {type.name}
+                  {t(`pets.types.${type.name.toLowerCase()}`, {
+                    defaultValue: type.name,
+                  })}
                 </option>
               ))}
             </select>
             {errors.petTypeId && (
-              <span className="error-message">{errors.petTypeId}</span>
+              <span className="error-message">{t(errors.petTypeId)}</span>
             )}
           </div>
 
           <div className="form-group">
-            <label>Birth Date</label>
+            <label>{t('pets.fields.birthDate')}</label>
             <input
               type="date"
               name="birthDate"
@@ -247,7 +251,7 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
           </div>
 
           <div className="form-group">
-            <label>Weight (kg) *</label>
+            <label>{t('pets.fields.weight')} *</label>
             <input
               type="number"
               name="weight"
@@ -259,12 +263,12 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
               disabled={isSubmitting}
             />
             {errors.weight && (
-              <span className="error-message">{errors.weight}</span>
+              <span className="error-message">{t(errors.weight)}</span>
             )}
           </div>
 
           {errors.submit && (
-            <div className="error-message">{errors.submit}</div>
+            <div className="error-message">{t(errors.submit)}</div>
           )}
 
           <div className="form-actions">
@@ -274,14 +278,14 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
               className="secondary-button"
               disabled={isSubmitting}
             >
-              Cancel
+              {t('pets.buttons.cancel')}
             </button>
             <button
               type="submit"
               className="primary-button"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Adding...' : 'Add Pet'}
+              {isSubmitting ? t('pets.buttons.adding') : t('pets.buttons.add')}
             </button>
           </div>
         </form>

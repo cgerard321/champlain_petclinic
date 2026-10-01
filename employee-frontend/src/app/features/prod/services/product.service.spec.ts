@@ -5,8 +5,8 @@ import { TestBed } from '@angular/core/testing';
 import {
   DeliveryType,
   Product,
+  ProductRequest,
   ProductStatus,
-  ProductType,
 } from '@features/prod/models/product.model';
 
 import { ProductService } from './product.service';
@@ -33,7 +33,8 @@ describe('ProductService', () => {
       productSalePrice: 10,
       productQuantity: 5,
       isUnlisted: false,
-      productType: ProductType.FOOD,
+      productType: 'FOOD',
+      productTypeId: '586d0700-57db-4312-b6f1-413b79dd018c',
       productStatus: ProductStatus.AVAILABLE,
       deliveryType: DeliveryType.DELIVERY,
     };
@@ -54,14 +55,27 @@ describe('ProductService', () => {
     expect(result?.map((item) => item.productId)).toEqual(['product-1', 'product-2']);
   });
 
+  it('sends a product name search parameter', () => {
+    service.getProducts({ productName: 'horse saddle' }).subscribe();
+
+    const request = http.expectOne(
+      (candidate) =>
+        candidate.url === '/api/gateway/products' &&
+        candidate.params.get('includeImage') === 'true' &&
+        candidate.params.get('productName') === 'horse saddle',
+    );
+    expect(request.request.method).toBe('GET');
+    request.flush('');
+  });
+
   it('creates a product with JSON', () => {
-    const requestBody = {
+    const requestBody: ProductRequest = {
       productName: 'Dog food',
       productDescription: 'Food',
       productSalePrice: 10,
       productQuantity: 5,
       isUnlisted: false,
-      productType: ProductType.FOOD,
+      productTypeId: '586d0700-57db-4312-b6f1-413b79dd018c',
       deliveryType: DeliveryType.DELIVERY,
     };
 
@@ -86,13 +100,13 @@ describe('ProductService', () => {
   });
 
   it('updates a product with JSON', () => {
-    const requestBody = {
+    const requestBody: ProductRequest = {
       productName: 'Updated food',
       productDescription: 'Updated description',
       productSalePrice: 12,
       productQuantity: 8,
       isUnlisted: false,
-      productType: ProductType.FOOD,
+      productTypeId: '586d0700-57db-4312-b6f1-413b79dd018c',
       deliveryType: DeliveryType.DELIVERY,
     };
 
