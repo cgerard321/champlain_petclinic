@@ -3,7 +3,6 @@
     "@types/bad-words": "^3.0.3",
     "axios": "^1.7.7",
     "bad-words": "^4.0.0",
-    "eventsource-parser": "^4.1.1",
     "i18next": "^26.4.2",
     "i18next-http-backend": "^4.0.2",
     "react-bootstrap": "^2.10.4",
