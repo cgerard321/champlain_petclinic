@@ -1,7 +1,14 @@
 import axiosInstance from '@/shared/api/axiosInstance';
-import { VetResponseModel } from '@/features/veterinarians/models/VetResponseModel';
 
-export const getAvailableVets = async (): Promise<VetResponseModel[]> => {
+export interface VetResponse {
+  vetId: string;
+  firstName: string;
+  lastName: string;
+  active: boolean;
+  specialties?: Array<{ specialtyId: string; name: string }>;
+}
+
+export const getAvailableVets = async (): Promise<VetResponse[]> => {
   const response = await axiosInstance.get('/vets', {
     responseType: 'text',
     useV2: false,
@@ -13,7 +20,7 @@ export const getAvailableVets = async (): Promise<VetResponseModel[]> => {
     try {
       const parsed = JSON.parse(data);
       if (Array.isArray(parsed)) {
-        return parsed as VetResponseModel[];
+        return parsed as VetResponse[];
       }
     } catch (err) {}
 
@@ -28,13 +35,11 @@ export const getAvailableVets = async (): Promise<VetResponseModel[]> => {
           return null;
         }
       })
-      .filter(
-        (d: VetResponseModel | null): d is VetResponseModel => d !== null
-      );
+      .filter((d: VetResponse | null): d is VetResponse => d !== null);
   }
 
   if (Array.isArray(data)) {
-    return data as VetResponseModel[];
+    return data as VetResponse[];
   }
 
   return [];
