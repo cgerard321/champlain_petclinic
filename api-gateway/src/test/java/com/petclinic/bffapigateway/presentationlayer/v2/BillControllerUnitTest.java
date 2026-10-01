@@ -93,7 +93,7 @@ private final String baseBillURL = "/api/v2/gateway/bills";
     @Test
     public void whenGetAllBillsByPageWithValidParameters_ThenReturnPagedBills() {
         when(billServiceClient.getAllBillsByPage(Optional.of(1), Optional.of(5), null, null,
-                null, null, null, null, null, null))
+                null, null, null, null, null, null, false))
                 .thenReturn(Flux.just(billresponse, billresponse2));
 
         webTestClient.get()
@@ -110,7 +110,7 @@ private final String baseBillURL = "/api/v2/gateway/bills";
 
         verify(billServiceClient, times(1)).getAllBillsByPage(Optional.of(1),
                 Optional.of(5), null, null, null, null, null,
-                null, null, null);
+                null, null, null, false);
     }
     @Test
     void getAllBillsStream_ShouldReturnAllBills() {

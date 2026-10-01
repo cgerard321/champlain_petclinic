@@ -77,6 +77,14 @@ public class AuthServiceClient {
                 .bodyToMono(Void.class);
     }
 
+    public Mono<PublicUserProfile> getPublicUserProfile(String userId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(authServiceUrl + "/users/{userId}/public-profile", userId)
+                .retrieve()
+                .bodyToMono(PublicUserProfile.class);
+    }
+
     public Mono<UserDetails> getUserById(String jwtToken, String userId) {
         return webClientBuilder.build()
                 .get()
