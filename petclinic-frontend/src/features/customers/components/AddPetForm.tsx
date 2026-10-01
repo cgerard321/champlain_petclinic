@@ -1,24 +1,26 @@
 import * as React from 'react';
 import { FormEvent, useState } from 'react';
-import { addPetForOwner } from '../api/addPetForOwner';
+import { addPetForCustomer } from '../api/addPetForCustomer.ts';
 import { PetRequestModel } from '../models/PetRequestModel';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import './customers.css';
 
 const petTypeOptions: { [key: string]: string } = {
-  '1': 'Cat',
-  '2': 'Dog',
-  '3': 'Lizard',
-  '4': 'Snake',
-  '5': 'Bird',
-  '6': 'Hamster',
+  '1': 'pets.types.cat',
+  '2': 'pets.types.dog',
+  '3': 'pets.types.lizard',
+  '4': 'pets.types.snake',
+  '5': 'pets.types.bird',
+  '6': 'pets.types.hamster',
 };
 
 const AddPetForm: React.FC = (): JSX.Element => {
   const navigate = useNavigate();
-  const { ownerId } = useParams<{ ownerId: string }>();
+  const { t } = useTranslation('customers');
+  const { customerId } = useParams<{ customerId: string }>();
   const [pet, setPet] = useState<PetRequestModel>({
-    ownerId: ownerId || '',
+    customerId: customerId || '',
     name: '',
     birthDate: new Date(),
     petTypeId: '',
@@ -54,9 +56,9 @@ const AddPetForm: React.FC = (): JSX.Element => {
 
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
-    if (!pet?.name) newErrors.name = 'Name is required';
-    if (!pet?.weight) newErrors.weight = 'Weight is required';
-    if (!pet?.petTypeId) newErrors.petTypeId = 'Pet Type is required';
+    if (!pet?.name) newErrors.name = 'pets.errors.nameRequired';
+    if (!pet?.weight) newErrors.weight = 'pets.errors.weightRequired';
+    if (!pet?.petTypeId) newErrors.petTypeId = 'pets.errors.typeRequired';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -65,11 +67,11 @@ const AddPetForm: React.FC = (): JSX.Element => {
     event: FormEvent<HTMLFormElement>
   ): Promise<void> => {
     event.preventDefault();
-    if (!validate() || !ownerId) return;
+    if (!validate() || !customerId) return;
     try {
-      const response = await addPetForOwner(ownerId, pet);
+      const response = await addPetForCustomer(customerId, pet);
       if (response.status === 201) {
-        setSuccessMessage('Pet added successfully!');
+        setSuccessMessage('pets.success.added');
         setIsAddModalOpen(true);
       } else {
         console.error('Error adding pet');
@@ -81,15 +83,15 @@ const AddPetForm: React.FC = (): JSX.Element => {
 
   const closeAddModal = (): void => {
     setIsAddModalOpen(false);
-    navigate(`/customers/${ownerId}`);
+    navigate(`/customers/${customerId}`);
   };
 
   return (
     <div className="form-container">
-      <h1>Add New Pet</h1>
+      <h1>{t('pets.addTitle')}</h1>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label>Name</label>
+          <label>{t('pets.fields.name')}</label>
           <input
             type="text"
             name="name"
@@ -97,31 +99,33 @@ const AddPetForm: React.FC = (): JSX.Element => {
             onChange={handleChange}
             className={errors.name ? 'error-input' : ''}
           />
-          {errors.name && <span className="error-message">{errors.name}</span>}
+          {errors.name && (
+            <span className="error-message">{t(errors.name)}</span>
+          )}
         </div>
 
         <div className="form-group">
-          <label>Pet Type</label>
+          <label>{t('pets.fields.petType')}</label>
           <select
             name="petTypeId"
             value={pet.petTypeId}
             onChange={handleChange}
             className={errors.petTypeId ? 'error-input' : ''}
           >
-            <option value="">Select a pet type</option>
+            <option value="">{t('pets.selectType')}</option>
             {Object.entries(petTypeOptions).map(([id, name]) => (
               <option key={id} value={id}>
-                {name}
+                {t(name)}
               </option>
             ))}
           </select>
           {errors.petTypeId && (
-            <span className="error-message">{errors.petTypeId}</span>
+            <span className="error-message">{t(errors.petTypeId)}</span>
           )}
         </div>
 
         <div className="form-group">
-          <label>Birth Date</label>
+          <label>{t('pets.fields.birthDate')}</label>
           <input
             type="date"
             name="birthDate"
@@ -131,7 +135,7 @@ const AddPetForm: React.FC = (): JSX.Element => {
         </div>
 
         <div className="form-group">
-          <label>Weight (kg)</label>
+          <label>{t('pets.fields.weight')}</label>
           <input
             type="text"
             name="weight"
@@ -140,41 +144,41 @@ const AddPetForm: React.FC = (): JSX.Element => {
             className={errors.weight ? 'error-input' : ''}
           />
           {errors.weight && (
-            <span className="error-message">{errors.weight}</span>
+            <span className="error-message">{t(errors.weight)}</span>
           )}
         </div>
 
         <div className="form-group" style={{ textAlign: 'center' }}>
           <button type="submit" className="button-base primary-button">
-            Add Pet
+            {t('pets.buttons.add')}
           </button>
           <button
             type="button"
-            onClick={() => navigate(`/customers/${ownerId}`)}
+            onClick={() => navigate(`/customers/${customerId}`)}
             className="button-base secondary-button mt-2"
           >
-            Cancel
+            {t('pets.buttons.cancel')}
           </button>
         </div>
       </form>
 
-      {successMessage && <p className="error-message">{successMessage}</p>}
+      {successMessage && <p className="error-message">{t(successMessage)}</p>}
 
       {isAddModalOpen && (
         <div className="customer-modal-overlay">
           <div className="customer-modal-content">
             <div className="customer-modal-header">
-              <h2>Success!</h2>
+              <h2>{t('pets.success.title')}</h2>
               <button className="customer-modal-close" onClick={closeAddModal}>
                 &times;
               </button>
             </div>
-            <p>Pet has been successfully added.</p>
+            <p>{t('pets.success.addedMessage')}</p>
             <button
               onClick={closeAddModal}
               className="button-base primary-button mt-4"
             >
-              Close
+              {t('pets.buttons.close')}
             </button>
           </div>
         </div>

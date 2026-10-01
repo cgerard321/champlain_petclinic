@@ -5,6 +5,7 @@ export async function getProduct(productId: string): Promise<ProductModel> {
   try {
     const response = await axiosInstance.get('/products/' + productId, {
       useV2: false,
+      params: { includeImage: true },
     });
 
     return response.data;

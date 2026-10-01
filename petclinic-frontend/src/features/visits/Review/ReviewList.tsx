@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { getAllReviews } from './Api/getAllReviews';
 import { ReviewResponseDTO } from './Model/ReviewResponseDTO';
 import { deleteReview } from './Api/deleteReview';
-import { IsOwner, IsAdmin } from '@/context/UserContext';
+import { IsCustomer, IsAdmin } from '@/context/UserContext';
 import BasicModal from '@/shared/components/BasicModal';
 import StarRating from '@/features/products/components/StarRating';
 import EditingReview from './reviewComponents/EditingReview';
@@ -15,7 +15,7 @@ const ReviewsList: React.FC = (): JSX.Element => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
   const navigate = useNavigate();
-  const isOwner = IsOwner();
+  const isOwner = IsCustomer();
   const isAdmin = IsAdmin();
   const canAccessActions = isOwner || isAdmin;
 

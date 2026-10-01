@@ -1,6 +1,6 @@
 package com.petclinic.bffapigateway.presentationlayer.v1.mockservers;
 
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.CustomerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
@@ -11,7 +11,7 @@ import static org.mockserver.model.Parameter.param;
 
 
 //Due to other groups, some of the changes made to endpoints were removed.
-// ideally, the endpoints should consistently be /owners, /petTypes and /pets
+// ideally, the endpoints should consistently be /customers, /petTypes and /pets
 //This was fixed in Sprint 1 and changed back by someone in Sprint 2.
 //Seeing as it is a fully fledged ticket, the current config will remain as is
 // Endpoints should be changed consistently across tests, front-end and api-gateway controllers and clients.
@@ -28,48 +28,48 @@ public class MockServerConfigCustomersService {
         this.clientAndServer = ClientAndServer.startClientAndServer(CUSTOMERS_SERVICE_SERVER_PORT);
     }
 
-    public void registerUpdateOwnerEndpoint() {
+    public void registerUpdateCustomerEndpoint() {
         mockServerClient_CustomersService
                 .when(
                         request()
                                 .withMethod("PUT")
-                                .withPath("/owners/" + "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
-                                .withBody(json("{\"ownerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"firstName\":\"Betty\",\"lastName\":\"Davis\",\"address\":\"638 Cardinal Ave.\",\"city\":\"Sun Prairie\",\"province\":\"Quebec\",\"telephone\":\"6085551749\"}"))
+                                .withPath("/customers/" + "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+                                .withBody(json("{\"customerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"firstName\":\"Betty\",\"lastName\":\"Davis\",\"address\":\"638 Cardinal Ave.\",\"city\":\"Sun Prairie\",\"province\":\"Quebec\",\"telephone\":\"6085551749\"}"))
                 )
                 .respond(
                         response()
                                 .withStatusCode(200)
-                                .withBody(json("{\"ownerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"firstName\":\"Betty\",\"lastName\":\"Davis\",\"address\":\"638 Cardinal Ave.\",\"city\":\"Sun Prairie\",\"province\":\"Quebec\",\"telephone\":\"6085551749\",\"pets\":null}"))
+                                .withBody(json("{\"customerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"firstName\":\"Betty\",\"lastName\":\"Davis\",\"address\":\"638 Cardinal Ave.\",\"city\":\"Sun Prairie\",\"province\":\"Quebec\",\"telephone\":\"6085551749\",\"pets\":null}"))
                 );
     }
 
-    public void registerAddOwnerEndpoint() {
+    public void registerAddCustomerEndpoint() {
         mockServerClient_CustomersService
                 .when(
                         request()
                                 .withMethod("POST")
-                                .withPath("/owners")
+                                .withPath("/customers")
                                 .withBody(json("{\"firstName\":\"Betty\",\"lastName\":\"Davis\",\"address\":\"638 Cardinal Ave.\",\"city\":\"Sun Prairie\",\"province\":\"Quebec\",\"telephone\":\"6085551749\"}"))
                 )
                 .respond(
                         response()
                                 .withStatusCode(201)
-                                .withBody(json("{\"ownerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"firstName\":\"Betty\",\"lastName\":\"Davis\",\"address\":\"638 Cardinal Ave.\",\"city\":\"Sun Prairie\",\"province\":\"Quebec\",\"telephone\":\"6085551749\",\"pets\":null}"))
+                                .withBody(json("{\"customerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"firstName\":\"Betty\",\"lastName\":\"Davis\",\"address\":\"638 Cardinal Ave.\",\"city\":\"Sun Prairie\",\"province\":\"Quebec\",\"telephone\":\"6085551749\",\"pets\":null}"))
                 );
     }
 
-    public void registerGetAllOwnersEndpoint() {
+    public void registerGetAllCustomersEndpoint() {
         String responseBody = "["
-                + "{\"ownerId\":\"owner1\",\"firstName\":\"John\",\"lastName\":\"Does\",\"address\":\"123 Main St\",\"city\":\"Springfield\",\"province\":\"Chicago\",\"telephone\":\"1234567890\"},"
-                + "{\"ownerId\":\"owner2\",\"firstName\":\"Jane\",\"lastName\":\"Doew\",\"address\":\"456 Maple St\",\"city\":\"Shelbyville\",\"province\":\"Illinois\",\"telephone\":\"0987654321\"},"
-                + "{\"ownerId\":\"owner3\",\"firstName\":\"Jim\",\"lastName\":\"Doee\",\"address\":\"789 Oak St\",\"city\":\"Capital City\",\"province\":\"Longueuil\",\"telephone\":\"1122334455\"}"
+                + "{\"customerId\":\"customer1\",\"firstName\":\"John\",\"lastName\":\"Does\",\"address\":\"123 Main St\",\"city\":\"Springfield\",\"province\":\"Chicago\",\"telephone\":\"1234567890\"},"
+                + "{\"customerId\":\"customer2\",\"firstName\":\"Jane\",\"lastName\":\"Doew\",\"address\":\"456 Maple St\",\"city\":\"Shelbyville\",\"province\":\"Illinois\",\"telephone\":\"0987654321\"},"
+                + "{\"customerId\":\"customer3\",\"firstName\":\"Jim\",\"lastName\":\"Doee\",\"address\":\"789 Oak St\",\"city\":\"Capital City\",\"province\":\"Longueuil\",\"telephone\":\"1122334455\"}"
                 + "]";
 
         mockServerClient_CustomersService
                 .when(
                         request()
                                 .withMethod("GET")
-                                .withPath("/owners")
+                                .withPath("/customers")
                 )
                 .respond(
                         response()
@@ -78,33 +78,33 @@ public class MockServerConfigCustomersService {
                 );
     }
 
-    public void registerDeleteOwnerEndpoint() {
-        OwnerResponseDTO ownerResponse = new OwnerResponseDTO();
-        ownerResponse.setOwnerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a");
-        ownerResponse.setFirstName("Betty");
-        ownerResponse.setLastName("Davis");
-        ownerResponse.setAddress("638 Cardinal Ave.");
-        ownerResponse.setCity("Sun Prairie");
-        ownerResponse.setProvince("Quebec");
-        ownerResponse.setTelephone("6085551749");
+    public void registerDeleteCustomerEndpoint() {
+        CustomerResponseDTO customerResponseDTO = new CustomerResponseDTO();
+        customerResponseDTO.setCustomerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a");
+        customerResponseDTO.setFirstName("Betty");
+        customerResponseDTO.setLastName("Davis");
+        customerResponseDTO.setAddress("638 Cardinal Ave.");
+        customerResponseDTO.setCity("Sun Prairie");
+        customerResponseDTO.setProvince("Quebec");
+        customerResponseDTO.setTelephone("6085551749");
 
         mockServerClient_CustomersService
                 .when(
                         request()
                                 .withMethod("DELETE")
-                                .withPath("/owners/e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+                                .withPath("/customers/e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
                 )
                 .respond(
                         response()
                                 .withStatusCode(200)
-                                .withBody(json(ownerResponse))
+                                .withBody(json(customerResponseDTO))
                                 .withHeader("Content-Type", "application/json")
                 );
     }
 
-    public void registerGetOwnerByIdEndpoint() {
-        String ownerResponseJson = "{"
-                + "\"ownerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\","
+    public void registerGetCustomerByIdEndpoint() {
+        String customerResponseJson = "{"
+                + "\"customerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\","
                 + "\"firstName\":\"Betty\","
                 + "\"lastName\":\"Davis\","
                 + "\"address\":\"638 Cardinal Ave.\","
@@ -118,12 +118,12 @@ public class MockServerConfigCustomersService {
                 .when(
                         request()
                                 .withMethod("GET")
-                                .withPath("/owners/e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+                                .withPath("/customers/e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
                 )
                 .respond(
                         response()
                                 .withStatusCode(200)
-                                .withBody(json(ownerResponseJson))
+                                .withBody(json(customerResponseJson))
                                 .withHeader("Content-Type", "application/json")
                 );
     }
@@ -148,7 +148,7 @@ public class MockServerConfigCustomersService {
                 .when(
                         request()
                                 .withMethod("DELETE")
-                                .withPath("/pet/" + petId)
+                                .withPath("/pets/" + petId)
                 )
                 .respond(
                         response()
@@ -165,7 +165,7 @@ public class MockServerConfigCustomersService {
                 .when(
                         request()
                                 .withMethod("GET")
-                                .withPath("/owners/petTypes")
+                                .withPath("/customers/petTypes")
                 )
                 .respond(
                         response()
@@ -181,7 +181,7 @@ public class MockServerConfigCustomersService {
                 .when(
                         request()
                                 .withMethod("GET")
-                                .withPath("/owners/petTypes")
+                                .withPath("/customers/petTypes")
                 )
                 .respond(
                         response()
@@ -196,7 +196,7 @@ public class MockServerConfigCustomersService {
                 .when(
                         request()
                                 .withMethod("GET")
-                                .withPath("/owners/petTypes/pet-types-filtered-count")
+                                .withPath("/customers/petTypes/pet-types-filtered-count")
                                 .withQueryStringParameter(param("name", "Dog"))
                                 .withQueryStringParameter(param("petTypeId", "pt-1"))
                 )
@@ -215,7 +215,7 @@ public class MockServerConfigCustomersService {
                 .when(
                         request()
                                 .withMethod("GET")
-                                .withPath("/owners/petTypes/pet-types-filtered-count")
+                                .withPath("/customers/petTypes/pet-types-filtered-count")
                 )
                 .respond(
                         response()
@@ -229,7 +229,7 @@ public class MockServerConfigCustomersService {
                 .when(
                         request()
                                 .withMethod("GET")
-                                .withPath("/owners/petTypes")
+                                .withPath("/customers/petTypes")
                 )
                 .respond(
                         response()
@@ -244,7 +244,7 @@ public class MockServerConfigCustomersService {
                 .when(
                         request()
                                 .withMethod("GET")
-                                .withPath("/owners/petTypes/" + petTypeId)
+                                .withPath("/customers/petTypes/" + petTypeId)
                 )
                 .respond(
                         response()
@@ -311,12 +311,12 @@ public class MockServerConfigCustomersService {
                 );
     }
 
-    public void registerGetOwnerPhotoEndpointNotFound(String ownerId) {
+    public void registerGetCustomerPhotoEndpointNotFound(String customerId) {
         mockServerClient_CustomersService
                 .when(
                         request()
                                 .withMethod("GET")
-                                .withPath("/owners/" + ownerId + "/photos")
+                                .withPath("/customers/" + customerId + "/photos")
                 )
                 .respond(
                         response()
@@ -324,12 +324,12 @@ public class MockServerConfigCustomersService {
                 );
     }
 
-    public void registerGetOwnerPhotoEndpoint(String ownerId, byte[] photoBytes) {
+    public void registerGetCustomerPhotoEndpoint(String customerId, byte[] photoBytes) {
         mockServerClient_CustomersService
                 .when(
                         request()
                                 .withMethod("GET")
-                                .withPath("/owners/" + ownerId + "/photos")
+                                .withPath("/customers/" + customerId + "/photos")
                 )
                 .respond(
                         response()
@@ -339,18 +339,18 @@ public class MockServerConfigCustomersService {
                 );
     }
 
-    public void registerGetOwnerWithPhotoEndpoint(String ownerId, String ownerJson) {
+    public void registerGetCustomerWithPhotoEndpoint(String customerId, String customerJson) {
         mockServerClient_CustomersService
                 .when(
                         request()
                                 .withMethod("GET")
-                                .withPath("/owners/" + ownerId)
+                                .withPath("/customers/" + customerId)
                                 .withQueryStringParameter("includePhoto", "true")
                 )
                 .respond(
                         response()
                                 .withStatusCode(200)
-                                .withBody(ownerJson)
+                                .withBody(customerJson)
                                 .withHeader("Content-Type", "application/json")
                 );
     }
@@ -391,13 +391,13 @@ public class MockServerConfigCustomersService {
         }
     }
 
-    public void clearExpectationsForOwner(String ownerId) {
-        //clear all expectations for this specific owner path
+    public void clearExpectationsForCustomer(String customerId) {
+        //clear all expectations for this specific customer path
         mockServerClient_CustomersService
                 .clear(
                         request()
                                 .withMethod("GET")
-                                .withPath("/owners/" + ownerId)
+                                .withPath("/customers/" + customerId)
                 );
     }
 

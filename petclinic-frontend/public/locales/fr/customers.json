@@ -1,0 +1,137 @@
+{
+  "title": "Détails du client",
+  "subtitle": "Gérez votre profil et vos animaux enregistrés.",
+  "buttons": {
+    "save": "Enregistrer les modifications",
+    "cancel": "Annuler"
+  },
+
+  "uploadPetPhotoModal": {
+    "title": "Changer la photo de votre animal",
+    "selectPhoto": "Sélectionner une photo :",
+    "chooseFile": "Choisir un fichier",
+    "preview": "Aperçu :",
+    "uploading": "Veuillez patienter...",
+    "uploadPhoto": "Ajouter une photo",
+    "cancelButton": "Annuler",
+    "alert": {
+      "photoRequired": "Veuillez sélectionner un fichier image (JPG, PNG, etc.)",
+      "photoSize": "La taille du fichier doit être inférieure à 5 Mo",
+      "fileRequired": "Veuillez sélectionner un fichier",
+      "uploadFailed": "Une erreur est survenue pendant le changement de la photo de l’animal. Veuillez réessayer."
+    }
+  },
+
+  "uploadPetPhoto": {
+    "uploading": "Veuillez patienter...",
+    "addPhoto": "Ajouter une photo",
+    "errors": {
+      "invalidFileType": "Veuillez sélectionner un fichier image (JPG, PNG, etc.)",
+      "fileTooLarge": "La taille du fichier doit être inférieure à 5 Mo",
+      "uploadFailed": "Une erreur est survenue pendant le changement de la photo de l’animal. Veuillez réessayer."
+    }
+  },
+
+  "uploadProfilePhoto": {
+    "uploading": "Veuillez patienter...",
+    "changePhoto": "Changer la photo",
+    "errors": {
+      "invalidFileType": "Veuillez sélectionner un fichier image (JPG, PNG, etc.)",
+      "fileTooLarge": "La taille du fichier doit être inférieure à 5 Mo",
+      "uploadFailed": "Une erreur est survenue pendant le changement de la photo de profil. Veuillez réessayer."
+    }
+  },
+
+  "uploadPhotoModal": {
+    "title": "Changer la photo de profil",
+    "selectPhoto": "Sélectionner une photo :",
+    "chooseFile": "Choisir un fichier",
+    "preview": "Aperçu :",
+    "cancel": "Annuler",
+    "uploading": "Veuillez patienter...",
+    "uploadPhoto": "Changer la photo",
+    "errors": {
+      "invalidFileType": "Veuillez sélectionner un fichier image (JPG, PNG, etc.)",
+      "fileTooLarge": "La taille du fichier doit être inférieure à 5 Mo",
+      "noFileSelected": "Veuillez sélectionner un fichier",
+      "uploadFailed": "Une erreur est survenue pendant le changement de la photo de profil. Veuillez réessayer."
+    },
+    "alt": {
+      "preview": "Aperçu"
+    }
+  },
+  "pets": {
+    "addTitle": "Ajouter un nouvel animal",
+    "editTitle": "Modifier l'animal : {{name}}",
+    "fields": {
+      "name": "Nom de l'animal",
+      "petType": "Type d'animal",
+      "birthDate": "Date de naissance",
+      "weight": "Poids (kg)",
+      "isActive": "Actif",
+      "uploadPhoto": "Téléverser une photo :",
+      "photoAlt": "Photo de profil de {{name}}",
+      "newPhotoAlt": "Photo de profil du nouvel animal"
+    },
+    "selectType": "Sélectionnez un type d'animal",
+    "loadingTypes": "Chargement des types d'animaux...",
+    "types": {
+      "cat": "Chat",
+      "dog": "Chien",
+      "lizard": "Lézard",
+      "snake": "Serpent",
+      "bird": "Oiseau",
+      "hamster": "Hamster",
+      "others": "Autres"
+    },
+    "buttons": {
+      "add": "Ajouter l'animal",
+      "adding": "Ajout en cours...",
+      "update": "Mettre à jour l'animal",
+      "updating": "Mise à jour...",
+      "delete": "Supprimer l'animal",
+      "confirmDelete": "Supprimer",
+      "yesDelete": "Oui, supprimer",
+      "cancel": "Annuler",
+      "close": "Fermer",
+      "addPhoto": "Ajouter une photo",
+      "deletePhoto": "Supprimer la photo"
+    },
+    "errors": {
+      "nameRequired": "Le nom de l'animal est requis",
+      "typeRequired": "Le type d'animal est requis",
+      "weightRequired": "Le poids est requis",
+      "weightPositive": "Le poids doit être supérieur à 0",
+      "addFailed": "Échec de l'ajout de l'animal. Veuillez réessayer.",
+      "updateFailed": "Échec de la mise à jour de l'animal. Veuillez réessayer.",
+      "deleteFailed": "Échec de la suppression de l'animal. Veuillez réessayer.",
+      "addPhotoFailed": "Échec de l'ajout de la photo. Veuillez réessayer.",
+      "deletePhotoFailed": "Échec de la suppression de la photo. Veuillez réessayer."
+    },
+    "success": {
+      "title": "Succès !",
+      "added": "Animal ajouté avec succès !",
+      "addedMessage": "L'animal a été ajouté avec succès.",
+      "updated": "Animal mis à jour avec succès !",
+      "updatedMessage": "L'animal a été mis à jour avec succès.",
+      "photoAdded": "Photo ajoutée avec succès !",
+      "photoDeleted": "Photo supprimée avec succès !"
+    },
+    "notFound": {
+      "title": "Animal introuvable",
+      "message": "Animal introuvable. Veuillez vérifier l'identifiant et réessayer."
+    },
+    "loading": {
+      "title": "Chargement...",
+      "message": "Chargement des données de l'animal..."
+    },
+    "deleteModal": {
+      "title": "Confirmer la suppression",
+      "message": "Voulez-vous vraiment supprimer cet animal ? Cette action est irréversible."
+    },
+    "deletePhotoModal": {
+      "title": "Supprimer la photo",
+      "message": "Voulez-vous vraiment supprimer la photo de cet animal ? Cette action est irréversible."
+    }
+  }
+}

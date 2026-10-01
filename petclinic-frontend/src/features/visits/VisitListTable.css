@@ -73,7 +73,6 @@
   background-color: var(--secondary-clr);
 }
 
-
 /* Emergency visit indicator - red left border using pseudo-element */
 .visit-table-section tbody tr.emergency-visit td:first-child {
   position: relative;
@@ -89,7 +88,7 @@
   background-color: var(--emergency-clr);
 }
 
-.visit-table-section > table  {
+.visit-table-section > table {
   background-color: transparent;
   border-radius: 10px;
 }
@@ -115,8 +114,7 @@
   border-bottom-right-radius: 10px;
 }
 
-
-.visit-table-section > table > tbody > tr:last-child{
+.visit-table-section > table > tbody > tr:last-child {
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
 }
@@ -160,7 +158,6 @@ h2 {
 main {
   padding: 20px;
 }
-
 
 .visit-success-message {
   display: inline-block;
@@ -206,7 +203,7 @@ main {
   border: 1px solid #dcdcdc;
   border-radius: 6px;
   padding: 6px;
-  box-shadow: 0px 4px 14px rgba(0,0,0,0.15);
+  box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.15);
   z-index: 200;
   animation: fadeIn 0.12s ease-out;
 }
@@ -243,12 +240,17 @@ main {
 }
 
 .icon-visits-anchor:hover {
-  background: rgba(0,0,0,0.07);
+  background: rgba(0, 0, 0, 0.07);
 }
 
 /* Fade-in animation */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-3px); }
-  to { opacity: 1; transform: translateY(0); }
-
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

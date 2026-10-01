@@ -1,5 +1,5 @@
 export interface PetRequestModel {
-  ownerId: string;
+  customerId: string;
   name: string;
   birthDate: Date;
   petTypeId: string;

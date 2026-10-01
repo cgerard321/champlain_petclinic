@@ -5,7 +5,7 @@ import com.petclinic.billing.domainclientlayer.Auth.AuthServiceClient;
 import com.petclinic.billing.domainclientlayer.Auth.UserDetails;
 import com.petclinic.billing.domainclientlayer.Mailing.Mail;
 import com.petclinic.billing.domainclientlayer.Mailing.MailService;
-import com.petclinic.billing.domainclientlayer.OwnerClient;
+import com.petclinic.billing.domainclientlayer.CustomerServiceClient;
 import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
@@ -40,9 +40,6 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import com.petclinic.billing.exceptions.CustomerNotFoundException;
-import com.petclinic.billing.exceptions.VetNotFoundException;
-import java.util.Collections;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
@@ -58,67 +55,14 @@ public class BillServiceImplTest {
     MailService mailService;
 
     @MockBean
-    OwnerClient ownerClient;
+    CustomerServiceClient customerServiceClient;
 
     @MockBean
     AuthServiceClient authClient;
 
     @Autowired
     BillService billService;
-    @Test
-    void createBill_customerDoesNotExist_shouldReturnCustomerNotFoundException() {
-        BillRequestDTO billDTO = new BillRequestDTO();
-        billDTO.setBillStatus(BillStatus.PAID);
-        billDTO.setVetId("vet-123");
-        billDTO.setCustomerId("customer-404");
 
-        when(vetClient.getVetByVetId("vet-123"))
-                .thenReturn(Mono.just(new VetResponseDTO()));
-
-        when(ownerClient.getOwnerByOwnerId("customer-404"))
-                .thenReturn(Mono.error(
-                        new CustomerNotFoundException("customer-404")
-                ));
-
-        StepVerifier.create(
-                        billService.createBill(
-                                Mono.just(billDTO),
-                                false,
-                                "USD",
-                                "JWTToken"
-                        )
-                )
-                .expectErrorMatches(error -> error instanceof CustomerNotFoundException &&
-                        error.getMessage().equals("Customer not found with customerId: customer-404"))
-                .verify();
-        verify(repo, never()).insert(any(Bill.class));
-    }
-    @Test
-    void createBill_vetDoesNotExist_shouldReturnVetNotFoundException() {
-        BillRequestDTO billDTO = new BillRequestDTO();
-        billDTO.setBillStatus(BillStatus.PAID);
-        billDTO.setVetId("vet-404");
-        billDTO.setCustomerId("customer-123");
-        when(vetClient.getVetByVetId("vet-404"))
-                .thenReturn(Mono.error(
-                        new VetNotFoundException("vet-404")
-                ));
-        when(ownerClient.getOwnerByOwnerId("customer-123"))
-                .thenReturn(Mono.just(new OwnerResponseDTO()));
-        StepVerifier.create(
-                        billService.createBill(
-                                Mono.just(billDTO),
-                                false,
-                                "USD",
-                                "JWTToken"
-                        )
-                )
-                .expectErrorMatches(error ->
-                        error instanceof VetNotFoundException &&
-                                error.getMessage().equals("Vet not found with vetId: vet-404"))
-                .verify();
-        verify(repo, never()).insert(any(Bill.class));
-    }
     @Test
     public void test_getBillById() {
         Bill billEntity = buildBill();
@@ -188,7 +132,7 @@ public class BillServiceImplTest {
         Pageable pageable = PageRequest.of(0, 2);
 
         // Mock the repository to return a Flux of owners
-        when(repo.findAll()).thenReturn(Flux.just(bill1, bill2, bill3));
+        when(repo.findAllByArchiveFalse()).thenReturn(Flux.just(bill1, bill2, bill3));
         when(repo.findAllBillsByBillStatus(BillStatus.UNPAID)).thenReturn(Flux.empty());
 
         // Call the method under test
@@ -203,6 +147,120 @@ public class BillServiceImplTest {
                 .verify();
 
     }
+
+    @Test
+    void getAllBillsStream_ShouldReturnAllMatchingResults() {
+
+        Bill bill1 = Bill.builder()
+                .billId("billId-1")
+                .customerId("customerId-1")
+                .ownerFirstName("ownerFirstName1")
+                .ownerLastName("ownerLastName1")
+                .visitType("operation")
+                .vetId("vetId1")
+                .vetFirstName("vetFirstName1")
+                .vetLastName("vetLastName1")
+                .date(LocalDate.of(2024, 10, 1))
+                .dueDate(LocalDate.of(2024, 10, 30))
+                .amount(new BigDecimal("100.00"))
+                .billStatus(BillStatus.UNPAID)
+                .build();
+
+        Bill bill2 = Bill.builder()
+                .billId("billId-2")
+                .customerId("customerId-2")
+                .ownerFirstName("ownerFirstName2")
+                .ownerLastName("ownerLastName2")
+                .visitType("general")
+                .vetId("vetId2")
+                .vetFirstName("vetFirstName2")
+                .vetLastName("vetLastName2")
+                .date(LocalDate.of(2024, 10, 1))
+                .dueDate(LocalDate.of(2024, 10, 30))
+                .amount(new BigDecimal("150.00"))
+                .billStatus(BillStatus.PAID)
+                .build();
+
+        Bill bill3 = Bill.builder()
+                .billId("billId-3")
+                .customerId("customerId-3")
+                .ownerFirstName("ownerFirstName3")
+                .ownerLastName("ownerLastName3")
+                .visitType("injury")
+                .vetId("vetId3")
+                .vetFirstName("vetFirstName3")
+                .vetLastName("vetLastName3")
+                .date(LocalDate.of(2024, 10, 1))
+                .dueDate(LocalDate.of(2024, 10, 30))
+                .amount(new BigDecimal("200.00"))
+                .billStatus(BillStatus.OVERDUE)
+                .build();
+
+        when(repo.findAll()).thenReturn(Flux.just(bill1, bill2, bill3));
+        when(repo.findAllBillsByBillStatus(BillStatus.UNPAID)).thenReturn(Flux.empty());
+
+        Flux<BillResponseDTO> bills = billService.getAllBillsStream(
+                null, null, null, null, null, null, null, null);
+
+        StepVerifier.create(bills)
+                .expectNextMatches(bill -> bill.getBillId().equals("billId-1"))
+                .expectNextMatches(bill -> bill.getBillId().equals("billId-2"))
+                .expectNextMatches(bill -> bill.getBillId().equals("billId-3"))
+                .verifyComplete();
+    }
+    @Test
+    void getAllBillsStream_WithCustomerIdFilter_ReturnsMatchingBills() {
+        Bill matching = buildBill();
+        matching.setCustomerId("customer-1");
+
+        Bill nonMatching = buildBill();
+        nonMatching.setCustomerId("customer-2");
+
+        when(repo.findAllBillsByBillStatus(BillStatus.UNPAID))
+                .thenReturn(Flux.empty());
+        when(repo.findAll())
+                .thenReturn(Flux.just(matching, nonMatching));
+
+        StepVerifier.create(
+                        billService.getAllBillsStream(
+                                null, "customer-1", null, null,
+                                null, null, null, null))
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+    @Test
+    void getAllBillsStream_WithAllFiltersMatching_ReturnsMatchingBill() {
+        Bill bill = buildBill();
+
+        bill.setBillId("bill-1");
+        bill.setCustomerId("customer-1");
+        bill.setOwnerFirstName("John");
+        bill.setOwnerLastName("Doe");
+        bill.setVisitType("Surgery");
+        bill.setVetId("vet-1");
+        bill.setVetFirstName("Alice");
+        bill.setVetLastName("Smith");
+
+        when(repo.findAllBillsByBillStatus(BillStatus.UNPAID))
+                .thenReturn(Flux.empty());
+
+        when(repo.findAll())
+                .thenReturn(Flux.just(bill));
+
+        StepVerifier.create(
+                        billService.getAllBillsStream(
+                                "bill-1",
+                                "customer-1",
+                                "John",
+                                "Doe",
+                                "Surgery",
+                                "vet-1",
+                                "Alice",
+                                "Smith"))
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
 
     @Test
     public void test_getAllBillsByPaidStatus() {
@@ -397,10 +455,10 @@ public class BillServiceImplTest {
                 .thenReturn(Mono.just(vetResponse));
 
         // Mock OwnerClient response
-        OwnerResponseDTO ownerResponse = new OwnerResponseDTO();
+        CustomerResponseDTO ownerResponse = new CustomerResponseDTO();
         ownerResponse.setFirstName("Alice");
         ownerResponse.setLastName("Smith");
-        Mockito.when(ownerClient.getOwnerByOwnerId("owner-456"))
+        Mockito.when(customerServiceClient.getCustomerByCustomerId("owner-456"))
                 .thenReturn(Mono.just(ownerResponse));
 
         // Mock AuthServiceClient response
@@ -432,7 +490,7 @@ public class BillServiceImplTest {
 
         // Verify mock interactions
         verify(vetClient).getVetByVetId("vet-123");
-        verify(ownerClient).getOwnerByOwnerId("owner-456");
+        verify(customerServiceClient).getCustomerByCustomerId("owner-456");
     }
 
     @Test
@@ -452,10 +510,10 @@ public class BillServiceImplTest {
                 .thenReturn(Mono.just(vetResponse));
 
         // Mock OwnerClient response
-        OwnerResponseDTO ownerResponse = new OwnerResponseDTO();
+        CustomerResponseDTO ownerResponse = new CustomerResponseDTO();
         ownerResponse.setFirstName("Alice");
         ownerResponse.setLastName("Smith");
-        Mockito.when(ownerClient.getOwnerByOwnerId("owner-456"))
+        Mockito.when(customerServiceClient.getCustomerByCustomerId("owner-456"))
                 .thenReturn(Mono.just(ownerResponse));
 
         // Mock AuthServiceClient response
@@ -515,10 +573,10 @@ public class BillServiceImplTest {
                 .thenReturn(Mono.just(vetResponse));
 
         // Mock OwnerClient response
-        OwnerResponseDTO ownerResponse = new OwnerResponseDTO();
+        CustomerResponseDTO ownerResponse = new CustomerResponseDTO();
         ownerResponse.setFirstName("Alice");
         ownerResponse.setLastName("Smith");
-        Mockito.when(ownerClient.getOwnerByOwnerId("owner-456"))
+        Mockito.when(customerServiceClient.getCustomerByCustomerId("owner-456"))
                 .thenReturn(Mono.just(ownerResponse));
 
         Bill existingBill = new Bill();
@@ -656,12 +714,12 @@ public class BillServiceImplTest {
 
         String CUSTOMER_ID = billEntity.getCustomerId();
 
-        OwnerResponseDTO mockOwner = new OwnerResponseDTO();
-        mockOwner.setOwnerId(CUSTOMER_ID);
+        CustomerResponseDTO mockOwner = new CustomerResponseDTO();
+        mockOwner.setCustomerId(CUSTOMER_ID);
         mockOwner.setFirstName("John");
         mockOwner.setLastName("Doe");
 
-        when(ownerClient.getOwnerByOwnerId(CUSTOMER_ID)).thenReturn(Mono.just(mockOwner));
+        when(customerServiceClient.getCustomerByCustomerId(CUSTOMER_ID)).thenReturn(Mono.just(mockOwner));
         when(repo.findByCustomerId(CUSTOMER_ID)).thenReturn(Flux.just(billEntity));
 
         // Act
@@ -778,20 +836,21 @@ public class BillServiceImplTest {
         // Arrange
         String nonExistentCustomerId = "nonExistentId";
 
-        when(ownerClient.getOwnerByOwnerId(nonExistentCustomerId))
+        when(customerServiceClient.getCustomerByCustomerId(nonExistentCustomerId))
                 .thenReturn(Mono.empty()); // Simulate missing owner
 
         // Act
         Flux<BillResponseDTO> result = billService.getBillsByCustomerId(nonExistentCustomerId);
 
-
+        // Assert
         StepVerifier.create(result)
-                .expectErrorMatches(error ->
-                        error instanceof CustomerNotFoundException && error.getMessage().equals
-                                ("Customer not found with customerId: " + nonExistentCustomerId))
+                .expectErrorMatches(throwable ->
+                        throwable instanceof ResponseStatusException &&
+                                ((ResponseStatusException) throwable).getStatus().equals(HttpStatus.NOT_FOUND) &&
+                                throwable.getMessage().contains("Customer ID does not exist"))
                 .verify();
 
-        verify(ownerClient, times(1)).getOwnerByOwnerId(nonExistentCustomerId);
+        verify(customerServiceClient, times(1)).getCustomerByCustomerId(nonExistentCustomerId);
         verify(repo, never()).findByCustomerId(anyString()); // should never call repo
     }
 
@@ -916,7 +975,7 @@ public void testGenerateBillPdf_BillNotFound() {
         bill2.setBillId("BillUUID2");
         Pageable pageable = PageRequest.of(0, 1);
 
-        when(repo.findAll()).thenReturn(Flux.just(bill1, bill2));
+        when(repo.findAllByArchiveFalse()).thenReturn(Flux.just(bill1, bill2));
         when(repo.findAllBillsByBillStatus(BillStatus.UNPAID)).thenReturn(Flux.empty());
 
 
@@ -935,7 +994,7 @@ public void testGenerateBillPdf_BillNotFound() {
 
         Pageable pageable = PageRequest.of(0, 10);
 
-        when(repo.findAll()).thenReturn(Flux.empty());
+        when(repo.findAllByArchiveFalse()).thenReturn(Flux.empty());
         when(repo.findAllBillsByBillStatus(BillStatus.UNPAID)).thenReturn(Flux.empty());
 
 
@@ -1003,7 +1062,84 @@ public void testGenerateBillPdf_BillNotFound() {
                 .expectNext(new BigDecimal(0.0))
                 .verifyComplete();
     }
+    //test for the ticket already paid bill
+    @Test
+    void processPayment_AlreadyPaidBill_ShouldReturnError() {
+        String customerId = "customerId-1";
+        String billId = "billId-1";
+        String jwtToken = "Bearer faketoken";
 
+        Bill bill = buildBill();
+        bill.setBillStatus(BillStatus.PAID);
+
+        PaymentRequestDTO paymentRequest =
+                new PaymentRequestDTO(
+                        "1234567812345678",
+                        "123",
+                        "12/30"
+                );
+
+        UserDetails user = new UserDetails();
+        user.setUserId(customerId);
+        user.setUsername("testUser");
+        user.setEmail("test@example.com");
+
+        when(authClient.getUserById(jwtToken, customerId)).thenReturn(Mono.just(user));
+
+        when(repo.findByCustomerIdAndBillId(customerId, billId)).thenReturn(Mono.just(bill));
+
+        StepVerifier.create(
+                        billService.processPayment(
+                                customerId, billId, paymentRequest, jwtToken)
+                )
+                .expectErrorMatches(error -> error instanceof InvalidPaymentException &&
+                                error.getMessage().equals("Bill has already been paid"
+                                )
+                )
+                .verify();
+
+        assertEquals(BillStatus.PAID, bill.getBillStatus());
+
+        verify(repo, never()).save(any(Bill.class));
+        verify(mailService, never()).sendMail(any(Mail.class));
+    }
+    //this test to prove that an OVERDUE bill can also be paid
+    @Test
+    void processPayment_OverdueBill_ShouldBecomePaid() {
+        String customerId = "customerId-1";
+        String billId = "billId-1";
+        String jwtToken = "Bearer faketoken";
+
+        Bill bill = buildBill();
+        bill.setBillStatus(BillStatus.OVERDUE);
+
+        PaymentRequestDTO paymentRequest =
+                new PaymentRequestDTO(
+                        "1234567812345678",
+                        "123",
+                        "12/30");
+
+        UserDetails user = new UserDetails();
+        user.setUserId(customerId);
+        user.setUsername("testUser");
+        user.setEmail("test@example.com");
+
+        when(authClient.getUserById(jwtToken, customerId)).thenReturn(Mono.just(user));
+
+        when(repo.findByCustomerIdAndBillId(customerId, billId)).thenReturn(Mono.just(bill));
+
+        when(mailService.sendMail(any(Mail.class))).thenReturn(null);
+
+        when(repo.save(any(Bill.class)))
+                .thenAnswer(answer -> Mono.just(answer.getArgument(0)));
+        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest, jwtToken))
+                .consumeNextWith(response -> assertEquals(BillStatus.PAID, response.getBillStatus())
+                )
+                .verifyComplete();
+
+        verify(repo).save(bill);
+        verify(mailService).sendMail(any(Mail.class));
+    }
     @Test
     void processPayment_Success() {
 
@@ -1020,10 +1156,8 @@ public void testGenerateBillPdf_BillNotFound() {
         fakeUser.setUsername("fakeUser");
         fakeUser.setEmail("fakeUser@example.com");
 
-        when(authClient.getUserById(anyString(), anyString()))
-                .thenReturn(Mono.just(fakeUser));
-        when(mailService.sendMail(any(Mail.class)))
-                .thenReturn(null);
+        when(authClient.getUserById(anyString(), anyString())).thenReturn(Mono.just(fakeUser));
+        when(mailService.sendMail(any(Mail.class))).thenReturn(null);
 
 
         when(repo.findByCustomerIdAndBillId(customerId, billId)).thenReturn(Mono.just(bill));
@@ -1177,7 +1311,7 @@ public void testGenerateBillPdf_BillNotFound() {
         b3.setVetFirstName("Tom");
         b3.setVetLastName("Lee");
 
-        when(repo.findAll()).thenReturn(Flux.just(b1, b2, b3));
+        when(repo.findAllByArchiveFalse()).thenReturn(Flux.just(b1, b2, b3));
 
         Mono<Long> result = billService.getNumberOfBillsWithFilters(
                 null,
@@ -1217,7 +1351,7 @@ public void testGenerateBillPdf_BillNotFound() {
         b2.setVetFirstName("Tom");
         b2.setVetLastName("Lee");
 
-        when(repo.findAll()).thenReturn(Flux.just(b1, b2));
+        when(repo.findAllByArchiveFalse()).thenReturn(Flux.just(b1, b2));
 
         Mono<Long> result = billService.getNumberOfBillsWithFilters(
                 "NO-SUCH-BILL",
@@ -2297,10 +2431,10 @@ public void testGenerateBillPdf_BillNotFound() {
         when(vetClient.getVetByVetId("vet-123")).thenReturn(Mono.just(vetResponse));
 
         // Mock owner info
-        OwnerResponseDTO ownerResponse = new OwnerResponseDTO();
+        CustomerResponseDTO ownerResponse = new CustomerResponseDTO();
         ownerResponse.setFirstName("Alice");
         ownerResponse.setLastName("Smith");
-        when(ownerClient.getOwnerByOwnerId("owner-456")).thenReturn(Mono.just(ownerResponse));
+        when(customerServiceClient.getCustomerByCustomerId("owner-456")).thenReturn(Mono.just(ownerResponse));
 
         // Mock user details (correct order for parameters)
         UserDetails userDetails = UserDetails.builder()
@@ -2330,7 +2464,7 @@ public void testGenerateBillPdf_BillNotFound() {
         when(mailService.sendMail(mailCaptor.capture()))
                 .thenReturn("Message sent to test@example.com");
 
-        billService = new BillServiceImpl(repo, vetClient, ownerClient, authClient, mailService);
+        billService = new BillServiceImpl(repo, vetClient, customerServiceClient, authClient, mailService);
 
         // Act
         StepVerifier.create(billService.createBill(Mono.just(billDTO), true, "CAD", "jwtToken"))

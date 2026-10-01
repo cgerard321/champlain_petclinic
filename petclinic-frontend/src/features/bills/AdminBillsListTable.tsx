@@ -1,10 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Bill } from '@/features/bills/models/Bill.ts';
-import { getAllOwners } from '@/features/customers/api/getAllOwners';
+import { getAllCustomers } from '@/features/customers/api/getAllCustomers.ts';
 import { getAllVets } from '@/features/veterinarians/api/getAllVets';
 import { BillRequestModel } from './models/BillRequestModel';
 import { addBill } from './api/addBill';
-import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseModel';
+import { CustomerResponseModel } from '@/features/customers/models/CustomerResponseModel.ts';
 import { VetResponseModel } from '@/features/veterinarians/models/VetResponseModel';
 import useGetAllBillsPaginated from '@/features/bills/hooks/useGetAllBillsPaginated.ts';
 import './AdminBillsListTable.css';
@@ -70,10 +70,11 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
         filter.visitType || undefined,
         undefined, // vetId
         filter.vetFirstName || undefined,
-        filter.vetLastName || undefined
+        filter.vetLastName || undefined,
+        showArchivedBills
       );
     },
-    [getBillsList, filter]
+    [getBillsList, filter, showArchivedBills]
   );
   const [filterYear, setFilterYear] = useState(new Date().getFullYear());
   const [filterMonth, setFilterMonth] = useState(new Date().getMonth() + 1);
@@ -91,7 +92,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
     billStatus: '',
     dueDate: '',
   });
-  const [owners, setOwners] = useState<OwnerResponseModel[]>([]);
+  const [owners, setOwners] = useState<CustomerResponseModel[]>([]);
   const [vets, setVets] = useState<VetResponseModel[]>([]);
   const [detailBill, setDetailBill] = useState<Bill | null>(null);
   const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
@@ -107,7 +108,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
 
   const fetchOwnersAndVets = useCallback(async (): Promise<void> => {
     try {
-      const ownersList = await getAllOwners();
+      const ownersList = await getAllCustomers();
       const vetsList = await getAllVets();
       setOwners(ownersList);
       setVets(vetsList);
@@ -117,10 +118,8 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
   }, []);
 
   useEffect(() => {
-    if (!selectedFilter) {
-      callGetBillsListWithFilters(currentPage, 10);
-    }
-  }, [currentPage, callGetBillsListWithFilters, selectedFilter]);
+    callGetBillsListWithFilters(currentPage, 10);
+  }, [currentPage, callGetBillsListWithFilters]);
 
   useEffect(() => {
     const callArchiveBills = async (): Promise<void> => {
@@ -192,6 +191,11 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
     if (!status) {
       callGetBillsListWithFilters(currentPage, 10);
     }
+  };
+
+  const handleArchiveToggle = (): void => {
+    setCurrentPage(0);
+    setShowArchivedBills(prev => !prev);
   };
 
   const handleOwnerNameChange = async (
@@ -507,7 +511,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
           </button>
           <button
             className={`archive-btn ${showArchivedBills ? 'active' : ''}`}
-            onClick={() => setShowArchivedBills(prev => !prev)}
+            onClick={handleArchiveToggle}
           >
             {showArchivedBills ? 'Hide Archived' : 'Show Archived'}
           </button>
@@ -688,7 +692,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                     <option value="">All Owners</option>
                     {owners.map(owner => (
                       <option
-                        key={owner.ownerId}
+                        key={owner.customerId}
                         value={`${owner.firstName} ${owner.lastName}`}
                       >
                         {owner.firstName} {owner.lastName}
@@ -791,7 +795,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                     >
                       <option value="">Select Customer</option>
                       {owners.map(owner => (
-                        <option key={owner.ownerId} value={owner.ownerId}>
+                        <option key={owner.customerId} value={owner.customerId}>
                           {owner.firstName} {owner.lastName}
                         </option>
                       ))}

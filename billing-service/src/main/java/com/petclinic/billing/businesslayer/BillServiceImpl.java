@@ -3,9 +3,10 @@ package com.petclinic.billing.businesslayer;
 import com.petclinic.billing.datalayer.*;
 import com.petclinic.billing.domainclientlayer.Auth.AuthServiceClient;
 import com.petclinic.billing.domainclientlayer.Auth.UserDetails;
+import com.petclinic.billing.domainclientlayer.CustomerServiceClient;
 import com.petclinic.billing.domainclientlayer.Mailing.Mail;
 import com.petclinic.billing.domainclientlayer.Mailing.MailService;
-import com.petclinic.billing.domainclientlayer.OwnerClient;
+import com.petclinic.billing.domainclientlayer.CustomerServiceClient;
 import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
@@ -36,7 +37,7 @@ public class BillServiceImpl implements BillService{
 
     private final BillRepository billRepository;
     private final VetClient vetClient;
-    private final OwnerClient ownerClient;
+    private final CustomerServiceClient customerServiceClient;
     private final AuthServiceClient authClient;
     private final MailService mailService;
 
@@ -96,9 +97,75 @@ public class BillServiceImpl implements BillService{
 //    }
 
     @Override
-    public Flux<BillResponseDTO> getAllBillsByPage(Pageable pageable, String billId, String customerId,
-                                                   String ownerFirstName, String ownerLastName, String visitType,
-                                                   String vetId, String vetFirstName, String vetLastName) {
+    public Flux<BillResponseDTO> getAllBillsByPage(
+            Pageable pageable,
+            String billId,
+            String customerId,
+            String ownerFirstName,
+            String ownerLastName,
+            String visitType,
+            String vetId,
+            String vetFirstName,
+            String vetLastName) {
+
+        return getAllBillsByPage(
+                pageable,
+                billId,
+                customerId,
+                ownerFirstName,
+                ownerLastName,
+                visitType,
+                vetId,
+                vetFirstName,
+                vetLastName,
+                false
+        );
+    }
+
+    @Override
+    public Flux<BillResponseDTO> getAllBillsByPage(
+            Pageable pageable,
+            String billId,
+            String customerId,
+            String ownerFirstName,
+            String ownerLastName,
+            String visitType,
+            String vetId,
+            String vetFirstName,
+            String vetLastName,
+            boolean includeArchived) {
+
+        Predicate<Bill> filterCriteria = bill ->
+                (billId == null || bill.getBillId().equals(billId)) &&
+                        (customerId == null || bill.getCustomerId().equals(customerId)) &&
+                        (ownerFirstName == null || bill.getOwnerFirstName().equals(ownerFirstName)) &&
+                        (ownerLastName == null || bill.getOwnerLastName().equals(ownerLastName)) &&
+                        (visitType == null || bill.getVisitType().equals(visitType)) &&
+                        (vetId == null || bill.getVetId().equals(vetId)) &&
+                        (vetFirstName == null || bill.getVetFirstName().equals(vetFirstName)) &&
+                        (vetLastName == null || bill.getVetLastName().equals(vetLastName));
+
+        Flux<Bill> bills = includeArchived
+                ? billRepository.findAll()
+                : billRepository.findAllByArchiveFalse();
+
+        return updateOverdueBills()
+                .thenMany(bills)
+                .filter(filterCriteria)
+                .skip((long) pageable.getPageNumber() * pageable.getPageSize())
+                .take(pageable.getPageSize())
+                .map(EntityDtoUtil::toBillResponseDto);
+    }
+    @Override
+    public Flux<BillResponseDTO> getAllBillsStream(
+            String billId,
+            String customerId,
+            String ownerFirstName,
+            String ownerLastName,
+            String visitType,
+            String vetId,
+            String vetFirstName,
+            String vetLastName) {
 
         Predicate<Bill> filterCriteria = bill ->
                 (billId == null || bill.getBillId().equals(billId)) &&
@@ -113,14 +180,45 @@ public class BillServiceImpl implements BillService{
         return updateOverdueBills()
                 .thenMany(billRepository.findAll())
                 .filter(filterCriteria)
-                .skip(pageable.getPageNumber() * pageable.getPageSize())
-                .take(pageable.getPageSize())
                 .map(EntityDtoUtil::toBillResponseDto);
     }
 
     @Override
-    public Mono<Long> getNumberOfBillsWithFilters(String billId, String customerId, String ownerFirstName, String ownerLastName,
-                                                  String visitType, String vetId, String vetFirstName, String vetLastName) {
+    public Mono<Long> getNumberOfBillsWithFilters(
+            String billId,
+            String customerId,
+            String ownerFirstName,
+            String ownerLastName,
+            String visitType,
+            String vetId,
+            String vetFirstName,
+            String vetLastName) {
+
+        return getNumberOfBillsWithFilters(
+                billId,
+                customerId,
+                ownerFirstName,
+                ownerLastName,
+                visitType,
+                vetId,
+                vetFirstName,
+                vetLastName,
+                false
+        );
+    }
+
+    @Override
+    public Mono<Long> getNumberOfBillsWithFilters(
+            String billId,
+            String customerId,
+            String ownerFirstName,
+            String ownerLastName,
+            String visitType,
+            String vetId,
+            String vetFirstName,
+            String vetLastName,
+            boolean includeArchived) {
+
         Predicate<Bill> filterCriteria = bill ->
                 (billId == null || bill.getBillId().equals(billId)) &&
                         (customerId == null || bill.getCustomerId().equals(customerId)) &&
@@ -131,7 +229,11 @@ public class BillServiceImpl implements BillService{
                         (vetFirstName == null || bill.getVetFirstName().equals(vetFirstName)) &&
                         (vetLastName == null || bill.getVetLastName().equals(vetLastName));
 
-        return billRepository.findAll()
+        Flux<Bill> bills = includeArchived
+                ? billRepository.findAll()
+                : billRepository.findAllByArchiveFalse();
+
+        return bills
                 .filter(filterCriteria)
                 .map(EntityDtoUtil::toBillResponseDto)
                 .count();
@@ -181,23 +283,18 @@ public class BillServiceImpl implements BillService{
                     if (dto.getCustomerId() == null || dto.getCustomerId().isEmpty()) {
                         return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer ID is required"));
                     }
+                    // Fetch Vet and Owner details
+                    Mono<VetResponseDTO> vetMono = vetClient.getVetByVetId(dto.getVetId());
+                    Mono<CustomerResponseDTO> customerMono = customerServiceClient.getCustomerByCustomerId(dto.getCustomerId())
+                            .switchIfEmpty(Mono.error(new ResponseStatusException(
+                                    HttpStatus.BAD_REQUEST, "Customer ID does not exist"
+                            )));
 
-                    // Verify that the vet and customer exist
-                    Mono<VetResponseDTO> vetMono =
-                            vetClient.getVetByVetId(dto.getVetId())
-                                    .switchIfEmpty(Mono.error(new VetNotFoundException(dto.getVetId())
-                                    ));
-
-                    Mono<OwnerResponseDTO> ownerMono =
-                            ownerClient.getOwnerByOwnerId(dto.getCustomerId())
-                                    .switchIfEmpty(Mono.error(new CustomerNotFoundException(dto.getCustomerId())));
-
-
-                    return Mono.zip(vetMono, ownerMono, Mono.just(dto));
+                    return Mono.zip(vetMono, customerMono, Mono.just(dto));
                 })
                 .flatMap(tuple -> {
                     VetResponseDTO vet = tuple.getT1();
-                    OwnerResponseDTO owner = tuple.getT2();
+                    CustomerResponseDTO owner = tuple.getT2();
                     BillRequestDTO dto = tuple.getT3();
 
                     // Map to Bill entity and set names
@@ -450,15 +547,13 @@ public class BillServiceImpl implements BillService{
 
     @Override
     public Flux<BillResponseDTO> getBillsByCustomerId(String customerId) {
+        // Fetch the owner info first
+        Mono<CustomerResponseDTO> customerMono = customerServiceClient.getCustomerByCustomerId(customerId)
+                .switchIfEmpty(Mono.error(new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Customer ID does not exist"
+                )));
 
-
-        Mono<OwnerResponseDTO> ownerMono =
-                ownerClient.getOwnerByOwnerId(customerId)
-                        .switchIfEmpty(Mono.error(
-                                new CustomerNotFoundException(customerId)
-                        ));
-
-        return ownerMono.flatMapMany(owner ->
+        return customerMono.flatMapMany(owner ->
                 billRepository.findByCustomerId(customerId)
                         // Only return bills where first/last name match the owner record
                         .filter(bill -> bill.getOwnerFirstName().equals(owner.getFirstName())
@@ -545,9 +640,18 @@ public class BillServiceImpl implements BillService{
                             .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Bill not found")))
 
                             // 3. If the bill exists, calculate and preserve the interest, then set status to PAID.
+
+
                             .flatMap(bill -> {
-                                // Calculate and preserve the interest before changing status
-                                BigDecimal interestAtPayment = InterestCalculationUtil.calculateInterest(bill);
+                                if (bill.getBillStatus() == BillStatus.PAID) {
+                                    return Mono.error(
+                                            new InvalidPaymentException("Bill has already been paid")
+                                    );
+                                }
+
+                                BigDecimal interestAtPayment =
+                                        InterestCalculationUtil.calculateInterest(bill);
+
                                 bill.setInterest(interestAtPayment);
                                 bill.setBillStatus(BillStatus.PAID);
 
