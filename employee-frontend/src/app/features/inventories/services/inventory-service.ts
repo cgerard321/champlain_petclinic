@@ -1,9 +1,9 @@
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { SseClient } from 'ngx-sse-client';
 import { Observable, throwError, timer } from 'rxjs';
 import { filter, map, retry } from 'rxjs/operators';
 
+import { SseClient } from '@core/services/sse-client';
 import { Inventory } from '@features/inventories/models/inventory.model';
 
 @Injectable({ providedIn: 'root' })
@@ -13,8 +13,7 @@ export class InventoryService {
   private readonly baseUrl = '/api/gateway/inventories';
 
   getInventories(importantOnly = false): Observable<Inventory> {
-    // The gateway only filters when importantOnly is true, so the parameter is
-    // left out entirely when the filter is off and the default search is used.
+    // Only add the filter when favorites are requested.
     let params = new HttpParams();
 
     if (importantOnly) {
@@ -29,11 +28,13 @@ export class InventoryService {
         retry({
           count: 5,
           delay: (error: unknown) => {
-            const status = error instanceof HttpErrorResponse ? error.status : undefined;
+            const err = error as { code?: number; status?: number };
+            const isNetworkError =
+              error instanceof HttpErrorResponse
+                ? error.status === 0
+                : err?.code === 0 || err?.status === 0;
 
-            // Only a dropped connection is worth retrying; permission and
-            // server errors are forwarded to the page instead.
-            return status === 0 ? timer(5000) : throwError(() => error);
+            return isNetworkError ? timer(5000) : throwError(() => error);
           },
         }),
       );
