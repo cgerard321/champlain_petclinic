@@ -243,7 +243,7 @@ public class ProductControllerV1 {
         return productsServiceClient.getProductEnumsValues();
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ALL})
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping(value="/types", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ProductTypeResponseDTO> getAllProductTypes(){
         return productsServiceClient.getAllProductTypes();
@@ -251,7 +251,7 @@ public class ProductControllerV1 {
     }
 
 
-    @SecuredEndpoint(allowedRoles = {Roles.ALL})
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping(value = "/types/{productTypeId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ProductTypeResponseDTO>> getProductTypeByProductTypeId(@PathVariable String productTypeId) {
         return productsServiceClient.getProductTypeByProductTypeId(productTypeId)

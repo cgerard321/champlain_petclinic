@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 import com.petclinic.bffapigateway.dtos.Files.FileDetails;
 import com.petclinic.bffapigateway.dtos.Products.*;
 import com.petclinic.bffapigateway.exceptions.BadRequestException;
+import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.exceptions.ProductImageDependencyException;
 import com.petclinic.bffapigateway.exceptions.ProductNotFoundException;
@@ -336,6 +337,11 @@ public class ProductsServiceClient {
                 .delete()
                 .uri(productsServiceUrl + "/types/"  + productTypeId)
                 .retrieve()
+                .onStatus(
+                        status -> status.value() == 409,
+                        response -> Mono.error(new GenericHttpException(
+                                "Cannot delete product type that is still used by products",
+                                HttpStatus.CONFLICT)))
                 .bodyToMono(ProductTypeResponseDTO.class);
     }
 
