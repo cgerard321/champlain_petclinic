@@ -7,4 +7,5 @@ public interface ProductTypeRepository extends R2dbcRepository<ProductTypeDb, Lo
 
     Mono<ProductTypeDb> findByProductTypeId(String bundleId);
 
+    Mono<ProductTypeDb> findByTypeName(String typeName);
 }
