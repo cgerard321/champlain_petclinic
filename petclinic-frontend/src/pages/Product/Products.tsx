@@ -57,17 +57,17 @@ export default function Products(): JSX.Element {
     setValidationMessage('');
   };
 
-    useEffect(() => {
-        getProductEnums()
-            .then(enums => {
-                setProductTypes(enums.productType);
-                setDeliveryTypes(enums.deliveryType);
-            })
-            .catch(() => {
-                setProductTypes([]);
-                setDeliveryTypes([]);
-            });
-    }, []);
+  useEffect(() => {
+    getProductEnums()
+      .then(enums => {
+        setProductTypes(enums.productType);
+        setDeliveryTypes(enums.deliveryType);
+      })
+      .catch(() => {
+        setProductTypes([]);
+        setDeliveryTypes([]);
+      });
+  }, []);
 
   const filters = useMemo(() => appliedFilters, [appliedFilters]);
 
@@ -205,16 +205,16 @@ export default function Products(): JSX.Element {
                 value={tempFilters.deliveryType}
                 onChange={e => updateTempFilter('deliveryType', e.target.value)}
               >
-                  <option value="">All Delivery Types</option>
-                  {deliveryTypes.map(type => (
-                      <option key={type} value={type}>
-                          {type
-                              .toLowerCase()
-                              .split('_')
-                              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                              .join(' ')}
-                      </option>
-                  ))}
+                <option value="">All Delivery Types</option>
+                {deliveryTypes.map(type => (
+                  <option key={type} value={type}>
+                    {type
+                      .toLowerCase()
+                      .split('_')
+                      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                      .join(' ')}
+                  </option>
+                ))}
               </select>
             </label>
 
