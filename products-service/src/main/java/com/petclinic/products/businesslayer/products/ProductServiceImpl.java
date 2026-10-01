@@ -463,9 +463,13 @@ public class ProductServiceImpl implements ProductService {
         return productTypeRepository.findByProductTypeId(productTypeId)
                 .switchIfEmpty(Mono.error(new NotFoundException("ProductType id was not found: " + productTypeId)))
                 .flatMap(existingProductType ->
-                        productTypeRepository.delete(existingProductType)
-                                .thenReturn(EntityModelUtil.toProductTypeResponseModel(existingProductType))
-                );
+                        productRepository.findProductsByProductTypeId(productTypeId)
+                                .hasElements()
+                                .flatMap(inUse -> inUse
+                                        ? Mono.error(new ProductTypeInUseException(
+                                        "Cannot delete product type that is still used by products"))
+                                        : productTypeRepository.delete(existingProductType)
+                                        .thenReturn(EntityModelUtil.toProductTypeResponseModel(existingProductType))));
     }
 
     // Allows an existing product to add or replace its image in the Files Service.

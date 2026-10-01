@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Files.FileDetails;
 import com.petclinic.bffapigateway.dtos.Products.*;
 import com.petclinic.bffapigateway.exceptions.BadRequestException;
+import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.exceptions.ProductImageDependencyException;
 import com.petclinic.bffapigateway.exceptions.ProductNotFoundException;
@@ -767,6 +768,19 @@ class ProductsServiceClientIntegrationTest {
         StepVerifier.create(result)
                 .expectNextMatches(type -> type.getProductTypeId().equals("2") && type.getTypeName().equals("EQUIPMENT"))
                 .verifyComplete();
+    }
+
+    @Test
+    void whenDeleteProductTypeInUse_thenThrowConflict() {
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(409)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\":\"Cannot delete product type that is still used by products\"}"));
+
+        StepVerifier.create(productsServiceClient.deleteProductType("2"))
+                .expectErrorMatches(error -> error instanceof GenericHttpException
+                        && ((GenericHttpException) error).getHttpStatus() == HttpStatus.CONFLICT)
+                .verify();
     }
 
 }
