@@ -87,7 +87,9 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
   );
   const [filterYear, setFilterYear] = useState(new Date().getFullYear());
   const [filterMonth, setFilterMonth] = useState(0);
-  const [appliedFilterYear, setAppliedFilterYear] = useState(new Date().getFullYear());
+  const [appliedFilterYear, setAppliedFilterYear] = useState(
+    new Date().getFullYear()
+  );
   const [appliedFilterMonth, setAppliedFilterMonth] = useState(0);
   const [selectedFilter, setSelectedFilter] = useState('');
   const [appliedSelectedFilter, setAppliedSelectedFilter] = useState('');
@@ -272,7 +274,6 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
   };
 
   const clearFilters = (): void => {
-
     const emptyFilter: FilterModel = {
       customerId: '',
       firstName: '',
@@ -280,7 +281,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
       visitType: '',
       vetFirstName: '',
       vetLastName: '',
-    }
+    };
 
     setFilterYear(new Date().getFullYear());
     setFilterMonth(0);
@@ -306,17 +307,19 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
       ? billsToFilter
       : billsToFilter.filter(bill => !bill.archive);
 
-      if (!applyFilters) {
-        return filteredByArchiveStatus;
-      }
+    if (!applyFilters) {
+      return filteredByArchiveStatus;
+    }
 
     return filteredByArchiveStatus.filter(bill => {
       const matchesStatus =
         !appliedSelectedFilter ||
-        (bill.billStatus || '').toLowerCase() === appliedSelectedFilter.toLowerCase();
+        (bill.billStatus || '').toLowerCase() ===
+          appliedSelectedFilter.toLowerCase();
 
       const matchesCustomerId =
-        !appliedFilter.customerId || bill.customerId.includes(appliedFilter.customerId);
+        !appliedFilter.customerId ||
+        bill.customerId.includes(appliedFilter.customerId);
 
       const ownerFirst = appliedFilter.firstName?.trim();
       const ownerLast = appliedFilter.lastName?.trim();
@@ -345,13 +348,15 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
 
       const matchesVisitType =
         !appliedFilter.visitType ||
-        (bill.visitType || '').toLowerCase() === appliedFilter.visitType.toLowerCase();
+        (bill.visitType || '').toLowerCase() ===
+          appliedFilter.visitType.toLowerCase();
 
       let matchesMonth = true;
       if (applyFilters) {
         const d = new Date(bill.date);
         matchesMonth =
-          d.getFullYear() === appliedFilterYear && (appliedFilterMonth === 0 || d.getMonth() + 1 === appliedFilterMonth);
+          d.getFullYear() === appliedFilterYear &&
+          (appliedFilterMonth === 0 || d.getMonth() + 1 === appliedFilterMonth);
       }
 
       return (
