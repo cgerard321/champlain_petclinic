@@ -132,7 +132,7 @@ public class BillServiceImplTest {
         Pageable pageable = PageRequest.of(0, 2);
 
         // Mock the repository to return a Flux of owners
-        when(repo.findAll()).thenReturn(Flux.just(bill1, bill2, bill3));
+        when(repo.findAllByArchiveFalse()).thenReturn(Flux.just(bill1, bill2, bill3));
         when(repo.findAllBillsByBillStatus(BillStatus.UNPAID)).thenReturn(Flux.empty());
 
         // Call the method under test
@@ -972,7 +972,7 @@ public void testGenerateBillPdf_BillNotFound() {
         bill2.setBillId("BillUUID2");
         Pageable pageable = PageRequest.of(0, 1);
 
-        when(repo.findAll()).thenReturn(Flux.just(bill1, bill2));
+        when(repo.findAllByArchiveFalse()).thenReturn(Flux.just(bill1, bill2));
         when(repo.findAllBillsByBillStatus(BillStatus.UNPAID)).thenReturn(Flux.empty());
 
 
@@ -991,7 +991,7 @@ public void testGenerateBillPdf_BillNotFound() {
 
         Pageable pageable = PageRequest.of(0, 10);
 
-        when(repo.findAll()).thenReturn(Flux.empty());
+        when(repo.findAllByArchiveFalse()).thenReturn(Flux.empty());
         when(repo.findAllBillsByBillStatus(BillStatus.UNPAID)).thenReturn(Flux.empty());
 
 
@@ -1308,7 +1308,7 @@ public void testGenerateBillPdf_BillNotFound() {
         b3.setVetFirstName("Tom");
         b3.setVetLastName("Lee");
 
-        when(repo.findAll()).thenReturn(Flux.just(b1, b2, b3));
+        when(repo.findAllByArchiveFalse()).thenReturn(Flux.just(b1, b2, b3));
 
         Mono<Long> result = billService.getNumberOfBillsWithFilters(
                 null,
@@ -1348,7 +1348,7 @@ public void testGenerateBillPdf_BillNotFound() {
         b2.setVetFirstName("Tom");
         b2.setVetLastName("Lee");
 
-        when(repo.findAll()).thenReturn(Flux.just(b1, b2));
+        when(repo.findAllByArchiveFalse()).thenReturn(Flux.just(b1, b2));
 
         Mono<Long> result = billService.getNumberOfBillsWithFilters(
                 "NO-SUCH-BILL",
