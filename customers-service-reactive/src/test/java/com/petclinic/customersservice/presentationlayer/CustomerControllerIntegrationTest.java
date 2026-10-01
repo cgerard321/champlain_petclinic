@@ -109,10 +109,10 @@ class CustomerControllerIntegrationTest {
     }
 
     @Test
-    void deleteNonExistentCustomerByCustomerId() {
+    void deleteNonExistentCustomerByCustomerId() throws InterruptedException {
 
         StepVerifier.create(repo.deleteAll()).verifyComplete();
-
+        Thread.sleep(100);
 
         String nonExistentCustomerId = "a6e0e5b0-5f60-45f0-8ac7-becd8b330486";
 
