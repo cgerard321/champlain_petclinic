@@ -307,7 +307,7 @@ export default function BillsListTable({
   };
 
   const formatTotalDue = (bill: Bill): string => {
-    const amount = bill.taxedAmount ?? bill.amount ?? 0;
+    const amount = bill.totalAmount ?? bill.amount ?? 0;
     if (currency === 'CAD') return `CAD $${amount.toFixed(2)}`;
     return `USD $${convertCurrency(amount, 'CAD', 'USD').toFixed(2)}`;
   };
@@ -654,7 +654,7 @@ export default function BillsListTable({
                   : `USD $${convertCurrency(detailBill.gstAmount, 'CAD', 'USD').toFixed(2)}`}
               </p>
               <p>
-                <strong>Amount:</strong>{' '}
+                <strong>QST (9.975%):</strong>{' '}
                 {currency === 'CAD'
                   ? `CAD $${detailBill.qstAmount.toFixed(2)}`
                   : `USD $${convertCurrency(detailBill.qstAmount, 'CAD', 'USD').toFixed(2)}`}
@@ -724,8 +724,11 @@ export default function BillsListTable({
         <PaymentForm
           billId={selectedBill.billId}
           customerId={user.userId}
-          billAmount={selectedBill.taxedAmount}
+          billAmount={selectedBill.totalAmount}
           baseAmount={selectedBill.amount}
+          qstAmount={selectedBill.qstAmount || 0}
+          gstAmount={selectedBill.gstAmount || 0}
+          taxedAmount={selectedBill.taxedAmount || 0}
           interestAmount={selectedBill.interest || 0}
           onPaymentSuccess={handlePaymentSuccess}
           onCancel={handlePaymentCancel}
