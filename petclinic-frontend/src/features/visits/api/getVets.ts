@@ -1,35 +1,41 @@
-import axiosInstance from '@/shared/api/axiosInstance.ts';
-import { Visit } from '@/features/visits/models/Visit.ts';
+import axiosInstance from '@/shared/api/axiosInstance';
+import { VetResponseModel } from '@/features/veterinarians/models/VetResponseModel';
 
-export async function getVisitsForPet(petId: string): Promise<Visit[]> {
-  try {
-    const cleanPetId = petId.trim();
-    const response = await axiosInstance.get(`/visits/pets/${cleanPetId}`, {
-      responseType: 'text',
-      useV2: false,
-    });
+export const getAvailableVets = async (): Promise<VetResponseModel[]> => {
+  const response = await axiosInstance.get('/vets', {
+    responseType: 'text',
+    useV2: false,
+  });
 
-    if (typeof response.data !== 'string') {
-      console.error('Expected string response, got:', typeof response.data);
-      return [];
-    }
+  const data = response.data;
+
+  if (typeof data === 'string') {
+    try {
+      const parsed = JSON.parse(data);
+      if (Array.isArray(parsed)) {
+        return parsed as VetResponseModel[];
+      }
+    } catch (err) {}
 
     return response.data
       .split('data:')
-      .map((payload: string): Visit | null => {
+      .map((payLoad: string) => {
         try {
-          const trimmed = payload.trim();
-          if (trimmed === '') return null;
-
-          return JSON.parse(trimmed) as Visit;
+          if (payLoad.trim() === '') return null;
+          return JSON.parse(payLoad);
         } catch (err) {
-          console.error("Can't parse JSON:", err);
+          console.error('Cannot parse vet payload:', err);
           return null;
         }
       })
-      .filter((data: Visit | null): data is Visit => data !== null);
-  } catch (error) {
-    console.error('Error fetching visits for pet:', error);
-    throw error;
+      .filter(
+        (d: VetResponseModel | null): d is VetResponseModel => d !== null
+      );
   }
-}
+
+  if (Array.isArray(data)) {
+    return data as VetResponseModel[];
+  }
+
+  return [];
+};

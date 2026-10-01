@@ -3,9 +3,7 @@ import { test, expect } from '@playwright/test';
 test('test cancel button visibility', async ({ page }) => {
   await page.goto('http://localhost:3000/users/login');
 
-  await page
-    .getByPlaceholder('Enter your email or username')
-    .fill('george@email.com');
+  await page.getByPlaceholder('Enter your email or username').fill('george@email.com');
   await page.getByPlaceholder('Enter your password').fill('pwd');
   await page.getByRole('button', { name: 'Login' }).click();
 
@@ -13,9 +11,11 @@ test('test cancel button visibility', async ({ page }) => {
 
   await page.goto('http://localhost:3000/customer/visits');
 
+
   const visitLink = page.locator('table tbody a').first();
   await expect(visitLink).toBeVisible();
   const visitId = await visitLink.innerText();
+
 
   const visitResponsePromise = page.waitForResponse(
     response =>
@@ -29,12 +29,10 @@ test('test cancel button visibility', async ({ page }) => {
 
   await expect(page).toHaveURL(`http://localhost:3000/visits/${visit.visitId}`);
 
+ 
   await expect(page.getByText('Visit Details')).toBeVisible();
   await expect(
-    page
-      .locator('.visit-field')
-      .filter({ hasText: 'Status:' })
-      .locator('.visit-value')
+    page.locator('.visit-field').filter({ hasText: 'Status:' }).locator('.visit-value')
   ).toHaveText(visit.status);
 
   const statusValue = page
@@ -58,4 +56,7 @@ test('test cancel button visibility', async ({ page }) => {
   } else {
     await expect(cancelButton).toHaveCount(0);
   }
-});
+
+
+
+})

@@ -1,8 +1,8 @@
 {
-  "recommendations": [
-    "esbenp.prettier-vscode",
-    "dbaeumer.vscode-eslint",
-    "rafapaulin.try-material-icon-theme",
-    "ms-playwright.playwright"
-  ]
+    "recommendations": [
+        "esbenp.prettier-vscode",
+         "dbaeumer.vscode-eslint",
+         "rafapaulin.try-material-icon-theme",
+         "ms-playwright.playwright"
+    ]
 }

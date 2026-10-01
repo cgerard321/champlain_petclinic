@@ -87,11 +87,12 @@
   .cart-table td {
     padding: 0.75rem 1rem;
   }
+
 }
 .cart-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0,0,0,.4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -105,7 +106,7 @@
   max-width: 90vw;
   max-height: 85vh;
   overflow: auto;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 30px rgba(0,0,0,.2);
 }
 
 .cart-modal__header {
@@ -116,17 +117,7 @@
   border-bottom: 1px solid #eee;
 }
 
-.cart-modal__body {
-  padding: 16px 20px;
-}
+.cart-modal__body { padding: 16px 20px; }
 
-.qty-controls {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-.qty-value {
-  min-width: 24px;
-  text-align: center;
-  display: inline-block;
-}
+.qty-controls { display: inline-flex; align-items: center; gap: 8px; }
+.qty-value { min-width: 24px; text-align: center; display: inline-block; }

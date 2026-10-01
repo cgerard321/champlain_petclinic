@@ -14,26 +14,26 @@
   position: relative;
 }
 
+
 .customer-bills-page .modern-sidebar {
   margin-top: 85px;
 }
 
 .sidebar-title {
-  font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, 'Noto Sans',
-    sans-serif;
+  font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
   font-size: 2.2rem;
   font-weight: 700;
   color: #22223b;
   margin-bottom: 2.5rem;
   letter-spacing: 0.04em;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  text-shadow: 0 2px 8px rgba(0,0,0,0.04);
   text-align: left;
 }
 
 .sidebar-button-container {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.00rem;
 }
 
 .modern-sidebar button,
@@ -42,16 +42,13 @@
   color: #fff;
   border: none;
   border-radius: 8px;
-  padding: 0.75rem 12px;
+  padding: 0.75rem 12px; 
   font-size: 1.05rem;
   font-weight: 600;
   box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
   cursor: pointer;
-  transition:
-    background 0.2s,
-    box-shadow 0.2s,
-    transform 0.1s;
-  margin: 0;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+  margin: 0; 
   width: 100%;
   text-align: center;
   outline: none;
@@ -65,14 +62,16 @@
 }
 
 :root {
+  
   --bills-offset: -130px;
 }
+
 
 .currency-dropdown {
   position: relative;
   display: inline-block;
   width: 100%;
-  margin: 5px 0;
+  margin: 5px 0; 
 }
 
 .currency-btn {
@@ -88,7 +87,7 @@
   font-weight: 600;
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
-  position: relative;
+  position: relative; 
 }
 
 .currency-label {
@@ -181,6 +180,7 @@
   transform: none;
 }
 
+
 .admin-bills-page .billsListContainer {
   transform: translateX(-100px);
 }
@@ -252,18 +252,10 @@
   text-overflow: ellipsis;
 }
 
-.billField.vet strong {
-  min-width: 0;
-}
-.billField.date strong {
-  min-width: 0;
-}
-.billField.total strong {
-  min-width: 0;
-}
-.billField.status strong {
-  min-width: 0;
-}
+.billField.vet strong { min-width: 0; }
+.billField.date strong { min-width: 0; }
+.billField.total strong { min-width: 0; }
+.billField.status strong { min-width: 0; }
 
 .billActions {
   display: flex;
@@ -337,9 +329,7 @@
   cursor: pointer;
   min-width: 120px;
   text-align: center;
-  transition:
-    background-color 120ms ease,
-    box-shadow 120ms ease;
+  transition: background-color 120ms ease, box-shadow 120ms ease;
 }
 
 .filter-btn:hover {
@@ -399,6 +389,7 @@
   cursor: pointer;
 }
 
+
 @media (max-width: 640px) {
   .form-grid,
   .modalContent.form-modal .form-grid,
@@ -421,6 +412,7 @@
     gap: 8px;
   }
 
+
   .billsListContainer {
     transform: none;
     align-items: center;
@@ -431,12 +423,14 @@
   }
 }
 
+
 .modalContent.form-modal {
   padding-left: 18px;
   padding-right: 18px;
 }
 
 .modalContent.form-modal .form-grid {
+
   justify-items: start;
   grid-template-columns: 140px 1fr;
 }
@@ -450,10 +444,11 @@
   justify-content: flex-start;
 }
 
+
 .modalContent.form-modal .form-actions .full-width-btn {
   width: 320px;
   max-width: 70%;
-  margin: 0;
+  margin: 0; 
   align-self: flex-start;
   display: block;
   padding: 12px 16px;
@@ -469,6 +464,7 @@
   background-color: #1585f5;
 }
 
+
 .modal-close-btn {
   background-color: #d64545;
   color: #fff;
@@ -483,6 +479,7 @@
   background-color: #b53b3b;
 }
 
+
 .modalContent.form-modal .form-actions .primary-modal-btn {
   background-color: #1585f5;
   color: #fff;
@@ -496,18 +493,17 @@
 .modalContent.form-modal .form-actions button,
 .modalContent.form-modal .form-actions .primary-modal-btn,
 .modalContent.form-modal .form-actions .full-width-btn {
-  transition:
-    background 0.25s ease,
-    box-shadow 0.18s ease,
-    transform 0.12s ease;
+  transition: background 0.25s ease, box-shadow 0.18s ease, transform 0.12s ease;
 }
 
 .modalContent.form-modal .form-actions button:hover,
 .modalContent.form-modal .form-actions .primary-modal-btn:hover,
 .modalContent.form-modal .form-actions .full-width-btn:hover {
+
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   transform: translateY(-2px) scale(1.02);
 }
+
 
 .modalContent.form-modal .form-actions .wide-btn {
   width: 225px;
@@ -531,7 +527,8 @@
   .billCard {
     width: 100%;
     padding: 10px;
-
+   
+  
     margin-top: 5.25rem;
     align-items: center;
   }
@@ -539,6 +536,8 @@
   .billField {
     min-width: 100%;
   }
+
+  
 
   .filter-button-row {
     flex-direction: column;
@@ -564,16 +563,14 @@
     gap: 10px;
   }
 
+
   .billActions {
     margin-left: 0;
   }
 
-  .billField strong {
-    min-width: 0;
-  }
-  .billValue {
-    white-space: normal;
-  }
+
+  .billField strong { min-width: 0; }
+  .billValue { white-space: normal; }
 }
 
 .archive-toggle button {
@@ -581,13 +578,11 @@
   color: #fff;
   border: none;
   border-radius: 4px;
-  padding: 0rem 3rem;
+  padding: 0.0rem 3rem;
   cursor: pointer;
   font-weight: 600;
   margin-top: 0.5rem;
-  transition:
-    background 0.2s,
-    color 0.2s;
+  transition: background 0.2s, color 0.2s;
 }
 
 .archive-toggle button:hover {
@@ -605,6 +600,7 @@
   transform: translateX(calc(var(--bills-offset) * -1));
 }
 
+
 .pagination-controls button {
   background: linear-gradient(90deg, #1976d2 0%, #63a4ff 100%);
   color: #fff;
@@ -614,10 +610,7 @@
   cursor: pointer;
   font-weight: 600;
   box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
-  transition:
-    background 0.18s ease,
-    box-shadow 0.12s ease,
-    transform 0.08s ease;
+  transition: background 0.18s ease, box-shadow 0.12s ease, transform 0.08s ease;
   margin: 0 14px;
 }
 
@@ -689,3 +682,5 @@
   gap: 10px;
   margin-top: 10px;
 }
+
+

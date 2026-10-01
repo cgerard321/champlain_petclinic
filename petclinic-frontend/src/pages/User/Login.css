@@ -57,12 +57,13 @@ input[type='password'] {
   border: none;
   background-color: transparent;
   cursor: pointer;
-}
+} 
 
-.input-wrapper {
+.input-wrapper  {
   position: relative;
   display: inline-block;
   width: 100%;
+  
 }
 .toggle-password {
   position: absolute;
@@ -72,11 +73,10 @@ input[type='password'] {
   border: transparent;
   background: transparent;
   cursor: pointer;
-}
+        }
 button:hover {
-  background-color: transparent;
-  opacity: 0.9;
-}
+  background-color:transparent;
+opacity: 0.9; }
 
 button[type='submit'] {
   width: 100%;

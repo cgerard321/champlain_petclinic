@@ -346,12 +346,8 @@ button.btn {
   text-overflow: clip !important;
 }
 
-.mobile-cards-view {
-  display: none;
-}
-.desktop-table-view {
-  display: block;
-}
+.mobile-cards-view { display: none; }
+.desktop-table-view { display: block; }
 
 .mobile-product-card {
   background: #ffffff;
@@ -404,9 +400,7 @@ button.btn {
   color: #721c24;
 }
 
-.mobile-card-body {
-  margin-bottom: 16px;
-}
+.mobile-card-body { margin-bottom: 16px; }
 
 .mobile-card-row {
   display: flex;
@@ -415,9 +409,7 @@ button.btn {
   border-bottom: 1px solid #f1f3f5;
 }
 
-.mobile-card-row:last-child {
-  border-bottom: none;
-}
+.mobile-card-row:last-child { border-bottom: none; }
 
 .mobile-card-label {
   font-weight: 600;
@@ -476,28 +468,18 @@ button.btn {
 }
 
 @media (max-width: 768px) {
-  .desktop-table-view {
-    display: none;
-  }
-  .mobile-cards-view {
-    display: block;
-  }
+  .desktop-table-view { display: none; }
+  .mobile-cards-view { display: block; }
 
   .products-filtering {
     flex-direction: column;
     gap: 12px;
   }
 
-  .inventory-supplies {
-    padding: 12px;
-  }
-  .inventory-title {
-    font-size: 20px;
-  }
+  .inventory-supplies { padding: 12px; }
+  .inventory-title { font-size: 20px; }
 }
 
 @media (max-width: 480px) {
-  .mobile-card-actions {
-    grid-template-columns: 1fr;
-  }
+  .mobile-card-actions { grid-template-columns: 1fr; }
 }

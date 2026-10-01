@@ -1,73 +1,71 @@
-.overlay {
+
+.overlay{
   --ovpad: clamp(10px, 2vh, 24px);
   position: fixed;
   inset: 0;
   padding: var(--ovpad);
-  background: rgba(10, 15, 20, 0.55);
+  background: rgba(10,15,20,.55);
   backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2147483647;
+  z-index: 2147483647; 
 }
 
-.form-container form > button[type='submit'] {
+.form-container form > button[type="submit"]{
   display: block;
   width: 100%;
   margin-top: calc(var(--gap) + 4px);
 }
 
-.form-container form > button:not([type='submit']) {
+.form-container form > button:not([type="submit"]){
   margin-top: var(--gap);
 }
 
-.form-container form > button[type='button'] + button[type='button'] {
+
+.form-container form > button[type="button"] + button[type="button"]{
   margin-left: var(--gap);
 }
 
-@media (min-width: 0) {
-  .form-container form > button:not([type='submit']) {
+@media (min-width: 0){
+  .form-container form > button:not([type="submit"]){
     display: inline-block;
   }
 }
 
-.form-container {
+.form-container{
   --gap: 14px;
   --radius: 16px;
   z-index: 1;
   position: relative;
   width: min(92vw, 720px);
-  max-height: calc(100vh - 2 * var(--ovpad));
+  max-height: calc(100vh - 2*var(--ovpad));
   overflow: auto;
   background: #fff;
   border-radius: var(--radius);
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  box-shadow:
-    0 20px 40px rgba(2, 8, 23, 0.16),
-    0 6px 12px rgba(2, 8, 23, 0.1);
+  border: 1px solid rgba(15,23,42,.08);
+  box-shadow: 0 20px 40px rgba(2,8,23,.16), 0 6px 12px rgba(2,8,23,.10);
   padding: clamp(16px, 2vw, 24px);
 }
 
-@supports (height: 100dvh) {
-  .form-container {
-    max-height: calc(100dvh - 2 * var(--ovpad));
-  }
+@supports (height: 100dvh){
+  .form-container{ max-height: calc(100dvh - 2*var(--ovpad)); }
 }
 
-.form-container h2 {
+.form-container h2{
   margin: 0 0 clamp(10px, 1.5vw, 16px);
-  font-size: clamp(1.1rem, 1.2rem + 0.2vw, 1.35rem);
+  font-size: clamp(1.1rem, 1.2rem + .2vw, 1.35rem);
 }
 
-.form-container label {
-  display: block;
+.form-container label{
+  display:block;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: .9rem;
   color: #475569;
   margin-bottom: 6px;
 }
 
-.form-container form > div {
+.form-container form > div{
   margin-bottom: var(--gap);
 }
 
@@ -75,124 +73,106 @@
 .form-container input[type='number'],
 .form-container input[type='file'],
 .form-container select,
-.form-container textarea {
+.form-container textarea{
   width: 100%;
-  padding: 0.75rem 0.8rem;
+  padding: .75rem .8rem;
   border-radius: 12px;
-  border: 1px solid rgba(15, 23, 42, 0.12);
+  border: 1px solid rgba(15,23,42,.12);
   font-size: 1rem;
   box-sizing: border-box;
-  transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease;
+  transition: border-color .15s ease, box-shadow .15s ease;
   min-width: 0;
 }
 
 .form-container input:focus,
 .form-container select:focus,
-.form-container textarea:focus {
+.form-container textarea:focus{
   outline: none;
   border-color: #2563eb;
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.22);
+  box-shadow: 0 0 0 4px rgba(37,99,235,.22);
 }
 
-.form-container [class~='field-error'] {
+
+.form-container [class~="field-error"]{
   display: block;
   color: #dc2626;
-  font-size: 0.875rem;
+  font-size: .875rem;
   line-height: 1.25;
   margin: 4px 0 8px;
 }
 
-.form-container :is(input, select, textarea)[class~='invalid'] {
+
+.form-container :is(input, select, textarea)[class~="invalid"]{
   border-color: #dc2626 !important;
   background-color: #fff6f6;
 }
 
-.form-container :is(input, select, textarea)[class~='invalid']:focus {
+.form-container :is(input, select, textarea)[class~="invalid"]:focus{
   outline: none;
   border-color: #dc2626 !important;
-  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.18);
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, .18);
 }
 
-@keyframes addinv-shake {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  25% {
-    transform: translateX(-3px);
-  }
-  75% {
-    transform: translateX(3px);
-  }
+
+@keyframes addinv-shake{
+  0%, 100%{ transform: translateX(0); }
+  25%{ transform: translateX(-3px); }
+  75%{ transform: translateX(3px); }
 }
-.form-container
-  :is(input, select, textarea)[class~='invalid'][class~='animate'] {
+.form-container :is(input, select, textarea)[class~="invalid"][class~="animate"]{
   animation: addinv-shake 180ms ease-in-out 0s 2;
 }
 
-.form-container img {
+
+.form-container img{
   max-width: 100%;
   height: auto;
   display: block;
   border-radius: 8px;
 }
 
-.form-container button {
+
+.form-container button{
   appearance: none;
   border: 0;
   border-radius: 12px;
-  padding: 0.8rem 1rem;
+  padding: .8rem 1rem;
   font-weight: 600;
   cursor: pointer;
   margin-right: var(--gap);
 }
 
-.form-container button[type='submit'] {
-  background: #2563eb;
-  color: #fff;
-}
-.form-container button[type='submit']:hover {
-  background: #1d4ed8;
-}
 
-.form-container button[class~='cancel'] {
-  background: #eef2ff;
-  color: #3730a3;
+.form-container button[type="submit"]{
+  background:#2563eb; color:#fff;
 }
-.form-container button[class~='cancel']:hover {
-  background: #e0e7ff;
-}
+.form-container button[type="submit"]:hover{ background:#1d4ed8; }
 
-.form-container button[class~='undo'] {
-  background: #0f172a;
-  color: #fff;
-}
-.form-container button[class~='undo']:hover {
-  background: #0b1222;
-}
 
-.form-container .loading-overlay {
+.form-container button[class~="cancel"]{
+  background:#eef2ff; color:#3730a3;
+}
+.form-container button[class~="cancel"]:hover{ background:#e0e7ff; }
+
+.form-container button[class~="undo"]{
+  background:#0f172a; color:#fff;
+}
+.form-container button[class~="undo"]:hover{ background:#0b1222; }
+
+.form-container .loading-overlay{
   position: absolute;
   inset: 0;
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255,255,255,0.6);
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: var(--radius);
   z-index: 1;
 }
-.form-container .loader {
-  width: 34px;
-  height: 34px;
-  border: 3px solid #2563eb;
-  border-left-color: transparent;
+.form-container .loader{
+  width: 34px; height: 34px;
+  border: 3px solid #2563eb; border-left-color: transparent;
   border-radius: 50%;
-  animation: addinv-spin 0.8s linear infinite;
+  animation: addinv-spin .8s linear infinite;
 }
-@keyframes addinv-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
+@keyframes addinv-spin{ to{ transform: rotate(360deg) } }
