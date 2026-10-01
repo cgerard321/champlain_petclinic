@@ -78,12 +78,12 @@ public class CustomerController {
     }
 
     @DeleteMapping(value = "/{customerId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<CustomerResponseDTO>> deleteCustomerByCustomerId(@PathVariable String customerId){
+    public Mono<ResponseEntity<Void>> deleteCustomerByCustomerId(@PathVariable String customerId){
         return Mono.just(customerId)
                 .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided course id is invalid: " + customerId)))
                 .flatMap(customerService::deleteCustomerByCustomerId)
-                .map(ResponseEntity::ok)
+                .map(v -> ResponseEntity.noContent().<Void>build())
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
@@ -113,9 +113,9 @@ public class CustomerController {
     }
 
     @DeleteMapping("/{customerId}/photo")
-    public Mono<ResponseEntity<CustomerResponseDTO>> deleteCustomerPhoto(@PathVariable String customerId) {
+    public Mono<ResponseEntity<Void>> deleteCustomerPhoto(@PathVariable String customerId) {
         return customerService.deleteCustomerPhoto(customerId)
-                .map(ResponseEntity::ok)
+                .map(v -> ResponseEntity.noContent().<Void>build())
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 }

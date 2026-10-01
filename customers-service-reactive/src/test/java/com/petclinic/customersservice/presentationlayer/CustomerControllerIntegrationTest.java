@@ -104,7 +104,7 @@ class CustomerControllerIntegrationTest {
         client.delete().uri("/customers/a6e0e5b0-5f60-45f0-8ac7-becd8b330486")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isNoContent()
                 .expectBody();
     }
 
@@ -360,7 +360,7 @@ class CustomerControllerIntegrationTest {
     }
 
     @Test
-    void whenDeleteCustomerPhoto_withValidId_ShouldReturnOkAndRemovePhotoId() {
+    void whenDeleteCustomerPhoto_withValidId_ShouldReturnNoContentAndRemovePhotoId() {
         String testCustomerId = "delete-photo-id-789";
         String TEST_PHOTO_ID = "photo-to-delete-456";
 
@@ -375,12 +375,8 @@ class CustomerControllerIntegrationTest {
         client.delete().uri("/customers/" + testCustomerId + "/photo")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.customerId").isEqualTo(testCustomerId)
-                .jsonPath("$.photoId").doesNotExist()
-                .jsonPath("$.photo").doesNotExist();
+                .expectStatus().isNoContent()
+                .expectBody();
 
         Mono<Customer> checkCustomer = repo.findCustomerByCustomerId(testCustomerId);
         StepVerifier.create(checkCustomer)
