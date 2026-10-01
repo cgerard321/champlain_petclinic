@@ -11,7 +11,6 @@ export class SupplyService {
   private readonly sse = inject(SseClient);
   private readonly baseUrl = '/api/gateway/inventories';
 
-
   getSupplies(inventoryId: string): Observable<Supply[]> {
     // This endpoint returns a finite SSE snapshot; collect it before giving the page one Supply[] to display.
     return this.sse
@@ -65,7 +64,7 @@ export class SupplyService {
   consumeSupply(inventoryId: string, productId: string): Observable<Supply> {
     return this.http.post<Supply>(
       `${this.baseUrl}/${inventoryId}/products/${productId}/consume`,
-      {}
+      {},
     );
   }
 }

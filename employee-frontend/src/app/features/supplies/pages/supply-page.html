@@ -143,7 +143,9 @@
         class="consume-button"
         (click)="consumeSupply(supply)"
         [disabled]="supply.productQuantity <= 0 || consumingSupplyId() === supply.productId"
-        [attr.aria-label]="supply.productQuantity <= 0 ? 'Cannot consume - out of stock' : 'Consume supply'"
+        [attr.aria-label]="
+          supply.productQuantity <= 0 ? 'Cannot consume - out of stock' : 'Consume supply'
+        "
       >
         {{ consumingSupplyId() === supply.productId ? 'Consuming...' : 'Consume' }}
       </button>
