@@ -92,9 +92,22 @@ public class BillController {
     }
 
     @GetMapping("/bills/bills-count")
-    public Mono<ResponseEntity<Long>> getTotalNumberOfBills() {
-        return billService.getAllBills().count()
-                .map(response -> ResponseEntity.status(HttpStatus.OK).body(response));
+    public Mono<ResponseEntity<Long>> getTotalNumberOfBills(
+            @RequestParam(defaultValue = "false") boolean includeArchived) {
+
+        return billService.getNumberOfBillsWithFilters(
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        includeArchived
+                )
+                .map(response ->
+                        ResponseEntity.status(HttpStatus.OK).body(response));
     }
 
 //    @GetMapping("/bills/bills-pagination")
@@ -125,14 +138,33 @@ public class BillController {
             @RequestParam(required = false) String visitType,
             @RequestParam(required = false) String vetId,
             @RequestParam(required = false) String vetFirstName,
-            @RequestParam(required = false) String vetLastName) {
+            @RequestParam(required = false) String vetLastName,
+            @RequestParam(defaultValue = "false") boolean includeArchived) {
 
-        if (page.orElse(0) < 0 || size.orElse(10) <= 0) {
-            return Flux.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid page or size"));
+        int pageNumber = page.orElse(0);
+        int pageSize = size.orElse(10);
+
+        if (pageNumber < 0 || pageSize <= 0) {
+            return Flux.error(
+                    new ResponseStatusException(
+                            HttpStatus.BAD_REQUEST,
+                            "Invalid page or size"
+                    )
+            );
         }
 
-        return billService.getAllBillsByPage(PageRequest.of(page.get(), size.get()), billId, customerId,
-                ownerFirstName, ownerLastName, visitType, vetId, vetFirstName, vetLastName);
+        return billService.getAllBillsByPage(
+                PageRequest.of(pageNumber, pageSize),
+                billId,
+                customerId,
+                ownerFirstName,
+                ownerLastName,
+                visitType,
+                vetId,
+                vetFirstName,
+                vetLastName,
+                includeArchived
+        );
     }
 
     @GetMapping(value = "/bills/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
@@ -159,18 +191,28 @@ public class BillController {
 
 
     @GetMapping("/bills/bills-filtered-count")
-    public Mono<Long> getNumberOfBillsWithFilters(@RequestParam(required = false) String billId,
-                                                  @RequestParam(required = false) String customerId,
-                                                  @RequestParam(required = false) String ownerFirstName,
-                                                  @RequestParam(required = false) String ownerLastName,
-                                                  @RequestParam(required = false) String visitType,
-                                                  @RequestParam(required = false) String vetId,
-                                                  @RequestParam(required = false) String vetFirstName,
-                                                  @RequestParam(required = false) String vetLastName
-    ) {
+    public Mono<Long> getNumberOfBillsWithFilters(
+            @RequestParam(required = false) String billId,
+            @RequestParam(required = false) String customerId,
+            @RequestParam(required = false) String ownerFirstName,
+            @RequestParam(required = false) String ownerLastName,
+            @RequestParam(required = false) String visitType,
+            @RequestParam(required = false) String vetId,
+            @RequestParam(required = false) String vetFirstName,
+            @RequestParam(required = false) String vetLastName,
+            @RequestParam(defaultValue = "false") boolean includeArchived) {
 
-        return billService.getNumberOfBillsWithFilters(billId, customerId, ownerFirstName, ownerLastName, visitType, vetId,
-                vetFirstName, vetLastName);
+        return billService.getNumberOfBillsWithFilters(
+                billId,
+                customerId,
+                ownerFirstName,
+                ownerLastName,
+                visitType,
+                vetId,
+                vetFirstName,
+                vetLastName,
+                includeArchived
+        );
     }
 
 
