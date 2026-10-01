@@ -11,7 +11,7 @@ import {
 } from '@features/inventories/models/inventory.model';
 
 @Injectable({ providedIn: 'root' })
-export class InventoryService {
+export class InventoryList {
   private readonly http = inject(HttpClient);
   private readonly sse = inject(SseClient);
   private readonly baseUrl = '/api/gateway/inventories';
