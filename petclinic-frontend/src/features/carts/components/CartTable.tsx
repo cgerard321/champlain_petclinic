@@ -1,34 +1,28 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+} from 'react';
+import axios from 'axios';
+
+import { addProductToCart } from '@/features/carts/api/addProductToCart';
+import { getAllProducts } from '@/features/products/api/getAllProducts';
+import type { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
+import type { CartDetailsModel, CartProductModel } from '@/shared/api/cart';
+import axiosInstance from '@/shared/api/axiosInstance';
+import { useToast } from '@/shared/components/toast/ToastProvider';
+
 import './cart-shared.css';
 import './CartTable.css';
-import axiosInstance from '@/shared/api/axiosInstance';
 
 interface CartModel {
   cartId: string;
   customerId: string;
   customerName?: string;
   products: Array<CartProductModel>;
-}
-
-interface CartDetailsModel {
-  cartId: string;
-  customerId: string;
-  customerName?: string;
-  products: Array<CartProductModel>;
-  wishListProducts?: Array<CartProductModel>;
-  subtotal: number;
-  tvq: number;
-  tvc: number;
-  total: number;
-  message?: string;
-  promoPercent?: number | null;
-}
-
-interface CartProductModel {
-  productId: string;
-  productName: string;
-  productSalePrice: number;
-  quantityInCart: number;
 }
 
 interface CustomerDTO {
@@ -81,6 +75,17 @@ export default function CartListTable(): JSX.Element {
   const [modalLoading, setModalLoading] = useState(false);
 
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+
+  const { showToast } = useToast();
+
+  const [showAddProduct, setShowAddProduct] = useState(false);
+  const [availableProducts, setAvailableProducts] = useState<ProductModel[]>(
+    []
+  );
+  const [selectedProductId, setSelectedProductId] = useState('');
+  const [addQuantity, setAddQuantity] = useState(1);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(false);
+  const [isAddingProduct, setIsAddingProduct] = useState(false);
 
   const fetchCustomerName = useCallback(
     async (customerId: string): Promise<string | null> => {
@@ -144,6 +149,10 @@ export default function CartListTable(): JSX.Element {
     setSelectedCart(null);
     setModalLoading(false);
     setActionLoadingId(null);
+
+    setShowAddProduct(false);
+    setSelectedProductId('');
+    setAddQuantity(1);
   }, []);
 
   const updateLineQty = useCallback(
@@ -328,6 +337,91 @@ export default function CartListTable(): JSX.Element {
     void fetchCarts();
   }, [fetchCarts]);
 
+  const toggleAddProductForm = async (): Promise<void> => {
+    if (showAddProduct) {
+      setShowAddProduct(false);
+      return;
+    }
+
+    setShowAddProduct(true);
+    if (availableProducts.length > 0) return;
+
+    try {
+      setIsLoadingProducts(true);
+      const products = await getAllProducts();
+
+      setAvailableProducts(
+        products.filter(
+          product =>
+            !product.isUnlisted &&
+            product.productStatus !== 'OUT_OF_STOCK' &&
+            product.productQuantity > 0
+        )
+      );
+    } catch (error) {
+      console.error('Failed to load products:', error);
+      showToast('Products could not be loaded.', 'error');
+    } finally {
+      setIsLoadingProducts(false);
+    }
+  };
+
+  const handleAddProduct = async (
+    event: FormEvent<HTMLFormElement>
+  ): Promise<void> => {
+    event.preventDefault();
+
+    if (
+      !selectedCart ||
+      !selectedProductId ||
+      !Number.isInteger(addQuantity) ||
+      addQuantity < 1
+    ) {
+      showToast('Select a product and enter a valid quantity.', 'error');
+      return;
+    }
+
+    try {
+      setIsAddingProduct(true);
+
+      const updatedCart = await addProductToCart(selectedCart.cartId, {
+        productId: selectedProductId,
+        quantity: addQuantity,
+      });
+
+      if (!updatedCart) return;
+
+      setSelectedCart(previous => ({
+        ...(previous ?? updatedCart),
+        ...updatedCart,
+        customerName: updatedCart.customerName ?? previous?.customerName,
+        wishListProducts:
+          updatedCart.wishListProducts ?? previous?.wishListProducts,
+        promoPercent:
+          updatedCart.promoPercent ?? previous?.promoPercent ?? null,
+      }));
+
+      setSelectedProductId('');
+      setAddQuantity(1);
+      setShowAddProduct(false);
+      showToast('Product added successfully.', 'success');
+    } catch (error: unknown) {
+      if (
+        axios.isAxiosError<{ message?: string }>(error) &&
+        [400, 404, 409, 422, 429].includes(error.response?.status ?? -1)
+      ) {
+        showToast(
+          error.response?.data?.message ?? 'The product could not be added.',
+          'error'
+        );
+      } else {
+        showToast('An unexpected error occurred.', 'error');
+      }
+    } finally {
+      setIsAddingProduct(false);
+    }
+  };
+
   return (
     <div className="cart-list-container cart-panel cart-panel--spacious">
       {loading && (
@@ -405,7 +499,79 @@ export default function CartListTable(): JSX.Element {
                     <strong>Total: {selectedCart.total.toFixed(2)}</strong>
                   </div>
                 </div>
+                <div className="admin-add-product">
+                  <button
+                    type="button"
+                    className="cart-button cart-button--brand"
+                    onClick={() => void toggleAddProductForm()}
+                  >
+                    {showAddProduct ? 'Cancel' : 'Add product'}
+                  </button>
 
+                  {showAddProduct && (
+                    <form
+                      className="admin-add-product__form"
+                      onSubmit={handleAddProduct}
+                    >
+                      <label
+                        className="admin-add-product__field"
+                        htmlFor="admin-product"
+                      >
+                        Product
+                        <select
+                          id="admin-product"
+                          value={selectedProductId}
+                          onChange={event =>
+                            setSelectedProductId(event.target.value)
+                          }
+                          disabled={isLoadingProducts}
+                          required
+                        >
+                          <option value="">
+                            {isLoadingProducts
+                              ? 'Loading products...'
+                              : 'Select a product'}
+                          </option>
+
+                          {availableProducts.map(product => (
+                            <option
+                              key={product.productId}
+                              value={product.productId}
+                            >
+                              {product.productName} - $
+                              {product.productSalePrice.toFixed(2)}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+
+                      <label
+                        className="admin-add-product__field"
+                        htmlFor="admin-quantity"
+                      >
+                        Quantity
+                        <input
+                          id="admin-quantity"
+                          type="number"
+                          min="1"
+                          step="1"
+                          value={addQuantity}
+                          onChange={event =>
+                            setAddQuantity(Number(event.target.value))
+                          }
+                        />
+                      </label>
+
+                      <button
+                        type="submit"
+                        className="cart-button cart-button--accent"
+                        disabled={isAddingProduct || !selectedProductId}
+                      >
+                        {isAddingProduct ? 'Adding...' : 'Add'}
+                      </button>
+                    </form>
+                  )}
+                </div>
                 <table className="cart-table cart-table--compact">
                   <thead>
                     <tr>
