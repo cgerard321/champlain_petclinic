@@ -3,7 +3,6 @@ package com.petclinic.billing.domainclientlayer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.billing.datalayer.OwnerResponseDTO;
-//import com.petclinic.billing.exceptions.NotFoundException;
 import com.petclinic.billing.exceptions.CustomerNotFoundException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -75,9 +74,6 @@ public class OwnerClientUnitTest {
 
         Mono<OwnerResponseDTO> result = ownerClient.getOwnerByOwnerId(invalidId);
 
-//        StepVerifier.create(result)
-//                .expectErrorMatches(throwable -> throwable instanceof NotFoundException && throwable.getMessage().equals("Owner not found with ownerId: " + invalidId))
-//                .verify();
 
 
         StepVerifier.create(result)

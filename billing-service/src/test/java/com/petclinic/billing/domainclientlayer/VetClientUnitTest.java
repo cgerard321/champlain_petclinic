@@ -3,7 +3,6 @@ package com.petclinic.billing.domainclientlayer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.billing.datalayer.VetResponseDTO;
-//import com.petclinic.billing.exceptions.NotFoundException;
 import com.petclinic.billing.exceptions.VetNotFoundException;
 import okhttp3.mockwebserver.MockResponse;
 import org.junit.jupiter.api.AfterAll;
@@ -71,10 +70,6 @@ public class VetClientUnitTest {
                         .addHeader("Content-Type", "application/json"));
         Mono<VetResponseDTO> result = vetClient.getVetByVetId(invalidId);
 
-//        StepVerifier.create(result)
-//                .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
-//                throwable.getMessage().equals("Vet not found with vetId: " + invalidId))
-//                .verify();
 
         StepVerifier.create(result)
                 .expectErrorMatches(error ->

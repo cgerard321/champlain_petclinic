@@ -784,13 +784,7 @@ public class BillServiceImplTest {
         // Act
         Flux<BillResponseDTO> result = billService.getBillsByCustomerId(nonExistentCustomerId);
 
-        // Assert
-//        StepVerifier.create(result)
-//                .expectErrorMatches(throwable ->
-//                        throwable instanceof ResponseStatusException &&
-//                                ((ResponseStatusException) throwable).getStatus().equals(HttpStatus.NOT_FOUND) &&
-//                                throwable.getMessage().contains("Customer ID does not exist"))
-//                .verify();
+
         StepVerifier.create(result)
                 .expectErrorMatches(error ->
                         error instanceof CustomerNotFoundException && error.getMessage().equals
