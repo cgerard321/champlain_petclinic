@@ -36,30 +36,25 @@ registerLocaleData(localeFr);
 export function getSavedLang(): string {
   return localStorage.getItem('lang') ?? 'fr';
 }
-
-// CHANGE MADE FOR TESTABILITY (VETS-CPC-1927)
-// This used to be an anonymous arrow function written inline inside the `providers` array below.
-// Being anonymous, it had no name to import, so the fetch and both of its error paths were
-// impossible to test. It is now a named export
-
 // Installs the English translations before the first component renders.
 
 export async function loadActiveTranslations(): Promise<void> {
+  // Read the language the user last picked in the header ('fr' if nothing was saved yet).
   const lang = getSavedLang();
   document.documentElement.lang = lang;
-  //retrr
-
+  // Stop here to avoid a useless network call.
   if (lang !== 'en') {
     return;
   }
 
   try {
-    const response = await fetch('/i18n/en.json');
     //save the english file
+    const response = await fetch('/i18n/en.json');
+    // fetch() does not throw on HTTP errors (404, 500...), so the status must be checked by hand.
     if (!response.ok) {
       throw new Error(`Failed to load translations: ${response.status}`);
     }
-
+    // loadTranslations() only needs the inner `translations` object, not the whole file.
     const { translations } = await response.json();
     loadTranslations(translations);
   } catch (err) {

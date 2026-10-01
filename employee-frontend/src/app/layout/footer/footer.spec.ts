@@ -21,14 +21,22 @@ describe('Footer', () => {
     clearTranslations();
   });
 
+  // Helper that renders the footer and returns its HTML, so tests can read the displayed text.
   async function renderFooter(): Promise<HTMLElement> {
+    // Set up a small Angular test environment containing only the Footer component.
     await TestBed.configureTestingModule({ imports: [Footer] }).compileComponents();
+
+    // Create an instance of the component (the fixture gives access to its class and its HTML).
     const fixture = TestBed.createComponent(Footer);
+
+    // Wait until the component has finished rendering before reading its content.
     await fixture.whenStable();
 
+    // Return the rendered HTML element of the footer.
     return fixture.nativeElement as HTMLElement;
   }
 
+  // POSITIVE - The Footer component can be created without errors.
   it('should create', async () => {
     // Arrange
     await TestBed.configureTestingModule({ imports: [Footer] }).compileComponents();
@@ -36,10 +44,11 @@ describe('Footer', () => {
     // Act
     const fixture = TestBed.createComponent(Footer);
 
-    // Assert
+    // Assert - the component instance exists
     expect(fixture.componentInstance).toBeTruthy();
   });
 
+  // POSITIVE - With no translations loaded, the footer displays the French text from its template.
   it('renders the French source text when no translations are loaded', async () => {
     // Act
     const footer = await renderFooter();
@@ -51,6 +60,7 @@ describe('Footer', () => {
     expect(footer.textContent).toContain('Tous droits réservés');
   });
 
+  // POSITIVE - Once the English translations are loaded, the footer displays English instead of French.
   it('renders the English text once the translations are loaded', async () => {
     // Arrange - must happen before the component renders, because $localize is only
     // substituted for calls evaluated after loadTranslations()
@@ -59,11 +69,13 @@ describe('Footer', () => {
     // Act
     const footer = await renderFooter();
 
-    // Assert
+    // Assert - every footer text is now in English
     expect(footer.textContent).toContain('PetClinic Employee Portal');
     expect(footer.textContent).toContain('Privacy Policy');
     expect(footer.textContent).toContain('Terms of Service');
     expect(footer.textContent).toContain('All rights reserved');
+
+    // Assert - the French text was replaced, not just displayed next to the English one
     expect(footer.textContent).not.toContain('Portail Employé Clinique Vétérinaire');
   });
 });

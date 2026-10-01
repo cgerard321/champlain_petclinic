@@ -7,16 +7,6 @@ import { Footer } from '@layout/footer/footer';
 import { getSavedLang, loadActiveTranslations } from './app.config';
 
 /**
- * VETS-CPC-1927 - the translation loader itself.
- *
- * The component specs install translations by hand, so they only prove that a filled catalogue
- * reaches the template. These tests cover the code that FILLS the catalogue: reading the saved
- * language, fetching /i18n/en.json, and both failure paths.
- *
- * The footer is rendered at the end of some tests because it is the only way to observe, from
- * outside, whether the loader actually installed anything.
- */
-/**
  * Mirrors the real en.json shape ({ locale, translations }) so the tests also check that
  * the loader unwraps `translations` before installing it.
  */
