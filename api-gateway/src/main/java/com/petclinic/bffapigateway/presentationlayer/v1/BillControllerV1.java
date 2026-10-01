@@ -98,8 +98,7 @@ public class BillControllerV1 {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    // Backward compatibility: allow paginated bills to be fetched from both /page and /
-    @GetMapping(value = {"/page", ""}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = {"/page"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<BillResponseDTO> getAllBillsByPage(
             @RequestParam Optional<Integer> page,
             @RequestParam Optional<Integer> size,
@@ -122,6 +121,29 @@ public class BillControllerV1 {
 
         return billServiceClient.getAllBillsByPage(page, size, billId, customerId, ownerFirstName, ownerLastName,
                 visitType, vetId, vetFirstName, vetLastName);
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> getAllBillsStream(
+            @RequestParam(required = false) String billId,
+            @RequestParam(required = false) String customerId,
+            @RequestParam(required = false) String ownerFirstName,
+            @RequestParam(required = false) String ownerLastName,
+            @RequestParam(required = false) String visitType,
+            @RequestParam(required = false) String vetId,
+            @RequestParam(required = false) String vetFirstName,
+            @RequestParam(required = false) String vetLastName) {
+
+        return billServiceClient.getAllBillsStream(
+                billId,
+                customerId,
+                ownerFirstName,
+                ownerLastName,
+                visitType,
+                vetId,
+                vetFirstName,
+                vetLastName);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})

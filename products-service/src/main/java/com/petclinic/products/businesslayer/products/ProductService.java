@@ -2,6 +2,7 @@ package com.petclinic.products.businesslayer.products;
 
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductType;
+import com.petclinic.products.domainclientlayer.FileRequestDTO;
 import com.petclinic.products.presentationlayer.products.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -10,17 +11,34 @@ import java.util.List;
 
 public interface ProductService {
 
-    Flux<ProductResponseModel> getAllProducts(Double minPrice, Double maxPrice,Double minRating, Double maxRating, String sort,String deliveryType,String productType);
-    Mono<ProductResponseModel> getProductByProductId(String productId);
+    Flux<ProductResponseModel> getAllProducts(Double minPrice, Double maxPrice, Double minRating, Double maxRating, String sort, String deliveryType, String productType);
+
+    default Mono<ProductResponseModel> getProductByProductId(String productId) {
+        return getProductByProductId(productId, false);
+    }
+
+    Mono<ProductResponseModel> getProductByProductId(
+            String productId, boolean includeImage);
+
+    Mono<ProductResponseModel> includeImage(ProductResponseModel product);
     Mono<ProductResponseModel> addProduct(Mono<ProductRequestModel> productRequestModel);
+
     Mono<ProductResponseModel> updateProductByProductId(String productId, Mono<ProductRequestModel> productRequestModel);
+
     Mono<ProductResponseModel> patchListingStatus(String productId, Mono<ProductRequestModel> productRequestModel);
+
     Mono<ProductResponseModel> deleteProductByProductId(String productId, boolean cascadeBundle);
+
     Mono<Void> requestCount(String productId);
+
     Mono<Void> DecreaseProductCount(String productId);//When item is sold in cart//temporarily in cart.
+
     Mono<Void> changeProductQuantity(String productId, Integer productQuantity);
+
     Flux<ProductResponseModel> getProductsByType(String productType);
+
     List<Product> getProductsByType(ProductType productType);
+
     Mono<ProductEnumsResponseModel> getProductsEnumValues();
 
     Flux<ProductTypeResponseModel> getAllProductTypes();
@@ -32,4 +50,8 @@ public interface ProductService {
     Mono<ProductTypeResponseModel> updateProductTypeByProductTypeId(String productTypeId, Mono<ProductTypeRequestModel> productTypeRequestModel);
 
     Mono<ProductTypeResponseModel> deleteProductTypeByProductTypeId(String productTypeId);
+
+    Mono<ProductResponseModel> updateProductImage(
+            String productId, FileRequestDTO image);
+    Mono<ProductResponseModel> deleteProductImage(String productId);
 }

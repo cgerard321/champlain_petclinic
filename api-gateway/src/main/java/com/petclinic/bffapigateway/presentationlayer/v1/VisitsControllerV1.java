@@ -152,7 +152,7 @@ public class VisitsControllerV1 {
 
     @GetMapping(value = "/owners/{ownerId}/visits", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VisitResponseDTO> getVisitsByOwnerId(@PathVariable String ownerId) {
-        return customersServiceClient.getPetsByOwnerId(ownerId)
+        return customersServiceClient.getPetsByCustomerId(ownerId)
                 .flatMap(pet -> visitsServiceClient.getVisitsForPet(pet.getPetId()));
     }
 

@@ -20,7 +20,7 @@ import java.util.Optional;
 @RestController()
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("api/gateway/owners/petTypes")
+@RequestMapping("api/gateway/customers/petTypes")
 public class PetTypeControllerV1 {
 
     private final CustomersServiceClient customersServiceClient;
@@ -70,7 +70,7 @@ public class PetTypeControllerV1 {
             @RequestBody Mono<PetTypeRequestDTO> petTypeRequestMono) {
         return petTypeRequestMono.flatMap(petTypeRequestDTO ->
                 customersServiceClient.updatePetType(petTypeId, Mono.just(petTypeRequestDTO))
-                        .map(updatedOwner -> ResponseEntity.ok().body(updatedOwner))
+                        .map(updatedCustomer -> ResponseEntity.ok().body(updatedCustomer))
                         .defaultIfEmpty(ResponseEntity.notFound().build())
         );
     }

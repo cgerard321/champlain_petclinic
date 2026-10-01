@@ -2,12 +2,13 @@ package com.petclinic.bffapigateway.presentationlayer.v1.Users;
 
 import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.Auth.*;
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.CustomerRequestDTO;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.CustomerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import com.petclinic.bffapigateway.presentationlayer.v1.UserControllerV1;
+import com.petclinic.bffapigateway.utils.Security.Filters.CsrfFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.IsUserFilter;
@@ -55,7 +56,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
         },
         excludeFilters = @ComponentScan.Filter(
                 type = FilterType.ASSIGNABLE_TYPE,
-                classes = {JwtTokenFilter.class, RoleFilter.class, IsUserFilter.class}
+                classes = {JwtTokenFilter.class, RoleFilter.class, IsUserFilter.class, CsrfFilter.class}
         )
 )
 @AutoConfigureWebTestClient
@@ -72,6 +73,7 @@ class UserControllerV1UnitTest {
     private final String EXISTING_USER_ID_1 = "be08dfa1-25d4-4352-92df-5dc37c2464c7";
     private final String EXISTING_USER_ID_2 = "be08dfa1-25d4-4352-92df-5dc37c2464c7";
     private final String NON_EXISTING_USER_ID = "be08dfa1-25d4-4352-92df-5dc37c246md8";
+    private final List<String> ROLES_LIST = List.of("OWNER");
 
     private final String UPDATED_USERNAME = "updatedTestUser";
 
@@ -87,13 +89,13 @@ class UserControllerV1UnitTest {
             .email("test2@example.com")
             .build();
 
-    private final OwnerRequestDTO OWNER_REQUEST_MODEL = OwnerRequestDTO.builder()
+    private final CustomerRequestDTO OWNER_REQUEST_MODEL = CustomerRequestDTO.builder()
             .firstName("Ric")
             .lastName("Danon")
             .build();
 
-    private final OwnerResponseDTO OWNER_RESPONSE_MODEL = OwnerResponseDTO.builder()
-            .ownerId(EXISTING_USER_ID_1)
+    private final CustomerResponseDTO OWNER_RESPONSE_MODEL = CustomerResponseDTO.builder()
+            .customerId(EXISTING_USER_ID_1)
             .firstName("Ric")
             .lastName("Danon")
             .build();
@@ -441,9 +443,9 @@ class UserControllerV1UnitTest {
                 .exchange()
                 .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(OwnerResponseDTO.class)
+                .expectBody(CustomerResponseDTO.class)
                 .value(dto->{
-                    assertNotNull(dto.getOwnerId());
+                    assertNotNull(dto.getCustomerId());
                     Assert.assertEquals(dto.getFirstName(), OWNER_RESPONSE_MODEL.getFirstName());
                     Assert.assertEquals(dto.getLastName(), OWNER_RESPONSE_MODEL.getLastName());
                     Assert.assertEquals(dto.getAddress(), OWNER_RESPONSE_MODEL.getAddress());
@@ -545,6 +547,65 @@ class UserControllerV1UnitTest {
 
         Mockito.verify(authServiceClient, times(1))
                 .createVetUser(any(Mono.class));
+    }
+
+    @Test
+    @DisplayName("Given a valid token with a body, /jwt should return 200 with user info")
+    void whenValidateToken_withBody_thenReturnOk() {
+        TokenResponseDTO tokenResponseDTO = TokenResponseDTO.builder()
+                .userId(EXISTING_USER_ID_1)
+                .username(USER_DETAILS_1.getUsername())
+                .email(USER_DETAILS_1.getEmail())
+                .roles(ROLES_LIST)
+                .build();
+
+        when(authServiceClient.validateToken(TOKEN))
+                .thenReturn(Mono.just(ResponseEntity.ok(tokenResponseDTO)));
+
+        client.get()
+                .uri("/api/gateway/users/jwt")
+                .cookie("Bearer", TOKEN)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ValidateUserTokenResponse.class)
+                .value(res -> {
+                    assertEquals(EXISTING_USER_ID_1, res.getUserId());
+                    assertEquals(USER_DETAILS_1.getUsername(), res.getUsername());
+                    assertEquals(USER_DETAILS_1.getEmail(), res.getEmail());
+                    assertEquals(ROLES_LIST, res.getRoles());
+                });
+
+        verify(authServiceClient).validateToken(TOKEN);
+    }
+
+    @Test
+    @DisplayName("Given a response entity with a null body, /jwt should return 401")
+    void whenValidateToken_withNullBody_thenReturnUnauthorized() {
+        when(authServiceClient.validateToken(TOKEN))
+                .thenReturn(Mono.just(ResponseEntity.ok(null)));
+
+        client.get()
+                .uri("/api/gateway/users/jwt")
+                .cookie("Bearer", TOKEN)
+                .exchange()
+                .expectStatus().isUnauthorized();
+
+        verify(authServiceClient).validateToken(TOKEN);
+    }
+
+    @Test
+    @DisplayName("Given an empty Mono from auth service, /jwt should return 401")
+    void whenValidateToken_withEmptyMono_thenReturnUnauthorized() {
+        when(authServiceClient.validateToken(TOKEN))
+                .thenReturn(Mono.empty());
+
+        client.get()
+                .uri("/api/gateway/users/jwt")
+                .cookie("Bearer", TOKEN)
+                .exchange()
+                .expectStatus().isUnauthorized();
+
+        verify(authServiceClient).validateToken(TOKEN);
     }
 
     //    @Test

@@ -17,7 +17,34 @@ var defaultData = []domain.FileInfo{
 	{"3e5a214b-009d-4a25-9313-344676e6157d", "petclinic base image", "image/jpg"},
 }
 
+func WaitForDatabase(db *sql.DB) {
+	delay := 2 * time.Second
+	maxDelay := 15 * time.Second
+
+	for attempt := 0; attempt < 10; attempt++ {
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		err := db.PingContext(ctx)
+		cancel()
+
+		if err == nil {
+			log.Printf("Connected to the database on attempt %d", attempt+1)
+			return
+		}
+
+		log.Printf("Failed to connect to the database on attempt %d, retrying in %s", attempt+1, delay)
+		time.Sleep(delay)
+
+		delay = delay * 2
+		if delay > maxDelay {
+			delay = maxDelay
+		}
+	}
+
+	log.Fatalf("Failed to connect to the database after %d attempts", 10)
+}
+
 func SetupDatabase(db *sql.DB) {
+	WaitForDatabase(db)
 	SetupTable(db)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

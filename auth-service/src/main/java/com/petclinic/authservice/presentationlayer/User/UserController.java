@@ -75,6 +75,12 @@ public class UserController {
         return ResponseEntity.ok(userMapper.modelToDetails(user));
     }
 
+    @GetMapping("/{userId}/public-profile")
+    public ResponseEntity<PublicUserProfile> getPublicProfile(@PathVariable String userId) {
+        User user = userService.getUserByUserId(userId);
+        return ResponseEntity.ok(new PublicUserProfile(user.getUsername()));
+    }
+
     //add pagination to this method later
     @GetMapping("/")
     public ResponseEntity<List<UserDetails>> getAllUsers(@RequestParam Optional<String> username) {
@@ -138,8 +144,10 @@ public class UserController {
 
             HashMap<String, Object> userAndToken = userService.login(login);
             ResponseCookie token = (ResponseCookie) userAndToken.get("token");
+            ResponseCookie csrfCookie = (ResponseCookie) userAndToken.get("csrfToken");
             User loggedInUser = (User) userAndToken.get("user");
-            response.setHeader(HttpHeaders.SET_COOKIE, token.toString());
+            response.addHeader(HttpHeaders.SET_COOKIE, token.toString());
+            response.addHeader(HttpHeaders.SET_COOKIE, csrfCookie.toString());
             UserPasswordLessDTO testUser = userMapper.modelToIDLessPasswordLessDTO(loggedInUser);
             return ResponseEntity.ok()
                     .body(testUser);
