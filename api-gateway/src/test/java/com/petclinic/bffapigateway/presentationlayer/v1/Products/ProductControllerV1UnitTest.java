@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.presentationlayer.v1.Products;
 
 import com.petclinic.bffapigateway.config.GlobalExceptionHandler;
 import com.petclinic.bffapigateway.domainclientlayer.ProductsServiceClient;
+import com.petclinic.bffapigateway.dtos.Files.FileDetails;
 import com.petclinic.bffapigateway.dtos.Products.*;
 import com.petclinic.bffapigateway.presentationlayer.v1.ProductControllerV1;
 import org.junit.jupiter.api.Test;
@@ -50,6 +51,25 @@ class ProductControllerV1UnitTest {
 
 
     private final String invalidProductId = "ae2d3af7-f2a2-407f-ad31-ca7d8220cb";
+
+    @Test
+    void updateProductImageWithMissingFileFieldsReturnsBadRequest() {
+        FileDetails invalidImage = FileDetails.builder()
+                .fileName(" ")
+                .fileType("")
+                .fileData(null)
+                .build();
+
+        webTestClient.patch()
+                .uri(baseProductsURL
+                        + "/06a7d573-bcab-4db3-956f-773324b92a80/image")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(invalidImage)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        verifyNoInteractions(productsServiceClient);
+    }
 
     private ProductRequestDTO productRequest1 = ProductRequestDTO.builder()
             .productName("Product 1")
