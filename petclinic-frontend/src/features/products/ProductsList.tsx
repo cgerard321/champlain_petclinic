@@ -111,7 +111,7 @@ const ProductList = function Productlist({
         sorted.filter(
           p =>
             p.productName.toLowerCase().includes(query) ||
-            p.productType.toLowerCase().includes(query)
+            p.productType?.toLowerCase().includes(query)
         )
       );
     }
