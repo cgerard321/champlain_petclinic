@@ -215,6 +215,75 @@
   background: var(--sage-50);
 }
 
+/* Download button: icon only, expands to show its label on hover, focus or while downloading */
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.download-pdf-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 10px;
+  border: 1px solid var(--forest-700);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--forest-700);
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 180ms ease;
+}
+
+.download-pdf-button mat-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+}
+
+.download-label {
+  max-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  opacity: 0;
+  transition:
+    max-width 220ms ease,
+    opacity 160ms ease,
+    margin-left 220ms ease;
+}
+
+.download-pdf-button:hover .download-label,
+.download-pdf-button:focus-visible .download-label,
+.download-pdf-button.expanded .download-label {
+  max-width: 8rem;
+  margin-left: 8px;
+  opacity: 1;
+}
+
+.download-pdf-button:hover:not(:disabled) {
+  background: var(--sage-50);
+}
+
+.download-pdf-button:focus-visible {
+  outline: 3px solid var(--sage-400);
+  outline-offset: 3px;
+}
+
+.download-pdf-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .download-label {
+    transition: none;
+  }
+}
+
 @media (width <= 700px) {
   .supply-page {
     padding: 2rem 1rem 3rem;
