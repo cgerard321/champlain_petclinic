@@ -11,7 +11,7 @@
 .customer-details-card h2 {
   margin-bottom: 20px;
   color: #333;
-  font-size:  2em;
+  font-size: 2em;
   text-align: center;
 }
 
@@ -155,7 +155,6 @@
   margin-right: 15px;
   border: 1px solid #ddd;
 }
-
 
 .customer-details-buttons {
   display: flex;
