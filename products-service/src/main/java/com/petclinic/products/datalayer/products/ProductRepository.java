@@ -16,9 +16,8 @@ public interface ProductRepository extends R2dbcRepository<Product, Long> {
 
     Flux<Product> findByProductSalePriceLessThanEqual(Double maxPrice);
 
-    Flux<Product> findProductsByProductType(String productType);
+    Flux<Product> findProductsByProductTypeId(String productTypeId);
 
-    List<Product> findByProductType(ProductType productType);
     Mono<Boolean> existsByImageIdAndProductIdNot(
             String imageId, String productId);
 

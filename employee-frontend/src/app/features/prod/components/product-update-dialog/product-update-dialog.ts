@@ -31,7 +31,7 @@ interface ProductFormModel {
   productSalePrice: number;
   productQuantity: number;
   isUnlisted: boolean;
-  productType: ProductType;
+  productTypeId: string;
   releaseDate: string;
   deliveryType: DeliveryType;
 }
@@ -57,7 +57,7 @@ export class ProductUpdateDialog implements OnInit {
   private readonly productService = inject(ProductService);
   private readonly imageService = inject(ImageService);
 
-  protected readonly productTypes = signal<ProductType[]>(Object.values(ProductType));
+  protected readonly productTypes = signal<ProductType[]>([]);
   protected readonly deliveryTypes = signal<DeliveryType[]>(Object.values(DeliveryType));
   protected readonly isSubmitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
@@ -71,7 +71,7 @@ export class ProductUpdateDialog implements OnInit {
     productSalePrice: this.data.product.productSalePrice,
     productQuantity: this.data.product.productQuantity,
     isUnlisted: this.data.product.isUnlisted,
-    productType: this.data.product.productType,
+    productTypeId: this.data.product.productTypeId,
     releaseDate: this.data.product.releaseDate ?? '',
     deliveryType: this.data.product.deliveryType,
   });
@@ -81,6 +81,7 @@ export class ProductUpdateDialog implements OnInit {
     required(schemaPath.productDescription, { message: 'Product description is required' });
     required(schemaPath.productSalePrice, { message: 'Sale price is required' });
     required(schemaPath.productQuantity, { message: 'Quantity is required' });
+    required(schemaPath.productTypeId, { message: 'Product type is required' });
   });
 
   ngOnInit(): void {

@@ -3,21 +3,16 @@ package com.petclinic.products.businesslayer.products;
 import com.petclinic.products.datalayer.images.Image;
 import com.petclinic.products.datalayer.images.ImageRepository;
 import com.petclinic.products.datalayer.products.*;
+import com.petclinic.products.datalayer.ratings.Rating;
+import com.petclinic.products.datalayer.ratings.RatingRepository;
 import com.petclinic.products.domainclientlayer.FileRequestDTO;
 import com.petclinic.products.domainclientlayer.FileResponseDTO;
 import com.petclinic.products.domainclientlayer.FilesServiceClient;
-import org.springframework.beans.factory.annotation.Value;
-import com.petclinic.products.datalayer.ratings.Rating;
-import com.petclinic.products.datalayer.ratings.RatingRepository;
 import com.petclinic.products.presentationlayer.products.*;
 import com.petclinic.products.utils.EntityModelUtil;
-import com.petclinic.products.utils.exceptions.InvalidAmountException;
-import com.petclinic.products.utils.exceptions.InvalidInputException;
-import com.petclinic.products.utils.exceptions.FailedDependencyException;
-import com.petclinic.products.utils.exceptions.FileNotFoundInFilesServiceException;
-import com.petclinic.products.utils.exceptions.NotFoundException;
-import com.petclinic.products.utils.exceptions.ProductInBundleConflictException;
+import com.petclinic.products.utils.exceptions.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -25,7 +20,8 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -56,6 +52,20 @@ public class ProductServiceImpl implements ProductService {
         this.productTypeRepository = productTypeRepository;
         this.imageRepository = imageRepository;
         this.filesServiceClient = filesServiceClient;
+    }
+
+    private Mono<ProductResponseModel> toResponse(Product product) {
+        return productTypeRepository.findByProductTypeId(product.getProductTypeId())
+                .map(ProductTypeDb::getTypeName)
+                .defaultIfEmpty("Unknown")
+                .map(typeName -> EntityModelUtil.toProductResponseModel(product, typeName));
+    }
+
+    private Mono<ProductResponseModel> toResponse(Product product, FileResponseDTO imageFile) {
+        return toResponse(product).map(p -> {
+            p.setImage(imageFile);
+            return p;
+        });
     }
 
     private Mono<Product> getAverageRating(Product product) {
@@ -96,7 +106,9 @@ public class ProductServiceImpl implements ProductService {
             products = productRepository.findAll();
         }
 
-        return products
+        Mono<Map<String, String>> productTypes = productTypeRepository.findAll().collectMap(ProductTypeDb::getProductTypeId, ProductTypeDb::getTypeName);
+
+        return productTypes.flatMapMany(productTypeNames -> products
                 .flatMap(this::getAverageRating)
                 .filter(product -> {
                     double avgRating = product.getAverageRating();
@@ -112,12 +124,8 @@ public class ProductServiceImpl implements ProductService {
                     }
                 })
                 //Filter productType
-                .filter(product -> {
-                    if (productType == null || productType.trim().isEmpty()) {
-                        return true;
-                    }
-                    return product.getProductType().toString().equalsIgnoreCase(productType);
-                })
+                .filter(p -> productType == null || productType.isBlank() ||
+                        productType.equalsIgnoreCase(productTypeNames.get(p.getProductTypeId())))
                 .collectList()
                 .flatMapMany(productList -> {
                     if ("asc".equals(sort)) {
@@ -125,9 +133,10 @@ public class ProductServiceImpl implements ProductService {
                     } else if ("desc".equals(sort)) {
                         productList.sort((p1, p2) -> Double.compare(p2.getAverageRating(), p1.getAverageRating()));
                     }
-                    return Flux.fromIterable(productList);
-                })
-                .map(EntityModelUtil::toProductResponseModel);
+                    return Flux.fromIterable(productList).flatMapSequential(p ->
+                            Mono.just(EntityModelUtil.toProductResponseModel(p, productTypeNames.getOrDefault(p.getProductTypeId(), "Unknown"))));
+                }));
+        //.flatMap(this::toResponse));
     }
 
 
@@ -141,22 +150,16 @@ public class ProductServiceImpl implements ProductService {
                                 "Product id was not found: " + productId)))
                 .flatMap(this::getAverageRating)
                 .flatMap(product -> {
-                    ProductResponseModel response =
-                            EntityModelUtil.toProductResponseModel(product);
-
                     if (!includeImage
                             || product.getImageId() == null
                             || product.getImageId().isBlank()) {
-                        return Mono.just(response);
+                        return toResponse(product);
                     }
 
-                    return loadProductImage(
-                                    product.getImageId(), product.getProductId())
-                            .map(file -> {
-                                response.setImage(file);
-                                return response;
-                            })
-                            .defaultIfEmpty(response);
+                    return loadProductImage(product.getImageId(), product.getProductId())
+                            .map(Optional::of)
+                            .defaultIfEmpty(Optional.empty())
+                            .flatMap(file -> toResponse(product, file.orElse(null)));
                 });
     }
 
@@ -233,7 +236,7 @@ public class ProductServiceImpl implements ProductService {
                     if (request.getImage() == null) {
                         return getAverageRating(product)
                                 .flatMap(productRepository::save)
-                                .map(EntityModelUtil::toProductResponseModel);
+                                .flatMap(this::toResponse);
                     }
 
                     return filesServiceClient.addFile(request.getImage())
@@ -259,14 +262,7 @@ public class ProductServiceImpl implements ProductService {
                                                         })
                                                         .then(Mono.<Product>error(
                                                                 saveError)))
-                                        .map(savedProduct -> {
-                                            ProductResponseModel response =
-                                                    EntityModelUtil
-                                                            .toProductResponseModel(
-                                                                    savedProduct);
-                                            response.setImage(file);
-                                            return response;
-                                        });
+                                        .flatMap(savedProduct -> toResponse(savedProduct, file));
                             });
                 });
     }
@@ -282,7 +278,7 @@ public class ProductServiceImpl implements ProductService {
                         .doOnNext(entity -> entity.setProductId(found.getProductId())))
                 .flatMap(this::getAverageRating)
                 .flatMap(productRepository::save)
-                .map(EntityModelUtil::toProductResponseModel);
+                .flatMap(this::toResponse);
     }
 
     @Override
@@ -296,7 +292,7 @@ public class ProductServiceImpl implements ProductService {
                         .thenReturn(found)
                 )
                 .flatMap(productRepository::save)
-                .map(EntityModelUtil::toProductResponseModel);
+                .flatMap(this::toResponse);
     }
 
     @Override
@@ -327,7 +323,7 @@ public class ProductServiceImpl implements ProductService {
                                             .thenReturn(found);
                                 })
                 )
-                .map(EntityModelUtil::toProductResponseModel);
+                .flatMap(this::toResponse);
     }
 
 
@@ -353,21 +349,22 @@ public class ProductServiceImpl implements ProductService {
                 .then();
     }
 
+    // TODO: This is a temp fix to still allow string types from the cart frontend (Eg /filter/FOOD), it is important to change this later
     @Override
     public Flux<ProductResponseModel> getProductsByType(String productType) {
-        return productRepository.findProductsByProductType(productType)
-                .map(product -> {
-                    ProductResponseModel responseModel = new ProductResponseModel();
-                    responseModel.setProductId(product.getProductId());
-                    responseModel.setProductName(product.getProductName());
-                    responseModel.setProductDescription(product.getProductDescription());
-                    responseModel.setProductSalePrice(product.getProductSalePrice());
-                    responseModel.setProductType(product.getProductType());
-                    responseModel.setImageId(product.getImageId());
-                    return responseModel;
-                });
+        return productTypeRepository.findByTypeName(productType)
+                .switchIfEmpty(Mono.error(new InvalidInputException("(Using legacy types) Invalid type name: " + productType)))
+                .flatMapMany(pType ->
+                        productRepository.findProductsByProductTypeId(pType.getProductTypeId())
+                                .map(product ->
+                                        EntityModelUtil.toProductResponseModel(product, pType.getTypeName())));
     }
 
+    @Override
+    public Flux<ProductResponseModel> getProductsByProductTypeId(String productTypeId) {
+        return productRepository.findProductsByProductTypeId(productTypeId)
+                .flatMap(this::toResponse);
+    }
 
     @Override
     public Mono<Void> DecreaseProductCount(String productId) {
@@ -389,13 +386,6 @@ public class ProductServiceImpl implements ProductService {
                 });
     }
 
-
-    @Override
-    public List<Product> getProductsByType(ProductType productType) {
-        return productRepository.findByProductType(productType);
-    }
-
-
     @Scheduled(cron = "0 0 0 * * ?") // Runs daily at midnight
     public Mono<Void> patchProductStatus() {
         return productRepository.findAll()
@@ -415,13 +405,16 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Mono<ProductEnumsResponseModel> getProductsEnumValues() {
-        ProductEnumsResponseModel response = ProductEnumsResponseModel.builder()
-                .productStatus(Arrays.asList(ProductStatus.values()))
-                .productType(Arrays.asList(ProductType.values()))
-                .deliveryType(Arrays.asList(DeliveryType.values()))
-                .build();
+        return productTypeRepository.findAll().collectList()
+                .flatMap(productTypes -> {
+                    ProductEnumsResponseModel response = ProductEnumsResponseModel.builder()
+                            .productStatus(Arrays.asList(ProductStatus.values()))
+                            .productType(productTypes)
+                            .deliveryType(Arrays.asList(DeliveryType.values()))
+                            .build();
 
-        return Mono.just(response);
+                    return Mono.just(response);
+                });
     }
 
     @Override
@@ -470,9 +463,13 @@ public class ProductServiceImpl implements ProductService {
         return productTypeRepository.findByProductTypeId(productTypeId)
                 .switchIfEmpty(Mono.error(new NotFoundException("ProductType id was not found: " + productTypeId)))
                 .flatMap(existingProductType ->
-                        productTypeRepository.delete(existingProductType)
-                                .thenReturn(EntityModelUtil.toProductTypeResponseModel(existingProductType))
-                );
+                        productRepository.findProductsByProductTypeId(productTypeId)
+                                .hasElements()
+                                .flatMap(inUse -> inUse
+                                        ? Mono.error(new ProductTypeInUseException(
+                                        "Cannot delete product type that is still used by products"))
+                                        : productTypeRepository.delete(existingProductType)
+                                        .thenReturn(EntityModelUtil.toProductTypeResponseModel(existingProductType))));
     }
 
     // Allows an existing product to add or replace its image in the Files Service.
@@ -503,7 +500,7 @@ public class ProductServiceImpl implements ProductService {
                                         .switchIfEmpty(Mono.error(
                                                 new FailedDependencyException(
                                                         "Files Service returned no file")))
-                                        .map(file -> toResponseWithImage(product, file))
+                                        .flatMap(file -> toResponse(product, file))
                                         .onErrorResume(
                                                 FileNotFoundInFilesServiceException.class,
                                                 error -> uploadProductImage(product, image));
@@ -522,7 +519,7 @@ public class ProductServiceImpl implements ProductService {
                             product.setImageId(null);
                             return productRepository.save(product);
                         })))
-                .map(EntityModelUtil::toProductResponseModel);
+                .flatMap(this::toResponse);
     }
 
     private Mono<ProductResponseModel> uploadProductImage(
@@ -553,20 +550,8 @@ public class ProductServiceImpl implements ProductService {
                                                 return Mono.empty();
                                             })
                                             .then(Mono.<Product>error(saveError)))
-                            .map(saved -> toResponseWithImage(saved, file));
+                            .flatMap(saved -> toResponse(saved, file));
                 });
-    }
-
-    private ProductResponseModel toResponseWithImage(
-            Product product, FileResponseDTO file) {
-
-        // Map the stored product fields to the response.
-        ProductResponseModel response =
-                EntityModelUtil.toProductResponseModel(product);
-
-        // Include file content in the response without storing it on the entity.
-        response.setImage(file);
-        return response;
     }
 
     private Mono<Void> deleteOwnedProductImage(Product product) {
