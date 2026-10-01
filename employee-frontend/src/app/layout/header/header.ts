@@ -29,6 +29,7 @@ export class Header {
     { label: 'Visits', route: '/vist' },
     { label: 'Inventory', route: '/invt' },
     { label: 'Products', route: '/prod' },
+    { label: 'Promos', route: '/promo' },
   ];
 
   protected logout(): void {

@@ -53,6 +53,11 @@ export const routes: Routes = [
         path: 'prod',
         loadChildren: () => import('@features/prod/routes'),
       },
+
+      {
+        path: 'promo',
+        loadChildren: () => import('@features/promo/routes'),
+      },
     ],
   },
   { path: '**', redirectTo: 'error/not-found' },

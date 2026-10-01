@@ -17,4 +17,7 @@ public class PromoCodeRequestDTO {
     private  double discount;
 
     private String expirationDate;
+
+    // active goes in request so we can toggle a promo
+    private Boolean active;
 }

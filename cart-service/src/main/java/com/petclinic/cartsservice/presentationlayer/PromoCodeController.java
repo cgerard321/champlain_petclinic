@@ -33,7 +33,7 @@ public class PromoCodeController {
     @GetMapping(value = "/{promoCodeId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<PromoCodeResponseModel>> getPromoCodeById(@PathVariable String promoCodeId) {
         return Mono.just(promoCodeId)
-                .filter(id -> id.length() == 36)
+                .filter(id -> id.length() == 36 || id.length() == 24)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided promo code ID is invalid: " + promoCodeId)))
                 .flatMap(promoCodeService::getPromoCodeById)
                 .map(ResponseEntity::ok)
@@ -53,7 +53,7 @@ public class PromoCodeController {
             @RequestBody PromoCodeRequestModel promoCodeRequestModel,
             @PathVariable String promoCodeId) {
         return Mono.just(promoCodeId)
-                .filter(id -> id.length() == 36)
+                .filter(id -> id.length() == 36 || id.length() == 24)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided promo code ID is invalid: " + promoCodeId)))
                 .flatMap(id -> promoCodeService.updatePromoCodeById(promoCodeRequestModel, id))  // Call service to update the promo code
                 .map(ResponseEntity::ok)
@@ -64,7 +64,7 @@ public class PromoCodeController {
     @DeleteMapping("/{promoCodeId}")
     public Mono<ResponseEntity<PromoCodeResponseModel>> deletePromoCodeById(@PathVariable String promoCodeId) {
         return Mono.just(promoCodeId)
-                .filter(id -> id.length() == 36)
+                .filter(id -> id.length() == 36 || id.length() == 24)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided promo code ID is invalid: " + promoCodeId)))
                 .flatMap(promoCodeService::deletePromoCode)
                 .map(ResponseEntity::ok)
