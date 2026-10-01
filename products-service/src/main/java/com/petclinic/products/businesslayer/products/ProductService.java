@@ -1,13 +1,9 @@
 package com.petclinic.products.businesslayer.products;
 
-import com.petclinic.products.datalayer.products.Product;
-import com.petclinic.products.datalayer.products.ProductType;
 import com.petclinic.products.domainclientlayer.FileRequestDTO;
 import com.petclinic.products.presentationlayer.products.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.List;
 
 public interface ProductService {
 
@@ -21,6 +17,7 @@ public interface ProductService {
             String productId, boolean includeImage);
 
     Mono<ProductResponseModel> includeImage(ProductResponseModel product);
+
     Mono<ProductResponseModel> addProduct(Mono<ProductRequestModel> productRequestModel);
 
     Mono<ProductResponseModel> updateProductByProductId(String productId, Mono<ProductRequestModel> productRequestModel);
@@ -37,7 +34,7 @@ public interface ProductService {
 
     Flux<ProductResponseModel> getProductsByType(String productType);
 
-    List<Product> getProductsByType(ProductType productType);
+    Flux<ProductResponseModel> getProductsByProductTypeId(String productTypeId);
 
     Mono<ProductEnumsResponseModel> getProductsEnumValues();
 
@@ -53,5 +50,6 @@ public interface ProductService {
 
     Mono<ProductResponseModel> updateProductImage(
             String productId, FileRequestDTO image);
+
     Mono<ProductResponseModel> deleteProductImage(String productId);
 }

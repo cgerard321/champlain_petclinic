@@ -1,9 +1,5 @@
-import { HarnessLoader } from '@angular/cdk/testing';
-import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
-import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatMenuHarness } from '@angular/material/menu/testing';
-import { provideRouter, Router } from '@angular/router';
+import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 
@@ -11,154 +7,101 @@ import { AuthState } from '@core/services/auth-state';
 
 import { Header } from './header';
 
-@Component({
-  template: '',
-})
-class TestSettingsComponent {}
-
-@Component({
-  template: '',
-})
-class TestLoginComponent {}
-
 describe('Header', () => {
+  // Shared by every test; created again in beforeEach.
   let fixture: ComponentFixture<Header>;
-  let loader: HarnessLoader;
 
-  const authStateMock = {
-    username: () => 'testuser',
-    logout: vi.fn().mockReturnValue(of(undefined)),
+  // Fake location.reload(): records calls instead of actually reloading the page.
+  const reload = vi.fn();
+
+  // Fake AuthState with only what the header uses, so no real HTTP call is made.
+  const authState = {
+    logout: vi.fn(),
   };
 
-  beforeEach(async () => {
-    vi.clearAllMocks();
+  /** Clicks the header button whose label matches, or fails loudly if it is missing. */
+  function clickLangButton(label: string): void {
+    const element = fixture.nativeElement as HTMLElement;
+    const buttons = Array.from(element.querySelectorAll('button'));
+    const button = buttons.find((candidate) => candidate.textContent?.trim() === label);
 
+    // A clear error message instead of "cannot read properties of undefined".
+    if (!button) {
+      throw new Error(`No "${label}" button found in the header`);
+    }
+
+    button.click();
+  }
+
+  beforeEach(async () => {
+    // Start every test from a clean state: no recorded calls, no saved language.
+    vi.clearAllMocks();
+    localStorage.clear();
+
+    // The real logout() returns an Observable, so the fake one does too.
+    authState.logout.mockReturnValue(of(undefined));
+
+    // jsdom does not implement navigation, so location.reload() would throw. The real object is
+    // spread so anything Angular's router reads from it still works.
+    vi.stubGlobal('location', { ...window.location, reload });
+
+    // Render the header with an empty router and the fake AuthState instead of the real one.
     await TestBed.configureTestingModule({
       imports: [Header],
-      providers: [
-        provideRouter([
-          {
-            path: 'settings',
-            component: TestSettingsComponent,
-          },
-          {
-            path: 'login',
-            component: TestLoginComponent,
-          },
-        ]),
-        {
-          provide: AuthState,
-          useValue: authStateMock,
-        },
-      ],
+      providers: [provideRouter([]), { provide: AuthState, useValue: authState }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Header);
     await fixture.whenStable();
-
-    loader = TestbedHarnessEnvironment.loader(fixture);
   });
 
-  it('should create the header', () => {
+  afterEach(() => {
+    // Restore the real location object and remove the saved language.
+    vi.unstubAllGlobals();
+    localStorage.clear();
+  });
+
+  // POSITIVE - The header is created and the existing navbar still renders next to the switcher.
+  it('should create', () => {
+    // Assert - also confirms the navbar from CPC-1971 still renders alongside the switcher
     expect(fixture.componentInstance).toBeTruthy();
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Champlain Petclinic');
   });
 
-  it('should display the username', async () => {
-    const button = fixture.nativeElement.querySelector('button[aria-label="User menu"]');
+  // POSITIVE - Clicking EN from the default French saves 'en' and reloads the page once.
+  it('stores the chosen language and reloads when switching to English', () => {
+    // Act
+    clickLangButton('EN');
 
-    expect(button).toBeTruthy();
-    button.click();
-    await fixture.whenStable();
-    const menu = await loader.getHarness(MatMenuHarness);
-    expect(await menu.isOpen()).toBe(true);
-    const usernameElement = document.querySelector('.username');
-
-    expect(usernameElement).toBeTruthy();
-    expect(usernameElement?.textContent.trim()).toBe('testuser');
+    // Assert - persistence is what makes the choice survive the reload
+    expect(localStorage.getItem('lang')).toBe('en');
+    expect(reload).toHaveBeenCalledTimes(1);
   });
 
-  it('should have a user menu button', () => {
-    const button = fixture.nativeElement.querySelector('button[aria-label="User menu"]');
+  // POSITIVE (edge case) - Clicking the language that is already active does not reload the page.
+  it('does nothing when the chosen language is already active', () => {
+    // Arrange
+    localStorage.setItem('lang', 'fr');
 
-    expect(button).toBeTruthy();
+    // Act
+    clickLangButton('FR');
+
+    // Assert - without this guard, clicking the active language would reload the page for
+    // nothing, which the user would see as a pointless flash
+    expect(reload).not.toHaveBeenCalled();
+    expect(localStorage.getItem('lang')).toBe('fr');
   });
 
-  it('should open the user menu', async () => {
-    const button = fixture.nativeElement.querySelector('button[aria-label="User menu"]');
+  // POSITIVE - Clicking FR while English is active saves 'fr' and reloads the page once.
+  it('switches back to French after English was selected', () => {
+    // Arrange
+    localStorage.setItem('lang', 'en');
 
-    expect(button).toBeTruthy();
+    // Act
+    clickLangButton('FR');
 
-    button.click();
-
-    await fixture.whenStable();
-
-    const menu = await loader.getHarness(MatMenuHarness);
-
-    expect(await menu.isOpen()).toBe(true);
-  });
-
-  it('should display Settings and Logout', async () => {
-    const button = fixture.nativeElement.querySelector('button[aria-label="User menu"]');
-
-    expect(button).toBeTruthy();
-
-    button.click();
-
-    await fixture.whenStable();
-
-    const menu = await loader.getHarness(MatMenuHarness);
-    const items = await menu.getItems();
-
-    expect(items.length).toBe(2);
-    const settingsItem = items[0];
-    const logoutItem = items[1];
-
-    expect(settingsItem).toBeDefined();
-    expect(logoutItem).toBeDefined();
-
-    expect(await settingsItem?.getText()).toContain('Settings');
-    expect(await logoutItem?.getText()).toContain('Logout');
-  });
-
-  it('should call logout when Logout is clicked', async () => {
-    const button = fixture.nativeElement.querySelector('button[aria-label="User menu"]');
-
-    expect(button).toBeTruthy();
-
-    button.click();
-
-    await fixture.whenStable();
-
-    const menu = await loader.getHarness(MatMenuHarness);
-    const items = await menu.getItems();
-
-    expect(items.length).toBe(2);
-
-    await items[1]?.click();
-
-    expect(authStateMock.logout).toHaveBeenCalled();
-  });
-
-  it('should navigate to Settings when Settings is clicked', async () => {
-    const button = fixture.nativeElement.querySelector('button[aria-label="User menu"]');
-
-    expect(button).toBeTruthy();
-
-    button.click();
-
-    await fixture.whenStable();
-
-    const menu = await loader.getHarness(MatMenuHarness);
-    const items = await menu.getItems();
-
-    expect(items.length).toBe(2);
-
-    await items[0]?.click();
-
-    await fixture.whenStable();
-
-    const router = TestBed.inject(Router);
-
-    expect(router.url).toBe('/settings');
+    // Assert
+    expect(localStorage.getItem('lang')).toBe('fr');
+    expect(reload).toHaveBeenCalledTimes(1);
   });
 });

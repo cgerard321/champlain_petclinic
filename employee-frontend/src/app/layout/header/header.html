@@ -13,6 +13,11 @@
 
   <span class="spacer"></span>
 
+  <div class="lang-switcher">
+    <button mat-button (click)="switchLang('fr')">FR</button>
+    <button mat-button (click)="switchLang('en')">EN</button>
+  </div>
+
   <button mat-icon-button [matMenuTriggerFor]="userMenu" aria-label="User menu">
     <mat-icon>account_circle</mat-icon>
   </button>
@@ -21,11 +26,6 @@
     <div class="username">
       {{ username() }}
     </div>
-
-    <button mat-menu-item (click)="setting()">
-      <mat-icon>settings</mat-icon>
-      <span>Settings</span>
-    </button>
 
     <button mat-menu-item (click)="logout()">
       <mat-icon>logout</mat-icon>
