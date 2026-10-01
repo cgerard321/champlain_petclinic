@@ -125,5 +125,31 @@
         </a>
       }
     </div>
+
+    <nav class="inventory-pagination" aria-label="Inventory pages">
+      <button
+        class="pagination-button"
+        type="button"
+        aria-label="Previous page"
+        [disabled]="currentPage() === 0 || isLoading()"
+        (click)="goToPreviousPage()"
+      >
+        &lt;
+      </button>
+
+      <span class="pagination-current" aria-current="page">
+        {{ currentPage() + 1 }}
+      </span>
+
+      <button
+        class="pagination-button"
+        type="button"
+        aria-label="Next page"
+        [disabled]="!canGoToNextPage() || isLoading()"
+        (click)="goToNextPage()"
+      >
+        &gt;
+      </button>
+    </nav>
   }
 </div>

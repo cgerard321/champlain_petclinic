@@ -27,6 +27,8 @@ export class InventoryList implements OnInit, OnDestroy {
   private readonly quantitySubscriptions = new Set<Subscription>();
   private filterTimer?: ReturnType<typeof setTimeout>;
 
+  protected readonly currentPage = signal(0);
+  protected readonly pageSize = 8;
   protected readonly inventories = signal<Inventory[]>([]);
   protected readonly inventoryTypes = signal<InventoryType[]>([]);
   protected readonly inventoryTypesLoading = signal(false);
@@ -131,6 +133,30 @@ export class InventoryList implements OnInit, OnDestroy {
     );
   }
 
+  protected canGoToNextPage(): boolean {
+    return this.inventories().length === this.pageSize;
+  }
+
+  protected goToPreviousPage(): void {
+    if (this.currentPage() === 0 || this.isLoading()) {
+      return;
+    }
+
+    const page = this.currentPage() - 1;
+    this.currentPage.set(page);
+    this.loadInventories(page);
+  }
+
+  protected goToNextPage(): void {
+    if (!this.canGoToNextPage() || this.isLoading()) {
+      return;
+    }
+
+    const page = this.currentPage() + 1;
+    this.currentPage.set(page);
+    this.loadInventories(page);
+  }
+
   private loadInventoryTypes(): void {
     this.inventoryTypesLoading.set(true);
     this.inventoryTypesError.set(null);
@@ -161,6 +187,7 @@ export class InventoryList implements OnInit, OnDestroy {
       clearTimeout(this.filterTimer);
     }
 
+    this.currentPage.set(0);
     this.inventorySubscription?.unsubscribe();
     this.inventories.set([]);
     this.isLoading.set(true);
@@ -169,59 +196,83 @@ export class InventoryList implements OnInit, OnDestroy {
 
     this.filterTimer = setTimeout(() => {
       this.filterTimer = undefined;
-      this.loadInventories(this.filters());
+      this.loadInventories(0);
     }, 300);
   }
 
-  private loadInventories(filters: Partial<InventoryFilters> = this.filters()): void {
-    this.inventorySubscription = this.inventoryService.getInventories(filters).subscribe({
-      next: (item) => {
-        this.isLoading.set(false);
-        this.errorMessage.set(null);
-        this.noResultsMessage.set(null);
+  private loadInventories(page = this.currentPage()): void {
+    const requestedPage = page;
 
-        this.inventories.update((current) => {
-          const index = current.findIndex(
-            (inventory) => inventory.inventoryId === item.inventoryId,
-          );
+    this.inventorySubscription?.unsubscribe();
+    this.inventories.set([]);
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
+    this.noResultsMessage.set(null);
 
-          if (index === -1) {
-            return [...current, item];
+    this.inventorySubscription = this.inventoryService
+      .getInventories(this.filters(), requestedPage, this.pageSize)
+      .subscribe({
+        next: (item) => {
+          this.isLoading.set(false);
+          this.errorMessage.set(null);
+          this.noResultsMessage.set(null);
+
+          this.inventories.update((current) => {
+            const index = current.findIndex(
+              (inventory) => inventory.inventoryId === item.inventoryId,
+            );
+
+            if (index === -1) {
+              return [...current, item];
+            }
+
+            const updated = [...current];
+            updated[index] = item;
+            return updated;
+          });
+
+          this.loadQuantities(item.inventoryId);
+        },
+        error: (err: unknown) => {
+          this.isLoading.set(false);
+
+          if (err instanceof HttpErrorResponse && err.status === 404 && requestedPage > 0) {
+            const previousPage = requestedPage - 1;
+            this.currentPage.set(previousPage);
+            this.loadInventories(previousPage);
+            return;
           }
 
-          const updated = [...current];
-          updated[index] = item;
-          return updated;
-        });
+          if (err instanceof HttpErrorResponse && err.status === 404 && this.hasActiveFilters()) {
+            this.noResultsMessage.set(
+              'No inventory matched your search. Try a different name or description, or clear the filters.',
+            );
+            this.errorMessage.set(null);
+            return;
+          }
 
-        this.loadQuantities(item.inventoryId);
-      },
-      error: (err: unknown) => {
-        this.isLoading.set(false);
-
-        if (err instanceof HttpErrorResponse && err.status === 404 && this.hasActiveFilters()) {
-          this.noResultsMessage.set(
-            'No inventory matched your search. Try a different name or description, or clear the filters.',
+          this.noResultsMessage.set(null);
+          this.errorMessage.set(
+            isApiError(err) ? err : { code: 'UNKNOWN', message: 'Failed to load inventories.' },
           );
-          this.errorMessage.set(null);
-          return;
-        }
+        },
+        complete: () => {
+          this.isLoading.set(false);
 
-        this.noResultsMessage.set(null);
-        this.errorMessage.set(
-          isApiError(err) ? err : { code: 'UNKNOWN', message: 'Failed to load inventories.' },
-        );
-      },
-      complete: () => {
-        this.isLoading.set(false);
+          if (this.inventories().length === 0 && requestedPage > 0) {
+            const previousPage = requestedPage - 1;
+            this.currentPage.set(previousPage);
+            this.loadInventories(previousPage);
+            return;
+          }
 
-        if (this.inventories().length === 0 && this.hasActiveFilters()) {
-          this.noResultsMessage.set(
-            'No inventory matched your search. Try a different name or description, or clear the filters.',
-          );
-        }
-      },
-    });
+          if (this.inventories().length === 0 && this.hasActiveFilters()) {
+            this.noResultsMessage.set(
+              'No inventory matched your search. Try a different name or description, or clear the filters.',
+            );
+          }
+        },
+      });
   }
 
   private loadQuantities(inventoryId: string): void {
