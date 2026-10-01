@@ -8,6 +8,7 @@ import com.petclinic.products.presentationlayer.products.ProductEnumsResponseMod
 import com.petclinic.products.presentationlayer.products.ProductResponseModel;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
 import com.petclinic.products.utils.exceptions.NotFoundException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -35,6 +36,29 @@ class ProductServiceUnitTest {
     @Mock
     private RatingRepository ratingRepository;
 
+    @Mock
+    private ProductTypeRepository productTypeRepository;
+
+    ProductTypeDb foodType = ProductTypeDb.builder()
+            .productTypeId("586d0700-57db-4312-b6f1-413b79dd018c")
+            .typeName("FOOD")
+            .build();
+
+    ProductTypeDb accessoryType = ProductTypeDb.builder()
+            .productTypeId("6a247af0-52d9-4179-a5b4-ad4b92e686b1")
+            .typeName("ACCESSORY")
+            .build();
+
+    ProductTypeDb equipmentType = ProductTypeDb.builder()
+            .productTypeId("79c8723a-8df3-495d-8eb0-07d574ff5ae5")
+            .typeName("EQUIPMENT")
+            .build();
+
+    @BeforeEach
+    void setUpProductTypes() {
+        lenient().when(productTypeRepository.findAll())
+                .thenReturn(Flux.just(foodType, accessoryType, equipmentType));
+    }
 
     Product product1 = Product.builder()
             .productId("06a7d573-bcab-4db3-956f-773324b92a80")
@@ -42,7 +66,7 @@ class ProductServiceUnitTest {
             .productDescription("Premium dry food for adult dogs")
             .productSalePrice(45.99)
             .averageRating(0.0)
-            .productType(ProductType.FOOD)
+            .productTypeId("586d0700-57db-4312-b6f1-413b79dd018c")
             .build();
 
     Product product2 = Product.builder()
@@ -51,7 +75,7 @@ class ProductServiceUnitTest {
             .productDescription("Clumping cat litter with odor control")
             .productSalePrice(12.99)
             .averageRating(0.0)
-            .productType(ProductType.ACCESSORY)
+            .productTypeId("6a247af0-52d9-4179-a5b4-ad4b92e686b1")
             .build();
 
 
@@ -81,12 +105,12 @@ class ProductServiceUnitTest {
         Double minPrice = null;
         Double maxPrice = null;
         String sort = null;
-        String deliveryType=null;
+        String deliveryType = null;
         String productType = null;
 
-        Product product1 = createProduct("1", 50.0,3.5);
-        Product product2 = createProduct("2", 60.0,3.7);
-        Product product3 = createProduct("3", 70.0,5.0);
+        Product product1 = createProduct("1", 50.0, 3.5);
+        Product product2 = createProduct("2", 60.0, 3.7);
+        Product product3 = createProduct("3", 70.0, 5.0);
 
         when(productRepository.findAll()).thenReturn(Flux.just(product1, product2, product3));
 
@@ -130,13 +154,13 @@ class ProductServiceUnitTest {
         Double minRating = null;
         Double maxRating = null;
         String invalidSort = "invalidSort";
-        String deliveryType=null;
+        String deliveryType = null;
         String productType = null;
 
 
         // When & Then
         try {
-            productService.getAllProducts(minPrice, maxPrice, minRating, maxRating, invalidSort,deliveryType, productType);
+            productService.getAllProducts(minPrice, maxPrice, minRating, maxRating, invalidSort, deliveryType, productType);
         } catch (InvalidInputException e) {
             assertNotNull(e);
             assertEquals("Invalid sort parameter: " + invalidSort, e.getMessage());
@@ -158,19 +182,20 @@ class ProductServiceUnitTest {
                 .thenReturn(Flux.just(rating2));
 
 
-        Flux<ProductResponseModel> result = productService.getAllProducts(null,null,null,null,null,null, null);
+        Flux<ProductResponseModel> result = productService.getAllProducts(null, null, null, null, null, null, null);
 
 
         StepVerifier.create(result)
                 .expectNextMatches(product ->
                         product.getProductId().equals(product1.getProductId()) &&
-                        product.getAverageRating() == 4)
+                                product.getAverageRating() == 4)
                 .expectNextMatches(product ->
                         product.getProductId().equals(product2.getProductId()) &&
-                        product.getAverageRating() == 5)
+                                product.getAverageRating() == 5)
                 .verifyComplete();
 
     }
+
     @Test
     public void whenGetAllProductsFilteredByDeliveryType_thenReturnFilteredProducts() {
         DeliveryType deliveryType = DeliveryType.DELIVERY;
@@ -207,7 +232,7 @@ class ProductServiceUnitTest {
         when(ratingRepository.findRatingsByProductId(product1.getProductId())).thenReturn(Flux.just(rating1));
         when(ratingRepository.findRatingsByProductId(product2.getProductId())).thenReturn(Flux.just(rating2));
 
-        Flux<ProductResponseModel> result = productService.getAllProducts(null, null, null, null, null, deliveryType,null);
+        Flux<ProductResponseModel> result = productService.getAllProducts(null, null, null, null, null, deliveryType, null);
 
         StepVerifier.create(result)
                 .expectNextMatches(product -> product.getProductId().equals("1") && product.getDeliveryType().equals(DeliveryType.DELIVERY))
@@ -218,39 +243,85 @@ class ProductServiceUnitTest {
     }
 
 
-
     @Test
     public void whenNoProductsFound_thenReturnEmptyFlux() {
 
         when(productRepository.findAll())
                 .thenReturn(Flux.empty());
 
-        Flux<ProductResponseModel> result = productService.getAllProducts(null,null,null,null,null,null, null);
+        Flux<ProductResponseModel> result = productService.getAllProducts(null, null, null, null, null, null, null);
 
         StepVerifier.create(result)
                 .expectNextCount(0)
                 .verifyComplete();
     }
+
     @Test
     public void whenGetProductsByType_thenReturnFilteredProducts() {
-        when(productRepository.findProductsByProductType("Food"))
+        when(productTypeRepository.findByTypeName("FOOD"))
+                .thenReturn(Mono.just(foodType));
+        when(productRepository.findProductsByProductTypeId(foodType.getProductTypeId()))
                 .thenReturn(Flux.just(product1));
 
-        Flux<ProductResponseModel> result = productService.getProductsByType("Food");
+        Flux<ProductResponseModel> result = productService.getProductsByType("FOOD");
 
         StepVerifier.create(result)
                 .expectNextMatches(product ->
                         product.getProductId().equals(product1.getProductId()) &&
-                                product.getProductType().equals(ProductType.FOOD))
+                                product.getProductType().equals("FOOD"))
                 .verifyComplete();
     }
 
     @Test
     public void whenNoProductsOfTypeFound_thenReturnEmptyFlux() {
-        when(productRepository.findProductsByProductType("Toys"))
+        when(productTypeRepository.findByTypeName("EQUIPMENT"))
+                .thenReturn(Mono.just(equipmentType));
+        when(productRepository.findProductsByProductTypeId(equipmentType.getProductTypeId()))
                 .thenReturn(Flux.empty());
 
+        Flux<ProductResponseModel> result = productService.getProductsByType("EQUIPMENT");
+
+        StepVerifier.create(result)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+    @Test
+    public void whenGetProductsByUnknownType_thenThrowInvalidInputException() {
+        when(productTypeRepository.findByTypeName("Toys"))
+                .thenReturn(Mono.empty());
+
         Flux<ProductResponseModel> result = productService.getProductsByType("Toys");
+
+        StepVerifier.create(result)
+                .expectError(InvalidInputException.class)
+                .verify();
+
+        verify(productRepository, never()).findProductsByProductTypeId(anyString());
+    }
+
+    @Test
+    public void whenGetProductsByProductTypeId_thenReturnProductsWithTypeName() {
+        when(productRepository.findProductsByProductTypeId(foodType.getProductTypeId()))
+                .thenReturn(Flux.just(product1));
+        when(productTypeRepository.findByProductTypeId(foodType.getProductTypeId()))
+                .thenReturn(Mono.just(foodType));
+
+        Flux<ProductResponseModel> result = productService.getProductsByProductTypeId(foodType.getProductTypeId());
+
+        StepVerifier.create(result)
+                .expectNextMatches(product ->
+                        product.getProductId().equals(product1.getProductId()) &&
+                                product.getProductType().equals("FOOD"))
+                .verifyComplete();
+    }
+
+    @Test
+    public void whenGetProductsByProductTypeIdWithNoProducts_thenReturnEmptyFlux() {
+        when(productRepository.findProductsByProductTypeId(equipmentType.getProductTypeId()))
+                .thenReturn(Flux.empty());
+
+        Flux<ProductResponseModel> result = productService.getProductsByProductTypeId(equipmentType.getProductTypeId());
 
         StepVerifier.create(result)
                 .expectNextCount(0)
@@ -270,20 +341,15 @@ class ProductServiceUnitTest {
                 .expectError(NotFoundException.class)
                 .verify();
     }
+
     @Test
     public void whenGetProductsEnums_thenReturnProductEnums() {
-        ProductEnumsResponseModel enumsResponseDTO = new ProductEnumsResponseModel(
-                List.of(ProductType.FOOD, ProductType.MEDICATION, ProductType.ACCESSORY, ProductType.EQUIPMENT),
-                List.of(ProductStatus.AVAILABLE, ProductStatus.PRE_ORDER, ProductStatus.OUT_OF_STOCK),
-                List.of(DeliveryType.DELIVERY, DeliveryType.PICKUP, DeliveryType.DELIVERY_AND_PICKUP, DeliveryType.NO_DELIVERY_OPTION)
-        );
-
         Mono<ProductEnumsResponseModel> result = productService.getProductsEnumValues();
 
         StepVerifier.create(result)
                 .expectNextMatches(enums ->
                         enums.getProductStatus().equals(List.of(ProductStatus.AVAILABLE, ProductStatus.PRE_ORDER, ProductStatus.OUT_OF_STOCK)) &&
-                                enums.getProductType().equals(List.of(ProductType.FOOD, ProductType.MEDICATION, ProductType.ACCESSORY, ProductType.EQUIPMENT)) &&
+                                enums.getProductType().equals(List.of(foodType, accessoryType, equipmentType)) &&
                                 enums.getDeliveryType().equals(List.of(DeliveryType.DELIVERY, DeliveryType.PICKUP, DeliveryType.DELIVERY_AND_PICKUP, DeliveryType.NO_DELIVERY_OPTION))
                 )
                 .verifyComplete();
