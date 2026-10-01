@@ -1,0 +1,227 @@
+/* The supplies page opens from an inventory, so keep its palette aligned with the inventory page. */
+:host {
+  --sage-50: #f7faf3;
+  --sage-400: #afc79a;
+  --forest-700: #244b3f;
+  --forest-800: #1c3d33;
+  --text-primary: #263832;
+  --text-secondary: #66766d;
+  --border: rgb(36 75 63 / 14%);
+  --shadow-sm: 0 2px 6px rgb(28 61 51 / 6%), 0 1px 2px rgb(28 61 51 / 5%);
+
+  display: block;
+}
+
+.supply-page {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1400px;
+  min-height: calc(100vh - 94px);
+  margin: 0 auto;
+  padding: 2.5rem 2rem 4rem;
+  color: var(--text-primary);
+  background:
+    radial-gradient(circle at 100% 0%, rgb(199 217 178 / 28%), transparent 30rem),
+    radial-gradient(circle at 0% 100%, rgb(199 217 178 / 16%), transparent 28rem);
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.page-header h1 {
+  position: relative;
+  margin: 0;
+  padding-bottom: 1rem;
+  color: var(--forest-700);
+  font-size: clamp(1.8rem, 3vw, 2.35rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+}
+
+.page-header h1::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 58px;
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--forest-700), var(--sage-400));
+}
+
+.page-description {
+  margin: 0.75rem 0 0;
+  color: var(--text-secondary);
+}
+
+.supply-name {
+  font-weight: 500;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status-badge.available {
+  background: #e8f5e9;
+  color: #1b5e20;
+}
+
+.status-badge.re-order {
+  background: #fff1cc;
+  color: #765000;
+}
+
+.status-badge.out-of-stock {
+  background: #ffebee;
+  color: #b71c1c;
+}
+
+.state-message {
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: linear-gradient(145deg, #fff, var(--sage-50));
+  box-shadow: var(--shadow-sm);
+}
+
+.error-message {
+  color: #b00020;
+}
+
+.add-supply-button,
+.edit-button,
+.delete-button {
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 180ms ease;
+}
+
+.add-supply-button {
+  padding: 10px 18px;
+  background: var(--forest-700);
+  font-size: 0.95rem;
+}
+
+.add-supply-button:hover,
+.edit-button:hover {
+  background: var(--forest-800);
+}
+
+.add-supply-button:focus-visible,
+.edit-button:focus-visible,
+.delete-button:focus-visible,
+.dialog-cancel-button:focus-visible {
+  outline: 3px solid var(--sage-400);
+  outline-offset: 3px;
+}
+
+.add-supply-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.supply-form {
+  display: grid;
+  gap: 12px;
+  max-width: 500px;
+  margin-bottom: 24px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+}
+
+.supply-form h2 {
+  margin: 0 0 8px;
+  color: var(--forest-700);
+}
+
+.supply-form label {
+  font-weight: 600;
+}
+
+.supply-form input {
+  padding: 10px;
+  border: 1px solid #bdbdbd;
+  border-radius: 6px;
+  font: inherit;
+}
+
+.supply-form input:focus {
+  outline: 2px solid var(--forest-700);
+  outline-offset: 2px;
+}
+
+.field-error {
+  margin: -6px 0 0;
+  color: #b00020;
+  font-size: 0.9rem;
+}
+
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.edit-button,
+.delete-button {
+  padding: 10px 18px;
+  font-size: 0.875rem;
+}
+
+.edit-button {
+  background: var(--forest-700);
+}
+
+.delete-button {
+  background: #b71c1c;
+}
+
+.delete-button:hover {
+  background: #8e0000;
+}
+
+.dialog-cancel-button {
+  padding: 10px 18px;
+  border: 1px solid var(--forest-700);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--forest-700);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dialog-cancel-button:hover {
+  background: var(--sage-50);
+}
+
+@media (width <= 700px) {
+  .supply-page {
+    padding: 2rem 1rem 3rem;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

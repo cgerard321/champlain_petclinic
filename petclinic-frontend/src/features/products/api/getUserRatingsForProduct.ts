@@ -11,7 +11,7 @@ export async function getUserRatingsForProduct(
     });
 
     return res.data
-      .split('data:')
+      .split(/^data:\s?/m)
       .map((dataChunk: string) => {
         try {
           if (dataChunk == '') return null;

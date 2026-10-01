@@ -53,6 +53,10 @@ export const routes: Routes = [
         path: 'prod',
         loadChildren: () => import('@features/prod/routes'),
       },
+      {
+        path: 'invt/:inventoryId/supplies',
+        loadChildren: () => import('@features/supplies/routes'),
+      },
     ],
   },
   { path: '**', redirectTo: 'error/not-found' },

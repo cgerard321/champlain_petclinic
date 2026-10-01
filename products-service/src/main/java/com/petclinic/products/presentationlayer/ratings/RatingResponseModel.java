@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class RatingResponseModel {
     private Byte rating;
     private String review;
+    private String customerId;
 }
