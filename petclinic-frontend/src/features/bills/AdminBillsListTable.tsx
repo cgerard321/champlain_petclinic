@@ -486,7 +486,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
   };
 
   const formatTotalDue = (bill: Bill): string => {
-    const amount = bill.taxedAmount ?? bill.amount ?? 0;
+    const amount = bill.totalAmount ?? bill.amount ?? 0;
     if (currency === 'CAD') return `CAD $${amount.toFixed(2)}`;
     return `USD $${convertCurrency(amount, 'CAD', 'USD').toFixed(2)}`;
   };
@@ -1036,7 +1036,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                   <strong>Date:</strong> {searchedBill.date}
                 </p>
                 <p>
-                  <strong>Amount:</strong> {formatTotalDue(searchedBill)}
+                  <strong>Total Amount:</strong> {formatTotalDue(searchedBill)}
                 </p>
                 <p>
                   <strong>Status:</strong> {searchedBill.billStatus}
@@ -1186,10 +1186,28 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                     : `USD $${convertCurrency(detailBill.amount, 'CAD', 'USD').toFixed(2)}`}
                 </p>
                 <p>
-                  <strong>Taxed Amount:</strong>{' '}
+                  <strong>GST (5%):</strong>{' '}
+                  {currency === 'CAD'
+                    ? `CAD $${detailBill.gstAmount.toFixed(2)}`
+                    : `USD $${convertCurrency(detailBill.gstAmount, 'CAD', 'USD').toFixed(2)}`}
+                </p>
+                <p>
+                  <strong>QST (9.975%):</strong>{' '}
+                  {currency === 'CAD'
+                    ? `CAD $${detailBill.qstAmount.toFixed(2)}`
+                    : `USD $${convertCurrency(detailBill.qstAmount, 'CAD', 'USD').toFixed(2)}`}
+                </p>
+                <p>
+                  <strong>Total Tax:</strong>{' '}
                   {currency === 'CAD'
                     ? `CAD $${detailBill.taxedAmount.toFixed(2)}`
                     : `USD $${convertCurrency(detailBill.taxedAmount, 'CAD', 'USD').toFixed(2)}`}
+                </p>
+                <p>
+                  <strong>Total with Interest:</strong>{' '}
+                  {currency === 'CAD'
+                    ? `CAD $${detailBill.totalAmount.toFixed(2)}`
+                    : `USD $${convertCurrency(detailBill.totalAmount, 'CAD', 'USD').toFixed(2)}`}
                 </p>
                 <p>
                   <strong>Status:</strong>{' '}
