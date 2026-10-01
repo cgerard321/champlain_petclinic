@@ -113,7 +113,7 @@
   line-height: 1.6;
 }
 
-.error-container button {
+.error-container a {
   position: relative;
   z-index: 1;
   display: inline-flex;
@@ -135,17 +135,17 @@
     box-shadow 220ms ease;
 }
 
-.error-container button:hover {
+.error-container a:hover {
   background-color: var(--forest-800);
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
 }
 
-.error-container button:focus-visible {
+.error-container a:focus-visible {
   outline: 3px solid rgb(36 75 63 / 22%);
   outline-offset: 4px;
 }
 
-.error-container button:active {
+.error-container a:active {
   transform: translateY(0);
 }

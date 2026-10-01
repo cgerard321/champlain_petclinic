@@ -1,16 +1,10 @@
-import { Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 @Component({
-  imports: [],
+  imports: [RouterLink],
   selector: 'app-not-found',
   styleUrl: './not-found.css',
   templateUrl: './not-found.html',
 })
-export class NotFound {
-  private readonly router = inject(Router);
-  handleAction(event: Event): void {
-    event.preventDefault();
-    this.router.navigate(['/home']);
-  }
-}
+export class NotFound {}
