@@ -92,9 +92,9 @@ export default function ProductDetails(): JSX.Element {
   // };
 
   const getProductTypeLabel = (productType: string): string => {
-    return (
-      productType.charAt(0).toUpperCase() + productType.slice(1).toLowerCase()
-    );
+    return productType
+      ? productType.charAt(0).toUpperCase() + productType.slice(1).toLowerCase()
+      : 'Unknown';
   };
   const getDeliveryTypeLabel = (deliveryType: string): string => {
     if (deliveryType === 'DELIVERY') return 'Standard Delivery';
