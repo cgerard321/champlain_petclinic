@@ -41,6 +41,10 @@ export class Header {
     { label: 'Products', route: '/prod' },
   ];
 
+  protected setting(): void {
+    this.router.navigateByUrl('/settings');
+  }
+
   protected logout(): void {
     this.authState.logout().subscribe(() => this.router.navigateByUrl('/login'));
   }
