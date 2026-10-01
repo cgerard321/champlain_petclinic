@@ -11,6 +11,7 @@ import com.petclinic.bffapigateway.exceptions.ProductImageDependencyException;
 import com.petclinic.bffapigateway.exceptions.ProductNotFoundException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +28,9 @@ import reactor.test.StepVerifier;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 class ProductsServiceClientIntegrationTest {
@@ -73,6 +77,41 @@ class ProductsServiceClientIntegrationTest {
                 .expectNextMatches(product -> product.getProductId().equals("baee7cd2-b67a-449f-b262-91f45dde8a6d") && product.getProductName().equals("Flea Collar"))
                 .verifyComplete();
     }
+
+    @Test
+    void getAllProducts_withTrimmedProductName_sendsProductNameQueryParameter() throws InterruptedException {
+        while (mockWebServer.takeRequest(0, TimeUnit.MILLISECONDS) != null) { }
+
+        mockWebServer.enqueue(new MockResponse()
+                .setBody("")
+                .setHeader("Content-Type", "text/event-stream")
+        );
+
+        StepVerifier.create(productsServiceClient.getAllProducts(
+                        null, null, null, null, null, null, null, "  horse  "))
+                .verifyComplete();
+
+        RecordedRequest request = mockWebServer.takeRequest();
+        assertEquals("/products?productName=horse&includeImage=false", request.getPath());
+    }
+
+    @Test
+    void getAllProducts_withBlankProductName_doesNotSendProductNameQueryParameter() throws InterruptedException {
+        while (mockWebServer.takeRequest(0, TimeUnit.MILLISECONDS) != null) { }
+
+        mockWebServer.enqueue(new MockResponse()
+                .setBody("")
+                .setHeader("Content-Type", "text/event-stream")
+        );
+
+        StepVerifier.create(productsServiceClient.getAllProducts(
+                        null, null, null, null, null, null, null, "   "))
+                .verifyComplete();
+
+        RecordedRequest request = mockWebServer.takeRequest();
+        assertEquals("/products?includeImage=false", request.getPath());
+    }
+
 
     @Test
     void getAllProducts_WithRatingFiltering_ThenReturnFilteredProductList() {
