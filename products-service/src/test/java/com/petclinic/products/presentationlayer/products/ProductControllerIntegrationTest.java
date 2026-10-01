@@ -897,6 +897,30 @@ class ProductControllerIntegrationTest extends PostgresTestContainerBase {
     }
 
     @Test
+    void whenDeleteProductTypeUsedByProducts_thenReturnConflict() {
+        Product productWithType = Product.builder()
+                .productId(UUID.randomUUID().toString())
+                .productName("Typed Product")
+                .productTypeId(productType1.getProductTypeId())
+                .build();
+        productRepository.save(productWithType).block();
+
+        webTestClient
+                .delete()
+                .uri("/products/types/" + productType1.getProductTypeId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(409)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Cannot delete product type that is still used by products");
+
+        StepVerifier
+                .create(productTypeRepository.findByProductTypeId(productType1.getProductTypeId()))
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
     void whenDeleteProductTypeWithNonExistingId_thenThrowNotFoundError() {
         webTestClient
                 .delete()

@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductTypeResponseDTO {
-
     private String productTypeId;
     private String typeName;
 }

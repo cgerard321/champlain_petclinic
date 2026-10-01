@@ -27,7 +27,7 @@ public class Product {
     private Integer requestCount;
     private Integer productQuantity;
     private Boolean isUnlisted;
-    private ProductType productType;
+    //private ProductType productType;
     private String productTypeId;
     private LocalDate releaseDate;
     private ProductStatus productStatus;
