@@ -2,12 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { of } from 'rxjs';
 
-import {
-  DeliveryType,
-  Product,
-  ProductStatus,
-  ProductType,
-} from '@features/prod/models/product.model';
+import { DeliveryType, Product, ProductStatus } from '@features/prod/models/product.model';
 import { ProductService } from '@features/prod/services/product.service';
 
 import { Prod } from './prod';
@@ -20,7 +15,8 @@ describe('Prod', () => {
     productSalePrice: 10,
     productQuantity: 5,
     isUnlisted: false,
-    productType: ProductType.FOOD,
+    productType: 'FOOD',
+    productTypeId: '586d0700-57db-4312-b6f1-413b79dd018c',
     productStatus: ProductStatus.AVAILABLE,
     deliveryType: DeliveryType.DELIVERY,
   };
