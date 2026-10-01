@@ -28,7 +28,6 @@
   margin: 8px;
 }
 
-
 #sidebar li > a {
   flex-grow: 100;
   text-decoration: none;
@@ -86,8 +85,9 @@
   font-size: 16px;
 }
 
-#sidebar button svg, #sidebar button img{
-    width:28px;
-    height:28px;
-    fill:#ffffff;
+#sidebar button svg,
+#sidebar button img {
+  width: 28px;
+  height: 28px;
+  fill: #ffffff;
 }
