@@ -91,9 +91,43 @@ public class BillServiceImpl implements BillService{
 //    }
 
     @Override
-    public Flux<BillResponseDTO> getAllBillsByPage(Pageable pageable, String billId, String customerId,
-                                                   String ownerFirstName, String ownerLastName, String visitType,
-                                                   String vetId, String vetFirstName, String vetLastName) {
+    public Flux<BillResponseDTO> getAllBillsByPage(
+            Pageable pageable,
+            String billId,
+            String customerId,
+            String ownerFirstName,
+            String ownerLastName,
+            String visitType,
+            String vetId,
+            String vetFirstName,
+            String vetLastName) {
+
+        return getAllBillsByPage(
+                pageable,
+                billId,
+                customerId,
+                ownerFirstName,
+                ownerLastName,
+                visitType,
+                vetId,
+                vetFirstName,
+                vetLastName,
+                false
+        );
+    }
+
+    @Override
+    public Flux<BillResponseDTO> getAllBillsByPage(
+            Pageable pageable,
+            String billId,
+            String customerId,
+            String ownerFirstName,
+            String ownerLastName,
+            String visitType,
+            String vetId,
+            String vetFirstName,
+            String vetLastName,
+            boolean includeArchived) {
 
         Predicate<Bill> filterCriteria = bill ->
                 (billId == null || bill.getBillId().equals(billId)) &&
@@ -105,10 +139,14 @@ public class BillServiceImpl implements BillService{
                         (vetFirstName == null || bill.getVetFirstName().equals(vetFirstName)) &&
                         (vetLastName == null || bill.getVetLastName().equals(vetLastName));
 
+        Flux<Bill> bills = includeArchived
+                ? billRepository.findAll()
+                : billRepository.findAllByArchiveFalse();
+
         return updateOverdueBills()
-                .thenMany(billRepository.findAll())
+                .thenMany(bills)
                 .filter(filterCriteria)
-                .skip(pageable.getPageNumber() * pageable.getPageSize())
+                .skip((long) pageable.getPageNumber() * pageable.getPageSize())
                 .take(pageable.getPageSize())
                 .map(EntityDtoUtil::toBillResponseDto);
     }
@@ -140,8 +178,41 @@ public class BillServiceImpl implements BillService{
     }
 
     @Override
-    public Mono<Long> getNumberOfBillsWithFilters(String billId, String customerId, String ownerFirstName, String ownerLastName,
-                                                  String visitType, String vetId, String vetFirstName, String vetLastName) {
+    public Mono<Long> getNumberOfBillsWithFilters(
+            String billId,
+            String customerId,
+            String ownerFirstName,
+            String ownerLastName,
+            String visitType,
+            String vetId,
+            String vetFirstName,
+            String vetLastName) {
+
+        return getNumberOfBillsWithFilters(
+                billId,
+                customerId,
+                ownerFirstName,
+                ownerLastName,
+                visitType,
+                vetId,
+                vetFirstName,
+                vetLastName,
+                false
+        );
+    }
+
+    @Override
+    public Mono<Long> getNumberOfBillsWithFilters(
+            String billId,
+            String customerId,
+            String ownerFirstName,
+            String ownerLastName,
+            String visitType,
+            String vetId,
+            String vetFirstName,
+            String vetLastName,
+            boolean includeArchived) {
+
         Predicate<Bill> filterCriteria = bill ->
                 (billId == null || bill.getBillId().equals(billId)) &&
                         (customerId == null || bill.getCustomerId().equals(customerId)) &&
@@ -152,9 +223,12 @@ public class BillServiceImpl implements BillService{
                         (vetFirstName == null || bill.getVetFirstName().equals(vetFirstName)) &&
                         (vetLastName == null || bill.getVetLastName().equals(vetLastName));
 
-        return billRepository.findAll()
+        Flux<Bill> bills = includeArchived
+                ? billRepository.findAll()
+                : billRepository.findAllByArchiveFalse();
+
+        return bills
                 .filter(filterCriteria)
-                .map(EntityDtoUtil::toBillResponseDto)
                 .count();
     }
 

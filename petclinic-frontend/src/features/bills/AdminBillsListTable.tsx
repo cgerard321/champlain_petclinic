@@ -70,10 +70,11 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
         filter.visitType || undefined,
         undefined, // vetId
         filter.vetFirstName || undefined,
-        filter.vetLastName || undefined
+        filter.vetLastName || undefined,
+        showArchivedBills
       );
     },
-    [getBillsList, filter]
+    [getBillsList, filter, showArchivedBills]
   );
   const [filterYear, setFilterYear] = useState(new Date().getFullYear());
   const [filterMonth, setFilterMonth] = useState(new Date().getMonth() + 1);
@@ -117,10 +118,8 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
   }, []);
 
   useEffect(() => {
-    if (!selectedFilter) {
-      callGetBillsListWithFilters(currentPage, 10);
-    }
-  }, [currentPage, callGetBillsListWithFilters, selectedFilter]);
+    callGetBillsListWithFilters(currentPage, 10);
+  }, [currentPage, callGetBillsListWithFilters]);
 
   useEffect(() => {
     const callArchiveBills = async (): Promise<void> => {
@@ -192,6 +191,11 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
     if (!status) {
       callGetBillsListWithFilters(currentPage, 10);
     }
+  };
+
+  const handleArchiveToggle = (): void => {
+    setCurrentPage(0);
+    setShowArchivedBills(prev => !prev);
   };
 
   const handleOwnerNameChange = async (
@@ -507,7 +511,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
           </button>
           <button
             className={`archive-btn ${showArchivedBills ? 'active' : ''}`}
-            onClick={() => setShowArchivedBills(prev => !prev)}
+            onClick={handleArchiveToggle}
           >
             {showArchivedBills ? 'Hide Archived' : 'Show Archived'}
           </button>

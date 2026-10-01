@@ -581,6 +581,7 @@ class BillControllerIntegrationTest {
                     .taxedAmount(new BigDecimal("114.98"))
                     .billStatus(BillStatus.PAID)
                     .dueDate(LocalDate.now().plusDays(30))
+                    .archive(false)
                     .build()).block();
         }
 
