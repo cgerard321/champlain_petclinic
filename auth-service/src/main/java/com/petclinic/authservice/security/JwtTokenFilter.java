@@ -39,7 +39,8 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     private final SecurityConst securityConst;
     private final JwtTokenUtil jwtTokenUtil;
     private final List<AntPathRequestMatcher> excludedPaths = Arrays.asList(
-            new AntPathRequestMatcher("/actuator/prometheus", "GET"));
+            new AntPathRequestMatcher("/actuator/prometheus", "GET"),
+            new AntPathRequestMatcher("/users/*/public-profile", "GET"));
 
     private final UserRepo userRepo;
 

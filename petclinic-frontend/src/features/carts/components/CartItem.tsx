@@ -76,7 +76,7 @@ const CartItem = ({
   return (
     <div className="CartItem">
       <div onClick={handleCartItemOnClick} className="cart-item-media">
-        <ImageContainer imageId={item.imageId} />
+        <ImageContainer productId={item.productId} imageId={item.imageId} />
       </div>
 
       <div className="cart-item-content">
