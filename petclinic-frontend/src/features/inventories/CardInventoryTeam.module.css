@@ -12,7 +12,6 @@
   margin-bottom: 60px;
 }
 
-
 .card {
   width: 300px;
   height: 480px;
@@ -162,11 +161,13 @@
 /* Each slide fades in/out */
 .carouselSlide {
   position: absolute;
-  inset: 0;                 /* top/right/bottom/left: 0 */
+  inset: 0; /* top/right/bottom/left: 0 */
   opacity: 0;
-  transform: scale(0.985);  /* tiny scale for a softer fade */
-  transition: opacity 260ms ease, transform 260ms ease;
-  pointer-events: none;     /* avoid clicking hidden slides */
+  transform: scale(0.985); /* tiny scale for a softer fade */
+  transition:
+    opacity 260ms ease,
+    transform 260ms ease;
+  pointer-events: none; /* avoid clicking hidden slides */
 }
 
 .carouselSlideActive {
@@ -185,13 +186,19 @@
 
 /* Responsive grid adjustments */
 @media (max-width: 1199px) {
-  .slideGrid { grid-template-columns: repeat(3, minmax(0,1fr)); }
+  .slideGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 @media (max-width: 991px) {
-  .slideGrid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .slideGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 @media (max-width: 575px) {
-  .slideGrid { grid-template-columns: 1fr; }
+  .slideGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Freeze button that matches the big blue square look next to Next */
@@ -216,9 +223,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;      /* a bit smaller than the arrow buttons */
+  width: 36px; /* a bit smaller than the arrow buttons */
   height: 36px;
-  padding: 0;       /* icon-only */
+  padding: 0; /* icon-only */
   line-height: 1;
   border-radius: 10px;
 }

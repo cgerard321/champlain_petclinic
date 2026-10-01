@@ -1,33 +1,32 @@
 .menuSection {
   position: relative;
   display: flex;
-  justify-content: flex-end;   /* push content to the right */
+  justify-content: flex-end; /* push content to the right */
   margin: 12px 0 20px;
   width: 100%;
 }
 
 .menuContainer {
-  position: relative;          /* anchor the dropdown panel */
+  position: relative; /* anchor the dropdown panel */
   display: flex;
   align-items: center;
-  justify-content: flex-end;   /* hamburger on the far right */
+  justify-content: flex-end; /* hamburger on the far right */
   margin: 0 auto;
   width: 100%;
 }
 
-
 /* Make the button frame a clean icon container */
 #menuIcon {
-   margin-top: -8px;  
+  margin-top: -8px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 64px;              /* bigger button */
+  width: 64px; /* bigger button */
   height: 64px;
   cursor: pointer;
   background: transparent;
   border: none;
-transition: transform 220ms cubic-bezier(.2,.7,.2,1);
+  transition: transform 220ms cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 /* rotate on hover, no drop shadow */
@@ -36,45 +35,47 @@ transition: transform 220ms cubic-bezier(.2,.7,.2,1);
 }
 
 /* bar color */
-.hamburgerSvg rect { fill: #1e63ff; }
+.hamburgerSvg rect {
+  fill: #1e63ff;
+}
 
 .actionsMenu {
   position: absolute;
   right: 0;
-  top: 68px;                                /* sits under the icon */
-  min-width: 340px;                         /* consistent width */
+  top: 68px; /* sits under the icon */
+  min-width: 340px; /* consistent width */
   max-width: min(90vw, 420px);
 
   /* closed state (hidden by default) */
   opacity: 0;
   transform: translateY(-8px) scale(0.98);
   transform-origin: top right;
-  visibility: hidden;                       /* hidden after fade completes */
+  visibility: hidden; /* hidden after fade completes */
   pointer-events: none;
   transition:
-    opacity 220ms cubic-bezier(.2,.7,.2,1),
-    transform 220ms cubic-bezier(.2,.7,.2,1),
-    visibility 0s linear 220ms;             /* delay hiding so fade-out shows */
+    opacity 220ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 220ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    visibility 0s linear 220ms; /* delay hiding so fade-out shows */
 
   /* panel look */
   display: block;
   background: #ffffff;
-  border-radius: 0;                          /* rectangular panel */
-  padding: 0;                                /* no side whitespace */
-  box-shadow: 0 10px 22px rgba(0,0,0,0.15);
+  border-radius: 0; /* rectangular panel */
+  padding: 0; /* no side whitespace */
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.15);
   z-index: 1000;
 }
 
 /* open state */
-.actionsMenu[data-open="true"] {
+.actionsMenu[data-open='true'] {
   opacity: 1;
   transform: translateY(0) scale(1);
   visibility: visible;
   pointer-events: auto;
   transition:
-    opacity 220ms cubic-bezier(.2,.7,.2,1),
-    transform 220ms cubic-bezier(.2,.7,.2,1),
-    visibility 0s linear 0s;                 /* show immediately */
+    opacity 220ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 220ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    visibility 0s linear 0s; /* show immediately */
 }
 
 /* Buttons: big full-width rectangles */
@@ -89,8 +90,11 @@ transition: transform 220ms cubic-bezier(.2,.7,.2,1);
   background: #1e63ff !important;
   color: #ffffff !important;
   border: none !important;
-  border-radius: 0 !important;               /* rectangular buttons */
-  transition: transform 120ms ease, box-shadow 120ms ease, opacity 160ms ease;
+  border-radius: 0 !important; /* rectangular buttons */
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    opacity 160ms ease;
 }
 
 /* hover/active/disabled */
@@ -101,15 +105,13 @@ transition: transform 220ms cubic-bezier(.2,.7,.2,1);
 }
 .actionsMenu :global(.btn:active):not(:disabled) {
   transform: translateY(0);
-  box-shadow: 0 3px 10px rgba(0,0,0,0.18);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
 }
 .actionsMenu :global(.btn:disabled) {
   opacity: 0.55;
   cursor: not-allowed;
   background: #84a8ff !important;
 }
-
-
 
 .confirmDialog {
   position: fixed;
@@ -138,7 +140,6 @@ transition: transform 220ms cubic-bezier(.2,.7,.2,1);
   border-collapse: collapse;
   border-spacing: 0;
 }
-
 
 .addInventorytypeButton {
   text-align: initial;
@@ -212,20 +213,21 @@ transition: transform 220ms cubic-bezier(.2,.7,.2,1);
   background: transparent !important;
   border: 0 !important;
   box-shadow: none !important;
-  color: #111827;                  /* dark gray text */
+  color: #111827; /* dark gray text */
   font-weight: 700;
-  text-transform: uppercase;       /* ALL CAPS */
+  text-transform: uppercase; /* ALL CAPS */
   letter-spacing: 0.02em;
-  text-align: left !important;     /* left-align by default */
+  text-align: left !important; /* left-align by default */
 }
 
 /* Center & enlarge the Important checkbox in the filter row (5th column) */
 .inventoryTable :global(thead tr:nth-of-type(2) td:nth-child(5)) {
-  text-align: center !important;   /* center that cell */
+  text-align: center !important; /* center that cell */
 }
-.inventoryTable :global(thead tr:nth-of-type(2) td:nth-child(5) input[type="checkbox"]) {
-  transform: scale(1.4);           /* make it bigger */
-  accent-color: #1e63ff;           /* blue tick color (modern browsers) */
+.inventoryTable
+  :global(thead tr:nth-of-type(2) td:nth-child(5) input[type='checkbox']) {
+  transform: scale(1.4); /* make it bigger */
+  accent-color: #1e63ff; /* blue tick color (modern browsers) */
 }
 
 /* Optional: ensure no table borders anywhere */
@@ -238,11 +240,11 @@ transition: transform 220ms cubic-bezier(.2,.7,.2,1);
 }
 /* --- 1) Divider lines (between titles & inputs, and under inputs) --- */
 .inventoryTable :global(thead tr:first-of-type th) {
-  border-bottom: 1px solid #e5e7eb !important;   /* line under titles */
+  border-bottom: 1px solid #e5e7eb !important; /* line under titles */
   padding-bottom: 14px;
 }
 .inventoryTable :global(thead tr:nth-of-type(2) td) {
-  border-bottom: 1px solid #eef2f7 !important;   /* line under inputs */
+  border-bottom: 1px solid #eef2f7 !important; /* line under inputs */
   padding-bottom: 16px;
 }
 
@@ -256,35 +258,36 @@ transition: transform 220ms cubic-bezier(.2,.7,.2,1);
   text-align: center !important;
 }
 
-.inventoryTable :global(thead tr:nth-of-type(2) td:nth-child(5) input[type="checkbox"]) {
-  transform: translateY(4px) scale(2.0);   /* slightly lower + bigger */
+.inventoryTable
+  :global(thead tr:nth-of-type(2) td:nth-child(5) input[type='checkbox']) {
+  transform: translateY(4px) scale(2); /* slightly lower + bigger */
   accent-color: #1e63ff;
 }
 
-
 /* Make the Clear button and Status select align nicely when centered */
 .inventoryTable :global(thead tr:nth-of-type(2) td:nth-child(6) .btn) {
-  margin: 0 auto;                      /* center the Clear button */
+  margin: 0 auto; /* center the Clear button */
   display: inline-flex;
 }
 .inventoryTable :global(thead tr:nth-of-type(2) td:nth-child(7) select) {
-  margin: 0 auto;                      /* center the Status select */
+  margin: 0 auto; /* center the Status select */
   display: inline-block;
 }
 
 /* Fix IMPORTANT checkbox alignment (override Bootstrap) */
 .inventoryTable :global(thead tr:nth-of-type(2) td:nth-child(5) .form-check) {
-  padding-left: 0 !important;                 /* kill BS padding */
-  display: inline-flex !important;            /* center properly */
+  padding-left: 0 !important; /* kill BS padding */
+  display: inline-flex !important; /* center properly */
   align-items: center !important;
   justify-content: center !important;
 }
 
-.inventoryTable :global(thead tr:nth-of-type(2) td:nth-child(5) .form-check-input) {
-  margin: 0 !important;                       /* remove default margins */
+.inventoryTable
+  :global(thead tr:nth-of-type(2) td:nth-child(5) .form-check-input) {
+  margin: 0 !important; /* remove default margins */
   float: none !important;
   position: static !important;
-  transform: translateY(4px) scale(2.0);      /* your size + slight drop */
+  transform: translateY(4px) scale(2); /* your size + slight drop */
   accent-color: #1e63ff;
 }
 
@@ -294,14 +297,14 @@ transition: transform 220ms cubic-bezier(.2,.7,.2,1);
   vertical-align: middle !important;
 }
 .inventoryTable :global(thead tr:nth-of-type(2) td:nth-child(3) select) {
-  transform: translateY(3px);     /* tiny vertical nudge */
+  transform: translateY(3px); /* tiny vertical nudge */
 }
 /* stack: small freeze button above, then the row with arrows */
 .pagerStack {
   display: flex;
   flex-direction: column;
-  align-items: center;   /* center everything horizontally */
-  gap: 10px;             /* space between freeze and row */
+  align-items: center; /* center everything horizontally */
+  gap: 10px; /* space between freeze and row */
 }
 
 /* row with the two arrows and the page number */
@@ -318,26 +321,29 @@ transition: transform 220ms cubic-bezier(.2,.7,.2,1);
   width: 36px;
   height: 36px;
   background: #ffffff;
-  color: #1e63ff;                 /* SVG uses currentColor */
+  color: #1e63ff; /* SVG uses currentColor */
   border: 1px solid #e5e7eb;
   border-radius: 10px;
   padding: 0;
   line-height: 1;
-  box-shadow: 0 6px 18px rgba(0,0,0,.06);
-  transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    background 120ms ease;
 }
 .freezeHeaderBtn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 10px 22px rgba(0,0,0,.12);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
   background: #f9fafb;
 }
 .freezeHeaderBtn:active {
   transform: translateY(0);
-  box-shadow: 0 4px 10px rgba(0,0,0,.10);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 .freezeHeaderBtn:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(30,99,255,.25);
+  box-shadow: 0 0 0 3px rgba(30, 99, 255, 0.25);
 }
 
 .mobileFilters {
@@ -405,7 +411,9 @@ transition: transform 220ms cubic-bezier(.2,.7,.2,1);
   font-weight: 600;
   font-size: 0.95rem;
   cursor: pointer;
-  transition: background-color 180ms ease, transform 120ms ease;
+  transition:
+    background-color 180ms ease,
+    transform 120ms ease;
 }
 
 .mobileClearButton:hover {

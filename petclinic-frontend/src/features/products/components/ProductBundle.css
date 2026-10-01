@@ -11,7 +11,7 @@
 
 .product-bundle-products {
   display: flex;
-  flex-direction: column; 
+  flex-direction: column;
   height: 250px;
   overflow-y: auto;
   overflow-x: hidden;

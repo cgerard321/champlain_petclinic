@@ -64,19 +64,16 @@
   font-size: 0.875rem;
 }
 
-
 .add-supply-input:focus {
   outline: none;
   border-color: #1976d2;
   box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.15);
 }
 
-
 .add-supply-input.invalid {
-  border-color: #d32f2f;          /* red border */
-  background-color: #ffebee;      /* light red background */
+  border-color: #d32f2f; /* red border */
+  background-color: #ffebee; /* light red background */
 }
-
 
 .add-supply-input.invalid:focus {
   box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.2);
@@ -87,14 +84,20 @@
   font-size: 0.875rem;
 }
 
-
 .add-supply-input.invalid.animate {
   animation: input-shake 180ms ease-in-out 0s 2;
 }
 @keyframes input-shake {
-  0%, 100% { transform: translateX(0); }
-  25%      { transform: translateX(-3px); }
-  75%      { transform: translateX(3px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-3px);
+  }
+  75% {
+    transform: translateX(3px);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

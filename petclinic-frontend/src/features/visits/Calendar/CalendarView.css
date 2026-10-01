@@ -4,19 +4,19 @@
   --hover-clr: #e1e5ef;
   --active-clr: #d4d4e7;
   --dark-clr: #212529;
-  --accent-clr: #0d6efd;           
+  --accent-clr: #0d6efd;
   --border-clr: #e0e0e0;
   --background-clr: #f8f9fa;
 }
 
 .customer-theme {
-  --secondary-clr: #f8f9fa;        
-  --hover-clr: #e9ecef;           
-  --active-clr: #dee2e6;          
-  --dark-clr: #495057;             
-  --accent-clr: #4a90e2;           
-  --border-clr: #dee2e6;           
-  --background-clr: #f0f2f5;       
+  --secondary-clr: #f8f9fa;
+  --hover-clr: #e9ecef;
+  --active-clr: #dee2e6;
+  --dark-clr: #495057;
+  --accent-clr: #4a90e2;
+  --border-clr: #dee2e6;
+  --background-clr: #f0f2f5;
 }
 
 .calendar-view-container {

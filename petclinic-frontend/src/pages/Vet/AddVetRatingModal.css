@@ -80,7 +80,9 @@
   padding: 10px 12px;
   font-size: 1rem;
   color: #2f3b52;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
   background-color: #fff;
 }
 
@@ -117,7 +119,10 @@
   border: none;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
 }
 
 .rating-cancel-button {
