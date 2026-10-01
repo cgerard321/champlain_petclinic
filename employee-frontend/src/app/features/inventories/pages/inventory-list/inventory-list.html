@@ -1,16 +1,78 @@
 <div class="inventory-page">
   <h1>Inventory</h1>
 
-  <label class="favorites-filter">
-    <input
-      #favoritesCheckbox
-      type="checkbox"
-      [checked]="favoritesOnly()"
-      [disabled]="isSavingAnyFavorite()"
-      (change)="setFavoritesOnly(favoritesCheckbox.checked)"
-    />
-    Favorites only
-  </label>
+  <section class="inventory-filters" aria-label="Filter inventories">
+    <div class="filter-heading">
+      <div>
+        <h2>Find an inventory</h2>
+        <p>Filter by name, type, or description.</p>
+      </div>
+
+      <button
+        class="clear-filters-button"
+        type="button"
+        (click)="clearFilters()"
+        [disabled]="!hasActiveFilters()"
+      >
+        Clear filters
+      </button>
+    </div>
+
+    <div class="inventory-filter-grid">
+      <label class="filter-field">
+        <span>Inventory name</span>
+        <input
+          type="search"
+          placeholder="Search by name"
+          [value]="filters().inventoryName"
+          (input)="setTextFilter('inventoryName', $event)"
+        />
+      </label>
+
+      <label class="filter-field">
+        <span>Inventory type</span>
+        <select
+          [value]="filters().inventoryType"
+          [disabled]="inventoryTypesLoading() || !!inventoryTypesError()"
+          (change)="setInventoryTypeFilter($event)"
+        >
+          <option value="">
+            {{ inventoryTypesLoading() ? 'Loading types…' : 'All types' }}
+          </option>
+
+          @for (type of inventoryTypes(); track type.typeId) {
+            <option [value]="type.type">{{ type.type }}</option>
+          }
+        </select>
+
+        @if (inventoryTypesError(); as typeError) {
+          <span class="filter-error" role="status">{{ typeError }}</span>
+        }
+      </label>
+
+      <label class="filter-field">
+        <span>Description</span>
+        <input
+          type="search"
+          placeholder="Search by description"
+          [value]="filters().inventoryDescription"
+          (input)="setTextFilter('inventoryDescription', $event)"
+        />
+      </label>
+    </div>
+
+    <div class="filter-footer">
+      <label class="important-filter">
+        <input
+          type="checkbox"
+          [checked]="filters().importantOnly"
+          [disabled]="isSavingAnyFavorite()"
+          (change)="setImportantOnly($event)"
+        />
+        <span>Favorites only</span>
+      </label>
+    </div>
+  </section>
 
   @if (favoriteError(); as saveError) {
     <p class="favorite-error" role="alert">{{ saveError }}</p>
@@ -26,11 +88,27 @@
       <mat-icon color="warn">error_outline</mat-icon>
       <p>{{ err.message }}</p>
     </div>
+  } @else if (noResultsMessage(); as message) {
+    <div class="state-container no-results-state" role="status">
+      <div class="no-results-icon">
+        <mat-icon>search_off</mat-icon>
+      </div>
+      <h2>No matching inventory</h2>
+      <p>{{ message }}</p>
+      <button class="clear-filters-button" type="button" (click)="clearFilters()">
+        Clear filters
+      </button>
+    </div>
   } @else if (inventories().length === 0) {
     <div class="state-container">
       <mat-icon>inventory_2</mat-icon>
+      <h2>No inventories available</h2>
       <p>
-        {{ favoritesOnly() ? 'No favorite inventories found.' : 'No inventories found.' }}
+        {{
+          filters().importantOnly
+            ? 'No favorite inventories found.'
+            : 'There are no inventories to display right now.'
+        }}
       </p>
     </div>
   } @else {
@@ -49,6 +127,7 @@
 
               <mat-card-content>
                 <p>{{ inventory.inventoryDescription }}</p>
+
                 <p class="quantity">
                   @if (quantityFor(inventory.inventoryId) !== null) {
                     {{ quantityFor(inventory.inventoryId) }} items in stock

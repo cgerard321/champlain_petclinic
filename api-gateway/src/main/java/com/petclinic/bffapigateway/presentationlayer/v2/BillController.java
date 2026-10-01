@@ -54,7 +54,8 @@ public class BillController {
             @RequestParam(required = false) String visitType,
             @RequestParam(required = false) String vetId,
             @RequestParam(required = false) String vetFirstName,
-            @RequestParam(required = false) String vetLastName) {
+            @RequestParam(required = false) String vetLastName,
+            @RequestParam(defaultValue = "false") boolean includeArchived) {
 
         if (page.isEmpty()) {
             page = Optional.of(0);
@@ -63,8 +64,22 @@ public class BillController {
         if (size.isEmpty()) {
             size = Optional.of(10);
         }
-        return ResponseEntity.ok().body(billService.getAllBillsByPage(page, size, billId, customerId, ownerFirstName,
-                ownerLastName, visitType, vetId, vetFirstName, vetLastName));
+
+        return ResponseEntity.ok().body(
+                billService.getAllBillsByPage(
+                        page,
+                        size,
+                        billId,
+                        customerId,
+                        ownerFirstName,
+                        ownerLastName,
+                        visitType,
+                        vetId,
+                        vetFirstName,
+                        vetLastName,
+                        includeArchived
+                )
+        );
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})

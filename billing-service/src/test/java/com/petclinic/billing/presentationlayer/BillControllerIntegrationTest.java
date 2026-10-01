@@ -539,6 +539,7 @@ class BillControllerIntegrationTest {
                     .amount(new BigDecimal(100.0))
                     .billStatus(BillStatus.PAID)
                     .dueDate(LocalDate.now().plusDays(30))
+                    .archive(false)
                     .build()).block();
         }
 
