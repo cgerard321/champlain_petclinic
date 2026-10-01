@@ -68,18 +68,18 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
 
   // helper that forwards the current local filter state into the paginated API
   const callGetBillsListWithFilters = useCallback(
-    async (page = 0, size = 10): Promise<void> => {
+    async (page = 0, size = 10, filterToUse = appliedFilter): Promise<void> => {
       await getBillsList(
         page,
         size,
         undefined, // billId
-        filter.customerId || undefined,
-        filter.firstName || undefined,
-        filter.lastName || undefined,
-        filter.visitType || undefined,
+        filterToUse.customerId || undefined,
+        filterToUse.firstName || undefined,
+        filterToUse.lastName || undefined,
+        filterToUse.visitType || undefined,
         undefined, // vetId
-        filter.vetFirstName || undefined,
-        filter.vetLastName || undefined,
+        filterToUse.vetFirstName || undefined,
+        filterToUse.vetLastName || undefined,
         showArchivedBills
       );
     },
@@ -268,16 +268,28 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
     setAppliedFilterMonth(filterMonth);
     setApplyFilters(true);
     setActiveSection(null);
-    callGetBillsListWithFilters(currentPage, 10);
+    callGetBillsListWithFilters(currentPage, 10, filter);
   };
 
   const clearFilters = (): void => {
+
+    const emptyFilter: FilterModel = {
+      customerId: '',
+      firstName: '',
+      lastName: '',
+      visitType: '',
+      vetFirstName: '',
+      vetLastName: '',
+    }
+
     setFilterYear(new Date().getFullYear());
-    setFilterMonth(new Date().getMonth() + 1);
+    setFilterMonth(0);
     setSelectedFilter('');
     setSelectedOwnerFilter('');
     setSelectedVetFilter('');
     setSelectedVisitTypeFilter('');
+    setFilter(emptyFilter);
+    setAppliedFilter(emptyFilter);
     setFilteredBills(null);
     setApplyFilters(false);
     setActiveSection(null);
