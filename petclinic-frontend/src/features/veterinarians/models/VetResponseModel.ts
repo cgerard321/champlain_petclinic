@@ -1,4 +1,4 @@
-import { Workday } from './Workday.ts';
+gitimport { Workday } from './Workday.ts';
 import { Speciality } from './Speciality.ts';
 
 export interface VetResponseModel {
