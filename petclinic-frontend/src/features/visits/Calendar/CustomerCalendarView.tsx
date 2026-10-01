@@ -41,7 +41,7 @@ export default function CustomerCalendarView(): JSX.Element {
     const controller = new AbortController();
 
     const fetchVisits = async (): Promise<void> => {
-      if (!user?.userId) {
+      if (!user || !user.userId) {
         setError('User not found. Please log in.');
         setIsLoading(false);
         return;
