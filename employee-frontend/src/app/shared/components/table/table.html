@@ -1,0 +1,29 @@
+<div class="table-container">
+  <table [attr.aria-label]="label()">
+    <thead>
+      <tr>
+        @for (column of columns(); track column.id) {
+          <th scope="col">{{ column.header }}</th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of rows(); track rowId()(row)) {
+        <tr>
+          @for (column of columns(); track column.id) {
+            <td>
+              @if (column.template; as cellTemplate) {
+                <ng-container
+                  [ngTemplateOutlet]="cellTemplate"
+                  [ngTemplateOutletContext]="{ $implicit: row }"
+                />
+              } @else {
+                {{ column.value?.(row) }}
+              }
+            </td>
+          }
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
