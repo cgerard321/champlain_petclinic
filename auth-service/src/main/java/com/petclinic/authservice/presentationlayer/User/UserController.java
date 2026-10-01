@@ -75,6 +75,12 @@ public class UserController {
         return ResponseEntity.ok(userMapper.modelToDetails(user));
     }
 
+    @GetMapping("/{userId}/public-profile")
+    public ResponseEntity<PublicUserProfile> getPublicProfile(@PathVariable String userId) {
+        User user = userService.getUserByUserId(userId);
+        return ResponseEntity.ok(new PublicUserProfile(user.getUsername()));
+    }
+
     //add pagination to this method later
     @GetMapping("/")
     public ResponseEntity<List<UserDetails>> getAllUsers(@RequestParam Optional<String> username) {

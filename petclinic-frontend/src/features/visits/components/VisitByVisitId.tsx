@@ -4,6 +4,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Visit } from '../models/Visit';
 import './VisitByVisitId.css';
 import { getVisit } from '../api/getVisit';
+import { cancelVisit } from '../api/cancelVisit';
+// import EditingVisit from './EditingVisit';
+// import { updateVisit } from '../api/updateVisit';
 
 export default function VisitDetails(): JSX.Element {
   const { visitId } = useParams<{ visitId: string }>(); // Extract visitId from URL parameters
@@ -60,17 +63,20 @@ export default function VisitDetails(): JSX.Element {
         </div>
         <div className="visit-field">
           <span className="visit-label">Status:</span>
+
           <span
             className="visit-value"
             style={{
               color:
                 visit.status === 'CONFIRMED'
                   ? 'green'
-                  : visit.status === 'UPCOMING'
-                    ? 'orange'
-                    : visit.status === 'COMPLETED'
-                      ? 'blue'
-                      : 'inherit',
+                  : visit.status === 'CANCELLED'
+                    ? 'red'
+                    : visit.status === 'UPCOMING'
+                      ? 'orange'
+                      : visit.status === 'COMPLETED'
+                        ? 'blue'
+                        : 'inherit',
             }}
           >
             {visit.status}
@@ -81,13 +87,27 @@ export default function VisitDetails(): JSX.Element {
           <span className="visit-value">{visit.visitEndDate}</span>
         </div>
       </div>
-      <button
-        className="btn btn-warning"
-        onClick={() => navigate('/visits')}
-        title="Let a review"
-      >
-        Return to visits
-      </button>
+
+      <div className="button-visit-details">
+        <button
+          className="btn btn-warning"
+          onClick={() => navigate('/customer/visits')}
+          title="Let a review"
+        >
+          Return to visits
+        </button>
+
+        {(visit.status == 'CONFIRMED' || visit.status == 'UPCOMING') && (
+          <button
+            className="btn-cancel"
+            onClick={() =>
+              cancelVisit(visit.visitId, updatedVisit => setVisit(updatedVisit))
+            }
+          >
+            Cancel
+          </button>
+        )}
+      </div>
     </div>
   );
 }
