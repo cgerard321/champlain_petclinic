@@ -802,6 +802,7 @@ public class BillServiceImplTest {
                 .verify();
 
         verify(repo, never()).save(any(Bill.class));
+        verify(repo, never()).findByBillId(anyString());
     }
 
     @Test
