@@ -77,7 +77,7 @@ public class CustomerServiceImpl implements CustomerService {
     public Mono<CustomerResponseDTO> deleteCustomerByCustomerId(String customerId) {
         return customerRepo.findCustomerByCustomerId(customerId)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Customer id not found: " + customerId))))
-                .flatMap(found -> customerRepo.deleteById(found.getId())
+                .flatMap(found -> customerRepo.delete(found)
                         .then(Mono.just(found)))
                 .map(EntityDTOUtil::toCustomerReponseDTO);
     }
