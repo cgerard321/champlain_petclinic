@@ -96,6 +96,8 @@ export class InventoryService {
         map((event) => JSON.parse(event.data) as Inventory),
         retry({ count: Infinity, delay: () => timer(5000) }),
       );
+  }
+
   updateImportantStatus(inventoryId: string, important: boolean): Observable<void> {
     return this.http.patch<void>(`${this.baseUrl}/${inventoryId}/important`, { important });
   }
