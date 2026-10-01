@@ -46,6 +46,8 @@ class CartControllerV1IntegrationTest {
 
     private static final String OWNER_TOKEN = MockServerConfigAuthService.jwtTokenForValidOwnerId;
 
+    private static final String ADMIN_TOKEN = MockServerConfigAuthService.jwtTokenForValidAdmin;
+
     private static final String CSRF_TOKEN = UUID.randomUUID().toString();
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -57,6 +59,7 @@ class CartControllerV1IntegrationTest {
 
         authServiceMock = new MockServerConfigAuthService();
         authServiceMock.registerValidateTokenForOwnerEndpoint();
+        authServiceMock.registerValidateTokenForAdminEndpoint();
     }
 
     @AfterAll
@@ -96,6 +99,37 @@ class CartControllerV1IntegrationTest {
         webTestClient.post()
                 .uri("/api/gateway/carts/{cartId}/products", cartId)
                 .cookie("Bearer", OWNER_TOKEN)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().valueEquals("Location", "/api/gateway/carts/" + cartId + "/products/" + productId)
+                .expectBody()
+                .jsonPath("$.cartId").isEqualTo(cartId)
+                .jsonPath("$.products[0].productId").isEqualTo(productId)
+                .jsonPath("$.products[0].quantityInCart").isEqualTo(2);
+    }
+
+    @Test
+    void addProductToCart_withAdminRole_returnsCreatedWithLocation() throws JsonProcessingException {
+        String cartId = "cart-admin-001";
+        String productId = "prod-admin-100";
+
+        stubCartService(
+                "POST",
+                "/api/v1/carts/" + cartId + "/products",
+                201,
+                cartResponseJson(cartId, List.of(buildCartProduct(productId, 2)), List.of())
+        );
+
+        CartItemRequestDTO requestDTO = new CartItemRequestDTO(productId, 2);
+
+        webTestClient.post()
+                .uri("/api/gateway/carts/{cartId}/products", cartId)
+                .cookie("Bearer", ADMIN_TOKEN)
                 .cookie("XSRF-TOKEN", CSRF_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("X-XSRF-TOKEN", CSRF_TOKEN)
