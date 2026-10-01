@@ -23,6 +23,8 @@ import Sidebar from './components/Sidebar';
 import SidebarItem from './components/SidebarItem';
 import SvgIcon from '@/shared/components/SvgIcon';
 import { FaCalendarAlt } from 'react-icons/fa';
+import {CancellationRequest} from "@/features/visits/models/CancellationRequest.ts";
+import CancellationModal from "@/features/visits/components/CancellationModal.tsx";
 
 interface EditingVisitHandle {
   openCreateBill: () => void;
@@ -170,20 +172,31 @@ export default function VisitListTable(): JSX.Element {
     }
   };
 
-  const handleCancel = async (visitId: string): Promise<void> => {
+  const handleCancel = async (
+      visitId: string,
+      cancellationRequest: CancellationRequest
+  ): Promise<void> => {
     try {
-      await cancelVisit(visitId, updatedVisit => {
-        setVisits(prev => {
-          return prev.map(visit => {
-            if (visit.visitId === visitId) return updatedVisit;
-            return visit;
-          });
-        });
-      });
+      await cancelVisit(
+          visitId,
+          cancellationRequest,
+          updatedVisit => {
+            setVisits(prev => {
+              return prev.map(visit => {
+                if (visit.visitId === visitId) {
+                  return updatedVisit;
+                }
+
+                return visit;
+              });
+            });
+          }
+      );
 
       showSuccessAndReload('Visit cancelled successfully!');
     } catch (error) {
-      return;
+      console.error('Error cancelling visit:', error);
+      throw error;
     }
   };
 
@@ -397,19 +410,12 @@ export default function VisitListTable(): JSX.Element {
                                     visit.status !== 'ARCHIVED' &&
                                     visit.status !== 'COMPLETED' &&
                                     !isVet && (
-                                      <BasicModal
-                                        title="Cancel Visit"
-                                        showButton={renderCancelButton()}
-                                        onConfirm={() =>
-                                          handleCancel(visit.visitId)
-                                        }
-                                      >
-                                        <div>
-                                          This will set the status of this visit
-                                          to Canceled.
-                                        </div>
-                                        <div>Do you wish to proceed?</div>
-                                      </BasicModal>
+                                        <CancellationModal
+                                            showButton={renderCancelButton()}
+                                            onConfirm={cancellationRequest =>
+                                                handleCancel(visit.visitId, cancellationRequest)
+                                            }
+                                        />
                                     )}
                                 </>
                               );

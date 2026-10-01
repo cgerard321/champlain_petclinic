@@ -5,6 +5,7 @@ import { Visit } from '../models/Visit';
 import './VisitByVisitId.css';
 import { getVisit } from '../api/getVisit';
 import { cancelVisit } from '../api/cancelVisit';
+import CancellationModal from "@/features/visits/components/CancellationModal.tsx";
 // import EditingVisit from './EditingVisit';
 // import { updateVisit } from '../api/updateVisit';
 
@@ -97,15 +98,21 @@ export default function VisitDetails(): JSX.Element {
           Return to visits
         </button>
 
-        {(visit.status == 'CONFIRMED' || visit.status == 'UPCOMING') && (
-          <button
-            className="btn-cancel"
-            onClick={() =>
-              cancelVisit(visit.visitId, updatedVisit => setVisit(updatedVisit))
-            }
-          >
-            Cancel
-          </button>
+        {(visit.status === 'CONFIRMED' || visit.status === 'UPCOMING') && (
+            <CancellationModal
+                showButton={
+                  <button className="btn-cancel">
+                    Cancel
+                  </button>
+                }
+                onConfirm={cancellationRequest =>
+                    cancelVisit(
+                        visit.visitId,
+                        cancellationRequest,
+                        updatedVisit => setVisit(updatedVisit)
+                    )
+                }
+            />
         )}
       </div>
     </div>

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.petclinic.visits.visitsservicenew.DataLayer.CancellationReason;
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FileRequestDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FileResponseDTO;
@@ -39,5 +40,6 @@ public class VisitResponseDTO {
     @JsonProperty("isEmergency")
     private Boolean isEmergency;
     private FileResponseDTO prescription;
-
+    private CancellationReason cancellationReason;
+    private String cancellationReasonDetails;
 }

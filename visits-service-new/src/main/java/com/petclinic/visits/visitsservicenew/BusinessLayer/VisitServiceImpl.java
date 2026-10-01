@@ -1,6 +1,7 @@
 package com.petclinic.visits.visitsservicenew.BusinessLayer;
 
 import com.petclinic.visits.visitsservicenew.BusinessLayer.Prescriptions.PrescriptionService;
+import com.petclinic.visits.visitsservicenew.DataLayer.CancellationReason;
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
@@ -17,6 +18,7 @@ import com.petclinic.visits.visitsservicenew.Exceptions.BadRequestException;
 import com.petclinic.visits.visitsservicenew.Exceptions.DuplicateTimeException;
 import com.petclinic.visits.visitsservicenew.Exceptions.InvalidInputException;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.CancellationRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
 import com.petclinic.visits.visitsservicenew.Utils.EntityDtoUtil;
@@ -318,6 +320,38 @@ public class VisitServiceImpl implements VisitService {
                     // Convert ByteArrayOutputStream to InputStreamResource
                     return new InputStreamResource(new ByteArrayInputStream(out.toByteArray()));
                 });
+    }
+
+    @Override
+    public Mono<VisitResponseDTO> cancelVisit(String visitId, CancellationRequestDTO request) {
+        if (request == null || request.getCancellationReason() == null){
+            return Mono.error(
+                    new BadRequestException("Cancellation reason is required")
+            );
+        }
+
+        if (request.getCancellationReason() == CancellationReason.OTHER &&
+                (request.getCancellationReasonDetails() == null || request.getCancellationReasonDetails().isBlank())){
+            return Mono.error(
+                    new BadRequestException(
+                            "Cancellation reason detaisl required when OTHER is selected"
+                    )
+            );
+        }
+
+        return repo.findByVisitId(visitId)
+                .switchIfEmpty(Mono.error(new NotFoundException("No visit was found with visitId: " + visitId)))
+                .flatMap(visit -> {
+                    visit.setStatus((Status.CANCELLED));
+                    visit.setCancellationReason(request.getCancellationReason());
+
+                    if (request.getCancellationReason() == CancellationReason.OTHER){
+                        visit.setCancellationReasonDetails(null);
+                    }
+
+                    return repo.save(visit);
+                })
+                .flatMap(entityDtoUtil::toVisitResponseDTO);
     }
 
 

@@ -5,11 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
+import com.petclinic.bffapigateway.dtos.Visits.*;
 import com.petclinic.bffapigateway.dtos.Visits.Prescriptions.PrescriptionResponseDTO;
-import com.petclinic.bffapigateway.dtos.Visits.Status;
-import com.petclinic.bffapigateway.dtos.Visits.TimeSlotDTO;
-import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
-import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewResponseDTO;
 import com.petclinic.bffapigateway.exceptions.BadRequestException;
@@ -433,6 +430,16 @@ public class VisitsServiceClient {
                 .body(request, PrescriptionResponseDTO.class)
                 .retrieve()
                 .bodyToMono(PrescriptionResponseDTO.class);
+    }
+
+    public Mono<VisitResponseDTO> cancelVisit(String visitId, CancellationRequestDTO request){
+        return webClient
+                .patch()
+                .uri("/" + visitId + "/cancel")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(VisitResponseDTO.class);
     }
 
 
