@@ -5,5 +5,134 @@
   "buttons": {
     "save": "Save Changes",
     "cancel": "Cancel"
+  },
+
+    "uploadPetPhotoModal": {
+      "title": "Upload Pet Photo",
+      "selectPhoto": "Select Photo:",
+      "chooseFile": "Choose File",
+      "preview": "Preview:",
+      "uploading": "Uploading...",
+      "uploadPhoto": "Upload Photo",
+      "cancelButton": "Cancel",
+      "alert": {
+        "photoRequired": "Please select an image file (JPG, PNG, etc.)",
+        "photoSize": "File size must be less than 5MB",
+        "fileRequired": "Please select a file",
+        "uploadFailed": "Failed to upload pet photo. Please try again."
+      }
+    },
+    "uploadPetPhoto": {
+      "uploading": "Uploading...",
+      "addPhoto": "Add Photo",
+      "errors": {
+        "invalidFileType": "Please select an image file (JPG, PNG, etc.)",
+        "fileTooLarge": "File size must be less than 5MB",
+        "uploadFailed": "Failed to upload photo. Please try again."
+      }
+    },
+
+  "uploadProfilePhoto": {
+    "uploading": "Uploading...",
+    "changePhoto": "Change Photo",
+    "errors": {
+      "invalidFileType": "Please select an image file (JPG, PNG, etc.)",
+      "fileTooLarge": "File size must be less than 5MB",
+      "uploadFailed": "Failed to upload photo. Please try again."
+    }
+  },
+
+    "uploadPhotoModal": {
+      "title": "Upload Profile Photo",
+      "selectPhoto": "Select Photo:",
+      "chooseFile": "Choose File",
+      "preview": "Preview:",
+      "cancel": "Cancel",
+      "uploading": "Uploading...",
+      "uploadPhoto": "Upload Photo",
+      "errors": {
+        "invalidFileType": "Please select an image file (JPG, PNG, etc.)",
+        "fileTooLarge": "File size must be less than 5MB",
+        "noFileSelected": "Please select a file",
+        "uploadFailed": "Failed to upload photo. Please try again."
+      },
+      "alt": {
+        "preview": "Preview"
+      }
+
+  },
+  "pets": {
+    "addTitle": "Add New Pet",
+    "editTitle": "Edit Pet: {{name}}",
+    "fields": {
+      "name": "Pet Name",
+      "petType": "Pet Type",
+      "birthDate": "Birth Date",
+      "weight": "Weight (kg)",
+      "isActive": "Is Active",
+      "uploadPhoto": "Upload Photo:",
+      "photoAlt": "{{name}} profile",
+      "newPhotoAlt": "New pet profile"
+    },
+    "selectType": "Select a pet type",
+    "loadingTypes": "Loading pet types...",
+    "types": {
+      "cat": "Cat",
+      "dog": "Dog",
+      "lizard": "Lizard",
+      "snake": "Snake",
+      "bird": "Bird",
+      "hamster": "Hamster",
+      "others": "Others"
+    },
+    "buttons": {
+      "add": "Add Pet",
+      "adding": "Adding...",
+      "update": "Update Pet",
+      "updating": "Updating...",
+      "delete": "Delete Pet",
+      "confirmDelete": "Delete",
+      "yesDelete": "Yes, Delete",
+      "cancel": "Cancel",
+      "close": "Close",
+      "addPhoto": "Add Photo",
+      "deletePhoto": "Delete Photo"
+    },
+    "errors": {
+      "nameRequired": "Pet name is required",
+      "typeRequired": "Pet type is required",
+      "weightRequired": "Weight is required",
+      "weightPositive": "Weight must be greater than 0",
+      "addFailed": "Failed to add pet. Please try again.",
+      "updateFailed": "Failed to update pet. Please try again.",
+      "deleteFailed": "Failed to delete pet. Please try again.",
+      "addPhotoFailed": "Failed to add pet photo. Please try again.",
+      "deletePhotoFailed": "Failed to delete pet photo. Please try again."
+    },
+    "success": {
+      "title": "Success!",
+      "added": "Pet added successfully!",
+      "addedMessage": "Pet has been successfully added.",
+      "updated": "Pet updated successfully!",
+      "updatedMessage": "Pet has been successfully updated.",
+      "photoAdded": "Pet photo added successfully!",
+      "photoDeleted": "Pet photo deleted successfully!"
+    },
+    "notFound": {
+      "title": "Pet Not Found",
+      "message": "Pet not found. Please check the pet ID and try again."
+    },
+    "loading": {
+      "title": "Loading...",
+      "message": "Loading pet data..."
+    },
+    "deleteModal": {
+      "title": "Confirm Delete",
+      "message": "Are you sure you want to delete this pet? This action cannot be undone."
+    },
+    "deletePhotoModal": {
+      "title": "Delete Pet Photo",
+      "message": "Are you sure you want to delete this pet's photo? This action cannot be undone."
+    }
   }
 }

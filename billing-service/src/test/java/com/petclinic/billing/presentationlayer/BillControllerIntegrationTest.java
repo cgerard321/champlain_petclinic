@@ -102,6 +102,75 @@ class BillControllerIntegrationTest {
     }
 
     @Test
+    void getAllBillsStream_ShouldReturnAllBills() {
+        Bill bill1 = buildBill();
+        bill1.setId("stream-id-1");
+        bill1.setBillId("bill-1");
+
+        Bill bill2 = buildBill();
+        bill2.setId("stream-id-2");
+        bill2.setBillId("bill-2");
+
+        repo.saveAll(List.of(bill1, bill2)).blockLast();
+
+        client.get()
+                .uri("/bills/stream")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectBodyList(BillResponseDTO.class)
+                .hasSize(2);
+    }
+
+    @Test
+    void getAllBillsStream_WithBillIdFilter_ReturnsMatchingBill() {
+        Bill matchingBill = buildBill();
+        matchingBill.setId("stream-id-1");
+        matchingBill.setBillId("bill-1");
+
+        Bill nonMatchingBill = buildBill();
+        nonMatchingBill.setId("stream-id-2");
+        nonMatchingBill.setBillId("bill-2");
+
+        repo.saveAll(List.of(matchingBill, nonMatchingBill)).blockLast();
+
+        client.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/bills/stream")
+                        .queryParam("billId", "bill-1")
+                        .build())
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(BillResponseDTO.class)
+                .hasSize(1)
+                .value(bills ->
+                        Assertions.assertEquals("bill-1", bills.get(0).getBillId()));
+    }
+
+    @Test
+    void getAllBillsStream_WithNoMatchingBills_ReturnsEmptyStream() {
+        Bill bill = buildBill();
+        bill.setId("stream-id-1");
+        bill.setBillId("bill-1");
+
+        repo.save(bill).block();
+
+        client.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/bills/stream")
+                        .queryParam("billId", "does-not-exist")
+                        .build())
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(BillResponseDTO.class)
+                .hasSize(0);
+    }
+
+
+    @Test
     void getAllPaidBills() {
 
         Bill billEntity = buildBill();
@@ -470,6 +539,7 @@ class BillControllerIntegrationTest {
                     .amount(new BigDecimal(100.0))
                     .billStatus(BillStatus.PAID)
                     .dueDate(LocalDate.now().plusDays(30))
+                    .archive(false)
                     .build()).block();
         }
 

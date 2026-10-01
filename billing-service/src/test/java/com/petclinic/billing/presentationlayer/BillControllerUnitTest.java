@@ -89,6 +89,29 @@ class BillControllerUnitTest {
                 });
         Mockito.verify(billService, times(1)).getAllBills();
     }
+    @Test
+    void getAllBillsStream() {
+
+        when(billService.getAllBillsStream(
+                null, null, null, null, null, null, null, null))
+                .thenReturn(Flux.just(responseDTO));
+
+        client.get()
+                .uri("/bills/stream")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(
+                        MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
+                .expectBodyList(BillResponseDTO.class)
+                .consumeWith(response -> {
+                    List<BillResponseDTO> bills = response.getResponseBody();
+                    Assertions.assertNotNull(bills);
+                });
+
+        verify(billService, times(1)).getAllBillsStream(
+                null, null, null, null, null, null, null, null);
+    }
 
     @Test
     void getAllPaidBills() {
@@ -376,7 +399,7 @@ class BillControllerUnitTest {
 
     @Test
     void whenValidParametersForPaginationProvided_thenShouldCallServiceWithCorrectParams() {
-        when(billService.getAllBillsByPage(any(), any(), any(), any(), any(), any(), any(), any(), any()))
+        when(billService.getAllBillsByPage(any(), any(), any(), any(), any(), any(), any(), any(), any(), anyBoolean()))
                 .thenReturn(Flux.just(responseDTO));
 
         client.get()
@@ -391,7 +414,7 @@ class BillControllerUnitTest {
 
         Mockito.verify(billService, times(1))
                 .getAllBillsByPage(PageRequest.of(1, 10), null, null, null,
-                        null, null, null, null, null);
+                        null, null, null, null, null, false);
     }
 
     @Test

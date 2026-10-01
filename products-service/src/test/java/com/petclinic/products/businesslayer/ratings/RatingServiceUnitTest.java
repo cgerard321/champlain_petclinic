@@ -67,11 +67,13 @@ class RatingServiceUnitTest {
 
         StepVerifier.create(ratingService.getAllRatingsForProductId(productId))
                 .expectNextMatches(response -> {
+                    assertEquals(rating1.getCustomerId(), response.getCustomerId());
                     assertNotNull(response.getRating());
                     assertNotNull(response.getReview());
                     return true;
                 })
                 .expectNextMatches(response -> {
+                    assertEquals(rating2.getCustomerId(), response.getCustomerId());
                     assertNotNull(response.getRating());
                     assertNotNull(response.getReview());
                     return true;

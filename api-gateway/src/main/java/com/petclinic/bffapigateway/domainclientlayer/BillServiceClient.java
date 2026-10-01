@@ -116,42 +116,121 @@ public class BillServiceClient {
 //                .bodyToFlux(BillResponseDTO.class);
 //    }
 
+    public Flux<BillResponseDTO> getAllBillsStream(
+            String billId,
+            String customerId,
+            String ownerFirstName,
+            String ownerLastName,
+            String visitType,
+            String vetId,
+            String vetFirstName,
+            String vetLastName) {
 
-    //to be changed
+        UriComponentsBuilder builder =
+                UriComponentsBuilder.fromUriString(billServiceUrl + "/stream")
+                        .queryParamIfPresent("billId", Optional.ofNullable(billId))
+                        .queryParamIfPresent("customerId", Optional.ofNullable(customerId))
+                        .queryParamIfPresent("ownerFirstName", Optional.ofNullable(ownerFirstName))
+                        .queryParamIfPresent("ownerLastName", Optional.ofNullable(ownerLastName))
+                        .queryParamIfPresent("visitType", Optional.ofNullable(visitType))
+                        .queryParamIfPresent("vetId", Optional.ofNullable(vetId))
+                        .queryParamIfPresent("vetFirstName", Optional.ofNullable(vetFirstName))
+                        .queryParamIfPresent("vetLastName", Optional.ofNullable(vetLastName));
+
+        return webClientBuilder.build()
+                .get()
+                .uri(builder.build().toUri())
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class);
+    }
+
     public Mono<Long> getTotalNumberOfBills() {
-        return webClientBuilder.build().get()
-                .uri(billServiceUrl + "/bills-count")
+        return getTotalNumberOfBills(false);
+    }
+
+    public Mono<Long> getTotalNumberOfBills(boolean includeArchived) {
+
+        UriComponentsBuilder builder =
+                UriComponentsBuilder.fromUriString(billServiceUrl + "/bills-count")
+                        .queryParam("includeArchived", includeArchived);
+
+        return webClientBuilder.build()
+                .get()
+                .uri(builder.build().toUri())
                 .retrieve()
                 .bodyToMono(Long.class);
     }
 
-    public Mono<Long> getTotalNumberOfBillsWithFilters(String billId, String customerId,
-                                                       String ownerFirstName, String ownerLastName, String visitType,
-                                                       String vetId, String vetFirstName, String vetLastName){
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(billServiceUrl + "/bills-filtered-count");
+    public Mono<Long> getTotalNumberOfBillsWithFilters(
+            String billId,
+            String customerId,
+            String ownerFirstName,
+            String ownerLastName,
+            String visitType,
+            String vetId,
+            String vetFirstName,
+            String vetLastName) {
 
-        // Add query parameters conditionally if they are not null or empty
+        return getTotalNumberOfBillsWithFilters(
+                billId,
+                customerId,
+                ownerFirstName,
+                ownerLastName,
+                visitType,
+                vetId,
+                vetFirstName,
+                vetLastName,
+                false
+        );
+    }
+
+    public Mono<Long> getTotalNumberOfBillsWithFilters(
+            String billId,
+            String customerId,
+            String ownerFirstName,
+            String ownerLastName,
+            String visitType,
+            String vetId,
+            String vetFirstName,
+            String vetLastName,
+            boolean includeArchived) {
+
+        UriComponentsBuilder builder =
+                UriComponentsBuilder.fromUriString(
+                        billServiceUrl + "/bills-filtered-count"
+                );
+
+        builder.queryParam("includeArchived", includeArchived);
+
         if (billId != null && !billId.isEmpty()) {
             builder.queryParam("billId", billId);
         }
+
         if (customerId != null && !customerId.isEmpty()) {
             builder.queryParam("customerId", customerId);
         }
+
         if (ownerFirstName != null && !ownerFirstName.isEmpty()) {
             builder.queryParam("ownerFirstName", ownerFirstName);
         }
+
         if (ownerLastName != null && !ownerLastName.isEmpty()) {
             builder.queryParam("ownerLastName", ownerLastName);
         }
+
         if (visitType != null && !visitType.isEmpty()) {
             builder.queryParam("visitType", visitType);
         }
+
         if (vetId != null && !vetId.isEmpty()) {
             builder.queryParam("vetId", vetId);
         }
+
         if (vetFirstName != null && !vetFirstName.isEmpty()) {
             builder.queryParam("vetFirstName", vetFirstName);
         }
+
         if (vetLastName != null && !vetLastName.isEmpty()) {
             builder.queryParam("vetLastName", vetLastName);
         }
@@ -300,15 +379,50 @@ public class BillServiceClient {
 //                .bodyToFlux(BillResponseDTO.class);
 //    }
 
-    public Flux<BillResponseDTO> getAllBillsByPage(Optional<Integer> page, Optional<Integer> size,
-                                                   String billId, String customerId,
-                                                   String ownerFirstName, String ownerLastName,
-                                                   String visitType, String vetId,
-                                                   String vetFirstName, String vetLastName) {
+    public Flux<BillResponseDTO> getAllBillsByPage(
+            Optional<Integer> page,
+            Optional<Integer> size,
+            String billId,
+            String customerId,
+            String ownerFirstName,
+            String ownerLastName,
+            String visitType,
+            String vetId,
+            String vetFirstName,
+            String vetLastName) {
+
+        return getAllBillsByPage(
+                page,
+                size,
+                billId,
+                customerId,
+                ownerFirstName,
+                ownerLastName,
+                visitType,
+                vetId,
+                vetFirstName,
+                vetLastName,
+                false
+        );
+    }
+
+    public Flux<BillResponseDTO> getAllBillsByPage(
+            Optional<Integer> page,
+            Optional<Integer> size,
+            String billId,
+            String customerId,
+            String ownerFirstName,
+            String ownerLastName,
+            String visitType,
+            String vetId,
+            String vetFirstName,
+            String vetLastName,
+            boolean includeArchived) {
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(billServiceUrl + "/paginated")
                 .queryParam("page", page.orElse(0))
                 .queryParam("size", size.orElse(10))
+                .queryParam("includeArchived", includeArchived)
                 .queryParamIfPresent("billId", Optional.ofNullable(billId))
                 .queryParamIfPresent("customerId", Optional.ofNullable(customerId))
                 .queryParamIfPresent("ownerFirstName", Optional.ofNullable(ownerFirstName))

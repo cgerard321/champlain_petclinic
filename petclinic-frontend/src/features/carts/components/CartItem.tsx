@@ -20,6 +20,7 @@ interface CartItemProps {
   addToWishlist: (item: ProductModel) => void;
   addToCart: (item: ProductModel) => void;
   isInWishlist: boolean;
+  removeFromWishListByIcon?: (item: ProductModel) => void;
   showNotification?: (message: string) => void;
   removeFromWishlist?: (item: ProductModel) => void;
 }
@@ -76,7 +77,7 @@ const CartItem = ({
   return (
     <div className="CartItem">
       <div onClick={handleCartItemOnClick} className="cart-item-media">
-        <ImageContainer imageId={item.imageId} />
+        <ImageContainer productId={item.productId} imageId={item.imageId} />
       </div>
 
       <div className="cart-item-content">

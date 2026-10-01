@@ -7,8 +7,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
+import { of, switchMap } from 'rxjs';
 
 import { isApiError } from '@core/models/api-error';
+import { FileDetails } from '@features/prod/models/image.model';
 import {
   DeliveryType,
   Product,
@@ -120,14 +122,14 @@ export class ProductUpdateDialog implements OnInit {
     this.errorMessage.set(null);
     const file = this.selectedFile();
     if (file) {
-      this.imageService.uploadImage(file).subscribe({
-        next: (image) => this.updateProduct(image.imageId),
-        error: (error: unknown) => this.handleError(error),
-      });
+      void this.imageService
+        .toFileDetails(file)
+        .then((image) => this.updateProduct(image))
+        .catch((error: unknown) => this.handleError(error));
       return;
     }
 
-    this.updateProduct(this.originalProduct.imageId);
+    this.updateProduct();
   }
 
   protected cancel(): void {
@@ -136,22 +138,28 @@ export class ProductUpdateDialog implements OnInit {
     }
   }
 
-  private updateProduct(imageId?: string): void {
+  private updateProduct(image?: FileDetails): void {
     const { releaseDate, ...formValue } = this.model();
     const request: ProductRequest = {
       ...formValue,
       ...(releaseDate ? { releaseDate } : {}),
-      ...(imageId ? { imageId } : {}),
       productStatus: this.originalProduct.productStatus,
     };
 
-    this.productService.updateProduct(this.originalProduct.productId, request).subscribe({
-      next: (product) => {
-        this.isSubmitting.set(false);
-        this.dialogRef.close(product);
-      },
-      error: (error: unknown) => this.handleError(error),
-    });
+    this.productService
+      .updateProduct(this.originalProduct.productId, request)
+      .pipe(
+        switchMap((product) =>
+          image ? this.productService.updateProductImage(product.productId, image) : of(product),
+        ),
+      )
+      .subscribe({
+        next: (product) => {
+          this.isSubmitting.set(false);
+          this.dialogRef.close(product);
+        },
+        error: (error: unknown) => this.handleError(error),
+      });
   }
 
   private validateBusinessRules(): boolean {
