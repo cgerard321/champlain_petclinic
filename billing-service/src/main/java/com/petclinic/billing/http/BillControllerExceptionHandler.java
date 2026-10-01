@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -31,9 +32,24 @@ public class BillControllerExceptionHandler {
         return createHttpErrorInfo(UNPROCESSABLE_ENTITY, request, ex);
     }
 
+    @ExceptionHandler(WebExchangeBindException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public HttpErrorInfo handleValidationException(ServerHttpRequest request, WebExchangeBindException ex) {
+        String message = ex.getFieldErrors().stream()
+                .map(error -> error.getDefaultMessage())
+                .filter(errorMessage -> errorMessage != null && !errorMessage.trim().isEmpty())
+                .findFirst()
+                .orElse("Invalid request");
+
+        return createHttpErrorInfo(HttpStatus.BAD_REQUEST, request, message);
+    }
+
     private HttpErrorInfo createHttpErrorInfo(HttpStatus httpStatus, ServerHttpRequest request, Exception ex) {
+        return createHttpErrorInfo(httpStatus, request, ex.getMessage());
+    }
+
+    private HttpErrorInfo createHttpErrorInfo(HttpStatus httpStatus, ServerHttpRequest request, String message) {
         final String path = request.getPath().pathWithinApplication().value();
-        final String message = ex.getMessage();
 
         LOG.debug("Returning HTTP status: {} for path: {}, message: {}", httpStatus, path, message);
 

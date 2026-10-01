@@ -367,7 +367,9 @@ class BillControllerIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .exchange()
-                .expectStatus().isBadRequest();
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Due date is required");
 
         StepVerifier.create(repo.findByBillId(existingBill.getBillId()))
                 .assertNext(bill -> Assertions.assertEquals(existingBill.getDueDate(), bill.getDueDate()))
