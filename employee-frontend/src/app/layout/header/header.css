@@ -24,9 +24,11 @@
   white-space: nowrap;
 }
 
+
 .active-link {
   background: rgb(0 0 0 / 6%);
 }
+
 
 mat-toolbar {
   background-color: #c2daae;
