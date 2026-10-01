@@ -54,7 +54,9 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
 
   const [pets, setPets] = useState<PetResponseModel[]>([]);
   const [loadingPets, setLoadingPets] = useState<boolean>(true);
-  const [vets, setVets] = useState<Awaited<ReturnType<typeof getAvailableVets>>>([]);
+  const [vets, setVets] = useState<
+    Awaited<ReturnType<typeof getAvailableVets>>
+  >([]);
   const [timeSlots, setTimeSlots] = useState<TimeSlotWithVet[]>([]);
   const [loadingVets, setLoadingVets] = useState<boolean>(true);
   const [loadingSlots, setLoadingSlots] = useState<boolean>(false);
