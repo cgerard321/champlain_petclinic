@@ -58,13 +58,9 @@ public class ProductControllerV1 {
                     productType, productName, includeImage);
         }
         if (includeImage) {
-            return productsServiceClient.getAllProducts(
-                    minPrice, maxPrice, minRating, maxRating, sort, deliveryType,
-                    productType, true);
+            return productsServiceClient.getAllProducts(minPrice, maxPrice, minRating, maxRating, sort, deliveryType, productType, true);
         }
-        return productsServiceClient.getAllProducts(
-                minPrice, maxPrice, minRating, maxRating, sort, deliveryType,
-                productType);
+        return productsServiceClient.getAllProducts(minPrice, maxPrice, minRating, maxRating, sort, deliveryType, productType);
 
     }
 
