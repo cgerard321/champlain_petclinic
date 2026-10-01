@@ -1859,4 +1859,19 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("No vet found with vetId: " + invalidVetId);
     }
 
+    @Test
+    void getNonExistentVet_ShouldReturnNotFound404() {
+        String nonExistentId = "ab1u0l25-90a3-5hj1-asd9-8695h4157881";
+
+        client
+                .get()
+                .uri("/vets/" + nonExistentId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("No vet with this vetId was found: " + nonExistentId);
+    }
+
 }
