@@ -2,19 +2,31 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { ImageResponse } from '@features/prod/models/image.model';
+import { FileDetails, ImageResponse } from '@features/prod/models/image.model';
 
 @Injectable({ providedIn: 'root' })
 export class ImageService {
   private readonly http = inject(HttpClient);
 
-  uploadImage(file: File): Observable<ImageResponse> {
-    const formData = new FormData();
-    formData.append('imageName', file.name);
-    formData.append('imageType', file.type);
-    formData.append('imageData', file, file.name);
+  toFileDetails(file: File): Promise<FileDetails> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result;
+        if (typeof dataUrl !== 'string' || !dataUrl.includes(',')) {
+          reject(new Error('Could not read the selected image.'));
+          return;
+        }
 
-    return this.http.post<ImageResponse>('/api/gateway/images', formData);
+        resolve({
+          fileName: file.name,
+          fileType: file.type,
+          fileData: dataUrl.slice(dataUrl.indexOf(',') + 1),
+        });
+      };
+      reader.onerror = () => reject(new Error('Could not read the selected image.'));
+      reader.readAsDataURL(file);
+    });
   }
 
   getImage(imageId: string): Observable<ImageResponse> {

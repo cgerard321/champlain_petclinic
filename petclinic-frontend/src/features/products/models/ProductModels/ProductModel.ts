@@ -1,9 +1,11 @@
 import { DeliverType } from '@/features/products/models/ProductModels/DeliverType.ts';
 import { ProductType } from '@/features/products/models/ProductModels/ProductType.ts';
+import { FileDetails } from '@/shared/models/FileDetails';
 
 export interface ProductModel {
   productId: string;
   imageId: string;
+  image?: FileDetails | null;
   productName: string;
   productDescription: string;
   productSalePrice: number;
@@ -25,6 +27,7 @@ export interface ProductModel {
 export const emptyProductModel: ProductModel = {
   productId: '',
   imageId: '',
+  image: null,
   productName: '',
   productDescription: '',
   productSalePrice: 0,
