@@ -77,7 +77,7 @@ public class CustomerController {
                 .map(customerResponseDTO -> ResponseEntity.status(HttpStatus.CREATED).body(customerResponseDTO));
     }
 
-    @DeleteMapping(value = "/{customerId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(value = "/{customerId}")
     public Mono<ResponseEntity<Void>> deleteCustomerByCustomerId(@PathVariable String customerId){
         return Mono.just(customerId)
                 .filter(id -> id.length() == 36)

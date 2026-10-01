@@ -112,8 +112,11 @@ class CustomerControllerIntegrationTest {
     void deleteNonExistentCustomerByCustomerId() throws InterruptedException {
 
         StepVerifier.create(repo.deleteAll()).verifyComplete();
-        Thread.sleep(100);
-
+       try {
+           Thread.sleep(100);
+       } catch (InterruptedException e) {
+           Thread.currentThread().interrupt();
+       }
         String nonExistentCustomerId = "a6e0e5b0-5f60-45f0-8ac7-becd8b330486";
 
         client.delete().uri("/customers/" + nonExistentCustomerId)
@@ -370,6 +373,11 @@ class CustomerControllerIntegrationTest {
         Publisher<Customer> setup = repo.deleteAll().then(repo.save(customerWithPhoto));
         StepVerifier.create(setup).expectNextCount(1).verifyComplete();
 
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
         when(filesServiceClient.deleteFile(TEST_PHOTO_ID)).thenReturn(Mono.empty());
 
         client.delete().uri("/customers/" + testCustomerId + "/photo")
