@@ -1,5 +1,4 @@
 import { DeliverType } from '@/features/products/models/ProductModels/DeliverType.ts';
-import { ProductType } from '@/features/products/models/ProductModels/ProductType.ts';
 import { FileDetails } from '@/shared/models/FileDetails';
 
 export interface ProductModel {
@@ -13,7 +12,7 @@ export interface ProductModel {
   productQuantity: number;
   productStatus: 'PRE_ORDER' | 'AVAILABLE' | 'OUT_OF_STOCK';
   requestCount: number;
-  productType: 'FOOD' | 'MEDICATION' | 'ACCESSORY' | 'EQUIPMENT';
+  productType: string;
   isUnlisted: boolean;
   dateAdded: Date;
   releaseDate?: Date;
@@ -35,7 +34,7 @@ export const emptyProductModel: ProductModel = {
   productQuantity: 0,
   productStatus: 'OUT_OF_STOCK',
   requestCount: 0,
-  productType: ProductType.ACCESSORY,
+  productType: 'Unknown',
   isUnlisted: false,
   dateAdded: new Date(),
   releaseDate: undefined,

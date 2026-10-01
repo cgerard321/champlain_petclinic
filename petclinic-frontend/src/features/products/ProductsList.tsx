@@ -106,9 +106,12 @@ const ProductList = function Productlist({
     if (searchQuery === '') {
       setFilteredList(sorted);
     } else {
+      const query = searchQuery.toLowerCase();
       setFilteredList(
-        sorted.filter(p =>
-          p.productName.toLowerCase().includes(searchQuery.toLowerCase())
+        sorted.filter(
+          p =>
+            p.productName.toLowerCase().includes(query) ||
+            p.productType.toLowerCase().includes(query)
         )
       );
     }
