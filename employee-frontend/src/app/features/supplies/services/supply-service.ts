@@ -62,7 +62,7 @@ export class SupplyService {
   }
 
   consumeSupply(inventoryId: string, productId: string): Observable<Supply> {
-    return this.http.post<Supply>(
+    return this.http.patch<Supply>(
       `${this.baseUrl}/${inventoryId}/products/${productId}/consume`,
       {},
     );
