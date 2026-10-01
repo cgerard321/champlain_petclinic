@@ -53,6 +53,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(authorizeRequests -> authorizeRequests
+                .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/users/*/public-profile")).permitAll()
                 .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/actuator/prometheus")).permitAll()
                 .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/actuator/health")).permitAll()
                 .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET,"/users/verification/*")).permitAll()

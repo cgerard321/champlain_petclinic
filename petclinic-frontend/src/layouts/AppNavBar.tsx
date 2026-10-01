@@ -13,6 +13,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { Container, Nav, Navbar, NavDropdown } from 'react-bootstrap';
 import { FaShoppingCart } from 'react-icons/fa'; // Importing the shopping cart icon
 import './AppNavBar.css';
+import { LanguageSwitcher } from '@/shared/components/language/LanguageSwitcher';
 
 // Uses centralized cart context
 import { useCart } from '@/context/CartContext';
@@ -237,6 +238,7 @@ export function NavBar(): JSX.Element {
             )}
           </Nav>
           <Nav className="ms-auto">
+            <LanguageSwitcher />
             {user.userId ? (
               <NavDropdown title={user.username} id="user-dropdown">
                 {isCustomer && (
