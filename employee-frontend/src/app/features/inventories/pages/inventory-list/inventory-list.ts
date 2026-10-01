@@ -178,9 +178,9 @@ export class InventoryList implements OnInit, OnDestroy {
 
     return Boolean(
       filters.inventoryName.trim() ||
-        filters.inventoryType.trim() ||
-        filters.inventoryDescription.trim() ||
-        filters.importantOnly,
+      filters.inventoryType.trim() ||
+      filters.inventoryDescription.trim() ||
+      filters.importantOnly,
     );
   }
 
