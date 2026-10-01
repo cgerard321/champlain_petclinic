@@ -35,14 +35,15 @@ export class Header {
     this.authState.logout().subscribe(() => this.router.navigateByUrl('/login'));
   }
 
-  // VETS-CPC-1927: the choice is persisted, then the page is reloaded so that
-  // loadActiveTranslations (app.config.ts) installs the right catalogue BEFORE the app
-  // bootstraps again. A reload is the simplest way to guarantee that ordering, because
-  // $localize is only substituted for calls evaluated after the translations are loaded.
+  // Saves the chosen language and reloads the page, because translations are only installed
+  // at startup (see loadActiveTranslations in app.config.ts).
   protected switchLang(lang: string): void {
+    // Clicking the language that is already active must not trigger a pointless reload.
     if (localStorage.getItem('lang') === lang) {
       return;
     }
+
+    // Persist the choice so it survives the reload.
     localStorage.setItem('lang', lang);
     location.reload();
   }
