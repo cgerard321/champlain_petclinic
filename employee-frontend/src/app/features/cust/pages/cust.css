@@ -1,3 +1,32 @@
-p {
-    max-width: 100%;
+.customer-page {
+  padding: 24px;
+}
+
+.state-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 32px;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 16px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+caption {
+  padding: 12px;
+  text-align: left;
 }
