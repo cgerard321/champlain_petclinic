@@ -91,6 +91,9 @@ public class PdfGenerator {
 
         BigDecimal subtotal = convertFromCad(rawAmount, currency);
         BigDecimal interest = convertFromCad(rawInterest, currency);
+        BigDecimal taxes = convertFromCad(rawTaxes, currency);
+        BigDecimal gst = convertFromCad(rawGst, currency);
+        BigDecimal qst = convertFromCad(rawQst, currency);
         BigDecimal totalDue = convertFromCad(rawTotal, currency);
 
         charges.addCell("Visit – " + Optional.ofNullable(bill.getVisitType()).orElse("N/A"));
@@ -118,13 +121,13 @@ public class PdfGenerator {
         totals.addCell(rightAligned(formatCurrency(subtotal, currency)));
 
         totals.addCell("GST (5%)");
-        totals.addCell(rightAligned(formatCurrency(rawGst, currency)));
+        totals.addCell(rightAligned(formatCurrency(gst, currency)));
 
         totals.addCell("QST (9.975%)");
-        totals.addCell(rightAligned(formatCurrency(rawQst, currency)));
+        totals.addCell(rightAligned(formatCurrency(qst, currency)));
 
         totals.addCell("Total Tax");
-        totals.addCell(rightAligned(formatCurrency(rawTaxes, currency)));
+        totals.addCell(rightAligned(formatCurrency(taxes, currency)));
 
         if (interest.compareTo(BigDecimal.ZERO) > 0) {
             totals.addCell("Interest");

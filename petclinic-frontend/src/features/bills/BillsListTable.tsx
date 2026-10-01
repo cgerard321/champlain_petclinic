@@ -648,6 +648,24 @@ export default function BillsListTable({
                   : `USD $${convertCurrency(detailBill.amount, 'CAD', 'USD').toFixed(2)}`}
               </p>
               <p>
+                <strong>GST (5%):</strong>{' '}
+                {currency === 'CAD'
+                  ? `CAD $${detailBill.gstAmount.toFixed(2)}`
+                  : `USD $${convertCurrency(detailBill.gstAmount, 'CAD', 'USD').toFixed(2)}`}
+              </p>
+              <p>
+                <strong>Amount:</strong>{' '}
+                {currency === 'CAD'
+                  ? `CAD $${detailBill.qstAmount.toFixed(2)}`
+                  : `USD $${convertCurrency(detailBill.qstAmount, 'CAD', 'USD').toFixed(2)}`}
+              </p>
+              <p>
+                <strong>Total Tax:</strong>{' '}
+                {currency === 'CAD'
+                  ? `CAD $${detailBill.taxedAmount.toFixed(2)}`
+                  : `USD $${convertCurrency(detailBill.taxedAmount, 'CAD', 'USD').toFixed(2)}`}
+              </p>
+              <p>
                 <strong>Interest:</strong>{' '}
                 {currency === 'CAD'
                   ? `CAD $${(detailBill.interest || 0).toFixed(2)}`
@@ -657,7 +675,7 @@ export default function BillsListTable({
                 <strong>Total Due:</strong>{' '}
                 {currency === 'CAD'
                   ? `CAD $${detailBill.totalAmount.toFixed(2)}`
-                  : `USD $${convertCurrency(detailBill.taxedAmount, 'CAD', 'USD').toFixed(2)}`}
+                  : `USD $${convertCurrency(detailBill.totalAmount, 'CAD', 'USD').toFixed(2)}`}
               </p>
               <p>
                 <strong>Status:</strong> {detailBill.billStatus}
