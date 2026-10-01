@@ -56,10 +56,99 @@
         "noFileSelected": "Please select a file",
         "uploadFailed": "Failed to upload photo. Please try again."
       },
+
       "alt": {
         "preview": "Preview"
       }
 
+  },
+
+
+  "fields": {
+    "username": "Username:",
+    "firstName": "First Name:",
+    "lastName": "Last Name:",
+    "address": "Address:",
+    "city": "City:",
+    "province": "Province:",
+    "telephone": "Telephone:"
+  },
+  "customerDetails": {
+    "heading": "Customer Details for {{firstName}} {{lastName}}",
+    "loading": "Loading...",
+    "notFound": "No customer found.",
+    "infoTitle": "Customer Info",
+    "pets": {
+      "title": "Customer Pets",
+      "petId": "Pet ID:",
+      "name": "Name:",
+      "type": "Type:",
+      "weight": "Weight:",
+      "age": "Age:",
+      "years_one": "{{count}} year",
+      "years_other": "{{count}} years",
+      "photoAlt": "{{name}} profile",
+      "editPet": "Edit Pet",
+      "none": "No pets found."
+    },
+    "bills": {
+      "title": "Customer Bills",
+      "billId": "Bill ID:",
+      "amount": "Amount:",
+      "date": "Date:",
+      "none": "No bills found."
+    },
+    "buttons": {
+      "edit": "Edit Customer",
+      "back": "Back to All Customers",
+      "addPet": "Add New Pet",
+      "delete": "Delete Customer",
+      "deleteTitle": "Delete",
+      "enable": "Enable Account",
+      "disable": "Disable Account"
+    },
+    "messages": {
+      "confirmDelete": "Are you sure you want to delete this customer?",
+      "deleteSuccess": "Customer deleted successfully.",
+      "deleteCanceled": "Customer deletion canceled.",
+      "confirmEnable": "Are you sure you want to enable this user's account?",
+      "confirmDisable": "Are you sure you want to disable this user's account?",
+      "enableSuccess": "User account enabled successfully.",
+      "disableSuccess": "User account disabled successfully."
+    }
+  },
+  "customerForm": {
+    "title": "Edit Profile",
+    "selectProvince": "Select Province",
+    "submit": "Update",
+    "back": "Back",
+    "updateSuccess": "Profile updated successfully",
+    "updateError": "Could not update your profile. Please check your information and try again.",
+    "modal": {
+      "title": "Success!",
+      "message": "Customer has been successfully updated.",
+      "close": "Close"
+    }
+  },
+  "validation": {
+    "firstNameRequired": "First name is required",
+    "lastNameRequired": "Last name is required",
+    "addressRequired": "Address is required",
+    "cityRequired": "City is required",
+    "provinceRequired": "Province is required",
+    "telephoneRequired": "Telephone is required",
+    "telephoneTenDigits": "Telephone must be exactly 10 digits (numbers only)",
+    "telephoneDigitsOnly": "Telephone must contain only digits",
+    "usernameRequired": "Username is required",
+    "usernameTooShort": "Username must be at least 3 characters long",
+    "usernameTooLong": "Username must be less than 30 characters",
+    "usernameInvalid": "Username must contain at least one letter and can only contain letters, numbers, and underscores",
+    "usernameTaken": "Username is already taken",
+    "noPermission": "You do not have permission to check username availability",
+    "loginRequired": "Please log in to check username availability",
+    "serverError": "Server error. Please try again later",
+    "networkError": "Network error. Please check your connection",
+    "usernameCheckFailed": "Unable to verify username availability. Please try again"
   },
   "pets": {
     "addTitle": "Add New Pet",
@@ -134,5 +223,6 @@
       "title": "Delete Pet Photo",
       "message": "Are you sure you want to delete this pet's photo? This action cannot be undone."
     }
+
   }
 }

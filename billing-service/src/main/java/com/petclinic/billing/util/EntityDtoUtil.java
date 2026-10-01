@@ -29,11 +29,13 @@ public class EntityDtoUtil {
         billResponseDTO.setVetLastName(bill.getVetLastName());
         billResponseDTO.setDate(bill.getDate());
         billResponseDTO.setAmount(bill.getAmount());
-        billResponseDTO.setTaxedAmount(bill.getTaxedAmount());
+
         billResponseDTO.setBillStatus(bill.getBillStatus());
         billResponseDTO.setDueDate(bill.getDueDate());
         billResponseDTO.setInterestExempt(bill.isInterestExempt());
-        
+
+
+
         // Use stored interest value if available, otherwise calculate
         BigDecimal interest;
         // For PAID bills, always use stored interest to preserve the amount that was actually paid
@@ -44,16 +46,34 @@ public class EntityDtoUtil {
             interest = InterestCalculationUtil.calculateInterest(bill);
         }
         billResponseDTO.setInterest(interest);
-        
+
         // Calculate final amount
         if (bill.getAmount() != null) {
-            BigDecimal totalWithInterest = bill.getAmount().add(interest);
-            billResponseDTO.setTaxedAmount(totalWithInterest.setScale(2, java.math.RoundingMode.HALF_UP));
+            if(bill.getGstAmount() == null || bill.getQstAmount() == null || bill.getTaxedAmount() == null){
+                billResponseDTO.setTaxedAmount(BigDecimal.ZERO);
+                billResponseDTO.setGstAmount(BigDecimal.ZERO);
+                billResponseDTO.setQstAmount(BigDecimal.ZERO);
+            } else {
+                billResponseDTO.setTaxedAmount(bill.getTaxedAmount());
+                billResponseDTO.setGstAmount(bill.getGstAmount());
+                billResponseDTO.setQstAmount(bill.getQstAmount());
+            }
+            BigDecimal totalTaxes;
+            if (bill.getTaxedAmount() != null){
+                totalTaxes = bill.getTaxedAmount();
+            } else {
+                totalTaxes = BigDecimal.ZERO;
+            }
+            BigDecimal totalWithInterest = bill.getAmount().add(totalTaxes).add(interest);
+            billResponseDTO.setTotalAmount(totalWithInterest.setScale(2, java.math.RoundingMode.HALF_UP));
         } else {
-            // If amount is null, set taxedAmount to just the interest (or zero if no interest)
-            billResponseDTO.setTaxedAmount(interest.setScale(2, java.math.RoundingMode.HALF_UP));
+            // If amount is null, set totalAmount to just the interest (or zero if no interest)
+            billResponseDTO.setAmount(BigDecimal.ZERO);
+            billResponseDTO.setGstAmount(BigDecimal.ZERO);
+            billResponseDTO.setQstAmount(BigDecimal.ZERO);
+            billResponseDTO.setTaxedAmount(BigDecimal.ZERO);
+            billResponseDTO.setTotalAmount(interest.setScale(2, java.math.RoundingMode.HALF_UP));
         }
-        
         billResponseDTO.setTimeRemaining(timeRemaining(bill));
         billResponseDTO.setArchive(bill.getArchive());
 
@@ -73,7 +93,7 @@ public class EntityDtoUtil {
 
     private static long timeRemaining(Bill bill){
         if (bill.getDueDate().isBefore(LocalDate.now())) {
-            return 0;
+            return 0L;
         }
 
         return Duration.between(LocalDate.now().atStartOfDay(), bill.getDueDate().atStartOfDay()).toDays();
