@@ -1,0 +1,64 @@
+
+{
+  "title": "Customer Details",
+  "subtitle": "Manage your customer profile and registered pets.",
+  "buttons": {
+    "save": "Save Changes",
+    "cancel": "Cancel"
+  },
+
+    "uploadPetPhotoModal": {
+      "title": "Upload Pet Photo",
+      "selectPhoto": "Select Photo:",
+      "chooseFile": "Choose File",
+      "preview": "Preview:",
+      "uploading": "Uploading...",
+      "uploadPhoto": "Upload Photo",
+      "cancelButton": "Cancel",
+      "alert": {
+        "photoRequired": "Please select an image file (JPG, PNG, etc.)",
+        "photoSize": "File size must be less than 5MB",
+        "fileRequired": "Please select a file",
+        "uploadFailed": "Failed to upload pet photo. Please try again."
+      }
+    },
+    "uploadPetPhoto": {
+      "uploading": "Uploading...",
+      "addPhoto": "Add Photo",
+      "errors": {
+        "invalidFileType": "Please select an image file (JPG, PNG, etc.)",
+        "fileTooLarge": "File size must be less than 5MB",
+        "uploadFailed": "Failed to upload photo. Please try again."
+      }
+    },
+
+  "uploadProfilePhoto": {
+    "uploading": "Uploading...",
+    "changePhoto": "Change Photo",
+    "errors": {
+      "invalidFileType": "Please select an image file (JPG, PNG, etc.)",
+      "fileTooLarge": "File size must be less than 5MB",
+      "uploadFailed": "Failed to upload photo. Please try again."
+    }
+  },
+
+    "uploadPhotoModal": {
+      "title": "Upload Profile Photo",
+      "selectPhoto": "Select Photo:",
+      "chooseFile": "Choose File",
+      "preview": "Preview:",
+      "cancel": "Cancel",
+      "uploading": "Uploading...",
+      "uploadPhoto": "Upload Photo",
+      "errors": {
+        "invalidFileType": "Please select an image file (JPG, PNG, etc.)",
+        "fileTooLarge": "File size must be less than 5MB",
+        "noFileSelected": "Please select a file",
+        "uploadFailed": "Failed to upload photo. Please try again."
+      },
+      "alt": {
+        "preview": "Preview"
+      }
+
+  }
+}

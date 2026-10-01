@@ -54,7 +54,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(401).body(new HttpErrorInfo(401,ex.getMessage()));
     }
 
-
     @ExceptionHandler(value = InvalidTokenException.class)
     public ResponseEntity<HttpErrorInfo> invalidTokenException(InvalidTokenException ex) {
 
@@ -62,12 +61,26 @@ public class GlobalExceptionHandler {
                 .body(new HttpErrorInfo(498, ex.getMessage()));
     }
 
-
     @ExceptionHandler(value = NotFoundException.class)
     public ResponseEntity<HttpErrorInfo> runtimeException(RuntimeException ex) {
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new HttpErrorInfo(HttpStatus.NOT_FOUND.value(), ex.getMessage()));
+    }
+
+    @ExceptionHandler(value = ProductNotFoundException.class)
+    public ResponseEntity<HttpErrorInfo> handleProductNotFoundException(
+            ProductNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new HttpErrorInfo(HttpStatus.NOT_FOUND.value(), ex.getMessage()));
+    }
+
+    @ExceptionHandler(value = ProductImageDependencyException.class)
+    public ResponseEntity<HttpErrorInfo> handleProductImageDependencyException(
+            ProductImageDependencyException ex) {
+        return ResponseEntity.status(HttpStatus.FAILED_DEPENDENCY)
+                .body(new HttpErrorInfo(
+                        HttpStatus.FAILED_DEPENDENCY.value(), ex.getMessage()));
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)

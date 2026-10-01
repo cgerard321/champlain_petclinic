@@ -42,7 +42,7 @@ class PetTypeControllerIntegrationTest {
     @Test
     void getAllPetTypes_shouldSucceed() {
         webTestClient.get()
-                .uri("/owners/petTypes")
+                .uri("/customers/petTypes")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -59,7 +59,7 @@ class PetTypeControllerIntegrationTest {
         PetTypeRequestDTO request = new PetTypeRequestDTO("Bird", "Flies");
 
         webTestClient.post()
-                .uri("/owners/petTypes")
+                .uri("/customers/petTypes")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(request), PetTypeRequestDTO.class)
                 .exchange()
@@ -90,7 +90,7 @@ class PetTypeControllerIntegrationTest {
                 .petTypeDescription("Updated Mammal")
                 .build();
 
-        webTestClient.put().uri("/owners/petTypes/" + testPetType.getPetTypeId())
+        webTestClient.put().uri("/customers/petTypes/" + testPetType.getPetTypeId())
                 .body(Mono.just(updateRequest), PetTypeRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -106,7 +106,7 @@ class PetTypeControllerIntegrationTest {
     void getPetTypeByPetTypeId() {
         Publisher<PetType> setup = petTypeRepo.deleteAll().thenMany(petTypeRepo.save(petTypeEntity2));
         StepVerifier.create(setup).expectNextCount(1).verifyComplete();
-        webTestClient.get().uri("/owners/petTypes/" + PUBLIC_PETTYPE_ID)
+        webTestClient.get().uri("/customers/petTypes/" + PUBLIC_PETTYPE_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -134,7 +134,7 @@ class PetTypeControllerIntegrationTest {
             assertNotNull(savedPetType);
 
             webTestClient.delete()
-                    .uri("/owners/petTypes/" + savedPetType.getPetTypeId())
+                    .uri("/customers/petTypes/" + savedPetType.getPetTypeId())
                     .exchange()
                     .expectStatus().isNoContent()
                     .expectBody().isEmpty();
@@ -161,7 +161,7 @@ class PetTypeControllerIntegrationTest {
     @Test
     void getPetTypesPagination_WithValidParameters_ShouldReturnPaginatedResults() {
         webTestClient.get()
-                .uri("/owners/petTypes/pet-types-pagination?page=0&size=2")
+                .uri("/customers/petTypes/pet-types-pagination?page=0&size=2")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -176,7 +176,7 @@ class PetTypeControllerIntegrationTest {
     @Test
     void getPetTypesPagination_WithNameFilter_ShouldReturnFilteredResults() {
         webTestClient.get()
-                .uri("/owners/petTypes/pet-types-pagination?page=0&size=10&name=Dog")
+                .uri("/customers/petTypes/pet-types-pagination?page=0&size=10&name=Dog")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -192,7 +192,7 @@ class PetTypeControllerIntegrationTest {
     @Test
     void getPetTypesPagination_WithDescriptionFilter_ShouldReturnFilteredResults() {
         webTestClient.get()
-                .uri("/owners/petTypes/pet-types-pagination?page=0&size=10&description=Mammal")
+                .uri("/customers/petTypes/pet-types-pagination?page=0&size=10&description=Mammal")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -208,7 +208,7 @@ class PetTypeControllerIntegrationTest {
     @Test
     void getPetTypesPagination_WithPetTypeIdFilter_ShouldReturnExactMatch() {
         webTestClient.get()
-                .uri("/owners/petTypes/pet-types-pagination?page=0&size=10&petTypeId=1")
+                .uri("/customers/petTypes/pet-types-pagination?page=0&size=10&petTypeId=1")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -226,7 +226,7 @@ class PetTypeControllerIntegrationTest {
     @Test
     void getPetTypesCount_ShouldReturnTotalCount() {
         webTestClient.get()
-                .uri("/owners/petTypes/pet-types-count")
+                .uri("/customers/petTypes/pet-types-count")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -241,7 +241,7 @@ class PetTypeControllerIntegrationTest {
     @Test
     void getPetTypesFilteredCount_WithNameFilter_ShouldReturnFilteredCount() {
         webTestClient.get()
-                .uri("/owners/petTypes/pet-types-filtered-count?name=Dog")
+                .uri("/customers/petTypes/pet-types-filtered-count?name=Dog")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -256,7 +256,7 @@ class PetTypeControllerIntegrationTest {
     @Test
     void getPetTypesPagination_WithEmptyFilters_ShouldReturnAllResults() {
         webTestClient.get()
-                .uri("/owners/petTypes/pet-types-pagination?page=0&size=100")
+                .uri("/customers/petTypes/pet-types-pagination?page=0&size=100")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -285,7 +285,7 @@ class PetTypeControllerIntegrationTest {
     void deletePetType_WithEmptyId_ShouldReturnBadRequest() {
         try {
             webTestClient.delete()
-                    .uri("/owners/petTypes/")
+                    .uri("/customers/petTypes/")
                     .exchange()
                     .expectStatus().is4xxClientError();
         } catch (NotFoundException e) {
@@ -304,7 +304,7 @@ class PetTypeControllerIntegrationTest {
     void deletePetType_WhenPetTypeNotFound_ShouldReturnUnprocessableEntity() {
         try {
             webTestClient.delete()
-                    .uri("/owners/petTypes/non-existent-pet-type")
+                    .uri("/customers/petTypes/non-existent-pet-type")
                     .exchange()
                     .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
         } catch (NotFoundException e) {
@@ -322,7 +322,7 @@ class PetTypeControllerIntegrationTest {
     void deletePetType_WithInvalidIdFormat_ShouldReturnUnprocessableEntity() {
         try {
             webTestClient.delete()
-                    .uri("/owners/petTypes/invalid@id#format")
+                    .uri("/customers/petTypes/invalid@id#format")
                     .exchange()
                     .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
         } catch (NotFoundException e) {
