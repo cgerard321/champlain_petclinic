@@ -57,6 +57,15 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
     vetLastName: '',
   });
 
+  const [appliedFilter, setAppliedFilter] = useState<FilterModel>({
+    customerId: '',
+    firstName: '',
+    lastName: '',
+    visitType: '',
+    vetFirstName: '',
+    vetLastName: '',
+  });
+
   // helper that forwards the current local filter state into the paginated API
   const callGetBillsListWithFilters = useCallback(
     async (page = 0, size = 10): Promise<void> => {
@@ -74,13 +83,16 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
         showArchivedBills
       );
     },
-    [getBillsList, filter, showArchivedBills]
+    [getBillsList, appliedFilter, showArchivedBills]
   );
   const [filterYear, setFilterYear] = useState(new Date().getFullYear());
-  const [filterMonth, setFilterMonth] = useState(new Date().getMonth() + 1);
+  const [filterMonth, setFilterMonth] = useState(0);
+  const [appliedFilterYear, setAppliedFilterYear] = useState(new Date().getFullYear());
+  const [appliedFilterMonth, setAppliedFilterMonth] = useState(0);
   const [selectedFilter, setSelectedFilter] = useState('');
+  const [appliedSelectedFilter, setAppliedSelectedFilter] = useState('');
   const [filteredBills, setFilteredBills] = useState<Bill[] | null>(null);
-  const [applyMonthFilter, setApplyMonthFilter] = useState(false);
+  const [applyFilters, setApplyFilters] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>(null);
 
   const [newBill, setNewBill] = useState<BillRequestModel>({
@@ -118,8 +130,10 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
   }, []);
 
   useEffect(() => {
-    callGetBillsListWithFilters(currentPage, 10);
-  }, [currentPage, callGetBillsListWithFilters]);
+    if (!selectedFilter) {
+      callGetBillsListWithFilters(currentPage, 10);
+    }
+  }, [currentPage, callGetBillsListWithFilters, selectedFilter]);
 
   useEffect(() => {
     const callArchiveBills = async (): Promise<void> => {
@@ -187,10 +201,6 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
     const status = event.target.value;
     setSelectedFilter(status);
     setFilteredBills(null);
-
-    if (!status) {
-      callGetBillsListWithFilters(currentPage, 10);
-    }
   };
 
   const handleArchiveToggle = (): void => {
@@ -249,18 +259,28 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
     }
   };
 
-  const handleMonthFilter = async (): Promise<void> => {
+  const handleFilters = async (): Promise<void> => {
     setError(null);
     setFilteredBills(null);
-    setApplyMonthFilter(true);
+    setAppliedFilter(filter);
+    setAppliedSelectedFilter(selectedFilter);
+    setAppliedFilterYear(filterYear);
+    setAppliedFilterMonth(filterMonth);
+    setApplyFilters(true);
+    setActiveSection(null);
     callGetBillsListWithFilters(currentPage, 10);
   };
 
-  const clearMonthFilter = (): void => {
+  const clearFilters = (): void => {
     setFilterYear(new Date().getFullYear());
     setFilterMonth(new Date().getMonth() + 1);
+    setSelectedFilter('');
+    setSelectedOwnerFilter('');
+    setSelectedVetFilter('');
+    setSelectedVisitTypeFilter('');
     setFilteredBills(null);
-    setApplyMonthFilter(false);
+    setApplyFilters(false);
+    setActiveSection(null);
     callGetBillsListWithFilters(currentPage, 10);
   };
 
@@ -274,16 +294,20 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
       ? billsToFilter
       : billsToFilter.filter(bill => !bill.archive);
 
+      if (!applyFilters) {
+        return filteredByArchiveStatus;
+      }
+
     return filteredByArchiveStatus.filter(bill => {
       const matchesStatus =
-        !selectedFilter ||
-        (bill.billStatus || '').toLowerCase() === selectedFilter.toLowerCase();
+        !appliedSelectedFilter ||
+        (bill.billStatus || '').toLowerCase() === appliedSelectedFilter.toLowerCase();
 
       const matchesCustomerId =
-        !filter.customerId || bill.customerId.includes(filter.customerId);
+        !appliedFilter.customerId || bill.customerId.includes(appliedFilter.customerId);
 
-      const ownerFirst = filter.firstName?.trim();
-      const ownerLast = filter.lastName?.trim();
+      const ownerFirst = appliedFilter.firstName?.trim();
+      const ownerLast = appliedFilter.lastName?.trim();
       const matchesOwner =
         (!ownerFirst ||
           (bill.ownerFirstName || '')
@@ -295,8 +319,8 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
             .includes(ownerLast.toLowerCase()));
 
       // vet name
-      const vetFirst = filter.vetFirstName?.trim();
-      const vetLast = filter.vetLastName?.trim();
+      const vetFirst = appliedFilter.vetFirstName?.trim();
+      const vetLast = appliedFilter.vetLastName?.trim();
       const matchesVet =
         (!vetFirst ||
           (bill.vetFirstName || '')
@@ -308,14 +332,14 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
             .includes(vetLast.toLowerCase()));
 
       const matchesVisitType =
-        !filter.visitType ||
-        (bill.visitType || '').toLowerCase() === filter.visitType.toLowerCase();
+        !appliedFilter.visitType ||
+        (bill.visitType || '').toLowerCase() === appliedFilter.visitType.toLowerCase();
 
       let matchesMonth = true;
-      if (applyMonthFilter) {
+      if (applyFilters) {
         const d = new Date(bill.date);
         matchesMonth =
-          d.getFullYear() === filterYear && d.getMonth() + 1 === filterMonth;
+          d.getFullYear() === appliedFilterYear && (appliedFilterMonth === 0 || d.getMonth() + 1 === appliedFilterMonth);
       }
 
       return (
@@ -674,6 +698,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                     value={filterMonth}
                     onChange={e => setFilterMonth(parseInt(e.target.value))}
                   >
+                    <option value={0}>All Months</option>
                     {Array.from({ length: 12 }, (_, i) => (
                       <option key={i + 1} value={i + 1}>
                         {new Date(0, i).toLocaleString('default', {
@@ -735,13 +760,13 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                   <div className="form-actions">
                     <button
                       className="primary-modal-btn wide-btn"
-                      onClick={handleMonthFilter}
+                      onClick={handleFilters}
                     >
                       Filter
                     </button>
                     <button
                       className="primary-modal-btn wide-btn"
-                      onClick={clearMonthFilter}
+                      onClick={clearFilters}
                     >
                       Clear
                     </button>
