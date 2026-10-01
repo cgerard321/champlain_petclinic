@@ -1,13 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import {
-  Component,
-  computed,
-  DestroyRef,
-  OnDestroy,
-  OnInit,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, computed, DestroyRef, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -151,9 +143,9 @@ export class InventoryList implements OnInit, OnDestroy {
 
     return Boolean(
       filters.inventoryName.trim() ||
-        filters.inventoryType.trim() ||
-        filters.inventoryDescription.trim() ||
-        filters.importantOnly,
+      filters.inventoryType.trim() ||
+      filters.inventoryDescription.trim() ||
+      filters.importantOnly,
     );
   }
 
