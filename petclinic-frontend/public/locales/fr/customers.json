@@ -56,8 +56,96 @@
       "noFileSelected": "Veuillez sélectionner un fichier",
       "uploadFailed": "Une erreur est survenue pendant le changement de la photo de profil. Veuillez réessayer."
     },
+
     "alt": {
       "preview": "Aperçu"
     }
+  },
+
+  "fields": {
+    "username": "Nom d'utilisateur :",
+    "firstName": "Prénom :",
+    "lastName": "Nom :",
+    "address": "Adresse :",
+    "city": "Ville :",
+    "province": "Province :",
+    "telephone": "Téléphone :"
+  },
+  "customerDetails": {
+    "heading": "Détails du client {{firstName}} {{lastName}}",
+    "loading": "Chargement...",
+    "notFound": "Aucun client trouvé.",
+    "infoTitle": "Informations du client",
+    "pets": {
+      "title": "Animaux du client",
+      "petId": "ID de l'animal :",
+      "name": "Nom :",
+      "type": "Type :",
+      "weight": "Poids :",
+      "age": "Âge :",
+      "years_one": "{{count}} an",
+      "years_other": "{{count}} ans",
+      "photoAlt": "Photo de profil de {{name}}",
+      "editPet": "Modifier l'animal",
+      "none": "Aucun animal trouvé."
+    },
+    "bills": {
+      "title": "Factures du client",
+      "billId": "ID de la facture :",
+      "amount": "Montant :",
+      "date": "Date :",
+      "none": "Aucune facture trouvée."
+    },
+    "buttons": {
+      "edit": "Modifier le client",
+      "back": "Retour à la liste des clients",
+      "addPet": "Ajouter un animal",
+      "delete": "Supprimer le client",
+      "deleteTitle": "Supprimer",
+      "enable": "Activer le compte",
+      "disable": "Désactiver le compte"
+    },
+    "messages": {
+      "confirmDelete": "Voulez-vous vraiment supprimer ce client ?",
+      "deleteSuccess": "Client supprimé avec succès.",
+      "deleteCanceled": "Suppression du client annulée.",
+      "confirmEnable": "Voulez-vous vraiment activer le compte de cet utilisateur ?",
+      "confirmDisable": "Voulez-vous vraiment désactiver le compte de cet utilisateur ?",
+      "enableSuccess": "Compte utilisateur activé avec succès.",
+      "disableSuccess": "Compte utilisateur désactivé avec succès."
+    }
+  },
+  "customerForm": {
+    "title": "Modifier le profil",
+    "selectProvince": "Sélectionnez une province",
+    "submit": "Mettre à jour",
+    "back": "Retour",
+    "updateSuccess": "Profil mis à jour avec succès",
+    "updateError": "Impossible de mettre à jour votre profil. Veuillez vérifier vos informations et réessayer.",
+    "modal": {
+      "title": "Succès !",
+      "message": "Le client a été mis à jour avec succès.",
+      "close": "Fermer"
+    }
+  },
+  "validation": {
+    "firstNameRequired": "Le prénom est requis",
+    "lastNameRequired": "Le nom est requis",
+    "addressRequired": "L'adresse est requise",
+    "cityRequired": "La ville est requise",
+    "provinceRequired": "La province est requise",
+    "telephoneRequired": "Le numéro de téléphone est requis",
+    "telephoneTenDigits": "Le numéro de téléphone doit contenir exactement 10 chiffres (chiffres seulement)",
+    "telephoneDigitsOnly": "Le numéro de téléphone doit contenir uniquement des chiffres",
+    "usernameRequired": "Le nom d'utilisateur est requis",
+    "usernameTooShort": "Le nom d'utilisateur doit contenir au moins 3 caractères",
+    "usernameTooLong": "Le nom d'utilisateur doit contenir moins de 30 caractères",
+    "usernameInvalid": "Le nom d'utilisateur doit contenir au moins une lettre et ne peut contenir que des lettres, des chiffres et des traits de soulignement",
+    "usernameTaken": "Ce nom d'utilisateur est déjà pris",
+    "noPermission": "Vous n'avez pas la permission de vérifier la disponibilité du nom d'utilisateur",
+    "loginRequired": "Veuillez vous connecter pour vérifier la disponibilité du nom d'utilisateur",
+    "serverError": "Erreur du serveur. Veuillez réessayer plus tard",
+    "networkError": "Erreur réseau. Veuillez vérifier votre connexion",
+    "usernameCheckFailed": "Impossible de vérifier la disponibilité du nom d'utilisateur. Veuillez réessayer"
   }
 }

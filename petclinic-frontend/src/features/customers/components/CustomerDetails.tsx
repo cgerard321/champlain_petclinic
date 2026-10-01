@@ -1,5 +1,6 @@
 import { FC, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import axiosInstance from '@/shared/api/axiosInstance';
 import { CustomerResponseModel } from '@/features/customers/models/CustomerResponseModel.ts';
 import { PetResponseModel } from '@/features/customers/models/PetResponseModel';
@@ -17,6 +18,7 @@ import AddPetModal from './AddPetModal';
 import defaultProfile from '@/assets/Customers/defaultProfilePicture.png';
 
 const CustomerDetails: FC = () => {
+  const { t } = useTranslation('customers');
   const { customerId } = useParams<{ customerId: string }>();
   const navigate = useNavigate();
   const isVet = IsVet();
@@ -178,24 +180,24 @@ const CustomerDetails: FC = () => {
 
   const handleDelete = async (customerId: string): Promise<void> => {
     const confirmDelete = window.confirm(
-      'Are you sure you want to delete this customer?'
+      t('customerDetails.messages.confirmDelete')
     );
 
     if (confirmDelete) {
       await deleteCustomer(customerId);
-      alert('Customer deleted successfully.');
+      alert(t('customerDetails.messages.deleteSuccess'));
       navigate('/customers');
     } else {
-      alert('Customer deletion canceled.');
+      alert(t('customerDetails.messages.deleteCanceled'));
     }
   };
 
   if (loading) {
-    return <p>Loading...</p>;
+    return <p>{t('customerDetails.loading')}</p>;
   }
 
   if (!customer) {
-    return <p>No customer found.</p>;
+    return <p>{t('customerDetails.notFound')}</p>;
   }
 
   const calculateAge = (birthDate: Date): number => {
@@ -207,7 +209,9 @@ const CustomerDetails: FC = () => {
 
   const handleDisableEnable = async (): Promise<void> => {
     const confirmAction = window.confirm(
-      `Are you sure you want to ${isDisabled ? 'enable' : 'disable'} this user's account?`
+      isDisabled
+        ? t('customerDetails.messages.confirmEnable')
+        : t('customerDetails.messages.confirmDisable')
     );
 
     if (confirmAction) {
@@ -215,12 +219,12 @@ const CustomerDetails: FC = () => {
         await axiosInstance.patch(`/users/${customerId}/enable`, {
           useV2: true,
         });
-        alert('User account enabled successfully.');
+        alert(t('customerDetails.messages.enableSuccess'));
       } else {
         await axiosInstance.patch(`/users/${customerId}/disable`, {
           useV2: true,
         });
-        alert('User account disabled successfully.');
+        alert(t('customerDetails.messages.disableSuccess'));
       }
       setIsDisabled(!isDisabled);
     }
@@ -347,74 +351,82 @@ const CustomerDetails: FC = () => {
   return (
     <div className="customer-details-card">
       <h2>
-        {' '}
-        Customer Details for {customer.firstName} {customer.lastName}{' '}
+        {t('customerDetails.heading', {
+          firstName: customer.firstName,
+          lastName: customer.lastName,
+        })}
       </h2>
 
       <div className="customer-details-container">
         {/* Customer Info */}
         <div className="section customer-info">
-          <h3>Customer Info</h3>
+          <h3>{t('customerDetails.infoTitle')}</h3>
           <p>
-            <strong>Username: </strong>
-            {userDetails?.username || 'Loading...'}
+            <strong>{t('fields.username')} </strong>
+            {userDetails?.username || t('customerDetails.loading')}
           </p>
           <p>
-            <strong>First Name: </strong>
+            <strong>{t('fields.firstName')} </strong>
             {customer.firstName}
           </p>
           <p>
-            <strong>Last Name: </strong>
+            <strong>{t('fields.lastName')} </strong>
             {customer.lastName}
           </p>
           <p>
-            <strong>Address: </strong>
+            <strong>{t('fields.address')} </strong>
             {customer.address}
           </p>
           <p>
-            <strong>City: </strong>
+            <strong>{t('fields.city')} </strong>
             {customer.city}
           </p>
           <p>
-            <strong>Province: </strong>
+            <strong>{t('fields.province')} </strong>
             {customer.province}
           </p>
           <p>
-            <strong>Telephone: </strong>
+            <strong>{t('fields.telephone')} </strong>
             {customer.telephone}
           </p>
         </div>
 
         {/* Customer Pets */}
         <div className="section customer-pets">
-          <h3>Customer Pets</h3>
+          <h3>{t('customerDetails.pets.title')}</h3>
           {pets && pets.length > 0 ? (
             <ul>
               {pets.map(pet => (
                 <li key={pet.petId} className="pet-item">
                   <img
                     src={petImageUrls[pet.petId] || defaultProfile}
-                    alt={`${pet.name} profile`}
+                    alt={t('customerDetails.pets.photoAlt', { name: pet.name })}
                     className="pet-profile-picture"
                   />
                   <div className="pet-details">
                     <div className="pet-info">
-                      <span className="pet-id">Pet ID: {pet.petId}</span>
+                      <span className="pet-id">
+                        {t('customerDetails.pets.petId')} {pet.petId}
+                      </span>
                     </div>
                     <div className="pet-main-info">
                       <span className="pet-name">
-                        <strong>Name:</strong> {pet.name}
+                        <strong>{t('customerDetails.pets.name')}</strong>{' '}
+                        {pet.name}
                       </span>
                       <span className="pet-type">
-                        <strong>Type:</strong>{' '}
+                        <strong>{t('customerDetails.pets.type')}</strong>{' '}
                         {getPetTypeName(pet.petTypeId, petTypes)}
                       </span>
                       <span className="pet-weight">
-                        <strong>Weight:</strong> {pet.weight}kg
+                        <strong>{t('customerDetails.pets.weight')}</strong>{' '}
+                        {pet.weight}kg
                       </span>
                       <span className="pet-age">
-                        <strong>Age:</strong> {calculateAge(pet.birthDate)}{' '}
-                        years
+                        <strong>{t('customerDetails.pets.age')}</strong>{' '}
+                        {t('customerDetails.pets.years', {
+                          count: calculateAge(pet.birthDate),
+                        })}
                       </span>
                     </div>
                     <div className="pet-actions">
@@ -422,7 +434,7 @@ const CustomerDetails: FC = () => {
                         className="edit-pet-button"
                         onClick={() => handleEditPetClick(pet.petId)}
                       >
-                        Edit Pet
+                        {t('customerDetails.pets.editPet')}
                       </button>
                     </div>
                   </div>
@@ -430,48 +442,50 @@ const CustomerDetails: FC = () => {
               ))}
             </ul>
           ) : (
-            <p>No pets found.</p>
+            <p>{t('customerDetails.pets.none')}</p>
           )}
         </div>
 
         {/* Customer Bills */}
         <div className="section customer-bills">
-          <h3>Customer Bills</h3>
+          <h3>{t('customerDetails.bills.title')}</h3>
           {Array.isArray(bills) && bills.length > 0 ? (
             <ul>
               {bills.map(bill => (
                 <li key={bill.billId}>
-                  <strong>Bill ID: </strong>
-                  {bill.billId}, <strong>Amount: </strong>
-                  {bill.amount}, <strong>Date: </strong>
+                  <strong>{t('customerDetails.bills.billId')} </strong>
+                  {bill.billId},{' '}
+                  <strong>{t('customerDetails.bills.amount')} </strong>
+                  {bill.amount},{' '}
+                  <strong>{t('customerDetails.bills.date')} </strong>
                   {bill.date}
                 </li>
               ))}
             </ul>
           ) : (
-            <p>No bills found.</p>
+            <p>{t('customerDetails.bills.none')}</p>
           )}
         </div>
       </div>
 
       <div className="customer-details-buttons">
         <button className="customer-details-button" onClick={handleEditClick}>
-          Edit Customer
+          {t('customerDetails.buttons.edit')}
         </button>
         <button className="customer-details-button" onClick={handleBackClick}>
-          Back to All Customers
+          {t('customerDetails.buttons.back')}
         </button>
         <button className="add-pet-button" onClick={handleAddPet}>
-          Add New Pet
+          {t('customerDetails.buttons.addPet')}
         </button>
         {!isVet && (
           <button
             className="btn btn-danger"
             onClick={() => handleDelete(customer.customerId)}
-            title="Delete"
+            title={t('customerDetails.buttons.deleteTitle')}
             style={{ backgroundColor: 'red', color: 'white' }}
           >
-            Delete Customer
+            {t('customerDetails.buttons.delete')}
           </button>
         )}
         {userDetails && (
@@ -479,7 +493,9 @@ const CustomerDetails: FC = () => {
             className={`btn ${isDisabled ? 'btn-success' : 'btn-warning'}`}
             onClick={handleDisableEnable}
           >
-            {isDisabled ? 'Enable Account' : 'Disable Account'}
+            {isDisabled
+              ? t('customerDetails.buttons.enable')
+              : t('customerDetails.buttons.disable')}
           </button>
         )}
       </div>
