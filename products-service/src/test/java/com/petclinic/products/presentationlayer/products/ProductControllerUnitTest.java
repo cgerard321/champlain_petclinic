@@ -85,6 +85,29 @@ public class ProductControllerUnitTest extends PostgresTestContainerBase {
     }
 
     @Test
+    public void whenSearchingProductsByNameThenPassProductNameToService() {
+        ProductResponseModel product = ProductResponseModel.builder()
+                .productId("ae2d3af7-f2a2-407f-ad31-ca7d8220cb7a")
+                .productName("Horse Saddle")
+                .productSalePrice(199.99)
+                .build();
+        when(productService.getAllProducts(null, null, null, null, null, null, null, "saddle"))
+                .thenReturn(Flux.just(product));
+
+        webClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/products")
+                        .queryParam("productName", "saddle")
+                        .build())
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseModel.class)
+                .hasSize(1);
+
+        verify(productService).getAllProducts(null, null, null, null, null, null, null, "saddle");
+    }
+
+    @Test
     public void whenNoProductsExist_thenReturnEmptyList() {
 
         when(productService.getAllProducts(null, null, null, null, null, null, null)).thenReturn(Flux.empty());
