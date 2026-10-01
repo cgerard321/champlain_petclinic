@@ -1,0 +1,20 @@
+{
+  "locale": "en",
+  "translations": {
+    "login.title": "Login",
+    "login.username": "Username or email",
+    "login.password": "Password",
+    "login.submit": "Sign in",
+    "footer.brand": "PetClinic Employee Portal",
+    "footer.privacy": "Privacy Policy",
+    "footer.terms": "Terms of Service",
+    "footer.support": "Support",
+    "footer.copyright": "© 2026 Champlain Pet Clinic. All rights reserved.",
+    "forbidden.title": "Access Denied",
+    "forbidden.message": "You do not have permission to access this page.",
+    "forbidden.back": "Back to home",
+    "notFound.title": "Page Not Found",
+    "notFound.message": "The page you are looking for does not exist.",
+    "notFound.back": "Back to home"
+  }
+}
