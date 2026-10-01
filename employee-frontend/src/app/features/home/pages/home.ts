@@ -7,8 +7,7 @@ import { catchError, of } from 'rxjs';
 
 // Core Model Import
 import { CurrentUserResponse } from '@core/models/current-user-response';
-import {AuthState} from '@core/services/auth-state';
-
+import { AuthState } from '@core/services/auth-state';
 
 @Component({
   selector: 'app-home',
@@ -39,7 +38,7 @@ export class Home {
         console.error('Failed to fetch current user credentials:', error);
         this.errorMessage.set('Failed to load user information. Please try again later.');
         return of(null);
-      })
+      }),
     ),
     { initialValue: null },
   );
