@@ -26,7 +26,10 @@ public class Bill {
     private LocalDate date;
     private BigDecimal amount;
     private BigDecimal taxedAmount;
+    private BigDecimal gstAmount;
+    private BigDecimal qstAmount;
     private BigDecimal interest;
+    private BigDecimal totalAmount;
     private BillStatus billStatus;
     private LocalDate dueDate;
     @Builder.Default

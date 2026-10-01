@@ -15,6 +15,7 @@
     "importHelpers": true,
     "target": "ES2022",
     "module": "preserve",
+    "moduleResolution": "bundler",
     "paths": {
       "@shared/*": ["./src/app/shared/*"],
       "@core/*": ["./src/app/core/*"],
