@@ -232,7 +232,7 @@ public class ProductsServiceClient {
                 .bodyToMono(Void.class);
 
     }
-    public Flux<ProductResponseDTO> getProductsByType(final String type){
+    public Flux<ProductResponseDTO> getProductsByType(final String type) {
         return getProductsByType(type, false);
     }
 
