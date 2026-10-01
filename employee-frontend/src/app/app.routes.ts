@@ -14,6 +14,10 @@ export const routes: Routes = [
     loadChildren: () => import('@features/error/routes'),
   },
   {
+    path: 'settings',
+    loadChildren: () => import('@features/settings/routes'),
+  },
+  {
     path: '',
     loadComponent: () => import('@layout/shell/shell').then((m) => m.Shell),
     canActivate: [authGuard(), customerRedirectGuard, employeeGuard],
