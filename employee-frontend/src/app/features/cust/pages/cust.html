@@ -1,1 +1,39 @@
-<app-coming-soon />
+<section class="customer-page" [attr.aria-busy]="isLoading()">
+  <h1>Customer List</h1>
+  @if (isLoading()) {
+    <div class="state-container" role="status">
+      <mat-spinner diameter="40" aria-label="Loading customers" />
+      <p>Loading customers…</p>
+    </div>
+  } @else if (errorMessage(); as message) {
+    <p role="alert">{{ message }}</p>
+  } @else if (customers().length === 0) {
+    <p role="status">No customers registered.</p>
+  } @else {
+    <div class="table-container">
+      <table>
+        <caption>
+          Registered customers and contact information
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Address</th>
+            <th scope="col">City</th>
+            <th scope="col">Phone number</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (customer of customers(); track customer.customerId) {
+            <tr>
+              <td>{{ customer.firstName }} {{ customer.lastName }}</td>
+              <td>{{ customer.address || 'Not available' }}</td>
+              <td>{{ customer.city || 'Not available' }}</td>
+              <td>{{ customer.telephone || 'Not available' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
