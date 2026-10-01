@@ -10,6 +10,8 @@ public interface ProductRepository extends R2dbcRepository<Product, Long> {
 
     Mono<Product> findProductByProductId(String productId);
 
+    Flux<Product> findByProductNameContainingIgnoreCase(String productName);
+
     Flux<Product> findByProductSalePriceBetween(Double minPrice, Double maxPrice);
 
     Flux<Product> findByProductSalePriceGreaterThanEqual(Double minPrice);

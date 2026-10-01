@@ -236,7 +236,7 @@ public class CartControllerV1 {
         ));
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
+    @SecuredEndpoint(allowedRoles = {Roles.OWNER, Roles.ADMIN})
     @PostMapping("/{cartId}/products")
     public Mono<ResponseEntity<CartResponseDTO>> addProductToCart(
         @PathVariable String cartId,
