@@ -129,6 +129,7 @@
   font: inherit;
   background: #fff;
 }
+
 .no-results-state h2 {
   position: relative;
   z-index: 1;
@@ -375,5 +376,4 @@
   .filter-footer {
     align-items: flex-start;
   }
-}
 }
