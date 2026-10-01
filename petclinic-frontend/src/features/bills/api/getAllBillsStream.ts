@@ -22,7 +22,7 @@ export async function getAllBillsStream(
       vetFirstName,
       vetLastName,
     },
-    responseType: 'stream',
+    responseType: 'text',
     useV2: false,
   });
 

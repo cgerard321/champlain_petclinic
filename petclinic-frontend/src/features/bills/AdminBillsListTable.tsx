@@ -98,8 +98,12 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
   }, [getBillsStream, filter]);
 
   const handleViewAllBills = async (): Promise<void> => {
-    setShowStreamedBills(true);
-    await callGetBillsStream();
+    try {
+      await callGetBillsStream();
+      setShowStreamedBills(true);
+    } catch {
+      // Stay on paginated view if streaming fails
+    }
   };
 
   const handleBackToPagination = (): void => {
