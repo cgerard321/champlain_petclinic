@@ -65,4 +65,13 @@ describe('ProductUpdateDialog', () => {
     const fixture = TestBed.createComponent(ProductUpdateDialog);
     expect(fixture.componentInstance).toBeTruthy();
   });
+
+  it('loads delivery types from the enums API', () => {
+    const fixture = TestBed.createComponent(ProductUpdateDialog);
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance as any;
+
+    expect(component.deliveryTypes()).toEqual(['DELIVERY', 'PICKUP']);
+  });
 });
