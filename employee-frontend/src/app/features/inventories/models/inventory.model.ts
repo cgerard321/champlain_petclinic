@@ -13,7 +13,7 @@ export interface InventoryRequest {
 }
 
 export const INVENTORY_TYPES = ['Bandages', 'Injections', 'Medications', 'Equipment'] as const;
-export type InventoryType = (typeof INVENTORY_TYPES)[number];
+export type InventoryTypeValue = (typeof INVENTORY_TYPES)[number];
 
 export interface InventoryFilters {
   inventoryName: string;

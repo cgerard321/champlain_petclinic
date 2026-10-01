@@ -101,7 +101,8 @@
 
 .add-supply-button,
 .edit-button,
-.delete-button {
+.delete-button,
+.consume-button {
   border: 0;
   border-radius: 999px;
   color: #fff;
@@ -118,13 +119,15 @@
 }
 
 .add-supply-button:hover,
-.edit-button:hover {
+.edit-button:hover,
+.consume-button:hover {
   background: var(--forest-800);
 }
 
 .add-supply-button:focus-visible,
 .edit-button:focus-visible,
 .delete-button:focus-visible,
+.consume-button:focus-visible,
 .dialog-cancel-button:focus-visible {
   outline: 3px solid var(--sage-400);
   outline-offset: 3px;
@@ -133,6 +136,12 @@
 .add-supply-button:disabled {
   opacity: 0.55;
   cursor: not-allowed;
+}
+
+.consume-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: var(--forest-700);
 }
 
 .supply-form {
@@ -182,13 +191,18 @@
 }
 
 .edit-button,
-.delete-button {
+.delete-button,
+.consume-button {
   padding: 10px 18px;
   font-size: 0.875rem;
 }
 
 .edit-button {
   background: var(--forest-700);
+}
+
+.consume-button {
+  background: #1976d2;
 }
 
 .delete-button {

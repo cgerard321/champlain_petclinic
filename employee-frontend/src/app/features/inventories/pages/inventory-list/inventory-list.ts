@@ -1,7 +1,6 @@
 import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { FormField, form, required, submit } from '@angular/forms/signals';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -14,10 +13,9 @@ import {
   Inventory,
   InventoryRequest,
   InventoryType,
+  InventoryTypeValue,
   INVENTORY_TYPES,
-  Inventory,
   InventoryFilters,
-  InventoryType,
 } from '@features/inventories/models/inventory.model';
 import { InventoryService } from '@features/inventories/services/inventory-service';
 import { getInventoryPermissions } from '@shared/models/inventory-permissions';
@@ -25,7 +23,7 @@ import { getInventoryPermissions } from '@shared/models/inventory-permissions';
 // added — some existing inventories have a type outside the four the
 // dropdown offers (e.g. "Diagnostic Kits"), so when editing one of those
 // this checks whether its current type is even a valid option
-function isInventoryType(value: string): value is InventoryType {
+function isInventoryType(value: string): value is InventoryTypeValue {
   return (INVENTORY_TYPES as readonly string[]).includes(value);
 }
 
@@ -70,7 +68,7 @@ export class InventoryList implements OnInit, OnDestroy {
   protected readonly savingInventory = signal(false);
   protected readonly formError = signal<string | null>(null);
 
-  protected readonly inventoryTypes = INVENTORY_TYPES;
+  protected readonly inventoryTypesDropdown = INVENTORY_TYPES;
 
   // explicit <InventoryRequest> here on purpose — without it, TS narrows
   // inventoryType down to just 'Bandages' (the literal from the initial
@@ -95,7 +93,6 @@ export class InventoryList implements OnInit, OnDestroy {
       return;
     }
 
-    this.inventorySubscription = this.inventoryService.getInventories().subscribe({
     this.loadInventories();
     this.loadInventoryTypes();
   }

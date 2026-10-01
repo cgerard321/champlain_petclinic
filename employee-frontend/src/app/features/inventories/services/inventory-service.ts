@@ -1,10 +1,3 @@
-import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
-import { Observable, timer } from 'rxjs';
-import { filter, map, retry } from 'rxjs/operators';
-
-import { SseClient } from '@core/services/sse-client';
-import { Inventory, InventoryRequest } from '@features/inventories/models/inventory.model';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { filter, map, Observable, retry, throwError, timer } from 'rxjs';
@@ -12,6 +5,7 @@ import { filter, map, Observable, retry, throwError, timer } from 'rxjs';
 import { SseClient } from '@core/services/sse-client';
 import {
   Inventory,
+  InventoryRequest,
   InventoryFilters,
   InventoryType,
 } from '@features/inventories/models/inventory.model';
@@ -22,15 +16,6 @@ export class InventoryService {
   private readonly sse = inject(SseClient);
   private readonly baseUrl = '/api/gateway/inventories';
 
-  getInventories(): Observable<Inventory> {
-    return this.sse
-      .stream(this.baseUrl, { keepAlive: false, responseType: 'event' }, {}, 'GET')
-      .pipe(
-        filter(
-          (event): event is MessageEvent => event instanceof MessageEvent && event.type !== 'error',
-        ),
-        map((event) => JSON.parse(event.data) as Inventory),
-        retry({ count: Infinity, delay: () => timer(5000) }),
   getInventoryTypes(): Observable<InventoryType> {
     return this.sse
       .stream(`${this.baseUrl}/types`, { keepAlive: false, responseType: 'event' }, {}, 'GET')
