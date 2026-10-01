@@ -16,10 +16,15 @@ const ownerUser = {
   roles: ['OWNER'],
 };
 
+const currentDate = new Date();
+const currentMonth = `${currentDate.getFullYear()}-${String(
+  currentDate.getMonth() + 1
+).padStart(2, '0')}`;
+
 const visits = [
   {
     visitId: 'visit-one',
-    visitDate: '2026-09-27T09:00:00',
+    visitDate: `${currentMonth}-15T09:00:00`,
     description: 'First streamed visit',
     petId: 'pet-one',
     petName: 'Buddy',
@@ -28,12 +33,12 @@ const visits = [
     vetEmail: 'jane@example.com',
     vetPhoneNumber: '555-0001',
     status: 'CONFIRMED',
-    visitEndDate: '2026-09-27T09:30:00',
+    visitEndDate: `${currentMonth}-15T09:30:00`,
     isEmergency: false,
   },
   {
     visitId: 'visit-two',
-    visitDate: '2026-09-28T10:00:00',
+    visitDate: `${currentMonth}-16T10:00:00`,
     description: 'Second streamed visit',
     petId: 'pet-two',
     petName: 'Milo',
@@ -42,7 +47,7 @@ const visits = [
     vetEmail: 'john@example.com',
     vetPhoneNumber: '555-0002',
     status: 'UPCOMING',
-    visitEndDate: '2026-09-28T10:30:00',
+    visitEndDate: `${currentMonth}-16T10:30:00`,
     isEmergency: true,
   },
 ];

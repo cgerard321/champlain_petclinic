@@ -7,7 +7,6 @@ import { VisitRequestModel } from '@/features/visits/models/VisitRequestModel';
 import { Status } from '@/features/visits/models/Status';
 import { addVisit } from '@/features/visits/api/addVisit';
 import { getAvailableVets } from '@/features/visits/api/getVets';
-import { VetResponseModel } from '@/features/veterinarians/models/VetResponseModel';
 import {
   getAvailableSlots,
   TimeSlot,
@@ -50,7 +49,7 @@ const OwnerBookingVisit: React.FC = (): JSX.Element => {
 
   const [pets, setPets] = useState<PetResponseModel[]>([]);
   const [loadingPets, setLoadingPets] = useState<boolean>(true);
-  const [vets, setVets] = useState<VetResponseModel[]>([]);
+  const [vets, setVets] = useState<Awaited<ReturnType<typeof getAvailableVets>>>([]);
   const [timeSlots, setTimeSlots] = useState<TimeSlotWithVet[]>([]);
   const [loadingVets, setLoadingVets] = useState<boolean>(true);
   const [loadingSlots, setLoadingSlots] = useState<boolean>(false);
