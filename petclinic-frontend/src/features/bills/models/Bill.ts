@@ -10,7 +10,10 @@ export interface Bill {
   date: string;
   amount: number;
   taxedAmount: number;
+  gstAmount: number;
+  qstAmount: number;
   interest: number;
+  totalAmount: number;
   billStatus: string;
   dueDate: string;
   timeRemaining: number;
