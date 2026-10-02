@@ -4,7 +4,6 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatCardModule } from '@angular/material/card';
 import { RouterLink } from '@angular/router';
-
 import { catchError, of } from 'rxjs';
 
 import { CurrentUserResponse } from '@core/models/current-user-response';
