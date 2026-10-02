@@ -71,4 +71,5 @@ export class SupplyService {
     return this.http.get(`/api/gateway/inventories/${inventoryId}/products/download`, {
       responseType: 'blob',
     });
-  }}
+  }
+}
