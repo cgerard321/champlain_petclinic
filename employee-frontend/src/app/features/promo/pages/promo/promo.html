@@ -56,10 +56,20 @@
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let promo" class="actions">
-          <button mat-icon-button type="button" aria-label="Edit promo" (click)="openPromoForm(promo)">
+          <button
+            mat-icon-button
+            type="button"
+            aria-label="Edit promo"
+            (click)="openPromoForm(promo)"
+          >
             <mat-icon>edit</mat-icon>
           </button>
-          <button mat-icon-button type="button" aria-label="Delete promo" (click)="deletePromo(promo)">
+          <button
+            mat-icon-button
+            type="button"
+            aria-label="Delete promo"
+            (click)="deletePromo(promo)"
+          >
             <mat-icon>delete</mat-icon>
           </button>
         </td>
