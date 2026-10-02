@@ -11,7 +11,7 @@ export async function cancelVisit(
 ): Promise<void> {
   try {
     const patchResponse = await axiosInstance.patch<VisitResponseModel>(
-      `/visits/${visitId}/status/cancel`,
+      `/visits/${visitId}/cancel`,
       cancellation,
       { useV2: false }
     );

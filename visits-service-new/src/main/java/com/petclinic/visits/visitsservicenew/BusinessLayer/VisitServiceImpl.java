@@ -345,7 +345,11 @@ public class VisitServiceImpl implements VisitService {
                     visit.setStatus((Status.CANCELLED));
                     visit.setCancellationReason(request.getCancellationReason());
 
-                    if (request.getCancellationReason() == CancellationReason.OTHER){
+                    if (request.getCancellationReason() == CancellationReason.OTHER) {
+                        visit.setCancellationReasonDetails(
+                                request.getCancellationReasonDetails()
+                        );
+                    } else {
                         visit.setCancellationReasonDetails(null);
                     }
 
