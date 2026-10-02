@@ -6,7 +6,6 @@ import com.petclinic.billing.domainclientlayer.Auth.UserDetails;
 import com.petclinic.billing.domainclientlayer.CustomerServiceClient;
 import com.petclinic.billing.domainclientlayer.Mailing.Mail;
 import com.petclinic.billing.domainclientlayer.Mailing.MailService;
-import com.petclinic.billing.domainclientlayer.CustomerServiceClient;
 import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
@@ -27,8 +26,7 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.UUID;
 import java.util.function.Predicate;
-import com.petclinic.billing.exceptions.CustomerNotFoundException;
-import com.petclinic.billing.exceptions.VetNotFoundException;
+
 
 @Service
 @RequiredArgsConstructor
