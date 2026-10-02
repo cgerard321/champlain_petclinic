@@ -686,13 +686,15 @@ export default function BillsListTable({
               <p>
                 <strong>Time Remaining:</strong>{' '}
                 {detailBill.billStatus === 'PAID' ? (
-                  <span style={{ color: 'green' }}>This bill is paid</span>
+                    <span style={{color: 'green'}}>
+                  This bill has already been paid.
+                    </span>
                 ) : detailBill.timeRemaining === 0 ? (
-                  <span style={{ color: 'red' }}>
+                    <span style={{color: 'red'}}>
                     0 days remaining to pay bill
                   </span>
                 ) : (
-                  `${detailBill.timeRemaining} days remaining to pay bill`
+                    `${detailBill.timeRemaining} days remaining to pay bill`
                 )}
               </p>
             </div>
@@ -705,15 +707,17 @@ export default function BillsListTable({
               >
                 Download PDF
               </button>
-              {detailBill.billStatus !== 'PAID' && (
-                <button
-                  onClick={() => {
-                    handlePayBillClick(detailBill);
-                    closeDetails();
-                  }}
-                >
-                  Pay Bill
-                </button>
+              {detailBill.billStatus === 'PAID' ? (
+                  <span>This bill has already been paid.</span>
+              ) : (
+                  <button
+                      onClick={() => {
+                        handlePayBillClick(detailBill);
+                        closeDetails();
+                      }}
+                  >
+                    Pay Bill
+                  </button>
               )}
             </div>
           </div>
