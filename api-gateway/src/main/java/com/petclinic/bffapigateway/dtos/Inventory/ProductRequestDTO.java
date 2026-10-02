@@ -16,6 +16,8 @@ public class ProductRequestDTO {
     private Integer productQuantity;
     private Double productSalePrice;
     private String recentUpdateMessage;
+    private byte[] photoData;
+    private String photoType;
 
 
 }

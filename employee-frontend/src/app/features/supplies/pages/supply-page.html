@@ -94,6 +94,7 @@
           </div>
 
           <app-supply-image-editor
+            [currentImage]="currentImage()"
             [disabled]="addingSupply()"
             (imageChange)="onImageChange($event)"
           />
@@ -141,7 +142,13 @@
 </section>
 
 <ng-template #nameCell let-supply>
-  <span class="supply-name">{{ supply.productName }}</span>
+  <div class="supply-details">
+    @if (supplyPhotoUrl(supply); as photo) {
+      <img class="supply-photo" [src]="photo" [alt]="supply.productName" />
+    }
+
+    <span class="supply-name">{{ supply.productName }}</span>
+  </div>
 </ng-template>
 
 <ng-template #priceCell let-supply>

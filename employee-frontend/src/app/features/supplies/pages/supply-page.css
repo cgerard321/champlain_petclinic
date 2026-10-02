@@ -244,3 +244,17 @@
     grid-template-columns: 1fr;
   }
 }
+
+.supply-details {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.supply-photo {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  object-fit: contain;
+}
