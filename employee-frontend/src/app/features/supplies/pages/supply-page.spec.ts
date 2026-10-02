@@ -105,6 +105,49 @@ describe('SupplyPage', () => {
     fixture.detectChanges();
   });
 
+  it('should combine filters dynamically and clear the controls without refetching', () => {
+    const inputs = fixture.nativeElement.querySelectorAll(
+      '.supply-filters input',
+    ) as NodeListOf<HTMLInputElement>;
+    const status = fixture.nativeElement.querySelector(
+      '.supply-filters select',
+    ) as HTMLSelectElement;
+    inputs.item(0).value = '  WIPES  ';
+    inputs.item(0).dispatchEvent(new Event('input'));
+    inputs.item(1).value = 'CLEANING';
+    inputs.item(1).dispatchEvent(new Event('input'));
+    status.value = Status.RE_ORDER;
+    status.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('tbody tr')).toHaveLength(1);
+    expect(fixture.nativeElement.querySelector('tbody').textContent).toContain('Antiseptic Wipes');
+
+    status.value = Status.AVAILABLE;
+    status.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('No matching supplies');
+
+    fixture.nativeElement.querySelector('.clear-filters-button').click();
+    fixture.detectChanges();
+    expect(inputs.item(0).value).toBe('');
+    expect(inputs.item(1).value).toBe('');
+    expect(status.value).toBe('');
+    expect(fixture.nativeElement.querySelectorAll('tbody tr')).toHaveLength(2);
+    expect(getSupplies).toHaveBeenCalledTimes(1);
+  });
+
+  it('should filter out-of-stock supplies and recompute after supplies change', () => {
+    component['filters'].set({
+      productName: '',
+      productDescription: '',
+      status: Status.OUT_OF_STOCK,
+    });
+    expect(component['filteredSupplies']()).toEqual([]);
+    const outOfStock = { ...supplyOne, status: Status.OUT_OF_STOCK, productQuantity: 0 };
+    component['supplies'].set([outOfStock, supplyTwo]);
+    expect(component['filteredSupplies']()).toEqual([outOfStock]);
+  });
+
   it('should load supplies using the inventory id from the route', () => {
     expect(getSupplies).toHaveBeenCalledWith(inventoryId);
 
