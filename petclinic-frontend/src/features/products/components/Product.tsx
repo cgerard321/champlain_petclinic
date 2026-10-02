@@ -6,11 +6,13 @@ import { AppRoutePaths } from '@/shared/models/path.routes';
 import './Product.css';
 import { useAddToCart } from '@/features/carts/api/addToCartFromProducts.ts';
 import {
+  useUser,
   IsInventoryManager,
   IsVet,
   IsReceptionist,
 } from '@/context/UserContext';
 import { useAddToWishlist } from '@/features/carts/api/addToWishlistFromProducts';
+import { useRemoveFromWishlistByIcon } from '@/features/carts/api/removeProductFromWishlist';
 import StarRating from './StarRating';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
 
@@ -19,6 +21,7 @@ export default function Product({
 }: {
   product: ProductModel;
 }): JSX.Element {
+  const { isAuthenticated } = useUser();
   const isInventoryManager = IsInventoryManager();
   const isVet = IsVet();
   const isReceptionist = IsReceptionist();
@@ -39,6 +42,7 @@ export default function Product({
   const navigate = useNavigate();
   const { addToCart } = useAddToCart();
   const { addToWishlist } = useAddToWishlist();
+  const { removeFromWishlistByIcon } = useRemoveFromWishlistByIcon();
 
   const handleProductClick = (): void => {
     navigate(
@@ -70,6 +74,10 @@ export default function Product({
   const handleBackToList = (): void => setSelectedProduct(null);
 
   const handleAddToCart = async (): Promise<void> => {
+    if (!isAuthenticated) {
+      navigate(AppRoutePaths.Login);
+      return;
+    }
     const isSuccess = await addToCart(currentProduct.productId, 1);
     if (isSuccess) {
       setSuccessMessageCart('Product added to cart successfully!');
@@ -78,11 +86,36 @@ export default function Product({
   };
 
   const handleAddToWishlist = async (): Promise<void> => {
+    if (!isAuthenticated) {
+      navigate(AppRoutePaths.Login);
+      return;
+    }
     const isSuccess = await addToWishlist(currentProduct.productId, 1);
     if (isSuccess) {
       setSuccessMessageWishlist('Product added to wishlist successfully!');
       setIsWishlisted(true); // stays true after adding
       setTimeout(() => setSuccessMessageWishlist(null), 3000);
+    }
+  };
+
+  const handleRemoveFromWishlist = async (): Promise<void> => {
+    if (!isAuthenticated) {
+      navigate(AppRoutePaths.Login);
+      return;
+    }
+    const isSuccess = await removeFromWishlistByIcon(currentProduct.productId);
+    if (isSuccess) {
+      setSuccessMessageWishlist('Product removed from wishlist successfully!');
+      setIsWishlisted(false); // stays false after removing
+      setTimeout(() => setSuccessMessageWishlist(null), 3000);
+    }
+  };
+
+  const handleOnClickHeartIcon = (): void => {
+    if (!isWishlisted) {
+      handleAddToWishlist();
+    } else if (isWishlisted) {
+      handleRemoveFromWishlist();
     }
   };
 
@@ -117,7 +150,7 @@ export default function Product({
         <button
           className="wishlist-heart-btn"
           title="Add to Wishlist"
-          onClick={handleAddToWishlist}
+          onClick={handleOnClickHeartIcon}
         >
           {isWishlisted ? (
             <FaHeart style={{ color: '#e11d48' }} />
@@ -128,7 +161,10 @@ export default function Product({
       )}
 
       <div onClick={handleProductClick} className="product-title">
-        <ImageContainer imageId={currentProduct.imageId} />
+        <ImageContainer
+          image={currentProduct.image}
+          imageId={currentProduct.imageId}
+        />
         <h2 className="product-title">{currentProduct.productName}</h2>
       </div>
 

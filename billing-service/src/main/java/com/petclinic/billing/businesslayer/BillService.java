@@ -27,6 +27,28 @@ public interface BillService {
                                             String vetFirstName,
                                             String vetLastName);
 
+    Flux<BillResponseDTO> getAllBillsStream(
+            String billId,
+            String customerId,
+            String ownerFirstName,
+            String ownerLastName,
+            String visitType,
+            String vetId,
+            String vetFirstName,
+            String vetLastName);
+
+    Flux<BillResponseDTO> getAllBillsByPage(
+            Pageable pageable,
+            String billId,
+            String customerId,
+            String ownerFirstName,
+            String ownerLastName,
+            String visitType,
+            String vetId,
+            String vetFirstName,
+            String vetLastName,
+            boolean includeArchived);
+
     Mono<Long> getNumberOfBillsWithFilters(String billId,
                                            String customerId,
                                            String ownerFirstName,
@@ -35,6 +57,16 @@ public interface BillService {
                                            String vetId,
                                            String vetFirstName,
                                            String vetLastName);
+
+    Mono<Long> getNumberOfBillsWithFilters(String billId,
+                                           String customerId,
+                                           String ownerFirstName,
+                                           String ownerLastName,
+                                           String visitType,
+                                           String vetId,
+                                           String vetFirstName,
+                                           String vetLastName,
+                                           boolean includeArchived);
 
     Flux<BillResponseDTO> getAllBillsByOwnerName(String ownerFirstName, String ownerLastName);
 
@@ -70,6 +102,8 @@ public interface BillService {
     // Method to check and update bills that are past due date from UNPAID to OVERDUE
     Mono<Void> updateOverdueBills();
 
+    Mono<Bill> addTaxesToBill(Bill bill);
+
 
 ///////////////// Used by both BillController and CustomerBillsController /////////////////////
 
@@ -98,5 +132,4 @@ public interface BillService {
     Flux<BillResponseDTO> getBillsByCustomerIdAndDateRange(String customerId, LocalDate startDate, LocalDate endDate);
 
      Mono<byte[]> generateStaffBillPdf(String billId, String currency);
-
 }

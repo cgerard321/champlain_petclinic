@@ -1,12 +1,13 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Bill } from '@/features/bills/models/Bill.ts';
-import { getAllOwners } from '@/features/customers/api/getAllOwners';
+import { getAllCustomers } from '@/features/customers/api/getAllCustomers.ts';
 import { getAllVets } from '@/features/veterinarians/api/getAllVets';
 import { BillRequestModel } from './models/BillRequestModel';
 import { addBill } from './api/addBill';
-import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseModel';
+import { CustomerResponseModel } from '@/features/customers/models/CustomerResponseModel.ts';
 import { VetResponseModel } from '@/features/veterinarians/models/VetResponseModel';
 import useGetAllBillsPaginated from '@/features/bills/hooks/useGetAllBillsPaginated.ts';
+import useGetAllBillsStream from '@/features/bills/hooks/useGetAllBillsStream';
 import './AdminBillsListTable.css';
 import { archiveBills } from './api/archiveBills';
 //import { getAllPaidBills } from '@/features/bills/api/getAllPaidBills.tsx';
@@ -39,6 +40,7 @@ interface FilterModel {
 
 export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.Element {
   const [showArchivedBills, setShowArchivedBills] = useState(false);
+  const [showStreamedBills, setShowStreamedBills] = useState(false);
   const [searchId, setSearchId] = useState('');
   const [searchedBill, setSearchedBill] = useState<Bill | null>(null);
   const [selectedOwnerFilter, setSelectedOwnerFilter] = useState('');
@@ -47,6 +49,12 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
   const [error, setError] = useState<string | null>(null);
   const { billsList, getBillsList, setCurrentPage, currentPage, hasMore } =
     useGetAllBillsPaginated();
+  const {
+    bills: streamedBills,
+    loading: streamLoading,
+    error: streamError,
+    getBillsStream,
+  } = useGetAllBillsStream();
 
   const [filter, setFilter] = useState<FilterModel>({
     customerId: '',
@@ -70,11 +78,38 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
         filter.visitType || undefined,
         undefined, // vetId
         filter.vetFirstName || undefined,
-        filter.vetLastName || undefined
+        filter.vetLastName || undefined,
+        showArchivedBills
       );
     },
-    [getBillsList, filter]
+    [getBillsList, filter, showArchivedBills]
   );
+
+  const callGetBillsStream = useCallback(async (): Promise<void> => {
+    await getBillsStream(
+      undefined, // billId
+      filter.customerId || undefined,
+      filter.firstName || undefined,
+      filter.lastName || undefined,
+      filter.visitType || undefined,
+      undefined, // vetId
+      filter.vetFirstName || undefined,
+      filter.vetLastName || undefined
+    );
+  }, [getBillsStream, filter]);
+
+  const handleViewAllBills = async (): Promise<void> => {
+    try {
+      await callGetBillsStream();
+      setShowStreamedBills(true);
+    } catch {
+      // Stay on paginated view if streaming fails
+    }
+  };
+
+  const handleBackToPagination = (): void => {
+    setShowStreamedBills(false);
+  };
   const [filterYear, setFilterYear] = useState(new Date().getFullYear());
   const [filterMonth, setFilterMonth] = useState(new Date().getMonth() + 1);
   const [selectedFilter, setSelectedFilter] = useState('');
@@ -91,7 +126,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
     billStatus: '',
     dueDate: '',
   });
-  const [owners, setOwners] = useState<OwnerResponseModel[]>([]);
+  const [owners, setOwners] = useState<CustomerResponseModel[]>([]);
   const [vets, setVets] = useState<VetResponseModel[]>([]);
   const [detailBill, setDetailBill] = useState<Bill | null>(null);
   const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
@@ -107,7 +142,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
 
   const fetchOwnersAndVets = useCallback(async (): Promise<void> => {
     try {
-      const ownersList = await getAllOwners();
+      const ownersList = await getAllCustomers();
       const vetsList = await getAllVets();
       setOwners(ownersList);
       setVets(vetsList);
@@ -117,10 +152,8 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
   }, []);
 
   useEffect(() => {
-    if (!selectedFilter) {
-      callGetBillsListWithFilters(currentPage, 10);
-    }
-  }, [currentPage, callGetBillsListWithFilters, selectedFilter]);
+    callGetBillsListWithFilters(currentPage, 10);
+  }, [currentPage, callGetBillsListWithFilters]);
 
   useEffect(() => {
     const callArchiveBills = async (): Promise<void> => {
@@ -194,6 +227,11 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
     }
   };
 
+  const handleArchiveToggle = (): void => {
+    setCurrentPage(0);
+    setShowArchivedBills(prev => !prev);
+  };
+
   const handleOwnerNameChange = async (
     event: React.ChangeEvent<HTMLSelectElement>
   ): Promise<void> => {
@@ -261,7 +299,9 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
   };
 
   const getFilteredBills = (): Bill[] => {
-    const billsToFilter = filteredBills || billsList;
+    const billsToFilter = showStreamedBills
+      ? streamedBills
+      : filteredBills || billsList;
     if (!billsToFilter || !Array.isArray(billsToFilter)) {
       return [];
     }
@@ -446,7 +486,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
   };
 
   const formatTotalDue = (bill: Bill): string => {
-    const amount = bill.taxedAmount ?? bill.amount ?? 0;
+    const amount = bill.totalAmount ?? bill.amount ?? 0;
     if (currency === 'CAD') return `CAD $${amount.toFixed(2)}`;
     return `USD $${convertCurrency(amount, 'CAD', 'USD').toFixed(2)}`;
   };
@@ -507,10 +547,23 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
           </button>
           <button
             className={`archive-btn ${showArchivedBills ? 'active' : ''}`}
-            onClick={() => setShowArchivedBills(prev => !prev)}
+            onClick={handleArchiveToggle}
           >
             {showArchivedBills ? 'Hide Archived' : 'Show Archived'}
           </button>
+          {showStreamedBills ? (
+            <button className="archive-btn" onClick={handleBackToPagination}>
+              Back to Pages
+            </button>
+          ) : (
+            <button
+              className="archive-btn"
+              onClick={handleViewAllBills}
+              disabled={streamLoading}
+            >
+              {streamLoading ? 'Loading Bills...' : 'View All Bills'}
+            </button>
+          )}
         </div>
 
         <div style={{ marginTop: '12px' }}>
@@ -688,7 +741,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                     <option value="">All Owners</option>
                     {owners.map(owner => (
                       <option
-                        key={owner.ownerId}
+                        key={owner.customerId}
                         value={`${owner.firstName} ${owner.lastName}`}
                       >
                         {owner.firstName} {owner.lastName}
@@ -791,7 +844,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                     >
                       <option value="">Select Customer</option>
                       {owners.map(owner => (
-                        <option key={owner.ownerId} value={owner.ownerId}>
+                        <option key={owner.customerId} value={owner.customerId}>
                           {owner.firstName} {owner.lastName}
                         </option>
                       ))}
@@ -983,7 +1036,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                   <strong>Date:</strong> {searchedBill.date}
                 </p>
                 <p>
-                  <strong>Amount:</strong> {formatTotalDue(searchedBill)}
+                  <strong>Total Amount:</strong> {formatTotalDue(searchedBill)}
                 </p>
                 <p>
                   <strong>Status:</strong> {searchedBill.billStatus}
@@ -1000,8 +1053,8 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
           </div>
         ) : (
           <div>
-            {error ? (
-              <p>{error}</p>
+            {error || streamError ? (
+              <p>{error || streamError}</p>
             ) : (
               <div className="billsListContainer">
                 {getFilteredBills().length === 0 ? (
@@ -1028,7 +1081,6 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                             </span>
                           </div>
                         </div>
-
                         <div className="billColumn rightColumn">
                           <div className="billField">
                             <strong>Total:</strong>
@@ -1036,6 +1088,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                               {formatTotalDue(bill)}
                             </span>
                           </div>
+
                           <div className="billField status">
                             <strong>Status:</strong>
                             <span
@@ -1067,13 +1120,17 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
               </div>
             )}
 
-            <div className="pagination-controls">
-              {currentPage > 0 && (
-                <button onClick={handlePreviousPage}>Previous</button>
-              )}
-              <span> Page {currentPage + 1} </span>
-              {hasMore && <button onClick={handleNextPage}>Next</button>}
-            </div>
+            {!showStreamedBills && (
+              <div className="pagination-controls">
+                {currentPage > 0 && (
+                  <button onClick={handlePreviousPage}>Previous</button>
+                )}
+
+                <span> Page {currentPage + 1} </span>
+
+                {hasMore && <button onClick={handleNextPage}>Next</button>}
+              </div>
+            )}
           </div>
         )}
 
@@ -1129,10 +1186,28 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                     : `USD $${convertCurrency(detailBill.amount, 'CAD', 'USD').toFixed(2)}`}
                 </p>
                 <p>
-                  <strong>Taxed Amount:</strong>{' '}
+                  <strong>GST (5%):</strong>{' '}
+                  {currency === 'CAD'
+                    ? `CAD $${detailBill.gstAmount.toFixed(2)}`
+                    : `USD $${convertCurrency(detailBill.gstAmount, 'CAD', 'USD').toFixed(2)}`}
+                </p>
+                <p>
+                  <strong>QST (9.975%):</strong>{' '}
+                  {currency === 'CAD'
+                    ? `CAD $${detailBill.qstAmount.toFixed(2)}`
+                    : `USD $${convertCurrency(detailBill.qstAmount, 'CAD', 'USD').toFixed(2)}`}
+                </p>
+                <p>
+                  <strong>Total Tax:</strong>{' '}
                   {currency === 'CAD'
                     ? `CAD $${detailBill.taxedAmount.toFixed(2)}`
                     : `USD $${convertCurrency(detailBill.taxedAmount, 'CAD', 'USD').toFixed(2)}`}
+                </p>
+                <p>
+                  <strong>Total with Interest:</strong>{' '}
+                  {currency === 'CAD'
+                    ? `CAD $${detailBill.totalAmount.toFixed(2)}`
+                    : `USD $${convertCurrency(detailBill.totalAmount, 'CAD', 'USD').toFixed(2)}`}
                 </p>
                 <p>
                   <strong>Status:</strong>{' '}

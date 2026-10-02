@@ -1,12 +1,11 @@
 package com.petclinic.products.presentationlayer.products;
 
-import com.petclinic.products.businesslayer.products.ProductService;
 import com.petclinic.products.datalayer.products.*;
 import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.datalayer.ratings.RatingRepository;
-import com.petclinic.products.utils.exceptions.NotFoundException;
-import org.junit.jupiter.api.*;
-import org.mockito.Mockito;
+import com.petclinic.products.utils.PostgresTestContainerBase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -19,19 +18,17 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.util.Arrays;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port=0"})
+@SpringBootTest(webEnvironment = RANDOM_PORT)
 @ActiveProfiles("test")
 @AutoConfigureWebTestClient
-class ProductControllerIntegrationTest {
+class ProductControllerIntegrationTest extends PostgresTestContainerBase {
 
     @Autowired
     private WebTestClient webTestClient;
@@ -895,6 +892,30 @@ class ProductControllerIntegrationTest {
 
         StepVerifier
                 .create(productTypeRepository.findAll())
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    void whenDeleteProductTypeUsedByProducts_thenReturnConflict() {
+        Product productWithType = Product.builder()
+                .productId(UUID.randomUUID().toString())
+                .productName("Typed Product")
+                .productTypeId(productType1.getProductTypeId())
+                .build();
+        productRepository.save(productWithType).block();
+
+        webTestClient
+                .delete()
+                .uri("/products/types/" + productType1.getProductTypeId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(409)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Cannot delete product type that is still used by products");
+
+        StepVerifier
+                .create(productTypeRepository.findByProductTypeId(productType1.getProductTypeId()))
                 .expectNextCount(1)
                 .verifyComplete();
     }

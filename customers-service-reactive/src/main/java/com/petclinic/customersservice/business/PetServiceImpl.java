@@ -24,7 +24,7 @@ public class PetServiceImpl implements PetService {
     PetRepo petRepo;
 
     @Autowired
-    OwnerService ownerService;
+    CustomerService customerService;
 
     @Autowired
     FilesServiceClient filesServiceClient;
@@ -64,11 +64,13 @@ public class PetServiceImpl implements PetService {
       });
     }
 
+
+
     @Override
-    public Flux<PetResponseDTO> getPetsByOwnerId(String ownerId) {
-        return petRepo.findAllPetByOwnerId(ownerId)
+    public Flux<PetResponseDTO> getPetsByCustomerId(String customerId) {
+        return petRepo.findAllPetByCustomerId(customerId)
                 .flatMap(petEntity -> Mono.just(EntityDTOUtil.toPetResponseDTO(petEntity)))
-                .onErrorResume(e -> Flux.empty()); // Handle errors by returning an empty Flux
+                .onErrorResume(e -> Flux.empty());
     }
 
     @Override
@@ -108,17 +110,17 @@ public class PetServiceImpl implements PetService {
 
 
     @Override
-    public Mono<PetResponseDTO> createPetForOwner(String ownerId, Mono<PetRequestDTO> petRequestDTO) {
+    public Mono<PetResponseDTO> createPetForCustomer(String customerId, Mono<PetRequestDTO> petRequestDTO) {
         return petRequestDTO
                 .flatMap(requestDTO -> {
-                    return ownerService.getOwnerByOwnerId(ownerId, false)
-                            .switchIfEmpty(Mono.error(new NotFoundException("Owner not found with id: " + ownerId)))
+                    return customerService.getCustomerByCustomerId(customerId, false)
+                            .switchIfEmpty(Mono.error(new NotFoundException("Customer not found with id: " + customerId)))
                             .then(Mono.just(requestDTO));
                 })
                 .map(requestDTO -> {
                     Pet pet = new Pet();
                     pet.setPetId(UUID.randomUUID().toString());
-                    pet.setOwnerId(ownerId);
+                    pet.setCustomerId(customerId);
                     pet.setName(requestDTO.getName());
                     pet.setBirthDate(requestDTO.getBirthDate());
                     pet.setPetTypeId(requestDTO.getPetTypeId());

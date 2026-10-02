@@ -1,3 +1,44 @@
-<p>home works!</p>
+<main class="home-container">
+  <mat-card class="welcome-card" appearance="outlined">
+    <div class="welcome-content">
+      <div class="welcome-text">
+        <span class="welcome-badge">EMPLOYEE PORTAL</span>
 
-{{ auth.roles() }}
+        <!-- Welcome Message (Ticket Criteria) -->
+        <h1 class="welcome-title">
+          @if (employeeName()) {
+            Welcome back, {{ employeeName() }}!
+          } @else {
+            Welcome to Champlain Petclinic
+          }
+        </h1>
+
+        <!-- Short Introduction (Ticket Criteria) -->
+        <p class="welcome-description">
+          At Champlain Pet Clinic, we offer a wide range of services to ensure the health and
+          well-being of your beloved pets. Our experienced veterinarians and staff are dedicated to
+          providing the best care possible.
+        </p>
+      </div>
+
+      <!-- Clinic Logo (Ticket Criteria) -->
+      <div class="logo-wrapper">
+        <div class="brand-emblem">
+          <span class="brand-title">Pet<span class="brand-highlight">Clinic</span></span>
+          <div class="paw-group" aria-hidden="true">
+            <svg class="paw-icon paw-large" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M12 11.5c-1.8 0-3.5 1.4-3.5 3.2 0 1.9 1.6 3.3 3.5 3.3s3.5-1.4 3.5-3.3c0-1.8-1.7-3.2-3.5-3.2zm-5.2-1.8c.8 0 1.5-.9 1.5-2s-.7-2-1.5-2-1.5.9-1.5 2 .7 2 1.5 2zm10.4 0c.8 0 1.5-.9 1.5-2s-.7-2-1.5-2-1.5.9-1.5 2 .7 2 1.5 2zm-7.8-3.2c.9 0 1.6-.9 1.6-2s-.7-2-1.6-2-1.6.9-1.6 2 .7 2 1.6 2zm5.2 0c.9 0 1.6-.9 1.6-2s-.7-2-1.6-2-1.6.9-1.6 2 .7 2 1.6 2z"
+              />
+            </svg>
+            <svg class="paw-icon paw-small" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M12 11.5c-1.8 0-3.5 1.4-3.5 3.2 0 1.9 1.6 3.3 3.5 3.3s3.5-1.4 3.5-3.3c0-1.8-1.7-3.2-3.5-3.2zm-5.2-1.8c.8 0 1.5-.9 1.5-2s-.7-2-1.5-2-1.5.9-1.5 2 .7 2 1.5 2zm10.4 0c.8 0 1.5-.9 1.5-2s-.7-2-1.5-2-1.5.9-1.5 2 .7 2 1.5 2zm-7.8-3.2c.9 0 1.6-.9 1.6-2s-.7-2-1.6-2-1.6.9-1.6 2 .7 2 1.6 2zm5.2 0c.9 0 1.6-.9 1.6-2s-.7-2-1.6-2-1.6.9-1.6 2 .7 2 1.6 2z"
+              />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </mat-card>
+</main>

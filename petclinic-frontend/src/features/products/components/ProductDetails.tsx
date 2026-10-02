@@ -9,6 +9,7 @@ import { updateUserRating } from '../api/updateUserRating';
 import { getProduct } from '../api/getProduct';
 import { deleteUserRating } from '../api/deleteUserRating';
 import './ProductDetails.css';
+import defaultProfile from '@/assets/Customers/defaultProfilePicture.png';
 import StarRating from './StarRating';
 import { RatingModel } from '../models/ProductModels/RatingModel';
 import { getUserRatingsForProduct } from '../api/getUserRatingsForProduct';
@@ -19,6 +20,7 @@ import ImageContainer from './ImageContainer';
 import { Button } from 'react-bootstrap';
 import {
   IsAdmin,
+  useUser,
   IsInventoryManager,
   IsVet,
   IsReceptionist,
@@ -33,6 +35,7 @@ import DeleteReviewModal from './DeleteReviewModal';
 
 export default function ProductDetails(): JSX.Element {
   const isAdmin = IsAdmin();
+  const { isAuthenticated } = useUser();
   const isInventoryManager = IsInventoryManager();
   const isVet = IsVet();
   const isReceptionist = IsReceptionist();
@@ -56,6 +59,10 @@ export default function ProductDetails(): JSX.Element {
   >(null);
 
   const handleAddToWishlist = async (): Promise<void> => {
+    if (!isAuthenticated) {
+      navigate(AppRoutePaths.Login);
+      return;
+    }
     const isSuccess = await addToWishlist(currentProduct.productId, 1);
     if (isSuccess) {
       setSuccessMessageWishlist('Product added to wishlist successfully!');
@@ -85,11 +92,9 @@ export default function ProductDetails(): JSX.Element {
   // };
 
   const getProductTypeLabel = (productType: string): string => {
-    if (productType === 'ACCESSORY') return 'Accessory';
-    if (productType === 'FOOD') return 'Food';
-    if (productType === 'MEDICATION') return 'Medication';
-    if (productType === 'EQUIPMENT') return 'Equipment';
-    return 'Unknown Product Type';
+    return productType
+      ? productType.charAt(0).toUpperCase() + productType.slice(1).toLowerCase()
+      : 'Unknown';
   };
   const getDeliveryTypeLabel = (deliveryType: string): string => {
     if (deliveryType === 'DELIVERY') return 'Standard Delivery';
@@ -189,13 +194,21 @@ export default function ProductDetails(): JSX.Element {
   useEffect(() => {
     fetchProduct();
     fetchRatings();
-    fetchRating();
+    if (isAuthenticated) {
+      fetchRating();
+    } else {
+      setUserRating({ rating: 0, review: '' });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [productId]);
+  }, [productId, isAuthenticated]);
 
   const isUnlisted = currentProduct.isUnlisted;
 
   const handleAddToCartClick = async (): Promise<void> => {
+    if (!isAuthenticated) {
+      navigate(AppRoutePaths.Login);
+      return;
+    }
     if (!productId) return;
     if (isStaff) return;
     const ok = await addToCart(String(productId), quantity);
@@ -250,7 +263,10 @@ export default function ProductDetails(): JSX.Element {
             ) : (
               <>
                 <div className="productimage-container">
-                  <ImageContainer imageId={currentProduct.imageId} />
+                  <ImageContainer
+                    image={currentProduct.image}
+                    imageId={currentProduct.imageId}
+                  />
                 </div>
                 <div className="productdetails-container">
                   <div
@@ -428,7 +444,13 @@ export default function ProductDetails(): JSX.Element {
                       </h3>
                       <Button
                         variant="primary"
-                        onClick={() => setShowReviewModal(true)}
+                        onClick={() => {
+                          if (!isAuthenticated) {
+                            navigate(AppRoutePaths.Login);
+                            return;
+                          }
+                          setShowReviewModal(true);
+                        }}
                         disabled={isStaff || currentUserRating.rating > 0}
                       >
                         Write a Review
@@ -462,9 +484,28 @@ export default function ProductDetails(): JSX.Element {
                     {productReviews.length > 0 ? (
                       productReviews.map(
                         (rating: RatingModel, index: number) => (
-                          <div key={index} className="reviewbox">
-                            {currentUserRating.rating > 0 &&
-                              currentUserRating.review === rating.review &&
+                          <div
+                            key={rating.customerId || index}
+                            className="reviewbox"
+                          >
+                            <div className="product-review-author">
+                              <img
+                                src={rating.reviewerPhoto || defaultProfile}
+                                alt={`${rating.reviewerUsername || 'Customer'} profile picture`}
+                                onError={event => {
+                                  event.currentTarget.onerror = null;
+                                  event.currentTarget.src = defaultProfile;
+                                }}
+                              />
+                              <span>
+                                {rating.reviewerUsername || 'Customer'}
+                              </span>
+                            </div>
+                            {isAuthenticated &&
+                              currentUserRating.rating > 0 &&
+                              !!currentUserRating.customerId &&
+                              currentUserRating.customerId ===
+                                rating.customerId &&
                               !isStaff && (
                                 <div className="review-card-actions">
                                   <button

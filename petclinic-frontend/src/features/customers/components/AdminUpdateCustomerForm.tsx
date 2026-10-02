@@ -1,11 +1,12 @@
 import { useEffect, useState, FC } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getOwner } from '../api/getOwner';
-import { updateOwner } from '../api/updateOwner';
+import { useTranslation } from 'react-i18next';
+import { getCustomer } from '../api/getCustomer.ts';
+import { updateCustomer } from '../api/updateCustomer.ts';
 import { getUserDetails } from '../api/getUserDetails';
 import { updateUsername } from '../api/updateUsername';
-import { OwnerRequestModel } from '../models/OwnerRequestModel';
-import { OwnerResponseModel } from '../models/OwnerResponseModel';
+import { CustomerRequestModel } from '../models/CustomerRequestModel.ts';
+import { CustomerResponseModel } from '../models/CustomerResponseModel.ts';
 import { UserDetailsModel } from '../models/UserDetailsModel';
 import { useUsernameValidation } from '../hooks/useUsernameValidation';
 import './UpdateCustomerForm.css';
@@ -27,10 +28,11 @@ const provincesOfCanada = [
 ];
 
 const AdminUpdateCustomerForm: FC = () => {
-  const { ownerId } = useParams<{ ownerId: string }>();
+  const { t } = useTranslation('customers');
+  const { customerId } = useParams<{ customerId: string }>();
   const navigate = useNavigate();
   const { validateUsernameField } = useUsernameValidation();
-  const [formData, setFormData] = useState<OwnerRequestModel>({
+  const [formData, setFormData] = useState<CustomerRequestModel>({
     firstName: '',
     lastName: '',
     address: '',
@@ -45,36 +47,36 @@ const AdminUpdateCustomerForm: FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    const fetchOwnerData = async (): Promise<void> => {
-      if (!ownerId) {
-        console.error('Owner id is undefined');
+    const fetchCustomerData = async (): Promise<void> => {
+      if (!customerId) {
+        console.error('Customer id is undefined');
         return;
       }
 
       try {
-        const response = await getOwner(ownerId);
-        const ownerData: OwnerResponseModel = response.data;
-        setFormData(ownerData);
+        const response = await getCustomer(customerId);
+        const customerData: CustomerResponseModel = response.data;
+        setFormData(customerData);
       } catch (error) {
-        console.error('Error fetching owner data:', error);
+        console.error('Error fetching customer data:', error);
       }
     };
 
     const fetchUserData = async (): Promise<void> => {
-      if (!ownerId) {
-        console.error('Owner id is undefined');
+      if (!customerId) {
+        console.error('Customer id is undefined');
         return;
       }
 
       try {
-        const response = await getUserDetails(ownerId);
+        const response = await getUserDetails(customerId);
         const userData: UserDetailsModel = response.data;
         setUserDetails(userData);
         setUsername(userData.username);
       } catch (error) {
         console.error('Error fetching user data:', error);
         setUserDetails({
-          userId: ownerId,
+          userId: customerId,
           username: 'Unknown',
           email: '',
           roles: [],
@@ -85,13 +87,13 @@ const AdminUpdateCustomerForm: FC = () => {
       }
     };
 
-    fetchOwnerData().catch(error =>
-      console.error('Error in fetchOwnerData:', error)
+    fetchCustomerData().catch(error =>
+      console.error('Error in fetchCustomerData:', error)
     );
     fetchUserData().catch(error =>
       console.error('Error in fetchUserData:', error)
     );
-  }, [ownerId]);
+  }, [customerId]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -114,17 +116,18 @@ const AdminUpdateCustomerForm: FC = () => {
   const validate = async (): Promise<boolean> => {
     const newErrors: { [key: string]: string } = {};
 
-    if (!formData.firstName) newErrors.firstName = 'First name is required';
-    if (!formData.lastName) newErrors.lastName = 'Last name is required';
-    if (!formData.address) newErrors.address = 'Address is required';
-    if (!formData.city) newErrors.city = 'City is required';
-    if (!formData.province) newErrors.province = 'Province is required';
+    if (!formData.firstName)
+      newErrors.firstName = 'validation.firstNameRequired';
+    if (!formData.lastName) newErrors.lastName = 'validation.lastNameRequired';
+    if (!formData.address) newErrors.address = 'validation.addressRequired';
+    if (!formData.city) newErrors.city = 'validation.cityRequired';
+    if (!formData.province) newErrors.province = 'validation.provinceRequired';
 
     const telephoneRegex = /^[0-9]+$/;
     if (!formData.telephone) {
-      newErrors.telephone = 'Telephone is required';
+      newErrors.telephone = 'validation.telephoneRequired';
     } else if (!telephoneRegex.test(formData.telephone)) {
-      newErrors.telephone = 'Telephone must contain only digits';
+      newErrors.telephone = 'validation.telephoneDigitsOnly';
     }
 
     const usernameError = await validateUsernameField(
@@ -146,118 +149,124 @@ const AdminUpdateCustomerForm: FC = () => {
     if (!(await validate())) return;
 
     try {
-      if (!ownerId) {
-        console.error('Owner id is undefined');
+      if (!customerId) {
+        console.error('Customer id is undefined');
         return;
       }
 
-      await updateOwner(ownerId, formData);
+      await updateCustomer(customerId, formData);
 
       if (userDetails && username !== userDetails.username) {
-        await updateUsername(ownerId, username);
+        await updateUsername(customerId, username);
       }
 
       setIsModalOpen(true);
     } catch (error) {
-      console.error('Error updating owner:', error);
+      console.error('Error updating customer:', error);
     }
   };
 
   const closeModal = (): void => {
     setIsModalOpen(false);
-    navigate(`/customers/${ownerId}`);
+    navigate(`/customers/${customerId}`);
   };
 
   const handleBack = (): void => {
-    navigate(`/customers/${ownerId}`);
+    navigate(`/customers/${customerId}`);
   };
 
   return (
     <div className="update-customer-form">
-      <h1>Edit Profile</h1>
+      <h1>{t('customerForm.title')}</h1>
       <form onSubmit={handleSubmit}>
-        <label>Username: </label>
+        <label>{t('fields.username')} </label>
         <input
           type="text"
           name="username"
           value={username}
           onChange={handleUsernameChange}
         />
-        {errors.username && <span className="error">{errors.username}</span>}
+        {errors.username && <span className="error">{t(errors.username)}</span>}
         <br />
-        <label>First Name: </label>
+        <label>{t('fields.firstName')} </label>
         <input
           type="text"
           name="firstName"
           value={formData.firstName}
           onChange={handleChange}
         />
-        {errors.firstName && <span className="error">{errors.firstName}</span>}
+        {errors.firstName && (
+          <span className="error">{t(errors.firstName)}</span>
+        )}
         <br />
-        <label>Last Name: </label>
+        <label>{t('fields.lastName')} </label>
         <input
           type="text"
           name="lastName"
           value={formData.lastName}
           onChange={handleChange}
         />
-        {errors.lastName && <span className="error">{errors.lastName}</span>}
+        {errors.lastName && <span className="error">{t(errors.lastName)}</span>}
         <br />
-        <label>Address: </label>
+        <label>{t('fields.address')} </label>
         <input
           type="text"
           name="address"
           value={formData.address}
           onChange={handleChange}
         />
-        {errors.address && <span className="error">{errors.address}</span>}
+        {errors.address && <span className="error">{t(errors.address)}</span>}
         <br />
-        <label>City: </label>
+        <label>{t('fields.city')} </label>
         <input
           type="text"
           name="city"
           value={formData.city}
           onChange={handleChange}
         />
-        {errors.city && <span className="error">{errors.city}</span>}
+        {errors.city && <span className="error">{t(errors.city)}</span>}
         <br />
-        <label>Province: </label>
+        <label>{t('fields.province')} </label>
         <select
           name="province"
           value={formData.province}
           onChange={handleChange}
         >
-          <option value="">Select Province</option>
+          <option value="">{t('customerForm.selectProvince')}</option>
           {provincesOfCanada.map(province => (
             <option key={province} value={province}>
               {province}
             </option>
           ))}
         </select>
-        {errors.province && <span className="error">{errors.province}</span>}
+        {errors.province && <span className="error">{t(errors.province)}</span>}
         <br />
-        <label>Telephone: </label>
+        <label>{t('fields.telephone')} </label>
         <input
           type="text"
           name="telephone"
           value={formData.telephone}
           onChange={handleChange}
         />
-        {errors.telephone && <span className="error">{errors.telephone}</span>}
+        {errors.telephone && (
+          <span className="error">{t(errors.telephone)}</span>
+        )}
         <br />
-        <button type="submit">Update</button>
+        <button type="submit">{t('customerForm.submit')}</button>
       </form>
 
       <button id="back-button" onClick={handleBack}>
-        Back
+        {t('customerForm.back')}
       </button>
 
       {isModalOpen && (
         <div className="admin-update-customer-modal-overlay">
           <div className="admin-update-customer-modal">
-            <h2>Success!</h2>
-            <p>Customer has been successfully updated.</p>
-            <button onClick={closeModal}>Close</button>
+            <h2>{t('customerForm.modal.title')}</h2>
+            <p>{t('customerForm.modal.message')}</p>
+            <button onClick={closeModal}>
+              {t('customerForm.modal.close')}
+            </button>
           </div>
         </div>
       )}

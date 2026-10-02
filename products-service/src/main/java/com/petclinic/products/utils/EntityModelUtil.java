@@ -19,20 +19,21 @@ import java.util.UUID;
 
 public class EntityModelUtil {
 
-    public static ProductResponseModel toProductResponseModel(Product product) {
+    public static ProductResponseModel toProductResponseModel(Product product, String productType) {
         ProductResponseModel productResponseModel = new ProductResponseModel();
         BeanUtils.copyProperties(product, productResponseModel);
+        productResponseModel.setProductType(productType);
         return productResponseModel;
     }
 
     public static Product toProductEntity(ProductRequestModel productRequestModel) {
         return Product.builder()
                 .productId(generateUUIDString())
-                .imageId(productRequestModel.getImageId())
                 .productName(productRequestModel.getProductName())
                 .productDescription(productRequestModel.getProductDescription())
                 .productSalePrice(productRequestModel.getProductSalePrice())
-                .productType(productRequestModel.getProductType())
+                //.productType(productRequestModel.getProductType())
+                .productTypeId(productRequestModel.getProductTypeId())
                 .productQuantity(productRequestModel.getProductQuantity())
                 .isUnlisted(productRequestModel.getIsUnlisted())
                 .releaseDate(productRequestModel.getReleaseDate())
@@ -41,13 +42,13 @@ public class EntityModelUtil {
                 .build();
     }
 
-    public static RatingResponseModel toRatingResponseModel(Rating rating){
+    public static RatingResponseModel toRatingResponseModel(Rating rating) {
         RatingResponseModel responseModel = new RatingResponseModel();
         BeanUtils.copyProperties(rating, responseModel);
         return responseModel;
     }
 
-    public static Rating toRatingEntity(RatingRequestModel requestModel, String productId, String customerId){
+    public static Rating toRatingEntity(RatingRequestModel requestModel, String productId, String customerId) {
         return Rating.builder()
                 .productId(productId)
                 .customerId(customerId)
@@ -62,7 +63,7 @@ public class EntityModelUtil {
         return imageResponseModel;
     }
 
-    public static Image toImageEntity(ImageRequestModel imageRequestModel){
+    public static Image toImageEntity(ImageRequestModel imageRequestModel) {
         return Image.builder()
                 .imageId(generateUUIDString())
                 .imageName(imageRequestModel.getImageName())
@@ -96,6 +97,7 @@ public class EntityModelUtil {
                 .bundlePrice(bundle.getBundlePrice())
                 .build();
     }
+
     public static ProductBundle toProductBundleEntity(ProductBundleRequestModel requestModel) {
         return ProductBundle.builder()
                 .bundleName(requestModel.getBundleName())
@@ -111,6 +113,7 @@ public class EntityModelUtil {
                 .typeName(productType.getTypeName())
                 .build();
     }
+
     public static ProductTypeDb toProductTypeEntity(ProductTypeRequestModel productTypeRequestModel) {
         return ProductTypeDb.builder()
                 .productTypeId(generateUUIDString())

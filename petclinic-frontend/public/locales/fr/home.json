@@ -1,0 +1,26 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "vets": "Vétérinaires",
+    "customers": "Clients",
+    "customersList": "Liste des clients",
+    "addCustomer": "Ajouter un client",
+    "users": "Utilisateurs",
+    "usersList": "Liste des utilisateurs",
+    "rolesList": "Liste des rôles",
+    "bills": "Factures",
+    "visits": "Visites",
+    "listView": "Vue liste",
+    "calendarView": "Vue calendrier",
+    "mySchedule": "Mon horaire",
+    "inventories": "Inventaires",
+    "promos": "Promotions",
+    "shop": "Boutique",
+    "carts": "Paniers",
+    "signup": "Inscription",
+    "login": "Connexion",
+    "profile": "Profil",
+    "editProfile": "Modifier le profil",
+    "logout": "Déconnexion"
+  }
+}

@@ -1,12 +1,13 @@
 import * as React from 'react';
 import { FormEvent, useState } from 'react';
-import { OwnerRequestModel } from '@/shared/models/OwnerRequestModel';
+import { CustomerRequestModel } from '@/shared/models/CustomerRequestModel.ts';
 import { Register } from '@/shared/models/RegisterModel';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import axiosInstance from '@/shared/api/axiosInstance';
 import { isAxiosError } from 'axios';
 import './SignUp.css';
 import SvgIcon from '@/shared/components/SvgIcon';
+import { provincesOfCanada } from '@/features/customers/utils/provinces';
 
 const SignUp: React.FC = (): JSX.Element => {
   const characterLimit = 60;
@@ -16,8 +17,8 @@ const SignUp: React.FC = (): JSX.Element => {
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
 
-  const [owner, setOwner] = useState<OwnerRequestModel>({
-    ownerId: '',
+  const [owner, setOwner] = useState<CustomerRequestModel>({
+    customerId: '',
     firstName: '',
     lastName: '',
     address: '',
@@ -108,7 +109,9 @@ const SignUp: React.FC = (): JSX.Element => {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ): void => {
     const { name, value } = e.target;
     if (name in owner) {
       setOwner({ ...owner, [name]: value });
@@ -129,7 +132,7 @@ const SignUp: React.FC = (): JSX.Element => {
     Object.keys(owner).forEach(key => {
       const error = validateField(
         key,
-        owner[key as keyof OwnerRequestModel] as string
+        owner[key as keyof CustomerRequestModel] as string
       );
       if (error) {
         errors[key] = error;
@@ -261,12 +264,18 @@ const SignUp: React.FC = (): JSX.Element => {
               )}
               <br />
               <label>Province: </label>
-              <input
-                type="text"
+              <select
                 name="province"
                 value={owner.province}
                 onChange={handleChange}
-              />
+              >
+                <option value="">Select Province</option>
+                {provincesOfCanada.map(province => (
+                  <option key={province} value={province}>
+                    {province}
+                  </option>
+                ))}
+              </select>
               {errorMessage.province && (
                 <span className="error">{errorMessage.province}</span>
               )}

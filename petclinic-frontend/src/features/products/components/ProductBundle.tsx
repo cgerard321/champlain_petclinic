@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import { useEffect, useState } from 'react';
 import { ProductBundleModel } from '@/features/products/models/ProductModels/ProductBundleModel';
+import { getProduct } from '@/features/products/api/getProduct';
 import { getProductByProductId } from '@/features/products/api/getProductByProductId';
 import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
 import { useNavigate, generatePath } from 'react-router-dom';
@@ -21,13 +22,13 @@ const ProductBundle: React.FC<ProductBundleProps> = ({ bundle }) => {
   >('available');
 
   const navigate = useNavigate();
-  const { user } = useUser();
+  const { user, isAuthenticated } = useUser();
 
   useEffect(() => {
     const fetchProducts = async (): Promise<void> => {
       try {
         const productPromises = bundle.productIds.map(id =>
-          getProductByProductId(id)
+          isAuthenticated ? getProductByProductId(id) : getProduct(id)
         );
         const productList = await Promise.all(productPromises);
 
@@ -47,7 +48,7 @@ const ProductBundle: React.FC<ProductBundleProps> = ({ bundle }) => {
     };
 
     fetchProducts();
-  }, [bundle.productIds]);
+  }, [bundle.productIds, isAuthenticated]);
 
   if (bundleStatus === 'hidden') {
     return null;
@@ -97,7 +98,7 @@ const ProductBundle: React.FC<ProductBundleProps> = ({ bundle }) => {
               }
             }}
           >
-            <ImageContainer imageId={product.imageId} />
+            <ImageContainer image={product.image} imageId={product.imageId} />
             <div className="product-details">
               <p>{product.productName}</p>
               <p>Price: ${product.productSalePrice.toFixed(2)}</p>
@@ -115,12 +116,14 @@ const ProductBundle: React.FC<ProductBundleProps> = ({ bundle }) => {
         Bundle Price:{' '}
         <span className="bundle-price">${bundle.bundlePrice.toFixed(2)}</span>
       </p>
-      <button
-        className="add-bundle-to-cart-button"
-        aria-label={`Add ${bundle.bundleName} to Cart`}
-      >
-        Add Bundle to Cart
-      </button>
+      {isAuthenticated && (
+        <button
+          className="add-bundle-to-cart-button"
+          aria-label={`Add ${bundle.bundleName} to Cart`}
+        >
+          Add Bundle to Cart
+        </button>
+      )}
     </div>
   );
 };

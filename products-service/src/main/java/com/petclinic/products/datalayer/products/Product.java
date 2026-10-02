@@ -5,20 +5,19 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDate;
 
 
-@Document(collection = "products")
+@Table("products")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Product {
-
     @Id
-    private String id;
+    private long id;
     private String productId;
     private String imageId;
     private String productName;
@@ -28,7 +27,7 @@ public class Product {
     private Integer requestCount;
     private Integer productQuantity;
     private Boolean isUnlisted;
-    private ProductType productType;
+    //private ProductType productType;
     private String productTypeId;
     private LocalDate releaseDate;
     private ProductStatus productStatus;

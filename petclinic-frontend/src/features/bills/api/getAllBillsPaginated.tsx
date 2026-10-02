@@ -11,11 +11,13 @@ export async function getAllBillsPaginated(
   visitType?: string,
   vetId?: string,
   vetFirstName?: string,
-  vetLastName?: string
+  vetLastName?: string,
+  includeArchived = false
 ): Promise<Bill[]> {
-  const params: Record<string, string | number> = {
+  const params: Record<string, string | number | boolean> = {
     page: currentPage,
     size: listSize,
+    includeArchived,
   };
 
   if (billId) params.billId = billId;
@@ -27,9 +29,9 @@ export async function getAllBillsPaginated(
   if (vetFirstName) params.vetFirstName = vetFirstName;
   if (vetLastName) params.vetLastName = vetLastName;
 
-  const response = await axiosInstance.get<Bill[]>('/bills', {
+  const response = await axiosInstance.get<Bill[]>('/bills/page', {
     params,
-    useV2: true,
+    useV2: false,
   });
 
   return response.data;
