@@ -1,6 +1,6 @@
 import { Status } from '@/features/visits/models/Status.ts';
 import { FileDetails } from '@/shared/models/FileDetails';
-import {CancellationReason} from "@/features/visits/models/CancellationReason.ts";
+import { CancellationReason } from '@/features/visits/models/CancellationReason.ts';
 
 export interface VisitResponseModel {
   visitDate: string;
