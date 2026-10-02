@@ -25,7 +25,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'io.micrometer:micrometer-registry-prometheus'
 	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
-	testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo'
+	testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring27x:4.16.1'
 
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.20'
@@ -89,4 +89,3 @@ test {
 		events "passed", "skipped", "failed"
 	}
 }
-
