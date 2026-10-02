@@ -151,7 +151,7 @@
 .supply-form {
   display: grid;
   gap: 12px;
-  max-width: 500px;
+  max-width: none;
   margin-bottom: 24px;
   padding: 20px;
   border: 1px solid var(--border);
@@ -311,6 +311,40 @@
     flex-direction: column;
     align-items: stretch;
   }
+}
+
+
+.supply-edit-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 2rem;
+}
+
+.supply-fields {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+@media (width <= 700px) {
+  .supply-edit-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.supply-details {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.supply-photo {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  object-fit: contain;
 }
 
 .supply-filters {
@@ -486,4 +520,5 @@
   .filter-heading {
     flex-direction: column;
   }
+
 }

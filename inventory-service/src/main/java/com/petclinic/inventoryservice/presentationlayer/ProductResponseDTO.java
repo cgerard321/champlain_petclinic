@@ -21,4 +21,6 @@ public class ProductResponseDTO {
     private Double productProfit;
     private Status status;
     private LocalDateTime lastUpdatedAt;
+    private byte[] photoData;
+    private String photoType;
 }

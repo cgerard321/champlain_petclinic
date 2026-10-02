@@ -5,15 +5,17 @@ import { FormField, form, min, required, submit } from '@angular/forms/signals';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 
 import { AuthState } from '@core/services/auth-state';
+import { SupplyImageEditor } from '@features/supplies/components/supply-image-editor/supply-image-editor';
 import { Supply } from '@features/supplies/models/supply';
 import { SupplyService } from '@features/supplies/services/supply-service';
 import { Table, TableColumn } from '@shared/components/table/table';
 import { Roles } from '@shared/models/roles';
 
 @Component({
-  imports: [CurrencyPipe, FormField, MatDialogModule, MatIconModule, Table],
+  imports: [CurrencyPipe, FormField, MatDialogModule, MatIconModule, Table, SupplyImageEditor],
   selector: 'app-supply',
   styleUrl: './supply-page.css',
   templateUrl: './supply-page.html',
@@ -89,6 +91,15 @@ export class SupplyPage {
       : []),
   ]);
 
+  protected readonly selectedImage = signal<File | null>(null);
+  protected readonly currentImage = signal<string | null>(null);
+  protected readonly imageChanged = signal(false);
+
+  protected onImageChange(file: File | null): void {
+    this.selectedImage.set(file);
+    this.imageChanged.set(true);
+  }
+
   protected readonly supplyForm = form(this.newSupply, (path) => {
     required(path.productName, {
       message: 'Name is required',
@@ -161,50 +172,60 @@ export class SupplyPage {
   protected addSupply(event: Event): void {
     event.preventDefault();
 
+    if (this.addingSupply()) return;
+
     void submit(this.supplyForm, async () => {
-      if (!this.inventoryId || !this.canManageSupplies()) {
-        return;
-      }
+      const inventoryId = this.inventoryId;
+
+      if (!inventoryId || !this.canManageSupplies()) return;
 
       this.addingSupply.set(true);
       this.addError.set('');
 
       const editingId = this.editingSupplyId();
 
-      const request$ = editingId
-        ? this.supplyService.updateSupply(this.inventoryId, editingId, this.newSupply())
-        : this.supplyService.createSupply(this.inventoryId, this.newSupply());
+      try {
+        const photo: {
+          photoData?: string;
+          photoType?: string | null;
+        } = {};
 
-      request$.subscribe({
-        next: () => {
-          // Clear field interaction state too, so the next add form does not show stale validation errors.
-          this.supplyForm().reset({
-            productName: '',
-            productDescription: '',
-            productPrice: 0,
-            productQuantity: 1,
-            productSalePrice: 0,
-          });
+        if (this.imageChanged()) {
+          const file = this.selectedImage();
 
-          this.editingSupplyId.set(null);
-          this.showAddForm.set(false);
-          this.addingSupply.set(false);
+          // Empty Base64 decodes to an empty byte array: remove the photo.
+          photo.photoData = file ? await this.readPhoto(file) : '';
+          photo.photoType = file ? file.type : null;
+        }
 
-          this.loadSupplies();
-        },
-        error: () => {
-          this.addError.set(editingId ? 'Unable to update supply.' : 'Unable to add supply.');
+        const supply = { ...this.newSupply(), ...photo };
 
-          this.addingSupply.set(false);
-        },
-      });
+        const request$ = editingId
+          ? this.supplyService.updateSupply(inventoryId, editingId, supply)
+          : this.supplyService.createSupply(inventoryId, supply);
+
+        await firstValueFrom(request$);
+
+        this.cancelAddForm();
+        this.loadSupplies();
+      } catch {
+        this.addError.set(
+          editingId ? 'Unable to update supply or photo.' : 'Unable to add supply or photo.',
+        );
+      } finally {
+        this.addingSupply.set(false);
+      }
     });
   }
 
   protected editSupply(supply: Supply): void {
+    this.selectedImage.set(null);
     if (!this.canManageSupplies()) {
       return;
     }
+    this.selectedImage.set(null);
+    this.imageChanged.set(false);
+    this.currentImage.set(this.supplyPhotoUrl(supply));
 
     this.editingSupplyId.set(supply.productId);
     this.addError.set('');
@@ -285,10 +306,15 @@ export class SupplyPage {
       return;
     }
 
+    this.selectedImage.set(null);
+    this.imageChanged.set(false);
+    this.currentImage.set(null);
+
     this.showAddForm.set(true);
   }
 
   protected cancelAddForm(): void {
+    this.selectedImage.set(null);
     this.supplyForm().reset({
       productName: '',
       productDescription: '',
@@ -299,6 +325,9 @@ export class SupplyPage {
     this.editingSupplyId.set(null);
     this.addError.set('');
     this.showAddForm.set(false);
+    this.selectedImage.set(null);
+    this.imageChanged.set(false);
+    this.currentImage.set(null);
   }
 
   protected downloadPdf(): void {
@@ -349,5 +378,34 @@ export class SupplyPage {
 
   protected formatStatus(status: string): string {
     return status.replaceAll('_', ' ');
+  }
+
+  protected supplyPhotoUrl(supply: Supply): string | null {
+    if (!supply.photoData || !['image/jpeg', 'image/png'].includes(supply.photoType ?? '')) {
+      return null;
+    }
+
+    return `data:${supply.photoType};base64,${supply.photoData}`;
+  }
+
+  private readPhoto(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        const result = reader.result;
+
+        if (typeof result !== 'string') {
+          reject(new Error('Unable to read photo.'));
+          return;
+        }
+
+        resolve(result.substring(result.indexOf(',') + 1));
+      };
+
+      reader.onerror = () => reject(new Error('Unable to read photo.'));
+      reader.onabort = () => reject(new Error('Photo reading cancelled.'));
+      reader.readAsDataURL(file);
+    });
   }
 }

@@ -35,6 +35,8 @@ export class SupplyService {
       productPrice: number;
       productQuantity: number;
       productSalePrice: number;
+      photoData?: string;
+      PhotoType?: string | null;
     },
   ): Observable<Supply> {
     return this.http.post<Supply>(`/api/gateway/inventories/${inventoryId}/products`, supply);
@@ -49,6 +51,8 @@ export class SupplyService {
       productPrice: number;
       productQuantity: number;
       productSalePrice: number;
+      photoData?: string;
+      PhotoType?: string | null;
     },
   ): Observable<Supply> {
     return this.http.put<Supply>(

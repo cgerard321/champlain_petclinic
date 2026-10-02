@@ -34,8 +34,11 @@ public class EntityDTOUtil {
                 .productPrice(product.getProductPrice())
                 .productQuantity(product.getProductQuantity())
                 .productSalePrice(product.getProductSalePrice())
+                .productProfit(product.getProductProfit())
                 .status(status)
                 .lastUpdatedAt(product.getLastUpdatedAt() != null ? product.getLastUpdatedAt() : LocalDateTime.of(1900, 1, 1, 0, 0))
+                .photoData(product.getPhotoData())
+                .photoType(product.getPhotoType())
                 .build();
     }
 
@@ -54,18 +57,7 @@ public class EntityDTOUtil {
         InventoryResponseDTO inventoryResponseDTO = new InventoryResponseDTO();
         BeanUtils.copyProperties(inventory, inventoryResponseDTO);
         List<ProductResponseDTO> productResponseDTOs = inventory.getProducts().stream()
-                .map(product -> new ProductResponseDTO(
-                        product.getProductId(),
-                        product.getInventoryId(),
-                        product.getProductName(),
-                        product.getProductDescription(),
-                        product.getProductPrice(),
-                        product.getProductQuantity(),
-                        product.getProductSalePrice(),
-                        product.getProductProfit(),
-                        product.getStatus(),
-                        product.getLastUpdatedAt()
-                ))
+                .map(EntityDTOUtil::toProductResponseDTO)
                 .collect(Collectors.toList());
         inventoryResponseDTO.setProducts(productResponseDTOs);
         return inventoryResponseDTO;
