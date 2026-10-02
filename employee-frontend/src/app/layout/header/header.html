@@ -13,6 +13,11 @@
 
   <span class="spacer"></span>
 
+  <div class="lang-switcher">
+    <button mat-button (click)="switchLang('fr')">FR</button>
+    <button mat-button (click)="switchLang('en')">EN</button>
+  </div>
+
   <button mat-icon-button aria-label="Log out" (click)="logout()">
     <mat-icon>logout</mat-icon>
   </button>

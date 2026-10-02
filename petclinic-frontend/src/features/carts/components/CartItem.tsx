@@ -20,6 +20,7 @@ interface CartItemProps {
   addToWishlist: (item: ProductModel) => void;
   addToCart: (item: ProductModel) => void;
   isInWishlist: boolean;
+  removeFromWishListByIcon?: (item: ProductModel) => void;
   showNotification?: (message: string) => void;
   removeFromWishlist?: (item: ProductModel) => void;
 }

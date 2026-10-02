@@ -289,7 +289,9 @@ class BillControllerIntegrationTest {
                 .jsonPath("$.ownerFirstName").isEqualTo("Alice")
                 .jsonPath("$.ownerLastName").isEqualTo("Smith")
                 .jsonPath("$.billStatus").isEqualTo("PAID")
-                .jsonPath("$.amount").isEqualTo(100.00);
+                .jsonPath("$.amount").isEqualTo(100.00)
+                .jsonPath("$.qstAmount").isEqualTo(9.98)
+                .jsonPath("$.gstAmount").isEqualTo(5.00);
 
         // Verify mock interactions
         verify(vetClient).getVetByVetId("vet-1");
@@ -430,7 +432,7 @@ class BillControllerIntegrationTest {
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
                 .expectBodyList(Bill.class)
                 .consumeWith(response -> {
                     List<Bill> bills = response.getResponseBody();
@@ -516,7 +518,7 @@ class BillControllerIntegrationTest {
                 .expectBody();
     }
 
-    private Bill buildBill(){
+    private Bill buildBill() {
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
@@ -524,12 +526,25 @@ class BillControllerIntegrationTest {
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate();
 
-        LocalDate dueDate = LocalDate.of(2022,Month.OCTOBER,15);
+        LocalDate dueDate = LocalDate.of(2022, Month.OCTOBER, 15);
 
-        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).billStatus(BillStatus.PAID).dueDate(dueDate).build();
+        return Bill.builder()
+                .id("Id")
+                .billId("BillUUID")
+                .customerId("1")
+                .vetId("1")
+                .visitType("Test Type")
+                .date(date)
+                .amount(new BigDecimal("13.37"))
+                .gstAmount(new BigDecimal("0.67"))
+                .qstAmount(new BigDecimal("1.33"))
+                .taxedAmount(new BigDecimal("15.37"))
+                .billStatus(BillStatus.PAID)
+                .dueDate(dueDate)
+                .build();
     }
 
-    private Bill buildUnpaidBill(){
+    private Bill buildUnpaidBill() {
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
@@ -539,10 +554,22 @@ class BillControllerIntegrationTest {
 
         LocalDate dueDate = LocalDate.of(2022, Month.OCTOBER, 5);
 
-        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).billStatus(BillStatus.UNPAID).dueDate(dueDate).build();
+        return Bill.builder()
+                .id("Id")
+                .billId("BillUUID")
+                .customerId("1")
+                .vetId("1")
+                .visitType("Test Type")
+                .date(date)
+                .amount(new BigDecimal("13.37"))
+                .gstAmount(new BigDecimal("0.67"))
+                .qstAmount(new BigDecimal("1.33"))
+                .taxedAmount(new BigDecimal("15.37"))
+                .billStatus(BillStatus.UNPAID)
+                .dueDate(dueDate).build();
     }
 
-    private Bill buildOverdueBill(){
+    private Bill buildOverdueBill() {
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
@@ -552,7 +579,19 @@ class BillControllerIntegrationTest {
 
         LocalDate dueDate = LocalDate.of(2022, Month.AUGUST, 15);
 
-        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).billStatus(BillStatus.OVERDUE).dueDate(dueDate).build();
+        return Bill.builder()
+                .id("Id")
+                .billId("BillUUID")
+                .customerId("1")
+                .vetId("1")
+                .visitType("Test Type")
+                .date(date)
+                .amount(new BigDecimal(13.37))
+                .gstAmount(new BigDecimal("0.67"))
+                .qstAmount(new BigDecimal("1.33"))
+                .taxedAmount(new BigDecimal("15.37"))
+                .billStatus(BillStatus.OVERDUE)
+                .dueDate(dueDate).build();
     }
 
     @Test
@@ -565,9 +604,13 @@ class BillControllerIntegrationTest {
                     .vetId("1")
                     .visitType("Routine Check")
                     .date(LocalDate.now())
-                    .amount(new BigDecimal(100.0))
+                    .amount(new BigDecimal("100.0"))
+                    .gstAmount(new BigDecimal("5.00"))
+                    .qstAmount(new BigDecimal("9.98"))
+                    .taxedAmount(new BigDecimal("114.98"))
                     .billStatus(BillStatus.PAID)
                     .dueDate(LocalDate.now().plusDays(30))
+                    .archive(false)
                     .build()).block();
         }
 
@@ -673,7 +716,10 @@ class BillControllerIntegrationTest {
                     .vetId("1")
                     .visitType("Routine Check")
                     .date(LocalDate.of(2022, 9, i))
-                    .amount(new BigDecimal(100.0))
+                    .amount(new BigDecimal("100.0"))
+                    .gstAmount(new BigDecimal("5.00"))
+                    .qstAmount(new BigDecimal("9.98"))
+                    .taxedAmount(new BigDecimal("114.98"))
                     .billStatus(BillStatus.PAID)
                     .dueDate(LocalDate.of(2022, 9, i).plusDays(30))
                     .build()).block();
@@ -813,7 +859,10 @@ class BillControllerIntegrationTest {
                 .vetId("1")
                 .visitType("Test Type")
                 .date(date)
-                .amount(new BigDecimal(100.0))
+                .amount(new BigDecimal("100.0"))
+                .gstAmount(new BigDecimal("5.00"))
+                .qstAmount(new BigDecimal("9.98"))
+                .taxedAmount(new BigDecimal("114.98"))
                 .billStatus(BillStatus.OVERDUE)
                 .dueDate(dueDate)
                 .archive(false)
@@ -832,7 +881,10 @@ class BillControllerIntegrationTest {
                 .vetId("1")
                 .visitType("Test Type")
                 .date(date)
-                .amount(new BigDecimal(100.0))
+                .amount(new BigDecimal("100.0"))
+                .gstAmount(new BigDecimal("5.00"))
+                .qstAmount(new BigDecimal("9.98"))
+                .taxedAmount(new BigDecimal("114.98"))
                 .billStatus(BillStatus.UNPAID)
                 .dueDate(dueDate)
                 .archive(false)
@@ -846,25 +898,27 @@ class BillControllerIntegrationTest {
         return Duration.between(LocalDate.now().atStartOfDay(), billEntity.getDueDate().atStartOfDay()).toDays();
     }
 
-        @Test
-        void getBillByValidBillID_Overdue_ShouldReturnInterest() {
-                Bill billEntity = buildOverdueBill();
+    @Test
+    void getBillByValidBillID_Overdue_ShouldReturnInterest() {
+        Bill billEntity = buildOverdueBill();
 
-                Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(billEntity));
+        Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(billEntity));
 
-                StepVerifier.create(setup)
-                        .expectNextCount(1)
-                         .verifyComplete();
+        StepVerifier.create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
 
-                // Use centralized utility for compound interest calculation
-                BigDecimal expectedInterest = InterestCalculationUtil.calculateCompoundInterest(
-                    billEntity.getAmount(), billEntity.getDueDate(), LocalDate.now());                client.get()
-                        .uri("/bills/" + billEntity.getBillId())
-                        .accept(MediaType.APPLICATION_JSON)
-                        .exchange()
-                        .expectStatus().isOk()
-                        .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                        .expectBody()
-                        .jsonPath("$.interest").isEqualTo(expectedInterest);
-}
+        // Use centralized utility for compound interest calculation
+        BigDecimal expectedInterest = InterestCalculationUtil.calculateCompoundInterest(
+                billEntity.getAmount(), billEntity.getDueDate(), LocalDate.now());
+        client.get()
+                .uri("/bills/" + billEntity.getBillId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.interest").isEqualTo(expectedInterest);
+    }
+
 }

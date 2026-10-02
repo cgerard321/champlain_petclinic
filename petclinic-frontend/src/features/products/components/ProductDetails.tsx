@@ -92,11 +92,9 @@ export default function ProductDetails(): JSX.Element {
   // };
 
   const getProductTypeLabel = (productType: string): string => {
-    if (productType === 'ACCESSORY') return 'Accessory';
-    if (productType === 'FOOD') return 'Food';
-    if (productType === 'MEDICATION') return 'Medication';
-    if (productType === 'EQUIPMENT') return 'Equipment';
-    return 'Unknown Product Type';
+    return productType
+      ? productType.charAt(0).toUpperCase() + productType.slice(1).toLowerCase()
+      : 'Unknown';
   };
   const getDeliveryTypeLabel = (deliveryType: string): string => {
     if (deliveryType === 'DELIVERY') return 'Standard Delivery';
