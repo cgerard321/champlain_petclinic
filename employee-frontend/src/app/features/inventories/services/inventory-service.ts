@@ -5,8 +5,8 @@ import { filter, map, Observable, retry, throwError, timer } from 'rxjs';
 import { SseClient } from '@core/services/sse-client';
 import {
   Inventory,
-  InventoryRequest,
   InventoryFilters,
+  InventoryRequest,
   InventoryType,
 } from '@features/inventories/models/inventory.model';
 
