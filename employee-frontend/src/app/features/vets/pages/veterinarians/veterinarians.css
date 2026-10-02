@@ -1,0 +1,212 @@
+:host {
+  display: block;
+  color: #214b3e;
+}
+
+.vets-page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.page-heading {
+  margin-bottom: 32px;
+}
+
+.eyebrow {
+  margin: 0 0 12px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(30px, 4vw, 42px);
+  line-height: 1.15;
+}
+
+.page-description {
+  margin: 14px 0 0;
+  color: #596c62;
+  font-size: 16px;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 24px;
+}
+
+.directory-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 36px;
+  border: 1px solid #d3dfcc;
+  border-radius: 24px;
+  background: #e4eddb;
+}
+
+.icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: #f4f7ef;
+}
+
+.directory-card h2 {
+  max-width: 360px;
+  margin: 24px 0 14px;
+  font-size: 30px;
+  line-height: 1.2;
+}
+
+.card-description {
+  max-width: 380px;
+  margin: 0;
+  color: #596c62;
+  line-height: 1.6;
+}
+
+.sample-team {
+  margin: 32px 0;
+}
+
+.avatars {
+  display: flex;
+  padding-left: 6px;
+}
+
+.avatars span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-left: -6px;
+  border: 3px solid #e4eddb;
+  border-radius: 50%;
+  background: #cadbc0;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.avatars span:nth-child(2) {
+  background: #f0e5d4;
+}
+
+.avatars span:nth-child(3) {
+  background: #d4e2e6;
+}
+
+.sample-team p,
+.preview-note {
+  color: #596c62;
+  font-size: 12px;
+}
+
+.sample-team p {
+  margin: 10px 0 0;
+}
+
+.directory-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: auto;
+  padding: 14px 20px;
+  border: 0;
+  border-radius: 12px;
+  background: #254e3e;
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+}
+
+.directory-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.preview-note {
+  margin: 10px 0 0;
+}
+
+.secondary-cards {
+  display: grid;
+  gap: 24px;
+}
+
+.feature-card {
+  padding: 28px;
+  border: 1px solid #dce3d8;
+  border-radius: 20px;
+  background: #fff;
+}
+
+.feature-card h2 {
+  margin: 18px 0 10px;
+  font-size: 21px;
+}
+
+.feature-card p {
+  margin: 0 0 20px;
+  color: #596c62;
+  line-height: 1.6;
+}
+
+.coming-soon {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: #f0f3ed;
+  color: #596c62;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+@media (width <= 900px) {
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (width <= 600px) {
+  .vets-page {
+    padding: 12px;
+  }
+
+  .directory-card,
+  .feature-card {
+    padding: 24px;
+  }
+
+  .directory-card h2 {
+    font-size: 26px;
+  }
+}
+
+.directory-card,
+.feature-card {
+  transition:
+    transform 200ms ease,
+    box-shadow 200ms ease,
+    border-color 200ms ease;
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .directory-card:hover,
+  .feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 28px rgb(33 75 62 / 12%);
+    border-color: #91ad83;
+  }
+}

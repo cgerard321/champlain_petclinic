@@ -26,7 +26,7 @@ interface ProductFormModel {
   productSalePrice: number;
   productQuantity: number;
   isUnlisted: boolean;
-  productType: ProductType;
+  productTypeId: string;
   releaseDate: string;
   deliveryType: DeliveryType;
 }
@@ -51,7 +51,7 @@ export class ProductAddDialog implements OnInit {
   private readonly productService = inject(ProductService);
   private readonly imageService = inject(ImageService);
 
-  protected readonly productTypes = signal<ProductType[]>(Object.values(ProductType));
+  protected readonly productTypes = signal<ProductType[]>([]);
   protected readonly deliveryTypes = signal<DeliveryType[]>(Object.values(DeliveryType));
   protected readonly isSubmitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
@@ -74,7 +74,7 @@ export class ProductAddDialog implements OnInit {
     productSalePrice: 0,
     productQuantity: 0,
     isUnlisted: false,
-    productType: ProductType.ACCESSORY,
+    productTypeId: '',
     releaseDate: '',
     deliveryType: DeliveryType.NO_DELIVERY_OPTION,
   });
@@ -84,6 +84,7 @@ export class ProductAddDialog implements OnInit {
     required(schemaPath.productDescription, { message: 'Product description is required' });
     required(schemaPath.productSalePrice, { message: 'Sale price is required' });
     required(schemaPath.productQuantity, { message: 'Quantity is required' });
+    required(schemaPath.productTypeId, { message: 'Product type is required' });
   });
 
   protected selectFile(event: Event): void {

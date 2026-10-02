@@ -1123,8 +1123,13 @@ class BillServiceClientIntegrationTest {
                 .verifyComplete();
 
         RecordedRequest request = server.takeRequest();
+
         assertEquals("GET", request.getMethod());
-        assertTrue(request.getPath().endsWith("/bills-count"));
+        assertTrue(request.getPath().contains("/bills-count"));
+        assertEquals(
+                "false",
+                request.getRequestUrl().queryParameter("includeArchived")
+        );
     }
 
     @Test

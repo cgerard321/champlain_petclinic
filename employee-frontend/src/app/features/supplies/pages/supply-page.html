@@ -1,0 +1,222 @@
+<section class="supply-page">
+  <div class="page-header">
+    <div>
+      <h1>Supplies</h1>
+      <p class="page-description">View and manage the supplies associated with this inventory.</p>
+    </div>
+
+    @if (canManageSupplies()) {
+      <div class="header-actions">
+        <button
+          type="button"
+          class="download-pdf-button"
+          [class.expanded]="downloadingPdf()"
+          [disabled]="downloadingPdf() || loading() || supplies().length === 0"
+          [attr.aria-label]="downloadingPdf() ? 'Downloading PDF' : 'Download PDF'"
+          (click)="downloadPdf()"
+        >
+          <mat-icon aria-hidden="true">download</mat-icon>
+          <span class="download-label">{{ downloadingPdf() ? 'Downloading...' : 'Download' }}</span>
+        </button>
+
+        <button
+          type="button"
+          class="add-supply-button"
+          (click)="showAddForm() ? cancelAddForm() : openAddForm()"
+        >
+          {{ showAddForm() ? 'Cancel' : 'Add Supply' }}
+        </button>
+      </div>
+    }
+  </div>
+
+  @if (showAddForm() && canManageSupplies()) {
+    <form class="supply-form" (submit)="addSupply($event)">
+      <h2>
+        {{ editingSupplyId() ? 'Edit Supply' : 'Add Supply' }}
+      </h2>
+
+      <label for="productName">Name</label>
+      <input id="productName" type="text" [formField]="supplyForm.productName" />
+
+      @if (supplyForm.productName().touched() && supplyForm.productName().invalid()) {
+        <p class="field-error">
+          {{ supplyForm.productName().errors()[0]?.message }}
+        </p>
+      }
+
+      <label for="productDescription">Description</label>
+      <input id="productDescription" type="text" [formField]="supplyForm.productDescription" />
+
+      @if (supplyForm.productDescription().touched() && supplyForm.productDescription().invalid()) {
+        <p class="field-error">
+          {{ supplyForm.productDescription().errors()[0]?.message }}
+        </p>
+      }
+
+      <label for="productPrice">Cost Price</label>
+      <input id="productPrice" type="number" step="0.01" [formField]="supplyForm.productPrice" />
+
+      @if (supplyForm.productPrice().touched() && supplyForm.productPrice().invalid()) {
+        <p class="field-error">
+          {{ supplyForm.productPrice().errors()[0]?.message }}
+        </p>
+      }
+
+      <label for="productQuantity">Quantity</label>
+      <input id="productQuantity" type="number" step="1" [formField]="supplyForm.productQuantity" />
+
+      @if (supplyForm.productQuantity().touched() && supplyForm.productQuantity().invalid()) {
+        <p class="field-error">
+          {{ supplyForm.productQuantity().errors()[0]?.message }}
+        </p>
+      }
+
+      <label for="productSalePrice">Sale Price</label>
+      <input
+        id="productSalePrice"
+        type="number"
+        step="0.01"
+        [formField]="supplyForm.productSalePrice"
+      />
+
+      @if (supplyForm.productSalePrice().touched() && supplyForm.productSalePrice().invalid()) {
+        <p class="field-error">
+          {{ supplyForm.productSalePrice().errors()[0]?.message }}
+        </p>
+      }
+
+      @if (addError()) {
+        <p class="field-error" role="alert">
+          {{ addError() }}
+        </p>
+      }
+
+      <button type="submit" class="add-supply-button" [disabled]="addingSupply()">
+        {{
+          addingSupply()
+            ? editingSupplyId()
+              ? 'Saving...'
+              : 'Adding...'
+            : editingSupplyId()
+              ? 'Save Changes'
+              : 'Add Supply'
+        }}
+      </button>
+    </form>
+  }
+
+  @if (deleteError()) {
+    <p class="field-error" role="alert">{{ deleteError() }}</p>
+  }
+
+  <section class="supply-filters" aria-label="Filter supplies">
+    <div class="filter-heading">
+      <div>
+        <h2>Find a supply</h2>
+        <p>Filter by name, description, or status.</p>
+      </div>
+      <button
+        class="clear-filters-button"
+        type="button"
+        (click)="clearFilters()"
+        [disabled]="!hasActiveFilters()"
+      >
+        Clear filters
+      </button>
+    </div>
+    <div class="supply-filter-grid">
+      <label class="filter-field">
+        <span>Supply name</span>
+        <input
+          type="search"
+          placeholder="Search by name"
+          [value]="filters().productName"
+          (input)="setFilter('productName', $event)"
+        />
+      </label>
+      <label class="filter-field">
+        <span>Description</span>
+        <input
+          type="search"
+          placeholder="Search by description"
+          [value]="filters().productDescription"
+          (input)="setFilter('productDescription', $event)"
+        />
+      </label>
+      <label class="filter-field">
+        <span>Status</span>
+        <select [value]="filters().status" (change)="setFilter('status', $event)">
+          <option value="">All statuses</option>
+          <option value="AVAILABLE">Available</option>
+          <option value="RE_ORDER">Re order</option>
+          <option value="OUT_OF_STOCK">Out of stock</option>
+        </select>
+      </label>
+    </div>
+  </section>
+  @if (downloadError()) {
+    <p class="field-error" role="alert">{{ downloadError() }}</p>
+  }
+
+  @if (loading()) {
+    <p class="state-message">Loading supplies...</p>
+  } @else if (error()) {
+    <p class="state-message error-message" role="alert">Unable to load supplies.</p>
+  } @else if (supplies().length === 0) {
+    <p class="state-message">No supplies found for this inventory.</p>
+  } @else if (filteredSupplies().length === 0) {
+    <div class="state-message" role="status">
+      <h2>No matching supplies</h2>
+      <p>No supplies match your filters in this inventory. Try changing or clearing the filters.</p>
+      <button class="clear-filters-button" type="button" (click)="clearFilters()">
+        Clear filters
+      </button>
+    </div>
+  } @else {
+    <app-table
+      label="Supplies in this inventory"
+      [rows]="filteredSupplies()"
+      [columns]="columns()"
+      [rowId]="supplyRowId"
+    />
+  }
+</section>
+
+<ng-template #nameCell let-supply>
+  <span class="supply-name">{{ supply.productName }}</span>
+</ng-template>
+
+<ng-template #priceCell let-supply>
+  {{ supply.productPrice | currency }}
+</ng-template>
+
+<ng-template #statusCell let-supply>
+  <span
+    class="status-badge"
+    [class.available]="supply.status === 'AVAILABLE'"
+    [class.re-order]="supply.status === 'RE_ORDER'"
+    [class.out-of-stock]="supply.status === 'OUT_OF_STOCK'"
+  >
+    {{ formatStatus(supply.status) }}
+  </span>
+</ng-template>
+
+<ng-template #actionsCell let-supply>
+  <div class="action-buttons">
+    <button type="button" class="edit-button" (click)="editSupply(supply)">Edit</button>
+    <button type="button" class="delete-button" (click)="deleteSupply(supply)">Delete</button>
+  </div>
+</ng-template>
+<ng-template #deleteDialog let-supply>
+  <h2 mat-dialog-title>Delete supply</h2>
+
+  <mat-dialog-content>
+    Are you sure you want to delete {{ supply.productName }}?
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button type="button" class="dialog-cancel-button" [mat-dialog-close]="false">Cancel</button>
+    <button type="button" class="delete-button" [mat-dialog-close]="true">Delete</button>
+  </mat-dialog-actions>
+</ng-template>
