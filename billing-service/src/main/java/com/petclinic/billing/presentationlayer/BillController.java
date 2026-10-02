@@ -250,7 +250,7 @@ public class BillController {
     @PutMapping(value = "/bills/{billId}")
     public Mono<ResponseEntity<BillResponseDTO>> updateBill(
             @PathVariable String billId,
-            @Validated(BillRequestDTO.UpdateValidation.class) @RequestBody Mono<BillRequestDTO> billRequestDTO) {
+            @RequestBody Mono<BillRequestDTO> billRequestDTO) {
         return billService.updateBill(billId, billRequestDTO)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
