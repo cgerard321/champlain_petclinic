@@ -1,9 +1,11 @@
 package com.petclinic.visits.visitsservicenew.BusinessLayer;
 
 import com.petclinic.visits.visitsservicenew.BusinessLayer.Prescriptions.PrescriptionService;
+import com.petclinic.visits.visitsservicenew.DataLayer.CancellationReason;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.Auth.Role;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FileResponseDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FilesServiceClient;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.CancellationRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Prescriptions.PrescriptionRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Prescriptions.PrescriptionResponseDTO;
 import com.petclinic.visits.visitsservicenew.Utils.IdGenerator;
@@ -1021,5 +1023,43 @@ class VisitServiceImplTest {
                     assertEquals("Status cannot be null", ex.getMessage());
                 })
                 .verify();
+    }
+
+    @Test
+    void cancelVisit_savesStatusAndCancellationReason() {
+        Visit visit = buildVisit("Cancellation test");
+
+        CancellationRequestDTO request = CancellationRequestDTO.builder()
+                .cancellationReason(CancellationReason.APPOINTMENT_NO_LONGER_NEEDED)
+                .build();
+
+        VisitResponseDTO response = buildVisitResponseDTO();
+        response.setStatus(Status.CANCELLED);
+        response.setCancellationReason(
+                CancellationReason.APPOINTMENT_NO_LONGER_NEEDED
+        );
+
+        when(visitRepo.findByVisitId(visit.getVisitId()))
+                .thenReturn(Mono.just(visit));
+
+        when(visitRepo.save(visit))
+                .thenReturn(Mono.just(visit));
+
+        when(entityDtoUtil.toVisitResponseDTO(visit))
+                .thenReturn(Mono.just(response));
+
+        StepVerifier.create(
+                        visitService.cancelVisit(visit.getVisitId(), request)
+                )
+                .expectNext(response)
+                .verifyComplete();
+
+        assertEquals(Status.CANCELLED, visit.getStatus());
+        assertEquals(
+                CancellationReason.APPOINTMENT_NO_LONGER_NEEDED,
+                visit.getCancellationReason()
+        );
+
+        verify(visitRepo, times(1)).save(visit);
     }
 }
