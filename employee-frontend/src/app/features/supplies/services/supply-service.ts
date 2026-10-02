@@ -66,9 +66,9 @@ export class SupplyService {
       `${this.baseUrl}/${inventoryId}/products/${productId}/consume`,
       {},
     );
+  }
   downloadSupplyPdf(inventoryId: string): Observable<Blob> {
     return this.http.get(`/api/gateway/inventories/${inventoryId}/products/download`, {
       responseType: 'blob',
     });
-  }
-}
+  }}

@@ -10,7 +10,6 @@ import {
   InventoryType,
 } from '@features/inventories/models/inventory.model';
 
-// @Injectable({ providedIn: 'root' })
 export class InventoryList {
   private readonly http = inject(HttpClient);
   private readonly sse = inject(SseClient);
@@ -25,7 +24,7 @@ export class InventoryList {
       );
   }
 
-  
+
   getInventories(filters: Partial<InventoryFilters> = {}): Observable<Inventory> {
     let params = new HttpParams().set('page', '0').set('size', '10');
 
