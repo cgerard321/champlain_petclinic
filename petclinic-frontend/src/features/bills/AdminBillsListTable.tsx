@@ -166,7 +166,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
   }, []);
 
   useEffect(() => {
-      callGetBillsListWithFilters(currentPage, 10);
+    callGetBillsListWithFilters(currentPage, 10);
   }, [currentPage, callGetBillsListWithFilters, selectedFilter]);
 
   useEffect(() => {
