@@ -32,7 +32,13 @@ export default function PromoListTable(): JSX.Element {
   };
 
   const handleDelete = async (promoCode: string) => {
-    await PromoApi.deletePromo(promoCode);
+    try {
+      await PromoApi.deletePromo(promoCode);
+      await fetchPromos();
+    } catch (err) {
+      console.error('Error deleting promo:', err);
+      setError('Failed to delete promo');
+    }
   };
 
   if (loading) {
