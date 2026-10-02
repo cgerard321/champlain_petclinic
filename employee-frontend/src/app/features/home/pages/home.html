@@ -1,27 +1,24 @@
 <main class="home-container">
+  <h1 class="welcome-title">
+    @if (employeeName()) {
+      Welcome back, {{ employeeName() }}!
+    } @else {
+      Welcome to Champlain Petclinic
+    }
+  </h1>
   <mat-card class="welcome-card" appearance="outlined">
     <div class="welcome-content">
       <div class="welcome-text">
         <span class="welcome-badge">EMPLOYEE PORTAL</span>
-
-        <!-- Welcome Message (Ticket Criteria) -->
-        <h1 class="welcome-title">
-          @if (employeeName()) {
-            Welcome back, {{ employeeName() }}!
-          } @else {
-            Welcome to Champlain Petclinic
-          }
+        <h1>
+          Clinic Management Dashboard
         </h1>
-
-        <!-- Short Introduction (Ticket Criteria) -->
         <p class="welcome-description">
-          At Champlain Pet Clinic, we offer a wide range of services to ensure the health and
-          well-being of your beloved pets. Our experienced veterinarians and staff are dedicated to
-          providing the best care possible.
+          Manage appointments, oversee daily clinic operations, access patient medical records, and
+          monitor inventory seamlessly in one central location!
         </p>
       </div>
 
-      <!-- Clinic Logo (Ticket Criteria) -->
       <div class="logo-wrapper">
         <div class="brand-emblem">
           <span class="brand-title">Pet<span class="brand-highlight">Clinic</span></span>
