@@ -189,9 +189,11 @@
     },
     "errors": {
       "nameRequired": "Pet name is required",
+      "nameTooLong": "Pet name cannot be longer than 20 characters",
       "typeRequired": "Pet type is required",
       "weightRequired": "Weight is required",
       "weightPositive": "Weight must be greater than 0",
+      "weightTooHigh": "Weight cannot be greater than 100 kg",
       "addFailed": "Failed to add pet. Please try again.",
       "updateFailed": "Failed to update pet. Please try again.",
       "deleteFailed": "Failed to delete pet. Please try again.",

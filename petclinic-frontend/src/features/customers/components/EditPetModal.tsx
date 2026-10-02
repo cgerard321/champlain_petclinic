@@ -196,14 +196,14 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
     if (!pet) return false;
     const newErrors: { [key: string]: string } = {};
     if (!pet?.name?.trim()) newErrors.name = 'pets.errors.nameRequired';
-    if (pet.name.trim().length > 20) newErrors.name = 'Pet name cannot be longer than 20 characters';
+    if (pet.name.trim().length > 20) newErrors.name = 'pets.errors.nameTooLong';
 
     if (!pet?.weight?.trim()) newErrors.weight = 'pets.errors.weightRequired';
     if (!pet?.petTypeId) newErrors.petTypeId = 'pets.errors.typeRequired';
     if (pet?.weight && parseFloat(pet.weight) <= 0)
       newErrors.weight = 'pets.errors.weightPositive';
     if (parseFloat(pet.weight) > 100)
-      newErrors.weight = 'Weight cannot be greater than 100 kg';
+      newErrors.weight = 'pets.errors.weightTooHigh';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
