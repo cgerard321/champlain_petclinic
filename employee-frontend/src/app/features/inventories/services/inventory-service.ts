@@ -34,12 +34,15 @@ export class InventoryService {
     if (filters.inventoryName?.trim()) {
       params = params.set('inventoryName', filters.inventoryName.trim());
     }
+
     if (filters.inventoryType?.trim()) {
       params = params.set('inventoryType', filters.inventoryType.trim());
     }
+
     if (filters.inventoryDescription?.trim()) {
       params = params.set('inventoryDescription', filters.inventoryDescription.trim());
     }
+
     if (filters.importantOnly) {
       params = params.set('importantOnly', 'true');
     }
@@ -56,7 +59,7 @@ export class InventoryService {
             const isNetworkError =
               error instanceof HttpErrorResponse
                 ? error.status === 0
-                : err.code === 0 || err.status === 0;
+                : err?.code === 0 || err?.status === 0;
 
             return isNetworkError ? timer(5000) : throwError(() => error);
           },
@@ -66,5 +69,9 @@ export class InventoryService {
 
   getQuantity(inventoryId: string): Observable<number> {
     return this.http.get<number>(`${this.baseUrl}/${inventoryId}/productquantity`);
+  }
+
+  updateImportantStatus(inventoryId: string, important: boolean): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/${inventoryId}/important`, { important });
   }
 }

@@ -1,11 +1,8 @@
-export enum ProductType {
-  FOOD = 'FOOD',
-  MEDICATION = 'MEDICATION',
-  ACCESSORY = 'ACCESSORY',
-  EQUIPMENT = 'EQUIPMENT',
-}
-
 import { FileDetails } from '@features/prod/models/image.model';
+export interface ProductType {
+  productTypeId: string;
+  typeName: string;
+}
 
 export enum ProductStatus {
   AVAILABLE = 'AVAILABLE',
@@ -31,7 +28,8 @@ export interface Product {
   requestCount?: number;
   productQuantity: number;
   isUnlisted: boolean;
-  productType: ProductType;
+  productType: string;
+  productTypeId: string;
   productStatus: ProductStatus;
   deliveryType: DeliveryType;
   releaseDate?: string;
@@ -44,7 +42,7 @@ export interface ProductRequest {
   productSalePrice: number;
   productQuantity: number;
   isUnlisted: boolean;
-  productType: ProductType;
+  productTypeId: string;
   releaseDate?: string;
   productStatus?: ProductStatus;
   deliveryType: DeliveryType;
