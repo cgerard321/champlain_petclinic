@@ -1,0 +1,65 @@
+<div class="dialog-header">
+  <h2 mat-dialog-title>{{ promo ? 'Update Promo' : 'Add Promo' }}</h2>
+  <button
+    class="dialog-close-button"
+    mat-icon-button
+    mat-dialog-close
+    type="button"
+    aria-label="Close promo dialog"
+  >
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<form class="promo-form" (submit)="submit($event)">
+  <mat-dialog-content>
+    <mat-form-field appearance="outline">
+      <mat-label>Name</mat-label>
+      <input matInput type="text" [formField]="promoForm.name" />
+      @if (promoForm.name().touched() && promoForm.name().invalid()) {
+        <mat-error>{{ promoForm.name().errors()[0]?.message }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Code</mat-label>
+      <input matInput type="text" [formField]="promoForm.code" />
+      @if (promoForm.code().touched() && promoForm.code().invalid()) {
+        <mat-error>{{ promoForm.code().errors()[0]?.message }}</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="two-column">
+      <mat-form-field appearance="outline">
+        <mat-label>Discount (%)</mat-label>
+        <input matInput type="number" step="1" [formField]="promoForm.discount" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Expiration date</mat-label>
+        <input matInput type="date" [formField]="promoForm.expirationDate" />
+        @if (promoForm.expirationDate().touched() && promoForm.expirationDate().invalid()) {
+          <mat-error>{{ promoForm.expirationDate().errors()[0]?.message }}</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <mat-slide-toggle [checked]="model().active" (change)="setActive($event.checked)">
+      {{ model().active ? 'Active' : 'Inactive' }}
+    </mat-slide-toggle>
+
+    @if (errorMessage()) {
+      <p class="error-message">{{ errorMessage() }}</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" [disabled]="isSubmitting()" (click)="cancel()">Cancel</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="isSubmitting()">
+      @if (isSubmitting()) {
+        <mat-progress-spinner diameter="20" mode="indeterminate" />
+      } @else {
+        Save Promo
+      }
+    </button>
+  </mat-dialog-actions>
+</form>
