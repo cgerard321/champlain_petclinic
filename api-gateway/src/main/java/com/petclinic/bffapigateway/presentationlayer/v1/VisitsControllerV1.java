@@ -116,10 +116,9 @@ public class VisitsControllerV1 {
     }
 
     @DeleteMapping(value = "/cancelled")
-    public Mono<ResponseEntity<Void>> deleteAllCancelledVisits(){
+    public Mono<ResponseEntity<Void>> deleteAllCancelledVisits() {
         return visitsServiceClient.deleteAllCancelledVisits()
-                .map(v -> ResponseEntity.noContent().<Void>build())
-                .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
+                .thenReturn(ResponseEntity.noContent().build());
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
@@ -153,7 +152,7 @@ public class VisitsControllerV1 {
 
     @GetMapping(value = "/owners/{ownerId}/visits", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VisitResponseDTO> getVisitsByOwnerId(@PathVariable String ownerId) {
-        return customersServiceClient.getPetsByOwnerId(ownerId)
+        return customersServiceClient.getPetsByCustomerId(ownerId)
                 .flatMap(pet -> visitsServiceClient.getVisitsForPet(pet.getPetId()));
     }
 

@@ -28,7 +28,7 @@ public class GlobalControllerExceptionHandler {
 
     @ResponseStatus(BAD_REQUEST)
     @ExceptionHandler(RatingAlreadyExists.class)
-    public HttpErrorInfo handleRatingAlreadyExists(ServerHttpRequest request, Exception ex){
+    public HttpErrorInfo handleRatingAlreadyExists(ServerHttpRequest request, Exception ex) {
         return createHttpErrorInfo(BAD_REQUEST, request, ex);
     }
 
@@ -47,6 +47,34 @@ public class GlobalControllerExceptionHandler {
     @ResponseStatus(CONFLICT)
     @ExceptionHandler(ProductInBundleConflictException.class)
     public HttpErrorInfo handleProductInBundleConflictException(ServerHttpRequest request, Exception ex) {
+        return createHttpErrorInfo(CONFLICT, request, ex);
+    }
+
+    @ResponseStatus(BAD_REQUEST)
+    @ExceptionHandler(BadRequestException.class)
+    public HttpErrorInfo handleBadRequestException(
+            ServerHttpRequest request, Exception ex) {
+        return createHttpErrorInfo(BAD_REQUEST, request, ex);
+    }
+
+    @ResponseStatus(UNPROCESSABLE_ENTITY)
+    @ExceptionHandler(UnprocessableEntityException.class)
+    public HttpErrorInfo handleUnprocessableEntityException(
+            ServerHttpRequest request, Exception ex) {
+        return createHttpErrorInfo(UNPROCESSABLE_ENTITY, request, ex);
+    }
+
+    @ResponseStatus(FAILED_DEPENDENCY)
+    @ExceptionHandler(FailedDependencyException.class)
+    public HttpErrorInfo handleFailedDependencyException(
+            ServerHttpRequest request, Exception ex) {
+        return createHttpErrorInfo(FAILED_DEPENDENCY, request, ex);
+    }
+
+    @ResponseStatus(CONFLICT)
+    @ExceptionHandler(ProductTypeInUseException.class)
+    public HttpErrorInfo handleProductTypeInUseException(
+            ServerHttpRequest request, Exception ex) {
         return createHttpErrorInfo(CONFLICT, request, ex);
     }
 

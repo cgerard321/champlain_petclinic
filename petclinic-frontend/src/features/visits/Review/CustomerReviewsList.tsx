@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IsOwner, useUser } from '@/context/UserContext';
+import { IsCustomer, useUser } from '@/context/UserContext';
 import { getAllReviews } from './Api/getAllReviews';
 import { ReviewResponseDTO } from './Model/ReviewResponseDTO';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
@@ -17,7 +17,7 @@ const CustomerReviewsList: React.FC = (): JSX.Element => {
   const [reviewList, setReviewList] = useState<ReviewResponseDTO[]>([]);
   const navigate = useNavigate();
   const { user } = useUser();
-  const isOwner = IsOwner();
+  const isOwner = IsCustomer();
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
 

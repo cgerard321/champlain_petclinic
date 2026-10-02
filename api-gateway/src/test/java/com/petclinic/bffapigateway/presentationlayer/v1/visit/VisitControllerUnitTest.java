@@ -30,6 +30,9 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
 
 import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
@@ -399,7 +402,7 @@ public class VisitControllerUnitTest {
                 .petId("P001")
                 .name("Oscar")
                 .build();
-        when(customersServiceClient.getPetsByOwnerId(ownerId))
+        when(customersServiceClient.getPetsByCustomerId(ownerId))
                 .thenReturn(Flux.just(pet));
 
         // Mock visits for that pet
@@ -415,7 +418,7 @@ public class VisitControllerUnitTest {
                 .hasSize(1)
                 .contains(visitResponseDTO1);
 
-        verify(customersServiceClient, times(1)).getPetsByOwnerId(ownerId);
+        verify(customersServiceClient, times(1)).getPetsByCustomerId(ownerId);
         verify(visitsServiceClient, times(1)).getVisitsForPet("P001");
     }
 
@@ -523,7 +526,7 @@ public class VisitControllerUnitTest {
     @Test
     void getVisitsByOwnerId_whenOwnerDoesNotExist_thenReturnEmptyFlux() {
         String ownerId = "nonExistingOwner";
-        when(customersServiceClient.getPetsByOwnerId(ownerId))
+        when(customersServiceClient.getPetsByCustomerId(ownerId))
                 .thenReturn(Flux.empty()); // No pets for that owner
 
         webTestClient.get()
@@ -534,7 +537,7 @@ public class VisitControllerUnitTest {
                 .expectBodyList(VisitResponseDTO.class)
                 .hasSize(0);
 
-        verify(customersServiceClient, times(1)).getPetsByOwnerId(ownerId);
+        verify(customersServiceClient, times(1)).getPetsByCustomerId(ownerId);
         verify(visitsServiceClient, never()).getVisitsForPet(anyString());
     }
 
@@ -772,7 +775,7 @@ public class VisitControllerUnitTest {
         webTestClient.delete()
                 .uri(BASE_VISIT_URL + "/cancelled")
                 .exchange()
-                .expectStatus().isNotFound();
+                .expectStatus().isNoContent();
 
         verify(visitsServiceClient, times(1)).deleteAllCancelledVisits();
     }
@@ -780,7 +783,9 @@ public class VisitControllerUnitTest {
     @Test
     void deleteAllCancelledVisits_whenNoneExist_thenReturnNotFound() {
         when(visitsServiceClient.deleteAllCancelledVisits())
-                .thenReturn(Mono.empty());
+                .thenReturn(Mono.error(
+                        new ResponseStatusException(HttpStatus.NOT_FOUND,"No cancelled visits were found")
+                ));
 
         webTestClient.delete()
                 .uri(BASE_VISIT_URL + "/cancelled")

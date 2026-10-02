@@ -39,10 +39,9 @@ public class IsUserFilter implements WebFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
 
-        if (exchange.getAttribute("whitelisted") != null && exchange.getAttribute("whitelisted") instanceof Boolean) {
-            if((boolean) exchange.getAttribute("whitelisted")) {
-                return chain.filter(exchange);
-            }
+        Boolean whitelisted = exchange.getAttribute("whitelisted");
+        if (Boolean.TRUE.equals(whitelisted)) {
+            return chain.filter(exchange);
         }
 
         HandlerMethod handler = utility.getHandler(exchange);

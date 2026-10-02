@@ -1,0 +1,229 @@
+{
+  "title": "Détails du client",
+  "subtitle": "Gérez votre profil et vos animaux enregistrés.",
+  "buttons": {
+    "save": "Enregistrer les modifications",
+    "cancel": "Annuler"
+  },
+
+  "uploadPetPhotoModal": {
+    "title": "Changer la photo de votre animal",
+    "selectPhoto": "Sélectionner une photo :",
+    "chooseFile": "Choisir un fichier",
+    "preview": "Aperçu :",
+    "uploading": "Veuillez patienter...",
+    "uploadPhoto": "Ajouter une photo",
+    "cancelButton": "Annuler",
+    "alert": {
+      "photoRequired": "Veuillez sélectionner un fichier image (JPG, PNG, etc.)",
+      "photoSize": "La taille du fichier doit être inférieure à 5 Mo",
+      "fileRequired": "Veuillez sélectionner un fichier",
+      "uploadFailed": "Une erreur est survenue pendant le changement de la photo de l’animal. Veuillez réessayer."
+    }
+  },
+
+  "uploadPetPhoto": {
+    "uploading": "Veuillez patienter...",
+    "addPhoto": "Ajouter une photo",
+    "errors": {
+      "invalidFileType": "Veuillez sélectionner un fichier image (JPG, PNG, etc.)",
+      "fileTooLarge": "La taille du fichier doit être inférieure à 5 Mo",
+      "uploadFailed": "Une erreur est survenue pendant le changement de la photo de l’animal. Veuillez réessayer."
+    }
+  },
+
+  "uploadProfilePhoto": {
+    "uploading": "Veuillez patienter...",
+    "changePhoto": "Changer la photo",
+    "errors": {
+      "invalidFileType": "Veuillez sélectionner un fichier image (JPG, PNG, etc.)",
+      "fileTooLarge": "La taille du fichier doit être inférieure à 5 Mo",
+      "uploadFailed": "Une erreur est survenue pendant le changement de la photo de profil. Veuillez réessayer."
+    }
+  },
+
+  "uploadPhotoModal": {
+    "title": "Changer la photo de profil",
+    "selectPhoto": "Sélectionner une photo :",
+    "chooseFile": "Choisir un fichier",
+    "preview": "Aperçu :",
+    "cancel": "Annuler",
+    "uploading": "Veuillez patienter...",
+    "uploadPhoto": "Changer la photo",
+    "errors": {
+      "invalidFileType": "Veuillez sélectionner un fichier image (JPG, PNG, etc.)",
+      "fileTooLarge": "La taille du fichier doit être inférieure à 5 Mo",
+      "noFileSelected": "Veuillez sélectionner un fichier",
+      "uploadFailed": "Une erreur est survenue pendant le changement de la photo de profil. Veuillez réessayer."
+    },
+
+    "alt": {
+      "preview": "Aperçu"
+    }
+  },
+
+
+  "fields": {
+    "username": "Nom d'utilisateur :",
+    "firstName": "Prénom :",
+    "lastName": "Nom :",
+    "address": "Adresse :",
+    "city": "Ville :",
+    "province": "Province :",
+    "telephone": "Téléphone :"
+  },
+  "customerDetails": {
+    "heading": "Détails du client {{firstName}} {{lastName}}",
+    "loading": "Chargement...",
+    "notFound": "Aucun client trouvé.",
+    "infoTitle": "Informations du client",
+    "pets": {
+      "title": "Animaux du client",
+      "petId": "ID de l'animal :",
+      "name": "Nom :",
+      "type": "Type :",
+      "weight": "Poids :",
+      "age": "Âge :",
+      "years_one": "{{count}} an",
+      "years_other": "{{count}} ans",
+      "photoAlt": "Photo de profil de {{name}}",
+      "editPet": "Modifier l'animal",
+      "none": "Aucun animal trouvé."
+    },
+    "bills": {
+      "title": "Factures du client",
+      "billId": "ID de la facture :",
+      "amount": "Montant :",
+      "date": "Date :",
+      "none": "Aucune facture trouvée."
+    },
+    "buttons": {
+      "edit": "Modifier le client",
+      "back": "Retour à la liste des clients",
+      "addPet": "Ajouter un animal",
+      "delete": "Supprimer le client",
+      "deleteTitle": "Supprimer",
+      "enable": "Activer le compte",
+      "disable": "Désactiver le compte"
+    },
+    "messages": {
+      "confirmDelete": "Voulez-vous vraiment supprimer ce client ?",
+      "deleteSuccess": "Client supprimé avec succès.",
+      "deleteCanceled": "Suppression du client annulée.",
+      "confirmEnable": "Voulez-vous vraiment activer le compte de cet utilisateur ?",
+      "confirmDisable": "Voulez-vous vraiment désactiver le compte de cet utilisateur ?",
+      "enableSuccess": "Compte utilisateur activé avec succès.",
+      "disableSuccess": "Compte utilisateur désactivé avec succès."
+    }
+  },
+  "customerForm": {
+    "title": "Modifier le profil",
+    "selectProvince": "Sélectionnez une province",
+    "submit": "Mettre à jour",
+    "back": "Retour",
+    "updateSuccess": "Profil mis à jour avec succès",
+    "updateError": "Impossible de mettre à jour votre profil. Veuillez vérifier vos informations et réessayer.",
+    "modal": {
+      "title": "Succès !",
+      "message": "Le client a été mis à jour avec succès.",
+      "close": "Fermer"
+    }
+  },
+  "validation": {
+    "firstNameRequired": "Le prénom est requis",
+    "lastNameRequired": "Le nom est requis",
+    "addressRequired": "L'adresse est requise",
+    "cityRequired": "La ville est requise",
+    "provinceRequired": "La province est requise",
+    "telephoneRequired": "Le numéro de téléphone est requis",
+    "telephoneTenDigits": "Le numéro de téléphone doit contenir exactement 10 chiffres (chiffres seulement)",
+    "telephoneDigitsOnly": "Le numéro de téléphone doit contenir uniquement des chiffres",
+    "usernameRequired": "Le nom d'utilisateur est requis",
+    "usernameTooShort": "Le nom d'utilisateur doit contenir au moins 3 caractères",
+    "usernameTooLong": "Le nom d'utilisateur doit contenir moins de 30 caractères",
+    "usernameInvalid": "Le nom d'utilisateur doit contenir au moins une lettre et ne peut contenir que des lettres, des chiffres et des traits de soulignement",
+    "usernameTaken": "Ce nom d'utilisateur est déjà pris",
+    "noPermission": "Vous n'avez pas la permission de vérifier la disponibilité du nom d'utilisateur",
+    "loginRequired": "Veuillez vous connecter pour vérifier la disponibilité du nom d'utilisateur",
+    "serverError": "Erreur du serveur. Veuillez réessayer plus tard",
+    "networkError": "Erreur réseau. Veuillez vérifier votre connexion",
+    "usernameCheckFailed": "Impossible de vérifier la disponibilité du nom d'utilisateur. Veuillez réessayer"
+  },
+  "pets": {
+    "addTitle": "Ajouter un nouvel animal",
+    "editTitle": "Modifier l'animal : {{name}}",
+    "fields": {
+      "name": "Nom de l'animal",
+      "petType": "Type d'animal",
+      "birthDate": "Date de naissance",
+      "weight": "Poids (kg)",
+      "isActive": "Actif",
+      "uploadPhoto": "Téléverser une photo :",
+      "photoAlt": "Photo de profil de {{name}}",
+      "newPhotoAlt": "Photo de profil du nouvel animal"
+    },
+    "selectType": "Sélectionnez un type d'animal",
+    "loadingTypes": "Chargement des types d'animaux...",
+    "types": {
+      "cat": "Chat",
+      "dog": "Chien",
+      "lizard": "Lézard",
+      "snake": "Serpent",
+      "bird": "Oiseau",
+      "hamster": "Hamster",
+      "others": "Autres"
+    },
+    "buttons": {
+      "add": "Ajouter l'animal",
+      "adding": "Ajout en cours...",
+      "update": "Mettre à jour l'animal",
+      "updating": "Mise à jour...",
+      "delete": "Supprimer l'animal",
+      "confirmDelete": "Supprimer",
+      "yesDelete": "Oui, supprimer",
+      "cancel": "Annuler",
+      "close": "Fermer",
+      "addPhoto": "Ajouter une photo",
+      "deletePhoto": "Supprimer la photo"
+    },
+    "errors": {
+      "nameRequired": "Le nom de l'animal est requis",
+      "nameTooLong": "Le nom de l'animal ne peut pas dépasser {{maxNameLength}} caractères",
+      "ageTooHigh": "L'âge de l'animal ne peut pas dépasser {{maxAge}} ans",
+      "typeRequired": "Le type d'animal est requis",
+      "weightRequired": "Le poids est requis",
+      "weightPositive": "Le poids doit être supérieur à 0",
+      "weightTooHigh": "Le poids ne peut pas dépasser {{maxWeight}} kg",
+      "addFailed": "Échec de l'ajout de l'animal. Veuillez réessayer.",
+      "updateFailed": "Échec de la mise à jour de l'animal. Veuillez réessayer.",
+      "deleteFailed": "Échec de la suppression de l'animal. Veuillez réessayer.",
+      "addPhotoFailed": "Échec de l'ajout de la photo. Veuillez réessayer.",
+      "deletePhotoFailed": "Échec de la suppression de la photo. Veuillez réessayer."
+    },
+    "success": {
+      "title": "Succès !",
+      "added": "Animal ajouté avec succès !",
+      "addedMessage": "L'animal a été ajouté avec succès.",
+      "updated": "Animal mis à jour avec succès !",
+      "updatedMessage": "L'animal a été mis à jour avec succès.",
+      "photoAdded": "Photo ajoutée avec succès !",
+      "photoDeleted": "Photo supprimée avec succès !"
+    },
+    "notFound": {
+      "title": "Animal introuvable",
+      "message": "Animal introuvable. Veuillez vérifier l'identifiant et réessayer."
+    },
+    "loading": {
+      "title": "Chargement...",
+      "message": "Chargement des données de l'animal..."
+    },
+    "deleteModal": {
+      "title": "Confirmer la suppression",
+      "message": "Voulez-vous vraiment supprimer cet animal ? Cette action est irréversible."
+    },
+    "deletePhotoModal": {
+      "title": "Supprimer la photo",
+      "message": "Voulez-vous vraiment supprimer la photo de cet animal ? Cette action est irréversible."
+    }
+  }
+}

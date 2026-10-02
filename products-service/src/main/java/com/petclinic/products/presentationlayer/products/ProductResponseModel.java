@@ -1,8 +1,8 @@
 package com.petclinic.products.presentationlayer.products;
 
-import com.petclinic.products.datalayer.products.ProductType;
-import com.petclinic.products.datalayer.products.ProductStatus;
 import com.petclinic.products.datalayer.products.DeliveryType;
+import com.petclinic.products.datalayer.products.ProductStatus;
+import com.petclinic.products.domainclientlayer.FileResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,7 +23,10 @@ public class ProductResponseModel {
     private Integer requestCount;
     private Integer productQuantity;
     private Boolean isUnlisted;
-    private ProductType productType;
+    private String productType;
+    private String productTypeId;
+    //private ProductType productType;
     private ProductStatus productStatus;
     private DeliveryType deliveryType;
+    private FileResponseDTO image;
 }

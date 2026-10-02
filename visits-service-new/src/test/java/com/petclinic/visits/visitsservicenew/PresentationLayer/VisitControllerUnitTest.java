@@ -9,6 +9,7 @@ import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.SpecialtyDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.Workday;
+import com.petclinic.visits.visitsservicenew.Exceptions.InvalidInputException;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Prescriptions.PrescriptionResponseDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewRequestDTO;
@@ -210,6 +211,29 @@ class VisitControllerUnitTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
+
+        verify(visitService, times(1)).addVisit(any(Mono.class));
+    }
+
+    @Test
+    void addVisit_WithEmptyDescription_ReturnsUnprocessableEntity() {
+        // Arrange
+        VisitRequestDTO requestDTO = buildVisitRequestDTO(vet.getVetId());
+        requestDTO.setDescription("");
+        when(visitService.addVisit(any(Mono.class)))
+                .thenReturn(Mono.error(new InvalidInputException("Please enter a description for this visit")));
+
+        // Act and assert
+        webTestClient.post()
+                .uri("/visits")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
+                .exchange()
+                .expectStatus().isEqualTo(422)
+                .expectBody()
+                .jsonPath("$.path").isEqualTo("/visits")
+                .jsonPath("$.httpStatus").isEqualTo("UNPROCESSABLE_ENTITY")
+                .jsonPath("$.message").isEqualTo("Please enter a description for this visit");
 
         verify(visitService, times(1)).addVisit(any(Mono.class));
     }

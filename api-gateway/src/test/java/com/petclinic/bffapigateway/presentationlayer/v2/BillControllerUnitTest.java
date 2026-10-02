@@ -9,6 +9,7 @@ import com.petclinic.bffapigateway.presentationlayer.v1.BillControllerV1;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -92,11 +93,11 @@ private final String baseBillURL = "/api/v2/gateway/bills";
     @Test
     public void whenGetAllBillsByPageWithValidParameters_ThenReturnPagedBills() {
         when(billServiceClient.getAllBillsByPage(Optional.of(1), Optional.of(5), null, null,
-                null, null, null, null, null, null))
+                null, null, null, null, null, null, false))
                 .thenReturn(Flux.just(billresponse, billresponse2));
 
         webTestClient.get()
-                .uri(uriBuilder -> uriBuilder.path(baseBillURL)
+                .uri(uriBuilder -> uriBuilder.path(baseBillURL + "/paginated")
                         .queryParam("page", 1)
                         .queryParam("size", 5)
                         .build())
@@ -109,13 +110,55 @@ private final String baseBillURL = "/api/v2/gateway/bills";
 
         verify(billServiceClient, times(1)).getAllBillsByPage(Optional.of(1),
                 Optional.of(5), null, null, null, null, null,
-                null, null, null);
+                null, null, null, false);
+    }
+    @Test
+    void getAllBillsStream_ShouldReturnAllBills() {
+        when(billServiceClient.getAllBillsStream(
+                null, null, null, null, null, null, null, null))
+                .thenReturn(Flux.just(billresponse, billresponse2));
+
+        webTestClient.get()
+                .uri(baseBillURL + "/stream")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader()
+                .contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectBodyList(BillResponseDTO.class)
+                .hasSize(2)
+                .contains(billresponse, billresponse2);
+
+        Mockito.verify(billServiceClient).getAllBillsStream(
+                null, null, null, null, null, null, null, null);
+    }
+
+    @Test
+    void getAllBillsStream_WithBillIdFilter_ReturnsMatchingBill() {
+        when(billServiceClient.getAllBillsStream(
+                "bill-1", null, null, null, null, null, null, null))
+                .thenReturn(Flux.just(billresponse));
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path(baseBillURL + "/stream")
+                        .queryParam("billId", "bill-1")
+                        .build())
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(BillResponseDTO.class)
+                .hasSize(1)
+                .contains(billresponse);
+
+        verify(billServiceClient).getAllBillsStream(
+                "bill-1", null, null, null, null, null, null, null);
     }
 
     @Test
     public void whenGetAllBillsByPageWithInvalidParameters_ThenReturnBadRequest() {
         webTestClient.get()
-                .uri(uriBuilder -> uriBuilder.path(baseBillURL)
+                .uri(uriBuilder -> uriBuilder.path(baseBillURL + "/paginated")
                         .queryParam("page", -1)
                         .queryParam("size", "invalid")
                         .build())
