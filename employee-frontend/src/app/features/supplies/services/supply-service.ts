@@ -63,4 +63,10 @@ export class SupplyService {
   deleteSupply(inventoryId: string, productId: string): Observable<void> {
     return this.http.delete<void>(`/api/gateway/inventories/${inventoryId}/products/${productId}`);
   }
+
+  downloadSupplyPdf(inventoryId: string): Observable<Blob> {
+    return this.http.get(`/api/gateway/inventories/${inventoryId}/products/download`, {
+      responseType: 'blob',
+    });
+  }
 }

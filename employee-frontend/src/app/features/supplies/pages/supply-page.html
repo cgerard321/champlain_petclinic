@@ -6,13 +6,27 @@
     </div>
 
     @if (canManageSupplies()) {
-      <button
-        type="button"
-        class="add-supply-button"
-        (click)="showAddForm() ? cancelAddForm() : openAddForm()"
-      >
-        {{ showAddForm() ? 'Cancel' : 'Add Supply' }}
-      </button>
+      <div class="header-actions">
+        <button
+          type="button"
+          class="download-pdf-button"
+          [class.expanded]="downloadingPdf()"
+          [disabled]="downloadingPdf() || loading() || supplies().length === 0"
+          [attr.aria-label]="downloadingPdf() ? 'Downloading PDF' : 'Download PDF'"
+          (click)="downloadPdf()"
+        >
+          <mat-icon aria-hidden="true">download</mat-icon>
+          <span class="download-label">{{ downloadingPdf() ? 'Downloading...' : 'Download' }}</span>
+        </button>
+
+        <button
+          type="button"
+          class="add-supply-button"
+          (click)="showAddForm() ? cancelAddForm() : openAddForm()"
+        >
+          {{ showAddForm() ? 'Cancel' : 'Add Supply' }}
+        </button>
+      </div>
     }
   </div>
 
@@ -123,6 +137,10 @@
 
   @if (deleteError()) {
     <p class="field-error" role="alert">{{ deleteError() }}</p>
+  }
+
+  @if (downloadError()) {
+    <p class="field-error" role="alert">{{ downloadError() }}</p>
   }
 
   @if (loading()) {
