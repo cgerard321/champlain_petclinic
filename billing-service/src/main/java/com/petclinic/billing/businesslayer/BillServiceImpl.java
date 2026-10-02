@@ -230,7 +230,6 @@ public class BillServiceImpl implements BillService{
 
         return bills
                 .filter(filterCriteria)
-                .map(EntityDtoUtil::toBillResponseDto)
                 .count();
     }
 
