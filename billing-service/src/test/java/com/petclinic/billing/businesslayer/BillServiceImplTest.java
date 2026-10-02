@@ -474,8 +474,9 @@ public class BillServiceImplTest {
         // Mock AuthServiceClient response
         UserDetails userDetails = new UserDetails();
         userDetails.setUserId("owner-456");
-        Mockito.when(authClient.getUserById("owner-456", "JWTToken"))
-                .thenReturn(Mono.just(userDetails)); // Ensure a non-null Mono is returned
+
+        Mockito.when(authClient.getUserById("JWTToken", "owner-456"))
+                .thenReturn(Mono.just(userDetails));
 
         // Mock repository insert
         Mockito.when(repo.findById(Mockito.anyString()))

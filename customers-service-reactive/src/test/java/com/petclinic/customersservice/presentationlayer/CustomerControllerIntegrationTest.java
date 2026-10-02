@@ -80,15 +80,14 @@ class CustomerControllerIntegrationTest {
     String publicCustomerId = customerEntity.getCustomerId();
 
     Customer customer1 = buildCustomerId("Billy","customerId_1");
-
     @Test
     void deleteCustomerbyCustomerId() {
 
-        StepVerifier.create(repo.deleteAll()).verifyComplete();
+        String uniqueCustomerId = java.util.UUID.randomUUID().toString();
 
         Customer customerEntity = Customer.builder()
-                .id("23")
-                .customerId("a6e0e5b0-5f60-45f0-8ac7-becd8b330486")
+                .id(java.util.UUID.randomUUID().toString())
+                .customerId(uniqueCustomerId)
                 .firstName("FirstName")
                 .lastName("LastName")
                 .address("Test address")
@@ -98,16 +97,15 @@ class CustomerControllerIntegrationTest {
                 .build();
 
         StepVerifier.create(repo.save(customerEntity))
-                .expectNextMatches(saved -> saved.getCustomerId().equals("a6e0e5b0-5f60-45f0-8ac7-becd8b330486"))
+                .expectNextMatches(saved -> saved.getCustomerId().equals(uniqueCustomerId))
                 .verifyComplete();
 
-        client.delete().uri("/customers/a6e0e5b0-5f60-45f0-8ac7-becd8b330486")
+        client.delete().uri("/customers/" + uniqueCustomerId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNoContent()
                 .expectBody();
     }
-
     @Test
     void deleteNonExistentCustomerByCustomerId() throws InterruptedException {
 
@@ -117,7 +115,7 @@ class CustomerControllerIntegrationTest {
        } catch (InterruptedException e) {
            Thread.currentThread().interrupt();
        }
-        String nonExistentCustomerId = "a6e0e5b0-5f60-45f0-8ac7-becd8b330486";
+        String nonExistentCustomerId = java.util.UUID.randomUUID().toString();
 
         client.delete().uri("/customers/" + nonExistentCustomerId)
                 .accept(MediaType.APPLICATION_JSON)
