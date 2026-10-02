@@ -67,7 +67,7 @@ describe('ProductUpdateDialog', () => {
   });
 });
 
-  /*it('loads delivery types from the enums API', () => {
+/*it('loads delivery types from the enums API', () => {
     const fixture = TestBed.createComponent(ProductUpdateDialog);
     fixture.detectChanges();
 
