@@ -119,10 +119,9 @@ public class VisitsControllerV1 {
     }
 
     @DeleteMapping(value = "/cancelled")
-    public Mono<ResponseEntity<Void>> deleteAllCancelledVisits(){
+    public Mono<ResponseEntity<Void>> deleteAllCancelledVisits() {
         return visitsServiceClient.deleteAllCancelledVisits()
-                .map(v -> ResponseEntity.noContent().<Void>build())
-                .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
+                .thenReturn(ResponseEntity.noContent().build());
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})

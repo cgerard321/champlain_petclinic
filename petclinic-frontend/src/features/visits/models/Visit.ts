@@ -1,5 +1,5 @@
 import { FileDetails } from '@/shared/models/FileDetails';
-import {CancellationReason} from "@/features/visits/models/CancellationReason.ts";
+import { CancellationReason } from '@/features/visits/models/CancellationReason.ts';
 
 export interface Visit {
   visitId: string;

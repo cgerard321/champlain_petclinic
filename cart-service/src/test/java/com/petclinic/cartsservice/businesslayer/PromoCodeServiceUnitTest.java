@@ -21,7 +21,9 @@ import java.util.Objects;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -247,7 +249,74 @@ public class PromoCodeServiceUnitTest {
         verify(promoRepository, times(1)).findPromoCodeByCode(promoCodeString);
     }
 
+    @Test
+    void createPromo_shouldBeActive_whenActiveNotProvided() {
+        // Arrange
+        promoCodeRequestModel.setExpirationDate("2999-12-31T23:59:59");
+        when(promoRepository.save(any(PromoCode.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
 
+        // Act
+        Mono<PromoCodeResponseModel> createdPromoCode = promoCodeService.createPromo(promoCodeRequestModel);
+
+        // Assert
+        StepVerifier.create(createdPromoCode)
+                .assertNext(promoCodeResponseModel -> assertTrue(promoCodeResponseModel.isActive()))
+                .verifyComplete();
+    }
+
+    @Test
+    void createPromo_shouldBeInactive_whenActiveIsFalse() {
+        // Arrange
+        promoCodeRequestModel.setExpirationDate("2999-12-31T23:59:59");
+        promoCodeRequestModel.setActive(false);
+        when(promoRepository.save(any(PromoCode.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+
+        // Act
+        Mono<PromoCodeResponseModel> createdPromoCode = promoCodeService.createPromo(promoCodeRequestModel);
+
+        // Assert
+        StepVerifier.create(createdPromoCode)
+                .assertNext(promoCodeResponseModel -> assertFalse(promoCodeResponseModel.isActive()))
+                .verifyComplete();
+    }
+
+    @Test
+    void updatePromoCodeById_shouldToggleActive() {
+        // Arrange
+        promoCodeRequestModel.setExpirationDate("2999-12-31T23:59:59");
+        promoCodeRequestModel.setActive(false);
+        when(promoRepository.findById(eq(promoCode.getId()))).thenReturn(Mono.just(promoCode));
+        when(promoRepository.save(any(PromoCode.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+
+        // Act
+        Mono<PromoCodeResponseModel> updatedPromoCode = promoCodeService.updatePromoCodeById(promoCodeRequestModel, promoCode.getId());
+
+        // Assert
+        StepVerifier.create(updatedPromoCode)
+                .assertNext(promoCodeResponseModel -> assertFalse(promoCodeResponseModel.isActive()))
+                .verifyComplete();
+    }
+
+    @Test
+    void getActivePromos_shouldReturnOnlyActivePromoCodes() {
+        // Arrange
+        PromoCode inactivePromo = new PromoCode();
+        inactivePromo.setId(UUID.randomUUID().toString());
+        inactivePromo.setCode("INACTIVE2999");
+        inactivePromo.setActive(false);
+        inactivePromo.setExpirationDate(EntityModelUtil.validateExpirationDate("2999-12-31T23:59:59"));
+        promoCode.setExpirationDate(EntityModelUtil.validateExpirationDate("2999-12-31T23:59:59"));
+        when(promoRepository.findAllByExpirationDateGreaterThanEqual(any()))
+                .thenReturn(Flux.just(promoCode, inactivePromo));
+
+        // Act
+        Flux<PromoCodeResponseModel> promoCodeFlux = promoCodeService.getActivePromos();
+
+        // Assert
+        StepVerifier.create(promoCodeFlux)
+                .assertNext(promoCodeResponseModel -> assertEquals("SUMMER2024", promoCodeResponseModel.getCode()))
+                .verifyComplete();
+
+        verify(promoRepository, times(1)).findAllByExpirationDateGreaterThanEqual(any());
+    }
 }
-
-

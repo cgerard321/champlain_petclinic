@@ -29,15 +29,20 @@ yarn-error.log
 !.vscode/mcp.json
 .history/*
 
+# Testing & Playwright
+/coverage
+/playwright-report
+/test-results
+/blob-report
+__screenshots__/
+testem.log
+
 # Miscellaneous
 /.angular/cache
 .sass-cache/
 /connect.lock
-/coverage
 /libpeerconnection.log
-testem.log
 /typings
-__screenshots__/
 
 # System files
 .DS_Store

@@ -51,7 +51,7 @@ export class PromoApi {
 
   static async addPromo(newPromo: PromoCodeRequestModel): Promise<void> {
     try {
-      const response = await axiosInstance.post(`/promos/`, newPromo);
+      const response = await axiosInstance.post(`/promos`, newPromo);
       return response.data;
     } catch (error) {
       console.error('Error adding promos:', error);

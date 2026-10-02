@@ -14,7 +14,8 @@ interface UseGetAllBillsPaginatedReturn {
     visitType?: string,
     vetId?: string,
     vetFirstName?: string,
-    vetLastName?: string
+    vetLastName?: string,
+    includeArchived?: boolean
   ) => Promise<void>;
   setCurrentPage: (page: number) => void;
   currentPage: number;
@@ -37,7 +38,8 @@ export default function useGetAllBillsPaginated(): UseGetAllBillsPaginatedReturn
       visitType?: string,
       vetId?: string,
       vetFirstName?: string,
-      vetLastName?: string
+      vetLastName?: string,
+      includeArchived?: boolean
     ): Promise<void> => {
       try {
         const bills = await getAllBillsPaginated(
@@ -50,7 +52,8 @@ export default function useGetAllBillsPaginated(): UseGetAllBillsPaginatedReturn
           visitType,
           vetId,
           vetFirstName,
-          vetLastName
+          vetLastName,
+          includeArchived
         );
 
         // NEW: always replace with the fetched page (don't append)

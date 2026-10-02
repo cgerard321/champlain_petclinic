@@ -1,6 +1,6 @@
-import {CancellationReason} from "@/features/visits/models/CancellationReason.ts";
+import { CancellationReason } from '@/features/visits/models/CancellationReason.ts';
 
-export interface CancellationRequest{
-    cancellationReason:CancellationReason;
-    cancellationReasonDetails?: string;
+export interface CancellationRequest {
+  cancellationReason: CancellationReason;
+  cancellationReasonDetails?: string;
 }
