@@ -4,15 +4,14 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatCardModule } from '@angular/material/card';
 import { catchError, of } from 'rxjs';
-
-// Core Model Import
+import { RouterLink } from '@angular/router';
 import { CurrentUserResponse } from '@core/models/current-user-response';
 import { AuthState } from '@core/services/auth-state';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, MatCardModule],
+  imports: [CommonModule, MatCardModule, RouterLink],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
