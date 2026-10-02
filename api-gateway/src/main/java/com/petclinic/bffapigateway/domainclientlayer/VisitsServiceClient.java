@@ -199,6 +199,9 @@ public class VisitsServiceClient {
                 .delete()
                 .uri("/cancelled")
                 .retrieve()
+                .onStatus(status ->
+                        status == HttpStatus.NOT_FOUND,
+                        response -> Mono.error(new NotFoundException("No cancelled visits were found")))
                 .bodyToMono(Void.class);
     }
 
