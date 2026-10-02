@@ -391,7 +391,18 @@ public class CustomerBillsControllerIntegrationTest {
                 .uri("/bills/{billId}/pdf", "nonexistent-bill-id")
                 .accept(MediaType.APPLICATION_PDF)
                 .exchange()
-                .expectStatus().isEqualTo(500); // INTERNAL_SERVER_ERROR
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void testDownloadCustomerBillPdf_BillNotFound() {
+        billRepository.deleteAll().block();
+
+        client.get()
+                .uri("/bills/customer/{customerId}/bills/{billId}/pdf", "cust-123", "nonexistent-bill-id")
+                .accept(MediaType.APPLICATION_PDF)
+                .exchange()
+                .expectStatus().isNotFound();
     }
 
 }
