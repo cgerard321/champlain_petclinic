@@ -190,7 +190,7 @@
     "errors": {
       "nameRequired": "Pet name is required",
       "nameTooLong": "Pet name cannot be longer than 20 characters",
-      "ageTooHigh": "Select an animal under 50 years old",
+      "ageTooHigh": "The age of the animal cannot be over 50 years old",
       "typeRequired": "Pet type is required",
       "weightRequired": "Weight is required",
       "weightPositive": "Weight must be greater than 0",
