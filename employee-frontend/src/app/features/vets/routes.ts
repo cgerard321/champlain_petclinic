@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
 
-import { Vets } from '@features/vets/pages/vets';
+import { Veterinarians } from '@features/vets/pages/veterinarians/veterinarians';
 
-export default [{ path: '', component: Vets }] satisfies Routes;
+export default [{ path: '', component: Veterinarians }] satisfies Routes;
