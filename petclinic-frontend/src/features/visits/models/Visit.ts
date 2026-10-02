@@ -1,4 +1,5 @@
 import { FileDetails } from '@/shared/models/FileDetails';
+import { CancellationReason } from '@/features/visits/models/CancellationReason.ts';
 
 export interface Visit {
   visitId: string;
@@ -11,6 +12,8 @@ export interface Visit {
   vetEmail: string;
   vetPhoneNumber: string;
   status: string;
+  cancellationReason?: CancellationReason;
+  cancellationReasonDetails?: string;
   visitEndDate: string;
   isEmergency: boolean;
   prescriptionFile?: FileDetails;

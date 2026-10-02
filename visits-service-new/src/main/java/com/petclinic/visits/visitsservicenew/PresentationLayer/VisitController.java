@@ -321,5 +321,9 @@ public class VisitController {
                         Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()));
     }
 
+    @PatchMapping(value = "/{visitId}/cancel", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<VisitResponseDTO> cancelVisit(@PathVariable String visitId, @RequestBody CancellationRequestDTO cancellationRequestDTO){
+        return visitService.cancelVisit(visitId, cancellationRequestDTO);
+    }
 
 }

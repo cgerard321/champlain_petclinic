@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.presentationlayer.v1;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
+import com.petclinic.bffapigateway.dtos.Visits.CancellationRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Prescriptions.PrescriptionResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.TimeSlotDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
@@ -79,7 +80,8 @@ public class VisitsControllerV1 {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.OWNER, Roles.VET})
-    @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value =
+            "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VisitResponseDTO>> addVisit(@RequestBody Mono<VisitRequestDTO> visitRequestDTO) {
         return visitsServiceClient.addVisit(visitRequestDTO)
                 .map(v -> ResponseEntity.status(HttpStatus.CREATED).body(v))
@@ -97,6 +99,7 @@ public class VisitsControllerV1 {
                         .defaultIfEmpty(ResponseEntity.notFound().build())); // Return 404 if not found
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.OWNER})
     @PatchMapping("/{visitId}/status/{status}")
     public Mono<ResponseEntity<VisitResponseDTO>> updateStatusForVisitByVisitId(
             @PathVariable String visitId,
@@ -301,6 +304,16 @@ public class VisitsControllerV1 {
 
         return visitsServiceClient.downloadPrescriptionPdf(visitId)
                 .map(pdfBytes -> new ResponseEntity<>(pdfBytes, HttpStatus.OK))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.OWNER})
+    @PatchMapping(value = "/{visitId}/cancel", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<VisitResponseDTO>> cancelVisit(@PathVariable String visitId, @RequestBody CancellationRequestDTO cancellationRequestDTO) {
+
+        return visitsServiceClient
+                .cancelVisit(visitId, cancellationRequestDTO)
+                .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
