@@ -59,6 +59,8 @@ public class EntityDtoUtil {
                             .status(visit.getStatus())
                             .visitEndDate(visit.getVisitDate().plusHours(1))
                             .isEmergency(visit.getIsEmergency())
+                            .cancellationReason(visit.getCancellationReason())
+                            .cancellationReasonDetails(visit.getCancellationReasonDetails())
                             .build());
                 });
     }

@@ -1,5 +1,6 @@
 package com.petclinic.visits.visitsservicenew.BusinessLayer;
 
+import com.petclinic.visits.visitsservicenew.PresentationLayer.CancellationRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
 import org.springframework.core.io.InputStreamResource;
@@ -39,6 +40,8 @@ public interface VisitService {
     Flux<VisitResponseDTO> getAllArchivedVisits();
 
     Mono<InputStreamResource> exportVisitsToCSV();
+
+    Mono<VisitResponseDTO> cancelVisit(String visitId, CancellationRequestDTO request);
 
 //    Mono<VetDTO> testingGetVetDTO(String vetId);
 //    Mono<PetResponseDTO> testingGetPetDTO(int petId);
