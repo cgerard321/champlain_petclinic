@@ -3,7 +3,7 @@ import { FormEvent, useState, useEffect } from 'react';
 import './EditVisit.css';
 import { Status } from '@/features/visits/models/Status';
 import { addVisit } from '@/features/visits/api/addVisit';
-import { getAvailableVets, VetResponse } from '@/features/visits/api/getVets';
+import { getAvailableVets } from '@/features/visits/api/getVets';
 import {
   getAvailableSlots,
   TimeSlot,
@@ -54,7 +54,9 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
 
   const [pets, setPets] = useState<PetResponseModel[]>([]);
   const [loadingPets, setLoadingPets] = useState<boolean>(true);
-  const [vets, setVets] = useState<VetResponse[]>([]);
+  const [vets, setVets] = useState<
+    Awaited<ReturnType<typeof getAvailableVets>>
+  >([]);
   const [timeSlots, setTimeSlots] = useState<TimeSlotWithVet[]>([]);
   const [loadingVets, setLoadingVets] = useState<boolean>(true);
   const [loadingSlots, setLoadingSlots] = useState<boolean>(false);

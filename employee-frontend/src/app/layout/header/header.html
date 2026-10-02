@@ -1,5 +1,5 @@
 <mat-toolbar color="primary">
-  <span class="title">Champlain Petclinic</span>
+  <span class="title">Petclinic</span>
 
   <ul class="horizontal-list">
     @for (navbarItem of navBarItems; track navbarItem.route) {
@@ -18,7 +18,23 @@
     <button mat-button (click)="switchLang('en')">EN</button>
   </div>
 
-  <button mat-icon-button aria-label="Log out" (click)="logout()">
-    <mat-icon>logout</mat-icon>
+  <button mat-icon-button [matMenuTriggerFor]="userMenu" aria-label="User menu">
+    <mat-icon>account_circle</mat-icon>
   </button>
+
+  <mat-menu #userMenu="matMenu">
+    <div class="username">
+      {{ username() }}
+    </div>
+
+    <button mat-menu-item (click)="setting()">
+      <mat-icon>settings</mat-icon>
+      <span>Settings</span>
+    </button>
+
+    <button mat-menu-item (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      <span>Logout</span>
+    </button>
+  </mat-menu>
 </mat-toolbar>

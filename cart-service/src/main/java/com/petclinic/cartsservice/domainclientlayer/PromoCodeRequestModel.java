@@ -20,4 +20,6 @@ public class PromoCodeRequestModel {
 
     private String expirationDate;
 
+    private Boolean active;
+
 }
