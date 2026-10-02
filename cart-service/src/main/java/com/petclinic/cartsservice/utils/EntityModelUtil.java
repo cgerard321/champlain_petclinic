@@ -97,6 +97,9 @@ public class EntityModelUtil {
             promoCode.setExpirationDate(validatedExpirationDate);
         }
         promoCode.setDiscount(promoCodeRequestModel.getDiscount());
+        if (promoCodeRequestModel.getActive() != null) {
+            promoCode.setActive(promoCodeRequestModel.getActive());
+        }
         return promoCode;
     }
 
@@ -117,7 +120,7 @@ public class EntityModelUtil {
         responseModel.setCode(promoCode.getCode());
         responseModel.setDiscount(promoCode.getDiscount());
         responseModel.setExpirationDate(promoCode.getExpirationDate());
-        responseModel.setActive(isPromoActive(promoCode.getExpirationDate()));
+        responseModel.setActive(promoCode.isActive() && isPromoActive(promoCode.getExpirationDate()));
         return responseModel;
     }
 
