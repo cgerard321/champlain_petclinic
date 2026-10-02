@@ -445,7 +445,7 @@ public class CartServiceClientTest {
             }
             """;
 
-        PromoCodeRequestDTO promoCodeRequestDTO = new PromoCodeRequestDTO("Promo 1", "PROMO1", 10.0, "2024-12-31T23:59:59");
+        PromoCodeRequestDTO promoCodeRequestDTO = new PromoCodeRequestDTO("Promo 1", "PROMO1", 10.0, "2024-12-31T23:59:59", true);
 
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
@@ -474,7 +474,7 @@ public class CartServiceClientTest {
             }
             """;
 
-        PromoCodeRequestDTO promoCodeRequestDTO = new PromoCodeRequestDTO("Updated Promo 1", "PROMO1", 15.0, "2024-12-31T23:59:59");
+        PromoCodeRequestDTO promoCodeRequestDTO = new PromoCodeRequestDTO("Updated Promo 1", "PROMO1", 15.0, "2024-12-31T23:59:59", true);
 
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")

@@ -1,0 +1,9 @@
+p {
+    max-width: 100%;
+}
+
+.home-button {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+}

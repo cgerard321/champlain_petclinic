@@ -1,0 +1,82 @@
+<section class="promo-page">
+  <div class="promo-header">
+    <div>
+      <h1>Promos</h1>
+      <p>Manage promo codes available to customers.</p>
+    </div>
+    <button mat-flat-button color="primary" type="button" (click)="openPromoForm()">
+      Add Promo
+    </button>
+  </div>
+
+  @if (errorMessage()) {
+    <p class="error-message" role="alert">{{ errorMessage() }}</p>
+  }
+
+  @if (isLoading()) {
+    <div class="state-container" role="status">
+      <mat-progress-spinner mode="indeterminate" diameter="40" />
+      <span>Loading promos...</span>
+    </div>
+  } @else if (promos().length === 0 && !errorMessage()) {
+    <div class="state-container">
+      <p>No promos found.</p>
+    </div>
+  } @else {
+    <table mat-table class="promo-table" [dataSource]="promos()">
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Name</th>
+        <td mat-cell *matCellDef="let promo">{{ promo.name }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="code">
+        <th mat-header-cell *matHeaderCellDef>Code</th>
+        <td mat-cell *matCellDef="let promo">{{ promo.code }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="discount">
+        <th mat-header-cell *matHeaderCellDef>Discount</th>
+        <td mat-cell *matCellDef="let promo">{{ promo.discount }}%</td>
+      </ng-container>
+
+      <ng-container matColumnDef="expirationDate">
+        <th mat-header-cell *matHeaderCellDef>Expires</th>
+        <td mat-cell *matCellDef="let promo">{{ promo.expirationDate | date: 'mediumDate' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let promo">
+          <span class="status" [class.status-active]="promo.active">
+            {{ promo.active ? 'Active' : 'Inactive' }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let promo" class="actions">
+          <button
+            mat-icon-button
+            type="button"
+            aria-label="Edit promo"
+            (click)="openPromoForm(promo)"
+          >
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            type="button"
+            aria-label="Delete promo"
+            (click)="deletePromo(promo)"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columns"></tr>
+      <tr mat-row *matRowDef="let row; columns: columns"></tr>
+    </table>
+  }
+</section>
