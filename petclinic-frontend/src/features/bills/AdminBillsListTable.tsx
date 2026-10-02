@@ -166,9 +166,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
   }, []);
 
   useEffect(() => {
-    if (!selectedFilter) {
       callGetBillsListWithFilters(currentPage, 10);
-    }
   }, [currentPage, callGetBillsListWithFilters, selectedFilter]);
 
   useEffect(() => {
