@@ -34,6 +34,7 @@ public class PromoCodeServiceImpl implements PromoCodeService {
     public Flux<PromoCodeResponseModel> getActivePromos() {
         LocalDateTime currentDateTime = LocalDateTime.now();
         return promoRepository.findAllByExpirationDateGreaterThanEqual(currentDateTime)
+                .filter(PromoCode::isActive)
                 .map(EntityModelUtil::toPromoCodeResponseModel);
     }
 
@@ -77,7 +78,7 @@ public class PromoCodeServiceImpl implements PromoCodeService {
         promoCode.setId(UUID.randomUUID().toString());
         promoCode.setName(promoCodeRequestModel.getName());
         promoCode.setDiscount(promoCodeRequestModel.getDiscount());
-        promoCode.setActive(true);
+        promoCode.setActive(!Boolean.FALSE.equals(promoCodeRequestModel.getActive()));
         promoCode.setExpirationDate(EntityModelUtil.validateExpirationDate(promoCodeRequestModel.getExpirationDate()));
 
         return promoRepository.save(promoCode)

@@ -29,6 +29,7 @@ type ViewMode = 'year' | 'month' | 'week';
 
 export default function CustomerCalendarView(): JSX.Element {
   const { user } = useUser();
+  const userId = user?.userId;
 
   const [visits, setVisits] = useState<Visit[]>([]);
   const [filteredVisits, setFilteredVisits] = useState<Visit[]>([]);
@@ -38,8 +39,10 @@ export default function CustomerCalendarView(): JSX.Element {
   const [error, setError] = useState<string>('');
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchVisits = async (): Promise<void> => {
-      if (!user?.userId) {
+      if (!userId) {
         setError('User not found. Please log in.');
         setIsLoading(false);
         return;
@@ -49,9 +52,19 @@ export default function CustomerCalendarView(): JSX.Element {
       setError('');
 
       try {
-        const fetchedVisits = await getAllOwnerVisits(user.userId);
-        setVisits(fetchedVisits);
+        const fetchedVisits: Visit[] = [];
+
+        // Add visits to the calendar as each event arrives.
+        for await (const visit of getAllOwnerVisits(
+          userId,
+          controller.signal
+        )) {
+          fetchedVisits.push(visit);
+          setVisits([...fetchedVisits]);
+        }
       } catch (err) {
+        if (controller.signal.aborted) return;
+
         console.error('Error fetching visits:', err);
         setError('Failed to load your visits. Please try again.');
       } finally {
@@ -60,7 +73,9 @@ export default function CustomerCalendarView(): JSX.Element {
     };
 
     fetchVisits();
-  }, [user?.userId]);
+
+    return () => controller.abort();
+  }, [userId]);
 
   useEffect(() => {
     if (!visits.length) {

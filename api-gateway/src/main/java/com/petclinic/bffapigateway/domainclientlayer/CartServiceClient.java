@@ -201,7 +201,8 @@ public Mono<Void> deleteCartByCartId(String cartId) {
         return webClientBuilder.build()
                 .get()
                 .uri(promoCodeServiceUrl)
-                .accept(MediaType.APPLICATION_JSON)
+                // accepting text event stream for streaming responses in
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
                 .bodyToFlux(PromoCodeResponseDTO.class);
     }
