@@ -198,6 +198,12 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
     if (!pet?.name?.trim()) newErrors.name = 'pets.errors.nameRequired';
     if (pet.name.trim().length > 20) newErrors.name = 'pets.errors.nameTooLong';
 
+    const fiftyYearsAgo = new Date();
+    fiftyYearsAgo.setFullYear(fiftyYearsAgo.getFullYear() - 50);
+    if (pet.birthDate < fiftyYearsAgo) {
+      newErrors.birthDate = 'pets.errors.ageTooHigh';
+    }
+
     if (!pet?.weight?.trim()) newErrors.weight = 'pets.errors.weightRequired';
     if (!pet?.petTypeId) newErrors.petTypeId = 'pets.errors.typeRequired';
     if (pet?.weight && parseFloat(pet.weight) <= 0)
@@ -454,6 +460,9 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
               onBlur={() => setIsDateInputFocused(false)}
               disabled={isSubmitting}
             />
+            {errors.birthDate && (
+              <span className="error-message">{t(errors.birthDate)}</span>
+            )}
           </div>
 
           {errors.submit && (

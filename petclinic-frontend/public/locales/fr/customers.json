@@ -189,6 +189,7 @@
     "errors": {
       "nameRequired": "Le nom de l'animal est requis",
       "nameTooLong": "Le nom de l'animal ne peut pas dépasser 20 caractères",
+      "ageTooHigh": "Sélectionnez un animal de moins de 50 ans",
       "typeRequired": "Le type d'animal est requis",
       "weightRequired": "Le poids est requis",
       "weightPositive": "Le poids doit être supérieur à 0",

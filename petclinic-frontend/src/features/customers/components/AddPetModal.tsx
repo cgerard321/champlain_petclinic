@@ -99,6 +99,12 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
     if (!pet.name.trim()) newErrors.name = 'pets.errors.nameRequired';
     if (pet.name.trim().length > 20) newErrors.name = 'pets.errors.nameTooLong';
 
+    const fiftyYearsAgo = new Date();
+    fiftyYearsAgo.setFullYear(fiftyYearsAgo.getFullYear() - 50);
+    if (pet.birthDate < fiftyYearsAgo) {
+      newErrors.birthDate = 'pets.errors.ageTooHigh';
+    }
+
     if (!pet.weight.trim()) newErrors.weight = 'pets.errors.weightRequired';
     if (!pet.petTypeId) newErrors.petTypeId = 'pets.errors.typeRequired';
     if (parseFloat(pet.weight) <= 0)
@@ -252,6 +258,9 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
               onBlur={() => setIsDateInputFocused(false)}
               disabled={isSubmitting}
             />
+            {errors.birthDate && (
+              <span className="error-message">{t(errors.birthDate)}</span>
+            )}
           </div>
 
           <div className="form-group">
