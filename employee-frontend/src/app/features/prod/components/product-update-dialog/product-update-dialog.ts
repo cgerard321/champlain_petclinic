@@ -58,7 +58,7 @@ export class ProductUpdateDialog implements OnInit {
   private readonly imageService = inject(ImageService);
 
   protected readonly productTypes = signal<ProductType[]>([]);
-  protected readonly deliveryTypes = signal<DeliveryType[]>(Object.values(DeliveryType));
+  protected readonly deliveryTypes = signal<DeliveryType[]>([]);
   protected readonly isSubmitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly selectedFile = signal<File | null>(null);
