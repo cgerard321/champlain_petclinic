@@ -519,6 +519,25 @@ class BillControllerUnitTest {
     }
 
     @Test
+    void updateBillWithNullDueDate_ShouldReturnBadRequestBeforeCallingService() {
+        BillRequestDTO request = BillRequestDTO.builder()
+                .customerId("customer-1")
+                .dueDate(null)
+                .build();
+
+        client.put()
+                .uri("/bills/{billId}", "bill-id")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Due date is required");
+
+        verifyNoInteractions(billService);
+    }
+
+    @Test
     void getBillByBillId_ShouldReturnInterest() {
         // Calculate expected compound interest using centralized utility
         LocalDate dueDate = LocalDate.of(2022, Month.AUGUST, 15);
