@@ -7,7 +7,6 @@ export const getAllPets = async (): Promise<PetResponseModel[]> => {
       useV2: false,
     });
 
-    // Handle SSE (Server-Sent Events) stream format
     if (typeof response.data === 'string') {
       const pieces = response.data.split('\n').filter(Boolean);
       const pets: PetResponseModel[] = [];
