@@ -12,7 +12,7 @@ import { Status } from '@/features/visits/models/Status';
 import { VisitResponseModel } from '../models/VisitResponseModel';
 import { getVisit } from '../api/getVisit';
 import { updateVisit } from '../api/updateVisit';
-import { getAvailableVets, VetResponse } from '@/features/visits/api/getVets';
+import { getAvailableVets } from '@/features/visits/api/getVets';
 
 import BasicModal from '@/shared/components/BasicModal';
 import PrescriptionModal from '@/features/visits/Prescription/prescriptionComponents/prescriptionModal';
@@ -69,7 +69,9 @@ const EditingVisit = forwardRef<EditingVisitHandle, EditingVisitProps>(
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [showNotification, setShowNotification] = useState<boolean>(false);
 
-    const [vets, setVets] = useState<VetResponse[]>([]);
+    const [vets, setVets] = useState<
+      Awaited<ReturnType<typeof getAvailableVets>>
+    >([]);
     const [showPrescriptionModal, setShowPrescriptionModal] =
       useState<boolean>(false);
     const prescriptionTriggerRef = useRef<HTMLButtonElement | null>(null);
