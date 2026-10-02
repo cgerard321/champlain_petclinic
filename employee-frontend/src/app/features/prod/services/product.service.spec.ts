@@ -55,6 +55,19 @@ describe('ProductService', () => {
     expect(result?.map((item) => item.productId)).toEqual(['product-1', 'product-2']);
   });
 
+  it('sends a product name search parameter', () => {
+    service.getProducts({ productName: 'horse saddle' }).subscribe();
+
+    const request = http.expectOne(
+      (candidate) =>
+        candidate.url === '/api/gateway/products' &&
+        candidate.params.get('includeImage') === 'true' &&
+        candidate.params.get('productName') === 'horse saddle',
+    );
+    expect(request.request.method).toBe('GET');
+    request.flush('');
+  });
+
   it('creates a product with JSON', () => {
     const requestBody: ProductRequest = {
       productName: 'Dog food',

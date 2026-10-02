@@ -18,6 +18,13 @@
   margin: 8px 0 0;
 }
 
+.product-search {
+  display: block;
+  max-width: 480px;
+  width: 100%;
+  margin-bottom: 24px;
+}
+
 .product-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -70,5 +77,9 @@ dd {
   .product-header {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .product-search {
+    max-width: none;
   }
 }
