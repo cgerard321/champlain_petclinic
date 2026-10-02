@@ -1,7 +1,9 @@
 import { CurrencyPipe } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal, TemplateRef, viewChild } from '@angular/core';
 import { FormField, form, min, required, submit } from '@angular/forms/signals';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute } from '@angular/router';
 
 import { AuthState } from '@core/services/auth-state';
@@ -11,7 +13,7 @@ import { Table, TableColumn } from '@shared/components/table/table';
 import { Roles } from '@shared/models/roles';
 
 @Component({
-  imports: [CurrencyPipe, FormField, MatDialogModule, Table],
+  imports: [CurrencyPipe, FormField, MatDialogModule, MatIconModule, Table],
   selector: 'app-supply',
   styleUrl: './supply-page.css',
   templateUrl: './supply-page.html',
@@ -26,12 +28,37 @@ export class SupplyPage {
   protected readonly inventoryId = this.route.snapshot.paramMap.get('inventoryId');
 
   protected readonly supplies = signal<Supply[]>([]);
+  protected readonly filters = signal({ productName: '', productDescription: '', status: '' });
+  protected readonly hasActiveFilters = computed(() =>
+    Object.values(this.filters()).some((value) => value.trim().length > 0),
+  );
+  protected readonly filteredSupplies = computed(() => {
+    const { productName, productDescription, status } = this.filters();
+    return this.supplies().filter(
+      (supply) =>
+        supply.productName.toLowerCase().includes(productName.trim().toLowerCase()) &&
+        supply.productDescription.toLowerCase().includes(productDescription.trim().toLowerCase()) &&
+        (!status || supply.status === status),
+    );
+  });
+
+  protected setFilter(field: 'productName' | 'productDescription' | 'status', event: Event): void {
+    const value = (event.target as HTMLInputElement | HTMLSelectElement).value;
+    this.filters.update((filters) => ({ ...filters, [field]: value }));
+  }
+
+  protected clearFilters(): void {
+    this.filters.set({ productName: '', productDescription: '', status: '' });
+  }
+
   // Only the initial fetch replaces the table; refreshes keep existing rows visible.
   protected readonly loading = signal(true);
   protected readonly error = signal(false);
   protected readonly addingSupply = signal(false);
   protected readonly addError = signal('');
   protected readonly deleteError = signal('');
+  protected readonly downloadingPdf = signal(false);
+  protected readonly downloadError = signal('');
   protected readonly showAddForm = signal(false);
   protected readonly editingSupplyId = signal<string | null>(null);
   protected readonly newSupply = signal({
@@ -239,6 +266,52 @@ export class SupplyPage {
     this.editingSupplyId.set(null);
     this.addError.set('');
     this.showAddForm.set(false);
+  }
+
+  protected downloadPdf(): void {
+    const inventoryId = this.inventoryId;
+
+    if (!inventoryId || this.downloadingPdf() || !this.canManageSupplies()) {
+      return;
+    }
+
+    this.downloadingPdf.set(true);
+    this.downloadError.set('');
+
+    this.supplyService.downloadSupplyPdf(inventoryId).subscribe({
+      next: (blob) => {
+        this.saveFile(blob, `supply-report-${inventoryId}.pdf`);
+        this.downloadingPdf.set(false);
+      },
+      error: async (err: unknown) => {
+        this.downloadError.set(await this.readDownloadError(err));
+        this.downloadingPdf.set(false);
+      },
+    });
+  }
+
+  private saveFile(blob: Blob, fileName: string): void {
+    const url = URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url));
+  }
+
+  private async readDownloadError(err: unknown): Promise<string> {
+    // With responseType 'blob', error bodies also arrive as Blobs, so read the message from it
+    if (err instanceof HttpErrorResponse && err.error instanceof Blob) {
+      try {
+        const body = JSON.parse(await err.error.text());
+        if (typeof body?.message === 'string') {
+          return body.message;
+        }
+      } catch {
+        // Not JSON, fall back to the generic message
+      }
+    }
+    return 'Unable to download PDF.';
   }
 
   protected formatStatus(status: string): string {

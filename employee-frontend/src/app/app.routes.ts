@@ -10,6 +10,14 @@ export const routes: Routes = [
     loadChildren: () => import('@features/auth/routes'),
   },
   {
+    path: 'error',
+    loadChildren: () => import('@features/error/routes'),
+  },
+  {
+    path: 'settings',
+    loadChildren: () => import('@features/settings/routes'),
+  },
+  {
     path: '',
     loadComponent: () => import('@layout/shell/shell').then((m) => m.Shell),
     canActivate: [authGuard(), customerRedirectGuard, employeeGuard],
@@ -48,6 +56,11 @@ export const routes: Routes = [
       {
         path: 'prod',
         loadChildren: () => import('@features/prod/routes'),
+      },
+
+      {
+        path: 'promo',
+        loadChildren: () => import('@features/promo/routes'),
       },
       {
         path: 'error',

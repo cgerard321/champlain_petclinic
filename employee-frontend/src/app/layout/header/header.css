@@ -29,6 +29,13 @@
   background: rgb(0 0 0 / 6%);
 }
 
+.username {
+  padding: 12px 16px;
+  font-weight: 500;
+  font-size: 14px;
+  border-bottom: 1px solid #ddd;
+  color: rgb(5 73 52);
+}
 
 mat-toolbar {
   background-color: #c2daae;
