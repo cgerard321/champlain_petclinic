@@ -26,6 +26,29 @@ export class SupplyPage {
   protected readonly inventoryId = this.route.snapshot.paramMap.get('inventoryId');
 
   protected readonly supplies = signal<Supply[]>([]);
+  protected readonly filters = signal({ productName: '', productDescription: '', status: '' });
+  protected readonly hasActiveFilters = computed(() =>
+    Object.values(this.filters()).some((value) => value.trim().length > 0),
+  );
+  protected readonly filteredSupplies = computed(() => {
+    const { productName, productDescription, status } = this.filters();
+    return this.supplies().filter(
+      (supply) =>
+        supply.productName.toLowerCase().includes(productName.trim().toLowerCase()) &&
+        supply.productDescription.toLowerCase().includes(productDescription.trim().toLowerCase()) &&
+        (!status || supply.status === status),
+    );
+  });
+
+  protected setFilter(field: 'productName' | 'productDescription' | 'status', event: Event): void {
+    const value = (event.target as HTMLInputElement | HTMLSelectElement).value;
+    this.filters.update((filters) => ({ ...filters, [field]: value }));
+  }
+
+  protected clearFilters(): void {
+    this.filters.set({ productName: '', productDescription: '', status: '' });
+  }
+
   // Only the initial fetch replaces the table; refreshes keep existing rows visible.
   protected readonly loading = signal(true);
   protected readonly error = signal(false);
