@@ -2,6 +2,7 @@ package com.petclinic.customersservice.data;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 
 @Data
 @NoArgsConstructor
@@ -12,6 +13,7 @@ public class Customer {
 
     @Id
     private String id;
+    @Indexed(unique = true)
     private String customerId; // public id
     private String firstName;
     private String lastName;
