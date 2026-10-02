@@ -85,6 +85,7 @@ export class ProductAddDialog implements OnInit {
     required(schemaPath.productSalePrice, { message: 'Sale price is required' });
     required(schemaPath.productQuantity, { message: 'Quantity is required' });
     required(schemaPath.productTypeId, { message: 'Product type is required' });
+    required(schemaPath.deliveryType, { message: 'Delivery type is required' });
   });
 
   protected selectFile(event: Event): void {
