@@ -582,7 +582,7 @@ public class BillServiceImpl implements BillService{
     public Mono<byte[]> generateBillPdf(String customerId, String billId, String currency) {
         return billRepository.findByBillId(billId)
                 .filter(bill -> bill.getCustomerId().equals(customerId))
-                .switchIfEmpty(Mono.error(new RuntimeException("Bill not found for given customer")))
+                .switchIfEmpty(Mono.error(new NotFoundException("Bill not found for given customer")))
                 .map(EntityDtoUtil::toBillResponseDto)
                 .flatMap(bill -> {
                     try {
@@ -714,7 +714,7 @@ public class BillServiceImpl implements BillService{
     @Override
     public Mono<byte[]> generateStaffBillPdf(String billId, String currency) {
         return billRepository.findByBillId(billId)
-                .switchIfEmpty(Mono.error(new RuntimeException("Bill not found for given ID")))
+                .switchIfEmpty(Mono.error(new NotFoundException("Bill not found for given ID")))
                 .map(EntityDtoUtil::toBillResponseDto)
                 .flatMap(bill -> {
                     try {
@@ -744,6 +744,7 @@ public class BillServiceImpl implements BillService{
                 .doOnSuccess(unused -> log.info("Completed overdue bills update check"))
                 .doOnError(error -> log.error("Error updating overdue bills: {}", error.getMessage(), error));
     }
+
 
     @Override
     public Mono<Bill> addTaxesToBill(Bill bill){

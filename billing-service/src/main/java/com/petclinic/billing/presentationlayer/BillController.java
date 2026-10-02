@@ -2,6 +2,7 @@ package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.businesslayer.BillService;
 import com.petclinic.billing.datalayer.*;
+import com.petclinic.billing.exceptions.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -341,6 +342,8 @@ public class BillController {
                     log.info("Staff PDF generated for bill {}", billId);
                     return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
                 })
+                .onErrorResume(NotFoundException.class,
+                        e -> Mono.just(new ResponseEntity<>(HttpStatus.NOT_FOUND)))
                 .onErrorResume(e -> {
                     log.error("Error generating staff PDF for billId: {}, currency: {}, error: {}", billId, currency, e.getMessage(), e);
                     return Mono.just(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
