@@ -168,7 +168,10 @@ public class CustomerBillsControllerIntegrationTest {
         Bill bill = Bill.builder()
                 .billId("bill-456")
                 .customerId("cust-123")
-                .amount(new BigDecimal(200.0))
+                .amount(new BigDecimal("200.0"))
+                .gstAmount(new BigDecimal("10.00"))
+                .qstAmount(new BigDecimal("19.95"))
+                .taxedAmount(new BigDecimal("229.95"))
                 .billStatus(BillStatus.UNPAID)
                 .dueDate(LocalDate.now().plusDays(10))
                 .build();
@@ -209,16 +212,19 @@ public class CustomerBillsControllerIntegrationTest {
 
     private Bill buildBill() {
                 return Bill.builder()
-                                .billId("1")
-                                .customerId("custId")
-                                .vetId("vetId")
-                                .visitType("surgery")
-                                .date(LocalDate.now().minusDays(10))
-                                .amount(new BigDecimal(150.0))
-                                .billStatus(BillStatus.UNPAID)
-                                .dueDate(LocalDate.now().plusDays(20))
-                                .archive(false)
-                                .build();
+                        .billId("1")
+                        .customerId("custId")
+                        .vetId("vetId")
+                        .visitType("surgery")
+                        .date(LocalDate.now().minusDays(10))
+                        .amount(new BigDecimal("150.0"))
+                        .gstAmount(new BigDecimal("7.5"))
+                        .qstAmount(new BigDecimal("14.96"))
+                        .taxedAmount(new BigDecimal("172.46"))
+                        .billStatus(BillStatus.UNPAID)
+                        .dueDate(LocalDate.now().plusDays(20))
+                        .archive(false)
+                        .build();
         }
 
         private Bill buildBill2() {
@@ -226,17 +232,20 @@ public class CustomerBillsControllerIntegrationTest {
                 calendar.set(2022, Calendar.SEPTEMBER, 25);
                 LocalDate date = calendar.getTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
                 return Bill.builder()
-                                .billId("1")
-                                .customerId("custId")
-                                .ownerFirstName("John")
-                                .ownerLastName("Doe")
-                                .vetId("vetId")
-                                .visitType("surgery")
-                                .date(date)
-                                .amount(new BigDecimal("150.00"))
-                                .billStatus(BillStatus.UNPAID)
-                                .archive(false)
-                                .build();
+                        .billId("1")
+                        .customerId("custId")
+                        .ownerFirstName("John")
+                        .ownerLastName("Doe")
+                        .vetId("vetId")
+                        .visitType("surgery")
+                        .date(date)
+                        .amount(new BigDecimal("150.00"))
+                        .gstAmount(new BigDecimal("7.5"))
+                        .qstAmount(new BigDecimal("14.96"))
+                        .taxedAmount(new BigDecimal("172.46"))
+                        .billStatus(BillStatus.UNPAID)
+                        .archive(false)
+                        .build();
         }
 
         @Test
@@ -247,6 +256,9 @@ public class CustomerBillsControllerIntegrationTest {
                         .billId("overdue-1")
                         .customerId("custId")
                         .amount(new BigDecimal("100.00"))
+                        .gstAmount(new BigDecimal("5.00"))
+                        .qstAmount(new BigDecimal("9.98"))
+                        .taxedAmount(new BigDecimal("114.98"))
                         .billStatus(BillStatus.OVERDUE)
                         .dueDate(LocalDate.now().minusMonths(1))
                         .build();
@@ -333,6 +345,9 @@ public class CustomerBillsControllerIntegrationTest {
                 .date(date)
                 .dueDate(date.plusDays(15))
                 .amount(new BigDecimal("150.00"))
+                .gstAmount(new BigDecimal("7.5"))
+                .qstAmount(new BigDecimal("14.96"))
+                .taxedAmount(new BigDecimal("172.46"))
                 .billStatus(BillStatus.UNPAID)
                 .archive(false)
                 .build();

@@ -121,11 +121,20 @@ public class VisitServiceImpl implements VisitService {
                 status = Status.ARCHIVED;
                 break;
 
+            case ("OUT_OF_STATUS"):
+                status = Status.OUT_OF_STATUS;
+                break;
+
             default:
                 status = Status.COMPLETED;
                 break;
         }
-        return repo.findAllByStatus(statusString)
+        return repo.findAllByStatus(Status.UPCOMING.name())
+                .filter(visit -> visit.getVisitEndDate() != null
+                        && visit.getVisitEndDate().isBefore(LocalDateTime.now()))
+                .doOnNext(visit -> visit.setStatus(Status.OUT_OF_STATUS))
+                .flatMap(repo::save)
+                .thenMany(repo.findAllByStatus(status.name()))
                 .flatMap(entityDtoUtil::toVisitResponseDTO);
     }
 
@@ -261,9 +270,10 @@ public class VisitServiceImpl implements VisitService {
     @Override
     public Mono<Void> deleteAllCancelledVisits() {
         return repo.findAllByStatus("CANCELLED")
+                .switchIfEmpty(Flux.error(
+                        new NotFoundException("No cancelled visits were found")
+                ))
                 .collectList()
-                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("No cancelled visits were found")))
-                )
                 .flatMap(repo::deleteAll);
     }
 
