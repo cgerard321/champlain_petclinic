@@ -8,5 +8,5 @@ export const getVisit = async (
     `/visits/${visitId}`,
     { useV2: false }
   );
-  return response.data; // Return only the data
+  return response.data;
 };
