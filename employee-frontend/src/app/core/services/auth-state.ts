@@ -13,10 +13,17 @@ export class AuthState {
   private readonly _roles = signal<string[]>([]);
   readonly roles = this._roles.asReadonly();
 
+  private readonly _username = signal('');
+  readonly username = this._username.asReadonly();
+
   logout(): Observable<void> {
-    return this.http
-      .post<void>('/api/gateway/users/logout', {})
-      .pipe(tap(() => this._isAuthenticated.set(false)));
+    return this.http.post<void>('/api/gateway/users/logout', {}).pipe(
+      tap(() => {
+        this._isAuthenticated.set(false);
+        this._roles.set([]);
+        this._username.set('');
+      }),
+    );
   }
 
   hasRole(role: string): boolean {
@@ -28,11 +35,13 @@ export class AuthState {
       tap((user) => {
         this._isAuthenticated.set(true);
         this._roles.set(user.roles);
+        this._username.set(user.username);
       }),
       map(() => undefined),
       catchError((err: HttpErrorResponse) => {
         this._isAuthenticated.set(false);
         this._roles.set([]);
+        this._username.set('');
         if (err.status !== 401) {
           console.error('Unexpected error checking auth token', err);
         }

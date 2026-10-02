@@ -52,7 +52,7 @@ export class ProductAddDialog implements OnInit {
   private readonly imageService = inject(ImageService);
 
   protected readonly productTypes = signal<ProductType[]>([]);
-  protected readonly deliveryTypes = signal<DeliveryType[]>(Object.values(DeliveryType));
+  protected readonly deliveryTypes = signal<DeliveryType[]>([]);
   protected readonly isSubmitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly selectedFile = signal<File | null>(null);
@@ -76,7 +76,7 @@ export class ProductAddDialog implements OnInit {
     isUnlisted: false,
     productTypeId: '',
     releaseDate: '',
-    deliveryType: DeliveryType.NO_DELIVERY_OPTION,
+    deliveryType: '' as DeliveryType,
   });
 
   protected readonly productForm = form(this.model, (schemaPath) => {
@@ -85,6 +85,7 @@ export class ProductAddDialog implements OnInit {
     required(schemaPath.productSalePrice, { message: 'Sale price is required' });
     required(schemaPath.productQuantity, { message: 'Quantity is required' });
     required(schemaPath.productTypeId, { message: 'Product type is required' });
+    required(schemaPath.deliveryType, { message: 'Delivery type is required' });
   });
 
   protected selectFile(event: Event): void {
