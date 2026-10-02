@@ -30,6 +30,9 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
 
 import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
@@ -772,7 +775,7 @@ public class VisitControllerUnitTest {
         webTestClient.delete()
                 .uri(BASE_VISIT_URL + "/cancelled")
                 .exchange()
-                .expectStatus().isNotFound();
+                .expectStatus().isNoContent();
 
         verify(visitsServiceClient, times(1)).deleteAllCancelledVisits();
     }
@@ -780,7 +783,9 @@ public class VisitControllerUnitTest {
     @Test
     void deleteAllCancelledVisits_whenNoneExist_thenReturnNotFound() {
         when(visitsServiceClient.deleteAllCancelledVisits())
-                .thenReturn(Mono.empty());
+                .thenReturn(Mono.error(
+                        new ResponseStatusException(HttpStatus.NOT_FOUND,"No cancelled visits were found")
+                ));
 
         webTestClient.delete()
                 .uri(BASE_VISIT_URL + "/cancelled")
