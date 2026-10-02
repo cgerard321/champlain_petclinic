@@ -68,6 +68,56 @@
   max-width: 620px;
 }
 
+.welcome-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.welcome-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 1.35rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 10px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.welcome-btn.btn-primary {
+  background-color: #1b382b;
+  color: #ffffff;
+  border: 1px solid #1b382b;
+  box-shadow: 0 2px 6px rgb(27 56 43 / 15%);
+}
+
+.welcome-btn.btn-primary:hover {
+  background-color: #2e523e;
+  transform: translateY(-1px);
+}
+
+.welcome-btn.btn-secondary {
+  background-color: #ffffff;
+  color: #1b382b;
+  border: 1px solid #dce8d2;
+}
+
+.welcome-btn.btn-secondary:hover {
+  background-color: #f7faf7;
+  border-color: #1b382b;
+  transform: translateY(-1px);
+}
+
+.btn-icon {
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+  flex-shrink: 0;
+  fill: currentColor;
+}
 /* --- Clinic Logo Emblem --- */
 .logo-wrapper {
   flex-shrink: 0;
