@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { FormEvent, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getCustomer } from '../api/getCustomer.ts';
 import { updateCustomer } from '../api/updateCustomer.ts';
 import { getUserDetails } from '../api/getUserDetails';
@@ -17,6 +18,7 @@ import { useToast } from '@/shared/components/toast/ToastProvider';
 import { provincesOfCanada } from '../utils/provinces';
 
 const UpdateCustomerForm: React.FC = (): JSX.Element => {
+  const { t } = useTranslation('customers');
   const { showToast } = useToast();
   const navigate = useNavigate();
   const { user, checkSession } = useUser();
@@ -89,11 +91,12 @@ const UpdateCustomerForm: React.FC = (): JSX.Element => {
 
   const validate = async (): Promise<boolean> => {
     const newErrors: { [key: string]: string } = {};
-    if (!customer.firstName) newErrors.firstName = 'First name is required';
-    if (!customer.lastName) newErrors.lastName = 'Last name is required';
-    if (!customer.address) newErrors.address = 'Address is required';
-    if (!customer.city) newErrors.city = 'City is required';
-    if (!customer.province) newErrors.province = 'Province is required';
+    if (!customer.firstName)
+      newErrors.firstName = 'validation.firstNameRequired';
+    if (!customer.lastName) newErrors.lastName = 'validation.lastNameRequired';
+    if (!customer.address) newErrors.address = 'validation.addressRequired';
+    if (!customer.city) newErrors.city = 'validation.cityRequired';
+    if (!customer.province) newErrors.province = 'validation.provinceRequired';
 
     const telephoneError = validateTelephone(customer.telephone);
     if (telephoneError) newErrors.telephone = telephoneError;
@@ -126,90 +129,91 @@ const UpdateCustomerForm: React.FC = (): JSX.Element => {
         await checkSession();
       }
 
-      showToast('Profile updated successfully', 'success');
+      showToast(t('customerForm.updateSuccess'), 'success');
       navigate(AppRoutePaths.Home);
     } catch (error) {
       console.error('Error:', error);
-      showToast(
-        'Could not update your profile. Please check your information and try again.',
-        'error'
-      );
+      showToast(t('customerForm.updateError'), 'error');
     }
   };
   return (
     <div className="update-customer-form">
-      <h1>Edit Profile</h1>
+      <h1>{t('customerForm.title')}</h1>
       <form onSubmit={handleSubmit}>
-        <label>Username: </label>
+        <label>{t('fields.username')} </label>
         <input
           type="text"
           name="username"
           value={username}
           onChange={handleUsernameChange}
         />
-        {errors.username && <span className="error">{errors.username}</span>}
+        {errors.username && <span className="error">{t(errors.username)}</span>}
         <br />
-        <label>First Name: </label>
+        <label>{t('fields.firstName')} </label>
         <input
           type="text"
           name="firstName"
           value={customer.firstName}
           onChange={handleChange}
         />
-        {errors.firstName && <span className="error">{errors.firstName}</span>}
+        {errors.firstName && (
+          <span className="error">{t(errors.firstName)}</span>
+        )}
         <br />
-        <label>Last Name: </label>
+        <label>{t('fields.lastName')} </label>
         <input
           type="text"
           name="lastName"
           value={customer.lastName}
           onChange={handleChange}
         />
-        {errors.lastName && <span className="error">{errors.lastName}</span>}
+        {errors.lastName && <span className="error">{t(errors.lastName)}</span>}
         <br />
-        <label>Address: </label>
+        <label>{t('fields.address')} </label>
         <input
           type="text"
           name="address"
           value={customer.address}
           onChange={handleChange}
         />
-        {errors.address && <span className="error">{errors.address}</span>}
+        {errors.address && <span className="error">{t(errors.address)}</span>}
         <br />
-        <label>City: </label>
+        <label>{t('fields.city')} </label>
         <input
           type="text"
           name="city"
           value={customer.city}
           onChange={handleChange}
         />
-        {errors.city && <span className="error">{errors.city}</span>}
+        {errors.city && <span className="error">{t(errors.city)}</span>}
         <br />
-        <label>Province: </label>
+        <label>{t('fields.province')} </label>
         <select
           name="province"
           value={customer.province}
           onChange={handleChange}
         >
-          <option value="">Select Province</option>
+          <option value="">{t('customerForm.selectProvince')}</option>
           {provincesOfCanada.map(province => (
             <option key={province} value={province}>
               {province}
             </option>
           ))}
         </select>
-        {errors.province && <span className="error">{errors.province}</span>}
+        {errors.province && <span className="error">{t(errors.province)}</span>}
         <br />
-        <label>Telephone: </label>
+        <label>{t('fields.telephone')} </label>
         <input
           type="text"
           name="telephone"
           value={customer.telephone}
           onChange={handleChange}
         />
-        {errors.telephone && <span className="error">{errors.telephone}</span>}
+        {errors.telephone && (
+          <span className="error">{t(errors.telephone)}</span>
+        )}
         <br />
-        <button type="submit">Update</button>
+        <button type="submit">{t('customerForm.submit')}</button>
       </form>
     </div>
   );

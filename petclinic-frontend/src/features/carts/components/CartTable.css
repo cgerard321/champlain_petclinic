@@ -121,3 +121,27 @@
 
 .qty-controls { display: inline-flex; align-items: center; gap: 8px; }
 .qty-value { min-width: 24px; text-align: center; display: inline-block; }
+
+.admin-add-product {
+  margin: 1rem 0;
+}
+
+.admin-add-product__form {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.admin-add-product__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.admin-add-product__field select,
+.admin-add-product__field input {
+  min-height: 40px;
+  padding: 0.5rem;
+}

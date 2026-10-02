@@ -104,16 +104,19 @@ class CustomerControllerIntegrationTest {
         client.delete().uri("/customers/a6e0e5b0-5f60-45f0-8ac7-becd8b330486")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isNoContent()
                 .expectBody();
     }
 
     @Test
-    void deleteNonExistentCustomerByCustomerId() {
+    void deleteNonExistentCustomerByCustomerId() throws InterruptedException {
 
         StepVerifier.create(repo.deleteAll()).verifyComplete();
-
-
+       try {
+           Thread.sleep(100);
+       } catch (InterruptedException e) {
+           Thread.currentThread().interrupt();
+       }
         String nonExistentCustomerId = "a6e0e5b0-5f60-45f0-8ac7-becd8b330486";
 
         client.delete().uri("/customers/" + nonExistentCustomerId)
@@ -360,7 +363,7 @@ class CustomerControllerIntegrationTest {
     }
 
     @Test
-    void whenDeleteCustomerPhoto_withValidId_ShouldReturnOkAndRemovePhotoId() {
+    void whenDeleteCustomerPhoto_withValidId_ShouldReturnNoContentAndRemovePhotoId() {
         String testCustomerId = "delete-photo-id-789";
         String TEST_PHOTO_ID = "photo-to-delete-456";
 
@@ -370,17 +373,18 @@ class CustomerControllerIntegrationTest {
         Publisher<Customer> setup = repo.deleteAll().then(repo.save(customerWithPhoto));
         StepVerifier.create(setup).expectNextCount(1).verifyComplete();
 
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
         when(filesServiceClient.deleteFile(TEST_PHOTO_ID)).thenReturn(Mono.empty());
 
         client.delete().uri("/customers/" + testCustomerId + "/photo")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.customerId").isEqualTo(testCustomerId)
-                .jsonPath("$.photoId").doesNotExist()
-                .jsonPath("$.photo").doesNotExist();
+                .expectStatus().isNoContent()
+                .expectBody();
 
         Mono<Customer> checkCustomer = repo.findCustomerByCustomerId(testCustomerId);
         StepVerifier.create(checkCustomer)

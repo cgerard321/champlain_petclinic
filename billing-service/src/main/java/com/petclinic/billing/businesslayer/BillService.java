@@ -102,6 +102,8 @@ public interface BillService {
     // Method to check and update bills that are past due date from UNPAID to OVERDUE
     Mono<Void> updateOverdueBills();
 
+    Mono<Bill> addTaxesToBill(Bill bill);
+
 
 ///////////////// Used by both BillController and CustomerBillsController /////////////////////
 
@@ -130,5 +132,4 @@ public interface BillService {
     Flux<BillResponseDTO> getBillsByCustomerIdAndDateRange(String customerId, LocalDate startDate, LocalDate endDate);
 
      Mono<byte[]> generateStaffBillPdf(String billId, String currency);
-
 }
