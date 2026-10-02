@@ -34,4 +34,17 @@ export class Header {
   protected logout(): void {
     this.authState.logout().subscribe(() => this.router.navigateByUrl('/login'));
   }
+
+  // Saves the chosen language and reloads the page, because translations are only installed
+  // at startup (see loadActiveTranslations in app.config.ts).
+  protected switchLang(lang: string): void {
+    // Clicking the language that is already active must not trigger a pointless reload.
+    if (localStorage.getItem('lang') === lang) {
+      return;
+    }
+
+    // Persist the choice so it survives the reload.
+    localStorage.setItem('lang', lang);
+    location.reload();
+  }
 }

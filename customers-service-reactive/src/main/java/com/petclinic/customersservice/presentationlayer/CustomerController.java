@@ -12,7 +12,6 @@ import org.springframework.data.domain.PageRequest;
 import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -77,13 +76,13 @@ public class CustomerController {
                 .map(customerResponseDTO -> ResponseEntity.status(HttpStatus.CREATED).body(customerResponseDTO));
     }
 
-    @DeleteMapping(value = "/{customerId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<CustomerResponseDTO>> deleteCustomerByCustomerId(@PathVariable String customerId){
+    @DeleteMapping(value = "/{customerId}")
+    public Mono<ResponseEntity<Void>> deleteCustomerByCustomerId(@PathVariable String customerId){
         return Mono.just(customerId)
                 .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided course id is invalid: " + customerId)))
                 .flatMap(customerService::deleteCustomerByCustomerId)
-                .map(ResponseEntity::ok)
+                .map(v -> ResponseEntity.noContent().<Void>build())
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
@@ -113,9 +112,9 @@ public class CustomerController {
     }
 
     @DeleteMapping("/{customerId}/photo")
-    public Mono<ResponseEntity<CustomerResponseDTO>> deleteCustomerPhoto(@PathVariable String customerId) {
+    public Mono<ResponseEntity<Void>> deleteCustomerPhoto(@PathVariable String customerId) {
         return customerService.deleteCustomerPhoto(customerId)
-                .map(ResponseEntity::ok)
+                .map(v -> ResponseEntity.noContent().<Void>build())
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 }

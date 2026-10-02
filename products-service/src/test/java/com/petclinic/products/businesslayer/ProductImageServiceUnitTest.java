@@ -67,6 +67,8 @@ class ProductImageServiceUnitTest {
     void setUpLegacyImageLookup() {
         lenient().when(imageRepository.findImageByImageId(any()))
                 .thenReturn(Mono.empty());
+        lenient().when(productTypeRepository.findByProductTypeId(any()))
+                .thenReturn(Mono.empty());
     }
 
     @Test
