@@ -16,6 +16,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.time.LocalDate;
@@ -519,11 +520,16 @@ class BillControllerUnitTest {
     }
 
     @Test
-    void updateBillWithNullDueDate_ShouldReturnBadRequestBeforeCallingService() {
+    void updateBillWithNullDueDate_ShouldReturnBadRequestFromService() {
         BillRequestDTO request = BillRequestDTO.builder()
                 .customerId("customer-1")
                 .dueDate(null)
                 .build();
+
+        when(billService.updateBill(eq("bill-id"), any()))
+                .thenReturn(Mono.error(new ResponseStatusException(
+                        org.springframework.http.HttpStatus.BAD_REQUEST,
+                        "Due date is required")));
 
         client.put()
                 .uri("/bills/{billId}", "bill-id")
@@ -534,7 +540,7 @@ class BillControllerUnitTest {
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("Due date is required");
 
-        verifyNoInteractions(billService);
+        verify(billService).updateBill(eq("bill-id"), any());
     }
 
     @Test

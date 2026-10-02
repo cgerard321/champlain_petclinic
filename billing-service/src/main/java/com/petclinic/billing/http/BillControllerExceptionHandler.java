@@ -6,11 +6,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
@@ -42,6 +44,14 @@ public class BillControllerExceptionHandler {
                 .orElse("Invalid request");
 
         return createHttpErrorInfo(HttpStatus.BAD_REQUEST, request, message);
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<HttpErrorInfo> handleResponseStatusException(
+            ServerHttpRequest request, ResponseStatusException ex) {
+        HttpStatus status = ex.getStatus();
+        return ResponseEntity.status(status)
+                .body(createHttpErrorInfo(status, request, ex.getReason()));
     }
 
     private HttpErrorInfo createHttpErrorInfo(HttpStatus httpStatus, ServerHttpRequest request, Exception ex) {
