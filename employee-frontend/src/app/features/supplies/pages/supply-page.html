@@ -110,6 +110,51 @@
     <p class="field-error" role="alert">{{ deleteError() }}</p>
   }
 
+  <section class="supply-filters" aria-label="Filter supplies">
+    <div class="filter-heading">
+      <div>
+        <h2>Find a supply</h2>
+        <p>Filter by name, description, or status.</p>
+      </div>
+      <button
+        class="clear-filters-button"
+        type="button"
+        (click)="clearFilters()"
+        [disabled]="!hasActiveFilters()"
+      >
+        Clear filters
+      </button>
+    </div>
+    <div class="supply-filter-grid">
+      <label class="filter-field">
+        <span>Supply name</span>
+        <input
+          type="search"
+          placeholder="Search by name"
+          [value]="filters().productName"
+          (input)="setFilter('productName', $event)"
+        />
+      </label>
+      <label class="filter-field">
+        <span>Description</span>
+        <input
+          type="search"
+          placeholder="Search by description"
+          [value]="filters().productDescription"
+          (input)="setFilter('productDescription', $event)"
+        />
+      </label>
+      <label class="filter-field">
+        <span>Status</span>
+        <select [value]="filters().status" (change)="setFilter('status', $event)">
+          <option value="">All statuses</option>
+          <option value="AVAILABLE">Available</option>
+          <option value="RE_ORDER">Re order</option>
+          <option value="OUT_OF_STOCK">Out of stock</option>
+        </select>
+      </label>
+    </div>
+  </section>
   @if (downloadError()) {
     <p class="field-error" role="alert">{{ downloadError() }}</p>
   }
@@ -120,10 +165,18 @@
     <p class="state-message error-message" role="alert">Unable to load supplies.</p>
   } @else if (supplies().length === 0) {
     <p class="state-message">No supplies found for this inventory.</p>
+  } @else if (filteredSupplies().length === 0) {
+    <div class="state-message" role="status">
+      <h2>No matching supplies</h2>
+      <p>No supplies match your filters in this inventory. Try changing or clearing the filters.</p>
+      <button class="clear-filters-button" type="button" (click)="clearFilters()">
+        Clear filters
+      </button>
+    </div>
   } @else {
     <app-table
       label="Supplies in this inventory"
-      [rows]="supplies()"
+      [rows]="filteredSupplies()"
       [columns]="columns()"
       [rowId]="supplyRowId"
     />
