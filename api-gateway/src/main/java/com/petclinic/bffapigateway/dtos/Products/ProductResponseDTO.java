@@ -1,11 +1,10 @@
 package com.petclinic.bffapigateway.dtos.Products;
 
+import com.petclinic.bffapigateway.dtos.Files.FileDetails;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDate;
 
 @Data
 @Builder
@@ -22,7 +21,28 @@ public class ProductResponseDTO {
     private Integer requestCount;
     private Integer productQuantity;
     private Boolean isUnlisted;
-    private ProductType productType;
+    private String productTypeId;
+    private String productType;
     private ProductStatus productStatus;
     private DeliveryType deliveryType;
+    private FileDetails image;
+
+    public ProductResponseDTO(
+            String productId,
+            String imageId,
+            String productName,
+            String productDescription,
+            Double productSalePrice,
+            Double averageRating,
+            Integer requestCount,
+            Integer productQuantity,
+            Boolean isUnlisted,
+            String productTypeId,
+            String productType,
+            ProductStatus productStatus,
+            DeliveryType deliveryType) {
+        this(productId, imageId, productName, productDescription,
+                productSalePrice, averageRating, requestCount, productQuantity,
+                isUnlisted, productTypeId, productType, productStatus, deliveryType, null);
+    }
 }

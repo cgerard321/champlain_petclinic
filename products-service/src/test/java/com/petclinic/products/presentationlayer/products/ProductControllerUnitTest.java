@@ -4,7 +4,8 @@ import com.petclinic.products.businesslayer.products.ProductBundleService;
 import com.petclinic.products.businesslayer.products.ProductService;
 import com.petclinic.products.datalayer.products.DeliveryType;
 import com.petclinic.products.datalayer.products.ProductStatus;
-import com.petclinic.products.datalayer.products.ProductType;
+import com.petclinic.products.datalayer.products.ProductTypeDb;
+import com.petclinic.products.domainclientlayer.FileRequestDTO;
 import com.petclinic.products.utils.PostgresTestContainerBase;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
 import org.junit.jupiter.api.Assertions;
@@ -37,6 +38,24 @@ public class ProductControllerUnitTest extends PostgresTestContainerBase {
     private WebTestClient webClient;
 
     @Test
+    void updateProductImageWithMissingFileFieldsReturnsBadRequest() {
+        FileRequestDTO invalidImage = FileRequestDTO.builder()
+                .fileName("")
+                .fileType(" ")
+                .fileData(new byte[0])
+                .build();
+
+        webClient.patch()
+                .uri("/products/06a7d573-bcab-4db3-956f-773324b92a80/image")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(invalidImage)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        verifyNoInteractions(productService);
+    }
+
+    @Test
     public void whenGetAllProductsThenReturnProducts() {
         ProductResponseModel productResponseModel1 = ProductResponseModel.builder()
                 .productId("ae2d3af7-f2a2-407f-ad31-ca7d8220cb7a")
@@ -63,6 +82,29 @@ public class ProductControllerUnitTest extends PostgresTestContainerBase {
                 .expectBodyList(ProductResponseModel.class);
 
         verify(productService).getAllProducts(null, null, null, null, null, null, null);
+    }
+
+    @Test
+    public void whenSearchingProductsByNameThenPassProductNameToService() {
+        ProductResponseModel product = ProductResponseModel.builder()
+                .productId("ae2d3af7-f2a2-407f-ad31-ca7d8220cb7a")
+                .productName("Horse Saddle")
+                .productSalePrice(199.99)
+                .build();
+        when(productService.getAllProducts(null, null, null, null, null, null, null, "saddle"))
+                .thenReturn(Flux.just(product));
+
+        webClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/products")
+                        .queryParam("productName", "saddle")
+                        .build())
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseModel.class)
+                .hasSize(1);
+
+        verify(productService).getAllProducts(null, null, null, null, null, null, null, "saddle");
     }
 
     @Test
@@ -375,8 +417,15 @@ public class ProductControllerUnitTest extends PostgresTestContainerBase {
 
     @Test
     public void whenGetProductEnums_thenReturnEnums() {
+        List<ProductTypeDb> productTypes = List.of(
+                ProductTypeDb.builder().productTypeId("586d0700-57db-4312-b6f1-413b79dd018c").typeName("FOOD").build(),
+                ProductTypeDb.builder().productTypeId("86627454-970e-41a9-baa6-71ab759bf66c").typeName("MEDICATION").build(),
+                ProductTypeDb.builder().productTypeId("6a247af0-52d9-4179-a5b4-ad4b92e686b1").typeName("ACCESSORY").build(),
+                ProductTypeDb.builder().productTypeId("79c8723a-8df3-495d-8eb0-07d574ff5ae5").typeName("EQUIPMENT").build()
+        );
+
         ProductEnumsResponseModel enumsResponseDTO = new ProductEnumsResponseModel(
-                List.of(ProductType.FOOD, ProductType.MEDICATION, ProductType.ACCESSORY, ProductType.EQUIPMENT),
+                productTypes,
                 List.of(ProductStatus.AVAILABLE, ProductStatus.PRE_ORDER, ProductStatus.OUT_OF_STOCK),
                 List.of(DeliveryType.DELIVERY, DeliveryType.PICKUP, DeliveryType.DELIVERY_AND_PICKUP, DeliveryType.NO_DELIVERY_OPTION)
         );
@@ -390,7 +439,7 @@ public class ProductControllerUnitTest extends PostgresTestContainerBase {
                 .expectBody(ProductEnumsResponseModel.class)
                 .value(response -> {
                     assertNotNull(response);
-                    assertEquals(List.of(ProductType.FOOD, ProductType.MEDICATION, ProductType.ACCESSORY, ProductType.EQUIPMENT), response.getProductType());
+                    assertEquals(productTypes, response.getProductType());
                     assertEquals(List.of(ProductStatus.AVAILABLE, ProductStatus.PRE_ORDER, ProductStatus.OUT_OF_STOCK), response.getProductStatus());
                     assertEquals(List.of(DeliveryType.DELIVERY, DeliveryType.PICKUP, DeliveryType.DELIVERY_AND_PICKUP, DeliveryType.NO_DELIVERY_OPTION), response.getDeliveryType());
                 });

@@ -7,8 +7,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
+import { of, switchMap } from 'rxjs';
 
 import { isApiError } from '@core/models/api-error';
+import { FileDetails } from '@features/prod/models/image.model';
 import {
   DeliveryType,
   Product,
@@ -29,7 +31,7 @@ interface ProductFormModel {
   productSalePrice: number;
   productQuantity: number;
   isUnlisted: boolean;
-  productType: ProductType;
+  productTypeId: string;
   releaseDate: string;
   deliveryType: DeliveryType;
 }
@@ -55,7 +57,7 @@ export class ProductUpdateDialog implements OnInit {
   private readonly productService = inject(ProductService);
   private readonly imageService = inject(ImageService);
 
-  protected readonly productTypes = signal<ProductType[]>(Object.values(ProductType));
+  protected readonly productTypes = signal<ProductType[]>([]);
   protected readonly deliveryTypes = signal<DeliveryType[]>(Object.values(DeliveryType));
   protected readonly isSubmitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
@@ -69,7 +71,7 @@ export class ProductUpdateDialog implements OnInit {
     productSalePrice: this.data.product.productSalePrice,
     productQuantity: this.data.product.productQuantity,
     isUnlisted: this.data.product.isUnlisted,
-    productType: this.data.product.productType,
+    productTypeId: this.data.product.productTypeId,
     releaseDate: this.data.product.releaseDate ?? '',
     deliveryType: this.data.product.deliveryType,
   });
@@ -79,6 +81,7 @@ export class ProductUpdateDialog implements OnInit {
     required(schemaPath.productDescription, { message: 'Product description is required' });
     required(schemaPath.productSalePrice, { message: 'Sale price is required' });
     required(schemaPath.productQuantity, { message: 'Quantity is required' });
+    required(schemaPath.productTypeId, { message: 'Product type is required' });
   });
 
   ngOnInit(): void {
@@ -120,14 +123,14 @@ export class ProductUpdateDialog implements OnInit {
     this.errorMessage.set(null);
     const file = this.selectedFile();
     if (file) {
-      this.imageService.uploadImage(file).subscribe({
-        next: (image) => this.updateProduct(image.imageId),
-        error: (error: unknown) => this.handleError(error),
-      });
+      void this.imageService
+        .toFileDetails(file)
+        .then((image) => this.updateProduct(image))
+        .catch((error: unknown) => this.handleError(error));
       return;
     }
 
-    this.updateProduct(this.originalProduct.imageId);
+    this.updateProduct();
   }
 
   protected cancel(): void {
@@ -136,22 +139,28 @@ export class ProductUpdateDialog implements OnInit {
     }
   }
 
-  private updateProduct(imageId?: string): void {
+  private updateProduct(image?: FileDetails): void {
     const { releaseDate, ...formValue } = this.model();
     const request: ProductRequest = {
       ...formValue,
       ...(releaseDate ? { releaseDate } : {}),
-      ...(imageId ? { imageId } : {}),
       productStatus: this.originalProduct.productStatus,
     };
 
-    this.productService.updateProduct(this.originalProduct.productId, request).subscribe({
-      next: (product) => {
-        this.isSubmitting.set(false);
-        this.dialogRef.close(product);
-      },
-      error: (error: unknown) => this.handleError(error),
-    });
+    this.productService
+      .updateProduct(this.originalProduct.productId, request)
+      .pipe(
+        switchMap((product) =>
+          image ? this.productService.updateProductImage(product.productId, image) : of(product),
+        ),
+      )
+      .subscribe({
+        next: (product) => {
+          this.isSubmitting.set(false);
+          this.dialogRef.close(product);
+        },
+        error: (error: unknown) => this.handleError(error),
+      });
   }
 
   private validateBusinessRules(): boolean {

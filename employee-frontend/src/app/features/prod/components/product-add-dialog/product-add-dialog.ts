@@ -9,6 +9,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 
 import { isApiError } from '@core/models/api-error';
+import { FileDetails } from '@features/prod/models/image.model';
 import {
   DeliveryType,
   Product,
@@ -25,7 +26,7 @@ interface ProductFormModel {
   productSalePrice: number;
   productQuantity: number;
   isUnlisted: boolean;
-  productType: ProductType;
+  productTypeId: string;
   releaseDate: string;
   deliveryType: DeliveryType;
 }
@@ -50,7 +51,7 @@ export class ProductAddDialog implements OnInit {
   private readonly productService = inject(ProductService);
   private readonly imageService = inject(ImageService);
 
-  protected readonly productTypes = signal<ProductType[]>(Object.values(ProductType));
+  protected readonly productTypes = signal<ProductType[]>([]);
   protected readonly deliveryTypes = signal<DeliveryType[]>(Object.values(DeliveryType));
   protected readonly isSubmitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
@@ -73,7 +74,7 @@ export class ProductAddDialog implements OnInit {
     productSalePrice: 0,
     productQuantity: 0,
     isUnlisted: false,
-    productType: ProductType.ACCESSORY,
+    productTypeId: '',
     releaseDate: '',
     deliveryType: DeliveryType.NO_DELIVERY_OPTION,
   });
@@ -83,6 +84,7 @@ export class ProductAddDialog implements OnInit {
     required(schemaPath.productDescription, { message: 'Product description is required' });
     required(schemaPath.productSalePrice, { message: 'Sale price is required' });
     required(schemaPath.productQuantity, { message: 'Quantity is required' });
+    required(schemaPath.productTypeId, { message: 'Product type is required' });
   });
 
   protected selectFile(event: Event): void {
@@ -113,13 +115,11 @@ export class ProductAddDialog implements OnInit {
     this.isSubmitting.set(true);
     this.errorMessage.set(null);
     const file = this.selectedFile();
-    const upload$ = file ? this.imageService.uploadImage(file) : null;
-
-    if (upload$) {
-      upload$.subscribe({
-        next: (image) => this.createProduct(image.imageId),
-        error: (error: unknown) => this.handleError(error),
-      });
+    if (file) {
+      void this.imageService
+        .toFileDetails(file)
+        .then((image) => this.createProduct(image))
+        .catch((error: unknown) => this.handleError(error));
       return;
     }
 
@@ -132,12 +132,12 @@ export class ProductAddDialog implements OnInit {
     }
   }
 
-  private createProduct(imageId?: string): void {
+  private createProduct(image?: FileDetails): void {
     const { releaseDate, ...formValue } = this.model();
     const request: ProductRequest = {
       ...formValue,
       ...(releaseDate ? { releaseDate } : {}),
-      ...(imageId ? { imageId } : {}),
+      ...(image ? { image } : {}),
     };
     this.productService.createProduct(request).subscribe({
       next: (product) => {
