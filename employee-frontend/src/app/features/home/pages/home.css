@@ -194,6 +194,9 @@
 
 /* Individual Action Card */
 .action-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
   background-color: #ffffff;
   border: 1px solid #e0eae0;
   border-radius: 12px;
