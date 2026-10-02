@@ -1,0 +1,39 @@
+<section class="image-editor">
+  <h3>Supply photo</h3>
+
+  <div class="image-preview">
+    @if (preview(); as image) {
+      <img [src]="image" alt="Supply photo preview" />
+    } @else {
+      <span>No photo selected</span>
+    }
+  </div>
+
+  <input
+    #fileInput
+    type="file"
+    accept="image/jpeg,image/png,image/webp"
+    aria-label="Choose supply photo"
+    hidden
+    [disabled]="disabled()"
+    (change)="selectImage($event)"
+  />
+
+  <div class="image-actions">
+    <button type="button" [disabled]="disabled()" (click)="fileInput.click()">
+      {{ preview() ? 'Change image' : 'Add image' }}
+    </button>
+
+    @if (preview()) {
+      <button type="button" class="remove-button" [disabled]="disabled()" (click)="removeImage()">
+        Remove image
+      </button>
+    }
+  </div>
+
+  <p class="image-hint">JPG, PNG, or WebP. Maximum 2 MB.</p>
+
+  @if (error()) {
+    <p class="image-error" role="alert">{{ error() }}</p>
+  }
+</section>

@@ -5,13 +5,14 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
 
 import { AuthState } from '@core/services/auth-state';
+import { SupplyImageEditor } from '@features/supplies/components/supply-image-editor/supply-image-editor';
 import { Supply } from '@features/supplies/models/supply';
 import { SupplyService } from '@features/supplies/services/supply-service';
 import { Table, TableColumn } from '@shared/components/table/table';
 import { Roles } from '@shared/models/roles';
 
 @Component({
-  imports: [CurrencyPipe, FormField, MatDialogModule, Table],
+  imports: [CurrencyPipe, FormField, MatDialogModule, Table, SupplyImageEditor],
   selector: 'app-supply',
   styleUrl: './supply-page.css',
   templateUrl: './supply-page.html',
@@ -60,6 +61,12 @@ export class SupplyPage {
       ? [{ id: 'actions', header: 'Actions', template: this.actionsCell() }]
       : []),
   ]);
+
+  protected readonly selectedImage = signal<File | null>(null);
+
+  protected onImageChange(file: File | null): void {
+    this.selectedImage.set(file);
+  }
 
   protected readonly supplyForm = form(this.newSupply, (path) => {
     required(path.productName, {
@@ -169,6 +176,7 @@ export class SupplyPage {
   }
 
   protected editSupply(supply: Supply): void {
+    this.selectedImage.set(null);
     if (!this.canManageSupplies()) {
       return;
     }
@@ -229,6 +237,7 @@ export class SupplyPage {
     this.showAddForm.set(true);
   }
   protected cancelAddForm(): void {
+    this.selectedImage.set(null);
     this.supplyForm().reset({
       productName: '',
       productDescription: '',
