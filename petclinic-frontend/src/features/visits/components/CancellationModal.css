@@ -1,0 +1,16 @@
+.cancellation-modal-description {
+    margin-bottom: 1rem;
+}
+
+.cancellation-option {
+    margin-bottom: 0.5rem;
+}
+
+.cancellation-other {
+    margin-top: 1rem;
+}
+
+.cancellation-error {
+    margin-top: 1rem;
+    color: red;
+}
