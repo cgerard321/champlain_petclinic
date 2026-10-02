@@ -57,6 +57,11 @@ export const routes: Routes = [
         path: 'prod',
         loadChildren: () => import('@features/prod/routes'),
       },
+
+      {
+        path: 'promo',
+        loadChildren: () => import('@features/promo/routes'),
+      },
       {
         path: 'error',
         loadChildren: () => import('@features/error/routes'),
