@@ -8,6 +8,11 @@ import { PetRequestModel } from '../models/PetRequestModel';
 import { PetResponseModel } from '../models/PetResponseModel';
 import { PetTypeModel } from '../models/PetTypeModel';
 import defaultProfile from '@/assets/Customers/defaultProfilePicture.png';
+import {
+  MAX_PET_AGE,
+  MAX_PET_NAME_LENGTH,
+  MAX_PET_WEIGHT,
+} from '../utils/petValidationLimits';
 import './customers.css';
 
 interface AddPetModalProps {
@@ -97,10 +102,21 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
     if (!pet.name.trim()) newErrors.name = 'pets.errors.nameRequired';
+    if (pet.name.trim().length > MAX_PET_NAME_LENGTH)
+      newErrors.name = 'pets.errors.nameTooLong';
+
+    const oldestBirthDate = new Date();
+    oldestBirthDate.setFullYear(oldestBirthDate.getFullYear() - MAX_PET_AGE);
+    if (pet.birthDate < oldestBirthDate) {
+      newErrors.birthDate = 'pets.errors.ageTooHigh';
+    }
+
     if (!pet.weight.trim()) newErrors.weight = 'pets.errors.weightRequired';
     if (!pet.petTypeId) newErrors.petTypeId = 'pets.errors.typeRequired';
     if (parseFloat(pet.weight) <= 0)
       newErrors.weight = 'pets.errors.weightPositive';
+    if (parseFloat(pet.weight) > MAX_PET_WEIGHT)
+      newErrors.weight = 'pets.errors.weightTooHigh';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -199,7 +215,9 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
               disabled={isSubmitting}
             />
             {errors.name && (
-              <span className="error-message">{t(errors.name)}</span>
+              <span className="error-message">
+                {t(errors.name, { maxNameLength: MAX_PET_NAME_LENGTH })}
+              </span>
             )}
           </div>
 
@@ -248,6 +266,11 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
               onBlur={() => setIsDateInputFocused(false)}
               disabled={isSubmitting}
             />
+            {errors.birthDate && (
+              <span className="error-message">
+                {t(errors.birthDate, { maxAge: MAX_PET_AGE })}
+              </span>
+            )}
           </div>
 
           <div className="form-group">
@@ -263,7 +286,9 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
               disabled={isSubmitting}
             />
             {errors.weight && (
-              <span className="error-message">{t(errors.weight)}</span>
+              <span className="error-message">
+                {t(errors.weight, { maxWeight: MAX_PET_WEIGHT })}
+              </span>
             )}
           </div>
 
