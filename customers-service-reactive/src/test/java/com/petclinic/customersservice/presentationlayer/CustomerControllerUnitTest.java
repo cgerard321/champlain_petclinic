@@ -151,22 +151,19 @@ public class CustomerControllerUnitTest {
     }
 
     @Test
-    void whenDeleteCustomerPhoto_thenReturnOk() {
+    void whenDeleteCustomerPhoto_thenReturnNoContent() {
         CustomerResponseDTO mockResponse = new CustomerResponseDTO();
         mockResponse.setCustomerId(testCustomerId);
         mockResponse.setFirstName("John");
 
         doReturn(Mono.just(mockResponse)).when(customerService).deleteCustomerPhoto(testCustomerId);
 
-        Mono<ResponseEntity<CustomerResponseDTO>> result = customerController.deleteCustomerPhoto(testCustomerId);
+        Mono<ResponseEntity<Void>> result = customerController.deleteCustomerPhoto(testCustomerId);
 
         StepVerifier.create(result)
                 .consumeNextWith(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertNotNull(response.getBody());
-                    assertEquals(testCustomerId, response.getBody().getCustomerId());
-                    // Verify the photo is gone
-                    assertNull(response.getBody().getPhoto());
+                    assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+                    assertNull(response.getBody());
                 })
                 .verifyComplete();
 
@@ -177,7 +174,7 @@ public class CustomerControllerUnitTest {
     void whenDeleteCustomerPhoto_ShouldReturnNotFound_ifCustomerNotFound() {
         doReturn(Mono.empty()).when(customerService).deleteCustomerPhoto(testCustomerId);
 
-        Mono<ResponseEntity<CustomerResponseDTO>> result = customerController.deleteCustomerPhoto(testCustomerId);
+        Mono<ResponseEntity<Void>> result = customerController.deleteCustomerPhoto(testCustomerId);
 
         StepVerifier.create(result)
                 .consumeNextWith(response -> {
