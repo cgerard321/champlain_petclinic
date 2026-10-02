@@ -33,6 +33,8 @@ export class InventoryList implements OnInit, OnDestroy {
   private readonly quantitySubscriptions = new Set<Subscription>();
   private filterTimer?: ReturnType<typeof setTimeout>;
 
+  protected readonly currentPage = signal(0);
+  protected readonly pageSize = 8;
   protected readonly inventories = signal<Inventory[]>([]);
   protected readonly inventoryTypes = signal<InventoryType[]>([]);
   protected readonly inventoryTypesLoading = signal(false);
@@ -71,11 +73,7 @@ export class InventoryList implements OnInit, OnDestroy {
 
     this.inventorySubscription?.unsubscribe();
     this.inventoryTypesSubscription?.unsubscribe();
-
-    this.quantitySubscriptions.forEach((subscription) => {
-      subscription.unsubscribe();
-    });
-    this.quantitySubscriptions.clear();
+    this.cancelQuantityRequests();
   }
 
   protected quantityFor(inventoryId: string): number | null {
@@ -84,46 +82,25 @@ export class InventoryList implements OnInit, OnDestroy {
 
   protected setTextFilter(field: 'inventoryName' | 'inventoryDescription', event: Event): void {
     const target = event.target;
+    if (!(target instanceof HTMLInputElement)) return;
 
-    if (!(target instanceof HTMLInputElement)) {
-      return;
-    }
-
-    this.filters.update((current) => ({
-      ...current,
-      [field]: target.value,
-    }));
-
+    this.filters.update((current) => ({ ...current, [field]: target.value }));
     this.scheduleFilteredLoad();
   }
 
   protected setInventoryTypeFilter(event: Event): void {
     const target = event.target;
+    if (!(target instanceof HTMLSelectElement)) return;
 
-    if (!(target instanceof HTMLSelectElement)) {
-      return;
-    }
-
-    this.filters.update((current) => ({
-      ...current,
-      inventoryType: target.value,
-    }));
-
+    this.filters.update((current) => ({ ...current, inventoryType: target.value }));
     this.scheduleFilteredLoad();
   }
 
   protected setImportantOnly(event: Event): void {
     const target = event.target;
+    if (!(target instanceof HTMLInputElement) || this.isSavingAnyFavorite()) return;
 
-    if (!(target instanceof HTMLInputElement) || this.isSavingAnyFavorite()) {
-      return;
-    }
-
-    this.filters.update((current) => ({
-      ...current,
-      importantOnly: target.checked,
-    }));
-
+    this.filters.update((current) => ({ ...current, importantOnly: target.checked }));
     this.scheduleFilteredLoad();
   }
 
@@ -134,7 +111,6 @@ export class InventoryList implements OnInit, OnDestroy {
       inventoryDescription: '',
       importantOnly: false,
     });
-
     this.scheduleFilteredLoad();
   }
 
@@ -147,6 +123,26 @@ export class InventoryList implements OnInit, OnDestroy {
       filters.inventoryDescription.trim() ||
       filters.importantOnly,
     );
+  }
+
+  protected canGoToNextPage(): boolean {
+    return this.inventories().length === this.pageSize;
+  }
+
+  protected goToPreviousPage(): void {
+    if (this.currentPage() === 0 || this.isLoading()) return;
+
+    const page = this.currentPage() - 1;
+    this.currentPage.set(page);
+    this.loadInventories(page);
+  }
+
+  protected goToNextPage(): void {
+    if (!this.canGoToNextPage() || this.isLoading()) return;
+
+    const page = this.currentPage() + 1;
+    this.currentPage.set(page);
+    this.loadInventories(page);
   }
 
   protected isSavingFavorite(inventoryId: string): boolean {
@@ -162,36 +158,29 @@ export class InventoryList implements OnInit, OnDestroy {
 
     const nextValue = !inventory.important;
     this.favoriteError.set(null);
-
-    this.savingFavorites.update((current) => ({
-      ...current,
-      [id]: true,
-    }));
+    this.savingFavorites.update((current) => ({ ...current, [id]: true }));
 
     this.inventoryService
       .updateImportantStatus(id, nextValue)
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         finalize(() => {
-          this.savingFavorites.update((current) => ({
-            ...current,
-            [id]: false,
-          }));
+          this.savingFavorites.update((current) => ({ ...current, [id]: false }));
         }),
       )
       .subscribe({
         next: () => {
-          this.inventories.update((current) => {
-            if (this.filters().importantOnly && !nextValue) {
-              return current.filter((item) => item.inventoryId !== id);
-            }
+          if (this.filters().importantOnly && !nextValue) {
+            this.loadInventories();
+            return;
+          }
 
-            return current.map((item) =>
+          this.inventories.update((current) =>
+            current.map((item) =>
               item.inventoryId === id ? { ...item, important: nextValue } : item,
-            );
-          });
+            ),
+          );
         },
-        // The star is only updated on success, so a failed save leaves it as it was.
         error: () => {
           this.favoriteError.set(`Could not update the favorite for ${inventory.inventoryName}.`);
         },
@@ -205,8 +194,8 @@ export class InventoryList implements OnInit, OnDestroy {
     this.inventoryTypesSubscription = this.inventoryService.getInventoryTypes().subscribe({
       next: (type) => {
         this.inventoryTypes.update((current) => {
-          const alreadyLoaded = current.some((item) => item.typeId === type.typeId);
-          return alreadyLoaded ? current : [...current, type];
+          if (current.some((item) => item.typeId === type.typeId)) return current;
+          return [...current, type];
         });
       },
       error: () => {
@@ -215,7 +204,6 @@ export class InventoryList implements OnInit, OnDestroy {
       },
       complete: () => {
         this.inventoryTypesLoading.set(false);
-
         if (this.inventoryTypes().length === 0) {
           this.inventoryTypesError.set('No inventory types are available.');
         }
@@ -224,37 +212,11 @@ export class InventoryList implements OnInit, OnDestroy {
   }
 
   private scheduleFilteredLoad(): void {
-    if (this.filterTimer) {
-      clearTimeout(this.filterTimer);
-    }
+    if (this.filterTimer) clearTimeout(this.filterTimer);
 
+    this.currentPage.set(0);
     this.inventorySubscription?.unsubscribe();
-
-    this.quantitySubscriptions.forEach((subscription) => {
-      subscription.unsubscribe();
-    });
-    this.quantitySubscriptions.clear();
-
-    this.inventories.set([]);
-    this.quantities.set({});
-    this.isLoading.set(true);
-    this.errorMessage.set(null);
-    this.noResultsMessage.set(null);
-
-    this.filterTimer = setTimeout(() => {
-      this.filterTimer = undefined;
-      this.loadInventories(this.filters());
-    }, 300);
-  }
-
-  private loadInventories(filters: Partial<InventoryFilters> = this.filters()): void {
-    this.inventorySubscription?.unsubscribe();
-
-    this.quantitySubscriptions.forEach((subscription) => {
-      subscription.unsubscribe();
-    });
-    this.quantitySubscriptions.clear();
-
+    this.cancelQuantityRequests();
     this.inventories.set([]);
     this.quantities.set({});
     this.isLoading.set(true);
@@ -262,91 +224,121 @@ export class InventoryList implements OnInit, OnDestroy {
     this.noResultsMessage.set(null);
     this.favoriteError.set(null);
 
-    this.inventorySubscription = this.inventoryService.getInventories(filters).subscribe({
-      next: (item) => {
-        this.isLoading.set(false);
-        this.errorMessage.set(null);
-        this.noResultsMessage.set(null);
+    this.filterTimer = setTimeout(() => {
+      this.filterTimer = undefined;
+      this.loadInventories(0);
+    }, 300);
+  }
 
-        this.inventories.update((current) => {
-          const index = current.findIndex(
-            (inventory) => inventory.inventoryId === item.inventoryId,
-          );
+  private loadInventories(page = this.currentPage()): void {
+    const requestedPage = page;
 
-          if (index === -1) {
-            return [...current, item];
+    this.inventorySubscription?.unsubscribe();
+    this.cancelQuantityRequests();
+    this.inventories.set([]);
+    this.quantities.set({});
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
+    this.noResultsMessage.set(null);
+    this.favoriteError.set(null);
+
+    this.inventorySubscription = this.inventoryService
+      .getInventories(this.filters(), requestedPage, this.pageSize)
+      .subscribe({
+        next: (item) => {
+          this.isLoading.set(false);
+          this.errorMessage.set(null);
+          this.noResultsMessage.set(null);
+
+          this.inventories.update((current) => {
+            const index = current.findIndex(
+              (inventory) => inventory.inventoryId === item.inventoryId,
+            );
+
+            if (index === -1) return [...current, item];
+
+            const updated = [...current];
+            updated[index] = item;
+            return updated;
+          });
+
+          this.loadQuantities(item.inventoryId);
+        },
+        error: (err: unknown) => {
+          this.isLoading.set(false);
+
+          if (err instanceof HttpErrorResponse && err.status === 404 && requestedPage > 0) {
+            const previousPage = requestedPage - 1;
+            this.currentPage.set(previousPage);
+            this.loadInventories(previousPage);
+            return;
           }
 
-          const updated = [...current];
-          updated[index] = item;
-          return updated;
-        });
+          if (err instanceof HttpErrorResponse && err.status === 404 && this.hasActiveFilters()) {
+            this.noResultsMessage.set(
+              'No inventory matched your search. Try a different name or description, or clear the filters.',
+            );
+            this.errorMessage.set(null);
+            return;
+          }
 
-        this.loadQuantities(item.inventoryId);
-      },
-      error: (err: unknown) => {
-        this.isLoading.set(false);
-
-        if (err instanceof HttpErrorResponse && err.status === 404 && this.hasActiveFilters()) {
-          this.noResultsMessage.set(
-            'No inventory matched your search. Try a different name or description, or clear the filters.',
+          this.noResultsMessage.set(null);
+          this.errorMessage.set(
+            isApiError(err) ? err : { code: 'UNKNOWN', message: 'Failed to load inventories.' },
           );
-          this.errorMessage.set(null);
-          return;
-        }
+        },
+        complete: () => {
+          this.isLoading.set(false);
 
-        this.noResultsMessage.set(null);
-        this.errorMessage.set(
-          isApiError(err) ? err : { code: 'UNKNOWN', message: 'Failed to load inventories.' },
-        );
-      },
-      complete: () => {
-        this.isLoading.set(false);
+          if (this.inventories().length === 0 && requestedPage > 0) {
+            const previousPage = requestedPage - 1;
+            this.currentPage.set(previousPage);
+            this.loadInventories(previousPage);
+            return;
+          }
 
-        if (this.inventories().length === 0 && this.hasActiveFilters()) {
-          this.noResultsMessage.set(
-            'No inventory matched your search. Try a different name or description, or clear the filters.',
-          );
-        }
-      },
-    });
+          if (this.inventories().length === 0 && this.hasActiveFilters()) {
+            this.noResultsMessage.set(
+              'No inventory matched your search. Try a different name or description, or clear the filters.',
+            );
+          }
+        },
+      });
   }
 
   private loadQuantities(inventoryId: string): void {
     if (!(inventoryId in this.quantities())) {
-      this.quantities.update((current) => ({
-        ...current,
-        [inventoryId]: null,
-      }));
+      this.quantities.update((current) => ({ ...current, [inventoryId]: null }));
     }
 
     let subscription = Subscription.EMPTY;
-    const forgetSubscription = (): void => {
+    const removeSubscription = (): void => {
       this.quantitySubscriptions.delete(subscription);
     };
 
     subscription = this.inventoryService
       .getQuantity(inventoryId)
-      .pipe(finalize(forgetSubscription))
+      .pipe(finalize(removeSubscription))
       .subscribe({
         next: (quantity) => {
           this.quantities.update((current) => ({ ...current, [inventoryId]: quantity }));
         },
         error: () => {
           if (!(inventoryId in this.quantities())) {
-            this.quantities.update((current) => ({
-              ...current,
-              [inventoryId]: null,
-            }));
+            this.quantities.update((current) => ({ ...current, [inventoryId]: null }));
           }
         },
       });
 
-    // Only track the request if it is still open.
     if (subscription.closed) {
-      forgetSubscription();
+      removeSubscription();
     } else {
       this.quantitySubscriptions.add(subscription);
     }
+  }
+
+  private cancelQuantityRequests(): void {
+    this.quantitySubscriptions.forEach((subscription) => subscription.unsubscribe());
+    this.quantitySubscriptions.clear();
   }
 }
