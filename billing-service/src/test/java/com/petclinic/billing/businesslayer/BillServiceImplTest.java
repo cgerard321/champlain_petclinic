@@ -908,7 +908,7 @@ public void testGenerateBillPdf_BillNotFound() {
     Mono<byte[]> pdfMono = billService.generateBillPdf("nonexistentCustomerId", "nonexistentBillId", currency);
 
     StepVerifier.create(pdfMono)
-            .expectErrorMatches(throwable -> throwable instanceof RuntimeException &&
+            .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
                     throwable.getMessage().equals("Bill not found for given customer"))
             .verify();
 }
@@ -2518,7 +2518,7 @@ public void testGenerateBillPdf_BillNotFound() {
         Mono<byte[]> pdfMono = billService.generateStaffBillPdf("nonexistentBillId", currency);
 
         StepVerifier.create(pdfMono)
-                .expectErrorMatches(throwable -> throwable instanceof RuntimeException &&
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
                         throwable.getMessage().equals("Bill not found for given ID"))
                 .verify();
     }
