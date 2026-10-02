@@ -22,7 +22,7 @@ describe('ProductAddDialog', () => {
                   { productTypeId: '586d0700-57db-4312-b6f1-413b79dd018c', typeName: 'FOOD' },
                 ],
                 productStatus: [],
-                deliveryType: [],
+                deliveryType: ['DELIVERY', 'PICKUP'],
               }),
             createProduct: () => of({ productId: 'product-1' }),
           },
