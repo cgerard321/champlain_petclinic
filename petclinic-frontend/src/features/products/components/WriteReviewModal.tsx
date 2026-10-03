@@ -64,7 +64,7 @@ const WriteReviewModal = ({
     <Modal
       show={show}
       onHide={onClose}
-      centered
+      fullscreen={true}
       dialogClassName="wrm-modal-dialog"
     >
       <div className="wrm-close-container">
