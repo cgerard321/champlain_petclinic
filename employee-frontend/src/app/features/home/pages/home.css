@@ -89,7 +89,7 @@
 
 .welcome-btn.btn-primary {
   background-color: #1b382b;
-  color: #ffffff;
+  color: #fff;
   border: 1px solid #1b382b;
   box-shadow: 0 2px 6px rgb(27 56 43 / 15%);
 }
@@ -100,7 +100,7 @@
 }
 
 .welcome-btn.btn-secondary {
-  background-color: #ffffff;
+  background-color: #fff;
   color: #1b382b;
   border: 1px solid #dce8d2;
 }
@@ -116,8 +116,9 @@
   height: 18px;
   margin-right: 8px;
   flex-shrink: 0;
-  fill: currentColor;
+  fill: currentcolor;
 }
+
 /* --- Clinic Logo Emblem --- */
 .logo-wrapper {
   flex-shrink: 0;
@@ -197,7 +198,7 @@
   display: block;
   text-decoration: none;
   color: inherit;
-  background-color: #ffffff;
+  background-color: #fff;
   border: 1px solid #e0eae0;
   border-radius: 12px;
   padding: 1.25rem 1.5rem;
@@ -219,6 +220,7 @@
   pointer-events: none;
   transition: transform 300ms ease;
 }
+
 .action-card:hover {
   border-color: #2e523e;
   box-shadow: 0 4px 12px rgb(27 56 43 / 8%);
@@ -229,7 +231,7 @@
   font-size: 1.1rem;
   font-weight: 700;
   color: #1b382b;
-  margin: 0 0 0.25rem 0;
+  margin: 0 0 0.25rem;
 }
 
 .action-tag {
@@ -247,7 +249,7 @@
 .action-card-desc {
   font-size: 0.875rem;
   color: #4a6353;
-  margin: 0 0 1rem 0;
+  margin: 0 0 1rem;
   line-height: 1.4;
 }
 
