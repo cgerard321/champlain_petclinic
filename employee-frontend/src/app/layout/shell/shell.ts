@@ -4,11 +4,12 @@ import { RouterOutlet } from '@angular/router';
 
 import { Footer } from '@layout/footer/footer';
 import { Header } from '@layout/header/header';
-import { Sidenav } from '@layout/sidenav/sidenav';
 
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, MatSidenavModule, Header, Sidenav, Footer],
+
+  imports: [RouterOutlet, MatSidenavModule, Header, Footer],
+
   templateUrl: './shell.html',
   styleUrl: './shell.css',
 })

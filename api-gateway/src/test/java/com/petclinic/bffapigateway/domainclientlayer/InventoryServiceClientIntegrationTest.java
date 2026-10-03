@@ -87,7 +87,7 @@ class InventoryServiceClientIntegrationTest {
                 2,
                 15.99,
                 Status.OUT_OF_STOCK,
-                LocalDateTime.now()
+                LocalDateTime.now(), null, null
         );
 
         mockWebServer.enqueue(new MockResponse()
@@ -114,7 +114,7 @@ class InventoryServiceClientIntegrationTest {
                 2,
                 15.99,
                 Status.OUT_OF_STOCK,
-                LocalDateTime.now()
+                LocalDateTime.now(), null, null
         );
 
         mockWebServer.enqueue(new MockResponse()
@@ -178,7 +178,7 @@ class InventoryServiceClientIntegrationTest {
                 2,
                 15.99,
                 Status.OUT_OF_STOCK,
-                LocalDateTime.now()
+                LocalDateTime.now(), null, null
         );
         ProductResponseDTO productResponseDTO1 = new ProductResponseDTO(
                 "productId",
@@ -189,7 +189,7 @@ class InventoryServiceClientIntegrationTest {
                 2,
                 15.99,
                 Status.OUT_OF_STOCK,
-                LocalDateTime.now()
+                LocalDateTime.now(), null, null
         );
 
         Flux<ProductResponseDTO> productFlux = Flux.just(productResponseDTO, productResponseDTO1);
@@ -294,7 +294,7 @@ class InventoryServiceClientIntegrationTest {
                 productQuantity,
                 15.99,
                 Status.AVAILABLE,
-                LocalDateTime.now()
+                LocalDateTime.now(), null, null
         );
 
         // Mock the response from the MockWebServer
@@ -360,7 +360,7 @@ class InventoryServiceClientIntegrationTest {
                 2,
                 15.99,
                 Status.OUT_OF_STOCK,
-                LocalDateTime.now()
+                LocalDateTime.now(), null, null
         );
 
         // Mock the response from the MockWebServer
@@ -413,7 +413,7 @@ class InventoryServiceClientIntegrationTest {
                 2,
                 15.99,
                 Status.OUT_OF_STOCK,
-                LocalDateTime.now()
+                LocalDateTime.now(), null, null
         );
 
         ProductResponseDTO productResponseDTO2 = new ProductResponseDTO(
@@ -425,7 +425,7 @@ class InventoryServiceClientIntegrationTest {
                 3,
                 17.99,
                 Status.OUT_OF_STOCK,
-                LocalDateTime.now()
+                LocalDateTime.now(), null, null
         );
 
         // Create lists of products for inventories
@@ -461,7 +461,7 @@ class InventoryServiceClientIntegrationTest {
                 2,
                 15.99,
                 Status.OUT_OF_STOCK,
-                LocalDateTime.now()
+                LocalDateTime.now(), null, null
         );
 
         mockWebServer.enqueue(new MockResponse()
@@ -562,7 +562,7 @@ class InventoryServiceClientIntegrationTest {
                 2,
                 15.99,
                 Status.OUT_OF_STOCK,
-                LocalDateTime.now()
+                LocalDateTime.now(), null, null
         );
 
         mockWebServer.enqueue(new MockResponse()
@@ -661,7 +661,7 @@ class InventoryServiceClientIntegrationTest {
                 2,
                 15.99,
                 Status.OUT_OF_STOCK,
-                LocalDateTime.now()
+                LocalDateTime.now(), null, null
         );
 
         // Mock the response from the MockWebServer
@@ -733,7 +733,7 @@ class InventoryServiceClientIntegrationTest {
                 2,
                 15.99,
                 Status.OUT_OF_STOCK,
-                LocalDateTime.now()
+                LocalDateTime.now(), null, null
         );
 
         List<ProductResponseDTO> products = new ArrayList<>(Arrays.asList(productResponseDTO));
@@ -779,7 +779,7 @@ class InventoryServiceClientIntegrationTest {
                 2,
                 15.99,
                 Status.OUT_OF_STOCK,
-                LocalDateTime.now()
+                LocalDateTime.now(), null, null
         );
 
         List<ProductResponseDTO> products = new ArrayList<>(Arrays.asList(productResponseDTO));
@@ -853,7 +853,7 @@ class InventoryServiceClientIntegrationTest {
                 1,
                 12.0,
                 Status.OUT_OF_STOCK,
-                LocalDateTime.now()
+                LocalDateTime.now(), null, null
         );
         ProductResponseDTO p2 = new ProductResponseDTO(
                 "p2",
@@ -864,7 +864,7 @@ class InventoryServiceClientIntegrationTest {
                 2,
                 22.0,
                 Status.AVAILABLE,
-                LocalDateTime.now()
+                LocalDateTime.now(), null, null
         );
         mockWebServer.enqueue(new MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -987,7 +987,7 @@ class InventoryServiceClientIntegrationTest {
                 5,
                 15.0,
                 Status.AVAILABLE,
-                LocalDateTime.now()
+                LocalDateTime.now(), null, null
         );
         mockWebServer.enqueue(new MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -1026,7 +1026,7 @@ class InventoryServiceClientIntegrationTest {
                 1,
                 11.0,
                 Status.AVAILABLE,
-                LocalDateTime.now()
+                LocalDateTime.now(), null, null
         );
         mockWebServer.enqueue(new MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -1079,7 +1079,7 @@ class InventoryServiceClientIntegrationTest {
                 1,
                 12.0,
                 Status.AVAILABLE,
-                LocalDateTime.now()
+                LocalDateTime.now(), null, null
         );
         mockWebServer.enqueue(new MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -1201,7 +1201,7 @@ class InventoryServiceClientIntegrationTest {
                 1,
                 12.0,
                 Status.AVAILABLE,
-                LocalDateTime.now()
+                LocalDateTime.now(), null, null
         );
         mockWebServer.enqueue(new MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)

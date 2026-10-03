@@ -23,6 +23,8 @@ import Sidebar from './components/Sidebar';
 import SidebarItem from './components/SidebarItem';
 import SvgIcon from '@/shared/components/SvgIcon';
 import { FaCalendarAlt } from 'react-icons/fa';
+import { CancellationRequest } from '@/features/visits/models/CancellationRequest.ts';
+import CancellationModal from '@/features/visits/components/CancellationModal.tsx';
 
 interface EditingVisitHandle {
   openCreateBill: () => void;
@@ -68,12 +70,21 @@ export default function VisitListTable(): JSX.Element {
   }
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const getVisits = async (): Promise<void> => {
       try {
-        const fetchedVisits = await getAllVisits();
-        setVisits(fetchedVisits);
-        setDisplayedVisits(fetchedVisits);
+        const fetchedVisits: Visit[] = [];
+
+        // Add each visit as soon as it arrives instead of waiting for the full stream.
+        for await (const visit of getAllVisits(controller.signal)) {
+          fetchedVisits.push(visit);
+          setVisits([...fetchedVisits]);
+          setDisplayedVisits([...fetchedVisits]);
+        }
       } catch (error) {
+        if (controller.signal.aborted) return;
+
         console.error('Error fetching visits:', error);
         const message =
           error instanceof Error
@@ -82,7 +93,10 @@ export default function VisitListTable(): JSX.Element {
         setError(`Failed to fetch visits: ${message}`);
       }
     };
+
     getVisits();
+
+    return () => controller.abort();
   }, []);
 
   // Sort visits: emergency visits first, then by VisitDate
@@ -170,12 +184,18 @@ export default function VisitListTable(): JSX.Element {
     }
   };
 
-  const handleCancel = async (visitId: string): Promise<void> => {
+  const handleCancel = async (
+    visitId: string,
+    cancellationRequest: CancellationRequest
+  ): Promise<void> => {
     try {
-      await cancelVisit(visitId, updatedVisit => {
+      await cancelVisit(visitId, cancellationRequest, updatedVisit => {
         setVisits(prev => {
           return prev.map(visit => {
-            if (visit.visitId === visitId) return updatedVisit;
+            if (visit.visitId === visitId) {
+              return updatedVisit;
+            }
+
             return visit;
           });
         });
@@ -183,7 +203,8 @@ export default function VisitListTable(): JSX.Element {
 
       showSuccessAndReload('Visit cancelled successfully!');
     } catch (error) {
-      return;
+      console.error('Error cancelling visit:', error);
+      throw error;
     }
   };
 
@@ -397,19 +418,15 @@ export default function VisitListTable(): JSX.Element {
                                     visit.status !== 'ARCHIVED' &&
                                     visit.status !== 'COMPLETED' &&
                                     !isVet && (
-                                      <BasicModal
-                                        title="Cancel Visit"
+                                      <CancellationModal
                                         showButton={renderCancelButton()}
-                                        onConfirm={() =>
-                                          handleCancel(visit.visitId)
+                                        onConfirm={cancellationRequest =>
+                                          handleCancel(
+                                            visit.visitId,
+                                            cancellationRequest
+                                          )
                                         }
-                                      >
-                                        <div>
-                                          This will set the status of this visit
-                                          to Canceled.
-                                        </div>
-                                        <div>Do you wish to proceed?</div>
-                                      </BasicModal>
+                                      />
                                     )}
                                 </>
                               );

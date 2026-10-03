@@ -5,8 +5,8 @@ import { filter, map, Observable, retry, throwError, timer } from 'rxjs';
 import { SseClient } from '@core/services/sse-client';
 import {
   Inventory,
-  InventoryRequest,
   InventoryFilters,
+  InventoryRequest,
   InventoryType,
 } from '@features/inventories/models/inventory.model';
 
@@ -25,8 +25,12 @@ export class InventoryService {
       );
   }
 
-  getInventories(filters: Partial<InventoryFilters> = {}): Observable<Inventory> {
-    let params = new HttpParams().set('page', '0').set('size', '10');
+  getInventories(
+    filters: Partial<InventoryFilters> = {},
+    page = 0,
+    size = 10,
+  ): Observable<Inventory> {
+    let params = new HttpParams().set('page', String(page)).set('size', String(size));
 
     if (filters.inventoryName?.trim()) {
       params = params.set('inventoryName', filters.inventoryName.trim());

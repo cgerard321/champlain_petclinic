@@ -5,6 +5,7 @@ import com.petclinic.billing.datalayer.BillResponseDTO;
 import com.petclinic.billing.datalayer.BillStatus;
 import com.petclinic.billing.datalayer.PaymentRequestDTO;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
+import com.petclinic.billing.exceptions.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -60,6 +61,8 @@ public class CustomerBillsController {
                     headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=bill-" + billId + ".pdf");
                     return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
                 })
+                .onErrorResume(NotFoundException.class,
+                        e -> Mono.just(new ResponseEntity<>(HttpStatus.NOT_FOUND)))
                 .onErrorResume(e -> {
                     log.error("Error generating PDF for billId: {} currency: {} error: {}", billId, currency, e.getMessage(), e);
                     return Mono.just(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));

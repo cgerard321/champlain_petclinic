@@ -1,9 +1,11 @@
 import { test, expect } from '@playwright/test';
 
-test('test cancel button visibility', async ({ page }) => {
+test('client can cancel a visit with a reason', async ({ page }) => {
   await page.goto('http://localhost:3000/users/login');
 
-  await page.getByPlaceholder('Enter your email or username').fill('george@email.com');
+  await page
+      .getByPlaceholder('Enter your email or username')
+      .fill('george@email.com');
   await page.getByPlaceholder('Enter your password').fill('pwd');
   await page.getByRole('button', { name: 'Login' }).click();
 
@@ -11,52 +13,62 @@ test('test cancel button visibility', async ({ page }) => {
 
   await page.goto('http://localhost:3000/customer/visits');
 
+  const visitLink = page.getByRole('link', {
+    name: 'VIST-2304-0101',
+  });
 
-  const visitLink = page.locator('table tbody a').first();
   await expect(visitLink).toBeVisible();
+
   const visitId = await visitLink.innerText();
 
-
   const visitResponsePromise = page.waitForResponse(
-    response =>
-      response.request().method() === 'GET' &&
-      response.url().includes(`/gateway/visits/${visitId}`)
+      response =>
+          response.request().method() === 'GET' &&
+          response.url().includes(`/gateway/visits/${visitId}`)
   );
 
   await visitLink.click();
 
   const visit = await (await visitResponsePromise).json();
 
-  await expect(page).toHaveURL(`http://localhost:3000/visits/${visit.visitId}`);
-
- 
-  await expect(page.getByText('Visit Details')).toBeVisible();
-  await expect(
-    page.locator('.visit-field').filter({ hasText: 'Status:' }).locator('.visit-value')
-  ).toHaveText(visit.status);
+  await expect(page).toHaveURL(
+      `http://localhost:3000/visits/${visit.visitId}`
+  );
 
   const statusValue = page
-    .locator('.visit-field')
-    .filter({ hasText: 'Status:' })
-    .locator('.visit-value');
-  await expect(statusValue).toHaveText(visit.status);
+      .locator('.visit-field')
+      .filter({ hasText: 'Status:' })
+      .locator('.visit-value');
 
-  const cancelButton = page.locator('.btn-cancel');
+  await expect(statusValue).toHaveText('CONFIRMED');
 
-  if (visit.status === 'CONFIRMED' || visit.status === 'UPCOMING') {
-    const cancelResponsePromise = page.waitForResponse(
+  await page.locator('.btn-cancel').click();
+
+  await expect(page.getByText('Cancel Visit')).toBeVisible();
+
+  await page
+      .getByLabel('Appointment is no longer needed')
+      .check();
+
+  const cancelResponsePromise = page.waitForResponse(
       response =>
-        response.request().method() === 'PATCH' &&
-        response.url().includes(`/gateway/visits/${visitId}/status/CANCELLED`)
-    );
-    await cancelButton.click();
-    await cancelResponsePromise;
-    await expect(statusValue).toHaveText('CANCELLED');
-    await expect(cancelButton).toHaveCount(0);
-  } else {
-    await expect(cancelButton).toHaveCount(0);
-  }
+          response.request().method() === 'PATCH' &&
+          response.url().includes(`/gateway/visits/${visitId}`)
+  );
 
+  await page
+      .getByRole('button', { name: 'Confirm Cancellation' })
+      .click();
 
+  const cancelResponse = await cancelResponsePromise;
 
-})
+  expect(cancelResponse.ok()).toBeTruthy();
+
+  const cancelledVisit = await cancelResponse.json();
+
+  expect(cancelledVisit.cancellationReason).toBe(
+      'APPOINTMENT_NO_LONGER_NEEDED'
+  );
+
+  await expect(statusValue).toHaveText('CANCELLED');
+});

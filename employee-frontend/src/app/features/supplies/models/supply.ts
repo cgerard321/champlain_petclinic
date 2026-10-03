@@ -10,4 +10,6 @@ export interface Supply {
   productSalePrice: number;
   status: Status;
   lastUpdatedAt: string;
+  photoData?: string | null;
+  photoType?: string | null;
 }

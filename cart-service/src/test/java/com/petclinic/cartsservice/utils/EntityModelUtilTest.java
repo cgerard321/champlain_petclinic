@@ -1,12 +1,16 @@
 package com.petclinic.cartsservice.utils;
 
 import com.petclinic.cartsservice.dataaccesslayer.Cart;
+import com.petclinic.cartsservice.dataaccesslayer.PromoCode;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
+import com.petclinic.cartsservice.domainclientlayer.PromoCodeRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -75,5 +79,57 @@ class EntityModelUtilTest {
         // Assert
         assertNotNull(uuidString);
         assertDoesNotThrow(() -> UUID.fromString(uuidString));  // Check if it's a valid UUID
+    }
+
+    @Test
+    void testMapPromoCode_updatesActive_whenProvided() {
+        // Arrange
+        PromoCode promoCode = new PromoCode();
+        promoCode.setActive(true);
+        PromoCodeRequestModel request = new PromoCodeRequestModel();
+        request.setActive(false);
+
+        // Act
+        PromoCode result = EntityModelUtil.mapPromoCode(promoCode, request);
+
+        // Assert
+        assertFalse(result.isActive());
+    }
+
+    @Test
+    void testMapPromoCode_keepsActive_whenNotProvided() {
+        // Arrange
+        PromoCode promoCode = new PromoCode();
+        promoCode.setActive(true);
+
+        // Act
+        PromoCode result = EntityModelUtil.mapPromoCode(promoCode, new PromoCodeRequestModel());
+
+        // Assert
+        assertTrue(result.isActive());
+    }
+
+    @Test
+    void testToPromoCodeResponseModel_activeOnlyWhenFlagOnAndNotExpired() {
+        // Arrange
+        PromoCode promoCode = new PromoCode();
+        promoCode.setExpirationDate(LocalDateTime.now().plusDays(1));
+
+        // Act & Assert
+        promoCode.setActive(true);
+        assertTrue(EntityModelUtil.toPromoCodeResponseModel(promoCode).isActive());
+
+        promoCode.setActive(false);
+        assertFalse(EntityModelUtil.toPromoCodeResponseModel(promoCode).isActive());
+
+        promoCode.setActive(true);
+        promoCode.setExpirationDate(LocalDateTime.now().minusDays(1));
+        assertFalse(EntityModelUtil.toPromoCodeResponseModel(promoCode).isActive());
+    }
+
+    @Test
+    void testValidateExpirationDate_throwsWhenFormatInvalid() {
+        // Act & Assert
+        assertThrows(ResponseStatusException.class, () -> EntityModelUtil.validateExpirationDate("2024-12-31"));
     }
 }

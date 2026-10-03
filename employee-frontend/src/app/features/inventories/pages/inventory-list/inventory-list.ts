@@ -27,6 +27,7 @@ import {
 import { InventoryService } from '@features/inventories/services/inventory-service';
 import { getInventoryPermissions } from '@shared/models/inventory-permissions';
 import { Roles } from '@shared/models/roles';
+import { SseClient } from '@core/services/sse-client';
 
 @Component({
   imports: [RouterLink, MatCardModule, MatIconModule, MatProgressSpinnerModule, FormField],
@@ -48,7 +49,7 @@ export class InventoryList implements OnInit, OnDestroy {
 
   protected readonly canManageFavorites = computed(
     () => this.auth.hasRole(Roles.admin) || this.auth.hasRole(Roles.inventoryManager),
-  );
+  ); 
 
   protected readonly currentPage = signal(0);
   protected readonly pageSize = 8;
@@ -88,7 +89,7 @@ export class InventoryList implements OnInit, OnDestroy {
     inventoryType: '',
     inventoryDescription: '',
   });
-
+  
   protected readonly inventoryForm = form(this.newInventory, (path) => {
     required(path.inventoryName, { message: 'Name is required' });
     required(path.inventoryType, { message: 'Type is required' });
