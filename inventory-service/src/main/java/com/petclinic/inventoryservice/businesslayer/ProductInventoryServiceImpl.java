@@ -99,6 +99,15 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                                         productRepository.findProductByProductId(productId)
                                                 .switchIfEmpty(Mono.error(new NotFoundException("Product not found with id: " + productId)))
                                                 .flatMap(existingProduct -> {
+                                            //Validate Photo type
+                                            validatePhoto(requestDTO);
+
+                                            if (requestDTO.getPhotoData() != null) {
+                                                boolean removePhoto = requestDTO.getPhotoData().length == 0;
+
+                                                existingProduct.setPhotoData(removePhoto ? null : requestDTO.getPhotoData());
+                                                existingProduct.setPhotoType(removePhoto ? null : requestDTO.getPhotoType());
+                                            }
                                             existingProduct.setProductName(requestDTO.getProductName());
                                             existingProduct.setProductDescription(requestDTO.getProductDescription());
                                             existingProduct.setProductPrice(requestDTO.getProductPrice());
@@ -612,8 +621,12 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                                         if (exists) {
                                             return Mono.error(new UnprocessableEntityException("A product with the name '" + requestDTO.getProductName() + "' already exists in this inventory."));
                                     }
-
+                                validatePhoto(requestDTO);
                                 Product product = EntityDTOUtil.toProductEntity(requestDTO);
+                                if (product.getPhotoData() != null && product.getPhotoData().length == 0) {
+                                    product.setPhotoData(null);
+                                    product.setPhotoType(null);
+                                }
                                 product.setInventoryId(inventoryId);
                                 product.setProductId(EntityDTOUtil.generateUUID());
                                 product.setLastUpdatedAt(LocalDateTime.now());
@@ -753,6 +766,43 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                         return count + " supplies updated in the last 15 min.";
                     }
                 });
+    }
+
+    private void validatePhoto(ProductRequestDTO requestDTO) {
+        byte[] data = requestDTO.getPhotoData();
+        String type = requestDTO.getPhotoType();
+
+        // No photo supplied, or an empty array requesting removal.
+        if (data == null || data.length == 0) {
+            if (type != null && !type.isBlank()) {
+                throw new InvalidInputException("Photo data is missing.");
+            }
+            return;
+        }
+
+        if (data.length > 2 * 1024 * 1024) {
+            throw new InvalidInputException("Photo must be 2 MB or smaller.");
+        }
+
+        boolean jpg = data.length >= 3
+                && data[0] == (byte) 0xFF
+                && data[1] == (byte) 0xD8
+                && data[2] == (byte) 0xFF;
+
+        boolean png = data.length >= 8
+                && data[0] == (byte) 0x89
+                && data[1] == 0x50
+                && data[2] == 0x4E
+                && data[3] == 0x47
+                && data[4] == 0x0D
+                && data[5] == 0x0A
+                && data[6] == 0x1A
+                && data[7] == 0x0A;
+
+        if (!("image/jpeg".equals(type) && jpg)
+                && !("image/png".equals(type) && png)) {
+            throw new InvalidInputException("Only JPG and PNG photos are supported.");
+        }
     }
 
 }
