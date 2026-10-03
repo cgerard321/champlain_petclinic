@@ -144,8 +144,6 @@
     @if (favoriteError(); as saveError) {
       <p class="favorite-error" role="alert">{{ saveError }}</p>
     }
-
-
     @if (isLoading()) {
       <div class="state-container">
         <mat-spinner diameter="40" />
