@@ -32,6 +32,7 @@ import { FaHeart, FaCheck, FaTimes, FaPen, FaTrash } from 'react-icons/fa';
 import WriteReviewModal from './WriteReviewModal';
 import EditReviewModal from './EditReviewModal';
 import DeleteReviewModal from './DeleteReviewModal';
+import { MarkdownReviewBody } from '@/features/products/components/MarkdownReviewBody.tsx';
 
 export default function ProductDetails(): JSX.Element {
   const isAdmin = IsAdmin();
@@ -545,7 +546,9 @@ export default function ProductDetails(): JSX.Element {
                                 </svg>
                               ))}
                             </div>
-                            <p>{rating.review}</p>
+                            <MarkdownReviewBody>
+                              {rating.review}
+                            </MarkdownReviewBody>
                           </div>
                         )
                       )

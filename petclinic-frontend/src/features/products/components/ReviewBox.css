@@ -20,3 +20,9 @@
   word-wrap: break-word;
   white-space: normal;
 }
+
+.reviewbox-preview-body {
+  background-color: rgb(247, 247, 247);
+  border-radius: 15px;
+  user-select: none;
+}
