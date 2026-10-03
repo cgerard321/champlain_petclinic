@@ -1,19 +1,11 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import {
-  Component,
-  DestroyRef,
-  OnDestroy,
-  OnInit,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, DestroyRef, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
+import { FormField, form, required, submit } from '@angular/forms/signals';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { FormField, form, required, submit } from '@angular/forms/signals';
+import { RouterLink } from '@angular/router';
 import { Subscription, finalize } from 'rxjs';
 
 import { isApiError, ApiError } from '@core/models/api-error';
@@ -27,7 +19,6 @@ import {
 import { InventoryService } from '@features/inventories/services/inventory-service';
 import { getInventoryPermissions } from '@shared/models/inventory-permissions';
 import { Roles } from '@shared/models/roles';
-import { SseClient } from '@core/services/sse-client';
 
 @Component({
   imports: [RouterLink, MatCardModule, MatIconModule, MatProgressSpinnerModule, FormField],
@@ -49,7 +40,7 @@ export class InventoryList implements OnInit, OnDestroy {
 
   protected readonly canManageFavorites = computed(
     () => this.auth.hasRole(Roles.admin) || this.auth.hasRole(Roles.inventoryManager),
-  ); 
+  );
 
   protected readonly currentPage = signal(0);
   protected readonly pageSize = 8;
@@ -89,7 +80,7 @@ export class InventoryList implements OnInit, OnDestroy {
     inventoryType: '',
     inventoryDescription: '',
   });
-  
+
   protected readonly inventoryForm = form(this.newInventory, (path) => {
     required(path.inventoryName, { message: 'Name is required' });
     required(path.inventoryType, { message: 'Type is required' });
@@ -154,9 +145,9 @@ export class InventoryList implements OnInit, OnDestroy {
 
     return Boolean(
       filters.inventoryName.trim() ||
-        filters.inventoryType.trim() ||
-        filters.inventoryDescription.trim() ||
-        filters.importantOnly,
+      filters.inventoryType.trim() ||
+      filters.inventoryDescription.trim() ||
+      filters.importantOnly,
     );
   }
 
