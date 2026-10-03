@@ -1,165 +1,263 @@
 <div class="inventory-page">
-  <h1>Inventory</h1>
+  <div class="page-header">
+    <h1>Inventory</h1>
 
-  <section class="inventory-filters" aria-label="Filter inventories">
-    <div class="filter-heading">
-      <div>
-        <h2>Find an inventory</h2>
-        <p>Filter by name, type, or description.</p>
-      </div>
-
-      <button
-        class="clear-filters-button"
-        type="button"
-        (click)="clearFilters()"
-        [disabled]="!hasActiveFilters()"
-      >
-        Clear filters
+    @if (can().canCreateInventory) {
+      <button type="button" class="add-inventory-button" (click)="toggleAddForm()">
+        {{ showAddForm() ? 'Cancel' : 'Add Inventory' }}
       </button>
-    </div>
+    }
+  </div>
 
-    <div class="inventory-filter-grid">
-      <label class="filter-field">
-        <span>Inventory name</span>
-        <input
-          type="search"
-          placeholder="Search by name"
-          [value]="filters().inventoryName"
-          (input)="setTextFilter('inventoryName', $event)"
-        />
-      </label>
+  @if (showAddForm() && (can().canCreateInventory || can().canUpdateInventory)) {
+    <form class="inventory-form" (submit)="saveInventory($event)">
+      <h2>{{ editingInventoryId() ? 'Edit Inventory' : 'Add Inventory' }}</h2>
 
-      <label class="filter-field">
-        <span>Inventory type</span>
-        <select
-          [value]="filters().inventoryType"
-          [disabled]="inventoryTypesLoading() || !!inventoryTypesError()"
-          (change)="setInventoryTypeFilter($event)"
-        >
-          <option value="">
-            {{ inventoryTypesLoading() ? 'Loading types…' : 'All types' }}
-          </option>
+      <label for="inventoryName">Name</label>
+      <input id="inventoryName" type="text" [formField]="inventoryForm.inventoryName" />
+      @if (inventoryForm.inventoryName().touched() && inventoryForm.inventoryName().invalid()) {
+        <p class="field-error">{{ inventoryForm.inventoryName().errors()[0]?.message }}</p>
+      }
 
-          @for (type of inventoryTypes(); track type.typeId) {
-            <option [value]="type.type">{{ type.type }}</option>
-          }
-        </select>
-
-        @if (inventoryTypesError(); as typeError) {
-          <span class="filter-error" role="status">{{ typeError }}</span>
+      <label for="inventoryType">Type</label>
+      <select id="inventoryType" [formField]="inventoryForm.inventoryType">
+        @for (type of inventoryTypesDropdown; track type) {
+          <option [value]="type">{{ type }}</option>
         }
-      </label>
+      </select>
+      @if (inventoryForm.inventoryType().touched() && inventoryForm.inventoryType().invalid()) {
+        <p class="field-error">{{ inventoryForm.inventoryType().errors()[0]?.message }}</p>
+      }
 
-      <label class="filter-field">
-        <span>Description</span>
-        <input
-          type="search"
-          placeholder="Search by description"
-          [value]="filters().inventoryDescription"
-          (input)="setTextFilter('inventoryDescription', $event)"
-        />
-      </label>
-    </div>
+      <label for="inventoryDescription">Description</label>
+      <input
+        id="inventoryDescription"
+        type="text"
+        [formField]="inventoryForm.inventoryDescription"
+      />
+      @if (
+        inventoryForm.inventoryDescription().touched() &&
+        inventoryForm.inventoryDescription().invalid()
+      ) {
+        <p class="field-error">
+          {{ inventoryForm.inventoryDescription().errors()[0]?.message }}
+        </p>
+      }
 
-    <div class="filter-footer">
-      <label class="important-filter">
-        <input
-          type="checkbox"
-          [checked]="filters().importantOnly"
-          [disabled]="isSavingAnyFavorite()"
-          (change)="setImportantOnly($event)"
-        />
-        <span>Favorites only</span>
-      </label>
-    </div>
-  </section>
+      @if (formError()) {
+        <p class="field-error" role="alert">{{ formError() }}</p>
+      }
 
-  @if (favoriteError(); as saveError) {
-    <p class="favorite-error" role="alert">{{ saveError }}</p>
+      <button type="submit" class="add-inventory-button" [disabled]="savingInventory()">
+        {{
+          savingInventory()
+            ? editingInventoryId()
+              ? 'Saving...'
+              : 'Adding...'
+            : editingInventoryId()
+              ? 'Save Changes'
+              : 'Add Inventory'
+        }}
+      </button>
+    </form>
   }
 
-  @if (isLoading()) {
+  @if (!can().hasAnyAccess) {
     <div class="state-container">
-      <mat-spinner diameter="40" />
-      <p>Loading inventories…</p>
-    </div>
-  } @else if (errorMessage(); as err) {
-    <div class="state-container">
-      <mat-icon color="warn">error_outline</mat-icon>
-      <p>{{ err.message }}</p>
-    </div>
-  } @else if (noResultsMessage(); as message) {
-    <div class="state-container no-results-state" role="status">
-      <div class="no-results-icon">
-        <mat-icon>search_off</mat-icon>
-      </div>
-      <h2>No matching inventory</h2>
-      <p>{{ message }}</p>
-      <button class="clear-filters-button" type="button" (click)="clearFilters()">
-        Clear filters
-      </button>
-    </div>
-  } @else if (inventories().length === 0) {
-    <div class="state-container">
-      <mat-icon>inventory_2</mat-icon>
-      <h2>No inventories available</h2>
-      <p>
-        {{
-          filters().importantOnly
-            ? 'No favorite inventories found.'
-            : 'There are no inventories to display right now.'
-        }}
-      </p>
+      <mat-icon color="warn">block</mat-icon>
+      <p>Inventory access isn't available for your role yet.</p>
     </div>
   } @else {
-    <div class="inventory-grid">
-      @for (inventory of inventories(); track inventory.inventoryId) {
-        <div class="inventory-card-wrapper">
-          <a
-            class="inventory-card-link"
-            [routerLink]="['/invt', inventory.inventoryId, 'supplies']"
-          >
-            <mat-card appearance="outlined" class="inventory-card">
-              <mat-card-header>
-                <mat-card-title>{{ inventory.inventoryName }}</mat-card-title>
-                <mat-card-subtitle>{{ inventory.inventoryType }}</mat-card-subtitle>
-              </mat-card-header>
-
-              <mat-card-content>
-                <p>{{ inventory.inventoryDescription }}</p>
-
-                <p class="quantity">
-                  @if (quantityFor(inventory.inventoryId) !== null) {
-                    {{ quantityFor(inventory.inventoryId) }} items in stock
-                  } @else {
-                    Quantity unavailable
-                  }
-                </p>
-              </mat-card-content>
-            </mat-card>
-          </a>
-
-          <button
-            type="button"
-            class="favorite-button"
-            [class.is-favorite]="inventory.important"
-            [disabled]="
-              !canManageFavorites() || isLoading() || isSavingFavorite(inventory.inventoryId)
-            "
-            [attr.aria-pressed]="!!inventory.important"
-            [attr.aria-label]="
-              (inventory.important ? 'Remove favorite: ' : 'Add favorite: ') +
-              inventory.inventoryName
-            "
-            (click)="toggleFavorite(inventory)"
-          >
-            <mat-icon aria-hidden="true">
-              {{ inventory.important ? 'star' : 'star_border' }}
-            </mat-icon>
-          </button>
+    <section class="inventory-filters" aria-label="Filter inventories">
+      <div class="filter-heading">
+        <div>
+          <h2>Find an inventory</h2>
+          <p>Filter by name, type, or description.</p>
         </div>
-      }
-    </div>
+
+        <button
+          class="clear-filters-button"
+          type="button"
+          (click)="clearFilters()"
+          [disabled]="!hasActiveFilters()"
+        >
+          Clear filters
+        </button>
+      </div>
+
+      <div class="inventory-filter-grid">
+        <label class="filter-field">
+          <span>Inventory name</span>
+          <input
+            type="search"
+            placeholder="Search by name"
+            [value]="filters().inventoryName"
+            (input)="setTextFilter('inventoryName', $event)"
+          />
+        </label>
+
+        <label class="filter-field">
+          <span>Inventory type</span>
+          <select
+            [value]="filters().inventoryType"
+            [disabled]="inventoryTypesLoading() || !!inventoryTypesError()"
+            (change)="setInventoryTypeFilter($event)"
+          >
+            <option value="">
+              {{ inventoryTypesLoading() ? 'Loading types…' : 'All types' }}
+            </option>
+
+            @for (type of inventoryTypes(); track type.typeId) {
+              <option [value]="type.type">{{ type.type }}</option>
+            }
+          </select>
+
+          @if (inventoryTypesError(); as typeError) {
+            <span class="filter-error" role="status">{{ typeError }}</span>
+          }
+        </label>
+
+        <label class="filter-field">
+          <span>Description</span>
+          <input
+            type="search"
+            placeholder="Search by description"
+            [value]="filters().inventoryDescription"
+            (input)="setTextFilter('inventoryDescription', $event)"
+          />
+        </label>
+      </div>
+
+      <div class="filter-footer">
+        <label class="important-filter">
+          <input
+            type="checkbox"
+            [checked]="filters().importantOnly"
+            [disabled]="isSavingAnyFavorite()"
+            (change)="setImportantOnly($event)"
+          />
+          <span>Favorites only</span>
+        </label>
+      </div>
+    </section>
+
+    @if (favoriteError(); as saveError) {
+      <p class="favorite-error" role="alert">{{ saveError }}</p>
+    }
+    @if (isLoading()) {
+      <div class="state-container">
+        <mat-spinner diameter="40" />
+        <p>Loading inventories…</p>
+      </div>
+    } @else if (errorMessage(); as err) {
+      <div class="state-container">
+        <mat-icon color="warn">error_outline</mat-icon>
+        <p>{{ err.message }}</p>
+      </div>
+    } @else if (noResultsMessage(); as message) {
+      <div class="state-container no-results-state" role="status">
+        <div class="no-results-icon">
+          <mat-icon>search_off</mat-icon>
+        </div>
+        <h2>No matching inventory</h2>
+        <p>{{ message }}</p>
+        <button class="clear-filters-button" type="button" (click)="clearFilters()">
+          Clear filters
+        </button>
+      </div>
+    } @else if (inventories().length === 0) {
+      <div class="state-container">
+        <mat-icon>inventory_2</mat-icon>
+        <h2>No inventories available</h2>
+        <p>
+          {{
+            filters().importantOnly
+              ? 'No favorite inventories found.'
+              : 'There are no inventories to display right now.'
+          }}
+        </p>
+      </div>
+    } @else {
+      <div class="inventory-grid">
+        @for (inventory of inventories(); track inventory.inventoryId) {
+          <div class="inventory-card-wrapper">
+            <a
+              class="inventory-card-link"
+              [routerLink]="['/invt', inventory.inventoryId, 'supplies']"
+            >
+              <mat-card appearance="outlined" class="inventory-card">
+                <mat-card-header>
+                  <mat-card-title>{{ inventory.inventoryName }}</mat-card-title>
+                  <mat-card-subtitle>{{ inventory.inventoryType }}</mat-card-subtitle>
+                </mat-card-header>
+
+                <mat-card-content>
+                  <p>{{ inventory.inventoryDescription }}</p>
+
+                  <p class="quantity">
+                    @if (quantityFor(inventory.inventoryId) !== null) {
+                      {{ quantityFor(inventory.inventoryId) }} items in stock
+                    } @else {
+                      Quantity unavailable
+                    }
+                  </p>
+
+                  @if (can().canUpdateInventory || can().canDeleteInventory) {
+                    <div class="inventory-actions">
+                      @if (can().canUpdateInventory) {
+                        <button
+                          type="button"
+                          class="edit-button"
+                          (click)="
+                            $event.stopPropagation();
+                            $event.preventDefault();
+                            editInventory(inventory)
+                          "
+                        >
+                          Edit
+                        </button>
+                      }
+                      @if (can().canDeleteInventory) {
+                        <button
+                          type="button"
+                          class="delete-button"
+                          (click)="
+                            $event.stopPropagation();
+                            $event.preventDefault();
+                            deleteInventoryAction(inventory)
+                          "
+                        >
+                          Delete
+                        </button>
+                      }
+                    </div>
+                  }
+                </mat-card-content>
+              </mat-card>
+            </a>
+
+            <button
+              type="button"
+              class="favorite-button"
+              [class.is-favorite]="inventory.important"
+              [disabled]="
+                !canManageFavorites() || isLoading() || isSavingFavorite(inventory.inventoryId)
+              "
+              [attr.aria-pressed]="!!inventory.important"
+              [attr.aria-label]="
+                (inventory.important ? 'Remove favorite: ' : 'Add favorite: ') +
+                inventory.inventoryName
+              "
+              (click)="toggleFavorite(inventory)"
+            >
+              <mat-icon aria-hidden="true">
+                {{ inventory.important ? 'star' : 'star_border' }}
+              </mat-icon>
+            </button>
+          </div>
+        }
+      </div>
+    }
 
     <nav class="inventory-pagination" aria-label="Inventory pages">
       <button
