@@ -32,7 +32,7 @@ function ReviewBox({
   const [reviewText, setReviewText] = useState<string>(rating.review);
   const [isError, setError] = useState<string | null>(null);
   const [previewToggle, setPreviewToggle] = useState<boolean>(true);
-  const ref = useRef(null);
+  const ref = useRef<HTMLTextAreaElement>(null);
   const [hasSelection, setHasSelection] = useState(false);
 
   useEffect(() => {
@@ -52,7 +52,7 @@ function ReviewBox({
   const handleToolbarButtonClick = (
     markdownTagStart: string,
     markdownTagEnd?: string
-  ) => {
+  ): void => {
     if (!hasSelection) return;
     handleLocalChange(
       wrapTextWithMarkdown(reviewText, markdownTagStart, markdownTagEnd ?? '')
@@ -64,7 +64,7 @@ function ReviewBox({
     markdownTagStart: string,
     markdownTagEnd?: string
   ): string => {
-    if (!ref) return text;
+    if (!ref || !ref.current) return text;
     let ss = ref.current.selectionStart;
 
     while (text.charAt(ss) == '\n' && ss != text.length) ss++;
@@ -177,7 +177,9 @@ function ReviewBox({
             ref={ref}
             onChange={e => handleLocalChange(e.target.value)}
             onSelect={e =>
-              setHasSelection(e.target.selectionStart !== e.target.selectionEnd)
+              setHasSelection(
+                e.currentTarget.selectionStart !== e.currentTarget.selectionEnd
+              )
             }
           />
           {previewToggle && (
