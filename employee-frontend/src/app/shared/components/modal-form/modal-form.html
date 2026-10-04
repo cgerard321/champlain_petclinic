@@ -1,0 +1,65 @@
+<h2 mat-dialog-title>
+  {{ data.title }}
+</h2>
+
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <mat-dialog-content>
+    <div class="modal-form">
+      @for (field of fields; track field.key) {
+        <div class="form-field">
+          <label [for]="field.key">
+            {{ field.label }}
+          </label>
+
+          @switch (field.type) {
+            @case ('string') {
+              <input
+                [id]="field.key"
+                type="text"
+                [formControlName]="field.key"
+                [placeholder]="field.placeholder ?? ''"
+              />
+            }
+
+            @case ('number') {
+              <input
+                [id]="field.key"
+                type="number"
+                [formControlName]="field.key"
+                [attr.min]="field.min ?? null"
+                [attr.max]="field.max ?? null"
+                [placeholder]="field.placeholder ?? ''"
+              />
+            }
+
+            @case ('enum') {
+              <select [id]="field.key" [formControlName]="field.key">
+                @for (option of options(field); track option.value) {
+                  <option [ngValue]="option.value">
+                    {{ option.label }}
+                  </option>
+                }
+              </select>
+            }
+          }
+
+          @if (control(field).touched && control(field).invalid) {
+            <p class="field-error">
+              {{ errorMessage(field) }}
+            </p>
+          }
+        </div>
+      }
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button type="button" class="dialog-cancel-button" (click)="cancel()">
+      {{ data.cancelLabel ?? 'Cancel' }}
+    </button>
+
+    <button type="submit" class="dialog-submit-button" [disabled]="form.invalid">
+      {{ data.submitLabel ?? 'Save' }}
+    </button>
+  </mat-dialog-actions>
+</form>

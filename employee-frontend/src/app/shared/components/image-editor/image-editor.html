@@ -1,9 +1,10 @@
 <section class="image-editor">
-  <h3>Supply photo</h3>
+  <h3>{{ label() }}</h3>
 
   <div class="image-preview">
     @if (preview(); as image) {
-      <img [src]="image" alt="Supply photo preview" />
+      <img [src]="image" [alt]="label() + ' preview'" />
+      
     } @else {
       <span>No photo selected</span>
     }
@@ -13,7 +14,7 @@
     #fileInput
     type="file"
     accept="image/jpeg,image/png,image/webp"
-    aria-label="Choose supply photo"
+    [attr.aria-label]="'Choose ' + label()"
     hidden
     [disabled]="disabled()"
     (change)="selectImage($event)"
@@ -31,7 +32,7 @@
     }
   </div>
 
-  <p class="image-hint">JPG, PNG, or WebP. Maximum 2 MB.</p>
+  <p class="image-hint">JPG, PNG, or WebP. Maximum {{ limitLabel() }}.</p>
 
   @if (error()) {
     <p class="image-error" role="alert">{{ error() }}</p>

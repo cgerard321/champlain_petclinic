@@ -8,7 +8,7 @@ import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { AuthState } from '@core/services/auth-state';
-import { SupplyImageEditor } from '@features/supplies/components/supply-image-editor/supply-image-editor';
+import { SupplyImageEditor } from '@shared/components/image-editor/image-editor';
 import { Supply } from '@features/supplies/models/supply';
 import { SupplyService } from '@features/supplies/services/supply-service';
 import { Table, TableColumn } from '@shared/components/table/table';
