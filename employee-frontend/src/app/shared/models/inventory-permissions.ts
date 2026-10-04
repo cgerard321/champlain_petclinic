@@ -76,7 +76,7 @@ const VET_ACCESS: InventoryPermissions = {
   canUpdateProduct: false,
   canDeleteProduct: false,
   canConsumeProduct: true,
-  canViewProductQuantity: false, // GET .../productquantity excludes VET
+  canViewProductQuantity: true, // GET .../productquantity excludes VET
 };
 
 const NO_ACCESS: InventoryPermissions = {

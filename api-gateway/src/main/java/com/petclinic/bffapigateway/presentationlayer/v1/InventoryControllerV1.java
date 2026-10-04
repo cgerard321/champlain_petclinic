@@ -301,7 +301,7 @@ public class InventoryControllerV1 {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER, Roles.VET})
     @GetMapping("/{inventoryId}/productquantity")
     public Mono<ResponseEntity<Integer>> getQuantityOfProductsInInventory(
             @PathVariable String inventoryId) {
