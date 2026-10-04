@@ -53,11 +53,6 @@
   margin-top: 0;
 }
 
-.settings-status {
-  color: var(--mat-sys-primary);
-  margin: 0;
-}
-
 .settings-actions {
   display: flex;
   justify-content: flex-end;
