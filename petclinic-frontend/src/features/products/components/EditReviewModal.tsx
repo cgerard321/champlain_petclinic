@@ -43,6 +43,10 @@ const EditReviewModal = ({
       setError('Please write a review before updating.');
       return;
     }
+    if (reviewText.length > 10000) {
+      setError('Review cannot exceed 10000 characters!');
+      return;
+    }
 
     try {
       await updateRating(localRating, reviewText);
@@ -63,7 +67,7 @@ const EditReviewModal = ({
     <Modal
       show={show}
       onHide={onClose}
-      centered
+      fullscreen
       dialogClassName="erm-modal-dialog"
     >
       <div className="erm-close-container">

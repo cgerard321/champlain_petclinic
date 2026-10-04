@@ -1,22 +1,15 @@
 /* EditReviewModal.css */
 
 .erm-modal-dialog {
-    /*
-    position: relative;
-    max-width: 500px;
-    padding: 0;*/
+    /*    position: relative;
+        max-width: 500px;
+        padding: 0;*/
 }
 
 .erm-modal-dialog .modal-content {
-    position: relative;
-    flex: 1 1 auto;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
+    width: 100%;
+    max-width: none;
+    border-radius: 0;
 }
 
 .erm-close-btn {
@@ -63,14 +56,14 @@
 }
 
 .erm-button-container .cancel-btn:active {
-    background-color: #e0e0e0;
+    background-color: #f9f9f9;
     color: #000;
     border: 1.5px solid #b9b9b9;
     outline: none;
 }
 
 .erm-button-container .cancel-btn:focus {
-    background-color: #e0e0e0;
+    background-color: #f9f9f9;
     color: #000;
     border: 1.5px solid #b9b9b9;
 }
@@ -133,4 +126,14 @@
     line-height: 1.5;
     text-align: left;
     overflow-y: auto;
+}
+
+.erm-error {
+    background-color: #fee;
+    color: #c33;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    border: 1px solid #fcc;
 }

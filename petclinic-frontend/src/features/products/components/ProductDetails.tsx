@@ -1,15 +1,14 @@
 import {
-  ProductModel,
   emptyProductModel,
+  ProductModel,
 } from '@/features/products/models/ProductModels/ProductModel';
 import { NavBar } from '@/layouts/AppNavBar';
-import { useState, useEffect, JSX } from 'react';
+import { JSX, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { updateUserRating } from '../api/updateUserRating';
 import { getProduct } from '../api/getProduct';
 import { deleteUserRating } from '../api/deleteUserRating';
 import './ProductDetails.css';
-import defaultProfile from '@/assets/Customers/defaultProfilePicture.png';
 import StarRating from './StarRating';
 import { RatingModel } from '../models/ProductModels/RatingModel';
 import { getUserRatingsForProduct } from '../api/getUserRatingsForProduct';
@@ -20,19 +19,19 @@ import ImageContainer from './ImageContainer';
 import { Button } from 'react-bootstrap';
 import {
   IsAdmin,
-  useUser,
   IsInventoryManager,
-  IsVet,
   IsReceptionist,
+  IsVet,
+  useUser,
 } from '@/context/UserContext';
 import RecentlyViewedProducts from '@/features/products/components/RecentlyViewedProducts';
 import { useAddToCart } from '@/features/carts/api/addToCartFromProducts';
 import { useAddToWishlist } from '@/features/carts/api/addToWishlistFromProducts';
-import { FaHeart, FaCheck, FaTimes, FaPen, FaTrash } from 'react-icons/fa';
+import { FaCheck, FaHeart, FaTimes } from 'react-icons/fa';
 import WriteReviewModal from './WriteReviewModal';
 import EditReviewModal from './EditReviewModal';
 import DeleteReviewModal from './DeleteReviewModal';
-import { MarkdownReviewBody } from '@/features/products/components/MarkdownReviewBody.tsx';
+import { Review } from '@/features/products/components/Review.tsx';
 
 export default function ProductDetails(): JSX.Element {
   const isAdmin = IsAdmin();
@@ -485,71 +484,21 @@ export default function ProductDetails(): JSX.Element {
                     {productReviews.length > 0 ? (
                       productReviews.map(
                         (rating: RatingModel, index: number) => (
-                          <div
-                            key={rating.customerId || index}
-                            className="reviewbox"
-                          >
-                            <div className="product-review-author">
-                              <img
-                                src={rating.reviewerPhoto || defaultProfile}
-                                alt={`${rating.reviewerUsername || 'Customer'} profile picture`}
-                                onError={event => {
-                                  event.currentTarget.onerror = null;
-                                  event.currentTarget.src = defaultProfile;
-                                }}
-                              />
-                              <span>
-                                {rating.reviewerUsername || 'Customer'}
-                              </span>
-                            </div>
-                            {isAuthenticated &&
+                          <Review
+                            key={index}
+                            rating={rating}
+                            index={index}
+                            canEdit={
+                              isAuthenticated &&
                               currentUserRating.rating > 0 &&
                               !!currentUserRating.customerId &&
                               currentUserRating.customerId ===
                                 rating.customerId &&
-                              !isStaff && (
-                                <div className="review-card-actions">
-                                  <button
-                                    className="review-card-edit-btn"
-                                    onClick={handleEditReview}
-                                    title="Edit your review"
-                                  >
-                                    <FaPen />
-                                  </button>
-                                  <button
-                                    className="review-card-delete-btn"
-                                    onClick={handleDeleteReview}
-                                    title="Delete your review"
-                                  >
-                                    <FaTrash />
-                                  </button>
-                                </div>
-                              )}
-                            <div className="starcontainer">
-                              {Array.from({ length: 5 }, (_, k) => (
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  width="24"
-                                  height="24"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  key={k}
-                                  className={`star-static ${
-                                    k < rating.rating ? 'star-shown' : ''
-                                  }`}
-                                >
-                                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                                </svg>
-                              ))}
-                            </div>
-                            <MarkdownReviewBody>
-                              {rating.review}
-                            </MarkdownReviewBody>
-                          </div>
+                              !isStaff
+                            }
+                            onEdit={handleEditReview}
+                            onDelete={handleDeleteReview}
+                          />
                         )
                       )
                     ) : (
