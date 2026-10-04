@@ -1,6 +1,55 @@
-<app-coming-soon />
+<div class="settings-page">
+  <h1 class="settings-title" i18n="@@settings.title">Paramètres</h1>
 
-<a mat-button routerLink="/home">
-  <mat-icon>home</mat-icon>
-  Back to Home
-</a>
+  <mat-card class="settings-card">
+    <div class="settings-body">
+      <nav class="settings-nav">
+        <button
+          type="button"
+          class="settings-nav-item"
+          [class.is-active]="activeSection() === 'security'"
+          [attr.aria-current]="activeSection() === 'security' ? 'page' : null"
+          (click)="select('security')"
+          i18n="@@settings.security.title"
+        >
+          Sécurité
+        </button>
+
+        <button
+          type="button"
+          class="settings-nav-item"
+          [class.is-active]="activeSection() === 'display'"
+          [attr.aria-current]="activeSection() === 'display' ? 'page' : null"
+          (click)="select('display')"
+          i18n="@@settings.display.title"
+        >
+          Affichage
+        </button>
+      </nav>
+
+      <section class="settings-panel">
+        @switch (activeSection()) {
+          @case ('security') {
+            <h2 class="settings-panel-title" i18n="@@settings.security.title">Sécurité</h2>
+            <!-- VETS-CPC-2089: left empty on purpose, filled by a follow-up ticket -->
+          }
+          @case ('display') {
+            <h2 class="settings-panel-title" i18n="@@settings.display.title">Affichage</h2>
+            <!-- VETS-CPC-2089: left empty on purpose, filled by a follow-up ticket -->
+          }
+        }
+      </section>
+    </div>
+  </mat-card>
+  <!-- Confirmation message, shown only after a successful save. -->
+  @if (isSaved()) {
+    <p class="settings-status" i18n="@@settings.saved">Modifications enregistrées</p>
+  }
+
+  <div class="settings-actions">
+    <button mat-button type="button" (click)="cancel()" i18n="@@settings.cancel">Annuler</button>
+    <button mat-flat-button color="primary" type="button" (click)="save()" i18n="@@settings.save">
+      Enregistrer
+    </button>
+  </div>
+</div>

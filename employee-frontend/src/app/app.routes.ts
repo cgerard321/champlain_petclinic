@@ -16,6 +16,7 @@ export const routes: Routes = [
   {
     path: 'settings',
     loadChildren: () => import('@features/settings/routes'),
+    canActivate: [authGuard(), customerRedirectGuard, employeeGuard],
   },
   {
     path: '',

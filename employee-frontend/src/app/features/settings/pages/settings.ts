@@ -1,17 +1,33 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { RouterLink } from '@angular/router';
-
-import { AuthState } from '@core/services/auth-state';
-import { ComingSoon } from '@shared/components/coming-soon/coming-soon';
-
+import { MatCardModule } from '@angular/material/card';
+import { Router } from '@angular/router';
+type SettingsSection = 'security' | 'display';
 @Component({
-  imports: [RouterLink, MatButtonModule, MatIconModule, ComingSoon],
   selector: 'app-settings',
-  styleUrl: './settings.css',
+  imports: [MatButtonModule, MatCardModule],
   templateUrl: './settings.html',
+  styleUrl: './settings.css',
 })
 export class Settings {
-  protected auth = inject(AuthState);
+  private readonly router = inject(Router);
+
+  protected readonly activeSection = signal<SettingsSection>('security');
+  protected readonly isSaved = signal(false);
+  protected select(section: SettingsSection): void {
+    if (section === this.activeSection()) {
+      return;
+    }
+
+    this.isSaved.set(false);
+    this.activeSection.set(section);
+  }
+
+  protected save(): void {
+    this.isSaved.set(true);
+  }
+
+  protected cancel(): void {
+    this.router.navigateByUrl('/home');
+  }
 }

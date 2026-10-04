@@ -15,6 +15,12 @@
     "forbidden.back": "Back to home",
     "notFound.title": "Page Not Found",
     "notFound.message": "The page you are looking for does not exist.",
-    "notFound.back": "Back to home"
+    "notFound.back": "Back to home",
+    "settings.title": "Settings",
+    "settings.security.title": "Security",
+    "settings.display.title": "Display",
+    "settings.save": "Save",
+    "settings.cancel": "Cancel",
+    "settings.saved": "Changes saved"
   }
 }
