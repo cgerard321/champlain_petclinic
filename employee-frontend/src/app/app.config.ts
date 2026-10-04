@@ -20,14 +20,7 @@ import { AuthState } from '@core/services/auth-state';
 
 import { routes } from './app.routes';
 
-/**
- * VETS-CPC-1927
- *
- * French is the SOURCE locale (see `angular.json` -> `i18n.sourceLocale`): French text is
- * written directly in the templates and tagged with `i18n="@@some.id"`. The templates
- * therefore already are the French version, which is why there is no French translation
- * file to load. Only English has to be fetched and installed at runtime.
- */
+
 registerLocaleData(localeFr);
 // save french as the first language because it is the rule in Quebec
 
@@ -35,6 +28,29 @@ registerLocaleData(localeFr);
 // source locale when nothing has been stored yet.
 export function getSavedLang(): string {
   return localStorage.getItem('lang') ?? 'fr';
+}
+
+/**
+ * The catalogue as it is written on disk: entries grouped by feature, nested as deeply as the
+ * message ids require. A leaf is always a translated string.
+ */
+export type Catalogue = { [key: string]: string | Catalogue };
+
+//to flat the information of the en.json because the en.json have been organized: better for preventing conflicts, and for scaling the localisation in the employeee frontend
+export function flattenTranslations(source: Catalogue, prefix = ''): Record<string, string> {
+  const flat: Record<string, string> = {};
+
+  for (const [key, value] of Object.entries(source)) {
+    const id = prefix ? `${prefix}.${key}` : key;
+
+    if (typeof value === 'string') {
+      flat[id] = value;
+    } else {
+      Object.assign(flat, flattenTranslations(value, id));
+    }
+  }
+
+  return flat;
 }
 // Installs the English translations before the first component renders.
 
@@ -54,9 +70,10 @@ export async function loadActiveTranslations(): Promise<void> {
     if (!response.ok) {
       throw new Error(`Failed to load translations: ${response.status}`);
     }
-    // loadTranslations() only needs the inner `translations` object, not the whole file.
-    const { translations } = await response.json();
-    loadTranslations(translations);
+    // loadTranslations() only needs the inner `translations` object, not the whole file, and it
+    // needs it flat.
+    const { translations } = (await response.json()) as { translations: Catalogue };
+    loadTranslations(flattenTranslations(translations));
   } catch (err) {
     console.error('Could not load en translations, falling back to fr', err);
   }
