@@ -248,15 +248,7 @@ export class InventoryList implements OnInit, OnDestroy {
         : this.inventoryService.createInventory(body);
 
       request$.subscribe({
-        next: (saved) => {
-          this.inventories.update((current) => {
-            const idx = current.findIndex((inv) => inv.inventoryId === saved.inventoryId);
-            if (idx === -1) return [...current, saved];
-            const updated = [...current];
-            updated[idx] = saved;
-            return updated;
-          });
-
+        next: () => {
           this.newInventory.set({
             inventoryName: '',
             inventoryType: '',
@@ -265,6 +257,8 @@ export class InventoryList implements OnInit, OnDestroy {
           this.editingInventoryId.set(null);
           this.showAddForm.set(false);
           this.savingInventory.set(false);
+
+          this.loadInventories(this.currentPage());
         },
         error: () => {
           this.formError.set(
