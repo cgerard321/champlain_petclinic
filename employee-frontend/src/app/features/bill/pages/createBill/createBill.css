@@ -1,0 +1,57 @@
+:host {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+mat-card{
+    width: 540px;
+}
+
+mat-form-field{
+    vertical-align: middle;
+    flex: 1;
+}
+
+mat-divider {
+  margin-bottom: 16px;
+}
+
+.align-center{
+    width: 100%;
+}
+
+.label-size{
+    font-size: medium;
+    width: 160px;
+    padding-bottom: 18px;
+    display: flex;
+    align-items: center;
+}
+
+.right-align{
+    text-align: right;
+}
+
+input.right-align::-webkit-outer-spin-button,
+input.right-align::-webkit-inner-spin-button {
+  display: none;
+}
+
+.form-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 16px
+}
+
+.center-buttons {
+  display: flex;
+  justify-content: right;
+  gap: 12px;
+}
+
+.red{
+  background-color: red;
+}

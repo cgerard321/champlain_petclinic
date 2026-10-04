@@ -1,0 +1,59 @@
+<section>
+    <mat-card class="align-center" appearance="outlined">
+        <mat-card-header>
+            <h1>Welcome, [insert Vet Name]</h1>
+        </mat-card-header>
+        <mat-divider></mat-divider>
+        <mat-card-content>
+            <div class="form-row">
+                <label class="label-size">Veteranarian Name:</label>
+                <mat-form-field appearance="outline">
+                    <input matInput disabled>
+                </mat-form-field>
+                
+            </div>
+            <mat-divider></mat-divider>
+            <div class="form-row">
+                <label class="label-size">Customer Name:</label>
+                <mat-form-field appearance="outline">
+                    <mat-select>
+                        <mat-option value="1"></mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+            <mat-divider></mat-divider>
+            <div class="form-row">
+                <label class="label-size">Visit Type:</label>
+                <mat-form-field appearance="outline">
+                    <mat-select>
+                        <mat-option value="1"></mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+            <mat-divider></mat-divider>
+            <div class="form-row">
+                <label class="label-size" >Amount:</label>
+                <mat-form-field appearance="outline">
+                    <input matInput type="number" class="right-align" placeholder="0"/>
+                    <span matTextPrefix>$&nbsp;</span>
+                </mat-form-field>
+            </div>
+            <mat-divider></mat-divider>
+            <div class="form-row">
+                <label class="label-size">Date:</label>
+                <mat-form-field appearance="outline">
+                    <mat-label>Choose a date</mat-label>
+                    <input matInput [matDatepicker]="picker">
+                    <mat-hint>MM/DD/YYYY</mat-hint>
+                    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                    <mat-datepicker #picker></mat-datepicker>
+                </mat-form-field>
+            </div>
+            <mat-divider></mat-divider>
+        </mat-card-content>
+        <mat-card-actions class="center-buttons">
+            <button matButton="filled" class="red">Cancel</button>
+            <button matButton="filled">Submit</button>
+        </mat-card-actions>
+    </mat-card>
+</section>
