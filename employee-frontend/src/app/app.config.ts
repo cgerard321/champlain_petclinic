@@ -30,10 +30,7 @@ export function getSavedLang(): string {
   return localStorage.getItem('lang') ?? 'fr';
 }
 
-/**
- * The catalogue as it is written on disk: entries grouped by feature, nested as deeply as the
- * message ids require. A leaf is always a translated string.
- */
+
 export type Catalogue = { [key: string]: string | Catalogue };
 
 //to flat the information of the en.json because the en.json have been organized: better for preventing conflicts, and for scaling the localisation in the employeee frontend
