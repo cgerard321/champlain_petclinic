@@ -52,26 +52,14 @@
     text-align: left;
 }
 
+.markdown-link-safety-modal-body p .safety-accent {
+    text-decoration: underline;
+}
+
 .markdown-link-safety-modal-buttons {
     display: flex;
     justify-content: flex-end;
     gap: 15px;
-}
-
-.markdown-link-safety-modal-buttons .cancel-btn {
-    background-color: #fff;
-    color: #000;
-    border: 1.5px solid #b9b9b9;
-    padding: 5px 12px;
-    font-size: 14px;
-    border-radius: 4px;
-    margin: 0;
-}
-
-.markdown-link-safety-modal-buttons .cancel-btn:hover {
-    background-color: #f0f0f0;
-    color: #000;
-    border: 1.5px solid #b9b9b9;
 }
 
 .markdown-link-safety-modal-buttons .markdown-link-safety-btn {

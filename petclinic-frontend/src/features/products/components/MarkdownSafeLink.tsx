@@ -1,6 +1,6 @@
 import { JSX, ReactNode, useState } from 'react';
-import { Button, ButtonGroup, Modal } from 'react-bootstrap';
-import { redirect } from 'react-router-dom';
+import { Button, Modal } from 'react-bootstrap';
+import './MarkdownSafeLink.css';
 
 interface MarkdownSafeLinkProps {
   href: string;
@@ -17,38 +17,45 @@ export function MarkdownSafeLink({
     setShow(true);
   };
   return (
-    <div>
+    <>
       <Modal
         centered
         show={show}
         dialogClassName="markdown-link-safety-modal-dialog"
       >
+        <button
+          className="delete-modal-close-btn"
+          onClick={() => setShow(false)}
+        >
+          ×
+        </button>
         <Modal.Body className="markdown-link-safety-modal-body">
           <h4>External Link</h4>
-          <span>
-            You're about to leave this site. External links may{' '}
-            <strong>not be safe</strong>. Do you want to continue?
-          </span>
+          <p>
+            You are about to leave this site. External links may{' '}
+            <strong className="safety-accent">not be safe</strong>. Do you want
+            to continue?
+          </p>
+          <p>
+            <strong>Link: </strong>
+            {href}
+          </p>
+          <div className="markdown-link-safety-modal-buttons">
+            <Button
+              variant="danger"
+              onClick={() => window.open(href, '_blank', 'noopener,noreferrer')}
+            >
+              Continue
+            </Button>
+            <Button variant="secondary" onClick={() => setShow(false)}>
+              Go back
+            </Button>
+          </div>
         </Modal.Body>
-        <div className="markdown-link-safety-modal-buttons">
-          <Button
-            variant="danger"
-            onClick={() => window.open(href, '_blank', 'noopener,noreferrer')}
-          >
-            Continue
-          </Button>
-          <Button
-            variant="secondary"
-            className="cancel-btn"
-            onClick={() => setShow(false)}
-          >
-            Go back
-          </Button>
-        </div>
       </Modal>
       <a href={href} onClick={handleLinkClick}>
         {children}
       </a>
-    </div>
+    </>
   );
 }
