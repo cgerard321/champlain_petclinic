@@ -40,12 +40,10 @@ function ReviewBox({
   }, [rating.review]);
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const handleLocalChange = (text: string) => {
-    if (text.length > 10000) {
-      setError('Review cannot exceed 10000 characters!');
-    } else {
-      setError(null);
-      updateFunc(text); // propagate changes to parent
-    }
+    setError(
+      text.length > 10000 ? 'Review cannot exceed 10000 characters!' : null
+    );
+    updateFunc(text);
     setReviewText(text);
   };
 
