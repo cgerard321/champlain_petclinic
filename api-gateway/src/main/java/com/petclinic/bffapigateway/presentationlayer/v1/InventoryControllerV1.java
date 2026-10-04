@@ -61,7 +61,7 @@ public class InventoryControllerV1 {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER, Roles.VET})
     @GetMapping(value = "/types", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<InventoryTypeResponseDTO> getAllInventoryTypes(){
         return inventoryServiceClient.getAllInventoryTypes();

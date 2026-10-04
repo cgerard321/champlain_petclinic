@@ -74,6 +74,7 @@ export class InventoryList implements OnInit, OnDestroy {
   protected readonly editingInventoryId = signal<string | null>(null);
   protected readonly savingInventory = signal(false);
   protected readonly formError = signal<string | null>(null);
+  protected readonly deleteError = signal<string | null>(null);
 
   protected readonly newInventory = signal<InventoryRequest>({
     inventoryName: '',
@@ -283,7 +284,7 @@ export class InventoryList implements OnInit, OnDestroy {
         );
       },
       error: () => {
-        this.formError.set('Unable to delete inventory.');
+        this.deleteError.set('Unable to delete inventory.');
       },
     });
   }
