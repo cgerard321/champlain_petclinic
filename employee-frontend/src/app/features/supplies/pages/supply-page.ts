@@ -8,14 +8,14 @@ import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { AuthState } from '@core/services/auth-state';
-import { SupplyImageEditor } from '@shared/components/image-editor/image-editor';
 import { Supply } from '@features/supplies/models/supply';
 import { SupplyService } from '@features/supplies/services/supply-service';
+import { ImageEditor } from '@shared/components/image-editor/image-editor';
 import { Table, TableColumn } from '@shared/components/table/table';
 import { Roles } from '@shared/models/roles';
 
 @Component({
-  imports: [CurrencyPipe, FormField, MatDialogModule, MatIconModule, Table, SupplyImageEditor],
+  imports: [CurrencyPipe, FormField, MatDialogModule, MatIconModule, Table, ImageEditor],
   selector: 'app-supply',
   styleUrl: './supply-page.css',
   templateUrl: './supply-page.html',

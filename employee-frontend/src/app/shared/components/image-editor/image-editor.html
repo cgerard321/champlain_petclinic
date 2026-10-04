@@ -4,7 +4,6 @@
   <div class="image-preview">
     @if (preview(); as image) {
       <img [src]="image" [alt]="label() + ' preview'" />
-      
     } @else {
       <span>No photo selected</span>
     }

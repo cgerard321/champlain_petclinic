@@ -15,11 +15,15 @@ import {
   MatDialogTitle,
 } from '@angular/material/dialog';
 
+// eslint-disable-next-line import-alias/import-alias
+import { ImageEditor } from '../image-editor/image-editor';
+
 import {
   ModalFormData,
   ModalFormField,
   ModalFormOption,
   ModalFormResult,
+  ModalFormImageValue,
 } from './modal-form-models';
 
 type DynamicFormControl = FormControl<unknown>;
@@ -31,7 +35,14 @@ type DynamicFormControls = {
 type DynamicFormGroup = FormGroup<DynamicFormControls>;
 
 @Component({
-  imports: [CommonModule, ReactiveFormsModule, MatDialogActions, MatDialogContent, MatDialogTitle],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatDialogActions,
+    MatDialogContent,
+    MatDialogTitle,
+    ImageEditor,
+  ],
   selector: 'app-modal-form',
   templateUrl: './modal-form.html',
   styleUrl: './modal-form.css',
@@ -71,6 +82,9 @@ export class ModalForm<T extends object> {
       case 'enum':
         return field.options?.[0]?.value ?? null;
 
+      case 'image':
+        return { file: null, changed: false } satisfies ModalFormImageValue;
+
       case 'string':
       default:
         return '';
@@ -80,8 +94,13 @@ export class ModalForm<T extends object> {
   private createValidators(field: ModalFormField): ValidatorFn[] {
     const validators: ValidatorFn[] = [];
 
-    if (field.required) {
+    if (field.required && field.type !== 'image') {
       validators.push(Validators.required);
+    }
+
+    // Validators.required would always pass for an image, because the value is an object
+    if (field.required && field.type === 'image') {
+      validators.push(this.requiredImage(field));
     }
 
     if (field.type === 'number') {
@@ -99,6 +118,14 @@ export class ModalForm<T extends object> {
     }
 
     return validators;
+  }
+
+  private requiredImage(field: ModalFormField): ValidatorFn {
+    return (control) => {
+      const { file, changed } = control.value as ModalFormImageValue;
+      const hasImage = changed ? file !== null : !!field.currentImageUrl;
+      return hasImage ? null : { required: true };
+    };
   }
 
   // Looks up the FormControl associated with a field.
@@ -157,5 +184,12 @@ export class ModalForm<T extends object> {
 
   protected cancel(): void {
     this.dialogRef.close();
+  }
+
+  protected onImageChange(field: ModalFormField, file: File | null): void {
+    const control = this.control(field);
+    control.setValue({ file, changed: true } satisfies ModalFormImageValue);
+    control.markAsDirty();
+    control.markAsTouched();
   }
 }

@@ -1,11 +1,19 @@
 import { ValidatorFn } from '@angular/forms';
 
-// Right now, modal forms only support string, number and enum (More can be added later on)
-export type ModalFormFieldType = 'string' | 'number' | 'enum';
+export type ModalFormFieldType = 'string' | 'number' | 'enum' | 'image';
 
 export interface ModalFormOption<T = string> {
   value: T;
   label: string;
+}
+
+// Image Control
+// changed == false && file == null -> untouched
+// changed == true && file == File -> new image
+// changed == true && file == null -> removed
+export interface ModalFormImageValue {
+  file: File | null;
+  changed: boolean;
 }
 
 export interface ModalFormField {
@@ -25,6 +33,9 @@ export interface ModalFormField {
 
   // Allows a component using the modal to provide additional Angular validators for a specific field.
   validators?: readonly ValidatorFn[];
+
+  currentImageUrl?: string | null; // existing picture to preview
+  maxImageSizeBytes?: number;
 }
 
 export interface ModalFormData<T extends object> {

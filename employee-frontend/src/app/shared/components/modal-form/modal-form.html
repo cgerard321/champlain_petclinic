@@ -7,9 +7,11 @@
     <div class="modal-form">
       @for (field of fields; track field.key) {
         <div class="form-field">
-          <label [for]="field.key">
-            {{ field.label }}
-          </label>
+          @if (field.type !== 'image') {
+            <label [for]="field.key">
+              {{ field.label }}
+            </label>
+          }
 
           @switch (field.type) {
             @case ('string') {
@@ -40,6 +42,16 @@
                   </option>
                 }
               </select>
+            }
+
+            @case ('image') {
+              <app-image-editor
+                [label]="field.label"
+                [currentImage]="field.currentImageUrl ?? null"
+                [maxSizeBytes]="field.maxImageSizeBytes"
+                [disabled]="control(field).disabled"
+                (imageChange)="onImageChange(field, $event)"
+              />
             }
           }
 

@@ -4,7 +4,7 @@ export const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as 
 const DEFAULT_MAX_IMAGE_BYTES = 2 * 1024 * 1024;
 
 @Component({
-  selector: 'app-supply-image-editor',
+  selector: 'app-image-editor',
   standalone: true,
   templateUrl: './image-editor.html',
   styleUrl: './image-editor.css',
