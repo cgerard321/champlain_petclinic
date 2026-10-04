@@ -15,7 +15,6 @@ interface ReviewProps {
 
 export function Review({
   rating,
-  index,
   canEdit,
   onEdit,
   onDelete,
@@ -24,7 +23,7 @@ export function Review({
   const [hasOverflow, setHasOverflow] = useState(false);
 
   return (
-    <div key={rating.customerId || index} className="reviewbox">
+    <div className="reviewbox">
       <div className="product-review-author">
         <img
           src={rating.reviewerPhoto || defaultProfile}

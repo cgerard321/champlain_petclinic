@@ -1,11 +1,5 @@
 /* WriteReviewModal.css */
 
-.wrm-modal-dialog {
-    /*    position: relative;
-        max-width: 500px;
-        padding: 0;*/
-}
-
 .wrm-modal-dialog .modal-content {
     width: 100%;
     max-width: none;

@@ -26,7 +26,10 @@ export function MarkdownReviewBody({
     setHasOverflow(el.scrollHeight > el.clientHeight);
   });
   return (
-    <div ref={ref} className={`markdown ${unlimitedSize && 'unlimited-size'}`}>
+    <div
+      ref={ref}
+      className={`markdown ${unlimitedSize ? 'unlimited-size' : ''}`}
+    >
       <Markdown
         allowedElements={[
           'p',
@@ -46,7 +49,8 @@ export function MarkdownReviewBody({
           'tr',
           'td',
           'pre',
-          'code',
+          'del',
+          'table',
           'ins',
           'blockquote',
           'img',

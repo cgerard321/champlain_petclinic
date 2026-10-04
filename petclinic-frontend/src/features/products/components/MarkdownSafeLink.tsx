@@ -3,8 +3,8 @@ import { Button, Modal } from 'react-bootstrap';
 import './MarkdownSafeLink.css';
 
 interface MarkdownSafeLinkProps {
-  href: string;
-  children: ReactNode;
+  href?: string;
+  children?: ReactNode;
 }
 
 export function MarkdownSafeLink({
@@ -12,19 +12,17 @@ export function MarkdownSafeLink({
   children,
 }: MarkdownSafeLinkProps): JSX.Element {
   const [show, setShow] = useState(false);
-  const handleLinkClick = e => {
-    e.preventDefault();
-    setShow(true);
-  };
+
   return (
     <>
       <Modal
         centered
         show={show}
+        onHide={() => setShow(false)}
         dialogClassName="markdown-link-safety-modal-dialog"
       >
         <button
-          className="delete-modal-close-btn"
+          className="markdown-link-safety-modal-close-btn"
           onClick={() => setShow(false)}
         >
           ×
@@ -43,7 +41,10 @@ export function MarkdownSafeLink({
           <div className="markdown-link-safety-modal-buttons">
             <Button
               variant="danger"
-              onClick={() => window.open(href, '_blank', 'noopener,noreferrer')}
+              onClick={() => {
+                setShow(false);
+                window.open(href, '_blank', 'noopener,noreferrer');
+              }}
             >
               Continue
             </Button>
@@ -53,9 +54,19 @@ export function MarkdownSafeLink({
           </div>
         </Modal.Body>
       </Modal>
-      <a href={href} onClick={handleLinkClick}>
-        {children}
-      </a>
+      {href ? (
+        <a
+          href={href}
+          onClick={e => {
+            e.preventDefault();
+            setShow(true);
+          }}
+        >
+          {children}
+        </a>
+      ) : (
+        <span>{children}</span>
+      )}
     </>
   );
 }
