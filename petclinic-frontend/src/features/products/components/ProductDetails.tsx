@@ -485,7 +485,7 @@ export default function ProductDetails(): JSX.Element {
                       productReviews.map(
                         (rating: RatingModel, index: number) => (
                           <Review
-                            key={index}
+                            key={rating.customerId || index}
                             rating={rating}
                             index={index}
                             canEdit={
