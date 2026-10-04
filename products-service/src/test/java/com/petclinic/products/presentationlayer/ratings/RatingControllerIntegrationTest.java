@@ -229,7 +229,7 @@ class RatingControllerIntegrationTest extends PostgresTestContainerBase {
 //    @Test
 //    public void whenAddRatingWithTooLongReview_thenReturnInvalidInput(){
 //        RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
-//                .review("It's great".repeat(200))
+//                .review("It's great".repeat(1001))
 //                .rating((byte) 5)
 //                .build();
 //        String randomCustomer = UUID.randomUUID().toString();
@@ -242,7 +242,7 @@ class RatingControllerIntegrationTest extends PostgresTestContainerBase {
 //                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
 //                .expectHeader().contentType(MediaType.APPLICATION_JSON)
 //                .expectBody()
-//                .jsonPath("$.message").isEqualTo("Review must be less than 2000 characters");
+//                .jsonPath("$.message").isEqualTo("Review cannot exceed 10000 characters");
 //
 //
 //        StepVerifier.create(ratingRepository.findAll())
@@ -502,7 +502,7 @@ class RatingControllerIntegrationTest extends PostgresTestContainerBase {
     public void whenUpdateWithLongReview_thenReturnInvalidInput() {
         RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
                 .rating((byte) 5)
-                .review("It's great".repeat(200))
+                .review("It's great".repeat(1001))
                 .build();
 
         webClient.put()
@@ -513,7 +513,7 @@ class RatingControllerIntegrationTest extends PostgresTestContainerBase {
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("Review must be less than 2000 characters");
+                .jsonPath("$.message").isEqualTo("Review cannot exceed 10000 characters");
 
         StepVerifier.create(ratingRepository.findAll())
                 .expectNextCount(4)

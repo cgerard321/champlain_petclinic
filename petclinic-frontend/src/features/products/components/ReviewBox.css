@@ -1,28 +1,45 @@
 .reviewbox-container {
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
 }
 
-.review-box {
-  padding-top: 10px;
-  height: 15vh;
-  text-align: left;
-  background-color: rgb(247, 247, 247);
-  border-color: rgb(247, 247, 247);
+.review-box-textarea {
+    padding-top: 10px;
+    height: 700px;
+    width: 50%;
+    text-align: left;
+    background-color: rgb(247, 247, 247);
+    border-color: rgb(247, 247, 247);
+    resize: none;
 }
 
 .reviewbox-container > button {
-  width: 10vw;
+    width: 10vw;
 }
 
 .past-review {
-  width: 50vw;
-  word-wrap: break-word;
-  white-space: normal;
+    width: 50vw;
+    word-wrap: break-word;
+    white-space: normal;
 }
 
 .reviewbox-preview-body {
-  background-color: rgb(247, 247, 247);
-  border-radius: 15px;
-  user-select: none;
+    background-color: rgb(247, 247, 247);
+    border-radius: 15px;
+    user-select: none;
+    width: 50%;
+    min-height: 700px;
+}
+
+.toolbar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    background-color: rgb(247, 247, 247);
+}
+
+.toolbar Button {
+    align-items: center;
+    display: inline-flex;
 }
