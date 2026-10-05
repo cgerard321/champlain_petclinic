@@ -23,7 +23,8 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.UUID;
 import java.util.function.Predicate;
-
+import com.petclinic.billing.exceptions.CustomerNotFoundException;
+import com.petclinic.billing.exceptions.VetNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -277,11 +278,11 @@ public class BillServiceImpl implements BillService{
                         return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer ID is required"));
                     }
                     // Fetch Vet and Owner details
-                    Mono<VetResponseDTO> vetMono = vetClient.getVetByVetId(dto.getVetId());
+                    Mono<VetResponseDTO> vetMono = vetClient.getVetByVetId(dto.getVetId())
+                            .switchIfEmpty(Mono.error(new VetNotFoundException(dto.getVetId())));
+
                     Mono<CustomerResponseDTO> customerMono = customerServiceClient.getCustomerByCustomerId(dto.getCustomerId())
-                            .switchIfEmpty(Mono.error(new ResponseStatusException(
-                                    HttpStatus.BAD_REQUEST, "Customer ID does not exist"
-                            )));
+                            .switchIfEmpty(Mono.error(new CustomerNotFoundException(dto.getCustomerId())));
 
                     return Mono.zip(vetMono, customerMono, Mono.just(dto));
                 })
@@ -542,9 +543,7 @@ public class BillServiceImpl implements BillService{
     public Flux<BillResponseDTO> getBillsByCustomerId(String customerId) {
         // Fetch the owner info first
         Mono<CustomerResponseDTO> customerMono = customerServiceClient.getCustomerByCustomerId(customerId)
-                .switchIfEmpty(Mono.error(new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Customer ID does not exist"
-                )));
+                .switchIfEmpty(Mono.error(new CustomerNotFoundException(customerId)));
 
         return customerMono.flatMapMany(owner ->
                 billRepository.findByCustomerId(customerId)
