@@ -139,11 +139,33 @@ describe('Prod', () => {
     expect(getProducts).toHaveBeenLastCalledWith({ productName: 'horse' });
   });
 
-  it('opens the delete confirmation for a manageable user', () => {
+  it('shows the Delete button for a manageable user', () => {
     const fixture = TestBed.createComponent(Prod);
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('Delete');
+    const buttons = fixture.nativeElement.querySelectorAll(
+      'button',
+    ) as NodeListOf<HTMLButtonElement>;
+    const deleteButton = Array.from(buttons).find(
+      (button) => button.textContent.trim() === 'Delete',
+    );
+
+    expect(deleteButton).toBeTruthy();
+  });
+
+  it('hides the Delete button for a user without product-management roles', () => {
+    TestBed.overrideProvider(AuthState, { useValue: { roles: signal([Roles.vet]) } });
+    const fixture = TestBed.createComponent(Prod);
+    fixture.detectChanges();
+
+    const buttons = fixture.nativeElement.querySelectorAll(
+      'button',
+    ) as NodeListOf<HTMLButtonElement>;
+    const deleteButton = Array.from(buttons).find(
+      (button) => button.textContent.trim() === 'Delete',
+    );
+
+    expect(deleteButton).toBeUndefined();
   });
 
   it('deletes a product and reloads the list after confirmation', () => {
@@ -184,5 +206,42 @@ describe('Prod', () => {
     expect(deleteProduct).toHaveBeenNthCalledWith(1, 'product-1', false);
     expect(deleteProduct).toHaveBeenNthCalledWith(2, 'product-1', true);
     expect(dialogOpen).toHaveBeenCalledTimes(2);
+  });
+
+  it('asks about bundles and retries with cascading when the API error code is 409', () => {
+    deleteProduct
+      .mockReturnValueOnce(
+        throwError(() => ({ code: 409, message: 'Product is part of one or more bundles' })),
+      )
+      .mockReturnValueOnce(of(product));
+    dialogOpen
+      .mockReturnValueOnce({ afterClosed: () => of(true) })
+      .mockReturnValueOnce({ afterClosed: () => of(true) });
+    const fixture = TestBed.createComponent(Prod);
+    fixture.detectChanges();
+
+    fixture.componentInstance['openProductDelete'](product);
+
+    expect(deleteProduct).toHaveBeenNthCalledWith(1, 'product-1', false);
+    expect(deleteProduct).toHaveBeenNthCalledWith(2, 'product-1', true);
+    expect(dialogOpen).toHaveBeenCalledTimes(2);
+  });
+
+  it('shows the backend message when deletion fails with a non-conflict error', () => {
+    dialogOpen.mockReturnValue({ afterClosed: () => of(true) });
+    deleteProduct.mockReturnValue(
+      throwError(() => ({ code: 404, message: 'Product not found: product-1' })),
+    );
+    const fixture = TestBed.createComponent(Prod);
+    fixture.detectChanges();
+
+    fixture.componentInstance['openProductDelete'](product);
+    fixture.detectChanges();
+
+    expect(deleteProduct).toHaveBeenCalledOnce();
+    expect(dialogOpen).toHaveBeenCalledOnce();
+    expect(fixture.nativeElement.querySelector('[role="alert"]')?.textContent).toContain(
+      'Product not found: product-1',
+    );
   });
 });
