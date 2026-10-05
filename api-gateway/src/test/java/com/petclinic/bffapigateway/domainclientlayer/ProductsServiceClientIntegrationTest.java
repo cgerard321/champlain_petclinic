@@ -500,6 +500,8 @@ class ProductsServiceClientIntegrationTest {
 
     @Test
     void whenDeleteProduct_thenSendCascadeBundlesParameter() throws InterruptedException {
+        while (mockWebServer.takeRequest(0, TimeUnit.MILLISECONDS) != null) { }
+
         mockWebServer.enqueue(new MockResponse()
                 .setBody("{}")
                 .addHeader("Content-Type", "application/json"));
