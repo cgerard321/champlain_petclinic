@@ -1151,7 +1151,7 @@ public class InventoryControllerTest {
     @Test
     void testUpdateProductInInventory() {
         // Create a sample ProductRequestDTO
-        ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", "Sample Description", 10.0, 100, 15.99, null);
+        ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", "Sample Description", 10.0, 100, 15.99, null, null, null);
 
         // Define the expected response
         ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
@@ -1193,7 +1193,7 @@ public class InventoryControllerTest {
     @DisplayName("Given valid inventoryId and valid productRequest Post and return productResponse")
     void testAddProductToInventory_ShouldSucceed() {
         // Create a sample ProductRequestDTO
-        ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", "Sample Description", 10.0, 100, 15.99, null);
+        ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", "Sample Description", 10.0, 100, 15.99, null, null, null);
 
         // Define the expected response
         ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
@@ -1236,7 +1236,7 @@ public class InventoryControllerTest {
     @DisplayName("Given invalid inventoryId and valid productRequest Post and return NotFoundException")
     void testAddProductToInventory_InvalidInventoryId_ShouldReturnNotFoundException() {
         // Create a sample ProductRequestDTO
-        ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", "Sample Description", 10.0, 100,15.99, null);
+        ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", "Sample Description", 10.0, 100,15.99, null, null, null);
 
 
         // Mock the behavior of the inventoryServiceClient
