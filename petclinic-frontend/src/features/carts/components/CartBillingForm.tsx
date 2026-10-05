@@ -1,6 +1,7 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { useUser } from '@/context/UserContext';
 import { getCustomer } from '@/features/customers/api/getCustomer';
+import { getUserDetails } from '@/features/customers/api/getUserDetails';
 import './cart-shared.css';
 import './CartBillingForm.css';
 export interface BillingInfo {
@@ -80,22 +81,21 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
   useEffect(() => {
     if (!isOpen) return;
 
-    setBilling(previous => ({
-      ...previous,
-      email: previous.email || user.email || '',
-    }));
-
     if (!user.userId) return;
 
     let ignoreResponse = false;
 
     const loadCustomerInformation = async (): Promise<void> => {
       try {
-        const response = await getCustomer(user.userId);
+        const [customerResponse, userResponse] = await Promise.all([
+          getCustomer(user.userId),
+          getUserDetails(user.userId),
+        ]);
 
         if (ignoreResponse) return;
 
-        const customer = response.data;
+        const customer = customerResponse.data;
+        const userDetails = userResponse.data;
         const fullName = [customer.firstName, customer.lastName]
           .filter(Boolean)
           .join(' ');
@@ -103,6 +103,7 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
         setBilling(previous => ({
           ...previous,
           fullName: previous.fullName || fullName,
+          email: previous.email || userDetails.email || '',
           phoneNumber: previous.phoneNumber || customer.telephone || '',
           address: previous.address || customer.address || '',
           city: previous.city || customer.city || '',
@@ -118,7 +119,7 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
     return () => {
       ignoreResponse = true;
     };
-  }, [isOpen, user.email, user.userId]);
+  }, [isOpen, user.userId]);
 
   if (!isOpen) return null;
 
