@@ -30,6 +30,7 @@
               <td>{{ customer.address || 'Not available' }}</td>
               <td>{{ customer.city || 'Not available' }}</td>
               <td>{{ customer.telephone || 'Not available' }}</td>
+              <td><button mat-flat-button color="primary" type="button" (click)="checkPetDetails(customer.customerId)">Registered Pets</button></td>
             </tr>
           }
         </tbody>
@@ -37,3 +38,4 @@
     </div>
   }
 </section>
+
