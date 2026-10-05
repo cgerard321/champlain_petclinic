@@ -215,7 +215,7 @@ public class ProductsServiceClient {
     }
 
     public Mono<ProductResponseDTO> deleteProduct(final String productId, boolean cascadeBundles) {
-        return webClientBuilder.build()
+        return webClient
                 .delete()
                 .uri(uri -> uri.path("/"  + productId)
                         .queryParam("cascadeBundles", cascadeBundles)
