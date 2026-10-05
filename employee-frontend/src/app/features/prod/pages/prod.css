@@ -65,6 +65,7 @@
 
 .product-card-actions .delete-button {
   --mdc-outlined-button-outline-color: var(--mat-sys-error, #d32f2f);
+
   border-color: var(--mat-sys-error, #d32f2f);
   color: var(--mat-sys-error, #d32f2f);
 }
