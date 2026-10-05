@@ -221,6 +221,16 @@ public class ProductsServiceClient {
                         .queryParam("cascadeBundles", cascadeBundles)
                         .build())
                 .retrieve()
+                .onStatus(
+                        status -> status.value() == 404,
+                        response -> Mono.error(new GenericHttpException(
+                                "Product not found: " + productId,
+                                HttpStatus.NOT_FOUND)))
+                .onStatus(
+                        status -> status.value() == 409,
+                        response -> Mono.error(new GenericHttpException(
+                                "Product is part of one or more bundles",
+                                HttpStatus.CONFLICT)))
                 .bodyToMono(ProductResponseDTO.class);
     }
 

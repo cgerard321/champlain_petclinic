@@ -32,7 +32,28 @@
 }
 
 .product-card {
+  display: flex;
+  flex-direction: column;
   min-height: 220px;
+}
+
+.product-card mat-card-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.product-card-actions {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: auto;
+  width: 100%;
+}
+
+.product-card-actions button {
+  min-width: 0;
 }
 
 dl {
@@ -67,6 +88,11 @@ dd {
 .error-message {
   color: var(--mat-sys-error, #b00020);
   flex-direction: column;
+}
+
+.delete-error-message {
+  color: var(--mat-sys-error, #b00020);
+  margin: 0 0 16px;
 }
 
 @media (width <= 560px) {

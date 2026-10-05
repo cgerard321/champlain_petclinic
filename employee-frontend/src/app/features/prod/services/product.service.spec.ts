@@ -126,6 +126,22 @@ describe('ProductService', () => {
     });
   });
 
+  it('deletes a product without cascading bundles by default', () => {
+    service.deleteProduct('product-1', false).subscribe();
+
+    const request = http.expectOne('/api/gateway/products/product-1?cascadeBundles=false');
+    expect(request.request.method).toBe('DELETE');
+    request.flush({ productId: 'product-1' });
+  });
+
+  it('deletes a product with cascading bundles when requested', () => {
+    service.deleteProduct('product-1', true).subscribe();
+
+    const request = http.expectOne('/api/gateway/products/product-1?cascadeBundles=true');
+    expect(request.request.method).toBe('DELETE');
+    request.flush({ productId: 'product-1' });
+  });
+
   it('updates a product image through the image subresource', () => {
     const image = {
       fileName: 'product.png',

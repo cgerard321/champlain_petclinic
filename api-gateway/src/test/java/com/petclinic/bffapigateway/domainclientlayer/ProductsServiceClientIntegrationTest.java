@@ -498,6 +498,39 @@ class ProductsServiceClientIntegrationTest {
                 .verifyComplete();
     }
 
+    @Test
+    void whenDeleteProduct_thenSendCascadeBundlesParameter() throws InterruptedException {
+        mockWebServer.enqueue(new MockResponse()
+                .setBody("{}")
+                .addHeader("Content-Type", "application/json"));
+
+        StepVerifier.create(productsServiceClient.deleteProduct("productId", false))
+                .expectNextCount(1)
+                .verifyComplete();
+
+        assertEquals("/products/productId?cascadeBundles=false", mockWebServer.takeRequest().getPath());
+    }
+
+    @Test
+    void whenDeleteProductReturnsNotFound_thenMapToNotFoundException() {
+        mockWebServer.enqueue(new MockResponse().setResponseCode(404));
+
+        StepVerifier.create(productsServiceClient.deleteProduct("productId", false))
+                .expectErrorMatches(error -> error instanceof GenericHttpException
+                        && ((GenericHttpException) error).getHttpStatus() == HttpStatus.NOT_FOUND)
+                .verify();
+    }
+
+    @Test
+    void whenDeleteProductReturnsConflict_thenMapToConflictException() {
+        mockWebServer.enqueue(new MockResponse().setResponseCode(409));
+
+        StepVerifier.create(productsServiceClient.deleteProduct("productId", false))
+                .expectErrorMatches(error -> error instanceof GenericHttpException
+                        && ((GenericHttpException) error).getHttpStatus() == HttpStatus.CONFLICT)
+                .verify();
+    }
+
 
     //----------------------------------------------
 //TODO: Quantity
