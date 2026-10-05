@@ -45,15 +45,32 @@
 .product-card-actions {
   box-sizing: border-box;
   display: flex;
-  flex-wrap: wrap;
   gap: 8px;
   justify-content: flex-end;
   margin-top: auto;
+  padding-left: 12px;
+  padding-right: 12px;
   width: 100%;
 }
 
 .product-card-actions button {
+  flex: 1;
   min-width: 0;
+  overflow: hidden;
+  padding-left: 8px;
+  padding-right: 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.product-card-actions .delete-button {
+  --mdc-outlined-button-outline-color: var(--mat-sys-error, #d32f2f);
+  border-color: var(--mat-sys-error, #d32f2f);
+  color: var(--mat-sys-error, #d32f2f);
+}
+
+.product-card-actions .delete-button:hover {
+  background-color: rgb(211 47 47 / 8%);
 }
 
 dl {
