@@ -39,7 +39,7 @@ class ProductsServiceClientIntegrationTest {
     @MockBean
     private ProductsServiceClient productsServiceClient;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
 
     private static MockWebServer mockWebServer;
 
