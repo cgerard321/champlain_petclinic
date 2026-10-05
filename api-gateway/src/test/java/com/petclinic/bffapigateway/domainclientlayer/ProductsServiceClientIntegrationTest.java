@@ -26,6 +26,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -299,6 +300,7 @@ class ProductsServiceClientIntegrationTest {
                 false,
                 "586d0700-57db-4312-b6f1-413b79dd018c",
                 null,
+                LocalDate.of(2026,10,5),
                 ProductStatus.AVAILABLE,
                 DeliveryType.DELIVERY
         );
@@ -330,6 +332,7 @@ class ProductsServiceClientIntegrationTest {
                 false,
                 "586d0700-57db-4312-b6f1-413b79dd018c",
                 null,
+                LocalDate.of(2026,10,5),
                 ProductStatus.AVAILABLE,
                 DeliveryType.PICKUP
         );
@@ -361,6 +364,7 @@ class ProductsServiceClientIntegrationTest {
                 true,
                 "586d0700-57db-4312-b6f1-413b79dd018c",
                 null,
+                LocalDate.of(2026,10,5),
                 ProductStatus.AVAILABLE,
                 DeliveryType.DELIVERY_AND_PICKUP
         );
