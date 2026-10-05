@@ -147,7 +147,6 @@ describe('Translation loader (app.config)', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-
   it('installs a catalogue that is grouped by feature', async () => {
     // Arrange - the real shape of en.json, nested rather than flat
     localStorage.setItem('lang', 'en');

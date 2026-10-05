@@ -59,7 +59,7 @@
   gap: 0.75rem;
 }
 
-@media (max-width: 600px) {
+@media (width <= 600px) {
   .settings-body {
     grid-template-columns: 1fr;
   }

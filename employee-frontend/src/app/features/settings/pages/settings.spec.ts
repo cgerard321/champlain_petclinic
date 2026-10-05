@@ -6,7 +6,6 @@ import { vi } from 'vitest';
 
 import { Settings } from './settings';
 
-
 const EN_SETTINGS = {
   'settings.title': 'Settings',
   'settings.security.title': 'Security',
@@ -32,7 +31,6 @@ describe('Settings page (VETS-CPC-2089)', () => {
     clearTranslations();
     vi.restoreAllMocks();
   });
-
 
   async function render(): Promise<{
     fixture: ComponentFixture<Settings>;
@@ -120,8 +118,6 @@ describe('Settings page (VETS-CPC-2089)', () => {
     expect(navItem(host, 'Sécurité').classList.contains('is-active')).toBe(false);
     expect(panelTitle(host)?.textContent).toContain('Affichage');
   });
-
-
 
   // 4. POSITIVE - Save confirms with a snack bar and leaves the page.
 

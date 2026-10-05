@@ -20,7 +20,6 @@ import { AuthState } from '@core/services/auth-state';
 
 import { routes } from './app.routes';
 
-
 registerLocaleData(localeFr);
 // save french as the first language because it is the rule in Quebec
 
@@ -29,7 +28,6 @@ registerLocaleData(localeFr);
 export function getSavedLang(): string {
   return localStorage.getItem('lang') ?? 'fr';
 }
-
 
 export type Catalogue = { [key: string]: string | Catalogue };
 
