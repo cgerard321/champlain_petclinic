@@ -16,6 +16,8 @@ export const routes: Routes = [
   {
     path: 'settings',
     loadChildren: () => import('@features/settings/routes'),
+    //verify if the user is an employee
+    canActivate: [authGuard(), customerRedirectGuard, employeeGuard],
   },
   {
     path: '',
