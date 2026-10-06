@@ -647,10 +647,7 @@ public class BillServiceImpl implements BillService{
                                 bill.setInterest(interestAtPayment);
                                 bill.setBillStatus(BillStatus.PAID);
 
-                                //Generate confirmation email and Send email
                                 mailService.sendMail(generateConfirmationEmail(user));
-
-                                // 4. Save the updated bill back into the repository.
                                 return billRepository.save(bill);
                             })
 
