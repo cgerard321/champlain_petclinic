@@ -13,7 +13,14 @@
       "cancel": "Cancel",
       "saved": "Changes saved",
       "security": {
-        "title": "Security"
+        "title": "Security",
+        "role": {
+          "admin": "Administrator",
+          "vet": "Veterinarian",
+          "receptionist": "Receptionist",
+          "inventoryManager": "Inventory Manager",
+          "unknown": "Employee"
+        }
       },
       "display": {
         "title": "Display"
