@@ -12,7 +12,6 @@ import './ReviewBox.css';
 import { MarkdownReviewBody } from '@/features/products/components/MarkdownReviewBody.tsx';
 import {
   FaBold,
-  FaImage,
   FaItalic,
   FaLink,
   FaList,
@@ -21,6 +20,7 @@ import {
 } from 'react-icons/fa';
 import { BsTypeH1, BsTypeH2, BsTypeH3 } from 'react-icons/bs';
 import { TbBlockquote } from 'react-icons/tb';
+import { flushSync } from 'react-dom';
 
 function ReviewBox({
   updateFunc,
@@ -32,7 +32,8 @@ function ReviewBox({
   const [reviewText, setReviewText] = useState<string>(rating.review);
   const [isError, setError] = useState<string | null>(null);
   const [previewToggle, setPreviewToggle] = useState<boolean>(true);
-  const ref = useRef<HTMLTextAreaElement>(null);
+  const selectionRef = useRef({ start: 0, end: 0 });
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const [hasSelection, setHasSelection] = useState(false);
 
   useEffect(() => {
@@ -52,8 +53,17 @@ function ReviewBox({
     markdownTagEnd?: string
   ): void => {
     if (!hasSelection) return;
-    handleLocalChange(
-      wrapTextWithMarkdown(reviewText, markdownTagStart, markdownTagEnd ?? '')
+    flushSync(() =>
+      handleLocalChange(
+        wrapTextWithMarkdown(reviewText, markdownTagStart, markdownTagEnd ?? '')
+      )
+    );
+
+    if (!textAreaRef.current) return;
+    textAreaRef.current.focus();
+    textAreaRef.current.setSelectionRange(
+      selectionRef.current.start,
+      selectionRef.current.end
     );
   };
 
@@ -62,20 +72,28 @@ function ReviewBox({
     markdownTagStart: string,
     markdownTagEnd?: string
   ): string => {
-    if (!ref || !ref.current) return text;
-    let ss = ref.current.selectionStart;
+    if (!textAreaRef || !textAreaRef.current) return text;
+    let ss = selectionRef.current.start;
 
     while (text.charAt(ss) == '\n' && ss != text.length) ss++;
 
-    const se = ref.current.selectionEnd;
+    const se = selectionRef.current.end;
 
-    return (
-      text.slice(0, ss) +
-      markdownTagStart +
-      text.slice(ss, se) +
-      markdownTagEnd +
-      text.slice(se, text.length)
-    );
+    const lines = text.slice(ss, se).split('\n');
+
+    const linesWithMarkdown = lines
+      .map(line => {
+        if (line == '') return line;
+        return markdownTagStart + line + markdownTagEnd;
+      })
+      .join('\n');
+
+    selectionRef.current = {
+      start: ss + markdownTagStart.length,
+      end: ss + lines[0].length + markdownTagStart.length,
+    };
+
+    return text.slice(0, ss) + linesWithMarkdown + text.slice(se, text.length);
   };
 
   return (
@@ -84,81 +102,111 @@ function ReviewBox({
         <ToggleButton
           id="preview-toggle"
           type="checkbox"
-          variant={previewToggle ? 'primary' : 'secondary'}
+          variant={previewToggle ? 'secondary' : 'primary'}
           checked={previewToggle}
           value="1"
           onChange={e => setPreviewToggle(e.target.checked)}
         >
-          Show Preview
+          {previewToggle ? 'Hide preview' : 'Show preview'}
         </ToggleButton>
         <ButtonGroup>
           <Button
             variant="light"
-            onMouseDown={() => handleToolbarButtonClick('**', '**')}
+            aria-label="Apply bold to selection"
+            onMouseDown={e => {
+              e.preventDefault();
+              handleToolbarButtonClick('**', '**');
+            }}
           >
             <FaBold size={18} />
           </Button>
           <Button
             variant="light"
-            onMouseDown={() => handleToolbarButtonClick('++', '++')}
+            aria-label="Apply underline to selection"
+            onMouseDown={e => {
+              e.preventDefault();
+              handleToolbarButtonClick('++', '++');
+            }}
           >
             <FaUnderline size={18} />
           </Button>
           <Button
             variant="light"
-            onMouseDown={() => handleToolbarButtonClick('*', '*')}
+            aria-label="Apply italic to selection"
+            onMouseDown={e => {
+              e.preventDefault();
+              handleToolbarButtonClick('*', '*');
+            }}
           >
             <FaItalic size={18} />
           </Button>
           <Button
             variant="light"
-            onMouseDown={() =>
-              handleToolbarButtonClick('[', '](https://yourlink.com)')
-            }
+            aria-label="Make selection a link"
+            onMouseDown={e => {
+              e.preventDefault();
+              handleToolbarButtonClick('[', '](https://yourlink.com)');
+            }}
           >
             <FaLink size={18} />
           </Button>
           <Button
             variant="light"
-            onMouseDown={() =>
-              handleToolbarButtonClick('![', '](https://yourimage.com)')
-            }
-          >
-            <FaImage size={18} />
-          </Button>
-          <Button
-            variant="light"
-            onMouseDown={() => handleToolbarButtonClick('- ')}
+            aria-label="Make selection a list"
+            onMouseDown={e => {
+              e.preventDefault();
+              handleToolbarButtonClick('- ');
+            }}
           >
             <FaList size={18} />
           </Button>
           <Button
             variant="light"
-            onMouseDown={() => handleToolbarButtonClick('1. ')}
+            aria-label="Make selection a numbered list"
+            onMouseDown={e => {
+              e.preventDefault();
+              handleToolbarButtonClick('1. ');
+            }}
           >
             <FaListOl size={18} />
           </Button>
           <Button
             variant="light"
-            onMouseDown={() => handleToolbarButtonClick('> ')}
+            aria-label="Put the selection in a blockquote"
+            onMouseDown={e => {
+              e.preventDefault();
+              handleToolbarButtonClick('> ');
+            }}
           >
             <TbBlockquote size={18} />
           </Button>
           <Button
             variant="light"
-            onMouseDown={() => handleToolbarButtonClick('# ')}
+            aria-label="Make the selection a header"
+            onMouseDown={e => {
+              e.preventDefault();
+              handleToolbarButtonClick('# ');
+            }}
           >
             <BsTypeH1 size={18} />
           </Button>
           <Button
             variant="light"
-            onMouseDown={() => handleToolbarButtonClick('## ')}
+            aria-label="Make the selection a sub-header"
+            onMouseDown={e => {
+              e.preventDefault();
+              handleToolbarButtonClick('## ');
+            }}
           >
             <BsTypeH2 size={18} />
           </Button>
           <Button
             variant="light"
-            onMouseDown={() => handleToolbarButtonClick('### ')}
+            aria-label="Make the selection a sub-sub header"
+            onMouseDown={e => {
+              e.preventDefault();
+              handleToolbarButtonClick('### ');
+            }}
           >
             <BsTypeH3 size={18} />
           </Button>
@@ -169,16 +217,21 @@ function ReviewBox({
         <Stack direction="horizontal" gap={3}>
           <Form.Control
             as="textarea"
-            className="review-box-textarea"
+            ref={textAreaRef}
+            className={`review-box-textarea ${!previewToggle ? 'full' : ''}`}
             placeholder="Leave your review here..."
             value={reviewText}
-            ref={ref}
             onChange={e => handleLocalChange(e.target.value)}
-            onSelect={e =>
+            onSelect={e => {
               setHasSelection(
                 e.currentTarget.selectionStart !== e.currentTarget.selectionEnd
-              )
-            }
+              );
+
+              selectionRef.current = {
+                start: e.currentTarget.selectionStart ?? 0,
+                end: e.currentTarget.selectionEnd ?? 0,
+              };
+            }}
           />
           {previewToggle && (
             <div className="reviewbox-preview-body">

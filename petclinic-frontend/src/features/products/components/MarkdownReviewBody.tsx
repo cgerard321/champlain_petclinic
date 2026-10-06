@@ -53,7 +53,6 @@ export function MarkdownReviewBody({
           'table',
           'ins',
           'blockquote',
-          'img',
           'hr',
         ]}
         unwrapDisallowed

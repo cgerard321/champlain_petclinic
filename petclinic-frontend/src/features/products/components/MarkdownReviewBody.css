@@ -3,11 +3,15 @@
     text-align: start;
     max-height: 700px;
     overflow-y: auto;
+    overflow-wrap: anywhere;
 }
 
 .markdown :is(h1, h2, h3, h4, h5, h6) {
     text-align: start;
     justify-content: start;
+}
+
+.markdown p {
 }
 
 .markdown ul {
