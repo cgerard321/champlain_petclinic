@@ -15,8 +15,7 @@ import {
   MatDialogTitle,
 } from '@angular/material/dialog';
 
-// eslint-disable-next-line import-alias/import-alias
-import { ImageEditor } from '../image-editor/image-editor';
+import { ImageEditor } from '@shared/components/image-editor/image-editor';
 
 import {
   ModalFormData,

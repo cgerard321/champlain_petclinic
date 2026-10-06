@@ -1,21 +1,37 @@
 import { CurrencyPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal, TemplateRef, viewChild } from '@angular/core';
-import { FormField, form, min, required, submit } from '@angular/forms/signals';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { AuthState } from '@core/services/auth-state';
-import { Supply } from '@features/supplies/models/supply';
+import { Supply, SupplyRequest } from '@features/supplies/models/supply';
 import { SupplyService } from '@features/supplies/services/supply-service';
-import { ImageEditor } from '@shared/components/image-editor/image-editor';
+import { ALLOWED_IMAGE_TYPES } from '@shared/components/image-editor/image-editor';
+import { ModalForm } from '@shared/components/modal-form/modal-form';
+import {
+  ModalFormData,
+  ModalFormField,
+  ModalFormImageValue,
+  ModalFormResult,
+} from '@shared/components/modal-form/modal-form-models';
 import { Table, TableColumn } from '@shared/components/table/table';
 import { Roles } from '@shared/models/roles';
 
+// The shape of the modal's form: the editable Supply fields plus the photo control.
+interface SupplyFormValue {
+  productName: string;
+  productDescription: string;
+  productPrice: number;
+  productQuantity: number;
+  productSalePrice: number;
+  photo: ModalFormImageValue;
+}
+
 @Component({
-  imports: [CurrencyPipe, FormField, MatDialogModule, MatIconModule, Table, ImageEditor],
+  imports: [CurrencyPipe, MatDialogModule, MatIconModule, Table],
   selector: 'app-supply',
   styleUrl: './supply-page.css',
   templateUrl: './supply-page.html',
@@ -61,15 +77,6 @@ export class SupplyPage {
   protected readonly deleteError = signal('');
   protected readonly downloadingPdf = signal(false);
   protected readonly downloadError = signal('');
-  protected readonly showAddForm = signal(false);
-  protected readonly editingSupplyId = signal<string | null>(null);
-  protected readonly newSupply = signal({
-    productName: '',
-    productDescription: '',
-    productPrice: 0,
-    productQuantity: 1,
-    productSalePrice: 0,
-  });
 
   protected readonly nameCell = viewChild<TemplateRef<{ $implicit: Supply }>>('nameCell');
   protected readonly priceCell = viewChild<TemplateRef<{ $implicit: Supply }>>('priceCell');
@@ -89,49 +96,6 @@ export class SupplyPage {
       ? [{ id: 'actions', header: 'Actions', template: this.actionsCell() }]
       : []),
   ]);
-
-  protected readonly selectedImage = signal<File | null>(null);
-  protected readonly currentImage = signal<string | null>(null);
-  protected readonly imageChanged = signal(false);
-
-  protected onImageChange(file: File | null): void {
-    this.selectedImage.set(file);
-    this.imageChanged.set(true);
-  }
-
-  protected readonly supplyForm = form(this.newSupply, (path) => {
-    required(path.productName, {
-      message: 'Name is required',
-    });
-
-    required(path.productDescription, {
-      message: 'Description is required',
-    });
-
-    required(path.productPrice, {
-      message: 'Cost price is required',
-    });
-
-    min(path.productPrice, 0.01, {
-      message: 'Cost price must be greater than 0',
-    });
-
-    required(path.productQuantity, {
-      message: 'Quantity is required',
-    });
-
-    min(path.productQuantity, 1, {
-      message: 'Quantity must be at least 1',
-    });
-
-    required(path.productSalePrice, {
-      message: 'Sale price is required',
-    });
-
-    min(path.productSalePrice, 0.01, {
-      message: 'Sale price must be greater than 0',
-    });
-  });
 
   protected readonly canManageSupplies = computed(() => {
     const roles = this.auth.roles();
@@ -163,78 +127,135 @@ export class SupplyPage {
     });
   }
 
-  protected addSupply(event: Event): void {
-    event.preventDefault();
-
-    if (this.addingSupply()) return;
-
-    void submit(this.supplyForm, async () => {
-      const inventoryId = this.inventoryId;
-
-      if (!inventoryId || !this.canManageSupplies()) return;
-
-      this.addingSupply.set(true);
-      this.addError.set('');
-
-      const editingId = this.editingSupplyId();
-
-      try {
-        const photo: {
-          photoData?: string;
-          photoType?: string | null;
-        } = {};
-
-        if (this.imageChanged()) {
-          const file = this.selectedImage();
-
-          // Empty Base64 decodes to an empty byte array: remove the photo.
-          photo.photoData = file ? await this.readPhoto(file) : '';
-          photo.photoType = file ? file.type : null;
-        }
-
-        const supply = { ...this.newSupply(), ...photo };
-
-        const request$ = editingId
-          ? this.supplyService.updateSupply(inventoryId, editingId, supply)
-          : this.supplyService.createSupply(inventoryId, supply);
-
-        await firstValueFrom(request$);
-
-        this.cancelAddForm();
-        this.loadSupplies();
-      } catch {
-        this.addError.set(
-          editingId ? 'Unable to update supply or photo.' : 'Unable to add supply or photo.',
-        );
-      } finally {
-        this.addingSupply.set(false);
-      }
-    });
-  }
-
-  protected editSupply(supply: Supply): void {
-    this.selectedImage.set(null);
+  protected openAddDialog(): void {
     if (!this.canManageSupplies()) {
       return;
     }
-    this.selectedImage.set(null);
-    this.imageChanged.set(false);
-    this.currentImage.set(this.supplyPhotoUrl(supply));
 
-    this.editingSupplyId.set(supply.productId);
+    void this.openSupplyDialog();
+  }
+
+  protected editSupply(supply: Supply): void {
+    if (!this.canManageSupplies()) {
+      return;
+    }
+
+    void this.openSupplyDialog(supply);
+  }
+
+  private supplyFields(currentImageUrl: string | null): readonly ModalFormField[] {
+    return [
+      { key: 'productName', label: 'Name', type: 'string', required: true },
+      { key: 'productDescription', label: 'Description', type: 'string', required: true },
+      {
+        key: 'productPrice',
+        label: 'Cost Price',
+        type: 'number',
+        required: true,
+        min: 0.01,
+        step: 0.01,
+      },
+      {
+        key: 'productQuantity',
+        label: 'Quantity',
+        type: 'number',
+        required: true,
+        min: 1,
+        step: 1,
+      },
+      {
+        key: 'productSalePrice',
+        label: 'Sale Price',
+        type: 'number',
+        required: true,
+        min: 0.01,
+        step: 0.01,
+      },
+      { key: 'photo', label: 'Supply photo', type: 'image', currentImageUrl },
+    ];
+  }
+
+  // Opens the dialog for a new supply (no argument) or for editing an existing one.
+  private async openSupplyDialog(supply?: Supply): Promise<void> {
     this.addError.set('');
 
-    // reset() clears touched and dirty state from the previous edit as it loads this supply.
-    this.supplyForm().reset({
-      productName: supply.productName,
-      productDescription: supply.productDescription,
-      productPrice: supply.productPrice,
-      productQuantity: supply.productQuantity,
-      productSalePrice: supply.productSalePrice,
+    const dialogRef = this.dialog.open<
+      ModalForm<SupplyFormValue>,
+      ModalFormData<SupplyFormValue>,
+      ModalFormResult<SupplyFormValue>
+    >(ModalForm, {
+      data: {
+        title: supply ? 'Edit Supply' : 'Add Supply',
+        submitLabel: supply ? 'Save Changes' : 'Add Supply',
+        fields: this.supplyFields(supply ? this.supplyPhotoUrl(supply) : null),
+        initialValue: supply
+          ? {
+              productName: supply.productName,
+              productDescription: supply.productDescription,
+              productPrice: supply.productPrice,
+              productQuantity: supply.productQuantity,
+              productSalePrice: supply.productSalePrice,
+            }
+          : {
+              productName: '',
+              productDescription: '',
+              productPrice: 0,
+              productQuantity: 1,
+              productSalePrice: 0,
+            },
+      },
+      ariaLabel: supply ? 'Edit supply' : 'Add supply',
+      width: '560px',
+      maxWidth: '95vw',
     });
 
-    this.showAddForm.set(true);
+    // The dialog closes with undefined when the user cancels.
+    const result = await firstValueFrom(dialogRef.afterClosed());
+
+    if (!result || !this.canManageSupplies()) {
+      return;
+    }
+
+    await this.saveSupply(result.value, supply?.productId ?? null);
   }
+
+  private async saveSupply(value: SupplyFormValue, editingId: string | null): Promise<void> {
+    const inventoryId = this.inventoryId;
+
+    if (!inventoryId || this.addingSupply()) {
+      return;
+    }
+
+    this.addingSupply.set(true);
+    this.addError.set('');
+
+    try {
+      const { photo, ...fields } = value;
+      const payload: SupplyRequest = { ...fields };
+
+      // Photo fields are only sent when the user touched the picture.
+      // Empty Base64 decodes to an empty byte array: remove the photo.
+      if (photo.changed) {
+        payload.photoData = photo.file ? await this.readPhoto(photo.file) : '';
+        payload.photoType = photo.file ? photo.file.type : null;
+      }
+
+      const request$ = editingId
+        ? this.supplyService.updateSupply(inventoryId, editingId, payload)
+        : this.supplyService.createSupply(inventoryId, payload);
+
+      await firstValueFrom(request$);
+
+      this.loadSupplies();
+    } catch {
+      this.addError.set(
+        editingId ? 'Unable to update supply or photo.' : 'Unable to add supply or photo.',
+      );
+    } finally {
+      this.addingSupply.set(false);
+    }
+  }
+
   protected deleteSupply(supply: Supply): void {
     if (!this.canManageSupplies()) {
       return;
@@ -268,33 +289,6 @@ export class SupplyPage {
         },
       });
     });
-  }
-  protected openAddForm(): void {
-    if (!this.canManageSupplies()) {
-      return;
-    }
-
-    this.selectedImage.set(null);
-    this.imageChanged.set(false);
-    this.currentImage.set(null);
-
-    this.showAddForm.set(true);
-  }
-  protected cancelAddForm(): void {
-    this.selectedImage.set(null);
-    this.supplyForm().reset({
-      productName: '',
-      productDescription: '',
-      productPrice: 0,
-      productQuantity: 1,
-      productSalePrice: 0,
-    });
-    this.editingSupplyId.set(null);
-    this.addError.set('');
-    this.showAddForm.set(false);
-    this.selectedImage.set(null);
-    this.imageChanged.set(false);
-    this.currentImage.set(null);
   }
 
   protected downloadPdf(): void {
@@ -343,16 +337,19 @@ export class SupplyPage {
     return 'Unable to download PDF.';
   }
 
+  // ------ Helpers ------
   protected formatStatus(status: string): string {
     return status.replaceAll('_', ' ');
   }
 
   protected supplyPhotoUrl(supply: Supply): string | null {
-    if (!supply.photoData || !['image/jpeg', 'image/png'].includes(supply.photoType ?? '')) {
+    const type = supply.photoType ?? '';
+
+    if (!supply.photoData || !(ALLOWED_IMAGE_TYPES as readonly string[]).includes(type)) {
       return null;
     }
 
-    return `data:${supply.photoType};base64,${supply.photoData}`;
+    return `data:${type};base64,${supply.photoData}`;
   }
 
   private readPhoto(file: File): Promise<string> {
