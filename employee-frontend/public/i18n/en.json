@@ -15,6 +15,19 @@
     "forbidden.back": "Back to home",
     "notFound.title": "Page Not Found",
     "notFound.message": "The page you are looking for does not exist.",
-    "notFound.back": "Back to home"
+    "notFound.back": "Back to home",
+    "vets.eyebrow": "Veterinary team",
+    "vets.title": "Veterinarians",
+    "vets.description": "The people behind every healthy pet.",
+    "vets.directory.heading": "Get to know your veterinary team.",
+    "vets.directory.description": "Explore veterinarian profiles and discover their areas of expertise.",
+    "vets.directory.sample_preview": "Sample profiles · Design preview",
+    "vets.directory.button": "Explore directory",
+    "vets.directory.preview_note": "Veterinarian directory coming soon.",
+    "vets.working_hours.heading": "Working hours",
+    "vets.working_hours.description": "The team's weekly schedule, all in one place.",
+    "vets.coming_soon": "Coming soon",
+    "vets.specialties.heading": "Specialties",
+    "vets.specialties.description": "Discover the clinic's different areas of care."
   }
 }
