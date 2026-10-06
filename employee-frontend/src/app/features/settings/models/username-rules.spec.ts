@@ -13,9 +13,7 @@ import {
   UsernameRuleId,
 } from './username-rules';
 
-// The ticket's test table checks the FORMAT (rules 1 to 7). Reserved names (rule 8) are a
-// separate check with their own message, which is why "Admin" is a valid format here and still
-// refused by `isValidUsername` further down.
+
 const ACCEPTED_FORMATS = [
   'Admin',
   'Vet1',
@@ -28,6 +26,9 @@ const ACCEPTED_FORMATS = [
   'jo_vet',
   'marie_tremblay',
   'dr_tremblay',
+  // Accepted because the rules judge the TRIMMED name (rule 7). Only a space inside the name
+  // breaks the space rule, since trimming cannot fix that one.
+  '  Vet1  ',
 ];
 
 const REFUSED_FORMATS = [
@@ -39,9 +40,7 @@ const REFUSED_FORMATS = [
   'é_vet',
   'admin_',
   'a_',
-  '  Vet1  ',
-  // Refused since the rules were aligned on the gateway's own pattern, which allows neither
-  // a period nor a hyphen.
+
   'jean.tremblay',
   'dr-smith_2',
 ];
@@ -148,11 +147,11 @@ describe('Username rules (VETS-CPC-2090)', () => {
       expect(ruleFor('bob@x.com', 'noSpaceNoAt')).toBe(false);
     });
 
-    // Rule 5 is checked on the RAW value: a pasted name padded with invisible spaces must show
-    // up as broken instead of being silently trimmed and accepted.
-    it('breaks the space rule on a name padded with spaces', () => {
+    // Rule 5 is about a space INSIDE the name. Spaces at either end are rule 7's job, removed
+    // on blur and on submit, so they must not light up the checklist as an error.
+    it('does not break the space rule on a name merely padded with spaces', () => {
       // Assert
-      expect(ruleFor('  Vet1  ', 'noSpaceNoAt')).toBe(false);
+      expect(ruleFor('  Vet1  ', 'noSpaceNoAt')).toBe(true);
     });
 
     it('breaks the trailing rule on a trailing underscore and on two in a row', () => {
