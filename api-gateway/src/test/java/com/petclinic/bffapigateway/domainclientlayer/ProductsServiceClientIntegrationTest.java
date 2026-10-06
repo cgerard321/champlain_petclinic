@@ -346,7 +346,8 @@ class ProductsServiceClientIntegrationTest {
                 .updateProduct(productResponseDTO.getProductId(), new ProductRequestDTO());
 
         StepVerifier.create(productResponseDTOMono)
-                .expectNextMatches(product -> product.getProductId().equals("productId"))
+                .expectNextMatches(product -> product.getProductId().equals("productId")
+                        && LocalDate.of(2026, 10, 5).equals(product.getReleaseDate()))
                 .verifyComplete();
     }
 
