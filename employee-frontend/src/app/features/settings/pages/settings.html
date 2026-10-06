@@ -31,7 +31,7 @@
         @switch (activeSection()) {
           @case ('security') {
             <h2 class="settings-panel-title" i18n="@@settings.security.title">Sécurité</h2>
-            <!-- VETS-CPC-2089: left empty on purpose, filled by a follow-up ticket -->
+            <app-username-form />
           }
           @case ('display') {
             <h2 class="settings-panel-title" i18n="@@settings.display.title">Affichage</h2>
@@ -44,7 +44,14 @@
 
   <div class="settings-actions">
     <button mat-button type="button" (click)="cancel()" i18n="@@settings.cancel">Annuler</button>
-    <button mat-flat-button color="primary" type="button" (click)="save()" i18n="@@settings.save">
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      [disabled]="!canSave()"
+      (click)="save()"
+      i18n="@@settings.save"
+    >
       Enregistrer
     </button>
   </div>
