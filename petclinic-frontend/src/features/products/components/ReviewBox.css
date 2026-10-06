@@ -13,6 +13,10 @@
     resize: none;
 }
 
+.review-box-textarea.full {
+    width: 100%;
+}
+
 .reviewbox-container > button {
     width: 10vw;
 }
