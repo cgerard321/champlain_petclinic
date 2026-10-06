@@ -15,8 +15,8 @@ export async function getAllBillsStream(
     params: {
       billId,
       customerId,
-        customerFirstName,
-        customerLastName,
+      customerFirstName,
+      customerLastName,
       visitType,
       vetId,
       vetFirstName,

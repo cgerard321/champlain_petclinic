@@ -39,8 +39,8 @@ export default function useGetAllBillsStream(): {
         const streamedBills = await getAllBillsStream(
           billId,
           customerId,
-            customerFirstName,
-            customerLastName,
+          customerFirstName,
+          customerLastName,
           visitType,
           vetId,
           vetFirstName,

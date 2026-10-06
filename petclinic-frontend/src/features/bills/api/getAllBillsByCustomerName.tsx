@@ -2,8 +2,8 @@ import axiosInstance from '@/shared/api/axiosInstance';
 import { Bill } from '@/features/bills/models/Bill.ts';
 
 export async function getAllBillsByCustomerName(
-    customerFirstName: string,
-    customerLastName: string
+  customerFirstName: string,
+  customerLastName: string
 ): Promise<Bill[]> {
   const response = await axiosInstance.get(
     `/bills/customer/${customerFirstName}/${customerLastName}`,

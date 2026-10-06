@@ -884,7 +884,10 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                     >
                       <option value="">Select Customer</option>
                       {customers.map(customer => (
-                        <option key={customer.customerId} value={customer.customerId}>
+                        <option
+                          key={customer.customerId}
+                          value={customer.customerId}
+                        >
                           {customer.firstName} {customer.lastName}
                         </option>
                       ))}
@@ -1062,7 +1065,8 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                   <strong>Customer ID:</strong> {searchedBill.customerId}
                 </p>
                 <p>
-                  <strong>Customer Name:</strong> {searchedBill.customerFirstName}{' '}
+                  <strong>Customer Name:</strong>{' '}
+                  {searchedBill.customerFirstName}{' '}
                   {searchedBill.customerLastName}
                 </p>
                 <p>
