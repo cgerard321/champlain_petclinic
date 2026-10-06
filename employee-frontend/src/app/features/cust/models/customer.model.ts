@@ -15,3 +15,7 @@ export interface Pet {
   isActive: string;
   weight: string;
 }
+export interface PetType {
+  petTypeId: string;
+  name: string
+}

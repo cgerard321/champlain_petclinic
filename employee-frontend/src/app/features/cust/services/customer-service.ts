@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, filter, map } from 'rxjs';
 
 import { SseClient } from '@core/services/sse-client';
-import {Customer, Pet} from '@features/cust/models/customer.model';
+import {Customer, Pet, PetType} from '@features/cust/models/customer.model';
 
 @Injectable({ providedIn: 'root' })
 export class CustomerService {
@@ -19,6 +19,14 @@ export class CustomerService {
       { keepAlive: false }).pipe(
       filter((event): event is MessageEvent<string> => event.type !== 'error'),
       map((event) => JSON.parse(event.data) as Pet),
+    );
+  }
+  getPetTypes(): Observable<PetType> {
+    return this.sse.stream('/api/gateway/customers/petTypes', {
+      keepAlive: false,
+    }).pipe(
+      filter((event): event is MessageEvent<string> => event.type !== 'error'),
+      map((event) => JSON.parse(event.data) as PetType),
     );
   }
 }
