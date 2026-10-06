@@ -41,5 +41,10 @@ export class PetDetails implements OnInit {
       },
     });
   }
-
+  calculateAge = (birthDate: Date): number => {
+    const birth = new Date(birthDate);
+    const ageDiffMs = Date.now() - birth.getTime();
+    const ageDate = new Date(ageDiffMs);
+    return Math.abs(ageDate.getUTCFullYear() - 1970);
+  };
 }
