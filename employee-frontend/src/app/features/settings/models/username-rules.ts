@@ -55,7 +55,8 @@ export function checkUsernameRules(raw: string): UsernameRule[] {
     },
     { id: 'startsAlpha', met: /^[A-Za-z]/.test(value) },
     { id: 'charset', met: /^[A-Za-z0-9_]+$/.test(value) },
-    { id: 'noSpaceNoAt', met: !/\s/.test(raw) && !raw.includes('@') },
+
+    { id: 'noSpaceNoAt', met: !/\s/.test(value) && !value.includes('@') },
     { id: 'noTrailing', met: !value.endsWith('_') && !value.includes('__') },
   ];
 }
@@ -63,10 +64,12 @@ export function checkUsernameRules(raw: string): UsernameRule[] {
 export function matchesUsernameFormat(raw: string): boolean {
   const value = normalizeUsername(raw);
 
+  // The pattern is applied to the trimmed name too, for the same reason as the rule above: the
+  // gate has to judge the name that will actually be sent, not the one still being typed.
   return (
     value.length >= USERNAME_MIN_LENGTH &&
     value.length <= USERNAME_MAX_LENGTH &&
-    USERNAME_PATTERN.test(raw)
+    USERNAME_PATTERN.test(value)
   );
 }
 
