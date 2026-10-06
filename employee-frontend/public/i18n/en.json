@@ -14,6 +14,28 @@
       "saved": "Changes saved",
       "security": {
         "title": "Security",
+        "account": {
+          "title": "Account",
+          "username": "Username",
+          "role": "Role"
+        },
+        "username": {
+          "title": "Change your username",
+          "label": "New username",
+          "preview": "You will sign in with",
+          "sameAsCurrent": "This username is the same as the current one",
+          "reserved": "This username is reserved",
+          "suggestions": "Suggestions",
+          "saved": "Username changed",
+          "saveFailed": "This username could not be saved. It may already be taken, try another one.",
+          "rules": {
+            "length": "3 to 30 characters",
+            "startsAlpha": "Starts with a letter",
+            "charset": "Only letters without accents, numbers or underscore",
+            "noSpaceNoAt": "No spaces or \"@\"",
+            "noTrailing": "Doesn't end with an underscore, and no two in a row"
+          }
+        },
         "role": {
           "admin": "Administrator",
           "vet": "Veterinarian",
