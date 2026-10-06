@@ -1154,10 +1154,10 @@ class ApiGatewayControllerTest {
 
         BillResponseDTO bill = new BillResponseDTO();
         bill.setBillId("1");
-        bill.setOwnerFirstName(ownerFirstName);
-        bill.setOwnerLastName(ownerLastName);
+        bill.setCustomerFirstName(ownerFirstName);
+        bill.setCustomerLastName(ownerLastName);
 
-        when(billServiceClient.getBillsByOwnerName(ownerFirstName, ownerLastName))
+        when(billServiceClient.getBillsByCustomerName(ownerFirstName, ownerLastName))
                 .thenReturn(Flux.just(bill));
 
         // Act & Assert
@@ -1179,7 +1179,7 @@ class ApiGatewayControllerTest {
         bill.setAmount(new BigDecimal("499"));
         bill.setVisitType("Test");
 
-        when(billServiceClient.getBillsByOwnerId(bill.getCustomerId()))
+        when(billServiceClient.getBillsByCustomerId(bill.getCustomerId()))
                 .thenReturn(Flux.just(bill));
 
         client.get()
