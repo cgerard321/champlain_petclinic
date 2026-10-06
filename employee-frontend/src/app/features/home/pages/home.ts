@@ -3,35 +3,26 @@ import { HttpClient } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatCardModule } from '@angular/material/card';
+import { RouterLink } from '@angular/router';
 import { catchError, of } from 'rxjs';
 
-// Core Model Import
 import { CurrentUserResponse } from '@core/models/current-user-response';
 import { AuthState } from '@core/services/auth-state';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, MatCardModule],
+  imports: [CommonModule, MatCardModule, RouterLink],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
 export class Home {
   private readonly http = inject(HttpClient);
 
-  /**
-   * Restored auth state to follow application convention.
-   */
   protected readonly auth = inject(AuthState);
 
-  /**
-   * Holds error message state when current user retrieval fails.
-   */
   protected readonly errorMessage = signal<string | null>(null);
 
-  /**
-   * Reactively fetches current user credentials from gateway API.
-   */
   private readonly currentUser = toSignal(
     this.http.get<CurrentUserResponse>('/api/gateway/users/jwt').pipe(
       catchError((error) => {
@@ -43,10 +34,7 @@ export class Home {
     { initialValue: null },
   );
 
-  /**
-   * Derives employee display name, falling back to null for generic greeting.
-   */
-  protected readonly employeeName = computed(() => {
+  protected readonly employeeName = computed((): string | null => {
     const user = this.currentUser();
     if (!user) return null;
 

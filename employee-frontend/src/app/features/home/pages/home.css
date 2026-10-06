@@ -10,7 +10,22 @@
   border: 1px solid #e0eae0 !important;
   border-radius: 16px !important;
   box-shadow: 0 4px 20px rgb(27 56 43 / 5%) !important;
-  padding: 36px 40px;
+  padding: 36px 40px !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.welcome-card::after {
+  content: "";
+  position: absolute;
+  top: -74px;
+  left: 90%;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: rgb(199 217 178 / 25%);
+  pointer-events: none;
+  transition: transform 300ms ease;
 }
 
 .welcome-content {
@@ -51,6 +66,57 @@
   color: #4a6353;
   margin: 0;
   max-width: 620px;
+}
+
+.welcome-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.welcome-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 1.35rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 10px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.welcome-btn.btn-primary {
+  background-color: #1b382b;
+  color: #fff;
+  border: 1px solid #1b382b;
+  box-shadow: 0 2px 6px rgb(27 56 43 / 15%);
+}
+
+.welcome-btn.btn-primary:hover {
+  background-color: #2e523e;
+  transform: translateY(-1px);
+}
+
+.welcome-btn.btn-secondary {
+  background-color: #fff;
+  color: #1b382b;
+  border: 1px solid #dce8d2;
+}
+
+.welcome-btn.btn-secondary:hover {
+  background-color: #f7faf7;
+  border-color: #1b382b;
+  transform: translateY(-1px);
+}
+
+.btn-icon {
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+  flex-shrink: 0;
+  fill: currentcolor;
 }
 
 /* --- Clinic Logo Emblem --- */
@@ -106,6 +172,93 @@
   transform: rotate(28deg) translateY(-3px);
 }
 
+
+/* --- Quick Actions Section (Global Styles) --- */
+.quick-actions-section {
+  margin-top: 2rem;
+  width: 100%;
+}
+
+.quick-actions-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1b382b;
+  margin-bottom: 1rem;
+}
+
+/* Multi-column grid for desktop */
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+/* Individual Action Card */
+.action-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  background-color: #fff;
+  border: 1px solid #e0eae0;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.action-card::after {
+  content: "";
+  position: absolute;
+  top: -35px;
+  right: -35px;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: rgb(199 217 178 / 25%);
+  pointer-events: none;
+  transition: transform 300ms ease;
+}
+
+.action-card:hover {
+  border-color: #2e523e;
+  box-shadow: 0 4px 12px rgb(27 56 43 / 8%);
+  transform: translateY(-2px);
+}
+
+.action-card-header h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1b382b;
+  margin: 0 0 0.25rem;
+}
+
+.action-tag {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #2e523e;
+  background-color: #e5efe4;
+  padding: 2px 8px;
+  border-radius: 10px;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.action-card-desc {
+  font-size: 0.875rem;
+  color: #4a6353;
+  margin: 0 0 1rem;
+  line-height: 1.4;
+}
+
+.action-card-footer .footer-label {
+  font-size: 0.8rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
 /* --- Mobile Responsiveness --- */
 @media (width <= 768px) {
   .home-container {
@@ -126,8 +279,16 @@
     font-size: 24px;
   }
 
+  .dashboard-title {
+    font-size: 16px;
+  }
+
   .logo-wrapper {
     width: 100%;
     justify-content: center;
+  }
+
+  .quick-actions-grid {
+    grid-template-columns: 1fr; /* Stack into 1 column on mobile */
   }
 }
