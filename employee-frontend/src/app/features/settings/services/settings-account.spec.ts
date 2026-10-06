@@ -28,29 +28,66 @@ describe('SettingsAccount (VETS-CPC-2090)', () => {
       providers: [SettingsAccount, provideHttpClient(), provideHttpClientTesting()],
     });
 
-    service = TestBed.inject(SettingsAccount);
     http = TestBed.inject(HttpTestingController);
+    // Injecting the service fires the /jwt read straight away, so every test has to answer it.
+    service = TestBed.inject(SettingsAccount);
   });
 
   afterEach(() => http.verify());
 
-  describe('getCurrentUser', () => {
-    // 1. POSITIVE
-    it('reads the signed-in employee from the token endpoint', () => {
-      // Act
-      service.getCurrentUser().subscribe((user) => {
-        // Assert
-        expect(user).toEqual(CURRENT_USER);
-      });
+  function flushCurrentUser(user: CurrentUserResponse | null = CURRENT_USER): void {
+    const request = http.expectOne(`${API_BASE_URL}/jwt`);
+    expect(request.request.method).toBe('GET');
 
-      const request = http.expectOne(`${API_BASE_URL}/jwt`);
-      expect(request.request.method).toBe('GET');
-      request.flush(CURRENT_USER);
+    if (user) {
+      request.flush(user);
+    } else {
+      request.flush('no token', { status: 401, statusText: 'Unauthorized' });
+    }
+  }
+
+  describe('currentUser', () => {
+    // 1. NEGATIVE - Nothing is known before the server answers.
+    it('starts empty', () => {
+      // Assert
+      expect(service.currentUser()).toBeNull();
+      flushCurrentUser();
+    });
+
+    // 2. POSITIVE - Reads the signed-in employee from the existing v1 endpoint.
+    it('exposes the signed-in employee once the token endpoint answers', () => {
+      // Act
+      flushCurrentUser();
+
+      // Assert
+      expect(service.currentUser()).toEqual(CURRENT_USER);
+    });
+
+    // 3. POSITIVE - One read per visit, shared by the page and its sections.
+    it('reads the token endpoint only once', () => {
+      // Act
+      flushCurrentUser();
+      service.currentUser();
+      service.currentUser();
+
+      // Assert
+      http.expectNone(`${API_BASE_URL}/jwt`);
+    });
+
+    // 4. NEGATIVE - A failed read leaves the page usable instead of throwing.
+    it('stays empty when the token endpoint fails', () => {
+      // Act
+      flushCurrentUser(null);
+
+      // Assert
+      expect(service.currentUser()).toBeNull();
     });
   });
 
   describe('updateUsername', () => {
-    // 2. POSITIVE
+    beforeEach(() => flushCurrentUser());
+
+    // 5. POSITIVE - Hits the existing v1 endpoint with the user id in the path.
     it('patches the username of the given user', () => {
       // Act
       service.updateUsername(USER_ID, 'jean_dupont').subscribe((saved) => {
@@ -63,7 +100,9 @@ describe('SettingsAccount (VETS-CPC-2090)', () => {
       request.flush('jean_dupont');
     });
 
-    // 3. POSITIVE - The body is a bare string, not JSON.
+    // 6. POSITIVE - The body is a bare string, not JSON.
+    // The gateway validates the body against a regex, so braces and quotes from a JSON object
+    // would make it answer 400. This assertion is what keeps that from regressing.
     it('sends the new name as a bare string', () => {
       // Act
       service.updateUsername(USER_ID, 'jean_dupont').subscribe();
@@ -75,7 +114,7 @@ describe('SettingsAccount (VETS-CPC-2090)', () => {
       request.flush('jean_dupont');
     });
 
-    // 4. POSITIVE - Plain text in, plain text out.
+    // 7. POSITIVE - Plain text in, plain text out.
     it('declares a plain text body and reads a plain text answer', () => {
       // Act
       service.updateUsername(USER_ID, 'jean_dupont').subscribe();
@@ -87,7 +126,8 @@ describe('SettingsAccount (VETS-CPC-2090)', () => {
       request.flush('jean_dupont');
     });
 
-    // 5. NEGATIVE - A rejected name surfaces as an error the caller can handle.
+    // 8. NEGATIVE - A refused name surfaces as an error the caller can handle.
+    // A duplicate lands here as a 500, because of the UNIQUE constraint in schema-mysql.sql.
     it('fails when the server refuses the name', () => {
       // Arrange
       let status = 0;
@@ -108,7 +148,9 @@ describe('SettingsAccount (VETS-CPC-2090)', () => {
   });
 
   describe('sendPasswordResetLink', () => {
-    // 6. POSITIVE - Hits the existing v1 forgot-password endpoint.
+    beforeEach(() => flushCurrentUser());
+
+    // 9. POSITIVE - Hits the existing v1 forgot-password endpoint.
     it('posts to the forgot password endpoint', () => {
       // Act
       service.sendPasswordResetLink('jean@example.com').subscribe();
@@ -119,7 +161,9 @@ describe('SettingsAccount (VETS-CPC-2090)', () => {
       request.flush(null);
     });
 
-    // 7. POSITIVE - Carries the email and the customer portal reset link.
+    // 10. POSITIVE - Carries the email and the customer portal reset link.
+    // The link is built from `environment.customerPortal` rather than hard-coded, so it follows
+    // the build (localhost in development, the real host in production).
     it('sends the email with the customer portal reset link', () => {
       // Act
       service.sendPasswordResetLink('jean@example.com').subscribe();
