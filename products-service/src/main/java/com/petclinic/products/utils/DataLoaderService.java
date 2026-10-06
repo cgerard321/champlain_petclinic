@@ -386,10 +386,6 @@ public class DataLoaderService implements CommandLineRunner {
                 2. Days 4 to 6: go 50/50.
                 3. Day 7 onward: ++100% new food++.
 
-                Here is what a portion looks like:
-
-                ![A bowl of dry dog kibble](https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Dog_food_in_a_bowl.jpg/960px-Dog_food_in_a_bowl.jpg "One cup of kibble")
-
                 Useful links: [Dog food on Wikipedia](https://en.wikipedia.org/wiki/Dog_food "Dog food"), the [AAFCO pet food guide][aafco], and <https://www.akc.org/expert-advice/nutrition/>.
 
                 [aafco]: https://www.aafco.org/consumers/understanding-pet-food/ "AAFCO"
@@ -472,9 +468,7 @@ public class DataLoaderService implements CommandLineRunner {
 
                 Fresh Out of the Bag
 
-                This is the box right after a full change. The granules are fine and pour evenly.
-
-                ![Fresh cat litter in a litter box](https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Fresh_cat_litter.JPG/960px-Fresh_cat_litter.JPG "Fresh litter")
+                Right after a full change, the granules are fine and pour evenly.
 
                 Links
 
@@ -533,10 +527,6 @@ public class DataLoaderService implements CommandLineRunner {
 
                 > Talk to your vet before combining this with any other flea treatment.
 
-                Here is Daisy showing off her collar (with a bow, of course):
-
-                ![A beagle wearing a collar](https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Beagle_with_a_bow_on_her_collar.jpg/960px-Beagle_with_a_bow_on_her_collar.jpg "Daisy")
-
                 More on fleas: [Flea on Wikipedia](https://en.wikipedia.org/wiki/Flea)
 
                 ---
@@ -585,8 +575,6 @@ public class DataLoaderService implements CommandLineRunner {
                 > > My neighbour said they sound happier than ever.
 
                 ## Sky and Lemon
-
-                ![Two budgerigars perched in a cage](https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Pair_of_colorful_budgerigars_in_a_cage.jpg/960px-Pair_of_colorful_budgerigars_in_a_cage.jpg "Sky and Lemon")
 
                 Tip: add a natural branch like I did. They ++love++ chewing on it.
 
@@ -643,9 +631,7 @@ public class DataLoaderService implements CommandLineRunner {
                 2. Squeeze it out in a bucket of old tank water instead.
                 3. Replace the sponge ++only when it falls apart++.
 
-                Here is the sponge after one month. Still holding up well:
-
-                ![Close up of an aquarium filter sponge](https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Aquarium_Sponge_Filter_foam_1.jpg/960px-Aquarium_Sponge_Filter_foam_1.jpg "Filter sponge")
+                After one month the sponge is still holding up well.
 
                 > Pro tip: cycle your tank *before* adding fish. See the [nitrogen cycle](https://en.wikipedia.org/wiki/Fishkeeping#Nitrogen_cycle "Nitrogen cycle").
 
@@ -689,10 +675,6 @@ public class DataLoaderService implements CommandLineRunner {
                 > "Bruno moved more freely from day one."
                 >
                 > > My trainer noticed it before I even told her about the new saddle.
-
-                ## On Bruno
-
-                ![An English saddle on a brown horse](https://upload.wikimedia.org/wikipedia/commons/0/01/English_saddle.jpg "Bruno tacked up")
 
                 ## Things to Know
 
@@ -743,8 +725,6 @@ public class DataLoaderService implements CommandLineRunner {
 
                 ## Pepper's Home
 
-                ![A rabbit inside a wooden hutch](https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Rabbit_in_hutch.jpg/960px-Rabbit_in_hutch.jpg "Pepper at home")
-
                 More info on rabbit housing: [Domestic rabbit](https://en.wikipedia.org/wiki/Domestic_rabbit "Domestic rabbit on Wikipedia")
 
                 ---
@@ -784,10 +764,6 @@ public class DataLoaderService implements CommandLineRunner {
                 3. Fully submerged it, as the manual says.
 
                 None of it made a real difference.
-
-                The heater itself:
-
-                ![A submersible aquarium heater](https://upload.wikimedia.org/wikipedia/commons/8/82/Aquarium_heater1.jpg "The heater")
 
                 The Good Parts
 
