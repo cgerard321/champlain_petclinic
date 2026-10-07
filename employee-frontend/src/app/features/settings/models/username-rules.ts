@@ -36,28 +36,19 @@ export function normalizeUsername(raw: string): string {
 export function checkUsernameRules(raw: string): UsernameRule[] {
   //remove the spaces before and after the username
   const value = normalizeUsername(raw);
+  //an empty field ticks nothing
+  const filled = value.length > 0;
 
-  // An empty field has nothing to tick. Without this, `charset` would report a success on it.
-  if (value.length === 0) {
-    return [
-      { id: 'length', met: false },
-      { id: 'startsAlpha', met: false },
-      { id: 'charset', met: false },
-      { id: 'noSpaceNoAt', met: false },
-      { id: 'noTrailing', met: false },
-    ];
-  }
-//all rules of username in this return
+  //all rules of username in this return
   return [
     {
       id: 'length',
-      met: value.length >= USERNAME_MIN_LENGTH && value.length <= USERNAME_MAX_LENGTH,
+      met: filled && value.length >= USERNAME_MIN_LENGTH && value.length <= USERNAME_MAX_LENGTH,
     },
-    { id: 'startsAlpha', met: /^[A-Za-z]/.test(value) },
-    { id: 'charset', met: /^[A-Za-z0-9_]+$/.test(value) },
-
-    { id: 'noSpaceNoAt', met: !/\s/.test(value) && !value.includes('@') },
-    { id: 'noTrailing', met: !value.endsWith('_') && !value.includes('__') },
+    { id: 'startsAlpha', met: filled && /^[A-Za-z]/.test(value) },
+    { id: 'charset', met: filled && /^[A-Za-z0-9_]+$/.test(value) },
+    { id: 'noSpaceNoAt', met: filled && !/\s/.test(value) && !value.includes('@') },
+    { id: 'noTrailing', met: filled && !value.endsWith('_') && !value.includes('__') },
   ];
 }
 
@@ -86,20 +77,9 @@ export function isSameAsCurrent(raw: string, current: string): boolean {
 export function isValidUsername(raw: string): boolean {
   return matchesUsernameFormat(raw) && !isReserved(raw);
 }
-//after all the modifications we stock the information here
+//cut to the max length, never leaving a trailing underscore
 function clampUsername(value: string): string {
-  if (value.length === 0) {
-    return '';
-  }
-
-  let clamped = value.slice(0, USERNAME_MAX_LENGTH).replace(/_+$/, '');
-
-  // Rule 1: pad a too-short base so it can still be offered as a suggestion.
-  while (clamped.length > 0 && clamped.length < USERNAME_MIN_LENGTH) {
-    clamped += '1';
-  }
-
-  return clamped;
+  return value.slice(0, USERNAME_MAX_LENGTH).replace(/_+$/, '');
 }
 
 function toUsernameBase(raw: string): string {
@@ -116,29 +96,9 @@ function toUsernameBase(raw: string): string {
 
   return clampUsername(folded);
 }
-//for suggestions of username
-function uniqueValidUsernames(candidates: string[], max: number): string[] {
-  const seen = new Set<string>();
-  const kept: string[] = [];
-
-  for (const candidate of candidates) {
-    const value = clampUsername(candidate);
-
-   //if it has 1 pf these condition it is skipped as false candidate
-    if (value.length === 0 || seen.has(value) || !isValidUsername(value)) {
-      continue;
-    }
-// added as seen candidate
-    seen.add(value);
-    //added to the list
-    kept.push(value);
-
-    if (kept.length === max) {
-      break;
-    }
-  }
-
-  return kept;
+//keeps the valid candidates only, without duplicates
+function suggestFrom(candidates: string[], max: number): string[] {
+  return [...new Set(candidates.map(clampUsername))].filter(isValidUsername).slice(0, max);
 }
 //this function ngenerates the 3 suggestions
 export function suggestUsernames(typed: string, max = 3): string[] {
@@ -148,7 +108,7 @@ export function suggestUsernames(typed: string, max = 3): string[] {
     return [];
   }
 
-  return uniqueValidUsernames([base, base.replace(/_/g, ''), `${base}1`], max);
+  return suggestFrom([base, `${base}1`], max);
 }
 //generate suggestioin based on the name and full name of the employee
 export function suggestFromName(first: string, last: string, max = 3): string[] {
@@ -159,13 +119,13 @@ export function suggestFromName(first: string, last: string, max = 3): string[] 
     return [];
   }
 
-  return uniqueValidUsernames(
+  return suggestFrom(
     [
-    //name + full name
+      //name + full name
       `${firstBase}_${lastBase}`,
-      //first letter of name  + _ +Last Name
+      //first letter of name + _ + last name
       `${firstBase.charAt(0)}_${lastBase}`,
-     // name + _+ fist letter of last name
+      //name + _ + first letter of last name
       `${firstBase}_${lastBase.charAt(0)}`,
     ],
     max,

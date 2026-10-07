@@ -1,4 +1,4 @@
-import { Component, computed, DestroyRef, effect, inject, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, linkedSignal, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -56,8 +56,6 @@ export class UsernameForm implements SettingsSectionForm {
   private readonly snackBar = inject(MatSnackBar);
 
 
-  private prefilled = false;
-
   protected readonly currentUser = this.account.currentUser;
 
   // Criterion 1, read-only.
@@ -67,7 +65,12 @@ export class UsernameForm implements SettingsSectionForm {
   );
 
 
-  protected readonly draft = signal('');
+  // Takes the current name as soon as it arrives over HTTP, but keeps whatever the employee has
+  // already typed: on the first pass the previous value is empty, so the current name wins.
+  protected readonly draft = linkedSignal<string, string>({
+    source: this.current,
+    computation: (current, previous) => previous?.value || current,
+  });
 
   protected readonly hasTyped = signal(false);
 
@@ -134,22 +137,11 @@ protected readonly showSuggestions = computed(
   );
 
   constructor() {
-    effect(() => {
-      const current = this.current();
-
-      if (!this.prefilled && current.length > 0) {
-        this.prefilled = true;
-        this.draft.set(current);
-      }
-    });
-
     this.formState.register(SECTION_ID, this);
     inject(DestroyRef).onDestroy(() => this.formState.unregister(SECTION_ID));
   }
 
   protected onType(value: string): void {
-    // Also closes the prefill window: a late answer must not overwrite what is being typed.
-    this.prefilled = true;
     this.hasTyped.set(true);
     this.errorMessage.set(null);
     this.draft.set(value);
@@ -163,7 +155,6 @@ protected readonly showSuggestions = computed(
   }
 
   cancel(): void {
-    this.prefilled = true;
     this.hasTyped.set(false);
     this.errorMessage.set(null);
     this.draft.set(this.current());
