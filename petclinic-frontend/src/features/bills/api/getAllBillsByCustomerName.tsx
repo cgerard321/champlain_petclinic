@@ -1,12 +1,12 @@
 import axiosInstance from '@/shared/api/axiosInstance';
 import { Bill } from '@/features/bills/models/Bill.ts';
 
-export async function getAllBillsByOwnerName(
-  ownerFirstName: string,
-  ownerLastName: string
+export async function getAllBillsByCustomerName(
+  customerFirstName: string,
+  customerLastName: string
 ): Promise<Bill[]> {
   const response = await axiosInstance.get(
-    `/bills/owner/${ownerFirstName}/${ownerLastName}`,
+    `/bills/customer/${customerFirstName}/${customerLastName}`,
     {
       responseType: 'stream',
       useV2: false,

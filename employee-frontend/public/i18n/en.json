@@ -64,6 +64,27 @@
       "terms": "Terms of Service",
       "support": "Support",
       "copyright": "© 2026 Champlain Pet Clinic. All rights reserved."
+    },
+    "vets": {
+      "eyebrow": "Veterinary team",
+      "title": "Veterinarians",
+      "description": "The people behind every healthy pet.",
+      "directory": {
+        "heading": "Get to know your veterinary team.",
+        "description": "Explore veterinarian profiles and discover their areas of expertise.",
+        "sample_preview": "Sample profiles · Design preview",
+        "button": "Explore directory",
+        "preview_note": "Veterinarian directory coming soon."
+      },
+      "working_hours": {
+        "heading": "Working hours",
+        "description": "The team's weekly schedule, all in one place."
+      },
+      "coming_soon": "Coming soon",
+      "specialties": {
+        "heading": "Specialties",
+        "description": "Discover the clinic's different areas of care."
+      }
     }
   }
 }

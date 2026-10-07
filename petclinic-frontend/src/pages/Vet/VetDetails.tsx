@@ -599,9 +599,8 @@ export default function VetDetails(): JSX.Element {
                   <strong>Rate Date:</strong>{' '}
                   {formatRatingDate(rating.rateDate)}
                 </p>
-                {(currentCustomerName &&
-                  rating.customerName === currentCustomerName) ||
-                isAdmin ? (
+                {currentCustomerName &&
+                rating.customerName === currentCustomerName ? (
                   <button
                     onClick={handleRatingDeleted}
                     className="delete-rating-button"
@@ -616,7 +615,7 @@ export default function VetDetails(): JSX.Element {
                       fontSize: '14px',
                     }}
                   >
-                    {isAdmin ? 'Delete Rating' : 'Delete My Rating'}
+                    Delete My Rating
                   </button>
                 ) : null}
                 <hr />
