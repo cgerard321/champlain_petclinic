@@ -15,7 +15,7 @@ export const ProtectedRoute = ({
   roles,
 }: ProtectedRouteProps): JSX.Element => {
   const navigate = useNavigate();
-  const { isLoading } = useUser();
+  const { user, isLoading } = useUser();
   const hasRequiredRole = useHasRequiredRole(roles);
 
   useEffect(() => {
@@ -25,6 +25,10 @@ export const ProtectedRoute = ({
   }, [isLoading, hasRequiredRole, navigate]);
 
   useAuthRedirect();
+
+  if (isLoading) return <p>Loading...</p>;
+
+  if (!user.userId || !hasRequiredRole) return <></>;
 
   return <>{children}</>;
 };

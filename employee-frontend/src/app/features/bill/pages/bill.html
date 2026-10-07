@@ -1,1 +1,46 @@
-<app-coming-soon>
+<div class="bill-page">
+  <header class="bill-header">
+    <div class="bill-header__copy">
+      <span class="bill-eyebrow">Billing</span>
+      <h1>Bill</h1>
+      <p>Review bill records and access the billing tools from one place.</p>
+    </div>
+
+    @if (canCreateBill()) {
+      <!-- The create flow belongs to the follow-up Bill CRUD story. -->
+      <button class="bill-primary-action" type="button">Create Bill</button>
+    }
+  </header>
+
+  <section class="bill-card" aria-labelledby="bill-overview-title">
+    <div class="bill-card__header">
+      <div>
+        <h2 id="bill-overview-title">Bill overview</h2>
+        <p>The bill workspace will connect to the Bill feature stories next.</p>
+      </div>
+    </div>
+
+    <div class="bill-table-wrapper">
+      <table class="bill-table">
+        <caption class="sr-only">
+          Bill records
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Bill ID</th>
+            <th scope="col">Customer</th>
+            <th scope="col">Veterinarian</th>
+            <th scope="col">Amount</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+
+    <div class="bill-empty-state" role="status">
+      <div class="bill-empty-state__icon" aria-hidden="true">$</div>
+      <h3>No bills to display</h3>
+      <p>Bill records will appear here when the related Bill features are connected.</p>
+    </div>
+  </section>
+</div>

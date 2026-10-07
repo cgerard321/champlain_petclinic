@@ -70,6 +70,7 @@ const ProfilePage = (): JSX.Element => {
     let isMounted = true;
 
     const fetchUserData = async (): Promise<void> => {
+      if (!user.userId) return;
       try {
         const userDetailsResponse = await getUserDetails(user.userId);
         if (isMounted) {
@@ -194,6 +195,7 @@ const ProfilePage = (): JSX.Element => {
     let isMounted = true;
 
     const fetchCustomerData = async (): Promise<void> => {
+      if (!user.userId) return;
       try {
         const customerResponse = await getCustomer(user.userId);
         const customerData = customerResponse.data;
@@ -237,6 +239,7 @@ const ProfilePage = (): JSX.Element => {
               ...customerData,
               pets: petsData,
             });
+            setError(null);
           }
         } catch (petsError) {
           console.warn(
@@ -248,6 +251,7 @@ const ProfilePage = (): JSX.Element => {
               ...customerData,
               pets: [],
             });
+            setError(null);
           }
         }
       } catch (error) {
