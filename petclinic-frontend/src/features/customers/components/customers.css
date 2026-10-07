@@ -758,3 +758,20 @@
     width: auto;
     margin: 0;
 }
+.pet-inline-edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+
+.pet-inline-edit-actions .primary-button {
+  flex-basis: 100%;
+}
+
+.pet-inline-edit-actions .danger-button {
+  background-color: #dc3545;
+  border-color: #dc3545;
+  color: white;
+}
