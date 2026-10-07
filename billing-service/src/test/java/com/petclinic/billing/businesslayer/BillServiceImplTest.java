@@ -1473,6 +1473,41 @@ public void testGenerateBillPdf_BillNotFound() {
     }
 
     @Test
+    void getAllBillsByPage_ArchivedOnlyWithCustomerId_ShouldReturnMatchingBills() {
+        Bill matchingBill = buildBill();
+        matchingBill.setBillId("ARCHIVED-MATCH");
+        matchingBill.setCustomerId("CUSTOMER-1");
+        matchingBill.setArchive(true);
+        matchingBill.setBillStatus(BillStatus.PAID);
+
+        Bill otherBill = buildBill();
+        otherBill.setBillId("ARCHIVED-OTHER");
+        otherBill.setCustomerId("CUSTOMER-2");
+        otherBill.setArchive(true);
+        otherBill.setBillStatus(BillStatus.PAID);
+
+        when(repo.findAllByArchiveTrue())
+                .thenReturn(Flux.just(otherBill, matchingBill));
+        when(repo.findAllBillsByBillStatus(BillStatus.UNPAID))
+                .thenReturn(Flux.empty());
+
+        StepVerifier.create(billService.getAllBillsByPage(
+                        PageRequest.of(0, 10),
+                        null, "CUSTOMER-1", null, null,
+                        null, null, null, null,
+                        true))
+                .assertNext(dto -> {
+                    assertEquals("ARCHIVED-MATCH", dto.getBillId());
+                    assertEquals("CUSTOMER-1", dto.getCustomerId());
+                })
+                .verifyComplete();
+
+        verify(repo).findAllByArchiveTrue();
+        verify(repo, never()).findAll();
+        verify(repo, never()).findAllByArchiveFalse();
+    }
+
+    @Test
     void getBillByCustomerIdAndBillId_Positive_ShouldReturnDtoWhenCustomerMatches() {
         Bill bill = buildBill();
         bill.setBillId("B-42");
