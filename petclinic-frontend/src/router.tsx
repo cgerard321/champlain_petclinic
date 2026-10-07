@@ -32,7 +32,7 @@ import UpdateCustomerPage from '@/pages/Customer/UpdateCustomerPage.tsx';
 import VisitDetails from './features/visits/components/VisitByVisitId';
 import CustomerVisits from '@/pages/Visit/CustomerVisits.tsx';
 import VisitsCalendar from '@/pages/Visit/VisitsCalendar.tsx';
-import UpdateCustomerPetPage from '@/pages/Customer/UpdateCustomerPetPage.tsx';
+
 import AllUsers from '@/pages/Users/AllUsers.tsx';
 import ProductDetails from '@/features/products/components/ProductDetails';
 import AddPetPage from '@/pages/Customer/AddPetPage.tsx';
@@ -340,14 +340,7 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      {
-        path: AppRoutePaths.UpdatePet,
-        element: (
-          <ProtectedRoute roles={['ADMIN', 'VET', 'OWNER']}>
-            <UpdateCustomerPetPage />
-          </ProtectedRoute>
-        ),
-      },
+
       {
         path: AppRoutePaths.AddPet,
         element: (

@@ -20,8 +20,8 @@ public interface BillService {
     Flux<BillResponseDTO> getAllBillsByPage(Pageable pageable,
                                             String billId,
                                             String customerId,
-                                            String ownerFirstName,
-                                            String ownerLastName,
+                                            String customerFirstName,
+                                            String customerLastName,
                                             String visitType,
                                             String vetId,
                                             String vetFirstName,
@@ -30,8 +30,8 @@ public interface BillService {
     Flux<BillResponseDTO> getAllBillsStream(
             String billId,
             String customerId,
-            String ownerFirstName,
-            String ownerLastName,
+            String customerFirstName,
+            String customerLastName,
             String visitType,
             String vetId,
             String vetFirstName,
@@ -41,8 +41,8 @@ public interface BillService {
             Pageable pageable,
             String billId,
             String customerId,
-            String ownerFirstName,
-            String ownerLastName,
+            String customerFirstName,
+            String customerLastName,
             String visitType,
             String vetId,
             String vetFirstName,
@@ -51,8 +51,8 @@ public interface BillService {
 
     Mono<Long> getNumberOfBillsWithFilters(String billId,
                                            String customerId,
-                                           String ownerFirstName,
-                                           String ownerLastName,
+                                           String customerFirstName,
+                                           String customerLastName,
                                            String visitType,
                                            String vetId,
                                            String vetFirstName,
@@ -60,15 +60,15 @@ public interface BillService {
 
     Mono<Long> getNumberOfBillsWithFilters(String billId,
                                            String customerId,
-                                           String ownerFirstName,
-                                           String ownerLastName,
+                                           String customerFirstName,
+                                           String customerLastName,
                                            String visitType,
                                            String vetId,
                                            String vetFirstName,
                                            String vetLastName,
                                            boolean includeArchived);
 
-    Flux<BillResponseDTO> getAllBillsByOwnerName(String ownerFirstName, String ownerLastName);
+    Flux<BillResponseDTO> getAllBillsByCustomerName(String customerFirstName, String customerLastName);
 
     Flux<BillResponseDTO> getAllBillsByVetName(String vetFirstName, String vetLastName);
 

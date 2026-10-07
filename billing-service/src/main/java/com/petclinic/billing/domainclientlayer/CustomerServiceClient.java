@@ -15,9 +15,9 @@ public class CustomerServiceClient {
     private final WebClient webClient;
     private final String customerServiceClientBaseURL;
 
-    CustomerServiceClient(@Value("${app.customers-service.host}") String ownerServiceHost,
-                          @Value("${app.customers-service.port}") String ownerServicePort) {
-        customerServiceClientBaseURL = "http://" + ownerServiceHost + ":" + ownerServicePort + "/customers";
+    CustomerServiceClient(@Value("${app.customers-service.host}") String customerServiceHost,
+                          @Value("${app.customers-service.port}") String customerServicePort) {
+        customerServiceClientBaseURL = "http://" + customerServiceHost + ":" + customerServicePort + "/customers";
         this.webClient = WebClient.builder()
                 .baseUrl(customerServiceClientBaseURL).build();
     }
