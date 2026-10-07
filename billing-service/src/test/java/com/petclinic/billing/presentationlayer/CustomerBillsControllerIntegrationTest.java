@@ -74,18 +74,18 @@ public class CustomerBillsControllerIntegrationTest {
     @Test
     void getBillsByCustomerId_shouldSucceed() {
         Bill bill = buildBill();
-        bill.setOwnerFirstName("John");   // <-- set this
-        bill.setOwnerLastName("Doe");     // <-- set this
+        bill.setCustomerFirstName("John");   // <-- set this
+        bill.setCustomerLastName("Doe");     // <-- set this
 
         Publisher<Bill> setup = billRepository.deleteAll().thenMany(billRepository.save(bill));
 
-        CustomerResponseDTO owner = new CustomerResponseDTO();
-        owner.setCustomerId(bill.getCustomerId());
-        owner.setFirstName("John");
-        owner.setLastName("Doe");
+        CustomerResponseDTO customer = new CustomerResponseDTO();
+        customer.setCustomerId(bill.getCustomerId());
+        customer.setFirstName("John");
+        customer.setLastName("Doe");
 
         when(customerServiceClient.getCustomerByCustomerId(bill.getCustomerId()))
-                .thenReturn(Mono.just(owner));
+                .thenReturn(Mono.just(customer));
 
         StepVerifier.create(setup)
                 .expectNextCount(1)
@@ -234,8 +234,8 @@ public class CustomerBillsControllerIntegrationTest {
                 return Bill.builder()
                         .billId("1")
                         .customerId("custId")
-                        .ownerFirstName("John")
-                        .ownerLastName("Doe")
+                        .customerFirstName("John")
+                        .customerLastName("Doe")
                         .vetId("vetId")
                         .visitType("surgery")
                         .date(date)
@@ -338,8 +338,8 @@ public class CustomerBillsControllerIntegrationTest {
         return Bill.builder()
                 .billId("staffBill-1")
                 .customerId("custId")
-                .ownerFirstName("John")
-                .ownerLastName("Doe")
+                .customerFirstName("John")
+                .customerLastName("Doe")
                 .vetId("vetId")
                 .visitType("surgery")
                 .date(date)
