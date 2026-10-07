@@ -615,7 +615,7 @@ export default function VetDetails(): JSX.Element {
                       fontSize: '14px',
                     }}
                   >
-                    {isAdmin ? 'Delete Rating' : 'Delete My Rating'}
+                    Delete My Rating
                   </button>
                 ) : null}
                 <hr />
