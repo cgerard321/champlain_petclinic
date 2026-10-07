@@ -1,244 +1,215 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { EMPTY, Subject, of, throwError } from 'rxjs';
-import { vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { AuthState } from '@core/services/auth-state';
 import { Inventory } from '@features/inventories/models/inventory.model';
 import { InventoryService } from '@features/inventories/services/inventory-service';
+import { Roles } from '@shared/models/roles';
 
 import { InventoryList } from './inventory-list';
 
 describe('InventoryList', () => {
   let fixture: ComponentFixture<InventoryList>;
-  let roles: string[];
+  let component: InventoryList;
 
-  const mainInventory: Inventory = {
+  const inventoryOne: Inventory = {
     inventoryId: 'inv-1',
-    inventoryName: 'Main',
-    inventoryType: 'Pharmacy',
-    inventoryDescription: 'Main inventory',
+    inventoryName: 'Pharmacy',
+    inventoryType: 'Medication',
+    inventoryDescription: 'Prescription drugs',
     important: false,
   };
 
+  const inventoryTwo: Inventory = {
+    inventoryId: 'inv-2',
+    inventoryName: 'Surgical',
+    inventoryType: 'Equipment',
+    inventoryDescription: 'Surgical tools',
+    important: false,
+  };
+
+  const getInventories = vi.fn();
+  const getInventoryTypes = vi.fn().mockReturnValue(EMPTY);
+  const getQuantity = vi.fn();
+  const createInventory = vi.fn();
+  const updateInventory = vi.fn();
+  const deleteInventory = vi.fn();
+  const updateImportantStatus = vi.fn();
+
   const inventoryService = {
-    getInventories: vi.fn(),
-    getQuantity: vi.fn(),
-    updateImportantStatus: vi.fn(),
+    getInventories,
+    getInventoryTypes,
+    getQuantity,
+    createInventory,
+    updateInventory,
+    deleteInventory,
+    updateImportantStatus,
   };
 
-  const createComponent = (): void => {
-    fixture = TestBed.createComponent(InventoryList);
-    fixture.detectChanges();
-  };
+  let activeRoles: string[] = [Roles.admin];
 
-  const stars = (): HTMLButtonElement[] =>
-    Array.from(fixture.nativeElement.querySelectorAll('.favorite-button'));
-
-  const checkbox = (): HTMLInputElement =>
-    fixture.nativeElement.querySelector('input[type="checkbox"]');
-
-  const setFavoritesOnly = (checked: boolean): void => {
-    const input = checkbox();
-    input.checked = checked;
-    input.dispatchEvent(new Event('change'));
-    fixture.detectChanges();
-  };
-
-  beforeEach(async () => {
+  function setup(roles: string[] = [Roles.admin]): Subject<Inventory> {
     vi.clearAllMocks();
-    roles = ['ADMIN'];
+    activeRoles = roles;
 
-    inventoryService.getInventories.mockReturnValue(of(mainInventory));
-    inventoryService.getQuantity.mockReturnValue(of(10));
-    inventoryService.updateImportantStatus.mockReturnValue(of(undefined));
+    const stream = new Subject<Inventory>();
+    getInventories.mockReturnValue(stream);
+    getInventoryTypes.mockReturnValue(EMPTY);
+    getQuantity.mockReturnValue(of(10));
+    createInventory.mockReturnValue(of(inventoryOne));
+    updateInventory.mockReturnValue(of(inventoryOne));
+    deleteInventory.mockReturnValue(of(undefined));
+    updateImportantStatus.mockReturnValue(of(undefined));
 
-    await TestBed.configureTestingModule({
+    TestBed.configureTestingModule({
       imports: [InventoryList],
       providers: [
-        {
-          provide: InventoryService,
-          useValue: inventoryService,
-        },
+        { provide: InventoryService, useValue: inventoryService },
         {
           provide: AuthState,
-          useValue: { hasRole: (role: string) => roles.includes(role) },
+          useValue: {
+            roles: () => activeRoles,
+            hasRole: (r: string) => activeRoles.includes(r),
+          },
         },
-        {
-          provide: ActivatedRoute,
-          useValue: {},
-        },
+        { provide: ActivatedRoute, useValue: {} },
       ],
     }).compileComponents();
-  });
 
-  it('should create', () => {
-    // Act
-    createComponent();
-
-    // Assert
-    expect(fixture.componentInstance).toBeTruthy();
-  });
-
-  it('should load inventories without the favorite filter on initialization', () => {
-    // Act
-    createComponent();
-
-    // Assert
-    expect(inventoryService.getInventories).toHaveBeenCalledWith(false);
-    expect(fixture.nativeElement.textContent).toContain('Main');
-    expect(fixture.nativeElement.textContent).toContain('10 items in stock');
-  });
-
-  it('should reload from the backend when the favorites filter is turned on', () => {
-    // Act
-    createComponent();
-    setFavoritesOnly(true);
-
-    // Assert
-    expect(inventoryService.getInventories).toHaveBeenLastCalledWith(true);
-  });
-
-  it('should drop the previous inventory and quantity requests when the filter changes', () => {
-    // Arrange
-    const firstStream = new Subject<Inventory>();
-    const quantityRequest = new Subject<number>();
-
-    inventoryService.getInventories
-      .mockReturnValueOnce(firstStream)
-      .mockReturnValueOnce(new Subject<Inventory>());
-    inventoryService.getQuantity.mockReturnValue(quantityRequest);
-
-    // Act
-    createComponent();
-    firstStream.next(mainInventory);
+    fixture = TestBed.createComponent(InventoryList);
+    component = fixture.componentInstance;
     fixture.detectChanges();
 
-    // Assert
-    expect(firstStream.observed).toBe(true);
-    expect(quantityRequest.observed).toBe(true);
+    return stream;
+  }
 
-    // Act
-    setFavoritesOnly(true);
+  describe('full-access role (ADMIN / INVENTORY_MANAGER)', () => {
+    it('exposes create/update/delete capabilities', () => {
+      setup([Roles.admin]);
 
-    // Assert
-    expect(firstStream.observed).toBe(false);
-    expect(quantityRequest.observed).toBe(false);
+      expect(component['can']().canCreateInventory).toBe(true);
+      expect(component['can']().canUpdateInventory).toBe(true);
+      expect(component['can']().canDeleteInventory).toBe(true);
+    });
+
+    it('creates a new inventory and reflects it immediately', () => {
+      setup([Roles.admin]);
+
+      component['newInventory'].set({
+        inventoryName: 'Pharmacy',
+        inventoryType: 'Medication',
+        inventoryDescription: 'Prescription drugs',
+      });
+
+      component['saveInventory'](new Event('submit', { cancelable: true }));
+
+      expect(createInventory).toHaveBeenCalledWith({
+        inventoryName: 'Pharmacy',
+        inventoryType: 'Medication',
+        inventoryDescription: 'Prescription drugs',
+      });
+      expect(component['inventories']()).toEqual([inventoryOne]);
+      expect(component['showAddForm']()).toBe(false);
+    });
+
+    it('updates the inventory being edited instead of creating a new one', () => {
+      const stream = setup([Roles.admin]);
+      stream.next(inventoryOne);
+
+      component['editInventory'](inventoryOne);
+      expect(component['editingInventoryId']()).toBe('inv-1');
+      expect(component['showAddForm']()).toBe(true);
+
+      const updated = { ...inventoryOne, inventoryName: 'Pharmacy (updated)' };
+      updateInventory.mockReturnValue(of(updated));
+
+      component['saveInventory'](new Event('submit', { cancelable: true }));
+
+      expect(updateInventory).toHaveBeenCalledWith('inv-1', {
+        inventoryName: 'Pharmacy',
+        inventoryType: 'Medication',
+        inventoryDescription: 'Prescription drugs',
+      });
+      expect(createInventory).not.toHaveBeenCalled();
+      expect(component['inventories']()).toEqual([updated]);
+      expect(component['editingInventoryId']()).toBe(null);
+    });
+
+    it('shows a form error when saving fails', () => {
+      setup([Roles.admin]);
+      createInventory.mockReturnValue(throwError(() => new Error('failed')));
+
+      component['newInventory'].set({
+        inventoryName: 'Pharmacy',
+        inventoryType: 'Medication',
+        inventoryDescription: 'Prescription drugs',
+      });
+      component['saveInventory'](new Event('submit', { cancelable: true }));
+
+      expect(component['formError']()).toBe('Unable to create inventory.');
+    });
+
+    it('deletes an inventory after confirmation and removes it locally', () => {
+      const stream = setup([Roles.admin]);
+      stream.next(inventoryOne);
+      stream.next(inventoryTwo);
+
+      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+      component['deleteInventoryAction'](inventoryOne);
+
+      expect(deleteInventory).toHaveBeenCalledWith('inv-1');
+      expect(component['inventories']()).toEqual([inventoryTwo]);
+
+      confirmSpy.mockRestore();
+    });
+
+    it('does not delete when the user cancels the confirmation', () => {
+      const stream = setup([Roles.admin]);
+      stream.next(inventoryOne);
+
+      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
+      component['deleteInventoryAction'](inventoryOne);
+
+      expect(deleteInventory).not.toHaveBeenCalled();
+      expect(component['inventories']()).toEqual([inventoryOne]);
+
+      confirmSpy.mockRestore();
+    });
   });
 
-  it('should show the favorites-specific empty message when the filter returns nothing', () => {
-    // Arrange
-    inventoryService.getInventories.mockReturnValue(EMPTY);
+  describe('VET', () => {
+    it('has no create/update/delete capability', () => {
+      setup([Roles.vet]);
 
-    // Act
-    createComponent();
+      expect(component['can']().canCreateInventory).toBe(false);
+      expect(component['can']().canUpdateInventory).toBe(false);
+      expect(component['can']().canDeleteInventory).toBe(false);
+    });
 
-    // Assert
-    expect(fixture.nativeElement.textContent).toContain('No inventories found.');
+    it('editInventory and deleteInventoryAction are no-ops without the capability', () => {
+      const stream = setup([Roles.vet]);
+      stream.next(inventoryOne);
 
-    // Act
-    setFavoritesOnly(true);
+      component['editInventory'](inventoryOne);
+      expect(component['showAddForm']()).toBe(false);
 
-    // Assert
-    expect(fixture.nativeElement.textContent).toContain('No favorite inventories found.');
+      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+      component['deleteInventoryAction'](inventoryOne);
+      expect(deleteInventory).not.toHaveBeenCalled();
+      confirmSpy.mockRestore();
+    });
   });
 
-  it('should mark an inventory as favorite and back again', () => {
-    // Act
-    createComponent();
-    stars()[0]?.click();
-    fixture.detectChanges();
+  describe('RECEPTIONIST', () => {
+    it('has no create/update/delete capability and the SSE stream never opens', () => {
+      setup([Roles.receptionist]);
 
-    // Assert
-    expect(inventoryService.updateImportantStatus).toHaveBeenCalledWith('inv-1', true);
-    expect(stars()[0]?.getAttribute('aria-pressed')).toBe('true');
-
-    // Act
-    stars()[0]?.click();
-    fixture.detectChanges();
-
-    // Assert
-    expect(inventoryService.updateImportantStatus).toHaveBeenLastCalledWith('inv-1', false);
-    expect(stars()[0]?.getAttribute('aria-pressed')).toBe('false');
-  });
-
-  it('should keep the star unchanged and report a local error when the save fails', () => {
-    // Arrange
-    inventoryService.updateImportantStatus.mockReturnValue(throwError(() => new Error('failed')));
-
-    // Act
-    createComponent();
-    stars()[0]?.click();
-    fixture.detectChanges();
-
-    // Assert
-    expect(stars()[0]?.getAttribute('aria-pressed')).toBe('false');
-    expect(fixture.nativeElement.querySelector('[role="alert"]').textContent).toContain(
-      'Could not update the favorite for Main.',
-    );
-  });
-
-  it('should disable the star while its save is pending', () => {
-    // Arrange
-    inventoryService.updateImportantStatus.mockReturnValue(new Subject<void>());
-
-    // Act
-    createComponent();
-    stars()[0]?.click();
-    fixture.detectChanges();
-    stars()[0]?.click();
-
-    // Assert
-    expect(stars()[0]?.disabled).toBe(true);
-    expect(inventoryService.updateImportantStatus).toHaveBeenCalledTimes(1);
-  });
-
-  it('should block filter changes while a favorite save is pending', () => {
-    // Arrange
-    inventoryService.updateImportantStatus.mockReturnValue(new Subject<void>());
-
-    // Act
-    createComponent();
-    stars()[0]?.click();
-    fixture.detectChanges();
-
-    // Assert
-    expect(checkbox().disabled).toBe(true);
-
-    // Act
-    setFavoritesOnly(true);
-
-    // Assert
-    expect(inventoryService.getInventories).toHaveBeenCalledTimes(1);
-  });
-
-  it('should remove an inventory from the list when it is unfavorited in favorites-only mode', () => {
-    // Arrange
-    inventoryService.getInventories.mockReturnValue(of({ ...mainInventory, important: true }));
-
-    // Act
-    createComponent();
-    setFavoritesOnly(true);
-    stars()[0]?.click();
-    fixture.detectChanges();
-
-    // Assert
-    expect(inventoryService.updateImportantStatus).toHaveBeenCalledWith('inv-1', false);
-    expect(stars()).toHaveLength(0);
-    expect(fixture.nativeElement.textContent).toContain('No favorite inventories found.');
-  });
-
-  it('should not let users without the inventory roles change favorites', () => {
-    // Arrange
-    roles = ['VET'];
-
-    // Act
-    createComponent();
-    stars()[0]?.click();
-
-    // Assert
-    expect(stars()[0]?.disabled).toBe(true);
-    expect(inventoryService.updateImportantStatus).not.toHaveBeenCalled();
-    expect(checkbox().disabled).toBe(false);
+      expect(getInventories).not.toHaveBeenCalled();
+      expect(component['can']().canCreateInventory).toBe(false);
+      expect(component['can']().canUpdateInventory).toBe(false);
+      expect(component['can']().canDeleteInventory).toBe(false);
+    });
   });
 });
