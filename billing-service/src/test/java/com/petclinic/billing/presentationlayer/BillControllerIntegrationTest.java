@@ -245,7 +245,7 @@ class BillControllerIntegrationTest {
     }
 
     @Test
-    void createBill_ShouldReturnCreatedBillWithVetAndOwner() {
+    void createBill_ShouldReturnCreatedBillWithVetAndCustomer() {
         // Arrange
         BillRequestDTO billRequest = new BillRequestDTO();
         billRequest.setBillStatus(BillStatus.PAID);
@@ -255,17 +255,17 @@ class BillControllerIntegrationTest {
         billRequest.setAmount(new BigDecimal("100.00"));
         billRequest.setDueDate(LocalDate.now().plusDays(10));
 
-        // Mock Vet + Owner service responses
+        // Mock Vet + Customer service responses
         VetResponseDTO vet = new VetResponseDTO();
         vet.setFirstName("John");
         vet.setLastName("Doe");
 
-        CustomerResponseDTO owner = new CustomerResponseDTO();
-        owner.setFirstName("Alice");
-        owner.setLastName("Smith");
+        CustomerResponseDTO customer = new CustomerResponseDTO();
+        customer.setFirstName("Alice");
+        customer.setLastName("Smith");
 
         when(vetClient.getVetByVetId("vet-1")).thenReturn(Mono.just(vet));
-        when(customerServiceClient.getCustomerByCustomerId("cust-1")).thenReturn(Mono.just(owner));
+        when(customerServiceClient.getCustomerByCustomerId("cust-1")).thenReturn(Mono.just(customer));
 
         String testJwtToken = "test-jwt-token";
 
@@ -286,8 +286,8 @@ class BillControllerIntegrationTest {
                 .jsonPath("$.billId").isNotEmpty()
                 .jsonPath("$.vetFirstName").isEqualTo("John")
                 .jsonPath("$.vetLastName").isEqualTo("Doe")
-                .jsonPath("$.ownerFirstName").isEqualTo("Alice")
-                .jsonPath("$.ownerLastName").isEqualTo("Smith")
+                .jsonPath("$.customerFirstName").isEqualTo("Alice")
+                .jsonPath("$.customerLastName").isEqualTo("Smith")
                 .jsonPath("$.billStatus").isEqualTo("PAID")
                 .jsonPath("$.amount").isEqualTo(100.00)
                 .jsonPath("$.qstAmount").isEqualTo(9.98)
@@ -353,17 +353,17 @@ class BillControllerIntegrationTest {
     void getBillByCustomerId() {
 
         Bill billEntity = buildBill();
-        billEntity.setOwnerFirstName("John");
-        billEntity.setOwnerLastName("Doe");
+        billEntity.setCustomerFirstName("John");
+        billEntity.setCustomerLastName("Doe");
 
-        // Mock the OwnerClient call
-        CustomerResponseDTO owner = new CustomerResponseDTO();
-        owner.setCustomerId(billEntity.getCustomerId());
-        owner.setFirstName("John");
-        owner.setLastName("Doe");
+        // Mock the CustomerClient call
+        CustomerResponseDTO customer = new CustomerResponseDTO();
+        customer.setCustomerId(billEntity.getCustomerId());
+        customer.setFirstName("John");
+        customer.setLastName("Doe");
 
         when(customerServiceClient.getCustomerByCustomerId(billEntity.getCustomerId()))
-                .thenReturn(Mono.just(owner));
+                .thenReturn(Mono.just(customer));
 
         Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(billEntity));
 
@@ -710,7 +710,7 @@ class BillControllerIntegrationTest {
     }
 
     @Test
-    void getBillsByOwnerName() {
+    void getBillsByCustomerName() {
         Bill billEntity = buildBill();
 
         repo.save(billEntity).block();
@@ -725,8 +725,8 @@ class BillControllerIntegrationTest {
                         .amount(bill.getAmount())
                         .billStatus(bill.getBillStatus())
                         .dueDate(bill.getDueDate())
-                        .ownerFirstName("John")
-                        .ownerLastName("Doe")
+                        .customerFirstName("John")
+                        .customerLastName("Doe")
                         .vetFirstName("Jane")
                         .vetLastName("Smith")
                         .build());
