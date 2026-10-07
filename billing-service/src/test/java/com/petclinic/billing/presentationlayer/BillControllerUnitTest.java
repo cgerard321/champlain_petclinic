@@ -4,7 +4,6 @@ import com.petclinic.billing.businesslayer.BillService;
 import com.petclinic.billing.datalayer.*;
 import com.petclinic.billing.domainclientlayer.Auth.AuthServiceClient;
 import com.petclinic.billing.domainclientlayer.Auth.Rethrower;
-import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
 import com.petclinic.billing.util.InterestCalculationUtil;
 import org.junit.jupiter.api.Assertions;
@@ -210,11 +209,11 @@ class BillControllerUnitTest {
     }
 
     @Test
-    void getAllBillsByOwnerName() {
-        when(billService.getAllBillsByOwnerName(anyString(), anyString())).thenReturn(Flux.just(responseDTO));
+    void getAllBillsByCustomerName() {
+        when(billService.getAllBillsByCustomerName(anyString(), anyString())).thenReturn(Flux.just(responseDTO));
 
         client.get()
-                .uri("/bills/owner/" + responseDTO.getOwnerFirstName() + "/" + responseDTO.getOwnerLastName())
+                .uri("/bills/customer/" + responseDTO.getCustomerFirstName() + "/" + responseDTO.getCustomerLastName())
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
@@ -225,7 +224,7 @@ class BillControllerUnitTest {
                     Assertions.assertNotNull(billResponseDTOS);
                 });
 
-        Mockito.verify(billService, times(1)).getAllBillsByOwnerName(responseDTO.getOwnerFirstName(), responseDTO.getOwnerLastName());
+        Mockito.verify(billService, times(1)).getAllBillsByCustomerName(responseDTO.getCustomerFirstName(), responseDTO.getCustomerLastName());
     }
 
     @Test
@@ -364,8 +363,8 @@ class BillControllerUnitTest {
                 .interest(new BigDecimal(0.00))
                 .billStatus(BillStatus.PAID)
                 .dueDate(dueDate)
-                .ownerFirstName("John")
-                .ownerLastName("Doe")
+                .customerFirstName("John")
+                .customerLastName("Doe")
                 .vetFirstName("Jane") // Set valid vetFirstName
                 .vetLastName("Smith") // Set valid vetLastName
                 .build();
