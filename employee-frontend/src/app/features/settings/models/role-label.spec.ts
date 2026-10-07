@@ -58,7 +58,7 @@ describe('employeeRoleLabel', () => {
     expect(employeeRoleLabel([Roles.owner])).toBe('Employé');
   });
 
-//localisation
+  //localisation
   describe('once the English catalogue is installed', () => {
     beforeEach(() => loadTranslations(EN_ROLES));
 

@@ -18,7 +18,6 @@ export class Settings {
 
   protected readonly activeSection = signal<SettingsSection>('security');
 
-
   protected readonly canSave = this.formState.canSave;
 
   readonly isDirty = this.formState.isDirty;
@@ -30,7 +29,6 @@ export class Settings {
 
     this.activeSection.set(section);
   }
-
 
   protected save(): void {
     this.formState.saveAll();

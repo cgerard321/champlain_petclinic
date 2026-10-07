@@ -61,7 +61,6 @@ describe('UsernameForm (VETS-CPC-2090)', () => {
     vi.restoreAllMocks();
   });
 
-
   async function signedIn(user: CurrentUserResponse = CURRENT_USER): Promise<void> {
     http.expectOne('/api/gateway/users/jwt').flush(user);
     await fixture.whenStable();

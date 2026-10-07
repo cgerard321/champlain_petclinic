@@ -1,4 +1,3 @@
-
 export const USERNAME_MIN_LENGTH = 3;
 export const USERNAME_MAX_LENGTH = 30;
 
@@ -7,7 +6,6 @@ export const USERNAME_PATTERN = /^[A-Za-z][A-Za-z0-9]*(?:_[A-Za-z0-9]+)*$/;
 
 // Convert accented letters to plain letters (é → e)...
 const DIACRITICS = new RegExp('[\\u0300-\\u036f]', 'g');
-
 
 export const RESERVED_USERNAMES = [
   'admin',
@@ -19,7 +17,6 @@ export const RESERVED_USERNAMES = [
   'undefined',
 ] as const;
 
-
 //structure of username
 export type UsernameRuleId = 'length' | 'startsAlpha' | 'charset' | 'noSpaceNoAt' | 'noTrailing';
 
@@ -27,7 +24,6 @@ export interface UsernameRule {
   id: UsernameRuleId;
   met: boolean;
 }
-
 
 export function normalizeUsername(raw: string): string {
   return raw.trim();
@@ -85,7 +81,6 @@ function clampUsername(value: string): string {
 function toUsernameBase(raw: string): string {
   //this constant transform it into valid username
   const folded = normalizeUsername(raw)
-
     .normalize('NFD')
     .replace(DIACRITICS, '')
 

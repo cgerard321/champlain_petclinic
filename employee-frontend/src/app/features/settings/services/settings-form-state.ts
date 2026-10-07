@@ -18,11 +18,11 @@ export class SettingsFormState {
   readonly canSave = computed(() =>
     [...this.sections().values()].some((section) => section.canSave()),
   );
-//save a new section
+  //save a new section
   register(id: string, section: SettingsSectionForm): void {
     this.sections.update((current) => new Map(current).set(id, section));
   }
-//remove a section
+  //remove a section
   unregister(id: string): void {
     this.sections.update((current) => {
       const next = new Map(current);
