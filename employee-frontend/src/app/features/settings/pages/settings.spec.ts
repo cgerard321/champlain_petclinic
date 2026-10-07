@@ -236,9 +236,7 @@ describe('Settings page (VETS-CPC-2089, VETS-CPC-2090)', () => {
     await fixture.whenStable();
 
     // Assert
-    const request = http.expectOne(
-      `/api/gateway/users/${CURRENT_USER.userId}/username`,
-    );
+    const request = http.expectOne(`/api/gateway/users/${CURRENT_USER.userId}/username`);
     expect(request.request.body).toBe('jean_dupont');
     request.flush('jean_dupont');
   });

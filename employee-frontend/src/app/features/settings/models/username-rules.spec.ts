@@ -13,7 +13,6 @@ import {
   UsernameRuleId,
 } from './username-rules';
 
-
 const ACCEPTED_FORMATS = [
   'Admin',
   'Vet1',
@@ -80,7 +79,6 @@ describe('Username rules (VETS-CPC-2090)', () => {
       expect(matchesUsernameFormat(thirty)).toBe(true);
       expect(matchesUsernameFormat(`${thirty}b`)).toBe(false);
     });
-
 
     it.each([...ACCEPTED_FORMATS, ...REFUSED_FORMATS])(
       'keeps the checklist and the pattern in agreement for %s',

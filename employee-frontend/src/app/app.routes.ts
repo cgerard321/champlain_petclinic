@@ -24,7 +24,6 @@ export const routes: Routes = [
         loadChildren: () => import('@features/home/routes'),
       },
 
-
       {
         path: 'settings',
         loadChildren: () => import('@features/settings/routes'),

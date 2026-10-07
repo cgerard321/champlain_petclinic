@@ -17,12 +17,10 @@ export class SettingsAccount {
   //all calls will start by that
   private readonly baseUrl = '/api/gateway/users';
 
-
   readonly currentUser = toSignal(
     this.http.get<CurrentUserResponse>(`${this.baseUrl}/jwt`).pipe(catchError(() => of(null))),
     { initialValue: null },
   );
-
 
   updateUsername(userId: string, username: string): Observable<string> {
     return this.http.patch(`${this.baseUrl}/${userId}/username`, username, {
@@ -30,7 +28,6 @@ export class SettingsAccount {
       responseType: 'text',
     });
   }
-
 
   sendPasswordResetLink(email: string): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/forgot_password`, {

@@ -25,7 +25,6 @@ import {
 
 const SECTION_ID = 'username';
 
-
 function usernameRuleLabel(id: UsernameRuleId): string {
   switch (id) {
     case 'length':
@@ -41,7 +40,6 @@ function usernameRuleLabel(id: UsernameRuleId): string {
   }
 }
 
-
 @Component({
   selector: 'app-username-form',
   imports: [MatButtonModule, MatFormFieldModule, MatIconModule, MatInputModule],
@@ -55,15 +53,11 @@ export class UsernameForm implements SettingsSectionForm {
   private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);
 
-
   protected readonly currentUser = this.account.currentUser;
 
   // Criterion 1, read-only.
   protected readonly current = computed(() => this.currentUser()?.username ?? '');
-  protected readonly roleLabel = computed(() =>
-    employeeRoleLabel(this.currentUser()?.roles ?? []),
-  );
-
+  protected readonly roleLabel = computed(() => employeeRoleLabel(this.currentUser()?.roles ?? []));
 
   // Takes the current name as soon as it arrives over HTTP, but keeps whatever the employee has
   // already typed: on the first pass the previous value is empty, so the current name wins.
@@ -88,12 +82,9 @@ export class UsernameForm implements SettingsSectionForm {
     })),
   );
 
-
   protected readonly valid = computed(() => isValidUsername(this.draft()));
   protected readonly reserved = computed(() => isReserved(this.draft()));
-  protected readonly sameAsCurrent = computed(() =>
-    isSameAsCurrent(this.draft(), this.current()),
-  );
+  protected readonly sameAsCurrent = computed(() => isSameAsCurrent(this.draft(), this.current()));
 
   // The name as it will actually be stored, spaces removed.
   protected readonly preview = computed(() => normalizeUsername(this.draft()));
@@ -102,7 +93,6 @@ export class UsernameForm implements SettingsSectionForm {
   protected readonly suggestions = computed(() =>
     this.valid() ? [] : suggestUsernames(this.draft()),
   );
-
 
   protected readonly errorText = computed(() => {
     const failure = this.errorMessage();
@@ -123,8 +113,8 @@ export class UsernameForm implements SettingsSectionForm {
   protected readonly showPreview = computed(
     () => this.hasTyped() && this.valid() && !this.sameAsCurrent(),
   );
-// Criterion 5: shows the name the employee will use at their next login (spaces trimmed).
-protected readonly showSuggestions = computed(
+  // Criterion 5: shows the name the employee will use at their next login (spaces trimmed).
+  protected readonly showSuggestions = computed(
     () => this.hasTyped() && this.suggestions().length > 0,
   );
 
