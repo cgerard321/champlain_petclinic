@@ -55,10 +55,10 @@ public class CustomerServiceClientUnitTest {
                 .setBody(objectMapper.writeValueAsString(customerResponseDTO))
         );
 
-        Mono<CustomerResponseDTO> ownerResponseDTOMono = customerServiceClient.getCustomerByCustomerId(customerId);
+        Mono<CustomerResponseDTO> customerResponseDTOMono = customerServiceClient.getCustomerByCustomerId(customerId);
 
-        StepVerifier.create(ownerResponseDTOMono)
-                .expectNextMatches(ownerResponseDTO1 -> ownerResponseDTO1.getCustomerId().equals(customerId))
+        StepVerifier.create(customerResponseDTOMono)
+                .expectNextMatches(customerResponseDTO1 -> customerResponseDTO1.getCustomerId().equals(customerId))
                 .verifyComplete();
     }
 

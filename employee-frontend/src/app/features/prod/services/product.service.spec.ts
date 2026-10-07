@@ -96,11 +96,7 @@ describe('ProductService', () => {
 
     const request = http.expectOne('/api/gateway/products/enums');
     expect(request.request.method).toBe('GET');
-    request.flush({
-      productType: [{ productTypeId: 'type-1', typeName: 'FOOD' }],
-      productStatus: ['AVAILABLE'],
-      deliveryType: ['DELIVERY', 'PICKUP'],
-    });
+    request.flush({ productType: [], productStatus: [], deliveryType: [] });
   });
 
   it('updates a product with JSON', () => {

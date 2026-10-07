@@ -89,8 +89,8 @@ public class BillServiceImplTest {
         Bill bill1 = Bill.builder()
                 .billId("billId-1")
                 .customerId("customerId-1")
-                .ownerFirstName("ownerFirstName1")
-                .ownerLastName("ownerLastName1")
+                .customerFirstName("customerFirstName1")
+                .customerLastName("customerLastName1")
                 .visitType("operation")
                 .vetId("vetId1")
                 .vetFirstName("vetFirstName1")
@@ -106,8 +106,8 @@ public class BillServiceImplTest {
         Bill bill2 = Bill.builder()
                 .billId("billId-2")
                 .customerId("customerId-2")
-                .ownerFirstName("ownerFirstName2")
-                .ownerLastName("ownerLastName2")
+                .customerFirstName("customerFirstName2")
+                .customerLastName("customerLastName2")
                 .visitType("general")
                 .vetId("vetId2")
                 .vetFirstName("vetFirstName2")
@@ -123,8 +123,8 @@ public class BillServiceImplTest {
         Bill bill3 = Bill.builder()
                 .billId("billId-3")
                 .customerId("customerId-3")
-                .ownerFirstName("ownerFirstName3")
-                .ownerLastName("ownerLastName3")
+                .customerFirstName("customerFirstName3")
+                .customerLastName("customerLastName3")
                 .visitType("injury")
                 .vetId("vetId3")
                 .vetFirstName("vetFirstName3")
@@ -140,7 +140,7 @@ public class BillServiceImplTest {
 
         Pageable pageable = PageRequest.of(0, 2);
 
-        // Mock the repository to return a Flux of owners
+        // Mock the repository to return a Flux of customers
         when(repo.findAllByArchiveFalse()).thenReturn(Flux.just(bill1, bill2, bill3));
         when(repo.findAllBillsByBillStatus(BillStatus.UNPAID)).thenReturn(Flux.empty());
 
@@ -163,8 +163,8 @@ public class BillServiceImplTest {
         Bill bill1 = Bill.builder()
                 .billId("billId-1")
                 .customerId("customerId-1")
-                .ownerFirstName("ownerFirstName1")
-                .ownerLastName("ownerLastName1")
+                .customerFirstName("customerFirstName1")
+                .customerLastName("customerLastName1")
                 .visitType("operation")
                 .vetId("vetId1")
                 .vetFirstName("vetFirstName1")
@@ -178,8 +178,8 @@ public class BillServiceImplTest {
         Bill bill2 = Bill.builder()
                 .billId("billId-2")
                 .customerId("customerId-2")
-                .ownerFirstName("ownerFirstName2")
-                .ownerLastName("ownerLastName2")
+                .customerFirstName("customerFirstName2")
+                .customerLastName("customerLastName2")
                 .visitType("general")
                 .vetId("vetId2")
                 .vetFirstName("vetFirstName2")
@@ -193,8 +193,8 @@ public class BillServiceImplTest {
         Bill bill3 = Bill.builder()
                 .billId("billId-3")
                 .customerId("customerId-3")
-                .ownerFirstName("ownerFirstName3")
-                .ownerLastName("ownerLastName3")
+                .customerFirstName("customerFirstName3")
+                .customerLastName("customerLastName3")
                 .visitType("injury")
                 .vetId("vetId3")
                 .vetFirstName("vetFirstName3")
@@ -243,8 +243,8 @@ public class BillServiceImplTest {
 
         bill.setBillId("bill-1");
         bill.setCustomerId("customer-1");
-        bill.setOwnerFirstName("John");
-        bill.setOwnerLastName("Doe");
+        bill.setCustomerFirstName("John");
+        bill.setCustomerLastName("Doe");
         bill.setVisitType("Surgery");
         bill.setVetId("vet-1");
         bill.setVetFirstName("Alice");
@@ -314,26 +314,26 @@ public class BillServiceImplTest {
     }
 
     @Test
-    public void test_getBillsByOwnerName() {
+    public void test_getBillsByCustomerName() {
 
-        String ownerFirstName = "John";
-        String ownerLastName = "Doe";
+        String customerFirstName = "John";
+        String customerLastName = "Doe";
 
         Bill billEntity = buildBill();
-        billEntity.setOwnerFirstName(ownerFirstName);
-        billEntity.setOwnerLastName(ownerLastName);
+        billEntity.setCustomerFirstName(customerFirstName);
+        billEntity.setCustomerLastName(customerLastName);
 
         when(repo.findAll()).thenReturn(Flux.just(billEntity));
 
 
-        Flux<BillResponseDTO> result = billService.getAllBillsByOwnerName(ownerFirstName, ownerLastName);
+        Flux<BillResponseDTO> result = billService.getAllBillsByCustomerName(customerFirstName, customerLastName);
 
 
         StepVerifier.create(result)
                 .consumeNextWith(bill -> {
                     assertNotNull(bill);
-                    assertEquals(ownerFirstName, bill.getOwnerFirstName());
-                    assertEquals(ownerLastName, bill.getOwnerLastName());
+                    assertEquals(customerFirstName, bill.getCustomerFirstName());
+                    assertEquals(customerLastName, bill.getCustomerLastName());
                 })
                 .verifyComplete();
     }
@@ -386,22 +386,22 @@ public class BillServiceImplTest {
     }
 
     @Test
-    public void test_getBillsByOwnerName_notFound() {
+    public void test_getBillsByCustomerName_notFound() {
 
-        String ownerFirstName = "Nonexistent";
-        String ownerLastName = "Person";
+        String customerFirstName = "Nonexistent";
+        String customerLastName = "Person";
 
         when(repo.findAll()).thenReturn(Flux.empty());
 
 
-        Flux<BillResponseDTO> result = billService.getAllBillsByOwnerName(ownerFirstName, ownerLastName);
+        Flux<BillResponseDTO> result = billService.getAllBillsByCustomerName(customerFirstName, customerLastName);
 
 
         StepVerifier.create(result)
                 .consumeErrorWith(error -> {
                     assertNotNull(error);
                     assertTrue(error instanceof NotFoundException);
-                    assertEquals("No bills found for the given owner name", error.getMessage());
+                    assertEquals("No bills found for the given customer name", error.getMessage());
                 })
                 .verify();
     }
@@ -453,7 +453,7 @@ public class BillServiceImplTest {
         BillRequestDTO billDTO = new BillRequestDTO();
         billDTO.setBillStatus(BillStatus.PAID);
         billDTO.setVetId("vet-123");
-        billDTO.setCustomerId("owner-456");
+        billDTO.setCustomerId("customer-456");
         billDTO.setDueDate(LocalDate.now().plusDays(30));
         billDTO.setAmount(new BigDecimal(100));
 
@@ -464,17 +464,17 @@ public class BillServiceImplTest {
         Mockito.when(vetClient.getVetByVetId("vet-123"))
                 .thenReturn(Mono.just(vetResponse));
 
-        // Mock OwnerClient response
-        CustomerResponseDTO ownerResponse = new CustomerResponseDTO();
-        ownerResponse.setFirstName("Alice");
-        ownerResponse.setLastName("Smith");
-        Mockito.when(customerServiceClient.getCustomerByCustomerId("owner-456"))
-                .thenReturn(Mono.just(ownerResponse));
+        // Mock CustomerClient response
+        CustomerResponseDTO customerResponse = new CustomerResponseDTO();
+        customerResponse.setFirstName("Alice");
+        customerResponse.setLastName("Smith");
+        Mockito.when(customerServiceClient.getCustomerByCustomerId("customer-456"))
+                .thenReturn(Mono.just(customerResponse));
 
         // Mock AuthServiceClient response
         UserDetails userDetails = new UserDetails();
-        userDetails.setUserId("owner-456");
-        Mockito.when(authClient.getUserById("owner-456", "JWTToken"))
+        userDetails.setUserId("customer-456");
+        Mockito.when(authClient.getUserById("customer-456", "JWTToken"))
                 .thenReturn(Mono.just(userDetails)); // Ensure a non-null Mono is returned
 
         // Mock repository insert
@@ -492,7 +492,7 @@ public class BillServiceImplTest {
                 .expectNextMatches(response ->
                         response.getBillId() != null &&
                                 response.getVetFirstName().equals("John") &&
-                                response.getOwnerFirstName().equals("Alice") &&
+                                response.getCustomerFirstName().equals("Alice") &&
                                 response.getQstAmount().equals(new BigDecimal("9.98")) &&
                                 response.getGstAmount().equals(new BigDecimal("5.00"))
                 )
@@ -500,7 +500,7 @@ public class BillServiceImplTest {
 
         // Verify mock interactions
         verify(vetClient).getVetByVetId("vet-123");
-        verify(customerServiceClient).getCustomerByCustomerId("owner-456");
+        verify(customerServiceClient).getCustomerByCustomerId("customer-456");
     }
 
     @Test
@@ -509,7 +509,7 @@ public class BillServiceImplTest {
         BillRequestDTO billDTO = new BillRequestDTO();
         billDTO.setBillStatus(BillStatus.PAID);
         billDTO.setVetId("vet-123");
-        billDTO.setCustomerId("owner-456");
+        billDTO.setCustomerId("customer-456");
         billDTO.setDueDate(LocalDate.now().plusDays(30));
         billDTO.setAmount(new BigDecimal("100"));
 
@@ -520,21 +520,21 @@ public class BillServiceImplTest {
         Mockito.when(vetClient.getVetByVetId("vet-123"))
                 .thenReturn(Mono.just(vetResponse));
 
-        // Mock OwnerClient response
-        CustomerResponseDTO ownerResponse = new CustomerResponseDTO();
-        ownerResponse.setFirstName("Alice");
-        ownerResponse.setLastName("Smith");
-        Mockito.when(customerServiceClient.getCustomerByCustomerId("owner-456"))
-                .thenReturn(Mono.just(ownerResponse));
+        // Mock CustomerClient response
+        CustomerResponseDTO customerResponse = new CustomerResponseDTO();
+        customerResponse.setFirstName("Alice");
+        customerResponse.setLastName("Smith");
+        Mockito.when(customerServiceClient.getCustomerByCustomerId("customer-456"))
+                .thenReturn(Mono.just(customerResponse));
 
         // Mock AuthServiceClient response
         UserDetails userDetails = UserDetails.builder()
-                .userId("owner-456")
+                .userId("customer-456")
                 .username("alice.smith")
                 .email("alice.smith@example.com")
                 .roles(Collections.emptySet())
                 .build();
-        Mockito.when(authClient.getUserById("owner-456", "JWTToken"))
+        Mockito.when(authClient.getUserById("customer-456", "JWTToken"))
                 .thenReturn(Mono.just(userDetails));
 
         Bill existingBill = new Bill();
@@ -556,7 +556,7 @@ public class BillServiceImplTest {
                         response.getBillId() != null &&
                                 response.getBillId().length() == 10 &&
                                 response.getVetFirstName().equals("John") &&
-                                response.getOwnerFirstName().equals("Alice") &&
+                                response.getCustomerFirstName().equals("Alice") &&
                                 response.getBillStatus().equals(BillStatus.PAID) &&
                                 response.getDueDate() != null &&
                                 response.getQstAmount().equals(new BigDecimal("9.98")) &&
@@ -574,7 +574,7 @@ public class BillServiceImplTest {
         BillRequestDTO billDTO = new BillRequestDTO();
         billDTO.setBillStatus(BillStatus.PAID);
         billDTO.setVetId("vet-123");
-        billDTO.setCustomerId("owner-456");
+        billDTO.setCustomerId("customer-456");
         billDTO.setDueDate(LocalDate.now().plusDays(30));
 
         // Mock VetClient response
@@ -584,12 +584,12 @@ public class BillServiceImplTest {
         Mockito.when(vetClient.getVetByVetId("vet-123"))
                 .thenReturn(Mono.just(vetResponse));
 
-        // Mock OwnerClient response
-        CustomerResponseDTO ownerResponse = new CustomerResponseDTO();
-        ownerResponse.setFirstName("Alice");
-        ownerResponse.setLastName("Smith");
-        Mockito.when(customerServiceClient.getCustomerByCustomerId("owner-456"))
-                .thenReturn(Mono.just(ownerResponse));
+        // Mock CustomerClient response
+        CustomerResponseDTO customerResponse = new CustomerResponseDTO();
+        customerResponse.setFirstName("Alice");
+        customerResponse.setLastName("Smith");
+        Mockito.when(customerServiceClient.getCustomerByCustomerId("customer-456"))
+                .thenReturn(Mono.just(customerResponse));
 
         Bill existingBill = new Bill();
         existingBill.setBillId("duplicateID");
@@ -613,7 +613,7 @@ public class BillServiceImplTest {
         // Arrange
         BillRequestDTO billDTO = new BillRequestDTO();
         billDTO.setVetId("vet-123");
-        billDTO.setCustomerId("owner-456");
+        billDTO.setCustomerId("customer-456");
         billDTO.setDueDate(LocalDate.now().plusDays(30));
 
         // Act + Assert
@@ -631,7 +631,7 @@ public class BillServiceImplTest {
     void createBill_missingVetId_shouldReturnError() {
         // Arrange
         BillRequestDTO billDTO = new BillRequestDTO();
-        billDTO.setCustomerId("owner-456");
+        billDTO.setCustomerId("customer-456");
         billDTO.setBillStatus(BillStatus.PAID);
         billDTO.setDueDate(LocalDate.now().plusDays(30));
 
@@ -721,17 +721,17 @@ public class BillServiceImplTest {
     public void test_getBillByCustomerId() {
         // Arrange
         Bill billEntity = buildBill();
-        billEntity.setOwnerFirstName("John");
-        billEntity.setOwnerLastName("Doe");
+        billEntity.setCustomerFirstName("John");
+        billEntity.setCustomerLastName("Doe");
 
         String CUSTOMER_ID = billEntity.getCustomerId();
 
-        CustomerResponseDTO mockOwner = new CustomerResponseDTO();
-        mockOwner.setCustomerId(CUSTOMER_ID);
-        mockOwner.setFirstName("John");
-        mockOwner.setLastName("Doe");
+        CustomerResponseDTO mockCustomer = new CustomerResponseDTO();
+        mockCustomer.setCustomerId(CUSTOMER_ID);
+        mockCustomer.setFirstName("John");
+        mockCustomer.setLastName("Doe");
 
-        when(customerServiceClient.getCustomerByCustomerId(CUSTOMER_ID)).thenReturn(Mono.just(mockOwner));
+        when(customerServiceClient.getCustomerByCustomerId(CUSTOMER_ID)).thenReturn(Mono.just(mockCustomer));
         when(repo.findByCustomerId(CUSTOMER_ID)).thenReturn(Flux.just(billEntity));
 
         // Act
@@ -849,7 +849,7 @@ public class BillServiceImplTest {
         String nonExistentCustomerId = "nonExistentId";
 
         when(customerServiceClient.getCustomerByCustomerId(nonExistentCustomerId))
-                .thenReturn(Mono.empty()); // Simulate missing owner
+                .thenReturn(Mono.empty()); // Simulate missing customer
 
         // Act
         Flux<BillResponseDTO> result = billService.getBillsByCustomerId(nonExistentCustomerId);
@@ -871,8 +871,8 @@ public class BillServiceImplTest {
     Bill mockBill = Bill.builder()
             .billId("billId-1")
             .customerId("customerId-1")
-            .ownerFirstName("John")
-            .ownerLastName("Doe")
+            .customerFirstName("John")
+            .customerLastName("Doe")
             .visitType("General")
             .vetId("vetId-1")
             .amount(new BigDecimal(100.0))
@@ -1340,8 +1340,8 @@ public void testGenerateBillPdf_BillNotFound() {
         Bill b1 = buildBill();
         b1.setBillId("B-1");
         b1.setCustomerId("C-1");
-        b1.setOwnerFirstName("Alice");
-        b1.setOwnerLastName("Smith");
+        b1.setCustomerFirstName("Alice");
+        b1.setCustomerLastName("Smith");
         b1.setVisitType("ANNUAL");
         b1.setVetId("V-1");
         b1.setVetFirstName("Jenny");
@@ -1350,8 +1350,8 @@ public void testGenerateBillPdf_BillNotFound() {
         Bill b2 = buildBill();
         b2.setBillId("B-2");
         b2.setCustomerId("C-1");
-        b2.setOwnerFirstName("Alice");
-        b2.setOwnerLastName("Smith");
+        b2.setCustomerFirstName("Alice");
+        b2.setCustomerLastName("Smith");
         b2.setVisitType("ANNUAL");
         b2.setVetId("V-1");
         b2.setVetFirstName("Jenny");
@@ -1360,8 +1360,8 @@ public void testGenerateBillPdf_BillNotFound() {
         Bill b3 = buildBill();
         b3.setBillId("B-3");
         b3.setCustomerId("C-2");
-        b3.setOwnerFirstName("Bob");
-        b3.setOwnerLastName("Jones");
+        b3.setCustomerFirstName("Bob");
+        b3.setCustomerLastName("Jones");
         b3.setVisitType("SURGERY");
         b3.setVetId("V-2");
         b3.setVetFirstName("Tom");
@@ -1390,8 +1390,8 @@ public void testGenerateBillPdf_BillNotFound() {
         Bill b1 = buildBill();
         b1.setBillId("B-10");
         b1.setCustomerId("C-10");
-        b1.setOwnerFirstName("Alice");
-        b1.setOwnerLastName("Smith");
+        b1.setCustomerFirstName("Alice");
+        b1.setCustomerLastName("Smith");
         b1.setVisitType("ANNUAL");
         b1.setVetId("V-10");
         b1.setVetFirstName("Jenny");
@@ -1400,8 +1400,8 @@ public void testGenerateBillPdf_BillNotFound() {
         Bill b2 = buildBill();
         b2.setBillId("B-11");
         b2.setCustomerId("C-11");
-        b2.setOwnerFirstName("Bob");
-        b2.setOwnerLastName("Jones");
+        b2.setCustomerFirstName("Bob");
+        b2.setCustomerLastName("Jones");
         b2.setVisitType("SURGERY");
         b2.setVetId("V-11");
         b2.setVetFirstName("Tom");
@@ -1935,8 +1935,8 @@ public void testGenerateBillPdf_BillNotFound() {
         Bill overdueBill = Bill.builder()
             .billId("overdue-test-id")
             .customerId("customer-1")
-            .ownerFirstName("John")
-            .ownerLastName("Doe")
+            .customerFirstName("John")
+            .customerLastName("Doe")
             .visitType("Surgery")
             .vetId("vet-1")
             .vetFirstName("Dr. Jane")
@@ -1956,8 +1956,8 @@ public void testGenerateBillPdf_BillNotFound() {
         
         assertEquals(overdueBill.getBillId(), dto.getBillId());
         assertEquals(overdueBill.getCustomerId(), dto.getCustomerId());
-        assertEquals(overdueBill.getOwnerFirstName(), dto.getOwnerFirstName());
-        assertEquals(overdueBill.getOwnerLastName(), dto.getOwnerLastName());
+        assertEquals(overdueBill.getCustomerFirstName(), dto.getCustomerFirstName());
+        assertEquals(overdueBill.getCustomerLastName(), dto.getCustomerLastName());
         assertEquals(overdueBill.getVisitType(), dto.getVisitType());
         assertEquals(overdueBill.getVetId(), dto.getVetId());
         assertEquals(overdueBill.getVetFirstName(), dto.getVetFirstName());
@@ -1990,8 +1990,8 @@ public void testGenerateBillPdf_BillNotFound() {
         Bill paidBill = Bill.builder()
             .billId("paid-test-id")
             .customerId("customer-2")
-            .ownerFirstName("Alice")
-            .ownerLastName("Johnson")
+            .customerFirstName("Alice")
+            .customerLastName("Johnson")
             .visitType("Checkup")
             .vetId("vet-2")
             .vetFirstName("Dr. Bob")
@@ -2482,8 +2482,8 @@ public void testGenerateBillPdf_BillNotFound() {
         Bill mockBill = Bill.builder()
                 .billId("billId-2")
                 .customerId("customerId-2")
-                .ownerFirstName("Jane")
-                .ownerLastName("Smith")
+                .customerFirstName("Jane")
+                .customerLastName("Smith")
                 .visitType("Surgery")
                 .vetId("vetId-2")
                 .amount(new BigDecimal("250.0"))
@@ -2529,7 +2529,7 @@ public void testGenerateBillPdf_BillNotFound() {
         BillRequestDTO billDTO = new BillRequestDTO();
         billDTO.setBillStatus(BillStatus.PAID);
         billDTO.setVetId("vet-123");
-        billDTO.setCustomerId("owner-456");
+        billDTO.setCustomerId("customer-456");
         billDTO.setAmount(new BigDecimal("100.00")); // required field per controller
         billDTO.setDate(LocalDate.now());
         billDTO.setDueDate(LocalDate.now().plusDays(30));
@@ -2540,19 +2540,19 @@ public void testGenerateBillPdf_BillNotFound() {
         vetResponse.setLastName("Doe");
         when(vetClient.getVetByVetId("vet-123")).thenReturn(Mono.just(vetResponse));
 
-        // Mock owner info
-        CustomerResponseDTO ownerResponse = new CustomerResponseDTO();
-        ownerResponse.setFirstName("Alice");
-        ownerResponse.setLastName("Smith");
-        when(customerServiceClient.getCustomerByCustomerId("owner-456")).thenReturn(Mono.just(ownerResponse));
+        // Mock customer info
+        CustomerResponseDTO customerResponse = new CustomerResponseDTO();
+        customerResponse.setFirstName("Alice");
+        customerResponse.setLastName("Smith");
+        when(customerServiceClient.getCustomerByCustomerId("customer-456")).thenReturn(Mono.just(customerResponse));
 
         // Mock user details (correct order for parameters)
         UserDetails userDetails = UserDetails.builder()
                 .email("test@example.com")
                 .username("Alice Smith")
-                .userId("owner-456")
+                .userId("customer-456")
                 .build();
-        when(authClient.getUserById(eq("jwtToken"), eq("owner-456")))
+        when(authClient.getUserById(eq("jwtToken"), eq("customer-456")))
                 .thenReturn(Mono.just(userDetails));
 
         // Mock repo behavior
@@ -2560,8 +2560,8 @@ public void testGenerateBillPdf_BillNotFound() {
         billEntity.setBillId("generated-id");
         billEntity.setVetFirstName("John");
         billEntity.setVetLastName("Doe");
-        billEntity.setOwnerFirstName("Alice");
-        billEntity.setOwnerLastName("Smith");
+        billEntity.setCustomerFirstName("Alice");
+        billEntity.setCustomerLastName("Smith");
         billEntity.setAmount(new BigDecimal("100.00"));
         billEntity.setInterest(BigDecimal.ZERO);
         billEntity.setTaxedAmount(BigDecimal.ZERO);
@@ -2582,7 +2582,7 @@ public void testGenerateBillPdf_BillNotFound() {
                 .expectNextMatches(response ->
                         response.getBillId().equals("generated-id") &&
                                 response.getVetFirstName().equals("John") &&
-                                response.getOwnerFirstName().equals("Alice") &&
+                                response.getCustomerFirstName().equals("Alice") &&
                                 response.getBillStatus().equals(BillStatus.PAID) &&
                                 response.getDueDate() != null
                 )

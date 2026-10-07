@@ -77,6 +77,16 @@ export class SupplyPage {
   protected readonly deleteError = signal('');
   protected readonly downloadingPdf = signal(false);
   protected readonly downloadError = signal('');
+  protected readonly showAddForm = signal(false);
+  protected readonly editingSupplyId = signal<string | null>(null);
+  protected readonly consumingSupplyId = signal<string | null>(null);
+  protected readonly newSupply = signal({
+    productName: '',
+    productDescription: '',
+    productPrice: 0,
+    productQuantity: 1,
+    productSalePrice: 0,
+  });
 
   protected readonly nameCell = viewChild<TemplateRef<{ $implicit: Supply }>>('nameCell');
   protected readonly priceCell = viewChild<TemplateRef<{ $implicit: Supply }>>('priceCell');
@@ -92,7 +102,7 @@ export class SupplyPage {
     { id: 'price', header: 'Cost Price', template: this.priceCell() },
     { id: 'quantity', header: 'Quantity', value: (supply) => supply.productQuantity },
     { id: 'status', header: 'Status', template: this.statusCell() },
-    ...(this.canManageSupplies()
+    ...(this.canManageSupplies() || this.canConsumeSupplies()
       ? [{ id: 'actions', header: 'Actions', template: this.actionsCell() }]
       : []),
   ]);
@@ -100,6 +110,11 @@ export class SupplyPage {
   protected readonly canManageSupplies = computed(() => {
     const roles = this.auth.roles();
     return roles.includes(Roles.admin) || roles.includes(Roles.inventoryManager);
+  });
+
+  protected readonly canConsumeSupplies = computed(() => {
+    const roles = this.auth.roles();
+    return roles.includes(Roles.vet);
   });
 
   constructor() {

@@ -13,7 +13,7 @@ import { getPetTypeName } from '../utils/petTypeMapping';
 import './CustomerDetails.css';
 import { deleteCustomer } from '../api/deleteCustomer.ts';
 import { IsVet } from '@/context/UserContext';
-import EditPetModal from './EditPetModal';
+import UpdatePetForm from './UpdatePetForm';
 import AddPetModal from './AddPetModal';
 import defaultProfile from '@/assets/Customers/defaultProfilePicture.png';
 
@@ -32,7 +32,6 @@ const CustomerDetails: FC = () => {
   const [bills, setBills] = useState<Bill[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isAddPetModalOpen, setIsAddPetModalOpen] = useState<boolean>(false);
-  const [isEditPetModalOpen, setIsEditPetModalOpen] = useState<boolean>(false);
   const [selectedPetId, setSelectedPetId] = useState<string>('');
 
   useEffect(() => {
@@ -232,11 +231,9 @@ const CustomerDetails: FC = () => {
 
   const handleEditPetClick = (petId: string): void => {
     setSelectedPetId(petId);
-    setIsEditPetModalOpen(true);
   };
 
-  const handleCloseEditPetModal = (): void => {
-    setIsEditPetModalOpen(false);
+  const handleCloseEditPetForm = (): void => {
     setSelectedPetId('');
   };
 
@@ -341,6 +338,7 @@ const CustomerDetails: FC = () => {
   };
 
   const handlePetUpdated = (): void => {
+    setSelectedPetId('');
     fetchCustomerDetail();
   };
 
@@ -437,6 +435,17 @@ const CustomerDetails: FC = () => {
                         {t('customerDetails.pets.editPet')}
                       </button>
                     </div>
+
+                    {selectedPetId === pet.petId && (
+                      <UpdatePetForm
+                        pet={pet}
+                        customerId={customerId || ''}
+                        petTypes={petTypes}
+                        onCancel={handleCloseEditPetForm}
+                        onPetUpdated={handlePetUpdated}
+                        onPetDeleted={handlePetDeleted}
+                      />
+                    )}
                   </div>
                 </li>
               ))}
@@ -505,15 +514,6 @@ const CustomerDetails: FC = () => {
         isOpen={isAddPetModalOpen}
         onClose={handleCloseAddPetModal}
         onPetAdded={handlePetAdded}
-      />
-
-      <EditPetModal
-        isOpen={isEditPetModalOpen}
-        onClose={handleCloseEditPetModal}
-        petId={selectedPetId}
-        customerId={customerId || ''}
-        onPetUpdated={handlePetUpdated}
-        onPetDeleted={handlePetDeleted}
       />
     </div>
   );
