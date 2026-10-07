@@ -1,6 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, DestroyRef, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormField, form, required, submit } from '@angular/forms/signals';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -12,13 +13,15 @@ import { AuthState } from '@core/services/auth-state';
 import {
   Inventory,
   InventoryFilters,
+  InventoryRequest,
   InventoryType,
 } from '@features/inventories/models/inventory.model';
 import { InventoryService } from '@features/inventories/services/inventory-service';
+import { getInventoryPermissions } from '@shared/models/inventory-permissions';
 import { Roles } from '@shared/models/roles';
 
 @Component({
-  imports: [RouterLink, MatCardModule, MatIconModule, MatProgressSpinnerModule],
+  imports: [RouterLink, MatCardModule, MatIconModule, MatProgressSpinnerModule, FormField],
   selector: 'app-inventory-list',
   styleUrls: ['../../inventories.css', './inventory-list.css'],
   templateUrl: './inventory-list.html',
@@ -32,6 +35,12 @@ export class InventoryList implements OnInit, OnDestroy {
   private inventoryTypesSubscription?: Subscription;
   private readonly quantitySubscriptions = new Set<Subscription>();
   private filterTimer?: ReturnType<typeof setTimeout>;
+
+  protected readonly can = computed(() => getInventoryPermissions(this.auth.roles()));
+
+  protected readonly canManageFavorites = computed(
+    () => this.auth.hasRole(Roles.admin) || this.auth.hasRole(Roles.inventoryManager),
+  );
 
   protected readonly currentPage = signal(0);
   protected readonly pageSize = 8;
@@ -53,13 +62,31 @@ export class InventoryList implements OnInit, OnDestroy {
     importantOnly: false,
   });
 
-  protected readonly canManageFavorites = computed(
-    () => this.auth.hasRole(Roles.admin) || this.auth.hasRole(Roles.inventoryManager),
-  );
-
   protected readonly isSavingAnyFavorite = computed(() =>
     Object.values(this.savingFavorites()).some(Boolean),
   );
+
+  protected get inventoryTypesDropdown(): string[] {
+    return this.inventoryTypes().map((t) => t.type);
+  }
+
+  protected readonly showAddForm = signal(false);
+  protected readonly editingInventoryId = signal<string | null>(null);
+  protected readonly savingInventory = signal(false);
+  protected readonly formError = signal<string | null>(null);
+  protected readonly deleteError = signal<string | null>(null);
+
+  protected readonly newInventory = signal<InventoryRequest>({
+    inventoryName: '',
+    inventoryType: '',
+    inventoryDescription: '',
+  });
+
+  protected readonly inventoryForm = form(this.newInventory, (path) => {
+    required(path.inventoryName, { message: 'Name is required' });
+    required(path.inventoryType, { message: 'Type is required' });
+    required(path.inventoryDescription, { message: 'Description is required' });
+  });
 
   ngOnInit(): void {
     this.loadInventories();
@@ -187,6 +214,81 @@ export class InventoryList implements OnInit, OnDestroy {
       });
   }
 
+  protected toggleAddForm(): void {
+    this.showAddForm.update((visible) => !visible);
+    if (!this.showAddForm()) {
+      this.editingInventoryId.set(null);
+      this.formError.set(null);
+    }
+  }
+
+  protected editInventory(inventory: Inventory): void {
+    if (!this.can().canUpdateInventory) return;
+
+    this.editingInventoryId.set(inventory.inventoryId);
+    this.newInventory.set({
+      inventoryName: inventory.inventoryName,
+      inventoryType: inventory.inventoryType,
+      inventoryDescription: inventory.inventoryDescription,
+    });
+    this.showAddForm.set(true);
+  }
+
+  protected saveInventory(event: Event): void {
+    event.preventDefault();
+
+    void submit(this.inventoryForm, async () => {
+      this.savingInventory.set(true);
+      this.formError.set(null);
+
+      const editingId = this.editingInventoryId();
+      const body = this.newInventory();
+
+      const request$ = editingId
+        ? this.inventoryService.updateInventory(editingId, body)
+        : this.inventoryService.createInventory(body);
+
+      request$.subscribe({
+        next: () => {
+          this.newInventory.set({
+            inventoryName: '',
+            inventoryType: '',
+            inventoryDescription: '',
+          });
+          this.editingInventoryId.set(null);
+          this.showAddForm.set(false);
+          this.savingInventory.set(false);
+
+          this.loadInventories(this.currentPage());
+        },
+        error: () => {
+          this.formError.set(
+            editingId ? 'Unable to update inventory.' : 'Unable to create inventory.',
+          );
+          this.savingInventory.set(false);
+        },
+      });
+    });
+  }
+
+  protected deleteInventoryAction(inventory: Inventory): void {
+    if (!this.can().canDeleteInventory) return;
+
+    const confirmed = window.confirm(`Delete ${inventory.inventoryName}?`);
+    if (!confirmed) return;
+
+    this.inventoryService.deleteInventory(inventory.inventoryId).subscribe({
+      next: () => {
+        this.inventories.update((current) =>
+          current.filter((inv) => inv.inventoryId !== inventory.inventoryId),
+        );
+      },
+      error: () => {
+        this.deleteError.set('Unable to delete inventory.');
+      },
+    });
+  }
+
   private loadInventoryTypes(): void {
     this.inventoryTypesLoading.set(true);
     this.inventoryTypesError.set(null);
@@ -231,6 +333,11 @@ export class InventoryList implements OnInit, OnDestroy {
   }
 
   private loadInventories(page = this.currentPage()): void {
+    if (!this.can().hasAnyAccess) {
+      this.isLoading.set(false);
+      return;
+    }
+
     const requestedPage = page;
 
     this.inventorySubscription?.unsubscribe();
