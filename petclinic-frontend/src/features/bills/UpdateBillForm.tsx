@@ -23,13 +23,13 @@ const UpdateBillForm: React.FC = (): JSX.Element => {
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [owners, setOwners] = useState<CustomerResponseModel[]>([]);
+  const [customers, setCustomers] = useState<CustomerResponseModel[]>([]);
   const [vets, setVets] = useState<VetResponseModel[]>([]);
 
-  const fetchOwnersAndVets = async (): Promise<void> => {
-    const ownersList = await getAllCustomers();
+  const fetchCustomersAndVets = async (): Promise<void> => {
+    const customersList = await getAllCustomers();
     const vetsList = await getAllVets();
-    setOwners(ownersList);
+    setCustomers(customersList);
     setVets(vetsList);
   };
 
@@ -54,7 +54,7 @@ const UpdateBillForm: React.FC = (): JSX.Element => {
   }, [billId]);
 
   useEffect(() => {
-    fetchOwnersAndVets();
+    fetchCustomersAndVets();
   }, []);
 
   const handleChange = (
@@ -113,9 +113,9 @@ const UpdateBillForm: React.FC = (): JSX.Element => {
           }
         >
           <option value="">Select Customer</option>
-          {owners.map(owner => (
-            <option key={owner.customerId} value={owner.customerId}>
-              {owner.firstName} {owner.lastName}
+          {customers.map(customer => (
+            <option key={customer.customerId} value={customer.customerId}>
+              {customer.firstName} {customer.lastName}
             </option>
           ))}
         </select>
