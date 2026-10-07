@@ -599,9 +599,8 @@ export default function VetDetails(): JSX.Element {
                   <strong>Rate Date:</strong>{' '}
                   {formatRatingDate(rating.rateDate)}
                 </p>
-                {(currentCustomerName &&
-                  rating.customerName === currentCustomerName) ||
-                isAdmin ? (
+                {currentCustomerName &&
+                rating.customerName === currentCustomerName ? (
                   <button
                     onClick={handleRatingDeleted}
                     className="delete-rating-button"
