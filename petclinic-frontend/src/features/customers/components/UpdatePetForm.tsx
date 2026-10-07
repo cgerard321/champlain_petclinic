@@ -227,14 +227,16 @@ const UpdatePetForm: React.FC<UpdatePetFormProps> = ({
           )}
         </div>
 
-        <div className="form-group">
-          <label>{t('pets.fields.isActive')}</label>
-          <input
-            type="checkbox"
-            name="isActive"
-            checked={pet.isActive === 'true'}
-            onChange={handleChange}
-          />
+        <div className="form-group is-active-group">
+          <label>
+            {t('pets.fields.isActive')}
+            <input
+              type="checkbox"
+              name="isActive"
+              checked={pet.isActive === 'true'}
+              onChange={handleChange}
+            />
+          </label>
         </div>
 
         <div className="form-group">

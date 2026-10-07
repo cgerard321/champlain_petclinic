@@ -745,3 +745,16 @@
   display: flex;
   justify-content: center;
 }
+.is-active-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.is-active-group label input[type='checkbox'] {
+    margin-left: 8px;
+}
+
+.is-active-group input[type='checkbox'] {
+    width: auto;
+    margin: 0;
+}
