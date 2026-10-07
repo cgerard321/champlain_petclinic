@@ -1426,6 +1426,53 @@ public void testGenerateBillPdf_BillNotFound() {
     }
 
     @Test
+    void getAllBillsByPage_ArchivedOnly_ShouldReturnArchivedBills() {
+        Bill archivedBill = buildBill();
+        archivedBill.setBillId("ARCHIVED-1");
+        archivedBill.setArchive(true);
+        archivedBill.setBillStatus(BillStatus.PAID);
+
+        when(repo.findAllByArchiveTrue())
+                .thenReturn(Flux.just(archivedBill));
+        when(repo.findAllBillsByBillStatus(BillStatus.UNPAID))
+                .thenReturn(Flux.empty());
+
+        StepVerifier.create(billService.getAllBillsByPage(
+                        PageRequest.of(0, 10),
+                        null, null, null, null,
+                        null, null, null, null,
+                        true))
+                .assertNext(dto ->
+                        assertEquals("ARCHIVED-1", dto.getBillId()))
+                .verifyComplete();
+
+        verify(repo).findAllByArchiveTrue();
+        verify(repo, never()).findAll();
+        verify(repo, never()).findAllByArchiveFalse();
+    }
+
+    @Test
+    void getNumberOfBillsWithFilters_ArchivedOnly_ShouldCountArchivedBills() {
+        Bill archivedBill = buildBill();
+        archivedBill.setArchive(true);
+        archivedBill.setBillStatus(BillStatus.PAID);
+
+        when(repo.findAllByArchiveTrue())
+                .thenReturn(Flux.just(archivedBill));
+
+        StepVerifier.create(billService.getNumberOfBillsWithFilters(
+                        null, null, null, null,
+                        null, null, null, null,
+                        true))
+                .expectNext(1L)
+                .verifyComplete();
+
+        verify(repo).findAllByArchiveTrue();
+        verify(repo, never()).findAll();
+        verify(repo, never()).findAllByArchiveFalse();
+    }
+
+    @Test
     void getBillByCustomerIdAndBillId_Positive_ShouldReturnDtoWhenCustomerMatches() {
         Bill bill = buildBill();
         bill.setBillId("B-42");

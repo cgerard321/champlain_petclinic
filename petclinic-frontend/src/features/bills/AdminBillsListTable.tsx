@@ -338,7 +338,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
     }
 
     const filteredByArchiveStatus = showArchivedBills
-      ? billsToFilter
+      ? billsToFilter.filter(bill => bill.archive)
       : billsToFilter.filter(bill => !bill.archive);
 
     if (!applyFilters) {
@@ -588,7 +588,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
             className={`archive-btn ${showArchivedBills ? 'active' : ''}`}
             onClick={handleArchiveToggle}
           >
-            {showArchivedBills ? 'Hide Archived' : 'Show Archived'}
+            {showArchivedBills ? 'Show Regular Bills' : 'Show Archived Bills'}
           </button>
           {showStreamedBills ? (
             <button className="archive-btn" onClick={handleBackToPagination}>
