@@ -2,13 +2,9 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { EMPTY, filter, map, switchMap, Observable } from 'rxjs';
 
-// eslint-disable-next-line import/order
 import { CurrentUserResponse } from '@core/models/current-user-response';
 import { AuthState } from '@core/services/auth-state';
-// eslint-disable-next-line import/order
 import { SseClient } from '@core/services/sse-client';
-
-// eslint-disable-next-line import-alias/import-alias
 import { Visit } from '@features/vist/models/Visit';
 
 @Injectable({ providedIn: 'root' })
