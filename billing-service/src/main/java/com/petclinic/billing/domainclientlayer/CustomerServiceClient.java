@@ -1,7 +1,7 @@
 package com.petclinic.billing.domainclientlayer;
 
 import com.petclinic.billing.datalayer.CustomerResponseDTO;
-import com.petclinic.billing.exceptions.NotFoundException;
+import com.petclinic.billing.exceptions.CustomerNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -28,7 +28,7 @@ public class CustomerServiceClient {
                 .retrieve()
                 .onStatus(HttpStatus::is4xxClientError, clientResponse -> {
                     if (clientResponse.statusCode() == HttpStatus.NOT_FOUND) {
-                        return Mono.error(new NotFoundException("Customer not found with customerId: " + customerId));
+                        return Mono.error(new CustomerNotFoundException(customerId));
                     } else {
                         return Mono.error(new IllegalArgumentException("Client error for customerId: " + customerId));
                     }

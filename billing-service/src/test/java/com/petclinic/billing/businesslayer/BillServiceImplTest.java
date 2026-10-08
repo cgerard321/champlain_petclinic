@@ -41,6 +41,8 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import com.petclinic.billing.exceptions.CustomerNotFoundException;
+import com.petclinic.billing.exceptions.VetNotFoundException;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
@@ -473,9 +475,10 @@ public class BillServiceImplTest {
 
         // Mock AuthServiceClient response
         UserDetails userDetails = new UserDetails();
-        userDetails.setUserId("customer-456");
-        Mockito.when(authClient.getUserById("customer-456", "JWTToken"))
-                .thenReturn(Mono.just(userDetails)); // Ensure a non-null Mono is returned
+        userDetails.setUserId("owner-456");
+
+        Mockito.when(authClient.getUserById("JWTToken", "owner-456"))
+                .thenReturn(Mono.just(userDetails));
 
         // Mock repository insert
         Mockito.when(repo.findById(Mockito.anyString()))
@@ -502,6 +505,40 @@ public class BillServiceImplTest {
         verify(vetClient).getVetByVetId("vet-123");
         verify(customerServiceClient).getCustomerByCustomerId("customer-456");
     }
+
+    //test cust and vet exception
+    @Test
+    void createBill_customerNotFound() {
+        BillRequestDTO dto = buildBillRequestDTO();
+
+        when(vetClient.getVetByVetId(dto.getVetId())).thenReturn(Mono.just(new VetResponseDTO()));
+        when(customerServiceClient.getCustomerByCustomerId(dto.getCustomerId())).thenReturn(Mono.empty());
+
+        StepVerifier.create(billService.createBill(
+                Mono.just(dto), false, "CAD", "JWTToken"))
+                .expectErrorMatches(error -> error instanceof CustomerNotFoundException && error.getMessage().equals("Customer not found with customerId: " + dto.getCustomerId()))
+                .verify();
+
+        verify(repo, never()).insert(any(Bill.class));
+    }
+
+    @Test
+    void createBill_vetNotFound() {
+        BillRequestDTO dto = buildBillRequestDTO();
+
+        when(vetClient.getVetByVetId(dto.getVetId())).thenReturn(Mono.empty());
+        when(customerServiceClient.getCustomerByCustomerId(dto.getCustomerId())).thenReturn(Mono.just(new CustomerResponseDTO()));
+        StepVerifier.create(billService.createBill(
+                Mono.just(dto), false, "CAD", "JWTToken"))
+                .expectErrorMatches(error -> error instanceof VetNotFoundException && error.getMessage().equals("Vet not found with vetId: " + dto.getVetId()))
+                .verify();
+        verify(repo, never()).insert(any(Bill.class));
+    }
+
+
+
+
+
 
     @Test
     void createBill_withIdCollision_shouldRetryAndSucceed() {
@@ -857,9 +894,9 @@ public class BillServiceImplTest {
         // Assert
         StepVerifier.create(result)
                 .expectErrorMatches(throwable ->
-                        throwable instanceof ResponseStatusException &&
-                                ((ResponseStatusException) throwable).getStatus().equals(HttpStatus.NOT_FOUND) &&
-                                throwable.getMessage().contains("Customer ID does not exist"))
+                        throwable instanceof CustomerNotFoundException &&
+                                throwable.getMessage().equals(
+                                        "Customer not found with customerId: " + nonExistentCustomerId))
                 .verify();
 
         verify(customerServiceClient, times(1)).getCustomerByCustomerId(nonExistentCustomerId);
@@ -2703,3 +2740,4 @@ public void testGenerateBillPdf_BillNotFound() {
     }
 
 }
+
