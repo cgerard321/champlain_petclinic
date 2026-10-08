@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="VistListTable.css" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>List of Visits</h1>
+    <table>
+      <tr>
+        <th>Visit ID</th>
+        <th>Veterinarian FullName</th>
+        <th>PetName</th>
+        <th>Description</th>
+        <th>Start Date</th>
+        <th>End Date</th>
+        <th>Status</th>
+      </tr>
+
+      @for (visits of visit(); track visits.visitId) {
+        <tr>
+          <td>{{ visits.visitId }}</td>
+          <td>{{ visits.vetFirstName }} {{ visits.vetLastName }}</td>
+          <td>{{ visits.petName }}</td>
+          <td>{{ visits.description }}</td>
+          <td>{{ visits.visitDate }}</td>
+          <td>{{ visits.visitEndDate }}</td>
+          <td>{{ visits.status }}</td>
+        </tr>
+      }
+    </table>
+  </body>
+</html>
