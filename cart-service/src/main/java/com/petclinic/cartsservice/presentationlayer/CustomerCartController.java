@@ -6,10 +6,7 @@ import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -46,5 +43,14 @@ public class CustomerCartController {
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided customer id is invalid: " + customerId)))
                 .flatMap(cartService::getRecommendationPurchasesByCustomerId)
                 .map(ResponseEntity::ok);
+    }
+
+    @DeleteMapping("/{customerId}/cart")
+    public Mono<ResponseEntity<Void>> deleteCartForCustomer(@PathVariable String customerId) {
+        return Mono.just(customerId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(Mono.error(new InvalidInputException("Provided customer id is invalid: " + customerId)))
+                .flatMap(validId -> cartService.deleteCartByCustomerId(validId)
+                        .thenReturn(ResponseEntity.noContent().build()));
     }
 }

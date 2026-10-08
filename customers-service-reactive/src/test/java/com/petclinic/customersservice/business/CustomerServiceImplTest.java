@@ -3,9 +3,11 @@ package com.petclinic.customersservice.business;
 import com.petclinic.customersservice.customersExceptions.exceptions.NotFoundException;
 import com.petclinic.customersservice.data.Customer;
 import com.petclinic.customersservice.data.CustomerRepo;
+import com.petclinic.customersservice.domainclientlayer.CartServiceClient;
 import com.petclinic.customersservice.domainclientlayer.FilesServiceClient;
 import com.petclinic.customersservice.presentationlayer.CustomerRequestDTO;
 import com.petclinic.customersservice.presentationlayer.CustomerResponseDTO;
+import org.mockito.InOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,6 +20,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.never;
@@ -33,6 +36,9 @@ class CustomerServiceImplTest {
 
     @MockBean
     private FilesServiceClient filesServiceClient;
+
+    @MockBean
+    private CartServiceClient cartServiceClient;
 
     @Autowired
     private CustomerService customerService;
@@ -192,18 +198,37 @@ class CustomerServiceImplTest {
     }
 
     @Test
-    void deleteCustomerByCustomerId_ShouldCompleteSuccessfully() {
+    void deleteCustomerByCustomerId_WhenCustomerExists_ShouldDeleteCartThenCustomer() {
         String customerId = customerEntity.getCustomerId();
-        when(repo.deleteById(customerId)).thenReturn(Mono.empty());
 
-        Mono<Void> deleteObj = customerService.deleteCustomer(customerId);
+        when(repo.findCustomerByCustomerId(customerId)).thenReturn(Mono.just(customerEntity));
+        when(cartServiceClient.deleteCartByCustomerId(customerId)).thenReturn(Mono.empty());
+        when(repo.deleteById(customerEntity.getId())).thenReturn(Mono.empty());
 
-        StepVerifier
-                .create(deleteObj)
+        StepVerifier.create(customerService.deleteCustomerByCustomerId(customerId))
+                .expectNextMatches(response -> response.getCustomerId().equals(customerId))
                 .verifyComplete();
 
-       verify(repo).deleteById(customerId);
+        InOrder inOrder = inOrder(repo, cartServiceClient);
+        inOrder.verify(repo).findCustomerByCustomerId(customerId);
+        inOrder.verify(cartServiceClient).deleteCartByCustomerId(customerId);
+        inOrder.verify(repo).deleteById(customerEntity.getId());
+    }
 
+    @Test
+    void deleteCustomerByCustomerId_WhenCustomerDoesNotExist_ShouldNotDeleteCart() {
+        String customerId = customerEntity.getCustomerId();
+
+        when(repo.findCustomerByCustomerId(customerId)).thenReturn(Mono.empty());
+
+        StepVerifier.create(customerService.deleteCustomerByCustomerId(customerId))
+                .expectErrorMatches(error -> error instanceof NotFoundException &&
+                        error.getMessage().equals("Customer id not found: " + customerId))
+                .verify();
+
+        verify(repo).findCustomerByCustomerId(customerId);
+        verify(cartServiceClient, never()).deleteCartByCustomerId(anyString());
+        verify(repo, never()).deleteById(anyString());
     }
 
 

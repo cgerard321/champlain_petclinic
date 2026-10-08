@@ -898,6 +898,28 @@ class CartServiceUnitTest {
     }
 
     @Test
+    void deleteCartByCustomerId_withValidCustomerId_deletesCustomerCart() {
+        String paddedCustomerId = "  " + validCustomerId + "  ";
+        when(cartRepository.deleteCartByCustomerId(validCustomerId)).thenReturn(Mono.empty());
+
+        StepVerifier.create(cartService.deleteCartByCustomerId(paddedCustomerId))
+                .verifyComplete();
+
+        verify(cartRepository).deleteCartByCustomerId(validCustomerId);
+    }
+
+    @Test
+    void deleteCartByCustomerId_withBlankCustomerId_throwsInvalidInput() {
+        StepVerifier.create(cartService.deleteCartByCustomerId("  "))
+                .expectErrorMatches(error ->
+                        error instanceof InvalidInputException &&
+                                error.getMessage().equals("customerId must not be null or empty"))
+                .verify();
+
+        verify(cartRepository, never()).deleteCartByCustomerId(anyString());
+    }
+
+    @Test
     void removeProductFromCart_RemovesProductSuccessfully() {
         // Arrange: Mock the cart retrieval
         when(cartRepository.findCartByCartId(cart1.getCartId())).thenReturn(Mono.just(cart1));

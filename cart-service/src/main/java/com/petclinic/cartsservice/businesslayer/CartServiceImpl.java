@@ -908,4 +908,14 @@ public class CartServiceImpl implements CartService {
                 .map(saved -> EntityModelUtil.toCartResponseModel(saved, saved.getProducts()));
     }
 
+    @Override
+    public Mono<Void> deleteCartByCustomerId(String customerId) {
+        final String normalizedCustomerId = customerId == null ? null : customerId.trim();
+
+        if (normalizedCustomerId == null || normalizedCustomerId.isBlank()) {
+            return Mono.error(new InvalidInputException("customerId must not be null or empty"));
+        }
+
+        return cartRepository.deleteCartByCustomerId(normalizedCustomerId);
+    }
 }
