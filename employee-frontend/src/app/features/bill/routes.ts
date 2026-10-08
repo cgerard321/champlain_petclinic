@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 
 import { Bill } from '@features/bill/pages/bill';
-import { CreateBill } from '@features/bill/pages/createBill/createBill';
+import { CreateBill } from '@features/bill/components/createBill/create-bill';
 
 
 export default [

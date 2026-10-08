@@ -8,7 +8,7 @@
             <div class="form-row">
                 <label class="label-size">Veteranarian Name:</label>
                 <mat-form-field appearance="outline">
-                    <input matInput disabled>
+                    <input matInput>
                 </mat-form-field>
                 
             </div>
@@ -17,7 +17,11 @@
                 <label class="label-size">Customer Name:</label>
                 <mat-form-field appearance="outline">
                     <mat-select>
-                        <mat-option value="1"></mat-option>
+                        @for (customer of customers(); track customer.customerId) {
+                        <mat-option [value]="customer.customerId">
+                        {{ customer.firstName }} {{customer.lastName}}
+                        </mat-option>
+                    }
                     </mat-select>
                 </mat-form-field>
             </div>
@@ -26,7 +30,10 @@
                 <label class="label-size">Visit Type:</label>
                 <mat-form-field appearance="outline">
                     <mat-select>
-                        <mat-option value="1"></mat-option>
+                        <mat-option value="Check-Up">Check-Up</mat-option>
+                        <mat-option value="Vaccine">Vaccine</mat-option>
+                        <mat-option value="Surgery">Surgery</mat-option>
+                        <mat-option value="Dental">Dental</mat-option>
                     </mat-select>
                 </mat-form-field>
             </div>
@@ -52,7 +59,7 @@
             <mat-divider></mat-divider>
         </mat-card-content>
         <mat-card-actions class="center-buttons">
-            <button matButton="filled" class="red">Cancel</button>
+            <button matButton="filled" class="red" (click)="closeCreateBill()">Cancel</button>
             <button matButton="filled">Submit</button>
         </mat-card-actions>
     </mat-card>

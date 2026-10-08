@@ -1,8 +1,8 @@
 export interface Bill {
   billId: string;
   customerId: string;
-  ownerFirstName: string;
-  ownerLastName: string;
+  customerFirstName: string;
+  customerLastName: string;
   visitType: string;
   vetId: string;
   vetFirstName: string;
@@ -20,3 +20,13 @@ export interface Bill {
   interestExempt: boolean;
   archive: boolean;
 }
+
+export interface BillRequestModel {
+  customerId: string;
+  visitType: string;
+  vetId: string;
+  date: string;
+  amount: number;
+  billStatus: string;
+}
+

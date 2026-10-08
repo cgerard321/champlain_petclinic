@@ -8,7 +8,7 @@
 
     @if (canCreateBill()) {
       <!-- The create flow belongs to the follow-up Bill CRUD story. -->
-      <button class="bill-primary-action" type="button">Create Bill</button>
+      <button class="bill-primary-action" type="button" (click)="openCreateBill()">Create Bill</button>
     }
   </header>
 
