@@ -3,9 +3,9 @@ package com.petclinic.billing.businesslayer;
 import com.petclinic.billing.datalayer.*;
 import com.petclinic.billing.domainclientlayer.Auth.AuthServiceClient;
 import com.petclinic.billing.domainclientlayer.Auth.UserDetails;
+import com.petclinic.billing.domainclientlayer.CustomerServiceClient;
 import com.petclinic.billing.domainclientlayer.Mailing.Mail;
 import com.petclinic.billing.domainclientlayer.Mailing.MailService;
-import com.petclinic.billing.domainclientlayer.CustomerServiceClient;
 import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
@@ -23,6 +23,8 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.UUID;
 import java.util.function.Predicate;
+import com.petclinic.billing.exceptions.CustomerNotFoundException;
+import com.petclinic.billing.exceptions.VetNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -245,12 +247,12 @@ public class BillServiceImpl implements BillService{
                     if (dto.getCustomerId() == null || dto.getCustomerId().isEmpty()) {
                         return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer ID is required"));
                     }
-                    // Fetch Vet and Customer details
-                    Mono<VetResponseDTO> vetMono = vetClient.getVetByVetId(dto.getVetId());
+                    // Fetch Vet and Owner details
+                    Mono<VetResponseDTO> vetMono = vetClient.getVetByVetId(dto.getVetId())
+                            .switchIfEmpty(Mono.error(new VetNotFoundException(dto.getVetId())));
+
                     Mono<CustomerResponseDTO> customerMono = customerServiceClient.getCustomerByCustomerId(dto.getCustomerId())
-                            .switchIfEmpty(Mono.error(new ResponseStatusException(
-                                    HttpStatus.BAD_REQUEST, "Customer ID does not exist"
-                            )));
+                            .switchIfEmpty(Mono.error(new CustomerNotFoundException(dto.getCustomerId())));
 
                     return Mono.zip(vetMono, customerMono, Mono.just(dto));
                 })
@@ -511,9 +513,7 @@ public class BillServiceImpl implements BillService{
     public Flux<BillResponseDTO> getBillsByCustomerId(String customerId) {
         // Fetch the customer info first
         Mono<CustomerResponseDTO> customerMono = customerServiceClient.getCustomerByCustomerId(customerId)
-                .switchIfEmpty(Mono.error(new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Customer ID does not exist"
-                )));
+                .switchIfEmpty(Mono.error(new CustomerNotFoundException(customerId)));
 
         return customerMono.flatMapMany(customer ->
                 billRepository.findByCustomerId(customerId)
@@ -618,7 +618,6 @@ public class BillServiceImpl implements BillService{
                                 bill.setBillStatus(BillStatus.PAID);
 
                                 mailService.sendMail(generateConfirmationEmail(user));
-
                                 return billRepository.save(bill);
                             })
 
