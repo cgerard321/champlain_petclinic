@@ -31,6 +31,18 @@
       }
     </mat-form-field>
 
+    <mat-form-field appearance="outline">
+      <mat-label>Product name (French)</mat-label>
+      <input matInput type="text" lang="fr" [formField]="productForm.productNameFr" />
+      <mat-hint>Optional. English is displayed when empty.</mat-hint>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Description (French)</mat-label>
+      <textarea matInput rows="4" lang="fr" [formField]="productForm.productDescriptionFr"></textarea>
+      <mat-hint>Optional. English is displayed when empty.</mat-hint>
+    </mat-form-field>
+
     <div class="two-column">
       <mat-form-field appearance="outline">
         <mat-label>Sale price</mat-label>

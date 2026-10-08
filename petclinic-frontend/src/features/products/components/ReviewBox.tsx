@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { JSX, useEffect, useState } from 'react';
 import { Form, Alert } from 'react-bootstrap';
 import { RatingModel } from '../models/ProductModels/RatingModel';
@@ -10,6 +11,7 @@ function ReviewBox({
   updateFunc: (newReview: string) => void;
   rating: RatingModel;
 }): JSX.Element {
+  const { t } = useTranslation('products');
   const [reviewText, setReviewText] = useState<string>(rating.review);
   const [isError, setError] = useState<string | null>(null);
 
@@ -19,7 +21,7 @@ function ReviewBox({
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const handleLocalChange = (text: string) => {
     if (text.length > 2000) {
-      setError('Review cannot exceed 2000 characters!');
+      setError('reviewTooLong');
     } else {
       setError(null);
       updateFunc(text); // propagate changes to parent
@@ -29,11 +31,11 @@ function ReviewBox({
 
   return (
     <div className="reviewbox-container">
-      {isError && <Alert variant="warning">{isError}</Alert>}
+      {isError && <Alert variant="warning">{t(isError)}</Alert>}
       <Form.Control
         as="textarea"
         className="review-box"
-        placeholder="Leave your review here..."
+        placeholder={t('reviewPlaceholder')}
         value={reviewText}
         onChange={e => handleLocalChange(e.target.value)} // now used
       />

@@ -28,6 +28,8 @@ interface ProductUpdateData {
 interface ProductFormModel {
   productName: string;
   productDescription: string;
+  productNameFr: string;
+  productDescriptionFr: string;
   productSalePrice: number;
   productQuantity: number;
   isUnlisted: boolean;
@@ -68,6 +70,8 @@ export class ProductUpdateDialog implements OnInit {
   protected readonly model = signal<ProductFormModel>({
     productName: this.data.product.productName,
     productDescription: this.data.product.productDescription,
+    productNameFr: this.data.product.productNameFr ?? '',
+    productDescriptionFr: this.data.product.productDescriptionFr ?? '',
     productSalePrice: this.data.product.productSalePrice,
     productQuantity: this.data.product.productQuantity,
     isUnlisted: this.data.product.isUnlisted,

@@ -1,3 +1,8 @@
+import { useTranslation } from 'react-i18next';
+import {
+  localizedProduct,
+  formatProductPrice,
+} from '@/features/products/utils/localizedProduct';
 import {
   ProductModel,
   emptyProductModel,
@@ -34,6 +39,8 @@ import EditReviewModal from './EditReviewModal';
 import DeleteReviewModal from './DeleteReviewModal';
 
 export default function ProductDetails(): JSX.Element {
+  const { t, i18n } = useTranslation('products');
+  const language = i18n.resolvedLanguage || i18n.language || 'en';
   const isAdmin = IsAdmin();
   const { isAuthenticated } = useUser();
   const isInventoryManager = IsInventoryManager();
@@ -65,7 +72,7 @@ export default function ProductDetails(): JSX.Element {
     }
     const isSuccess = await addToWishlist(currentProduct.productId, 1);
     if (isSuccess) {
-      setSuccessMessageWishlist('Product added to wishlist successfully!');
+      setSuccessMessageWishlist('wishSuccess');
 
       // Clear the message after 3 seconds
       setTimeout(() => setSuccessMessageWishlist(null), 3000);
@@ -93,15 +100,15 @@ export default function ProductDetails(): JSX.Element {
 
   const getProductTypeLabel = (productType: string): string => {
     return productType
-      ? productType.charAt(0).toUpperCase() + productType.slice(1).toLowerCase()
-      : 'Unknown';
+      ? t(`types.${productType.toUpperCase()}`, { defaultValue: productType })
+      : t('unknown');
   };
   const getDeliveryTypeLabel = (deliveryType: string): string => {
-    if (deliveryType === 'DELIVERY') return 'Standard Delivery';
-    if (deliveryType === 'PICKUP') return 'Pickup';
-    if (deliveryType === 'DELIVERY_AND_PICKUP') return 'Delivery & Pickup';
-    if (deliveryType === 'NO_DELIVERY_OPTION') return 'No delivery option';
-    return 'Unknown Delivery Type';
+    if (deliveryType === 'DELIVERY') return t('standardDelivery');
+    if (deliveryType === 'PICKUP') return t('pickup');
+    if (deliveryType === 'DELIVERY_AND_PICKUP') return t('deliveryPickup');
+    if (deliveryType === 'NO_DELIVERY_OPTION') return t('noDelivery');
+    return t('unknownDelivery');
   };
 
   const fetchProduct = async (): Promise<void> => {
@@ -212,11 +219,7 @@ export default function ProductDetails(): JSX.Element {
     if (!productId) return;
     if (isStaff) return;
     const ok = await addToCart(String(productId), quantity);
-    alert(
-      ok
-        ? `Added ${quantity} item${quantity > 1 ? 's' : ''} to cart`
-        : "Couldn't add to cart. Please try again."
-    );
+    alert(ok ? t('addedItems', { count: quantity }) : t('cartFailed'));
   };
 
   const handleEditReview = (): void => {
@@ -246,7 +249,7 @@ export default function ProductDetails(): JSX.Element {
       <NavBar />
       {isLoading ? (
         <div>
-          <p>Is Loading..</p>
+          <p>{t('loadingDetails')}</p>
         </div>
       ) : (
         <div
@@ -257,8 +260,8 @@ export default function ProductDetails(): JSX.Element {
           <div className="product-container">
             {isUnlisted && !isAdmin && !isInventoryManager ? (
               <div className="product-unavailable">
-                <h2>Item Unavailable</h2>
-                <h3>This item has been unlisted. Check back later! </h3>
+                <h2>{t('unavailable')}</h2>
+                <h3>{t('unlisted')}</h3>
               </div>
             ) : (
               <>
@@ -283,24 +286,24 @@ export default function ProductDetails(): JSX.Element {
                     {productId && (
                       <PatchListingStatusButton productId={productId} />
                     )}
-                    <Button variant="danger" onClick={handleDeleteProduct}>
-                      Delete
-                    </Button> */}
+                    <Button variant="danger" onClick={handleDeleteProduct}>{t('delete')}</Button> */}
                   </div>
 
                   <h2>
-                    {currentProduct.productName}
+                    {localizedProduct(currentProduct, language).name}
                     {!isInventoryManager && !isVet && !isReceptionist && (
                       <button
                         onClick={handleAddToWishlist}
                         className="wishlist-btn"
                       >
-                        <FaHeart className="wishlist-icon" /> Wishlist{' '}
+                        <FaHeart className="wishlist-icon" /> {t('wishlist')}
                       </button>
                     )}
                   </h2>
                   {successMessageWishlist && (
-                    <p className="success-message">{successMessageWishlist}</p>
+                    <p className="success-message">
+                      {t(successMessageWishlist)}
+                    </p>
                   )}
 
                   <div className="avgrating-container">
@@ -310,24 +313,27 @@ export default function ProductDetails(): JSX.Element {
                     />
                     <h3>{currentProduct.averageRating} </h3>
                     <div className="review-nums">
-                      {productReviews.length || 0} reviews{' '}
+                      {t('reviewCount', { count: productReviews.length })}
                     </div>
                   </div>
                   <div className="line"></div>
 
                   <div className="details-type">
-                    Type:
+                    {t('type')}
                     <span className="box-details">
                       {getProductTypeLabel(currentProduct.productType)}
                     </span>
-                    Delivery Type:
+                    {t('deliveryType')}
                     <span className="box-details">
                       {getDeliveryTypeLabel(currentProduct.deliveryType)}
                     </span>
                   </div>
 
                   <h3 className="prod-price">
-                    {currentProduct.productSalePrice}$
+                    {formatProductPrice(
+                      currentProduct.productSalePrice,
+                      language
+                    )}
                   </h3>
 
                   <div className="stock-details">
@@ -335,7 +341,8 @@ export default function ProductDetails(): JSX.Element {
                       {currentProduct.productQuantity >= 10 && (
                         <p>
                           {' '}
-                          <FaCheck /> In Stock - Available for Pickup
+                          <FaCheck />
+                          {t('inStock')}
                         </p>
                       )}
                     </div>
@@ -343,7 +350,8 @@ export default function ProductDetails(): JSX.Element {
                       {currentProduct.productQuantity === 0 && (
                         <p>
                           {' '}
-                          <FaTimes /> Out of Stock
+                          <FaTimes />
+                          {t('outStock')}
                         </p>
                       )}
                     </div>
@@ -352,14 +360,15 @@ export default function ProductDetails(): JSX.Element {
                         currentProduct.productQuantity < 10 && (
                           <p>
                             {' '}
-                            <FaCheck /> Only a few left!
+                            <FaCheck />
+                            {t('fewLeft')}
                           </p>
                         )}
                     </div>
                   </div>
-                  <h3 className="prod-desc-title">About this Product</h3>
+                  <h3 className="prod-desc-title">{t('about')}</h3>
                   <p className="prod-description">
-                    {currentProduct.productDescription}
+                    {localizedProduct(currentProduct, language).description}
                   </p>
                   <div className=" cart-box">
                     <div className=" quantity-selector">
@@ -380,7 +389,7 @@ export default function ProductDetails(): JSX.Element {
                           disabled={isStaff}
                           aria-disabled={isStaff}
                         >
-                          Add to Cart
+                          {t('addCart')}
                         </Button>
                       </div>
                     )}
@@ -389,7 +398,7 @@ export default function ProductDetails(): JSX.Element {
                 <div className="product-review-separator"></div>
                 <div className="review-section-container">
                   <div className="reviewproduct-container">
-                    <h2>Customer Review</h2>
+                    <h2>{t('customerReview')}</h2>
 
                     <div className="rating-summary-container">
                       <div className="rating-left">
@@ -406,8 +415,7 @@ export default function ProductDetails(): JSX.Element {
                             </div>
                           </div>
                           <p className="review-count">
-                            Based on {productReviews.length} review
-                            {productReviews.length !== 1 ? 's' : ''}
+                            {t('basedOn', { count: productReviews.length })}
                           </p>
                         </div>
                       </div>
@@ -423,7 +431,9 @@ export default function ProductDetails(): JSX.Element {
                               : 0;
                           return (
                             <div key={star} className="rating-bar-row">
-                              <span className="star-label">{star} stars</span>
+                              <span className="star-label">
+                                {t('stars', { count: star })}
+                              </span>
                               <div className="rating-bar">
                                 <div
                                   className="rating-bar-fill"
@@ -440,7 +450,7 @@ export default function ProductDetails(): JSX.Element {
 
                     <div className="review-action-row">
                       <h3 className="reviews-heading">
-                        Reviews ({productReviews.length})
+                        {t('reviewsHeading', { count: productReviews.length })}
                       </h3>
                       <Button
                         variant="primary"
@@ -453,7 +463,7 @@ export default function ProductDetails(): JSX.Element {
                         }}
                         disabled={isStaff || currentUserRating.rating > 0}
                       >
-                        Write a Review
+                        {t('writeReview')}
                       </Button>
                     </div>
 
@@ -491,14 +501,17 @@ export default function ProductDetails(): JSX.Element {
                             <div className="product-review-author">
                               <img
                                 src={rating.reviewerPhoto || defaultProfile}
-                                alt={`${rating.reviewerUsername || 'Customer'} profile picture`}
+                                alt={t('photoAlt', {
+                                  name:
+                                    rating.reviewerUsername || t('customer'),
+                                })}
                                 onError={event => {
                                   event.currentTarget.onerror = null;
                                   event.currentTarget.src = defaultProfile;
                                 }}
                               />
                               <span>
-                                {rating.reviewerUsername || 'Customer'}
+                                {rating.reviewerUsername || t('customer')}
                               </span>
                             </div>
                             {isAuthenticated &&
@@ -511,14 +524,14 @@ export default function ProductDetails(): JSX.Element {
                                   <button
                                     className="review-card-edit-btn"
                                     onClick={handleEditReview}
-                                    title="Edit your review"
+                                    title={t('editReviewTitle')}
                                   >
                                     <FaPen />
                                   </button>
                                   <button
                                     className="review-card-delete-btn"
                                     onClick={handleDeleteReview}
-                                    title="Delete your review"
+                                    title={t('deleteReviewTitle')}
                                   >
                                     <FaTrash />
                                   </button>
@@ -550,7 +563,7 @@ export default function ProductDetails(): JSX.Element {
                         )
                       )
                     ) : (
-                      <p>This item does not have any reviews yet!</p>
+                      <p>{t('noReviews')}</p>
                     )}
                   </div>
                 </div>

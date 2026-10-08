@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import { FileDetails } from '@/shared/models/FileDetails';
 import { getImage } from '../api/getImage';
@@ -19,6 +20,7 @@ export default function ImageContainer({
   productId,
   imageUrl,
 }: ImageContainerProps): JSX.Element {
+  const { t } = useTranslation('products');
   const [imageName, setImageName] = useState<string | null>(
     image?.fileName ?? null
   );
@@ -94,14 +96,14 @@ export default function ImageContainer({
   return (
     <div className="image-container">
       {imageUrl ? (
-        <img src={imageUrl} alt={imageName || 'Product image'} />
+        <img src={imageUrl} alt={imageName || t('image')} />
       ) : imageData ? (
         <img
           src={`data:${imageType};base64,${imageData}`}
-          alt={imageName || 'Product image'}
+          alt={imageName || t('image')}
         />
       ) : (
-        <p>No image available</p>
+        <p>{t('noImage')}</p>
       )}
     </div>
   );

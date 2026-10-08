@@ -1,3 +1,8 @@
+import { useTranslation } from 'react-i18next';
+import {
+  localizedProduct,
+  normalizeProductSearch,
+} from '@/features/products/utils/localizedProduct';
 import * as React from 'react';
 import { useState, useEffect, useCallback, JSX } from 'react';
 import { getAllProducts } from '@/features/products/api/getAllProducts.ts';
@@ -36,6 +41,8 @@ const ProductList = function Productlist({
   filters,
   sortCriteria,
 }: ProductsListProps): JSX.Element {
+  const { t, i18n } = useTranslation('products');
+  const language = i18n.resolvedLanguage || i18n.language || 'en';
   const [productList, setProductList] = useState<ProductModel[]>([]);
   const [bundleList, setBundleList] = useState<ProductBundleModel[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -106,16 +113,17 @@ const ProductList = function Productlist({
     if (searchQuery === '') {
       setFilteredList(sorted);
     } else {
-      const query = searchQuery.toLowerCase();
+      const query = normalizeProductSearch(searchQuery);
       setFilteredList(
         sorted.filter(
           p =>
-            p.productName.toLowerCase().includes(query) ||
-            p.productType?.toLowerCase().includes(query)
+            normalizeProductSearch(localizedProduct(p, language).name).includes(
+              query
+            ) || normalizeProductSearch(p.productType || '').includes(query)
         )
       );
     }
-  }, [sortCriteria, productList, searchQuery]);
+  }, [sortCriteria, productList, searchQuery, language]);
 
   const handleProductClick = (product: ProductModel): void => {
     setRecentlyClickedProducts(prev => {
@@ -133,18 +141,24 @@ const ProductList = function Productlist({
   const RecentlyViewedProducts = (): JSX.Element => (
     <Reveal delay={80}>
       <div className="products-section-container ">
-        <h2 className="section-title category-title">Recently Seen</h2>
+        <h2 className="section-title category-title">{t('recent')}</h2>
         <div className="recently-viewed-flex">
           {recentlyClickedProducts.length > 0 ? (
             recentlyClickedProducts
               .filter(p => !p.isUnlisted)
               .map((p, i) => (
                 <Reveal key={p.productId} delay={i * 60 + 120}>
-                  <Product product={p} />
+                  <Product
+                    product={
+                      productList.find(
+                        current => current.productId === p.productId
+                      ) ?? p
+                    }
+                  />
                 </Reveal>
               ))
           ) : (
-            <p>No Recently Seen Items.</p>
+            <p>{t('noRecent')}</p>
           )}
         </div>
       </div>
@@ -157,22 +171,28 @@ const ProductList = function Productlist({
         {view === 'catalog' && (
           <Reveal delay={80}>
             <div className="products-section-container ">
-              <h2 className="section-title category-title">Catalog</h2>
+              <h2 className="section-title category-title">{t('catalog')}</h2>
               {isLoading ? (
-                <p>Loading items...</p>
+                <p>{t('loading')}</p>
               ) : filteredList.length > 0 ? (
                 <div className="grid">
                   {filteredList.map((p, i) => (
                     <Reveal key={p.productId} delay={i * 60 + 120}>
                       <div onClick={() => handleProductClick(p)}>
-                        <Product product={p} />
+                        <Product
+                          product={
+                            productList.find(
+                              current => current.productId === p.productId
+                            ) ?? p
+                          }
+                        />
                       </div>
                     </Reveal>
                   ))}
                 </div>
               ) : (
                 <p style={{ textAlign: 'center', margin: '40px 0' }}>
-                  No items found.
+                  {t('noItems')}
                 </p>
               )}
             </div>
@@ -183,7 +203,7 @@ const ProductList = function Productlist({
           <>
             <Reveal delay={80}>
               <div className="products-section-container ">
-                <h2 className="section-title">Bundles</h2>
+                <h2 className="section-title">{t('bundles')}</h2>
                 <div className="grid product-bundles-grid">
                   {bundleList.length > 0 ? (
                     bundleList.map((b, i) => (
@@ -192,7 +212,7 @@ const ProductList = function Productlist({
                       </Reveal>
                     ))
                   ) : (
-                    <p>No Bundles Available</p>
+                    <p>{t('noBundles')}</p>
                   )}
                 </div>
               </div>

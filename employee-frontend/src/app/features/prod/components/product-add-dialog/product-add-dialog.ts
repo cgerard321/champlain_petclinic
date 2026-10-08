@@ -23,6 +23,8 @@ import { ProductService } from '@features/prod/services/product.service';
 interface ProductFormModel {
   productName: string;
   productDescription: string;
+  productNameFr: string;
+  productDescriptionFr: string;
   productSalePrice: number;
   productQuantity: number;
   isUnlisted: boolean;
@@ -71,6 +73,8 @@ export class ProductAddDialog implements OnInit {
   protected readonly model = signal<ProductFormModel>({
     productName: '',
     productDescription: '',
+    productNameFr: '',
+    productDescriptionFr: '',
     productSalePrice: 0,
     productQuantity: 0,
     isUnlisted: false,

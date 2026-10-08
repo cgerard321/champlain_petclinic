@@ -1,6 +1,8 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import HttpApi from "i18next-http-backend";
+import productsEn from '../../public/locales/en/products.json';
+import productsFr from '../../public/locales/fr/products.json';
 
 void i18n
     .use(HttpApi)
@@ -24,6 +26,14 @@ void i18n
             'visits'
         ],
         defaultNS: 'customers',
+        // Ship shop labels with the versioned app bundle so cached locale files
+        // cannot leave new UI keys untranslated after a deployment.
+        resources: {
+            en: { products: productsEn },
+            fr: { products: productsFr },
+        },
+        partialBundledLanguages: true, // Other namespaces still load over HTTP.
+
 
         backend: {
             loadPath: '/locales/{{lng}}/{{ns}}.json',

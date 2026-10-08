@@ -283,6 +283,15 @@ public class ProductServiceImpl implements ProductService {
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Product id was not found: " + productId))))
                 .flatMap(found -> productRequestModel
                         .map(EntityModelUtil::toProductEntity)
+                        // Older clients omit translations. Preserve them; an explicit empty string clears them.
+                        .doOnNext(entity -> {
+                            if (entity.getProductNameFr() == null) {
+                                entity.setProductNameFr(found.getProductNameFr());
+                            }
+                            if (entity.getProductDescriptionFr() == null) {
+                                entity.setProductDescriptionFr(found.getProductDescriptionFr());
+                            }
+                        })
                         .doOnNext(entity -> entity.setId(found.getId()))
                         .doOnNext(entity -> entity.setImageId(found.getImageId()))
                         .doOnNext(entity -> entity.setProductId(found.getProductId())))

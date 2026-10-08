@@ -31,6 +31,8 @@ public class EntityModelUtil {
                 .productId(generateUUIDString())
                 .productName(productRequestModel.getProductName())
                 .productDescription(productRequestModel.getProductDescription())
+                .productNameFr(productRequestModel.getProductNameFr())
+                .productDescriptionFr(productRequestModel.getProductDescriptionFr())
                 .productSalePrice(productRequestModel.getProductSalePrice())
                 //.productType(productRequestModel.getProductType())
                 .productTypeId(productRequestModel.getProductTypeId())
