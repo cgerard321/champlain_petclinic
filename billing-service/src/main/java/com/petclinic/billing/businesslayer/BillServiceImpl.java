@@ -112,7 +112,7 @@ public class BillServiceImpl implements BillService{
                         (vetLastName == null || bill.getVetLastName().equals(vetLastName));
 
         Flux<Bill> bills = includeArchived
-                ? billRepository.findAll()
+                ? billRepository.findAllByArchiveTrue()
                 : billRepository.findAllByArchiveFalse();
 
         return updateOverdueBills()
@@ -196,7 +196,7 @@ public class BillServiceImpl implements BillService{
                         (vetLastName == null || bill.getVetLastName().equals(vetLastName));
 
         Flux<Bill> bills = includeArchived
-                ? billRepository.findAll()
+                ? billRepository.findAllByArchiveTrue()
                 : billRepository.findAllByArchiveFalse();
 
         return bills
