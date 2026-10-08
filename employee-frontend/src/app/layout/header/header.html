@@ -14,8 +14,12 @@
   <span class="spacer"></span>
 
   <div class="lang-switcher">
-    <button mat-button (click)="switchLang('fr')">FR</button>
-    <button mat-button (click)="switchLang('en')">EN</button>
+    <button mat-button [class.active]="currentLanguage === 'fr'" (click)="switchLang('fr')">
+      FR
+    </button>
+    <button mat-button [class.active]="currentLanguage === 'en'" (click)="switchLang('en')">
+      EN
+    </button>
   </div>
 
   <button mat-icon-button [matMenuTriggerFor]="userMenu" aria-label="User menu">
@@ -29,12 +33,12 @@
 
     <button mat-menu-item (click)="setting()">
       <mat-icon>settings</mat-icon>
-      <span>Settings</span>
+      <span i18n="@@navbar.settings">Paramètres</span>
     </button>
 
     <button mat-menu-item (click)="logout()">
       <mat-icon>logout</mat-icon>
-      <span>Logout</span>
+      <span i18n="@@navbar.logout">Déconnexion</span>
     </button>
   </mat-menu>
 </mat-toolbar>
