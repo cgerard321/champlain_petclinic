@@ -7,7 +7,7 @@
   },
   "include": [
     "src/**/*.ts"
- ],
+, "tests/visitsTest/visitListVetVisits.spec.ts", "tests/visitsTest/visitListAdmin.spec.ts"  ],
   "exclude": [
     "src/**/*.spec.ts"
   ]
