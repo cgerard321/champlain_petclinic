@@ -21,6 +21,72 @@
     "login": "Connexion",
     "profile": "Profil",
     "editProfile": "Modifier le profil",
-    "logout": "Déconnexion"
-  }
+    "logout": "Déconnexion",
+    "privacy": "Politique de confidentialité",
+    "contact": "Contact"
+  },
+  "highlights": {
+    "ariaLabel": "Points forts",
+    "rating": { "title": "Note moyenne de 4,9/5", "label": "selon les propriétaires d'animaux" },
+    "team": { "title": "Équipe expérimentée", "label": "Vétérinaires certifiés" },
+    "sameDay": { "title": "Rendez-vous le jour même", "label": "Selon les disponibilités" }
+  },
+  "loading": "Chargement...",
+  "intro": {
+    "welcome": "Bienvenue à la",
+    "clinicName": "Clinique vétérinaire Champlain"
+  },
+  "clinicDescription": "À la Clinique vétérinaire Champlain, nous offrons une large gamme de services pour assurer la santé et le bien-être de vos animaux de compagnie. Nos vétérinaires et notre personnel expérimentés sont dévoués à fournir les meilleurs soins possibles.",
+  "bookAppointment": "Prendre rendez-vous",
+  "contactUs": "Contactez-nous",
+  "services": {
+    "ariaLabel": "Services",
+    "title": "Aperçu de nos services",
+    "items": {
+      "wellness": {
+        "title": "Examens de santé",
+        "desc": "Bilans annuels et soins préventifs."
+      },
+      "vaccinations": {
+        "title": "Vaccination",
+        "desc": "Vaccins essentiels et selon le mode de vie."
+      },
+      "dental": {
+        "title": "Soins dentaires",
+        "desc": "Détartrage, polissage et radiographies dentaires."
+      },
+      "diagnostics": {
+        "title": "Diagnostic",
+        "desc": "Radiologie numérique et laboratoire sur place."
+      },
+      "surgery": {
+        "title": "Chirurgie",
+        "desc": "Interventions courantes et chirurgie des tissus mous."
+      },
+      "emergency": {
+        "title": "Urgences",
+        "desc": "Soins urgents pendant les heures d'ouverture."
+      }
+    }
+  },
+  "featuredVets": {
+    "ariaLabel": "Vétérinaires en vedette",
+    "title": "Vétérinaires en vedette"
+  },
+  "faq": {
+    "ariaLabel": "FAQ",
+    "title": "FAQ",
+    "button": "Voir toutes les FAQ"
+  },
+  "contactInfo": {
+    "ariaLabel": "Contact",
+    "hasQuestion": "Vous avez des questions ou besoin d'aide ?",
+    "messageAway": "Notre équipe est à un message de vous aider.",
+    "buttonContact": "Contactez-nous",
+    "buttonBook": "Prendre rendez-vous"
+  },
+  "allRightsReserved": "Clinique vétérinaire Champlain. Tous droits réservés.",
+  "explore": "Explorer",
+  "clinicMessage": "Des soins vétérinaires attentionnés pour garder vos animaux en santé et heureux.",
+  "support": "Support"
 }
