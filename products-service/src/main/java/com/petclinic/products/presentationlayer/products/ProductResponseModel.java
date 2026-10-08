@@ -8,6 +8,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.util.Date;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -26,7 +29,10 @@ public class ProductResponseModel {
     private String productType;
     private String productTypeId;
     //private ProductType productType;
+    private LocalDate releaseDate;
     private ProductStatus productStatus;
     private DeliveryType deliveryType;
     private FileResponseDTO image;
+
+
 }
