@@ -313,7 +313,6 @@
   }
 }
 
-
 .supply-edit-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
@@ -520,5 +519,4 @@
   .filter-heading {
     flex-direction: column;
   }
-
 }

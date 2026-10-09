@@ -17,7 +17,7 @@ import { LoginPage } from './login';
  * authenticating.
  */
 
-/** The login subset of public/i18n/en.json, kept in sync with that file. */
+/** The login subset of src/locale/en.json, kept in sync with that file. */
 const EN_LOGIN = {
   'login.title': 'Login',
   'login.username': 'Username or email',

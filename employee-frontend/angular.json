@@ -13,13 +13,16 @@
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
+
       "i18n": {
-        "sourceLocale": "fr"
+        "sourceLocale": "fr-CA"
       },
+
       "architect": {
         "build": {
           "builder": "@angular/build:application",
           "options": {
+            "localize": false,
             "browser": "src/main.ts",
             "polyfills": ["@angular/localize/init"],
             "tsConfig": "tsconfig.app.json",
@@ -27,6 +30,11 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "en.json",
+                "input": "src/locale",
+                "output": "locale"
               }
             ],
             "styles": ["src/material-theme.scss", "src/styles.css"]

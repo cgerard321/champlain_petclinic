@@ -7,16 +7,16 @@
     <title>Document</title>
   </head>
   <body>
-    <h1>List of Visits</h1>
+    <h1 i18n="@@visits.title">Liste des visites</h1>
     <table>
       <tr>
-        <th>Visit ID</th>
-        <th>Veterinarian FullName</th>
-        <th>PetName</th>
-        <th>Description</th>
-        <th>Start Date</th>
-        <th>End Date</th>
-        <th>Status</th>
+        <th i18n="@@visits.visitId">Identifiant de la visite</th>
+        <th i18n="@@visits.veterinarianFullName">Nom complet du vétérinaire</th>
+        <th i18n="@@visits.petName">Nom de l&apos;animal</th>
+        <th i18n="@@visits.description">Description</th>
+        <th i18n="@@visits.startDate">Date de début</th>
+        <th i18n="@@visits.endDate">Date de fin</th>
+        <th i18n="@@visits.status">Statut</th>
       </tr>
 
       @for (visits of visit(); track visits.visitId) {
@@ -25,9 +25,9 @@
           <td>{{ visits.vetFirstName }} {{ visits.vetLastName }}</td>
           <td>{{ visits.petName }}</td>
           <td>{{ visits.description }}</td>
-          <td>{{ visits.visitDate }}</td>
-          <td>{{ visits.visitEndDate }}</td>
-          <td>{{ visits.status }}</td>
+          <td>{{ visits.visitDate | date }}</td>
+          <td>{{ visits.visitEndDate | date }}</td>
+          <td>{{ statusLabel(visits.status) }}</td>
         </tr>
       }
     </table>

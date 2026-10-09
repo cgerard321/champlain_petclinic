@@ -140,7 +140,7 @@
   height: 190px;
   border-radius: 50%;
   background: rgb(199 217 178 / 18%);
-  content: "";
+  content: '';
   pointer-events: none;
 }
 
@@ -491,7 +491,6 @@
     align-items: flex-start;
   }
 }
-
 
 .inventory-pagination {
   display: flex;
