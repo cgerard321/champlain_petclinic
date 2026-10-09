@@ -43,7 +43,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
   const [showStreamedBills, setShowStreamedBills] = useState(false);
   const [searchId, setSearchId] = useState('');
   const [searchedBill, setSearchedBill] = useState<Bill | null>(null);
-  const [selectedOwnerFilter, setSelectedOwnerFilter] = useState('');
+  const [selectedCustomerFilter, setSelectedCustomerFilter] = useState('');
   const [selectedVetFilter, setSelectedVetFilter] = useState('');
   const [selectedVisitTypeFilter, setSelectedVisitTypeFilter] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -140,7 +140,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
     billStatus: '',
     dueDate: '',
   });
-  const [owners, setOwners] = useState<CustomerResponseModel[]>([]);
+  const [customers, setCustomers] = useState<CustomerResponseModel[]>([]);
   const [vets, setVets] = useState<VetResponseModel[]>([]);
   const [detailBill, setDetailBill] = useState<Bill | null>(null);
   const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
@@ -154,14 +154,14 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
   const [statusError, setStatusError] = useState<boolean>(false);
   const [dueDateError, setDueDateError] = useState<boolean>(false);
 
-  const fetchOwnersAndVets = useCallback(async (): Promise<void> => {
+  const fetchCustomersAndVets = useCallback(async (): Promise<void> => {
     try {
-      const ownersList = await getAllCustomers();
+      const customersList = await getAllCustomers();
       const vetsList = await getAllVets();
-      setOwners(ownersList);
+      setCustomers(customersList);
       setVets(vetsList);
     } catch (err) {
-      setError('Failed to fetch owners and vets');
+      setError('Failed to fetch customers and vets');
     }
   }, []);
 
@@ -242,11 +242,11 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
     setShowArchivedBills(prev => !prev);
   };
 
-  const handleOwnerNameChange = async (
+  const handleCustomerNameChange = async (
     event: React.ChangeEvent<HTMLSelectElement>
   ): Promise<void> => {
     const fullName = event.target.value;
-    setSelectedOwnerFilter(fullName);
+    setSelectedCustomerFilter(fullName);
 
     if (fullName) {
       const parts = fullName.trim().split(' ');
@@ -318,7 +318,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
     setFilterYear(new Date().getFullYear());
     setFilterMonth(0);
     setSelectedFilter('');
-    setSelectedOwnerFilter('');
+    setSelectedCustomerFilter('');
     setSelectedVetFilter('');
     setSelectedVisitTypeFilter('');
     setFilter(emptyFilter);
@@ -338,7 +338,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
     }
 
     const filteredByArchiveStatus = showArchivedBills
-      ? billsToFilter
+      ? billsToFilter.filter(bill => bill.archive)
       : billsToFilter.filter(bill => !bill.archive);
 
     if (!applyFilters) {
@@ -355,17 +355,17 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
         !appliedFilter.customerId ||
         bill.customerId.includes(appliedFilter.customerId);
 
-      const ownerFirst = appliedFilter.firstName?.trim();
-      const ownerLast = appliedFilter.lastName?.trim();
-      const matchesOwner =
-        (!ownerFirst ||
-          (bill.ownerFirstName || '')
+      const customerFirst = appliedFilter.firstName?.trim();
+      const customerLast = appliedFilter.lastName?.trim();
+      const matchesCustomer =
+        (!customerFirst ||
+          (bill.customerFirstName || '')
             .toLowerCase()
-            .includes(ownerFirst.toLowerCase())) &&
-        (!ownerLast ||
-          (bill.ownerLastName || '')
+            .includes(customerFirst.toLowerCase())) &&
+        (!customerLast ||
+          (bill.customerLastName || '')
             .toLowerCase()
-            .includes(ownerLast.toLowerCase()));
+            .includes(customerLast.toLowerCase()));
 
       // vet name
       const vetFirst = appliedFilter.vetFirstName?.trim();
@@ -396,7 +396,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
       return (
         matchesStatus &&
         matchesCustomerId &&
-        matchesOwner &&
+        matchesCustomer &&
         matchesVet &&
         matchesVisitType &&
         matchesMonth
@@ -472,8 +472,8 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
   };
 
   useEffect(() => {
-    fetchOwnersAndVets();
-  }, [fetchOwnersAndVets]);
+    fetchCustomersAndVets();
+  }, [fetchCustomersAndVets]);
 
   useEffect(() => {
     if (activeSection === 'create') {
@@ -588,7 +588,7 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
             className={`archive-btn ${showArchivedBills ? 'active' : ''}`}
             onClick={handleArchiveToggle}
           >
-            {showArchivedBills ? 'Hide Archived' : 'Show Archived'}
+            {showArchivedBills ? 'Show Regular Bills' : 'Show Archived Bills'}
           </button>
           {showStreamedBills ? (
             <button className="archive-btn" onClick={handleBackToPagination}>
@@ -772,19 +772,19 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                     ))}
                   </select>
 
-                  <label htmlFor="ownerNameFilter">Owner Name</label>
+                  <label htmlFor="customerNameFilter">Customer Name</label>
                   <select
-                    id="ownerNameFilter"
-                    value={selectedOwnerFilter}
-                    onChange={handleOwnerNameChange}
+                    id="customerNameFilter"
+                    value={selectedCustomerFilter}
+                    onChange={handleCustomerNameChange}
                   >
-                    <option value="">All Owners</option>
-                    {owners.map(owner => (
+                    <option value="">All Customers</option>
+                    {customers.map(customer => (
                       <option
-                        key={owner.customerId}
-                        value={`${owner.firstName} ${owner.lastName}`}
+                        key={customer.customerId}
+                        value={`${customer.firstName} ${customer.lastName}`}
                       >
-                        {owner.firstName} {owner.lastName}
+                        {customer.firstName} {customer.lastName}
                       </option>
                     ))}
                   </select>
@@ -883,9 +883,12 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                       }
                     >
                       <option value="">Select Customer</option>
-                      {owners.map(owner => (
-                        <option key={owner.customerId} value={owner.customerId}>
-                          {owner.firstName} {owner.lastName}
+                      {customers.map(customer => (
+                        <option
+                          key={customer.customerId}
+                          value={customer.customerId}
+                        >
+                          {customer.firstName} {customer.lastName}
                         </option>
                       ))}
                     </select>
@@ -1062,8 +1065,9 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                   <strong>Customer ID:</strong> {searchedBill.customerId}
                 </p>
                 <p>
-                  <strong>Owner Name:</strong> {searchedBill.ownerFirstName}{' '}
-                  {searchedBill.ownerLastName}
+                  <strong>Customer Name:</strong>{' '}
+                  {searchedBill.customerFirstName}{' '}
+                  {searchedBill.customerLastName}
                 </p>
                 <p>
                   <strong>Visit Type:</strong> {searchedBill.visitType}
@@ -1109,9 +1113,9 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                       <div className="billCardContent">
                         <div className="billColumn leftColumn">
                           <div className="billField">
-                            <strong>Owner:</strong>
+                            <strong>Customer:</strong>
                             <span className="billValue">
-                              {bill.ownerFirstName} {bill.ownerLastName}
+                              {bill.customerFirstName} {bill.customerLastName}
                             </span>
                           </div>
                           <div className="billField">
@@ -1206,8 +1210,8 @@ export default function AdminBillsListTable({}: AdminBillsListTableProps): JSX.E
                   <strong>Customer ID:</strong> {detailBill.customerId}
                 </p>
                 <p>
-                  <strong>Owner Name:</strong> {detailBill.ownerFirstName}{' '}
-                  {detailBill.ownerLastName}
+                  <strong>Customer Name:</strong> {detailBill.customerFirstName}{' '}
+                  {detailBill.customerLastName}
                 </p>
                 <p>
                   <strong>Visit Type:</strong> {detailBill.visitType}

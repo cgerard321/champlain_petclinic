@@ -3,7 +3,7 @@ package com.petclinic.billing.domainclientlayer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.billing.datalayer.CustomerResponseDTO;
-import com.petclinic.billing.exceptions.NotFoundException;
+import com.petclinic.billing.exceptions.CustomerNotFoundException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
@@ -55,10 +55,10 @@ public class CustomerServiceClientUnitTest {
                 .setBody(objectMapper.writeValueAsString(customerResponseDTO))
         );
 
-        Mono<CustomerResponseDTO> ownerResponseDTOMono = customerServiceClient.getCustomerByCustomerId(customerId);
+        Mono<CustomerResponseDTO> customerResponseDTOMono = customerServiceClient.getCustomerByCustomerId(customerId);
 
-        StepVerifier.create(ownerResponseDTOMono)
-                .expectNextMatches(ownerResponseDTO1 -> ownerResponseDTO1.getCustomerId().equals(customerId))
+        StepVerifier.create(customerResponseDTOMono)
+                .expectNextMatches(customerResponseDTO1 -> customerResponseDTO1.getCustomerId().equals(customerId))
                 .verifyComplete();
     }
 
@@ -74,7 +74,7 @@ public class CustomerServiceClientUnitTest {
         Mono<CustomerResponseDTO> result = customerServiceClient.getCustomerByCustomerId(invalidId);
 
         StepVerifier.create(result)
-                .expectErrorMatches(throwable -> throwable instanceof NotFoundException && throwable.getMessage().equals("Customer not found with customerId: " + invalidId))
+                .expectErrorMatches(throwable -> throwable instanceof CustomerNotFoundException && throwable.getMessage().equals("Customer not found with customerId: " + invalidId))
                 .verify();
     }
 
