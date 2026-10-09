@@ -13,7 +13,7 @@ import { getPetTypeName } from '../utils/petTypeMapping';
 import './CustomerDetails.css';
 import { deleteCustomer } from '../api/deleteCustomer.ts';
 import { IsVet } from '@/context/UserContext';
-import EditPetModal from './EditPetModal';
+import UpdatePetForm from './UpdatePetForm';
 import AddPetModal from './AddPetModal';
 import defaultProfile from '@/assets/Customers/defaultProfilePicture.png';
 
@@ -32,13 +32,12 @@ const CustomerDetails: FC = () => {
   const [bills, setBills] = useState<Bill[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isAddPetModalOpen, setIsAddPetModalOpen] = useState<boolean>(false);
-  const [isEditPetModalOpen, setIsEditPetModalOpen] = useState<boolean>(false);
   const [selectedPetId, setSelectedPetId] = useState<string>('');
 
   useEffect(() => {
     const fetchCustomerDetails = async (): Promise<void> => {
       //customerId can't be undefied here so it is ok to assert it.
-      const customerResponse = await getCustomer(customerId!);
+      const customerResponse = await getCustomer(customerId!, true);
       setCustomer(customerResponse.data);
 
       try {
@@ -232,11 +231,9 @@ const CustomerDetails: FC = () => {
 
   const handleEditPetClick = (petId: string): void => {
     setSelectedPetId(petId);
-    setIsEditPetModalOpen(true);
   };
 
-  const handleCloseEditPetModal = (): void => {
-    setIsEditPetModalOpen(false);
+  const handleCloseEditPetForm = (): void => {
     setSelectedPetId('');
   };
 
@@ -245,7 +242,7 @@ const CustomerDetails: FC = () => {
     if (!customerId) return;
 
     try {
-      const customerResponse = await getCustomer(customerId);
+      const customerResponse = await getCustomer(customerId, true);
       setCustomer(customerResponse.data);
 
       try {
@@ -341,6 +338,7 @@ const CustomerDetails: FC = () => {
   };
 
   const handlePetUpdated = (): void => {
+    setSelectedPetId('');
     fetchCustomerDetail();
   };
 
@@ -361,6 +359,17 @@ const CustomerDetails: FC = () => {
         {/* Customer Info */}
         <div className="section customer-info">
           <h3>{t('customerDetails.infoTitle')}</h3>
+          <img
+            src={
+              customer.photo?.fileData
+                ? `data:${customer.photo.fileType};base64,${customer.photo.fileData}`
+                : defaultProfile
+            }
+            alt={t('customerDetails.pets.photoAlt', {
+              name: `${customer.firstName} ${customer.lastName}`,
+            })}
+            className="customer-profile-picture"
+          />
           <p>
             <strong>{t('fields.username')} </strong>
             {userDetails?.username || t('customerDetails.loading')}
@@ -437,6 +446,17 @@ const CustomerDetails: FC = () => {
                         {t('customerDetails.pets.editPet')}
                       </button>
                     </div>
+
+                    {selectedPetId === pet.petId && (
+                      <UpdatePetForm
+                        pet={pet}
+                        customerId={customerId || ''}
+                        petTypes={petTypes}
+                        onCancel={handleCloseEditPetForm}
+                        onPetUpdated={handlePetUpdated}
+                        onPetDeleted={handlePetDeleted}
+                      />
+                    )}
                   </div>
                 </li>
               ))}
@@ -505,15 +525,6 @@ const CustomerDetails: FC = () => {
         isOpen={isAddPetModalOpen}
         onClose={handleCloseAddPetModal}
         onPetAdded={handlePetAdded}
-      />
-
-      <EditPetModal
-        isOpen={isEditPetModalOpen}
-        onClose={handleCloseEditPetModal}
-        petId={selectedPetId}
-        customerId={customerId || ''}
-        onPetUpdated={handlePetUpdated}
-        onPetDeleted={handlePetDeleted}
       />
     </div>
   );
