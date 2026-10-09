@@ -54,7 +54,7 @@ export async function loadActiveTranslations(): Promise<void> {
   const lang = getSavedLang();
   document.documentElement.lang = lang;
   // Stop here to avoid a useless network call.
-  if (lang !== 'en') {
+  if (!lang.startsWith('en')) {
     return;
   }
 

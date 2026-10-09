@@ -7,16 +7,16 @@
   <title>Document</title>
 </head>
 <body>
-<h1>Liste des visites</h1>
+<h1 i18n="@@visits.title">Liste des visites</h1>
 <table>
   <tr>
-    <th>Identifiant de la visite</th>
-    <th>Nom complet du vétérinaire</th>
-    <th>Nom de l&apos;animal</th>
-    <th>Description</th>
-    <th>Date de début</th>
-    <th>Date de fin</th>
-    <th>Statut</th>
+    <th i18n="@@visits.visitId">Identifiant de la visite</th>
+    <th i18n="@@visits.veterinarianFullName">Nom complet du vétérinaire</th>
+    <th i18n="@@visits.petName">Nom de l&apos;animal</th>
+    <th i18n="@@visits.description">Description</th>
+    <th i18n="@@visits.startDate">Date de début</th>
+    <th i18n="@@visits.endDate">Date de fin</th>
+    <th i18n="@@visits.status">Statut</th>
   </tr>
 
   @for (visits of visit(); track visits.visitId) {

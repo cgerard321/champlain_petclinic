@@ -68,6 +68,16 @@
         "heading": "Specialties",
         "description": "Discover the clinic's different areas of care."
       }
+    },
+    "visits": {
+      "title": "List of Visits",
+      "visitId": "Visit ID",
+      "veterinarianFullName": "Veterinarian full name",
+      "petName": "Pet name",
+      "description": "Description",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "status": "Status"
     }
   }
 }

@@ -16,11 +16,7 @@
 
 
       "i18n": {
-        "sourceLocale": "fr-CA",
-        "en-CA": {
-          "translation": "src/public/i18n/en.json",
-          "subPath": ""
-        }
+        "sourceLocale": "fr-CA"
       },
 
 
@@ -28,9 +24,7 @@
         "build": {
           "builder": "@angular/build:application",
           "options": {
-            "localize": [
-              "fr-CA"
-            ],
+            "localize": false,
             "browser": "src/main.ts",
             "polyfills": ["@angular/localize/init"],
             "tsConfig": "tsconfig.app.json",
