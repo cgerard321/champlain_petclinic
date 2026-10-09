@@ -1,35 +1,35 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="VistListTable.css" />
-  <title>Document</title>
-</head>
-<body>
-<h1 i18n="@@visits.title">Liste des visites</h1>
-<table>
-  <tr>
-    <th i18n="@@visits.visitId">Identifiant de la visite</th>
-    <th i18n="@@visits.veterinarianFullName">Nom complet du vétérinaire</th>
-    <th i18n="@@visits.petName">Nom de l&apos;animal</th>
-    <th i18n="@@visits.description">Description</th>
-    <th i18n="@@visits.startDate">Date de début</th>
-    <th i18n="@@visits.endDate">Date de fin</th>
-    <th i18n="@@visits.status">Statut</th>
-  </tr>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="VistListTable.css" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1 i18n="@@visits.title">Liste des visites</h1>
+    <table>
+      <tr>
+        <th i18n="@@visits.visitId">Identifiant de la visite</th>
+        <th i18n="@@visits.veterinarianFullName">Nom complet du vétérinaire</th>
+        <th i18n="@@visits.petName">Nom de l&apos;animal</th>
+        <th i18n="@@visits.description">Description</th>
+        <th i18n="@@visits.startDate">Date de début</th>
+        <th i18n="@@visits.endDate">Date de fin</th>
+        <th i18n="@@visits.status">Statut</th>
+      </tr>
 
-  @for (visits of visit(); track visits.visitId) {
-    <tr>
-      <td>{{ visits.visitId }}</td>
-      <td>{{ visits.vetFirstName }} {{ visits.vetLastName }}</td>
-      <td>{{ visits.petName }}</td>
-      <td>{{ visits.description }}</td>
-      <td>{{ visits.visitDate | date}}</td>
-      <td>{{ visits.visitEndDate | date}}</td>
-      <td>{{ statusLabel(visits.status) }}</td>
-    </tr>
-  }
-</table>
-</body>
+      @for (visits of visit(); track visits.visitId) {
+        <tr>
+          <td>{{ visits.visitId }}</td>
+          <td>{{ visits.vetFirstName }} {{ visits.vetLastName }}</td>
+          <td>{{ visits.petName }}</td>
+          <td>{{ visits.description }}</td>
+          <td>{{ visits.visitDate | date }}</td>
+          <td>{{ visits.visitEndDate | date }}</td>
+          <td>{{ statusLabel(visits.status) }}</td>
+        </tr>
+      }
+    </table>
+  </body>
 </html>

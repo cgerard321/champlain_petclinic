@@ -4,15 +4,13 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Visit } from '@features/vist/models/Visit';
 import { Status } from '@features/vist/models/Status';
 import { VisitService } from '@features/vist/services/visit-service';
-import {DatePipe} from '@angular/common';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-visit',
   styleUrl: './VistListTable.css',
   templateUrl: './VistListTable.html',
-  imports: [
-    DatePipe
-  ]
+  imports: [DatePipe],
 })
 export class VistListTable implements OnInit {
   private readonly visitService = inject(VisitService);
@@ -54,7 +52,7 @@ export class VistListTable implements OnInit {
         error: () => {
           this.isLoading.set(false);
           this.errorMessage.set(
-            $localize`:@@visitListLoadError:Unable to load visits. Please try again later`
+            $localize`:@@visitListLoadError:Unable to load visits. Please try again later`,
           );
         },
         complete: () => this.isLoading.set(false),
