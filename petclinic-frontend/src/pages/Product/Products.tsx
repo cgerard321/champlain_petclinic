@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import ProductsList from '@/features/products/ProductsList.tsx';
 import './Products.css';
@@ -9,6 +10,7 @@ import { ProductTypeModel } from '@/features/products/models/ProductModels/Produ
 import { getProductTypes } from '@/features/products/api/getProductTypes.ts';
 
 export default function Products(): JSX.Element {
+  const { t } = useTranslation('products');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [validationMessage, setValidationMessage] = useState<string>('');
@@ -69,15 +71,12 @@ export default function Products(): JSX.Element {
       <NavBar />
       <header className="header-container">
         <div className="overlay-text">
-          <h1>Welcome to PetClinic Shop Page!</h1>
-          <p>
-            Discover a range of quality items to keep your pets healthy and
-            happy.
-          </p>
+          <h1>{t('welcome')}</h1>
+          <p>{t('intro')}</p>
         </div>
         <img
           src="https://cdn.pixabay.com/photo/2018/10/01/09/21/pets-3715733_1280.jpg"
-          alt="Pets"
+          alt={t('pets')}
           className="full-width-image"
         />
       </header>
@@ -89,7 +88,7 @@ export default function Products(): JSX.Element {
           aria-expanded={isSidebarOpen}
           aria-controls="products-sidebar"
         >
-          {'☰ Filters'}
+          {t('filterButton')}
         </button>
 
         <div className="search-wrapper">
@@ -108,24 +107,24 @@ export default function Products(): JSX.Element {
             aria-controls="sort-menu"
             aria-expanded={showSortOptions}
           >
-            Sort By
+            {t('sort')}
           </button>
           {showSortOptions && (
             <div className="sort-options" role="menu" id="sort-menu">
               <button role="menuitem" onClick={() => handleSort('default')}>
-                Sort by Default
+                {t('sortDefault')}
               </button>
               <button role="menuitem" onClick={() => handleSort('rating-desc')}>
-                Rating: High → Low
+                {t('ratingDesc')}
               </button>
               <button role="menuitem" onClick={() => handleSort('rating-asc')}>
-                Rating: Low → High
+                {t('ratingAsc')}
               </button>
               <button role="menuitem" onClick={() => handleSort('price-desc')}>
-                Price: High → Low
+                {t('priceDesc')}
               </button>
               <button role="menuitem" onClick={() => handleSort('price-asc')}>
-                Price: Low → High
+                {t('priceAsc')}
               </button>
             </div>
           )}
@@ -141,15 +140,15 @@ export default function Products(): JSX.Element {
           <button
             className="close-button"
             onClick={toggleSidebar}
-            aria-label="Close Filters"
+            aria-label={t('closeFilters')}
           >
             &times;
           </button>
           <div className="filter-container">
-            <h2>Filters</h2>
+            <h2>{t('filters')}</h2>
 
             <label>
-              Min Price:
+              {t('minPrice')}
               <input
                 type="number"
                 value={tempFilters.minPrice ?? ''}
@@ -163,7 +162,7 @@ export default function Products(): JSX.Element {
             </label>
 
             <label>
-              Max Price:
+              {t('maxPrice')}
               <input
                 type="number"
                 value={tempFilters.maxPrice ?? ''}
@@ -177,37 +176,40 @@ export default function Products(): JSX.Element {
             </label>
 
             <label>
-              Item Type:
+              {t('itemType')}
               <select
                 value={tempFilters.productType}
                 onChange={e => updateTempFilter('productType', e.target.value)}
               >
-                <option value="">All Item Types</option>
+                <option value="">{t('allTypes')}</option>
                 {productTypes.map(type => (
                   <option key={type.typeName} value={type.typeName}>
-                    {type.typeName.charAt(0).toUpperCase() +
-                      type.typeName.slice(1).toLowerCase()}
+                    {t(`types.${type.typeName.toUpperCase()}`, {
+                      defaultValue: type.typeName,
+                    })}
                   </option>
                 ))}
               </select>
             </label>
 
             <label>
-              Delivery Type:
+              {t('deliveryType')}
               <select
                 value={tempFilters.deliveryType}
                 onChange={e => updateTempFilter('deliveryType', e.target.value)}
               >
-                <option value="">All Delivery Types</option>
-                <option value="DELIVERY">Delivery</option>
-                <option value="PICKUP">Pickup</option>
-                <option value="DELIVERY_AND_PICKUP">Delivery & Pickup</option>
-                <option value="NO_DELIVERY_OPTION">No Delivery Option</option>
+                <option value="">{t('allDelivery')}</option>
+                <option value="DELIVERY">{t('delivery')}</option>
+                <option value="PICKUP">{t('pickup')}</option>
+                <option value="DELIVERY_AND_PICKUP">
+                  {t('deliveryPickup')}
+                </option>
+                <option value="NO_DELIVERY_OPTION">{t('noDelivery')}</option>
               </select>
             </label>
 
             <div className="star-rating-container">
-              <h2>Filter by Star Rating</h2>
+              <h2>{t('filterRating')}</h2>
               <StarRating
                 currentRating={tempFilters.minStars}
                 viewOnly={false}
@@ -220,8 +222,8 @@ export default function Products(): JSX.Element {
               />
             </div>
 
-            <button onClick={applyFilters}>Apply</button>
-            <button onClick={clearFilters}>Clear</button>
+            <button onClick={applyFilters}>{t('apply')}</button>
+            <button onClick={clearFilters}>{t('clear')}</button>
             {validationMessage && (
               <span style={{ color: 'red' }}>{validationMessage}</span>
             )}

@@ -1,4 +1,9 @@
 /* eslint-disable react/prop-types */
+import { useTranslation } from 'react-i18next';
+import {
+  localizedProduct,
+  formatProductPrice,
+} from '@/features/products/utils/localizedProduct';
 import { useEffect, useState } from 'react';
 import { ProductBundleModel } from '@/features/products/models/ProductModels/ProductBundleModel';
 import { getProduct } from '@/features/products/api/getProduct';
@@ -16,6 +21,17 @@ interface ProductBundleProps {
 }
 
 const ProductBundle: React.FC<ProductBundleProps> = ({ bundle }) => {
+  const { t, i18n } = useTranslation('products');
+  const language = i18n.resolvedLanguage || i18n.language || 'en';
+  const bundleName = t(`bundleNames.${bundle.bundleName}`, {
+    defaultValue: bundle.bundleName,
+  });
+  const bundleDescription = t(
+    `bundleDescriptions.${bundle.bundleDescription}`,
+    {
+      defaultValue: bundle.bundleDescription,
+    }
+  );
   const [products, setProducts] = useState<ProductModel[]>([]);
   const [bundleStatus, setBundleStatus] = useState<
     'available' | 'unavailable' | 'hidden'
@@ -23,7 +39,6 @@ const ProductBundle: React.FC<ProductBundleProps> = ({ bundle }) => {
 
   const navigate = useNavigate();
   const { user, isAuthenticated } = useUser();
-
   useEffect(() => {
     const fetchProducts = async (): Promise<void> => {
       try {
@@ -57,18 +72,18 @@ const ProductBundle: React.FC<ProductBundleProps> = ({ bundle }) => {
   if (bundleStatus === 'unavailable') {
     return (
       <div className="product-bundle-card">
-        <h3 className="bundle-title">{bundle.bundleName}</h3>
-        <h1>Bundle Unavailable</h1>
-        <p>Bundle temporarily unavailable due to missing Products</p>
+        <h3 className="bundle-title">{bundleName}</h3>
+        <h1>{t('bundleUnavailable')}</h1>
+        <p>{t('bundleMissing')}</p>
       </div>
     );
   }
 
   return (
     <div className="product-bundle-card">
-      <div className="deal-stamp">DEAL</div>
-      <h3 className="bundle-title">{bundle.bundleName}</h3>
-      <p>{bundle.bundleDescription}</p>
+      <div className="deal-stamp">{t('deal')}</div>
+      <h3 className="bundle-title">{bundleName}</h3>
+      <p>{bundleDescription}</p>
       <div className="product-bundle-products">
         {products.map(product => (
           <div
@@ -100,28 +115,33 @@ const ProductBundle: React.FC<ProductBundleProps> = ({ bundle }) => {
           >
             <ImageContainer image={product.image} imageId={product.imageId} />
             <div className="product-details">
-              <p>{product.productName}</p>
-              <p>Price: ${product.productSalePrice.toFixed(2)}</p>
+              <p>{localizedProduct(product, language).name}</p>
+              <p>
+                {t('price')}{' '}
+                {formatProductPrice(product.productSalePrice, language)}
+              </p>
             </div>
           </div>
         ))}
       </div>
       <p>
-        Original Total Price:{' '}
+        {t('originalPrice')}{' '}
         <span className="original-price">
-          ${bundle.originalTotalPrice.toFixed(2)}
+          {formatProductPrice(bundle.originalTotalPrice, language)}
         </span>
       </p>
       <p>
-        Bundle Price:{' '}
-        <span className="bundle-price">${bundle.bundlePrice.toFixed(2)}</span>
+        {t('bundlePrice')}{' '}
+        <span className="bundle-price">
+          {formatProductPrice(bundle.bundlePrice, language)}
+        </span>
       </p>
       {isAuthenticated && (
         <button
           className="add-bundle-to-cart-button"
-          aria-label={`Add ${bundle.bundleName} to Cart`}
+          aria-label={t('bundleCart', { name: bundleName })}
         >
-          Add Bundle to Cart
+          {t('addBundle')}
         </button>
       )}
     </div>

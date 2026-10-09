@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState, useEffect, useMemo } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import StarRating from './StarRating.tsx';
@@ -19,6 +20,7 @@ const EditReviewModal = ({
   updateRating,
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 }: EditReviewModalProps) => {
+  const { t } = useTranslation('products');
   const [reviewText, setReviewText] = useState<string>(
     currentUserRating.review
   );
@@ -36,11 +38,11 @@ const EditReviewModal = ({
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const handleSubmit = async () => {
     if (localRating === 0) {
-      setError('Please select a rating before updating.');
+      setError('updateRatingRequired');
       return;
     }
     if (!reviewText.trim()) {
-      setError('Please write a review before updating.');
+      setError('updateReviewRequired');
       return;
     }
 
@@ -49,7 +51,7 @@ const EditReviewModal = ({
       setError('');
       onClose();
     } catch (err) {
-      setError('Failed to update review. Please try again.');
+      setError('updateFailed');
       console.error('Failed to update review:', err);
     }
   };
@@ -73,14 +75,14 @@ const EditReviewModal = ({
       </div>
 
       <Modal.Body className="wrm-body">
-        <p className="wrm-title">Edit Your Review</p>
-        <p className="wrm-subtitle">Update your rating and review below.</p>
+        <p className="wrm-title">{t('editReview')}</p>
+        <p className="wrm-subtitle">{t('updateHint')}</p>
 
-        {error && <div className="wrm-error">{error}</div>}
+        {error && <div className="wrm-error">{t(error)}</div>}
 
         {/* Rating Section */}
         <div className="wrm-section">
-          <label className="wrm-label">Your Rating *</label>
+          <label className="wrm-label">{t('yourRating')}</label>
           <StarRating
             currentRating={localRating}
             viewOnly={false}
@@ -90,16 +92,16 @@ const EditReviewModal = ({
 
         {/* Review Section */}
         <div className="wrm-section">
-          <label className="wrm-label">Your Review *</label>
+          <label className="wrm-label">{t('yourReview')}</label>
           <ReviewBox updateFunc={setReviewText} rating={memoizedRating} />
         </div>
 
         {/* Buttons */}
         <div className="wrm-button-container">
           <Button className="cancel-btn" onClick={onClose}>
-            Cancel
+            {t('cancel')}
           </Button>
-          <Button onClick={handleSubmit}>Update Review</Button>
+          <Button onClick={handleSubmit}>{t('updateReview')}</Button>
         </div>
       </Modal.Body>
     </Modal>

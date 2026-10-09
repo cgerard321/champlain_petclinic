@@ -50,8 +50,7 @@ body,
   border-top: 5px solid orange;
   position: relative;
 }
-.low-quantity::after {
-  content: 'Low Stock';
+.low-quantity .stock-label {
   color: orange;
   font-weight: bold;
   font-size: 12px;
@@ -68,8 +67,7 @@ body,
   border-top: 5px solid red;
   position: relative;
 }
-.out-of-stock::after {
-  content: 'Out of Stock';
+.out-of-stock .stock-label {
   color: red;
   font-weight: bold;
   font-size: 12px;

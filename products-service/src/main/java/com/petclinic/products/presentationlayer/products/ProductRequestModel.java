@@ -18,6 +18,8 @@ import java.time.LocalDate;
 public class ProductRequestModel {
     private String productName;
     private String productDescription;
+    private String productNameFr;
+    private String productDescriptionFr;
     private Double productSalePrice;
     private Integer productQuantity;
     private Boolean isUnlisted;
