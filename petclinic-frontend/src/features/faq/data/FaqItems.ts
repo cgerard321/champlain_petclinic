@@ -10,6 +10,19 @@ export const formattedHours = contact.hours
   )
   .join('\n');
 
+import type { TFunction } from 'i18next';
+
+export function formatHours(t: TFunction): string {
+  return contact.hours
+    .map(h => {
+      const days = t(`hours.day.${h.id}`, { ns: `home` });
+      return 'note' in h && h.note
+        ? `${days}: ${t('hours.closed', { ns: 'home' })}`
+        : `${days}: ${h.open ?? '–'}–${h.close ?? '–'}`;
+    })
+    .join('\n');
+}
+
 // All the sample FAQ questions, answers, and so on.
 export const FAQ_ITEMS: readonly FaqItem[] = [
   {
