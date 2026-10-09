@@ -1,35 +1,35 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="VistListTable.css" />
-    <title>Document</title>
-  </head>
-  <body>
-    <h1 i18n>List of Visits</h1>
-    <table>
-      <tr>
-        <th i18n>Visit ID</th>
-        <th i18n>Veterinarian FullName</th>
-        <th i18n>PetName</th>
-        <th i18n>Description</th>
-        <th i18n>Start Date</th>
-        <th i18n>End Date</th>
-        <th i18n>Status</th>
-      </tr>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="VistListTable.css" />
+  <title>Document</title>
+</head>
+<body>
+<h1>Liste des visites</h1>
+<table>
+  <tr>
+    <th>Identifiant de la visite</th>
+    <th>Nom complet du vétérinaire</th>
+    <th>Nom de l&apos;animal</th>
+    <th>Description</th>
+    <th>Date de début</th>
+    <th>Date de fin</th>
+    <th>Statut</th>
+  </tr>
 
-      @for (visits of visit(); track visits.visitId) {
-        <tr>
-          <td>{{ visits.visitId }}</td>
-          <td>{{ visits.vetFirstName }} {{ visits.vetLastName }}</td>
-          <td>{{ visits.petName }}</td>
-          <td>{{ visits.description }}</td>
-          <td>{{ visits.visitDate | date}}</td>
-          <td>{{ visits.visitEndDate | date}}</td>
-          <td i18n>{{ visits.status }}</td>
-        </tr>
-      }
-    </table>
-  </body>
+  @for (visits of visit(); track visits.visitId) {
+    <tr>
+      <td>{{ visits.visitId }}</td>
+      <td>{{ visits.vetFirstName }} {{ visits.vetLastName }}</td>
+      <td>{{ visits.petName }}</td>
+      <td>{{ visits.description }}</td>
+      <td>{{ visits.visitDate | date}}</td>
+      <td>{{ visits.visitEndDate | date}}</td>
+      <td>{{ visits.status }}</td>
+    </tr>
+  }
+</table>
+</body>
 </html>
