@@ -16,6 +16,7 @@ import {
   FaLink,
   FaList,
   FaListOl,
+  FaStrikethrough,
   FaUnderline,
 } from 'react-icons/fa';
 import { BsTypeH1, BsTypeH2, BsTypeH3 } from 'react-icons/bs';
@@ -50,16 +51,22 @@ function ReviewBox({
 
   const handleToolbarButtonClick = (
     markdownTagStart: string,
-    markdownTagEnd?: string
+    markdownTagEnd?: string,
+    lineBased: boolean = false
   ): void => {
-    if (!hasSelection) return;
+    //if (!hasSelection) return;
     flushSync(() =>
       handleLocalChange(
-        wrapTextWithMarkdown(reviewText, markdownTagStart, markdownTagEnd ?? '')
+        wrapTextWithMarkdown(
+          reviewText,
+          markdownTagStart,
+          markdownTagEnd ?? '',
+          lineBased
+        )
       )
     );
 
-    if (!textAreaRef.current) return;
+    if (!textAreaRef?.current || !hasSelection) return;
     textAreaRef.current.focus();
     textAreaRef.current.setSelectionRange(
       selectionRef.current.start,
@@ -67,33 +74,61 @@ function ReviewBox({
     );
   };
 
+  const isWrapped = (str: string, start: string, end: string): boolean =>
+    str.length >= start.length + end.length &&
+    str.startsWith(start) &&
+    str.endsWith(end);
+
   const wrapTextWithMarkdown = (
     text: string,
     markdownTagStart: string,
-    markdownTagEnd?: string
+    markdownTagEnd: string,
+    lineBased: boolean
   ): string => {
-    if (!textAreaRef || !textAreaRef.current) return text;
-    let ss = selectionRef.current.start;
+    if (!textAreaRef?.current) return text;
 
-    while (text.charAt(ss) == '\n' && ss != text.length) ss++;
+    let selStart = selectionRef.current.start;
+    const selEnd = selectionRef.current.end;
 
-    const se = selectionRef.current.end;
+    const markdownStartLen = markdownTagStart.length;
 
-    const lines = text.slice(ss, se).split('\n');
+    if (selStart === selEnd) {
+      const curLineStartPos = text.lastIndexOf('\n', selStart - 1) + 1;
+      let curLineEndPos = text.indexOf('\n', curLineStartPos);
+      curLineEndPos = curLineEndPos === -1 ? text.length : curLineEndPos;
+      const curLine = text.slice(curLineStartPos, curLineEndPos);
 
-    const linesWithMarkdown = lines
-      .map(line => {
-        if (line == '') return line;
-        return markdownTagStart + line + markdownTagEnd;
-      })
-      .join('\n');
+      if (isWrapped(curLine, markdownTagStart, markdownTagEnd)) return text;
 
-    selectionRef.current = {
-      start: ss + markdownTagStart.length,
-      end: ss + lines[0].length + markdownTagStart.length,
-    };
+      return (
+        text.slice(0, curLineStartPos) +
+        markdownTagStart +
+        curLine +
+        markdownTagEnd +
+        text.slice(curLineEndPos)
+      );
+    } else {
+      if (lineBased) selStart = text.lastIndexOf('\n', selStart - 1) + 1;
 
-    return text.slice(0, ss) + linesWithMarkdown + text.slice(se, text.length);
+      while (text.charAt(selStart) === '\n') selStart++;
+
+      const lines = text.slice(selStart, selEnd).trim().split('\n');
+
+      const linesWithMarkdown = lines
+        .map(line => {
+          if (line === '' || isWrapped(line, markdownTagStart, markdownTagEnd))
+            return line;
+          return markdownTagStart + line + markdownTagEnd;
+        })
+        .join('\n');
+
+      selectionRef.current = {
+        start: selStart + markdownStartLen,
+        end: selStart + lines[0].length + markdownStartLen,
+      };
+
+      return text.slice(0, selStart) + linesWithMarkdown + text.slice(selEnd);
+    }
   };
 
   return (
@@ -119,6 +154,16 @@ function ReviewBox({
             }}
           >
             <FaBold size={18} />
+          </Button>
+          <Button
+            variant="light"
+            aria-label="Apply strikethrough to selection"
+            onMouseDown={e => {
+              e.preventDefault();
+              handleToolbarButtonClick('~', '~');
+            }}
+          >
+            <FaStrikethrough size={18} />
           </Button>
           <Button
             variant="light"
@@ -155,7 +200,7 @@ function ReviewBox({
             aria-label="Make selection a list"
             onMouseDown={e => {
               e.preventDefault();
-              handleToolbarButtonClick('- ');
+              handleToolbarButtonClick('- ', '', true);
             }}
           >
             <FaList size={18} />
@@ -165,7 +210,7 @@ function ReviewBox({
             aria-label="Make selection a numbered list"
             onMouseDown={e => {
               e.preventDefault();
-              handleToolbarButtonClick('1. ');
+              handleToolbarButtonClick('1. ', '', true);
             }}
           >
             <FaListOl size={18} />
@@ -175,7 +220,7 @@ function ReviewBox({
             aria-label="Put the selection in a blockquote"
             onMouseDown={e => {
               e.preventDefault();
-              handleToolbarButtonClick('> ');
+              handleToolbarButtonClick('> ', '', true);
             }}
           >
             <TbBlockquote size={18} />
@@ -185,7 +230,7 @@ function ReviewBox({
             aria-label="Make the selection a header"
             onMouseDown={e => {
               e.preventDefault();
-              handleToolbarButtonClick('# ');
+              handleToolbarButtonClick('# ', '', true);
             }}
           >
             <BsTypeH1 size={18} />
@@ -195,7 +240,7 @@ function ReviewBox({
             aria-label="Make the selection a sub-header"
             onMouseDown={e => {
               e.preventDefault();
-              handleToolbarButtonClick('## ');
+              handleToolbarButtonClick('## ', '', true);
             }}
           >
             <BsTypeH2 size={18} />
@@ -205,7 +250,7 @@ function ReviewBox({
             aria-label="Make the selection a sub-sub header"
             onMouseDown={e => {
               e.preventDefault();
-              handleToolbarButtonClick('### ');
+              handleToolbarButtonClick('### ', '', true);
             }}
           >
             <BsTypeH3 size={18} />
