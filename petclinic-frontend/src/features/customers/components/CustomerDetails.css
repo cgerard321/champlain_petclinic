@@ -190,3 +190,11 @@
 .delete-button:hover {
   background-color: #c82333;
 }
+
+.customer-profile-picture {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e5e7eb;
+}

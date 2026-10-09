@@ -15,13 +15,19 @@ export const uploadCustomerPhoto = async (
     fileData: fileData,
   };
 
-  return await axiosInstance.patch<CustomerResponseModel>(
+  const response = await axiosInstance.patch<CustomerResponseModel>(
     `/customers/${customerId}/photo`,
     photoRequest,
     {
       useV2: false,
     }
   );
+
+  if (!response.data) {
+    throw new Error('Photo upload failed: the server did not save the photo');
+  }
+
+  return response;
 };
 
 const convertFileToBase64 = (file: File): Promise<string> => {
