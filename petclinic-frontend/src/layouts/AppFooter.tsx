@@ -2,10 +2,11 @@ import { Container, Row, Col } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
 import { contact, clinic } from '@/shared/content';
-
+import { useTranslation } from 'react-i18next';
 import './AppFooter.css';
 
 export function AppFooter(): JSX.Element {
+  const { t } = useTranslation('home');
   return (
     <footer className="app-footer">
       <Container>
@@ -17,41 +18,41 @@ export function AppFooter(): JSX.Element {
               </span>
               {clinic.name}
             </h5>
-            <p className="footer-desc">{clinic.message}</p>
+            <p className="footer-desc">{t('clinicMessage')}</p>
           </Col>
 
           <Col md={2}>
-            <h6>Explore</h6>
+            <h6>{t('explore')}</h6>
             <ul className="footer-links">
               <li>
-                <Link to="/">Home</Link>
+                <Link to="/">{t('nav.home')}</Link>
               </li>
               <li>
-                <Link to="/vets">Veterinarians</Link>
+                <Link to="/vets">{t('nav.vets')}</Link>
               </li>
               <li>
-                <Link to="/products">Shop</Link>
+                <Link to="/products">{t('nav.shop')}</Link>
               </li>
             </ul>
           </Col>
 
           <Col md={3}>
-            <h6>Support</h6>
+            <h6>{t('support')}</h6>
             <ul className="footer-links">
               <li>
-                <Link to="/faq">FAQ</Link>
+                <Link to="/faq">{t('faq.title')}</Link>
               </li>
               <li>
-                <Link to="/privacy">Privacy Policy</Link>
+                <Link to="/privacy">{t('nav.privacy')}</Link>
               </li>
               <li>
-                <Link to="/contact">Contact</Link>
+                <Link to="/contact">{t('nav.contact')}</Link>
               </li>
             </ul>
           </Col>
 
           <Col md={3}>
-            <h6>Contact Us</h6>
+            <h6>{t('contactUs')}</h6>
             <ul className="footer-contact">
               <li>
                 <span className="icon" aria-hidden="true">
@@ -79,8 +80,7 @@ export function AppFooter(): JSX.Element {
 
         <Row className="pt-4 mt-4 border-top border-secondary">
           <Col className="text-center text-muted small">
-            © {new Date().getFullYear()} Champlain Pet Clinic. All rights
-            reserved.
+            © {new Date().getFullYear()} {t('allRightsReserved')}
           </Col>
         </Row>
       </Container>

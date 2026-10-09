@@ -16,31 +16,37 @@ export const clinic = {
 
   services: [
     {
+      id: 'wellness',
       icon: '\uD83E\uDE7A',
       title: 'Wellness Exams',
       desc: 'Annual check-ups & preventive care.',
     },
     {
+      id: 'vaccinations',
       icon: '\uD83D\uDC89',
       title: 'Vaccinations',
       desc: 'Core & lifestyle vaccines.',
     },
     {
+      id: 'dental',
       icon: '\uD83E\uDDB7',
       title: 'Dental Care',
       desc: 'Cleaning, polishing & dental X-rays.',
     },
     {
+      id: 'diagnostics',
       icon: '\uD83E\uDDBB',
       title: 'Diagnostics',
       desc: 'Digital radiology & in-house lab.',
     },
     {
+      id: 'surgery',
       icon: '\u2702\uFE0F',
       title: 'Surgery',
       desc: 'Routine & soft-tissue procedures.',
     },
     {
+      id: 'emergency',
       icon: '\uD83D\uDE91',
       title: 'Emergency',
       desc: 'Urgent care during open hours.',
