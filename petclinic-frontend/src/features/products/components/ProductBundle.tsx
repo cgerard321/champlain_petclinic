@@ -26,12 +26,12 @@ const ProductBundle: React.FC<ProductBundleProps> = ({ bundle }) => {
   const bundleName = t(`bundleNames.${bundle.bundleName}`, {
     defaultValue: bundle.bundleName,
   });
-const bundleDescription = t(
-  `bundleDescriptions.${bundle.bundleDescription}`,
-  {
-    defaultValue: bundle.bundleDescription,
-  }
-);
+  const bundleDescription = t(
+    `bundleDescriptions.${bundle.bundleDescription}`,
+    {
+      defaultValue: bundle.bundleDescription,
+    }
+  );
   const [products, setProducts] = useState<ProductModel[]>([]);
   const [bundleStatus, setBundleStatus] = useState<
     'available' | 'unavailable' | 'hidden'
@@ -39,7 +39,6 @@ const bundleDescription = t(
 
   const navigate = useNavigate();
   const { user, isAuthenticated } = useUser();
-
   useEffect(() => {
     const fetchProducts = async (): Promise<void> => {
       try {
