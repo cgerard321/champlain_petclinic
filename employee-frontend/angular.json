@@ -17,7 +17,12 @@
 
       "i18n": {
         "sourceLocale": "en-CA",
-        "locales": {"fr-CA": "src/locale/messages.fr.xlf"}
+        "locales": {
+          "fr-CA": {
+            "translation": "src/locale/messages.fr.xlf",
+            "subPath": ""
+          }
+        }
       },
 
 
