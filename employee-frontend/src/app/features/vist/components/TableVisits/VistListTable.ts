@@ -1,10 +1,10 @@
+import { DatePipe } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-import { Visit } from '@features/vist/models/Visit';
 import { Status } from '@features/vist/models/Status';
+import { Visit } from '@features/vist/models/Visit';
 import { VisitService } from '@features/vist/services/visit-service';
-import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-visit',
