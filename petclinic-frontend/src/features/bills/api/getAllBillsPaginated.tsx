@@ -6,8 +6,8 @@ export async function getAllBillsPaginated(
   listSize: number,
   billId?: string,
   customerId?: string,
-  ownerFirstName?: string,
-  ownerLastName?: string,
+  customerFirstName?: string,
+  customerLastName?: string,
   visitType?: string,
   vetId?: string,
   vetFirstName?: string,
@@ -22,16 +22,16 @@ export async function getAllBillsPaginated(
 
   if (billId) params.billId = billId;
   if (customerId) params.customerId = customerId;
-  if (ownerFirstName) params.ownerFirstName = ownerFirstName;
-  if (ownerLastName) params.ownerLastName = ownerLastName;
+  if (customerFirstName) params.customerFirstName = customerFirstName;
+  if (customerLastName) params.customerLastName = customerLastName;
   if (visitType) params.visitType = visitType;
   if (vetId) params.vetId = vetId;
   if (vetFirstName) params.vetFirstName = vetFirstName;
   if (vetLastName) params.vetLastName = vetLastName;
 
-  const response = await axiosInstance.get<Bill[]>('/bills/page', {
+  const response = await axiosInstance.get<Bill[]>('/bills/paginated', {
     params,
-    useV2: false,
+    useV2: true,
   });
 
   return response.data;

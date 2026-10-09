@@ -9,8 +9,8 @@ export default function useGetAllBillsStream(): {
   getBillsStream: (
     billId?: string,
     customerId?: string,
-    ownerFirstName?: string,
-    ownerLastName?: string,
+    customerFirstName?: string,
+    customerLastName?: string,
     visitType?: string,
     vetId?: string,
     vetFirstName?: string,
@@ -25,8 +25,8 @@ export default function useGetAllBillsStream(): {
     async (
       billId?: string,
       customerId?: string,
-      ownerFirstName?: string,
-      ownerLastName?: string,
+      customerFirstName?: string,
+      customerLastName?: string,
       visitType?: string,
       vetId?: string,
       vetFirstName?: string,
@@ -39,8 +39,8 @@ export default function useGetAllBillsStream(): {
         const streamedBills = await getAllBillsStream(
           billId,
           customerId,
-          ownerFirstName,
-          ownerLastName,
+          customerFirstName,
+          customerLastName,
           visitType,
           vetId,
           vetFirstName,

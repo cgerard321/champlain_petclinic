@@ -47,7 +47,7 @@ public class BillServiceClient {
                 .retrieve()
                 .bodyToMono(BillResponseDTO.class);
     }
-    public Flux<BillResponseDTO> getBillsByOwnerId(final String customerId) {
+    public Flux<BillResponseDTO> getBillsByCustomerId(final String customerId) {
         return webClientBuilder.build().get()
                 .uri(billServiceUrl + "/customer/{customerId}", customerId)
                 .retrieve()
@@ -119,8 +119,8 @@ public class BillServiceClient {
     public Flux<BillResponseDTO> getAllBillsStream(
             String billId,
             String customerId,
-            String ownerFirstName,
-            String ownerLastName,
+            String customerFirstName,
+            String customerLastName,
             String visitType,
             String vetId,
             String vetFirstName,
@@ -130,8 +130,8 @@ public class BillServiceClient {
                 UriComponentsBuilder.fromUriString(billServiceUrl + "/stream")
                         .queryParamIfPresent("billId", Optional.ofNullable(billId))
                         .queryParamIfPresent("customerId", Optional.ofNullable(customerId))
-                        .queryParamIfPresent("ownerFirstName", Optional.ofNullable(ownerFirstName))
-                        .queryParamIfPresent("ownerLastName", Optional.ofNullable(ownerLastName))
+                        .queryParamIfPresent("customerFirstName", Optional.ofNullable(customerFirstName))
+                        .queryParamIfPresent("customerLastName", Optional.ofNullable(customerLastName))
                         .queryParamIfPresent("visitType", Optional.ofNullable(visitType))
                         .queryParamIfPresent("vetId", Optional.ofNullable(vetId))
                         .queryParamIfPresent("vetFirstName", Optional.ofNullable(vetFirstName))
@@ -165,8 +165,8 @@ public class BillServiceClient {
     public Mono<Long> getTotalNumberOfBillsWithFilters(
             String billId,
             String customerId,
-            String ownerFirstName,
-            String ownerLastName,
+            String customerFirstName,
+            String customerLastName,
             String visitType,
             String vetId,
             String vetFirstName,
@@ -175,8 +175,8 @@ public class BillServiceClient {
         return getTotalNumberOfBillsWithFilters(
                 billId,
                 customerId,
-                ownerFirstName,
-                ownerLastName,
+                customerFirstName,
+                customerLastName,
                 visitType,
                 vetId,
                 vetFirstName,
@@ -188,8 +188,8 @@ public class BillServiceClient {
     public Mono<Long> getTotalNumberOfBillsWithFilters(
             String billId,
             String customerId,
-            String ownerFirstName,
-            String ownerLastName,
+            String customerFirstName,
+            String customerLastName,
             String visitType,
             String vetId,
             String vetFirstName,
@@ -211,12 +211,12 @@ public class BillServiceClient {
             builder.queryParam("customerId", customerId);
         }
 
-        if (ownerFirstName != null && !ownerFirstName.isEmpty()) {
-            builder.queryParam("ownerFirstName", ownerFirstName);
+        if (customerFirstName != null && !customerFirstName.isEmpty()) {
+            builder.queryParam("customerFirstName", customerFirstName);
         }
 
-        if (ownerLastName != null && !ownerLastName.isEmpty()) {
-            builder.queryParam("ownerLastName", ownerLastName);
+        if (customerLastName != null && !customerLastName.isEmpty()) {
+            builder.queryParam("customerLastName", customerLastName);
         }
 
         if (visitType != null && !visitType.isEmpty()) {
@@ -263,12 +263,12 @@ public class BillServiceClient {
                 .bodyToFlux(BillResponseDTO.class);
     }
 
-    public Flux<BillResponseDTO> getBillsByOwnerName(final String ownerFirstName, final String ownerLastName) {
+    public Flux<BillResponseDTO> getBillsByCustomerName(final String customerFirstName, final String customerLastName) {
         return webClientBuilder.build().get()
-                .uri(billServiceUrl + "/owner/{ownerFirstName}/{ownerLastName}", ownerFirstName, ownerLastName)
+                .uri(billServiceUrl + "/customer/{customerFirstName}/{customerLastName}", customerFirstName, customerLastName)
                 .retrieve()
                 .bodyToFlux(BillResponseDTO.class)
-                .switchIfEmpty(Flux.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "No bills found for owner: " + ownerFirstName + " " + ownerLastName)));
+                .switchIfEmpty(Flux.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "No bills found for customer: " + customerFirstName + " " + customerLastName)));
     }
 
     public Flux<BillResponseDTO> getBillsByVetName(final String vetFirstName, final String vetLastName) {
@@ -384,8 +384,8 @@ public class BillServiceClient {
             Optional<Integer> size,
             String billId,
             String customerId,
-            String ownerFirstName,
-            String ownerLastName,
+            String customerFirstName,
+            String customerLastName,
             String visitType,
             String vetId,
             String vetFirstName,
@@ -396,8 +396,8 @@ public class BillServiceClient {
                 size,
                 billId,
                 customerId,
-                ownerFirstName,
-                ownerLastName,
+                customerFirstName,
+                customerLastName,
                 visitType,
                 vetId,
                 vetFirstName,
@@ -411,8 +411,8 @@ public class BillServiceClient {
             Optional<Integer> size,
             String billId,
             String customerId,
-            String ownerFirstName,
-            String ownerLastName,
+            String customerFirstName,
+            String customerLastName,
             String visitType,
             String vetId,
             String vetFirstName,
@@ -425,8 +425,8 @@ public class BillServiceClient {
                 .queryParam("includeArchived", includeArchived)
                 .queryParamIfPresent("billId", Optional.ofNullable(billId))
                 .queryParamIfPresent("customerId", Optional.ofNullable(customerId))
-                .queryParamIfPresent("ownerFirstName", Optional.ofNullable(ownerFirstName))
-                .queryParamIfPresent("ownerLastName", Optional.ofNullable(ownerLastName))
+                .queryParamIfPresent("customerFirstName", Optional.ofNullable(customerFirstName))
+                .queryParamIfPresent("customerLastName", Optional.ofNullable(customerLastName))
                 .queryParamIfPresent("visitType", Optional.ofNullable(visitType))
                 .queryParamIfPresent("vetId", Optional.ofNullable(vetId))
                 .queryParamIfPresent("vetFirstName", Optional.ofNullable(vetFirstName))

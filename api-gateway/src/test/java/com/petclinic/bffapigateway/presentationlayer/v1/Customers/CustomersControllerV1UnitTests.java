@@ -385,6 +385,31 @@ public class CustomersControllerV1UnitTests {
     }
 
     @Test
+    void whenGetCustomerById_withIncludePhotoTrue_thenReturnCustomerWithPhoto() {
+        CustomerResponseDTO customer = new CustomerResponseDTO();
+        customer.setCustomerId(customerId);
+        FileDetails photo = new FileDetails();
+        photo.setFileData("mockPhotoData".getBytes());
+        photo.setFileType("image/png");
+        customer.setPhoto(photo);
+
+        when(customersServiceClient.getCustomer(customerId, true))
+                .thenReturn(Mono.just(customer));
+
+        client.get()
+                .uri("/api/gateway/customers/{customerId}?includePhoto=true", customerId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(CustomerResponseDTO.class)
+                .value(dto -> {
+                    assertNotNull(dto.getPhoto());
+                    assertEquals("image/png", dto.getPhoto().getFileType());
+                });
+
+        verify(customersServiceClient, times(1)).getCustomer(customerId, true);
+    }
+
+    @Test
     void whenUpdateCustomer_withNonExistentCustomer_thenReturnNotFound() {
         CustomerRequestDTO requestDTO = new CustomerRequestDTO();
         requestDTO.setFirstName("John");

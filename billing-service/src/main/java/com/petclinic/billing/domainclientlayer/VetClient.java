@@ -1,7 +1,7 @@
 package com.petclinic.billing.domainclientlayer;
 
 import com.petclinic.billing.datalayer.VetResponseDTO;
-import com.petclinic.billing.exceptions.NotFoundException;
+import com.petclinic.billing.exceptions.VetNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -26,11 +26,14 @@ public class VetClient {
                 .get()
                 .uri("/{vetId}", vetId)
                 .retrieve()
+
                 .onStatus(HttpStatus::is4xxClientError, clientResponse -> {
                     if (clientResponse.statusCode() == HttpStatus.NOT_FOUND) {
-                        return Mono.error(new NotFoundException("Vet not found with vetId: " + vetId));
+                        return Mono.error(new VetNotFoundException(vetId));
                     } else {
-                        return Mono.error(new IllegalArgumentException("Client error for vetId: " + vetId));
+                        return Mono.error(
+                                new IllegalArgumentException("Client error for vetId: " + vetId)
+                        );
                     }
                 })
                 .onStatus(HttpStatus::is5xxServerError, serverResponse ->
