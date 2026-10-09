@@ -18,8 +18,9 @@ public class CustomersLookupController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.OWNER, Roles.VET})
     @GetMapping("/{customerId}")
-    public Mono<ResponseEntity<CustomerResponseDTO>> getCustomerById(@PathVariable String customerId) {
-        return customersServiceClient.getCustomer(customerId)
+    public Mono<ResponseEntity<CustomerResponseDTO>> getCustomerById(@PathVariable String customerId,
+                                                                     @RequestParam(required = false, defaultValue = "false") boolean includePhoto) {
+        return customersServiceClient.getCustomer(customerId, includePhoto)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
