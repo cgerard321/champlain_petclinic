@@ -1,0 +1,87 @@
+<section class="account-block">
+  <h3 class="block-title" i18n="@@settings.security.account.title">Compte</h3>
+
+  <dl class="account-facts">
+    <dt i18n="@@settings.security.account.username">Nom d'utilisateur</dt>
+    <dd>{{ current() }}</dd>
+
+    <dt i18n="@@settings.security.account.role">Rôle</dt>
+    <dd>{{ roleLabel() }}</dd>
+  </dl>
+</section>
+
+<section class="username-block">
+  <h3 class="block-title" i18n="@@settings.security.username.title">
+    Changer de nom d'utilisateur
+  </h3>
+
+  <mat-form-field appearance="outline" class="username-field">
+    <mat-label i18n="@@settings.security.username.label">Nouveau nom d'utilisateur</mat-label>
+    <input
+      #usernameInput
+      matInput
+      type="text"
+      autocomplete="username"
+      spellcheck="false"
+      aria-describedby="username-rules"
+      [attr.aria-busy]="isSubmitting()"
+      [attr.aria-invalid]="hasTyped() && !valid()"
+      [value]="draft()"
+      [disabled]="isSubmitting()"
+      (input)="onType(usernameInput.value)"
+      (blur)="onBlur()"
+    />
+  </mat-form-field>
+
+  <!-- Criterion 3: every rule is listed, and ticked as soon as it holds. -->
+  <ul id="username-rules" class="rule-list">
+    @for (rule of rules(); track rule.id) {
+      <li class="rule" [class.is-met]="rule.met">
+        <mat-icon class="rule-icon" aria-hidden="true">
+          {{ rule.met ? 'check_circle' : 'radio_button_unchecked' }}
+        </mat-icon>
+        <span>{{ rule.label }}</span>
+      </li>
+    }
+  </ul>
+
+  <!--
+    Criterion 19. Always in the DOM, empty when there is nothing to say: a live region added to
+    the page at the same time as its content is announced unreliably. Carries both the reserved
+    name message (rule 8, shown on its own rather than as a checklist line) and the save
+    failure of criterion 7.
+  -->
+  <p class="field-note is-error" role="alert" aria-live="assertive">{{ errorText() }}</p>
+
+  @if (showSameAsCurrent()) {
+    <p class="field-note" aria-live="polite" i18n="@@settings.security.username.sameAsCurrent">
+      Ce nom est identique au nom actuel
+    </p>
+  }
+
+  @if (showPreview()) {
+    <p class="field-note is-preview" aria-live="polite">
+      <span i18n="@@settings.security.username.preview">Prochaine connexion avec</span>
+      <strong>{{ preview() }}</strong>
+    </p>
+  }
+
+  <!-- Criterion 9: clicking a suggestion fills the field. -->
+  @if (showSuggestions()) {
+    <div class="suggestions">
+      <span id="suggestions-label" i18n="@@settings.security.username.suggestions">
+        Suggestions
+      </span>
+
+      <ul class="suggestion-list" aria-labelledby="suggestions-label">
+        @for (suggestion of suggestions(); track suggestion) {
+          <li>
+            <button mat-stroked-button type="button" (click)="applySuggestion(suggestion)">
+              {{ suggestion }}
+            </button>
+          </li>
+        }
+      </ul>
+    </div>
+  }
+</section>

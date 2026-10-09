@@ -1,0 +1,98 @@
+.block-title {
+  font: var(--mat-sys-title-small);
+  margin: 0 0 0.75rem;
+}
+
+.account-block {
+  margin-bottom: 2rem;
+}
+
+.account-facts {
+  display: grid;
+  margin: 0;
+  gap: 0.25rem 1rem;
+  grid-template-columns: auto 1fr;
+}
+
+.account-facts dt {
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-small);
+}
+
+.account-facts dd {
+  margin: 0;
+  font: var(--mat-sys-body-medium);
+}
+
+.username-field {
+  width: 100%;
+  max-width: 24rem;
+}
+
+.rule-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0 0 0.75rem;
+  gap: 0.25rem;
+  list-style: none;
+  padding: 0;
+}
+
+.rule {
+  display: flex;
+  align-items: center;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-small);
+  gap: 0.5rem;
+}
+
+/* The icon carries the state as well as the colour, so it stays readable without colour. */
+.rule.is-met {
+  color: var(--mat-sys-primary);
+}
+
+.rule-icon {
+  font-size: 1.125rem;
+  height: 1.125rem;
+  width: 1.125rem;
+}
+
+.field-note {
+  margin: 0 0 0.75rem;
+  font: var(--mat-sys-body-small);
+}
+
+/*
+ * The error note is a live region that stays in the DOM even when empty, so it has to take no
+ * room in that state. `display: none` would do it visually but would drop the element from the
+ * accessibility tree, and the region would stop announcing anything.
+ */
+.field-note:empty {
+  margin: 0;
+}
+
+.field-note.is-error {
+  color: var(--mat-sys-error);
+}
+
+.field-note.is-preview {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.suggestions {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0.75rem;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-small);
+  gap: 0.5rem;
+}
+
+.suggestion-list {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+}
