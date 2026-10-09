@@ -181,7 +181,10 @@ export default function Home(): JSX.Element {
                         {t(`items.${item.id}.question`, { ns: 'faq' })}
                       </Accordion.Header>
                       <Accordion.Body>
-                        {t(`items.${item.id}.answer`, { ns: 'faq', hours: formatHours(t) })}
+                        {t(`items.${item.id}.answer`, {
+                          ns: 'faq',
+                          hours: formatHours(t),
+                        })}
                       </Accordion.Body>
                     </Accordion.Item>
                   ))}
