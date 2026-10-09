@@ -14,12 +14,6 @@ export const routes: Routes = [
     loadChildren: () => import('@features/error/routes'),
   },
   {
-    path: 'settings',
-    loadChildren: () => import('@features/settings/routes'),
-    //verify if the user is an employee
-    canActivate: [authGuard(), customerRedirectGuard, employeeGuard],
-  },
-  {
     path: '',
     loadComponent: () => import('@layout/shell/shell').then((m) => m.Shell),
     canActivate: [authGuard(), customerRedirectGuard, employeeGuard],
@@ -28,6 +22,11 @@ export const routes: Routes = [
       {
         path: 'home',
         loadChildren: () => import('@features/home/routes'),
+      },
+
+      {
+        path: 'settings',
+        loadChildren: () => import('@features/settings/routes'),
       },
 
       {

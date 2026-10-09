@@ -1,10 +1,25 @@
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { clearTranslations, loadTranslations } from '@angular/localize';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
+import { of } from 'rxjs';
 import { vi } from 'vitest';
 
+import { CurrentUserResponse } from '@core/models/current-user-response';
+import { AuthState } from '@core/services/auth-state';
+import { SettingsAccount } from '@features/settings/services/settings-account';
+import { SettingsFormState } from '@features/settings/services/settings-form-state';
+
 import { Settings } from './settings';
+
+const CURRENT_USER: CurrentUserResponse = {
+  userId: '69f852ca-625b-11ee-8c99-0242ac120002',
+  email: 'Vet1',
+  username: 'Vet1',
+  roles: ['VET'],
+};
 
 const EN_SETTINGS = {
   'settings.title': 'Settings',
@@ -12,12 +27,18 @@ const EN_SETTINGS = {
   'settings.display.title': 'Display',
   'settings.save': 'Save',
   'settings.cancel': 'Cancel',
-  'settings.saved': 'Changes saved',
+  'settings.security.account.title': 'Account',
+  'settings.security.account.username': 'Username',
+  'settings.security.account.role': 'Role',
+  'settings.security.role.vet': 'Veterinarian',
+  'settings.security.username.title': 'Change your username',
+  'settings.security.username.label': 'New username',
 };
 
-describe('Settings page (VETS-CPC-2089)', () => {
+describe('Settings page (VETS-CPC-2089, VETS-CPC-2090)', () => {
   let navigateByUrl: ReturnType<typeof vi.fn>;
   let snackBarOpen: ReturnType<typeof vi.fn>;
+  let http: HttpTestingController;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -28,6 +49,7 @@ describe('Settings page (VETS-CPC-2089)', () => {
   // Translations are installed globally, so a test that loads them has to put the environment
   // back as it found it or it would leak into the next ones.
   afterEach(() => {
+    http.verify();
     clearTranslations();
     vi.restoreAllMocks();
   });
@@ -39,12 +61,24 @@ describe('Settings page (VETS-CPC-2089)', () => {
     await TestBed.configureTestingModule({
       imports: [Settings],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        // Both are route-scoped in production, so the spec provides them the same way.
+        SettingsAccount,
+        SettingsFormState,
         { provide: Router, useValue: { navigateByUrl } },
         { provide: MatSnackBar, useValue: { open: snackBarOpen } },
+        { provide: AuthState, useValue: { logout: vi.fn(() => of(undefined)) } },
       ],
     }).compileComponents();
 
+    http = TestBed.inject(HttpTestingController);
+
     const fixture = TestBed.createComponent(Settings);
+    await fixture.whenStable();
+
+    // The Security section reads the signed-in employee as soon as it renders.
+    http.expectOne('/api/gateway/users/jwt').flush(CURRENT_USER);
     await fixture.whenStable();
 
     return { fixture, host: fixture.nativeElement as HTMLElement };
@@ -78,6 +112,27 @@ describe('Settings page (VETS-CPC-2089)', () => {
     return host.querySelector('.settings-panel-title');
   }
 
+  function usernameInput(host: HTMLElement): HTMLInputElement {
+    const field = host.querySelector<HTMLInputElement>('.username-field input');
+
+    if (!field) {
+      throw new Error('No username input rendered');
+    }
+
+    return field;
+  }
+
+  async function type(
+    fixture: ComponentFixture<Settings>,
+    host: HTMLElement,
+    value: string,
+  ): Promise<void> {
+    const field = usernameInput(host);
+    field.value = value;
+    field.dispatchEvent(new Event('input'));
+    await fixture.whenStable();
+  }
+
   // 1. POSITIVE - Opens on Security.
   it('opens on the Security section', async () => {
     // Act
@@ -104,7 +159,6 @@ describe('Settings page (VETS-CPC-2089)', () => {
   });
 
   // 3. POSITIVE - Display swaps the panel and moves the highlight.
-
   it('switches to Display and moves the highlight onto it', async () => {
     // Arrange
     const { fixture, host } = await render();
@@ -119,39 +173,47 @@ describe('Settings page (VETS-CPC-2089)', () => {
     expect(panelTitle(host)?.textContent).toContain('Affichage');
   });
 
-  // 4. POSITIVE - Save confirms with a snack bar and leaves the page.
-
-  it('confirms with a snack bar and leaves the page when saving', async () => {
-    // Arrange
-    const { host } = await render();
-
+  // 4. VETS-CPC-2090 - Replaces the CPC-2089 test that expected Save to confirm and leave.
+  // Save no longer does either: it drives the sections, and criterion 6 keeps it disabled
+  // until one of them actually has a valid change.
+  it('keeps Save disabled while nothing has changed', async () => {
     // Act
-    actionButton(host, 'Enregistrer').click();
+    const { host } = await render();
 
     // Assert
-    expect(snackBarOpen).toHaveBeenCalledWith('Modifications enregistrées', '', {
-      duration: 2000,
-      verticalPosition: 'top',
-    });
-    expect(navigateByUrl).toHaveBeenCalledWith('/home');
+    expect(actionButton(host, 'Enregistrer').disabled).toBe(true);
   });
 
-  // 6. POSITIVE - Cancel leaves the page without confirming.
-
-  it('leaves the page without confirming anything when cancelling', async () => {
+  // 5. VETS-CPC-2090 - Criterion 6, the other way round.
+  it('enables Save once a section holds a valid change', async () => {
     // Arrange
-    const { host } = await render();
+    const { fixture, host } = await render();
+
+    // Act
+    await type(fixture, host, 'jean_dupont');
+
+    // Assert
+    expect(actionButton(host, 'Enregistrer').disabled).toBe(false);
+  });
+
+  // 6. VETS-CPC-2090 - Replaces the CPC-2089 test that expected Cancel to leave the page.
+  // Criterion 2 asks Cancel to restore the current value instead.
+  it('restores the current value when cancelling, without leaving the page', async () => {
+    // Arrange
+    const { fixture, host } = await render();
+    await type(fixture, host, 'jean_dupont');
 
     // Act
     actionButton(host, 'Annuler').click();
+    await fixture.whenStable();
 
     // Assert
-    expect(navigateByUrl).toHaveBeenCalledWith('/home');
+    expect(usernameInput(host).value).toBe('Vet1');
+    expect(navigateByUrl).not.toHaveBeenCalled();
     expect(snackBarOpen).not.toHaveBeenCalled();
   });
 
   // 7. POSITIVE - Both actions sit at the bottom of the page.
-
   it('keeps both actions at the bottom of the page', async () => {
     // Act
     const { host } = await render();
@@ -163,8 +225,23 @@ describe('Settings page (VETS-CPC-2089)', () => {
     expect(actionButton(host, 'Enregistrer')).toBeTruthy();
   });
 
-  // 8. POSITIVE - The whole template switches to English.
+  // 8. POSITIVE - Save sends the change through the section.
+  it('sends the change through the section when saving', async () => {
+    // Arrange
+    const { fixture, host } = await render();
+    await type(fixture, host, 'jean_dupont');
 
+    // Act
+    actionButton(host, 'Enregistrer').click();
+    await fixture.whenStable();
+
+    // Assert
+    const request = http.expectOne(`/api/gateway/users/${CURRENT_USER.userId}/username`);
+    expect(request.request.body).toBe('jean_dupont');
+    request.flush('jean_dupont');
+  });
+
+  // 9. POSITIVE - The whole template switches to English.
   it('renders fully in English once the catalogue is installed', async () => {
     // Arrange
     loadTranslations(EN_SETTINGS);
@@ -178,23 +255,8 @@ describe('Settings page (VETS-CPC-2089)', () => {
     expect(host.textContent).toContain('Display');
     expect(host.textContent).toContain('Save');
     expect(host.textContent).toContain('Cancel');
+    expect(host.textContent).toContain('Veterinarian');
     expect(host.textContent).not.toContain('Paramètres');
-  });
-
-  // 9. POSITIVE - The snack bar message switches to English too.
-  it('translates the snack bar message as well', async () => {
-    // Arrange
-    loadTranslations(EN_SETTINGS);
-    const { host } = await render();
-
-    // Act
-    actionButton(host, 'Save').click();
-
-    // Assert
-    expect(snackBarOpen).toHaveBeenCalledWith('Changes saved', '', {
-      duration: 2000,
-      verticalPosition: 'top',
-    });
   });
 
   // 10. NEGATIVE - Stays French when no catalogue is installed.
@@ -204,6 +266,7 @@ describe('Settings page (VETS-CPC-2089)', () => {
 
     // Assert
     expect(host.textContent).toContain('Paramètres');
+    expect(host.textContent).toContain('Vétérinaire');
     expect(host.textContent).not.toContain('Settings');
   });
 });
