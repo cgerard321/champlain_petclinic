@@ -88,5 +88,12 @@
   "allRightsReserved": "Clinique vétérinaire Champlain. Tous droits réservés.",
   "explore": "Explorer",
   "clinicMessage": "Des soins vétérinaires attentionnés pour garder vos animaux en santé et heureux.",
-  "support": "Support"
-}
+  "support": "Support",
+  "hours": {
+    "day": {
+      "weekdays": "Lun - Ven",
+      "saturday": "Sam",
+      "sunday": "Dim"
+    },
+    "closed": "Fermé"
+}}

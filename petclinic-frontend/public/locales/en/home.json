@@ -89,6 +89,14 @@
   "allRightsReserved": "Champlain Pet Clinic. All rights reserved.",
   "explore": "Explore",
   "clinicMessage": "Providing compassionate veterinary care to keep your pets healthy and happy.",
-  "support": "Support"
+  "support": "Support",
+  "hours": {
+    "day": {
+      "weekdays": "Mon - Fri",
+      "saturday": "Sat",
+      "sunday": "Sun"
+    },
+    "closed": "Closed"
+  }
 
 }
