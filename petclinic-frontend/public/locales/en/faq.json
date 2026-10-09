@@ -1,0 +1,44 @@
+{
+  "items": {
+    "hours": {
+      "question": "What are your hours?",
+      "answer": "{{hours}}. For urgent issues outside these hours, visit our Emergency page."
+    },
+    "walkins": {
+      "question": "Do you accept walk-ins?",
+      "answer": "Appointments are recommended, but we try to accommodate walk-ins when possible."
+    },
+    "booking": {
+      "question": "How do I book an appointment?",
+      "answer": "Use the “Book Appointment” button on the site or call the clinic during business hours."
+    },
+    "first-visit": {
+      "question": "What should I bring to my first visit?",
+      "answer": "Please bring medical records, vaccination history, a list of medications, and your pet’s favorite treat or toy."
+    },
+    "vaccines": {
+      "question": "Do you offer vaccinations?",
+      "answer": "Yes. We provide core and lifestyle vaccines tailored to your pet’s needs."
+    },
+    "dental": {
+      "question": "Do you provide dental care?",
+      "answer": "We offer dental exams, cleaning and polishing, and dental X-rays when indicated."
+    },
+    "emergency": {
+      "question": "Is there emergency care?",
+      "answer": "Yes during open hours. For after-hours emergencies, please see our Emergency page for partner locations."
+    },
+    "payment": {
+      "question": "Which payment methods do you accept?",
+      "answer": "Visa, MasterCard, debit, and cash. We can help with claims for select pet insurers."
+    },
+    "refills": {
+      "question": "Can I get prescription refills?",
+      "answer": "Request refills through your account or call us. Some medications require an exam before renewal."
+    },
+    "microchip": {
+      "question": "Do you microchip pets?",
+      "answer": "Yes. Microchipping can be done during a regular appointment or while your pet is under anesthesia."
+    }
+  }
+}
