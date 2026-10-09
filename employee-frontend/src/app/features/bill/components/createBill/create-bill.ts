@@ -17,6 +17,8 @@ import { BillRequestModel } from '@features/bill/models/bill.model';
 import { BillService } from '@features/bill/services/bill-service';
 import { Customer } from '@features/cust/models/customer.model';
 import { CustomerService } from '@features/cust/services/customer-service';
+import { Veterinarian } from '@features/vets/models/vet.model';
+import { VetService } from '@features/vets/services/vet-service';
 
 @Component({
   imports: [
@@ -29,21 +31,27 @@ import { CustomerService } from '@features/cust/services/customer-service';
     MatDividerModule,
     MatListModule,
     MatButtonModule,
-],
+  ],
   providers: [provideNativeDateAdapter()],
   selector: 'app-create-bill',
   styleUrl: './create-bill.css',
   templateUrl: './create-bill.html',
 })
-export class CreateBill implements OnInit{
+export class CreateBill implements OnInit {
   protected auth = inject(AuthState);
   protected billService = inject(BillService);
+
   protected customerService = inject(CustomerService);
 
+  protected vetService = inject(VetService);
+
   private readonly untilDestroyed = takeUntilDestroyed<Customer>();
+  private readonly untilDestroyedVet = takeUntilDestroyed<Veterinarian>();
   protected readonly customers = signal<Customer[]>([]);
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal<string | null>(null);
+
+  protected readonly vets = signal<Veterinarian[]>([]);
 
   readonly billRequest = signal<BillRequestModel>({
     customerId: '',
@@ -52,7 +60,7 @@ export class CreateBill implements OnInit{
     date: '',
     amount: 0,
     billStatus: '',
-  })
+  });
 
   readonly billRequestForm = form(this.billRequest);
 
@@ -61,6 +69,8 @@ export class CreateBill implements OnInit{
   closeCreateBill(): void {
     this.dialogRef.close();
   }
+
+
 
   ngOnInit(): void {
     this.customerService
@@ -71,6 +81,22 @@ export class CreateBill implements OnInit{
         error: () => {
           this.isLoading.set(false);
           this.errorMessage.set('Unable to load customers. Please try again later.');
+        },
+        complete: () => this.isLoading.set(false),
+      });
+
+    const userId = this.auth.userId();
+
+    this.vetService
+      .getVetByVetId(userId)
+      .pipe(this.untilDestroyedVet)
+      .subscribe({
+        next: (veterinarian) => {
+          this.vets.set([veterinarian]);
+        },
+        error: () => {
+          this.isLoading.set(false);
+          this.errorMessage.set('Unable to load veterinarians. Please try again later.');
         },
         complete: () => this.isLoading.set(false),
       });

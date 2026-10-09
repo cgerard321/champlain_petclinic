@@ -8,9 +8,9 @@
             <div class="form-row">
                 <label class="label-size">Veteranarian Name:</label>
                 <mat-form-field appearance="outline">
-                    <input matInput>
+                    <input matInput disabled [value]="(vets()[0]?.firstName) + ' ' + (vets()[0]?.lastName)">
+                    <input hidden [value]="vets()[0]?.vetId">
                 </mat-form-field>
-                
             </div>
             <mat-divider></mat-divider>
             <div class="form-row">
