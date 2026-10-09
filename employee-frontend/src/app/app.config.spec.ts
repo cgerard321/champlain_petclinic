@@ -7,7 +7,7 @@ import { Footer } from '@layout/footer/footer';
 import { flattenTranslations, getSavedLang, loadActiveTranslations } from './app.config';
 
 /**
- * Mirrors the real en.json shape ({ locale, translations }) so the tests also check that
+ * Mirrors the real src/locale/en.json shape ({ locale, translations }) so the tests also check that
  * the loader unwraps `translations` before installing it.
  */
 const EN_CATALOGUE = {
@@ -87,7 +87,7 @@ describe('Translation loader (app.config)', () => {
     await loadActiveTranslations();
 
     // Assert - the happy path of the whole ticket
-    expect(fetchMock).toHaveBeenCalledWith('/i18n/en.json');
+    expect(fetchMock).toHaveBeenCalledWith('/locale/en.json');
     expect(document.documentElement.lang).toBe('en');
 
     const footer = await renderFooter();
@@ -117,7 +117,7 @@ describe('Translation loader (app.config)', () => {
 
   // NEGATIVE - If the response body is not valid JSON, the error is logged and the app stays in French.
   it('keeps the app in French when the catalogue is not valid JSON', async () => {
-    // Arrange - this is what a missing en.json really looks like in production: nginx serves
+    // Arrange - this is what a missing src/locale/en.json really looks like in production: nginx serves
     // index.html for unknown paths, so the response is a 200 whose body is HTML
     localStorage.setItem('lang', 'en');
     fetchMock.mockResolvedValue({
@@ -148,7 +148,7 @@ describe('Translation loader (app.config)', () => {
   });
 
   it('installs a catalogue that is grouped by feature', async () => {
-    // Arrange - the real shape of en.json, nested rather than flat
+    // Arrange - the real shape of src/locale/en.json, nested rather than flat
     localStorage.setItem('lang', 'en');
     fetchMock.mockResolvedValue({
       ok: true,

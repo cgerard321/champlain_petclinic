@@ -31,7 +31,7 @@ export function getSavedLang(): string {
 
 export type Catalogue = { [key: string]: string | Catalogue };
 
-//to flat the information of the en.json because the en.json have been organized: better for preventing conflicts, and for scaling the localisation in the employeee frontend
+//to flat the information of src/locale/en.json because the file has been organized: better for preventing conflicts, and for scaling the localisation in the employeee frontend
 export function flattenTranslations(source: Catalogue, prefix = ''): Record<string, string> {
   const flat: Record<string, string> = {};
 
@@ -60,7 +60,7 @@ export async function loadActiveTranslations(): Promise<void> {
 
   try {
     //save the english file
-    const response = await fetch('/i18n/en.json');
+    const response = await fetch('/locale/en.json');
     // fetch() does not throw on HTTP errors (404, 500...), so the status must be checked by hand.
     if (!response.ok) {
       throw new Error(`Failed to load translations: ${response.status}`);

@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { Visit } from '@features/vist/models/Visit';
+import { Status } from '@features/vist/models/Status';
 import { VisitService } from '@features/vist/services/visit-service';
 import {DatePipe} from '@angular/common';
 
@@ -19,6 +20,25 @@ export class VistListTable implements OnInit {
   protected readonly visit = signal<Visit[]>([]);
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal<string | null>(null);
+
+  protected statusLabel(status: Status): string {
+    switch (status) {
+      case Status.SCHEDULED:
+        return $localize`:@@visits.statusScheduled:Planifiée`;
+      case Status.COMPLETED:
+        return $localize`:@@visits.statusCompleted:Terminée`;
+      case Status.CANCELLED:
+        return $localize`:@@visits.statusCancelled:Annulée`;
+      case Status.CONFIRMED:
+        return $localize`:@@visits.statusConfirmed:Confirmée`;
+      case Status.UPCOMING:
+        return $localize`:@@visits.statusUpcoming:À venir`;
+      case Status.ARCHIVED:
+        return $localize`:@@visits.statusArchived:Archivée`;
+      case Status.OUT_OF_STATUS:
+        return $localize`:@@visits.statusOutOfStatus:Hors statut`;
+    }
+  }
 
   ngOnInit(): void {
     this.visitService

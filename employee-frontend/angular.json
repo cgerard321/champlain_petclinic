@@ -32,6 +32,11 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "en.json",
+                "input": "src/locale",
+                "output": "locale"
               }
             ],
             "styles": ["src/material-theme.scss", "src/styles.css"]

@@ -77,7 +77,14 @@
       "description": "Description",
       "startDate": "Start date",
       "endDate": "End date",
-      "status": "Status"
+      "status": "Status",
+      "statusScheduled": "Scheduled",
+      "statusCompleted": "Completed",
+      "statusCancelled": "Cancelled",
+      "statusConfirmed": "Confirmed",
+      "statusUpcoming": "Upcoming",
+      "statusArchived": "Archived",
+      "statusOutOfStatus": "Out of status"
     }
   }
 }

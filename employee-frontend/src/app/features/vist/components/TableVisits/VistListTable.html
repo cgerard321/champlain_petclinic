@@ -27,7 +27,7 @@
       <td>{{ visits.description }}</td>
       <td>{{ visits.visitDate | date}}</td>
       <td>{{ visits.visitEndDate | date}}</td>
-      <td>{{ visits.status }}</td>
+      <td>{{ statusLabel(visits.status) }}</td>
     </tr>
   }
 </table>
