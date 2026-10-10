@@ -9,5 +9,5 @@ import java.util.Optional;
 public interface CartRepository extends ReactiveMongoRepository<Cart, String> {
     public Mono<Cart> findCartByCartId(String cartId);
     public Mono<Cart>  findCartByCustomerId(String customerId);
-
+    Mono<Void> deleteCartByCustomerId(String customerId);
 }

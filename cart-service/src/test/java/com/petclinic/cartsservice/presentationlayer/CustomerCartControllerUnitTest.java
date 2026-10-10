@@ -14,6 +14,8 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest(controllers = CustomerCartController.class)
@@ -111,5 +113,38 @@ class CustomerCartControllerUnitTest {
                 .expectStatus().isOk()
                 .expectBodyList(CartProduct.class)
                 .value(result -> assertEquals(1, result.size()));
+    }
+
+    @Test
+    void whenDeleteCartByValidCustomerId_thenReturnNoContent() {
+        String validCustomerId = "123e4567-e89b-12d3-a456-426614174003";
+
+        when(cartService.deleteCartByCustomerId(validCustomerId)).thenReturn(Mono.empty());
+
+        webTestClient
+                .delete()
+                .uri("/api/v1/customers/{customerId}/cart", validCustomerId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
+
+        verify(cartService).deleteCartByCustomerId(validCustomerId);
+    }
+
+    @Test
+    void whenDeleteCartWithInvalidCustomerId_thenReturnUnprocessableEntity() {
+        String invalidCustomerId = "invalid-id";
+
+        webTestClient
+                .delete()
+                .uri("/api/v1/customers/{customerId}/cart", invalidCustomerId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(422)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Provided customer id is invalid: " + invalidCustomerId);
+
+        verify(cartService, never()).deleteCartByCustomerId(invalidCustomerId);
     }
 }
