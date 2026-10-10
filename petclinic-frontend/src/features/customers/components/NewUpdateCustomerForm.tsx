@@ -1,0 +1,326 @@
+import { FormEvent, useState } from 'react';
+import { CustomerRequestModel } from '@/features/customers/models/CustomerRequestModel.ts';
+import { CustomerResponseModel } from '@/features/customers/models/CustomerResponseModel.ts';
+import { UserDetailsModel } from '@/features/customers/models/UserDetailsModel';
+import { useUser } from '@/context/UserContext';
+import { useToast } from '@/shared/components/toast/ToastProvider';
+import { useUsernameValidation } from '../hooks/useUsernameValidation';
+
+import { validateTelephone } from '../utils/validation';
+import { provincesOfCanada } from '../utils/provinces';
+
+import { updateCustomer } from '../api/updateCustomer.ts';
+import { updateUsername } from '../api/updateUsername.ts';
+
+import defaultProfile from '@/assets/Customers/defaultProfilePicture.png';
+
+import './UpdateCustomerForm.css';
+
+const NewUpdateCustomerForm = ({
+  customer,
+  userDetails,
+  profilePicUrl,
+  setCustomer,
+  onBackButtonClick,
+}: {
+  customer: CustomerResponseModel;
+  userDetails: UserDetailsModel;
+  profilePicUrl: string;
+
+  setCustomer: React.Dispatch<
+    React.SetStateAction<CustomerResponseModel | null>
+  >;
+
+  onBackButtonClick: () => void;
+}): JSX.Element => {
+  const { user, checkSession } = useUser();
+  const { showToast } = useToast();
+  const { validateUsernameField } = useUsernameValidation();
+
+  /*
+   * This is temporary form state.
+   *
+   * It does NOT need to be stored in ProfilePage because it only
+   * matters while the UpdateCustomerForm is open.
+   */
+  const [formCustomer, setFormCustomer] = useState<CustomerRequestModel>({
+    firstName: customer.firstName,
+    lastName: customer.lastName,
+    address: customer.address,
+    city: customer.city,
+    province: customer.province,
+    telephone: customer.telephone,
+  });
+
+  const [username, setUsername] = useState<string>(userDetails.username);
+
+  const [errors, setErrors] = useState<{
+    [key: string]: string;
+  }>({});
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ): void => {
+    const { name, value } = e.target;
+
+    setFormCustomer(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: '',
+      }));
+    }
+  };
+
+  const handleUsernameChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ): void => {
+    setUsername(e.target.value);
+
+    if (errors.username) {
+      setErrors(prev => ({
+        ...prev,
+        username: '',
+      }));
+    }
+  };
+
+  const validate = async (): Promise<boolean> => {
+    const newErrors: { [key: string]: string } = {};
+
+    if (!formCustomer.firstName) {
+      newErrors.firstName = 'validation.firstNameRequired';
+    }
+
+    if (!formCustomer.lastName) {
+      newErrors.lastName = 'validation.lastNameRequired';
+    }
+
+    if (!formCustomer.address) {
+      newErrors.address = 'validation.addressRequired';
+    }
+
+    if (!formCustomer.city) {
+      newErrors.city = 'validation.cityRequired';
+    }
+
+    if (!formCustomer.province) {
+      newErrors.province = 'validation.provinceRequired';
+    }
+
+    const telephoneError = validateTelephone(formCustomer.telephone);
+
+    if (telephoneError) {
+      newErrors.telephone = telephoneError;
+    }
+
+    const usernameError = await validateUsernameField(
+      username,
+      userDetails.username
+    );
+
+    if (usernameError) {
+      newErrors.username = usernameError;
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (
+    event: FormEvent<HTMLFormElement>
+  ): Promise<void> => {
+    event.preventDefault();
+
+    if (!(await validate())) return;
+
+    try {
+      /*
+       * PUT/update operation.
+       *
+       * This is not a fetch used to load the page.
+       * We update the parent state immediately after the successful
+       * update so we don't need to GET the customer again.
+       */
+      await updateCustomer(user.userId, formCustomer);
+
+      setCustomer(prevCustomer => {
+        if (!prevCustomer) return prevCustomer;
+
+        return {
+          ...prevCustomer,
+          ...formCustomer,
+        };
+      });
+
+      if (username !== userDetails.username) {
+        await updateUsername(user.userId, username);
+
+        await checkSession();
+      }
+
+      showToast('customerForm.updateSuccess', 'success');
+
+      onBackButtonClick();
+    } catch (error) {
+      console.error('Error updating customer:', error);
+
+      showToast('customerForm.updateError', 'error');
+    }
+  };
+
+  return (
+    <div>
+      <div className="customers-page customers-container-profile">
+        <div className="customers-profile-card shadow-lg p-5 mb-5 bg-white rounded">
+          <div
+            className="customers-profile-header"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              <img
+                src={profilePicUrl || defaultProfile}
+                alt="Profile Picture"
+                className="profile-picture"
+              />
+            </div>
+
+            <h1>
+              {customer.firstName} {customer.lastName}&apos;s Profile
+            </h1>
+          </div>
+
+          <form onSubmit={handleSubmit} className="customers-profile-info">
+            <p>
+              <strong>Username:</strong>{' '}
+              <input
+                type="text"
+                name="username"
+                value={username}
+                onChange={handleUsernameChange}
+              />
+              {errors.username && (
+                <span className="error">{errors.username}</span>
+              )}
+            </p>
+
+            <p>
+              <strong>First Name:</strong>{' '}
+              <input
+                type="text"
+                name="firstName"
+                value={formCustomer.firstName}
+                onChange={handleChange}
+              />
+              {errors.firstName && (
+                <span className="error">{errors.firstName}</span>
+              )}
+            </p>
+
+            <p>
+              <strong>Last Name:</strong>{' '}
+              <input
+                type="text"
+                name="lastName"
+                value={formCustomer.lastName}
+                onChange={handleChange}
+              />
+              {errors.lastName && (
+                <span className="error">{errors.lastName}</span>
+              )}
+            </p>
+
+            <p>
+              <strong>Address:</strong>{' '}
+              <input
+                type="text"
+                name="address"
+                value={formCustomer.address}
+                onChange={handleChange}
+              />
+              {errors.address && (
+                <span className="error">{errors.address}</span>
+              )}
+            </p>
+
+            <p>
+              <strong>City:</strong>{' '}
+              <input
+                type="text"
+                name="city"
+                value={formCustomer.city}
+                onChange={handleChange}
+              />
+              {errors.city && <span className="error">{errors.city}</span>}
+            </p>
+
+            <p>
+              <strong>Province:</strong>{' '}
+              <select
+                name="province"
+                value={formCustomer.province}
+                onChange={handleChange}
+              >
+                <option value="">Select Province</option>
+
+                {provincesOfCanada.map(province => (
+                  <option key={province} value={province}>
+                    {province}
+                  </option>
+                ))}
+              </select>
+              {errors.province && (
+                <span className="error">{errors.province}</span>
+              )}
+            </p>
+
+            <p>
+              <strong>Telephone:</strong>{' '}
+              <input
+                type="text"
+                name="telephone"
+                value={formCustomer.telephone}
+                onChange={handleChange}
+              />
+              {errors.telephone && (
+                <span className="error">{errors.telephone}</span>
+              )}
+            </p>
+
+            <div className="button-container">
+              <button
+                type="button"
+                className="customers-backButton"
+                onClick={onBackButtonClick}
+              >
+                Back
+              </button>
+
+              <button type="submit" className="customers-updateButton">
+                Save Changes
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default NewUpdateCustomerForm;
