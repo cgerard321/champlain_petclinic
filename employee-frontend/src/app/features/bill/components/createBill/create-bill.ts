@@ -15,11 +15,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { AuthState } from '@core/services/auth-state';
 import { BillRequestModel } from '@features/bill/models/bill.model';
+import { Customer } from '@features/bill/models/customer.model';
+import { Veterinarian } from '@features/bill/models/vet.model';
 import { BillService } from '@features/bill/services/bill-service';
-import { Customer } from '@features/cust/models/customer.model';
-import { CustomerService } from '@features/cust/services/customer-service';
-import { Veterinarian } from '@features/vets/models/vet.model';
-import { VetService } from '@features/vets/services/vet-service';
 
 @Component({
   imports: [
@@ -42,8 +40,6 @@ import { VetService } from '@features/vets/services/vet-service';
 export class CreateBill implements OnInit {
   protected auth = inject(AuthState);
   protected billService = inject(BillService);
-  protected customerService = inject(CustomerService);
-  protected vetService = inject(VetService);
 
   private readonly untilDestroyed = takeUntilDestroyed<Customer>();
   private readonly untilDestroyedVet = takeUntilDestroyed<Veterinarian>();
@@ -116,7 +112,7 @@ export class CreateBill implements OnInit {
   }
 
   ngOnInit(): void {
-    this.customerService
+    this.billService
       .getCustomers()
       .pipe(this.untilDestroyed)
       .subscribe({
@@ -130,7 +126,7 @@ export class CreateBill implements OnInit {
 
     const userId = this.auth.userId();
 
-    this.vetService
+    this.billService
       .getVetByVetId(userId)
       .pipe(this.untilDestroyedVet)
       .subscribe({
