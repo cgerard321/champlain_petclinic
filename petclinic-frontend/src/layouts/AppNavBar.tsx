@@ -103,7 +103,10 @@ export function NavBar(): JSX.Element {
                   </Nav.Link>
                 )}
                 {(isAdmin || isVet || isReceptionist) && (
-                   <NavDropdown title={t('nav.customers')} id="customers-dropdown">
+                  <NavDropdown
+                    title={t('nav.customers')}
+                    id="customers-dropdown"
+                  >
                     {(isAdmin || isVet) && (
                       <NavDropdown.Item
                         as={Link}
@@ -123,7 +126,7 @@ export function NavBar(): JSX.Element {
                   </NavDropdown>
                 )}
                 {isAdmin && (
-                    <NavDropdown title={t('nav.users')} id="users-dropdown">
+                  <NavDropdown title={t('nav.users')} id="users-dropdown">
                     <NavDropdown.Item as={Link} to={AppRoutePaths.AllUsers}>
                       {t('nav.usersList')}
                     </NavDropdown.Item>
@@ -141,7 +144,10 @@ export function NavBar(): JSX.Element {
                     </Nav.Link>
                   )}
                 {isCustomer && !hasStaffVisits && (
-                    <NavDropdown title={t('nav.visits')} id="customer-visits-dropdown">
+                  <NavDropdown
+                    title={t('nav.visits')}
+                    id="customer-visits-dropdown"
+                  >
                     <NavDropdown.Item
                       as={Link}
                       to={AppRoutePaths.CustomerVisits}
@@ -162,7 +168,10 @@ export function NavBar(): JSX.Element {
                   </Nav.Link>
                 )}
                 {(isAdmin || isReceptionist) && (
-                   <NavDropdown title={t('nav.visits')} id="staff-visits-dropdown">
+                  <NavDropdown
+                    title={t('nav.visits')}
+                    id="staff-visits-dropdown"
+                  >
                     <NavDropdown.Item as={Link} to={AppRoutePaths.Visits}>
                       {t('nav.listView')}
                     </NavDropdown.Item>
@@ -175,7 +184,7 @@ export function NavBar(): JSX.Element {
                   </NavDropdown>
                 )}
                 {isVet && (
-                   <NavDropdown title={t('nav.visits')} id="vet-visits-dropdown">
+                  <NavDropdown title={t('nav.visits')} id="vet-visits-dropdown">
                     <NavDropdown.Item as={Link} to={AppRoutePaths.Visits}>
                       {t('nav.listView')}
                     </NavDropdown.Item>
@@ -223,7 +232,9 @@ export function NavBar(): JSX.Element {
                     }}
                     aria-busy={cartLoading}
                     className={`cart-link${cartCount === 0 ? ' cart-empty' : ''}`}
-                    title={cartLoading ? t('nav.loadingCart') : t('nav.viewCart')}
+                    title={
+                      cartLoading ? t('nav.loadingCart') : t('nav.viewCart')
+                    }
                   >
                     <FaShoppingCart aria-label={t('nav.shoppingCart')} />
                     {cartCount > 0 && (
