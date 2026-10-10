@@ -201,7 +201,7 @@ mat-dialog-actions {
   outline-offset: 3px;
 }
 
-/*Any destructive action gets a red submit button*/
+/* Any destructive action gets a red submit button */
 .dialog-submit-button.destructive {
   border-color: rgb(142 0 0 / 100%);
   background: rgb(183 28 28 / 100%);
