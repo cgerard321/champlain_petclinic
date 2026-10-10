@@ -344,6 +344,451 @@ public class DataLoaderService implements CommandLineRunner {
                 .review("Doesn't heat evenly")
                 .build();
 
+        Rating rating3prod1 = Rating.builder()
+                .productId(product1.getProductId())
+                .customerId("9fe8a36a-36f3-4198-a5cc-d96371083493")
+                .rating((byte) 5)
+                .review("""
+                Finally, a Kibble My Picky Eater Finishes
+                =========================================
+
+                Quick Summary
+                -------------
+
+                I switched my 6 year old Lab mix to this **premium dry food** about a month ago and the difference is *night and day*.
+
+                ---
+
+                Score Breakdown
+
+                | Category      | Score | Notes                           |
+                | :------------ | :---: | ------------------------------: |
+                | Taste         | 5/5   | Bowl is empty within minutes    |
+                | Digestion     | 5/5   | No more upset stomach           |
+                | Coat & Skin   | 4/5   | Shinier after about 3 weeks     |
+                | Value         | 4/5   | Pricey, but a bag lasts a month |
+
+                > "He actually waits by his bowl now."
+                >
+                > > Before this food he would walk away after two bites.
+
+                What I Liked
+
+                - **Small kibble size**: easy to chew for medium dogs.
+                - **Real meat first**: the first ingredient is chicken.
+                  - No corn or wheat fillers.
+                  - No artificial colours.
+                - **Resealable bag**: keeps the food fresh.
+
+                How I Switched Foods
+
+                1. Days 1 to 3: mix 25% new food with 75% old food.
+                2. Days 4 to 6: go 50/50.
+                3. Day 7 onward: ++100% new food++.
+
+                Useful links: [Dog food on Wikipedia](https://en.wikipedia.org/wiki/Dog_food "Dog food"), the [AAFCO pet food guide][aafco], and <https://www.akc.org/expert-advice/nutrition/>.
+
+                [aafco]: https://www.aafco.org/consumers/understanding-pet-food/ "AAFCO"
+
+                ### Final Verdict
+
+                Worth every penny. I would ***definitely*** buy it again.
+                """)
+                .build();
+
+        Rating rating3prod2 = Rating.builder()
+                .productId(product2.getProductId())
+                .customerId("9fe8a36a-36f3-4198-a5cc-d96371083493")
+                .rating((byte) 4)
+                .review("""
+                Solid Everyday Litter for the Price
+                ===================================
+
+                Quick Summary
+                -------------
+
+                I picked up the 5 kg bag of Unicorn Litter Sand and have been using it for a couple of weeks now.
+
+                Overall, it's a great value for the price.
+
+                ---
+
+                Rating
+
+                Score: 4/5
+
+                Score Breakdown
+
+                | Category       | Score | Notes                        |
+                | :------------- | :---: | ---------------------------: |
+                | Clumping       | 5/5   | Firm, easy to scoop          |
+                | Odor Control   | 4/5   | Fresh for 4 to 5 days        |
+                | Dust Level     | 3/5   | A bit dusty when pouring     |
+                | Value          | 5/5   | Great price for 5 kg         |
+
+                > "My cat took to it right away."
+                >
+                > > Even my picky older cat used it without hesitation.
+
+                What I Liked
+
+                - Clumps well: Forms firm clumps that are easy to scoop.
+                - Odor control: Keeps the box fresh for several days.
+                  - Works best with a covered litter box.
+                  - Still effective after 4 to 5 days.
+                - Good value: Only $12.99 for 5 kg.
+
+                What Could Be Better
+
+                - A bit dusty when pouring.
+                - Some granules get tracked outside the box.
+
+                How I Use It
+
+                1. Pour about 3 inches into a clean litter box.
+                2. Scoop clumps ++once a day++.
+                3. Do a full change every 2 weeks.
+
+                My scooping schedule looks like this:
+
+                ```
+                Morning: scoop clumps
+                Evening: quick check
+                Sunday:  top up litter
+                ```
+
+                And here's my quick shopping note:
+
+                ```
+                Item:     Cat Litter (Unicorn Litter Sand)
+                Weight:   5 kg
+                Price:    12.99$
+                Delivery: Pickup
+                ```
+
+                Fresh Out of the Bag
+
+                Right after a full change, the granules are fine and pour evenly.
+
+                Links
+
+                - Product guide: [Cat litter](https://en.wikipedia.org/wiki/Cat_litter "Cat litter on Wikipedia")
+                - Litter box tips: [Litter box][litterbox]
+                - Vet advice: <https://www.aspca.org/pet-care/cat-care/general-cat-care>
+                - More reading: www.humanesociety.org
+
+                [litterbox]: https://en.wikipedia.org/wiki/Litter_box "Litter box on Wikipedia"
+
+                Final Verdict
+
+                A reliable, affordable clumping litter. I would ++definitely++ buy it again.
+
+                \\*This is not italic\\* and prices are in USD &amp; include tax &copy; my honest opinion.
+                """)
+                .build();
+
+        Rating rating3prod3 = Rating.builder()
+                .productId(product3.getProductId())
+                .customerId("9fe8a36a-36f3-4198-a5cc-d96371083493")
+                .rating((byte) 3)
+                .review("""
+                # Does the Job, But Not for Long
+
+                ## Background
+
+                My beagle **Daisy** spends a lot of time in tall grass, so flea season is a big deal for us. I tried this collar for the whole summer.
+
+                ## The Good
+
+                - Fleas were *gone* within about **48 hours**.
+                - Fits small necks well, with plenty of extra length to trim.
+                - No smell that I could notice.
+
+                ## The Not So Good
+
+                - Protection faded after about `6 weeks`, not the advertised 8 months.
+                - The buckle is a little stiff to open.
+
+                ## Week by Week
+
+                | Week | Fleas Spotted | Notes                     |
+                | ---- | :-----------: | ------------------------- |
+                | 1    | Many          | Collar put on Monday      |
+                | 2    | None          | Huge improvement          |
+                | 4    | None          | Still working great       |
+                | 6    | A few         | Starting to wear off      |
+                | 8    | Many          | Back to square one        |
+
+                ### Tips If You Buy It
+
+                1. Leave room for **two fingers** between the collar and the neck.
+                2. Cut off the extra length so your dog can't chew it.
+                3. Mark the date on your calendar and ++replace it early++.
+
+                > Talk to your vet before combining this with any other flea treatment.
+
+                More on fleas: [Flea on Wikipedia](https://en.wikipedia.org/wiki/Flea)
+
+                ---
+
+                **Bottom line:** works fast, but plan on buying a few per season.
+                """)
+                .build();
+
+        Rating rating3prod4 = Rating.builder()
+                .productId(product4.getProductId())
+                .customerId("9fe8a36a-36f3-4198-a5cc-d96371083493")
+                .rating((byte) 5)
+                .review("""
+                # A Happy Home for Two Budgies
+
+                I bought this cage for my two budgerigars, **Sky** and **Lemon**, and they settled in on the very first day.
+
+                ## Dimensions
+
+                | Measurement   | Value      |
+                | :------------ | ---------: |
+                | Width         | 60 cm      |
+                | Depth         | 40 cm      |
+                | Height        | 75 cm      |
+                | Bar spacing   | 1.2 cm     |
+
+                ## Setup
+
+                1. Unpack all the panels.
+                   1. Lay the side panels flat.
+                   2. Clip the corners together.
+                2. Attach the roof.
+                3. Slide in the tray and grate.
+                4. Add perches, toys and food cups.
+
+                Took me about *20 minutes* with no tools.
+
+                ## What I Love
+
+                - **Pull out tray**: cleaning takes five minutes.
+                - **Two doors**: easy to reach in without birds escaping.
+                - **Bar spacing**: safe for small birds like budgies and finches.
+
+                > "They chirp all morning now."
+                >
+                > > My neighbour said they sound happier than ever.
+
+                ## Sky and Lemon
+
+                Tip: add a natural branch like I did. They ++love++ chewing on it.
+
+                Read more about [budgerigar care](https://en.wikipedia.org/wiki/Budgerigar "Budgerigar on Wikipedia").
+
+                ---
+
+                ***Highly recommended*** for anyone with small birds.
+                """)
+                .build();
+
+        Rating rating3prod5 = Rating.builder()
+                .productId(product5.getProductId())
+                .customerId("9fe8a36a-36f3-4198-a5cc-d96371083493")
+                .rating((byte) 4)
+                .review("""
+                Crystal Clear Water After One Week
+                ==================================
+
+                I run this filter on my **75 litre** community tank with tetras, corydoras and a few shrimp.
+
+                Water Test Results
+                ------------------
+
+                | Parameter | Before | After 1 Week |
+                | :-------- | :----: | :----------: |
+                | Ammonia   | 0.5    | 0            |
+                | Nitrite   | 0.25   | 0            |
+                | Nitrate   | 40     | 20           |
+                | Clarity   | Cloudy | Clear        |
+
+                My weekly maintenance log:
+
+                ```
+                Mon: 25% water change
+                Wed: rinse sponge in tank water
+                Sat: check flow rate
+                ```
+
+                Pros
+
+                - Very easy to install, *about 10 minutes*.
+                - Adjustable flow, so it's gentle enough for shrimp.
+                - The sponge grows lots of good bacteria.
+
+                Cons
+
+                - A slight hum at night.
+                - The intake cover pops off if you bump it.
+
+                Maintenance Tips
+
+                1. **Never** rinse the sponge under tap water. The chlorine kills the good bacteria.
+                2. Squeeze it out in a bucket of old tank water instead.
+                3. Replace the sponge ++only when it falls apart++.
+
+                After one month the sponge is still holding up well.
+
+                > Pro tip: cycle your tank *before* adding fish. See the [nitrogen cycle](https://en.wikipedia.org/wiki/Fishkeeping#Nitrogen_cycle "Nitrogen cycle").
+
+                ---
+
+                **4/5**, would be perfect if it were quieter.
+                """)
+                .build();
+
+        Rating rating3prod6 = Rating.builder()
+                .productId(product6.getProductId())
+                .customerId("9fe8a36a-36f3-4198-a5cc-d96371083493")
+                .rating((byte) 4)
+                .review("""
+                # Light, Comfortable and Well Made
+
+                ## About Me
+
+                I ride *three to four times a week*, mostly flatwork and small jumps, on my 16 hand gelding **Bruno**.
+
+                ## First Impressions
+
+                The saddle is **noticeably lighter** than my old one, which makes tacking up a lot easier. The leather was a bit stiff at first but softened after a few rides.
+
+                ## Fit and Comfort
+
+                | Feature        | Rating | Comment                         |
+                | :------------- | :----: | :------------------------------ |
+                | Seat comfort   | 5/5    | Deep seat, very secure          |
+                | Weight         | 5/5    | Easy to lift onto a tall horse  |
+                | Knee rolls     | 4/5    | Good support over fences        |
+                | Leather        | 3/5    | Needed a few rides to break in  |
+
+                ## Break In Routine
+
+                1. Clean the leather with a damp sponge.
+                2. Apply a thin layer of conditioner.
+                3. Let it sit overnight.
+                4. Repeat ++after every ride++ for the first two weeks.
+
+                > "Bruno moved more freely from day one."
+                >
+                > > My trainer noticed it before I even told her about the new saddle.
+
+                ## Things to Know
+
+                - Always have a professional check the fit. See [saddle fitting][fit].
+                - Stirrups and leathers are **not included**.
+                - Use a good saddle pad underneath.
+
+                [fit]: https://en.wikipedia.org/wiki/Saddle#Saddle_fitting "Saddle fitting"
+
+                ---
+
+                Great value for a saddle at this price. ***Recommended.***
+                """)
+                .build();
+
+        Rating rating3prod7 = Rating.builder()
+                .productId(product7.getProductId())
+                .customerId("9fe8a36a-36f3-4198-a5cc-d96371083493")
+                .rating((byte) 3)
+                .review("""
+                # Cozy Hutch, Needs Some Tweaks
+
+                My rabbit **Pepper** has been living in this hutch for two months. It's a nice home, but I had to make a few changes.
+
+                ## Pros and Cons
+
+                | Pros                         | Cons                            |
+                | :--------------------------- | :------------------------------ |
+                | Solid wood construction      | Not much airflow in summer      |
+                | Separate sleeping area       | Latch is a bit flimsy           |
+                | Easy to reach inside         | Wood needs weatherproofing      |
+
+                ## What I Changed
+
+                1. Drilled a few extra **ventilation holes** in the back panel.
+                2. Replaced the latch with a sturdier one.
+                3. Painted the outside with *pet safe* wood stain.
+                   - Let it dry for 48 hours before moving Pepper back in.
+                   - Two coats worked best.
+
+                ## Daily Routine
+
+                - Fresh hay and water every morning.
+                - Spot clean the litter corner.
+                - ++Full clean++ every weekend.
+
+                > Rabbits need **lots of exercise** outside the hutch too. Pepper gets at least 3 hours a day in a pen.
+
+                ## Pepper's Home
+
+                More info on rabbit housing: [Domestic rabbit](https://en.wikipedia.org/wiki/Domestic_rabbit "Domestic rabbit on Wikipedia")
+
+                ---
+
+                **3/5**: good starting point, but plan to spend an afternoon improving it.
+                """)
+                .build();
+
+        Rating rating3prod8 = Rating.builder()
+                .productId(product8.getProductId())
+                .customerId("9fe8a36a-36f3-4198-a5cc-d96371083493")
+                .rating((byte) 2)
+                .review("""
+                Inconsistent Temperatures
+                =========================
+
+                I wanted to love this heater for my **40 litre** betta tank, but it struggles to hold a steady temperature.
+
+                Temperature Log
+                ---------------
+
+                Set to **26 °C** the whole time:
+
+                | Time     | Reading | Difference |
+                | :------- | :-----: | ---------: |
+                | 8:00 AM  | 24.5 °C | -1.5       |
+                | 12:00 PM | 26.0 °C | 0          |
+                | 6:00 PM  | 27.5 °C | +1.5       |
+                | 11:00 PM | 25.0 °C | -1.0       |
+
+                A swing of *three degrees* in one day is too much for tropical fish.
+
+                What I Tried
+
+                1. Moved it closer to the filter outflow for better circulation.
+                2. Recalibrated the dial against a separate thermometer.
+                3. Fully submerged it, as the manual says.
+
+                None of it made a real difference.
+
+                The Good Parts
+
+                - Compact, it hides behind plants easily.
+                - The glass tube feels sturdy.
+                - The indicator light is handy.
+
+                > **Warning:** always unplug the heater ++before++ taking it out of the water, or the glass can crack.
+
+                Notes for Other Buyers
+
+                ```
+                Tank size:   40 L
+                Setting:     26 C
+                Daily swing: about 3 C
+                ```
+
+                Learn more about keeping tropical tanks stable: [Aquarium heaters](https://en.wikipedia.org/wiki/Aquarium#Heating)
+
+                ---
+
+                **2/5**: fine as a backup, but I wouldn't trust it as my main heater.
+                """)
+                .build();
+
         Resource resource1 = new ClassPathResource("images/dog_food.png");
         Resource resource2 = new ClassPathResource("images/cat_litter.png");
         Resource resource3 = new ClassPathResource("images/flea_collar.png");
@@ -439,14 +884,14 @@ public class DataLoaderService implements CommandLineRunner {
                 .subscribe();
 
         Flux.just(
-                        rating1prod1, rating2prod1,
-                        rating1prod2, rating2prod2,
-                        rating1prod3, rating2prod3,
-                        rating1prod4, rating2prod4,
-                        rating1prod5, rating2prod5,
-                        rating1prod6, rating2prod6,
-                        rating1prod7, rating2prod7,
-                        rating1prod8, rating2prod8
+                        rating1prod1, rating2prod1, rating3prod1,
+                        rating1prod2, rating2prod2, rating3prod2,
+                        rating1prod3, rating2prod3, rating3prod3,
+                        rating1prod4, rating2prod4, rating3prod4,
+                        rating1prod5, rating2prod5, rating3prod5,
+                        rating1prod6, rating2prod6, rating3prod6,
+                        rating1prod7, rating2prod7, rating3prod7,
+                        rating1prod8, rating2prod8, rating3prod8
                 )
                 .flatMap(s -> ratingRepository.save(s)
                         .log(s.toString()))
