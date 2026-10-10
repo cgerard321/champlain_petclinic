@@ -4,7 +4,6 @@ import { Observable } from 'rxjs';
 
 import { Bill, BillRequestModel } from '@features/bill/models/bill.model';
 
-
 @Injectable({ providedIn: 'root' })
 export class BillService {
   private readonly http = inject(HttpClient);
@@ -14,4 +13,3 @@ export class BillService {
     return this.http.post<Bill>(this.baseUrl, body);
   }
 }
-

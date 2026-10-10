@@ -30,4 +30,3 @@ export interface BillRequestModel {
   billStatus: string;
   dueDate: Date;
 }
-

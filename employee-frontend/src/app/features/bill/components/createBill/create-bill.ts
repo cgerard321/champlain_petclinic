@@ -21,7 +21,6 @@ import { CustomerService } from '@features/cust/services/customer-service';
 import { Veterinarian } from '@features/vets/models/vet.model';
 import { VetService } from '@features/vets/services/vet-service';
 
-
 @Component({
   imports: [
     MatFormFieldModule,
@@ -34,7 +33,7 @@ import { VetService } from '@features/vets/services/vet-service';
     MatListModule,
     MatButtonModule,
     FormField,
-],
+  ],
   providers: [provideNativeDateAdapter()],
   selector: 'app-create-bill',
   styleUrl: './create-bill.css',

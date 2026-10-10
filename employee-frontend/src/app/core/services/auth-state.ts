@@ -25,7 +25,7 @@ export class AuthState {
         this._isAuthenticated.set(false);
         this._roles.set([]);
         this._username.set('');
-        this._userId.set('')
+        this._userId.set('');
       }),
     );
   }

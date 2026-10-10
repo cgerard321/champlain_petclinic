@@ -5,8 +5,6 @@ import { AuthState } from '@core/services/auth-state';
 import { CreateBill } from '@features/bill/components/createBill/create-bill';
 import { Roles } from '@shared/models/roles';
 
-
-
 @Component({
   selector: 'app-bill',
   styleUrl: './bill.css',
