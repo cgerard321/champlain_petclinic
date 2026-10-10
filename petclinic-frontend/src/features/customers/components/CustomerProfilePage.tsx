@@ -4,15 +4,12 @@ import { PetResponseModel } from '@/features/customers/models/PetResponseModel';
 import { PetTypeModel } from '@/features/customers/models/PetTypeModel';
 import { UserDetailsModel } from '@/features/customers/models/UserDetailsModel';
 import { useUser } from '@/context/UserContext';
-
 import AddPetModal from '@/features/customers/components/AddPetModal';
 import UploadPhotoModal from '@/features/customers/components/UploadPhotoModal';
 import UploadPetPhotoModal from '@/features/customers/components/UploadPetPhotoModal';
-
 import { deletePet } from '@/features/customers/api/deletePet';
 import { deleteCustomerPhoto } from '@/features/customers/api/deleteCustomerPhoto';
 import { deletePetPhoto } from '@/features/customers/api/deletePetPhoto';
-
 import {
   getPetTypeName,
   getPetTypeImage,
