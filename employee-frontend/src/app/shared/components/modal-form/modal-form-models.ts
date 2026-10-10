@@ -44,6 +44,9 @@ export interface ModalFormData<T extends object> {
 
   fields: readonly ModalFormField[];
 
+  message?: string; // optional text shown above the fields
+  destructive?: boolean; // styles the submit button as a danger action
+
   // Partial<T> allows the caller to provide only the initial values that are relevant to the fields being displayed.
   initialValue: Partial<T>;
 

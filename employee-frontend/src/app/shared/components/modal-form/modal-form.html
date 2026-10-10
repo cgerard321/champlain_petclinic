@@ -4,6 +4,10 @@
 
 <form [formGroup]="form" (ngSubmit)="submit()">
   <mat-dialog-content>
+    @if (data.message) {
+      <p class="modal-message">{{ data.message }}</p>
+    }
+
     <div class="modal-form">
       @for (field of fields; track field.key) {
         <div class="form-field">
@@ -12,7 +16,13 @@
               {{ field.label }}
             </label>
           }
-
+          
+          @if (control(field).touched && control(field).invalid) {
+            <p class="field-error">
+              {{ errorMessage(field) }}
+            </p>
+          }
+          
           @switch (field.type) {
             @case ('string') {
               <input
@@ -55,12 +65,6 @@
               />
             }
           }
-
-          @if (control(field).touched && control(field).invalid) {
-            <p class="field-error">
-              {{ errorMessage(field) }}
-            </p>
-          }
         </div>
       }
     </div>
@@ -71,7 +75,7 @@
       {{ data.cancelLabel ?? 'Cancel' }}
     </button>
 
-    <button type="submit" class="dialog-submit-button" [disabled]="form.invalid">
+    <button type="submit" class="dialog-submit-button" [disabled]="form.invalid" [class.destructive]="data.destructive">
       {{ data.submitLabel ?? 'Save' }}
     </button>
   </mat-dialog-actions>

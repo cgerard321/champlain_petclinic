@@ -41,7 +41,6 @@ export class SupplyPage {
   private readonly supplyService = inject(SupplyService);
   private readonly auth = inject(AuthState);
   private readonly dialog = inject(MatDialog);
-  private readonly deleteDialogTemplate = viewChild.required<TemplateRef<unknown>>('deleteDialog');
 
   protected readonly inventoryId = this.route.snapshot.paramMap.get('inventoryId');
 
@@ -271,6 +270,30 @@ export class SupplyPage {
     }
   }
 
+  protected consumeSupply(supply: Supply): void {
+    if (!this.canConsumeSupplies() || !this.inventoryId) {
+      return;
+    }
+
+    if (supply.productQuantity <= 0) {
+      return;
+    }
+    this.deleteError.set('');
+
+    this.consumingSupplyId.set(supply.productId);
+
+    this.supplyService.consumeSupply(this.inventoryId, supply.productId).subscribe({
+      next: () => {
+        this.consumingSupplyId.set(null);
+        this.loadSupplies();
+      },
+      error: () => {
+        this.consumingSupplyId.set(null);
+        this.deleteError.set('Unable to consume supply.');
+      },
+    });
+  }
+
   protected deleteSupply(supply: Supply): void {
     if (!this.canManageSupplies()) {
       return;
@@ -285,13 +308,27 @@ export class SupplyPage {
       return;
     }
 
-    const dialogRef = this.dialog.open<unknown, Supply, boolean>(this.deleteDialogTemplate(), {
-      data: supply,
+    const dialogRef = this.dialog.open<
+      ModalForm<Record<string, never>>,
+      ModalFormData<Record<string, never>>,
+      ModalFormResult<Record<string, never>>
+    >(ModalForm, {
+      data: {
+        title: 'Delete Supply',
+        message: `Are you sure you want to delete ${supply.productName}?`,
+        fields: [],
+        initialValue: {},
+        submitLabel: 'Delete',
+        destructive: true,
+      },
       ariaLabel: 'Delete supply',
+      width: '440px',
+      maxWidth: '95vw',
     });
 
-    dialogRef.afterClosed().subscribe((confirmed) => {
-      if (confirmed !== true || !this.canManageSupplies()) {
+    dialogRef.afterClosed().subscribe((result) => {
+      // result is undefined when the user cancels
+      if (!result || !this.canManageSupplies()) {
         return;
       }
 

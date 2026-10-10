@@ -170,14 +170,6 @@
   background: #1976d2;
 }
 
-.delete-button {
-  background: #b71c1c;
-}
-
-.delete-button:hover {
-  background: #8e0000;
-}
-
 .dialog-cancel-button {
   padding: 10px 18px;
   border: 1px solid var(--forest-700);

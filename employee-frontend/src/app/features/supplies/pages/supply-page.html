@@ -153,16 +153,3 @@
     }
   </div>
 </ng-template>
-
-<ng-template #deleteDialog let-supply>
-  <h2 mat-dialog-title>Delete supply</h2>
-
-  <mat-dialog-content>
-    Are you sure you want to delete {{ supply.productName }}?
-  </mat-dialog-content>
-
-  <mat-dialog-actions align="end">
-    <button type="button" class="dialog-cancel-button" [mat-dialog-close]="false">Cancel</button>
-    <button type="button" class="delete-button" [mat-dialog-close]="true">Delete</button>
-  </mat-dialog-actions>
-</ng-template>

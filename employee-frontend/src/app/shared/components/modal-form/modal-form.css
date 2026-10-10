@@ -81,7 +81,8 @@ mat-dialog-content {
   box-sizing: border-box;
   width: 100%;
   min-height: 44px;
-  padding: 0.65rem 0.8rem;
+  padding: 0.65rem 0.2rem;
+  margin-bottom: 0.85rem;
   border: 1px solid var(--border-strong);
   border-radius: 8px;
   outline: none;
@@ -198,6 +199,17 @@ mat-dialog-actions {
 .dialog-submit-button:focus-visible {
   outline: 3px solid var(--sage-400);
   outline-offset: 3px;
+}
+
+/*Any destructive action gets a red submit button*/
+.dialog-submit-button.destructive {
+  border-color: rgb(142 0 0 / 100%);
+  background: rgb(183 28 28 / 100%);
+}
+
+.dialog-submit-button.destructive:hover:not(:disabled) {
+  border-color: rgb(183 28 28 / 100%);
+  background: rgb(142 0 0 / 100%);
 }
 
 @media (width <= 600px) {
