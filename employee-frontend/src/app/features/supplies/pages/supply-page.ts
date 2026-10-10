@@ -63,6 +63,7 @@ export class SupplyPage {
   protected readonly downloadError = signal('');
   protected readonly showAddForm = signal(false);
   protected readonly editingSupplyId = signal<string | null>(null);
+  protected readonly consumingSupplyId = signal<string | null>(null);
   protected readonly newSupply = signal({
     productName: '',
     productDescription: '',
@@ -85,7 +86,7 @@ export class SupplyPage {
     { id: 'price', header: 'Cost Price', template: this.priceCell() },
     { id: 'quantity', header: 'Quantity', value: (supply) => supply.productQuantity },
     { id: 'status', header: 'Status', template: this.statusCell() },
-    ...(this.canManageSupplies()
+    ...(this.canManageSupplies() || this.canConsumeSupplies()
       ? [{ id: 'actions', header: 'Actions', template: this.actionsCell() }]
       : []),
   ]);
@@ -136,6 +137,11 @@ export class SupplyPage {
   protected readonly canManageSupplies = computed(() => {
     const roles = this.auth.roles();
     return roles.includes(Roles.admin) || roles.includes(Roles.inventoryManager);
+  });
+
+  protected readonly canConsumeSupplies = computed(() => {
+    const roles = this.auth.roles();
+    return roles.includes(Roles.vet);
   });
 
   constructor() {
@@ -235,6 +241,32 @@ export class SupplyPage {
 
     this.showAddForm.set(true);
   }
+
+  protected consumeSupply(supply: Supply): void {
+    if (!this.canConsumeSupplies() || !this.inventoryId) {
+      return;
+    }
+
+    // Prevent consuming if quantity is already 0
+    if (supply.productQuantity <= 0) {
+      return;
+    }
+    this.deleteError.set('');
+
+    this.consumingSupplyId.set(supply.productId);
+
+    this.supplyService.consumeSupply(this.inventoryId, supply.productId).subscribe({
+      next: () => {
+        this.consumingSupplyId.set(null);
+        this.loadSupplies();
+      },
+      error: () => {
+        this.consumingSupplyId.set(null);
+        this.deleteError.set('Unable to consume supply.');
+      },
+    });
+  }
+
   protected deleteSupply(supply: Supply): void {
     if (!this.canManageSupplies()) {
       return;
@@ -269,6 +301,7 @@ export class SupplyPage {
       });
     });
   }
+
   protected openAddForm(): void {
     if (!this.canManageSupplies()) {
       return;
@@ -280,6 +313,7 @@ export class SupplyPage {
 
     this.showAddForm.set(true);
   }
+
   protected cancelAddForm(): void {
     this.selectedImage.set(null);
     this.supplyForm().reset({

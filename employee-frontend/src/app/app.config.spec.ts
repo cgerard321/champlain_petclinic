@@ -4,7 +4,7 @@ import { vi } from 'vitest';
 
 import { Footer } from '@layout/footer/footer';
 
-import { getSavedLang, loadActiveTranslations } from './app.config';
+import { flattenTranslations, getSavedLang, loadActiveTranslations } from './app.config';
 
 /**
  * Mirrors the real en.json shape ({ locale, translations }) so the tests also check that
@@ -145,5 +145,91 @@ describe('Translation loader (app.config)', () => {
 
     // Assert - guards the early return that keeps the source locale free of network calls
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('installs a catalogue that is grouped by feature', async () => {
+    // Arrange - the real shape of en.json, nested rather than flat
+    localStorage.setItem('lang', 'en');
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          locale: 'en',
+          translations: {
+            footer: {
+              brand: 'PetClinic Employee Portal',
+              privacy: 'Privacy Policy',
+              terms: 'Terms of Service',
+              support: 'Support',
+              copyright: '© 2026 Champlain Pet Clinic. All rights reserved.',
+            },
+          },
+        }),
+    });
+
+    // Act
+    await loadActiveTranslations();
+
+    // Assert
+    const footer = await renderFooter();
+    expect(footer.textContent).toContain('PetClinic Employee Portal');
+    expect(footer.textContent).not.toContain('Portail Employé Clinique Vétérinaire');
+  });
+});
+
+describe('flattenTranslations (VETS-CPC-2089)', () => {
+  // POSITIVE - The three-level case, which is the one the templates actually need: the page uses
+  // i18n="@@settings.security.title", and a dot in a message id is a character, never a path.
+  it('rebuilds a dotted message id from the nesting', () => {
+    // Arrange
+    const grouped = {
+      settings: {
+        security: { title: 'Security' },
+        display: { title: 'Display' },
+      },
+    };
+
+    // Act
+    const flat = flattenTranslations(grouped);
+
+    // Assert
+    expect(flat).toEqual({
+      'settings.security.title': 'Security',
+      'settings.display.title': 'Display',
+    });
+  });
+
+  // POSITIVE - A flat catalogue comes back untouched. This idempotence is what lets the loader
+  it('leaves an already flat catalogue unchanged', () => {
+    // Arrange
+    const flat = {
+      'footer.brand': 'PetClinic Employee Portal',
+      'login.title': 'Login',
+    };
+
+    // Act & Assert
+    expect(flattenTranslations(flat)).toEqual(flat);
+  });
+
+  // POSITIVE - Real groups mix depths: settings.title is a leaf sitting next to settings.security,
+  it('handles leaves and groups side by side in one group', () => {
+    // Arrange
+    const grouped = {
+      settings: {
+        title: 'Settings',
+        save: 'Save',
+        security: { title: 'Security' },
+      },
+    };
+
+    // Act
+    const flat = flattenTranslations(grouped);
+
+    // Assert
+    expect(flat).toEqual({
+      'settings.title': 'Settings',
+      'settings.save': 'Save',
+      'settings.security.title': 'Security',
+    });
   });
 });
