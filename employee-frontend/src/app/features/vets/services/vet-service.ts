@@ -8,7 +8,7 @@ import { Veterinarian } from '@features/vets/models/vet.model';
 @Injectable({ providedIn: 'root' })
 export class VetService {
   private readonly sse = inject(SseClient);
-  private readonly http = inject(HttpClient)
+  private readonly http = inject(HttpClient);
 
   getVetByVetId(vetId: string): Observable<Veterinarian> {
     return this.http.get<Veterinarian>(`/api/v2/gateway/vets/${vetId}`);
