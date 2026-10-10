@@ -15,6 +15,7 @@ import { updateUsername } from '../api/updateUsername.ts';
 import defaultProfile from '@/assets/Customers/defaultProfilePicture.png';
 
 import './UpdateCustomerForm.css';
+import { useTranslation } from 'react-i18next';
 
 const NewUpdateCustomerForm = ({
   customer,
@@ -33,16 +34,11 @@ const NewUpdateCustomerForm = ({
 
   onBackButtonClick: () => void;
 }): JSX.Element => {
+  const { t } = useTranslation('customers');
   const { user, checkSession } = useUser();
   const { showToast } = useToast();
   const { validateUsernameField } = useUsernameValidation();
 
-  /*
-   * This is temporary form state.
-   *
-   * It does NOT need to be stored in ProfilePage because it only
-   * matters while the UpdateCustomerForm is open.
-   */
   const [formCustomer, setFormCustomer] = useState<CustomerRequestModel>({
     firstName: customer.firstName,
     lastName: customer.lastName,
@@ -140,13 +136,6 @@ const NewUpdateCustomerForm = ({
     if (!(await validate())) return;
 
     try {
-      /*
-       * PUT/update operation.
-       *
-       * This is not a fetch used to load the page.
-       * We update the parent state immediately after the successful
-       * update so we don't need to GET the customer again.
-       */
       await updateCustomer(user.userId, formCustomer);
 
       setCustomer(prevCustomer => {
@@ -208,7 +197,7 @@ const NewUpdateCustomerForm = ({
 
           <form onSubmit={handleSubmit} className="customers-profile-info">
             <p>
-              <strong>Username:</strong>{' '}
+              <strong>{t('fields.username')}</strong>{' '}
               <input
                 type="text"
                 name="username"
@@ -216,12 +205,12 @@ const NewUpdateCustomerForm = ({
                 onChange={handleUsernameChange}
               />
               {errors.username && (
-                <span className="error">{errors.username}</span>
+                <span className="error">{t(errors.username)}</span>
               )}
             </p>
 
             <p>
-              <strong>First Name:</strong>{' '}
+              <strong>{t('fields.firstName')} </strong>{' '}
               <input
                 type="text"
                 name="firstName"
@@ -229,12 +218,12 @@ const NewUpdateCustomerForm = ({
                 onChange={handleChange}
               />
               {errors.firstName && (
-                <span className="error">{errors.firstName}</span>
+                <span className="error">{t(errors.firstName)}</span>
               )}
             </p>
 
             <p>
-              <strong>Last Name:</strong>{' '}
+              <strong>{t('fields.lastName')}</strong>{' '}
               <input
                 type="text"
                 name="lastName"
@@ -242,12 +231,12 @@ const NewUpdateCustomerForm = ({
                 onChange={handleChange}
               />
               {errors.lastName && (
-                <span className="error">{errors.lastName}</span>
+                <span className="error">{t(errors.lastName)}</span>
               )}
             </p>
 
             <p>
-              <strong>Address:</strong>{' '}
+              <strong>{t('fields.address')}</strong>{' '}
               <input
                 type="text"
                 name="address"
@@ -255,23 +244,23 @@ const NewUpdateCustomerForm = ({
                 onChange={handleChange}
               />
               {errors.address && (
-                <span className="error">{errors.address}</span>
+                <span className="error">{t(errors.address)}</span>
               )}
             </p>
 
             <p>
-              <strong>City:</strong>{' '}
+              <strong>{t('fields.city')}</strong>{' '}
               <input
                 type="text"
                 name="city"
                 value={formCustomer.city}
                 onChange={handleChange}
               />
-              {errors.city && <span className="error">{errors.city}</span>}
+              {errors.city && <span className="error">{t(errors.city)}</span>}
             </p>
 
             <p>
-              <strong>Province:</strong>{' '}
+              <strong>{t('customerForm.selectProvince')}</strong>{' '}
               <select
                 name="province"
                 value={formCustomer.province}
@@ -286,12 +275,12 @@ const NewUpdateCustomerForm = ({
                 ))}
               </select>
               {errors.province && (
-                <span className="error">{errors.province}</span>
+                <span className="error">{t(errors.province)}</span>
               )}
             </p>
 
             <p>
-              <strong>Telephone:</strong>{' '}
+              <strong>{t('fields.telephone')}</strong>{' '}
               <input
                 type="text"
                 name="telephone"
@@ -299,7 +288,7 @@ const NewUpdateCustomerForm = ({
                 onChange={handleChange}
               />
               {errors.telephone && (
-                <span className="error">{errors.telephone}</span>
+                <span className="error">{t(errors.telephone)}</span>
               )}
             </p>
 
@@ -309,11 +298,11 @@ const NewUpdateCustomerForm = ({
                 className="customers-backButton"
                 onClick={onBackButtonClick}
               >
-                Back
+                {t('customerForm.back')}
               </button>
 
               <button type="submit" className="customers-updateButton">
-                Save Changes
+                {t('customerForm.submit')}
               </button>
             </div>
           </form>
