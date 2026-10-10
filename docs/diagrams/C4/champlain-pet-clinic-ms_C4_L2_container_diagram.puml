@@ -119,6 +119,7 @@ Rel(files_service, files_db, "Reads from and writes to", "JDCB/SQL/TCP", $tags="
 Rel(files_service, minio, "Makes API calls to", "JSON/REST/HTTPS")
 Rel(api_gateway, customers_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
 Rel(customers_service, customers_db, "Reads from and writes to", "Mongo/MQL/TCP")
+Rel(customers_service, cart_service, "Deletes customer cart when customer is deleted", "JSON/REST/HTTPS", $tags="green-line")
 Rel(api_gateway, inventory_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
 Rel(inventory_service, inventory_db, "Reads from and writes to", "Mongo/MQL/TCP")
 Rel(api_gateway, vets_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")

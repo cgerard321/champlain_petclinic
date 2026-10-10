@@ -21,6 +21,82 @@
     "login": "Login",
     "profile": "Profile",
     "editProfile": "Edit Profile",
-    "logout": "Logout"
+    "logout": "Logout",
+    "privacy": "Privacy Policy",
+    "contact": "Contact"
+  },
+  "highlights": {
+    "ariaLabel": "Highlights",
+    "rating": {"title":  "4.9/5 average rating", "label": "from pet parents"},
+    "team": {"title": "Experienced team", "label": "Board-certified vets"},
+    "sameDay": {"title": "Same-day appointments", "label": "When available"}
+  },
+  "loading": "Loading...",
+  "intro": {
+    "welcome": "Welcome to ",
+    "clinicName": "Champlain Pet Clinic"
+  },
+  "clinicDescription": "At Champlain Pet Clinic, we offer a wide range of services to ensure the health and well-being of your beloved pets. Our experienced veterinarians and staff are dedicated to providing the best care possible.",
+  "bookAppointment": "Book Appointment",
+  "contactUs": "Contact Us",
+  "services": {
+    "ariaLabel": "Services",
+    "title": "Services at a Glance",
+    "items": {
+      "wellness": {
+        "title": "Wellness Exams",
+        "desc": "Annual check-ups & preventive care."
+      },
+      "vaccinations": {
+        "title": "Vaccinations",
+        "desc": "Core & lifestyle vaccines."
+      },
+      "dental": {
+        "title": "Dental Care",
+        "desc": "Cleaning, polishing & dental X-rays."
+      },
+      "diagnostics": {
+        "title": "Diagnostics",
+        "desc": "Digital radiology & in-house lab."
+      },
+      "surgery": {
+        "title": "Surgery",
+        "desc": "Routine & soft-tissue procedures."
+      },
+      "emergency": {
+        "title": "Emergency",
+        "desc": "Urgent care during open hours."
+      }
+    }
+  },
+  "featuredVets": {
+    "ariaLabel": "Featured veterinarians",
+    "title": "Featured Veterinarians"
+   },
+  "faq": {
+    "ariaLabel": "FAQ",
+    "title": "FAQ",
+    "button": "View All FAQs"
+  },
+  "contactInfo": {
+    "ariaLabel": "Contact",
+    "hasQuestion": "Have questions or need help?",
+    "messageAway": "Our team is just a message away.",
+    "buttonContact": "Contact Us",
+    "buttonBook": "Book Appointment"
+
+  },
+  "allRightsReserved": "Champlain Pet Clinic. All rights reserved.",
+  "explore": "Explore",
+  "clinicMessage": "Providing compassionate veterinary care to keep your pets healthy and happy.",
+  "support": "Support",
+  "hours": {
+    "day": {
+      "weekdays": "Mon - Fri",
+      "saturday": "Sat",
+      "sunday": "Sun"
+    },
+    "closed": "Closed"
   }
+
 }

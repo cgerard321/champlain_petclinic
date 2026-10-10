@@ -29,17 +29,19 @@ export class Header {
   private readonly authState = inject(AuthState);
   private readonly router = inject(Router);
 
+  protected currentLanguage = localStorage.getItem('lang') ?? 'fr';
+
   protected readonly username = this.authState.username;
 
   protected readonly navBarItems: NavBarItem[] = [
-    { label: 'Home', route: '/home' },
-    { label: 'Veterinarians', route: '/vets' },
-    { label: 'Customers', route: '/cust' },
-    { label: 'Bills', route: '/bill' },
-    { label: 'Visits', route: '/vist' },
-    { label: 'Inventory', route: '/invt' },
-    { label: 'Products', route: '/prod' },
-    { label: 'Promos', route: '/promo' },
+    { label: $localize`:@@navbar.home:Accueil`, route: '/home' },
+    { label: $localize`:@@navbar.veterinarians:Vétérinaires`, route: '/vets' },
+    { label: $localize`:@@navbar.customers:Clients`, route: '/cust' },
+    { label: $localize`:@@navbar.bills:Factures`, route: '/bill' },
+    { label: $localize`:@@navbar.visits:Visites`, route: '/vist' },
+    { label: $localize`:@@navbar.inventory:Inventaire`, route: '/invt' },
+    { label: $localize`:@@navbar.products:Produits`, route: '/prod' },
+    { label: $localize`:@@navbar.promos:Promotions`, route: '/promo' },
   ];
 
   protected setting(): void {

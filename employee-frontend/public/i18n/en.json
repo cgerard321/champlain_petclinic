@@ -7,6 +7,18 @@
       "password": "Password",
       "submit": "Sign in"
     },
+    "navbar": {
+      "home": "Home",
+      "veterinarians": "Veterinarians",
+      "customers": "Customers",
+      "bills": "Bills",
+      "visits": "Visits",
+      "inventory": "Inventory",
+      "products": "Products",
+      "promos": "Promos",
+      "settings": "Settings",
+      "logout": "Logout"
+    },
     "settings": {
       "title": "Settings",
       "save": "Save",
