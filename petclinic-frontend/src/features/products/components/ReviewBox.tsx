@@ -112,13 +112,40 @@ function ReviewBox({
 
       while (text.charAt(selStart) === '\n') selStart++;
 
-      const lines = text.slice(selStart, selEnd).trim().split('\n');
+      const raw = text.slice(selStart, selEnd);
+      selStart += raw.length - raw.trimStart().length;
+      const trimmedEnd = selEnd - (raw.length - raw.trimEnd().length);
+      const lines = text.slice(selStart, trimmedEnd).split('\n');
+
+      if (
+        !lineBased &&
+        text.slice(selStart - markdownStartLen, selStart) ===
+          markdownTagStart &&
+        text.slice(trimmedEnd, trimmedEnd + markdownTagEnd.length) ===
+          markdownTagEnd
+      ) {
+        selectionRef.current = {
+          start: selStart - markdownStartLen,
+          end: trimmedEnd - markdownStartLen,
+        };
+        return (
+          text.slice(0, selStart - markdownStartLen) +
+          text.slice(selStart, trimmedEnd) +
+          text.slice(trimmedEnd + markdownTagEnd.length)
+        );
+      }
 
       const linesWithMarkdown = lines
         .map(line => {
-          if (line === '' || isWrapped(line, markdownTagStart, markdownTagEnd))
-            return line;
-          return markdownTagStart + line + markdownTagEnd;
+          const clean = lineBased
+            ? line.replace(/^(#{1,6} |[-*] |\d+\. |> )+/, '')
+            : line;
+          if (
+            clean === '' ||
+            isWrapped(clean, markdownTagStart, markdownTagEnd)
+          )
+            return clean;
+          return markdownTagStart + clean + markdownTagEnd;
         })
         .join('\n');
 
@@ -127,7 +154,9 @@ function ReviewBox({
         end: selStart + lines[0].length + markdownStartLen,
       };
 
-      return text.slice(0, selStart) + linesWithMarkdown + text.slice(selEnd);
+      return (
+        text.slice(0, selStart) + linesWithMarkdown + text.slice(trimmedEnd)
+      );
     }
   };
 
