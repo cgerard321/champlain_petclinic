@@ -7,7 +7,7 @@ export interface Bill {
   vetId: string;
   vetFirstName: string;
   vetLastName: string;
-  date: string;
+  date: Date;
   amount: number;
   taxedAmount: number;
   gstAmount: number;
@@ -15,7 +15,7 @@ export interface Bill {
   interest: number;
   totalAmount: number;
   billStatus: string;
-  dueDate: string;
+  dueDate: Date;
   timeRemaining: number;
   interestExempt: boolean;
   archive: boolean;
@@ -25,8 +25,9 @@ export interface BillRequestModel {
   customerId: string;
   visitType: string;
   vetId: string;
-  date: string;
-  amount: number;
+  date: Date;
+  amount: number | null;
   billStatus: string;
+  dueDate: Date;
 }
 

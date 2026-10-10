@@ -55,3 +55,7 @@ input.right-align::-webkit-inner-spin-button {
 .red{
   background-color: red;
 }
+
+.center-error{
+  text-align: center;
+}

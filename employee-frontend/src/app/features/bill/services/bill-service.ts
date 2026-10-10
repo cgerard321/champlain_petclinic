@@ -8,7 +8,7 @@ import { Bill, BillRequestModel } from '@features/bill/models/bill.model';
 @Injectable({ providedIn: 'root' })
 export class BillService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = '/api/gateway/bill';
+  private readonly baseUrl = '/api/gateway/bills';
 
   createBill(body: BillRequestModel): Observable<Bill> {
     return this.http.post<Bill>(this.baseUrl, body);

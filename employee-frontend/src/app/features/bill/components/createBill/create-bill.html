@@ -1,7 +1,7 @@
-<section>
+<form (submit)="onSubmit($event)" novalidate>
     <mat-card class="align-center" appearance="outlined">
         <mat-card-header>
-            <h1>Welcome, [insert Vet Name]</h1>
+            <h1>Welcome, {{ (vets()[0]?.firstName) + ' ' + (vets()[0]?.lastName) }}</h1>
         </mat-card-header>
         <mat-divider></mat-divider>
         <mat-card-content>
@@ -9,14 +9,14 @@
                 <label class="label-size">Veteranarian Name:</label>
                 <mat-form-field appearance="outline">
                     <input matInput disabled [value]="(vets()[0]?.firstName) + ' ' + (vets()[0]?.lastName)">
-                    <input hidden [value]="vets()[0]?.vetId">
+                    <input type="hidden" [formField]="billRequestForm.vetId">
                 </mat-form-field>
             </div>
             <mat-divider></mat-divider>
             <div class="form-row">
-                <label class="label-size">Customer Name:</label>
+                <label class="label-size">Customer Name:</label>       
                 <mat-form-field appearance="outline">
-                    <mat-select>
+                    <mat-select [formField]="billRequestForm.customerId">
                         @for (customer of customers(); track customer.customerId) {
                         <mat-option [value]="customer.customerId">
                         {{ customer.firstName }} {{customer.lastName}}
@@ -25,11 +25,13 @@
                     </mat-select>
                 </mat-form-field>
             </div>
+            @if (submitted() && billRequestForm.customerId().invalid()){
+                <mat-error class="center-error">Customer name is required.</mat-error>}
             <mat-divider></mat-divider>
             <div class="form-row">
                 <label class="label-size">Visit Type:</label>
                 <mat-form-field appearance="outline">
-                    <mat-select>
+                    <mat-select [formField]="billRequestForm.visitType">
                         <mat-option value="Check-Up">Check-Up</mat-option>
                         <mat-option value="Vaccine">Vaccine</mat-option>
                         <mat-option value="Surgery">Surgery</mat-option>
@@ -37,30 +39,36 @@
                     </mat-select>
                 </mat-form-field>
             </div>
-            <mat-divider></mat-divider>
+            @if (submitted() && billRequestForm.visitType().invalid()){
+                <mat-error class="center-error">Visit type is required.</mat-error>}
+            <mat-divider>
+
+            </mat-divider>
             <div class="form-row">
                 <label class="label-size" >Amount:</label>
                 <mat-form-field appearance="outline">
-                    <input matInput type="number" class="right-align" placeholder="0"/>
+                    <input matInput type="number" class="right-align" [formField]="billRequestForm.amount">
                     <span matTextPrefix>$&nbsp;</span>
                 </mat-form-field>
             </div>
+            @if (submitted() && billRequestForm.amount().invalid()){
+                <mat-error class="center-error">Amount is required.</mat-error>}
             <mat-divider></mat-divider>
             <div class="form-row">
                 <label class="label-size">Date:</label>
                 <mat-form-field appearance="outline">
                     <mat-label>Choose a date</mat-label>
-                    <input matInput [matDatepicker]="picker">
+                    <input matInput [matDatepicker]="picker" [formField]="billRequestForm.date">
                     <mat-hint>MM/DD/YYYY</mat-hint>
                     <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-                    <mat-datepicker #picker></mat-datepicker>
+                    <mat-datepicker #picker ></mat-datepicker>
                 </mat-form-field>
             </div>
             <mat-divider></mat-divider>
         </mat-card-content>
         <mat-card-actions class="center-buttons">
             <button matButton="filled" class="red" (click)="closeCreateBill()">Cancel</button>
-            <button matButton="filled">Submit</button>
+            <button matButton="filled" type="submit">Submit</button>
         </mat-card-actions>
     </mat-card>
-</section>
+</form>

@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { form, FormField } from '@angular/forms/signals';
+import { form, FormField, required } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { provideNativeDateAdapter, MatOption } from '@angular/material/core';
@@ -11,6 +11,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatSelect } from '@angular/material/select';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { AuthState } from '@core/services/auth-state';
 import { BillRequestModel } from '@features/bill/models/bill.model';
@@ -19,6 +20,7 @@ import { Customer } from '@features/cust/models/customer.model';
 import { CustomerService } from '@features/cust/services/customer-service';
 import { Veterinarian } from '@features/vets/models/vet.model';
 import { VetService } from '@features/vets/services/vet-service';
+
 
 @Component({
   imports: [
@@ -31,7 +33,8 @@ import { VetService } from '@features/vets/services/vet-service';
     MatDividerModule,
     MatListModule,
     MatButtonModule,
-  ],
+    FormField,
+],
   providers: [provideNativeDateAdapter()],
   selector: 'app-create-bill',
   styleUrl: './create-bill.css',
@@ -40,9 +43,7 @@ import { VetService } from '@features/vets/services/vet-service';
 export class CreateBill implements OnInit {
   protected auth = inject(AuthState);
   protected billService = inject(BillService);
-
   protected customerService = inject(CustomerService);
-
   protected vetService = inject(VetService);
 
   private readonly untilDestroyed = takeUntilDestroyed<Customer>();
@@ -53,16 +54,40 @@ export class CreateBill implements OnInit {
 
   protected readonly vets = signal<Veterinarian[]>([]);
 
-  readonly billRequest = signal<BillRequestModel>({
+  private today = new Date();
+
+  private newDate: Date = (() => {
+    const date = new Date(this.today);
+    date.setDate(date.getDate() + 30);
+    return this.newDate;
+  })();
+
+  protected readonly billRequest = signal<BillRequestModel>({
     customerId: '',
     visitType: '',
     vetId: '',
-    date: '',
-    amount: 0,
-    billStatus: '',
+    date: this.today,
+    amount: null,
+    billStatus: 'UNPAID',
+    dueDate: this.newDate,
   });
 
-  readonly billRequestForm = form(this.billRequest);
+  private _snackBar = inject(MatSnackBar);
+
+  protected showSnackbar(message: string): void {
+    this._snackBar.open(message, 'Close', {
+      duration: 3000,
+    });
+  }
+
+  protected readonly billRequestForm = form(this.billRequest, (schemaPath) => {
+    required(schemaPath.customerId, { message: 'Customer is required' });
+    required(schemaPath.visitType, { message: 'Visit Type is required' });
+    required(schemaPath.vetId, { message: 'Vet is required' });
+    required(schemaPath.date, { message: 'Date is required' });
+    required(schemaPath.amount, { message: 'Amount is required' });
+    required(schemaPath.billStatus, { message: 'Bill status is required' });
+  });
 
   readonly dialogRef = inject(MatDialogRef<CreateBill>);
 
@@ -70,7 +95,26 @@ export class CreateBill implements OnInit {
     this.dialogRef.close();
   }
 
+  protected readonly submitted = signal(false);
 
+  onSubmit(event: Event): void {
+    event.preventDefault();
+    this.submitted.set(true);
+
+    if (this.billRequestForm().invalid()) {
+      return;
+    }
+    this.billService.createBill(this.billRequest()).subscribe({
+      next: (createdBill: BillRequestModel) => {
+        this.dialogRef.close(createdBill);
+        this.showSnackbar('Bill created successfully!');
+      },
+      error: (error) => {
+        console.warn('Error status:', error.status);
+        console.warn('Error body:', error.error);
+      },
+    });
+  }
 
   ngOnInit(): void {
     this.customerService
@@ -93,6 +137,10 @@ export class CreateBill implements OnInit {
       .subscribe({
         next: (veterinarian) => {
           this.vets.set([veterinarian]);
+          this.billRequest.update((request) => ({
+            ...request,
+            vetId: veterinarian.vetId,
+          }));
         },
         error: () => {
           this.isLoading.set(false);
