@@ -17,8 +17,8 @@ import {
 
 import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
 import defaultProfile from '@/assets/Customers/defaultProfilePicture.png';
-// eslint-disable-next-line import/default
-import PropTypes from 'prop-types';
+import { object, array, string, func } from 'prop-types';
+import type { Validator } from 'prop-types';
 import UpdatePetForm from './UpdatePetForm';
 
 interface CustomerProfilePageProps {
@@ -481,21 +481,17 @@ const CustomerProfilePage: React.FC<CustomerProfilePageProps> = ({
   );
 };
 CustomerProfilePage.propTypes = {
-  customer: PropTypes.object
-    .isRequired as PropTypes.Validator<CustomerResponseModel>,
-  userDetails: PropTypes.object
-    .isRequired as PropTypes.Validator<UserDetailsModel>,
-  petTypes: PropTypes.array.isRequired,
-  profilePicUrl: PropTypes.string.isRequired,
-  petImageUrls: PropTypes.object.isRequired as PropTypes.Validator<
-    Record<string, string>
-  >,
-  pets: PropTypes.array.isRequired,
-  setCustomer: PropTypes.func.isRequired,
-  setPetImageUrls: PropTypes.func.isRequired,
-  setProfilePicUrl: PropTypes.func.isRequired,
-  onUpdateProfileClick: PropTypes.func.isRequired,
-  onProfilePhotoUploaded: PropTypes.func.isRequired,
-  onPetPhotoUploaded: PropTypes.func.isRequired,
+  customer: object.isRequired as Validator<CustomerResponseModel>,
+  userDetails: object.isRequired as Validator<UserDetailsModel>,
+  petTypes: array.isRequired,
+  profilePicUrl: string.isRequired,
+  petImageUrls: object.isRequired as Validator<Record<string, string>>,
+  pets: array.isRequired,
+  setCustomer: func.isRequired,
+  setPetImageUrls: func.isRequired,
+  setProfilePicUrl: func.isRequired,
+  onUpdateProfileClick: func.isRequired,
+  onProfilePhotoUploaded: func.isRequired,
+  onPetPhotoUploaded: func.isRequired,
 };
 export default CustomerProfilePage;
