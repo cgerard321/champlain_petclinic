@@ -170,6 +170,16 @@
   background: #1976d2;
 }
 
+.delete-button {
+  border-color: rgb(142 0 0 / 100%);
+  background: rgb(183 28 28 / 100%);
+}
+
+.delete-button:hover {
+  border-color: rgb(183 28 28 / 100%);
+  background: rgb(142 0 0 / 100%);
+}
+
 .dialog-cancel-button {
   padding: 10px 18px;
   border: 1px solid var(--forest-700);

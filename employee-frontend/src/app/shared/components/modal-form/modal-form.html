@@ -16,13 +16,13 @@
               {{ field.label }}
             </label>
           }
-          
+
           @if (control(field).touched && control(field).invalid) {
             <p class="field-error">
               {{ errorMessage(field) }}
             </p>
           }
-          
+
           @switch (field.type) {
             @case ('string') {
               <input
@@ -75,7 +75,12 @@
       {{ data.cancelLabel ?? 'Cancel' }}
     </button>
 
-    <button type="submit" class="dialog-submit-button" [disabled]="form.invalid" [class.destructive]="data.destructive">
+    <button
+      type="submit"
+      class="dialog-submit-button"
+      [disabled]="form.invalid"
+      [class.destructive]="data.destructive"
+    >
       {{ data.submitLabel ?? 'Save' }}
     </button>
   </mat-dialog-actions>

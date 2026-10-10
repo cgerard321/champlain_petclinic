@@ -1,9 +1,15 @@
 <div class="inventory-page">
   <div class="page-header">
+    np
     <h1>Inventory</h1>
 
     @if (can().canCreateInventory) {
-      <button type="button" class="add-inventory-button" [disabled]="savingInventory() || inventoryTypesLoading()" (click)="openAddDialog()">
+      <button
+        type="button"
+        class="add-inventory-button"
+        [disabled]="savingInventory() || inventoryTypesLoading()"
+        (click)="openAddDialog()"
+      >
         {{ savingInventory() ? 'Saving...' : 'Add Inventory' }}
       </button>
     }
