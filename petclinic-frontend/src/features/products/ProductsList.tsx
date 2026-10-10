@@ -15,7 +15,7 @@ import ProductBundle from './components/ProductBundle';
 //import ProductSearch from './components/ProductSearch';
 import Reveal from '@/shared/components/animations/Reveal';
 
-const CATALOG_PAGE_SIZE = 8;
+const CATALOG_PAGE_SIZE = 6;
 
 interface ProductsListProps {
   searchQuery: string;
