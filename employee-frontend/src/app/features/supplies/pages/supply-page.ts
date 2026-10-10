@@ -189,7 +189,6 @@ export class SupplyPage {
     ];
   }
 
-  // Opens the dialog for a new supply (no argument) or for editing an existing one.
   private async openSupplyDialog(supply?: Supply): Promise<void> {
     this.addError.set('');
 
@@ -327,7 +326,6 @@ export class SupplyPage {
     });
 
     dialogRef.afterClosed().subscribe((result) => {
-      // result is undefined when the user cancels
       if (!result || !this.canManageSupplies()) {
         return;
       }
