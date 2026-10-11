@@ -19,6 +19,7 @@ import { ProductBundleModel } from './models/ProductModels/ProductBundleModel';
 import ProductBundle from './components/ProductBundle';
 //import ProductSearch from './components/ProductSearch';
 import Reveal from '@/shared/components/animations/Reveal';
+import { loadRecentlyViewed } from './utils/recentlyViewed';
 
 interface ProductsListProps {
   searchQuery: string;
@@ -84,11 +85,18 @@ const ProductList = function Productlist({
 
   useEffect(() => {
     fetchProducts();
-    const saved = localStorage.getItem(
-      `recentlyClickedProducts_${user.userId}`
-    );
-    if (saved) setRecentlyClickedProducts(JSON.parse(saved));
-  }, [fetchProducts, user.userId]);
+  }, [fetchProducts]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setRecentlyClickedProducts([]);
+    void loadRecentlyViewed(user.userId).then(products => {
+      if (!cancelled) setRecentlyClickedProducts(products);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [user.userId]);
 
   useEffect(() => {
     const sorted = [...productList];
@@ -119,11 +127,16 @@ const ProductList = function Productlist({
           p =>
             normalizeProductSearch(localizedProduct(p, language).name).includes(
               query
-            ) || normalizeProductSearch(p.productType || '').includes(query)
+            ) ||
+            normalizeProductSearch(
+              t(`types.${(p.productType || '').toUpperCase()}`, {
+                defaultValue: p.productType || '',
+              })
+            ).includes(query)
         )
       );
     }
-  }, [sortCriteria, productList, searchQuery, language]);
+  }, [sortCriteria, productList, searchQuery, language, t]);
 
   const handleProductClick = (product: ProductModel): void => {
     setRecentlyClickedProducts(prev => {
@@ -148,13 +161,7 @@ const ProductList = function Productlist({
               .filter(p => !p.isUnlisted)
               .map((p, i) => (
                 <Reveal key={p.productId} delay={i * 60 + 120}>
-                  <Product
-                    product={
-                      productList.find(
-                        current => current.productId === p.productId
-                      ) ?? p
-                    }
-                  />
+                  <Product product={p} />
                 </Reveal>
               ))
           ) : (

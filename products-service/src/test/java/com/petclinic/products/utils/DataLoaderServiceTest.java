@@ -52,6 +52,9 @@ class DataLoaderServiceTest {
         dataLoaderService.ratingRepository = ratingRepository;
         dataLoaderService.productTypeRepository = productTypeRepository;
 
+        when(productRepository.backfillFrenchName(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString())).thenReturn(Mono.just(0));
+        when(productRepository.backfillFrenchDescription(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString())).thenReturn(Mono.just(0));
+
         product = Product.builder()
                 .productId(PRODUCT_ID)
                 .imageId(IMAGE_ID)

@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
 import Product from './Product';
+import { loadRecentlyViewed } from '../utils/recentlyViewed';
 import '@/features/products/ProductList.css';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@/context/UserContext';
@@ -15,14 +16,15 @@ export default function RecentlyViewedProducts(): JSX.Element {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user?.userId) return;
-    const savedProducts = localStorage.getItem(
-      `recentlyClickedProducts_${user.userId}`
-    );
-    if (savedProducts) {
-      setRecentlyClickedProducts(JSON.parse(savedProducts));
-    }
-  }, [user]);
+    let cancelled = false;
+    setRecentlyClickedProducts([]);
+    void loadRecentlyViewed(user?.userId).then(products => {
+      if (!cancelled) setRecentlyClickedProducts(products);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.userId]);
   const handleProductClick = (productId: string): void => {
     navigate(`/products/${productId}`);
   };

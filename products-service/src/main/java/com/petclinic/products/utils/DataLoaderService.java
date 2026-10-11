@@ -46,6 +46,7 @@ public class DataLoaderService implements CommandLineRunner {
     public void run(String... args) throws Exception {
         // If the database is not empty, do not load data
         try {
+            backfillSeedTranslations();
             restoreMissingReferencedLegacyImages();
             if (
                     Boolean.TRUE.equals(productRepository.findAll().hasElements().block()) ||
@@ -78,22 +79,6 @@ public class DataLoaderService implements CommandLineRunner {
         Product product6 = seededProduct6.product();
         Product product7 = seededProduct7.product();
         Product product8 = seededProduct8.product();
-        product1.setProductNameFr("Nourriture pour chiens");
-        product1.setProductDescriptionFr("Nourriture sèche de qualité supérieure pour chiens adultes");
-        product2.setProductNameFr("Litière pour chats");
-        product2.setProductDescriptionFr("Litière agglomérante pour chats avec contrôle des odeurs");
-        product3.setProductNameFr("Collier antipuces");
-        product3.setProductDescriptionFr("Protection contre les puces et les tiques pour petits chiens");
-        product4.setProductNameFr("Cage pour oiseaux");
-        product4.setProductDescriptionFr("Cage spacieuse pour petits oiseaux comme les perruches");
-        product5.setProductNameFr("Filtre pour aquarium");
-        product5.setProductDescriptionFr("Système de filtration pour aquariums de petite et moyenne taille");
-        product6.setProductNameFr("Selle pour cheval");
-        product6.setProductDescriptionFr("Selle légère pour monter à cheval");
-        product7.setProductNameFr("Clapier pour lapins");
-        product7.setProductDescriptionFr("Clapier extérieur en bois pour lapins");
-        product8.setProductNameFr("Chauffe-eau pour aquarium");
-        product8.setProductDescriptionFr("Chauffe-eau submersible pour aquariums de poissons tropicaux");
 
         ProductTypeDb productType1 = ProductTypeDb.builder()
                 .productTypeId("86627454-970e-41a9-baa6-71ab759bf66c")
@@ -342,6 +327,30 @@ public class DataLoaderService implements CommandLineRunner {
                 .subscribe();
     }
 
+    // Only missing translations of unchanged seed text are filled on existing databases.
+    private void backfillSeedTranslations() {
+        Flux.fromIterable(productTranslations())
+                .concatMap(seed -> productRepository.backfillFrenchName(seed.productId(), seed.name(), seed.nameFr())
+                        .then(productRepository.backfillFrenchDescription(seed.productId(), seed.description(), seed.descriptionFr())))
+                .then().block();
+    }
+
+    private static List<ProductTranslation> productTranslations() {
+        return List.of(
+                new ProductTranslation("06a7d573-bcab-4db3-956f-773324b92a80", "Dog Food", "Nourriture pour chiens", "Premium dry food for adult dogs", "Nourriture sèche de qualité supérieure pour chiens adultes"),
+                new ProductTranslation("98f7b33a-d62a-420a-a84a-05a27c85fc91", "Cat Litter", "Litière pour chats", "Clumping cat litter with odor control", "Litière agglomérante pour chats avec contrôle des odeurs"),
+                new ProductTranslation("baee7cd2-b67a-449f-b262-91f45dde8a6d", "Flea Collar", "Collier antipuces", "Flea and tick prevention for small dogs", "Protection contre les puces et les tiques pour petits chiens"),
+                new ProductTranslation("ae2d3af7-f2a2-407f-ad31-ca7d8220cb7a", "Bird Cage", "Cage pour oiseaux", "Spacious cage for small birds like parakeets", "Cage spacieuse pour petits oiseaux comme les perruches"),
+                new ProductTranslation("4d508fb7-f1f2-4952-829d-10dd7254cf26", "Aquarium Filter", "Filtre pour aquarium", "Filter system for small to medium-sized aquariums", "Système de filtration pour aquariums de petite et moyenne taille"),
+                new ProductTranslation("a6a27433-e7a9-4e78-8ae3-0cb57d756863", "Horse Saddle", "Selle pour cheval", "Lightweight saddle for riding horses", "Selle légère pour monter à cheval"),
+                new ProductTranslation("4affcab7-3ab1-4917-a114-2b6301aa5565", "Rabbit Hutch", "Clapier pour lapins", "Outdoor wooden hutch for rabbits", "Clapier extérieur en bois pour lapins"),
+                new ProductTranslation("1501f30e-1db1-44b2-a555-bca6f64450e4", "Fish Tank Heater", "Chauffe-eau pour aquarium", "Submersible heater for tropical fish tanks", "Chauffe-eau submersible pour aquariums de poissons tropicaux")
+        );
+    }
+
+    private record ProductTranslation(String productId, String name, String nameFr,
+                                      String description, String descriptionFr) { }
+
     private void restoreMissingReferencedLegacyImages() {
         Set<String> referencedImageIds = productRepository.findAll()
                 .map(Product::getImageId)
@@ -459,6 +468,12 @@ public class DataLoaderService implements CommandLineRunner {
                 .deliveryType(deliveryType)
                 .build();
 
+        productTranslations().stream()
+                .filter(seed -> seed.productId().equals(productId))
+                .findFirst().ifPresent(seed -> {
+                    product.setProductNameFr(seed.nameFr());
+                    product.setProductDescriptionFr(seed.descriptionFr());
+                });
         return new SeededProduct(product, image);
     }
 

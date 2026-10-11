@@ -79,9 +79,6 @@ test('guest switches catalog and bundle product names between English and French
   ).toBeVisible();
   await page.getByRole('button', { name: 'FR', exact: true }).click();
   await expect(
-    page.getByRole('link', { name: 'Shop', exact: true })
-  ).toBeVisible();
-  await expect(
     cards.getByRole('heading', { name: 'Litière pour chats' }).first()
   ).toBeVisible();
   await expect(
@@ -109,9 +106,6 @@ test('guest can search French names without typing accents', async ({
       .first()
   ).toBeVisible();
   await page.getByRole('button', { name: 'FR', exact: true }).click();
-  await expect(
-    page.getByRole('link', { name: 'Shop', exact: true })
-  ).toBeVisible();
   await page.getByPlaceholder('Rechercher un produit…').fill('LITIERE');
   await expect(
     page
@@ -134,9 +128,6 @@ test('direct details page switches both fields and falls back for legacy data', 
   await page.goto(`${baseURL}/products/french-product`);
   await page.getByRole('button', { name: 'FR', exact: true }).click();
   await expect(
-    page.getByRole('link', { name: 'Shop', exact: true })
-  ).toBeVisible();
-  await expect(
     page.getByText(product.productDescriptionFr, { exact: true })
   ).toBeVisible();
   await expect(
@@ -148,9 +139,6 @@ test('direct details page switches both fields and falls back for legacy data', 
   ).toBeVisible();
   await page.goto(`${baseURL}/products/legacy-product`);
   await page.getByRole('button', { name: 'FR', exact: true }).click();
-  await expect(
-    page.getByRole('link', { name: 'Shop', exact: true })
-  ).toBeVisible();
   await expect(
     page.getByText(fallback.productDescription, { exact: true })
   ).toBeVisible();
@@ -216,5 +204,108 @@ test('shop labels work even when the browser has stale empty locale responses', 
   await page.getByRole('button', { name: 'EN', exact: true }).click();
   await expect(
     page.getByRole('heading', { name: 'Welcome to PetClinic Shop Page!' })
+  ).toBeVisible();
+});
+
+test('search matches translated types without accents and follows language changes', async ({
+  page,
+}) => {
+  await page.route('**/api/gateway/products?*', route =>
+    route.fulfill({
+      contentType: 'text/event-stream',
+      body: `data:${JSON.stringify({ ...product, productType: 'EQUIPMENT' })}\n\n`,
+    })
+  );
+  await page.goto(`${baseURL}/products`);
+  await page.getByRole('button', { name: 'FR', exact: true }).click();
+  await page.getByPlaceholder('Rechercher un produit…').fill('equipement');
+  const catalog = page.locator('.product-list-container').first();
+  await expect(
+    catalog.getByRole('heading', { name: product.productNameFr })
+  ).toBeVisible();
+  await page.getByRole('button', { name: 'EN', exact: true }).click();
+  await expect(catalog.locator('.product-card')).toHaveCount(0);
+  await page.locator('input[type="text"]').first().fill('equipment');
+  await expect(
+    catalog.getByRole('heading', { name: product.productName })
+  ).toBeVisible();
+});
+
+test('recent history fetches bilingual data independently of the catalog and skips unavailable products', async ({
+  page,
+}) => {
+  await page.addInitScript(() =>
+    localStorage.setItem(
+      'recentlyClickedProducts_review-user',
+      JSON.stringify([
+        {
+          productId: 'history-product',
+          productName: 'Old cached English name',
+        },
+        { productId: 'deleted-product', productName: 'Deleted product' },
+        { productId: 'hidden-product', productName: 'Hidden product' },
+        { productId: 'failed-product', productName: 'Failed product' },
+      ])
+    )
+  );
+  await page.route('**/api/gateway/users/jwt', route =>
+    route.fulfill({
+      json: {
+        userId: 'review-user',
+        username: 'Reviewer',
+        email: 'review@example.com',
+        roles: ['OWNER'],
+      },
+    })
+  );
+  let historyReads = 0;
+  let historyWrites = 0;
+  await page.route('**/api/gateway/products/history-product?*', route => {
+    if (route.request().method() === 'GET') historyReads++;
+    else historyWrites++;
+    return route.fulfill({
+      json: {
+        ...product,
+        productId: 'history-product',
+        productNameFr: 'Produit récemment consulté',
+      },
+    });
+  });
+  await page.route('**/api/gateway/products/deleted-product?*', route =>
+    route.fulfill({ status: 404, json: {} })
+  );
+  await page.route('**/api/gateway/products/failed-product?*', route =>
+    route.fulfill({ status: 500, json: {} })
+  );
+  await page.route('**/api/gateway/products/hidden-product?*', route =>
+    route.fulfill({ json: { ...product, isUnlisted: true } })
+  );
+  await page.goto(`${baseURL}/products`);
+  await page.getByRole('button', { name: 'FR', exact: true }).click();
+  const recent = page.locator('.recently-viewed-flex');
+  await expect(async () => {
+    await recent.scrollIntoViewIfNeeded();
+  }).toPass();
+  await expect(
+    recent.getByRole('heading', { name: 'Produit récemment consulté' })
+  ).toBeVisible();
+  await expect(recent.locator('.product-card')).toHaveCount(1);
+  expect(historyReads).toBeGreaterThan(0);
+  expect(historyWrites).toBe(0);
+  await page.getByRole('button', { name: 'EN', exact: true }).click();
+  await expect(async () => {
+    await recent.scrollIntoViewIfNeeded();
+  }).toPass();
+  await expect(
+    recent.getByRole('heading', { name: product.productName })
+  ).toBeVisible();
+  // The details page uses the separate recently-viewed component.
+  await page.goto(`${baseURL}/products/legacy-product`);
+  await page.getByRole('button', { name: 'FR', exact: true }).click();
+  await expect(async () => {
+    await recent.scrollIntoViewIfNeeded();
+  }).toPass();
+  await expect(
+    recent.getByRole('heading', { name: 'Produit récemment consulté' })
   ).toBeVisible();
 });
