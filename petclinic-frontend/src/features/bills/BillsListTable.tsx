@@ -628,8 +628,8 @@ export default function BillsListTable({
                 <strong>Bill ID:</strong> {detailBill.billId}
               </p>
               <p>
-                <strong>Owner:</strong> {detailBill.ownerFirstName}{' '}
-                {detailBill.ownerLastName}
+                <strong>Customer:</strong> {detailBill.customerFirstName}{' '}
+                {detailBill.customerLastName}
               </p>
               <p>
                 <strong>Visit Type:</strong> {detailBill.visitType}
