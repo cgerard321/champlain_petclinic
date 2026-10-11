@@ -2,6 +2,7 @@ package com.petclinic.customersservice.presentationlayer;
 
 import com.petclinic.customersservice.data.Customer;
 import com.petclinic.customersservice.data.CustomerRepo;
+import com.petclinic.customersservice.domainclientlayer.CartServiceClient;
 import com.petclinic.customersservice.domainclientlayer.FilesServiceClient;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
@@ -32,6 +33,9 @@ class CustomerControllerIntegrationTest {
 
     @MockBean
     private FilesServiceClient filesServiceClient;
+
+    @MockBean
+    private CartServiceClient cartServiceClient;
 
     private Customer buildCustomer() {
         return Customer.builder()
@@ -86,9 +90,11 @@ class CustomerControllerIntegrationTest {
 
         StepVerifier.create(repo.deleteAll()).verifyComplete();
 
+        String testCustomerId = "11111111-1111-4111-8111-111111111111";
+
         Customer customerEntity = Customer.builder()
                 .id("23")
-                .customerId("a6e0e5b0-5f60-45f0-8ac7-becd8b330486")
+                .customerId(testCustomerId)
                 .firstName("FirstName")
                 .lastName("LastName")
                 .address("Test address")
@@ -98,14 +104,18 @@ class CustomerControllerIntegrationTest {
                 .build();
 
         StepVerifier.create(repo.save(customerEntity))
-                .expectNextMatches(saved -> saved.getCustomerId().equals("a6e0e5b0-5f60-45f0-8ac7-becd8b330486"))
+                .expectNextMatches(saved -> saved.getCustomerId().equals(testCustomerId))
                 .verifyComplete();
 
-        client.delete().uri("/customers/a6e0e5b0-5f60-45f0-8ac7-becd8b330486")
+        when(cartServiceClient.deleteCartByCustomerId(customerEntity.getCustomerId())).thenReturn(Mono.empty());
+
+        client.delete().uri("/customers/" + testCustomerId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNoContent()
                 .expectBody();
+
+        verify(cartServiceClient).deleteCartByCustomerId(customerEntity.getCustomerId());
     }
 
     @Test
