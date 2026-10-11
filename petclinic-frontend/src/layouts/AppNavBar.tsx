@@ -262,14 +262,6 @@ export function NavBar(): JSX.Element {
                     {t('nav.profile')}
                   </NavDropdown.Item>
                 )}
-                {isCustomer && (
-                  <NavDropdown.Item
-                    as={Link}
-                    to={AppRoutePaths.CustomerProfileEdit}
-                  >
-                    {t('nav.editProfile')}
-                  </NavDropdown.Item>
-                )}
                 {isAdmin && (
                   <NavDropdown.Item as={Link} to={AppRoutePaths.Home}>
                     {t('nav.adminPanel')}
