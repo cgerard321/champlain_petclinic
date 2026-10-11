@@ -23,13 +23,28 @@
     "editProfile": "Modifier le profil",
     "logout": "Déconnexion",
     "privacy": "Politique de confidentialité",
-    "contact": "Contact"
+    "contact": "Contact",
+    "loadingCart": "Chargement du panier...",
+    "viewCart": "Voir le panier",
+    "shoppingCart": "Panier",
+    "cartHasItems": "Le panier contient {{count}} article(s)",
+    "adminPanel": "Panneau d'administration",
+    "receptionistPanel": "Panneau du réceptionniste"
   },
   "highlights": {
     "ariaLabel": "Points forts",
-    "rating": { "title": "Note moyenne de 4,9/5", "label": "selon les propriétaires d'animaux" },
-    "team": { "title": "Équipe expérimentée", "label": "Vétérinaires certifiés" },
-    "sameDay": { "title": "Rendez-vous le jour même", "label": "Selon les disponibilités" }
+    "rating": {
+      "title": "Note moyenne de 4,9/5",
+      "label": "selon les propriétaires d'animaux"
+    },
+    "team": {
+      "title": "Équipe expérimentée",
+      "label": "Vétérinaires certifiés"
+    },
+    "sameDay": {
+      "title": "Rendez-vous le jour même",
+      "label": "Selon les disponibilités"
+    }
   },
   "loading": "Chargement...",
   "intro": {
@@ -96,4 +111,5 @@
       "sunday": "Dim"
     },
     "closed": "Fermé"
-}}
+  }
+}
