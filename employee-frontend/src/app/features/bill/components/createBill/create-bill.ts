@@ -54,7 +54,7 @@ export class CreateBill implements OnInit {
   private newDate: Date = (() => {
     const date = new Date(this.today);
     date.setDate(date.getDate() + 30);
-    return this.newDate;
+    return date;
   })();
 
   protected readonly billRequest = signal<BillRequestModel>({
