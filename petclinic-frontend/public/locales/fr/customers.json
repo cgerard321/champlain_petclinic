@@ -3,7 +3,10 @@
   "subtitle": "Gérez votre profil et vos animaux enregistrés.",
   "buttons": {
     "save": "Enregistrer les modifications",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "uploadPhoto": "Téléverser une photo",
+    "deletePhoto": "Supprimer la photo",
+    "update": "Mettre à jour le profile"
   },
 
   "uploadPetPhotoModal": {
@@ -150,6 +153,7 @@
     "usernameCheckFailed": "Impossible de vérifier la disponibilité du nom d'utilisateur. Veuillez réessayer"
   },
   "pets": {
+    "profileTitle": "Vos Animaux",
     "addTitle": "Ajouter un nouvel animal",
     "editTitle": "Modifier l'animal : {{name}}",
     "fields": {
@@ -160,7 +164,9 @@
       "isActive": "Actif",
       "uploadPhoto": "Téléverser une photo :",
       "photoAlt": "Photo de profil de {{name}}",
-      "newPhotoAlt": "Photo de profil du nouvel animal"
+      "newPhotoAlt": "Photo de profil du nouvel animal",
+      "type": "Type",
+      "age": "Age"
     },
     "selectType": "Sélectionnez un type d'animal",
     "loadingTypes": "Chargement des types d'animaux...",
@@ -174,7 +180,7 @@
       "others": "Autres"
     },
     "buttons": {
-      "add": "Ajouter l'animal",
+      "add": "Ajouter un animal",
       "adding": "Ajout en cours...",
       "update": "Mettre à jour l'animal",
       "updating": "Mise à jour...",
@@ -198,7 +204,9 @@
       "updateFailed": "Échec de la mise à jour de l'animal. Veuillez réessayer.",
       "deleteFailed": "Échec de la suppression de l'animal. Veuillez réessayer.",
       "addPhotoFailed": "Échec de l'ajout de la photo. Veuillez réessayer.",
-      "deletePhotoFailed": "Échec de la suppression de la photo. Veuillez réessayer."
+      "deletePhotoFailed": "Échec de la suppression de la photo. Veuillez réessayer.",
+      "notFound": "Aucun animal n'a été trouvé",
+      "recommendation": "Vous pouvez ajouter votre premier animal"
     },
     "success": {
       "title": "Succès !",
@@ -225,5 +233,13 @@
       "title": "Supprimer la photo",
       "message": "Voulez-vous vraiment supprimer la photo de cet animal ? Cette action est irréversible."
     }
+  },
+
+  "customerProfile":
+  {
+    "title": "Profile de {{name}}"
   }
 }
+
+
+

@@ -4,7 +4,10 @@
   "subtitle": "Manage your customer profile and registered pets.",
   "buttons": {
     "save": "Save Changes",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "uploadPhoto": "Upload Photo",
+    "deletePhoto": "Delete Photo",
+    "update": "Update Profile"
   },
 
     "uploadPetPhotoModal": {
@@ -151,6 +154,7 @@
     "usernameCheckFailed": "Unable to verify username availability. Please try again"
   },
   "pets": {
+    "profileTitle": "Your Animals",
     "addTitle": "Add New Pet",
     "editTitle": "Edit Pet: {{name}}",
     "fields": {
@@ -161,7 +165,9 @@
       "isActive": "Is Active",
       "uploadPhoto": "Upload Photo:",
       "photoAlt": "{{name}} profile",
-      "newPhotoAlt": "New pet profile"
+      "newPhotoAlt": "New pet profile",
+      "type": "Type",
+      "age": "Age"
     },
     "selectType": "Select a pet type",
     "loadingTypes": "Loading pet types...",
@@ -199,7 +205,9 @@
       "updateFailed": "Failed to update pet. Please try again.",
       "deleteFailed": "Failed to delete pet. Please try again.",
       "addPhotoFailed": "Failed to add pet photo. Please try again.",
-      "deletePhotoFailed": "Failed to delete pet photo. Please try again."
+      "deletePhotoFailed": "Failed to delete pet photo. Please try again.",
+      "notFound": "No pet were found",
+      "recommendation": "Add your first pet"
     },
     "success": {
       "title": "Success!",
@@ -227,5 +235,10 @@
       "message": "Are you sure you want to delete this pet's photo? This action cannot be undone."
     }
 
+  },
+
+  "customerProfile":
+  {
+    "title": "{{name}}'s Profile"
   }
 }
