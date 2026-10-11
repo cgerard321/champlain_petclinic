@@ -25,8 +25,8 @@
           <td>{{ visits.vetFirstName }} {{ visits.vetLastName }}</td>
           <td>{{ visits.petName }}</td>
           <td>{{ visits.description }}</td>
-          <td>{{ visits.visitDate | date }}</td>
-          <td>{{ visits.visitEndDate | date }}</td>
+          <td>{{ visits.visitDate | date: 'short' }}</td>
+          <td>{{ visits.visitEndDate | date: 'short' }}</td>
           <td>{{ statusLabel(visits.status) }}</td>
         </tr>
       }
