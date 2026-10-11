@@ -635,14 +635,14 @@ public class CartServiceImpl implements CartService {
             }
 
             if (availability == null) {
-                int requestedQty = safeQuantity(item.getQuantityInCart(), 1);
+                int requestedQty = 1;
                 skippedCount += requestedQty;
                 skippedNames.add(valueOrEmpty(item.getProductName()));
                 updatedWishlist.add(item);
                 continue;
             }
 
-            int requestedQty = safeQuantity(item.getQuantityInCart(), 1);
+            int requestedQty = 1;
             int allocated = availability.allocate(requestedQty);
 
             if (allocated <= 0) {
