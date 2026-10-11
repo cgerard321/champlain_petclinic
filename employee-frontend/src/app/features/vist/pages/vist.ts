@@ -3,6 +3,7 @@ import { Component, inject, signal } from '@angular/core';
 import { AuthState } from '@core/services/auth-state';
 import { Sidebar } from '@features/vist/components/Sidebar/sidebar';
 import { VistListTable } from '@features/vist/components/TableVisits/VistListTable';
+import { Status } from '@features/vist/models/Status';
 // import { ComingSoon } from '@shared/components/coming-soon/coming-soon';
 
 @Component({
@@ -20,6 +21,7 @@ import { VistListTable } from '@features/vist/components/TableVisits/VistListTab
 export class Vist {
   protected auth = inject(AuthState);
   protected readonly isSidebarVisible = signal(true);
+  protected readonly selectedStatuses = signal<Status[]>(Object.values(Status));
 
   protected hideSidebar(): void {
     this.isSidebarVisible.set(false);
@@ -27,5 +29,9 @@ export class Vist {
 
   protected showSidebar(): void {
     this.isSidebarVisible.set(true);
+  }
+
+  protected updateSelectedStatuses(statuses: Status[]): void {
+    this.selectedStatuses.set(statuses);
   }
 }

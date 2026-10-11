@@ -74,7 +74,7 @@
         "buttonName": "Show filters"
       },
       "components": {
-        "filterbutton": "Filter"
+        "filterbutton": "Filter By"
       }
     }
   }

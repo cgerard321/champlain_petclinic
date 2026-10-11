@@ -1,6 +1,7 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, input, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
+import { Status } from '@features/vist/models/Status';
 import { Visit } from '@features/vist/models/Visit';
 import { VisitService } from '@features/vist/services/visit-service';
 
@@ -13,6 +14,11 @@ export class VistListTable implements OnInit {
   private readonly visitService = inject(VisitService);
   private readonly untilDestroyed = takeUntilDestroyed<Visit>();
   protected readonly visit = signal<Visit[]>([]);
+  readonly selectedStatuses = input<Status[]>(Object.values(Status));
+  protected readonly visibleVisits = computed(() => {
+    const selectedStatuses = new Set(this.selectedStatuses());
+    return this.visit().filter((visit) => selectedStatuses.has(visit.status));
+  });
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal<string | null>(null);
 

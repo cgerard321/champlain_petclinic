@@ -1,14 +1,17 @@
-<aside class="sidebar" aria-label="Filtres de visite">
+<aside class="sidebar" aria-label="Visit filters">
   <div class="sidebar__header">
     <button
       class="sidebar__hide"
       type="button"
-      aria-label="Masquer les filtres"
-      title="Masquer les filtres"
+      aria-label="Hide filters"
+      title="Hide filters"
       (click)="hide.emit()"
     >
       <span aria-hidden="true">‹</span>
     </button>
   </div>
-  <app-filter-button />
+  <app-filter-button
+    [selectedStatuses]="selectedStatuses()"
+    (statusSelectionChange)="statusSelectionChange.emit($event)"
+  />
 </aside>

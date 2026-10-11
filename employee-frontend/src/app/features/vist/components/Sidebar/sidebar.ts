@@ -1,6 +1,7 @@
-import { Component, output } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 
 import { FilterButton } from '@features/vist/components/FilterButton/filter-button';
+import { Status } from '@features/vist/models/Status';
 
 @Component({
   selector: 'app-visit-sidebar',
@@ -9,5 +10,7 @@ import { FilterButton } from '@features/vist/components/FilterButton/filter-butt
   styleUrl: './sidebar.css',
 })
 export class Sidebar {
-  protected readonly hide = output<void>();
+  readonly hide = output<void>();
+  readonly selectedStatuses = input.required<Status[]>();
+  readonly statusSelectionChange = output<Status[]>();
 }
