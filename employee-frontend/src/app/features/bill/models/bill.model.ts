@@ -27,6 +27,4 @@ export interface BillRequestModel {
   vetId: string;
   date: Date;
   amount: number | null;
-  billStatus: string;
-  dueDate: Date;
 }

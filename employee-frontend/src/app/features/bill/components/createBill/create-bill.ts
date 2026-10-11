@@ -50,12 +50,7 @@ export class CreateBill implements OnInit {
   protected readonly vets = signal<Veterinarian[]>([]);
 
   private today = new Date();
-
-  private newDate: Date = (() => {
-    const date = new Date(this.today);
-    date.setDate(date.getDate() + 30);
-    return date;
-  })();
+  readonly minDate = this.today;
 
   protected readonly billRequest = signal<BillRequestModel>({
     customerId: '',
@@ -63,8 +58,6 @@ export class CreateBill implements OnInit {
     vetId: '',
     date: this.today,
     amount: null,
-    billStatus: 'UNPAID',
-    dueDate: this.newDate,
   });
 
   private _snackBar = inject(MatSnackBar);
@@ -81,7 +74,6 @@ export class CreateBill implements OnInit {
     required(schemaPath.vetId, { message: 'Vet is required' });
     required(schemaPath.date, { message: 'Date is required' });
     required(schemaPath.amount, { message: 'Amount is required' });
-    required(schemaPath.billStatus, { message: 'Bill status is required' });
   });
 
   readonly dialogRef = inject(MatDialogRef<CreateBill>);
