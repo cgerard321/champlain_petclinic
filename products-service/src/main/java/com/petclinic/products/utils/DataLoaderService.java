@@ -10,17 +10,23 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.InputStream;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
 @Service
 public class DataLoaderService implements CommandLineRunner {
+
+    private static final Logger log = LoggerFactory.getLogger(DataLoaderService.class);
 
     @Autowired
     ProductRepository productRepository;
@@ -428,12 +434,62 @@ public class DataLoaderService implements CommandLineRunner {
                 .imageData(imageBytes8)
                 .build();
 
+        List<SeededProduct> additionalProductSeeds = List.of(
+                seedProduct("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7001", "Senior Dog Joint Supplement", "Glucosamine chews supporting mobility in older dogs", 24.99, 18, "586d0700-57db-4312-b6f1-413b79dd018c", DeliveryType.DELIVERY, ProductStatus.AVAILABLE, "2025-11-15", "senior_dog_joint_supplement.png", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7101"),
+                seedProduct("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7002", "Puppy Deworming Tablets", "Broad-spectrum deworming treatment for puppies", 16.49, 2, "86627454-970e-41a9-baa6-71ab759bf66c", DeliveryType.NO_DELIVERY_OPTION, ProductStatus.PRE_ORDER, "2026-02-10", "puppy_deworming_tablets.png", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7102"),
+                seedProduct("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7003", "Ear Cleaning Solution", "Gentle cleanser for routine canine and feline ear care", 13.99, 27, "86627454-970e-41a9-baa6-71ab759bf66c", DeliveryType.DELIVERY_AND_PICKUP, ProductStatus.AVAILABLE, "2024-08-21", "ear_cleaning_solution.png", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7103"),
+                seedProduct("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7004", "Veterinary Dental Gel", "Enzymatic gel for reducing plaque and tartar", 18.99, 11, "86627454-970e-41a9-baa6-71ab759bf66c", DeliveryType.DELIVERY, ProductStatus.AVAILABLE, "2025-04-12", "veterinary_dental_gel.png", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7104"),
+                seedProduct("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7005", "Calming Chews", "Herbal calming supplement for stressful visits and travel", 21.99, 1, "86627454-970e-41a9-baa6-71ab759bf66c", DeliveryType.PICKUP, ProductStatus.AVAILABLE, "2026-01-18", "calming_chews.png", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7105"),
+                seedProduct("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7006", "Cat Hairball Remedy", "Lubricating paste to help prevent hairballs", 9.49, 22, "86627454-970e-41a9-baa6-71ab759bf66c", DeliveryType.DELIVERY_AND_PICKUP, ProductStatus.AVAILABLE, "2023-10-03", "cat_hairball_remedy.png", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7106"),
+                seedProduct("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7007", "Wound Care Spray", "Antiseptic spray for minor cuts and abrasions", 15.99, 0, "86627454-970e-41a9-baa6-71ab759bf66c", DeliveryType.DELIVERY, ProductStatus.OUT_OF_STOCK, "2024-01-09", null, null),
+                seedProduct("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7008", "Flea Treatment Drops", "Monthly topical flea and tick treatment for cats", 29.99, 9, "86627454-970e-41a9-baa6-71ab759bf66c", DeliveryType.NO_DELIVERY_OPTION, ProductStatus.AVAILABLE, "2025-06-27", null, null),
+                seedProduct("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7009", "Stainless Steel Food Bowl", "Non-slip bowl suitable for cats and small dogs", 11.99, 31, "6a247af0-52d9-4179-a5b4-ad4b92e686b1", DeliveryType.DELIVERY_AND_PICKUP, ProductStatus.AVAILABLE, "2024-03-14", "stainless_steel_food_bowl.png", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7107"),
+                seedProduct("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7010", "Reflective Dog Leash", "Reflective nylon leash for safer evening walks", 17.99, 14, "6a247af0-52d9-4179-a5b4-ad4b92e686b1", DeliveryType.DELIVERY, ProductStatus.AVAILABLE, "2025-02-26", "reflective_dog_leash.png", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7108"),
+                seedProduct("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7011", "Adjustable Recovery Collar", "Soft adjustable collar for post-treatment recovery", 19.99, 6, "6a247af0-52d9-4179-a5b4-ad4b92e686b1", DeliveryType.PICKUP, ProductStatus.AVAILABLE, "2023-07-19", "adjustable_recovery_collar.png", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7109"),
+                seedProduct("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7012", "Orthopedic Pet Bed", "Supportive washable bed for aging pets", 64.99, 4, "6a247af0-52d9-4179-a5b4-ad4b92e686b1", DeliveryType.DELIVERY_AND_PICKUP, ProductStatus.PRE_ORDER, "2026-03-01", "orthopedic_pet_bed.png", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7110"),
+                seedProduct("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7013", "Cat Scratching Post", "Compact sisal scratching post with toy attachment", 34.99, 16, "6a247af0-52d9-4179-a5b4-ad4b92e686b1", DeliveryType.DELIVERY, ProductStatus.AVAILABLE, "2024-11-08", "cat_scratching_post.png", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7111"),
+                seedProduct("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7014", "Grooming Brush Set", "Brush and comb set for routine coat maintenance", 22.49, 25, "6a247af0-52d9-4179-a5b4-ad4b92e686b1", DeliveryType.PICKUP, ProductStatus.AVAILABLE, "2025-09-05", "grooming_brush_set.png", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7112"),
+                seedProduct("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7015", "Portable Water Bottle", "Leak-resistant travel bottle for dogs", 14.99, 3, "6a247af0-52d9-4179-a5b4-ad4b92e686b1", DeliveryType.DELIVERY_AND_PICKUP, ProductStatus.AVAILABLE, "2026-04-06", "portable_water_bottle.png", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7113"),
+                seedProduct("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7016", "Heated Pet Blanket", "Low-voltage fleece blanket for cold-weather comfort", 49.99, 0, "6a247af0-52d9-4179-a5b4-ad4b92e686b1", DeliveryType.DELIVERY, ProductStatus.OUT_OF_STOCK, "2022-12-11", null, null),
+                seedProduct("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7017", "Sensitive Stomach Dog Food", "Easily digestible dry food for adult dogs", 52.99, 20, "586d0700-57db-4312-b6f1-413b79dd018c", DeliveryType.DELIVERY, ProductStatus.AVAILABLE, "2025-12-02", "sensitive_stomach_dog_food.png", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7114"),
+                seedProduct("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7018", "Indoor Cat Formula", "Balanced dry food formulated for indoor cats", 38.99, 13, "586d0700-57db-4312-b6f1-413b79dd018c", DeliveryType.PICKUP, ProductStatus.AVAILABLE, "2024-05-23", "indoor_cat_formula.png", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7115"),
+                seedProduct("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7019", "Kitten Starter Food", "Nutrient-rich food for growing kittens", 31.99, 7, "586d0700-57db-4312-b6f1-413b79dd018c", DeliveryType.DELIVERY_AND_PICKUP, ProductStatus.AVAILABLE, "2026-02-22", "kitten_starter_food.png", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7116"),
+                seedProduct("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7020", "Small Animal Timothy Hay", "Fresh timothy hay for rabbits and guinea pigs", 18.49, 29, "586d0700-57db-4312-b6f1-413b79dd018c", DeliveryType.DELIVERY, ProductStatus.AVAILABLE, "2023-04-17", "small_animal_timothy_hay.png", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7117"),
+                seedProduct("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7021", "Tropical Fish Flakes", "Daily flake food for tropical aquarium fish", 8.99, 2, "586d0700-57db-4312-b6f1-413b79dd018c", DeliveryType.PICKUP, ProductStatus.AVAILABLE, "2025-07-31", "tropical_fish_flakes.png", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7118"),
+                seedProduct("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7022", "Parakeet Seed Blend", "Mixed seed blend for small companion birds", 12.99, 24, "586d0700-57db-4312-b6f1-413b79dd018c", DeliveryType.DELIVERY_AND_PICKUP, ProductStatus.AVAILABLE, "2024-09-12", "parakeet_seed_blend.png", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7119"),
+                seedProduct("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7023", "Senior Cat Wet Food Pack", "Moisture-rich meal pack for senior cats", 26.99, 10, "586d0700-57db-4312-b6f1-413b79dd018c", DeliveryType.DELIVERY, ProductStatus.AVAILABLE, "2025-03-30", "senior_cat_wet_food_pack.png", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7120"),
+                seedProduct("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7024", "Equine Electrolyte Supplement", "Electrolyte powder for active horses", 44.99, 5, "586d0700-57db-4312-b6f1-413b79dd018c", DeliveryType.PICKUP, ProductStatus.AVAILABLE, "2022-06-28", null, null),
+                seedProduct("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7025", "Digital Pet Scale", "Precise scale for monitoring pet weight at home", 39.99, 8, "79c8723a-8df3-495d-8eb0-07d574ff5ae5", DeliveryType.DELIVERY_AND_PICKUP, ProductStatus.AVAILABLE, "2024-02-05", "digital_pet_scale.png", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7121"),
+                seedProduct("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7026", "Automatic Feeder", "Programmable feeder for scheduled meals", 79.99, 12, "79c8723a-8df3-495d-8eb0-07d574ff5ae5", DeliveryType.DELIVERY, ProductStatus.PRE_ORDER, "2026-05-15", "automatic_feeder.png", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7122"),
+                seedProduct("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7027", "Compact Pet Carrier", "Ventilated carrier for cats and small dogs", 54.99, 15, "79c8723a-8df3-495d-8eb0-07d574ff5ae5", DeliveryType.PICKUP, ProductStatus.AVAILABLE, "2025-10-19", "compact_pet_carrier.png", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7123"),
+                seedProduct("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7028", "Aquarium Water Test Kit", "Multi-parameter test kit for aquarium water quality", 27.99, 19, "79c8723a-8df3-495d-8eb0-07d574ff5ae5", DeliveryType.DELIVERY_AND_PICKUP, ProductStatus.AVAILABLE, "2023-11-26", "aquarium_water_test_kit.png", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7124"),
+                seedProduct("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7029", "LED Examination Light", "Rechargeable light for home health checks", 32.99, 3, "79c8723a-8df3-495d-8eb0-07d574ff5ae5", DeliveryType.DELIVERY, ProductStatus.AVAILABLE, "2025-08-08", "led_examination_light.png", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7125"),
+                seedProduct("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7030", "Pet Nail Grinder", "Quiet rechargeable grinder for routine nail care", 42.99, 17, "79c8723a-8df3-495d-8eb0-07d574ff5ae5", DeliveryType.PICKUP, ProductStatus.AVAILABLE, "2024-06-16", "pet_nail_grinder.png", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7126"),
+                seedProduct("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7031", "Foldable Exercise Pen", "Portable enclosure for puppies and small animals", 89.99, 6, "79c8723a-8df3-495d-8eb0-07d574ff5ae5", DeliveryType.DELIVERY_AND_PICKUP, ProductStatus.AVAILABLE, "2026-01-30", "foldable_exercise_pen.png", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7127"),
+                seedProduct("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7032", "Canine First Aid Kit", "Practical first aid kit for common pet emergencies", 36.99, 1, "79c8723a-8df3-495d-8eb0-07d574ff5ae5", DeliveryType.DELIVERY, ProductStatus.AVAILABLE, "2023-02-13", null, null)
+        );
+
+        List<Product> seededProducts = new ArrayList<>(List.of(
+                product1, product2, product3, product4,
+                product5, product6, product7, product8));
+        seededProducts.addAll(additionalProductSeeds.stream()
+                .map(SeededProduct::product)
+                .toList());
+
+        List<Image> seededImages = new ArrayList<>(List.of(
+                image1, image2, image3, image4,
+                image5, image6, image7, image8));
+        seededImages.addAll(additionalProductSeeds.stream()
+                .map(SeededProduct::image)
+                .filter(Objects::nonNull)
+                .toList());
+
         Flux.just(bundle1, bundle2, bundle3)
                 .flatMap(s -> productBundleRepository.save(s)
                         .log(s.toString()))
                 .subscribe();
 
-        Flux.just(product1, product2, product3, product4, product5, product6, product7, product8)
+        Flux.fromIterable(seededProducts)
                 .flatMap(s -> productRepository.save(s)
                         .log(s.toString()))
                 .subscribe();
@@ -452,7 +508,7 @@ public class DataLoaderService implements CommandLineRunner {
                         .log(s.toString()))
                 .subscribe();
 
-        Flux.just(image1, image2, image3, image4, image5, image6, image7, image8)
+        Flux.fromIterable(seededImages)
                 .flatMap(s -> imageRepository.save(s)
                         .log(s.toString()))
                 .subscribe();
@@ -527,6 +583,63 @@ public class DataLoaderService implements CommandLineRunner {
                         "c76ed4c1-fc5d-4868-8b39-1bca6b0be368",
                         "fish_tank_heater.jpg", "image/jpeg",
                         "images/fish_tank_heater.png"));
+    }
+
+    private SeededProduct seedProduct(
+            String productId,
+            String productName,
+            String productDescription,
+            double productSalePrice,
+            int productQuantity,
+            String productTypeId,
+            DeliveryType deliveryType,
+            ProductStatus productStatus,
+            String releaseDate,
+            String imageFile,
+            String imageId) {
+        Image image = null;
+        String effectiveImageId = null;
+
+        if (imageFile != null && imageId != null) {
+            Resource resource = new ClassPathResource("images/" + imageFile);
+            if (!resource.exists()) {
+                log.warn("Seed image not found: {}; continuing without an image for product {}", imageFile, productId);
+            } else {
+                try {
+                    image = Image.builder()
+                            .imageId(imageId)
+                            .imageName(imageFile)
+                            .imageType(imageFile.toLowerCase().endsWith(".jpg")
+                                    || imageFile.toLowerCase().endsWith(".jpeg")
+                                    ? "image/jpeg" : "image/png")
+                            .imageData(resource.getContentAsByteArray())
+                            .build();
+                    effectiveImageId = imageId;
+                } catch (Exception error) {
+                    log.warn("Unable to load seed image {}; continuing without an image for product {}", imageFile, productId, error);
+                }
+            }
+        }
+
+        Product product = Product.builder()
+                .productId(productId)
+                .imageId(effectiveImageId)
+                .productName(productName)
+                .productDescription(productDescription)
+                .productSalePrice(productSalePrice)
+                .requestCount(0)
+                .productTypeId(productTypeId)
+                .productStatus(productStatus)
+                .productQuantity(productQuantity)
+                .isUnlisted(false)
+                .releaseDate(LocalDate.parse(releaseDate))
+                .deliveryType(deliveryType)
+                .build();
+
+        return new SeededProduct(product, image);
+    }
+
+    private record SeededProduct(Product product, Image image) {
     }
 
     private record LegacyImageSeed(
