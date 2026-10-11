@@ -494,6 +494,22 @@
   opacity: 0.45;
 }
 
+.expiration-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.expiration-badge.expired {
+  color: #b42318;
+  font-weight: 600;
+}
+
+.expiration-badge.expiring-soon {
+  color: #b54708;
+  font-weight: 600;
+}
+
 @media (width <= 850px) {
   .supply-filter-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));

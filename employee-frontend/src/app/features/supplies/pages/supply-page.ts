@@ -70,13 +70,15 @@ export class SupplyPage {
     productPrice: 0,
     productQuantity: 1,
     productSalePrice: 0,
+    expirationDate: '',
   });
 
   protected readonly nameCell = viewChild<TemplateRef<{ $implicit: Supply }>>('nameCell');
   protected readonly priceCell = viewChild<TemplateRef<{ $implicit: Supply }>>('priceCell');
   protected readonly statusCell = viewChild<TemplateRef<{ $implicit: Supply }>>('statusCell');
   protected readonly actionsCell = viewChild<TemplateRef<{ $implicit: Supply }>>('actionsCell');
-
+  protected readonly expirationCell =
+    viewChild<TemplateRef<{ $implicit: Supply }>>('expirationCell');
   protected readonly supplyRowId = (supply: Supply): string => supply.productId;
 
   // Formatting and actions stay here so the shared table has no supply-specific logic.
@@ -85,6 +87,7 @@ export class SupplyPage {
     { id: 'description', header: 'Description', value: (supply) => supply.productDescription },
     { id: 'price', header: 'Cost Price', template: this.priceCell() },
     { id: 'quantity', header: 'Quantity', value: (supply) => supply.productQuantity },
+    { id: 'expiration', header: 'Expiration Date', template: this.expirationCell() },
     { id: 'status', header: 'Status', template: this.statusCell() },
     ...(this.canManageSupplies() || this.canConsumeSupplies()
       ? [{ id: 'actions', header: 'Actions', template: this.actionsCell() }]
@@ -198,7 +201,11 @@ export class SupplyPage {
           photo.photoType = file ? file.type : null;
         }
 
-        const supply = { ...this.newSupply(), ...photo };
+        const supply = {
+          ...this.newSupply(),
+          expirationDate: this.newSupply().expirationDate || null,
+          ...photo,
+        };
 
         const request$ = editingId
           ? this.supplyService.updateSupply(inventoryId, editingId, supply)
@@ -237,6 +244,7 @@ export class SupplyPage {
       productPrice: supply.productPrice,
       productQuantity: supply.productQuantity,
       productSalePrice: supply.productSalePrice,
+      expirationDate: supply.expirationDate ?? '',
     });
 
     this.showAddForm.set(true);
@@ -322,6 +330,7 @@ export class SupplyPage {
       productPrice: 0,
       productQuantity: 1,
       productSalePrice: 0,
+      expirationDate: '',
     });
     this.editingSupplyId.set(null);
     this.addError.set('');
@@ -375,6 +384,76 @@ export class SupplyPage {
       }
     }
     return 'Unable to download PDF.';
+  }
+
+  protected expirationStatus(
+    expirationDate: string | null | undefined,
+  ): 'expired' | 'expiring-soon' | 'valid' | 'none' {
+    if (!expirationDate) {
+      return 'none';
+    }
+
+    // Treat the ISO value as a calendar date, without a UTC timezone shift.
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(expirationDate);
+
+    if (!match) {
+      return 'none';
+    }
+
+    const year = Number(match[1]);
+    const month = Number(match[2]);
+    const day = Number(match[3]);
+    const expiration = new Date(year, month - 1, day);
+
+    // Reject impossible calendar dates.
+    if (
+      expiration.getFullYear() !== year ||
+      expiration.getMonth() !== month - 1 ||
+      expiration.getDate() !== day
+    ) {
+      return 'none';
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const expirationDay = new Date(year, month - 1, day);
+    const daysRemaining = Math.round(
+      (expirationDay.getTime() - today.getTime()) / (24 * 60 * 60 * 1000),
+    );
+
+    if (daysRemaining < 0) {
+      return 'expired';
+    }
+
+    if (daysRemaining <= 30) {
+      return 'expiring-soon';
+    }
+
+    return 'valid';
+  }
+
+  protected formatExpirationDate(expirationDate: string | null | undefined): string {
+    if (!expirationDate) {
+      return '—';
+    }
+
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(expirationDate);
+
+    if (!match) {
+      return expirationDate;
+    }
+
+    const year = Number(match[1]);
+    const month = Number(match[2]);
+    const day = Number(match[3]);
+    const date = new Date(year, month - 1, day);
+
+    if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+      return expirationDate;
+    }
+
+    return date.toLocaleDateString();
   }
 
   protected formatStatus(status: string): string {

@@ -105,6 +105,9 @@
                 {{ supplyForm.productSalePrice().errors()[0]?.message }}
               </p>
             }
+
+            <label for="expirationDate">Expiration Date (optional)</label>
+            <input id="expirationDate" type="date" [formField]="supplyForm.expirationDate" />
           </div>
 
           <app-supply-image-editor
@@ -270,4 +273,24 @@
     <button type="button" class="dialog-cancel-button" [mat-dialog-close]="false">Cancel</button>
     <button type="button" class="delete-button" [mat-dialog-close]="true">Delete</button>
   </mat-dialog-actions>
+</ng-template>
+
+<ng-template #expirationCell let-supply>
+  @if (supply.expirationDate) {
+    <span
+      class="expiration-badge"
+      [class.expired]="expirationStatus(supply.expirationDate) === 'expired'"
+      [class.expiring-soon]="expirationStatus(supply.expirationDate) === 'expiring-soon'"
+    >
+      {{ formatExpirationDate(supply.expirationDate) }}
+
+      @if (expirationStatus(supply.expirationDate) === 'expired') {
+        <span>— Expired</span>
+      } @else if (expirationStatus(supply.expirationDate) === 'expiring-soon') {
+        <span>— Expiring soon</span>
+      }
+    </span>
+  } @else {
+    <span>—</span>
+  }
 </ng-template>
