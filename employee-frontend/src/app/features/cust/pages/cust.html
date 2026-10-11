@@ -10,6 +10,16 @@
   } @else if (customers().length === 0) {
     <p role="status">No customers registered.</p>
   } @else {
+    <div class="search-container">
+      <label for="customer-search">Search customers</label>
+      <input
+        id="customer-search"
+        type="search"
+        placeholder="Search customer by name, Id, address, city or phone number"
+        [value]="searchText()"
+        (input)="searchText.set($any($event.target).value)">
+
+    </div>
     <div class="table-container">
       <table>
         <caption>
@@ -24,13 +34,22 @@
           </tr>
         </thead>
         <tbody>
-          @for (customer of customers(); track customer.customerId) {
+          @for (customer of filteredCustomers(); track customer.customerId) {
             <tr>
               <td>{{ customer.firstName }} {{ customer.lastName }}</td>
               <td>{{ customer.address || 'Not available' }}</td>
               <td>{{ customer.city || 'Not available' }}</td>
               <td>{{ customer.telephone || 'Not available' }}</td>
               <td><button mat-flat-button color="primary" type="button" (click)="checkPetDetails(customer.customerId)">Registered Pets</button></td>
+            </tr>
+          } @empty {
+            <tr class="no-customers-row">
+              <td colspan="5">
+                <div class="no-customers-state" role="status">
+                  <h2>No customers found.</h2>
+                  <p>Try a different name, ID, or phone number.</p>
+                </div>
+              </td>
             </tr>
           }
         </tbody>

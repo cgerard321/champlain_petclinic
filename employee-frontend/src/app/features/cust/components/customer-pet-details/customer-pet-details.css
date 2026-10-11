@@ -1,111 +1,208 @@
 :host {
   display: block;
   width: 100%;
-  max-width: 100%;
   min-width: 0;
+  color: #263832;
+  background: #f8faf7;
 }
 
 .dialog-header {
-  box-sizing: border-box;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  padding: 20px 24px 12px;
-  width: 100%;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e0e7de;
+  background: #fff;
 }
 
 .dialog-title {
   margin: 0;
   padding: 0;
+  color: #244b3f;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.025em;
+}
+
+.dialog-subtitle {
+  margin: 0.4rem 0 0;
+  color: #66766d;
+  font-size: 0.9rem;
+  line-height: 1.5;
 }
 
 .dialog-close-button {
-  align-items: center;
-  background-color: transparent;
-  border-radius: 50%;
-  border: 0;
-  box-sizing: border-box;
-  color: inherit;
-  display: flex;
-  height: 48px;
-  justify-content: center;
+  display: grid;
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
   padding: 0;
-  width: 48px;
+  place-items: center;
+  border: 1px solid #e0e7de;
+  border-radius: 50%;
+  color: #52675b;
+  background: #f8faf7;
+  cursor: pointer;
+  transition:
+    color 160ms ease,
+    background-color 160ms ease;
+}
+
+.dialog-close-button:hover {
+  color: #244b3f;
+  background: #edf3e7;
+}
+
+.dialog-close-button:focus-visible {
+  outline: 3px solid rgb(36 75 63 / 25%);
+  outline-offset: 3px;
 }
 
 .details-content {
-  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  max-height: min(68vh, 680px);
-  min-width: 0;
-  overflow: hidden auto;
-  padding: 8px 24px 20px;
+  gap: 1rem;
   width: 100%;
+  min-width: 0;
+  max-height: min(65vh, 640px);
+  box-sizing: border-box;
+  padding: 1.5rem;
+  overflow: hidden auto;
 }
 
-.product-image {
-  display: block;
-  max-height: 220px;
-  max-width: 100%;
-  object-fit: contain;
-  margin: 0 auto 16px;
+.pet-card {
+  flex: 0 0 auto;
+  padding: 1.25rem;
+  border: 1px solid #e0e7de;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 2px 6px rgb(28 61 51 / 5%);
 }
 
-h3 {
-  margin-top: 0;
+.pet-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+.pet-avatar {
+  display: grid;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 12px;
+  color: #244b3f;
+  background: #edf3e7;
+}
+
+.pet-heading h3 {
+  margin: 0;
+  color: #263832;
+  font-size: 1.15rem;
+  font-weight: 650;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
 }
 
 dl {
-  margin: 20px 0 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0;
 }
 
 dl div {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 5px 0;
+  min-width: 0;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  background: #f8faf7;
 }
 
 dt {
-  font-weight: 600;
+  margin-bottom: 0.35rem;
+  color: #66766d;
+  font-size: 0.8rem;
+  font-weight: 500;
 }
 
 dd {
   margin: 0;
-  text-align: right;
+  color: #263832;
+  font-size: 0.95rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
 }
 
 .state {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  min-height: 160px;
+  gap: 1rem;
+  min-height: 200px;
+  padding: 1rem;
+  color: #66766d;
+  text-align: center;
+}
+
+.state p {
+  margin: 0;
+}
+
+.state > mat-icon {
+  width: 40px;
+  height: 40px;
+  color: #52675b;
+  font-size: 40px;
 }
 
 .error-message {
-  color: var(--mat-sys-error, #b00020);
-}
-
-mat-dialog-actions {
-  box-sizing: border-box;
-  position: sticky;
-  bottom: 0;
-  z-index: 1;
-  min-height: 68px;
-  padding: 12px 24px 20px;
-  background: var(--mat-sys-surface, #fff);
-  border-top: 1px solid var(--mat-sys-outline-variant, #ddd);
-  width: 100%;
+  margin: 0;
+  padding: 1rem 1.25rem;
+  border: 1px solid #ebcfc9;
+  border-radius: 12px;
+  color: #9a3d32;
+  background: #fff3ef;
+  line-height: 1.5;
 }
 
 @media (width <= 560px) {
   .dialog-header,
-  .details-content,
-  mat-dialog-actions {
-    padding-left: 16px;
-    padding-right: 16px;
+  .details-content {
+    padding: 1.25rem 1rem;
+  }
+
+  .pet-card {
+    padding: 1rem;
+  }
+
+  dl {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  dl div {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  dt {
+    margin: 0;
+  }
+
+  dd {
+    text-align: right;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialog-close-button {
+    transition: none;
   }
 }
