@@ -64,7 +64,13 @@
       <div class="form-row">
         <label for="date" class="label-size">Date:</label>
         <mat-form-field appearance="outline">
-          <input for="date" matInput [min]="minDate" [matDatepicker]="picker" [formField]="billRequestForm.date" />
+          <input
+            for="date"
+            matInput
+            [min]="minDate"
+            [matDatepicker]="picker"
+            [formField]="billRequestForm.date"
+          />
           <mat-hint>DD/MM/YYYY</mat-hint>
           <mat-datepicker-toggle matIconSuffix [for]="picker" />
           <mat-datepicker #picker />
