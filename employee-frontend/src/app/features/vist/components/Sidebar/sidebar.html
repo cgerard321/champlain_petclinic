@@ -1,0 +1,14 @@
+<aside class="sidebar" aria-label="Filtres de visite">
+  <div class="sidebar__header">
+    <button
+      class="sidebar__hide"
+      type="button"
+      aria-label="Masquer les filtres"
+      title="Masquer les filtres"
+      (click)="hide.emit()"
+    >
+      <span aria-hidden="true">‹</span>
+    </button>
+  </div>
+  <app-filter-button />
+</aside>

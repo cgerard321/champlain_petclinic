@@ -68,6 +68,14 @@
         "heading": "Specialties",
         "description": "Discover the clinic's different areas of care."
       }
+    },
+    "visit":{
+      "pages": {
+        "buttonName": "Show filters"
+      },
+      "components": {
+        "filterbutton": "Filter"
+      }
     }
   }
 }
