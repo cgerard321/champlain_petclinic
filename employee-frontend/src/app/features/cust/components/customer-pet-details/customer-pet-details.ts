@@ -1,14 +1,13 @@
-import {Component,inject, OnInit, signal} from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
-import {Pet, PetType} from '@features/cust/models/customer.model'
+import { Pet, PetType } from '@features/cust/models/customer.model';
 import { CustomerService } from '@features/cust/services/customer-service';
 
-import {MatProgressSpinner} from '@angular/material/progress-spinner';
-
-interface CustomerPetDetails{
-  customerId : string
+interface CustomerPetDetails {
+  customerId: string;
 }
 
 @Component({
@@ -26,9 +25,8 @@ export class PetDetails implements OnInit {
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal<string | null>(null);
 
-
   ngOnInit(): void {
-    this.customerService.getPetDetails(this.data.customerId ).subscribe({
+    this.customerService.getPetDetails(this.data.customerId).subscribe({
       next: (pet) => {
         this.pets.update((pets) => [...pets, pet]);
       },
@@ -37,7 +35,6 @@ export class PetDetails implements OnInit {
       },
       error: (error) => {
         console.error('Pet details error:', error);
-        console.log('Customer ID:', this.data.customerId);
 
         this.isLoading.set(false);
         this.errorMessage.set('Could not load pet details.');
@@ -60,9 +57,7 @@ export class PetDetails implements OnInit {
     return Math.abs(ageDate.getUTCFullYear() - 1970);
   };
   protected getPetTypeName(petTypeId: string): string {
-    const petType = this.petTypes().find(
-      (type) => type.petTypeId === petTypeId,
-    );
+    const petType = this.petTypes().find((type) => type.petTypeId === petTypeId);
 
     return petType?.name ?? 'Unknown';
   }

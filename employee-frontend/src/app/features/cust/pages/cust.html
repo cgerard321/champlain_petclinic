@@ -17,8 +17,8 @@
         type="search"
         placeholder="Search customer by name, Id, address, city or phone number"
         [value]="searchText()"
-        (input)="searchText.set($any($event.target).value)">
-
+        (input)="searchText.set($any($event.target).value)"
+      />
     </div>
     <div class="table-container">
       <table>
@@ -40,7 +40,16 @@
               <td>{{ customer.address || 'Not available' }}</td>
               <td>{{ customer.city || 'Not available' }}</td>
               <td>{{ customer.telephone || 'Not available' }}</td>
-              <td><button mat-flat-button color="primary" type="button" (click)="checkPetDetails(customer.customerId)">Registered Pets</button></td>
+              <td>
+                <button
+                  mat-flat-button
+                  color="primary"
+                  type="button"
+                  (click)="checkPetDetails(customer.customerId)"
+                >
+                  Registered Pets
+                </button>
+              </td>
             </tr>
           } @empty {
             <tr class="no-customers-row">
@@ -57,4 +66,3 @@
     </div>
   }
 </section>
-

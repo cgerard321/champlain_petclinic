@@ -2,22 +2,14 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatCardModule } from '@angular/material/card'
-
-
-
+import { MatCardModule } from '@angular/material/card';
 
 import { Customer } from '@features/cust/models/customer.model';
 import { CustomerService } from '@features/cust/services/customer-service';
 import { PetDetails } from '@features/cust/components/customer-pet-details/customer-pet-details';
 
-
 @Component({
-  imports: [
-    MatProgressSpinnerModule,
-    MatCardModule,
-    MatDialogModule
-  ],
+  imports: [MatProgressSpinnerModule, MatCardModule, MatDialogModule],
   selector: 'app-cust',
   styleUrl: './cust.css',
   templateUrl: './cust.html',
@@ -54,7 +46,7 @@ export class Cust implements OnInit {
       width: '850px',
       maxWidth: '95vw',
       maxHeight: '90vh',
-    })
+    });
   }
 
   protected readonly searchText = signal('');
@@ -62,15 +54,13 @@ export class Cust implements OnInit {
   protected readonly filteredCustomers = computed(() => {
     const query = this.searchText().trim().toLowerCase();
 
-    return this.customers().filter(customer =>
-      [
-        `${customer.firstName} ${customer.lastName}`,
-        customer.customerId,
-        customer.telephone,
-      ].some(value =>
-        String(value ?? '').toLowerCase().includes(query)
-
-      )
+    return this.customers().filter((customer) =>
+      [`${customer.firstName} ${customer.lastName}`, customer.customerId, customer.telephone].some(
+        (value) =>
+          String(value ?? '')
+            .toLowerCase()
+            .includes(query),
+      ),
     );
   });
 }

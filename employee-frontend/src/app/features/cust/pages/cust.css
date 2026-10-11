@@ -11,9 +11,7 @@
   --text-muted: #7d8982;
   --border: rgb(36 75 63 / 14%);
   --border-strong: rgb(36 75 63 / 22%);
-  --shadow-sm:
-    0 2px 6px rgb(28 61 51 / 6%),
-    0 1px 2px rgb(28 61 51 / 5%);
+  --shadow-sm: 0 2px 6px rgb(28 61 51 / 6%), 0 1px 2px rgb(28 61 51 / 5%);
 
   display: block;
   min-height: 100%;
@@ -50,7 +48,7 @@
   height: 4px;
   border-radius: 999px;
   background: linear-gradient(90deg, var(--forest-700), var(--sage-400));
-  content: "";
+  content: '';
 }
 
 .search-container {
@@ -263,7 +261,7 @@ td button:focus-visible {
   margin: 0;
 }
 
-.customer-page > p[role="alert"] {
+.customer-page > p[role='alert'] {
   border-color: rgb(154 61 50 / 25%);
   color: #9a3d32;
 }

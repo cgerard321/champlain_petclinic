@@ -17,5 +17,5 @@ export interface Pet {
 }
 export interface PetType {
   petTypeId: string;
-  name: string
+  name: string;
 }

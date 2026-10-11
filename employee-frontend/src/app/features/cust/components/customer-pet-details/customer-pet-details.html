@@ -36,26 +36,29 @@
     </div>
   } @else {
     @for (currentPet of pets(); track currentPet.petId) {
-    <article class="pet-card">
-      <div class="pet-heading">
-        <span class="pet-avatar" aria-hidden="true"><mat-icon>pets</mat-icon></span>
-        <h3>{{ currentPet.name }}</h3>
-      </div>
-      <dl>
-      <div>
-        <dt>Species</dt>
-        <dd>{{ getPetTypeName(currentPet.petTypeId) }}</dd>
-      </div>
-      <div>
-        <dt>Age</dt>
-        <dd>{{ calculateAge(currentPet.birthDate) }} {{ calculateAge(currentPet.birthDate) === 1 ? 'year' : 'years' }}</dd>
-      </div>
-      <div>
-        <dt>Weight</dt>
-        <dd>{{ currentPet.weight }}</dd>
-      </div>
-    </dl>
-    </article>
-  }
+      <article class="pet-card">
+        <div class="pet-heading">
+          <span class="pet-avatar" aria-hidden="true"><mat-icon>pets</mat-icon></span>
+          <h3>{{ currentPet.name }}</h3>
+        </div>
+        <dl>
+          <div>
+            <dt>Species</dt>
+            <dd>{{ getPetTypeName(currentPet.petTypeId) }}</dd>
+          </div>
+          <div>
+            <dt>Age</dt>
+            <dd>
+              {{ calculateAge(currentPet.birthDate) }}
+              {{ calculateAge(currentPet.birthDate) === 1 ? 'year' : 'years' }}
+            </dd>
+          </div>
+          <div>
+            <dt>Weight</dt>
+            <dd>{{ currentPet.weight }}</dd>
+          </div>
+        </dl>
+      </article>
+    }
   }
 </mat-dialog-content>
