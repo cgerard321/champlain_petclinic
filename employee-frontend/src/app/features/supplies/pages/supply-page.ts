@@ -386,74 +386,41 @@ export class SupplyPage {
     return 'Unable to download PDF.';
   }
 
-  protected expirationStatus(
-    expirationDate: string | null | undefined,
-  ): 'expired' | 'expiring-soon' | 'valid' | 'none' {
-    if (!expirationDate) {
+  // Supplies expiring within this many days are flagged as "expiring soon".
+  private readonly expiringSoonDays = 30;
+
+  // When creating, the date picker does not offer past days (the backend rejects them).
+  // When editing there is no minimum, because a supply may already be expired.
+  protected readonly minExpirationDate = computed(() =>
+    this.editingSupplyId() ? null : this.todayAsText(),
+  );
+
+  protected expirationState(supply: Supply): 'none' | 'expired' | 'soon' | 'ok' {
+    if (!supply.expirationDate) {
       return 'none';
     }
 
-    // Treat the ISO value as a calendar date, without a UTC timezone shift.
-    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(expirationDate);
-
-    if (!match) {
-      return 'none';
-    }
-
-    const year = Number(match[1]);
-    const month = Number(match[2]);
-    const day = Number(match[3]);
-    const expiration = new Date(year, month - 1, day);
-
-    // Reject impossible calendar dates.
-    if (
-      expiration.getFullYear() !== year ||
-      expiration.getMonth() !== month - 1 ||
-      expiration.getDate() !== day
-    ) {
-      return 'none';
-    }
-
+    // Adding T00:00:00 makes the date local. Without it, "2026-10-20" is read as UTC,
+    // which is the evening of the 19th in Montreal and would be off by one day.
+    const expiration = new Date(`${supply.expirationDate}T00:00:00`);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const expirationDay = new Date(year, month - 1, day);
-    const daysRemaining = Math.round(
-      (expirationDay.getTime() - today.getTime()) / (24 * 60 * 60 * 1000),
-    );
+    const daysLeft = Math.round((expiration.getTime() - today.getTime()) / 86_400_000);
 
-    if (daysRemaining < 0) {
+    if (daysLeft < 0) {
       return 'expired';
     }
 
-    if (daysRemaining <= 30) {
-      return 'expiring-soon';
-    }
-
-    return 'valid';
+    return daysLeft <= this.expiringSoonDays ? 'soon' : 'ok';
   }
 
-  protected formatExpirationDate(expirationDate: string | null | undefined): string {
-    if (!expirationDate) {
-      return '—';
-    }
+  private todayAsText(): string {
+    const now = new Date();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
 
-    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(expirationDate);
-
-    if (!match) {
-      return expirationDate;
-    }
-
-    const year = Number(match[1]);
-    const month = Number(match[2]);
-    const day = Number(match[3]);
-    const date = new Date(year, month - 1, day);
-
-    if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
-      return expirationDate;
-    }
-
-    return date.toLocaleDateString();
+    return `${now.getFullYear()}-${month}-${day}`;
   }
 
   protected formatStatus(status: string): string {

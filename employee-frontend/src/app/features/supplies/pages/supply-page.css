@@ -495,19 +495,25 @@
 }
 
 .expiration-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
 }
 
 .expiration-badge.expired {
-  color: #b42318;
-  font-weight: 600;
+  background: #ffebee;
+  color: #b71c1c;
 }
 
 .expiration-badge.expiring-soon {
-  color: #b54708;
-  font-weight: 600;
+  background: #fff1cc;
+  color: #765000;
+}
+
+.no-expiration {
+  color: var(--text-secondary);
 }
 
 @media (width <= 850px) {

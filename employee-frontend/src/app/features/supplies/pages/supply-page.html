@@ -107,7 +107,12 @@
             }
 
             <label for="expirationDate">Expiration Date (optional)</label>
-            <input id="expirationDate" type="date" [formField]="supplyForm.expirationDate" />
+            <input
+              id="expirationDate"
+              type="date"
+              [attr.min]="minExpirationDate()"
+              [formField]="supplyForm.expirationDate"
+            />
           </div>
 
           <app-supply-image-editor
@@ -277,20 +282,13 @@
 
 <ng-template #expirationCell let-supply>
   @if (supply.expirationDate) {
-    <span
-      class="expiration-badge"
-      [class.expired]="expirationStatus(supply.expirationDate) === 'expired'"
-      [class.expiring-soon]="expirationStatus(supply.expirationDate) === 'expiring-soon'"
-    >
-      {{ formatExpirationDate(supply.expirationDate) }}
-
-      @if (expirationStatus(supply.expirationDate) === 'expired') {
-        <span>— Expired</span>
-      } @else if (expirationStatus(supply.expirationDate) === 'expiring-soon') {
-        <span>— Expiring soon</span>
-      }
-    </span>
+    {{ supply.expirationDate }}
+    @if (expirationState(supply) === 'expired') {
+      <span class="expiration-badge expired">Expired</span>
+    } @else if (expirationState(supply) === 'soon') {
+      <span class="expiration-badge expiring-soon">Expiring soon</span>
+    }
   } @else {
-    <span>—</span>
+    <span class="no-expiration">No expiration</span>
   }
 </ng-template>
