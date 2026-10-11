@@ -153,13 +153,13 @@ const NewUpdateCustomerForm = ({
         await checkSession();
       }
 
-      showToast('customerForm.updateSuccess', 'success');
+      showToast(t('customerForm.updateSuccess'), 'success');
 
       onBackButtonClick();
     } catch (error) {
       console.error('Error updating customer:', error);
 
-      showToast('customerForm.updateError', 'error');
+      showToast(t('customerForm.updateError'), 'error');
     }
   };
 
