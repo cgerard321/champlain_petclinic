@@ -217,7 +217,7 @@ const CustomerProfilePage: React.FC<CustomerProfilePageProps> = ({
       await deletePetPhoto(petId);
       setPetImageUrls(prev => ({
         ...prev,
-        [petId]: getPetTypeImage(pet.petTypeId, petTypes),
+        [petId]: getPetTypeImage(pet.petTypeId, petTypes, t),
       }));
 
       if (customer) {
@@ -343,7 +343,7 @@ const CustomerProfilePage: React.FC<CustomerProfilePageProps> = ({
                         <img
                           src={
                             petImageUrls[pet.petId] ||
-                            getPetTypeImage(pet.petTypeId, petTypes)
+                            getPetTypeImage(pet.petTypeId, petTypes, t)
                           }
                           alt={`${pet.name} profile`}
                           className="pet-profile-picture"
@@ -354,7 +354,7 @@ const CustomerProfilePage: React.FC<CustomerProfilePageProps> = ({
                           <div className="customers-pet-details">
                             <span className="customers-pet-detail">
                               <strong>{t('pets.fields.type')}:</strong>{' '}
-                              {getPetTypeName(pet.petTypeId, petTypes)}
+                              {getPetTypeName(pet.petTypeId, petTypes, t)}
                             </span>
                             <span className="customers-pet-detail">
                               <strong>{t('pets.fields.weight')}:</strong>{' '}
@@ -379,7 +379,7 @@ const CustomerProfilePage: React.FC<CustomerProfilePageProps> = ({
 
                         {(!petImageUrls[pet.petId] ||
                           petImageUrls[pet.petId] ===
-                            getPetTypeImage(pet.petTypeId, petTypes)) && (
+                            getPetTypeImage(pet.petTypeId, petTypes, t)) && (
                           <button
                             className="pet-photo-change"
                             onClick={() =>
@@ -392,7 +392,7 @@ const CustomerProfilePage: React.FC<CustomerProfilePageProps> = ({
 
                         {petImageUrls[pet.petId] &&
                           petImageUrls[pet.petId] !==
-                            getPetTypeImage(pet.petTypeId, petTypes) && (
+                            getPetTypeImage(pet.petTypeId, petTypes, t) && (
                             <button
                               className="customers-delete-photo-button"
                               onClick={() => handleDeletePetPhoto(pet.petId)}
