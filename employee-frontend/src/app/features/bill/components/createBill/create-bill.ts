@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { form, FormField, required } from '@angular/forms/signals';
@@ -83,6 +84,7 @@ export class CreateBill implements OnInit {
   }
 
   protected readonly submitted = signal(false);
+  private isSubmitting = false;
 
   onSubmit(event: Event): void {
     event.preventDefault();
@@ -91,12 +93,20 @@ export class CreateBill implements OnInit {
     if (this.billRequestForm().invalid()) {
       return;
     }
+
+    if (this.isSubmitting) {
+      return;
+    }
+    this.isSubmitting = true;
+
     this.billService.createBill(this.billRequest()).subscribe({
       next: (createdBill: BillRequestModel) => {
         this.dialogRef.close(createdBill);
         this.showSnackbar('Bill created successfully!');
       },
-      error: (error) => {
+      error: (error: HttpErrorResponse) => {
+        this.isSubmitting = false;
+        this.showSnackbar(`400 Bad request: ${error.message}`);
         console.warn('Error status:', error.status);
         console.warn('Error body:', error.error);
       },
