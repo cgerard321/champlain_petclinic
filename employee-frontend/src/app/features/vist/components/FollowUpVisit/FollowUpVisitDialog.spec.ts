@@ -33,12 +33,14 @@ describe('FollowUpVisitDialog', () => {
     status: Status.UPCOMING,
   };
 
+  const getAvailableDates = vi.fn<VisitService['getAvailableDates']>();
   const getAvailableTimeSlots = vi.fn<VisitService['getAvailableTimeSlots']>();
   const addFollowUpVisit = vi.fn<VisitService['addFollowUpVisit']>();
   const close = vi.fn();
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    getAvailableDates.mockReturnValue(of(['2027-01-12']));
     getAvailableTimeSlots.mockReturnValue(of([]));
     addFollowUpVisit.mockReturnValue(of(createdVisit));
 
@@ -49,7 +51,7 @@ describe('FollowUpVisitDialog', () => {
         { provide: MatDialogRef, useValue: { close } },
         {
           provide: VisitService,
-          useValue: { getAvailableTimeSlots, addFollowUpVisit },
+          useValue: { getAvailableDates, getAvailableTimeSlots, addFollowUpVisit },
         },
       ],
     }).compileComponents();
@@ -61,6 +63,21 @@ describe('FollowUpVisitDialog', () => {
 
     expect(fixture.nativeElement.textContent).toContain('Leo');
     expect(fixture.nativeElement.textContent).toContain('Linda Douglas');
+  });
+
+  it('only allows days that have available times', () => {
+    const component = TestBed.createComponent(FollowUpVisitDialog).componentInstance;
+
+    expect(getAvailableDates).toHaveBeenCalledWith('vet-1', expect.any(String), expect.any(String));
+    expect(component['isAvailableDay'](new Date(2027, 0, 12))).toBe(true);
+    expect(component['isAvailableDay'](new Date(2027, 0, 13))).toBe(false);
+  });
+
+  it('keeps every day selectable when the available dates cannot be loaded', () => {
+    getAvailableDates.mockReturnValue(throwError(() => new Error('Backend unavailable')));
+    const component = TestBed.createComponent(FollowUpVisitDialog).componentInstance;
+
+    expect(component['isAvailableDay'](new Date(2027, 0, 13))).toBe(true);
   });
 
   it('loads only future available time slots for the selected date', () => {

@@ -31,8 +31,9 @@
         readonly
         [matDatepicker]="datePicker"
         [min]="minDate"
+        [matDatepickerFilter]="isAvailableDay"
         [formField]="followUpForm.date"
-        (dateChange)="loadTimeSlots($event.value)"
+        (dateChange)="loadTimeSlots($event.value ?? null)"
       />
       <mat-datepicker-toggle matIconSuffix [for]="datePicker" />
       <mat-datepicker #datePicker />

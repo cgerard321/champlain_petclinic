@@ -58,6 +58,19 @@ describe('VisitService', () => {
     request.flush([]);
   });
 
+  it('gets the available dates for the veterinarian within the date range', () => {
+    service.getAvailableDates('vet-1', '2027-01-01', '2027-06-30').subscribe();
+
+    const request = http.expectOne(
+      (candidate) =>
+        candidate.url === '/api/gateway/visits/availability/vets/vet-1/dates' &&
+        candidate.params.get('startDate') === '2027-01-01' &&
+        candidate.params.get('endDate') === '2027-06-30',
+    );
+    expect(request.request.method).toBe('GET');
+    request.flush([]);
+  });
+
   it('creates an upcoming follow-up for the same pet and veterinarian', () => {
     service.addFollowUpVisit(completedVisit, '2027-01-12T09:00:00', 'Follow-up check').subscribe();
 

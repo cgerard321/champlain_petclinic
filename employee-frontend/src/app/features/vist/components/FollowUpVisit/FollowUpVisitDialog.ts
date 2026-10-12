@@ -20,6 +20,10 @@ interface FollowUpVisitDialogData {
   visit: Visit;
 }
 
+function toIsoDate(date: Date): string {
+  return formatDate(date, 'yyyy-MM-dd', 'en-CA');
+}
+
 interface FollowUpVisitFormModel {
   date: Date | null;
   visitDate: string;
@@ -51,6 +55,8 @@ export class FollowUpVisitDialog {
 
   protected readonly visit = this.data.visit;
   protected readonly minDate = new Date();
+  // null until the available dates load; every future day stays selectable in the meantime
+  private readonly availableDates = signal<Set<string> | null>(null);
   protected readonly timeSlots = signal<TimeSlot[]>([]);
   protected readonly isLoadingSlots = signal(false);
   protected readonly isSubmitting = signal(false);
@@ -77,6 +83,22 @@ export class FollowUpVisitDialog {
     });
   });
 
+  constructor() {
+    const endDate = new Date(this.minDate);
+    endDate.setMonth(endDate.getMonth() + 6);
+    this.visitService
+      .getAvailableDates(this.visit.practitionerId, toIsoDate(this.minDate), toIsoDate(endDate))
+      .subscribe({
+        next: (dates) => this.availableDates.set(new Set(dates)),
+        error: () => this.availableDates.set(null),
+      });
+  }
+
+  protected readonly isAvailableDay = (date: Date | null | undefined): boolean => {
+    const availableDates = this.availableDates();
+    return !!date && (availableDates === null || availableDates.has(toIsoDate(date)));
+  };
+
   protected loadTimeSlots(date: Date | null): void {
     this.model.update((current) => ({ ...current, date, visitDate: '' }));
     this.timeSlots.set([]);
@@ -87,7 +109,7 @@ export class FollowUpVisitDialog {
     }
 
     this.isLoadingSlots.set(true);
-    const selectedDate = formatDate(date, 'yyyy-MM-dd', 'en-CA');
+    const selectedDate = toIsoDate(date);
     this.visitService.getAvailableTimeSlots(this.visit.practitionerId, selectedDate).subscribe({
       next: (timeSlots) => {
         const now = Date.now();

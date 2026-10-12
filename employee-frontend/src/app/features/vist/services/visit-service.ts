@@ -53,6 +53,17 @@ export class VisitService {
     );
   }
 
+  getAvailableDates(
+    practitionerId: string,
+    startDate: string,
+    endDate: string,
+  ): Observable<string[]> {
+    return this.http.get<string[]>(
+      `/api/gateway/visits/availability/vets/${practitionerId}/dates`,
+      { params: { startDate, endDate } },
+    );
+  }
+
   addFollowUpVisit(
     completedVisit: Visit,
     visitDate: string,
