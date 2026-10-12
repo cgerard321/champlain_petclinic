@@ -36,18 +36,18 @@
             "noSpaceNoAt": "No spaces or \"@\"",
             "noTrailing": "Doesn't end with an underscore, and no two in a row"
           }
-        },
-        "role": {
-          "admin": "Administrator",
-          "vet": "Veterinarian",
-          "receptionist": "Receptionist",
-          "inventoryManager": "Inventory Manager",
-          "unknown": "Employee"
         }
       },
       "display": {
         "title": "Display"
       }
+    },
+    "role": {
+      "admin": "Administrator",
+      "vet": "Veterinarian",
+      "receptionist": "Receptionist",
+      "inventoryManager": "Inventory Manager",
+      "unknown": "Employee"
     },
     "notFound": {
       "title": "Page Not Found",

@@ -5,14 +5,14 @@ export function employeeRoleLabel(roles: readonly string[]): string {
 
   switch (match) {
     case Roles.admin:
-      return $localize`:@@settings.security.role.admin:Administrateur`;
+      return $localize`:@@role.admin:Administrateur`;
     case Roles.vet:
-      return $localize`:@@settings.security.role.vet:Vétérinaire`;
+      return $localize`:@@role.vet:Vétérinaire`;
     case Roles.receptionist:
-      return $localize`:@@settings.security.role.receptionist:Réceptionniste`;
+      return $localize`:@@role.receptionist:Réceptionniste`;
     case Roles.inventoryManager:
-      return $localize`:@@settings.security.role.inventoryManager:Gestionnaire d'inventaire`;
+      return $localize`:@@role.inventoryManager:Gestionnaire d'inventaire`;
     default:
-      return $localize`:@@settings.security.role.unknown:Employé`;
+      return $localize`:@@role.unknown:Employé`;
   }
 }

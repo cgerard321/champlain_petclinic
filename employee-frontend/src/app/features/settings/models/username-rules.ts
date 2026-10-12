@@ -1,10 +1,8 @@
 export const USERNAME_MIN_LENGTH = 3;
 export const USERNAME_MAX_LENGTH = 30;
 
-//start with a letter,can have numbers and underscores, no two underscore at the same time
 export const USERNAME_PATTERN = /^[A-Za-z][A-Za-z0-9]*(?:_[A-Za-z0-9]+)*$/;
 
-// Convert accented letters to plain letters (é → e)...
 const DIACRITICS = new RegExp('[\\u0300-\\u036f]', 'g');
 
 export const RESERVED_USERNAMES = [
@@ -66,7 +64,6 @@ export function isSameAsCurrent(raw: string, current: string): boolean {
 export function isValidUsername(raw: string): boolean {
   return matchesUsernameFormat(raw) && !isReserved(raw);
 }
-//cut to the max length, never leaving a trailing underscore
 function clampUsername(value: string): string {
   return value.slice(0, USERNAME_MAX_LENGTH).replace(/_+$/, '');
 }
@@ -94,21 +91,4 @@ export function suggestUsernames(typed: string, max = 3): string[] {
   }
 
   return suggestFrom([base, `${base}1`], max);
-}
-export function suggestFromName(first: string, last: string, max = 3): string[] {
-  const firstBase = toUsernameBase(first).toLowerCase();
-  const lastBase = toUsernameBase(last).toLowerCase();
-
-  if (firstBase.length === 0 || lastBase.length === 0) {
-    return [];
-  }
-
-  return suggestFrom(
-    [
-      `${firstBase}_${lastBase}`,
-      `${firstBase.charAt(0)}_${lastBase}`,
-      `${firstBase}_${lastBase.charAt(0)}`,
-    ],
-    max,
-  );
 }

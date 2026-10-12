@@ -61,7 +61,6 @@
   font: var(--mat-sys-body-small);
 }
 
-
 .field-note:empty {
   margin: 0;
 }

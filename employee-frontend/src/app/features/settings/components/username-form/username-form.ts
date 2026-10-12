@@ -4,7 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 
 import { AuthState } from '@core/services/auth-state';
@@ -25,6 +25,8 @@ import {
 } from '@features/settings/services/settings-form-state';
 
 const SECTION_ID = 'username';
+
+const SAVED_SNACK_BAR: MatSnackBarConfig = { duration: 2000, verticalPosition: 'top' };
 
 function usernameRuleLabel(id: UsernameRuleId): string {
   switch (id) {
@@ -54,13 +56,11 @@ export class UsernameForm implements SettingsSectionForm {
   private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);
 
-  // Read here rather than in the service so every visit to the page asks the server again.
   protected readonly currentUser = toSignal(this.account.getCurrentUser(), { initialValue: null });
 
   protected readonly current = computed(() => this.currentUser()?.username ?? '');
   protected readonly roleLabel = computed(() => employeeRoleLabel(this.currentUser()?.roles ?? []));
 
-  // Always starts empty: the employee types the new name themselves.
   protected readonly draft = signal('');
 
   protected readonly isSubmitting = signal(false);
@@ -159,7 +159,7 @@ export class UsernameForm implements SettingsSectionForm {
     this.snackBar.open(
       $localize`:@@settings.security.username.saved:Nom d'utilisateur modifié`,
       '',
-      { duration: 2000, verticalPosition: 'top' },
+      SAVED_SNACK_BAR,
     );
 
     this.authState.logout().subscribe({
