@@ -210,7 +210,7 @@ export function ReviewsList({
         </div>
 
         {productReviews.length > 0 && (
-          <div className="review-search">
+          <div>
             <Stack direction="horizontal">
               <input
                 type="text"
