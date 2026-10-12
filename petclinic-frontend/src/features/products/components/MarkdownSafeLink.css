@@ -1,0 +1,83 @@
+.markdown-link-safety-modal-dialog {
+    position: relative;
+    padding: 0px;
+}
+
+.markdown-link-safety-modal-dialog .modal-content {
+    padding: 20px;
+    min-height: 0;
+}
+
+.markdown-link-safety-modal-close-btn {
+    position: absolute;
+    top: -15px;
+    right: 0px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #000;
+    z-index: 10;
+}
+
+.markdown-link-safety-modal-close-btn:hover,
+.markdown-link-safety-modal-close-btn:focus,
+.markdown-link-safety-modal-close-btn:active {
+    color: #000;
+    background: transparent;
+    box-shadow: none;
+}
+
+.markdown-link-safety-modal-body {
+    padding: 5px;
+    position: relative;
+}
+
+.markdown-link-safety-modal-body h4 {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    margin-bottom: 4px;
+    color: #333;
+    text-align: left;
+}
+
+.markdown-link-safety-modal-body p {
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    color: #555;
+    margin-top: 20px;
+    margin-bottom: 25px;
+    text-align: left;
+}
+
+.markdown-link-safety-modal-body p .safety-accent {
+    text-decoration: underline;
+}
+
+.markdown-link-safety-modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+}
+
+.markdown-link-safety-modal-buttons .markdown-link-safety-btn {
+    background-color: #dc3545;
+    color: #fff;
+    border: 1.5px solid #dc3545;
+    padding: 5px 12px;
+    font-size: 14px;
+    border-radius: 4px;
+    margin: 0;
+}
+
+.markdown-link-safety-modal-buttons .markdown-link-safety-btn:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+.markdown-link-safety-modal-buttons .btn-danger {
+    padding: 5px 12px;
+    font-size: 14px;
+}

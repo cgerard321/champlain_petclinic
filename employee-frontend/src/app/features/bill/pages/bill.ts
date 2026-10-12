@@ -1,14 +1,16 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 
 import { AuthState } from '@core/services/auth-state';
-import { ComingSoon } from '@shared/components/coming-soon/coming-soon';
+import { Roles } from '@shared/models/roles';
 
 @Component({
-  imports: [ComingSoon],
   selector: 'app-bill',
   styleUrl: './bill.css',
   templateUrl: './bill.html',
 })
 export class Bill {
-  protected auth = inject(AuthState);
+  protected readonly auth = inject(AuthState);
+
+  // Only vets can start a bill. The CRUD work is handled in the follow-up stories.
+  protected readonly canCreateBill = computed(() => this.auth.hasRole(Roles.vet));
 }

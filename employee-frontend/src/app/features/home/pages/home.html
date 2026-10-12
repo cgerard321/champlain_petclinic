@@ -1,44 +1,114 @@
 <main class="home-container">
+  <h1 class="welcome-title">
+    @if (employeeName()) {
+      Welcome back, {{ employeeName() }}!
+    } @else {
+      Welcome to Champlain Petclinic
+    }
+  </h1>
   <mat-card class="welcome-card" appearance="outlined">
     <div class="welcome-content">
       <div class="welcome-text">
         <span class="welcome-badge">EMPLOYEE PORTAL</span>
-
-        <!-- Welcome Message (Ticket Criteria) -->
-        <h1 class="welcome-title">
-          @if (employeeName()) {
-            Welcome back, {{ employeeName() }}!
-          } @else {
-            Welcome to Champlain Petclinic
-          }
-        </h1>
-
-        <!-- Short Introduction (Ticket Criteria) -->
+        <h1>Clinic Management Dashboard</h1>
         <p class="welcome-description">
-          At Champlain Pet Clinic, we offer a wide range of services to ensure the health and
-          well-being of your beloved pets. Our experienced veterinarians and staff are dedicated to
-          providing the best care possible.
+          Manage appointments, oversee daily clinic operations, access patient medical records, and
+          monitor inventory seamlessly in one central location!
         </p>
+        <div class="welcome-buttons">
+          <a routerLink="/vist" class="welcome-btn btn-primary">
+            <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"
+              ></path>
+            </svg>
+            View Visits
+          </a>
+          <a routerLink="/prod" class="welcome-btn btn-secondary">
+            <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"
+              ></path>
+            </svg>
+            Browse Products
+          </a>
+        </div>
       </div>
 
-      <!-- Clinic Logo (Ticket Criteria) -->
       <div class="logo-wrapper">
         <div class="brand-emblem">
           <span class="brand-title">Pet<span class="brand-highlight">Clinic</span></span>
           <div class="paw-group" aria-hidden="true">
             <svg class="paw-icon paw-large" viewBox="0 0 24 24" fill="currentColor">
               <path
-                d="M12 11.5c-1.8 0-3.5 1.4-3.5 3.2 0 1.9 1.6 3.3 3.5 3.3s3.5-1.4 3.5-3.3c0-1.8-1.7-3.2-3.5-3.2zm-5.2-1.8c.8 0 1.5-.9 1.5-2s-.7-2-1.5-2-1.5.9-1.5 2 .7 2 1.5 2zm10.4 0c.8 0 1.5-.9 1.5-2s-.7-2-1.5-2-1.5.9-1.5 2 .7 2 1.5 2zm-7.8-3.2c.9 0 1.6-.9 1.6-2s-.7-2-1.6-2-1.6.9-1.6 2 .7 2 1.6 2zm5.2 0c.9 0 1.6-.9 1.6-2s-.7-2-1.6-2-1.6.9-1.6 2 .7 2 1.6 2z"
-              />
+                d="M12 11.5c-1.8 0-3.5 1.4-3.5 3.2 0 1.9 1.6 3.3 3.5 3.3s3.5-1.4 3.5-3.3c0-1.8-1.7-3.2-3.5-3.2zm-5.2-1.8c.8 0 1.5-.9 1.5-2s-.7-2-1.5-2-1.5.9-1.5 2 .7 2 1.5 2zm10.4 0c.8 0 1.5-.9 1.5-2s-.7-2-1.5-2-1.5.9-1.5 2 .7 2 1.5 2z"
+              ></path>
             </svg>
             <svg class="paw-icon paw-small" viewBox="0 0 24 24" fill="currentColor">
               <path
-                d="M12 11.5c-1.8 0-3.5 1.4-3.5 3.2 0 1.9 1.6 3.3 3.5 3.3s3.5-1.4 3.5-3.3c0-1.8-1.7-3.2-3.5-3.2zm-5.2-1.8c.8 0 1.5-.9 1.5-2s-.7-2-1.5-2-1.5.9-1.5 2 .7 2 1.5 2zm10.4 0c.8 0 1.5-.9 1.5-2s-.7-2-1.5-2-1.5.9-1.5 2 .7 2 1.5 2zm-7.8-3.2c.9 0 1.6-.9 1.6-2s-.7-2-1.6-2-1.6.9-1.6 2 .7 2 1.6 2zm5.2 0c.9 0 1.6-.9 1.6-2s-.7-2-1.6-2-1.6.9-1.6 2 .7 2 1.6 2z"
-              />
+                d="M12 11.5c-1.8 0-3.5 1.4-3.5 3.2 0 1.9 1.6 3.3 3.5 3.3s3.5-1.4 3.5-3.3c0-1.8-1.7-3.2-3.5-3.2zm-5.2-1.8c.8 0 1.5-.9 1.5-2s-.7-2-1.5-2-1.5.9-1.5 2 .7 2 1.5 2zm10.4 0c.8 0 1.5-.9 1.5-2s-.7-2-1.5-2-1.5.9-1.5 2 .7 2 1.5 2z"
+              ></path>
             </svg>
           </div>
         </div>
       </div>
     </div>
   </mat-card>
+  <div class="quick-actions-section">
+    <h2 class="quick-actions-title">Quick Actions</h2>
+
+    <div class="quick-actions-grid">
+      <a class="action-card" routerLink="/vets">
+        <div class="action-card-header">
+          <h3>Veterinarians</h3>
+          <span class="action-tag">SCHEDULES & SPECIALTIES</span>
+        </div>
+        <p class="action-card-desc">
+          Access vet profiles, assigned specialties, and daily availability calendars.
+        </p>
+        <div class="action-card-footer">
+          <span class="footer-label">Active Staff</span>
+        </div>
+      </a>
+
+      <a class="action-card" routerLink="/cust">
+        <div class="action-card-header">
+          <h3>Customers & Owners</h3>
+          <span class="action-tag">CLIENT RECORDS</span>
+        </div>
+        <p class="action-card-desc">
+          Register new clients, manage pet profiles, and update contact details.
+        </p>
+        <div class="action-card-footer">
+          <span class="footer-label">Patient Database</span>
+        </div>
+      </a>
+
+      <a class="action-card" routerLink="/bill">
+        <div class="action-card-header">
+          <h3>Bills & Invoices</h3>
+          <span class="action-tag">FINANCIAL MANAGEMENT</span>
+        </div>
+        <p class="action-card-desc">
+          Track pending payments, generate clinic invoices, and process billing.
+        </p>
+        <div class="action-card-footer">
+          <span class="footer-label">Invoicing System</span>
+        </div>
+      </a>
+
+      <a class="action-card" routerLink="/invt">
+        <div class="action-card-header">
+          <h3>Inventory & Stock</h3>
+          <span class="action-tag">SUPPLY MONITORING</span>
+        </div>
+        <p class="action-card-desc">
+          Monitor pharmaceutical stocks, equipment levels, and restock alerts.
+        </p>
+        <div class="action-card-footer">
+          <span class="footer-label">Stock Control</span>
+        </div>
+      </a>
+    </div>
+  </div>
 </main>

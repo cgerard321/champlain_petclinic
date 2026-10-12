@@ -28,7 +28,7 @@ Without the polyfill, `$localize` never exists at runtime and the app fails to s
 
 **The important difference from the customer portal:** there, English is one JSON file and French is another. Here, **French is the source locale.** The French text is written directly in the templates, and only English lives in a catalogue. There is no `fr.json`, and there should never be one.
 
-- **Message ids:** every translatable element carries an `i18n="@@some.id"` attribute. Ids are flat, there are no namespaces. The convention is `module.key`.
+- **Message ids:** every translatable element carries an `i18n="@@some.id"` attribute. Ids are flat: `settings.security.title` is a single string, and the dots are a reading convention, never a path — Angular does not split them. The convention is `module.key`.
 
 - **The catalogue** is a plain JSON file, loaded over HTTP at runtime from:
 
@@ -36,16 +36,28 @@ Without the polyfill, `$localize` never exists at runtime and the app fails to s
   employee-frontend/public/i18n/en.json
   ```
 
-  It uses the "simple JSON" shape:
+  Its entries are **grouped by feature**, nested as deeply as their ids require:
 
   ```json
   {
     "locale": "en",
     "translations": {
-      "footer.brand": "PetClinic Employee Portal"
+      "footer": {
+        "brand": "PetClinic Employee Portal"
+      },
+      "settings": {
+        "title": "Settings",
+        "security": { "title": "Security" }
+      }
     }
   }
   ```
+
+- **The grouping is flattened before Angular sees it.** `loadTranslations()` reads only the first level of the object and calls `.split()` on every value, so a nested catalogue makes it throw on its first key and install nothing at all. `flattenTranslations()` in `app.config.ts` walks the tree first and rebuilds the dotted ids: `{ settings: { security: { title: 'Security' } } }` becomes `{ 'settings.security.title': 'Security' }`.
+
+  Grouping is what keeps the file readable as it grows, and keeps two teams off the same lines in a merge. Flattening is what makes it usable.
+
+  > **The nesting path must reproduce the id exactly.** `i18n="@@settings.security.title"` needs `settings` → `security` → `title`: same words, same order, same number of levels. Rename a group and the id it produces no longer matches anything — silently, as always.
 
 - **When it loads:** `loadActiveTranslations()` in `src/app/app.config.ts`, registered through `provideAppInitializer`. Angular waits for it before bootstrapping the app.
 
@@ -64,7 +76,7 @@ employee-frontend/
       en.json            <- English only. There is no fr.json.
   src/
     app/
-      app.config.ts      <- getSavedLang(), loadActiveTranslations()
+      app.config.ts      <- getSavedLang(), flattenTranslations(), loadActiveTranslations()
       layout/
         header/
           header.ts      <- switchLang()
@@ -105,7 +117,7 @@ The choice is persisted, then the page reloads. The reload is deliberate: it is 
 
 ### Step 1: Pick the id
 
-Use `module.key`. Prefixes already in use are `login.` and `footer.`.
+Use `module.key`. Prefixes already in use are `login.`, `footer.`, `settings.`, `notFound.` and `forbidden.`.
 
 ### Step 2: Write the French straight into the template
 
@@ -125,20 +137,29 @@ For text that has no element of its own, wrap it in `<ng-container>`:
 
 **`public/i18n/en.json`**
 
+Add your entries inside their feature group, creating the group if it does not exist yet. The nesting has to spell out the id:
+
 ```json
 {
   "locale": "en",
   "translations": {
-    "vets.list.title": "Veterinarians",
-    "vets.list.add": "Add a veterinarian"
+    "vets": {
+      "list": {
+        "title": "Veterinarians",
+        "add": "Add a veterinarian"
+      }
+    }
   }
 }
 ```
+
+Both ids above come out of `flattenTranslations()` as `vets.list.title` and `vets.list.add`, which is what the templates ask for. Never mix the two styles in the same file — write the groups, not the dotted keys.
 
 ### Key rules
 
 - **Always write an explicit `@@id`.** A bare `i18n` attribute makes Angular generate a hash from the text, so the id changes the moment somebody edits the French — silently breaking the English.
 - **Ids are global, so prefix them by module.** `vets.list.title`, not `title`.
+- **The catalogue nesting must reproduce the id.** `vets.list.title` lives at `vets` → `list` → `title`. Reorganising the groups changes the ids they produce, so it breaks the translations even though no template changed.
 - **Never create a `fr.json`.** French comes from the templates.
 - **A missing id shows French, not an error.** If a string refuses to translate, that is the first thing to check.
 - **Attributes need their own marker.** Translate `placeholder`, `aria-label`, `title` and `alt` too, not only visible text:
@@ -213,6 +234,7 @@ describe('Footer', () => {
 ```
 
 * **`loadTranslations()`** takes a simple translations object, not an object with `{ locale, translations }`. If you read a real file, extract just the translations part first.
+* **In a spec, write the ids out flat.** `loadTranslations({ 'settings.security.title': 'Security' })`, not the grouped shape of `en.json`. A spec installs the catalogue directly, so nothing flattens it for you. `flattenTranslations()` is covered on its own in `app.config.spec.ts`, including an integration case that feeds the loader a grouped catalogue and checks the English actually lands.
 * **Call it before `TestBed.createComponent`.** Loading after the component renders has no effect.
 * **`clearTranslations()` in `afterEach` is mandatory.** The catalogue is global memory, so translations loaded by one test leak into the next and test order becomes important.
 * To test the loader itself instead of a component, mock `fetch` with `vi.stubGlobal`. See `src/app/app.config.spec.ts` for the success cases and failure paths.
@@ -227,8 +249,10 @@ npm test
 
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
-| A string stays French after switching to `EN` | The id is missing from `en.json` | Add it. Use the extraction in section 6 as a checklist |
+| A string stays French after switching to `EN` | The id is missing from `en.json`, or its group nesting does not spell the id out | Add it, or fix the group names. Use the extraction in section 6 as a checklist |
+| **Nothing** translates after the catalogue was reorganised, and the console shows `Could not load en translations` | A group was renamed, a level was added or removed, or the `flattenTranslations()` call was dropped from the loader. `loadTranslations()` throws on the first value that is not a string, so one bad group kills the whole catalogue | Make every nesting path spell its id out exactly, and check `loadTranslations(flattenTranslations(translations))` is still in `app.config.ts` |
 | Nothing translates, `$localize is not defined` | The polyfill is not declared | Add `"polyfills": ["@angular/localize/init"]` to the `build` target in `angular.json` |
+| `Cannot find name '$localize'` when compiling | The global is not typed. The polyfill makes it exist at runtime, but TypeScript needs to be told about it | Add `"@angular/localize"` to `types` in **both** `tsconfig.app.json` and `tsconfig.spec.json` |
 | Part of the page is English and part French | Something rendered before the loader finished | Move the string out of module scope (section 5) |
 | App starts in French, console shows `Could not load en translations` | `en.json` is missing or not valid JSON. nginx serves `index.html` for unknown paths, so this arrives as a parse error rather than a 404 | Confirm the file is in `public/i18n/` and open `/i18n/en.json` in the browser — you should see raw JSON, not the app |
 | `Missing locale data for the locale "xx"` | `localStorage.lang` holds something other than `fr` or `en` | Clear the key. The stored value is not validated today |
@@ -245,8 +269,8 @@ npm test
 3. [ ] Write the French straight into the template with an explicit `i18n="@@module.key"`.
 4. [ ] Wrap bare text in `<ng-container i18n="...">` when it has no element of its own.
 5. [ ] Mark attributes separately with `i18n-placeholder`, `i18n-aria-label`, `i18n-title`.
-6. [ ] For strings in a `.ts` file use `` $localize`:@@id:texte` ``, and keep them out of module scope.
-7. [ ] Add every new id to `public/i18n/en.json`. Never create a `fr.json`.
+6. [ ] For strings in a `.ts` file use `` $localize`:@@id:texte` ``, keep them out of module scope, and make sure `types` lists `"@angular/localize"` in both `tsconfig.app.json` and `tsconfig.spec.json`.
+7. [ ] Add every new id to `public/i18n/en.json`, inside its feature group, with the nesting spelling the id out. Never create a `fr.json`.
 8. [ ] Run the extraction to a scratch folder to catch ids you missed, then delete the folder.
 9. [ ] In specs, `loadTranslations()` before rendering and `clearTranslations()` in `afterEach`.
 10. [ ] Test in the browser: switch to `EN`, reload the page, and confirm the choice sticks with no French left behind.

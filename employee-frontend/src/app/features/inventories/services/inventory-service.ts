@@ -6,6 +6,7 @@ import { SseClient } from '@core/services/sse-client';
 import {
   Inventory,
   InventoryFilters,
+  InventoryRequest,
   InventoryType,
 } from '@features/inventories/models/inventory.model';
 
@@ -69,6 +70,36 @@ export class InventoryService {
 
   getQuantity(inventoryId: string): Observable<number> {
     return this.http.get<number>(`${this.baseUrl}/${inventoryId}/productquantity`);
+  }
+
+  createInventory(body: InventoryRequest): Observable<Inventory> {
+    return this.http.post<Inventory>(this.baseUrl, body);
+  }
+
+  updateInventory(inventoryId: string, body: InventoryRequest): Observable<Inventory> {
+    return this.http.put<Inventory>(`${this.baseUrl}/${inventoryId}`, body);
+  }
+
+  deleteInventory(inventoryId: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${inventoryId}`);
+  }
+
+  // GETs a single inventory by ID (ADMIN/INVENTORY_MANAGER only, VET excluded)
+  getInventoryById(inventoryId: string): Observable<Inventory> {
+    return this.sse
+      .stream(
+        `${this.baseUrl}/${inventoryId}`,
+        { keepAlive: false, responseType: 'event' },
+        {},
+        'GET',
+      )
+      .pipe(
+        filter(
+          (event): event is MessageEvent => event instanceof MessageEvent && event.type !== 'error',
+        ),
+        map((event) => JSON.parse(event.data) as Inventory),
+        retry({ count: Infinity, delay: () => timer(5000) }),
+      );
   }
 
   updateImportantStatus(inventoryId: string, important: boolean): Observable<void> {

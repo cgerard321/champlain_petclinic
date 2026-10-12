@@ -3,6 +3,7 @@ package com.petclinic.customersservice.business;
 import com.petclinic.customersservice.customersExceptions.exceptions.NotFoundException;
 import com.petclinic.customersservice.data.Customer;
 import com.petclinic.customersservice.data.CustomerRepo;
+import com.petclinic.customersservice.domainclientlayer.CartServiceClient;
 import com.petclinic.customersservice.domainclientlayer.FileRequestDTO;
 import com.petclinic.customersservice.domainclientlayer.FileResponseDTO;
 import com.petclinic.customersservice.domainclientlayer.FilesServiceClient;
@@ -27,6 +28,9 @@ public class CustomerServiceImpl implements CustomerService {
     
     @Autowired
     FilesServiceClient filesServiceClient;
+
+    @Autowired
+    CartServiceClient cartServiceClient;
 
     // insertCustomer has been updated, now sets a UUID for customerId rather than leave null
     @Override
@@ -68,17 +72,12 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public Mono<Void> deleteCustomer(String customerId) {
-        return customerRepo.deleteById(customerId);
-    }
-
-
-    @Override
     public Mono<CustomerResponseDTO> deleteCustomerByCustomerId(String customerId) {
         return customerRepo.findCustomerByCustomerId(customerId)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Customer id not found: " + customerId))))
-                .flatMap(found -> customerRepo.deleteById(found.getId())
-                        .then(Mono.just(found)))
+                .flatMap(found -> cartServiceClient.deleteCartByCustomerId(found.getCustomerId())
+                        .then(customerRepo.deleteById(found.getId()))
+                        .thenReturn(found))
                 .map(EntityDTOUtil::toCustomerReponseDTO);
     }
 
