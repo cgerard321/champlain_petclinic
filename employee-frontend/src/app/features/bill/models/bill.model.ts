@@ -7,8 +7,8 @@ export interface BillRecord {
   vetFirstName: string | null;
   vetLastName: string | null;
   visitType: string;
-  date: string;
-  dueDate: string;
+  date: Date;
+  dueDate: Date;
   amount: number;
   totalAmount: number | null;
   billStatus: 'PAID' | 'UNPAID' | 'OVERDUE';
@@ -24,5 +24,8 @@ export interface BillRecord {
 
 export type BillUpdateRequest = Pick<
   BillRecord,
-  'customerId' | 'vetId' | 'visitType' | 'date' | 'dueDate' | 'amount' | 'billStatus'
->;
+  'customerId' | 'vetId' | 'visitType' | 'amount' | 'billStatus'
+> & {
+  date: string;
+  dueDate: string;
+};

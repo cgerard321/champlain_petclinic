@@ -37,6 +37,12 @@ export class Bill implements OnInit {
 
   protected readonly canViewBills = computed(() => this.auth.hasRole(Roles.admin));
 
+  protected readonly canViewOwnBills = computed(() => this.auth.hasRole(Roles.vet));
+
+  protected readonly canViewBillList = computed(
+    () => this.canViewBills() || this.canViewOwnBills(),
+  );
+
   protected readonly canCreateBill = computed(() => this.auth.hasRole(Roles.vet));
 
   protected readonly canViewDetails = computed(
@@ -44,13 +50,13 @@ export class Bill implements OnInit {
   );
 
   ngOnInit(): void {
-    if (this.canViewBills()) {
+    if (this.canViewBillList()) {
       this.loadBills();
     }
   }
 
   protected loadBills(): void {
-    if (!this.canViewBills()) {
+    if (!this.canViewBillList()) {
       return;
     }
 
@@ -58,21 +64,22 @@ export class Bill implements OnInit {
     this.errorMessage.set(null);
     this.isLoading.set(true);
 
-    this.billService
-      .getAllBills()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (bill: BillRecord) => {
-          this.bills.update((currentBills) => [...currentBills, bill]);
-        },
-        error: () => {
-          this.isLoading.set(false);
-          this.errorMessage.set('Unable to load bills. Please try again.');
-        },
-        complete: () => {
-          this.isLoading.set(false);
-        },
-      });
+    const bills$ = this.canViewBills()
+      ? this.billService.getAllBills()
+      : this.billService.getMyBills();
+
+    bills$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (bill: BillRecord) => {
+        this.bills.update((currentBills) => [...currentBills, bill]);
+      },
+      error: () => {
+        this.isLoading.set(false);
+        this.errorMessage.set('Unable to load bills. Please try again.');
+      },
+      complete: () => {
+        this.isLoading.set(false);
+      },
+    });
   }
 
   protected searchForBill(event: Event): void {
@@ -224,11 +231,16 @@ export class Bill implements OnInit {
         },
       });
   }
+
   protected readonly showArchivedBills = signal(false);
 
-  protected readonly displayedBills = computed(() =>
-    this.bills().filter((bill) =>
+  protected readonly displayedBills = computed(() => {
+    if (!this.canViewBills()) {
+      return this.bills();
+    }
+
+    return this.bills().filter((bill) =>
       this.showArchivedBills() ? bill.archive === true : bill.archive !== true,
-    ),
-  );
+    );
+  });
 }

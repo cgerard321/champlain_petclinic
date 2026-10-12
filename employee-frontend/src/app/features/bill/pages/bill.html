@@ -1,3 +1,4 @@
+
 <div class="bill-page">
   <header class="bill-header">
     <div class="bill-header__copy">
@@ -32,63 +33,71 @@
     </form>
   }
 
-  @if (canViewBills()) {
+  @if (canViewBillList()) {
     <section class="bill-card">
       <div class="bill-card__header">
         <div>
-          <h2>Bill Overview</h2>
-          <p>View, update, and archive billing records.</p>
+          <h2>{{ canViewBills() ? 'Bill Overview' : 'My Bills' }}</h2>
+          <p>
+            {{
+              canViewBills()
+                ? 'View, update, and archive billing records.'
+                : 'View bills associated with your veterinarian account.'
+            }}
+          </p>
         </div>
 
-        <button
-          type="button"
-          class="bill-archive-action"
-          [disabled]="isArchiving() || isLoading()"
-          (click)="openArchiveBills()"
-        >
-          {{ isArchiving() ? 'Archiving...' : 'Archive Eligible Bills' }}
-        </button>
+        @if (canViewBills()) {
+          <button
+            type="button"
+            class="bill-archive-action"
+            [disabled]="isArchiving() || isLoading()"
+            (click)="openArchiveBills()"
+          >
+            {{ isArchiving() ? 'Archiving...' : 'Archive Eligible Bills' }}
+          </button>
+        }
       </div>
 
-      @if (archiveSuccess()) {
-        <p class="bill-archive-message bill-archive-message--success" role="status">
-          {{ archiveSuccess() }}
-        </p>
+      @if (canViewBills()) {
+        @if (archiveSuccess()) {
+          <p class="bill-archive-message bill-archive-message--success" role="status">
+            {{ archiveSuccess() }}
+          </p>
+        }
+
+        @if (archiveError()) {
+          <p class="bill-archive-message bill-archive-message--error" role="alert">
+            {{ archiveError() }}
+          </p>
+        }
+
+        <div class="bill-view-actions" role="group" aria-label="Bill archive views">
+          <button
+            type="button"
+            class="bill-view-action"
+            [class.bill-view-action--selected]="!showArchivedBills()"
+            [attr.aria-pressed]="!showArchivedBills()"
+            (click)="showArchivedBills.set(false)"
+          >
+            Active Bills
+          </button>
+
+          <button
+            type="button"
+            class="bill-view-action"
+            [class.bill-view-action--selected]="showArchivedBills()"
+            [attr.aria-pressed]="showArchivedBills()"
+            (click)="showArchivedBills.set(true)"
+          >
+            Archived Bills
+          </button>
+        </div>
       }
-
-      @if (archiveError()) {
-        <p class="bill-archive-message bill-archive-message--error" role="alert">
-          {{ archiveError() }}
-        </p>
-      }
-
-      <!-- Active/Archived tabs: outside the table -->
-      <div class="bill-view-actions" role="group" aria-label="Bill archive views">
-        <button
-          type="button"
-          class="bill-view-action"
-          [class.bill-view-action--selected]="!showArchivedBills()"
-          [attr.aria-pressed]="!showArchivedBills()"
-          (click)="showArchivedBills.set(false)"
-        >
-          Active Bills
-        </button>
-
-        <button
-          type="button"
-          class="bill-view-action"
-          [class.bill-view-action--selected]="showArchivedBills()"
-          [attr.aria-pressed]="showArchivedBills()"
-          (click)="showArchivedBills.set(true)"
-        >
-          Archived Bills
-        </button>
-      </div>
 
       @if (errorMessage()) {
         <div class="bill-empty-state" role="alert">
           <p>{{ errorMessage() }}</p>
-
           <button class="bill-secondary-action" type="button" (click)="loadBills()">Retry</button>
         </div>
       } @else {
@@ -151,13 +160,15 @@
                           Details
                         </button>
 
-                        <button
-                          type="button"
-                          class="bill-table-button bill-table-button--primary"
-                          (click)="openBillUpdate(bill)"
-                        >
-                          Update
-                        </button>
+                        @if (canViewBills()) {
+                          <button
+                            type="button"
+                            class="bill-table-button bill-table-button--primary"
+                            (click)="openBillUpdate(bill)"
+                          >
+                            Update
+                          </button>
+                        }
                       </div>
                     </td>
                   </tr>
@@ -171,23 +182,24 @@
           <div class="bill-empty-state" role="status">Loading bills...</div>
         } @else if (displayedBills().length === 0) {
           <div class="bill-empty-state" role="status">
-            <h3>
-              {{ showArchivedBills() ? 'No archived bills' : 'No active bills' }}
-            </h3>
+            @if (canViewBills()) {
+              <h3>{{ showArchivedBills() ? 'No archived bills' : 'No active bills' }}</h3>
 
-            <p>
-              {{
-                showArchivedBills()
-                  ? 'There are no archived billing records.'
-                  : 'There are no active billing records.'
-              }}
-            </p>
+              <p>
+                {{
+                  showArchivedBills()
+                    ? 'There are no archived billing records.'
+                    : 'There are no active billing records.'
+                }}
+              </p>
+            } @else {
+              <h3>No bills found</h3>
+              <p>There are no bills associated with your veterinarian account.</p>
+            }
           </div>
         }
       }
     </section>
-  } @else if (canCreateBill()) {
-    <p class="bill-permission-note">You can create bills or find an individual bill by ID.</p>
   } @else {
     <p role="alert">You do not have permission to access billing records.</p>
   }

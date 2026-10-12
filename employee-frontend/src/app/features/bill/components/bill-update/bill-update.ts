@@ -1,3 +1,4 @@
+import { formatDate } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
@@ -36,8 +37,8 @@ export class BillUpdate {
     customerId: this.bill.customerId,
     vetId: this.bill.vetId,
     visitType: this.bill.visitType,
-    date: this.bill.date.slice(0, 10),
-    dueDate: this.bill.dueDate.slice(0, 10),
+    date: formatDate(this.bill.date, 'yyyy-MM-dd', 'en-US'),
+    dueDate: formatDate(this.bill.dueDate, 'yyyy-MM-dd', 'en-US'),
     amount: this.bill.amount,
     billStatus: this.bill.billStatus,
   });

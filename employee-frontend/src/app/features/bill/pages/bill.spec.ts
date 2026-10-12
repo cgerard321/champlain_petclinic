@@ -22,8 +22,8 @@ describe('Bill page', () => {
     vetFirstName: 'Alex',
     vetLastName: 'Martin',
     visitType: 'CHECKUP',
-    date: '2026-10-01',
-    dueDate: '2026-11-15',
+    date: new Date(2026, 9, 1),
+    dueDate: new Date(2026, 10, 15),
     amount: 100,
     totalAmount: 114.98,
     billStatus: 'UNPAID',
@@ -36,12 +36,18 @@ describe('Bill page', () => {
     fixture: ComponentFixture<Bill>;
     host: HTMLElement;
     getAllBills: Mock<() => Observable<BillRecord>>;
+    getMyBills: Mock<() => Observable<BillRecord>>;
     getBillById: Mock<(billId: string) => Observable<BillRecord>>;
     openDialog: Mock;
   };
 
-  async function render(roles: string[] = []): Promise<RenderResult> {
-    const getAllBills = vi.fn<() => Observable<BillRecord>>(() => of(sampleBill));
+  async function render(
+    roles: string[] = [],
+    bills: BillRecord[] = [sampleBill],
+  ): Promise<RenderResult> {
+    const getAllBills = vi.fn<() => Observable<BillRecord>>(() => of(...bills));
+
+    const getMyBills = vi.fn<() => Observable<BillRecord>>(() => of(...bills));
 
     const getBillById = vi.fn<(billId: string) => Observable<BillRecord>>(() => of(sampleBill));
 
@@ -60,6 +66,7 @@ describe('Bill page', () => {
           provide: BillService,
           useValue: {
             getAllBills,
+            getMyBills,
             getBillById,
           },
         },
@@ -79,31 +86,132 @@ describe('Bill page', () => {
       fixture,
       host: fixture.nativeElement as HTMLElement,
       getAllBills,
+      getMyBills,
       getBillById,
       openDialog,
     };
   }
 
   it('allows administrators to view all bills', async () => {
-    const { host, getAllBills } = await render([Roles.admin]);
+    const { host, getAllBills, getMyBills } = await render([Roles.admin]);
 
     expect(getAllBills).toHaveBeenCalledOnce();
+    expect(getMyBills).not.toHaveBeenCalled();
+
     expect(host.querySelector('tbody')?.textContent).toContain('BILL-123');
     expect(host.querySelector('tbody')?.textContent).toContain('Jane');
+    expect(host.textContent).toContain('Bill Overview');
   });
 
-  it('does not retrieve all bills for veterinarians', async () => {
-    const { host, getAllBills } = await render([Roles.vet]);
+  it('allows veterinarians to view their associated bills', async () => {
+    const { host, getAllBills, getMyBills } = await render([Roles.vet]);
 
     expect(getAllBills).not.toHaveBeenCalled();
-    expect(host.querySelector('tbody')).toBeNull();
+    expect(getMyBills).toHaveBeenCalledOnce();
+
+    expect(host.textContent).toContain('My Bills');
+    expect(host.querySelector('tbody')?.textContent).toContain('BILL-123');
+    expect(host.querySelector('tbody')?.textContent).toContain('Jane');
     expect(host.textContent).toContain('Create Bill');
+  });
+
+  it('does not show update or archive actions to veterinarians', async () => {
+    const { host } = await render([Roles.vet]);
+
+    expect(host.querySelector('.bill-table-button--outline')).not.toBeNull();
+
+    expect(host.querySelector('.bill-table-button--primary')).toBeNull();
+    expect(host.querySelector('.bill-archive-action')).toBeNull();
+    expect(host.querySelector('.bill-view-actions')).toBeNull();
+  });
+
+  it('allows veterinarians to view archived bills associated with them', async () => {
+    const archivedBill: BillRecord = {
+      ...sampleBill,
+      archive: true,
+    };
+
+    const { host, getMyBills } = await render([Roles.vet], [archivedBill]);
+
+    expect(getMyBills).toHaveBeenCalledOnce();
+    expect(host.querySelector('tbody')?.textContent).toContain('BILL-123');
+    expect(host.querySelector('tbody')?.textContent).toContain('Archived');
+  });
+
+  it('shows an empty state when a veterinarian has no bills', async () => {
+    const { host, getMyBills } = await render([Roles.vet], []);
+
+    expect(getMyBills).toHaveBeenCalledOnce();
+    expect(host.textContent).toContain('My Bills');
+    expect(host.textContent).toContain('No bills found');
+    expect(host.querySelector('tbody')).toBeNull();
+  });
+
+  it('allows administrators to switch between active and archived bills', async () => {
+    const archivedBill: BillRecord = {
+      ...sampleBill,
+      billId: 'BILL-456',
+      archive: true,
+    };
+
+    const { fixture, host } = await render([Roles.admin], [sampleBill, archivedBill]);
+
+    expect(host.querySelector('tbody')?.textContent).toContain('BILL-123');
+    expect(host.querySelector('tbody')?.textContent).not.toContain('BILL-456');
+
+    const archivedButton = host.querySelectorAll<HTMLButtonElement>('.bill-view-action')[1];
+
+    expect(archivedButton).toBeDefined();
+
+    if (!archivedButton) {
+      throw new Error('Archived bills toggle button not found');
+    }
+
+    archivedButton.click();
+    fixture.detectChanges();
+
+    expect(host.querySelector('tbody')?.textContent).toContain('BILL-456');
+    expect(host.querySelector('tbody')?.textContent).not.toContain('BILL-123');
+  });
+
+  it('does not load bills for receptionists', async () => {
+    const { host, getAllBills, getMyBills } = await render([Roles.receptionist]);
+
+    expect(getAllBills).not.toHaveBeenCalled();
+    expect(getMyBills).not.toHaveBeenCalled();
+
+    expect(host.querySelector('tbody')).toBeNull();
+    expect(host.querySelector('.bill-archive-action')).toBeNull();
+
+    expect(host.textContent).toContain('You do not have permission');
   });
 
   it('allows administrators to open bill details in a dialog', async () => {
     const { fixture, host, getBillById, openDialog } = await render([Roles.admin]);
 
-    const button = host.querySelector<HTMLButtonElement>('tbody button');
+    const button = host.querySelector<HTMLButtonElement>('.bill-table-button--outline');
+
+    expect(button).not.toBeNull();
+
+    button?.click();
+    fixture.detectChanges();
+
+    expect(getBillById).toHaveBeenCalledWith('BILL-123');
+
+    expect(openDialog).toHaveBeenCalledOnce();
+    expect(openDialog).toHaveBeenCalledWith(
+      BillDetails,
+      expect.objectContaining({
+        data: sampleBill,
+      }),
+    );
+  });
+
+  it('allows veterinarians to open details from their bill list', async () => {
+    const { fixture, host, getBillById, openDialog } = await render([Roles.vet]);
+
+    const button = host.querySelector<HTMLButtonElement>('.bill-table-button--outline');
+
     expect(button).not.toBeNull();
 
     button?.click();
@@ -124,6 +232,7 @@ describe('Bill page', () => {
     const { fixture, host, getBillById, openDialog } = await render([Roles.vet]);
 
     const input = host.querySelector<HTMLInputElement>('#bill-id-lookup');
+
     expect(input).not.toBeNull();
 
     if (!input) {
@@ -155,7 +264,7 @@ describe('Bill page', () => {
 
     getBillById.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 404 })));
 
-    host.querySelector<HTMLButtonElement>('tbody button')?.click();
+    host.querySelector<HTMLButtonElement>('.bill-table-button--outline')?.click();
     fixture.detectChanges();
 
     expect(getBillById).toHaveBeenCalledWith('BILL-123');
