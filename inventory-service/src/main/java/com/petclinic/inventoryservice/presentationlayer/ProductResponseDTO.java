@@ -14,6 +14,7 @@ public class ProductResponseDTO {
     private String productId;
     private String inventoryId;
     private String productName;
+    private String supplierName;
     private String productDescription;
     private Double productPrice;
     private Integer productQuantity;

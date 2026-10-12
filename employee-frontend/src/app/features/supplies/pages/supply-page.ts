@@ -64,8 +64,10 @@ export class SupplyPage {
   protected readonly showAddForm = signal(false);
   protected readonly editingSupplyId = signal<string | null>(null);
   protected readonly consumingSupplyId = signal<string | null>(null);
+  private readonly originalSupplierName = signal<string | null>(null);
   protected readonly newSupply = signal({
     productName: '',
+    supplierName: '',
     productDescription: '',
     productPrice: 0,
     productQuantity: 1,
@@ -82,6 +84,11 @@ export class SupplyPage {
   // Formatting and actions stay here so the shared table has no supply-specific logic.
   protected readonly columns = computed<TableColumn<Supply>[]>(() => [
     { id: 'name', header: 'Name', template: this.nameCell() },
+    {
+      id: 'supplier',
+      header: 'Supplier',
+      value: (supply) => supply.supplierName?.trim() || 'Not recorded',
+    },
     { id: 'description', header: 'Description', value: (supply) => supply.productDescription },
     { id: 'price', header: 'Cost Price', template: this.priceCell() },
     { id: 'quantity', header: 'Quantity', value: (supply) => supply.productQuantity },
@@ -103,6 +110,11 @@ export class SupplyPage {
   protected readonly supplyForm = form(this.newSupply, (path) => {
     required(path.productName, {
       message: 'Name is required',
+    });
+
+    required(path.supplierName, {
+      message: 'Supplier name is required',
+      when: () => this.editingSupplyId() === null || this.originalSupplierName() !== null,
     });
 
     required(path.productDescription, {
@@ -179,10 +191,15 @@ export class SupplyPage {
 
       if (!inventoryId || !this.canManageSupplies()) return;
 
+      const editingId = this.editingSupplyId();
+      const supplierName = this.newSupply().supplierName.trim();
+      if (!supplierName && (editingId === null || this.originalSupplierName() !== null)) {
+        this.addError.set('Supplier name is required.');
+        return;
+      }
+
       this.addingSupply.set(true);
       this.addError.set('');
-
-      const editingId = this.editingSupplyId();
 
       try {
         const photo: {
@@ -198,7 +215,16 @@ export class SupplyPage {
           photo.photoType = file ? file.type : null;
         }
 
-        const supply = { ...this.newSupply(), ...photo };
+        const formValue = this.newSupply();
+        const supply = {
+          productName: formValue.productName,
+          productDescription: formValue.productDescription,
+          productPrice: formValue.productPrice,
+          productQuantity: formValue.productQuantity,
+          productSalePrice: formValue.productSalePrice,
+          ...(supplierName ? { supplierName } : {}),
+          ...photo,
+        };
 
         const request$ = editingId
           ? this.supplyService.updateSupply(inventoryId, editingId, supply)
@@ -228,11 +254,13 @@ export class SupplyPage {
     this.currentImage.set(this.supplyPhotoUrl(supply));
 
     this.editingSupplyId.set(supply.productId);
+    this.originalSupplierName.set(supply.supplierName?.trim() || null);
     this.addError.set('');
 
     // reset() clears touched and dirty state from the previous edit as it loads this supply.
     this.supplyForm().reset({
       productName: supply.productName,
+      supplierName: supply.supplierName ?? '',
       productDescription: supply.productDescription,
       productPrice: supply.productPrice,
       productQuantity: supply.productQuantity,
@@ -310,6 +338,7 @@ export class SupplyPage {
     this.selectedImage.set(null);
     this.imageChanged.set(false);
     this.currentImage.set(null);
+    this.originalSupplierName.set(null);
 
     this.showAddForm.set(true);
   }
@@ -318,12 +347,14 @@ export class SupplyPage {
     this.selectedImage.set(null);
     this.supplyForm().reset({
       productName: '',
+      supplierName: '',
       productDescription: '',
       productPrice: 0,
       productQuantity: 1,
       productSalePrice: 0,
     });
     this.editingSupplyId.set(null);
+    this.originalSupplierName.set(null);
     this.addError.set('');
     this.showAddForm.set(false);
     this.selectedImage.set(null);

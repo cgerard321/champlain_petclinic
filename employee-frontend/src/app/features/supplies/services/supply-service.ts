@@ -35,6 +35,7 @@ export class SupplyService {
       productPrice: number;
       productQuantity: number;
       productSalePrice: number;
+      supplierName?: string;
       photoData?: string;
       PhotoType?: string | null;
     },
@@ -51,6 +52,7 @@ export class SupplyService {
       productPrice: number;
       productQuantity: number;
       productSalePrice: number;
+      supplierName?: string;
       photoData?: string;
       PhotoType?: string | null;
     },

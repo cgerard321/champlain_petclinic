@@ -30,6 +30,7 @@ public class EntityDTOUtil {
                 .productId(product.getProductId())
                 .inventoryId(product.getInventoryId())
                 .productName(product.getProductName())
+                .supplierName(product.getSupplierName())
                 .productDescription(product.getProductDescription())
                 .productPrice(product.getProductPrice())
                 .productQuantity(product.getProductQuantity())

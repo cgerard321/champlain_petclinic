@@ -47,6 +47,15 @@
               </p>
             }
 
+            <label for="supplierName">Supplier name</label>
+            <input id="supplierName" type="text" [formField]="supplyForm.supplierName" />
+
+            @if (supplyForm.supplierName().touched() && supplyForm.supplierName().invalid()) {
+              <p class="field-error">
+                {{ supplyForm.supplierName().errors()[0]?.message }}
+              </p>
+            }
+
             <label for="productDescription">Description</label>
             <input
               id="productDescription"

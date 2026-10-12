@@ -12,4 +12,5 @@ export interface Supply {
   lastUpdatedAt: string;
   photoData?: string | null;
   photoType?: string | null;
+  supplierName?: string | null;
 }
