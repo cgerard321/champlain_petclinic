@@ -1,4 +1,3 @@
-
 <div class="bill-page">
   <header class="bill-header">
     <div class="bill-header__copy">
@@ -8,9 +7,7 @@
     </div>
 
     @if (canCreateBill()) {
-      <button class="bill-primary-action" type="button">
-        Create Bill
-      </button>
+      <button class="bill-primary-action" type="button">Create Bill</button>
     }
   </header>
 
@@ -28,11 +25,7 @@
           (input)="billIdInput.set(billIdSearch.value)"
         />
 
-        <button
-          class="bill-secondary-action"
-          type="submit"
-          [disabled]="isDetailsLoading()"
-        >
+        <button class="bill-secondary-action" type="submit" [disabled]="isDetailsLoading()">
           Find Bill
         </button>
       </div>
@@ -58,29 +51,19 @@
       </div>
 
       @if (archiveSuccess()) {
-        <p
-          class="bill-archive-message bill-archive-message--success"
-          role="status"
-        >
+        <p class="bill-archive-message bill-archive-message--success" role="status">
           {{ archiveSuccess() }}
         </p>
       }
 
       @if (archiveError()) {
-        <p
-          class="bill-archive-message bill-archive-message--error"
-          role="alert"
-        >
+        <p class="bill-archive-message bill-archive-message--error" role="alert">
           {{ archiveError() }}
         </p>
       }
 
       <!-- Active/Archived tabs: outside the table -->
-      <div
-        class="bill-view-actions"
-        role="group"
-        aria-label="Bill archive views"
-      >
+      <div class="bill-view-actions" role="group" aria-label="Bill archive views">
         <button
           type="button"
           class="bill-view-action"
@@ -106,13 +89,7 @@
         <div class="bill-empty-state" role="alert">
           <p>{{ errorMessage() }}</p>
 
-          <button
-            class="bill-secondary-action"
-            type="button"
-            (click)="loadBills()"
-          >
-            Retry
-          </button>
+          <button class="bill-secondary-action" type="button" (click)="loadBills()">Retry</button>
         </div>
       } @else {
         @if (displayedBills().length > 0) {
@@ -150,10 +127,7 @@
                     </td>
 
                     <td>
-                      {{
-                        (bill.totalAmount ?? bill.amount)
-                          | currency: 'CAD'
-                      }}
+                      {{ bill.totalAmount ?? bill.amount | currency: 'CAD' }}
                     </td>
 
                     <td>{{ bill.billStatus }}</td>
@@ -194,9 +168,7 @@
         }
 
         @if (isLoading()) {
-          <div class="bill-empty-state" role="status">
-            Loading bills...
-          </div>
+          <div class="bill-empty-state" role="status">Loading bills...</div>
         } @else if (displayedBills().length === 0) {
           <div class="bill-empty-state" role="status">
             <h3>
@@ -215,19 +187,13 @@
       }
     </section>
   } @else if (canCreateBill()) {
-    <p class="bill-permission-note">
-      You can create bills or find an individual bill by ID.
-    </p>
+    <p class="bill-permission-note">You can create bills or find an individual bill by ID.</p>
   } @else {
-    <p role="alert">
-      You do not have permission to access billing records.
-    </p>
+    <p role="alert">You do not have permission to access billing records.</p>
   }
 
   @if (isDetailsLoading()) {
-    <div class="bill-empty-state" role="status">
-      Loading bill details...
-    </div>
+    <div class="bill-empty-state" role="status">Loading bill details...</div>
   }
 
   @if (detailsError(); as message) {

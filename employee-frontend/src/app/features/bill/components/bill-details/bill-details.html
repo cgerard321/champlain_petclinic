@@ -147,7 +147,7 @@
         <dd>
           @if (bill().billStatus === 'PAID') {
             Bill paid
-          } @else if (bill().timeRemaining != null) {
+          } @else if (bill().timeRemaining !== null && bill().timeRemaining !== undefined) {
             {{ bill().timeRemaining }} days
           } @else {
             Not available
