@@ -971,7 +971,7 @@ const UserCart: React.FC = () => {
           error as { response?: { data?: { message?: string } } }
         ).response?.data;
         setCheckoutMessage(
-          `Checkout failed: ${errorData?.message || 'Unexpected error'}`,
+          `Checkout failed: ${errorData?.message || 'Unexpected error'}`
         );
       } else {
         setCheckoutMessage('Checkout failed: Unexpected error');
@@ -1517,15 +1517,19 @@ const UserCart: React.FC = () => {
         </div>
 
         {showBillingForm && (
-          <CartBillingForm
-            isOpen={true}
-            onClose={() => setShowBillingForm(false)}
-            onSubmit={async billing => {
-              setBillingInfo(billing);
-              await handleCheckout(billing);
-              setShowBillingForm(false);
-            }}
-          />
+          <div className="modal-backdrop">
+            <div className="modal-content">
+              <CartBillingForm
+                isOpen={true}
+                onClose={() => setShowBillingForm(false)}
+                onSubmit={async billing => {
+                  setBillingInfo(billing);
+                  await handleCheckout(billing);
+                  setShowBillingForm(false);
+                }}
+              />
+            </div>
+          </div>
         )}
 
         {isCheckoutModalOpen && (
