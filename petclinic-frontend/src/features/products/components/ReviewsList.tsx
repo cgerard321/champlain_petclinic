@@ -45,8 +45,14 @@ export function ReviewsList({
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const navigate = useNavigate();
 
+  const [selectedRating, setSelectedRating] = useState<number | null>(null);
+  const ratingFilteredReviews =
+    selectedRating === null
+      ? productReviews
+      : productReviews.filter(r => Math.floor(r.rating) === selectedRating);
+
   const [searchQuery, setSearchQuery] = useState('');
-  const filteredReviews = productReviews.filter(r =>
+  const filteredReviews = ratingFilteredReviews.filter(r =>
     r.review.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -109,6 +115,7 @@ export function ReviewsList({
   };
 
   useEffect(() => {
+    setSelectedRating(null);
     fetchReviews();
     if (isAuthenticated) {
       fetchCurrentUserReview();
@@ -118,6 +125,12 @@ export function ReviewsList({
     setSearchQuery('');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productId, isAuthenticated]);
+
+  const handleRatingFilter = (rating: number): void => {
+    setSelectedRating(currentRating =>
+      currentRating === rating ? null : rating
+    );
+  };
 
   const handleEditReview = (): void => {
     setShowEditModal(true);
@@ -175,16 +188,33 @@ export function ReviewsList({
                 productReviews.length > 0
                   ? (count / productReviews.length) * 100
                   : 0;
+
+              const ratingLabel = star === 1 ? 'star' : 'stars';
+              const reviewLabel = count === 1 ? 'review' : 'reviews';
+
               return (
-                <div key={star} className="rating-bar-row">
-                  <span className="star-label">{star} stars</span>
-                  <div className="rating-bar">
-                    <div
+                <button
+                  key={star}
+                  type="button"
+                  className={`rating-bar-row ${
+                    selectedRating === star ? 'rating-bar-row-selected' : ''
+                  }`}
+                  onClick={() => handleRatingFilter(star)}
+                  aria-pressed={selectedRating === star}
+                  aria-label={`${star} ${ratingLabel}, ${count} ${reviewLabel}`}
+                >
+                  <span className="star-label">
+                    {star} {ratingLabel}
+                  </span>
+                  <span className="rating-bar">
+                    <span
                       className="rating-bar-fill"
                       style={{ width: `${percentage}%` }}
-                    ></div>
-                  </div>
-                </div>
+                    ></span>
+                  </span>
+
+                  <span className="rating-category-count">{count}</span>
+                </button>
               );
             })}
           </div>
@@ -193,7 +223,21 @@ export function ReviewsList({
         <div className="rating-section-separator"></div>
 
         <div className="review-action-row">
-          <h3 className="reviews-heading">Reviews ({productReviews.length})</h3>
+          <div className="reviews-heading-container">
+            <h3 className="reviews-heading">
+              Reviews ({ratingFilteredReviews.length}
+              {selectedRating !== null ? ` of ${productReviews.length}` : ''})
+            </h3>
+            {selectedRating !== null && (
+              <button
+                type="button"
+                className="clear-rating-filter"
+                onClick={() => setSelectedRating(null)}
+              >
+                Clear {selectedRating}-star filter
+              </button>
+            )}
+          </div>
           <Button
             variant="primary"
             onClick={() => {
@@ -228,8 +272,8 @@ export function ReviewsList({
             </Stack>
             {filteredReviews.length > 0 && searchQuery !== '' && (
               <span className="reviews-search-result-count">
-                Showing {filteredReviews.length} of {productReviews.length}{' '}
-                review(s)
+                Showing {filteredReviews.length} of{' '}
+                {ratingFilteredReviews.length} review(s)
               </span>
             )}
           </div>
@@ -279,7 +323,11 @@ export function ReviewsList({
             </Reveal>
           ))
         ) : productReviews.length === 0 ? (
-          <p>This item does not have any reviews yet!</p>
+          <p role="status">This item does not have any reviews yet!</p>
+        ) : ratingFilteredReviews.length === 0 ? (
+          <p role="status">
+            This item does not have any {selectedRating}-star reviews.
+          </p>
         ) : (
           <p>No results were found</p>
         )}
