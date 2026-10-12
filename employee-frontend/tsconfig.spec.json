@@ -4,11 +4,12 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "types": [
-      "vitest/globals"
+      "vitest/globals",
+      "@angular/localize"
     ]
   },
   "include": [
     "src/**/*.d.ts",
     "src/**/*.spec.ts"
-  ]
+, "tests/visitsTest/visitListVetVisits.spec.ts", "tests/visitsTest/visitListAdmin.spec.ts"  ]
 }

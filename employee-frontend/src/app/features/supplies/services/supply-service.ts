@@ -9,6 +9,7 @@ import { Supply } from '@features/supplies/models/supply';
 export class SupplyService {
   private readonly http = inject(HttpClient);
   private readonly sse = inject(SseClient);
+  private readonly baseUrl = '/api/gateway/inventories';
 
   getSupplies(inventoryId: string): Observable<Supply[]> {
     // This endpoint returns a finite SSE snapshot; collect it before giving the page one Supply[] to display.
@@ -64,6 +65,12 @@ export class SupplyService {
     return this.http.delete<void>(`/api/gateway/inventories/${inventoryId}/products/${productId}`);
   }
 
+  consumeSupply(inventoryId: string, productId: string): Observable<Supply> {
+    return this.http.patch<Supply>(
+      `${this.baseUrl}/${inventoryId}/products/${productId}/consume`,
+      {},
+    );
+  }
   downloadSupplyPdf(inventoryId: string): Observable<Blob> {
     return this.http.get(`/api/gateway/inventories/${inventoryId}/products/download`, {
       responseType: 'blob',

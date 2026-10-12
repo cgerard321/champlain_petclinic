@@ -176,27 +176,6 @@
   color: #9ca3af;
 }
 
-/* modify profile button */
-.customers-updateButton {
-  align-self: flex-end;
-  background-color: #2563eb;
-  color: #fff;
-  border: none;
-  padding: 12px 30px;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition:
-    background-color 0.25s,
-    transform 0.2s;
-}
-
-.customers-updateButton:hover {
-  background-color: #1d4ed8;
-  transform: translateY(-2px);
-}
-
 /* makes it responsive */
 @media (max-width: 768px) {
   .customers-profile-info {
@@ -632,4 +611,48 @@ h1 {
   background-color: #d97706;
   transform: translateY(-2px);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.customers-updateButton {
+  align-self: flex-end;
+  background-color: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.25s,
+    transform 0.2s;
+  width: auto;
+  margin-left: 6px;
+}
+
+.customers-updateButton:hover {
+  background-color: #1d4ed8;
+  transform: translateY(-2px);
+}
+
+.customers-backButton {
+  align-self: flex-end;
+  background-color: #ff2714;
+  color: #fff;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.25s,
+    transform 0.2s;
+  width: auto;
+  margin-right: 6px;
+}
+
+.customers-backButton:hover {
+  background-color: #ff0e0e;
+  transform: translateY(-2px);
 }
