@@ -168,10 +168,6 @@ tbody tr:last-child td {
   border-bottom: 0;
 }
 
-td:last-child {
-  text-align: right;
-}
-
 td button {
   min-height: 40px;
   padding: 0.55rem 0.95rem;
