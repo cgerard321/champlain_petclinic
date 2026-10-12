@@ -1,43 +1,43 @@
-import { useCallback, useEffect, useState } from 'react';
-import { useToast } from '@/shared/components/toast/ToastProvider';
-import CartBillingForm, { BillingInfo } from './CartBillingForm';
+import { useCallback, useEffect, useState } from "react";
+import { useToast } from "@/shared/components/toast/ToastProvider";
+import CartBillingForm, { BillingInfo } from "./CartBillingForm";
 import InvoiceComponent, {
   InvoiceFull as InvoiceFullType,
   InvoiceItem as InvoiceItemType,
-} from './Invoice';
-import { generatePath, useNavigate, useParams } from 'react-router-dom';
-import CartItem from './CartItem';
-import { ProductModel } from '../models/ProductModel';
-import './cart-shared.css';
-import './UserCart.css';
-import { NavBar } from '@/layouts/AppNavBar';
-import { FaShoppingCart } from 'react-icons/fa';
-import ImageContainer from '@/features/products/components/ImageContainer';
-import axiosInstance from '@/shared/api/axiosInstance';
-import getErrorMessage from '@/shared/api/getErrorMessage';
-import { formatPrice } from '../utils/formatPrice';
+} from "./Invoice";
+import { generatePath, useNavigate, useParams } from "react-router-dom";
+import CartItem from "./CartItem";
+import { ProductModel } from "../models/ProductModel";
+import "./cart-shared.css";
+import "./UserCart.css";
+import { NavBar } from "@/layouts/AppNavBar";
+import { FaShoppingCart } from "react-icons/fa";
+import ImageContainer from "@/features/products/components/ImageContainer";
+import axiosInstance from "@/shared/api/axiosInstance";
+import getErrorMessage from "@/shared/api/getErrorMessage";
+import { formatPrice } from "../utils/formatPrice";
 import {
   applyPromo,
   clearPromo,
   type CartDetailsModel,
-} from '@/shared/api/cart';
+} from "@/shared/api/cart";
 import {
   IsAdmin,
   IsInventoryManager,
   IsReceptionist,
   IsVet,
   useUser,
-} from '@/context/UserContext';
-import { AppRoutePaths } from '@/shared/models/path.routes';
+} from "@/context/UserContext";
+import { AppRoutePaths } from "@/shared/models/path.routes";
 import {
   notifyCartChanged,
   setCartCountInLS,
   setCartIdInLS,
-} from '../api/cartEvent';
-import { computeTaxes, formatTaxRate, roundToCents } from '../utils/taxUtils';
-import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
-import { getCustomerOrders } from '../api/getCustomerOrders';
-import type { OrderModel } from '../models/OrderModel';
+} from "../api/cartEvent";
+import { computeTaxes, formatTaxRate, roundToCents } from "../utils/taxUtils";
+import { useConfirmModal } from "@/shared/hooks/useConfirmModal";
+import { getCustomerOrders } from "../api/getCustomerOrders";
+import type { OrderModel } from "../models/OrderModel";
 interface ProductAPIResponse {
   productId: string;
   imageId?: string;
@@ -55,7 +55,6 @@ interface Invoice {
   productSalePrice: number;
   quantity: number;
 }
-
 
 /**
  * UserCart component displays the user's shopping cart, allowing them to view, update, and remove items,
@@ -76,7 +75,7 @@ const UserCart: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [errorMessages, setErrorMessages] = useState<Record<number, string>>(
-    {}
+    {},
   );
 
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
@@ -88,7 +87,7 @@ const UserCart: React.FC = () => {
   const [showBillingForm, setShowBillingForm] = useState<boolean>(false);
   const [billingInfo, setBillingInfo] = useState<BillingInfo | null>(null);
 
-  const [voucherCode, setVoucherCode] = useState<string>('');
+  const [voucherCode, setVoucherCode] = useState<string>("");
   const [voucherError, setVoucherError] = useState<string | null>(null);
 
   const [movingAll, setMovingAll] = useState<boolean>(false);
@@ -111,12 +110,12 @@ const UserCart: React.FC = () => {
     try {
       const data = await getCustomerOrders(customerId);
 
-      console.log('Fetched orders:', data);
+      console.log("Fetched orders:", data);
 
       setOrders(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error('Failed to fetch orders:', error);
-      setOrdersError('Could not load previous orders.');
+      console.error("Failed to fetch orders:", error);
+      setOrdersError("Could not load previous orders.");
     } finally {
       setOrdersLoading(false);
     }
@@ -128,10 +127,10 @@ const UserCart: React.FC = () => {
 
   const toProductModel = useCallback(
     (product: ProductAPIResponse): ProductModel => ({
-      productId: String(product.productId ?? ''),
-      imageId: product.imageId ?? '',
+      productId: String(product.productId ?? ""),
+      imageId: product.imageId ?? "",
       productName: product.productName,
-      productDescription: product.productDescription ?? '',
+      productDescription: product.productDescription ?? "",
       productSalePrice: product.productSalePrice,
       averageRating: product.averageRating,
       quantity:
@@ -140,25 +139,25 @@ const UserCart: React.FC = () => {
           : 1,
       productQuantity: product.productQuantity ?? 0,
     }),
-    []
+    [],
   );
 
   const redirectToProductPageOnClick = (productId: string): void => {
     navigate(
       generatePath(AppRoutePaths.ProductDetails, {
         productId,
-      })
+      }),
     );
   };
 
   const emitCartMessage = useCallback(
     (serverMessage?: string | null, fallbackMessage?: string) => {
-      const text = (serverMessage ?? '').trim() || fallbackMessage;
+      const text = (serverMessage ?? "").trim() || fallbackMessage;
       if (!text) return;
-      const tone = serverMessage?.trim() ? 'info' : 'success';
+      const tone = serverMessage?.trim() ? "info" : "success";
       showToast(text, tone);
     },
-    [showToast]
+    [showToast],
   );
 
   const getStatusCode = useCallback((err: unknown): number | undefined => {
@@ -167,17 +166,17 @@ const UserCart: React.FC = () => {
 
   const apiErrorMessage = useCallback(
     (err: unknown, defaultMessage: string): string => {
-      if (getStatusCode(err) === 404) return 'Cart not found';
+      if (getStatusCode(err) === 404) return "Cart not found";
       return getErrorMessage(err, { defaultMessage });
     },
-    [getStatusCode]
+    [getStatusCode],
   );
 
   const ensureCartId = useCallback((): string | undefined => {
     if (!cartId) {
-      const message = 'Invalid cart ID';
+      const message = "Invalid cart ID";
       setError(message);
-      showToast(message, 'error');
+      showToast(message, "error");
       return undefined;
     }
     return cartId;
@@ -186,23 +185,21 @@ const UserCart: React.FC = () => {
   const syncCartState = useCallback(
     (
       cartData: CartDetailsModel | null | undefined,
-      fallbackMessage?: string
+      fallbackMessage?: string,
     ) => {
       if (!cartData) return;
 
-
       const normalizedCartItems = Array.isArray(cartData.products)
-        ? cartData.products.map(item =>
-            toProductModel(item as ProductAPIResponse)
+        ? cartData.products.map((item) =>
+            toProductModel(item as ProductAPIResponse),
           )
         : [];
 
       setCartItems(normalizedCartItems);
 
-
       const cartCount = normalizedCartItems.reduce(
         (acc, item) => acc + (item.quantity ?? 0),
-        0
+        0,
       );
       setCartItemCount(cartCount);
       setCartCountInLS(cartCount);
@@ -213,22 +210,24 @@ const UserCart: React.FC = () => {
       }
 
       const normalizedWishlist = Array.isArray(cartData.wishListProducts)
-        ? cartData.wishListProducts.map(item =>
-            toProductModel(item as ProductAPIResponse)
+        ? cartData.wishListProducts.map((item) =>
+            toProductModel(item as ProductAPIResponse),
           )
         : [];
       setWishlistItems(normalizedWishlist);
 
       setPromoPercent(
-        typeof cartData.promoPercent === 'number' ? cartData.promoPercent : null
+        typeof cartData.promoPercent === "number"
+          ? cartData.promoPercent
+          : null,
       );
 
       emitCartMessage(
-        typeof cartData.message === 'string' ? cartData.message : undefined,
-        fallbackMessage
+        typeof cartData.message === "string" ? cartData.message : undefined,
+        fallbackMessage,
       );
     },
-    [emitCartMessage, toProductModel]
+    [emitCartMessage, toProductModel],
   );
 
   // Recent purchases state
@@ -250,9 +249,9 @@ const UserCart: React.FC = () => {
   // Handle quantity change for recent purchases
   const handleRecentPurchaseQuantityChange = (
     productId: string,
-    value: number
+    value: number,
   ): void => {
-    setRecentPurchaseQuantities(prev => ({
+    setRecentPurchaseQuantities((prev) => ({
       ...prev,
       [productId]: Math.max(1, value),
     }));
@@ -278,14 +277,14 @@ const UserCart: React.FC = () => {
           productId: item.productId,
           quantity,
         },
-        { useV2: false }
+        { useV2: false },
       );
 
       syncCartState(data, `${item.productName} (x${quantity}) added to cart!`);
     } catch (err: unknown) {
       showToast(
         apiErrorMessage(err, `Failed to add ${item.productName} to cart.`),
-        'error'
+        "error",
       );
     }
   };
@@ -313,9 +312,9 @@ const UserCart: React.FC = () => {
   // Handle quantity change for recommendation purchases
   const handleRecommendationPurchaseQuantityChange = (
     productId: string,
-    value: number
+    value: number,
   ): void => {
-    setRecommendationPurchaseQuantities(prev => ({
+    setRecommendationPurchaseQuantities((prev) => ({
       ...prev,
       [productId]: Math.max(1, value),
     }));
@@ -334,7 +333,7 @@ const UserCart: React.FC = () => {
 
     const quantity = Math.max(
       1,
-      recommendationPurchaseQuantities[item.productId] || 1
+      recommendationPurchaseQuantities[item.productId] || 1,
     );
 
     try {
@@ -344,13 +343,13 @@ const UserCart: React.FC = () => {
           productId: item.productId,
           quantity,
         },
-        { useV2: false }
+        { useV2: false },
       );
       syncCartState(data, `${item.productName} (x${quantity}) added to cart!`);
     } catch (err: unknown) {
       showToast(
         apiErrorMessage(err, `Failed to add ${item.productName} to cart.`),
-        'error'
+        "error",
       );
     }
   };
@@ -363,7 +362,7 @@ const UserCart: React.FC = () => {
   // derived totals
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
-    0
+    0,
   );
 
   const promoDiscount =
@@ -371,13 +370,13 @@ const UserCart: React.FC = () => {
   const discountedSubtotal = Math.max(0, subtotal - promoDiscount);
   const resolvedTaxLines = computeTaxes(
     discountedSubtotal,
-    billingInfo?.province
-  ).map(line => ({
+    billingInfo?.province,
+  ).map((line) => ({
     ...line,
     amount: line.amount ?? roundToCents(discountedSubtotal * line.rate),
   }));
   const totalTax = roundToCents(
-    resolvedTaxLines.reduce((acc, line) => acc + (line.amount ?? 0), 0)
+    resolvedTaxLines.reduce((acc, line) => acc + (line.amount ?? 0), 0),
   );
 
   const effectiveDiscount = promoDiscount;
@@ -387,7 +386,7 @@ const UserCart: React.FC = () => {
   const updateCartItemCount = useCallback(() => {
     const count = cartItems.reduce(
       (acc, item) => acc + (item.quantity || 0),
-      0
+      0,
     );
     setCartItemCount(count);
   }, [cartItems]);
@@ -395,7 +394,7 @@ const UserCart: React.FC = () => {
   useEffect(() => {
     const fetchCartItems = async (): Promise<void> => {
       if (!cartId) {
-        setError('Invalid cart ID');
+        setError("Invalid cart ID");
         setLoading(false);
         return;
       }
@@ -405,13 +404,13 @@ const UserCart: React.FC = () => {
           `/carts/${cartId}`,
           {
             useV2: false,
-          }
+          },
         );
 
         syncCartState(data);
       } catch (err: unknown) {
         console.error(err);
-        setError('Failed to fetch cart items');
+        setError("Failed to fetch cart items");
       } finally {
         setLoading(false);
       }
@@ -435,7 +434,7 @@ const UserCart: React.FC = () => {
       try {
         const { data } = await axiosInstance.get(
           `/customers/${customerId}/cart/recent-purchases`,
-          { useV2: false }
+          { useV2: false },
         );
         setRecentPurchases(data || []);
       } catch (err) {
@@ -456,7 +455,7 @@ const UserCart: React.FC = () => {
     try {
       const { data } = await axiosInstance.get(
         `/customers/${customerId}/cart/recommendation-purchases`,
-        { useV2: false }
+        { useV2: false },
       );
       setRecommendationPurchases(data || []);
     } catch (err) {
@@ -471,23 +470,23 @@ const UserCart: React.FC = () => {
   const applyVoucherCode = async (): Promise<void> => {
     const existingCartId = ensureCartId();
     if (!existingCartId) {
-      setVoucherError('Invalid cart ID');
+      setVoucherError("Invalid cart ID");
       return;
     }
     if (!voucherCode.trim()) {
-      setVoucherError('Please enter a promo code.');
+      setVoucherError("Please enter a promo code.");
       return;
     }
 
     try {
       const { data } = await axiosInstance.get(
         `/carts/promos/validate/${encodeURIComponent(voucherCode.trim())}`,
-        { useV2: false, handleLocally: true }
+        { useV2: false, handleLocally: true },
       );
 
       const percent: number = Number(data?.discount);
       if (Number.isNaN(percent) || percent < 0 || percent > 100) {
-        setVoucherError('Received invalid discount from server.');
+        setVoucherError("Received invalid discount from server.");
         return;
       }
 
@@ -501,14 +500,14 @@ const UserCart: React.FC = () => {
       }`;
       syncCartState(updated, appliedMessage);
     } catch (err) {
-      console.error('Error validating promo code:', err);
-      setVoucherError('Promo code invalid or expired.');
+      console.error("Error validating promo code:", err);
+      setVoucherError("Promo code invalid or expired.");
     }
   };
 
   const blockIfReadOnly = useCallback((): boolean => {
     if (isStaff) {
-      showToast('Read-only mode: staff/admin cannot modify carts.', 'info');
+      showToast("Read-only mode: staff/admin cannot modify carts.", "info");
       return true;
     }
     return false;
@@ -517,7 +516,7 @@ const UserCart: React.FC = () => {
   const changeItemQuantity = useCallback(
     async (
       event: React.ChangeEvent<HTMLInputElement>,
-      index: number
+      index: number,
     ): Promise<void> => {
       if (blockIfReadOnly()) return;
       const existingCartId = ensureCartId();
@@ -526,13 +525,13 @@ const UserCart: React.FC = () => {
       const newQuantity = Math.max(1, Number(event.target.value));
       const item = cartItems[index];
       if (newQuantity > item.productQuantity) {
-        setErrorMessages(prevErrors => ({
+        setErrorMessages((prevErrors) => ({
           ...prevErrors,
           [index]: `You cannot add more than ${item.productQuantity} items. Only ${item.productQuantity} items left in stock.`,
         }));
         return;
       } else {
-        setErrorMessages(prevErrors => {
+        setErrorMessages((prevErrors) => {
           const rest = { ...prevErrors };
           delete rest[index];
           return rest;
@@ -543,12 +542,12 @@ const UserCart: React.FC = () => {
         const { data } = await axiosInstance.patch<CartDetailsModel>(
           `/carts/${existingCartId}/products/${item.productId}`,
           { quantity: newQuantity },
-          { useV2: false }
+          { useV2: false },
         );
 
         if (data?.message) {
-          if (data.message.includes('moved to your wishlist')) {
-            setErrorMessages(prevErrors => {
+          if (data.message.includes("moved to your wishlist")) {
+            setErrorMessages((prevErrors) => {
               const next = { ...prevErrors };
               delete next[index];
               return next;
@@ -557,29 +556,29 @@ const UserCart: React.FC = () => {
             return;
           }
 
-          setErrorMessages(prevErrors => ({
+          setErrorMessages((prevErrors) => ({
             ...prevErrors,
-            [index]: data.message ?? 'Failed to update quantity',
+            [index]: data.message ?? "Failed to update quantity",
           }));
           syncCartState(data, data.message);
           return;
         }
 
-        setErrorMessages(prevErrors => {
+        setErrorMessages((prevErrors) => {
           const next = { ...prevErrors };
           delete next[index];
           return next;
         });
-        syncCartState(data, 'Item quantity updated successfully.');
+        syncCartState(data, "Item quantity updated successfully.");
       } catch (err) {
-        console.error('Error updating quantity:', err);
-        setErrorMessages(prev => ({
+        console.error("Error updating quantity:", err);
+        setErrorMessages((prev) => ({
           ...prev,
-          [index]: 'Failed to update quantity',
+          [index]: "Failed to update quantity",
         }));
       }
     },
-    [cartItems, blockIfReadOnly, ensureCartId, syncCartState]
+    [cartItems, blockIfReadOnly, ensureCartId, syncCartState],
   );
 
   const onClearPromo = async (): Promise<void> => {
@@ -588,9 +587,9 @@ const UserCart: React.FC = () => {
     try {
       await clearPromo(existingCartId);
       setPromoPercent(null);
-      showToast('Promo removed.', 'success');
+      showToast("Promo removed.", "success");
     } catch (err: unknown) {
-      showToast(apiErrorMessage(err, 'Failed to remove promo.'), 'error');
+      showToast(apiErrorMessage(err, "Failed to remove promo."), "error");
     }
   };
 
@@ -601,11 +600,11 @@ const UserCart: React.FC = () => {
       if (!existingCartId) return;
 
       const ok = await confirm({
-        title: 'Remove item',
-        message: 'Remove this item from your cart?',
-        confirmText: 'Remove',
-        cancelText: 'Cancel',
-        variant: 'danger',
+        title: "Remove item",
+        message: "Remove this item from your cart?",
+        confirmText: "Remove",
+        cancelText: "Cancel",
+        variant: "danger",
       });
       if (!ok) return;
 
@@ -614,28 +613,28 @@ const UserCart: React.FC = () => {
           `/carts/${existingCartId}/products/${productId}`,
           {
             useV2: false,
-          }
+          },
         );
         // Expect a 204 response here; any errors are handled below.
 
-        setCartItems(prev => {
+        setCartItems((prev) => {
           const next = prev.filter((_, idx) => idx !== indexToDelete);
           const nextCount = next.reduce(
             (acc, cartItem) => acc + (cartItem.quantity || 0),
-            0
+            0,
           );
           setCartItemCount(nextCount);
           setCartCountInLS(nextCount);
           notifyCartChanged();
           return next;
         });
-        showToast('Item removed from cart.', 'success');
+        showToast("Item removed from cart.", "success");
       } catch (error) {
-        console.error('Error deleting item: ', error);
-        showToast(apiErrorMessage(error, 'Failed to delete item.'), 'error');
+        console.error("Error deleting item: ", error);
+        showToast(apiErrorMessage(error, "Failed to delete item."), "error");
       }
     },
-    [apiErrorMessage, blockIfReadOnly, confirm, ensureCartId, showToast]
+    [apiErrorMessage, blockIfReadOnly, confirm, ensureCartId, showToast],
   );
 
   const clearCart = async (): Promise<void> => {
@@ -644,11 +643,11 @@ const UserCart: React.FC = () => {
     if (!existingCartId) return;
 
     const ok = await confirm({
-      title: 'Clear cart',
-      message: 'Are you sure you want to clear the cart?',
-      confirmText: 'Clear cart',
-      cancelText: 'Cancel',
-      variant: 'danger',
+      title: "Clear cart",
+      message: "Are you sure you want to clear the cart?",
+      confirmText: "Clear cart",
+      cancelText: "Cancel",
+      variant: "danger",
     });
     if (!ok) return;
 
@@ -660,10 +659,10 @@ const UserCart: React.FC = () => {
       setCartItemCount(0);
       setCartCountInLS(0);
       notifyCartChanged();
-      showToast('Cart has been cleared.', 'success');
+      showToast("Cart has been cleared.", "success");
     } catch (error) {
-      console.error('Error clearing cart:', error);
-      showToast(apiErrorMessage(error, 'Failed to clear cart.'), 'error');
+      console.error("Error clearing cart:", error);
+      showToast(apiErrorMessage(error, "Failed to clear cart."), "error");
     }
   };
 
@@ -679,22 +678,22 @@ const UserCart: React.FC = () => {
       const normalizedId = productId?.trim();
       const payload = {
         productIds: normalizedId ? [normalizedId] : [],
-        direction: 'TO_WISHLIST',
+        direction: "TO_WISHLIST",
       };
 
       const { data } = await axiosInstance.post<CartDetailsModel>(
         `/carts/${existingCartId}/wishlist-transfers`,
         payload,
-        { useV2: false }
+        { useV2: false },
       );
 
       const fallback = `${item.productName} has been added to your wishlist!`;
       syncCartState(data, fallback);
     } catch (error: unknown) {
-      console.error('Error adding to wishlist:', error);
+      console.error("Error adding to wishlist:", error);
       showToast(
-        apiErrorMessage(error, 'Failed to add item to wishlist.'),
-        'error'
+        apiErrorMessage(error, "Failed to add item to wishlist."),
+        "error",
       );
     }
   };
@@ -708,7 +707,7 @@ const UserCart: React.FC = () => {
     if (item.productQuantity <= 0) {
       showToast(
         `${item.productName} is out of stock and cannot be added to the cart.`,
-        'info'
+        "info",
       );
       return;
     }
@@ -718,20 +717,20 @@ const UserCart: React.FC = () => {
       const normalizedId = productId?.trim();
       const payload = {
         productIds: normalizedId ? [normalizedId] : [],
-        direction: 'TO_CART',
+        direction: "TO_CART",
       };
 
       const { data } = await axiosInstance.post<CartDetailsModel>(
         `/carts/${existingCartId}/wishlist-transfers`,
         payload,
-        { useV2: false }
+        { useV2: false },
       );
 
       const fallback = `${item.productName} has been added to your cart!`;
       syncCartState(data, fallback);
     } catch (error: unknown) {
-      console.error('Error adding to cart:', error);
-      showToast(apiErrorMessage(error, 'Failed to add item to cart.'), 'error');
+      console.error("Error adding to cart:", error);
+      showToast(apiErrorMessage(error, "Failed to add item to cart."), "error");
     }
   };
 
@@ -742,11 +741,11 @@ const UserCart: React.FC = () => {
     if (!existingCartId) return;
 
     const ok = await confirm({
-      title: 'Remove from wishlist',
+      title: "Remove from wishlist",
       message: `Remove "${item.productName}" from wishlist?`,
-      confirmText: 'Remove',
-      cancelText: 'Cancel',
-      variant: 'danger',
+      confirmText: "Remove",
+      cancelText: "Cancel",
+      variant: "danger",
     });
 
     if (!ok) return;
@@ -754,17 +753,17 @@ const UserCart: React.FC = () => {
     try {
       await axiosInstance.delete(
         `/carts/${existingCartId}/wishlist/${item.productId}`,
-        { useV2: false }
+        { useV2: false },
       );
 
-      setWishlistItems(prev =>
-        prev.filter(p => p.productId !== item.productId)
+      setWishlistItems((prev) =>
+        prev.filter((p) => p.productId !== item.productId),
       );
     } catch (e) {
       console.error(e);
       showToast(
-        apiErrorMessage(e, 'Could not remove item from wishlist.'),
-        'error'
+        apiErrorMessage(e, "Could not remove item from wishlist."),
+        "error",
       );
     }
   };
@@ -777,36 +776,36 @@ const UserCart: React.FC = () => {
     if (!existingCartId) return;
 
     const movableItems = wishlistItems.filter(
-      item => item.productQuantity == null || item.productQuantity > 0
+      (item) => item.productQuantity == null || item.productQuantity > 0,
     );
     if (movableItems.length === 0) {
-      showToast('All wishlist items are currently out of stock.', 'info');
+      showToast("All wishlist items are currently out of stock.", "info");
       return;
     }
 
     const blockedCount = wishlistItems.length - movableItems.length;
 
     const ok = await confirm({
-      title: 'Move all from wishlist',
+      title: "Move all from wishlist",
       message:
         blockedCount > 0
           ? `Move ${movableItems.length} in-stock item(s) to your cart? ${blockedCount} item(s) are out of stock and will remain in your wishlist.`
           : `Move ${movableItems.length} item(s) to your cart?`,
-      confirmText: 'Move all',
-      cancelText: 'Cancel',
+      confirmText: "Move all",
+      cancelText: "Cancel",
     });
     if (!ok) return;
 
     const productIds = Array.from(
       new Set(
         movableItems
-          .map(item => item.productId)
-          .filter((id): id is string => Boolean(id && id.trim()))
-      )
+          .map((item) => item.productId)
+          .filter((id): id is string => Boolean(id && id.trim())),
+      ),
     );
 
     if (productIds.length === 0) {
-      showToast('No wishlist items are eligible to move.', 'info');
+      showToast("No wishlist items are eligible to move.", "info");
       return;
     }
 
@@ -815,13 +814,13 @@ const UserCart: React.FC = () => {
     try {
       const payload = {
         productIds,
-        direction: 'TO_CART' as const,
+        direction: "TO_CART" as const,
       };
 
       const { data } = await axiosInstance.post<CartDetailsModel>(
         `/carts/${existingCartId}/wishlist-transfers`,
         payload,
-        { useV2: false }
+        { useV2: false },
       );
 
       const fallback =
@@ -832,8 +831,8 @@ const UserCart: React.FC = () => {
     } catch (e) {
       console.error(e);
       showToast(
-        apiErrorMessage(e, 'Unexpected error while moving wishlist items.'),
-        'error'
+        apiErrorMessage(e, "Unexpected error while moving wishlist items."),
+        "error",
       );
     } finally {
       setMovingAll(false);
@@ -843,7 +842,7 @@ const UserCart: React.FC = () => {
   const handleCheckoutConfirmation = (): void => {
     if (isStaff) {
       navigate(AppRoutePaths.Unauthorized, {
-        state: { message: 'Staff/Admin cannot perform checkout.' },
+        state: { message: "Staff/Admin cannot perform checkout." },
       });
       return;
     }
@@ -855,7 +854,7 @@ const UserCart: React.FC = () => {
     if (isStaff) return;
 
     if (!cartId) {
-      setCheckoutMessage('Invalid cart ID');
+      setCheckoutMessage("Invalid cart ID");
       return;
     }
 
@@ -863,17 +862,17 @@ const UserCart: React.FC = () => {
       await axiosInstance.post(
         `/carts/${cartId}/checkout`,
         {},
-        { useV2: false }
+        { useV2: false },
       );
 
-      const invoiceItems: Invoice[] = cartItems.map(item => ({
+      const invoiceItems: Invoice[] = cartItems.map((item) => ({
         productId: Number(item.productId),
         productName: item.productName,
         productSalePrice: item.productSalePrice,
         quantity: item.quantity || 1,
       }));
 
-      const invoiceItemsForFull: InvoiceItemType[] = invoiceItems.map(i => ({
+      const invoiceItemsForFull: InvoiceItemType[] = invoiceItems.map((i) => ({
         productId: i.productId,
         productName: i.productName,
         productSalePrice: i.productSalePrice,
@@ -883,24 +882,24 @@ const UserCart: React.FC = () => {
       // calculate money values in integer cents to avoid floating point errors
       const invoiceSubtotalCents = invoiceItemsForFull.reduce(
         (s, it) => s + Math.round(it.productSalePrice * 100) * it.quantity,
-        0
+        0,
       );
       const invoiceSubtotal = invoiceSubtotalCents / 100;
       const usedBilling = billing ?? billingInfo ?? null;
 
       const invoiceTaxLines = computeTaxes(
         invoiceSubtotal,
-        usedBilling?.province
-      ).map(line => ({
+        usedBilling?.province,
+      ).map((line) => ({
         ...line,
         amount: line.amount ?? roundToCents(invoiceSubtotal * line.rate),
       }));
-      const invoiceTaxCents = invoiceTaxLines.map(line =>
-        Math.round((line.amount ?? 0) * 100)
+      const invoiceTaxCents = invoiceTaxLines.map((line) =>
+        Math.round((line.amount ?? 0) * 100),
       );
       const invoiceTaxTotalCents = invoiceTaxCents.reduce(
         (sum, cents) => sum + cents,
-        0
+        0,
       );
       const discountCents = Math.round(effectiveDiscount * 100);
       const invoiceTotalCents =
@@ -912,7 +911,7 @@ const UserCart: React.FC = () => {
 
       const newInvoice: InvoiceFullType = {
         invoiceId: `${Date.now()}`,
-        userId: user?.userId || 'anonymous',
+        userId: user?.userId || "anonymous",
         billing: usedBilling
           ? {
               fullName: usedBilling.fullName,
@@ -933,7 +932,7 @@ const UserCart: React.FC = () => {
       };
       setLastInvoice(newInvoice);
       setShowInvoiceModal(true);
-      setCheckoutMessage('Checkout successful! Your order is being processed.');
+      setCheckoutMessage("Checkout successful! Your order is being processed.");
       setCartItems([]);
       setCartItemCount(0);
       setIsCheckoutModalOpen(false);
@@ -945,16 +944,15 @@ const UserCart: React.FC = () => {
 
       await fetchOrders();
 
-
       try {
         const { data } = await axiosInstance.get<CartDetailsModel>(
-            `/carts/${cartId}`,
-            { useV2: false }
+          `/carts/${cartId}`,
+          { useV2: false },
         );
 
         syncCartState(data);
       } catch (err) {
-        console.error('Failed to refresh orders after checkout:', err);
+        console.error("Failed to refresh orders after checkout:", err);
       }
 
       // Fetch recent purchases after checkout
@@ -962,7 +960,7 @@ const UserCart: React.FC = () => {
         try {
           const { data } = await axiosInstance.get(
             `/customers/${customerId}/cart/recent-purchases`,
-            { useV2: false }
+            { useV2: false },
           );
           setRecentPurchases(data || []);
         } catch (err) {
@@ -973,15 +971,15 @@ const UserCart: React.FC = () => {
       // Fetch recommendation purchases after checkout
       await fetchRecommendationPurchases();
     } catch (error: unknown) {
-      if (error && typeof error === 'object' && 'response' in error) {
+      if (error && typeof error === "object" && "response" in error) {
         const errorData = (
           error as { response?: { data?: { message?: string } } }
         ).response?.data;
         setCheckoutMessage(
-          `Checkout failed: ${errorData?.message || 'Unexpected error'}`
+          `Checkout failed: ${errorData?.message || "Unexpected error"}`,
         );
       } else {
-        setCheckoutMessage('Checkout failed: Unexpected error');
+        setCheckoutMessage("Checkout failed: Unexpected error");
       }
     }
   };
@@ -1024,15 +1022,15 @@ const UserCart: React.FC = () => {
     return acc;
   }, {});
   const recommendationPurchasesList = Object.values(
-    uniqueRecommendationPurchases
+    uniqueRecommendationPurchases,
   );
 
   const recommendationListClassName = `recommendation-purchases-list recent-purchases-list cart-scroll-strip${
-    recommendationPurchasesList.length === 0 ? ' recommendation-empty' : ''
+    recommendationPurchasesList.length === 0 ? " recommendation-empty" : ""
   }`;
 
   const hasMovableWishlistItems = wishlistItems.some(
-    item => item.productQuantity == null || item.productQuantity > 0
+    (item) => item.productQuantity == null || item.productQuantity > 0,
   );
 
   return (
@@ -1045,9 +1043,9 @@ const UserCart: React.FC = () => {
             <div
               className="cart-header"
               style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
               }}
             >
               <div className="cart-badge-container">
@@ -1063,8 +1061,8 @@ const UserCart: React.FC = () => {
               </div>
               <button
                 className="continue-shopping-btn cart-button cart-button--outline"
-                onClick={() => navigate('/products')}
-                style={{ marginLeft: 'auto' }}
+                onClick={() => navigate("/products")}
+                style={{ marginLeft: "auto" }}
               >
                 Continue Shopping
               </button>
@@ -1083,7 +1081,7 @@ const UserCart: React.FC = () => {
                     addToWishlist={addToWishlist}
                     addToCart={() => {}}
                     isInWishlist={false}
-                    showNotification={message => showToast(message, 'info')}
+                    showNotification={(message) => showToast(message, "info")}
                   />
                 ))
               ) : (
@@ -1121,7 +1119,7 @@ const UserCart: React.FC = () => {
                   type="text"
                   placeholder="Enter voucher code"
                   value={voucherCode}
-                  onChange={e => {
+                  onChange={(e) => {
                     setVoucherCode(e.target.value);
                     setVoucherError(null);
                   }}
@@ -1144,9 +1142,9 @@ const UserCart: React.FC = () => {
                     className="voucher-hint"
                     style={{
                       marginTop: 6,
-                      display: 'flex',
+                      display: "flex",
                       gap: 8,
-                      alignItems: 'center',
+                      alignItems: "center",
                     }}
                   >
                     <span>Current promo: {promoPercent}%</span>
@@ -1166,9 +1164,9 @@ const UserCart: React.FC = () => {
                 <p className="summary-item">
                   Subtotal: {formatPrice(subtotal)}
                 </p>
-                {resolvedTaxLines.map(line => (
+                {resolvedTaxLines.map((line) => (
                   <p key={`${line.name}-${line.rate}`} className="summary-item">
-                    {line.name} ({formatTaxRate(line.rate)}%):{' '}
+                    {line.name} ({formatTaxRate(line.rate)}%):{" "}
                     {formatPrice(line.amount ?? 0)}
                   </p>
                 ))}
@@ -1178,7 +1176,7 @@ const UserCart: React.FC = () => {
                   </p>
                 )}
                 <p className="summary-item">
-                  Discount{promoPercent != null ? ` (${promoPercent}%)` : ''}:{' '}
+                  Discount{promoPercent != null ? ` (${promoPercent}%)` : ""}:{" "}
                   {formatPrice(effectiveDiscount)}
                 </p>
                 <p className="total-price summary-item">
@@ -1202,7 +1200,7 @@ const UserCart: React.FC = () => {
                 <button
                   className="view-receipt-btn cart-button cart-button--brand cart-button--block"
                   onClick={() => setShowInvoiceModal(true)}
-                  style={{ marginTop: '1rem' }}
+                  style={{ marginTop: "1rem" }}
                   aria-label="View your last receipt"
                 >
                   View Receipt
@@ -1212,87 +1210,78 @@ const UserCart: React.FC = () => {
           )}
         </div>
 
-
         {/* Previous Orders */}
         <div className="orders-section cart-panel cart-panel--padded">
           <h2>Your Orders</h2>
 
           {ordersLoading ? (
-              <p>Loading your orders...</p>
+            <p>Loading your orders...</p>
           ) : ordersError ? (
-              <p className="error">{ordersError}</p>
+            <p className="error">{ordersError}</p>
           ) : orders.length === 0 ? (
-              <p>You haven't placed any orders yet.</p>
+            <p>You haven't placed any orders yet.</p>
           ) : (
-              <div className="orders-list">
-                {orders.map(order => (
-                    <div key={order.orderId} className="order-card cart-card">
+            <div className="orders-list">
+              {orders.map((order) => (
+                <div key={order.orderId} className="order-card cart-card">
+                  <div className="order-header">
+                    <h3>Order #{order.orderId}</h3>
 
-                      <div className="order-header">
-                        <h3>Order #{order.orderId}</h3>
+                    <p>
+                      Placed on:{" "}
+                      {new Date(order.orderDate).toLocaleDateString()}
+                    </p>
+                  </div>
 
-                        <p>
-                          Placed on:{' '}
-                          {new Date(order.orderDate).toLocaleDateString()}
-                        </p>
+                  <div className="order-products">
+                    {order.products.map((item) => (
+                      <div key={item.productId} className="order-product">
+                        <div
+                          className="recent-purchase-image"
+                          onClick={() =>
+                            redirectToProductPageOnClick(item.productId)
+                          }
+                        >
+                          <ImageContainer
+                            productId={item.productId}
+                            imageId={item.imageId}
+                          />
+                        </div>
+
+                        <div className="order-product-details">
+                          <h4>{item.productName}</h4>
+
+                          <p>Qty: {item.quantityInCart}</p>
+
+                          <p>{formatPrice(item.productSalePrice)} each</p>
+                        </div>
                       </div>
+                    ))}
+                  </div>
 
-                      <div className="order-products">
-                        {order.products.map(item => (
-                            <div
-                                key={item.productId}
-                                className="order-product"
-                            >
-                              <div
-                                  className="recent-purchase-image"
-                                  onClick={() =>
-                                      redirectToProductPageOnClick(item.productId)
-                                  }
-                              >
-                                <ImageContainer
-                                    productId={item.productId}
-                                    imageId={item.imageId}
-                                />
-                              </div>
+                  <div className="order-footer">
+                    <span>Subtotal: {formatPrice(order.subtotal)}</span>
+                    <span>TVQ: {formatPrice(order.tvq)}</span>
+                    <span>TVC: {formatPrice(order.tvc)}</span>
 
-                              <div className="order-product-details">
-                                <h4>{item.productName}</h4>
+                    {order.promoPercent != null && (
+                      <span>Promo: {order.promoPercent}%</span>
+                    )}
 
-                                <p>Qty: {item.quantityInCart}</p>
-
-                                <p>{formatPrice(item.productSalePrice)} each</p>
-                              </div>
-                            </div>
-                        ))}
-                      </div>
-
-                      <div className="order-footer">
-                        <span>Subtotal: {formatPrice(order.subtotal)}</span>
-                        <span>TVQ: {formatPrice(order.tvq)}</span>
-                        <span>TVC: {formatPrice(order.tvc)}</span>
-
-                        {order.promoPercent != null && (
-                            <span>Promo: {order.promoPercent}%</span>
-                        )}
-
-                        <strong>
-                          Total: {formatPrice(order.total)}
-                        </strong>
-                      </div>
-
-                    </div>
-                ))}
-              </div>
+                    <strong>Total: {formatPrice(order.total)}</strong>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
 
-
-            {/* Recent purchases*/}
+        {/* Recent purchases*/}
         <div className="recent-purchases-section cart-panel cart-panel--padded">
           <h2>Recent Purchases</h2>
           <div className="recent-purchases-list cart-scroll-strip">
             {recentPurchasesList.length > 0 ? (
-              recentPurchasesList.map(item => (
+              recentPurchasesList.map((item) => (
                 <div
                   key={item.productId}
                   className="recent-purchase-card cart-card"
@@ -1326,10 +1315,10 @@ const UserCart: React.FC = () => {
                       type="number"
                       min={1}
                       value={recentPurchaseQuantities[item.productId] || 1}
-                      onChange={e =>
+                      onChange={(e) =>
                         handleRecentPurchaseQuantityChange(
                           item.productId,
-                          Number(e.target.value)
+                          Number(e.target.value),
                         )
                       }
                       className="recent-purchase-qty-input"
@@ -1362,9 +1351,9 @@ const UserCart: React.FC = () => {
           <div
             className="wishlist-header"
             style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
             }}
           >
             <h2 style={{ margin: 0 }}>Your Wishlist</h2>
@@ -1377,22 +1366,22 @@ const UserCart: React.FC = () => {
                 aria-disabled={isStaff || movingAll || !hasMovableWishlistItems}
                 title={
                   isStaff
-                    ? 'Read-only: staff/admin cannot move wishlist items'
+                    ? "Read-only: staff/admin cannot move wishlist items"
                     : !hasMovableWishlistItems
-                      ? 'All wishlist items are out of stock'
-                      : 'Move all wishlist items to cart'
+                      ? "All wishlist items are out of stock"
+                      : "Move all wishlist items to cart"
                 }
               >
-                {movingAll ? 'Moving…' : 'Move All to Cart'}
+                {movingAll ? "Moving…" : "Move All to Cart"}
               </button>
             )}
           </div>
 
           <div className="Wishlist-items cart-scroll-strip">
             {wishlistItems.length > 0 ? (
-              wishlistItems.map(item => {
+              wishlistItems.map((item) => {
                 const isOutOfStock = item.productQuantity <= 0;
-                const wishlistCardClassName = `Wishlist-item cart-card${isOutOfStock ? ' Wishlist-item--out-of-stock' : ''}`;
+                const wishlistCardClassName = `Wishlist-item cart-card${isOutOfStock ? " Wishlist-item--out-of-stock" : ""}`;
 
                 return (
                   <div key={item.productId} className={wishlistCardClassName}>
@@ -1422,7 +1411,7 @@ const UserCart: React.FC = () => {
                         disabled={isStaff || isOutOfStock}
                         aria-disabled={isStaff || isOutOfStock}
                       >
-                        {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+                        {isOutOfStock ? "Out of Stock" : "Add to Cart"}
                       </button>
                       <button
                         className="cart-button cart-button--danger cart-button--block cart-button--strike-disabled"
@@ -1451,7 +1440,7 @@ const UserCart: React.FC = () => {
           </div>
           <div className={recommendationListClassName}>
             {recommendationPurchasesList.length > 0 ? (
-              recommendationPurchasesList.map(item => (
+              recommendationPurchasesList.map((item) => (
                 <div
                   key={item.productId}
                   className="recommendation-purchase-card cart-card"
@@ -1489,10 +1478,10 @@ const UserCart: React.FC = () => {
                       value={
                         recommendationPurchaseQuantities[item.productId] || 1
                       }
-                      onChange={e =>
+                      onChange={(e) =>
                         handleRecommendationPurchaseQuantityChange(
                           item.productId,
-                          Number(e.target.value)
+                          Number(e.target.value),
                         )
                       }
                       className="recommendation-qty-input recent-purchase-qty-input"
@@ -1523,7 +1512,7 @@ const UserCart: React.FC = () => {
                 </div>
                 <button
                   className="cta-browse-products-btn cart-button cart-button--brand"
-                  onClick={() => navigate('/products')}
+                  onClick={() => navigate("/products")}
                 >
                   Browse Products
                 </button>
@@ -1538,7 +1527,7 @@ const UserCart: React.FC = () => {
               <CartBillingForm
                 isOpen={true}
                 onClose={() => setShowBillingForm(false)}
-                onSubmit={async billing => {
+                onSubmit={async (billing) => {
                   setBillingInfo(billing);
                   await handleCheckout(billing);
                   setShowBillingForm(false);
