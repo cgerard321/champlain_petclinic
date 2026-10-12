@@ -70,7 +70,7 @@ input.right-align::-webkit-inner-spin-button {
   text-align: center;
 }
 
-.bill-update-summary {
+.bill-create-form {
   padding: 16px;
   border: 1px solid #e0eae0;
   border-radius: 10px;
