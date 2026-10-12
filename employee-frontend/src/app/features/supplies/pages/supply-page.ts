@@ -255,8 +255,8 @@ export class SupplyPage {
       return;
     }
 
-    // Prevent consuming if quantity is already 0
-    if (supply.productQuantity <= 0) {
+    // Prevent consuming if quantity is already 0 or if the supply is expired
+    if (supply.productQuantity <= 0 || this.expirationState(supply) === 'expired') {
       return;
     }
     this.deleteError.set('');
@@ -394,6 +394,12 @@ export class SupplyPage {
   protected readonly minExpirationDate = computed(() =>
     this.editingSupplyId() ? null : this.todayAsText(),
   );
+  protected effectiveStatus(supply: Supply): string {
+    if (this.expirationState(supply) === 'expired') {
+      return 'OUT_OF_STOCK';
+    }
+    return supply.status;
+  }
 
   protected expirationState(supply: Supply): 'none' | 'expired' | 'soon' | 'ok' {
     if (!supply.expirationDate) {

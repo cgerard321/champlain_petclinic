@@ -237,11 +237,11 @@
 <ng-template #statusCell let-supply>
   <span
     class="status-badge"
-    [class.available]="supply.status === 'AVAILABLE'"
-    [class.re-order]="supply.status === 'RE_ORDER'"
-    [class.out-of-stock]="supply.status === 'OUT_OF_STOCK'"
+    [class.available]="effectiveStatus(supply) === 'AVAILABLE'"
+    [class.re-order]="effectiveStatus(supply) === 'RE_ORDER'"
+    [class.out-of-stock]="effectiveStatus(supply) === 'OUT_OF_STOCK'"
   >
-    {{ formatStatus(supply.status) }}
+    {{ formatStatus(effectiveStatus(supply)) }}
   </span>
 </ng-template>
 
@@ -256,9 +256,17 @@
         type="button"
         class="consume-button"
         (click)="consumeSupply(supply)"
-        [disabled]="supply.productQuantity <= 0 || consumingSupplyId() === supply.productId"
+        [disabled]="
+          supply.productQuantity <= 0 ||
+          expirationState(supply) === 'expired' ||
+          consumingSupplyId() === supply.productId
+        "
         [attr.aria-label]="
-          supply.productQuantity <= 0 ? 'Cannot consume - out of stock' : 'Consume supply'
+          supply.productQuantity <= 0
+            ? 'Cannot consume - out of stock'
+            : expirationState(supply) === 'expired'
+              ? 'Cannot consume - expired'
+              : 'Consume supply'
         "
       >
         {{ consumingSupplyId() === supply.productId ? 'Consuming...' : 'Consume' }}
