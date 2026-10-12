@@ -90,15 +90,15 @@ public class BFFApiGatewayController {
     //not for me to mess with
     @IsUserSpecific(idToMatch = {"customerId"}, bypassRoles = {Roles.ADMIN})
     @GetMapping(value = "bills/customer/{customerId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getBillsByOwnerId(final @PathVariable String customerId)
+    public Flux<BillResponseDTO> getBillsByCustomerId(final @PathVariable String customerId)
     {
-        return billServiceClient.getBillsByOwnerId(customerId);
+        return billServiceClient.getBillsByCustomerId(customerId);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "bills/owner/{ownerFirstName}/{ownerLastName}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getAllBillsByOwnerName(@PathVariable String ownerFirstName, @PathVariable String ownerLastName) {
-        return billServiceClient.getBillsByOwnerName(ownerFirstName, ownerLastName);
+    @GetMapping(value = "bills/customer/{customerFirstName}/{customerLastName}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> getAllBillsByCustomerName(@PathVariable String customerFirstName, @PathVariable String customerLastName) {
+        return billServiceClient.getBillsByCustomerName(customerFirstName, customerLastName);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
