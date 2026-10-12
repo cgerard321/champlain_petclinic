@@ -21,8 +21,8 @@ public class EntityDtoUtil {
         //BeanUtils.copyProperties(bill,billResponseDTO);
         billResponseDTO.setBillId(bill.getBillId());
         billResponseDTO.setCustomerId(bill.getCustomerId());
-        billResponseDTO.setOwnerFirstName(bill.getOwnerFirstName());
-        billResponseDTO.setOwnerLastName(bill.getOwnerLastName());
+        billResponseDTO.setCustomerFirstName(bill.getCustomerFirstName());
+        billResponseDTO.setCustomerLastName(bill.getCustomerLastName());
         billResponseDTO.setVisitType(bill.getVisitType());
         billResponseDTO.setVetId(bill.getVetId());
         billResponseDTO.setVetFirstName(bill.getVetFirstName());

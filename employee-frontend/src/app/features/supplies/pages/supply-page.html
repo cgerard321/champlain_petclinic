@@ -239,10 +239,26 @@
 
 <ng-template #actionsCell let-supply>
   <div class="action-buttons">
-    <button type="button" class="edit-button" (click)="editSupply(supply)">Edit</button>
-    <button type="button" class="delete-button" (click)="deleteSupply(supply)">Delete</button>
+    @if (canManageSupplies()) {
+      <button type="button" class="edit-button" (click)="editSupply(supply)">Edit</button>
+      <button type="button" class="delete-button" (click)="deleteSupply(supply)">Delete</button>
+    }
+    @if (canConsumeSupplies()) {
+      <button
+        type="button"
+        class="consume-button"
+        (click)="consumeSupply(supply)"
+        [disabled]="supply.productQuantity <= 0 || consumingSupplyId() === supply.productId"
+        [attr.aria-label]="
+          supply.productQuantity <= 0 ? 'Cannot consume - out of stock' : 'Consume supply'
+        "
+      >
+        {{ consumingSupplyId() === supply.productId ? 'Consuming...' : 'Consume' }}
+      </button>
+    }
   </div>
 </ng-template>
+
 <ng-template #deleteDialog let-supply>
   <h2 mat-dialog-title>Delete supply</h2>
 
