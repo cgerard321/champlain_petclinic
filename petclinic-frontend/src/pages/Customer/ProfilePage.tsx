@@ -179,7 +179,7 @@ const ProfilePage: React.FC = (): JSX.Element => {
         }));
       }
     },
-    [petTypes]
+    [petTypes, t]
   );
 
   React.useEffect(() => {
