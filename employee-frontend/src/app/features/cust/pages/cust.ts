@@ -55,7 +55,7 @@ export class Cust implements OnInit {
     const query = this.searchText().trim().toLowerCase();
 
     return this.customers().filter((customer) =>
-      [`${customer.firstName} ${customer.lastName}`, customer.customerId, customer.telephone].some(
+      [`${customer.firstName} ${customer.lastName}`, customer.customerId, customer.telephone, customer.address, customer.city].some(
         (value) =>
           String(value ?? '')
             .toLowerCase()
