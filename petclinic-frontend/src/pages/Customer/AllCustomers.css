@@ -67,31 +67,73 @@
   font-family: 'Arial', sans-serif;
 }
 
-/*filter css */
-.customers-container input[type='text'] {
-  padding: 2px;
-  margin: 2px 0;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-sizing: border-box;
-}
-
-.filter-container {
+/* Filter bar */
+.customers-filter-bar {
   display: flex;
-  gap: 10px;
+  flex-direction: column;
   align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
-.filter-container input {
-  padding: 5px;
-  font-size: 14px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  width: 190px;
-}
-
-.filter-toggle {
+.customers-filter-toggle {
   padding: 5px 30px;
   height: 40px;
   font-size: 14px;
+}
+
+.customers-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  width: 100%;
+  max-width: 900px;
+}
+
+.customers-filters input,
+.customers-filters select {
+  width: 100%;
+  height: 36px;
+  padding: 6px 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #fff;
+  box-sizing: border-box;
+}
+
+.customers-filters input:focus,
+.customers-filters select:focus {
+  border-color: #0d6efd;
+  outline: 2px solid rgba(13, 110, 253, 0.25);
+}
+
+/* Result count + clear */
+.customers-filter-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 10px 0;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+/* Table scrolls horizontally on narrow screens */
+.customers-table-wrapper {
+  overflow-x: auto;
+}
+
+/* Loading / error / empty messages */
+.customers-state {
+  text-align: center;
+  padding: 24px 0;
+  color: #6c757d;
+}
+
+@media screen and (max-width: 576px) {
+  .customers-filter-summary {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
