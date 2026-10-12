@@ -13,7 +13,7 @@ table {
   border: 1px solid #ddd;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgb(0, 0, 0 / 8%);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 8%);
 }
 
 th {
@@ -30,6 +30,10 @@ td {
   border-bottom: 1px solid #e5e5e5;
   color: #222;
   font-size: 14px;
+}
+
+td button {
+  white-space: nowrap;
 }
 
 tr:last-child td {

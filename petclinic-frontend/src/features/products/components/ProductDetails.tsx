@@ -1,15 +1,14 @@
 import {
-  ProductModel,
   emptyProductModel,
+  ProductModel,
 } from '@/features/products/models/ProductModels/ProductModel';
 import { NavBar } from '@/layouts/AppNavBar';
-import { useState, useEffect, JSX } from 'react';
+import { JSX, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { updateUserRating } from '../api/updateUserRating';
 import { getProduct } from '../api/getProduct';
 import { deleteUserRating } from '../api/deleteUserRating';
 import './ProductDetails.css';
-import defaultProfile from '@/assets/Customers/defaultProfilePicture.png';
 import StarRating from './StarRating';
 import { RatingModel } from '../models/ProductModels/RatingModel';
 import { getUserRatingsForProduct } from '../api/getUserRatingsForProduct';
@@ -20,18 +19,19 @@ import ImageContainer from './ImageContainer';
 import { Button } from 'react-bootstrap';
 import {
   IsAdmin,
-  useUser,
   IsInventoryManager,
-  IsVet,
   IsReceptionist,
+  IsVet,
+  useUser,
 } from '@/context/UserContext';
 import RecentlyViewedProducts from '@/features/products/components/RecentlyViewedProducts';
 import { useAddToCart } from '@/features/carts/api/addToCartFromProducts';
 import { useAddToWishlist } from '@/features/carts/api/addToWishlistFromProducts';
-import { FaHeart, FaCheck, FaTimes, FaPen, FaTrash } from 'react-icons/fa';
+import { FaCheck, FaHeart, FaTimes } from 'react-icons/fa';
 import WriteReviewModal from './WriteReviewModal';
 import EditReviewModal from './EditReviewModal';
 import DeleteReviewModal from './DeleteReviewModal';
+import { Review } from '@/features/products/components/Review.tsx';
 
 export default function ProductDetails(): JSX.Element {
   const isAdmin = IsAdmin();
@@ -79,6 +79,7 @@ export default function ProductDetails(): JSX.Element {
     review: '',
   });
   const [productReviews, setProductReviews] = useState<RatingModel[]>([]);
+  const [selectedRating, setSelectedRating] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -192,6 +193,7 @@ export default function ProductDetails(): JSX.Element {
   };
 
   useEffect(() => {
+    setSelectedRating(null);
     fetchProduct();
     fetchRatings();
     if (isAuthenticated) {
@@ -218,6 +220,11 @@ export default function ProductDetails(): JSX.Element {
         : "Couldn't add to cart. Please try again."
     );
   };
+  const handleRatingFilter = (rating: number): void => {
+    setSelectedRating(currentRating =>
+      currentRating === rating ? null : rating
+    );
+  };
 
   const handleEditReview = (): void => {
     setShowEditModal(true);
@@ -240,6 +247,13 @@ export default function ProductDetails(): JSX.Element {
       console.error('Could not delete review', err);
     }
   };
+
+  const filteredProductReviews =
+    selectedRating === null
+      ? productReviews
+      : productReviews.filter(
+          review => Math.floor(review.rating) === selectedRating
+        );
 
   return (
     <>
@@ -421,16 +435,38 @@ export default function ProductDetails(): JSX.Element {
                             productReviews.length > 0
                               ? (count / productReviews.length) * 100
                               : 0;
+
+                          const ratingLabel = star === 1 ? 'star' : 'stars';
+                          const reviewLabel =
+                            count === 1 ? 'review' : 'reviews';
+
                           return (
-                            <div key={star} className="rating-bar-row">
-                              <span className="star-label">{star} stars</span>
-                              <div className="rating-bar">
-                                <div
+                            <button
+                              key={star}
+                              type="button"
+                              className={`rating-bar-row ${
+                                selectedRating === star
+                                  ? 'rating-bar-row-selected'
+                                  : ''
+                              }`}
+                              onClick={() => handleRatingFilter(star)}
+                              aria-pressed={selectedRating === star}
+                              aria-label={`${star} ${ratingLabel}, ${count} ${reviewLabel}`}
+                            >
+                              <span className="star-label">
+                                {star} {ratingLabel}
+                              </span>
+                              <span className="rating-bar">
+                                <span
                                   className="rating-bar-fill"
                                   style={{ width: `${percentage}%` }}
-                                ></div>
-                              </div>
-                            </div>
+                                ></span>
+                              </span>
+
+                              <span className="rating-category-count">
+                                {count}
+                              </span>
+                            </button>
                           );
                         })}
                       </div>
@@ -439,9 +475,24 @@ export default function ProductDetails(): JSX.Element {
                     <div className="rating-section-separator"></div>
 
                     <div className="review-action-row">
-                      <h3 className="reviews-heading">
-                        Reviews ({productReviews.length})
-                      </h3>
+                      <div className="reviews-heading-container">
+                        <h3 className="reviews-heading">
+                          Reviews ({filteredProductReviews.length}
+                          {selectedRating !== null
+                            ? ` of ${productReviews.length}`
+                            : ''}
+                          )
+                        </h3>
+                        {selectedRating !== null && (
+                          <button
+                            type="button"
+                            className="clear-rating-filter"
+                            onClick={() => setSelectedRating(null)}
+                          >
+                            Clear {selectedRating}-star filter
+                          </button>
+                        )}
+                      </div>
                       <Button
                         variant="primary"
                         onClick={() => {
@@ -481,76 +532,32 @@ export default function ProductDetails(): JSX.Element {
                   </div>
 
                   <div className="reviewsforproduct-container">
-                    {productReviews.length > 0 ? (
-                      productReviews.map(
+                    {filteredProductReviews.length > 0 ? (
+                      filteredProductReviews.map(
                         (rating: RatingModel, index: number) => (
-                          <div
+                          <Review
                             key={rating.customerId || index}
-                            className="reviewbox"
-                          >
-                            <div className="product-review-author">
-                              <img
-                                src={rating.reviewerPhoto || defaultProfile}
-                                alt={`${rating.reviewerUsername || 'Customer'} profile picture`}
-                                onError={event => {
-                                  event.currentTarget.onerror = null;
-                                  event.currentTarget.src = defaultProfile;
-                                }}
-                              />
-                              <span>
-                                {rating.reviewerUsername || 'Customer'}
-                              </span>
-                            </div>
-                            {isAuthenticated &&
+                            rating={rating}
+                            index={index}
+                            canEdit={
+                              isAuthenticated &&
                               currentUserRating.rating > 0 &&
                               !!currentUserRating.customerId &&
                               currentUserRating.customerId ===
                                 rating.customerId &&
-                              !isStaff && (
-                                <div className="review-card-actions">
-                                  <button
-                                    className="review-card-edit-btn"
-                                    onClick={handleEditReview}
-                                    title="Edit your review"
-                                  >
-                                    <FaPen />
-                                  </button>
-                                  <button
-                                    className="review-card-delete-btn"
-                                    onClick={handleDeleteReview}
-                                    title="Delete your review"
-                                  >
-                                    <FaTrash />
-                                  </button>
-                                </div>
-                              )}
-                            <div className="starcontainer">
-                              {Array.from({ length: 5 }, (_, k) => (
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  width="24"
-                                  height="24"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  key={k}
-                                  className={`star-static ${
-                                    k < rating.rating ? 'star-shown' : ''
-                                  }`}
-                                >
-                                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                                </svg>
-                              ))}
-                            </div>
-                            <p>{rating.review}</p>
-                          </div>
+                              !isStaff
+                            }
+                            onEdit={handleEditReview}
+                            onDelete={handleDeleteReview}
+                          />
                         )
                       )
                     ) : (
-                      <p>This item does not have any reviews yet!</p>
+                      <p role="status">
+                        {selectedRating !== null
+                          ? `This item does not have any ${selectedRating}-star reviews.`
+                          : 'This item does not have any reviews yet!'}
+                      </p>
                     )}
                   </div>
                 </div>

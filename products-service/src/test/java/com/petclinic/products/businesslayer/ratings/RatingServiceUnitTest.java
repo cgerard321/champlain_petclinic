@@ -220,7 +220,7 @@ class RatingServiceUnitTest {
     public void whenAddRatingWithLongReview_thenReturnInvalidInput(){
         RatingRequestModel requestModel = RatingRequestModel.builder()
                 .rating(rating1.getRating())
-                .review("a".repeat(2000))
+                .review("a".repeat(10001))
                 .build();
 
         StepVerifier.create(ratingService.addRatingForProduct(productId, rating1.getCustomerId(), Mono.just(requestModel)))
@@ -360,7 +360,7 @@ class RatingServiceUnitTest {
     public void whenUpdateRatingWithLongReview_thenReturnInvalidInput(){
         RatingRequestModel requestModel = RatingRequestModel.builder()
                 .rating(rating1.getRating())
-                .review("a".repeat(2000))
+                .review("a".repeat(10001))
                 .build();
 
         StepVerifier.create(ratingService.updateRatingForProduct(productId, rating1.getCustomerId(), Mono.just(requestModel)))

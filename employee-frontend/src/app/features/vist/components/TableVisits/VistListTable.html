@@ -17,6 +17,9 @@
         <th i18n="@@visits.startDate">Date de début</th>
         <th i18n="@@visits.endDate">Date de fin</th>
         <th i18n="@@visits.status">Statut</th>
+        @if (canScheduleFollowUp) {
+          <th i18n="@@visits.followUp.actions">Actions</th>
+        }
       </tr>
 
       @for (visits of visit(); track visits.visitId) {
@@ -28,6 +31,20 @@
           <td>{{ visits.visitDate | date: 'short' }}</td>
           <td>{{ visits.visitEndDate | date: 'short' }}</td>
           <td>{{ statusLabel(visits.status) }}</td>
+          @if (canScheduleFollowUp) {
+            <td>
+              @if (visits.status === 'COMPLETED') {
+                <button
+                  mat-stroked-button
+                  type="button"
+                  (click)="openFollowUpVisit(visits)"
+                  i18n="@@visits.followUp.button"
+                >
+                  Planifier un suivi
+                </button>
+              }
+            </td>
+          }
         </tr>
       }
     </table>

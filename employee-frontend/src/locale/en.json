@@ -48,6 +48,30 @@
       "support": "Support",
       "copyright": "© 2026 Champlain Pet Clinic. All rights reserved."
     },
+    "visits": {
+      "followUp": {
+        "actions": "Actions",
+        "button": "Schedule follow-up",
+        "title": "Schedule a follow-up visit",
+        "close": "Close",
+        "pet": "Pet",
+        "veterinarian": "Veterinarian",
+        "date": "Date",
+        "time": "Available time",
+        "description": "Description",
+        "loadingSlots": "Loading available times...",
+        "noSlots": "No available times for this date.",
+        "cancel": "Cancel",
+        "schedule": "Schedule",
+        "dateRequired": "Date is required",
+        "timeRequired": "Time is required",
+        "descriptionRequired": "Description is required",
+        "descriptionInvalid": "Description must contain text",
+        "slotsError": "Could not load available times.",
+        "scheduleError": "Could not schedule the follow-up.",
+        "confirmation": "The follow-up visit was scheduled."
+      }
+    },
     "vets": {
       "eyebrow": "Veterinary team",
       "title": "Veterinarians",
