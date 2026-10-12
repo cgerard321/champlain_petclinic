@@ -47,7 +47,7 @@
   color: #666;
 }
 
-@media (max-width: 600px) {
+@media (width <= 600px) {
   .footer-content {
     flex-direction: column;
     gap: 12px;
