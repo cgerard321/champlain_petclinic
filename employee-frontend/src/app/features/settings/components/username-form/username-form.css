@@ -46,7 +46,6 @@
   gap: 0.5rem;
 }
 
-/* The icon carries the state as well as the colour, so it stays readable without colour. */
 .rule.is-met {
   color: var(--mat-sys-primary);
 }
@@ -62,11 +61,7 @@
   font: var(--mat-sys-body-small);
 }
 
-/*
- * The error note is a live region that stays in the DOM even when empty, so it has to take no
- * room in that state. `display: none` would do it visually but would drop the element from the
- * accessibility tree, and the region would stop announcing anything.
- */
+
 .field-note:empty {
   margin: 0;
 }

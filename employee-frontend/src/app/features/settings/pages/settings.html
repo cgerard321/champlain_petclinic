@@ -1,5 +1,17 @@
 <div class="settings-page">
-  <h1 class="settings-title" i18n="@@settings.title">Paramètres</h1>
+  <div class="settings-header">
+    <h1 class="settings-title" i18n="@@settings.title">Paramètres</h1>
+
+    <button
+      mat-icon-button
+      type="button"
+      aria-label="Fermer les paramètres"
+      i18n-aria-label="@@settings.close"
+      (click)="close()"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
 
   <mat-card class="settings-card">
     <div class="settings-body">
@@ -35,7 +47,6 @@
           }
           @case ('display') {
             <h2 class="settings-panel-title" i18n="@@settings.display.title">Affichage</h2>
-            <!-- VETS-CPC-2089: left empty on purpose, filled by a follow-up ticket -->
           }
         }
       </section>

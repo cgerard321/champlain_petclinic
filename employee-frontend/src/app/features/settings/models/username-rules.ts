@@ -17,7 +17,6 @@ export const RESERVED_USERNAMES = [
   'undefined',
 ] as const;
 
-//structure of username
 export type UsernameRuleId = 'length' | 'startsAlpha' | 'charset' | 'noSpaceNoAt' | 'noTrailing';
 
 export interface UsernameRule {
@@ -30,12 +29,9 @@ export function normalizeUsername(raw: string): string {
 }
 
 export function checkUsernameRules(raw: string): UsernameRule[] {
-  //remove the spaces before and after the username
   const value = normalizeUsername(raw);
-  //an empty field ticks nothing
   const filled = value.length > 0;
 
-  //all rules of username in this return
   return [
     {
       id: 'length',
@@ -50,9 +46,6 @@ export function checkUsernameRules(raw: string): UsernameRule[] {
 
 export function matchesUsernameFormat(raw: string): boolean {
   const value = normalizeUsername(raw);
-
-  // The pattern is applied to the trimmed name too, for the same reason as the rule above: the
-  // gate has to judge the name that will actually be sent, not the one still being typed.
   return (
     value.length >= USERNAME_MIN_LENGTH &&
     value.length <= USERNAME_MAX_LENGTH &&
@@ -79,7 +72,6 @@ function clampUsername(value: string): string {
 }
 
 function toUsernameBase(raw: string): string {
-  //this constant transform it into valid username
   const folded = normalizeUsername(raw)
     .normalize('NFD')
     .replace(DIACRITICS, '')
@@ -91,11 +83,9 @@ function toUsernameBase(raw: string): string {
 
   return clampUsername(folded);
 }
-//keeps the valid candidates only, without duplicates
 function suggestFrom(candidates: string[], max: number): string[] {
   return [...new Set(candidates.map(clampUsername))].filter(isValidUsername).slice(0, max);
 }
-//this function ngenerates the 3 suggestions
 export function suggestUsernames(typed: string, max = 3): string[] {
   const base = toUsernameBase(typed);
 
@@ -105,7 +95,6 @@ export function suggestUsernames(typed: string, max = 3): string[] {
 
   return suggestFrom([base, `${base}1`], max);
 }
-//generate suggestioin based on the name and full name of the employee
 export function suggestFromName(first: string, last: string, max = 3): string[] {
   const firstBase = toUsernameBase(first).toLowerCase();
   const lastBase = toUsernameBase(last).toLowerCase();
@@ -116,11 +105,8 @@ export function suggestFromName(first: string, last: string, max = 3): string[] 
 
   return suggestFrom(
     [
-      //name + full name
       `${firstBase}_${lastBase}`,
-      //first letter of name + _ + last name
       `${firstBase.charAt(0)}_${lastBase}`,
-      //name + _ + first letter of last name
       `${firstBase}_${lastBase.charAt(0)}`,
     ],
     max,

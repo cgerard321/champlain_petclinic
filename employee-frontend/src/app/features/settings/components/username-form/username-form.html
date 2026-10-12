@@ -25,7 +25,7 @@
       spellcheck="false"
       aria-describedby="username-rules"
       [attr.aria-busy]="isSubmitting()"
-      [attr.aria-invalid]="hasTyped() && !valid()"
+      [attr.aria-invalid]="filled() && !valid()"
       [value]="draft()"
       [disabled]="isSubmitting()"
       (input)="onType(usernameInput.value)"
@@ -33,7 +33,6 @@
     />
   </mat-form-field>
 
-  <!-- Criterion 3: every rule is listed, and ticked as soon as it holds. -->
   <ul id="username-rules" class="rule-list">
     @for (rule of rules(); track rule.id) {
       <li class="rule" [class.is-met]="rule.met">
@@ -45,12 +44,6 @@
     }
   </ul>
 
-  <!--
-    Criterion 19. Always in the DOM, empty when there is nothing to say: a live region added to
-    the page at the same time as its content is announced unreliably. Carries both the reserved
-    name message (rule 8, shown on its own rather than as a checklist line) and the save
-    failure of criterion 7.
-  -->
   <p class="field-note is-error" role="alert" aria-live="assertive">{{ errorText() }}</p>
 
   @if (showSameAsCurrent()) {
@@ -61,13 +54,12 @@
 
   @if (showPreview()) {
     <p class="field-note is-preview" aria-live="polite">
-      <span i18n="@@settings.security.username.preview">Prochaine connexion avec</span>
+      <span i18n="@@settings.security.username.preview">Prochaine connexion avec</span>&ngsp;
       <strong>{{ preview() }}</strong>
     </p>
   }
 
-  <!-- Criterion 9: clicking a suggestion fills the field. -->
-  @if (showSuggestions()) {
+  @if (suggestions().length > 0) {
     <div class="suggestions">
       <span id="suggestions-label" i18n="@@settings.security.username.suggestions">
         Suggestions

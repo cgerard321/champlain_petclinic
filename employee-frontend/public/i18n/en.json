@@ -11,6 +11,7 @@
       "title": "Settings",
       "save": "Save",
       "cancel": "Cancel",
+      "close": "Close settings",
       "saved": "Changes saved",
       "security": {
         "title": "Security",

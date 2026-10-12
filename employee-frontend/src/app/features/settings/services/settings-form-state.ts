@@ -8,7 +8,6 @@ export interface SettingsSectionForm {
 }
 @Injectable()
 export class SettingsFormState {
-  // Held in a signal and replaced immutably so the computed values below actually recompute when a section registers or unregisters
   private readonly sections = signal<ReadonlyMap<string, SettingsSectionForm>>(new Map());
 
   readonly isDirty = computed(() =>
@@ -18,11 +17,9 @@ export class SettingsFormState {
   readonly canSave = computed(() =>
     [...this.sections().values()].some((section) => section.canSave()),
   );
-  //save a new section
   register(id: string, section: SettingsSectionForm): void {
     this.sections.update((current) => new Map(current).set(id, section));
   }
-  //remove a section
   unregister(id: string): void {
     this.sections.update((current) => {
       const next = new Map(current);
