@@ -75,7 +75,7 @@ export class CreateBill implements OnInit {
     required(schemaPath.vetId, { message: 'Vet is required' });
     required(schemaPath.date, { message: 'Date is required' });
     required(schemaPath.amount, { message: 'Amount is required' });
-    min(schemaPath.amount, 0, { message: 'Amount must not be less than 0' });
+    min(schemaPath.amount, 0.01, { message: 'Amount must be greater than 0' });
   });
 
   readonly dialogRef = inject(MatDialogRef<CreateBill>);
