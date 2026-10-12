@@ -1,6 +1,7 @@
 package com.petclinic.cartsservice.utils;
 
 import com.petclinic.cartsservice.dataaccesslayer.Cart;
+import com.petclinic.cartsservice.dataaccesslayer.ShippingMethod;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.dataaccesslayer.PromoCode;
 import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
@@ -25,8 +26,11 @@ public class EntityModelUtil {
         CartResponseModel resp = new CartResponseModel();
         BeanUtils.copyProperties(cart, resp);
 
+        //This prevents a crash if products is null
+        List<CartProduct> safeProducts = products == null ? List.of() : products;
+
         double subtotal = 0.0;
-        for (CartProduct p : products) {
+        for (CartProduct p : safeProducts) {
             double price = p.getProductSalePrice() != null ? p.getProductSalePrice() : 0.0;
             int qty = p.getQuantityInCart() != null ? p.getQuantityInCart() : 0;
             subtotal += price * qty;
@@ -39,12 +43,20 @@ public class EntityModelUtil {
             discountedSubtotal = round2(subtotal * (1.0 - (promo / 100.0)));
         }
 
-        double tvq = round2(discountedSubtotal * 0.09975); // QC
-        double tvc = round2(discountedSubtotal * 0.05);    // CA/GST
-        double total = round2(discountedSubtotal + tvq + tvc);
+        ShippingMethod shippingMethod = cart.getShippingMethod() == null
+                ? ShippingMethod.PICKUP
+                : cart.getShippingMethod();
+        double shippingCost = safeProducts.isEmpty() ? 0.0 : round2(shippingMethod.getCost());
+        double taxableSubtotal = round2(discountedSubtotal + shippingCost);
 
-        resp.setProducts(products);
-        resp.setSubtotal(subtotal);
+        double tvq = round2(taxableSubtotal * 0.09975); // QC
+        double tvc = round2(taxableSubtotal * 0.05);    // CA/GST
+        double total = round2(taxableSubtotal + tvq + tvc);
+
+        resp.setProducts(safeProducts);
+        resp.setSubtotal(taxableSubtotal);
+        resp.setShippingMethod(shippingMethod);
+        resp.setShippingCost(shippingCost);
         resp.setTvq(tvq);
         resp.setTvc(tvc);
         resp.setTotal(total);
@@ -62,6 +74,9 @@ public class EntityModelUtil {
         return Cart.builder()
                 .cartId(generateUUIDString())
                 .customerId(cartRequestModel.getCustomerId())
+                //Default shipping of PICKUP with cost of 0.00 when a new cart is created
+                .shippingMethod(ShippingMethod.PICKUP)
+                .shippingCost(ShippingMethod.PICKUP.getCost())
                 .build();
     }
 

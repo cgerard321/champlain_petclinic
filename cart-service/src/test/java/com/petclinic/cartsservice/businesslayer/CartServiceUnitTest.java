@@ -2,6 +2,7 @@ package com.petclinic.cartsservice.businesslayer;
 
 import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.CartRepository;
+import com.petclinic.cartsservice.dataaccesslayer.ShippingMethod;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.domainclientlayer.CustomerClient;
 import com.petclinic.cartsservice.domainclientlayer.CustomerResponseModel;
@@ -1823,6 +1824,8 @@ class CartServiceUnitTest {
                 .cartId(cartId)
                 .products(Arrays.asList(product1, product2))
                 .recentPurchases(Arrays.asList(product1))
+                .shippingMethod(ShippingMethod.EXPRESS)
+                .shippingCost(ShippingMethod.EXPRESS.getCost())
                 .build();
 
         when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
@@ -1847,9 +1850,16 @@ class CartServiceUnitTest {
                     assertEquals(cartId, response.getCartId());
                     assertNotNull(response.getInvoiceId());
                     assertEquals(2, response.getProducts().size());
+                    assertEquals(ShippingMethod.EXPRESS, response.getShippingMethod());
+                    assertEquals(ShippingMethod.EXPRESS.getCost(), response.getShippingCost());
                     assertTrue(response.getTotal() > 0);
                 })
                 .verifyComplete();
+
+        ArgumentCaptor<Cart> checkoutCartCaptor = ArgumentCaptor.forClass(Cart.class);
+        verify(cartRepository).save(checkoutCartCaptor.capture());
+        assertEquals(ShippingMethod.PICKUP, checkoutCartCaptor.getValue().getShippingMethod());
+        assertEquals(ShippingMethod.PICKUP.getCost(), checkoutCartCaptor.getValue().getShippingCost());
 
         when(cartRepository.findCartByCartId("notfound")).thenReturn(Mono.empty());
         StepVerifier.create(cartService.checkoutCart("notfound"))
@@ -1990,6 +2000,44 @@ class CartServiceUnitTest {
                         t.getMessage().equals("Cart not found: " + cartId))
                 .verify();
 
+        verify(cartRepository, never()).save(any(Cart.class));
+    }
+
+    @Test
+    void updateShippingMethod_validMethod_setsMethodAndCost() {
+        String cartId = "shipping-cart";
+        Cart cart = Cart.builder()
+                .cartId(cartId)
+                .products(new ArrayList<>(List.of(product1)))
+                .shippingMethod(ShippingMethod.PICKUP)
+                .shippingCost(ShippingMethod.PICKUP.getCost())
+                .build();
+
+        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
+        when(cartRepository.save(any(Cart.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
+
+        StepVerifier.create(cartService.updateShippingMethod(cartId, "express"))
+                .assertNext(response -> {
+                    assertEquals(ShippingMethod.EXPRESS, response.getShippingMethod());
+                    assertEquals(ShippingMethod.EXPRESS.getCost(), response.getShippingCost());
+                    assertTrue(response.getTotal() > response.getSubtotal());
+                })
+                .verifyComplete();
+
+        ArgumentCaptor<Cart> cap = ArgumentCaptor.forClass(Cart.class);
+        verify(cartRepository).save(cap.capture());
+        assertEquals(ShippingMethod.EXPRESS, cap.getValue().getShippingMethod());
+        assertEquals(ShippingMethod.EXPRESS.getCost(), cap.getValue().getShippingCost());
+    }
+
+    @Test
+    void updateShippingMethod_invalidMethod_throwsInvalidInputAndDoesNotSave() {
+        StepVerifier.create(cartService.updateShippingMethod("shipping-cart", "OVERNIGHT"))
+                .expectErrorMatches(t -> t instanceof InvalidInputException &&
+                        t.getMessage().equals("Invalid shipping method. Allowed values are PICKUP, STANDARD, EXPRESS"))
+                .verify();
+
+        verify(cartRepository, never()).findCartByCartId(anyString());
         verify(cartRepository, never()).save(any(Cart.class));
     }
 

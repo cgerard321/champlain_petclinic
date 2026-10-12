@@ -2,6 +2,7 @@ package com.petclinic.cartsservice.businesslayer;
 
 import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.CartRepository;
+import com.petclinic.cartsservice.dataaccesslayer.ShippingMethod;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.domainclientlayer.CartItemRequestModel;
 import com.petclinic.cartsservice.domainclientlayer.ProductClient;
@@ -230,8 +231,9 @@ public class CartServiceImpl implements CartService {
 
                     String invoiceId = UUID.randomUUID().toString();
                     List<CartProduct> products = cart.getProducts();
-                    // this is the correct way to get the total do not use calculateTotal
-                    double total = EntityModelUtil.toCartResponseModel(cart, products).getTotal();
+                    //This keeps the full calculated receipt
+                    CartResponseModel checkoutResponse = EntityModelUtil.toCartResponseModel(cart, products);
+                    checkoutResponse.setInvoiceId(invoiceId);
 
                     // --- Recent Purchases Logic ---
                     List<CartProduct> updatedRecentPurchases = cart.getRecentPurchases() != null
@@ -269,9 +271,11 @@ public class CartServiceImpl implements CartService {
                             .flatMap(recommendations -> {
                                 cart.setRecommendationPurchase(recommendations);
                                 cart.setProducts(Collections.emptyList());
+                                cart.setShippingMethod(ShippingMethod.PICKUP);
+                                cart.setShippingCost(ShippingMethod.PICKUP.getCost());
 
                                 return cartRepository.save(cart)
-                                        .thenReturn(new CartResponseModel(invoiceId, cartId, products, total));
+                                        .thenReturn(checkoutResponse);
 
                                     });
                 });
@@ -311,6 +315,8 @@ public class CartServiceImpl implements CartService {
                             .tvq(0.0)
                             .tvc(0.0)
                             .total(0.0)
+                            .shippingMethod(ShippingMethod.PICKUP)
+                            .shippingCost(ShippingMethod.PICKUP.getCost())
                             .build();
 
                     return cartRepository.save(newCart)
@@ -441,6 +447,8 @@ public class CartServiceImpl implements CartService {
         newCart.setCustomerId(customerId);
         newCart.setCartId(UUID.randomUUID().toString());
         newCart.setProducts(new ArrayList<>());
+        newCart.setShippingMethod(ShippingMethod.PICKUP);
+        newCart.setShippingCost(ShippingMethod.PICKUP.getCost());
         return cartRepository.save(newCart);
     }
 
@@ -903,6 +911,30 @@ public class CartServiceImpl implements CartService {
                         return Mono.error(new InvalidInputException("promoPercent must be 1..100"));
                     }
                     cart.setPromoPercent(promoPercent);
+                    return cartRepository.save(cart);
+                })
+                .map(saved -> EntityModelUtil.toCartResponseModel(saved, saved.getProducts()));
+    }
+
+    @Override
+    public Mono<CartResponseModel> updateShippingMethod(String cartId, String shippingMethod) {
+        if (shippingMethod == null || shippingMethod.isBlank()) {
+            return Mono.error(new InvalidInputException("shippingMethod must be provided"));
+        }
+
+        final ShippingMethod resolvedMethod;
+        try {
+            resolvedMethod = ShippingMethod.valueOf(shippingMethod.trim().toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            return Mono.error(new InvalidInputException(
+                    "Invalid shipping method. Allowed values are PICKUP, STANDARD, EXPRESS"));
+        }
+
+        return cartRepository.findCartByCartId(cartId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
+                .flatMap(cart -> {
+                    cart.setShippingMethod(resolvedMethod);
+                    cart.setShippingCost(resolvedMethod.getCost());
                     return cartRepository.save(cart);
                 })
                 .map(saved -> EntityModelUtil.toCartResponseModel(saved, saved.getProducts()));

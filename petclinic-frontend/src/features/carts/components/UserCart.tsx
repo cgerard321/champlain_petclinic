@@ -19,7 +19,9 @@ import { formatPrice } from '../utils/formatPrice';
 import {
   applyPromo,
   clearPromo,
+  updateShippingMethod,
   type CartDetailsModel,
+  type ShippingMethod,
 } from '@/shared/api/cart';
 import {
   IsAdmin,
@@ -91,6 +93,9 @@ const UserCart: React.FC = () => {
   const [movingAll, setMovingAll] = useState<boolean>(false);
 
   const [promoPercent, setPromoPercent] = useState<number | null>(null);
+  const [shippingMethod, setShippingMethod] =
+    useState<ShippingMethod>('PICKUP');
+  const [shippingCost, setShippingCost] = useState<number>(0);
 
   const toProductModel = useCallback(
     (product: ProductAPIResponse): ProductModel => ({
@@ -185,6 +190,10 @@ const UserCart: React.FC = () => {
 
       setPromoPercent(
         typeof cartData.promoPercent === 'number' ? cartData.promoPercent : null
+      );
+      setShippingMethod(cartData.shippingMethod ?? 'PICKUP');
+      setShippingCost(
+        typeof cartData.shippingCost === 'number' ? cartData.shippingCost : 0
       );
 
       emitCartMessage(
@@ -333,12 +342,16 @@ const UserCart: React.FC = () => {
   const promoDiscount =
     promoPercent != null ? (subtotal * promoPercent) / 100 : 0;
   const discountedSubtotal = Math.max(0, subtotal - promoDiscount);
+  const effectiveShippingCost = cartItems.length > 0 ? shippingCost : 0;
+  const taxableSubtotal = roundToCents(
+    discountedSubtotal + effectiveShippingCost
+  );
   const resolvedTaxLines = computeTaxes(
-    discountedSubtotal,
+    taxableSubtotal,
     billingInfo?.province
   ).map(line => ({
     ...line,
-    amount: line.amount ?? roundToCents(discountedSubtotal * line.rate),
+    amount: line.amount ?? roundToCents(taxableSubtotal * line.rate),
   }));
   const totalTax = roundToCents(
     resolvedTaxLines.reduce((acc, line) => acc + (line.amount ?? 0), 0)
@@ -346,7 +359,7 @@ const UserCart: React.FC = () => {
 
   const effectiveDiscount = promoDiscount;
 
-  const total = roundToCents(discountedSubtotal + totalTax);
+  const total = roundToCents(taxableSubtotal + totalTax);
 
   const updateCartItemCount = useCallback(() => {
     const count = cartItems.reduce(
@@ -555,6 +568,28 @@ const UserCart: React.FC = () => {
       showToast('Promo removed.', 'success');
     } catch (err: unknown) {
       showToast(apiErrorMessage(err, 'Failed to remove promo.'), 'error');
+    }
+  };
+
+  const onShippingMethodChange = async (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ): Promise<void> => {
+    if (blockIfReadOnly()) return;
+    const existingCartId = ensureCartId();
+    if (!existingCartId) return;
+
+    const nextShippingMethod = event.target.value as ShippingMethod;
+    try {
+      const updatedCart = await updateShippingMethod(
+        existingCartId,
+        nextShippingMethod
+      );
+      syncCartState(updatedCart, 'Shipping method updated.');
+    } catch (err: unknown) {
+      showToast(
+        apiErrorMessage(err, 'Failed to update shipping method.'),
+        'error'
+      );
     }
   };
 
@@ -851,13 +886,20 @@ const UserCart: React.FC = () => {
       );
       const invoiceSubtotal = invoiceSubtotalCents / 100;
       const usedBilling = billing ?? billingInfo ?? null;
+      const shippingCents = Math.round(effectiveShippingCost * 100);
+      const discountCents = Math.round(effectiveDiscount * 100);
+      const invoiceTaxableSubtotalCents = Math.max(
+        0,
+        invoiceSubtotalCents - discountCents + shippingCents
+      );
+      const invoiceTaxableSubtotal = invoiceTaxableSubtotalCents / 100;
 
       const invoiceTaxLines = computeTaxes(
-        invoiceSubtotal,
+        invoiceTaxableSubtotal,
         usedBilling?.province
       ).map(line => ({
         ...line,
-        amount: line.amount ?? roundToCents(invoiceSubtotal * line.rate),
+        amount: line.amount ?? roundToCents(invoiceTaxableSubtotal * line.rate),
       }));
       const invoiceTaxCents = invoiceTaxLines.map(line =>
         Math.round((line.amount ?? 0) * 100)
@@ -866,9 +908,8 @@ const UserCart: React.FC = () => {
         (sum, cents) => sum + cents,
         0
       );
-      const discountCents = Math.round(effectiveDiscount * 100);
       const invoiceTotalCents =
-        invoiceSubtotalCents + invoiceTaxTotalCents - discountCents;
+        invoiceTaxableSubtotalCents + invoiceTaxTotalCents;
       const invoiceTvq = (invoiceTaxCents[0] ?? 0) / 100;
       const invoiceTvc =
         invoiceTaxCents.slice(1).reduce((sum, cents) => sum + cents, 0) / 100;
@@ -890,9 +931,12 @@ const UserCart: React.FC = () => {
         date: new Date().toISOString(),
         items: invoiceItemsForFull,
         subtotal: invoiceSubtotal,
+        taxableSubtotal: invoiceTaxableSubtotal,
         tvq: invoiceTvq,
         tvc: invoiceTvc,
         discount: effectiveDiscount,
+        shippingMethod,
+        shippingCost: effectiveShippingCost,
         total: invoiceTotal,
       };
       setLastInvoice(newInvoice);
@@ -900,6 +944,8 @@ const UserCart: React.FC = () => {
       setCheckoutMessage('Checkout successful! Your order is being processed.');
       setCartItems([]);
       setCartItemCount(0);
+      setShippingMethod('PICKUP');
+      setShippingCost(0);
       setIsCheckoutModalOpen(false);
 
       // Reset LS so navbar badge = 0 without API
@@ -1112,7 +1158,32 @@ const UserCart: React.FC = () => {
               <div className="CartSummary">
                 <h3>Cart Summary</h3>
                 <p className="summary-item">
-                  Subtotal: {formatPrice(subtotal)}
+                  Items subtotal: {formatPrice(subtotal)}
+                </p>
+                <p className="summary-item">
+                  Discount{promoPercent != null ? ` (${promoPercent}%)` : ''}:{' '}
+                  {formatPrice(effectiveDiscount)}
+                </p>
+                {cartItems.length > 0 && (
+                  <>
+                    <label htmlFor="shipping-method">Shipping method</label>
+                    <select
+                      id="shipping-method"
+                      value={shippingMethod}
+                      onChange={onShippingMethodChange}
+                      className="shipping-method-select"
+                    >
+                      <option value="PICKUP">Pickup - $0.00</option>
+                      <option value="STANDARD">Standard - $9.99</option>
+                      <option value="EXPRESS">Express - $19.99</option>
+                    </select>
+                  </>
+                )}
+                <p className="summary-item">
+                  Shipping: {formatPrice(effectiveShippingCost)}
+                </p>
+                <p className="summary-item">
+                  Subtotal: {formatPrice(taxableSubtotal)}
                 </p>
                 {resolvedTaxLines.map(line => (
                   <p key={`${line.name}-${line.rate}`} className="summary-item">
@@ -1125,10 +1196,6 @@ const UserCart: React.FC = () => {
                     Total taxes: {formatPrice(totalTax)}
                   </p>
                 )}
-                <p className="summary-item">
-                  Discount{promoPercent != null ? ` (${promoPercent}%)` : ''}:{' '}
-                  {formatPrice(effectiveDiscount)}
-                </p>
                 <p className="total-price summary-item">
                   Total: {formatPrice(total)}
                 </p>

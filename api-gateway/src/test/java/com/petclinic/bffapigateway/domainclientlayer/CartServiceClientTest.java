@@ -648,6 +648,61 @@ public class CartServiceClientTest {
                                 .verifyComplete();
         }
 
+        @Test
+        void testUpdateShippingMethod_Success() throws InterruptedException {
+                String cartId = "cart-shipping";
+                String responseBody = """
+                        {
+                                "cartId": "cart-shipping",
+                                "shippingMethod": "STANDARD",
+                                "shippingCost": 9.99
+                        }
+                        """;
+
+                prepareResponse(response -> response
+                                .setHeader("Content-Type", "application/json")
+                                .setBody(responseBody)
+                                .setResponseCode(200));
+
+                Mono<CartResponseDTO> result = mockCartServiceClient.updateShippingMethod(cartId, "STANDARD");
+
+                StepVerifier.create(result)
+                                .assertNext(cart -> {
+                                        assertEquals(cartId, cart.getCartId());
+                                        assertEquals("STANDARD", cart.getShippingMethod());
+                                        assertEquals(9.99, cart.getShippingCost());
+                                })
+                                .verifyComplete();
+
+                var recordedRequest = mockWebServer.takeRequest();
+                assertEquals("PUT", recordedRequest.getMethod());
+                assertEquals("/api/v1/carts/" + cartId + "/shipping", recordedRequest.getPath());
+                assertThat(recordedRequest.getBody().readUtf8()).contains("\"shippingMethod\":\"STANDARD\"");
+        }
+
+        @Test
+        void testUpdateShippingMethod_InvalidInput() {
+                String responseBody = """
+                        {
+                                "message": "Invalid shipping method. Allowed values are PICKUP, STANDARD, EXPRESS"
+                        }
+                        """;
+
+                prepareResponse(response -> response
+                                .setHeader("Content-Type", "application/json")
+                                .setBody(responseBody)
+                                .setResponseCode(422));
+
+                Mono<CartResponseDTO> result = mockCartServiceClient.updateShippingMethod("cart-shipping", "OVERNIGHT");
+
+                StepVerifier.create(result)
+                                .expectErrorSatisfies(throwable -> {
+                                        assertThat(throwable).isInstanceOf(InvalidInputException.class);
+                                        assertThat(throwable.getMessage()).contains("Invalid shipping method");
+                                })
+                                .verify();
+        }
+
     @Test
     void testAddProductToCart_InvalidInput_ErrorFromResponse() {
         String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
