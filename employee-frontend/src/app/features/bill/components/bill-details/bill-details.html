@@ -1,0 +1,163 @@
+<div class="bill-details-header">
+  <div>
+    <h2 mat-dialog-title>Bill Details</h2>
+    <p class="bill-details-subtitle">Billing information and payment details</p>
+  </div>
+
+  <span
+    class="bill-status"
+    [class.bill-status--paid]="bill().billStatus === 'PAID'"
+    [class.bill-status--overdue]="bill().billStatus === 'OVERDUE'"
+  >
+    {{ bill().billStatus }}
+  </span>
+</div>
+
+<mat-dialog-content class="bill-details-content">
+  <!-- Bill Information -->
+  <section class="bill-details-section">
+    <h3>Bill Information</h3>
+
+    <dl class="bill-details-grid">
+      <div class="bill-details-field">
+        <dt>Bill ID</dt>
+        <dd>{{ bill().billId }}</dd>
+      </div>
+
+      <div class="bill-details-field">
+        <dt>Visit Type</dt>
+        <dd>{{ bill().visitType }}</dd>
+      </div>
+
+      <div class="bill-details-field">
+        <dt>Customer Name</dt>
+        <dd>
+          @if (bill().customerFirstName || bill().customerLastName) {
+            {{ bill().customerFirstName }}
+            {{ bill().customerLastName }}
+          } @else {
+            Not available
+          }
+        </dd>
+      </div>
+
+      <div class="bill-details-field">
+        <dt>Customer ID</dt>
+        <dd>{{ bill().customerId }}</dd>
+      </div>
+
+      <div class="bill-details-field">
+        <dt>Veterinarian</dt>
+        <dd>
+          {{ bill().vetFirstName }}
+          {{ bill().vetLastName }}
+        </dd>
+      </div>
+
+      <div class="bill-details-field">
+        <dt>Veterinarian ID</dt>
+        <dd>{{ bill().vetId }}</dd>
+      </div>
+
+      <div class="bill-details-field">
+        <dt>Creation Date</dt>
+        <dd>{{ bill().date }}</dd>
+      </div>
+
+      <div class="bill-details-field">
+        <dt>Due Date</dt>
+        <dd>{{ bill().dueDate }}</dd>
+      </div>
+    </dl>
+  </section>
+
+  <!-- Payment Summary -->
+  <section class="bill-details-section">
+    <h3>Payment Summary</h3>
+
+    <dl class="bill-details-grid">
+      <div class="bill-details-field">
+        <dt>Original Amount</dt>
+        <dd>
+          {{ bill().amount | currency: 'CAD' : 'symbol-narrow' : '1.2-2' }}
+        </dd>
+      </div>
+
+      <div class="bill-details-field">
+        <dt>GST (5%)</dt>
+        <dd>
+          {{ bill().gstAmount ?? 0 | currency: 'CAD' : 'symbol-narrow' : '1.2-2' }}
+        </dd>
+      </div>
+
+      <div class="bill-details-field">
+        <dt>QST (9.975%)</dt>
+        <dd>
+          {{ bill().qstAmount ?? 0 | currency: 'CAD' : 'symbol-narrow' : '1.2-2' }}
+        </dd>
+      </div>
+
+      <div class="bill-details-field">
+        <dt>Total Taxes</dt>
+        <dd>
+          {{ bill().taxedAmount ?? 0 | currency: 'CAD' : 'symbol-narrow' : '1.2-2' }}
+        </dd>
+      </div>
+
+      <div class="bill-details-field">
+        <dt>Interest</dt>
+        <dd>
+          {{ bill().interest ?? 0 | currency: 'CAD' : 'symbol-narrow' : '1.2-2' }}
+        </dd>
+      </div>
+
+      <div class="bill-details-field bill-details-total">
+        <dt>Total Amount</dt>
+        <dd>
+          {{ bill().totalAmount ?? 0 | currency: 'CAD' : 'symbol-narrow' : '1.2-2' }}
+        </dd>
+      </div>
+    </dl>
+  </section>
+
+  <!-- Additional Information -->
+  <section class="bill-details-section">
+    <h3>Additional Information</h3>
+
+    <dl class="bill-details-grid">
+      <div class="bill-details-field">
+        <dt>Payment Status</dt>
+        <dd>{{ bill().billStatus }}</dd>
+      </div>
+
+      <div class="bill-details-field">
+        <dt>Archived</dt>
+        <dd>{{ bill().archive ? 'Yes' : 'No' }}</dd>
+      </div>
+
+      <div class="bill-details-field">
+        <dt>Interest Exempt</dt>
+        <dd>
+          {{ bill().interestExempt ? 'Yes' : 'No' }}
+        </dd>
+      </div>
+
+      <div class="bill-details-field">
+        <dt>Time Remaining</dt>
+        <dd>
+          @if (bill().billStatus === 'PAID') {
+            Bill paid
+          } @else if (bill().timeRemaining != null) {
+            {{ bill().timeRemaining }} days
+          } @else {
+            Not available
+          }
+        </dd>
+      </div>
+    </dl>
+  </section>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="bill-details-footer">
+  <button type="button" class="bill-details-close-button" (click)="close()">Close</button>
+</mat-dialog-actions>
