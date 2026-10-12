@@ -35,6 +35,7 @@ public class Cart {
     // Add recent purchases field
     private List<CartProduct> recentPurchases;
     private List<CartProduct> recommendationPurchase;
+    private List<Order> orders;
 
     private Double promoPercent;
     public Double getPromoPercent() { return promoPercent; }

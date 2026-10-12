@@ -2,11 +2,13 @@ package com.petclinic.cartsservice.businesslayer;
 
 import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.CartRepository;
+import com.petclinic.cartsservice.dataaccesslayer.Order;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.domainclientlayer.CartItemRequestModel;
 import com.petclinic.cartsservice.domainclientlayer.ProductClient;
 import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
+import com.petclinic.cartsservice.presentationlayer.OrderResponseModel;
 import com.petclinic.cartsservice.presentationlayer.WishlistItemRequestModel;
 import com.petclinic.cartsservice.presentationlayer.WishlistTransferDirection;
 import com.petclinic.cartsservice.utils.EntityModelUtil;
@@ -38,12 +40,13 @@ public class CartServiceImpl implements CartService {
     private final CartRepository cartRepository;
     private final ProductClient productClient;
     private final CustomerClient customerClient;
+    private final OrderServiceImpl orderService;
 
-
-    public CartServiceImpl(CartRepository cartRepository, ProductClient productClient, CustomerClient customerClient ) {
+    public CartServiceImpl(CartRepository cartRepository, ProductClient productClient, CustomerClient customerClient , OrderServiceImpl orderService) {
         this.cartRepository = cartRepository;
         this.productClient = productClient;
         this.customerClient = customerClient;
+        this.orderService = orderService;
     }
     private static final int DEFAULT_PAGE_SIZE = 50;
     private static final int MAX_PAGE_SIZE = 200;
@@ -233,49 +236,70 @@ public class CartServiceImpl implements CartService {
                     // this is the correct way to get the total do not use calculateTotal
                     double total = EntityModelUtil.toCartResponseModel(cart, products).getTotal();
 
-                    // --- Recent Purchases Logic ---
-                    List<CartProduct> updatedRecentPurchases = cart.getRecentPurchases() != null
-                            ? new ArrayList<>(cart.getRecentPurchases())
-                            : new ArrayList<>();
+                    // Order Feature Logic
 
-                    for (CartProduct purchasedProduct : products) {
-                        boolean found = false;
-                        for (CartProduct recent : updatedRecentPurchases) {
-                            if (recent.getProductId().equals(purchasedProduct.getProductId())) {
-                                recent.setQuantityInCart(
-                                        recent.getQuantityInCart() + purchasedProduct.getQuantityInCart()
-                                );
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (!found) {
-                            updatedRecentPurchases.add(purchasedProduct);
-                        }
-                    }
-                    cart.setRecentPurchases(updatedRecentPurchases);
+                    CartResponseModel calculatedCart = EntityModelUtil.toCartResponseModel(cart, products);
 
-                    // --- Recommendation Purchases Logic ---
-                    return Flux.fromIterable(products)
-                            .map(CartProduct::getProductId)
-                            .flatMap(productClient::getProductByProductId)
-                            .filter(product -> product.getProductType() != null)
-                            .map(ProductResponseModel::getProductType)
-                            .distinct()
-                            .flatMap(productClient::getProductsByType)
-                            .distinct(ProductResponseModel::getProductId)
-                            .map(this::toCartProduct)
-                            .collectList()
-                            .flatMap(recommendations -> {
-                                cart.setRecommendationPurchase(recommendations);
-                                cart.setProducts(Collections.emptyList());
+                    cart.setSubtotal(calculatedCart.getSubtotal());
+                    cart.setTvq(calculatedCart.getTvq());
+                    cart.setTvc(calculatedCart.getTvc());
+                    cart.setTotal(calculatedCart.getTotal());
 
-                                return cartRepository.save(cart)
-                                        .thenReturn(new CartResponseModel(invoiceId, cartId, products, total));
 
-                                    });
+                    return orderService.createOrder(cart)
+                            .map(orderService::toOrder)
+                            .flatMap(order -> {
+                                if (cart.getOrders() == null) {
+                                    cart.setOrders(new ArrayList<>());
+                                }
+                                cart.getOrders().add(order);
+
+
+                                // --- Recent Purchases Logic ---
+                                List<CartProduct> updatedRecentPurchases = cart.getRecentPurchases() != null
+                                        ? new ArrayList<>(cart.getRecentPurchases())
+                                        : new ArrayList<>();
+
+                                for (CartProduct purchasedProduct : products) {
+                                    boolean found = false;
+                                    for (CartProduct recent : updatedRecentPurchases) {
+                                        if (recent.getProductId().equals(purchasedProduct.getProductId())) {
+                                            recent.setQuantityInCart(
+                                                    recent.getQuantityInCart() + purchasedProduct.getQuantityInCart()
+                                            );
+                                            found = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!found) {
+                                        updatedRecentPurchases.add(purchasedProduct);
+                                    }
+                                }
+                                cart.setRecentPurchases(updatedRecentPurchases);
+
+                                // --- Recommendation Purchases Logic ---
+                                return Flux.fromIterable(products)
+                                        .map(CartProduct::getProductId)
+                                        .flatMap(productClient::getProductByProductId)
+                                        .filter(product -> product.getProductType() != null)
+                                        .map(ProductResponseModel::getProductType)
+                                        .distinct()
+                                        .flatMap(productClient::getProductsByType)
+                                        .distinct(ProductResponseModel::getProductId)
+                                        .map(this::toCartProduct)
+                                        .collectList()
+                                        .flatMap(recommendations -> {
+                                            cart.setRecommendationPurchase(recommendations);
+                                            cart.setProducts(Collections.emptyList());
+
+                                            return cartRepository.save(cart)
+                                                    .thenReturn(new CartResponseModel(invoiceId, cartId, products, total));
+
+                                        });
+                            });
                 });
     }
+
 
 
     private CartProduct toCartProduct(ProductResponseModel product) {

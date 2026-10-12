@@ -1,17 +1,21 @@
 package com.petclinic.cartsservice.utils;
 
 import com.petclinic.cartsservice.dataaccesslayer.Cart;
+import com.petclinic.cartsservice.dataaccesslayer.Order;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.dataaccesslayer.PromoCode;
 import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
+import com.petclinic.cartsservice.domainclientlayer.CustomerResponseModel;
 import com.petclinic.cartsservice.domainclientlayer.PromoCodeRequestModel;
 import com.petclinic.cartsservice.domainclientlayer.PromoCodeResponseModel;
 import com.petclinic.cartsservice.presentationlayer.CartRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
+import com.petclinic.cartsservice.presentationlayer.OrderResponseModel;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -127,6 +131,19 @@ public class EntityModelUtil {
     public static boolean isPromoActive(LocalDateTime expirationDate) {
         return expirationDate != null && expirationDate.isAfter(LocalDateTime.now());
     }
+
+    public static OrderResponseModel toOrderResponseModel(Order order) {
+        OrderResponseModel responseModel = new OrderResponseModel();
+        BeanUtils.copyProperties(order, responseModel);
+        return responseModel;
+    }
+
+    public static CustomerResponseModel toCustomerResponseModel(Mono<CustomerResponseModel> customerResponseModelMono){
+        CustomerResponseModel responseModel = new CustomerResponseModel();
+        BeanUtils.copyProperties(customerResponseModelMono, responseModel);
+        return responseModel;
+    }
+
 
 
     private static double round2(double v) {
