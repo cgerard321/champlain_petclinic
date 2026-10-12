@@ -13,6 +13,10 @@ import DeleteReviewModal from '@/features/products/components/DeleteReviewModal.
 import { Review } from '@/features/products/components/Review.tsx';
 import { useNavigate } from 'react-router-dom';
 import { ProductModel } from '@/features/products/models/ProductModels/ProductModel.ts';
+import { Reveal } from '@/shared/components';
+import { MdClear } from 'react-icons/md';
+import './ReviewsList.css';
+import Stack from 'react-bootstrap/Stack';
 
 interface ReviewListProps {
   productId: string | undefined;
@@ -40,6 +44,11 @@ export function ReviewsList({
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const navigate = useNavigate();
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const filteredReviews = productReviews.filter(r =>
+    r.review.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   useEffect(() => {
     onModifyReviews(productReviews.length);
@@ -107,6 +116,7 @@ export function ReviewsList({
       setCurrentUserReview({ rating: 0, review: '' });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
+    setSearchQuery('');
   }, [productId, isAuthenticated]);
 
   const handleEditReview = (): void => {
@@ -199,6 +209,32 @@ export function ReviewsList({
           </Button>
         </div>
 
+        {productReviews.length > 0 && (
+          <div className="review-search">
+            <Stack direction="horizontal">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Search for a review..."
+                className="search-input"
+              />
+              <Button
+                onClick={() => setSearchQuery('')}
+                aria-label="Clear search"
+              >
+                <MdClear />
+              </Button>
+            </Stack>
+            {filteredReviews.length > 0 && searchQuery != '' && (
+              <span className="reviews-search-result-count">
+                Showing {filteredReviews.length} of {productReviews.length}{' '}
+                review(s)
+              </span>
+            )}
+          </div>
+        )}
+
         <div className="rating-section-separator"></div>
 
         <WriteReviewModal
@@ -223,25 +259,29 @@ export function ReviewsList({
       </div>
 
       <div className="reviewsforproduct-container">
-        {productReviews.length > 0 ? (
-          productReviews.map((rating: RatingModel, index: number) => (
-            <Review
-              key={rating.customerId || index}
-              rating={rating}
-              index={index}
-              canEdit={
-                isAuthenticated &&
-                currentUserReview.rating > 0 &&
-                !!currentUserReview.customerId &&
-                currentUserReview.customerId === rating.customerId &&
-                !isStaff
-              }
-              onEdit={handleEditReview}
-              onDelete={handleDeleteReview}
-            />
+        {filteredReviews.length > 0 ? (
+          filteredReviews.map((rating: RatingModel, index: number) => (
+            <Reveal key={rating.customerId || index}>
+              <Review
+                key={rating.customerId || index}
+                rating={rating}
+                index={index}
+                canEdit={
+                  isAuthenticated &&
+                  currentUserReview.rating > 0 &&
+                  !!currentUserReview.customerId &&
+                  currentUserReview.customerId === rating.customerId &&
+                  !isStaff
+                }
+                onEdit={handleEditReview}
+                onDelete={handleDeleteReview}
+              />
+            </Reveal>
           ))
-        ) : (
+        ) : productReviews.length == 0 ? (
           <p>This item does not have any reviews yet!</p>
+        ) : (
+          <p>No results were found</p>
         )}
       </div>
     </div>
