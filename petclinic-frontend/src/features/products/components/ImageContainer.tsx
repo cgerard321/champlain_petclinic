@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import defaultProductImage from '@/assets/Products/defaultProductImage.svg';
 import { FileDetails } from '@/shared/models/FileDetails';
 import { getImage } from '../api/getImage';
@@ -33,6 +33,7 @@ export default function ImageContainer({
   );
   const [loadState, setLoadState] = useState<ImageLoadState>('loading');
   const [isFallback, setIsFallback] = useState(false);
+  const imageRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -121,12 +122,19 @@ export default function ImageContainer({
     return () => {
       cancelled = true;
     };
-  }, [image, imageId, imageUrl, productId]);
+  }, [
+    image?.fileData,
+    image?.fileType,
+    image?.fileName,
+    imageId,
+    imageUrl,
+    productId,
+  ]);
 
   const imageSource = imageUrl
     ? imageUrl
     : imageData
-      ? `data:${imageType || 'image/*'};base64,${imageData}`
+      ? `data:${imageType || 'image/png'};base64,${imageData}`
       : null;
   const isFetching =
     loadState === 'loading' &&
@@ -135,6 +143,15 @@ export default function ImageContainer({
     Boolean(productId || imageId);
   const showingFallback =
     isFallback || loadState === 'error' || (!imageSource && !isFetching);
+
+  useEffect(() => {
+    if (showingFallback || !imageSource) return;
+
+    const imageElement = imageRef.current;
+    if (imageElement?.complete && imageElement.naturalWidth > 0) {
+      setLoadState('loaded');
+    }
+  }, [imageSource, showingFallback]);
 
   const handleImageLoad = (): void => {
     if (!showingFallback && imageSource) setLoadState('loaded');
@@ -157,6 +174,7 @@ export default function ImageContainer({
         />
       )}
       <img
+        ref={imageRef}
         src={
           showingFallback
             ? defaultProductImage

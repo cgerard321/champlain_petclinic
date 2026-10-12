@@ -36,6 +36,12 @@
   animation: image-spinner 0.8s linear infinite;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .image-loading-spinner {
+    animation-duration: 2s;
+  }
+}
+
 @keyframes image-spinner {
   to {
     transform: rotate(360deg);
