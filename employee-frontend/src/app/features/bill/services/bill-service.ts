@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { filter, map, Observable } from 'rxjs';
 
 import { SseClient } from '@core/services/sse-client';
-import { Bill, BillRequestModel } from '@features/bill/models/bill.model';
+import { BillRecord, BillRequestModel } from '@features/bill/models/bill.model';
 import { Customer } from '@features/bill/models/customer.model';
 import { Veterinarian } from '@features/bill/models/vet.model';
 
@@ -13,8 +13,8 @@ export class BillService {
   private readonly sse = inject(SseClient);
   private readonly baseUrl = '/api/gateway/bills';
 
-  createBill(body: BillRequestModel): Observable<Bill> {
-    return this.http.post<Bill>(this.baseUrl, body);
+  createBill(body: BillRequestModel): Observable<BillRecord> {
+    return this.http.post<BillRecord>(this.baseUrl, body);
   }
 
   getVetByVetId(vetId: string): Observable<Veterinarian> {

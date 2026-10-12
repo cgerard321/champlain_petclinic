@@ -1,5 +1,5 @@
 <form (submit)="onSubmit($event)" novalidate>
-  <mat-card class="align-center" appearance="outlined">
+  <mat-card class="bill-update-summary" appearance="outlined">
     <mat-card-header>
       <h1>Welcome, {{ vets()[0]?.firstName + ' ' + vets()[0]?.lastName }}</h1>
     </mat-card-header>
@@ -25,8 +25,13 @@
           </mat-select>
         </mat-form-field>
       </div>
-      @if (submitted() && billRequestForm.customerId().invalid()) {
-        <mat-error class="center-error">Customer name is required.</mat-error>
+      @if (
+        (submitted() && billRequestForm.customerId().invalid()) ||
+        billRequestForm.customerId().touched()
+      ) {
+        @for (error of billRequestForm.customerId().errors(); track error) {
+          <mat-error class="center-error"> {{ error.message }}</mat-error>
+        }
       }
       <mat-divider />
       <div class="form-row">
@@ -40,8 +45,13 @@
           </mat-select>
         </mat-form-field>
       </div>
-      @if (submitted() && billRequestForm.visitType().invalid()) {
-        <mat-error class="center-error">Visit type is required.</mat-error>
+      @if (
+        (submitted() && billRequestForm.visitType().invalid()) ||
+        billRequestForm.visitType().touched()
+      ) {
+        @for (error of billRequestForm.visitType().errors(); track error) {
+          <mat-error class="center-error">{{ error.message }}.</mat-error>
+        }
       }
       <mat-divider />
       <div class="form-row">
@@ -57,8 +67,12 @@
           <span matTextPrefix>$&nbsp;</span>
         </mat-form-field>
       </div>
-      @if (submitted() && billRequestForm.amount().invalid()) {
-        <mat-error class="center-error">Amount is required.</mat-error>
+      @if (
+        (submitted() && billRequestForm.amount().invalid()) || billRequestForm.amount().touched()
+      ) {
+        @for (error of billRequestForm.amount().errors(); track error) {
+          <mat-error class="center-error">{{ error.message }}.</mat-error>
+        }
       }
       <mat-divider />
       <div class="form-row">
@@ -79,7 +93,7 @@
       <mat-divider />
     </mat-card-content>
     <mat-card-actions class="center-buttons">
-      <button matButton="filled" type="button" class="red" (click)="closeCreateBill()">
+      <button matButton="outlined" type="button" class="red" (click)="closeCreateBill()">
         Cancel
       </button>
       <button matButton="filled" type="submit">Submit</button>

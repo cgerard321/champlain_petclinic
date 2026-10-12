@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { form, FormField, required } from '@angular/forms/signals';
+import { form, FormField, required, min } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { provideNativeDateAdapter, MatOption } from '@angular/material/core';
@@ -75,6 +75,7 @@ export class CreateBill implements OnInit {
     required(schemaPath.vetId, { message: 'Vet is required' });
     required(schemaPath.date, { message: 'Date is required' });
     required(schemaPath.amount, { message: 'Amount is required' });
+    min(schemaPath.amount, 0, { message: 'Amount must not be less than 0' });
   });
 
   readonly dialogRef = inject(MatDialogRef<CreateBill>);
@@ -106,9 +107,7 @@ export class CreateBill implements OnInit {
       },
       error: (error: HttpErrorResponse) => {
         this.isSubmitting = false;
-        this.showSnackbar(`400 Bad request: ${error.message}`);
-        console.warn('Error status:', error.status);
-        console.warn('Error body:', error.error);
+        this.showSnackbar(`${error.message}`);
       },
     });
   }
@@ -122,6 +121,7 @@ export class CreateBill implements OnInit {
         error: () => {
           this.isLoading.set(false);
           this.errorMessage.set('Unable to load customers. Please try again later.');
+          this.showSnackbar(`${this.errorMessage()}`);
         },
         complete: () => this.isLoading.set(false),
       });
@@ -142,6 +142,7 @@ export class CreateBill implements OnInit {
         error: () => {
           this.isLoading.set(false);
           this.errorMessage.set('Unable to load veterinarians. Please try again later.');
+          this.showSnackbar(`${this.errorMessage()}`);
         },
         complete: () => this.isLoading.set(false),
       });

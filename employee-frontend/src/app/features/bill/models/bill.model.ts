@@ -1,24 +1,25 @@
-export interface Bill {
+export interface BillRecord {
   billId: string;
   customerId: string;
-  customerFirstName: string;
-  customerLastName: string;
-  visitType: string;
+  customerFirstName: string | null;
+  customerLastName: string | null;
   vetId: string;
-  vetFirstName: string;
-  vetLastName: string;
+  vetFirstName: string | null;
+  vetLastName: string | null;
+  visitType: string;
   date: Date;
+  dueDate: string;
   amount: number;
-  taxedAmount: number;
-  gstAmount: number;
-  qstAmount: number;
-  interest: number;
-  totalAmount: number;
-  billStatus: string;
-  dueDate: Date;
-  timeRemaining: number;
-  interestExempt: boolean;
-  archive: boolean;
+  totalAmount: number | null;
+  billStatus: 'PAID' | 'UNPAID' | 'OVERDUE';
+  archive: boolean | null;
+
+  taxedAmount?: number | null;
+  gstAmount?: number | null;
+  qstAmount?: number | null;
+  interest?: number | null;
+  interestExempt?: boolean;
+  timeRemaining?: number | null;
 }
 
 export interface BillRequestModel {

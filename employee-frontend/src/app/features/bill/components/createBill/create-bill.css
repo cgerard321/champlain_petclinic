@@ -4,11 +4,25 @@
   align-items: flex-start;
 }
 
+h1{
+  color: #2e523e;
+}
+
+label {
+  color: #2e523e;
+}
+
+.bill-create-form{
+  width: 100%;
+  padding: 20px;
+}
+
 mat-card {
   width: 540px;
 }
 
 mat-form-field {
+  width: 100%;
   vertical-align: middle;
   flex: 1;
 }
@@ -52,10 +66,14 @@ input.right-align::-webkit-inner-spin-button {
   gap: 12px;
 }
 
-.red {
-  background-color: red;
-}
-
 .center-error {
   text-align: center;
 }
+
+.bill-update-summary {
+  padding: 16px;
+  border: 1px solid #e0eae0;
+  border-radius: 10px;
+  background: #f7faf7;
+}
+
