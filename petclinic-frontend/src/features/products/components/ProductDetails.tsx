@@ -79,6 +79,7 @@ export default function ProductDetails(): JSX.Element {
     review: '',
   });
   const [productReviews, setProductReviews] = useState<RatingModel[]>([]);
+  const [selectedRating, setSelectedRating] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -192,6 +193,7 @@ export default function ProductDetails(): JSX.Element {
   };
 
   useEffect(() => {
+    setSelectedRating(null);
     fetchProduct();
     fetchRatings();
     if (isAuthenticated) {
@@ -218,6 +220,11 @@ export default function ProductDetails(): JSX.Element {
         : "Couldn't add to cart. Please try again."
     );
   };
+  const handleRatingFilter = (rating: number): void => {
+    setSelectedRating(currentRating =>
+      currentRating === rating ? null : rating
+    );
+  };
 
   const handleEditReview = (): void => {
     setShowEditModal(true);
@@ -240,6 +247,13 @@ export default function ProductDetails(): JSX.Element {
       console.error('Could not delete review', err);
     }
   };
+
+  const filteredProductReviews =
+    selectedRating === null
+      ? productReviews
+      : productReviews.filter(
+          review => Math.floor(review.rating) === selectedRating
+        );
 
   return (
     <>
@@ -421,16 +435,38 @@ export default function ProductDetails(): JSX.Element {
                             productReviews.length > 0
                               ? (count / productReviews.length) * 100
                               : 0;
+
+                          const ratingLabel = star === 1 ? 'star' : 'stars';
+                          const reviewLabel =
+                            count === 1 ? 'review' : 'reviews';
+
                           return (
-                            <div key={star} className="rating-bar-row">
-                              <span className="star-label">{star} stars</span>
-                              <div className="rating-bar">
-                                <div
+                            <button
+                              key={star}
+                              type="button"
+                              className={`rating-bar-row ${
+                                selectedRating === star
+                                  ? 'rating-bar-row-selected'
+                                  : ''
+                              }`}
+                              onClick={() => handleRatingFilter(star)}
+                              aria-pressed={selectedRating === star}
+                              aria-label={`${star} ${ratingLabel}, ${count} ${reviewLabel}`}
+                            >
+                              <span className="star-label">
+                                {star} {ratingLabel}
+                              </span>
+                              <span className="rating-bar">
+                                <span
                                   className="rating-bar-fill"
                                   style={{ width: `${percentage}%` }}
-                                ></div>
-                              </div>
-                            </div>
+                                ></span>
+                              </span>
+
+                              <span className="rating-category-count">
+                                {count}
+                              </span>
+                            </button>
                           );
                         })}
                       </div>
@@ -439,9 +475,24 @@ export default function ProductDetails(): JSX.Element {
                     <div className="rating-section-separator"></div>
 
                     <div className="review-action-row">
-                      <h3 className="reviews-heading">
-                        Reviews ({productReviews.length})
-                      </h3>
+                      <div className="reviews-heading-container">
+                        <h3 className="reviews-heading">
+                          Reviews ({filteredProductReviews.length}
+                          {selectedRating !== null
+                            ? ` of ${productReviews.length}`
+                            : ''}
+                          )
+                        </h3>
+                        {selectedRating !== null && (
+                          <button
+                            type="button"
+                            className="clear-rating-filter"
+                            onClick={() => setSelectedRating(null)}
+                          >
+                            Clear {selectedRating}-star filter
+                          </button>
+                        )}
+                      </div>
                       <Button
                         variant="primary"
                         onClick={() => {
@@ -481,8 +532,8 @@ export default function ProductDetails(): JSX.Element {
                   </div>
 
                   <div className="reviewsforproduct-container">
-                    {productReviews.length > 0 ? (
-                      productReviews.map(
+                    {filteredProductReviews.length > 0 ? (
+                      filteredProductReviews.map(
                         (rating: RatingModel, index: number) => (
                           <Review
                             key={rating.customerId || index}
@@ -502,7 +553,11 @@ export default function ProductDetails(): JSX.Element {
                         )
                       )
                     ) : (
-                      <p>This item does not have any reviews yet!</p>
+                      <p role="status">
+                        {selectedRating !== null
+                          ? `This item does not have any ${selectedRating}-star reviews.`
+                          : 'This item does not have any reviews yet!'}
+                      </p>
                     )}
                   </div>
                 </div>
