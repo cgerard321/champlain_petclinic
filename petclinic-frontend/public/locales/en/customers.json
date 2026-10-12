@@ -167,7 +167,8 @@
       "photoAlt": "{{name}} profile",
       "newPhotoAlt": "New pet profile",
       "type": "Type",
-      "age": "Age"
+      "age": "Age",
+      "year": "years"
     },
     "selectType": "Select a pet type",
     "loadingTypes": "Loading pet types...",

@@ -166,7 +166,8 @@
       "photoAlt": "Photo de profil de {{name}}",
       "newPhotoAlt": "Photo de profil du nouvel animal",
       "type": "Type",
-      "age": "Age"
+      "age": "Age",
+      "year": "ans"
     },
     "selectType": "Sélectionnez un type d'animal",
     "loadingTypes": "Chargement des types d'animaux...",

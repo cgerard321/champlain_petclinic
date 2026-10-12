@@ -362,7 +362,8 @@ const CustomerProfilePage: React.FC<CustomerProfilePageProps> = ({
                             </span>
                             <span className="customers-pet-detail">
                               <strong>{t('pets.fields.age')}:</strong>{' '}
-                              {calculateAge(pet.birthDate)} years
+                              {calculateAge(pet.birthDate)}{' '}
+                              {t('pets.fields.year')}
                             </span>
                           </div>
                         </div>
