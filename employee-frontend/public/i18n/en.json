@@ -13,6 +13,12 @@
       "cancel": "Cancel",
       "close": "Close settings",
       "saved": "Changes saved",
+      "leave": {
+        "title": "Unsaved changes",
+        "message": "Your changes have not been saved. Do you want to leave this page?",
+        "confirm": "Leave",
+        "cancel": "Stay"
+      },
       "security": {
         "title": "Security",
         "account": {
@@ -36,6 +42,14 @@
             "noSpaceNoAt": "No spaces or \"@\"",
             "noTrailing": "Doesn't end with an underscore, and no two in a row"
           }
+        },
+        "password": {
+          "title": "Password",
+          "intro": "Receive a link by email to choose a new password.",
+          "label": "Email",
+          "send": "Send link",
+          "retryIn": "Send again in",
+          "sent": "If this email matches an account, a reset link has been sent."
         }
       },
       "display": {
