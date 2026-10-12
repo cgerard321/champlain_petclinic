@@ -109,9 +109,6 @@ const UserCart: React.FC = () => {
 
     try {
       const data = await getCustomerOrders(customerId);
-
-      console.log('Fetched orders:', data);
-
       setOrders(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Failed to fetch orders:', error);
@@ -217,9 +214,7 @@ const UserCart: React.FC = () => {
       setWishlistItems(normalizedWishlist);
 
       setPromoPercent(
-        typeof cartData.promoPercent === 'number'
-          ? cartData.promoPercent
-          : null,
+        typeof cartData.promoPercent === 'number' ? cartData.promoPercent : null
       );
 
       emitCartMessage(
@@ -349,7 +344,7 @@ const UserCart: React.FC = () => {
     } catch (err: unknown) {
       showToast(
         apiErrorMessage(err, `Failed to add ${item.productName} to cart.`),
-        "error"
+        'error'
       );
     }
   };
@@ -976,7 +971,7 @@ const UserCart: React.FC = () => {
           error as { response?: { data?: { message?: string } } }
         ).response?.data;
         setCheckoutMessage(
-          `Checkout failed: ${errorData?.message || "Unexpected error"}`,
+          `Checkout failed: ${errorData?.message || 'Unexpected error'}`,
         );
       } else {
         setCheckoutMessage('Checkout failed: Unexpected error');
@@ -1219,7 +1214,7 @@ const UserCart: React.FC = () => {
           ) : ordersError ? (
             <p className="error">{ordersError}</p>
           ) : orders.length === 0 ? (
-            <p>You haven't placed any orders yet.</p>
+            <p>You have not placed any orders yet.</p>
           ) : (
             <div className="orders-list">
               {orders.map(order => (
