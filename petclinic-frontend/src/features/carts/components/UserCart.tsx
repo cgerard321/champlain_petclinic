@@ -1155,6 +1155,22 @@ const UserCart: React.FC = () => {
                 )}
               </div>
 
+              {cartItems.length > 0 && (
+                <div className="voucher-code-section" style={{ marginTop: 12 }}>
+                  <label htmlFor="shipping-method">Shipping method</label>
+                  <select
+                    id="shipping-method"
+                    value={shippingMethod}
+                    onChange={onShippingMethodChange}
+                    className="shipping-method-select"
+                  >
+                    <option value="PICKUP">Pickup - $0.00</option>
+                    <option value="STANDARD">Standard - $9.99</option>
+                    <option value="EXPRESS">Express - $19.99</option>
+                  </select>
+                </div>
+              )}
+
               <div className="CartSummary">
                 <h3>Cart Summary</h3>
                 <p className="summary-item">
@@ -1164,21 +1180,6 @@ const UserCart: React.FC = () => {
                   Discount{promoPercent != null ? ` (${promoPercent}%)` : ''}:{' '}
                   {formatPrice(effectiveDiscount)}
                 </p>
-                {cartItems.length > 0 && (
-                  <>
-                    <label htmlFor="shipping-method">Shipping method</label>
-                    <select
-                      id="shipping-method"
-                      value={shippingMethod}
-                      onChange={onShippingMethodChange}
-                      className="shipping-method-select"
-                    >
-                      <option value="PICKUP">Pickup - $0.00</option>
-                      <option value="STANDARD">Standard - $9.99</option>
-                      <option value="EXPRESS">Express - $19.99</option>
-                    </select>
-                  </>
-                )}
                 <p className="summary-item">
                   Shipping: {formatPrice(effectiveShippingCost)}
                 </p>
