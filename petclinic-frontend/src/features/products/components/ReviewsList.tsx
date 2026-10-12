@@ -115,8 +115,8 @@ export function ReviewsList({
     } else {
       setCurrentUserReview({ rating: 0, review: '' });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     setSearchQuery('');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productId, isAuthenticated]);
 
   const handleEditReview = (): void => {
@@ -215,7 +215,7 @@ export function ReviewsList({
               <input
                 type="text"
                 value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value.trimStart())}
                 placeholder="Search for a review..."
                 className="search-input"
               />
@@ -226,7 +226,7 @@ export function ReviewsList({
                 <MdClear />
               </Button>
             </Stack>
-            {filteredReviews.length > 0 && searchQuery != '' && (
+            {filteredReviews.length > 0 && searchQuery !== '' && (
               <span className="reviews-search-result-count">
                 Showing {filteredReviews.length} of {productReviews.length}{' '}
                 review(s)
@@ -263,7 +263,6 @@ export function ReviewsList({
           filteredReviews.map((rating: RatingModel, index: number) => (
             <Reveal key={rating.customerId || index}>
               <Review
-                key={rating.customerId || index}
                 rating={rating}
                 index={index}
                 canEdit={
@@ -275,10 +274,11 @@ export function ReviewsList({
                 }
                 onEdit={handleEditReview}
                 onDelete={handleDeleteReview}
+                searchQuery={searchQuery}
               />
             </Reveal>
           ))
-        ) : productReviews.length == 0 ? (
+        ) : productReviews.length === 0 ? (
           <p>This item does not have any reviews yet!</p>
         ) : (
           <p>No results were found</p>

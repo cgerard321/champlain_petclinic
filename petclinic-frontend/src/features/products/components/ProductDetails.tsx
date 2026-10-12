@@ -104,6 +104,7 @@ export default function ProductDetails(): JSX.Element {
   };
   useEffect(() => {
     fetchProduct();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productId, isAuthenticated]);
 
   const isUnlisted = currentProduct.isUnlisted;
