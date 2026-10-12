@@ -6,7 +6,7 @@
     <mat-divider />
     <mat-card-content>
       <div class="form-row">
-        <label for="vetId" class="label-size">Veteranarian Name:</label>
+        <label for="vetId" class="label-size">Veterinarian Name:</label>
         <mat-form-field appearance="outline">
           <input matInput disabled [value]="vets()[0]?.firstName + ' ' + vets()[0]?.lastName" />
           <input id="vetId" type="hidden" [formField]="billRequestForm.vetId" />
