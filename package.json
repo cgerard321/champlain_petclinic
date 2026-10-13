@@ -1,5 +1,7 @@
 {
   "dependencies": {
+    "@angular/material": "^22.2.1",
+    "@angular/router": "^22.2.1",
     "@types/bad-words": "^3.0.3",
     "axios": "^1.7.7",
     "bad-words": "^4.0.0",
