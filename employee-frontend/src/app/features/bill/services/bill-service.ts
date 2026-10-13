@@ -1,14 +1,14 @@
 import { formatDate } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Customer } from '@features/bill/models/customer.model';
-import { Veterinarian } from '@features/bill/models/vet.model';
 import { EMPTY, filter, map, Observable, switchMap } from 'rxjs';
 
 import { CurrentUserResponse } from '@core/models/current-user-response';
 import { AuthState } from '@core/services/auth-state';
 import { SseClient } from '@core/services/sse-client';
 import { BillRecord, BillRequestModel, BillUpdateRequest } from '@features/bill/models/bill.model';
+import { Customer } from '@features/bill/models/customer.model';
+import { Veterinarian } from '@features/bill/models/vet.model';
 import { Roles } from '@shared/models/roles';
 
 type BillApiRecord = Omit<BillRecord, 'date' | 'dueDate'> & {
