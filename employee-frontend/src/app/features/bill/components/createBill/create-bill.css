@@ -4,7 +4,7 @@
   align-items: flex-start;
 }
 
-h1{
+h1 {
   color: #2e523e;
 }
 
@@ -12,7 +12,7 @@ label {
   color: #2e523e;
 }
 
-.bill-create-form{
+.bill-create-form {
   width: 100%;
   padding: 20px;
 }
@@ -76,4 +76,3 @@ input.right-align::-webkit-inner-spin-button {
   border-radius: 10px;
   background: #f7faf7;
 }
-

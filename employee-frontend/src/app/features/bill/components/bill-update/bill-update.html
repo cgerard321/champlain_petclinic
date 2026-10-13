@@ -1,0 +1,64 @@
+<h2 mat-dialog-title>Update Bill</h2>
+
+<form class="bill-update-form" (submit)="submit($event)">
+  <mat-dialog-content class="bill-update-content">
+    <div class="bill-update-summary">
+      <p><strong>Bill ID:</strong> {{ bill.billId }}</p>
+      <p>
+        <strong>Customer:</strong>
+        {{ bill.customerFirstName }} {{ bill.customerLastName }}
+      </p>
+      <p>
+        <strong>Veterinarian:</strong>
+        {{ bill.vetFirstName }} {{ bill.vetLastName }}
+      </p>
+      <p><strong>Creation Date:</strong> {{ bill.date }}</p>
+    </div>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Visit Type</mat-label>
+
+      <mat-select [formField]="billForm.visitType">
+        @for (type of visitTypes; track type) {
+          <mat-option [value]="type">{{ type }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Amount (CAD)</mat-label>
+      <input matInput type="number" step="0.01" [formField]="billForm.amount" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Due Date</mat-label>
+      <input matInput type="date" [min]="model().date" [formField]="billForm.dueDate" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Bill Status</mat-label>
+      <mat-select [formField]="billForm.billStatus">
+        <mat-option value="UNPAID">Unpaid</mat-option>
+        <mat-option value="PAID">Paid</mat-option>
+
+        @if (bill.billStatus === 'OVERDUE') {
+          <mat-option value="OVERDUE">Overdue</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    @if (errorMessage()) {
+      <p class="bill-update-error" role="alert">
+        {{ errorMessage() }}
+      </p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" [disabled]="isSaving()" (click)="cancel()">Cancel</button>
+
+    <button mat-flat-button type="submit" [disabled]="isSaving()">
+      {{ isSaving() ? 'Saving...' : 'Save Changes' }}
+    </button>
+  </mat-dialog-actions>
+</form>
