@@ -1,0 +1,62 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 12px;
+}
+
+.dialog-header h2 {
+  margin: 0;
+}
+
+.follow-up-form,
+mat-dialog-content {
+  display: flex;
+  flex-direction: column;
+}
+
+mat-dialog-content {
+  gap: 12px;
+  padding: 8px 24px 20px;
+}
+
+.visit-details {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.visit-details div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.visit-details span {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 13px;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+mat-dialog-actions {
+  padding: 12px 24px 20px;
+}
+
+.error-message {
+  color: var(--mat-sys-error, #b00020);
+}
+
+@media (width <= 560px) {
+  .visit-details {
+    grid-template-columns: 1fr;
+  }
+}
