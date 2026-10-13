@@ -11,7 +11,9 @@ import { ProductModel } from '../models/ProductModel';
 import './cart-shared.css';
 import './UserCart.css';
 import { NavBar } from '@/layouts/AppNavBar';
-import { FaShoppingCart } from 'react-icons/fa';
+import { FaShoppingCart, FaHeart, FaRegHeart } from 'react-icons/fa';
+import { useAddToWishlist } from '../api/addToWishlistFromProducts';
+import { useRemoveFromWishlistByIcon } from '../api/removeProductFromWishlist';
 import ImageContainer from '@/features/products/components/ImageContainer';
 import axiosInstance from '@/shared/api/axiosInstance';
 import getErrorMessage from '@/shared/api/getErrorMessage';
@@ -252,6 +254,34 @@ const UserCart: React.FC = () => {
         'error'
       );
     }
+  };
+
+  const { addToWishlist: addRecommendationToWishlist } = useAddToWishlist();
+  const { removeFromWishlistByIcon } = useRemoveFromWishlistByIcon();
+
+  const isInWishlist = (productId: string): boolean =>
+    wishlistItems.some(p => p.productId === productId);
+
+  const toggleRecommendationWishlist = async (
+    productId: string
+  ): Promise<void> => {
+    let success;
+    if (isInWishlist(productId)) {
+      success = await removeFromWishlistByIcon(productId);
+    } else {
+      success = await addRecommendationToWishlist(productId, 1);
+    }
+
+    if (!success) {
+      showToast('Could not update wishlist.', 'error');
+      return;
+    }
+
+    const { data } = await axiosInstance.get<CartDetailsModel>(
+      `/carts/${cartId}`,
+      { useV2: false }
+    );
+    syncCartState(data);
   };
 
   // Recommendation purchases state
@@ -1328,6 +1358,18 @@ const UserCart: React.FC = () => {
                   key={item.productId}
                   className="recommendation-purchase-card cart-card"
                 >
+                  <button
+                    className="wishlist-heart-btn"
+                    title="Add to Wishlist"
+                    onClick={() => toggleRecommendationWishlist(item.productId)}
+                  >
+                    {isInWishlist(item.productId) && (
+                      <FaHeart style={{ color: '#e11d48' }} />
+                    )}
+                    {!isInWishlist(item.productId) && (
+                      <FaRegHeart style={{ color: '#000' }} />
+                    )}
+                  </button>
                   <div className="recent-purchase-image-container">
                     <div
                       onClick={() =>
