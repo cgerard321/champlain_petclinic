@@ -55,11 +55,7 @@ export class Bill implements OnInit {
     }
 
     this.dialog
-      .open(CreateBill, {
-        width: '750px',
-        maxWidth: '95vw',
-        maxHeight: '90vh',
-      })
+      .open(CreateBill)
       .afterClosed()
       .pipe(take(1), takeUntilDestroyed(this.destroyRef))
       .subscribe((createdBill: unknown) => {

@@ -7,14 +7,9 @@
     </div>
 
     @if (canCreateBill()) {
-      <<<<<<< HEAD
-      <button class="bill-primary-action" type="button">Create Bill</button>
-      =======
-      <!-- The create flow belongs to the follow-up Bill CRUD story. -->
       <button class="bill-primary-action" type="button" (click)="openCreateBill()">
         Create Bill
       </button>
-      >>>>>>> origin/main
     }
   </header>
 
@@ -189,7 +184,9 @@
         } @else if (displayedBills().length === 0) {
           <div class="bill-empty-state" role="status">
             @if (canViewBills()) {
-              <h3>{{ showArchivedBills() ? 'No archived bills' : 'No active bills' }}</h3>
+              <h3>
+                {{ showArchivedBills() ? 'No archived bills' : 'No active bills' }}
+              </h3>
 
               <p>
                 {{
