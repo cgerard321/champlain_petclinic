@@ -37,6 +37,17 @@
   color: rgb(5 73 52);
 }
 
+.lang-switcher {
+  display: flex;
+  gap: 4px;
+}
+
+.lang-switcher button.active {
+  background-color:rgb(0 0 0 / 6%);
+  color: white;
+  font-weight: 600;
+}
+
 mat-toolbar {
   background-color: #c2daae;
 }

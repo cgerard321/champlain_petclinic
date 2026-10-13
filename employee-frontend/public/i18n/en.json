@@ -7,6 +7,18 @@
       "password": "Password",
       "submit": "Sign in"
     },
+    "navbar": {
+      "home": "Home",
+      "veterinarians": "Veterinarians",
+      "customers": "Customers",
+      "bills": "Bills",
+      "visits": "Visits",
+      "inventory": "Inventory",
+      "products": "Products",
+      "promos": "Promos",
+      "settings": "Settings",
+      "logout": "Logout"
+    },
     "settings": {
       "title": "Settings",
       "save": "Save",
@@ -30,11 +42,56 @@
       "back": "Back to home"
     },
     "footer": {
-      "brand": "PetClinic Employee Portal",
+      "description": "Providing compassionate veterinary care to keep your pets healthy and happy.",
+      "contact": "Contact Us",
       "privacy": "Privacy Policy",
       "terms": "Terms of Service",
-      "support": "Support",
       "copyright": "© 2026 Champlain Pet Clinic. All rights reserved."
+    },
+    "visits": {
+      "followUp": {
+        "actions": "Actions",
+        "button": "Schedule follow-up",
+        "title": "Schedule a follow-up visit",
+        "close": "Close",
+        "pet": "Pet",
+        "veterinarian": "Veterinarian",
+        "date": "Date",
+        "time": "Available time",
+        "description": "Description",
+        "loadingSlots": "Loading available times...",
+        "noSlots": "No available times for this date.",
+        "cancel": "Cancel",
+        "schedule": "Schedule",
+        "dateRequired": "Date is required",
+        "timeRequired": "Time is required",
+        "descriptionRequired": "Description is required",
+        "descriptionInvalid": "Description must contain text",
+        "slotsError": "Could not load available times.",
+        "scheduleError": "Could not schedule the follow-up.",
+        "confirmation": "The follow-up visit was scheduled."
+      }
+    },
+    "vets": {
+      "eyebrow": "Veterinary team",
+      "title": "Veterinarians",
+      "description": "The people behind every healthy pet.",
+      "directory": {
+        "heading": "Get to know your veterinary team.",
+        "description": "Explore veterinarian profiles and discover their areas of expertise.",
+        "sample_preview": "Sample profiles · Design preview",
+        "button": "Explore directory",
+        "preview_note": "Veterinarian directory coming soon."
+      },
+      "working_hours": {
+        "heading": "Working hours",
+        "description": "The team's weekly schedule, all in one place."
+      },
+      "coming_soon": "Coming soon",
+      "specialties": {
+        "heading": "Specialties",
+        "description": "Discover the clinic's different areas of care."
+      }
     }
   }
 }

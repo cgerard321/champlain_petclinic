@@ -1426,19 +1426,15 @@ const UserCart: React.FC = () => {
         </div>
 
         {showBillingForm && (
-          <div className="modal-backdrop">
-            <div className="modal-content">
-              <CartBillingForm
-                isOpen={true}
-                onClose={() => setShowBillingForm(false)}
-                onSubmit={async billing => {
-                  setBillingInfo(billing);
-                  await handleCheckout(billing);
-                  setShowBillingForm(false);
-                }}
-              />
-            </div>
-          </div>
+          <CartBillingForm
+            isOpen={true}
+            onClose={() => setShowBillingForm(false)}
+            onSubmit={async billing => {
+              setBillingInfo(billing);
+              await handleCheckout(billing);
+              setShowBillingForm(false);
+            }}
+          />
         )}
 
         {isCheckoutModalOpen && (
