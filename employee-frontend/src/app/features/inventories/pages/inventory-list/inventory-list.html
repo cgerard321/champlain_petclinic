@@ -3,63 +3,19 @@
     <h1>Inventory</h1>
 
     @if (can().canCreateInventory) {
-      <button type="button" class="add-inventory-button" (click)="toggleAddForm()">
-        {{ showAddForm() ? 'Cancel' : 'Add Inventory' }}
+      <button
+        type="button"
+        class="add-inventory-button"
+        [disabled]="savingInventory() || inventoryTypesLoading()"
+        (click)="openAddDialog()"
+      >
+        {{ savingInventory() ? 'Saving...' : 'Add Inventory' }}
       </button>
     }
   </div>
 
-  @if (showAddForm() && (can().canCreateInventory || can().canUpdateInventory)) {
-    <form class="inventory-form" (submit)="saveInventory($event)">
-      <h2>{{ editingInventoryId() ? 'Edit Inventory' : 'Add Inventory' }}</h2>
-
-      <label for="inventoryName">Name</label>
-      <input id="inventoryName" type="text" [formField]="inventoryForm.inventoryName" />
-      @if (inventoryForm.inventoryName().touched() && inventoryForm.inventoryName().invalid()) {
-        <p class="field-error">{{ inventoryForm.inventoryName().errors()[0]?.message }}</p>
-      }
-
-      <label for="inventoryType">Type</label>
-      <select id="inventoryType" [formField]="inventoryForm.inventoryType">
-        @for (type of inventoryTypesDropdown; track type) {
-          <option [value]="type">{{ type }}</option>
-        }
-      </select>
-      @if (inventoryForm.inventoryType().touched() && inventoryForm.inventoryType().invalid()) {
-        <p class="field-error">{{ inventoryForm.inventoryType().errors()[0]?.message }}</p>
-      }
-
-      <label for="inventoryDescription">Description</label>
-      <input
-        id="inventoryDescription"
-        type="text"
-        [formField]="inventoryForm.inventoryDescription"
-      />
-      @if (
-        inventoryForm.inventoryDescription().touched() &&
-        inventoryForm.inventoryDescription().invalid()
-      ) {
-        <p class="field-error">
-          {{ inventoryForm.inventoryDescription().errors()[0]?.message }}
-        </p>
-      }
-
-      @if (formError()) {
-        <p class="field-error" role="alert">{{ formError() }}</p>
-      }
-
-      <button type="submit" class="add-inventory-button" [disabled]="savingInventory()">
-        {{
-          savingInventory()
-            ? editingInventoryId()
-              ? 'Saving...'
-              : 'Adding...'
-            : editingInventoryId()
-              ? 'Save Changes'
-              : 'Add Inventory'
-        }}
-      </button>
-    </form>
+  @if (formError(); as error) {
+    <p class="field-error" role="alert">{{ error }}</p>
   }
 
   @if (!can().hasAnyAccess) {

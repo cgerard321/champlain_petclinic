@@ -1,166 +1,130 @@
-import { FormEvent, useEffect, useState } from 'react';
-import { getCustomer } from '@/features/customers/api/getCustomer.ts';
-
-import { getUserDetails } from '@/features/customers/api/getUserDetails';
+import { FormEvent, useState } from 'react';
+import { CustomerRequestModel } from '@/features/customers/models/CustomerRequestModel.ts';
 import { CustomerResponseModel } from '@/features/customers/models/CustomerResponseModel.ts';
-
 import { UserDetailsModel } from '@/features/customers/models/UserDetailsModel';
 import { useUser } from '@/context/UserContext';
+import { useToast } from '@/shared/components/toast/ToastProvider';
+import { useUsernameValidation } from '../hooks/useUsernameValidation';
+
+import { validateTelephone } from '../utils/validation';
+import { provincesOfCanada } from '../utils/provinces';
+
+import { updateCustomer } from '../api/updateCustomer.ts';
+import { updateUsername } from '../api/updateUsername.ts';
 
 import defaultProfile from '@/assets/Customers/defaultProfilePicture.png';
 
-import { useToast } from '@/shared/components/toast/ToastProvider';
-import { useUsernameValidation } from '../hooks/useUsernameValidation';
-import { CustomerRequestModel } from '@/features/customers/models/CustomerRequestModel.ts';
-import { provincesOfCanada } from '../utils/provinces';
-import { updateUsername } from '@/features/customers/api/updateUsername.ts';
-import { updateCustomer } from '@/features/customers/api/updateCustomer.ts';
-import { validateTelephone } from '@/features/customers/utils/validation.ts';
-import { t } from 'i18next';
+import './UpdateCustomerForm.css';
+import { useTranslation } from 'react-i18next';
 
-const CustomerProfilePage = ({
+const NewUpdateCustomerForm = ({
+  customer,
+  userDetails,
+  profilePicUrl,
+  setCustomer,
   onBackButtonClick,
 }: {
+  customer: CustomerResponseModel;
+  userDetails: UserDetailsModel;
+  profilePicUrl: string;
+
+  setCustomer: React.Dispatch<
+    React.SetStateAction<CustomerResponseModel | null>
+  >;
+
   onBackButtonClick: () => void;
 }): JSX.Element => {
-  const { showToast } = useToast();
+  const { t } = useTranslation('customers');
   const { user, checkSession } = useUser();
+  const { showToast } = useToast();
   const { validateUsernameField } = useUsernameValidation();
-  const [customer, setCustomer] = useState<CustomerRequestModel>({
-    firstName: '',
-    lastName: '',
-    address: '',
-    city: '',
-    province: '',
-    telephone: '',
+
+  const [formCustomer, setFormCustomer] = useState<CustomerRequestModel>({
+    firstName: customer.firstName,
+    lastName: customer.lastName,
+    address: customer.address,
+    city: customer.city,
+    province: customer.province,
+    telephone: customer.telephone,
   });
-  const [userDetails, setUserDetails] = useState<UserDetailsModel | null>(null);
-  const [username, setUsername] = useState<string>('');
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [profilePicUrl, setProfilePicUrl] = useState<string>('');
 
-  useEffect(() => {
-    let isMounted = true;
-    let objectUrl: string | null = null;
+  const [username, setUsername] = useState<string>(userDetails.username);
 
-    const fetchProfilePic = async (): Promise<void> => {
-      if (!user.userId) return;
-
-      try {
-        const customerResponse = await getCustomer(user.userId, true);
-        const customerData = customerResponse.data;
-
-        if (customerData.photo && customerData.photo.fileData) {
-          const base64Data = customerData.photo.fileData;
-          const contentType = customerData.photo.fileType || 'image/png';
-          const byteCharacters = atob(base64Data);
-          const byteNumbers = new Array(byteCharacters.length);
-          for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i);
-          }
-          const byteArray = new Uint8Array(byteNumbers);
-          const blob = new Blob([byteArray], { type: contentType });
-          objectUrl = URL.createObjectURL(blob);
-          if (isMounted) {
-            setProfilePicUrl(objectUrl);
-          }
-        } else {
-          if (isMounted) {
-            setProfilePicUrl('');
-          }
-        }
-      } catch (err) {
-        console.warn(
-          'Failed to fetch customer profile picture, using local default',
-          err
-        );
-        if (isMounted) {
-          setProfilePicUrl('');
-        }
-      }
-    };
-
-    fetchProfilePic();
-    const fetchData = async (): Promise<void> => {
-      try {
-        const [customerResponse, userResponse] = await Promise.all([
-          getCustomer(user.userId),
-          getUserDetails(user.userId),
-        ]);
-
-        const customerData: CustomerResponseModel = customerResponse.data;
-        setCustomer({
-          firstName: customerData.firstName,
-          lastName: customerData.lastName,
-          address: customerData.address,
-          city: customerData.city,
-          province: customerData.province,
-          telephone: customerData.telephone,
-        });
-
-        const userData: UserDetailsModel = userResponse.data;
-        setUserDetails(userData);
-        setUsername(userData.username);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        setUserDetails({
-          userId: user.userId,
-          username: 'Unknown',
-          email: '',
-          roles: [],
-          verified: false,
-          disabled: false,
-        });
-        setUsername('Unknown');
-      }
-    };
-
-    fetchData();
-    return () => {
-      isMounted = false;
-      if (objectUrl) {
-        URL.revokeObjectURL(objectUrl);
-      }
-    };
-  }, [user.userId]);
+  const [errors, setErrors] = useState<{
+    [key: string]: string;
+  }>({});
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ): void => {
     const { name, value } = e.target;
-    setCustomer({ ...customer, [name]: value });
+
+    setFormCustomer(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: '',
+      }));
+    }
   };
 
   const handleUsernameChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ): void => {
     setUsername(e.target.value);
+
     if (errors.username) {
-      setErrors(prev => ({ ...prev, username: '' }));
+      setErrors(prev => ({
+        ...prev,
+        username: '',
+      }));
     }
   };
 
   const validate = async (): Promise<boolean> => {
     const newErrors: { [key: string]: string } = {};
-    if (!customer.firstName)
-      newErrors.firstName = 'validation.firstNameRequired';
-    if (!customer.lastName) newErrors.lastName = 'validation.lastNameRequired';
-    if (!customer.address) newErrors.address = 'validation.addressRequired';
-    if (!customer.city) newErrors.city = 'validation.cityRequired';
-    if (!customer.province) newErrors.province = 'validation.provinceRequired';
 
-    const telephoneError = validateTelephone(customer.telephone);
-    if (telephoneError) newErrors.telephone = telephoneError;
+    if (!formCustomer.firstName) {
+      newErrors.firstName = 'validation.firstNameRequired';
+    }
+
+    if (!formCustomer.lastName) {
+      newErrors.lastName = 'validation.lastNameRequired';
+    }
+
+    if (!formCustomer.address) {
+      newErrors.address = 'validation.addressRequired';
+    }
+
+    if (!formCustomer.city) {
+      newErrors.city = 'validation.cityRequired';
+    }
+
+    if (!formCustomer.province) {
+      newErrors.province = 'validation.provinceRequired';
+    }
+
+    const telephoneError = validateTelephone(formCustomer.telephone);
+
+    if (telephoneError) {
+      newErrors.telephone = telephoneError;
+    }
 
     const usernameError = await validateUsernameField(
       username,
-      userDetails?.username
+      userDetails.username
     );
+
     if (usernameError) {
       newErrors.username = usernameError;
     }
 
     setErrors(newErrors);
+
     return Object.keys(newErrors).length === 0;
   };
 
@@ -168,22 +132,34 @@ const CustomerProfilePage = ({
     event: FormEvent<HTMLFormElement>
   ): Promise<void> => {
     event.preventDefault();
+
     if (!(await validate())) return;
 
     try {
-      await updateCustomer(user.userId, customer);
+      await updateCustomer(user.userId, formCustomer);
 
-      if (userDetails && username !== userDetails.username) {
+      setCustomer(prevCustomer => {
+        if (!prevCustomer) return prevCustomer;
+
+        return {
+          ...prevCustomer,
+          ...formCustomer,
+        };
+      });
+
+      if (username !== userDetails.username) {
         await updateUsername(user.userId, username);
 
-        // Refresh the session so context (and navbar, etc.) picks up the new username
         await checkSession();
       }
 
       showToast(t('customerForm.updateSuccess'), 'success');
+
+      onBackButtonClick();
     } catch (error) {
-      console.error('Error:', error);
-      showToast('customerForm.updateError', 'error');
+      console.error('Error updating customer:', error);
+
+      showToast(t('customerForm.updateError'), 'error');
     }
   };
 
@@ -193,7 +169,11 @@ const CustomerProfilePage = ({
         <div className="customers-profile-card shadow-lg p-5 mb-5 bg-white rounded">
           <div
             className="customers-profile-header"
-            style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem',
+            }}
           >
             <div
               style={{
@@ -209,103 +189,127 @@ const CustomerProfilePage = ({
                 className="profile-picture"
               />
             </div>
+
             <h1>
               {customer.firstName} {customer.lastName}&apos;s Profile
             </h1>
           </div>
 
-          <div>
-            <form onSubmit={handleSubmit} className="customers-profile-info">
-              <p>
-                <strong>Username:</strong>{' '}
-                <input
-                  type="text"
-                  name="username"
-                  value={username}
-                  onChange={handleUsernameChange}
-                />
-                {errors.username && (
-                  <span className="error">{t(errors.username)}</span>
-                )}
-              </p>
-              <p>
-                <strong>First Name:</strong>{' '}
-                <input
-                  type="text"
-                  name="firstName"
-                  value={customer.firstName}
-                  onChange={handleChange}
-                />
-              </p>
-              <p>
-                <strong>Last Name:</strong>{' '}
-                <input
-                  type="text"
-                  name="lastName"
-                  value={customer.lastName}
-                  onChange={handleChange}
-                />
-                {errors.lastName && (
-                  <span className="error">{errors.lastName}</span>
-                )}
-              </p>
-              <p>
-                <strong>Address:</strong>{' '}
-                <input
-                  type="text"
-                  name="address"
-                  value={customer.address}
-                  onChange={handleChange}
-                />
-              </p>
-              <p>
-                <strong>City:</strong>
-                <input
-                  type="text"
-                  name="city"
-                  value={customer.city}
-                  onChange={handleChange}
-                />
-              </p>
-              <p>
-                <strong>Province:</strong>
-                <select
-                  name="province"
-                  value={customer.province}
-                  onChange={handleChange}
-                >
-                  <option value="">{'customerForm.selectProvince'}</option>
-                  {provincesOfCanada.map(province => (
-                    <option key={province} value={province}>
-                      {province}
-                    </option>
-                  ))}
-                </select>
-              </p>
-              <p>
-                <strong>Telephone:</strong>{' '}
-                <input
-                  type="text"
-                  name="telephone"
-                  value={customer.telephone}
-                  onChange={handleChange}
-                />
-              </p>
-            </form>
-          </div>
-          <div className="button-container">
-            <button
-              className="customers-backButton"
-              onClick={() => onBackButtonClick()}
-            >
-              Back
-            </button>
-            <button className="customers-updateButton">Save Changes</button>
-          </div>
+          <form onSubmit={handleSubmit} className="customers-profile-info">
+            <p>
+              <strong>{t('fields.username')}</strong>{' '}
+              <input
+                type="text"
+                name="username"
+                value={username}
+                onChange={handleUsernameChange}
+              />
+              {errors.username && (
+                <span className="error">{t(errors.username)}</span>
+              )}
+            </p>
+
+            <p>
+              <strong>{t('fields.firstName')} </strong>{' '}
+              <input
+                type="text"
+                name="firstName"
+                value={formCustomer.firstName}
+                onChange={handleChange}
+              />
+              {errors.firstName && (
+                <span className="error">{t(errors.firstName)}</span>
+              )}
+            </p>
+
+            <p>
+              <strong>{t('fields.lastName')}</strong>{' '}
+              <input
+                type="text"
+                name="lastName"
+                value={formCustomer.lastName}
+                onChange={handleChange}
+              />
+              {errors.lastName && (
+                <span className="error">{t(errors.lastName)}</span>
+              )}
+            </p>
+
+            <p>
+              <strong>{t('fields.address')}</strong>{' '}
+              <input
+                type="text"
+                name="address"
+                value={formCustomer.address}
+                onChange={handleChange}
+              />
+              {errors.address && (
+                <span className="error">{t(errors.address)}</span>
+              )}
+            </p>
+
+            <p>
+              <strong>{t('fields.city')}</strong>{' '}
+              <input
+                type="text"
+                name="city"
+                value={formCustomer.city}
+                onChange={handleChange}
+              />
+              {errors.city && <span className="error">{t(errors.city)}</span>}
+            </p>
+
+            <p>
+              <strong>{t('customerForm.selectProvince')}</strong>{' '}
+              <select
+                name="province"
+                value={formCustomer.province}
+                onChange={handleChange}
+              >
+                <option value="">Select Province</option>
+
+                {provincesOfCanada.map(province => (
+                  <option key={province} value={province}>
+                    {province}
+                  </option>
+                ))}
+              </select>
+              {errors.province && (
+                <span className="error">{t(errors.province)}</span>
+              )}
+            </p>
+
+            <p>
+              <strong>{t('fields.telephone')}</strong>{' '}
+              <input
+                type="text"
+                name="telephone"
+                value={formCustomer.telephone}
+                onChange={handleChange}
+              />
+              {errors.telephone && (
+                <span className="error">{t(errors.telephone)}</span>
+              )}
+            </p>
+
+            <div className="button-container">
+              <button
+                type="button"
+                className="customers-backButton"
+                onClick={onBackButtonClick}
+              >
+                {t('customerForm.back')}
+              </button>
+
+              <button type="submit" className="customers-updateButton">
+                {t('customerForm.submit')}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
   );
 };
 
-export default CustomerProfilePage;
+export default NewUpdateCustomerForm;

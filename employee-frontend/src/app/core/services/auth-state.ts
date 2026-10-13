@@ -16,12 +16,16 @@ export class AuthState {
   private readonly _username = signal('');
   readonly username = this._username.asReadonly();
 
+  private readonly _userId = signal('');
+  readonly userId = this._userId.asReadonly();
+
   logout(): Observable<void> {
     return this.http.post<void>('/api/gateway/users/logout', {}).pipe(
       tap(() => {
         this._isAuthenticated.set(false);
         this._roles.set([]);
         this._username.set('');
+        this._userId.set('');
       }),
     );
   }
@@ -36,12 +40,14 @@ export class AuthState {
         this._isAuthenticated.set(true);
         this._roles.set(user.roles);
         this._username.set(user.username);
+        this._userId.set(user.userId);
       }),
       map(() => undefined),
       catchError((err: HttpErrorResponse) => {
         this._isAuthenticated.set(false);
         this._roles.set([]);
         this._username.set('');
+        this._userId.set('');
         if (err.status !== 401) {
           console.error('Unexpected error checking auth token', err);
         }

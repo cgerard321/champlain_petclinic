@@ -37,7 +37,7 @@ const CustomerDetails: FC = () => {
   useEffect(() => {
     const fetchCustomerDetails = async (): Promise<void> => {
       //customerId can't be undefied here so it is ok to assert it.
-      const customerResponse = await getCustomer(customerId!);
+      const customerResponse = await getCustomer(customerId!, true);
       setCustomer(customerResponse.data);
 
       try {
@@ -242,7 +242,7 @@ const CustomerDetails: FC = () => {
     if (!customerId) return;
 
     try {
-      const customerResponse = await getCustomer(customerId);
+      const customerResponse = await getCustomer(customerId, true);
       setCustomer(customerResponse.data);
 
       try {
@@ -359,6 +359,17 @@ const CustomerDetails: FC = () => {
         {/* Customer Info */}
         <div className="section customer-info">
           <h3>{t('customerDetails.infoTitle')}</h3>
+          <img
+            src={
+              customer.photo?.fileData
+                ? `data:${customer.photo.fileType};base64,${customer.photo.fileData}`
+                : defaultProfile
+            }
+            alt={t('customerDetails.pets.photoAlt', {
+              name: `${customer.firstName} ${customer.lastName}`,
+            })}
+            className="customer-profile-picture"
+          />
           <p>
             <strong>{t('fields.username')} </strong>
             {userDetails?.username || t('customerDetails.loading')}

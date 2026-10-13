@@ -112,7 +112,7 @@ public class BillServiceImpl implements BillService{
                         (vetLastName == null || bill.getVetLastName().equals(vetLastName));
 
         Flux<Bill> bills = includeArchived
-                ? billRepository.findAll()
+                ? billRepository.findAllByArchiveTrue()
                 : billRepository.findAllByArchiveFalse();
 
         return updateOverdueBills()
@@ -196,7 +196,7 @@ public class BillServiceImpl implements BillService{
                         (vetLastName == null || bill.getVetLastName().equals(vetLastName));
 
         Flux<Bill> bills = includeArchived
-                ? billRepository.findAll()
+                ? billRepository.findAllByArchiveTrue()
                 : billRepository.findAllByArchiveFalse();
 
         return bills
@@ -297,23 +297,86 @@ public class BillServiceImpl implements BillService{
 
 
     @Override
-    public Mono<BillResponseDTO> updateBill(String billId, Mono<BillRequestDTO> billRequestDTO) {
+    public Mono<BillResponseDTO> updateBill(
+            String billId,
+            Mono<BillRequestDTO> billRequestDTO) {
+
         return billRequestDTO
-                .flatMap(r -> billRepository.findByBillId(billId)
-                        .flatMap(existingBill -> {
-                            existingBill.setCustomerId(r.getCustomerId());
-                            existingBill.setVisitType(r.getVisitType());
-                            existingBill.setVetId(r.getVetId());
-                            existingBill.setDate(r.getDate());
-                            existingBill.setBillStatus(r.getBillStatus());
-                            existingBill.setAmount(r.getAmount());
-                            existingBill.setDueDate(r.getDueDate());
+                .switchIfEmpty(Mono.error(new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Bill update request is required"
+                )))
+                .flatMap(request -> {
 
-                            return addTaxesToBill(existingBill).flatMap(newbill -> billRepository.save(existingBill));
-                        })
-                        .map(EntityDtoUtil::toBillResponseDto)
-                );
+                    if (request.getCustomerId() == null ||
+                            request.getCustomerId().trim().isEmpty()) {
+                        return Mono.error(new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST,
+                                "Customer ID is required"
+                        ));
+                    }
 
+                    if (request.getVetId() == null ||
+                            request.getVetId().trim().isEmpty()) {
+                        return Mono.error(new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST,
+                                "Veterinarian ID is required"
+                        ));
+                    }
+
+                    if (request.getVisitType() == null ||
+                            request.getVisitType().trim().isEmpty()) {
+                        return Mono.error(new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST,
+                                "Visit type is required"
+                        ));
+                    }
+
+                    if (request.getAmount() == null ||
+                            request.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+                        return Mono.error(new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST,
+                                "Bill amount must be greater than zero"
+                        ));
+                    }
+
+                    if (request.getDate() == null ||
+                            request.getDueDate() == null) {
+                        return Mono.error(new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST,
+                                "Creation date and due date are required"
+                        ));
+                    }
+
+                    if (request.getDueDate().isBefore(request.getDate())) {
+                        return Mono.error(new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST,
+                                "Due date cannot be before the creation date"
+                        ));
+                    }
+
+                    if (request.getBillStatus() == null) {
+                        return Mono.error(new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST,
+                                "Bill status is required"
+                        ));
+                    }
+
+                    return billRepository.findByBillId(billId)
+                            .flatMap(existingBill -> {
+                                existingBill.setCustomerId(request.getCustomerId());
+                                existingBill.setVetId(request.getVetId());
+                                existingBill.setVisitType(request.getVisitType());
+                                existingBill.setDate(request.getDate());
+                                existingBill.setDueDate(request.getDueDate());
+                                existingBill.setAmount(request.getAmount());
+                                existingBill.setBillStatus(request.getBillStatus());
+
+                                return addTaxesToBill(existingBill)
+                                        .flatMap(billRepository::save);
+                            })
+                            .map(EntityDtoUtil::toBillResponseDto);
+                });
     }
 
     @Override
