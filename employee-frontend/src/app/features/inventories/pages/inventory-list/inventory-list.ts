@@ -1,12 +1,12 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, DestroyRef, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormField, form, required, submit } from '@angular/forms/signals';
 import { MatCardModule } from '@angular/material/card';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterLink } from '@angular/router';
-import { Subscription, finalize } from 'rxjs';
+import { Subscription, finalize, firstValueFrom } from 'rxjs';
 
 import { isApiError, ApiError } from '@core/models/api-error';
 import { AuthState } from '@core/services/auth-state';
@@ -17,11 +17,23 @@ import {
   InventoryType,
 } from '@features/inventories/models/inventory.model';
 import { InventoryService } from '@features/inventories/services/inventory-service';
+import { ModalForm } from '@shared/components/modal-form/modal-form';
+import {
+  ModalFormData,
+  ModalFormField,
+  ModalFormResult,
+} from '@shared/components/modal-form/modal-form-models';
 import { getInventoryPermissions } from '@shared/models/inventory-permissions';
 import { Roles } from '@shared/models/roles';
 
+interface InventoryFormValue {
+  inventoryName: string;
+  inventoryType: string;
+  inventoryDescription: string;
+}
+
 @Component({
-  imports: [RouterLink, MatCardModule, MatIconModule, MatProgressSpinnerModule, FormField],
+  imports: [RouterLink, MatCardModule, MatIconModule, MatProgressSpinnerModule],
   selector: 'app-inventory-list',
   styleUrls: ['../../inventories.css', './inventory-list.css'],
   templateUrl: './inventory-list.html',
@@ -30,6 +42,7 @@ export class InventoryList implements OnInit, OnDestroy {
   private readonly inventoryService = inject(InventoryService);
   private readonly auth = inject(AuthState);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly dialog = inject(MatDialog);
 
   private inventorySubscription?: Subscription;
   private inventoryTypesSubscription?: Subscription;
@@ -70,23 +83,9 @@ export class InventoryList implements OnInit, OnDestroy {
     return this.inventoryTypes().map((t) => t.type);
   }
 
-  protected readonly showAddForm = signal(false);
-  protected readonly editingInventoryId = signal<string | null>(null);
   protected readonly savingInventory = signal(false);
   protected readonly formError = signal<string | null>(null);
   protected readonly deleteError = signal<string | null>(null);
-
-  protected readonly newInventory = signal<InventoryRequest>({
-    inventoryName: '',
-    inventoryType: '',
-    inventoryDescription: '',
-  });
-
-  protected readonly inventoryForm = form(this.newInventory, (path) => {
-    required(path.inventoryName, { message: 'Name is required' });
-    required(path.inventoryType, { message: 'Type is required' });
-    required(path.inventoryDescription, { message: 'Description is required' });
-  });
 
   ngOnInit(): void {
     this.loadInventories();
@@ -214,78 +213,141 @@ export class InventoryList implements OnInit, OnDestroy {
       });
   }
 
-  protected toggleAddForm(): void {
-    this.showAddForm.update((visible) => !visible);
-    if (!this.showAddForm()) {
-      this.editingInventoryId.set(null);
-      this.formError.set(null);
-    }
+  protected openAddDialog(): void {
+    if (!this.can().canCreateInventory) return;
+
+    void this.openInventoryDialog();
   }
 
   protected editInventory(inventory: Inventory): void {
     if (!this.can().canUpdateInventory) return;
 
-    this.editingInventoryId.set(inventory.inventoryId);
-    this.newInventory.set({
-      inventoryName: inventory.inventoryName,
-      inventoryType: inventory.inventoryType,
-      inventoryDescription: inventory.inventoryDescription,
-    });
-    this.showAddForm.set(true);
+    void this.openInventoryDialog(inventory);
   }
 
-  protected saveInventory(event: Event): void {
-    event.preventDefault();
+  private inventoryFields(): readonly ModalFormField[] {
+    return [
+      { key: 'inventoryName', label: 'Name', type: 'string', required: true },
+      {
+        key: 'inventoryType',
+        label: 'Type',
+        type: 'enum',
+        required: true,
+        options: this.inventoryTypes().map((type) => ({ value: type.type, label: type.type })),
+      },
+      { key: 'inventoryDescription', label: 'Description', type: 'string', required: true },
+    ];
+  }
 
-    void submit(this.inventoryForm, async () => {
-      this.savingInventory.set(true);
-      this.formError.set(null);
+  private async openInventoryDialog(inventory?: Inventory): Promise<void> {
+    this.formError.set(null);
 
-      const editingId = this.editingInventoryId();
-      const body = this.newInventory();
+    if (this.inventoryTypesLoading() || this.inventoryTypes().length === 0) {
+      this.formError.set(
+        this.inventoryTypesError() ?? 'Inventory types are still loading. Try again in a moment.',
+      );
+      return;
+    }
 
-      const request$ = editingId
-        ? this.inventoryService.updateInventory(editingId, body)
-        : this.inventoryService.createInventory(body);
-
-      request$.subscribe({
-        next: () => {
-          this.newInventory.set({
-            inventoryName: '',
-            inventoryType: '',
-            inventoryDescription: '',
-          });
-          this.editingInventoryId.set(null);
-          this.showAddForm.set(false);
-          this.savingInventory.set(false);
-
-          this.loadInventories(this.currentPage());
-        },
-        error: () => {
-          this.formError.set(
-            editingId ? 'Unable to update inventory.' : 'Unable to create inventory.',
-          );
-          this.savingInventory.set(false);
-        },
-      });
+    const dialogRef = this.dialog.open<
+      ModalForm<InventoryFormValue>,
+      ModalFormData<InventoryFormValue>,
+      ModalFormResult<InventoryFormValue>
+    >(ModalForm, {
+      data: {
+        title: inventory ? 'Edit Inventory' : 'Add Inventory',
+        submitLabel: inventory ? 'Save Changes' : 'Add Inventory',
+        fields: this.inventoryFields(),
+        initialValue: inventory
+          ? {
+              inventoryName: inventory.inventoryName,
+              inventoryType: inventory.inventoryType,
+              inventoryDescription: inventory.inventoryDescription,
+            }
+          : { inventoryName: '', inventoryType: '', inventoryDescription: '' },
+      },
+      ariaLabel: inventory ? 'Edit inventory' : 'Add inventory',
+      width: '480px',
+      maxWidth: '95vw',
     });
+
+    // The dialog closes with undefined when the user cancels.
+    const result = await firstValueFrom(dialogRef.afterClosed());
+
+    const allowed = inventory ? this.can().canUpdateInventory : this.can().canCreateInventory;
+
+    if (!result || !allowed) return;
+
+    await this.saveInventory(result.value, inventory?.inventoryId ?? null);
+  }
+
+  private async saveInventory(value: InventoryFormValue, editingId: string | null): Promise<void> {
+    if (this.savingInventory()) return;
+
+    this.savingInventory.set(true);
+    this.formError.set(null);
+
+    try {
+      const body = this.toInventoryRequest(value);
+
+      await firstValueFrom(
+        editingId
+          ? this.inventoryService.updateInventory(editingId, body)
+          : this.inventoryService.createInventory(body),
+      );
+
+      this.loadInventories(this.currentPage());
+    } catch {
+      this.formError.set(editingId ? 'Unable to update inventory.' : 'Unable to create inventory.');
+    } finally {
+      this.savingInventory.set(false);
+    }
+  }
+
+  private toInventoryRequest(value: InventoryFormValue): InventoryRequest {
+    return {
+      inventoryName: value.inventoryName,
+      inventoryType: value.inventoryType,
+      inventoryDescription: value.inventoryDescription,
+    };
   }
 
   protected deleteInventoryAction(inventory: Inventory): void {
     if (!this.can().canDeleteInventory) return;
 
-    const confirmed = window.confirm(`Delete ${inventory.inventoryName}?`);
-    if (!confirmed) return;
+    this.deleteError.set(null);
 
-    this.inventoryService.deleteInventory(inventory.inventoryId).subscribe({
-      next: () => {
-        this.inventories.update((current) =>
-          current.filter((inv) => inv.inventoryId !== inventory.inventoryId),
-        );
+    const dialogRef = this.dialog.open<
+      ModalForm<Record<string, never>>,
+      ModalFormData<Record<string, never>>,
+      ModalFormResult<Record<string, never>>
+    >(ModalForm, {
+      data: {
+        title: 'Delete Inventory',
+        message: `Are you sure you want to delete ${inventory.inventoryName}?`,
+        fields: [],
+        initialValue: {},
+        submitLabel: 'Delete',
+        destructive: true,
       },
-      error: () => {
-        this.deleteError.set('Unable to delete inventory.');
-      },
+      ariaLabel: 'Delete inventory',
+      width: '440px',
+      maxWidth: '95vw',
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (!result || !this.can().canDeleteInventory) return;
+
+      this.inventoryService.deleteInventory(inventory.inventoryId).subscribe({
+        next: () => {
+          this.inventories.update((current) =>
+            current.filter((inv) => inv.inventoryId !== inventory.inventoryId),
+          );
+        },
+        error: () => {
+          this.deleteError.set('Unable to delete inventory.');
+        },
+      });
     });
   }
 

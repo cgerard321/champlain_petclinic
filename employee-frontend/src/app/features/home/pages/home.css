@@ -16,7 +16,7 @@
 }
 
 .welcome-card::after {
-  content: "";
+  content: '';
   position: absolute;
   top: -74px;
   left: 90%;
@@ -172,7 +172,6 @@
   transform: rotate(28deg) translateY(-3px);
 }
 
-
 /* --- Quick Actions Section (Global Styles) --- */
 .quick-actions-section {
   margin-top: 2rem;
@@ -203,13 +202,16 @@
   border-radius: 12px;
   padding: 1.25rem 1.5rem;
   cursor: pointer;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
   position: relative;
   overflow: hidden;
 }
 
 .action-card::after {
-  content: "";
+  content: '';
   position: absolute;
   top: -35px;
   right: -35px;
