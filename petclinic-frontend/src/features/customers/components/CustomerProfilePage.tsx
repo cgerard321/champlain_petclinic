@@ -10,6 +10,9 @@ import UploadPetPhotoModal from '@/features/customers/components/UploadPetPhotoM
 import { deletePet } from '@/features/customers/api/deletePet';
 import { deleteCustomerPhoto } from '@/features/customers/api/deleteCustomerPhoto';
 import { deletePetPhoto } from '@/features/customers/api/deletePetPhoto';
+import { softDeleteCustomer } from '@/features/customers/api/softDeleteCustomer';
+import { useNavigate } from 'react-router-dom';
+import { AppRoutePaths } from '@/shared/models/path.routes';
 import {
   getPetTypeName,
   getPetTypeImage,
@@ -52,7 +55,8 @@ const CustomerProfilePage: React.FC<CustomerProfilePageProps> = ({
   onProfilePhotoUploaded,
   onPetPhotoUploaded,
 }): JSX.Element => {
-  const { user } = useUser();
+  const { user, logout } = useUser();
+  const navigate = useNavigate();
 
   const [error, setError] = useState<string | null>(null);
   const [isAddPetModalOpen, setIsAddPetModalOpen] = useState<boolean>(false);
@@ -176,6 +180,31 @@ const CustomerProfilePage: React.FC<CustomerProfilePageProps> = ({
     } catch (error) {
       console.error('Error deleting profile photo:', error);
       alert('Failed to delete profile photo. Please try again.');
+    }
+  };
+
+  const handleDeleteAccount = async (): Promise<void> => {
+    if (!user.userId) return;
+
+    const confirmed = await confirm({
+      title: 'Delete Account',
+      message:
+        'Are you sure you want to delete your account? Your profile photo will be permanently removed and you will be logged out.',
+      confirmText: 'Delete Account',
+      cancelText: 'Cancel',
+      variant: 'danger',
+      destructive: true,
+    });
+
+    if (!confirmed) return;
+
+    try {
+      await softDeleteCustomer(user.userId);
+      await logout();
+      navigate(AppRoutePaths.Login);
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      alert('Failed to delete your account. Please try again.');
     }
   };
 
@@ -418,6 +447,13 @@ const CustomerProfilePage: React.FC<CustomerProfilePageProps> = ({
             onClick={onUpdateProfileClick}
           >
             Update Profile
+          </button>
+          <button
+            className="customers-delete-pet-button"
+            style={{ alignSelf: 'flex-end', marginTop: '8px' }}
+            onClick={handleDeleteAccount}
+          >
+            Delete Account
           </button>
         </div>
       </div>
