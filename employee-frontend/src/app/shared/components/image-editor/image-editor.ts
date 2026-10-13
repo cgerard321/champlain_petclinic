@@ -1,15 +1,27 @@
 import { Component, computed, input, OnDestroy, output, signal } from '@angular/core';
 
+export const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const;
+export type ImageAction =
+  { action: 'keep' } | { action: 'replace'; file: File } | { action: 'remove' };
+
+const DEFAULT_MAX_IMAGE_BYTES = 2 * 1024 * 1024;
+
 @Component({
-  selector: 'app-supply-image-editor',
+  selector: 'app-image-editor',
   standalone: true,
-  templateUrl: './supply-image-editor.html',
-  styleUrl: './supply-image-editor.css',
+  templateUrl: './image-editor.html',
+  styleUrl: './image-editor.css',
 })
-export class SupplyImageEditor implements OnDestroy {
+export class ImageEditor implements OnDestroy {
+  readonly label = input('Photo');
+  readonly maxSizeBytes = input<number | undefined>(undefined);
+
   readonly currentImage = input<string | null>(null);
   readonly disabled = input(false);
-  readonly imageChange = output<File | null>();
+  readonly imageChange = output<ImageAction>();
+
+  private readonly limit = computed(() => this.maxSizeBytes() ?? DEFAULT_MAX_IMAGE_BYTES);
+  protected readonly limitLabel = computed(() => `${this.limit() / (1024 * 1024)} MB`);
 
   protected readonly selectedPreview = signal<string | null>(null);
   protected readonly removed = signal(false);
@@ -28,21 +40,21 @@ export class SupplyImageEditor implements OnDestroy {
 
     this.error.set('');
 
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+    if (!(ALLOWED_IMAGE_TYPES as readonly string[]).includes(file.type)) {
       this.error.set('Choose a JPG, PNG, or WebP image.');
       return;
     }
 
     // A provisional frontend limit; align it with the backend later.
-    if (file.size > 2 * 1024 * 1024) {
-      this.error.set('Choose an image smaller than 2 MB.');
+    if (file.size > this.limit()) {
+      this.error.set(`Choose an image smaller than ${this.limitLabel()}.`);
       return;
     }
 
     this.clearPreview();
     this.selectedPreview.set(URL.createObjectURL(file));
     this.removed.set(false);
-    this.imageChange.emit(file);
+    this.imageChange.emit({ action: 'replace', file });
   }
 
   protected removeImage(): void {
@@ -51,7 +63,8 @@ export class SupplyImageEditor implements OnDestroy {
     this.clearPreview();
     this.removed.set(true);
     this.error.set('');
-    this.imageChange.emit(null);
+
+    this.imageChange.emit(this.currentImage() ? { action: 'remove' } : { action: 'keep' });
   }
 
   private clearPreview(): void {
