@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { filter, map, Observable, toArray } from 'rxjs';
 
 import { SseClient } from '@core/services/sse-client';
-import { Supply } from '@features/supplies/models/supply';
+import { Supply, SupplyRequest } from '@features/supplies/models/supply';
 
 @Injectable({ providedIn: 'root' })
 export class SupplyService {
@@ -27,34 +27,11 @@ export class SupplyService {
       );
   }
 
-  createSupply(
-    inventoryId: string,
-    supply: {
-      productName: string;
-      productDescription: string;
-      productPrice: number;
-      productQuantity: number;
-      productSalePrice: number;
-      photoData?: string;
-      PhotoType?: string | null;
-    },
-  ): Observable<Supply> {
+  createSupply(inventoryId: string, supply: SupplyRequest): Observable<Supply> {
     return this.http.post<Supply>(`/api/gateway/inventories/${inventoryId}/products`, supply);
   }
 
-  updateSupply(
-    inventoryId: string,
-    productId: string,
-    supply: {
-      productName: string;
-      productDescription: string;
-      productPrice: number;
-      productQuantity: number;
-      productSalePrice: number;
-      photoData?: string;
-      PhotoType?: string | null;
-    },
-  ): Observable<Supply> {
+  updateSupply(inventoryId: string, productId: string, supply: SupplyRequest): Observable<Supply> {
     return this.http.put<Supply>(
       `/api/gateway/inventories/${inventoryId}/products/${productId}`,
       supply,
