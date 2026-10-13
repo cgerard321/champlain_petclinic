@@ -37,3 +37,7 @@
 .markdown.unlimited-size {
     max-height: none;
 }
+
+.markdown mark {
+    padding: 0;
+}
