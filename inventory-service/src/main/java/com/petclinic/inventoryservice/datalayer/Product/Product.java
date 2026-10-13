@@ -3,6 +3,7 @@ package com.petclinic.inventoryservice.datalayer.Product;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -26,5 +27,7 @@ public class Product {
     private LocalDateTime lastUpdatedAt;
     private byte[] photoData;
     private String photoType;
+
+    private LocalDate expirationDate;
 
 }

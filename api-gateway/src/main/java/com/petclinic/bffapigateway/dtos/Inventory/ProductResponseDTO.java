@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -24,5 +25,7 @@ public class ProductResponseDTO {
     private LocalDateTime lastUpdatedAt;
     private byte[] photoData;
     private String photoType;
+
+    private LocalDate expirationDate;
 
 }

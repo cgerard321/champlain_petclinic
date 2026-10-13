@@ -19,129 +19,15 @@
           <span class="download-label">{{ downloadingPdf() ? 'Downloading...' : 'Download' }}</span>
         </button>
 
-        <button
-          type="button"
-          class="add-supply-button"
-          (click)="showAddForm() ? cancelAddForm() : openAddForm()"
-        >
-          {{ showAddForm() ? 'Cancel' : 'Add Supply' }}
+        <button type="button" class="add-supply-button" (click)="openAddDialog()">
+          Add Supply
         </button>
       </div>
     }
   </div>
 
-  @if (showAddForm() && canManageSupplies()) {
-    @for (editorKey of [editingSupplyId()]; track editorKey) {
-      <form class="supply-form" (submit)="addSupply($event)">
-        <h2>
-          {{ editingSupplyId() ? 'Edit Supply' : 'Add Supply' }}
-        </h2>
-        <div class="supply-edit-layout">
-          <div class="supply-fields">
-            <label for="productName">Name</label>
-            <input id="productName" type="text" [formField]="supplyForm.productName" />
-
-            @if (supplyForm.productName().touched() && supplyForm.productName().invalid()) {
-              <p class="field-error">
-                {{ supplyForm.productName().errors()[0]?.message }}
-              </p>
-            }
-
-            <label for="supplierName">Supplier name</label>
-            <input id="supplierName" type="text" [formField]="supplyForm.supplierName" />
-
-            @if (supplyForm.supplierName().touched() && supplyForm.supplierName().invalid()) {
-              <p class="field-error">
-                {{ supplyForm.supplierName().errors()[0]?.message }}
-              </p>
-            }
-
-            <label for="productDescription">Description</label>
-            <input
-              id="productDescription"
-              type="text"
-              [formField]="supplyForm.productDescription"
-            />
-
-            @if (
-              supplyForm.productDescription().touched() && supplyForm.productDescription().invalid()
-            ) {
-              <p class="field-error">
-                {{ supplyForm.productDescription().errors()[0]?.message }}
-              </p>
-            }
-
-            <label for="productPrice">Cost Price</label>
-            <input
-              id="productPrice"
-              type="number"
-              step="0.01"
-              [formField]="supplyForm.productPrice"
-            />
-
-            @if (supplyForm.productPrice().touched() && supplyForm.productPrice().invalid()) {
-              <p class="field-error">
-                {{ supplyForm.productPrice().errors()[0]?.message }}
-              </p>
-            }
-
-            <label for="productQuantity">Quantity</label>
-            <input
-              id="productQuantity"
-              type="number"
-              step="1"
-              [formField]="supplyForm.productQuantity"
-            />
-
-            @if (supplyForm.productQuantity().touched() && supplyForm.productQuantity().invalid()) {
-              <p class="field-error">
-                {{ supplyForm.productQuantity().errors()[0]?.message }}
-              </p>
-            }
-
-            <label for="productSalePrice">Sale Price</label>
-            <input
-              id="productSalePrice"
-              type="number"
-              step="0.01"
-              [formField]="supplyForm.productSalePrice"
-            />
-
-            @if (
-              supplyForm.productSalePrice().touched() && supplyForm.productSalePrice().invalid()
-            ) {
-              <p class="field-error">
-                {{ supplyForm.productSalePrice().errors()[0]?.message }}
-              </p>
-            }
-          </div>
-
-          <app-supply-image-editor
-            [currentImage]="currentImage()"
-            [disabled]="addingSupply()"
-            (imageChange)="onImageChange($event)"
-          />
-        </div>
-
-        @if (addError()) {
-          <p class="field-error" role="alert">
-            {{ addError() }}
-          </p>
-        }
-
-        <button type="submit" class="add-supply-button" [disabled]="addingSupply()">
-          {{
-            addingSupply()
-              ? editingSupplyId()
-                ? 'Saving...'
-                : 'Adding...'
-              : editingSupplyId()
-                ? 'Save Changes'
-                : 'Add Supply'
-          }}
-        </button>
-      </form>
-    }
+  @if (addError()) {
+    <p class="field-error" role="alert">{{ addError() }}</p>
   }
 
   @if (deleteError()) {
@@ -238,11 +124,11 @@
 <ng-template #statusCell let-supply>
   <span
     class="status-badge"
-    [class.available]="supply.status === 'AVAILABLE'"
-    [class.re-order]="supply.status === 'RE_ORDER'"
-    [class.out-of-stock]="supply.status === 'OUT_OF_STOCK'"
+    [class.available]="effectiveStatus(supply) === 'AVAILABLE'"
+    [class.re-order]="effectiveStatus(supply) === 'RE_ORDER'"
+    [class.out-of-stock]="effectiveStatus(supply) === 'OUT_OF_STOCK'"
   >
-    {{ formatStatus(supply.status) }}
+    {{ formatStatus(effectiveStatus(supply)) }}
   </span>
 </ng-template>
 
@@ -257,9 +143,17 @@
         type="button"
         class="consume-button"
         (click)="consumeSupply(supply)"
-        [disabled]="supply.productQuantity <= 0 || consumingSupplyId() === supply.productId"
+        [disabled]="
+          supply.productQuantity <= 0 ||
+          expirationState(supply) === 'expired' ||
+          consumingSupplyId() === supply.productId
+        "
         [attr.aria-label]="
-          supply.productQuantity <= 0 ? 'Cannot consume - out of stock' : 'Consume supply'
+          supply.productQuantity <= 0
+            ? 'Cannot consume - out of stock'
+            : expirationState(supply) === 'expired'
+              ? 'Cannot consume - expired'
+              : 'Consume supply'
         "
       >
         {{ consumingSupplyId() === supply.productId ? 'Consuming...' : 'Consume' }}
@@ -268,15 +162,15 @@
   </div>
 </ng-template>
 
-<ng-template #deleteDialog let-supply>
-  <h2 mat-dialog-title>Delete supply</h2>
-
-  <mat-dialog-content>
-    Are you sure you want to delete {{ supply.productName }}?
-  </mat-dialog-content>
-
-  <mat-dialog-actions align="end">
-    <button type="button" class="dialog-cancel-button" [mat-dialog-close]="false">Cancel</button>
-    <button type="button" class="delete-button" [mat-dialog-close]="true">Delete</button>
-  </mat-dialog-actions>
+<ng-template #expirationCell let-supply>
+  @if (supply.expirationDate) {
+    {{ supply.expirationDate }}
+    @if (expirationState(supply) === 'expired') {
+      <span class="expiration-badge expired">Expired</span>
+    } @else if (expirationState(supply) === 'soon') {
+      <span class="expiration-badge expiring-soon">Expiring soon</span>
+    }
+  } @else {
+    <span class="no-expiration">No expiration</span>
+  }
 </ng-template>

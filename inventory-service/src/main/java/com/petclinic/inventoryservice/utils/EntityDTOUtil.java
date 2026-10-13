@@ -40,6 +40,7 @@ public class EntityDTOUtil {
                 .lastUpdatedAt(product.getLastUpdatedAt() != null ? product.getLastUpdatedAt() : LocalDateTime.of(1900, 1, 1, 0, 0))
                 .photoData(product.getPhotoData())
                 .photoType(product.getPhotoType())
+                .expirationDate(product.getExpirationDate())
                 .build();
     }
 

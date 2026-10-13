@@ -1,0 +1,16 @@
+.reviews-search-result-count {
+    font-size: 13px;
+    color: gray;
+}
+
+.search-input {
+    width: 100%;
+    margin-top: 12px;
+    min-width: 600px;
+    min-height: 45px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    text-align: left;
+}
