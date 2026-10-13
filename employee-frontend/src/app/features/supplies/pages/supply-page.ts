@@ -9,12 +9,11 @@ import { firstValueFrom } from 'rxjs';
 import { AuthState } from '@core/services/auth-state';
 import { Supply, SupplyRequest } from '@features/supplies/models/supply';
 import { SupplyService } from '@features/supplies/services/supply-service';
-import { ALLOWED_IMAGE_TYPES } from '@shared/components/image-editor/image-editor';
+import { ALLOWED_IMAGE_TYPES, ImageAction } from '@shared/components/image-editor/image-editor';
 import { ModalForm } from '@shared/components/modal-form/modal-form';
 import {
   ModalFormData,
   ModalFormField,
-  ModalFormImageValue,
   ModalFormResult,
 } from '@shared/components/modal-form/modal-form-models';
 import { Table, TableColumn } from '@shared/components/table/table';
@@ -27,7 +26,7 @@ interface SupplyFormValue {
   productPrice: number;
   productQuantity: number;
   productSalePrice: number;
-  photo: ModalFormImageValue;
+  photo: ImageAction;
 }
 
 @Component({
@@ -243,15 +242,7 @@ export class SupplyPage {
     this.addError.set('');
 
     try {
-      const { photo, ...fields } = value;
-      const payload: SupplyRequest = { ...fields };
-
-      // Photo fields are only sent when the user touched the picture.
-      // Empty Base64 decodes to an empty byte array: remove the photo.
-      if (photo.changed) {
-        payload.photoData = photo.file ? await this.readPhoto(photo.file) : '';
-        payload.photoType = photo.file ? photo.file.type : null;
-      }
+      const payload = await this.buildSupplyRequest(value);
 
       const request$ = editingId
         ? this.supplyService.updateSupply(inventoryId, editingId, payload)
@@ -421,5 +412,25 @@ export class SupplyPage {
       reader.onabort = () => reject(new Error('Photo reading cancelled.'));
       reader.readAsDataURL(file);
     });
+  }
+
+  private async buildSupplyRequest(value: SupplyFormValue): Promise<SupplyRequest> {
+    const { photo, ...fields } = value;
+    const request: SupplyRequest = { ...fields };
+
+    switch (photo.action) {
+      case 'replace':
+        request.photoData = await this.readPhoto(photo.file);
+        request.photoType = photo.file.type;
+        break;
+      case 'remove':
+        request.photoData = '';
+        request.photoType = null;
+        break;
+      case 'keep':
+        break; // Nothing changes in the backend
+    }
+
+    return request;
   }
 }

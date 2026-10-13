@@ -1,6 +1,9 @@
 import { Component, computed, input, OnDestroy, output, signal } from '@angular/core';
 
 export const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const;
+export type ImageAction =
+  { action: 'keep' } | { action: 'replace'; file: File } | { action: 'remove' };
+
 const DEFAULT_MAX_IMAGE_BYTES = 2 * 1024 * 1024;
 
 @Component({
@@ -15,7 +18,7 @@ export class ImageEditor implements OnDestroy {
 
   readonly currentImage = input<string | null>(null);
   readonly disabled = input(false);
-  readonly imageChange = output<File | null>();
+  readonly imageChange = output<ImageAction>();
 
   private readonly limit = computed(() => this.maxSizeBytes() ?? DEFAULT_MAX_IMAGE_BYTES);
   protected readonly limitLabel = computed(() => `${this.limit() / (1024 * 1024)} MB`);
@@ -51,7 +54,7 @@ export class ImageEditor implements OnDestroy {
     this.clearPreview();
     this.selectedPreview.set(URL.createObjectURL(file));
     this.removed.set(false);
-    this.imageChange.emit(file);
+    this.imageChange.emit({ action: 'replace', file });
   }
 
   protected removeImage(): void {
@@ -60,7 +63,8 @@ export class ImageEditor implements OnDestroy {
     this.clearPreview();
     this.removed.set(true);
     this.error.set('');
-    this.imageChange.emit(null);
+
+    this.imageChange.emit(this.currentImage() ? { action: 'remove' } : { action: 'keep' });
   }
 
   private clearPreview(): void {

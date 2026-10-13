@@ -26,6 +26,12 @@ import {
 import { getInventoryPermissions } from '@shared/models/inventory-permissions';
 import { Roles } from '@shared/models/roles';
 
+interface InventoryFormValue {
+  inventoryName: string;
+  inventoryType: string;
+  inventoryDescription: string;
+}
+
 @Component({
   imports: [RouterLink, MatCardModule, MatIconModule, MatProgressSpinnerModule],
   selector: 'app-inventory-list',
@@ -244,9 +250,9 @@ export class InventoryList implements OnInit, OnDestroy {
     }
 
     const dialogRef = this.dialog.open<
-      ModalForm<InventoryRequest>,
-      ModalFormData<InventoryRequest>,
-      ModalFormResult<InventoryRequest>
+      ModalForm<InventoryFormValue>,
+      ModalFormData<InventoryFormValue>,
+      ModalFormResult<InventoryFormValue>
     >(ModalForm, {
       data: {
         title: inventory ? 'Edit Inventory' : 'Add Inventory',
@@ -275,13 +281,15 @@ export class InventoryList implements OnInit, OnDestroy {
     await this.saveInventory(result.value, inventory?.inventoryId ?? null);
   }
 
-  private async saveInventory(body: InventoryRequest, editingId: string | null): Promise<void> {
+  private async saveInventory(value: InventoryFormValue, editingId: string | null): Promise<void> {
     if (this.savingInventory()) return;
 
     this.savingInventory.set(true);
     this.formError.set(null);
 
     try {
+      const body = this.toInventoryRequest(value);
+
       await firstValueFrom(
         editingId
           ? this.inventoryService.updateInventory(editingId, body)
@@ -294,6 +302,14 @@ export class InventoryList implements OnInit, OnDestroy {
     } finally {
       this.savingInventory.set(false);
     }
+  }
+
+  private toInventoryRequest(value: InventoryFormValue): InventoryRequest {
+    return {
+      inventoryName: value.inventoryName,
+      inventoryType: value.inventoryType,
+      inventoryDescription: value.inventoryDescription,
+    };
   }
 
   protected deleteInventoryAction(inventory: Inventory): void {

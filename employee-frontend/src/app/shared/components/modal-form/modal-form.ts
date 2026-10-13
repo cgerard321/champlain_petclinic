@@ -15,14 +15,13 @@ import {
   MatDialogTitle,
 } from '@angular/material/dialog';
 
-import { ImageEditor } from '@shared/components/image-editor/image-editor';
+import { ImageEditor, ImageAction } from '@shared/components/image-editor/image-editor';
 
 import {
   ModalFormData,
   ModalFormField,
   ModalFormOption,
   ModalFormResult,
-  ModalFormImageValue,
 } from './modal-form-models';
 
 type DynamicFormControl = FormControl<unknown>;
@@ -59,7 +58,7 @@ export class ModalForm<T extends object> {
 
   protected createForm(): DynamicFormGroup {
     const controls: DynamicFormControls = {};
-    const initialValue = this.data.initialValue as Record<string, unknown>;
+    const initialValue = structuredClone(this.data.initialValue) as Record<string, unknown>;
 
     for (const field of this.data.fields) {
       const fieldValue = initialValue[field.key];
@@ -82,7 +81,7 @@ export class ModalForm<T extends object> {
         return field.options?.[0]?.value ?? null;
 
       case 'image':
-        return { file: null, changed: false } satisfies ModalFormImageValue;
+        return { action: 'keep' } satisfies ImageAction;
 
       case 'string':
       default:
@@ -121,8 +120,9 @@ export class ModalForm<T extends object> {
 
   private requiredImage(field: ModalFormField): ValidatorFn {
     return (control) => {
-      const { file, changed } = control.value as ModalFormImageValue;
-      const hasImage = changed ? file !== null : !!field.currentImageUrl;
+      const change = control.value as ImageAction;
+      const hasImage =
+        change.action === 'replace' || (change.action === 'keep' && !!field.currentImageUrl);
       return hasImage ? null : { required: true };
     };
   }
@@ -148,6 +148,11 @@ export class ModalForm<T extends object> {
 
     if (!control.touched || !control.errors) {
       return '';
+    }
+
+    for (const key of Object.keys(control.errors)) {
+      const message = field.errorMessages?.[key];
+      if (message) return message;
     }
 
     if (control.hasError('required')) {
@@ -185,9 +190,9 @@ export class ModalForm<T extends object> {
     this.dialogRef.close();
   }
 
-  protected onImageChange(field: ModalFormField, file: File | null): void {
+  protected onImageChange(field: ModalFormField, change: ImageAction): void {
     const control = this.control(field);
-    control.setValue({ file, changed: true } satisfies ModalFormImageValue);
+    control.setValue(change);
     control.markAsDirty();
     control.markAsTouched();
   }

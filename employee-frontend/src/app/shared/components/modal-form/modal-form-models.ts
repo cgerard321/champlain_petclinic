@@ -7,15 +7,6 @@ export interface ModalFormOption<T = string> {
   label: string;
 }
 
-// Image Control
-// changed == false && file == null -> untouched
-// changed == true && file == File -> new image
-// changed == true && file == null -> removed
-export interface ModalFormImageValue {
-  file: File | null;
-  changed: boolean;
-}
-
 export interface ModalFormField {
   key: string;
   label: string;
@@ -34,6 +25,8 @@ export interface ModalFormField {
 
   // Allows a component using the modal to provide additional Angular validators for a specific field.
   validators?: readonly ValidatorFn[];
+
+  errorMessages?: Record<string, string>;
 
   currentImageUrl?: string | null; // existing picture to preview
   maxImageSizeBytes?: number;
