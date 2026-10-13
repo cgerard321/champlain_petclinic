@@ -1191,7 +1191,7 @@ const UserCart: React.FC = () => {
                       htmlFor={`recent-qty-${item.productId}`}
                       className="recent-purchase-qty-label"
                     >
-                      Qty:
+                      Quantity:
                     </label>
                     <input
                       id={`recent-qty-${item.productId}`}
@@ -1345,14 +1345,14 @@ const UserCart: React.FC = () => {
                     {item.productName}
                   </div>
                   <div className="recommendation-product-price recent-purchase-price">
-                    ${formatPrice(item.productSalePrice)}
+                    {formatPrice(item.productSalePrice)}
                   </div>
                   <div className="recommendation-qty-row recent-purchase-qty-row">
                     <label
                       htmlFor={`recommendation-qty-${item.productId}`}
                       className="recommendation-qty-label recent-purchase-qty-label"
                     >
-                      Qty:
+                      Quantity:
                     </label>
                     <input
                       id={`recommendation-qty-${item.productId}`}
@@ -1374,7 +1374,7 @@ const UserCart: React.FC = () => {
                     className="purchase-again-btn cart-button cart-button--brand"
                     onClick={() => handlePurchaseRecommendation(item)}
                   >
-                    Purchase Again
+                    Add to Cart
                   </button>
                   <div className="recommendation-total recent-purchase-total">
                     Total: $
