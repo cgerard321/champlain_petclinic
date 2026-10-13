@@ -4,17 +4,20 @@ import { MarkdownSafeLink } from '@/features/products/components/MarkdownSafeLin
 import './MarkdownReviewBody.css';
 import remarkGfm from 'remark-gfm';
 import remarkIns from 'remark-ins';
+import { RehypeHighlightSearch } from '@/features/products/utils/rehypeHighlightSearch.ts';
 
 interface MarkdownReviewBodyProps {
   unlimitedSize?: boolean;
   children: string;
   setHasOverflow?: (arg0: boolean) => void;
+  searchQuery?: string;
 }
 
 export function MarkdownReviewBody({
   unlimitedSize = false,
   children,
   setHasOverflow,
+  searchQuery,
 }: MarkdownReviewBodyProps): JSX.Element {
   const ref = useRef<HTMLDivElement>(null);
   const components = {
@@ -54,10 +57,12 @@ export function MarkdownReviewBody({
           'ins',
           'blockquote',
           'hr',
+          'mark',
         ]}
         unwrapDisallowed
         components={components}
         remarkPlugins={[remarkGfm, remarkIns]}
+        rehypePlugins={[[RehypeHighlightSearch, { searchQuery: searchQuery }]]}
       >
         {children}
       </Markdown>
