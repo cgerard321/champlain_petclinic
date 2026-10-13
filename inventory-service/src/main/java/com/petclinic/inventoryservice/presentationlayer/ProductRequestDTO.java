@@ -1,5 +1,8 @@
 package com.petclinic.inventoryservice.presentationlayer;
 
+import java.time.LocalDate;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.petclinic.inventoryservice.datalayer.Product.Status;
 import lombok.*;
 
@@ -18,4 +21,7 @@ public class ProductRequestDTO {
     private String recentUpdateMessage;
     private byte[] photoData;
     private String photoType;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+   private LocalDate expirationDate;
 }

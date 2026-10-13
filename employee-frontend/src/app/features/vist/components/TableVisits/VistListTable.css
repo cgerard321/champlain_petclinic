@@ -37,3 +37,7 @@ tr:last-child td {
 tr:hover td { 
   background: #f5f5f5; 
 }
+
+td button {
+  white-space: nowrap;
+}
