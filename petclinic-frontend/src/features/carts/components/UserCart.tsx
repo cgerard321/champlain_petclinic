@@ -983,6 +983,12 @@ const UserCart: React.FC = () => {
     item => item.productQuantity == null || item.productQuantity > 0
   );
 
+  const displayAddToCartOrPurchaseAgain = (productId: string): string => {
+    return recentPurchasesList.some(item => item.productId === productId)
+      ? 'Purchase Again'
+      : 'Add to Cart';
+  };
+
   return (
     <div>
       <NavBar />
@@ -1374,7 +1380,7 @@ const UserCart: React.FC = () => {
                     className="purchase-again-btn cart-button cart-button--brand"
                     onClick={() => handlePurchaseRecommendation(item)}
                   >
-                    Add to Cart
+                    {displayAddToCartOrPurchaseAgain(item.productId)}
                   </button>
                   <div className="recommendation-total recent-purchase-total">
                     Total: $
