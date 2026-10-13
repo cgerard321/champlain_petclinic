@@ -833,6 +833,55 @@ public class BillServiceImplTest {
     }
 
     @Test
+    public void updateBill_zeroAmount_shouldReturnBadRequest() {
+        BillRequestDTO request = buildBillRequestDTO();
+        request.setAmount(BigDecimal.ZERO);
+
+        StepVerifier.create(
+                        billService.updateBill("bill-123", Mono.just(request)))
+                .expectErrorMatches(error ->
+                        error instanceof ResponseStatusException &&
+                                ((ResponseStatusException) error).getStatus() ==
+                                        HttpStatus.BAD_REQUEST)
+                .verify();
+
+        verify(repo, never()).save(any(Bill.class));
+    }
+
+    @Test
+    public void updateBill_invalidDueDate_shouldReturnBadRequest() {
+        BillRequestDTO request = buildBillRequestDTO();
+        request.setDueDate(request.getDate().minusDays(1));
+
+        StepVerifier.create(
+                        billService.updateBill("bill-123", Mono.just(request)))
+                .expectErrorMatches(error ->
+                        error instanceof ResponseStatusException &&
+                                ((ResponseStatusException) error).getStatus() ==
+                                        HttpStatus.BAD_REQUEST)
+                .verify();
+
+        verify(repo, never()).save(any(Bill.class));
+    }
+
+    @Test
+    public void updateBill_blankVisitType_shouldReturnBadRequest() {
+        BillRequestDTO request = buildBillRequestDTO();
+        request.setVisitType("   ");
+
+        StepVerifier.create(
+                        billService.updateBill("bill-123", Mono.just(request)))
+                .expectErrorMatches(error ->
+                        error instanceof ResponseStatusException &&
+                                ((ResponseStatusException) error).getStatus() ==
+                                        HttpStatus.BAD_REQUEST)
+                .verify();
+
+        verify(repo, never()).save(any(Bill.class));
+    }
+
+
+    @Test
     public void test_getBillByNonExistentBillId() {
         String nonExistentBillId = "nonExistentId";
 
