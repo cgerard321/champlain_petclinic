@@ -19,10 +19,7 @@ import com.petclinic.cartsservice.utils.exceptions.OutOfStockException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -1933,11 +1930,13 @@ class CartServiceUnitTest {
         String cartId = "test-cart-id";
         Cart cart = Cart.builder()
                 .cartId(cartId)
+                .customerId("test-customer-id")
                 .products(Arrays.asList(product1, product2))
                 .recentPurchases(Arrays.asList(product1))
                 .build();
 
         when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
+        doCallRealMethod().when(orderService).storeCartOrder(any(Cart.class));
 
         OrderResponseModel orderResponse = OrderResponseModel.builder()
                 .orderId(UUID.randomUUID().toString())
@@ -1946,28 +1945,19 @@ class CartServiceUnitTest {
                 .total(100.0)
                 .build();
 
-        Order order = Order.builder()
-                .orderId(orderResponse.getOrderId())
-                .customerId(orderResponse.getCustomerId())
-                .products(orderResponse.getProducts())
-                .total(orderResponse.getTotal())
-                .build();
 
 
         when(orderService.createOrder(any(Cart.class)))
                 .thenAnswer(invocation -> {
                     Cart checkoutCart = invocation.getArgument(0);
-
                     assertTrue(checkoutCart.getSubtotal() > 0);
                     assertTrue(checkoutCart.getTvq() > 0);
                     assertTrue(checkoutCart.getTvc() > 0);
                     assertTrue(checkoutCart.getTotal() > 0);
-
                     return Mono.just(orderResponse);
                 });
 
-        when(orderService.toOrder(any(OrderResponseModel.class)))
-                .thenReturn(order);
+
 
         ProductResponseModel productResponse = ProductResponseModel.builder()
                 .productId(product1.getProductId())
@@ -1992,6 +1982,13 @@ class CartServiceUnitTest {
                     assertTrue(response.getTotal() > 0);
                 })
                 .verifyComplete();
+        InOrder inOrder = inOrder(cartRepository, orderService);
+
+        inOrder.verify(cartRepository)
+                .save(any(Cart.class));
+
+        inOrder.verify(orderService)
+                .createOrder(any(Cart.class));
 
         when(cartRepository.findCartByCartId("notfound")).thenReturn(Mono.empty());
         StepVerifier.create(cartService.checkoutCart("notfound"))
@@ -2003,6 +2000,9 @@ class CartServiceUnitTest {
         StepVerifier.create(cartService.checkoutCart("empty"))
                 .expectErrorMatches(e -> e instanceof InvalidInputException)
                 .verify();
+
+        verify(orderService, times(1))
+                .createOrder(any(Cart.class));
     }
 
     @Test
@@ -2134,5 +2134,103 @@ class CartServiceUnitTest {
 
         verify(cartRepository, never()).save(any(Cart.class));
     }
+
+
+    @Test
+    void checkoutCart_CartSaveFails_DoesNotCreateOrder() {
+        // Arrange
+        String cartId = "cart-save-failure";
+
+        Cart cart = Cart.builder()
+                .cartId(cartId)
+                .customerId("customer-123")
+                .products(new ArrayList<>(List.of(product1, product2)))
+                .recentPurchases(new ArrayList<>())
+                .build();
+
+        when(cartRepository.findCartByCartId(cartId))
+                .thenReturn(Mono.just(cart));
+
+        doCallRealMethod().when(orderService)
+                .storeCartOrder(any(Cart.class));
+
+        ProductResponseModel productResponse = ProductResponseModel.builder()
+                .productId(product1.getProductId())
+                .productName(product1.getProductName())
+                .productType("Food")
+                .build();
+
+        when(productClient.getProductByProductId(anyString()))
+                .thenReturn(Mono.just(productResponse));
+
+        when(productClient.getProductsByType("Food"))
+                .thenReturn(Flux.just(productResponse));
+
+        when(cartRepository.save(any(Cart.class)))
+                .thenReturn(Mono.error(
+                        new RuntimeException("Cart save failed")
+                ));
+
+        // Act & Assert
+        StepVerifier.create(cartService.checkoutCart(cartId))
+                .expectErrorMatches(error ->
+                        error instanceof RuntimeException &&
+                                error.getMessage().equals("Cart save failed"))
+                .verify();
+
+        verify(cartRepository, times(1))
+                .save(any(Cart.class));
+
+        verify(orderService, never())
+                .createOrder(any(Cart.class));
+
+        verify(orderService, times(1))
+                .storeCartOrder(any(Cart.class));
+    }
+
+
+    @Test
+    void checkoutCart_RecommendationFails_DoesNotCreateOrder() {
+        // Arrange
+        String cartId = "cart-recommendation-failure";
+
+        Cart cart = Cart.builder()
+                .cartId(cartId)
+                .customerId("customer-123")
+                .products(new ArrayList<>(List.of(product1)))
+                .recentPurchases(new ArrayList<>())
+                .build();
+
+        when(cartRepository.findCartByCartId(cartId))
+                .thenReturn(Mono.just(cart));
+
+        doCallRealMethod().when(orderService)
+                .storeCartOrder(any(Cart.class));
+
+        when(productClient.getProductByProductId(product1.getProductId()))
+                .thenReturn(Mono.error(
+                        new RuntimeException("Recommendation service failed")
+                ));
+
+        // Act & Assert
+        StepVerifier.create(cartService.checkoutCart(cartId))
+                .expectErrorMatches(error ->
+                        error instanceof RuntimeException &&
+                                error.getMessage()
+                                        .equals("Recommendation service failed"))
+                .verify();
+
+        // Cart and order should both not be persisted
+        verify(cartRepository, never())
+                .save(any(Cart.class));
+
+        verify(orderService, never())
+                .createOrder(any(Cart.class));
+
+        verify(orderService, times(1))
+                .storeCartOrder(any(Cart.class));
+    }
+
+
 
 }

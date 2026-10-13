@@ -16,4 +16,5 @@ public interface OrderService {
     Flux<OrderResponseModel> getAllOrders();
     Flux<OrderResponseModel>  findOrdersByCustomerId(String customerId);
     Order toOrder(OrderResponseModel orderResponseModel);
+    Cart storeCartOrder(Cart cart);
 }

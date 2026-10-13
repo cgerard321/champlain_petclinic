@@ -7,12 +7,14 @@ import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.domainclientlayer.CustomerClient;
 import com.petclinic.cartsservice.domainclientlayer.CustomerResponseModel;
 import com.petclinic.cartsservice.domainclientlayer.ProductClient;
+import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
 import com.petclinic.cartsservice.presentationlayer.OrderRequestModel;
 import com.petclinic.cartsservice.presentationlayer.OrderResponseModel;
 import com.petclinic.cartsservice.utils.EntityModelUtil;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -22,6 +24,7 @@ import reactor.core.publisher.Mono;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+
 
 @Service
 @Slf4j
@@ -84,7 +87,7 @@ public class OrderServiceImpl implements OrderService {
                 )
                 .map(EntityModelUtil::toOrderResponseModel);
     }
-
+    @Override
     public Order toOrder(OrderResponseModel orderResponse){
         return Order.builder()
                 .products(orderResponse.getProducts())
@@ -100,6 +103,31 @@ public class OrderServiceImpl implements OrderService {
                 .orderDate(orderResponse.getOrderDate())
                 .build();
     }
+
+    @Override
+    public Cart storeCartOrder(Cart cart) {
+        Cart orderCart = new Cart();
+        BeanUtils.copyProperties(cart, orderCart);
+        List<CartProduct> products = cart.getProducts().stream()
+                .map(product -> {
+                    CartProduct copy = new CartProduct();
+                    BeanUtils.copyProperties(product, copy);
+                    return copy;
+                })
+                .toList();
+
+        orderCart.setProducts(products);
+        CartResponseModel calculatedCart =
+                EntityModelUtil.toCartResponseModel(orderCart, products);
+        orderCart.setSubtotal(calculatedCart.getSubtotal());
+        orderCart.setPromoPercent(calculatedCart.getPromoPercent());
+        orderCart.setTvq(calculatedCart.getTvq());
+        orderCart.setTvc(calculatedCart.getTvc());
+        orderCart.setTotal(calculatedCart.getTotal());
+
+        return orderCart;
+    }
+
 
 
 }

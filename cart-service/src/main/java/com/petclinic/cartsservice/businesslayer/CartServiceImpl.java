@@ -227,23 +227,9 @@ public class CartServiceImpl implements CartService {
                     // this is the correct way to get the total do not use calculateTotal
                     double total = EntityModelUtil.toCartResponseModel(cart, products).getTotal();
 
-                    // Order Feature Logic
+                    //store a version of the cart for orders because cart gets wiped
+                    Cart orderCart = orderService.storeCartOrder(cart);
 
-                    CartResponseModel calculatedCart = EntityModelUtil.toCartResponseModel(cart, products);
-
-                    cart.setSubtotal(calculatedCart.getSubtotal());
-                    cart.setTvq(calculatedCart.getTvq());
-                    cart.setTvc(calculatedCart.getTvc());
-                    cart.setTotal(calculatedCart.getTotal());
-
-
-                    return orderService.createOrder(cart)
-                            .map(orderService::toOrder)
-                            .flatMap(order -> {
-                                if (cart.getOrders() == null) {
-                                    cart.setOrders(new ArrayList<>());
-                                }
-                                cart.getOrders().add(order);
 
 
                                 // --- Recent Purchases Logic ---
@@ -284,11 +270,12 @@ public class CartServiceImpl implements CartService {
                                             cart.setProducts(Collections.emptyList());
 
                                             return cartRepository.save(cart)
-                                                    .thenReturn(new CartResponseModel(invoiceId, cartId, products, total));
+                                                    .then(Mono.defer(() -> orderService.createOrder(orderCart))
+                                                    .thenReturn(new CartResponseModel(invoiceId, cartId, products, total)));
 
                                         });
+
                             });
-                });
     }
 
 

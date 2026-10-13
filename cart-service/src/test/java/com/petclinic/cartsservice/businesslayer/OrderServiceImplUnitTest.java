@@ -386,4 +386,41 @@ class OrderServiceUnitTest {
         assertEquals(6.25, result.getTvc(), 0.001);
         assertEquals(143.72, result.getTotal(), 0.001);
     }
+
+
+    @Test
+    void storeCartOrder_ValidCart_PreservesOriginalProductsAndTotals() {
+        // Arrange
+        cart.setPromoPercent(10.0);
+
+        int originalQuantity =
+                cart.getProducts().get(0).getQuantityInCart();
+
+        // Act
+        Cart orderCart = orderService.storeCartOrder(cart);
+
+        // Assert
+        assertNotNull(orderCart);
+
+        assertNotSame(cart, orderCart);
+        assertEquals(cart.getCustomerId(), orderCart.getCustomerId());
+        assertEquals(cart.getPromoPercent(), orderCart.getPromoPercent());
+
+        assertEquals(2, orderCart.getProducts().size());
+        assertNotSame(cart.getProducts(), orderCart.getProducts());
+        assertNotSame(cart.getProducts().get(0), orderCart.getProducts().get(0));
+        assertEquals(cart.getProducts().get(0).getProductId(), orderCart.getProducts().get(0).getProductId());
+        assertEquals(originalQuantity, orderCart.getProducts().get(0).getQuantityInCart());
+        assertEquals(125.0, orderCart.getSubtotal(), 0.001);
+        assertEquals(11.22, orderCart.getTvq(), 0.001);
+        assertEquals(5.63, orderCart.getTvc(), 0.001);
+        assertEquals(129.35, orderCart.getTotal(), 0.001);
+
+        cart.getProducts().get(0).setQuantityInCart(5);
+
+        assertEquals(originalQuantity, orderCart.getProducts().get(0).getQuantityInCart());
+        verifyNoInteractions(orderRepository);
+        verifyNoInteractions(customerClient);
+    }
+
 }
