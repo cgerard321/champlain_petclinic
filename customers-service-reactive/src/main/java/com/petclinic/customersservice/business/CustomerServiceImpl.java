@@ -82,6 +82,30 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    public Mono<CustomerResponseDTO> softDeleteCustomerByCustomerId(String customerId) {
+        return customerRepo.findCustomerByCustomerId(customerId)
+                .filter(found -> !Boolean.FALSE.equals(found.getIsActive()))
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Customer id not found: " + customerId))))
+                .flatMap(found -> {
+                    String photoId = found.getPhotoId();
+                    Mono<Void> deletePhoto = Mono.empty();
+                    if (photoId != null && !photoId.isEmpty()) {
+                        deletePhoto = filesServiceClient.deleteFile(photoId)
+                                .onErrorResume(e -> {
+                                    log.error("Error deleting photo file {}: {}", photoId, e.getMessage());
+                                    return Mono.empty();
+                                });
+                    }
+                    found.setPhotoId(null);
+                    found.setIsActive(false);
+                    return deletePhoto
+                            .then(cartServiceClient.deleteCartByCustomerId(found.getCustomerId()))
+                            .then(customerRepo.save(found));
+                })
+                .map(EntityDTOUtil::toCustomerReponseDTO);
+    }
+
+    @Override
     public Mono<CustomerResponseDTO> updateCustomer(Mono<CustomerRequestDTO> customerRequestDTO, String customerId) {
         return customerRepo.findCustomerByCustomerId(customerId)
                 .flatMap(customer -> customerRequestDTO
@@ -89,6 +113,7 @@ public class CustomerServiceImpl implements CustomerService {
                         .doOnNext(o -> {
                             o.setId(customer.getId());
                             o.setCustomerId(customerId);
+                            o.setIsActive(customer.getIsActive());
                         })
                 )
                 .flatMap(customerRepo::save)
@@ -130,7 +155,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public Flux<CustomerResponseDTO> getAllCustomers() {
-        return customerRepo.findAll()
+        return findActiveCustomers()
                 .map(EntityDTOUtil::toCustomerReponseDTO);
     }
 
@@ -143,7 +168,7 @@ public class CustomerServiceImpl implements CustomerService {
                 (phoneNumber == null || customer.getTelephone().equals(phoneNumber)) &&
                 (city == null || customer.getCity().equals(city));
 
-        return customerRepo.findAll()
+        return findActiveCustomers()
                 .filter(filterCriteria) // Apply filtering
                 .map(EntityDTOUtil::toCustomerReponseDTO)
                 .count();
@@ -165,17 +190,22 @@ public class CustomerServiceImpl implements CustomerService {
                 (city == null || customer.getCity().equals(city));
 
         if(customerId == null && firstName == null && lastName == null && phoneNumber == null && city == null){
-            return customerRepo.findAll()
+            return findActiveCustomers()
                     .map(EntityDTOUtil::toCustomerReponseDTO)
                     .skip(pageable.getPageNumber() * pageable.getPageSize())
                     .take(pageable.getPageSize());
         } else {
-            return customerRepo.findAll()
+            return findActiveCustomers()
                     .filter(filterCriteria)
                     .map(EntityDTOUtil::toCustomerReponseDTO)
                     .skip(pageable.getPageNumber() * pageable.getPageSize())
                     .take(pageable.getPageSize());
         }
+    }
+
+    private Flux<Customer> findActiveCustomers() {
+        return customerRepo.findAll()
+                .filter(customer -> !Boolean.FALSE.equals(customer.getIsActive()));
     }
 
     @Override
