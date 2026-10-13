@@ -11,6 +11,7 @@ interface ReviewProps {
   canEdit: boolean;
   onEdit: () => void;
   onDelete: () => void;
+  searchQuery?: string;
 }
 
 export function Review({
@@ -18,6 +19,7 @@ export function Review({
   canEdit,
   onEdit,
   onDelete,
+  searchQuery,
 }: ReviewProps): JSX.Element {
   const [showExpanded, setShowExpanded] = useState(false);
   const [hasOverflow, setHasOverflow] = useState(false);
@@ -77,6 +79,7 @@ export function Review({
           if (!hasOverflow && b) setHasOverflow(b);
         }}
         unlimitedSize={showExpanded}
+        searchQuery={searchQuery}
       >
         {rating.review}
       </MarkdownReviewBody>
