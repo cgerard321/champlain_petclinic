@@ -1,7 +1,7 @@
 import { CurrencyPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal, TemplateRef, viewChild } from '@angular/core';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -30,7 +30,7 @@ interface SupplyFormValue {
 }
 
 @Component({
-  imports: [CurrencyPipe, MatDialogModule, MatIconModule, Table],
+  imports: [CurrencyPipe, MatIconModule, Table],
   selector: 'app-supply',
   styleUrl: './supply-page.css',
   templateUrl: './supply-page.html',
@@ -75,16 +75,7 @@ export class SupplyPage {
   protected readonly deleteError = signal('');
   protected readonly downloadingPdf = signal(false);
   protected readonly downloadError = signal('');
-  protected readonly showAddForm = signal(false);
-  protected readonly editingSupplyId = signal<string | null>(null);
   protected readonly consumingSupplyId = signal<string | null>(null);
-  protected readonly newSupply = signal({
-    productName: '',
-    productDescription: '',
-    productPrice: 0,
-    productQuantity: 1,
-    productSalePrice: 0,
-  });
 
   protected readonly nameCell = viewChild<TemplateRef<{ $implicit: Supply }>>('nameCell');
   protected readonly priceCell = viewChild<TemplateRef<{ $implicit: Supply }>>('priceCell');
