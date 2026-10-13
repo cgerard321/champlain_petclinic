@@ -6,9 +6,7 @@ import com.petclinic.billing.datalayer.BillResponseDTO;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
-import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
-import java.util.Locale;
 import java.util.Optional;
 
 import static com.petclinic.billing.util.FormatBillUtil.convertFromCad;
@@ -50,15 +48,15 @@ public class PdfGenerator {
 
         document.add(metaTable);
 
-        // Owner and Vet Info
+        // Customer and Vet Info
         PdfPTable partyTable = new PdfPTable(2);
         partyTable.setWidthPercentage(100);
         partyTable.setSpacingAfter(15);
 
-        String ownerName = (Optional.ofNullable(bill.getOwnerFirstName()).orElse("") + " "
-                + Optional.ofNullable(bill.getOwnerLastName()).orElse("")).trim();
+        String customerName = (Optional.ofNullable(bill.getCustomerFirstName()).orElse("") + " "
+                + Optional.ofNullable(bill.getCustomerLastName()).orElse("")).trim();
 
-        addMetaCell(partyTable, "Owner:", (ownerName.isEmpty() ? "N/A" : ownerName));
+        addMetaCell(partyTable, "Customer:", (customerName.isEmpty() ? "N/A" : customerName));
         addMetaCell(partyTable, "Vet:", Optional.ofNullable(bill.getVetFirstName()).orElse("") + " "
                 + Optional.ofNullable(bill.getVetLastName()).orElse(""));
 

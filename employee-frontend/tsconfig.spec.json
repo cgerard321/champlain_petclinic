@@ -3,12 +3,13 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "types": [
-      "vitest/globals"
-    ]
+    "types": ["vitest/globals", "@angular/localize", "node"]
   },
   "include": [
     "src/**/*.d.ts",
-    "src/**/*.spec.ts"
+    "src/**/*.spec.ts",
+    "tests/visitsTest/visitListVetVisits.spec.ts",
+    "tests/visitsTest/visitListAdmin.spec.ts",
+    "tests/visitsTest/scheduleFollowUpVisit.spec.ts"
   ]
 }
