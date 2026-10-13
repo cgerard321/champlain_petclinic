@@ -7,7 +7,14 @@
     </div>
 
     @if (canCreateBill()) {
+      <<<<<<< HEAD
       <button class="bill-primary-action" type="button">Create Bill</button>
+      =======
+      <!-- The create flow belongs to the follow-up Bill CRUD story. -->
+      <button class="bill-primary-action" type="button" (click)="openCreateBill()">
+        Create Bill
+      </button>
+      >>>>>>> origin/main
     }
   </header>
 

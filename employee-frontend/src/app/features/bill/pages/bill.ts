@@ -3,6 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
+import { CreateBill } from '@features/bill/components/createBill/create-bill';
 import { Subscription, finalize, switchMap, take, tap, toArray } from 'rxjs';
 
 import { AuthState } from '@core/services/auth-state';
@@ -21,11 +22,11 @@ import { Roles } from '@shared/models/roles';
 })
 export class Bill implements OnInit {
   protected readonly auth = inject(AuthState);
+  protected readonly dialog = inject(MatDialog);
 
   private readonly billService = inject(BillService);
   private readonly destroyRef = inject(DestroyRef);
   private detailsRequest?: Subscription;
-  private readonly dialog = inject(MatDialog);
 
   protected readonly bills = signal<BillRecord[]>([]);
   protected readonly isLoading = signal(false);
@@ -48,6 +49,25 @@ export class Bill implements OnInit {
   protected readonly canViewDetails = computed(
     () => this.auth.hasRole(Roles.admin) || this.auth.hasRole(Roles.vet),
   );
+  protected openCreateBill(): void {
+    if (!this.canCreateBill()) {
+      return;
+    }
+
+    this.dialog
+      .open(CreateBill, {
+        width: '750px',
+        maxWidth: '95vw',
+        maxHeight: '90vh',
+      })
+      .afterClosed()
+      .pipe(take(1), takeUntilDestroyed(this.destroyRef))
+      .subscribe((createdBill: unknown) => {
+        if (createdBill) {
+          this.loadBills();
+        }
+      });
+  }
 
   ngOnInit(): void {
     if (this.canViewBillList()) {

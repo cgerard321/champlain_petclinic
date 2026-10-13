@@ -29,3 +29,10 @@ export type BillUpdateRequest = Pick<
   date: string;
   dueDate: string;
 };
+export interface BillRequestModel {
+  customerId: string;
+  visitType: string;
+  vetId: string;
+  date: Date;
+  amount: number | null;
+}
