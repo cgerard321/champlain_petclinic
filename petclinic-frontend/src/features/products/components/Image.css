@@ -25,6 +25,15 @@
   opacity: 0;
 }
 
+.products-loading-state {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 180px;
+}
+
 .image-loading-spinner {
   position: absolute;
   z-index: 1;
