@@ -26,6 +26,7 @@ interface SupplyFormValue {
   productPrice: number;
   productQuantity: number;
   productSalePrice: number;
+  expirationDate: string;
   photo: ImageAction;
 }
 
@@ -48,13 +49,14 @@ export class SupplyPage {
   protected readonly hasActiveFilters = computed(() =>
     Object.values(this.filters()).some((value) => value.trim().length > 0),
   );
+
   protected readonly filteredSupplies = computed(() => {
     const { productName, productDescription, status } = this.filters();
     return this.supplies().filter(
       (supply) =>
         supply.productName.toLowerCase().includes(productName.trim().toLowerCase()) &&
         supply.productDescription.toLowerCase().includes(productDescription.trim().toLowerCase()) &&
-        (!status || supply.status === status),
+        (!status || this.effectiveStatus(supply) === status),
     );
   });
 
@@ -81,7 +83,8 @@ export class SupplyPage {
   protected readonly priceCell = viewChild<TemplateRef<{ $implicit: Supply }>>('priceCell');
   protected readonly statusCell = viewChild<TemplateRef<{ $implicit: Supply }>>('statusCell');
   protected readonly actionsCell = viewChild<TemplateRef<{ $implicit: Supply }>>('actionsCell');
-
+  protected readonly expirationCell =
+    viewChild<TemplateRef<{ $implicit: Supply }>>('expirationCell');
   protected readonly supplyRowId = (supply: Supply): string => supply.productId;
 
   // Formatting and actions stay here so the shared table has no supply-specific logic.
@@ -90,6 +93,7 @@ export class SupplyPage {
     { id: 'description', header: 'Description', value: (supply) => supply.productDescription },
     { id: 'price', header: 'Cost Price', template: this.priceCell() },
     { id: 'quantity', header: 'Quantity', value: (supply) => supply.productQuantity },
+    { id: 'expiration', header: 'Expiration Date', template: this.expirationCell() },
     { id: 'status', header: 'Status', template: this.statusCell() },
     ...(this.canManageSupplies() || this.canConsumeSupplies()
       ? [{ id: 'actions', header: 'Actions', template: this.actionsCell() }]
@@ -147,7 +151,9 @@ export class SupplyPage {
     void this.openSupplyDialog(supply);
   }
 
-  private supplyFields(currentImageUrl: string | null): readonly ModalFormField[] {
+  private supplyFields(supply?: Supply): readonly ModalFormField[] {
+    const currentImageUrl = supply ? this.supplyPhotoUrl(supply) : null;
+
     return [
       { key: 'productName', label: 'Name', type: 'string', required: true },
       { key: 'productDescription', label: 'Description', type: 'string', required: true },
@@ -175,6 +181,14 @@ export class SupplyPage {
         min: 0.01,
         step: 0.01,
       },
+      {
+        key: 'expirationDate',
+        label: 'Expiration Date',
+        type: 'date',
+        // Only reject past expiry dates when creating new supplies
+        minDate: supply ? undefined : this.todayAsText(),
+        errorMessages: { minDate: 'Expiration date cannot be in the past.' },
+      },
       { key: 'photo', label: 'Supply photo', type: 'image', currentImageUrl },
     ];
   }
@@ -190,7 +204,7 @@ export class SupplyPage {
       data: {
         title: supply ? 'Edit Supply' : 'Add Supply',
         submitLabel: supply ? 'Save Changes' : 'Add Supply',
-        fields: this.supplyFields(supply ? this.supplyPhotoUrl(supply) : null),
+        fields: this.supplyFields(supply),
         initialValue: supply
           ? {
               productName: supply.productName,
@@ -198,6 +212,7 @@ export class SupplyPage {
               productPrice: supply.productPrice,
               productQuantity: supply.productQuantity,
               productSalePrice: supply.productSalePrice,
+              expirationDate: supply.expirationDate ?? '',
             }
           : {
               productName: '',
@@ -205,6 +220,7 @@ export class SupplyPage {
               productPrice: 0,
               productQuantity: 1,
               productSalePrice: 0,
+              expirationDate: '',
             },
       },
       ariaLabel: supply ? 'Edit supply' : 'Add supply',
@@ -256,7 +272,8 @@ export class SupplyPage {
       return;
     }
 
-    if (supply.productQuantity <= 0) {
+    // Prevent consuming if quantity is already 0 or if the supply is expired
+    if (supply.productQuantity <= 0 || this.expirationState(supply) === 'expired') {
       return;
     }
     this.deleteError.set('');
@@ -370,6 +387,45 @@ export class SupplyPage {
   }
 
   // ------ Helpers ------
+
+  // Supplies expiring within this many days are flagged as "expiring soon".
+  private readonly expiringSoonDays = 30;
+
+  protected effectiveStatus(supply: Supply): string {
+    if (this.expirationState(supply) === 'expired') {
+      return 'OUT_OF_STOCK';
+    }
+    return supply.status;
+  }
+
+  protected expirationState(supply: Supply): 'none' | 'expired' | 'soon' | 'ok' {
+    if (!supply.expirationDate) {
+      return 'none';
+    }
+
+    // Adding T00:00:00 makes the date local. Without it, "2026-10-20" is read as UTC,
+    // which is the evening of the 19th in Montreal and would be off by one day.
+    const expiration = new Date(`${supply.expirationDate}T00:00:00`);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const daysLeft = Math.round((expiration.getTime() - today.getTime()) / 86_400_000);
+
+    if (daysLeft < 0) {
+      return 'expired';
+    }
+
+    return daysLeft <= this.expiringSoonDays ? 'soon' : 'ok';
+  }
+
+  private todayAsText(): string {
+    const now = new Date();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+
+    return `${now.getFullYear()}-${month}-${day}`;
+  }
+
   protected formatStatus(status: string): string {
     return status.replaceAll('_', ' ');
   }
@@ -406,8 +462,8 @@ export class SupplyPage {
   }
 
   private async buildSupplyRequest(value: SupplyFormValue): Promise<SupplyRequest> {
-    const { photo, ...fields } = value;
-    const request: SupplyRequest = { ...fields };
+    const { photo, expirationDate, ...fields } = value;
+    const request: SupplyRequest = { ...fields, expirationDate: expirationDate || null };
 
     switch (photo.action) {
       case 'replace':

@@ -5,6 +5,8 @@ import { EMPTY, filter, map, switchMap, Observable } from 'rxjs';
 import { CurrentUserResponse } from '@core/models/current-user-response';
 import { AuthState } from '@core/services/auth-state';
 import { SseClient } from '@core/services/sse-client';
+import { Status } from '@features/vist/models/Status';
+import { TimeSlot } from '@features/vist/models/TimeSlot';
 import { Visit } from '@features/vist/models/Visit';
 
 @Injectable({ providedIn: 'root' })
@@ -42,5 +44,38 @@ export class VisitService {
         filter((event): event is MessageEvent<string> => event.type !== 'error'),
         map((event) => JSON.parse(event.data) as Visit),
       );
+  }
+
+  getAvailableTimeSlots(practitionerId: string, date: string): Observable<TimeSlot[]> {
+    return this.http.get<TimeSlot[]>(
+      `/api/gateway/visits/availability/vets/${practitionerId}/slots`,
+      { params: { date } },
+    );
+  }
+
+  getAvailableDates(
+    practitionerId: string,
+    startDate: string,
+    endDate: string,
+  ): Observable<string[]> {
+    return this.http.get<string[]>(
+      `/api/gateway/visits/availability/vets/${practitionerId}/dates`,
+      { params: { startDate, endDate } },
+    );
+  }
+
+  addFollowUpVisit(
+    completedVisit: Visit,
+    visitDate: string,
+    description: string,
+  ): Observable<Visit> {
+    return this.http.post<Visit>('/api/gateway/visits', {
+      visitDate,
+      description,
+      petId: completedVisit.petId,
+      practitionerId: completedVisit.practitionerId,
+      status: Status.UPCOMING,
+      isEmergency: false,
+    });
   }
 }

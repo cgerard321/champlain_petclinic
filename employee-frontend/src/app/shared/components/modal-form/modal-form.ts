@@ -111,6 +111,10 @@ export class ModalForm<T extends object> {
       }
     }
 
+    if (field.type === 'date' && field.minDate) {
+      validators.push(this.minDate(field.minDate));
+    }
+
     if (field.validators) {
       validators.push(...field.validators);
     }
@@ -118,6 +122,7 @@ export class ModalForm<T extends object> {
     return validators;
   }
 
+  // -------- Validator Methods --------
   private requiredImage(field: ModalFormField): ValidatorFn {
     return (control) => {
       const change = control.value as ImageAction;
@@ -126,6 +131,15 @@ export class ModalForm<T extends object> {
       return hasImage ? null : { required: true };
     };
   }
+
+  private minDate(min: string): ValidatorFn {
+    return (control) => {
+      const value = control.value as string | null;
+
+      return value && value < min ? { minDate: { min } } : null;
+    };
+  }
+  // ----------------------------------------
 
   // Looks up the FormControl associated with a field.
   // This is used by the template because the controls are created dynamically.
@@ -167,6 +181,10 @@ export class ModalForm<T extends object> {
     if (control.hasError('max')) {
       const maximum = control.getError('max').max;
       return `${field.label} must be at most ${maximum}.`;
+    }
+
+    if (control.hasError('minDate')) {
+      return `${field.label} cannot be before ${control.getError('minDate').min}.`;
     }
 
     return 'Invalid value.';

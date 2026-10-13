@@ -12,6 +12,7 @@ export interface Supply {
   lastUpdatedAt: string;
   photoData?: string | null;
   photoType?: string | null;
+  expirationDate?: string | null;
 }
 
 export interface SupplyRequest {
@@ -22,4 +23,5 @@ export interface SupplyRequest {
   productSalePrice: number;
   photoData?: string;
   photoType?: string | null;
+  expirationDate?: string | null;
 }

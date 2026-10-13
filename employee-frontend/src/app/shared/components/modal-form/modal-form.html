@@ -64,6 +64,15 @@
                 (imageChange)="onImageChange(field, $event)"
               />
             }
+
+            @case ('date') {
+              <input
+                [id]="field.key"
+                type="date"
+                [formControlName]="field.key"
+                [attr.min]="field.minDate ?? null"
+              />
+            }
           }
         </div>
       }

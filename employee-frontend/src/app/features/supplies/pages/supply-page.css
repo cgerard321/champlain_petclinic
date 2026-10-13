@@ -438,6 +438,28 @@
   opacity: 0.45;
 }
 
+.expiration-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.expiration-badge.expired {
+  background: #ffebee;
+  color: #b71c1c;
+}
+
+.expiration-badge.expiring-soon {
+  background: #fff1cc;
+  color: #765000;
+}
+
+.no-expiration {
+  color: var(--text-secondary);
+}
+
 @media (width <= 850px) {
   .supply-filter-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));

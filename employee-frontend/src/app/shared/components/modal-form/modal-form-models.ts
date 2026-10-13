@@ -1,6 +1,6 @@
 import { ValidatorFn } from '@angular/forms';
 
-export type ModalFormFieldType = 'string' | 'number' | 'enum' | 'image';
+export type ModalFormFieldType = 'string' | 'number' | 'enum' | 'image' | 'date';
 
 export interface ModalFormOption<T = string> {
   value: T;
@@ -30,6 +30,8 @@ export interface ModalFormField {
 
   currentImageUrl?: string | null; // existing picture to preview
   maxImageSizeBytes?: number;
+
+  minDate?: string; // date fields only, as YYYY-MM-DD
 }
 
 export interface ModalFormData<T extends object> {
