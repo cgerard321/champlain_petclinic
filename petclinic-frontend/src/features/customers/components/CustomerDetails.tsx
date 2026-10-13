@@ -425,7 +425,7 @@ const CustomerDetails: FC = () => {
                       </span>
                       <span className="pet-type">
                         <strong>{t('customerDetails.pets.type')}</strong>{' '}
-                        {getPetTypeName(pet.petTypeId, petTypes)}
+                        {getPetTypeName(pet.petTypeId, petTypes, t)}
                       </span>
                       <span className="pet-weight">
                         <strong>{t('customerDetails.pets.weight')}</strong>{' '}
