@@ -29,10 +29,14 @@ import { ProductUpdateDialog } from '@features/prod/components/product-update-di
 import { Product } from '@features/prod/models/product.model';
 import { ProductService } from '@features/prod/services/product.service';
 import { Roles } from '@shared/models/roles';
+import { FormsModule } from '@angular/forms';
+import { ReviewSettingsService } from '@features/prod/services/review-settings.service';
+import {ReviewSettings} from '@features/prod/models/review-settings.model';
 
 @Component({
   imports: [
     CurrencyPipe,
+    FormsModule,
     MatButtonModule,
     MatCardModule,
     MatDialogModule,
@@ -53,12 +57,19 @@ export class Prod implements OnInit {
   private readonly productSearch = new Subject<string>();
   private readonly reload = new Subject<void>();
   private readonly searchTerm = signal('');
+  private readonly reviewSettingsService = inject(ReviewSettingsService);
+
+  protected readonly isAdmin = computed(() => this.auth.roles().includes(Roles.admin),);
 
   protected readonly products = signal<Product[]>([]);
   protected readonly isLoading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly deleteErrorMessage = signal<string | null>(null);
   protected readonly deletingProductId = signal<string | null>(null);
+  protected readonly reviewEditPeriodHours = signal(48);
+  protected readonly settingsMessage = signal<string | null>(null);
+  protected readonly settingsError = signal<string | null>(null);
+  protected readonly isSavingSettings = signal(false);
   protected readonly canManageProducts = computed(() => {
     const roles = this.auth.roles();
     return roles.includes(Roles.admin) || roles.includes(Roles.inventoryManager);
@@ -89,6 +100,45 @@ export class Prod implements OnInit {
       });
 
     this.loadProducts();
+
+    if (this.isAdmin()) {
+      this.loadReviewSettings();
+    }
+  }
+
+  protected loadReviewSettings(): void {
+    this.reviewSettingsService.getSettings().subscribe({
+      next: (settings) => {
+        this.reviewEditPeriodHours.set(settings.editPeriodHours);
+      },
+      error: () => {
+        this.settingsError.set('Could not load review settings.');
+      },
+    });
+  }
+
+  protected saveReviewSettings(): void {
+    const hours = this.reviewEditPeriodHours();
+
+    if (!Number.isInteger(hours) || hours < 1) {
+      this.settingsError.set('The edit period must be at least 1 hour');
+      return;
+    }
+    this.isSavingSettings.set(true);
+    this.settingsMessage.set(null);
+    this.settingsError.set(null);
+
+    this.reviewSettingsService.updateSettings({ editPeriodHours: hours}).subscribe({
+      next: (settings) => {
+        this.reviewEditPeriodHours.set(settings.editPeriodHours);
+        this.settingsMessage.set('Review edit period saved.');
+        this.isSavingSettings.set(false);
+      },
+      error: () => {
+        this.settingsError.set('Could not save review settings.');
+        this.isSavingSettings.set(false);
+      },
+    });
   }
 
   protected searchProducts(productName: string): void {

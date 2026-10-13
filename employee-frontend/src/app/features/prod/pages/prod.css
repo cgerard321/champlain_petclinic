@@ -74,6 +74,21 @@
   background-color: rgb(211 47 47 / 8%);
 }
 
+.review-settings-card {
+  margin-bottom: 24px;
+}
+
+.review-settings-card mat-form-field {
+  margin-top: 16px;
+  max-width: 300px;
+}
+.settings-success {
+  color: #2e7d32;
+}
+
+.settings-error {
+  color: var(--mat-sys-error, #b00020);
+}
 dl {
   margin: 16px 0 0;
 }

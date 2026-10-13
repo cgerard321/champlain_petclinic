@@ -11,6 +11,51 @@
     }
   </div>
 
+  @if (isAdmin()) {
+    <mat-card class="review-settings-card">
+      <mat-card-header>
+        <mat-card-title>Review Settings</mat-card-title>
+        <mat-card-subtitle>
+          Set how long customers can edit their reviews.
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <mat-form-field appearance="outline">
+          <mat-label>Review edit period</mat-label>
+          <input
+            matInput
+            type="number"
+            min="1"
+            step="1"
+            [ngModel]="reviewEditPeriodHours()"
+            (ngModelChange)="reviewEditPeriodHours.set($event)"
+          />
+          <span matTextSuffix>hours</span>
+        </mat-form-field>
+        @if (settingsMessage()) {
+          <p class="settings-success">{{ settingsMessage() }}</p>
+        }
+
+        @if (settingsError()) {
+          <p class="settings-error">{{ settingsError() }}</p>
+        }
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          [disabled]="isSavingSettings()"
+          (click)="saveReviewSettings()"
+          >
+          Save Review Settings
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  }
+
   <mat-form-field class="product-search" appearance="outline">
     <mat-label>Search products by name</mat-label>
     <input

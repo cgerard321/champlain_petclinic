@@ -14,6 +14,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.codec.multipart.FilePart;
 import reactor.core.publisher.Mono;
+import java.time.LocalDateTime;
 
 import java.util.UUID;
 
@@ -56,6 +57,7 @@ public class EntityModelUtil {
                 .customerId(customerId)
                 .rating(requestModel.getRating())
                 .review(requestModel.getReview() != null ? requestModel.getReview() : "")
+                .createdAt(LocalDateTime.now())
                 .build();
     }
 

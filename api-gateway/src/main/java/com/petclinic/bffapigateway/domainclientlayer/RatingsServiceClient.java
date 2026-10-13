@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.Ratings.RatingRequestModel;
 import com.petclinic.bffapigateway.dtos.Ratings.RatingResponseModel;
+import com.petclinic.bffapigateway.dtos.Ratings.ReviewSettingsModel;
 import com.petclinic.bffapigateway.dtos.Ratings.ReviewLikeResponseModel;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +18,7 @@ import reactor.core.publisher.Mono;
 public class RatingsServiceClient {
     private final WebClient.Builder webClientBuilder;
     private final String baseURL;
+    private final String settingsURL;
 
     public RatingsServiceClient(
             WebClient.Builder wcb,
@@ -25,6 +27,7 @@ public class RatingsServiceClient {
     ){
         this.webClientBuilder = wcb;
         this.baseURL = "http://" + host + ":" + port + "/ratings";
+        this.settingsURL = "http://" + host + ":" + port + "/review-settings";
     }
 
     public Flux<RatingResponseModel> getAllRatingsForProductId(final String productId){
@@ -88,6 +91,23 @@ public class RatingsServiceClient {
                 .uri(baseURL + "/" + productId + "/" + customerId)
                 .retrieve()
                 .bodyToMono(RatingResponseModel.class);
+    }
+
+    public Mono<ReviewSettingsModel> getReviewSettings(){
+        return webClientBuilder.build()
+                .get()
+                .uri(settingsURL)
+                .retrieve()
+                .bodyToMono(ReviewSettingsModel.class);
+    }
+
+    public Mono<ReviewSettingsModel> updateReviewSettings(ReviewSettingsModel settings){
+        return webClientBuilder.build()
+                .put()
+                .uri(settingsURL)
+                .bodyValue(settings)
+                .retrieve()
+                .bodyToMono(ReviewSettingsModel.class);
     }
 
     public Mono<ReviewLikeResponseModel> likeReview(final String productId,
