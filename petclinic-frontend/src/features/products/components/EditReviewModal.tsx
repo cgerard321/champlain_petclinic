@@ -43,6 +43,10 @@ const EditReviewModal = ({
       setError('Please write a review before updating.');
       return;
     }
+    if (reviewText.length > 10000) {
+      setError('Review cannot exceed 10000 characters!');
+      return;
+    }
 
     try {
       await updateRating(localRating, reviewText);
@@ -63,24 +67,24 @@ const EditReviewModal = ({
     <Modal
       show={show}
       onHide={onClose}
-      centered
-      dialogClassName="wrm-modal-dialog"
+      fullscreen
+      dialogClassName="erm-modal-dialog"
     >
-      <div className="wrm-close-container">
-        <button onClick={onClose} className="wrm-close-btn">
+      <div className="erm-close-container">
+        <button onClick={onClose} className="erm-close-btn">
           ×
         </button>
       </div>
 
-      <Modal.Body className="wrm-body">
-        <p className="wrm-title">Edit Your Review</p>
-        <p className="wrm-subtitle">Update your rating and review below.</p>
+      <Modal.Body className="erm-body">
+        <p className="erm-title">Edit Your Review</p>
+        <p className="erm-subtitle">Update your rating and review below.</p>
 
-        {error && <div className="wrm-error">{error}</div>}
+        {error && <div className="erm-error">{error}</div>}
 
         {/* Rating Section */}
-        <div className="wrm-section">
-          <label className="wrm-label">Your Rating *</label>
+        <div className="erm-section">
+          <label className="erm-label">Your Rating *</label>
           <StarRating
             currentRating={localRating}
             viewOnly={false}
@@ -89,13 +93,13 @@ const EditReviewModal = ({
         </div>
 
         {/* Review Section */}
-        <div className="wrm-section">
-          <label className="wrm-label">Your Review *</label>
+        <div className="erm-section">
+          <label className="erm-label">Your Review *</label>
           <ReviewBox updateFunc={setReviewText} rating={memoizedRating} />
         </div>
 
         {/* Buttons */}
-        <div className="wrm-button-container">
+        <div className="erm-button-container">
           <Button className="cancel-btn" onClick={onClose}>
             Cancel
           </Button>

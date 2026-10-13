@@ -23,6 +23,9 @@ app:
   files-service:
     host: localhost
     port: 8000
+  cart-service:
+    host: localhost
+    port: 7008
 
 ---
 spring:
@@ -42,6 +45,9 @@ app:
   files-service:
     host: localhost
     port: 8000
+  cart-service:
+    host: localhost
+    port: 7008
 ---
 spring:
   config:
@@ -64,3 +70,6 @@ app:
   files-service:
     host: files-service
     port: 8000
+  cart-service:
+    host: cart-service
+    port: 8080
