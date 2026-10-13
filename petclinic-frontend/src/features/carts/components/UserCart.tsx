@@ -1387,7 +1387,7 @@ const UserCart: React.FC = () => {
                     {item.productName}
                   </div>
                   <div className="recommendation-product-price recent-purchase-price">
-                    ${formatPrice(item.productSalePrice)}
+                    {formatPrice(item.productSalePrice)}
                   </div>
                   <div className="recommendation-qty-row recent-purchase-qty-row">
                     <label
