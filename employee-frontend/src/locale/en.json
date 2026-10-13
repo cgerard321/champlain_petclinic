@@ -42,10 +42,10 @@
       "back": "Back to home"
     },
     "footer": {
-      "brand": "PetClinic Employee Portal",
+      "description": "Providing compassionate veterinary care to keep your pets healthy and happy.",
+      "contact": "Contact Us",
       "privacy": "Privacy Policy",
       "terms": "Terms of Service",
-      "support": "Support",
       "copyright": "© 2026 Champlain Pet Clinic. All rights reserved."
     },
     "visits": {
