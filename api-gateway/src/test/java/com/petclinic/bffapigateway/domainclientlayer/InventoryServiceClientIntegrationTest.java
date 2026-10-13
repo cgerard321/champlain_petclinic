@@ -1057,22 +1057,32 @@ class InventoryServiceClientIntegrationTest {
 
     @Test
     void addSupplyToInventory_shouldForwardSupplierNameAndReadItFromResponse() throws Exception {
-        ProductRequestDTO request = ProductRequestDTO.builder()
-                .productName("Bandages")
-                .supplierName("Clinic Supplier")
-                .build();
-        mockWebServer.enqueue(new MockResponse()
-                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody("{\"productId\":\"p1\",\"inventoryId\":\"inv1\",\"productName\":\"Bandages\",\"supplierName\":\"Clinic Supplier\"}"));
+        MockWebServer supplierServer = new MockWebServer();
+        supplierServer.start();
+        try {
+            InventoryServiceClient supplierClient = new InventoryServiceClient(
+                    "localhost", String.valueOf(supplierServer.getPort()));
+            ReflectionTestUtils.setField(supplierClient, "rethrower", new Rethrower(new ObjectMapper()));
 
-        StepVerifier.create(inventoryServiceClient.addSupplyToInventory(request, "inv1"))
-                .assertNext(response -> assertEquals("Clinic Supplier", response.getSupplierName()))
-                .verifyComplete();
+            ProductRequestDTO request = ProductRequestDTO.builder()
+                    .productName("Bandages")
+                    .supplierName("Clinic Supplier")
+                    .build();
+            supplierServer.enqueue(new MockResponse()
+                    .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .setBody("{\"productId\":\"p1\",\"inventoryId\":\"inv1\",\"productName\":\"Bandages\",\"supplierName\":\"Clinic Supplier\"}"));
 
-        var recordedRequest = mockWebServer.takeRequest();
-        assertEquals("POST", recordedRequest.getMethod());
-        assertEquals("Clinic Supplier",
-                objectMapper.readTree(recordedRequest.getBody().readUtf8()).path("supplierName").asText());
+            StepVerifier.create(supplierClient.addSupplyToInventory(request, "inv1"))
+                    .assertNext(response -> assertEquals("Clinic Supplier", response.getSupplierName()))
+                    .verifyComplete();
+
+            var recordedRequest = supplierServer.takeRequest();
+            assertEquals("POST", recordedRequest.getMethod());
+            assertEquals("Clinic Supplier",
+                    objectMapper.readTree(recordedRequest.getBody().readUtf8()).path("supplierName").asText());
+        } finally {
+            supplierServer.shutdown();
+        }
     }
 
     @Test
