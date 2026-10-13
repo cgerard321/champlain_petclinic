@@ -179,6 +179,9 @@ public class VisitControllerUnitTest {
                 .status(newVisitRequestDTO.getStatus())
                 .build();
 
+        when(customersServiceClient.getPetByPetId("P001", false))
+                .thenReturn(Mono.just(PetResponseDTO.builder().petId("P001").customerId("C001").build()));
+
         // Mock the visitsServiceClient to return the expected Mono
         when(visitsServiceClient.addVisit(any(Mono.class)))
                 .thenReturn(Mono.just(createdVisitResponseDTO));
@@ -212,7 +215,39 @@ public class VisitControllerUnitTest {
                 .verifyComplete();
 
         // Verify that addVisit was called
-        verify(visitsServiceClient, times(1)).addVisit(any(Mono.class));
+        @SuppressWarnings("unchecked")
+        org.mockito.ArgumentCaptor<Mono<VisitRequestDTO>> requestCaptor =
+                org.mockito.ArgumentCaptor.forClass(Mono.class);
+        verify(visitsServiceClient, times(1)).addVisit(requestCaptor.capture());
+        VisitRequestDTO forwardedRequest = requestCaptor.getValue().block();
+        assertNotNull(forwardedRequest);
+        assertEquals("C001", forwardedRequest.getOwnerId());
+        assertEquals(jwtTokenForValidAdmin, forwardedRequest.getJwtToken());
+        verify(customersServiceClient, times(1)).getPetByPetId("P001", false);
+    }
+
+    @Test
+    void whenAddVisit_petDoesNotExist_thenReturnBadRequest() {
+        VisitRequestDTO newVisitRequestDTO = VisitRequestDTO.builder()
+                .visitDate(LocalDateTime.of(2027, 1, 12, 9, 0))
+                .description("Follow-up check")
+                .petId("missing-pet")
+                .practitionerId("PR001")
+                .status(Status.UPCOMING)
+                .build();
+
+        when(customersServiceClient.getPetByPetId("missing-pet", false))
+                .thenReturn(Mono.empty());
+
+        webTestClient.post()
+                .uri(BASE_VISIT_URL)
+                .cookie("Bearer", jwtTokenForValidAdmin)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(newVisitRequestDTO)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        verify(visitsServiceClient, never()).addVisit(any(Mono.class));
     }
 
     @Test
