@@ -1,4 +1,5 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useUser } from '@/context/UserContext';
 import { getCustomer } from '@/features/customers/api/getCustomer';
 import { getUserDetails } from '@/features/customers/api/getUserDetails';
@@ -60,6 +61,7 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
   onSubmit,
 }) => {
   const { user } = useUser();
+  const { t } = useTranslation('carts');
   const [billing, setBilling] = useState<BillingInfo>({
     fullName: '',
     email: '',
