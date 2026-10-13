@@ -70,13 +70,15 @@ export class SupplyPage {
     productPrice: 0,
     productQuantity: 1,
     productSalePrice: 0,
+    expirationDate: '',
   });
 
   protected readonly nameCell = viewChild<TemplateRef<{ $implicit: Supply }>>('nameCell');
   protected readonly priceCell = viewChild<TemplateRef<{ $implicit: Supply }>>('priceCell');
   protected readonly statusCell = viewChild<TemplateRef<{ $implicit: Supply }>>('statusCell');
   protected readonly actionsCell = viewChild<TemplateRef<{ $implicit: Supply }>>('actionsCell');
-
+  protected readonly expirationCell =
+    viewChild<TemplateRef<{ $implicit: Supply }>>('expirationCell');
   protected readonly supplyRowId = (supply: Supply): string => supply.productId;
 
   // Formatting and actions stay here so the shared table has no supply-specific logic.
@@ -85,6 +87,7 @@ export class SupplyPage {
     { id: 'description', header: 'Description', value: (supply) => supply.productDescription },
     { id: 'price', header: 'Cost Price', template: this.priceCell() },
     { id: 'quantity', header: 'Quantity', value: (supply) => supply.productQuantity },
+    { id: 'expiration', header: 'Expiration Date', template: this.expirationCell() },
     { id: 'status', header: 'Status', template: this.statusCell() },
     ...(this.canManageSupplies() || this.canConsumeSupplies()
       ? [{ id: 'actions', header: 'Actions', template: this.actionsCell() }]
@@ -198,7 +201,11 @@ export class SupplyPage {
           photo.photoType = file ? file.type : null;
         }
 
-        const supply = { ...this.newSupply(), ...photo };
+        const supply = {
+          ...this.newSupply(),
+          expirationDate: this.newSupply().expirationDate || null,
+          ...photo,
+        };
 
         const request$ = editingId
           ? this.supplyService.updateSupply(inventoryId, editingId, supply)
@@ -237,6 +244,7 @@ export class SupplyPage {
       productPrice: supply.productPrice,
       productQuantity: supply.productQuantity,
       productSalePrice: supply.productSalePrice,
+      expirationDate: supply.expirationDate ?? '',
     });
 
     this.showAddForm.set(true);
@@ -247,8 +255,8 @@ export class SupplyPage {
       return;
     }
 
-    // Prevent consuming if quantity is already 0
-    if (supply.productQuantity <= 0) {
+    // Prevent consuming if quantity is already 0 or if the supply is expired
+    if (supply.productQuantity <= 0 || this.expirationState(supply) === 'expired') {
       return;
     }
     this.deleteError.set('');
@@ -322,6 +330,7 @@ export class SupplyPage {
       productPrice: 0,
       productQuantity: 1,
       productSalePrice: 0,
+      expirationDate: '',
     });
     this.editingSupplyId.set(null);
     this.addError.set('');
@@ -375,6 +384,49 @@ export class SupplyPage {
       }
     }
     return 'Unable to download PDF.';
+  }
+
+  // Supplies expiring within this many days are flagged as "expiring soon".
+  private readonly expiringSoonDays = 30;
+
+  // When creating, the date picker does not offer past days (the backend rejects them).
+  // When editing there is no minimum, because a supply may already be expired.
+  protected readonly minExpirationDate = computed(() =>
+    this.editingSupplyId() ? null : this.todayAsText(),
+  );
+  protected effectiveStatus(supply: Supply): string {
+    if (this.expirationState(supply) === 'expired') {
+      return 'OUT_OF_STOCK';
+    }
+    return supply.status;
+  }
+
+  protected expirationState(supply: Supply): 'none' | 'expired' | 'soon' | 'ok' {
+    if (!supply.expirationDate) {
+      return 'none';
+    }
+
+    // Adding T00:00:00 makes the date local. Without it, "2026-10-20" is read as UTC,
+    // which is the evening of the 19th in Montreal and would be off by one day.
+    const expiration = new Date(`${supply.expirationDate}T00:00:00`);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const daysLeft = Math.round((expiration.getTime() - today.getTime()) / 86_400_000);
+
+    if (daysLeft < 0) {
+      return 'expired';
+    }
+
+    return daysLeft <= this.expiringSoonDays ? 'soon' : 'ok';
+  }
+
+  private todayAsText(): string {
+    const now = new Date();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+
+    return `${now.getFullYear()}-${month}-${day}`;
   }
 
   protected formatStatus(status: string): string {
