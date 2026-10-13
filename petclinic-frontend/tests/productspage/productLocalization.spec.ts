@@ -309,3 +309,61 @@ test('recent history fetches bilingual data independently of the catalog and ski
     recent.getByRole('heading', { name: 'Produit récemment consulté' })
   ).toBeVisible();
 });
+
+test('merged Markdown reviews keep French labels, formatting and validation', async ({
+  page,
+}) => {
+  await page.route('**/api/gateway/users/jwt', route =>
+    route.fulfill({
+      json: {
+        userId: 'reader',
+        username: 'Reader',
+        email: 'reader@example.com',
+        roles: ['OWNER'],
+      },
+    })
+  );
+  await page.route('**/api/gateway/ratings/french-product', route =>
+    route.fulfill({ json: { rating: 0, review: '' } })
+  );
+  await page.route('**/api/gateway/ratings/product/french-product', route =>
+    route.fulfill({
+      contentType: 'text/event-stream',
+      body: `data:${JSON.stringify({ rating: 5, review: '**Excellent product**', customerId: 'other', reviewerUsername: 'Reviewer' })}\n\n`,
+    })
+  );
+  await page.goto(`${baseURL}/products/french-product`);
+  await page.getByRole('button', { name: 'FR', exact: true }).click();
+  await expect(
+    page.getByRole('heading', { name: 'Avis des clients', exact: true })
+  ).toBeVisible();
+  await expect(page.locator('.reviewsforproduct-container strong')).toHaveText(
+    'Excellent product'
+  );
+  await page.getByPlaceholder('Rechercher un avis…').fill('Excellent');
+  await expect(page.locator('.reviews-search-result-count')).toHaveText(
+    '1 avis affiché(s) sur 1'
+  );
+  await page
+    .getByRole('button', { name: 'Rédiger un avis', exact: true })
+    .click();
+  const dialog = page.getByRole('dialog');
+  await expect(
+    dialog.getByText('Masquer l’aperçu', { exact: true })
+  ).toBeVisible();
+  await expect(
+    dialog.getByRole('button', {
+      name: 'Mettre la sélection en gras',
+      exact: true,
+    })
+  ).toBeVisible();
+  const input = dialog.locator('textarea');
+  await input.fill('**Mon avis**');
+  await expect(dialog.locator('.reviewbox-preview-body strong')).toHaveText(
+    'Mon avis'
+  );
+  await input.fill('a'.repeat(10001));
+  await expect(dialog.getByRole('alert')).toHaveText(
+    'L’avis ne peut pas dépasser 10 000 caractères !'
+  );
+});

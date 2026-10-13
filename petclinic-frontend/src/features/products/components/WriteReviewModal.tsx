@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { useState, useEffect, useMemo } from 'react';
-import { Modal, Button } from 'react-bootstrap';
+import { useEffect, useMemo, useState } from 'react';
+import { Button, Modal } from 'react-bootstrap';
 import StarRating from './StarRating';
 import ReviewBox from './ReviewBox';
 import { RatingModel } from '../models/ProductModels/RatingModel';
@@ -46,6 +46,10 @@ const WriteReviewModal = ({
       setError('reviewRequired');
       return;
     }
+    if (reviewText.length > 10000) {
+      setError('reviewTooLong');
+      return;
+    }
 
     try {
       await updateRating(localRating, reviewText);
@@ -66,7 +70,7 @@ const WriteReviewModal = ({
     <Modal
       show={show}
       onHide={onClose}
-      centered
+      fullscreen
       dialogClassName="wrm-modal-dialog"
     >
       <div className="wrm-close-container">

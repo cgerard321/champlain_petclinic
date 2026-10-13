@@ -45,6 +45,10 @@ const EditReviewModal = ({
       setError('updateReviewRequired');
       return;
     }
+    if (reviewText.length > 10000) {
+      setError('reviewTooLong');
+      return;
+    }
 
     try {
       await updateRating(localRating, reviewText);
@@ -65,24 +69,24 @@ const EditReviewModal = ({
     <Modal
       show={show}
       onHide={onClose}
-      centered
-      dialogClassName="wrm-modal-dialog"
+      fullscreen
+      dialogClassName="erm-modal-dialog"
     >
-      <div className="wrm-close-container">
-        <button onClick={onClose} className="wrm-close-btn">
+      <div className="erm-close-container">
+        <button onClick={onClose} className="erm-close-btn">
           ×
         </button>
       </div>
 
-      <Modal.Body className="wrm-body">
-        <p className="wrm-title">{t('editReview')}</p>
-        <p className="wrm-subtitle">{t('updateHint')}</p>
+      <Modal.Body className="erm-body">
+        <p className="erm-title">{t('editReview')}</p>
+        <p className="erm-subtitle">{t('updateHint')}</p>
 
-        {error && <div className="wrm-error">{t(error)}</div>}
+        {error && <div className="erm-error">{t(error)}</div>}
 
         {/* Rating Section */}
-        <div className="wrm-section">
-          <label className="wrm-label">{t('yourRating')}</label>
+        <div className="erm-section">
+          <label className="erm-label">{t('yourRating')}</label>
           <StarRating
             currentRating={localRating}
             viewOnly={false}
@@ -91,13 +95,13 @@ const EditReviewModal = ({
         </div>
 
         {/* Review Section */}
-        <div className="wrm-section">
-          <label className="wrm-label">{t('yourReview')}</label>
+        <div className="erm-section">
+          <label className="erm-label">{t('yourReview')}</label>
           <ReviewBox updateFunc={setReviewText} rating={memoizedRating} />
         </div>
 
         {/* Buttons */}
-        <div className="wrm-button-container">
+        <div className="erm-button-container">
           <Button className="cancel-btn" onClick={onClose}>
             {t('cancel')}
           </Button>
