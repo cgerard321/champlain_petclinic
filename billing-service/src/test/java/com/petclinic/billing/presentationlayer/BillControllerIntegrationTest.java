@@ -350,6 +350,40 @@ class BillControllerIntegrationTest {
     }
 
     @Test
+    void updateBillWithNullDueDateReturnsBadRequest() {
+        Bill existingBill = buildBill();
+
+        repo.save(existingBill).block();
+
+        BillRequestDTO request = BillRequestDTO.builder()
+                .customerId(existingBill.getCustomerId())
+                .visitType(existingBill.getVisitType())
+                .vetId(existingBill.getVetId())
+                .date(existingBill.getDate())
+                .amount(existingBill.getAmount())
+                .billStatus(existingBill.getBillStatus())
+                .dueDate(null)
+                .build();
+
+        client.put()
+                .uri("/bills/" + existingBill.getBillId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .exchange()
+                .expectStatus()
+                .isBadRequest();
+
+        StepVerifier.create(repo.findByBillId(existingBill.getBillId()))
+                .assertNext(savedBill ->
+                        Assertions.assertEquals(
+                                existingBill.getDueDate(),
+                                savedBill.getDueDate()
+                        )
+                )
+                .verifyComplete();
+    }
+
+    @Test
     void getBillByCustomerId() {
 
         Bill billEntity = buildBill();

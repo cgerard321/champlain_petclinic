@@ -2739,5 +2739,26 @@ public void testGenerateBillPdf_BillNotFound() {
         assertEquals(expectedBody, sentMail.getBody(), "Email body should match the formatted receipt layout");
     }
 
+    @Test
+    void updateBillWithNullDueDateReturnsBadRequest() {
+        BillRequestDTO request = buildBillRequestDTO();
+        request.setDueDate(null);
+
+        StepVerifier.create(
+                        billService.updateBill("bill-id", Mono.just(request))
+                )
+                .expectErrorSatisfies(error -> {
+                    assertTrue(error instanceof ResponseStatusException);
+
+                    ResponseStatusException exception = (ResponseStatusException) error;
+                    assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+                    assertEquals("Due date is required", exception.getReason());
+                })
+                .verify();
+
+        verify(repo, never()).findByBillId(anyString());
+        verify(repo, never()).save(any(Bill.class));
+    }
+
 }
 
