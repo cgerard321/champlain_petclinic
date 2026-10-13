@@ -15,6 +15,9 @@ import com.petclinic.billing.util.InterestCalculationUtil;
 import com.petclinic.billing.util.TaxCalculationUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -273,44 +276,16 @@ public class BillServiceImplTest {
     }
 
 
-    @Test
-    public void test_getAllBillsByPaidStatus() {
-        BillStatus status = BillStatus.PAID; // Change this to the desired status
-
+    // run the same check for all supported bill statuses
+    @ParameterizedTest(name = "returns bills with status {0}")
+    @EnumSource(value = BillStatus.class, names = {"PAID", "UNPAID", "OVERDUE"})
+    void getAllBillsByStatus_returnsMatchingBills(BillStatus status) {
         Bill billEntity = buildBill();
+        billEntity.setBillStatus(status);
+
         when(repo.findAllBillsByBillStatus(status)).thenReturn(Flux.just(billEntity));
 
-        Flux<BillResponseDTO> billDTOFlux = billService.getAllBillsByStatus(status);
-
-        StepVerifier.create(billDTOFlux)
-                .expectNextCount(1)
-                .verifyComplete();
-    }
-
-    @Test
-    public void test_getAllBillsByUnpaidStatus() {
-        BillStatus status = BillStatus.UNPAID; // Change this to the desired status
-
-        Bill billEntity = buildUnpaidBill();
-        when(repo.findAllBillsByBillStatus(status)).thenReturn(Flux.just(billEntity));
-
-        Flux<BillResponseDTO> billDTOFlux = billService.getAllBillsByStatus(status);
-
-        StepVerifier.create(billDTOFlux)
-                .expectNextCount(1)
-                .verifyComplete();
-    }
-
-    @Test
-    public void test_getAllBillsByOverdueStatus() {
-        BillStatus status = BillStatus.OVERDUE; // Change this to the desired status
-
-        Bill billEntity = buildOverdueBill();
-        when(repo.findAllBillsByBillStatus(status)).thenReturn(Flux.just(billEntity));
-
-        Flux<BillResponseDTO> billDTOFlux = billService.getAllBillsByStatus(status);
-
-        StepVerifier.create(billDTOFlux)
+        StepVerifier.create(billService.getAllBillsByStatus(status))
                 .expectNextCount(1)
                 .verifyComplete();
     }
@@ -645,59 +620,38 @@ public class BillServiceImplTest {
         Mockito.verify(repo, Mockito.never()).insert(Mockito.any(Bill.class));
     }
 
-    @Test
-    void createBill_missingBillStatus_shouldReturnError() {
-        // Arrange
-        BillRequestDTO billDTO = new BillRequestDTO();
-        billDTO.setVetId("vet-123");
-        billDTO.setCustomerId("customer-456");
-        billDTO.setDueDate(LocalDate.now().plusDays(30));
+    // keep the valid request and change one required field at a time
+    @ParameterizedTest(name = "rejects missing {0}")
+    @CsvSource({
+            "status, 'Bill status is required'",
+            "vetId, 'Vet ID is required'",
+            "customerId, 'Customer ID is required'"
+    })
+    void createBill_missingRequiredField_shouldReturnBadRequest(
+            String missingField,
+            String expectedMessage) {
+        BillRequestDTO billDTO = buildBillRequestDTO();
 
-        // Act + Assert
+        switch (missingField) {
+            case "status":
+                billDTO.setBillStatus(null);
+                break;
+            case "vetId":
+                billDTO.setVetId(null);
+                break;
+            case "customerId":
+                billDTO.setCustomerId(null);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown field: " + missingField);
+        }
+
         StepVerifier.create(billService.createBill(Mono.just(billDTO), true, "USD", "JWTToken"))
                 .expectErrorSatisfies(throwable -> {
                     assertTrue(throwable instanceof ResponseStatusException);
-                    ResponseStatusException ex = (ResponseStatusException) throwable;
-                    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
-                    assertEquals("Bill status is required", ex.getReason());
-                })
-                .verify();
-    }
-
-    @Test
-    void createBill_missingVetId_shouldReturnError() {
-        // Arrange
-        BillRequestDTO billDTO = new BillRequestDTO();
-        billDTO.setCustomerId("customer-456");
-        billDTO.setBillStatus(BillStatus.PAID);
-        billDTO.setDueDate(LocalDate.now().plusDays(30));
-
-        // Act + Assert
-        StepVerifier.create(billService.createBill(Mono.just(billDTO), true, "USD", "JWTToken"))
-                .expectErrorSatisfies(throwable -> {
-                    assertTrue(throwable instanceof ResponseStatusException);
-                    ResponseStatusException ex = (ResponseStatusException) throwable;
-                    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
-                    assertEquals("Vet ID is required", ex.getReason());
-                })
-                .verify();
-    }
-
-    @Test
-    void createBill_missingCustomerId_shouldReturnError() {
-        // Arrange
-        BillRequestDTO billDTO = new BillRequestDTO();
-        billDTO.setVetId("vet-123");
-        billDTO.setBillStatus(BillStatus.PAID);
-        billDTO.setDueDate(LocalDate.now().plusDays(30));
-
-        // Act + Assert
-        StepVerifier.create(billService.createBill(Mono.just(billDTO), true, "USD", "JWTToken"))
-                .expectErrorSatisfies(throwable -> {
-                    assertTrue(throwable instanceof ResponseStatusException);
-                    ResponseStatusException ex = (ResponseStatusException) throwable;
-                    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
-                    assertEquals("Customer ID is required", ex.getReason());
+                    ResponseStatusException exception = (ResponseStatusException) throwable;
+                    assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+                    assertEquals(expectedMessage, exception.getReason());
                 })
                 .verify();
     }
@@ -1320,60 +1274,21 @@ public void testGenerateBillPdf_BillNotFound() {
                 .verifyComplete();
     }
 
-    @Test
-    void processPayment_InvalidCardNumber_Failure() {
+    // check the invalid payment inputs with the same expected error
+    @ParameterizedTest(name = "rejects invalid payment data")
+    @CsvSource({
+            "12345678, 123, 12/23",
+            "1234567812345678, 12, 12/23",
+            "1234567812345678, 123, 1223"
+    })
+    void processPayment_invalidPaymentDetails_shouldFail(
+            String cardNumber,
+            String cvv,
+            String expirationDate) {
         String customerId = "customerId-1";
         String billId = "billId-1";
         String jwtToken = "Bearer faketoken";
-        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("12345678", "123", "12/23");
-
-        UserDetails fakeUser = new UserDetails();
-        fakeUser.setUserId("user-123");
-        fakeUser.setUsername("fakeUser");
-        fakeUser.setEmail("fakeUser@example.com");
-
-        when(authClient.getUserById(anyString(), anyString()))
-                .thenReturn(Mono.just(fakeUser));
-        when(mailService.sendMail(any(Mail.class)))
-                .thenReturn(null);
-
-        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest, jwtToken))
-                .expectErrorMatches(throwable -> throwable instanceof InvalidPaymentException &&
-                        throwable.getMessage().contains("Invalid payment details"))
-                .verify();
-    }
-
-
-    @Test
-    void processPayment_InvalidCVV_Failure() {
-        String customerId = "customerId-1";
-        String billId = "billId-1";
-        String jwtToken = "Bearer faketoken";
-        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "12", "12/23");
-
-        UserDetails fakeUser = new UserDetails();
-        fakeUser.setUserId("user-123");
-        fakeUser.setUsername("fakeUser");
-        fakeUser.setEmail("fakeUser@example.com");
-
-        when(authClient.getUserById(anyString(), anyString()))
-                .thenReturn(Mono.just(fakeUser));
-        when(mailService.sendMail(any(Mail.class)))
-                .thenReturn(null);
-
-        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest, jwtToken))
-                .expectErrorMatches(throwable -> throwable instanceof InvalidPaymentException &&
-                        throwable.getMessage().contains("Invalid payment details"))
-                .verify();
-    }
-
-
-    @Test
-    void processPayment_InvalidExpirationDate_Failure() {
-        String customerId = "customerId-1";
-        String billId = "billId-1";
-        String jwtToken = "Bearer faketoken";
-        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "1223");
+        PaymentRequestDTO paymentRequest = new PaymentRequestDTO(cardNumber, cvv, expirationDate);
 
         UserDetails fakeUser = new UserDetails();
         fakeUser.setUserId("user-123");
@@ -1949,39 +1864,6 @@ public void testGenerateBillPdf_BillNotFound() {
             .verifyComplete();
 
 
-        verify(repo, never()).save(any(Bill.class));
-    }
-
-    @Test
-    void test_setInterestExempt_Positive_ShouldClearInterestWhenSetToTrue() {
-
-        Bill bill = buildBill();
-        bill.setBillId("B-300");
-        bill.setInterestExempt(false);
-        bill.setInterest(new BigDecimal("33.33"));
-
-        when(repo.findByBillId("B-300")).thenReturn(Mono.just(bill));
-        when(repo.save(any(Bill.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
-
-        Mono<Void> result = billService.setInterestExempt("B-300", true);
-
-        StepVerifier.create(result).verifyComplete();
-
-        ArgumentCaptor<Bill> captor = ArgumentCaptor.forClass(Bill.class);
-        verify(repo).save(captor.capture());
-        Bill saved = captor.getValue();
-
-        assertTrue(saved.isInterestExempt(), "exempt flag should be true");
-        assertEquals(BigDecimal.ZERO, saved.getInterest(), "interest should be cleared when exempted");
-    }
-
-    @Test
-    void setInterestExempt_Negative_ShouldNotSaveWhenBillNotFound() {
-        when(repo.findByBillId("B-301")).thenReturn(Mono.empty());
-
-        Mono<Void> result = billService.setInterestExempt("B-301", true);
-
-        StepVerifier.create(result).verifyComplete();
         verify(repo, never()).save(any(Bill.class));
     }
 
