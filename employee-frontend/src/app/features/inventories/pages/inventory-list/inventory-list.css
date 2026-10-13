@@ -1,5 +1,4 @@
 /* --- Added: Add/Edit Inventory form + card action buttons --- */
-
 .page-header {
   display: flex;
   align-items: center;
@@ -16,32 +15,6 @@
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-}
-
-.inventory-form {
-  display: grid;
-  gap: 12px;
-  max-width: 500px;
-  margin-bottom: 24px;
-  padding: 20px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  background: #fff;
-}
-
-.inventory-form h2 {
-  margin: 0 0 8px;
-}
-
-.inventory-form label {
-  font-weight: 600;
-}
-
-.inventory-form input {
-  padding: 10px;
-  border: 1px solid #bdbdbd;
-  border-radius: 6px;
-  font: inherit;
 }
 
 .field-error {
@@ -73,14 +46,6 @@
 
 .inventory-actions .delete-button {
   background: #b71c1c;
-}
-
-.inventory-form select {
-  padding: 10px;
-  border: 1px solid #bdbdbd;
-  border-radius: 6px;
-  font: inherit;
-  background: #fff;
 }
 
 .no-results-state h2 {
@@ -140,7 +105,7 @@
   height: 190px;
   border-radius: 50%;
   background: rgb(199 217 178 / 18%);
-  content: "";
+  content: '';
   pointer-events: none;
 }
 
@@ -491,7 +456,6 @@
     align-items: flex-start;
   }
 }
-
 
 .inventory-pagination {
   display: flex;

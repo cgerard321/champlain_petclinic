@@ -119,6 +119,7 @@ class CartServiceUnitTest {
             .productQuantity(5) // Initialized productQuantity
             .build();
 
+
     List<CartProduct> wishListProducts = List.of(wishListProduct1, wishlistProduct2);
 
     private final Cart cart1 = Cart.builder()
@@ -595,7 +596,7 @@ class CartServiceUnitTest {
     }
 
     @Test
-    void addProductToWishlist_existingProduct_incrementsWishlistQuantity() {
+    void addProductToWishlist_existingProduct_doesNotIncrementsWishlistQuantity() {
         String cartId = "wishlist-cart-allow";
         String productId = "0e6d3f24-2e7a-4db0-86f2-5920a5fdc9aa";
 
@@ -627,8 +628,8 @@ class CartServiceUnitTest {
                     assertEquals(1, response.getWishListProducts().size());
                     CartProduct updated = response.getWishListProducts().get(0);
                     assertEquals(productId, updated.getProductId());
-                    assertEquals(5, updated.getQuantityInCart());
-                    assertEquals(10, updated.getProductQuantity());
+                    assertEquals(2, updated.getQuantityInCart()); //quantity stays the same even after trying to add 3 products
+                    assertEquals(5, updated.getProductQuantity());
                 })
                 .verifyComplete();
     }
@@ -637,7 +638,7 @@ class CartServiceUnitTest {
     void addProductToCart_NewProduct_Success() {
         String cartId = cart1.getCartId();
         String productId = product3.getProductId();
-        int quantityToAdd = 2;
+        int quantityToAdd = 1;
         CartItemRequestModel request = new CartItemRequestModel(productId, quantityToAdd);
 
         when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart1));
@@ -1791,6 +1792,115 @@ class CartServiceUnitTest {
                                 })
                                 .verifyComplete();
         }
+
+    @Test
+    void addProductToWishlist_existingDuplicates_keepsOneEntry() {
+        String cartId = "cart-1";
+        String productId = "06a7d573-bcab-4db3-956f-773324b92a80";
+
+        CartProduct first = CartProduct.builder()
+                .productId(productId)
+                .productName("Dog Food")
+                .quantityInCart(2)
+                .productQuantity(10)
+                .build();
+
+        CartProduct duplicate = CartProduct.builder()
+                .productId(productId)
+                .productName("Dog Food")
+                .quantityInCart(4)
+                .productQuantity(10)
+                .build();
+
+        Cart cart = Cart.builder()
+                .cartId(cartId)
+                .products(new ArrayList<>())
+                .wishListProducts(new ArrayList<>(List.of(first, duplicate)))
+                .build();
+
+        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
+        when(productClient.getProductByProductId(productId))
+                .thenReturn(Mono.just(ProductResponseModel.builder()
+                        .productId(productId)
+                        .productName("Dog Food")
+                        .productQuantity(10)
+                        .build()));
+
+        when(cartRepository.save(any(Cart.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
+
+        StepVerifier.create(cartService.addProductToWishlist(cartId, new WishlistItemRequestModel(productId, 1)))
+                .assertNext(response -> {
+                    assertEquals(1, response.getWishListProducts().size());
+                    assertEquals(productId, response.getWishListProducts().get(0).getProductId());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void addProductToWishlist_existingProduct_doesNotAddDuplicate(){
+        String cartId = "cart-1";
+        String productId = "06a7d573-bcab-4db3-956f-773324b92a80";
+
+        CartProduct first = CartProduct.builder()
+                .productId(productId)
+                .productName("Dog Food")
+                .quantityInCart(2)
+                .productQuantity(10)
+                .build();
+
+        Cart cart = Cart.builder()
+                .cartId(cartId)
+                .products(new ArrayList<>())
+                .wishListProducts(new ArrayList<>(List.of(first)))
+                .build();
+
+        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
+        when(productClient.getProductByProductId(productId))
+                .thenReturn(Mono.just(ProductResponseModel.builder()
+                        .productId(productId)
+                        .productName("Dog Food")
+                        .productQuantity(10)
+                        .build()));
+
+        when(cartRepository.save(any(Cart.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
+
+        StepVerifier.create(cartService.addProductToWishlist(cartId, new WishlistItemRequestModel(productId, 1)))
+                .assertNext(response -> {
+                    assertEquals(1, response.getWishListProducts().size());
+                    assertEquals(productId, response.getWishListProducts().get(0).getProductId());
+                })
+                .verifyComplete();
+
+
+    }
+    @Test
+    void transferWishlist_toWishlist_newProduct_addsOneEntry(){
+        String cartId = "cart-1";
+        String productId = "132d3c5e-dcaa-4a4f-a35e-b8acc37c51c1";
+
+        CartProduct product = CartProduct.builder()
+                .productId(productId)
+                .productName("Dog Food")
+                .quantityInCart(2)
+                .productQuantity(10)
+                .build();
+
+        Cart cart = Cart.builder()
+                .cartId(cartId)
+                .products(new ArrayList<>())
+                .wishListProducts(new ArrayList<>(List.of(product)))
+                .build();
+
+        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
+
+        StepVerifier.create(cartService.transferWishlist(cartId, new ArrayList<>(), WishlistTransferDirection.TO_WISHLIST))
+                .assertNext(response -> {
+                    assertEquals(1, response.getWishListProducts().size());
+                    assertEquals(productId, response.getWishListProducts().get(0).getProductId());
+                })
+                .verifyComplete();
+    }
+
     @Test
     void checkoutCart_CartNotFound_ThrowsNotFoundException() {
         String cartId = "missing";
