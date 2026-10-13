@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useCallback, useMemo, JSX } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef, JSX } from 'react';
 import { getAllProducts } from '@/features/products/api/getAllProducts.ts';
 import './ProductList.css';
 import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
@@ -15,7 +15,7 @@ import ProductBundle from './components/ProductBundle';
 //import ProductSearch from './components/ProductSearch';
 import Reveal from '@/shared/components/animations/Reveal';
 
-const CATALOG_PAGE_SIZE = 6;
+const CATALOG_PAGE_SIZE = 8;
 
 interface ProductsListProps {
   searchQuery: string;
@@ -47,6 +47,17 @@ const ProductList = function Productlist({
   >([]);
   const [filteredList, setFilteredList] = useState<ProductModel[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
+  const catalogRef = useRef<HTMLDivElement>(null);
+
+  const handlePageChange = (direction: number): void => {
+    setCurrentPage(page => page + direction);
+    catalogRef.current?.scrollIntoView({
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        ? 'instant'
+        : 'smooth',
+      block: 'start',
+    });
+  };
 
   const fetchProducts = useCallback(async (): Promise<void> => {
     setIsLoading(true);
@@ -179,12 +190,12 @@ const ProductList = function Productlist({
       <div className="main-content">
         {view === 'catalog' && (
           <Reveal delay={80}>
-            <div className="products-section-container ">
+            <div ref={catalogRef} className="products-section-container ">
               <h2 className="section-title category-title">Catalog</h2>
               {isLoading ? (
                 <p>Loading items...</p>
               ) : filteredList.length > 0 ? (
-                <div className="grid">
+                <div className="grid catalog-grid">
                   {paginatedProducts.map((p, i) => (
                     <Reveal key={p.productId} delay={i * 60 + 120}>
                       <div onClick={() => handleProductClick(p)}>
@@ -207,7 +218,7 @@ const ProductList = function Productlist({
                     <button
                       type="button"
                       className="catalog-pagination-button"
-                      onClick={() => setCurrentPage(page => page - 1)}
+                      onClick={() => handlePageChange(-1)}
                       disabled={currentPage === 0}
                       aria-label="Previous product page"
                       title="Previous page"
@@ -226,7 +237,7 @@ const ProductList = function Productlist({
                     <button
                       type="button"
                       className="catalog-pagination-button"
-                      onClick={() => setCurrentPage(page => page + 1)}
+                      onClick={() => handlePageChange(1)}
                       disabled={currentPage + 1 >= totalPages}
                       aria-label="Next product page"
                       title="Next page"

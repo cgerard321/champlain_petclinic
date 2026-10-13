@@ -25,6 +25,32 @@ body,
   margin-top: 10px;
 }
 
+.catalog-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (max-width: 1200px) {
+  .product-list-container {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .catalog-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .product-list-container {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .catalog-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .main-content {
   padding: 10px;
   transition: margin-right 0.3s ease;
