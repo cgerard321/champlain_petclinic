@@ -42,6 +42,7 @@ export class BillUpdate {
     amount: this.bill.amount,
     billStatus: this.bill.billStatus,
   });
+  protected readonly visitTypes = ['Check-Up', 'Vaccine', 'Surgery', 'Dental'];
 
   protected readonly billForm = form(this.model, (schemaPath) => {
     required(schemaPath.visitType, { message: 'Visit type is required' });
@@ -57,6 +58,16 @@ export class BillUpdate {
     }
 
     const request = this.model();
+    const normalizedVisitType = request.visitType.replace(/[^a-z0-9]/gi, '').toUpperCase();
+
+    const validVisitType = this.visitTypes.some(
+      (type) => type.replace(/[^a-z0-9]/gi, '').toUpperCase() === normalizedVisitType,
+    );
+
+    if (!validVisitType) {
+      this.errorMessage.set('Please select a valid visit type.');
+      return;
+    }
 
     if (this.billForm().invalid()) {
       this.errorMessage.set('Please complete the required fields.');
