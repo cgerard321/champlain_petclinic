@@ -27,7 +27,6 @@ x-healthchecks:
       retries: 10
       start_period: 15s
 
-  
 
   mysql: &mysql
     healthcheck:
