@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.Ratings.RatingRequestModel;
 import com.petclinic.bffapigateway.dtos.Ratings.RatingResponseModel;
+import com.petclinic.bffapigateway.dtos.Ratings.ReviewSettingsModel;
 import com.petclinic.bffapigateway.dtos.Ratings.ReviewLikeResponseModel;
 import com.petclinic.bffapigateway.dtos.Ratings.ReviewSettingsModel;
 import com.petclinic.bffapigateway.dtos.Ratings.ReviewLikeResponseModel;
@@ -92,6 +93,23 @@ public class RatingsServiceClient {
                 .uri(baseURL + "/" + productId + "/" + customerId)
                 .retrieve()
                 .bodyToMono(RatingResponseModel.class);
+    }
+
+    public Mono<ReviewSettingsModel> getReviewSettings(){
+        return webClientBuilder.build()
+                .get()
+                .uri(settingsURL)
+                .retrieve()
+                .bodyToMono(ReviewSettingsModel.class);
+    }
+
+    public Mono<ReviewSettingsModel> updateReviewSettings(ReviewSettingsModel settings){
+        return webClientBuilder.build()
+                .put()
+                .uri(settingsURL)
+                .bodyValue(settings)
+                .retrieve()
+                .bodyToMono(ReviewSettingsModel.class);
     }
 
     public Mono<ReviewLikeResponseModel> likeReview(final String productId,
