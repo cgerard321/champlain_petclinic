@@ -32,7 +32,7 @@ public class CustomerBillController {
     @IsUserSpecific(idToMatch = {"customerId"})
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<BillResponseDTO> getBillsByCustomerId(@PathVariable String customerId) {
-        return billService.getBillsByOwnerId(customerId);
+        return billService.getBillsByCustomerId(customerId);
     }
 
     @IsUserSpecific(idToMatch = {"customerId"})

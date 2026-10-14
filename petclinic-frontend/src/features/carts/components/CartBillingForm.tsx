@@ -1,4 +1,7 @@
-import { useState, ChangeEvent, FormEvent } from 'react';
+import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
+import { useUser } from '@/context/UserContext';
+import { getCustomer } from '@/features/customers/api/getCustomer';
+import { getUserDetails } from '@/features/customers/api/getUserDetails';
 import './cart-shared.css';
 import './CartBillingForm.css';
 export interface BillingInfo {
@@ -19,20 +22,34 @@ export interface CartBillingFormProps {
   onSubmit: (billing: BillingInfo) => void;
 }
 const provinces = [
-  'AB',
-  'BC',
-  'MB',
-  'NB',
-  'NL',
-  'NS',
-  'ON',
-  'PE',
-  'QC',
-  'SK',
-  'NT',
-  'NU',
-  'YT',
+  { code: 'AB', name: 'Alberta' },
+  { code: 'BC', name: 'British Columbia' },
+  { code: 'MB', name: 'Manitoba' },
+  { code: 'NB', name: 'New Brunswick' },
+  { code: 'NL', name: 'Newfoundland and Labrador' },
+  { code: 'NS', name: 'Nova Scotia' },
+  { code: 'ON', name: 'Ontario' },
+  { code: 'PE', name: 'Prince Edward Island' },
+  { code: 'QC', name: 'Quebec' },
+  { code: 'SK', name: 'Saskatchewan' },
+  { code: 'NT', name: 'Northwest Territories' },
+  { code: 'NU', name: 'Nunavut' },
+  { code: 'YT', name: 'Yukon' },
 ];
+
+const getProvinceCode = (province?: string): string => {
+  const normalized = province?.trim().toLowerCase();
+
+  if (!normalized) return '';
+
+  return (
+    provinces.find(
+      option =>
+        option.code.toLowerCase() === normalized ||
+        option.name.toLowerCase() === normalized
+    )?.code ?? ''
+  );
+};
 
 const CartBillingForm: React.FC<CartBillingFormProps> = ({
   // eslint-disable-next-line react/prop-types
@@ -42,6 +59,7 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
   // eslint-disable-next-line react/prop-types
   onSubmit,
 }) => {
+  const { user } = useUser();
   const [billing, setBilling] = useState<BillingInfo>({
     fullName: '',
     email: '',
@@ -59,6 +77,49 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    if (!user.userId) return;
+
+    let ignoreResponse = false;
+
+    const loadCustomerInformation = async (): Promise<void> => {
+      try {
+        const [customerResponse, userResponse] = await Promise.all([
+          getCustomer(user.userId),
+          getUserDetails(user.userId),
+        ]);
+
+        if (ignoreResponse) return;
+
+        const customer = customerResponse.data;
+        const userDetails = userResponse.data;
+        const fullName = [customer.firstName, customer.lastName]
+          .filter(Boolean)
+          .join(' ');
+
+        setBilling(previous => ({
+          ...previous,
+          fullName: previous.fullName || fullName,
+          email: previous.email || userDetails.email || '',
+          phoneNumber: previous.phoneNumber || customer.telephone || '',
+          address: previous.address || customer.address || '',
+          city: previous.city || customer.city || '',
+          province: previous.province || getProvinceCode(customer.province),
+        }));
+      } catch (error) {
+        console.error('Could not pre-fill checkout information:', error);
+      }
+    };
+
+    void loadCustomerInformation();
+
+    return () => {
+      ignoreResponse = true;
+    };
+  }, [isOpen, user.userId]);
 
   if (!isOpen) return null;
 
@@ -156,6 +217,15 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
               required
             />
             <input
+              type="tel"
+              name="phoneNumber"
+              placeholder="Telephone"
+              value={billing.phoneNumber}
+              onChange={handleChange}
+              autoComplete="tel"
+              required
+            />
+            <input
               type="text"
               name="address"
               placeholder="Address"
@@ -178,9 +248,9 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
               required
             >
               <option value="">Select Province</option>
-              {provinces.map(prov => (
-                <option key={prov} value={prov}>
-                  {prov}
+              {provinces.map(province => (
+                <option key={province.code} value={province.code}>
+                  {province.name}
                 </option>
               ))}
             </select>

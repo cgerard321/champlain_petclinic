@@ -49,8 +49,8 @@ public class RatingServiceImpl implements RatingService {
                 .switchIfEmpty(Mono.error(new InvalidInputException("Rating must be provided")))
                 .filter(req -> req.getRating() > 0 && req.getRating() <= 5)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Rating must be between 1 and 5")))
-                .filter(req -> req.getReview() == null || req.getReview().length() < 2000)
-                .switchIfEmpty(Mono.error(new InvalidInputException("Review must be less than 2000 characters")))
+                .filter(req -> req.getReview() == null || req.getReview().length() <= 10000)
+                .switchIfEmpty(Mono.error(new InvalidInputException("Review cannot exceed 10000 characters")))
                 .flatMap(req ->
                         productRepository.findProductByProductId(productId)
                                 .switchIfEmpty(Mono.error(new NotFoundException("Product id not found: " + productId)))
@@ -75,8 +75,8 @@ public class RatingServiceImpl implements RatingService {
                 .switchIfEmpty(Mono.error(new InvalidInputException("Rating must be provided")))
                 .filter(req -> req.getRating() > 0 && req.getRating() <= 5)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Rating must be between 1 and 5")))
-                .filter(req -> req.getReview() == null || req.getReview().length() < 2000)
-                .switchIfEmpty(Mono.error(new InvalidInputException("Review must be less than 2000 characters")))
+                .filter(req -> req.getReview() == null || req.getReview().length() <= 10000)
+                .switchIfEmpty(Mono.error(new InvalidInputException("Review cannot exceed 10000 characters")))
                 .flatMap(req ->
                         productRepository.findProductByProductId(productId)
                                 .switchIfEmpty(Mono.error(new NotFoundException("Product id not found: " + productId)))
