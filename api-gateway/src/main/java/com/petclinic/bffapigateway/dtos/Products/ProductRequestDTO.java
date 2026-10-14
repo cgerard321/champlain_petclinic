@@ -16,6 +16,8 @@ import java.time.LocalDate;
 public class ProductRequestDTO {
     private String productName;
     private String productDescription;
+    private String productNameFr;
+    private String productDescriptionFr;
     private Double productSalePrice;
     private Double averageRating;
     private Integer productQuantity;

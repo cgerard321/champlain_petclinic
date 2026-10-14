@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { getAllProducts } from '@/features/products/api/getAllProducts';
 import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
@@ -5,6 +6,7 @@ import Product from './components/Product';
 import { useUser } from '@/context/UserContext';
 
 export default function TrendingList(): JSX.Element {
+  const { t } = useTranslation('products');
   const [trendingList, setTrendingList] = useState<ProductModel[]>([]);
   const { user } = useUser();
 
@@ -49,7 +51,7 @@ export default function TrendingList(): JSX.Element {
 
   return (
     <div className="products-section-container ">
-      <h2 className="section-title category-title">Trending</h2>
+      <h2 className="section-title category-title">{t('trending')}</h2>
       <div className="grid">
         {topFourTrending.map((product: ProductModel) => (
           <div
