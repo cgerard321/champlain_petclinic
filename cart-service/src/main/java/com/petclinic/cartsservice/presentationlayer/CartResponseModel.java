@@ -1,5 +1,6 @@
 package com.petclinic.cartsservice.presentationlayer;
 
+import com.petclinic.cartsservice.dataaccesslayer.ShippingMethod;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
 import lombok.AllArgsConstructor;
@@ -32,6 +33,9 @@ public class CartResponseModel {
     private String invoiceId;
 
     private Double promoPercent;
+
+    private ShippingMethod shippingMethod;
+    private double shippingCost;
 
 
     public CartResponseModel(String invoiceId, String cartId, List<CartProduct> products, double total) {

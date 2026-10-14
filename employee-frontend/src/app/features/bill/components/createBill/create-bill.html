@@ -4,6 +4,11 @@
       <h1>Welcome, {{ vets()[0]?.firstName + ' ' + vets()[0]?.lastName }}</h1>
     </mat-card-header>
     <mat-divider />
+    <div class="form-row">
+      <mat-checkbox [checked]="sendEmail()" (change)="sendEmail.set($event.checked)">
+        Email this bill to the customer
+      </mat-checkbox>
+    </div>
     <mat-card-content>
       <div class="form-row">
         <label for="vetId" class="label-size">Veterinarian Name:</label>

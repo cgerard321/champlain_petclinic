@@ -713,6 +713,7 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 import com.petclinic.bffapigateway.domainclientlayer.CartServiceClient;
 import com.petclinic.bffapigateway.dtos.Cart.CartItemRequestDTO;
 import com.petclinic.bffapigateway.dtos.Cart.CartResponseDTO;
+import com.petclinic.bffapigateway.dtos.Cart.CartShippingRequestDTO;
 import com.petclinic.bffapigateway.dtos.Cart.UpdateProductQuantityRequestDTO;
 import com.petclinic.bffapigateway.dtos.Cart.WishlistItemRequestDTO;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
@@ -1021,5 +1022,44 @@ class CartControllerUnitTest {
                 .uri("/api/v2/gateway/carts/{cartId}/checkout", "missing")
                 .exchange()
                 .expectStatus().isNotFound();
+    }
+
+    @Test
+    void updateShippingMethod_success_returnsUpdatedCart() {
+        CartResponseDTO response = sampleCart("c-1");
+        response.setShippingMethod("STANDARD");
+        response.setShippingCost(9.99);
+
+        when(cartServiceClient.updateShippingMethod(eq("c-1"), eq("STANDARD")))
+                .thenReturn(Mono.just(response));
+
+        client.put()
+                .uri("/api/v2/gateway/carts/{cartId}/shipping", "c-1")
+                .bodyValue(new CartShippingRequestDTO("STANDARD"))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(CartResponseDTO.class)
+                .value(body -> {
+                    assertThat(body.getShippingMethod()).isEqualTo("STANDARD");
+                    assertThat(body.getShippingCost()).isEqualTo(9.99);
+                });
+
+        verify(cartServiceClient).updateShippingMethod(eq("c-1"), eq("STANDARD"));
+    }
+
+    @Test
+    void updateShippingMethod_invalidMethod_returns422() {
+        when(cartServiceClient.updateShippingMethod(eq("c-1"), eq("OVERNIGHT")))
+                .thenReturn(Mono.error(new InvalidInputException("Invalid shipping method. Allowed values are PICKUP, STANDARD, EXPRESS")));
+
+        client.put()
+                .uri("/api/v2/gateway/carts/{cartId}/shipping", "c-1")
+                .bodyValue(new CartShippingRequestDTO("OVERNIGHT"))
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+                .expectBody(CartResponseDTO.class)
+                .value(body -> assertThat(body.getMessage()).isEqualTo("Invalid shipping method. Allowed values are PICKUP, STANDARD, EXPRESS"));
+
+        verify(cartServiceClient).updateShippingMethod(eq("c-1"), eq("OVERNIGHT"));
     }
 }

@@ -1,3 +1,5 @@
+import type { ShippingMethod } from '@/shared/api/cart';
+
 export interface OrderItemModel {
   productId: string;
   imageId: string;
@@ -21,5 +23,7 @@ export interface OrderModel {
   tvq: number;
   tvc: number;
   total: number;
+  shippingMethod?: ShippingMethod | null;
+  shippingCost?: number;
   invoiceId: string | null;
 }
