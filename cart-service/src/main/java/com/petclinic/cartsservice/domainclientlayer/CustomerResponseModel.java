@@ -6,6 +6,8 @@ public class CustomerResponseModel {
     private String customerId;
     private String firstName;
     private String lastName;
+    private String address;
+    private String telephone;
 
     public String getFullName() {
         String f = firstName == null ? "" : firstName.trim();
