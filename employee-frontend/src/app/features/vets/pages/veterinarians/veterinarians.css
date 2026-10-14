@@ -127,11 +127,16 @@ h1 {
   color: #fff;
   font: inherit;
   font-weight: 600;
+  text-decoration: none;
 }
 
-.directory-button:disabled {
-  opacity: 0.65;
-  cursor: not-allowed;
+.directory-button:hover {
+  background: #193c2e;
+}
+
+.directory-button:focus-visible {
+  outline: 3px solid #254e3e;
+  outline-offset: 4px;
 }
 
 .preview-note {
