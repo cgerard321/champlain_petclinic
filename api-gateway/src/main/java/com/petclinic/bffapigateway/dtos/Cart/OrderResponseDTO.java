@@ -27,6 +27,8 @@ public class OrderResponseDTO {
     private double tvq;
     private double tvc;
     private double total;
+    private String shippingMethod;
+    private double shippingCost;
 
     private String invoiceId;
 }
