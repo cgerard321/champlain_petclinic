@@ -1,4 +1,6 @@
-
+import { useTranslation } from 'react-i18next';
+import { useEffect, useRef, useState } from 'react';
+import defaultProductImage from '@/assets/Products/defaultProductImage.svg';
 import { FileDetails } from '@/shared/models/FileDetails';
 import { getImage } from '../api/getImage';
 import { getProduct } from '../api/getProduct';
