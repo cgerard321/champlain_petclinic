@@ -12,11 +12,13 @@ export interface Supply {
   lastUpdatedAt: string;
   photoData?: string | null;
   photoType?: string | null;
+  supplierName?: string | null;
   expirationDate?: string | null;
 }
 
 export interface SupplyRequest {
   productName: string;
+  supplierName?: string;
   productDescription: string;
   productPrice: number;
   productQuantity: number;

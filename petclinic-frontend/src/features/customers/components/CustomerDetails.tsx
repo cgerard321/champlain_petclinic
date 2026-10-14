@@ -12,6 +12,7 @@ import { getPetTypes } from '../api/getPetTypes';
 import { getPetTypeName } from '../utils/petTypeMapping';
 import './CustomerDetails.css';
 import { deleteCustomer } from '../api/deleteCustomer.ts';
+import { deleteCustomerPhoto } from '../api/deleteCustomerPhoto.ts';
 import { IsVet } from '@/context/UserContext';
 import UpdatePetForm from './UpdatePetForm';
 import AddPetModal from './AddPetModal';
@@ -191,6 +192,21 @@ const CustomerDetails: FC = () => {
     }
   };
 
+  const handleDeleteCustomerPhoto = async (): Promise<void> => {
+    if (!customer) return;
+    if (!window.confirm(t('customerDetails.messages.confirmDeletePhoto')))
+      return;
+
+    try {
+      await deleteCustomerPhoto(customer.customerId);
+      setCustomer({ ...customer, photo: undefined });
+      alert(t('customerDetails.messages.deletePhotoSuccess'));
+    } catch (error) {
+      console.error('Error deleting customer photo:', error);
+      alert(t('customerDetails.messages.deletePhotoError'));
+    }
+  };
+
   if (loading) {
     return <p>{t('customerDetails.loading')}</p>;
   }
@@ -359,17 +375,27 @@ const CustomerDetails: FC = () => {
         {/* Customer Info */}
         <div className="section customer-info">
           <h3>{t('customerDetails.infoTitle')}</h3>
-          <img
-            src={
-              customer.photo?.fileData
-                ? `data:${customer.photo.fileType};base64,${customer.photo.fileData}`
-                : defaultProfile
-            }
-            alt={t('customerDetails.pets.photoAlt', {
-              name: `${customer.firstName} ${customer.lastName}`,
-            })}
-            className="customer-profile-picture"
-          />
+          <div className="customer-photo-block">
+            <img
+              src={
+                customer.photo?.fileData
+                  ? `data:${customer.photo.fileType};base64,${customer.photo.fileData}`
+                  : defaultProfile
+              }
+              alt={t('customerDetails.photoAlt', {
+                name: `${customer.firstName} ${customer.lastName}`,
+              })}
+              className="customer-profile-picture"
+            />
+            {!isVet && customer.photo?.fileData && (
+              <button
+                className="btn btn-danger btn-sm"
+                onClick={handleDeleteCustomerPhoto}
+              >
+                {t('customerDetails.buttons.deletePhoto')}
+              </button>
+            )}
+          </div>
           <p>
             <strong>{t('fields.username')} </strong>
             {userDetails?.username || t('customerDetails.loading')}

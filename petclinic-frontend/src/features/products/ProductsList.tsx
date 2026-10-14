@@ -12,6 +12,7 @@ import './components/StarRating.css';
 import { getAllProductBundles } from './api/getAllProductBundles';
 import { ProductBundleModel } from './models/ProductModels/ProductBundleModel';
 import ProductBundle from './components/ProductBundle';
+import './components/Image.css';
 //import ProductSearch from './components/ProductSearch';
 import Reveal from '@/shared/components/animations/Reveal';
 
@@ -193,7 +194,13 @@ const ProductList = function Productlist({
             <div ref={catalogRef} className="products-section-container ">
               <h2 className="section-title category-title">Catalog</h2>
               {isLoading ? (
-                <p>Loading items...</p>
+                <div className="products-loading-state">
+                  <span
+                    className="image-loading-spinner"
+                    role="status"
+                    aria-label="Loading products"
+                  />
+                </div>
               ) : filteredList.length > 0 ? (
                 <div className="grid catalog-grid">
                   {paginatedProducts.map((p, i) => (
