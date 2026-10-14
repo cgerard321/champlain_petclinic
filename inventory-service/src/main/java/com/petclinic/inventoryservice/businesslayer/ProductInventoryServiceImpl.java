@@ -113,7 +113,6 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
                                                     validatePhoto(requestDTO);
 
-
                                                     if (requestDTO.getPhotoData() != null) {
                                                         boolean removePhoto = requestDTO.getPhotoData().length == 0;
                                                         existingProduct.setPhotoData(
@@ -121,29 +120,6 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                                                         existingProduct.setPhotoType(
                                                                 removePhoto ? null : requestDTO.getPhotoType());
                                                     }
-
-                                                existingProduct.setPhotoData(removePhoto ? null : requestDTO.getPhotoData());
-                                                existingProduct.setPhotoType(removePhoto ? null : requestDTO.getPhotoType());
-                                            }
-                                            existingProduct.setProductName(requestDTO.getProductName());
-                                            existingProduct.setProductDescription(requestDTO.getProductDescription());
-                                            existingProduct.setProductPrice(requestDTO.getProductPrice());
-                                            existingProduct.setProductQuantity(requestDTO.getProductQuantity());
-                                            existingProduct.setProductSalePrice(requestDTO.getProductSalePrice());
-                                            existingProduct.setLastUpdatedAt(LocalDateTime.now());
-                                            if (requestDTO.getSupplierName() != null) {
-                                                existingProduct.setSupplierName(normalizeSupplierName(requestDTO.getSupplierName()));
-                                            }
-                                            existingProduct.setExpirationDate(requestDTO.getExpirationDate());
-                                            // Set Status based on the product quantity
-//                                            if (existingProduct.getProductQuantity() == 0) {
-//                                                existingProduct.setStatus(Status.OUT_OF_STOCK);
-//                                            } else if (existingProduct.getProductQuantity() < 20) {
-//                                                existingProduct.setStatus(Status.RE_ORDER);
-//                                            } else {
-//                                                existingProduct.setStatus(Status.AVAILABLE);
-//                                            }
-
 
                                                     existingProduct.setProductName(requestDTO.getProductName());
                                                     existingProduct.setProductDescription(requestDTO.getProductDescription());
@@ -678,30 +654,11 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                                                 "Product must have an inventory id, product name, product price, and product quantity."));
                                     }
 
-                                validatePhoto(requestDTO);
-                                Product product = EntityDTOUtil.toProductEntity(requestDTO);
-                                product.setSupplierName(normalizeSupplierName(requestDTO.getSupplierName()));
-
-                                if (product.getPhotoData() != null && product.getPhotoData().length == 0) {
-                                    product.setPhotoData(null);
-                                    product.setPhotoType(null);
-                                }
-                                product.setInventoryId(inventoryId);
-                                product.setProductId(EntityDTOUtil.generateUUID());
-                                product.setLastUpdatedAt(LocalDateTime.now());
-                                product.setExpirationDate(requestDTO.getExpirationDate());
-                                return productRepository.save(product)
-                                        .map(EntityDTOUtil::toProductResponseDTO);
-                            });
-                        }))
-                .switchIfEmpty(Mono.error(new InvalidInputException("Unable to save supply to the inventory, an error occurred.")));
-
-
                                     if (requestDTO.getProductPrice() <= 0
                                             || requestDTO.getProductQuantity() <= 0
                                             || requestDTO.getProductSalePrice() <= 0) {
                                         return Mono.error(new InvalidInputException(
-                                                "Product price quantity and sale price must be greater than 0."));
+                                                "Product price, quantity and sale price must be greater than 0."));
                                     }
 
                                     return productRepository
@@ -718,8 +675,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
                                                 Product product = EntityDTOUtil.toProductEntity(requestDTO);
                                                 product.setSupplierName(normalizeSupplierName(requestDTO.getSupplierName()));
-                                                if (product.getPhotoData() != null
-                                                        && product.getPhotoData().length == 0) {
+                                                if (product.getPhotoData() != null && product.getPhotoData().length == 0) {
                                                     product.setPhotoData(null);
                                                     product.setPhotoType(null);
                                                 }
@@ -943,13 +899,8 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     }
 
     private String normalizeSupplierName(String supplierName) {
-
         if (supplierName == null) {
-            return null;
-
-        if(supplierName == null) {
             return null; // Allow older clients to create supplies without this new field.
-
         }
 
         String normalized = supplierName.strip();
@@ -998,4 +949,3 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     }
 
 }
-
