@@ -133,7 +133,7 @@ public class CustomerControllerV1 {
     public Mono<ResponseEntity<CustomerResponseDTO>> deleteCustomerPhoto(@PathVariable String customerId) {
         return customersServiceClient.deleteCustomerPhoto(customerId)
                 .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+                .defaultIfEmpty(ResponseEntity.noContent().<CustomerResponseDTO>build());
     }
 
 

@@ -1,5 +1,7 @@
 package com.petclinic.bffapigateway.dtos.Inventory;
 
+import java.time.LocalDate;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,6 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ProductRequestDTO {
     private String productName;
+    private String supplierName;
     private String productDescription;
     private Double productPrice;
     private Integer productQuantity;
@@ -18,6 +21,8 @@ public class ProductRequestDTO {
     private String recentUpdateMessage;
     private byte[] photoData;
     private String photoType;
+
+    private LocalDate expirationDate;
 
 
 }

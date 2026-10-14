@@ -24,7 +24,6 @@
   white-space: nowrap;
 }
 
-
 .active-link {
   background: rgb(0 0 0 / 6%);
 }
@@ -43,7 +42,7 @@
 }
 
 .lang-switcher button.active {
-  background-color:rgb(0 0 0 / 6%);
+  background-color: rgb(0 0 0 / 6%);
   color: white;
   font-weight: 600;
 }
