@@ -21,6 +21,8 @@ public class ProductResponseModel {
     private String imageId;
     private String productName;
     private String productDescription;
+    private String productNameFr;
+    private String productDescriptionFr;
     private Double productSalePrice;
     private Double averageRating;
     private Integer requestCount;

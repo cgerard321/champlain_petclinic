@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import './Invoice.css';
 import { computeTaxes, formatTaxRate, roundToCents } from '../utils/taxUtils';
+import type { ShippingMethod } from '@/shared/api/cart';
 
 export interface InvoiceItem {
   productId: number;
@@ -25,9 +26,12 @@ export interface InvoiceFull {
   date: string; // ISO
   items: InvoiceItem[];
   subtotal: number;
+  taxableSubtotal: number;
   tvq: number;
   tvc: number;
   discount: number;
+  shippingMethod: ShippingMethod;
+  shippingCost: number;
   total: number;
 }
 
@@ -68,6 +72,7 @@ function Invoice({
   }
 
   const inv = invoices[index];
+  const taxableSubtotal = inv.taxableSubtotal ?? inv.subtotal;
 
   const downloadInvoice = async (): Promise<void> => {
     // Build smaller pieces to avoid nested template literals
@@ -145,17 +150,20 @@ function Invoice({
         </div>
 
         <div class="totals">
-          <p><span>Subtotal</span><span>$${inv.subtotal.toFixed(2)}</span></p>
+          <p><span>Items subtotal</span><span>$${inv.subtotal.toFixed(2)}</span></p>
+          <p><span>Discount</span><span>-$${inv.discount.toFixed(2)}</span></p>
+          <p><span>Shipping (${inv.shippingMethod})</span><span>$${inv.shippingCost.toFixed(2)}</span></p>
+          <p><span>Subtotal</span><span>$${taxableSubtotal.toFixed(2)}</span></p>
           ${(() => {
             // compute tax lines if billing province available
             try {
               const prov = inv.billing?.province;
               if (prov) {
-                const lines = computeTaxes(inv.subtotal, prov);
+                const lines = computeTaxes(taxableSubtotal, prov);
                 return lines
                   .map(
                     l =>
-                      `<p><span>${l.name} (${formatTaxRate(l.rate)}%)</span><span>$${(l.amount ?? roundToCents(inv.subtotal * l.rate)).toFixed(2)}</span></p>`
+                      `<p><span>${l.name} (${formatTaxRate(l.rate)}%)</span><span>$${(l.amount ?? roundToCents(taxableSubtotal * l.rate)).toFixed(2)}</span></p>`
                   )
                   .join('');
               }
@@ -167,7 +175,6 @@ function Invoice({
             // fallback to legacy fields
             return `<p><span>TVQ (9.975%)</span><span>$${inv.tvq.toFixed(2)}</span></p><p><span>TVC (5%)</span><span>$${inv.tvc.toFixed(2)}</span></p>`;
           })()}
-          <p><span>Discount</span><span>-$${inv.discount.toFixed(2)}</span></p>
           <p class="total"><span>Total</span><span>$${inv.total.toFixed(2)}</span></p>
         </div>
 
@@ -311,19 +318,24 @@ function Invoice({
           ))}
 
           <div className="invoice-taxes">
-            <p>Subtotal: ${inv.subtotal.toFixed(2)}</p>
+            <p>Items subtotal: ${inv.subtotal.toFixed(2)}</p>
+            <p>Discount: -${inv.discount.toFixed(2)}</p>
+            <p>
+              Shipping ({inv.shippingMethod}): ${inv.shippingCost.toFixed(2)}
+            </p>
+            <p>Subtotal: ${taxableSubtotal.toFixed(2)}</p>
             {/* Render tax lines based on billing province when available */}
             {(() => {
               try {
                 const prov = inv.billing?.province;
                 if (prov) {
-                  const lines = computeTaxes(inv.subtotal, prov);
+                  const lines = computeTaxes(taxableSubtotal, prov);
                   return (
                     <div>
                       {lines.map((l, i) => {
                         const displayAmount = (
                           (l.amount ??
-                            roundToCents(inv.subtotal * l.rate)) as number
+                            roundToCents(taxableSubtotal * l.rate)) as number
                         ).toFixed(2);
                         return (
                           <p key={i}>
@@ -348,7 +360,6 @@ function Invoice({
                 </>
               );
             })()}
-            <p>Discount: -${inv.discount.toFixed(2)}</p>
             <h3>Total: ${inv.total.toFixed(2)}</h3>
           </div>
           <div className="invoice-modal-actions">

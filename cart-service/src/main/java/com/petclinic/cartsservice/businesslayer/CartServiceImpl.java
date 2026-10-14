@@ -2,6 +2,7 @@ package com.petclinic.cartsservice.businesslayer;
 
 import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.CartRepository;
+import com.petclinic.cartsservice.dataaccesslayer.ShippingMethod;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.domainclientlayer.CartItemRequestModel;
 import com.petclinic.cartsservice.domainclientlayer.ProductClient;
@@ -14,7 +15,6 @@ import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
 import com.petclinic.cartsservice.utils.exceptions.OutOfStockException;
 import com.petclinic.cartsservice.domainclientlayer.CustomerClient;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 
 
 @Service
-@Slf4j
 public class CartServiceImpl implements CartService {
     private final CartRepository cartRepository;
     private final ProductClient productClient;
@@ -116,13 +115,6 @@ public class CartServiceImpl implements CartService {
 
     private int safeQuantity(Integer quantity) {
         return quantity == null ? 0 : Math.max(quantity, 0);
-    }
-
-    private int safeQuantity(Integer quantity, int fallback) {
-        if (quantity == null || quantity <= 0) {
-            return Math.max(fallback, 0);
-        }
-        return quantity;
     }
 
     @Override
@@ -237,12 +229,19 @@ public class CartServiceImpl implements CartService {
 
                                 cart.setRecommendationPurchase(recommendations);
                                 cart.setProducts(Collections.emptyList());
+                                cart.setShippingMethod(ShippingMethod.PICKUP);
+                                cart.setShippingCost(ShippingMethod.PICKUP.getCost());
+
                                 return cartRepository.save(cart);
                             })
                             .flatMap(savedCart -> orderService.createOrder(orderCart))
-                            .map(savedOrder ->
-                                    new CartResponseModel(invoiceId, cartId, purchasedProducts, total)
-                            );
+                            .map(savedOrder -> {
+                                CartResponseModel response =
+                                        new CartResponseModel(invoiceId, cartId, purchasedProducts, total);
+                                response.setShippingMethod(orderCart.getShippingMethod());
+                                response.setShippingCost(orderCart.getShippingCost());
+                                return response;
+                            });
                 });
     }
 
@@ -297,6 +296,8 @@ public class CartServiceImpl implements CartService {
                             .tvq(0.0)
                             .tvc(0.0)
                             .total(0.0)
+                            .shippingMethod(ShippingMethod.PICKUP)
+                            .shippingCost(ShippingMethod.PICKUP.getCost())
                             .build();
 
                     return cartRepository.save(newCart)
@@ -419,6 +420,8 @@ public class CartServiceImpl implements CartService {
         newCart.setCustomerId(customerId);
         newCart.setCartId(UUID.randomUUID().toString());
         newCart.setProducts(new ArrayList<>());
+        newCart.setShippingMethod(ShippingMethod.PICKUP);
+        newCart.setShippingCost(ShippingMethod.PICKUP.getCost());
         return cartRepository.save(newCart);
     }
 
@@ -892,6 +895,30 @@ public class CartServiceImpl implements CartService {
         }
 
         return uniqueWishlist;
+    }
+
+    @Override
+    public Mono<CartResponseModel> updateShippingMethod(String cartId, String shippingMethod) {
+        if (shippingMethod == null || shippingMethod.isBlank()) {
+            return Mono.error(new InvalidInputException("shippingMethod must be provided"));
+        }
+
+        final ShippingMethod resolvedMethod;
+        try {
+            resolvedMethod = ShippingMethod.valueOf(shippingMethod.trim().toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            return Mono.error(new InvalidInputException(
+                    "Invalid shipping method. Allowed values are PICKUP, STANDARD, EXPRESS"));
+        }
+
+        return cartRepository.findCartByCartId(cartId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
+                .flatMap(cart -> {
+                    cart.setShippingMethod(resolvedMethod);
+                    cart.setShippingCost(resolvedMethod.getCost());
+                    return cartRepository.save(cart);
+                })
+                .map(saved -> EntityModelUtil.toCartResponseModel(saved, saved.getProducts()));
     }
 
     @Override

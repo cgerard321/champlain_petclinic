@@ -86,6 +86,15 @@ public class CustomerController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
+    @DeleteMapping(value = "/{customerId}/soft")
+    public Mono<ResponseEntity<Void>> softDeleteCustomerByCustomerId(@PathVariable String customerId) {
+        return Mono.just(customerId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(ApplicationExceptions.invalidCustomerId(customerId))
+                .flatMap(customerService::softDeleteCustomerByCustomerId)
+                .map(v -> ResponseEntity.noContent().<Void>build());
+    }
+
     @PutMapping("/{customerId}")
     public Mono<ResponseEntity<CustomerResponseDTO>> updateCustomer(@RequestBody Mono<CustomerRequestDTO> customerRequestDTOMono, @PathVariable String customerId) {
         return Mono.just(customerId)

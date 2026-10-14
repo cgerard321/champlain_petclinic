@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.Ratings.RatingRequestModel;
 import com.petclinic.bffapigateway.dtos.Ratings.RatingResponseModel;
+import com.petclinic.bffapigateway.dtos.Ratings.ReviewLikeResponseModel;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -30,6 +31,16 @@ public class RatingsServiceClient {
         return webClientBuilder.build()
                 .get()
                 .uri(baseURL + "/" + productId)
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .retrieve()
+                .bodyToFlux(RatingResponseModel.class);
+    }
+
+    public Flux<RatingResponseModel> getAllRatingsForProductIdAndCustomerId(
+            final String productId, final String customerId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(baseURL + "/" + productId + "/for-user/" + customerId)
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
                 .bodyToFlux(RatingResponseModel.class);
@@ -77,5 +88,24 @@ public class RatingsServiceClient {
                 .uri(baseURL + "/" + productId + "/" + customerId)
                 .retrieve()
                 .bodyToMono(RatingResponseModel.class);
+    }
+
+    public Mono<ReviewLikeResponseModel> likeReview(final String productId,
+                                                     final String reviewCustomerId,
+                                                     final String likingCustomerId) {
+        return webClientBuilder.build()
+                .post()
+                .uri(baseURL + "/" + productId + "/" + reviewCustomerId + "/likes/" + likingCustomerId)
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::is4xxClientError, clientResponse -> {
+                            HttpStatus status = HttpStatus.valueOf(clientResponse.statusCode().value());
+                            String message = status == HttpStatus.NOT_FOUND
+                                    ? "Review not found"
+                                    : "Could not like review";
+                            return Mono.error(new GenericHttpException(message, status));
+                        }
+                )
+                .bodyToMono(ReviewLikeResponseModel.class);
     }
 }

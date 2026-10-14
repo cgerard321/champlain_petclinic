@@ -19,5 +19,6 @@ public interface CustomerService {
     Mono<CustomerResponseDTO> updateCustomerPhoto(String customerId, FileRequestDTO photo);
     Mono<CustomerResponseDTO> deleteCustomerByCustomerId(String customerId);
     Mono<CustomerResponseDTO> deleteCustomerPhoto(String customerId);
+    Mono<CustomerResponseDTO> softDeleteCustomerByCustomerId(String customerId);
 }
 
