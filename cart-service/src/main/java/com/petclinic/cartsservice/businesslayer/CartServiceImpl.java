@@ -30,12 +30,13 @@ public class CartServiceImpl implements CartService {
     private final CartRepository cartRepository;
     private final ProductClient productClient;
     private final CustomerClient customerClient;
+    private final OrderServiceImpl orderService;
 
-
-    public CartServiceImpl(CartRepository cartRepository, ProductClient productClient, CustomerClient customerClient ) {
+    public CartServiceImpl(CartRepository cartRepository, ProductClient productClient, CustomerClient customerClient , OrderServiceImpl orderService) {
         this.cartRepository = cartRepository;
         this.productClient = productClient;
         this.customerClient = customerClient;
+        this.orderService = orderService;
     }
     private static final int DEFAULT_PAGE_SIZE = 50;
     private static final int MAX_PAGE_SIZE = 200;
@@ -216,9 +217,10 @@ public class CartServiceImpl implements CartService {
         return cartRepository.findCartByCartId(cartId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
                 .flatMap(cart -> {
-                    if (cart.getProducts().isEmpty()) {
+                    if (cart.getProducts() == null || cart.getProducts().isEmpty()) {
                         return Mono.error(new InvalidInputException("Cart is empty"));
                     }
+                    Cart orderCart = EntityModelUtil.storeCartOrder(cart);
 
                     String invoiceId = UUID.randomUUID().toString();
                     List<CartProduct> products = cart.getProducts();
@@ -259,7 +261,19 @@ public class CartServiceImpl implements CartService {
                             .distinct(ProductResponseModel::getProductId)
                             .map(this::toCartProduct)
                             .collectList()
+                    orderCart.setInvoiceId(invoiceId);
+
+                    List<CartProduct> purchasedProducts = orderCart.getProducts();
+                    double total = orderCart.getTotal();
+
+                    return generateRecommendations(purchasedProducts)
                             .flatMap(recommendations -> {
+                                cart.setRecentPurchases(
+                                        EntityModelUtil.mergeRecentPurchases(
+                                                cart.getRecentPurchases(),
+                                                purchasedProducts)
+                                );
+
                                 cart.setRecommendationPurchase(recommendations);
                                 cart.setProducts(Collections.emptyList());
                                 cart.setShippingMethod(ShippingMethod.PICKUP);
@@ -269,11 +283,34 @@ public class CartServiceImpl implements CartService {
                                         .thenReturn(checkoutResponse);
 
                                     });
+                                return cartRepository.save(cart);
+                            })
+                            .flatMap(savedCart -> orderService.createOrder(orderCart))
+                            .map(savedOrder ->
+                                    new CartResponseModel(invoiceId, cartId, purchasedProducts, total)
+                            );
                 });
     }
 
+        private Mono<List<CartProduct>> generateRecommendations(
+                List<CartProduct> purchasedProducts
+        ) {
+            return Flux.fromIterable(purchasedProducts)
+                    .map(CartProduct::getProductId)
+                    .flatMap(productClient::getProductByProductId)
+                    .filter(product -> product.getProductType() != null)
+                    .map(ProductResponseModel::getProductType)
+                    .distinct()
+                    .flatMap(productClient::getProductsByType)
+                    .distinct(ProductResponseModel::getProductId)
+                    .map(this::toCartProduct)
+                    .collectList();
+        }
 
-    private CartProduct toCartProduct(ProductResponseModel product) {
+
+
+
+        private CartProduct toCartProduct(ProductResponseModel product) {
         return CartProduct.builder()
                 .productId(product.getProductId())
                 .imageId(product.getImageId())

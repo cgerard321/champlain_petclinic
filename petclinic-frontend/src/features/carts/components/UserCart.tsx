@@ -40,6 +40,8 @@ import {
 } from '../api/cartEvent';
 import { computeTaxes, formatTaxRate, roundToCents } from '../utils/taxUtils';
 import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
+import { getCustomerOrders } from '../api/getCustomerOrders';
+import type { OrderModel } from '../models/OrderModel';
 interface ProductAPIResponse {
   productId: string;
   imageId?: string;
@@ -93,11 +95,39 @@ const UserCart: React.FC = () => {
   const [voucherError, setVoucherError] = useState<string | null>(null);
 
   const [movingAll, setMovingAll] = useState<boolean>(false);
+  const [orders, setOrders] = useState<OrderModel[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(true);
+  const [ordersError, setOrdersError] = useState<string | null>(null);
 
   const [promoPercent, setPromoPercent] = useState<number | null>(null);
   const [shippingMethod, setShippingMethod] =
     useState<ShippingMethod>('PICKUP');
   const [shippingCost, setShippingCost] = useState<number>(0);
+
+  const fetchOrders = useCallback(async (): Promise<void> => {
+    if (!customerId) {
+      setOrders([]);
+      setOrdersLoading(false);
+      return;
+    }
+
+    setOrdersLoading(true);
+    setOrdersError(null);
+
+    try {
+      const data = await getCustomerOrders(customerId);
+      setOrders(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Failed to fetch orders:', error);
+      setOrdersError('Could not load previous orders.');
+    } finally {
+      setOrdersLoading(false);
+    }
+  }, [customerId]);
+
+  useEffect(() => {
+    void fetchOrders();
+  }, [fetchOrders]);
 
   const toProductModel = useCallback(
     (product: ProductAPIResponse): ProductModel => ({
@@ -981,6 +1011,21 @@ const UserCart: React.FC = () => {
       // Reset LS so navbar badge = 0 without API
       setCartCountInLS(0);
 
+      // Refresh cart data to retrieve the newly created order
+
+      await fetchOrders();
+
+      try {
+        const { data } = await axiosInstance.get<CartDetailsModel>(
+          `/carts/${cartId}`,
+          { useV2: false }
+        );
+
+        syncCartState(data);
+      } catch (err) {
+        console.error('Failed to refresh orders after checkout:', err);
+      }
+
       // Fetch recent purchases after checkout
       if (customerId) {
         try {
@@ -1264,6 +1309,73 @@ const UserCart: React.FC = () => {
           )}
         </div>
 
+        {/* Previous Orders */}
+        <div className="orders-section cart-panel cart-panel--padded">
+          <h2>Your Orders</h2>
+
+          {ordersLoading ? (
+            <p>Loading your orders...</p>
+          ) : ordersError ? (
+            <p className="error">{ordersError}</p>
+          ) : orders.length === 0 ? (
+            <p>You have not placed any orders yet.</p>
+          ) : (
+            <div className="orders-list">
+              {orders.map(order => (
+                <div key={order.orderId} className="order-card cart-card">
+                  <div className="order-header">
+                    <h3>Order #{order.orderId}</h3>
+
+                    <p>
+                      Placed on:{' '}
+                      {new Date(order.orderDate).toLocaleDateString()}
+                    </p>
+                  </div>
+
+                  <div className="order-products">
+                    {order.products.map(item => (
+                      <div key={item.productId} className="order-product">
+                        <div
+                          className="recent-purchase-image"
+                          onClick={() =>
+                            redirectToProductPageOnClick(item.productId)
+                          }
+                        >
+                          <ImageContainer
+                            productId={item.productId}
+                            imageId={item.imageId}
+                          />
+                        </div>
+
+                        <div className="order-product-details">
+                          <h4>{item.productName}</h4>
+
+                          <p>Qty: {item.quantityInCart}</p>
+
+                          <p>{formatPrice(item.productSalePrice)} each</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="order-footer">
+                    <span>Subtotal: {formatPrice(order.subtotal)}</span>
+                    <span>TVQ: {formatPrice(order.tvq)}</span>
+                    <span>TVC: {formatPrice(order.tvc)}</span>
+
+                    {order.promoPercent != null && (
+                      <span>Promo: {order.promoPercent}%</span>
+                    )}
+
+                    <strong>Total: {formatPrice(order.total)}</strong>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Recent purchases*/}
         <div className="recent-purchases-section cart-panel cart-panel--padded">
           <h2>Recent Purchases</h2>
           <div className="recent-purchases-list cart-scroll-strip">
