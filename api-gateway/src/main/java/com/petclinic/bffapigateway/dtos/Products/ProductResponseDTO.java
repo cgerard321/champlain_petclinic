@@ -18,6 +18,8 @@ public class ProductResponseDTO {
     private String imageId;
     private String productName;
     private String productDescription;
+    private String productNameFr;
+    private String productDescriptionFr;
     private Double productSalePrice;
     private Double averageRating;
     private Integer requestCount;
@@ -45,7 +47,7 @@ public class ProductResponseDTO {
             LocalDate releaseDate,
             ProductStatus productStatus,
             DeliveryType deliveryType) {
-        this(productId, imageId, productName, productDescription,
+        this(productId, imageId, productName, productDescription, null, null,
                 productSalePrice, averageRating, requestCount, productQuantity,
                 isUnlisted, productTypeId, productType,releaseDate, productStatus, deliveryType, null);
     }

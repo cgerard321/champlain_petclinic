@@ -1,15 +1,16 @@
-import { expect, test } from '@playwright/test';
-import type { Page } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
 const visitStatuses = [
-  'SCHEDULED',
-  'COMPLETED',
-  'CANCELLED',
-  'CONFIRMED',
-  'UPCOMING',
-  'ARCHIVED',
-  'OUT_OF_STATUS',
-];
+  { code: 'SCHEDULED', french: 'Planifiée', english: 'Scheduled' },
+  { code: 'COMPLETED', french: 'Complétée', english: 'Completed' },
+  { code: 'CANCELLED', french: 'Annulée', english: 'Cancelled' },
+  { code: 'CONFIRMED', french: 'Confirmée', english: 'Confirmed' },
+  { code: 'UPCOMING', french: 'À venir', english: 'Upcoming' },
+  { code: 'ARCHIVED', french: 'Archivée', english: 'Archived' },
+  { code: 'OUT_OF_STATUS', french: 'Hors statut', english: 'Out of status' },
+] as const;
+
+type Language = 'french' | 'english';
 
 async function getDisplayedStatuses(page: Page): Promise<string[]> {
   const rows = page.locator('table tr');
@@ -22,92 +23,152 @@ async function getDisplayedStatuses(page: Page): Promise<string[]> {
   return statuses;
 }
 
-test('filters visits by selected statuses and preserves selection when the sidebar is toggled', async ({
+async function openVisitsPage(page: Page): Promise<void> {
+  const visits = visitStatuses.map((status, index) => ({
+    visitId: `FILTER-${status.code}`,
+    visitDate: `2026-10-${String(9 - index).padStart(2, '0')}T12:00:00.000Z`,
+    visitEndDate: `2026-10-${String(9 - index).padStart(2, '0')}T13:00:00.000Z`,
+    description: 'Filter test visit',
+    petId: `filter-pet-${index}`,
+    petName: 'Milo',
+    petBirthDate: '2020-01-01T00:00:00.000Z',
+    vetFirstName: 'Alex',
+    vetLastName: 'Martin',
+    vetEmail: 'alex@example.test',
+    vetPhoneNumber: '555-0100',
+    practitionerId: 'filter-vet',
+    status: status.code,
+    isEmergency: false,
+  }));
+
+  await page.route('**/api/gateway/users/jwt', (route) =>
+    route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        userId: 'filter-test-admin',
+        email: 'admin@example.test',
+        username: 'Filter Test Admin',
+        roles: ['ADMIN'],
+      }),
+    }),
+  );
+  await page.route('**/api/gateway/visits', (route) =>
+    route.fulfill({
+      contentType: 'text/event-stream',
+      body: visits
+        .map((visit, index) => `id: ${index + 1}\ndata: ${JSON.stringify(visit)}\n\n`)
+        .join(''),
+    }),
+  );
+  await page.addInitScript(() => {
+    if (!localStorage.getItem('lang')) localStorage.setItem('lang', 'fr-CA');
+  });
+
+  await page.goto('/vist');
+  await expect(page.getByRole('row')).toHaveCount(visitStatuses.length + 1);
+}
+
+async function expectAllStatusesChecked(page: Page, language: Language): Promise<void> {
+  const menu = page.locator('#visit-status-menu');
+  await expect(menu).toBeVisible();
+
+  for (const status of visitStatuses) {
+    await expect(menu.getByLabel(status[language], { exact: true })).toBeChecked();
+  }
+}
+
+test('opens and closes the status menu with every localized visit status selected', async ({
   page,
 }) => {
-  await page.goto('http://localhost:4200/login');
+  await openVisitsPage(page);
 
-  await page.getByLabel("Nom d'utilisateur ou courriel").fill('admin@admin.com');
-  await page.getByLabel('Mot de passe').fill('pwd');
-  await page.getByRole('button', { name: 'Se connecter' }).click();
+  const filterButton = page.getByRole('button', { name: 'Filtrer Par' });
+  const menu = page.locator('#visit-status-menu');
 
-  await expect(page).toHaveURL('http://localhost:4200/home');
-  await page.goto('http://localhost:4200/vist');
+  await expect(filterButton).toHaveAttribute('aria-expanded', 'false');
+  await expect(menu).toHaveCount(0);
+  await filterButton.click();
+  await expect(filterButton).toHaveAttribute('aria-expanded', 'true');
+  await expect(menu.locator('input[type="checkbox"]')).toHaveCount(visitStatuses.length);
+  await expectAllStatusesChecked(page, 'french');
 
-  const visitRows = page.locator('table tr');
-  await expect(visitRows.nth(1)).toBeVisible({ timeout: 10000 });
+  await filterButton.click();
+  await expect(filterButton).toHaveAttribute('aria-expanded', 'false');
+  await expect(menu).toHaveCount(0);
 
-  // The filter menu should expose every status, selected by default.
+  await filterButton.click();
+  await expectAllStatusesChecked(page, 'french');
+});
+
+test('filters visits, preserves choices when the sidebar is toggled, and translates filter controls', async ({
+  page,
+}) => {
+  await openVisitsPage(page);
+
+  await expect(page.getByRole('complementary', { name: 'Filtres de visite' })).toBeVisible();
   await page.getByRole('button', { name: 'Filtrer Par' }).click();
-  const statusMenu = page.locator('#visit-status-menu');
-  await expect(statusMenu).toBeVisible();
-  await expect(statusMenu.locator('input[type="checkbox"]')).toHaveCount(visitStatuses.length);
+  const menu = page.locator('#visit-status-menu');
+  await expect(page.getByRole('list', { name: 'Statuts de visite' })).toBeVisible();
+  await expectAllStatusesChecked(page, 'french');
 
+  const statusesToKeep = ['SCHEDULED', 'UPCOMING'];
   for (const status of visitStatuses) {
-    await expect(statusMenu.getByLabel(status, { exact: true })).toBeChecked();
-  }
-
-  // Keep one status that is present in the table, then verify it filters the visits.
-  const initialStatuses = await getDisplayedStatuses(page);
-  expect(initialStatuses.length).toBeGreaterThan(0);
-  const statusToKeep = initialStatuses[0];
-  const secondStatusToKeep = visitStatuses.find((status) => status !== statusToKeep)!;
-  const statusesToKeep = [statusToKeep, secondStatusToKeep];
-
-  for (const status of visitStatuses) {
-    if (!statusesToKeep.includes(status)) {
-      await statusMenu.getByLabel(status, { exact: true }).uncheck();
+    if (!statusesToKeep.includes(status.code)) {
+      await menu.getByLabel(status.french, { exact: true }).uncheck();
     }
   }
 
   await expect
-    .poll(async () => {
-      const displayedStatuses = await getDisplayedStatuses(page);
-      return (
-        displayedStatuses.length > 0 &&
-        displayedStatuses.every((status) => statusesToKeep.includes(status)) &&
-        displayedStatuses.includes(statusToKeep)
-      );
-    })
-    .toBe(true);
+    .poll(async () => (await getDisplayedStatuses(page)).sort())
+    .toEqual(['À venir', 'Planifiée'].sort());
 
-  await expect(statusMenu.getByLabel(secondStatusToKeep, { exact: true })).toBeChecked();
+  await menu.getByLabel('Planifiée', { exact: true }).uncheck();
+  await expect(page.getByRole('row')).toHaveCount(2);
+  await expect(page.getByRole('cell', { name: 'À venir', exact: true })).toHaveCount(1);
 
-  // Removing the second choice should leave only visits with the first status.
-  await statusMenu.getByLabel(secondStatusToKeep, { exact: true }).uncheck();
-  await expect
-    .poll(async () => {
-      const displayedStatuses = await getDisplayedStatuses(page);
-      return displayedStatuses.length > 0 && displayedStatuses.every((status) => status === statusToKeep);
-    })
-    .toBe(true);
+  await menu.getByLabel('À venir', { exact: true }).uncheck();
+  await expect(page.getByRole('row')).toHaveCount(1);
 
-  // Clearing the last selected status should leave only the table header.
-  await statusMenu.getByLabel(statusToKeep, { exact: true }).uncheck();
-  await expect(visitRows).toHaveCount(1);
+  await menu.getByLabel('Complétée', { exact: true }).check();
+  await expect(page.getByRole('row')).toHaveCount(2);
+  await expect(page.getByRole('cell', { name: 'Complétée', exact: true })).toHaveCount(1);
 
-  // Restore the status, hide and reopen the sidebar, and verify the choice remains selected.
-  await statusMenu.getByLabel(statusToKeep, { exact: true }).check();
-  await expect
-    .poll(async () => {
-      const displayedStatuses = await getDisplayedStatuses(page);
-      return displayedStatuses.length > 0 && displayedStatuses.every((status) => status === statusToKeep);
-    })
-    .toBe(true);
+  await page.getByRole('button', { name: 'Masquer les filtres' }).click();
+  const showFilters = page.getByRole('button', { name: 'Afficher les filtres' });
+  await expect(showFilters).toBeVisible();
+  await showFilters.click();
 
+  const filterButton = page.getByRole('button', { name: 'Filtrer Par' });
+  await filterButton.click();
+  await expect(
+    page.locator('#visit-status-menu').getByLabel('Complétée', { exact: true }),
+  ).toBeChecked();
+  for (const status of visitStatuses) {
+    if (status.code !== 'COMPLETED') {
+      await expect(
+        page.locator('#visit-status-menu').getByLabel(status.french, { exact: true }),
+      ).not.toBeChecked();
+    }
+  }
+  await expect.poll(() => getDisplayedStatuses(page)).toEqual(['Complétée']);
+
+  const englishCatalogRequest = page.waitForResponse((response) =>
+    response.url().endsWith('/locale/en.json'),
+  );
+  await page.getByRole('button', { name: 'EN', exact: true }).click();
+  const englishCatalogResponse = await englishCatalogRequest;
+  expect(englishCatalogResponse.ok()).toBe(true);
+
+  await expect(page.getByRole('complementary', { name: 'Visit filters' })).toBeVisible();
+  const englishFilterButton = page.getByRole('button', { name: 'Filter By' });
+  await expect(englishFilterButton).toBeVisible();
+  await englishFilterButton.click();
+  const englishMenu = page.locator('#visit-status-menu');
+  await expect(page.getByRole('list', { name: 'Visit statuses' })).toBeVisible();
+  await expectAllStatusesChecked(page, 'english');
+  await expect(englishMenu.getByLabel('Completed', { exact: true })).toBeChecked();
+
+  await englishFilterButton.click();
   await page.getByRole('button', { name: 'Hide filters' }).click();
-  await page.getByRole('button', { name: 'Afficher les filtres' }).click();
-  await page.getByRole('button', { name: 'Filtrer Par' }).click();
-
-  const reopenedStatusMenu = page.locator('#visit-status-menu');
-  await expect(reopenedStatusMenu.getByLabel(statusToKeep, { exact: true })).toBeChecked();
-  for (const status of visitStatuses) {
-    if (status !== statusToKeep) {
-      await expect(reopenedStatusMenu.getByLabel(status, { exact: true })).not.toBeChecked();
-    }
-  }
-
-  const finalStatuses = await getDisplayedStatuses(page);
-  expect(finalStatuses.length).toBeGreaterThan(0);
-  expect(finalStatuses.every((status) => status === statusToKeep)).toBe(true);
+  await expect(page.getByRole('button', { name: 'Show filters' })).toBeVisible();
 });

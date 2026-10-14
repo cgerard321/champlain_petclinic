@@ -40,4 +40,7 @@ public class Cart {
     private Double promoPercent;
     public Double getPromoPercent() { return promoPercent; }
     public void setPromoPercent(Double promoPercent) { this.promoPercent = promoPercent; }
+
+    private ShippingMethod shippingMethod;
+    private double shippingCost;
 }
