@@ -16,7 +16,6 @@ const loadedProducts = new Map<string, ProductModel>();
 // product ids we already asked the api
 const requestedIds = new Set<string>();
 
-
 const refreshCallbacks = new Set<() => void>();
 
 // using the translation from product api
@@ -65,13 +64,12 @@ export function useProductText(products: CartProduct[]): {
           refreshCallbacks.forEach(refresh => refresh());
         })
         .catch(() => {
-          
           requestedIds.delete(id);
         });
     }
   }, [isFrench, idsKey]);
 
-  // falls back to cart 
+  // falls back to cart
   const getText = (
     product: CartProduct
   ): { name: string; description: string } => {
