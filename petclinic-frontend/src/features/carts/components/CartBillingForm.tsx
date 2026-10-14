@@ -249,10 +249,12 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
               onChange={handleSelectChange}
               required
             >
-              <option value="">Select Province</option>
+              <option value="">{t('billing.selectProvince')}</option>
               {provinces.map(province => (
                 <option key={province.code} value={province.code}>
-                  {province.name}
+                  {t(`billing.provinces.${province.code}`, {
+                    defaultValue: province.name,
+                  })}
                 </option>
               ))}
             </select>

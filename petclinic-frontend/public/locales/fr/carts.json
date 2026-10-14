@@ -161,7 +161,22 @@
     "success": "Commande réussie! (simulée, aucun serveur pour le moment)",
     "cardInvalid": "Le numéro de carte de crédit doit comporter 16 chiffres.",
     "expiryInvalid": "La date d'expiration doit être au format MM/AA.",
-    "cvvInvalid": "Le CVV doit comporter 3 ou 4 chiffres."
+    "cvvInvalid": "Le CVV doit comporter 3 ou 4 chiffres.",
+    "provinces": {
+      "AB": "Alberta",
+      "BC": "Colombie-Britannique",
+      "MB": "Manitoba",
+      "NB": "Nouveau-Brunswick",
+      "NL": "Terre-Neuve-et-Labrador",
+      "NS": "Nouvelle-Écosse",
+      "ON": "Ontario",
+      "PE": "Île-du-Prince-Édouard",
+      "QC": "Québec",
+      "SK": "Saskatchewan",
+      "NT": "Territoires du Nord-Ouest",
+      "NU": "Nunavut",
+      "YT": "Yukon"
+    }
   },
   "invoice": {
     "label": "Reçu de facture",
