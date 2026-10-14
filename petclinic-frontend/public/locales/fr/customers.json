@@ -6,7 +6,16 @@
     "cancel": "Annuler",
     "uploadPhoto": "Téléverser une photo",
     "deletePhoto": "Supprimer la photo",
-    "update": "Mettre à jour le profile"
+    "update": "Mettre à jour le profile",
+    "deleteAccount": "Supprimer le compte"
+  },
+
+  "deleteAccount": {
+    "title": "Supprimer le compte",
+    "message": "Voulez-vous vraiment supprimer votre compte ? Vous serez déconnecté et votre photo de profil sera définitivement supprimée.",
+    "confirm": "Supprimer le compte",
+    "cancel": "Annuler",
+    "failed": "Échec de la suppression de votre compte. Veuillez réessayer."
   },
 
   "uploadPetPhotoModal": {
