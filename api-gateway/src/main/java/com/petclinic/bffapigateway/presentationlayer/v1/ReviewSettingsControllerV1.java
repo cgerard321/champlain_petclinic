@@ -10,7 +10,7 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/gateway/review-settings")
+@RequestMapping("/api/gateway/review-settings")
 public class ReviewSettingsControllerV1 {
 
     private final RatingsServiceClient ratingsServiceClient;

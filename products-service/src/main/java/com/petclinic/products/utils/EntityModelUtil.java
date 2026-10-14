@@ -1,5 +1,8 @@
 package com.petclinic.products.utils;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 import com.petclinic.products.datalayer.images.Image;
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductBundle;
@@ -14,9 +17,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.codec.multipart.FilePart;
 import reactor.core.publisher.Mono;
-import java.time.LocalDateTime;
-
-import java.util.UUID;
 
 public class EntityModelUtil {
 

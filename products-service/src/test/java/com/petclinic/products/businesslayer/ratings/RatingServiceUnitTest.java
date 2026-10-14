@@ -1,5 +1,7 @@
 package com.petclinic.products.businesslayer.ratings;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductRepository;
 import com.petclinic.products.datalayer.ratings.Rating;
@@ -7,9 +9,13 @@ import com.petclinic.products.datalayer.ratings.RatingRepository;
 import com.petclinic.products.datalayer.ratings.ReviewLikeRepository;
 import com.petclinic.products.datalayer.ratings.ReviewLike;
 import com.petclinic.products.presentationlayer.ratings.RatingRequestModel;
+import com.petclinic.products.datalayer.ratings.ReviewSettings;
+import com.petclinic.products.datalayer.ratings.ReviewSettingsRepository;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
 import com.petclinic.products.utils.exceptions.NotFoundException;
 import com.petclinic.products.utils.exceptions.RatingAlreadyExists;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,13 +25,14 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.util.UUID;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class RatingServiceUnitTest {
@@ -35,6 +42,8 @@ class RatingServiceUnitTest {
     private ProductRepository productRepository;
     @Mock
     private ReviewLikeRepository reviewLikeRepository;
+    @Mock
+    private ReviewSettingsRepository reviewSettingsRepository;
 
     @InjectMocks
     private RatingServiceImpl ratingService;
@@ -46,6 +55,7 @@ class RatingServiceUnitTest {
             .productId(productId)
             .customerId(UUID.randomUUID().toString())
             .rating((byte) 5)
+            .createdAt(LocalDateTime.now().minusHours(1))
             .review("Good stuff!")
             .build();
 
@@ -53,8 +63,16 @@ class RatingServiceUnitTest {
             .productId(productId)
             .customerId(UUID.randomUUID().toString())
             .rating((byte) 3)
+            .createdAt(LocalDateTime.now().minusHours(1))
             .review("It's alright..")
             .build();
+
+    @BeforeEach
+    void setUpReviewSettings() {
+        lenient()
+                .when(reviewSettingsRepository.findById(1L))
+                .thenReturn(Mono.just(new ReviewSettings(1L, 48)));
+    }
 
     @Test
     void whenGetAllRatingsForProduct_thenReturnRatings() {
@@ -544,5 +562,79 @@ class RatingServiceUnitTest {
         StepVerifier.create(ratingService.deleteRatingForProduct(productId, rating1.getCustomerId()))
                 .expectError(NotFoundException.class)
                 .verify();
+    }
+
+    @Test
+    void whenUpdateRatingWithinEditPeriod_thenUpdateRating() {
+        when(reviewSettingsRepository.findById(1L))
+                .thenReturn(Mono.just(new ReviewSettings(1L, 48)));
+
+        Rating existingRating = Rating.builder()
+                .id(rating1.getId())
+                .productId(rating1.getProductId())
+                .customerId(rating1.getCustomerId())
+                .rating(rating1.getRating())
+                .review(rating1.getReview())
+                .createdAt(LocalDateTime.now().minusHours(2))
+                .build();
+
+        when(ratingRepository.findRatingByCustomerIdAndProductId(
+                existingRating.getCustomerId(),
+                existingRating.getProductId()))
+                .thenReturn(Mono.just(existingRating));
+
+        when(ratingRepository.save(any(Rating.class)))
+                .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+
+        RatingRequestModel request = RatingRequestModel.builder()
+                .rating((byte) 4)
+                .review("Updated review")
+                .build();
+
+        StepVerifier.create(
+                        ratingService.updateRatingForProduct(
+                                existingRating.getProductId(),
+                                existingRating.getCustomerId(),
+                                Mono.just(request)))
+                .expectNextMatches(response ->
+                        response.getRating() == 4 &&
+                                response.getReview().equals("Updated review"))
+                .verifyComplete();
+    }
+
+    @Test
+    void whenUpdateRatingAfterEditPeriod_thenRejectUpdate() {
+        when(reviewSettingsRepository.findById(1L))
+                .thenReturn(Mono.just(new ReviewSettings(1L, 48)));
+
+        Rating existingRating = Rating.builder()
+                .id(rating1.getId())
+                .productId(rating1.getProductId())
+                .customerId(rating1.getCustomerId())
+                .rating(rating1.getRating())
+                .review(rating1.getReview())
+                .createdAt(LocalDateTime.now().minusHours(49))
+                .build();
+
+        when(ratingRepository.findRatingByCustomerIdAndProductId(
+                existingRating.getCustomerId(),
+                existingRating.getProductId()))
+                .thenReturn(Mono.just(existingRating));
+
+        RatingRequestModel request = RatingRequestModel.builder()
+                .rating((byte) 4)
+                .review("Updated review")
+                .build();
+
+        StepVerifier.create(
+                        ratingService.updateRatingForProduct(
+                                existingRating.getProductId(),
+                                existingRating.getCustomerId(),
+                                Mono.just(request)))
+                .expectErrorMatches(error ->
+                        error.getMessage().equals("This review is no longer editable"))
+                .verify();
+
+        verify(ratingRepository, never()).save(any(Rating.class));
     }
 }

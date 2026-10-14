@@ -2,6 +2,7 @@ import { CurrencyPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -28,10 +29,8 @@ import { ProductThumbnail } from '@features/prod/components/product-thumbnail/pr
 import { ProductUpdateDialog } from '@features/prod/components/product-update-dialog/product-update-dialog';
 import { Product } from '@features/prod/models/product.model';
 import { ProductService } from '@features/prod/services/product.service';
-import { Roles } from '@shared/models/roles';
-import { FormsModule } from '@angular/forms';
 import { ReviewSettingsService } from '@features/prod/services/review-settings.service';
-import {ReviewSettings} from '@features/prod/models/review-settings.model';
+import { Roles } from '@shared/models/roles';
 
 @Component({
   imports: [
@@ -59,7 +58,7 @@ export class Prod implements OnInit {
   private readonly searchTerm = signal('');
   private readonly reviewSettingsService = inject(ReviewSettingsService);
 
-  protected readonly isAdmin = computed(() => this.auth.roles().includes(Roles.admin),);
+  protected readonly isAdmin = computed(() => this.auth.roles().includes(Roles.admin));
 
   protected readonly products = signal<Product[]>([]);
   protected readonly isLoading = signal(false);
@@ -120,7 +119,7 @@ export class Prod implements OnInit {
   protected saveReviewSettings(): void {
     const hours = this.reviewEditPeriodHours();
 
-    if (!Number.isInteger(hours) || hours < 1) {
+    if (!Number.isInteger(hours) || hours < 0) {
       this.settingsError.set('The edit period must be at least 1 hour');
       return;
     }
@@ -128,7 +127,7 @@ export class Prod implements OnInit {
     this.settingsMessage.set(null);
     this.settingsError.set(null);
 
-    this.reviewSettingsService.updateSettings({ editPeriodHours: hours}).subscribe({
+    this.reviewSettingsService.updateSettings({ editPeriodHours: hours }).subscribe({
       next: (settings) => {
         this.reviewEditPeriodHours.set(settings.editPeriodHours);
         this.settingsMessage.set('Review edit period saved.');

@@ -119,6 +119,12 @@ public class RatingServiceImpl implements RatingService {
                                            reviewSettingsRepository.findById(1L)
                                                    .switchIfEmpty(Mono.error(new InvalidInputException("Review settings are unavailable")))
                                                    .flatMap(settings -> {
+                                                       if (existingRating.getCreatedAt() == null) {
+                                                           return Mono.error(new InvalidInputException("Review creation time is unavailable"));
+                                                       }
+                                                       if (settings.getEditPeriodHours() == null || settings.getEditPeriodHours() < 1) {
+                                                           return Mono.error(new InvalidInputException("Edit period must be at least 1 hour"));
+                                                       }
                                                        LocalDateTime deadline = existingRating.getCreatedAt()
                                                                .plusHours(settings.getEditPeriodHours());
                                                        if (LocalDateTime.now().isAfter(deadline)){

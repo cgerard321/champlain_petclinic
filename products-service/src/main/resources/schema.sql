@@ -39,6 +39,13 @@ CREATE TABLE IF NOT EXISTS product_ratings
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+ALTER TABLE product_ratings
+ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+
+UPDATE product_ratings
+SET created_at = CURRENT_TIMESTAMP
+WHERE created_at IS NULL;
+
 CREATE TABLE IF NOT EXISTS review_settings
 (
     id                BIGINT PRIMARY KEY,

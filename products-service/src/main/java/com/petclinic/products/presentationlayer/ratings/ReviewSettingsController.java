@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/review-settings")
 public class ReviewSettingsController {
 
-    private ReviewSettingsRepository reviewSettingsRepository;
+    private final ReviewSettingsRepository reviewSettingsRepository;
 
     @GetMapping
     public Mono<ReviewSettings> getSettings(){
