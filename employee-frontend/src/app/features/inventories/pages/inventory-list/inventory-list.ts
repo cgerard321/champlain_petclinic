@@ -1,11 +1,30 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, DestroyRef, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  LOCALE_ID,
+  OnDestroy,
+  OnInit,
+  inject,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterLink } from '@angular/router';
-import { Subscription, finalize } from 'rxjs';
+import {
+  EMPTY,
+  from,
+  Observable,
+  Subscription,
+  expand,
+  finalize,
+  reduce,
+  switchMap,
+  toArray,
+} from 'rxjs';
 
 import { isApiError, ApiError } from '@core/models/api-error';
 import { AuthState } from '@core/services/auth-state';
@@ -17,6 +36,42 @@ import {
 import { InventoryService } from '@features/inventories/services/inventory-service';
 import { Roles } from '@shared/models/roles';
 
+// These values are the starter records created by the inventory service. Keep the API values
+// unchanged so existing filters, links, and favorite updates continue to use the stored data.
+const starterInventoryNames: Record<string, string> = {
+  'Medical equipment': $localize`:@@inventory.data.names.medicalEquipment:Équipement médical`,
+  'First-Aid': $localize`:@@inventory.data.names.firstAid:Premiers soins`,
+  Vaccines: $localize`:@@inventory.data.names.vaccines:Vaccins`,
+  Medications: $localize`:@@inventory.data.names.medications:Médicaments`,
+  'Pet Carriers': $localize`:@@inventory.data.names.petCarriers:Cages de transport pour animaux`,
+  'Diagnostic Kits': $localize`:@@inventory.data.names.diagnosticKits:Trousses de diagnostic`,
+  'Surgical Instruments': $localize`:@@inventory.data.names.surgicalInstruments:Instruments chirurgicaux`,
+  'Anesthesia Supplies': $localize`:@@inventory.data.names.anesthesiaSupplies:Fournitures d'anesthésie`,
+  'Wound Care Supplies': $localize`:@@inventory.data.names.woundCareSupplies:Fournitures de soins des plaies`,
+  'Infectious Disease Test Kits': $localize`:@@inventory.data.names.infectiousDiseaseTestKits:Trousses de dépistage des maladies infectieuses`,
+};
+
+const starterInventoryTypes: Record<string, string> = {
+  Equipment: $localize`:@@inventory.data.types.equipment:Équipement`,
+  Bandages: $localize`:@@inventory.data.types.bandages:Bandages`,
+  Injections: $localize`:@@inventory.data.types.injections:Injections`,
+  Medications: $localize`:@@inventory.data.types.medications:Médicaments`,
+  'Diagnostic Kits': $localize`:@@inventory.data.types.diagnosticKits:Trousses de diagnostic`,
+};
+
+const starterInventoryDescriptions: Record<string, string> = {
+  'Medical equipment for surgery': $localize`:@@inventory.data.descriptions.medicalEquipment:Équipement médical pour la chirurgie`,
+  'First-aid supplies for pet emergencies': $localize`:@@inventory.data.descriptions.firstAid:Fournitures de premiers soins pour les urgences chez les animaux`,
+  'Supplies for disease prevention': $localize`:@@inventory.data.descriptions.vaccines:Fournitures pour la prévention des maladies`,
+  'Antibiotics for pet infections': $localize`:@@inventory.data.descriptions.medications:Antibiotiques pour traiter les infections chez les animaux`,
+  'Carriers for transporting pets': $localize`:@@inventory.data.descriptions.petCarriers:Cages pour transporter les animaux`,
+  'Kits for diagnosing various pet illnesses and conditions': $localize`:@@inventory.data.descriptions.diagnosticKits:Trousses pour diagnostiquer diverses maladies et affections chez les animaux`,
+  'Tools for performing surgical procedures on pets': $localize`:@@inventory.data.descriptions.surgicalInstruments:Outils pour effectuer des interventions chirurgicales sur les animaux`,
+  'Supplies for administering anesthesia during surgeries': $localize`:@@inventory.data.descriptions.anesthesiaSupplies:Fournitures pour administrer l'anesthésie pendant les interventions chirurgicales`,
+  'Supplies for treating and dressing wounds': $localize`:@@inventory.data.descriptions.woundCareSupplies:Fournitures pour traiter et panser les plaies`,
+  'Kits for testing infectious diseases in pets': $localize`:@@inventory.data.descriptions.infectiousDiseaseTestKits:Trousses pour dépister les maladies infectieuses chez les animaux`,
+};
+
 @Component({
   imports: [RouterLink, MatCardModule, MatIconModule, MatProgressSpinnerModule],
   selector: 'app-inventory-list',
@@ -27,6 +82,7 @@ export class InventoryList implements OnInit, OnDestroy {
   private readonly inventoryService = inject(InventoryService);
   private readonly auth = inject(AuthState);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly locale = inject(LOCALE_ID);
 
   private inventorySubscription?: Subscription;
   private inventoryTypesSubscription?: Subscription;
@@ -45,6 +101,10 @@ export class InventoryList implements OnInit, OnDestroy {
   protected readonly noResultsMessage = signal<string | null>(null);
   protected readonly savingFavorites = signal<Record<string, boolean>>({});
   protected readonly favoriteError = signal<string | null>(null);
+  protected readonly loadingTypesLabel = $localize`:@@inventory.filters.loadingTypes:Chargement des types…`;
+  protected readonly allTypesLabel = $localize`:@@inventory.filters.allTypes:Tous les types`;
+  protected readonly noFavoritesLabel = $localize`:@@inventory.empty.noFavorites:Aucun inventaire favori trouvé.`;
+  protected readonly emptyLabel = $localize`:@@inventory.empty.message:Aucun inventaire à afficher pour le moment.`;
 
   protected readonly filters = signal<InventoryFilters>({
     inventoryName: '',
@@ -78,6 +138,92 @@ export class InventoryList implements OnInit, OnDestroy {
 
   protected quantityFor(inventoryId: string): number | null {
     return this.quantities()[inventoryId] ?? null;
+  }
+
+  protected localizedInventoryName(name: string): string {
+    return starterInventoryNames[name] ?? name;
+  }
+
+  protected localizedInventoryType(type: string): string {
+    return starterInventoryTypes[type] ?? type;
+  }
+
+  protected localizedInventoryDescription(description: string): string {
+    return starterInventoryDescriptions[description] ?? description;
+  }
+
+  private normalizeSearchText(value: string): string {
+    return value
+      .trim()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLocaleLowerCase(this.locale);
+  }
+
+  private matchesLocalizedFilters(inventory: Inventory, filters: InventoryFilters): boolean {
+    const nameQuery = this.normalizeSearchText(filters.inventoryName);
+    const descriptionQuery = this.normalizeSearchText(filters.inventoryDescription);
+    const name = this.normalizeSearchText(this.localizedInventoryName(inventory.inventoryName));
+    const description = this.normalizeSearchText(
+      this.localizedInventoryDescription(inventory.inventoryDescription),
+    );
+
+    return (
+      (!nameQuery ||
+        name.startsWith(nameQuery) ||
+        this.normalizeSearchText(inventory.inventoryName).startsWith(nameQuery)) &&
+      (!descriptionQuery ||
+        description.startsWith(descriptionQuery) ||
+        this.normalizeSearchText(inventory.inventoryDescription).startsWith(descriptionQuery)) &&
+      (!filters.inventoryType || inventory.inventoryType === filters.inventoryType) &&
+      (!filters.importantOnly || !!inventory.important)
+    );
+  }
+
+  private inventoryResults(page: number): Observable<Inventory> {
+    const filters = this.filters();
+    if (
+      !filters.inventoryName.trim() &&
+      !filters.inventoryDescription.trim() &&
+      !filters.inventoryType &&
+      !filters.importantOnly
+    ) {
+      return this.inventoryService.getInventories(filters, page, this.pageSize);
+    }
+
+    // Read the stored records and apply every active filter to the display values locally.
+    // This keeps translated text searches, the type dropdown, and favorites consistent.
+    const batchSize = 50;
+    return this.inventoryService.getInventories({}, 0, batchSize).pipe(
+      toArray(),
+      expand((batch, index) =>
+        batch.length === batchSize
+          ? this.inventoryService.getInventories({}, index + 1, batchSize).pipe(toArray())
+          : EMPTY,
+      ),
+      reduce((all, batch) => all.concat(batch), [] as Inventory[]),
+      switchMap((all) =>
+        from(
+          all
+            .filter((inventory) => this.matchesLocalizedFilters(inventory, filters))
+            .slice(page * this.pageSize, (page + 1) * this.pageSize),
+        ),
+      ),
+    );
+  }
+
+  protected stockQuantityLabel(inventoryId: string): string {
+    const count = this.quantityFor(inventoryId) ?? 0;
+    return count === 1
+      ? $localize`:@@inventory.quantity.one:${count}:count: article en stock`
+      : $localize`:@@inventory.quantity.other:${count}:count: articles en stock`;
+  }
+
+  protected favoriteAriaLabel(inventory: Inventory): string {
+    const name = this.localizedInventoryName(inventory.inventoryName);
+    return inventory.important
+      ? $localize`:@@inventory.favorite.remove:Retirer ${name}:name: des favoris`
+      : $localize`:@@inventory.favorite.add:Ajouter ${name}:name: aux favoris`;
   }
 
   protected setTextFilter(field: 'inventoryName' | 'inventoryDescription', event: Event): void {
@@ -182,7 +328,10 @@ export class InventoryList implements OnInit, OnDestroy {
           );
         },
         error: () => {
-          this.favoriteError.set(`Could not update the favorite for ${inventory.inventoryName}.`);
+          const name = this.localizedInventoryName(inventory.inventoryName);
+          this.favoriteError.set(
+            $localize`:@@inventory.errors.favorite:Impossible de modifier le favori pour ${name}:name:.`,
+          );
         },
       });
   }
@@ -200,12 +349,16 @@ export class InventoryList implements OnInit, OnDestroy {
       },
       error: () => {
         this.inventoryTypesLoading.set(false);
-        this.inventoryTypesError.set('Could not load inventory types. Try refreshing the page.');
+        this.inventoryTypesError.set(
+          $localize`:@@inventory.errors.types:Impossible de charger les types d'inventaire. Actualisez la page.`,
+        );
       },
       complete: () => {
         this.inventoryTypesLoading.set(false);
         if (this.inventoryTypes().length === 0) {
-          this.inventoryTypesError.set('No inventory types are available.');
+          this.inventoryTypesError.set(
+            $localize`:@@inventory.errors.noTypes:Aucun type d'inventaire disponible.`,
+          );
         }
       },
     });
@@ -242,68 +395,67 @@ export class InventoryList implements OnInit, OnDestroy {
     this.noResultsMessage.set(null);
     this.favoriteError.set(null);
 
-    this.inventorySubscription = this.inventoryService
-      .getInventories(this.filters(), requestedPage, this.pageSize)
-      .subscribe({
-        next: (item) => {
-          this.isLoading.set(false);
-          this.errorMessage.set(null);
-          this.noResultsMessage.set(null);
+    this.inventorySubscription = this.inventoryResults(requestedPage).subscribe({
+      next: (item) => {
+        this.isLoading.set(false);
+        this.errorMessage.set(null);
+        this.noResultsMessage.set(null);
 
-          this.inventories.update((current) => {
-            const index = current.findIndex(
-              (inventory) => inventory.inventoryId === item.inventoryId,
-            );
-
-            if (index === -1) return [...current, item];
-
-            const updated = [...current];
-            updated[index] = item;
-            return updated;
-          });
-
-          this.loadQuantities(item.inventoryId);
-        },
-        error: (err: unknown) => {
-          this.isLoading.set(false);
-
-          if (err instanceof HttpErrorResponse && err.status === 404 && requestedPage > 0) {
-            const previousPage = requestedPage - 1;
-            this.currentPage.set(previousPage);
-            this.loadInventories(previousPage);
-            return;
-          }
-
-          if (err instanceof HttpErrorResponse && err.status === 404 && this.hasActiveFilters()) {
-            this.noResultsMessage.set(
-              'No inventory matched your search. Try a different name or description, or clear the filters.',
-            );
-            this.errorMessage.set(null);
-            return;
-          }
-
-          this.noResultsMessage.set(null);
-          this.errorMessage.set(
-            isApiError(err) ? err : { code: 'UNKNOWN', message: 'Failed to load inventories.' },
+        this.inventories.update((current) => {
+          const index = current.findIndex(
+            (inventory) => inventory.inventoryId === item.inventoryId,
           );
-        },
-        complete: () => {
-          this.isLoading.set(false);
 
-          if (this.inventories().length === 0 && requestedPage > 0) {
-            const previousPage = requestedPage - 1;
-            this.currentPage.set(previousPage);
-            this.loadInventories(previousPage);
-            return;
-          }
+          if (index === -1) return [...current, item];
 
-          if (this.inventories().length === 0 && this.hasActiveFilters()) {
-            this.noResultsMessage.set(
-              'No inventory matched your search. Try a different name or description, or clear the filters.',
-            );
-          }
-        },
-      });
+          const updated = [...current];
+          updated[index] = item;
+          return updated;
+        });
+
+        this.loadQuantities(item.inventoryId);
+      },
+      error: (err: unknown) => {
+        this.isLoading.set(false);
+
+        if (err instanceof HttpErrorResponse && err.status === 404 && requestedPage > 0) {
+          const previousPage = requestedPage - 1;
+          this.currentPage.set(previousPage);
+          this.loadInventories(previousPage);
+          return;
+        }
+
+        if (err instanceof HttpErrorResponse && err.status === 404 && this.hasActiveFilters()) {
+          this.noResultsMessage.set(
+            $localize`:@@inventory.noResults.message:Aucun inventaire ne correspond à votre recherche. Essayez un autre nom ou une autre description, ou effacez les filtres.`,
+          );
+          this.errorMessage.set(null);
+          return;
+        }
+
+        this.noResultsMessage.set(null);
+        this.errorMessage.set({
+          code: isApiError(err) ? err.code : 'UNKNOWN',
+          message: $localize`:@@inventory.errors.load:Impossible de charger les inventaires.`,
+        });
+      },
+      complete: () => {
+        this.isLoading.set(false);
+
+        if (this.inventories().length === 0 && requestedPage > 0) {
+          const previousPage = requestedPage - 1;
+          this.currentPage.set(previousPage);
+          this.loadInventories(previousPage);
+          return;
+        }
+
+        if (this.inventories().length === 0 && this.hasActiveFilters()) {
+          this.noResultsMessage.set(
+            $localize`:@@inventory.noResults.message:Aucun inventaire ne correspond à votre recherche. Essayez un autre nom ou une autre description, ou effacez les filtres.`,
+          );
+        }
+      },
+    });
   }
 
   private loadQuantities(inventoryId: string): void {

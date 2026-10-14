@@ -1,11 +1,15 @@
 <div class="inventory-page">
-  <h1>Inventory</h1>
+  <h1 i18n="@@inventory.title">Inventaire</h1>
 
-  <section class="inventory-filters" aria-label="Filter inventories">
+  <section
+    class="inventory-filters"
+    aria-label="Filtrer les inventaires"
+    i18n-aria-label="@@inventory.filters.aria"
+  >
     <div class="filter-heading">
       <div>
-        <h2>Find an inventory</h2>
-        <p>Filter by name, type, or description.</p>
+        <h2 i18n="@@inventory.filters.heading">Trouver un inventaire</h2>
+        <p i18n="@@inventory.filters.help">Filtrer par nom, type ou description.</p>
       </div>
 
       <button
@@ -14,34 +18,35 @@
         (click)="clearFilters()"
         [disabled]="!hasActiveFilters()"
       >
-        Clear filters
+        <ng-container i18n="@@inventory.filters.clear">Effacer les filtres</ng-container>
       </button>
     </div>
 
     <div class="inventory-filter-grid">
       <label class="filter-field">
-        <span>Inventory name</span>
+        <span i18n="@@inventory.fields.name">Nom de l'inventaire</span>
         <input
           type="search"
-          placeholder="Search by name"
+          placeholder="Rechercher par nom"
+          i18n-placeholder="@@inventory.filters.namePlaceholder"
           [value]="filters().inventoryName"
           (input)="setTextFilter('inventoryName', $event)"
         />
       </label>
 
       <label class="filter-field">
-        <span>Inventory type</span>
+        <span i18n="@@inventory.fields.type">Type d'inventaire</span>
         <select
           [value]="filters().inventoryType"
           [disabled]="inventoryTypesLoading() || !!inventoryTypesError()"
           (change)="setInventoryTypeFilter($event)"
         >
           <option value="">
-            {{ inventoryTypesLoading() ? 'Loading types…' : 'All types' }}
+            {{ inventoryTypesLoading() ? loadingTypesLabel : allTypesLabel }}
           </option>
 
           @for (type of inventoryTypes(); track type.typeId) {
-            <option [value]="type.type">{{ type.type }}</option>
+            <option [value]="type.type">{{ localizedInventoryType(type.type) }}</option>
           }
         </select>
 
@@ -51,10 +56,11 @@
       </label>
 
       <label class="filter-field">
-        <span>Description</span>
+        <span i18n="@@inventory.fields.description">Description</span>
         <input
           type="search"
-          placeholder="Search by description"
+          placeholder="Rechercher par description"
+          i18n-placeholder="@@inventory.filters.descriptionPlaceholder"
           [value]="filters().inventoryDescription"
           (input)="setTextFilter('inventoryDescription', $event)"
         />
@@ -69,7 +75,7 @@
           [disabled]="isSavingAnyFavorite()"
           (change)="setImportantOnly($event)"
         />
-        <span>Favorites only</span>
+        <span i18n="@@inventory.filters.favoritesOnly">Favoris seulement</span>
       </label>
     </div>
   </section>
@@ -81,7 +87,7 @@
   @if (isLoading()) {
     <div class="state-container">
       <mat-spinner diameter="40" />
-      <p>Loading inventories…</p>
+      <p i18n="@@inventory.loading">Chargement des inventaires…</p>
     </div>
   } @else if (errorMessage(); as err) {
     <div class="state-container">
@@ -93,22 +99,18 @@
       <div class="no-results-icon">
         <mat-icon>search_off</mat-icon>
       </div>
-      <h2>No matching inventory</h2>
+      <h2 i18n="@@inventory.noResults.heading">Aucun inventaire correspondant</h2>
       <p>{{ message }}</p>
       <button class="clear-filters-button" type="button" (click)="clearFilters()">
-        Clear filters
+        <ng-container i18n="@@inventory.filters.clear">Effacer les filtres</ng-container>
       </button>
     </div>
   } @else if (inventories().length === 0) {
     <div class="state-container">
       <mat-icon>inventory_2</mat-icon>
-      <h2>No inventories available</h2>
+      <h2 i18n="@@inventory.empty.heading">Aucun inventaire disponible</h2>
       <p>
-        {{
-          filters().importantOnly
-            ? 'No favorite inventories found.'
-            : 'There are no inventories to display right now.'
-        }}
+        {{ filters().importantOnly ? noFavoritesLabel : emptyLabel }}
       </p>
     </div>
   } @else {
@@ -121,18 +123,24 @@
           >
             <mat-card appearance="outlined" class="inventory-card">
               <mat-card-header>
-                <mat-card-title>{{ inventory.inventoryName }}</mat-card-title>
-                <mat-card-subtitle>{{ inventory.inventoryType }}</mat-card-subtitle>
+                <mat-card-title>{{
+                  localizedInventoryName(inventory.inventoryName)
+                }}</mat-card-title>
+                <mat-card-subtitle>{{
+                  localizedInventoryType(inventory.inventoryType)
+                }}</mat-card-subtitle>
               </mat-card-header>
 
               <mat-card-content>
-                <p>{{ inventory.inventoryDescription }}</p>
+                <p>{{ localizedInventoryDescription(inventory.inventoryDescription) }}</p>
 
                 <p class="quantity">
                   @if (quantityFor(inventory.inventoryId) !== null) {
-                    {{ quantityFor(inventory.inventoryId) }} items in stock
+                    {{ stockQuantityLabel(inventory.inventoryId) }}
                   } @else {
-                    Quantity unavailable
+                    <ng-container i18n="@@inventory.quantity.unavailable"
+                      >Quantité indisponible</ng-container
+                    >
                   }
                 </p>
               </mat-card-content>
@@ -147,10 +155,7 @@
               !canManageFavorites() || isLoading() || isSavingFavorite(inventory.inventoryId)
             "
             [attr.aria-pressed]="!!inventory.important"
-            [attr.aria-label]="
-              (inventory.important ? 'Remove favorite: ' : 'Add favorite: ') +
-              inventory.inventoryName
-            "
+            [attr.aria-label]="favoriteAriaLabel(inventory)"
             (click)="toggleFavorite(inventory)"
           >
             <mat-icon aria-hidden="true">
@@ -161,11 +166,16 @@
       }
     </div>
 
-    <nav class="inventory-pagination" aria-label="Inventory pages">
+    <nav
+      class="inventory-pagination"
+      aria-label="Pages de l'inventaire"
+      i18n-aria-label="@@inventory.pagination.aria"
+    >
       <button
         class="pagination-button"
         type="button"
-        aria-label="Previous page"
+        aria-label="Page précédente"
+        i18n-aria-label="@@inventory.pagination.previous"
         [disabled]="currentPage() === 0 || isLoading()"
         (click)="goToPreviousPage()"
       >
@@ -179,7 +189,8 @@
       <button
         class="pagination-button"
         type="button"
-        aria-label="Next page"
+        aria-label="Page suivante"
+        i18n-aria-label="@@inventory.pagination.next"
         [disabled]="!canGoToNextPage() || isLoading()"
         (click)="goToNextPage()"
       >
