@@ -1,5 +1,6 @@
 // src/features/carts/components/CartItem.tsx
 import { useTranslation } from 'react-i18next';
+import { useProductText } from '../utils/useProductText';
 import './cart-shared.css';
 import './CartItem.css';
 import { ProductModel } from '../models/ProductModel';
@@ -39,6 +40,7 @@ const CartItem = ({
   removeFromWishlist,
 }: CartItemProps): JSX.Element => {
   const { t } = useTranslation('carts');
+  const { localizedName, localizedDescription } = useProductText([item]);
   const remainingStock = item.productQuantity - (item.quantity ?? 0);
 
   // ---- rôles / read-only staff+admin ----
@@ -70,7 +72,7 @@ const CartItem = ({
     if (item.productQuantity > 0) {
       addToCart(item);
     } else {
-      const message = t('item.outOfStockNotice', { name: item.productName });
+      const message = t('item.outOfStockNotice', { name: localizedName(item) });
       if (showNotification) showNotification(message);
       else alert(message);
     }
@@ -84,7 +86,7 @@ const CartItem = ({
 
       <div className="cart-item-content">
         <div className="cart-item-header">
-          <h2 className="info-title">{item.productName}</h2>
+          <h2 className="info-title">{localizedName(item)}</h2>
           {remainingStock <= 5 && remainingStock > 0 && (
             <span className="stock-message">
               {t('item.lowStock', { count: remainingStock })}
@@ -97,7 +99,7 @@ const CartItem = ({
           )}
         </div>
 
-        <p className="info-description">{item.productDescription}</p>
+        <p className="info-description">{localizedDescription(item)}</p>
 
         {/* Ligne panier normale */}
         {!isInWishlist && (
@@ -108,7 +110,7 @@ const CartItem = ({
                   className="sr-only"
                   htmlFor={`quantity-${item.productId}`}
                 >
-                  {t('item.quantityOf', { name: item.productName })}
+                  {t('item.quantityOf', { name: localizedName(item) })}
                 </label>
                 <input
                   id={`quantity-${item.productId}`}
@@ -118,7 +120,9 @@ const CartItem = ({
                   value={item.quantity || 1}
                   onChange={e => changeItemQuantity(e, index)}
                   onBlur={e => changeItemQuantity(e, index)}
-                  aria-label={t('item.quantityOf', { name: item.productName })}
+                  aria-label={t('item.quantityOf', {
+                    name: localizedName(item),
+                  })}
                   disabled={isStaff}
                 />
               </div>
@@ -156,7 +160,7 @@ const CartItem = ({
                 className="cart-button cart-button--accent cart-button--pill cart-button--block cart-button--strike-disabled"
                 onClick={handleAddToCart}
                 aria-label={t('item.addToCartLabel', {
-                  name: item.productName,
+                  name: localizedName(item),
                 })}
                 disabled={isStaff || item.productQuantity === 0}
                 aria-disabled={isStaff || item.productQuantity === 0}
@@ -171,7 +175,7 @@ const CartItem = ({
                 className="cart-button cart-button--danger cart-button--pill cart-button--block cart-button--strike-disabled"
                 onClick={() => removeFromWishlist && removeFromWishlist(item)}
                 aria-label={t('item.removeFromWishlistLabel', {
-                  name: item.productName,
+                  name: localizedName(item),
                 })}
                 disabled={isStaff}
               >

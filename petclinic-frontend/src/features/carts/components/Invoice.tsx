@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useProductText } from '../utils/useProductText';
 import './Invoice.css';
 import {
   computeTaxes,
@@ -55,6 +56,7 @@ function Invoice({
   onClose,
 }: Props): JSX.Element | null {
   const { t } = useTranslation('carts');
+  const { localizedName } = useProductText(invoices?.[index]?.items ?? []);
   interface WindowWithHtml2Pdf extends Window {
     html2pdf?: unknown;
   }
@@ -317,7 +319,7 @@ function Invoice({
               key={`${item.productId ?? 'item'}-${idx}`}
               className="invoice-card"
             >
-              <h4>{item.productName}</h4>
+              <h4>{localizedName(item)}</h4>
               <p>
                 {t('invoice.price')} ${item.productSalePrice.toFixed(2)}
               </p>

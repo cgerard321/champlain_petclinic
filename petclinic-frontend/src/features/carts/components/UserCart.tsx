@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useProductText } from '../utils/useProductText';
 import { useToast } from '@/shared/components/toast/ToastProvider';
 import CartBillingForm, { BillingInfo } from './CartBillingForm';
 import InvoiceComponent, {
@@ -298,13 +299,13 @@ const UserCart: React.FC = () => {
 
       syncCartState(
         data,
-        t('toasts.purchaseAdded', { name: item.productName, quantity })
+        t('toasts.purchaseAdded', { name: localizedName(item), quantity })
       );
     } catch (err: unknown) {
       showToast(
         apiErrorMessage(
           err,
-          t('errors.addProductFailed', { name: item.productName })
+          t('errors.addProductFailed', { name: localizedName(item) })
         ),
         'error'
       );
@@ -359,6 +360,14 @@ const UserCart: React.FC = () => {
     [productId: string]: number;
   }>({});
 
+  const { localizedName } = useProductText([
+    ...cartItems,
+    ...wishlistItems,
+    ...recentPurchases,
+    ...recommendationPurchases,
+    ...orders.flatMap(order => order.products),
+  ]);
+
   // Handle quantity change for recommendation purchases
   const handleRecommendationPurchaseQuantityChange = (
     productId: string,
@@ -397,13 +406,13 @@ const UserCart: React.FC = () => {
       );
       syncCartState(
         data,
-        t('toasts.purchaseAdded', { name: item.productName, quantity })
+        t('toasts.purchaseAdded', { name: localizedName(item), quantity })
       );
     } catch (err: unknown) {
       showToast(
         apiErrorMessage(
           err,
-          t('errors.addProductFailed', { name: item.productName })
+          t('errors.addProductFailed', { name: localizedName(item) })
         ),
         'error'
       );
@@ -767,7 +776,9 @@ const UserCart: React.FC = () => {
         { useV2: false }
       );
 
-      const fallback = t('toasts.addedToWishlist', { name: item.productName });
+      const fallback = t('toasts.addedToWishlist', {
+        name: localizedName(item),
+      });
       syncCartState(data, fallback, { preferFallback: true });
     } catch (error: unknown) {
       console.error('Error adding to wishlist:', error);
@@ -785,7 +796,7 @@ const UserCart: React.FC = () => {
     if (!existingCartId) return;
 
     if (item.productQuantity <= 0) {
-      showToast(t('toasts.outOfStock', { name: item.productName }), 'info');
+      showToast(t('toasts.outOfStock', { name: localizedName(item) }), 'info');
       return;
     }
     try {
@@ -803,7 +814,7 @@ const UserCart: React.FC = () => {
         { useV2: false }
       );
 
-      const fallback = t('toasts.addedToCart', { name: item.productName });
+      const fallback = t('toasts.addedToCart', { name: localizedName(item) });
       syncCartState(data, fallback, { preferFallback: true });
     } catch (error: unknown) {
       console.error('Error adding to cart:', error);
@@ -819,7 +830,9 @@ const UserCart: React.FC = () => {
 
     const ok = await confirm({
       title: t('confirm.removeWishlistTitle'),
-      message: t('confirm.removeWishlistMessage', { name: item.productName }),
+      message: t('confirm.removeWishlistMessage', {
+        name: localizedName(item),
+      }),
       confirmText: t('buttons.remove'),
       cancelText: t('buttons.cancel'),
       variant: 'danger',
@@ -1385,7 +1398,7 @@ const UserCart: React.FC = () => {
                         </div>
 
                         <div className="order-product-details">
-                          <h4>{item.productName}</h4>
+                          <h4>{localizedName(item)}</h4>
 
                           <p>
                             {t('orders.quantity')} {item.quantityInCart}
@@ -1459,7 +1472,9 @@ const UserCart: React.FC = () => {
                       />
                     </div>
                   </div>
-                  <div className="recent-purchase-name">{item.productName}</div>
+                  <div className="recent-purchase-name">
+                    {localizedName(item)}
+                  </div>
                   <div className="recent-purchase-price">
                     ${item.productSalePrice.toFixed(2)}
                   </div>
@@ -1559,7 +1574,7 @@ const UserCart: React.FC = () => {
                       </div>
                     </div>
                     <div className="recent-purchase-name">
-                      {item.productName}
+                      {localizedName(item)}
                     </div>
                     <div className="recent-purchase-price">
                       {formatPrice(item.productSalePrice)}
@@ -1633,7 +1648,7 @@ const UserCart: React.FC = () => {
                     </div>
                   </div>
                   <div className="recommendation-product-name recent-purchase-name">
-                    {item.productName}
+                    {localizedName(item)}
                   </div>
                   <div className="recommendation-product-price recent-purchase-price">
                     {formatPrice(item.productSalePrice)}
