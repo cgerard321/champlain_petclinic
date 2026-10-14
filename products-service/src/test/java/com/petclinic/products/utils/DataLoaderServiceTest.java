@@ -24,6 +24,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -60,6 +61,13 @@ class DataLoaderServiceTest {
         dataLoaderService.imageRepository = imageRepository;
         dataLoaderService.ratingRepository = ratingRepository;
         dataLoaderService.productTypeRepository = productTypeRepository;
+
+        lenient().when(productRepository.backfillFrenchName(org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString()))
+                .thenReturn(Mono.just(0));
+        lenient().when(productRepository.backfillFrenchDescription(org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString()))
+                .thenReturn(Mono.just(0));
 
         product = Product.builder()
                 .productId(PRODUCT_ID)

@@ -73,6 +73,7 @@ class ProductTranslationMigrationTest {
                 assertNull(rows.getString(1));
             }
             loader.run();
+            awaitFrenchTranslation(connection, "Dog Food", "Nourriture pour chiens");
             try (var rows = sql.executeQuery("SELECT * FROM products WHERE product_name='Dog Food'")) {
                 assertTrue(rows.next());
                 assertEquals("Nourriture pour chiens", rows.getString("product_name_fr"));
@@ -88,6 +89,7 @@ class ProductTranslationMigrationTest {
             sql.execute("UPDATE products SET product_name_fr='Nom personnalisé', product_description_fr='' WHERE product_name='Dog Food'");
             sql.execute(schema);
             loader.run();
+            awaitFrenchTranslation(connection, "Dog Food", "Nom personnalisÃ©");
             try (var rows = sql.executeQuery("SELECT * FROM products WHERE product_name='Dog Food'")) {
                 assertTrue(rows.next());
                 assertEquals("Nom personnalisé", rows.getString("product_name_fr"));
@@ -100,5 +102,23 @@ class ProductTranslationMigrationTest {
                 assertEquals(3, rows.getInt("product_quantity"));
             }
         }
+    }
+
+    private void awaitFrenchTranslation(java.sql.Connection connection, String productName,
+                                        String expectedName) throws Exception {
+        long deadline = System.currentTimeMillis() + 5_000;
+        while (System.currentTimeMillis() < deadline) {
+            try (var statement = connection.prepareStatement(
+                    "SELECT product_name_fr FROM products WHERE product_name=?")) {
+                statement.setString(1, productName);
+                try (var rows = statement.executeQuery()) {
+                    if (rows.next() && expectedName.equals(rows.getString(1))) {
+                        return;
+                    }
+                }
+            }
+            Thread.sleep(50);
+        }
+        fail("Timed out waiting for French translation of " + productName);
     }
 }
