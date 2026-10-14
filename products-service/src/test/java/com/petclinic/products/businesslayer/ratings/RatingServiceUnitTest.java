@@ -316,6 +316,8 @@ class RatingServiceUnitTest {
                 .thenReturn(Mono.just(prod));
         when(ratingRepository.findRatingByCustomerIdAndProductId(rating1.getCustomerId(), productId))
                 .thenReturn(Mono.just(rating1));
+        when(reviewSettingsRepository.findById(1L))
+                .thenReturn(Mono.just(new ReviewSettings(1L, 48)));
         when(ratingRepository.save(any(Rating.class))
         ).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
 
@@ -362,6 +364,8 @@ class RatingServiceUnitTest {
                 .thenReturn(Mono.just(prod));
         when(ratingRepository.findRatingByCustomerIdAndProductId(rating1.getCustomerId(), productId))
                 .thenReturn(Mono.just(rating1));
+        when(reviewSettingsRepository.findById(1L))
+                .thenReturn(Mono.just(new ReviewSettings(1L, 48)));
         when(ratingRepository.save(any(Rating.class))
         ).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
 
