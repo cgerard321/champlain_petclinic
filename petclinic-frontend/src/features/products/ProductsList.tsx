@@ -205,14 +205,13 @@ const ProductList = function Productlist({
       </div>
     </Reveal>
   );
-
-  return (
+ return (
     <div className="product-list-container">
       <div className="main-content">
         {view === 'catalog' && (
           <Reveal delay={80}>
-<div ref={catalogRef} className="products-section-container ">
-  <h2 className="section-title category-title">{t('catalog')}</h2>
+            <div ref={catalogRef} className="products-section-container ">
+              <h2 className="section-title category-title">{t('catalog')}</h2>
               {isLoading ? (
                 <p>{t('loading')}</p>
               ) : filteredList.length > 0 ? (
@@ -232,6 +231,10 @@ const ProductList = function Productlist({
                   ))}
                 </div>
               ) : (
+                <p style={{ textAlign: 'center', margin: '40px 0' }}>
+                  {t('noItems')}
+                </p>
+              )}
                 <p style={{ textAlign: 'center', margin: '40px 0' }}>
                   {t('noItems')}
                 </p>
