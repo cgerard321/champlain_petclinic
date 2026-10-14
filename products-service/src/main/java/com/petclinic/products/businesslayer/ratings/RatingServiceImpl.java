@@ -19,10 +19,10 @@ import reactor.core.publisher.Mono;
 
 @Service
 public class RatingServiceImpl implements RatingService {
-    private RatingRepository ratingRepository;
-    private ProductRepository productRepository;
-    private ReviewSettingsRepository reviewSettingsRepository;
-    private ReviewLikeRepository reviewLikeRepository;
+    private final RatingRepository ratingRepository;
+    private final ProductRepository productRepository;
+    private final ReviewSettingsRepository reviewSettingsRepository;
+    private final ReviewLikeRepository reviewLikeRepository;
 
     public RatingServiceImpl(RatingRepository ratingRepository, ProductRepository productRepository,
                              ReviewLikeRepository reviewLikeRepository, ReviewSettingsRepository reviewSettingsRepository) {
