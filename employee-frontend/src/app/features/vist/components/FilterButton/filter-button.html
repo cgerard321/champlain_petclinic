@@ -20,7 +20,7 @@
               [checked]="selectedStatuses().includes(status)"
               (change)="toggleStatus(status)"
             />
-            <span>{{ status }}</span>
+            <span>{{ statusLabel(status) }}</span>
           </label>
         </li>
       }
