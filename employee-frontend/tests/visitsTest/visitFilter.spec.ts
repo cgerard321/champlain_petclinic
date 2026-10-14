@@ -61,7 +61,7 @@ async function openVisitsPage(page: Page): Promise<void> {
     }),
   );
   await page.addInitScript(() => {
-    localStorage.setItem('lang', 'fr-CA');
+    if (!localStorage.getItem('lang')) localStorage.setItem('lang', 'fr-CA');
   });
 
   await page.goto('/vist');
