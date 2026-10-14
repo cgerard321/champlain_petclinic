@@ -1,16 +1,51 @@
 'use strict';
 
 angular.module('vetForm')
-    .controller('VetFormController', ["$http", '$state', '$stateParams', function ($http, $state, $stateParams) {
+    .controller('VetFormController', ["$http", '$state', '$stateParams', function ($http, $state,$stateParams) {
         var self = this;
         document.getElementById("loaderDiv").style.display = "none";
+
+        self.showConfirmationModal = function (title, body, confirmCallback) {
+            const backdrop = document.getElementById("confirmationBackdrop");
+            const modalTitle = document.getElementById("confirmationModalTitle");
+            const modalBody = document.getElementById("confirmationModalBody");
+            const confirmBtn = document.getElementById("confirmationModalConfirmBtn");
+            const cancelBtn = document.getElementById("confirmationModalCancelBtn");
+
+            if (!backdrop) return;
+
+            modalTitle.textContent = title;
+            modalBody.textContent = body;
+
+            const hideModal = () => {
+                backdrop.classList.remove("modalOn");
+                backdrop.classList.add("modalOff");
+                backdrop.onclick = null;
+            };
+
+            backdrop.onclick = (e) => {
+                if (e.target === backdrop) {
+                    hideModal();
+                }
+            };
+
+            cancelBtn.onclick = hideModal;
+
+            confirmBtn.onclick = () => {
+                if (confirmCallback) {
+                    confirmCallback();
+                }
+                hideModal();
+            };
+
+            backdrop.classList.remove("modalOff");
+            backdrop.classList.add("modalOn");
+        };
 
         var vetId = $stateParams.vetId || 0;
         if (!vetId || vetId === 0) {
             document.getElementById("title").innerHTML = "New Vet Sign Up";
             self.vet = {};
-
-
         } else {
             $http.get("api/gateway/vets/" + $stateParams.vetId).then(function (resp) {
                 self.vet = resp.data;
@@ -25,14 +60,13 @@ angular.module('vetForm')
                 const specialties = self.vet.specialties;
                 specialties.forEach(specs => {
                     document.getElementById(specs.name).checked = true;
-                })
+                });
 
                 const workdays = self.vet.workday;
                 workdays.forEach(work => {
                     console.log(work);
                     document.getElementById(work).checked = true;
                 });
-
 
                 let isAct = document.getElementsByClassName("isActiveRadio");
                 if (self.vet.active) {
@@ -43,7 +77,6 @@ angular.module('vetForm')
                 let phoneNumber = self.vet.phoneNumber;
                 let code = phoneNumber.substring(phoneNumber.length - 4);
                 document.getElementById("phoneNumber").value = code;
-
             });
         }
 
@@ -51,44 +84,7 @@ angular.module('vetForm')
             const fileInput = document.querySelector('input[id="photoVet"]');
             let vetPhoto = "";
 
-                const file = fileInput.files[0]; // Changed fileInput.target.files to fileInput.files
-                const reader = new FileReader();
-                var image = {};
-                reader.onloadend = () => {
-                    vetPhoto = reader.result
-                        .replace('data:', '')
-                        .replace(/^.+,/, '');
-                    self.PreviewImage = vetPhoto;
-                    image = {
-                        name: file.name,
-                        type: "jpeg",
-                        photo: vetPhoto
-                    };
-                    if(image.photo == null){
-                        self.vet.photoDefault = true;
-                    }
-
-                    //console.log(vetId + " default after photo is: " + self.vet.photoDefault)
-                    // Use template literals for URL concatenation
-                    $http.post(`api/gateway/vets/${vetId}/photos/${image.name}`, image) // Send the image object
-                        .then(function (response) {
-                            console.log("VET ID: " + vetId);
-                            console.log("RESPONSE: " + JSON.stringify(response.data)); // Access response data
-                        })
-                        .catch(function (error) {
-                            console.error(error);
-                        });
-                };
-                reader.readAsDataURL(file);
-            };
-
-        let updatePhoto = function (vetId) {
-            const fileInput = document.querySelector('input[id="photoVet"]');
-            let vetPhoto = "";
-
-            const file = fileInput.files[0]; // Changed fileInput.target.files to fileInput.files
-
-            console.log(fileInput)
+            const file = fileInput.files[0];
             const reader = new FileReader();
             var image = {};
             reader.onloadend = () => {
@@ -101,13 +97,47 @@ angular.module('vetForm')
                     type: "jpeg",
                     photo: vetPhoto
                 };
-                console.log(image)
+                if (image.photo == null) {
+                    self.vet.photoDefault = true;
+                }
 
-                // Use template literals for URL concatenation
-                $http.put(`api/gateway/vets/${vetId}/photos/${image.name}`, image) // Send the image object
+                $http.post(`api/gateway/vets/${vetId}/photos/${image.name}`, image)
                     .then(function (response) {
                         console.log("VET ID: " + vetId);
-                        console.log("RESPONSE: " + JSON.stringify(response.data)); // Access response data
+                        console.log("RESPONSE: " + JSON.stringify(response.data));
+                    })
+                    .catch(function (error) {
+                        console.error(error);
+                    });
+            };
+            reader.readAsDataURL(file);
+        };
+
+        let updatePhoto = function (vetId) {
+            const fileInput = document.querySelector('input[id="photoVet"]');
+            let vetPhoto = "";
+
+            const file = fileInput.files[0];
+
+            console.log(fileInput);
+            const reader = new FileReader();
+            var image = {};
+            reader.onloadend = () => {
+                vetPhoto = reader.result
+                    .replace('data:', '')
+                    .replace(/^.+,/, '');
+                self.PreviewImage = vetPhoto;
+                image = {
+                    name: file.name,
+                    type: "jpeg",
+                    photo: vetPhoto
+                };
+                console.log(image);
+
+                $http.put(`api/gateway/vets/${vetId}/photos/${image.name}`, image)
+                    .then(function (response) {
+                        console.log("VET ID: " + vetId);
+                        console.log("RESPONSE: " + JSON.stringify(response.data));
                     })
                     .catch(function (error) {
                         console.error(error);
@@ -120,12 +150,12 @@ angular.module('vetForm')
             console.log("vet please: " + vet);
             document.getElementById("loaderDiv").style.display = "block";
 
-            let specialtyList = document.getElementsByClassName("specialty")
+            let specialtyList = document.getElementsByClassName("specialty");
             let selectedSpecialtiesList = [];
             let specialtiesStr = "[";
             for (let i = 0; i < specialtyList.length; i++) {
                 if (specialtyList[i].checked) {
-                    selectedSpecialtiesList.push(specialtyList[i])
+                    selectedSpecialtiesList.push(specialtyList[i]);
                 }
             }
             for (let i = 0; i < selectedSpecialtiesList.length; i++) {
@@ -135,10 +165,11 @@ angular.module('vetForm')
                         specialtiesStr += ", ";
                 }
             }
-            specialtiesStr += "]"
-            if(specialtiesStr=="[]"){
-                alert("vet should have at least one specialty: "+specialtiesStr)
-                return
+            specialtiesStr += "]";
+            if (specialtiesStr === "[]") {
+                document.getElementById("loaderDiv").style.display = "none";
+                self.showConfirmationModal("Validation Error", "vet should have at least one specialty: " + specialtiesStr, null);
+                return;
             }
 
             var id = self.vet.vetId;
@@ -152,54 +183,54 @@ angular.module('vetForm')
                     selectedWorkdayList.push(workdayList[i].value);
                 }
             }
-            let workdaysArray = selectedWorkdayList; // Convert to an array
+            let workdaysArray = selectedWorkdayList;
 
             if (workdaysArray.length === 0) {
-                alert("vet should have at least one workday: " + workdaysArray);
+                document.getElementById("loaderDiv").style.display = "none";
+                self.showConfirmationModal("Validation Error", "vet should have at least one workday: " + workdaysArray, null);
                 return;
             }
-            vet.workday = workdaysArray; // Assign the array to vet.workday
+            vet.workday = workdaysArray;
 
             vet.firstName = document.getElementById("firstName").value;
             var namePattern = /^[a-zA-Z -]+/;
             if (!namePattern.test(vet.firstName)) {
-                alert("first name should be minimum 2 characters and maximum of 30 characters, only letters, spaces, and hyphens: "+vet.firstName)
-                return
+                document.getElementById("loaderDiv").style.display = "none";
+                self.showConfirmationModal("Validation Error", "first name should be minimum 2 characters and maximum of 30 characters, only letters, spaces, and hyphens: " + vet.firstName, null);
+                return;
             }
-            if(vet.firstName.length>30||vet.firstName.length<2){
-                alert("first name should be minimum 2 characters and maximum of 30 characters, only letters, spaces, and hyphens: "+vet.firstName)
-                return
+            if (vet.firstName.length > 30 || vet.firstName.length < 2) {
+                document.getElementById("loaderDiv").style.display = "none";
+                self.showConfirmationModal("Validation Error", "first name should be minimum 2 characters and maximum of 30 characters, only letters, spaces, and hyphens: " + vet.firstName, null);
+                return;
             }
 
             vet.lastName = document.getElementById("lastName").value;
             if (!namePattern.test(vet.lastName)) {
-                alert("last name should be minimum 2 characters and maximum of 30 characters, only letters, spaces, and hyphens: "+vet.lastName)
-                return
+                document.getElementById("loaderDiv").style.display = "none";
+                self.showConfirmationModal("Validation Error", "last name should be minimum 2 characters and maximum of 30 characters, only letters, spaces, and hyphens: " + vet.lastName, null);
+                return;
             }
-            if(vet.lastName.length>30||vet.lastName.length<2){
-                alert("last name should be minimum 2 characters and maximum of 30 characters, only letters, spaces, and hyphens: "+vet.lastName)
-                return
-            }
-/*
-            var emailPattern = /\b[\w.%-]+@[-.\w]+\.[A-Za-z]{2,3}\b/;
-            if (!emailPattern.test(document.getElementById("email").value)) {
-                alert("email should be minimum 6 characters and maximum 320 characters. Top level domain should have 2 to 3 letters: "+vet.email)
-                return
+            if (vet.lastName.length > 30 || vet.lastName.length < 2) {
+                document.getElementById("loaderDiv").style.display = "none";
+                self.showConfirmationModal("Validation Error", "last name should be minimum 2 characters and maximum of 30 characters, only letters, spaces, and hyphens: " + vet.lastName, null);
+                return;
             }
 
- */
             let basePhoneNumber = "(514)-634-8276 #";
-            let inputPhoneNumber=document.getElementById("phoneNumber").value;
-            if(inputPhoneNumber.length!==4){
-                alert("phoneNumber length not equal to 4: "+vet.phoneNumber)
-                return
+            let inputPhoneNumber = document.getElementById("phoneNumber").value;
+            if (inputPhoneNumber.length !== 4) {
+                document.getElementById("loaderDiv").style.display = "none";
+                self.showConfirmationModal("Validation Error", "phoneNumber length not equal to 4: " + vet.phoneNumber, null);
+                return;
             }
             vet.phoneNumber = basePhoneNumber + inputPhoneNumber;
 
             vet.resume = document.getElementById("vetResume").value;
-            if(vet.resume.length<10){
-                alert("resume should be minimum 10 characters: "+vet.resume)
-                return
+            if (vet.resume.length < 10) {
+                document.getElementById("loaderDiv").style.display = "none";
+                self.showConfirmationModal("Validation Error", "resume should be minimum 10 characters: " + vet.resume, null);
+                return;
             }
 
             let isAct = document.getElementsByClassName("isActiveRadio");
@@ -220,20 +251,21 @@ angular.module('vetForm')
                     console.log("Response data:", result);
                     console.log("Response vet id ", result.vetId);
                     updatePhoto(result.vetId);
-                    console.log(result.vetId)
+                    console.log(result.vetId);
                     $state.go('vets');
                 }, function (response) {
+                    document.getElementById("loaderDiv").style.display = "none";
                     let error = "Invalid vet fields";
                     $state.go('vets');
-                    alert(error);
+                    self.showConfirmationModal("Error", error, null);
                     console.error(error);
-                })
+                });
             } else {
                 req = $http.post("api/gateway/users/vets", {
                     username: vet.username,
                     password: vet.password,
                     email: vet.email,
-                    vet:vet
+                    vet: vet
                 });
                 console.log(self.vet);
                 console.log(self.vet.photoDefault);
@@ -245,11 +277,12 @@ angular.module('vetForm')
                     uploadPhoto(result.vetId);
                     $state.go('vets');
                 }, function (response) {
+                    document.getElementById("loaderDiv").style.display = "none";
                     let error = "Invalid vet profile picture";
                     $state.go('vets');
-                    alert(error);
+                    self.showConfirmationModal("Error", error, null);
                     console.error(error);
                 });
             }
-        }
+        };
     }]);
