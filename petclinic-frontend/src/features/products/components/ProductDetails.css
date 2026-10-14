@@ -237,6 +237,50 @@
   background: transparent;
 }
 
+.review-helpful-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.review-like-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.55rem;
+  color: #495057;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+.review-like-button:hover:not(:disabled),
+.review-like-button-selected {
+  color: #0d6efd;
+  background: #e7f1ff;
+}
+
+.review-like-button:focus-visible {
+  outline: 2px solid #0d6efd;
+  outline-offset: 2px;
+}
+
+.review-like-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.review-like-button[aria-busy='true'] {
+  cursor: wait;
+}
+
+.review-like-error {
+  color: #b02a37;
+  font-size: 0.875rem;
+}
+
 .product-container {
   margin: 2vw 5vw 5vw 5vw;
   display: grid;
