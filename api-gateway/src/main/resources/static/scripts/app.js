@@ -22,12 +22,17 @@ petClinicApp.factory("authProvider", [
   "$window",
   function ($window) {
     return {
-      setUser: ({ username, email, userId, roles }) => {
+      setUser: ({ username, email, userId, roles, token }) => {
         $window.localStorage.setItem("username", username);
         $window.localStorage.setItem("email", email);
         $window.localStorage.setItem("UUID", userId);
+        if (token) {
+          $window.localStorage.setItem("token", token);
+        }
         let rolesArr = [];
-        roles.forEach((role) => rolesArr.push(role.name));
+        if (roles) {
+          roles.forEach((role) => rolesArr.push(role.name || role));
+        }
         $window.localStorage.setItem("roles", rolesArr.toString());
       },
       getUser: () => ({
@@ -35,17 +40,19 @@ petClinicApp.factory("authProvider", [
         email: $window.localStorage.getItem("email"),
         UUID: $window.localStorage.getItem("UUID"),
         roles: $window.localStorage.getItem("roles"),
+        token: $window.localStorage.getItem("token"),
       }),
       purgeUser: () => {
         $window.localStorage.removeItem("username");
         $window.localStorage.removeItem("email");
         $window.localStorage.removeItem("UUID");
         $window.localStorage.removeItem("roles");
+        $window.localStorage.removeItem("token");
       },
       isLoggedIn: () => !!$window.localStorage.getItem("email"),
       isAdmin: () =>
-        $window.localStorage.getItem("roles") != null &&
-        !!$window.localStorage.getItem("roles").includes("ADMIN"),
+          $window.localStorage.getItem("roles") != null &&
+          !!$window.localStorage.getItem("roles").includes("ADMIN"),
     };
   },
 ]);
@@ -56,10 +63,17 @@ petClinicApp.factory("httpErrorInterceptor", [
   "authProvider",
   function ($q, $location, authProvider) {
     return {
+      request: function (config) {
+        const token = authProvider.getUser().token;
+        if (token) {
+          config.headers["Authorization"] = "Bearer " + token;
+        }
+        return config;
+      },
       responseError: (rej) => {
         if (
-          !whiteList.has($location.path().substring(1)) &&
-          rej.status === 401
+            !whiteList.has($location.path().substring(1)) &&
+            rej.status === 401
         ) {
           authProvider.purgeUser();
           $location.path("/login");
@@ -81,8 +95,8 @@ petClinicApp.run([
   function ($rootScope, $location, authProvider) {
     $rootScope.$on("$locationChangeSuccess", function (event) {
       if (
-        whiteList.has($location.path().substring(1)) ||
-        $location.path().startsWith("/reset_password")
+          whiteList.has($location.path().substring(1)) ||
+          $location.path().startsWith("/reset_password")
       ) {
         return;
       }
@@ -100,10 +114,10 @@ petClinicApp.config([
   "$locationProvider",
   "$httpProvider",
   function (
-    $stateProvider,
-    $urlRouterProvider,
-    $locationProvider,
-    $httpProvider,
+      $stateProvider,
+      $urlRouterProvider,
+      $locationProvider,
+      $httpProvider,
   ) {
     $httpProvider.defaults.headers.common["Cache-Control"] = "no-cache";
     $locationProvider.hashPrefix("!");

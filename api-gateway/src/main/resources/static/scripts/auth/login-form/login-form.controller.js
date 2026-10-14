@@ -28,32 +28,33 @@ angular.module("loginForm").controller("LoginFormController", [
       $scope.errorMessages = [];
 
       return $http
-        .post("/api/gateway/users/login", {
-          emailOrUsername: $scope.login && $scope.login.email,
-          password: $scope.login && $scope.login.password,
-        })
-        .then(function (res) {
-          authProvider.setUser({
-            username: res.data.username,
-            email: res.data.email,
-            userId: res.data.userId,
-            roles: res.data.roles,
+          .post("/api/gateway/users/login", {
+            emailOrUsername: $scope.login && $scope.login.email,
+            password: $scope.login && $scope.login.password,
+          })
+          .then(function (res) {
+            authProvider.setUser({
+              username: res.data.username,
+              email: res.data.email,
+              userId: res.data.userId,
+              roles: res.data.roles,
+              token: res.data.token || res.data.authToken || res.data.accessToken,
+            });
+            $location.path("/welcome");
+          })
+          .catch(function (err) {
+            var msg = "Login failed. Please try again.";
+            if (err && err.data) {
+              if (typeof err.data === "string") msg = err.data;
+              else if (err.data.message) msg = err.data.message;
+              else if (Array.isArray(err.data.errors))
+                msg = err.data.errors.join("\n");
+            }
+            $scope.errorMessages = String(msg).split("\n");
+          })
+          .finally(function () {
+            vm.loading = false;
           });
-          $location.path("/welcome");
-        })
-        .catch(function (err) {
-          var msg = "Login failed. Please try again.";
-          if (err && err.data) {
-            if (typeof err.data === "string") msg = err.data;
-            else if (err.data.message) msg = err.data.message;
-            else if (Array.isArray(err.data.errors))
-              msg = err.data.errors.join("\n");
-          }
-          $scope.errorMessages = String(msg).split("\n");
-        })
-        .finally(function () {
-          vm.loading = false;
-        });
     };
 
     vm.keypress = function (e) {
