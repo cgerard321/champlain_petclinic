@@ -67,13 +67,6 @@ class RatingServiceUnitTest {
             .review("It's alright..")
             .build();
 
-    @BeforeEach
-    void setUpReviewSettings() {
-        lenient()
-                .when(reviewSettingsRepository.findById(1L))
-                .thenReturn(Mono.just(new ReviewSettings(1L, 48)));
-    }
-
     @Test
     void whenGetAllRatingsForProduct_thenReturnRatings() {
         Product prod = Product.builder()

@@ -30,6 +30,7 @@ public class RatingServiceImpl implements RatingService {
         this.productRepository = productRepository;
         this.reviewLikeRepository = reviewLikeRepository;
         this.reviewSettingsRepository = reviewSettingsRepository;
+        this.reviewLikeRepository = reviewLikeRepository;
     }
 
     @Override

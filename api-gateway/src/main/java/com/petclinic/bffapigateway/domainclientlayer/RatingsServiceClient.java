@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.Ratings.RatingRequestModel;
 import com.petclinic.bffapigateway.dtos.Ratings.RatingResponseModel;
+import com.petclinic.bffapigateway.dtos.Ratings.ReviewLikeResponseModel;
 import com.petclinic.bffapigateway.dtos.Ratings.ReviewSettingsModel;
 import com.petclinic.bffapigateway.dtos.Ratings.ReviewLikeResponseModel;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
@@ -91,6 +92,25 @@ public class RatingsServiceClient {
                 .uri(baseURL + "/" + productId + "/" + customerId)
                 .retrieve()
                 .bodyToMono(RatingResponseModel.class);
+    }
+
+    public Mono<ReviewLikeResponseModel> likeReview(final String productId,
+                                                     final String reviewCustomerId,
+                                                     final String likingCustomerId) {
+        return webClientBuilder.build()
+                .post()
+                .uri(baseURL + "/" + productId + "/" + reviewCustomerId + "/likes/" + likingCustomerId)
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::is4xxClientError, clientResponse -> {
+                            HttpStatus status = HttpStatus.valueOf(clientResponse.statusCode().value());
+                            String message = status == HttpStatus.NOT_FOUND
+                                    ? "Review not found"
+                                    : "Could not like review";
+                            return Mono.error(new GenericHttpException(message, status));
+                        }
+                )
+                .bodyToMono(ReviewLikeResponseModel.class);
     }
 
     public Mono<ReviewSettingsModel> getReviewSettings(){
