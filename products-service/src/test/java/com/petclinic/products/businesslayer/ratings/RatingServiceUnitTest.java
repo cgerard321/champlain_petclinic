@@ -4,6 +4,8 @@ import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductRepository;
 import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.datalayer.ratings.RatingRepository;
+import com.petclinic.products.datalayer.ratings.ReviewLikeRepository;
+import com.petclinic.products.datalayer.ratings.ReviewLike;
 import com.petclinic.products.presentationlayer.ratings.RatingRequestModel;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
 import com.petclinic.products.utils.exceptions.NotFoundException;
@@ -22,6 +24,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,6 +33,8 @@ class RatingServiceUnitTest {
     private RatingRepository ratingRepository;
     @Mock
     private ProductRepository productRepository;
+    @Mock
+    private ReviewLikeRepository reviewLikeRepository;
 
     @InjectMocks
     private RatingServiceImpl ratingService;
@@ -64,6 +69,10 @@ class RatingServiceUnitTest {
                 .thenReturn(Mono.just(prod));
         when(ratingRepository.findRatingsByProductId(rating1.getProductId()))
                 .thenReturn(Flux.just(rating1, rating2));
+        when(reviewLikeRepository.countByProductIdAndReviewCustomerId(productId, rating1.getCustomerId()))
+                .thenReturn(Mono.just(0L));
+        when(reviewLikeRepository.countByProductIdAndReviewCustomerId(productId, rating2.getCustomerId()))
+                .thenReturn(Mono.just(0L));
 
         StepVerifier.create(ratingService.getAllRatingsForProductId(productId))
                 .expectNextMatches(response -> {
@@ -423,6 +432,8 @@ class RatingServiceUnitTest {
                 .thenReturn(Mono.just(rating1));
         when(ratingRepository.delete(any(Rating.class)))
                 .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+        when(reviewLikeRepository.deleteByProductIdAndReviewCustomerId(productId, rating1.getCustomerId()))
+                .thenReturn(Mono.empty());
 
         StepVerifier.create(ratingService.deleteRatingForProduct(productId, rating1.getCustomerId()))
                 .expectNextMatches(response -> {
@@ -430,6 +441,78 @@ class RatingServiceUnitTest {
                     return true;
                 })
                 .verifyComplete();
+    }
+
+    @Test
+    void whenLikeReviewTwice_thenSecondClickRemovesLike() {
+        String likingCustomerId = UUID.randomUUID().toString();
+        Product product = Product.builder().productId(productId).build();
+        ReviewLike savedLike = ReviewLike.builder()
+                .productId(productId)
+                .reviewCustomerId(rating1.getCustomerId())
+                .likingCustomerId(likingCustomerId)
+                .build();
+
+        when(productRepository.findProductByProductId(productId)).thenReturn(Mono.just(product));
+        when(ratingRepository.findRatingByCustomerIdAndProductId(rating1.getCustomerId(), productId))
+                .thenReturn(Mono.just(rating1));
+        when(reviewLikeRepository.existsByProductIdAndReviewCustomerIdAndLikingCustomerId(
+                productId, rating1.getCustomerId(), likingCustomerId))
+                .thenReturn(Mono.just(false), Mono.just(true));
+        when(reviewLikeRepository.addIfAbsent(productId, rating1.getCustomerId(), likingCustomerId))
+                .thenReturn(Mono.just(savedLike));
+        when(reviewLikeRepository.deleteByProductIdAndReviewCustomerIdAndLikingCustomerId(
+                productId, rating1.getCustomerId(), likingCustomerId))
+                .thenReturn(Mono.empty());
+        when(reviewLikeRepository.countByProductIdAndReviewCustomerId(productId, rating1.getCustomerId()))
+                .thenReturn(Mono.just(1L), Mono.just(0L));
+
+        StepVerifier.create(ratingService.likeReview(productId, rating1.getCustomerId(), likingCustomerId))
+                .expectNextMatches(response -> response.getLikeCount() == 1 && response.isLikedByCurrentUser())
+                .verifyComplete();
+
+        StepVerifier.create(ratingService.likeReview(productId, rating1.getCustomerId(), likingCustomerId))
+                .expectNextMatches(response -> response.getLikeCount() == 0 && !response.isLikedByCurrentUser())
+                .verifyComplete();
+    }
+
+    @Test
+    void whenCustomerLikesOwnReview_thenReturnInvalidInput() {
+        StepVerifier.create(ratingService.likeReview(productId, rating1.getCustomerId(), rating1.getCustomerId()))
+                .expectError(InvalidInputException.class)
+                .verify();
+
+        verifyNoInteractions(productRepository, ratingRepository, reviewLikeRepository);
+    }
+
+    @Test
+    void whenLikeReviewForNotFoundProduct_thenReturnNotFound() {
+        when(productRepository.findProductByProductId(productId))
+                .thenReturn(Mono.empty());
+        when(ratingRepository.findRatingByCustomerIdAndProductId(rating1.getCustomerId(), productId))
+                .thenReturn(Mono.just(rating1));
+        when(reviewLikeRepository.existsByProductIdAndReviewCustomerIdAndLikingCustomerId(
+                productId, rating1.getCustomerId(), "liking-customer"))
+                .thenReturn(Mono.just(false));
+
+        StepVerifier.create(ratingService.likeReview(productId, rating1.getCustomerId(), "liking-customer"))
+                .expectError(NotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void whenLikeReviewThatDoesNotExist_thenReturnNotFound() {
+        when(productRepository.findProductByProductId(productId))
+                .thenReturn(Mono.just(Product.builder().productId(productId).build()));
+        when(ratingRepository.findRatingByCustomerIdAndProductId(rating1.getCustomerId(), productId))
+                .thenReturn(Mono.empty());
+        when(reviewLikeRepository.existsByProductIdAndReviewCustomerIdAndLikingCustomerId(
+                productId, rating1.getCustomerId(), "liking-customer"))
+                .thenReturn(Mono.just(false));
+
+        StepVerifier.create(ratingService.likeReview(productId, rating1.getCustomerId(), "liking-customer"))
+                .expectError(NotFoundException.class)
+                .verify();
     }
 
     @Test

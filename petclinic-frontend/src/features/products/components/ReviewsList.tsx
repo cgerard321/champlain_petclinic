@@ -18,6 +18,7 @@ import { Reveal } from '@/shared/components';
 import { MdClear } from 'react-icons/md';
 import './ReviewsList.css';
 import Stack from 'react-bootstrap/Stack';
+import { likeReview } from '@/features/products/api/likeReview.ts';
 
 interface ReviewListProps {
   productId: string | undefined;
@@ -65,7 +66,17 @@ export function ReviewsList({
   const fetchReviews = async (): Promise<void> => {
     if (!productId) return;
     try {
-      const reviews = await getUserRatingsForProduct(productId);
+      let reviews: RatingModel[];
+      try {
+        reviews = await getUserRatingsForProduct(productId, isAuthenticated);
+      } catch (err) {
+        if (!isAuthenticated) throw err;
+        console.warn(
+          'Personalized ratings unavailable, using public list',
+          err
+        );
+        reviews = await getUserRatingsForProduct(productId);
+      }
       setProductReviews(reviews.filter((r: RatingModel) => r.review !== ''));
     } catch (err) {
       console.error('Failed to fetch product ratings', err);
@@ -140,6 +151,27 @@ export function ReviewsList({
 
   const handleDeleteReview = (): void => {
     setShowDeleteModal(true);
+  };
+
+  const handleLikeReview = async (review: RatingModel): Promise<void> => {
+    if (!productId || !review.customerId) return;
+    if (!isAuthenticated) {
+      navigate(AppRoutePaths.Login);
+      return;
+    }
+
+    const result = await likeReview(productId, review.customerId);
+    setProductReviews(currentReviews =>
+      currentReviews.map(currentReview =>
+        currentReview.customerId === review.customerId
+          ? {
+              ...currentReview,
+              likeCount: result.likeCount,
+              likedByCurrentUser: result.likedByCurrentUser,
+            }
+          : currentReview
+      )
+    );
   };
 
   const confirmDeleteReview = async (): Promise<void> => {
@@ -322,6 +354,12 @@ export function ReviewsList({
                 }
                 onEdit={handleEditReview}
                 onDelete={handleDeleteReview}
+                canLike={
+                  !isAuthenticated ||
+                  !currentUserReview.customerId ||
+                  currentUserReview.customerId !== rating.customerId
+                }
+                onLike={() => handleLikeReview(rating)}
                 searchQuery={searchQuery}
               />
             </Reveal>
