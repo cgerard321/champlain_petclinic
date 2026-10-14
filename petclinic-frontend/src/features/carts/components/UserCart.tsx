@@ -191,7 +191,8 @@ const UserCart: React.FC = () => {
   const syncCartState = useCallback(
     (
       cartData: CartDetailsModel | null | undefined,
-      fallbackMessage?: string
+      fallbackMessage?: string,
+      options?: { preferFallback?: boolean }
     ) => {
       if (!cartData) return;
 
@@ -230,10 +231,12 @@ const UserCart: React.FC = () => {
         typeof cartData.shippingCost === 'number' ? cartData.shippingCost : 0
       );
 
-      emitCartMessage(
-        typeof cartData.message === 'string' ? cartData.message : undefined,
-        fallbackMessage
-      );
+      // sse are in english so prefer the localized fallback when asked
+      const serverMessage =
+        !options?.preferFallback && typeof cartData.message === 'string'
+          ? cartData.message
+          : undefined;
+      emitCartMessage(serverMessage, fallbackMessage);
     },
     [emitCartMessage, toProductModel]
   );
@@ -760,7 +763,7 @@ const UserCart: React.FC = () => {
       );
 
       const fallback = t('toasts.addedToWishlist', { name: item.productName });
-      syncCartState(data, fallback);
+      syncCartState(data, fallback, { preferFallback: true });
     } catch (error: unknown) {
       console.error('Error adding to wishlist:', error);
       showToast(
@@ -796,7 +799,7 @@ const UserCart: React.FC = () => {
       );
 
       const fallback = t('toasts.addedToCart', { name: item.productName });
-      syncCartState(data, fallback);
+      syncCartState(data, fallback, { preferFallback: true });
     } catch (error: unknown) {
       console.error('Error adding to cart:', error);
       showToast(apiErrorMessage(error, t('errors.addToCartFailed')), 'error');
@@ -897,7 +900,7 @@ const UserCart: React.FC = () => {
         blockedCount > 0
           ? t('toasts.movedBlocked', counts)
           : t('toasts.moved', counts);
-      syncCartState(data, fallback);
+      syncCartState(data, fallback, { preferFallback: true });
     } catch (e) {
       console.error(e);
       showToast(apiErrorMessage(e, t('errors.moveFailed')), 'error');
