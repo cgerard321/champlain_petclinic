@@ -9,7 +9,7 @@ h1 {
 table {
   width: 100%;
   border-collapse: collapse;
-  background: #fff;
+  background: #d5ebd8;
   border: 1px solid #ddd;
   border-radius: 8px;
   overflow: hidden;
@@ -17,8 +17,8 @@ table {
 }
 
 th {
-  background: #111;
-  color: #d1b606;
+  background: #c5dec3;
+  color: #000000;
   text-align: left;
   padding: 14px 16px;
   font-size: 14px;
