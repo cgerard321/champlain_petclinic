@@ -12,7 +12,6 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { MatDialog } from '@angular/material/dialog';
 import { Subscription, finalize, switchMap, take, tap, toArray } from 'rxjs';
 
 import { isApiError } from '@core/models/api-error';

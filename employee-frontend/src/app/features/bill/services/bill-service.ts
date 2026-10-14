@@ -110,6 +110,7 @@ export class BillService {
         payment,
       )
       .pipe(map((result) => this.toBillRecord(result)));
+  }
 
   setInterestExempt(billId: string, exempt: boolean): Observable<void> {
     return this.http.patch<void>(
