@@ -104,7 +104,8 @@
         "contact": "Contact details",
         "email": "Email",
         "phone": "Phone",
-        "not_provided": "Not provided",
+        "no_email": "Email not provided",
+        "no_phone": "Phone number not provided",
         "hours": "Working hours",
         "no_hours": "No working hours provided."
       },

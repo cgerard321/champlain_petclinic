@@ -67,10 +67,9 @@ describe('VetProfileCard', () => {
     expect(element.textContent).toContain('Aucune spécialité renseignée.');
     expect(element.textContent).toContain('Biographie non renseignée.');
     expect(element.textContent).toContain('Horaire non renseigné.');
-    expect(element.querySelectorAll('dd').length).toBe(2);
-    for (const detail of element.querySelectorAll('dd')) {
-      expect(detail.textContent?.trim()).toBe('Non renseigné');
-    }
+    expect(
+      Array.from(element.querySelectorAll('dd'), (detail) => detail.textContent?.trim()),
+    ).toEqual(['Courriel non renseigné', 'Téléphone non renseigné']);
     expect(element.textContent).not.toContain('undefined');
   });
 });

@@ -47,7 +47,7 @@
             @if (vet().email) {
               {{ vet().email }}
             } @else {
-              <span class="muted" i18n="@@vets.profile.not_provided">Non renseigné</span>
+              <span class="muted" i18n="@@vets.profile.no_email">Courriel non renseigné</span>
             }
           </dd>
         </div>
@@ -57,7 +57,7 @@
             @if (vet().phoneNumber) {
               {{ vet().phoneNumber }}
             } @else {
-              <span class="muted" i18n="@@vets.profile.not_provided">Non renseigné</span>
+              <span class="muted" i18n="@@vets.profile.no_phone">Téléphone non renseigné</span>
             }
           </dd>
         </div>
