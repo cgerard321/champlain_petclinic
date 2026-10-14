@@ -5,6 +5,7 @@ import com.petclinic.bffapigateway.businesslayer.ReviewAuthorService;
 import com.petclinic.bffapigateway.domainclientlayer.RatingsServiceClient;
 import com.petclinic.bffapigateway.dtos.Ratings.RatingRequestModel;
 import com.petclinic.bffapigateway.dtos.Ratings.RatingResponseModel;
+import com.petclinic.bffapigateway.dtos.Ratings.ReviewLikeResponseModel;
 import com.petclinic.bffapigateway.exceptions.InvalidCredentialsException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
@@ -85,6 +86,18 @@ public class RatingControllerV1 {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ALL})
+    @GetMapping(value = "/product/{productId}/personalized", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<RatingResponseModel> getAllRatingsForProductIdAndCurrentCustomer(
+            @PathVariable String productId,
+            @CookieValue("Bearer") String jwt
+    ) {
+        return getFromJWTUserId(jwt)
+                .doOnNext(e -> cleanCache())
+                .flatMapMany(user -> ratingsServiceClient.getAllRatingsForProductIdAndCustomerId(productId, user))
+                .flatMapSequential(rating -> reviewAuthorService.enrich(rating), 4);
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ALL})
     @GetMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<RatingResponseModel>> getRatingForProductIdAndCustomerId(
             @PathVariable String productId,
@@ -141,6 +154,19 @@ public class RatingControllerV1 {
         return getFromJWTUserId(jwt)
                 .doOnNext(e -> cleanCache())
                 .flatMap(user -> ratingsServiceClient.deleteRatingFromProductIdAssociatedToCustomerId(productId, user))
+                .map(ResponseEntity::ok);
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ALL})
+    @PostMapping(value = "/{productId}/{reviewCustomerId}/likes", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<ReviewLikeResponseModel>> likeReview(
+            @PathVariable String productId,
+            @PathVariable String reviewCustomerId,
+            @CookieValue("Bearer") String jwt
+    ) {
+        return getFromJWTUserId(jwt)
+                .doOnNext(e -> cleanCache())
+                .flatMap(user -> ratingsServiceClient.likeReview(productId, reviewCustomerId, user))
                 .map(ResponseEntity::ok);
     }
 }
