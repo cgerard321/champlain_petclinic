@@ -68,7 +68,7 @@ class OrderControllerV1UnitTest {
 
             // Act & Assert
             client.get()
-                    .uri("/api/v1/gateway/orders/customer/{customerId}",
+                    .uri("/api/gateway/orders/customer/{customerId}",
                             CUSTOMER_ID)
                     .exchange()
                     .expectStatus().isOk()
@@ -101,7 +101,7 @@ class OrderControllerV1UnitTest {
 
             // Act & Assert
             client.get()
-                    .uri("/api/v1/gateway/orders/customer/{customerId}",
+                    .uri("/api/gateway/orders/customer/{customerId}",
                             CUSTOMER_ID)
                     .exchange()
                     .expectStatus().isOk()
@@ -124,7 +124,7 @@ class OrderControllerV1UnitTest {
 
             // Act & Assert
             client.get()
-                    .uri("/api/v1/gateway/orders/customer/{customerId}",
+                    .uri("/api/gateway/orders/customer/{customerId}",
                             CUSTOMER_ID)
                     .exchange()
                     .expectStatus().is5xxServerError();
@@ -148,7 +148,7 @@ class OrderControllerV1UnitTest {
 
             // Act & Assert
             client.get()
-                    .uri("/api/v1/gateway/orders/customer/{customerId}",
+                    .uri("/api/gateway/orders/customer/{customerId}",
                             customerId)
                     .exchange()
                     .expectStatus().isNotFound();

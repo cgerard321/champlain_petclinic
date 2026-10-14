@@ -227,38 +227,44 @@ public class CartServiceImpl implements CartService {
                     List<CartProduct> purchasedProducts = orderCart.getProducts();
                     double total = orderCart.getTotal();
 
-                    return orderService.createOrder(orderCart).flatMap(savedOrder -> {
-
-                                cart.setRecentPurchases(EntityModelUtil.mergeRecentPurchases(
-                                                cart.getRecentPurchases(), purchasedProducts)
+                    return generateRecommendations(purchasedProducts)
+                            .flatMap(recommendations -> {
+                                cart.setRecentPurchases(
+                                        EntityModelUtil.mergeRecentPurchases(
+                                                cart.getRecentPurchases(),
+                                                purchasedProducts)
                                 );
 
-                                return Flux.fromIterable(purchasedProducts)
-                                        .map(CartProduct::getProductId)
-                                        .flatMap(productClient::getProductByProductId)
-                                        .filter(product ->
-                                                product.getProductType() != null)
-                                        .map(ProductResponseModel::getProductType)
-                                        .distinct()
-                                        .flatMap(productClient::getProductsByType)
-                                        .distinct(ProductResponseModel::getProductId)
-                                        .map(this::toCartProduct)
-                                        .collectList()
-                                        .flatMap(recommendations -> {
-                                            cart.setRecommendationPurchase(recommendations);
-                                            cart.setProducts(Collections.emptyList());
-                                            return cartRepository.save(cart);})
-                                        .map(savedCart ->
-                                                new CartResponseModel(invoiceId, cartId, purchasedProducts, total)
-                                        );
-                                        });
-
-                            });
+                                cart.setRecommendationPurchase(recommendations);
+                                cart.setProducts(Collections.emptyList());
+                                return cartRepository.save(cart);
+                            })
+                            .flatMap(savedCart -> orderService.createOrder(orderCart))
+                            .map(savedOrder ->
+                                    new CartResponseModel(invoiceId, cartId, purchasedProducts, total)
+                            );
+                });
     }
 
+        private Mono<List<CartProduct>> generateRecommendations(
+                List<CartProduct> purchasedProducts
+        ) {
+            return Flux.fromIterable(purchasedProducts)
+                    .map(CartProduct::getProductId)
+                    .flatMap(productClient::getProductByProductId)
+                    .filter(product -> product.getProductType() != null)
+                    .map(ProductResponseModel::getProductType)
+                    .distinct()
+                    .flatMap(productClient::getProductsByType)
+                    .distinct(ProductResponseModel::getProductId)
+                    .map(this::toCartProduct)
+                    .collectList();
+        }
 
 
-    private CartProduct toCartProduct(ProductResponseModel product) {
+
+
+        private CartProduct toCartProduct(ProductResponseModel product) {
         return CartProduct.builder()
                 .productId(product.getProductId())
                 .imageId(product.getImageId())

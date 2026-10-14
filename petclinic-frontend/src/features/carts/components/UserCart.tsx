@@ -1517,8 +1517,7 @@ const UserCart: React.FC = () => {
         </div>
 
         {showBillingForm && (
-          <div className="modal-backdrop">
-            <div className="modal-content">
+
               <CartBillingForm
                 isOpen={true}
                 onClose={() => setShowBillingForm(false)}
@@ -1528,8 +1527,6 @@ const UserCart: React.FC = () => {
                   setShowBillingForm(false);
                 }}
               />
-            </div>
-          </div>
         )}
 
         {isCheckoutModalOpen && (

@@ -2147,8 +2147,9 @@ class CartServiceUnitTest {
 
 
 
+
     @Test
-    void checkoutCart_CartSaveFails_PropagatesError() {
+    void checkoutCart_CartSaveFails_DoesNotCreateOrder() {
         // Arrange
         String cartId = "cart-save-failure";
 
@@ -2162,16 +2163,6 @@ class CartServiceUnitTest {
         when(cartRepository.findCartByCartId(cartId))
                 .thenReturn(Mono.just(cart));
 
-        OrderResponseModel orderResponse = OrderResponseModel.builder()
-                .orderId("order-123")
-                .customerId("customer-123")
-                .products(cart.getProducts())
-                .total(100.0)
-                .build();
-
-        when(orderService.createOrder(any(Cart.class)))
-                .thenReturn(Mono.just(orderResponse));
-
         ProductResponseModel productResponse = ProductResponseModel.builder()
                 .productId(product1.getProductId())
                 .productName(product1.getProductName())
@@ -2183,24 +2174,22 @@ class CartServiceUnitTest {
 
         when(productClient.getProductsByType("Food"))
                 .thenReturn(Flux.just(productResponse));
+
         when(cartRepository.save(any(Cart.class)))
                 .thenReturn(Mono.error(new RuntimeException("Cart save failed")));
-
         // Act & Assert
         StepVerifier.create(cartService.checkoutCart(cartId))
                 .expectErrorMatches(error -> error instanceof RuntimeException &&
                                 "Cart save failed".equals(error.getMessage()))
                 .verify();
-
-        verify(orderService).createOrder(any(Cart.class));
         verify(cartRepository).save(any(Cart.class));
+        verify(orderService, never())
+                .createOrder(any(Cart.class));
     }
 
 
-
-
     @Test
-    void checkoutCart_RecommendationFails_PropagatesError() {
+    void checkoutCart_RecommendationFails_DoesNotCreateOrder() {
         // Arrange
         String cartId = "cart-recommendation-failure";
 
@@ -2213,17 +2202,6 @@ class CartServiceUnitTest {
 
         when(cartRepository.findCartByCartId(cartId))
                 .thenReturn(Mono.just(cart));
-
-        OrderResponseModel orderResponse = OrderResponseModel.builder()
-                .orderId("order-123")
-                .customerId("customer-123")
-                .products(cart.getProducts())
-                .total(100.0)
-                .build();
-
-        when(orderService.createOrder(any(Cart.class)))
-                .thenReturn(Mono.just(orderResponse));
-
         when(productClient.getProductByProductId(product1.getProductId()))
                 .thenReturn(Mono.error(new RuntimeException("Recommendation service failed")));
 
@@ -2232,10 +2210,59 @@ class CartServiceUnitTest {
                 .expectErrorMatches(error -> error instanceof RuntimeException &&
                                 "Recommendation service failed".equals(error.getMessage()))
                 .verify();
-
-        verify(orderService).createOrder(any(Cart.class));
-        verify(productClient).getProductByProductId(product1.getProductId());
+        verify(productClient)
+                .getProductByProductId(product1.getProductId());
+        verify(cartRepository, never())
+                .save(any(Cart.class));
+        verify(orderService, never())
+                .createOrder(any(Cart.class));
     }
+
+
+    @Test
+    void checkoutCart_OrderCreationFails_PropagatesError() {
+        // Arrange
+        String cartId = "cart-order-failure";
+
+        Cart cart = Cart.builder()
+                .cartId(cartId)
+                .customerId("customer-123")
+                .products(new ArrayList<>(List.of(product1, product2)))
+                .recentPurchases(new ArrayList<>())
+                .build();
+
+        when(cartRepository.findCartByCartId(cartId))
+                .thenReturn(Mono.just(cart));
+
+        ProductResponseModel productResponse = ProductResponseModel.builder()
+                .productId(product1.getProductId())
+                .productName(product1.getProductName())
+                .productType("Food")
+                .build();
+
+        when(productClient.getProductByProductId(anyString()))
+                .thenReturn(Mono.just(productResponse));
+
+        when(productClient.getProductsByType("Food"))
+                .thenReturn(Flux.just(productResponse));
+
+        when(cartRepository.save(any(Cart.class)))
+                .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+
+        when(orderService.createOrder(any(Cart.class)))
+                .thenReturn(Mono.error(new RuntimeException("Order creation failed")));
+        // Act & Assert
+        StepVerifier.create(cartService.checkoutCart(cartId))
+                .expectErrorMatches(error -> error instanceof RuntimeException &&
+                                "Order creation failed".equals(error.getMessage()))
+                .verify();
+        verify(cartRepository).save(any(Cart.class));
+        verify(orderService).createOrder(any(Cart.class));
+        InOrder inOrder = inOrder(cartRepository, orderService);
+        inOrder.verify(cartRepository).save(any(Cart.class));
+        inOrder.verify(orderService).createOrder(any(Cart.class));
+    }
+
 
 
 
