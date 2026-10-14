@@ -61,7 +61,7 @@ export class SupplyPage {
     return this.supplies().filter(
       (supply) =>
         supply.productName.toLowerCase().includes(productName.trim().toLowerCase()) &&
-        (supply.supplierName ?? '').toLowerCase().includes(supplierName.trim().toLowerCase()) &&
+        this.supplierLabel(supply).toLowerCase().includes(supplierName.trim().toLowerCase()) &&
         supply.productDescription.toLowerCase().includes(productDescription.trim().toLowerCase()) &&
         (!status || this.effectiveStatus(supply) === status),
     );
@@ -103,7 +103,7 @@ export class SupplyPage {
     {
       id: 'supplier',
       header: 'Supplier',
-      value: (supply) => supply.supplierName?.trim() || 'Not recorded',
+      value: (supply) => this.supplierLabel(supply),
     },
     { id: 'description', header: 'Description', value: (supply) => supply.productDescription },
     { id: 'price', header: 'Cost Price', template: this.priceCell() },
@@ -114,6 +114,10 @@ export class SupplyPage {
       ? [{ id: 'actions', header: 'Actions', template: this.actionsCell() }]
       : []),
   ]);
+
+  private supplierLabel(supply: Supply): string {
+    return supply.supplierName?.trim() || 'Not recorded';
+  }
 
   protected readonly canManageSupplies = computed(() => {
     const roles = this.auth.roles();
