@@ -2,13 +2,11 @@ package com.petclinic.cartsservice.businesslayer;
 
 import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.CartRepository;
-import com.petclinic.cartsservice.dataaccesslayer.Order;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.domainclientlayer.CartItemRequestModel;
 import com.petclinic.cartsservice.domainclientlayer.ProductClient;
 import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
-import com.petclinic.cartsservice.presentationlayer.OrderResponseModel;
 import com.petclinic.cartsservice.presentationlayer.WishlistItemRequestModel;
 import com.petclinic.cartsservice.presentationlayer.WishlistTransferDirection;
 import com.petclinic.cartsservice.utils.EntityModelUtil;
@@ -218,47 +216,28 @@ public class CartServiceImpl implements CartService {
         return cartRepository.findCartByCartId(cartId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
                 .flatMap(cart -> {
-                    if (cart.getProducts().isEmpty()) {
+                    if (cart.getProducts() == null || cart.getProducts().isEmpty()) {
                         return Mono.error(new InvalidInputException("Cart is empty"));
                     }
+                    Cart orderCart = EntityModelUtil.storeCartOrder(cart);
 
                     String invoiceId = UUID.randomUUID().toString();
-                    List<CartProduct> products = cart.getProducts();
-                    // this is the correct way to get the total do not use calculateTotal
-                    double total = EntityModelUtil.toCartResponseModel(cart, products).getTotal();
+                    orderCart.setInvoiceId(invoiceId);
 
-                    //store a version of the cart for orders because cart gets wiped
-                    Cart orderCart = orderService.storeCartOrder(cart);
+                    List<CartProduct> purchasedProducts = orderCart.getProducts();
+                    double total = orderCart.getTotal();
 
+                    return orderService.createOrder(orderCart).flatMap(savedOrder -> {
 
+                                cart.setRecentPurchases(EntityModelUtil.mergeRecentPurchases(
+                                                cart.getRecentPurchases(), purchasedProducts)
+                                );
 
-                                // --- Recent Purchases Logic ---
-                                List<CartProduct> updatedRecentPurchases = cart.getRecentPurchases() != null
-                                        ? new ArrayList<>(cart.getRecentPurchases())
-                                        : new ArrayList<>();
-
-                                for (CartProduct purchasedProduct : products) {
-                                    boolean found = false;
-                                    for (CartProduct recent : updatedRecentPurchases) {
-                                        if (recent.getProductId().equals(purchasedProduct.getProductId())) {
-                                            recent.setQuantityInCart(
-                                                    recent.getQuantityInCart() + purchasedProduct.getQuantityInCart()
-                                            );
-                                            found = true;
-                                            break;
-                                        }
-                                    }
-                                    if (!found) {
-                                        updatedRecentPurchases.add(purchasedProduct);
-                                    }
-                                }
-                                cart.setRecentPurchases(updatedRecentPurchases);
-
-                                // --- Recommendation Purchases Logic ---
-                                return Flux.fromIterable(products)
+                                return Flux.fromIterable(purchasedProducts)
                                         .map(CartProduct::getProductId)
                                         .flatMap(productClient::getProductByProductId)
-                                        .filter(product -> product.getProductType() != null)
+                                        .filter(product ->
+                                                product.getProductType() != null)
                                         .map(ProductResponseModel::getProductType)
                                         .distinct()
                                         .flatMap(productClient::getProductsByType)
@@ -268,11 +247,10 @@ public class CartServiceImpl implements CartService {
                                         .flatMap(recommendations -> {
                                             cart.setRecommendationPurchase(recommendations);
                                             cart.setProducts(Collections.emptyList());
-
-                                            return cartRepository.save(cart)
-                                                    .then(Mono.defer(() -> orderService.createOrder(orderCart))
-                                                    .thenReturn(new CartResponseModel(invoiceId, cartId, products, total)));
-
+                                            return cartRepository.save(cart);})
+                                        .map(savedCart ->
+                                                new CartResponseModel(invoiceId, cartId, purchasedProducts, total)
+                                        );
                                         });
 
                             });

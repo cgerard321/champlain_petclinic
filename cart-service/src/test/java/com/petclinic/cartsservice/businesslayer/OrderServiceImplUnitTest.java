@@ -8,12 +8,13 @@ import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.domainclientlayer.CustomerClient;
 import com.petclinic.cartsservice.domainclientlayer.CustomerResponseModel;
 import com.petclinic.cartsservice.domainclientlayer.ProductClient;
-import com.petclinic.cartsservice.presentationlayer.OrderResponseModel;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
+import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -50,8 +51,10 @@ class OrderServiceUnitTest {
     private CartProduct product1;
     private CartProduct product2;
 
-    private final String customerId = "customer-123";
-    private final String orderId = "order-123";
+    private static final String CUSTOMER_ID = "customer-123";
+    private static final String ORDER_ID = "order-123";
+    private static final String CUSTOMER_NAME = "Test Customer";
+    private static final String CUSTOMER_ADDRESS = "123 Test Street";
 
     @BeforeEach
     void init() {
@@ -74,7 +77,7 @@ class OrderServiceUnitTest {
 
         cart = Cart.builder()
                 .cartId("cart-123")
-                .customerId(customerId)
+                .customerId(CUSTOMER_ID)
                 .products(List.of(product1, product2))
                 .subtotal(125.0)
                 .tvq(12.47)
@@ -83,65 +86,72 @@ class OrderServiceUnitTest {
                 .build();
 
         order = Order.builder()
-                .orderId(orderId)
-                .customerId(customerId)
-                .customerName("Test Customer")
-                .customerAddress("123 Test Street")
+                .orderId(ORDER_ID)
+                .customerId(CUSTOMER_ID)
+                .customerName(CUSTOMER_NAME)
+                .customerAddress(CUSTOMER_ADDRESS)
                 .products(List.of(product1, product2))
                 .subtotal(125.0)
                 .tvq(12.47)
                 .tvc(6.25)
                 .total(143.72)
-                .orderDate(LocalDateTime.now())
+                .orderDate(LocalDateTime.of(2026, 1, 15, 12, 0))
                 .build();
     }
 
+    // =========================================================
+    // CREATE ORDER TESTS
+    // =========================================================
 
     @Test
     void createOrder_ValidCart_ReturnsOrderResponseModel() {
         // Arrange
-        CustomerResponseModel customer = mock(CustomerResponseModel.class);
+        CustomerResponseModel customer = mockCustomer();
 
-        when(customer.getCustomerId()).thenReturn(customerId);
-        when(customer.getFullName()).thenReturn("Test Customer");
-        when(customer.getAddress()).thenReturn("123 Test Street");
-
-        when(customerClient.getCustomerById(customerId))
+        when(customerClient.getCustomerById(CUSTOMER_ID))
                 .thenReturn(Mono.just(customer));
 
         when(orderRepository.save(any(Order.class)))
-                .thenAnswer(inv -> Mono.just(inv.getArgument(0)));
+                .thenAnswer(invocation ->
+                        Mono.just(invocation.getArgument(0)));
 
         // Act & Assert
         StepVerifier.create(orderService.createOrder(cart))
                 .assertNext(response -> {
                     assertNotNull(response.getOrderId());
-                    assertEquals(customerId, response.getCustomerId());
-                    assertEquals("Test Customer", response.getCustomerName());
-                    assertEquals("123 Test Street", response.getCustomerAddress());
+                    assertEquals(CUSTOMER_ID, response.getCustomerId());
+                    assertEquals(CUSTOMER_NAME, response.getCustomerName());
+                    assertEquals(CUSTOMER_ADDRESS, response.getCustomerAddress());
                     assertEquals(2, response.getProducts().size());
                     assertNotNull(response.getOrderDate());
                 })
                 .verifyComplete();
 
-        verify(customerClient, times(1)).getCustomerById(customerId);
-        verify(orderRepository, times(1)).save(any(Order.class));
+        // Verify saved order
+        ArgumentCaptor<Order> orderCaptor =
+                ArgumentCaptor.forClass(Order.class);
+
+        verify(orderRepository).save(orderCaptor.capture());
+
+        Order savedOrder = orderCaptor.getValue();
+
+        assertEquals(CUSTOMER_ID, savedOrder.getCustomerId());
+        assertEquals(CUSTOMER_NAME, savedOrder.getCustomerName());
+        assertEquals(CUSTOMER_ADDRESS, savedOrder.getCustomerAddress());
+        assertEquals(2, savedOrder.getProducts().size());
+        verify(customerClient).getCustomerById(CUSTOMER_ID);
     }
 
     @Test
     void createOrder_ValidCart_SavesCorrectFinancialValues() {
         // Arrange
-        CustomerResponseModel customer = mock(CustomerResponseModel.class);
+        CustomerResponseModel customer = mockCustomer();
 
-        when(customer.getCustomerId()).thenReturn(customerId);
-        when(customer.getFullName()).thenReturn("Test Customer");
-        when(customer.getAddress()).thenReturn("123 Test Street");
-
-        when(customerClient.getCustomerById(customerId))
-                .thenReturn(Mono.just(customer));
+        when(customerClient.getCustomerById(CUSTOMER_ID)).thenReturn(Mono.just(customer));
 
         when(orderRepository.save(any(Order.class)))
-                .thenAnswer(inv -> Mono.just(inv.getArgument(0)));
+                .thenAnswer(invocation ->
+                        Mono.just(invocation.getArgument(0)));
 
         // Act & Assert
         StepVerifier.create(orderService.createOrder(cart))
@@ -150,88 +160,87 @@ class OrderServiceUnitTest {
                     assertEquals(12.47, response.getTvq(), 0.001);
                     assertEquals(6.25, response.getTvc(), 0.001);
                     assertEquals(143.72, response.getTotal(), 0.001);
-                })
-                .verifyComplete();
+                }).verifyComplete();
 
-        verify(orderRepository, times(1)).save(any(Order.class));
+        // Verify financial values saved in repository
+        ArgumentCaptor<Order> orderCaptor = ArgumentCaptor.forClass(Order.class);
+
+        verify(orderRepository).save(orderCaptor.capture());
+
+        Order savedOrder = orderCaptor.getValue();
+
+        assertEquals(125.0, savedOrder.getSubtotal(), 0.001);
+        assertEquals(12.47, savedOrder.getTvq(), 0.001);
+        assertEquals(6.25, savedOrder.getTvc(), 0.001);
+        assertEquals(143.72, savedOrder.getTotal(), 0.001);
     }
 
     @Test
-    void createOrder_CustomerNotFound_ReturnsEmpty() {
+    void createOrder_CustomerNotFound_ThrowsNotFoundException() {
         // Arrange
-        when(customerClient.getCustomerById(customerId))
-                .thenReturn(Mono.empty());
+        when(customerClient.getCustomerById(CUSTOMER_ID)).thenReturn(Mono.empty());
 
         // Act & Assert
         StepVerifier.create(orderService.createOrder(cart))
-                .expectNextCount(0)
-                .verifyComplete();
+                .expectErrorMatches(error ->
+                        error instanceof NotFoundException &&
+                                error.getMessage().equals("Customer not found")).verify();
 
+        verify(customerClient).getCustomerById(CUSTOMER_ID);
         verify(orderRepository, never()).save(any(Order.class));
     }
 
     @Test
     void createOrder_RepositoryError_ThrowsException() {
         // Arrange
-        CustomerResponseModel customer = mock(CustomerResponseModel.class);
+        CustomerResponseModel customer = mockCustomer();
 
-        when(customer.getCustomerId()).thenReturn(customerId);
-        when(customer.getFullName()).thenReturn("Test Customer");
-        when(customer.getAddress()).thenReturn("123 Test Street");
-
-        when(customerClient.getCustomerById(customerId))
-                .thenReturn(Mono.just(customer));
+        when(customerClient.getCustomerById(CUSTOMER_ID)).thenReturn(Mono.just(customer));
 
         when(orderRepository.save(any(Order.class)))
-                .thenReturn(Mono.error(
-                        new RuntimeException("Database error")
-                ));
-
+                .thenReturn(Mono.error(new RuntimeException("Database error")));
         // Act & Assert
         StepVerifier.create(orderService.createOrder(cart))
                 .expectErrorMatches(error ->
                         error instanceof RuntimeException &&
-                                error.getMessage().equals("Database error"))
-                .verify();
+                                error.getMessage().equals("Database error")).verify();
 
-        verify(orderRepository, times(1)).save(any(Order.class));
+        verify(orderRepository).save(any(Order.class));
     }
-
 
     @Test
     void getOrderByOrderId_ExistingOrder_ReturnsOrderResponseModel() {
         // Arrange
-        when(orderRepository.findOrderByOrderId(orderId))
+        when(orderRepository.findOrderByOrderId(ORDER_ID))
                 .thenReturn(Mono.just(order));
 
         // Act & Assert
-        StepVerifier.create(orderService.getOrderByOrderId(orderId))
-                .expectNextMatches(response ->
-                        response.getOrderId().equals(orderId) &&
-                                response.getCustomerId().equals(customerId) &&
-                                response.getProducts().size() == 2 &&
-                                response.getTotal() == 143.72)
+        StepVerifier.create(orderService.getOrderByOrderId(ORDER_ID))
+                .assertNext(response -> {
+                    assertEquals(ORDER_ID, response.getOrderId());
+                    assertEquals(CUSTOMER_ID, response.getCustomerId());
+                    assertEquals(2, response.getProducts().size());
+                    assertEquals(143.72, response.getTotal(), 0.001);
+                })
                 .verifyComplete();
 
-        verify(orderRepository, times(1)).findOrderByOrderId(orderId);
+        verify(orderRepository).findOrderByOrderId(ORDER_ID);
     }
 
     @Test
     void getOrderByOrderId_NonExistentOrder_ThrowsNotFound() {
         // Arrange
-        when(orderRepository.findOrderByOrderId(orderId))
-                .thenReturn(Mono.empty());
+        when(orderRepository.findOrderByOrderId(ORDER_ID)).thenReturn(Mono.empty());
 
         // Act & Assert
-        StepVerifier.create(orderService.getOrderByOrderId(orderId))
+        StepVerifier.create(orderService.getOrderByOrderId(ORDER_ID))
                 .expectErrorMatches(error ->
                         error instanceof ResponseStatusException &&
                                 ((ResponseStatusException) error)
-                                        .getStatusCode().value() == 404)
-                .verify();
-
-        verify(orderRepository, times(1)).findOrderByOrderId(orderId);
+                                        .getStatusCode().value() == 404).verify();
+        verify(orderRepository).findOrderByOrderId(ORDER_ID);
     }
+
 
     @Test
     void getAllOrders_ReturnsMultipleOrders() {
@@ -249,65 +258,61 @@ class OrderServiceUnitTest {
         // Act & Assert
         StepVerifier.create(orderService.getAllOrders())
                 .expectNextMatches(response ->
-                        response.getOrderId().equals(orderId))
+                        response.getOrderId().equals(ORDER_ID))
                 .expectNextMatches(response ->
                         response.getOrderId().equals("order-456"))
                 .verifyComplete();
 
-        verify(orderRepository, times(1)).findAll();
+        verify(orderRepository).findAll();
     }
 
     @Test
     void getAllOrders_NoOrders_ReturnsEmptyList() {
         // Arrange
-        when(orderRepository.findAll())
-                .thenReturn(Flux.empty());
+        when(orderRepository.findAll()).thenReturn(Flux.empty());
 
         // Act & Assert
-        StepVerifier.create(orderService.getAllOrders())
-                .expectNextCount(0)
-                .verifyComplete();
-
-        verify(orderRepository, times(1)).findAll();
+        StepVerifier.create(orderService.getAllOrders()).verifyComplete();
+        verify(orderRepository).findAll();
     }
+
+
 
     @Test
     void findOrdersByCustomerId_ExistingCustomer_ReturnsOrders() {
         // Arrange
         Order olderOrder = Order.builder()
                 .orderId("older-order")
-                .customerId(customerId)
+                .customerId(CUSTOMER_ID)
                 .products(List.of(product1))
                 .total(100.0)
-                .orderDate(LocalDateTime.now().minusDays(5))
+                .orderDate(LocalDateTime.of(2026, 1, 10, 12, 0))
                 .build();
 
-        when(orderRepository.findAllByCustomerId(customerId))
+        when(orderRepository.findAllByCustomerId(CUSTOMER_ID))
                 .thenReturn(Flux.just(olderOrder, order));
 
         // Act & Assert
-        StepVerifier.create(orderService.findOrdersByCustomerId(customerId))
+        StepVerifier.create(orderService.findOrdersByCustomerId(CUSTOMER_ID))
                 .expectNextMatches(response ->
-                        response.getOrderId().equals(orderId))
+                        response.getOrderId().equals(ORDER_ID))
                 .expectNextMatches(response ->
-                        response.getOrderId().equals("older-order"))
-                .verifyComplete();
+                        response.getOrderId().equals("older-order")).verifyComplete();
 
-        verify(orderRepository, times(1)).findAllByCustomerId(customerId);
+        verify(orderRepository).findAllByCustomerId(CUSTOMER_ID);
     }
 
     @Test
     void findOrdersByCustomerId_NoOrders_ReturnsEmptyList() {
         // Arrange
-        when(orderRepository.findAllByCustomerId(customerId))
+        when(orderRepository.findAllByCustomerId(CUSTOMER_ID))
                 .thenReturn(Flux.empty());
 
         // Act & Assert
-        StepVerifier.create(orderService.findOrdersByCustomerId(customerId))
-                .expectNextCount(0)
+        StepVerifier.create(orderService.findOrdersByCustomerId(CUSTOMER_ID))
                 .verifyComplete();
 
-        verify(orderRepository, times(1)).findAllByCustomerId(customerId);
+        verify(orderRepository).findAllByCustomerId(CUSTOMER_ID);
     }
 
     @Test
@@ -317,8 +322,7 @@ class OrderServiceUnitTest {
                 .expectErrorMatches(error ->
                         error instanceof InvalidInputException &&
                                 error.getMessage().equals(
-                                        "customerId must not be null or empty"))
-                .verify();
+                                        "customerId must not be null or empty")).verify();
 
         verifyNoInteractions(orderRepository);
     }
@@ -330,8 +334,7 @@ class OrderServiceUnitTest {
                 .expectErrorMatches(error ->
                         error instanceof InvalidInputException &&
                                 error.getMessage().equals(
-                                        "customerId must not be null or empty"))
-                .verify();
+                                        "customerId must not be null or empty")).verify();
 
         verifyNoInteractions(orderRepository);
     }
@@ -339,88 +342,34 @@ class OrderServiceUnitTest {
     @Test
     void findOrdersByCustomerId_RepositoryError_ThrowsException() {
         // Arrange
-        when(orderRepository.findAllByCustomerId(customerId))
+        when(orderRepository.findAllByCustomerId(CUSTOMER_ID))
                 .thenReturn(Flux.error(
                         new RuntimeException("Database error")
                 ));
 
         // Act & Assert
-        StepVerifier.create(orderService.findOrdersByCustomerId(customerId))
+        StepVerifier.create(orderService.findOrdersByCustomerId(CUSTOMER_ID))
                 .expectErrorMatches(error ->
                         error instanceof RuntimeException &&
                                 error.getMessage().equals("Database error"))
                 .verify();
 
-        verify(orderRepository, times(1)).findAllByCustomerId(customerId);
+        verify(orderRepository).findAllByCustomerId(CUSTOMER_ID);
     }
 
 
-    @Test
-    void toOrder_ValidOrderResponse_ReturnsOrder() {
-        // Arrange
-        OrderResponseModel response = OrderResponseModel.builder()
-                .orderId(orderId)
-                .customerId(customerId)
-                .customerName("Test Customer")
-                .customerAddress("123 Test Street")
-                .products(List.of(product1, product2))
-                .subtotal(125.0)
-                .tvq(12.47)
-                .tvc(6.25)
-                .total(143.72)
-                .orderDate(LocalDateTime.now())
-                .build();
+    private CustomerResponseModel mockCustomer() {
+        CustomerResponseModel customer = mock(CustomerResponseModel.class);
 
-        // Act
-        Order result = orderService.toOrder(response);
+        lenient().when(customer.getCustomerId())
+                .thenReturn(CUSTOMER_ID);
 
-        // Assert
-        assertNotNull(result);
-        assertEquals(orderId, result.getOrderId());
-        assertEquals(customerId, result.getCustomerId());
-        assertEquals("Test Customer", result.getCustomerName());
-        assertEquals("123 Test Street", result.getCustomerAddress());
-        assertEquals(2, result.getProducts().size());
-        assertEquals(125.0, result.getSubtotal(), 0.001);
-        assertEquals(12.47, result.getTvq(), 0.001);
-        assertEquals(6.25, result.getTvc(), 0.001);
-        assertEquals(143.72, result.getTotal(), 0.001);
+        lenient().when(customer.getFullName())
+                .thenReturn(CUSTOMER_NAME);
+
+        lenient().when(customer.getAddress())
+                .thenReturn(CUSTOMER_ADDRESS);
+
+        return customer;
     }
-
-
-    @Test
-    void storeCartOrder_ValidCart_PreservesOriginalProductsAndTotals() {
-        // Arrange
-        cart.setPromoPercent(10.0);
-
-        int originalQuantity =
-                cart.getProducts().get(0).getQuantityInCart();
-
-        // Act
-        Cart orderCart = orderService.storeCartOrder(cart);
-
-        // Assert
-        assertNotNull(orderCart);
-
-        assertNotSame(cart, orderCart);
-        assertEquals(cart.getCustomerId(), orderCart.getCustomerId());
-        assertEquals(cart.getPromoPercent(), orderCart.getPromoPercent());
-
-        assertEquals(2, orderCart.getProducts().size());
-        assertNotSame(cart.getProducts(), orderCart.getProducts());
-        assertNotSame(cart.getProducts().get(0), orderCart.getProducts().get(0));
-        assertEquals(cart.getProducts().get(0).getProductId(), orderCart.getProducts().get(0).getProductId());
-        assertEquals(originalQuantity, orderCart.getProducts().get(0).getQuantityInCart());
-        assertEquals(125.0, orderCart.getSubtotal(), 0.001);
-        assertEquals(11.22, orderCart.getTvq(), 0.001);
-        assertEquals(5.63, orderCart.getTvc(), 0.001);
-        assertEquals(129.35, orderCart.getTotal(), 0.001);
-
-        cart.getProducts().get(0).setQuantityInCart(5);
-
-        assertEquals(originalQuantity, orderCart.getProducts().get(0).getQuantityInCart());
-        verifyNoInteractions(orderRepository);
-        verifyNoInteractions(customerClient);
-    }
-
 }

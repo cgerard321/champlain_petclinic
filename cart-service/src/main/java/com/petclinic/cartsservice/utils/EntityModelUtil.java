@@ -20,8 +20,7 @@ import reactor.core.publisher.Mono;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class EntityModelUtil {
 
@@ -144,6 +143,93 @@ public class EntityModelUtil {
         return responseModel;
     }
 
+    public static Order toOrder(Cart cart, CustomerResponseModel customer) {
+        return Order.builder()
+                .orderId(UUID.randomUUID().toString())
+                .customerId(customer.getCustomerId())
+                .customerName(customer.getFullName())
+                .customerAddress(customer.getAddress())
+                .products(copyCartProducts(cart.getProducts()))
+                .subtotal(cart.getSubtotal())
+                .promoPercent(cart.getPromoPercent())
+                .tvq(cart.getTvq())
+                .tvc(cart.getTvc())
+                .total(cart.getTotal())
+                .invoiceId(cart.getInvoiceId())
+                .orderDate(LocalDateTime.now())
+                .build();
+    }
+
+
+    private static List<CartProduct> copyCartProducts(
+            List<CartProduct> products
+    ) {
+        Objects.requireNonNull(products, "Cart products must not be null");
+
+        return products.stream()
+                .map(product -> {
+                    CartProduct copy = new CartProduct();
+                    BeanUtils.copyProperties(product, copy);
+                    return copy;
+                })
+                .toList();
+    }
+
+
+    public static Cart storeCartOrder(Cart cart) {
+        Cart orderCart = new Cart();
+
+        BeanUtils.copyProperties(cart, orderCart);
+
+        List<CartProduct> products =
+                copyCartProducts(cart.getProducts());
+
+        orderCart.setProducts(products);
+
+        CartResponseModel calculatedCart =
+                toCartResponseModel(orderCart, products);
+
+        orderCart.setSubtotal(calculatedCart.getSubtotal());
+        orderCart.setPromoPercent(calculatedCart.getPromoPercent());
+        orderCart.setTvq(calculatedCart.getTvq());
+        orderCart.setTvc(calculatedCart.getTvc());
+        orderCart.setTotal(calculatedCart.getTotal());
+
+        return orderCart;
+    }
+
+
+
+    public static List<CartProduct> mergeRecentPurchases(List<CartProduct> recentPurchases, List<CartProduct> purchasedProducts)
+    {
+        Map<String, CartProduct> merged = new LinkedHashMap<>();
+
+        if (recentPurchases != null) {
+            for (CartProduct product : recentPurchases) {
+                merged.put(product.getProductId(), copyCartProduct(product));
+            }
+        }
+
+        for (CartProduct purchased : purchasedProducts) {
+            String productId = purchased.getProductId();
+
+            merged.merge(productId, copyCartProduct(purchased),
+                    (existing, incoming) -> {
+                        existing.setQuantityInCart(existing.getQuantityInCart() + incoming.getQuantityInCart());
+                        return existing;
+                    }
+            );
+        }
+
+        return new ArrayList<>(merged.values());
+    }
+
+
+    private static CartProduct copyCartProduct(CartProduct product) {
+        CartProduct copy = new CartProduct();
+        BeanUtils.copyProperties(product, copy);
+        return copy;
+    }
 
 
     private static double round2(double v) {

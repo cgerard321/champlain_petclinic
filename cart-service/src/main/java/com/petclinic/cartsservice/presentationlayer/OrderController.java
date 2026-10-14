@@ -1,9 +1,6 @@
 package com.petclinic.cartsservice.presentationlayer;
 
-import com.petclinic.cartsservice.businesslayer.CartService;
 import com.petclinic.cartsservice.businesslayer.OrderService;
-import com.petclinic.cartsservice.domainclientlayer.PromoCodeRequestModel;
-import com.petclinic.cartsservice.domainclientlayer.PromoCodeResponseModel;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -45,11 +42,4 @@ public class OrderController {
         return orderService.findOrdersByCustomerId(customerId);
     }
 
-
-  //  @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-  //  public Mono<ResponseEntity<OrderResponseModel>> createOrder(@RequestBody PromoCodeRequestModel promoCodeRequestModel) {
-   //     return orderService.createOrder(order)
-   //             .map(c -> ResponseEntity.status(HttpStatus.CREATED).body(c))
-  //              .defaultIfEmpty(ResponseEntity.badRequest().build());
-  //  }
 }

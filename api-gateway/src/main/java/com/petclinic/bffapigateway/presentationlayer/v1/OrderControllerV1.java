@@ -1,4 +1,4 @@
-package com.petclinic.bffapigateway.presentationlayer.v2;
+package com.petclinic.bffapigateway.presentationlayer.v1;
 
 import com.petclinic.bffapigateway.domainclientlayer.CartServiceClient;
 import com.petclinic.bffapigateway.dtos.Cart.OrderResponseDTO;
@@ -9,8 +9,8 @@ import reactor.core.publisher.Flux;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v2/gateway/orders")
-public class OrderController {
+@RequestMapping("/api/gateway/orders")
+public class OrderControllerV1 {
 
     private final CartServiceClient cartServiceClient;
 

@@ -6,7 +6,7 @@ export const getCustomerOrders = async (
 ): Promise<OrderModel[]> => {
   const { data } = await axiosInstance.get<OrderModel[]>(
     `/orders/customer/${encodeURIComponent(customerId)}`,
-    { useV2: true }
+    { useV2: false }
   );
 
   return data;
