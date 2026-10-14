@@ -88,6 +88,9 @@
       }
     },
     "visits": {
+      "nextappointement": {
+        "title": "Next upcoming visit"
+      },
       "showFilters": "Show filters",
       "filterButton": "Filter By",
       "hideFilters": "Hide filters",
