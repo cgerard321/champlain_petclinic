@@ -8,7 +8,6 @@ import { Status } from '@features/vist/models/Status';
   templateUrl: './filter-button.html',
   styleUrl: './filter-button.css',
 })
-
 export class FilterButton {
   protected readonly statuses = Object.values(Status) as Status[];
   readonly selectedStatuses = input.required<Status[]>();
@@ -31,8 +30,8 @@ export class FilterButton {
       return selected.has(candidate);
     }
 
-    this.statusSelectionChange.emit(this.statuses.filter(isSelected));  }
-
+    this.statusSelectionChange.emit(this.statuses.filter(isSelected));
+  }
 
   protected statusLabel(status: Status): string {
     switch (status) {
