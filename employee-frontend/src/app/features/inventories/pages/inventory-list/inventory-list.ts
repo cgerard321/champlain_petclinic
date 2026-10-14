@@ -271,6 +271,20 @@ export class InventoryList implements OnInit, OnDestroy {
     );
   }
 
+  private emptyFilteredMessage(): string {
+    const filters = this.filters();
+    if (
+      filters.importantOnly &&
+      !filters.inventoryName.trim() &&
+      !filters.inventoryType &&
+      !filters.inventoryDescription.trim()
+    ) {
+      return this.noFavoritesLabel;
+    }
+
+    return $localize`:@@inventory.noResults.message:Aucun inventaire ne correspond à votre recherche. Essayez un autre nom ou une autre description, ou effacez les filtres.`;
+  }
+
   protected canGoToNextPage(): boolean {
     return this.inventories().length === this.pageSize;
   }
@@ -426,9 +440,7 @@ export class InventoryList implements OnInit, OnDestroy {
         }
 
         if (err instanceof HttpErrorResponse && err.status === 404 && this.hasActiveFilters()) {
-          this.noResultsMessage.set(
-            $localize`:@@inventory.noResults.message:Aucun inventaire ne correspond à votre recherche. Essayez un autre nom ou une autre description, ou effacez les filtres.`,
-          );
+          this.noResultsMessage.set(this.emptyFilteredMessage());
           this.errorMessage.set(null);
           return;
         }
@@ -450,9 +462,7 @@ export class InventoryList implements OnInit, OnDestroy {
         }
 
         if (this.inventories().length === 0 && this.hasActiveFilters()) {
-          this.noResultsMessage.set(
-            $localize`:@@inventory.noResults.message:Aucun inventaire ne correspond à votre recherche. Essayez un autre nom ou une autre description, ou effacez les filtres.`,
-          );
+          this.noResultsMessage.set(this.emptyFilteredMessage());
         }
       },
     });
