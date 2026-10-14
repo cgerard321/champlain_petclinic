@@ -3,6 +3,7 @@
 Back to [Main page](../README.md)
 
 <!-- TOC -->
+
 - [Frontend Standards (React TypeScript)](#frontend-standards-react-typescript)
   - [Critical Issues - These Will Not Be Tolerated](#critical-issues---these-will-not-be-tolerated)
     - [1. Hardcoded URLs Instead of Environment Variables](#1-hardcoded-urls-instead-of-environment-variables)
@@ -20,6 +21,7 @@ Back to [Main page](../README.md)
     - [TypeScript Best Practices](#typescript-best-practices)
     - [React Component Standards](#react-component-standards)
   - [Shared Axios Instance Configuration](#shared-axios-instance-configuration)
+
 <!-- TOC -->
 
 ## Critical Issues - These Will Not Be Tolerated
@@ -30,11 +32,11 @@ Back to [Main page](../README.md)
 
 ```typescript
 // DON'T: Hardcoded URLs
-const response = await fetch('http://localhost:8080/api/v2/gateway/vets');
+const response = await fetch("http://localhost:8080/api/v2/gateway/vets");
 
 // DON'T: Hardcoded base URL in class
 export class PromoApi {
-  private static BASE_URL = 'http://localhost:8080/api/v2/gateway/promos';
+  private static BASE_URL = "http://localhost:8080/api/v2/gateway/promos";
 }
 ```
 
@@ -42,13 +44,13 @@ export class PromoApi {
 
 ```typescript
 // DO: Be explicit about version choice - prefer v1 unless breaking changes needed
-import axiosInstance from '@/shared/api/axiosInstance';
+import axiosInstance from "@/shared/api/axiosInstance";
 
 // Preferred: Use v1 API explicitly for most cases
-const response = await axiosInstance.get('/vets', { useV2: false });
+const response = await axiosInstance.get("/vets", { useV2: false });
 
 // Only use v2 when you need breaking changes that would affect Angular frontend
-const response = await axiosInstance.get('/vets', { useV2: true });
+const response = await axiosInstance.get("/vets", { useV2: true });
 ```
 
 ### 2. Using fetch() or Creating New Axios Instances
@@ -57,15 +59,18 @@ const response = await axiosInstance.get('/vets', { useV2: true });
 
 ```typescript
 // DON'T: Use fetch() directly
-const response = await fetch(`http://localhost:8080/api/v2/gateway/vets/${vetId}`, {
-  headers: { Accept: 'application/json' },
-  credentials: 'include',
-});
+const response = await fetch(
+  `http://localhost:8080/api/v2/gateway/vets/${vetId}`,
+  {
+    headers: { Accept: "application/json" },
+    credentials: "include",
+  },
+);
 
 // DON'T: Create new axios instances
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:8080/api/v2/gateway',
-  headers: { 'Content-Type': 'application/json' },
+  baseURL: "http://localhost:8080/api/v2/gateway",
+  headers: { "Content-Type": "application/json" },
 });
 ```
 
@@ -73,9 +78,11 @@ const axiosInstance = axios.create({
 
 ```typescript
 // DO: Use the shared axios instance
-import axiosInstance from '@/shared/api/axiosInstance';
+import axiosInstance from "@/shared/api/axiosInstance";
 
-const response = await axiosInstance.get<VetResponseModel>(`/vets/${vetId}`, {useV2: false});
+const response = await axiosInstance.get<VetResponseModel>(`/vets/${vetId}`, {
+  useV2: false,
+});
 return response.data;
 ```
 
@@ -86,12 +93,12 @@ return response.data;
 ```typescript
 // DON'T: Manually concatenate with baseURL
 const response = await axiosInstance.get<ProductModel[]>(
-  axiosInstance.defaults.baseURL + `inventories/${inventoryId}/products`
+  axiosInstance.defaults.baseURL + `inventories/${inventoryId}/products`,
 );
 
 // DON'T: Mix different concatenation styles
 const response = await axiosInstance.get<InventoryType[]>(
-  axiosInstance.defaults.baseURL + 'inventories/types'
+  axiosInstance.defaults.baseURL + "inventories/types",
 );
 ```
 
@@ -100,10 +107,10 @@ const response = await axiosInstance.get<InventoryType[]>(
 ```typescript
 // DO: Let axios handle URL construction
 const response = await axiosInstance.get<ProductModel[]>(
-  `/inventories/${inventoryId}/products`
+  `/inventories/${inventoryId}/products`,
 );
 
-const response = await axiosInstance.get<InventoryType[]>('/inventories/types');
+const response = await axiosInstance.get<InventoryType[]>("/inventories/types");
 ```
 
 ### 4. Inconsistent API Versioning
@@ -112,12 +119,21 @@ const response = await axiosInstance.get<InventoryType[]>('/inventories/types');
 
 ```typescript
 // DON'T: Mix different API versions in the same file
-export const updateVetEducation = async (vetId: string, educationId: string, education: EducationRequestModel) => {
-  return await axiosInstance.put(`/vets/${vetId}/educations/${educationId}`, education);
+export const updateVetEducation = async (
+  vetId: string,
+  educationId: string,
+  education: EducationRequestModel,
+) => {
+  return await axiosInstance.put(
+    `/vets/${vetId}/educations/${educationId}`,
+    education,
+  );
 };
 
 export const getEducation = async (vetId: string) => {
-  return await axios.get(`http://localhost:8080/api/gateway/vet/${vetId}/education`);
+  return await axios.get(
+    `http://localhost:8080/api/gateway/vet/${vetId}/education`,
+  );
 };
 ```
 
@@ -125,13 +141,21 @@ export const getEducation = async (vetId: string) => {
 
 ```typescript
 // DO: Be explicit about API versioning and prefer v1 unless breaking changes needed
-export const updateVetEducation = async (vetId: string, educationId: string, education: EducationRequestModel) => {
+export const updateVetEducation = async (
+  vetId: string,
+  educationId: string,
+  education: EducationRequestModel,
+) => {
   // Use v1 API explicitly (preferred for backwards compatibility)
-  return await axiosInstance.put(`/vets/${vetId}/educations/${educationId}`, education, { useV2: false });
+  return await axiosInstance.put(
+    `/vets/${vetId}/educations/${educationId}`,
+    education,
+    { useV2: false },
+  );
 };
 
 export const getEducation = async (vetId: string) => {
-  // Use v1 API explicitly 
+  // Use v1 API explicitly
   return await axiosInstance.get(`/vets/${vetId}/education`, { useV2: false });
 };
 ```
@@ -140,11 +164,19 @@ export const getEducation = async (vetId: string) => {
 
 ```typescript
 // DO: Prefer v1 API for new features unless breaking changes are required
-import axiosInstance from '@/shared/api/axiosInstance';
+import axiosInstance from "@/shared/api/axiosInstance";
 
-export const updateVetEducation = async (vetId: string, educationId: string, education: EducationRequestModel) => {
+export const updateVetEducation = async (
+  vetId: string,
+  educationId: string,
+  education: EducationRequestModel,
+) => {
   // Use v1 API explicitly (preferred approach)
-  return await axiosInstance.put(`/vets/${vetId}/educations/${educationId}`, education, { useV2: false });
+  return await axiosInstance.put(
+    `/vets/${vetId}/educations/${educationId}`,
+    education,
+    { useV2: false },
+  );
 };
 
 export const getEducation = async (vetId: string) => {
@@ -152,8 +184,6 @@ export const getEducation = async (vetId: string) => {
   return await axiosInstance.get(`/vet/${vetId}/education`, { useV2: true });
 };
 ```
-
-
 
 ## Required Standards
 
@@ -166,20 +196,20 @@ export const getEducation = async (vetId: string) => {
 **GOOD Example:**
 
 ```typescript
-import { VetResponseModel } from '@/features/veterinarians/models/VetResponseModel';
-import axiosInstance from '@/shared/api/axiosInstance';
+import { VetResponseModel } from "@/features/veterinarians/models/VetResponseModel";
+import axiosInstance from "@/shared/api/axiosInstance";
 
 export async function getAllVets(): Promise<VetResponseModel[]> {
   try {
-    const response = await axiosInstance.get<VetResponseModel[]>('/vets', {
-      responseType: 'stream'
+    const response = await axiosInstance.get<VetResponseModel[]>("/vets", {
+      responseType: "stream",
     });
-    
+
     return response.data
-      .split('data:')
+      .split("data:")
       .map((payload: string) => {
         try {
-          if (payload === '') return null;
+          if (payload === "") return null;
           return JSON.parse(payload);
         } catch (err) {
           console.error("Can't parse JSON:", err);
@@ -187,7 +217,7 @@ export async function getAllVets(): Promise<VetResponseModel[]> {
       })
       .filter((data?: JSON) => data !== null);
   } catch (error) {
-    console.error('Error fetching vets:', error);
+    console.error("Error fetching vets:", error);
     throw error;
   }
 }
@@ -206,7 +236,7 @@ The axios instance automatically categorizes errors into two types:
 These errors are handled globally by the axios interceptor and trigger automatic redirects:
 
 - `401 Unauthorized` - Authentication required, redirects to login
-- `403 Forbidden` - Access denied, redirects to forbidden page  
+- `403 Forbidden` - Access denied, redirects to forbidden page
 - `500 Internal Server Error` - Server issue, redirects to error page
 - `502 Bad Gateway` - Server connectivity issue
 - `503 Service Unavailable` - Maintenance mode, redirects to maintenance page
@@ -232,12 +262,12 @@ These errors propagate to components for custom handling:
 export const getVets = async () => {
   try {
     // Missing explicit API versioning
-    const response = await axiosInstance.get('/vets');
+    const response = await axiosInstance.get("/vets");
     return response.data;
   } catch (error) {
     if (error.response?.status === 401) {
       // Manual redirect - already handled globally
-      window.location.href = '/login';
+      window.location.href = "/login";
     }
     throw error;
   }
@@ -251,7 +281,9 @@ export const getVets = async () => {
 export const getVets = async (): Promise<VetResponseModel[]> => {
   try {
     // Use explicit API versioning - prefer v1 unless breaking changes needed
-    const response = await axiosInstance.get<VetResponseModel[]>('/vets', { useV2: false });
+    const response = await axiosInstance.get<VetResponseModel[]>("/vets", {
+      useV2: false,
+    });
     return response.data;
   } catch (error) {
     // Only handle business logic errors here
@@ -269,23 +301,23 @@ export const getVets = async (): Promise<VetResponseModel[]> => {
 // DO: Handle local errors in components for user feedback
 const VetList: React.FC = () => {
   const [vets, setVets] = useState<VetResponseModel[]>([]);
-  const [error, setError] = useState<string>('');
-  
+  const [error, setError] = useState<string>("");
+
   const loadVets = async () => {
     try {
       // Use explicit API versioning - prefer v1 unless breaking changes needed
       const vets = await getVets();
       setVets(vets);
-      setError('');
+      setError("");
     } catch (error) {
       // Handle local errors (404) with user feedback
       if (axios.isAxiosError(error)) {
         switch (error.response?.status) {
           case 404:
-            setError('No veterinarians found. Please try again later.');
+            setError("No veterinarians found. Please try again later.");
             break;
           default:
-            setError('An unexpected error occurred.');
+            setError("An unexpected error occurred.");
         }
       }
       // Global errors (401, 500, etc.) are automatically handled by interceptor
@@ -297,25 +329,25 @@ const VetList: React.FC = () => {
     try {
       // Use v1 API explicitly for search functionality
       const response = await axiosInstance.get<VetResponseModel[]>(
-        `/vets/search?specialty=${specialty}`, 
-        { useV2: false }
+        `/vets/search?specialty=${specialty}`,
+        { useV2: false },
       );
       setVets(response.data);
-      setError('');
+      setError("");
     } catch (error) {
       if (axios.isAxiosError(error)) {
         switch (error.response?.status) {
           case 400:
-            setError('Invalid specialty provided. Please check your input.');
+            setError("Invalid specialty provided. Please check your input.");
             break;
           case 404:
             setError(`No veterinarians found with specialty: ${specialty}`);
             break;
           case 422:
-            setError('Invalid search criteria. Please check your filters.');
+            setError("Invalid search criteria. Please check your filters.");
             break;
           default:
-            setError('Search failed. Please try again.');
+            setError("Search failed. Please try again.");
         }
       }
     }
@@ -351,13 +383,13 @@ const VetList: React.FC = () => {
 The project uses a centralized axios configuration at `/src/shared/api/axiosInstance.ts` with a flexible per-request versioning system and hybrid error handling:
 
 ```typescript
-import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
-import axiosErrorResponseHandler from '@/shared/api/axiosErrorResponseHandler.ts';
+import axios, { AxiosInstance, InternalAxiosRequestConfig } from "axios";
+import axiosErrorResponseHandler from "@/shared/api/axiosErrorResponseHandler.ts";
 
 axios.defaults.withCredentials = true;
 
 // Extend AxiosRequestConfig to include our custom useV2 property
-declare module 'axios' {
+declare module "axios" {
   export interface AxiosRequestConfig {
     useV2?: boolean;
   }
@@ -372,7 +404,7 @@ const createAxiosInstance = (): AxiosInstance => {
   const instance = axios.create({
     baseURL: import.meta.env.VITE_BACKEND_URL, // Base URL without version
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
   });
 
@@ -381,13 +413,13 @@ const createAxiosInstance = (): AxiosInstance => {
     (config: CustomAxiosRequestConfig) => {
       // Default to v2 if useV2 is not specified
       const useV2 = config.useV2 !== undefined ? config.useV2 : true;
-      const versionPath = useV2 ? '/v2/gateway' : '/gateway';
+      const versionPath = useV2 ? "/v2/gateway" : "/gateway";
 
       // Modify the URL to include the version path
       if (
         config.url &&
-        !config.url.startsWith('http://') &&
-        !config.url.startsWith('https://')
+        !config.url.startsWith("http://") &&
+        !config.url.startsWith("https://")
       ) {
         config.url = versionPath + config.url;
       }
@@ -397,15 +429,15 @@ const createAxiosInstance = (): AxiosInstance => {
 
       return config;
     },
-    error => {
+    (error) => {
       return Promise.reject(error);
-    }
+    },
   );
 
   // Response interceptor with hybrid error handling
   instance.interceptors.response.use(
-    response => response,
-    error => {
+    (response) => response,
+    (error) => {
       // Handle errors through a custom error handler
       const shouldStopPropagation = handleAxiosError(error);
 
@@ -416,7 +448,7 @@ const createAxiosInstance = (): AxiosInstance => {
 
       // Otherwise, let the error propagate to try-catch blocks
       return Promise.reject(error);
-    }
+    },
   );
 
   return instance;
@@ -428,13 +460,13 @@ const handleAxiosError = (error: unknown): boolean => {
 
     // Define which errors should be handled globally vs locally
     const globallyHandledCodes = {
-      401: 'Authentication required - redirecting to login',
-      403: 'Access forbidden - redirecting to unauthorized page',
-      500: 'Internal server error - showing error page',
-      502: 'Bad gateway - server issue',
-      503: 'Service unavailable - showing maintenance page',
-      504: 'Gateway timeout - server issue',
-      0: 'Network error - no connection',
+      401: "Authentication required - redirecting to login",
+      403: "Access forbidden - redirecting to unauthorized page",
+      500: "Internal server error - showing error page",
+      502: "Bad gateway - server issue",
+      503: "Service unavailable - showing maintenance page",
+      504: "Gateway timeout - server issue",
+      0: "Network error - no connection",
     };
 
     // Local handling errors (don't stop propagation)
@@ -457,7 +489,7 @@ const handleAxiosError = (error: unknown): boolean => {
     // For unknown status codes, let components handle
     return false;
   }
-  
+
   return false;
 };
 

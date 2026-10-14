@@ -26,7 +26,7 @@
 }
 
 .card:hover {
-  transform: translateY(-2px) scale(1.01); 
+  transform: translateY(-2px) scale(1.01);
   box-shadow: 0 10px 28px rgba(2, 6, 23, 0.12);
   border-color: #e6eefb;
 }
@@ -123,13 +123,13 @@
   cursor: pointer;
   font-size: 0.95rem;
   font-weight: 600;
-    width: auto;
-    max-width: 100%;
-    min-height: 44px;
-    height: auto;
-    padding: 10px 16px;
-    white-space: normal;
-    line-height: 1.3;
+  width: auto;
+  max-width: 100%;
+  min-height: 44px;
+  height: auto;
+  padding: 10px 16px;
+  white-space: normal;
+  line-height: 1.3;
   margin: 10px 0 0 0;
   display: block;
   transition:

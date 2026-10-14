@@ -26,7 +26,7 @@ src/
 ```
 
 | Folder         | Loaded                 | Knows about business logic? | Imported by                           |
-|----------------|------------------------|-----------------------------|---------------------------------------|
+| -------------- | ---------------------- | --------------------------- | ------------------------------------- |
 | `core`         | once, at bootstrap     | Yes (app-wide concerns)     | Only `app.ts` and `app.config.ts`     |
 | `shared`       | anywhere it's used     | No                          | `features`, `layout`                  |
 | `layout`       | once, in the app shell | A little (composes routes)  | `app.ts` only                         |
@@ -82,9 +82,9 @@ shared/
 1. Does it contain any domain/business logic (talks to a feature-specific service, knows about feature-specific models
    like `Visit` or `Bill`)? → **Yes**, keep it in the feature.
 2. Is it purely presentational (inputs/outputs only, no feature imports)? → **Yes candidate**.
-3. Is it used by 2+ features, or clearly *going to be*? → **Yes**, move it to `shared`.
+3. Is it used by 2+ features, or clearly _going to be_? → **Yes**, move it to `shared`.
 
-If a component is domain-specific but *visually* generic (e.g. a
+If a component is domain-specific but _visually_ generic (e.g. a
 `visit-status-badge`), don't shortcut it into `shared` just because it's small. Only the logic-free shell belongs
 there — e.g. a generic
 `status-badge` that takes a `color` and `label` input, which the feature then wraps/configures with its own
@@ -146,10 +146,10 @@ features/
   `components/` +
   `shared/` components into a screen.
 - Pages are **never imported by anything** — not by other pages, not by other features, not even by other pages in the
-  *same* feature. If
+  _same_ feature. If
   `visit-list` and `visit-detail` need the same chunk of UI, extract that chunk into `components/` (or `shared/` if it's
   generic) and have both pages use it.
-- A page is the "leaf" of the import graph — things point *into* it via routing, nothing points *out* of it via
+- A page is the "leaf" of the import graph — things point _into_ it via routing, nothing points _out_ of it via
   `import`.
 
 ### `components/`
@@ -171,26 +171,24 @@ features/
 ```ts
 // app.routes.ts
 export const routes: Routes = [
-    {
-        path: 'visits',
-        loadChildren: () =>
-            import('./features/visits/visits.routes')
-                .then(m => m.VISITS_ROUTES),
-    },
-    {
-        path: 'bills',
-        loadChildren: () =>
-            import('./features/bills/bills.routes')
-                .then(m => m.BILLS_ROUTES),
-    },
+  {
+    path: "visits",
+    loadChildren: () =>
+      import("./features/visits/visits.routes").then((m) => m.VISITS_ROUTES),
+  },
+  {
+    path: "bills",
+    loadChildren: () =>
+      import("./features/bills/bills.routes").then((m) => m.BILLS_ROUTES),
+  },
 ];
 ```
 
 ```ts
 // features/visits/visits.routes.ts
 export const VISITS_ROUTES: Routes = [
-    {path: '', component: VisitList},
-    {path: ':id', component: VisitDetail},
+  { path: "", component: VisitList },
+  { path: ":id", component: VisitDetail },
 ];
 ```
 
@@ -201,8 +199,8 @@ export const VISITS_ROUTES: Routes = [
 **Features can depend on other features' `services/` (and `models/`), but never on another feature's `pages/` or
 `components/`.**
 
-A service is a *contract* (methods in, typed data out) — depending on it is a normal, controlled dependency, same as
-depending on `HttpClient`. A component or page is an *implementation* (DOM structure, styling, internal state, its own
+A service is a _contract_ (methods in, typed data out) — depending on it is a normal, controlled dependency, same as
+depending on `HttpClient`. A component or page is an _implementation_ (DOM structure, styling, internal state, its own
 service calls) — depending on it means you inherit all of that, and it can shift under you without warning.
 
 Why not allow feature → feature **component** imports?
@@ -234,7 +232,7 @@ Why not allow feature → feature **component** imports?
 ❌ features/customers/pages/customer-detail
      imports features/visits/components/visit-card
    → build customers' own summary component fed by VisitsService instead
-   
+
 ❌ features/bills/components/bills-list-table
      imports features/visits/components/visit-list-table
    → both are "a table of domain rows" — promote the generic table shell
@@ -252,7 +250,7 @@ allowed, `❌` = not allowed,
 `—` = doesn't apply (that folder has no such thing to import from/into).
 
 | Importing from ↓ \\ Importing what → |          `core`          |   `shared`    | its own `pages`/`components` |           another feature's `pages`/`components`           | another feature's `services`/`models` |               `layout`                |
-|--------------------------------------|:------------------------:|:-------------:|:----------------------------:|:----------------------------------------------------------:|:-------------------------------------:|:-------------------------------------:|
+| ------------------------------------ | :----------------------: | :-----------: | :--------------------------: | :--------------------------------------------------------: | :-----------------------------------: | :-----------------------------------: |
 | `core`                               |      ✅ (internal)       |      ❌       |              —               |                             ❌                             |                  ❌                   |                  ❌                   |
 | `shared`                             |            ❌            | ✅ (internal) |              —               |                             ❌                             |                  ❌                   |                  ❌                   |
 | `features/*`                         |       ✅ (via DI)        |      ✅       |              ✅              |                             ❌                             |            ✅ (sparingly)             |                  ❌                   |
@@ -275,25 +273,26 @@ promote a generic, config-driven table shell to `shared/`:
 ```ts
 // shared/components/data-table/data-table.ts
 @Component({
-    selector: 'app-data-table',
-    standalone: true,
-    imports: [NgTemplateOutlet],
-    template: `
+  selector: "app-data-table",
+  standalone: true,
+  imports: [NgTemplateOutlet],
+  template: `
     <table>
       <tr *ngFor="let row of rows">
         <td *ngFor="let col of columns">
           <ng-container
             [ngTemplateOutlet]="col.cellTemplate ?? defaultCell"
-            [ngTemplateOutletContext]="{ $implicit: row, col }">
+            [ngTemplateOutletContext]="{ $implicit: row, col }"
+          >
           </ng-container>
         </td>
       </tr>
     </table>
-  `
+  `,
 })
 export class DataTable<T> {
-    @Input() rows: T[] = [];
-    @Input() columns: ColumnDef<T>[] = [];
+  @Input() rows: T[] = [];
+  @Input() columns: ColumnDef<T>[] = [];
 }
 ```
 
@@ -342,7 +341,7 @@ vets reaches it by routing, not importing:
 
 ```html
 <a routerLink="/visits/vet-schedule" [queryParams]="{ vetId: vet.id }">
-    View schedule
+  View schedule
 </a>
 ```
 
@@ -355,7 +354,7 @@ No cross-feature import happens at all — vets just links to a URL that visits 
 `features/customers/pages/customer-detail` needs to show an customer's profile, plus their recent visits and outstanding
 bills. That's three domains on one screen.
 
-Give the aggregating page its own feature-local components, and let it depend on the *services* of the other features —
+Give the aggregating page its own feature-local components, and let it depend on the _services_ of the other features —
 never their pages or components:
 
 ```
@@ -378,18 +377,18 @@ features/
 ```ts
 // features/customers/pages/customer-detail/customer-detail.ts
 export class CustomerDetail {
-    private visits = inject(VisitsService);   // ✅ service import — OK
-    private bills = inject(BillsService);     // ✅ service import — OK
+  private visits = inject(VisitsService); // ✅ service import — OK
+  private bills = inject(BillsService); // ✅ service import — OK
 
-    recentVisits = toSignal(this.visits.getRecentForOwner(this.ownerId));
-    outstandingBills = toSignal(this.bills.getUnpaidForOwner(this.ownerId));
+  recentVisits = toSignal(this.visits.getRecentForOwner(this.ownerId));
+  outstandingBills = toSignal(this.bills.getUnpaidForOwner(this.ownerId));
 }
 ```
 
 ```html
 <!-- customer-detail.html -->
-<app-recent-visits-panel [visits]="recentVisits()"/>
-<app-outstanding-bills-panel [bills]="outstandingBills()"/>
+<app-recent-visits-panel [visits]="recentVisits()" />
+<app-outstanding-bills-panel [bills]="outstandingBills()" />
 ```
 
 Don't import `visit-card` from `visits` or `bills-list-table` from `bills`
@@ -398,7 +397,7 @@ here — build `recent-visits-panel` and `outstanding-bills-panel` as
 visually identical to something already in `shared`, use that instead.
 
 **One smell to watch for:** if a page ends up injecting five or six other features' services just to stitch together a
-view, that's a sign the *data shape* itself should be aggregated one layer down — e.g. a `core` or
+view, that's a sign the _data shape_ itself should be aggregated one layer down — e.g. a `core` or
 `shared/data-access` service that composes calls to the individual feature APIs and exposes a single `CustomerSummary`
 shape. That keeps the page itself simple (one injected dependency) even though multiple domains feed it.
 
@@ -440,7 +439,7 @@ testing/
 
 **What belongs here:**
 
-- Anything created *only* to be imported by `*.spec.ts` files, and reused by more than one of them. If a mock, fixture,
+- Anything created _only_ to be imported by `*.spec.ts` files, and reused by more than one of them. If a mock, fixture,
   or helper is only ever used by a single spec file, keep it next to that spec instead of promoting it — same "don't
   move it until it's actually shared" rule as `shared/`.
 - Fakes/mocks for `core` and feature `services/`, so specs don't have to hand-roll a `MockVisitsService` in three
@@ -449,17 +448,17 @@ testing/
 ```ts
 // testing/mocks/mock-visits.service.ts
 export class MockVisitsService {
-    getRecentForOwner = jasmine.createSpy().and.returnValue(of([]));
-    getById = jasmine.createSpy().and.returnValue(of(mockVisit));
+  getRecentForOwner = jasmine.createSpy().and.returnValue(of([]));
+  getById = jasmine.createSpy().and.returnValue(of(mockVisit));
 }
 ```
 
 ```ts
 // features/visits/pages/visit-detail/visit-detail.spec.ts
-import {MockVisitsService} from '../../../../testing/mocks/mock-visits.service';
+import { MockVisitsService } from "../../../../testing/mocks/mock-visits.service";
 
 TestBed.configureTestingModule({
-    providers: [{provide: VisitsService, useClass: MockVisitsService}],
+  providers: [{ provide: VisitsService, useClass: MockVisitsService }],
 });
 ```
 
@@ -469,7 +468,10 @@ TestBed.configureTestingModule({
 ```ts
 // testing/fixtures/visit.fixture.ts
 export const mockVisit: Visit = {
-    id: 'v1', petName: 'Rex', date: '2026-08-01', status: 'scheduled',
+  id: "v1",
+  petName: "Rex",
+  date: "2026-08-01",
+  status: "scheduled",
 };
 ```
 

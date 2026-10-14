@@ -3,12 +3,15 @@
 Back to [Main page](../README.md)
 
 <!-- TOC -->
-* [Scrum and Agile Guidelines](#scrum-and-agile-guidelines)
-  * [Requirements for a user story to be considered DONE](#requirements-for-a-user-story-to-be-considered-done)
-  * [Project Structure](#project-structure)
+
+- [Scrum and Agile Guidelines](#scrum-and-agile-guidelines)
+  - [Requirements for a user story to be considered DONE](#requirements-for-a-user-story-to-be-considered-done)
+  - [Project Structure](#project-structure)
+
 <!-- TOC -->
 
 ## Requirements for a user story to be considered DONE (DoD)
+
 For a User Story to be considered as DONE, all the following need to be met:
 <ol>
 <li>A pull request has been made, reviewed and merged into Main.</li>

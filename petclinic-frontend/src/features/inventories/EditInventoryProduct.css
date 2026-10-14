@@ -1,28 +1,24 @@
-
 .edit-product-container {
   display: flex;
   justify-content: center;
-  align-items: flex-start;     
-  min-height: auto;            
-  padding: 24px 0;            
+  align-items: flex-start;
+  min-height: auto;
+  padding: 24px 0;
   background-color: #f5f5f5;
 }
-
 
 .edit-product-form-container {
   background-color: #fff;
   padding: 2rem;
   border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0,0,0,.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   max-width: 600px;
   width: 100%;
 }
 
-
 .edit-product-form-group {
   margin-bottom: 1.5rem;
 }
-
 
 .edit-product-input {
   width: 100%;
@@ -31,13 +27,16 @@
   border: 1px solid #ccc;
   border-radius: 5px;
   font-size: 1rem;
-  transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .edit-product-input:focus {
   outline: none;
   border-color: #1976d2;
-  box-shadow: 0 0 0 3px rgba(25,118,210,.15);
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.15);
 }
 
 .edit-product-input.invalid {
@@ -46,9 +45,8 @@
 }
 
 .edit-product-input.invalid:focus {
-  box-shadow: 0 0 0 3px rgba(211,47,47,.2);
+  box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.2);
 }
-
 
 .edit-product-error-text {
   color: #d32f2f;
@@ -56,7 +54,6 @@
   margin-top: 6px;
   line-height: 1.2;
 }
-
 
 .edit-product-submit-button {
   width: 100%;
@@ -67,7 +64,7 @@
   border-radius: 5px;
   font-size: 1.2rem;
   cursor: pointer;
-  transition: background-color .3s ease;
+  transition: background-color 0.3s ease;
 }
 
 .edit-product-submit-button:hover {
@@ -79,7 +76,6 @@
   cursor: not-allowed;
 }
 
-
 .edit-product-error-message {
   color: #d32f2f;
   margin-bottom: 1rem;
@@ -89,15 +85,23 @@
   margin-top: 1rem;
 }
 
-
 .edit-product-input.invalid.animate {
   animation: edit-product-shake 180ms ease-in-out 0s 2;
 }
 @keyframes edit-product-shake {
-  0%,100% { transform: translateX(0); }
-  25%     { transform: translateX(-3px); }
-  75%     { transform: translateX(3px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-3px);
+  }
+  75% {
+    transform: translateX(3px);
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .edit-product-input.invalid.animate { animation: none; }
+  .edit-product-input.invalid.animate {
+    animation: none;
+  }
 }

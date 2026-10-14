@@ -8,13 +8,15 @@ interface DeleteVetEducationProps {
 }
 
 const DeleteVetEducation: React.FC<DeleteVetEducationProps> = ({
-                                                                 vetId,
-                                                                 educationId,
-                                                                 onEducationDeleted,
-                                                               }) => {
+  vetId,
+  educationId,
+  onEducationDeleted,
+}) => {
   const [showModal, setShowModal] = React.useState<boolean>(false);
 
-  const handleDeleteClick = (event: React.MouseEvent<HTMLButtonElement>): void => {
+  const handleDeleteClick = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ): void => {
     event.stopPropagation();
     setShowModal(true);
   };
@@ -31,66 +33,68 @@ const DeleteVetEducation: React.FC<DeleteVetEducationProps> = ({
   };
 
   return (
-      <>
-        <button onClick={handleDeleteClick} className="btn btn-danger">
-          Delete Education
-        </button>
+    <>
+      <button onClick={handleDeleteClick} className="btn btn-danger">
+        Delete Education
+      </button>
 
-        {showModal && (
+      {showModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          onClick={e => {
+            e.stopPropagation();
+            setShowModal(false);
+          }}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1050,
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: '#fff',
+              padding: '24px',
+              borderRadius: '8px',
+              maxWidth: '400px',
+              width: '90%',
+              textAlign: 'center',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            }}
+          >
+            <h4 style={{ marginBottom: '12px' }}>Confirm Deletion</h4>
+            <p style={{ color: '#555', marginBottom: '20px' }}>
+              Are you sure you want to delete this Education?
+            </p>
             <div
-                role="dialog"
-                aria-modal="true"
-                onClick={(e) => {
+              style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}
+            >
+              <button
+                onClick={e => {
                   e.stopPropagation();
                   setShowModal(false);
                 }}
-                style={{
-                  position: 'fixed',
-                  top: 0,
-                  left: 0,
-                  width: '100vw',
-                  height: '100vh',
-                  backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  zIndex: 1050,
-                }}
-            >
-              <div
-                  onClick={(e) => e.stopPropagation()}
-                  style={{
-                    background: '#fff',
-                    padding: '24px',
-                    borderRadius: '8px',
-                    maxWidth: '400px',
-                    width: '90%',
-                    textAlign: 'center',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                  }}
+                className="btn btn-secondary"
               >
-                <h4 style={{ marginBottom: '12px' }}>Confirm Deletion</h4>
-                <p style={{ color: '#555', marginBottom: '20px' }}>
-                  Are you sure you want to delete this Education?
-                </p>
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}>
-                  <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setShowModal(false);
-                      }}
-                      className="btn btn-secondary"
-                  >
-                    Cancel
-                  </button>
-                  <button onClick={handleConfirmDelete} className="btn btn-danger">
-                    Delete
-                  </button>
-                </div>
-              </div>
+                Cancel
+              </button>
+              <button onClick={handleConfirmDelete} className="btn btn-danger">
+                Delete
+              </button>
             </div>
-        )}
-      </>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

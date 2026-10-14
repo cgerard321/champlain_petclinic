@@ -24,7 +24,8 @@
 .intro {
   padding: 56px 20px 28px;
   border-bottom: 1px solid var(--ring);
-  background: radial-gradient(
+  background:
+    radial-gradient(
       700px 180px at 20% -60px,
       rgba(37, 99, 235, 0.08),
       transparent 60%
@@ -125,7 +126,8 @@
 }
 
 .stat-card {
-  background: radial-gradient(
+  background:
+    radial-gradient(
       150% 100% at -10% 0%,
       rgba(37, 99, 235, 0.05),
       transparent 50%

@@ -1,7 +1,6 @@
-'use strict';
+"use strict";
 
-angular.module('customerDetails')
-    .component('customerDetails', {
-        templateUrl: 'scripts/customer-details/customer-details.template.html',
-        controller: 'CustomerDetailsController'
-    });
+angular.module("customerDetails").component("customerDetails", {
+  templateUrl: "scripts/customer-details/customer-details.template.html",
+  controller: "CustomerDetailsController",
+});

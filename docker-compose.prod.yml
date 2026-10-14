@@ -4,7 +4,11 @@
 x-healthchecks:
   springboot: &springboot
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/actuator/health || curl -fsS http://localhost:8080/health"]
+      test:
+        [
+          "CMD-SHELL",
+          "curl -fsS http://localhost:8080/actuator/health || curl -fsS http://localhost:8080/health",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -28,7 +32,11 @@ x-healthchecks:
 
   mysql: &mysql
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -P 3306 -u${DB_USER} -p${DB_PASSWORD}"]
+      test:
+        [
+          "CMD-SHELL",
+          "mysqladmin ping -h 127.0.0.1 -P 3306 -u${DB_USER} -p${DB_PASSWORD}",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -442,7 +450,6 @@ services:
       - postgres-products-data:/var/lib/postgresql/data
     restart: unless-stopped
 
-
   mongo-carts:
     <<: *mongo
     image: mongo:7.0
@@ -473,7 +480,7 @@ services:
       args:
         BUILD_MODE: production
     ports:
-      - '5200:80'
+      - "5200:80"
     environment:
       - NODE_ENV=production
     restart: unless-stopped

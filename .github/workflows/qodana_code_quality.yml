@@ -30,8 +30,8 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          java-version: "17"
+          distribution: "temurin"
       - name: Cache Gradle packages
         uses: actions/cache@v3
         with:
@@ -87,7 +87,7 @@ jobs:
           else
             echo "No relevant files changed for analysis"
           fi
-      - name: 'Qodana PR Analysis'
+      - name: "Qodana PR Analysis"
         id: qodana
         uses: JetBrains/qodana-action@v2025.2
         env:

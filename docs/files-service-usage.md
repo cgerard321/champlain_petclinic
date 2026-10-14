@@ -3,42 +3,42 @@
 Back to [Main page](../README.md)
 
 <!-- TOC -->
-* [General Rules](#general-rules)
-* [Backend Usage](#backend-usage)
-    * [Backend Setup](#backend-setup)
-    * [Get File](#get-file)
-    * [Add File](#add-file)
-    * [Update File](#update-file)
-    * [Delete File](#delete-file)
-    * [Patch File](#patch-file)
-* [React Frontend Usage](#react-frontend-usage)
-    * [React Frontend Setup](#react-frontend-setup)
-    * [React Display Image](#react-display-image)
+
+- [General Rules](#general-rules)
+- [Backend Usage](#backend-usage)
+  - [Backend Setup](#backend-setup)
+  - [Get File](#get-file)
+  - [Add File](#add-file)
+  - [Update File](#update-file)
+  - [Delete File](#delete-file)
+  - [Patch File](#patch-file)
+- [React Frontend Usage](#react-frontend-usage)
+  - [React Frontend Setup](#react-frontend-setup)
+  - [React Display Image](#react-display-image)
+
 <!-- TOC -->
 
 ## General Rules
-1. Never communicate with the Files Service directly through the API Gateway.
-    - All communication with the Files Service must go through your own domain service (e.g., `customer-service`, `vet-service`, etc.).
-    - The API Gateway must never call the Files Service directly.
-    - Do not register or reference a `FilesServiceClient` or `FilesController` inside the API Gateway.
 
+1. Never communicate with the Files Service directly through the API Gateway.
+   - All communication with the Files Service must go through your own domain service (e.g., `customer-service`, `vet-service`, etc.).
+   - The API Gateway must never call the Files Service directly.
+   - Do not register or reference a `FilesServiceClient` or `FilesController` inside the API Gateway.
 
 2. Always use your service’s existing logic and endpoints when accessing files.
-    - Do not create new “get file” endpoints just to retrieve files.
-    - If your entity already has a standard “get by ID” endpoint, use it and include a query parameter (e.g., `includePhoto=true`) to control file inclusion.
-    - This ensures a single API call returns both entity and file data when needed.
-
+   - Do not create new “get file” endpoints just to retrieve files.
+   - If your entity already has a standard “get by ID” endpoint, use it and include a query parameter (e.g., `includePhoto=true`) to control file inclusion.
+   - This ensures a single API call returns both entity and file data when needed.
 
 3. Files are owned and managed by the services that reference them.
-    - Each service is responsible for creating, updating, and deleting its associated files via the Files Service.
-    - When deleting an entity that has a file, always delete the associated file (unless it’s a shared or default file).
-    - Never let orphaned files remain in the Files Service.
-
+   - Each service is responsible for creating, updating, and deleting its associated files via the Files Service.
+   - When deleting an entity that has a file, always delete the associated file (unless it’s a shared or default file).
+   - Never let orphaned files remain in the Files Service.
 
 4. Entities should only store the File ID, not the file content.
-    - File data should only exist in memory when being sent to or received from the Files Service.
-    - Database entities must store only the file’s `fileId` field.
-    - The actual file data (e.g., `byte[] fileData`) belongs exclusively in the Files Service.
+   - File data should only exist in memory when being sent to or received from the Files Service.
+   - Database entities must store only the file’s `fileId` field.
+   - The actual file data (e.g., `byte[] fileData`) belongs exclusively in the Files Service.
 
 ## Backend Usage
 
@@ -48,10 +48,12 @@ These are the steps that need to be followed to integrate your service with the 
 All of these are already implemented properly in the customer-service.
 
 #### 1. Add the Files Service Client
+
 You will first need to add the FilesServiceClient to your service. This file should be almost identical across all services that use the files service.
 For an example of what the file should look like please take a look at the one from the customer-service.
 
 #### 2. Handle the Files Service Client Errors
+
 When handling errors returned by the Files Service, other services should not simply mirror the HTTP status code or expose the raw error message from the Files Service. Doing so may leak sensitive implementation details and create inconsistencies in how errors are reported to clients.
 
 Instead, each service should interpret the error in context and return an HTTP status code that accurately reflects what happened from its own perspective.
@@ -61,6 +63,7 @@ For example, if the Files Service returns a 404 Not Found, the calling service s
 This approach ensures consistent, meaningful, and secure error reporting across all services.
 
 #### 3. Add Host and Port to application.yaml
+
 You will need to add the host and port in the application.yaml of your service for the client to work.
 
 ```yaml
@@ -71,6 +74,7 @@ app:
 ```
 
 #### 4. Update Service Implement
+
 You will need to add the following variable to your service implement
 
 ```java
@@ -78,6 +82,7 @@ private final FilesServiceClient filesServiceClient;
 ```
 
 #### 7. Add the File Details DTO
+
 You will also need to create a new DTO in your service with the following structure:
 
 ```java
@@ -98,7 +103,7 @@ public class FileResponseDTO {
 @Setter
 @AllArgsConstructor
 public class FileRequestDTO {
-    
+
     private String fileName;
     private String fileType;
     private byte[] fileData;
@@ -117,7 +122,7 @@ Good Examples from Customer-Service:
 @AllArgsConstructor
 @NoArgsConstructor
 public class OwnerResponseDTO {
-    
+
     private String ownerId;
     private String firstName;
     private String lastName;
@@ -152,6 +157,7 @@ public class OwnerRequestDTO {
 Your Entity should only store the id of the file that it wishes to access later.
 
 Good Example from Customer-Service:
+
 ```java
 @Data
 @NoArgsConstructor
@@ -175,6 +181,7 @@ public class Owner {
 ```
 
 #### 7. Update EntityMapper
+
 You will also need to update your EntityModelMapper to handle the file fields correctly:
 
 Request Model → Entity <br>
@@ -219,7 +226,7 @@ Good Example from Customer-Service's ServiceImplement:
                 .switchIfEmpty(Mono.error(new NotFoundException("Customer not found with id: " + ownerId)))
                 .flatMap(customer -> {
                     OwnerResponseDTO dto = EntityDTOUtil.toOwnerResponseDTO(customer);
-    
+
                     if (includePhoto && customer.getPhotoId() != null) {
                         return filesServiceClient.getFileById(customer.getPhotoId())
                                 .map(fileDetails -> {
@@ -254,7 +261,7 @@ Good Example from Customer Service Client:
     public Mono<OwnerResponseDTO> getOwner(final String ownerId, boolean includePhoto) {
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(customersServiceUrl + "/owners/" + ownerId);
         builder.queryParam("includePhoto", includePhoto);
-    
+
         return webClientBuilder.build().get()
                 .uri(builder.build().toUri())
                 .retrieve()
@@ -268,6 +275,7 @@ Add the includeFile query parameter to your API Gateway controller endpoint.
 This allows clients to control whether file data should be included in the response, maintaining consistency with the service-level endpoint.
 
 Good Example from Customer Api-gateway Controller:
+
 ```java
     @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN})
     @GetMapping(value = "/{ownerId}")
@@ -281,13 +289,16 @@ Good Example from Customer Api-gateway Controller:
 ### Add File
 
 There are two possible ways to associate a file with your entity, depending on your use case:
-* If the file should be uploaded when creating the entity, follow [Add File on Creation](#update-service-implement-to-addfile)
-* If the file should be uploaded after creating the entity, follow [Add File after Creation](#patch-file)
+
+- If the file should be uploaded when creating the entity, follow [Add File on Creation](#update-service-implement-to-addfile)
+- If the file should be uploaded after creating the entity, follow [Add File after Creation](#patch-file)
 
 #### Update Service Implement to Support addFile
+
 This approach is the simplest and only requires to update the addEntity of your service.
 
 Good Example from Customer Service Implement:
+
 ```java
     @Override
     public Mono<OwnerResponseDTO> addOwner(Mono<OwnerRequestDTO> customerRequestDTO) {
@@ -296,13 +307,13 @@ Good Example from Customer Service Implement:
                 .flatMap(ownerRequest -> {
                     Owner customer = EntityDTOUtil.toOwner(ownerRequest);
                     Mono<FileDetails> photoMono;
-    
+
                     if (ownerRequest.getPhoto() != null) {
                         photoMono = filesServiceClient.addFile(ownerRequest.getPhoto());
                     } else {
                         photoMono = Mono.empty();
                     }
-    
+
                     return photoMono
                             .defaultIfEmpty(null)
                             .flatMap(photo -> {
@@ -311,7 +322,7 @@ Good Example from Customer Service Implement:
                                 } else {
                                     customer.setPhotoId(null);
                                 }
-    
+
                                 return ownerRepo.save(customer)
                                         .map(savedOwner -> {
                                             OwnerResponseDTO dto = EntityDTOUtil.toOwnerResponseDTO(savedOwner);
@@ -329,6 +340,7 @@ This is the harder method, but the most efficient. It requires that a new endpoi
 Here are the steps for adding the endpoint to your service, to add it to the api-gateway, you can just do the same things as other endpoints.
 
 #### 1. Add Service Implement Patch
+
 When using a PATCH endpoint, you need to make that you update only if the entity already has a fileId.
 Do not use addFile when a file already exists because it will not remove the old file.
 
@@ -345,7 +357,7 @@ Good Example from Customer Service Implement:
                     if (existingCustomer.getPhotoId() != null && !existingCustomer.getPhotoId().isEmpty()) {
                         fileOperation = filesServiceClient.updateFile(existingCustomer.getPhotoId(), photo)
                                 .onErrorResume(e -> {
-                                    log.warn("Photo file {} not found or error updating, creating new file instead: {}", 
+                                    log.warn("Photo file {} not found or error updating, creating new file instead: {}",
                                             existingCustomer.getPhotoId(), e.getMessage());
                                     return filesServiceClient.addFile(photo);
                                 });
@@ -367,7 +379,8 @@ Good Example from Customer Service Implement:
     }
 ```
 
-#### 2. Add Controller Patch 
+#### 2. Add Controller Patch
+
 The PATCH endpoint doesn't need the full entity dto, it only needs the FileDTO.
 
 Good Example from Customer Service Implement:
@@ -404,7 +417,7 @@ Good Example from Customer Service Implement:
                 .flatMap(existingCustomer ->
                         customerRequestDTO.flatMap(requestDTO -> {
                             Mono<String> fileIdMono;
-    
+
                             if (existingCustomer.getPhotoId() != null && requestDTO.getPhoto() != null) {
                                 fileIdMono = filesServiceClient.updateFile(existingCustomer.getPhotoId(), requestDTO.getPhoto()).thenReturn(existingCustomer.getPhotoId());
                             } else if (requestDTO.getPhoto() != null) {
@@ -414,7 +427,7 @@ Good Example from Customer Service Implement:
                             } else {
                                 fileIdMono = Mono.justOrEmpty(existingCustomer.getPhotoId());
                             }
-    
+
                             return fileIdMono
                                     .defaultIfEmpty(null)
                                     .map(fileId -> {
@@ -451,7 +464,7 @@ Good Example from Customer Service Implement:
                     Mono<Void> deletePhotoMono = Mono.justOrEmpty(found.getPhotoId())
                             .flatMap(filesServiceClient::deleteFileById);
                     Mono<Void> deleteOwnerMono = ownerRepo.delete(found);
-    
+
                     return Mono.when(deleteOwnerMono, deletePhotoMono)
                             .thenReturn(found);
                 })
@@ -469,18 +482,18 @@ The Response Model of your entity on the frontend should be modified to include 
 Make sure that you are using the shared component, do not make a new one.
 
 ```ts
-import {FileDetails} from "@/shared/models/FileDetails.ts"
+import { FileDetails } from "@/shared/models/FileDetails.ts";
 
 export interface CustomerResponseModel {
-    ownerId: string;
-    firstName: string;
-    lastName: string;
-    address: string;
-    city: string;
-    province: string;
-    telephone: string;
-    pets: PetResponseModel[];
-    photo: FileDetails;
+  ownerId: string;
+  firstName: string;
+  lastName: string;
+  address: string;
+  city: string;
+  province: string;
+  telephone: string;
+  pets: PetResponseModel[];
+  photo: FileDetails;
 }
 ```
 
@@ -488,7 +501,7 @@ export interface CustomerResponseModel {
 
 ```html
 <img
-        src={`data:${fileDetails.fileType};base64,${fileDetails.fileData}`}
-        alt={`${fileDetails.fileName}`}
+  src="{`data:${fileDetails.fileType};base64,${fileDetails.fileData}`}"
+  alt="{`${fileDetails.fileName}`}"
 />
 ```

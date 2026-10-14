@@ -1,7 +1,8 @@
 .privacy-intro {
   padding: 40px 0 22px;
   border-bottom: 1px solid var(--ring);
-  background: radial-gradient(
+  background:
+    radial-gradient(
       680px 160px at 16% -52px,
       rgba(37, 99, 235, 0.05),
       transparent 60%

@@ -19,7 +19,6 @@ import { DbConsole } from '@features/db-consoles/services/db-console';
 import { Observable } from 'rxjs';
 import { extractApiError } from '@core/models/api-error';
 
-
 function resolveQueryLanguage(dbType: string | null | undefined): QueryLanguage {
   return dbType === 'Mongo' ? 'mongo' : 'sql';
 }

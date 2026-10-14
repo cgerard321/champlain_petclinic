@@ -30,10 +30,12 @@ angular.module("customerList").controller("CustomerListController", [
     loadDefaultData();
 
     function loadTotalItemForDefaultData() {
-      return $http.get("api/gateway/customers/customers-count").then(function (resp) {
-        console.log(resp);
-        return resp.data;
-      });
+      return $http
+        .get("api/gateway/customers/customers-count")
+        .then(function (resp) {
+          console.log(resp);
+          return resp.data;
+        });
     }
 
     function loadTotalItemForSearchData(searchURL) {
@@ -54,7 +56,7 @@ angular.module("customerList").controller("CustomerListController", [
             "api/gateway/customers/customers-pagination?page=" +
               vm.currentPage +
               "&size=" +
-              vm.pageSize
+              vm.pageSize,
           )
             .then((response) => response.text())
             .then((text) => {
@@ -80,7 +82,7 @@ angular.module("customerList").controller("CustomerListController", [
 
     vm.searchCustomersByPaginationAndFilters = function (
       currentPage = 0,
-      prevOrNextPressed = false
+      prevOrNextPressed = false,
     ) {
       vm.selectedSize = document.getElementById("sizeInput").value;
 
@@ -98,11 +100,11 @@ angular.module("customerList").controller("CustomerListController", [
             vm.lastName,
             vm.phoneNumber,
             vm.city,
-            vm.selectedSize
+            vm.selectedSize,
           )
         ) {
           alert(
-            "Oops! It seems like you forgot to enter any filter criteria. Please provide some filter input to continue."
+            "Oops! It seems like you forgot to enter any filter criteria. Please provide some filter input to continue.",
           );
           return;
         }
@@ -148,12 +150,12 @@ angular.module("customerList").controller("CustomerListController", [
 
       console.log(searchURL);
 
-      loadTotalItemForSearchData(loadTotalNumberOfDataURL).then(function (
-        totalItems
-      ) {
-        vm.totalItems = totalItems;
-        vm.totalPages = Math.ceil(vm.totalItems / parseInt(vm.pageSize));
-      });
+      loadTotalItemForSearchData(loadTotalNumberOfDataURL).then(
+        function (totalItems) {
+          vm.totalItems = totalItems;
+          vm.totalPages = Math.ceil(vm.totalItems / parseInt(vm.pageSize));
+        },
+      );
 
       fetch(searchURL)
         .then((response) => response.text())
@@ -182,7 +184,7 @@ angular.module("customerList").controller("CustomerListController", [
       lastName,
       phoneNumber,
       city,
-      selectedSize
+      selectedSize,
     ) {
       return (
         (customerId === null || customerId === "") &&

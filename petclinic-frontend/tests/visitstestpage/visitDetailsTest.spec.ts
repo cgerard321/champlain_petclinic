@@ -1,14 +1,13 @@
 import { test, expect } from '@playwright/test';
 
 test('test visit details', async ({ page }) => {
-
   await page.goto('http://localhost:3000/users/login');
 
-  await page.getByPlaceholder('Enter your email or username')
+  await page
+    .getByPlaceholder('Enter your email or username')
     .fill('george@email.com');
 
-  await page.getByPlaceholder('Enter your password')
-    .fill('pwd');
+  await page.getByPlaceholder('Enter your password').fill('pwd');
 
   await page.getByRole('button', { name: 'Login' }).click();
 
@@ -16,31 +15,25 @@ test('test visit details', async ({ page }) => {
 
   await page.goto('http://localhost:3000/customer/visits');
 
-
   const visitLink = page.getByRole('link', {
-    name: 'VIST-2212-2401'
+    name: 'VIST-2212-2401',
   });
-
 
   const visitId = await visitLink.innerText();
 
-
-const visitResponsePromise = page.waitForResponse(response =>
-  response.request().method() === 'GET' &&
-  response.url().includes(`/gateway/visits/${visitId}`)
-);
-
-await visitLink.click();
-
-const visitResponse = await visitResponsePromise;
-
-const visit = await visitResponse.json();
-
-
-  await expect(page).toHaveURL(
-    `http://localhost:3000/visits/${visit.visitId}`
+  const visitResponsePromise = page.waitForResponse(
+    response =>
+      response.request().method() === 'GET' &&
+      response.url().includes(`/gateway/visits/${visitId}`)
   );
 
+  await visitLink.click();
+
+  const visitResponse = await visitResponsePromise;
+
+  const visit = await visitResponse.json();
+
+  await expect(page).toHaveURL(`http://localhost:3000/visits/${visit.visitId}`);
 
   const detailsVisitId = await page
     .locator('.visit-field')

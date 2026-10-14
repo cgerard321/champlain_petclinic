@@ -27,7 +27,7 @@ The following packages must be present in `package.json`:
 
   ```tsx
   // src/main.tsx
-  import './i18n';
+  import "./i18n";
   ```
 
   Without this import, nothing is translated and the UI shows the raw keys.
@@ -41,12 +41,14 @@ The following packages must be present in `package.json`:
   This matches the config in `i18n.js`:
 
   ```js
-  backend: { loadPath: '/locales/{{lng}}/{{ns}}.json' }
+  backend: {
+    loadPath: "/locales/{{lng}}/{{ns}}.json";
+  }
   ```
 
 - **Files must live in `public/`, not `src/`.** Vite only serves files at the site root from `public/`. If the JSON is in `src/locales`, the requests fail (404 or an HTML page instead of JSON).
 
-- **Namespaces:** each JSON file is a *namespace*, roughly one per feature area. The namespaces registered in `i18n.js` are:
+- **Namespaces:** each JSON file is a _namespace_, roughly one per feature area. The namespaces registered in `i18n.js` are:
 
   `bills`, `carts`, `customers`, `faq`, `home`, `inventories`, `products`, `promos`, `users`, `veterinarians`, `visits`
 
@@ -90,7 +92,7 @@ The `LanguageSwitcher` component lets users toggle between English (`EN`) and Fr
 ### Import and render
 
 ```tsx
-import { LanguageSwitcher } from '@/shared/components/language/LanguageSwitcher';
+import { LanguageSwitcher } from "@/shared/components/language/LanguageSwitcher";
 
 export function Header() {
   return (
@@ -145,17 +147,17 @@ Choose the namespace that fits your feature (e.g. `customers`, `bills`, `visits`
 Pass the namespace to `useTranslation`, then replace hard-coded text with `t('key')`:
 
 ```tsx
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
 export function CustomerDetails(): React.JSX.Element {
-  const { t } = useTranslation('customers');
+  const { t } = useTranslation("customers");
 
   return (
     <div>
-      <h2>{t('title')}</h2>
-      <p>{t('subtitle')}</p>
-      <button type="button">{t('buttons.save')}</button>
-      <button type="button">{t('buttons.cancel')}</button>
+      <h2>{t("title")}</h2>
+      <p>{t("subtitle")}</p>
+      <button type="button">{t("buttons.save")}</button>
+      <button type="button">{t("buttons.cancel")}</button>
     </div>
   );
 }
@@ -168,9 +170,9 @@ export function CustomerDetails(): React.JSX.Element {
 - **Use a different namespace for a single key** without changing the hook:
 
   ```tsx
-  t('nav.home', { ns: 'home' });
+  t("nav.home", { ns: "home" });
   // or
-  t('home:nav.home');
+  t("home:nav.home");
   ```
 
 - **Use the same key names in `en` and `fr`.** Only the values differ.
@@ -186,7 +188,7 @@ export function CustomerDetails(): React.JSX.Element {
 ```
 
 ```tsx
-t('welcome', { name: user.username });
+t("welcome", { name: user.username });
 ```
 
 ### Plurals
@@ -212,7 +214,7 @@ Use `_one` and `_other` suffixes and pass `count`:
 ```
 
 ```tsx
-t('items', { count: cartCount });
+t("items", { count: cartCount });
 ```
 
 i18next chooses the right form automatically for each language.
@@ -267,15 +269,15 @@ Use this when a feature area has no JSON file yet (for example `bills`).
 
 ## 8. Troubleshooting
 
-| Symptom | Likely cause | Fix |
-| --- | --- | --- |
-| Screen shows raw keys like `saveBtn` or `nav.home` | Key doesn't exist in the JSON, wrong namespace, or the JSON isn't loading | Compare the key to the JSON (nested keys need dots), check `useTranslation('namespace')`, and open the JSON URL in the browser |
-| Nothing translates anywhere | `i18n.js` isn't imported | Add `import './i18n';` to `src/main.tsx` |
-| `404` for `/locales/...` or JSON parse error (`Unexpected token <`) | Files are in `src/locales` instead of `public/locales` | Move them to `public/locales` and restart the dev server |
-| French text is missing but English shows | Key missing in the `fr` file (fallback is `en`) | Add the key to `public/locales/fr/<namespace>.json` |
-| Console `404` for a namespace | Namespace is in `ns` but has no JSON file | Create the `en` and `fr` files for it |
-| Brief flash of raw keys on first load | Translations load over HTTP and `useSuspense` is `false` | Optional: `const { t, ready } = useTranslation('ns'); if (!ready) return null;` |
-| Keys still old after editing JSON | Browser cached the old file | Hard refresh (Ctrl+Shift+R) |
+| Symptom                                                             | Likely cause                                                              | Fix                                                                                                                            |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Screen shows raw keys like `saveBtn` or `nav.home`                  | Key doesn't exist in the JSON, wrong namespace, or the JSON isn't loading | Compare the key to the JSON (nested keys need dots), check `useTranslation('namespace')`, and open the JSON URL in the browser |
+| Nothing translates anywhere                                         | `i18n.js` isn't imported                                                  | Add `import './i18n';` to `src/main.tsx`                                                                                       |
+| `404` for `/locales/...` or JSON parse error (`Unexpected token <`) | Files are in `src/locales` instead of `public/locales`                    | Move them to `public/locales` and restart the dev server                                                                       |
+| French text is missing but English shows                            | Key missing in the `fr` file (fallback is `en`)                           | Add the key to `public/locales/fr/<namespace>.json`                                                                            |
+| Console `404` for a namespace                                       | Namespace is in `ns` but has no JSON file                                 | Create the `en` and `fr` files for it                                                                                          |
+| Brief flash of raw keys on first load                               | Translations load over HTTP and `useSuspense` is `false`                  | Optional: `const { t, ready } = useTranslation('ns'); if (!ready) return null;`                                                |
+| Keys still old after editing JSON                                   | Browser cached the old file                                               | Hard refresh (Ctrl+Shift+R)                                                                                                    |
 
 ---
 

@@ -3,34 +3,37 @@
 Back to [Main page](../README.md)
 
 <!-- TOC -->
-* [General Rules](#general-rules)
-* [Backend Usage](#backend-usage)
-    * [Backend Setup](#backend-setup)
-    * [Send Email](#send-email)
-    * [Understanding Rethrower and Role Components](#understanding-rethrower-and-role-components)
-* [Environment Variables](#environment-variables-required)
+
+- [General Rules](#general-rules)
+- [Backend Usage](#backend-usage)
+  - [Backend Setup](#backend-setup)
+  - [Send Email](#send-email)
+  - [Understanding Rethrower and Role Components](#understanding-rethrower-and-role-components)
+- [Environment Variables](#environment-variables-required)
+
 <!-- TOC -->
 
 ## General Rules
+
 1. Never communicate with the Mailer Service directly through the API Gateway.
-    - All communication with the Mailer Service must go through your own domain service (e.g., `billing-service`, `customer-service`, etc.).
-    - The API Gateway must never call the Mailer Service directly.
-    - Do not register or reference a `MailServiceClient` or `MailController` inside the API Gateway.
+   - All communication with the Mailer Service must go through your own domain service (e.g., `billing-service`, `customer-service`, etc.).
+   - The API Gateway must never call the Mailer Service directly.
+   - Do not register or reference a `MailServiceClient` or `MailController` inside the API Gateway.
 
 2. Always retrieve user information from the Auth Service before sending emails.
-    - Use the JWT token to authenticate the request
-    - Call `authServiceClient.getUserById(jwtToken, userId)` to get the user details
-    - Extract the email address from the returned `UserDetails` object
+   - Use the JWT token to authenticate the request
+   - Call `authServiceClient.getUserById(jwtToken, userId)` to get the user details
+   - Extract the email address from the returned `UserDetails` object
 
 3. Create private helper methods for email generation.
-    - Encapsulate email creation logic in private methods within your service implementation
-    - These methods should accept user details and other necessary parameters
-    - Return a `Mail` object configured with all required fields
+   - Encapsulate email creation logic in private methods within your service implementation
+   - These methods should accept user details and other necessary parameters
+   - Return a `Mail` object configured with all required fields
 
 4. Handle errors appropriately.
-    - Log any errors that occur during email sending
-    - Do not fail the entire business operation if email sending fails (use error handling strategies like `.onErrorResume()`)
-    - Consider email sending as a supplementary action, not a critical one
+   - Log any errors that occur during email sending
+   - Do not fail the entire business operation if email sending fails (use error handling strategies like `.onErrorResume()`)
+   - Consider email sending as a supplementary action, not a critical one
 
 ## Backend Usage
 
@@ -67,26 +70,26 @@ import lombok.NoArgsConstructor;
 public class Mail {
     @JsonProperty("EmailSendTo")
     private String emailSendTo;
-    
+
     @JsonProperty("EmailTitle")
     private String emailTitle;
-    
+
     @JsonProperty("TemplateName")
     private String templateName;
-    
+
     @JsonProperty("Header")
     private String header;
-    
+
     @JsonProperty("Body")
     private String body;
-    
+
     @JsonProperty("Footer")
     private String footer;
-    
+
     @JsonProperty("CorrespondantName")
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private String correspondantName;
-    
+
     @JsonProperty("SenderName")
     private String senderName;
 }
@@ -95,6 +98,7 @@ public class Mail {
 **Note:** The `@JsonProperty` annotations are required because the Go mailer service expects PascalCase field names.
 
 **Field Descriptions:**
+
 - `emailSendTo` (required): The recipient's email address
 - `emailTitle` (required): The subject line of the email
 - `templateName`: Template identifier (if using templates)
@@ -139,7 +143,7 @@ public class MailServiceClient {
                 .retrieve()
                 .bodyToMono(String.class)
                 .doOnSuccess(response -> log.info("Email sent successfully to: {}", mail.getEmailSendTo()))
-                .doOnError(error -> log.error("Failed to send email to {}: {}", 
+                .doOnError(error -> log.error("Failed to send email to {}: {}",
                                               mail.getEmailSendTo(), error.getMessage()));
     }
 }
@@ -150,6 +154,7 @@ public class MailServiceClient {
 Add both the auth service and mailer service configurations in your application.yml file. This ensures all necessary service endpoints are properly configured in one place.
 
 For default profile:
+
 ```yaml
 app:
   auth-service:
@@ -161,6 +166,7 @@ app:
 ```
 
 For docker profile:
+
 ```yaml
 ---
 spring:
@@ -199,8 +205,8 @@ import java.util.function.Function;
 @Component
 public class Rethrower {
     private final ObjectMapper objectMapper;
-    
-    public Mono<? extends Throwable> rethrow(ClientResponse clientResponse, 
+
+    public Mono<? extends Throwable> rethrow(ClientResponse clientResponse,
                                            Function<Map, ? extends Throwable> exceptionProvider) {
         return clientResponse.createException().flatMap(n -> {
             try {
@@ -237,7 +243,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 public class AuthServiceClient {
     private final WebClient.Builder webClientBuilder;
     private final String authServiceUrl;
-    
+
     @Autowired
     private Rethrower rethrower;
 
@@ -345,6 +351,7 @@ private final MailServiceClient mailServiceClient;
 ### Send Email
 
 The process of sending an email involves:
+
 1. Getting the JWT token from the request
 2. Fetching user details using the Auth Service
 3. Generating the email content
@@ -356,16 +363,16 @@ Here's a complete example of how the billing service sends a confirmation email 
 
 ```java
 @Override
-public Mono<BillResponseDTO> processPayment(String customerId, String billId, 
+public Mono<BillResponseDTO> processPayment(String customerId, String billId,
                                            PaymentRequestDTO paymentRequestDTO, String jwtToken) {
     return authClient.getUserById(jwtToken, customerId)
             .onErrorResume(e -> {
-                log.error("Failed to authenticate or fetch user for customerId: {}. Error: {}", 
+                log.error("Failed to authenticate or fetch user for customerId: {}. Error: {}",
                          customerId, e.getMessage(), e);
                 if (e instanceof ResponseStatusException) {
                     return Mono.error(e);
                 }
-                return Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, 
+                return Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED,
                                  "Authentication failed or user not found"));
             })
             .flatMap(user -> {
@@ -390,14 +397,14 @@ public Mono<BillResponseDTO> processPayment(String customerId, String billId,
 // Private helper method
 private Mail generateConfirmationEmail(UserDetails user) {
     return new Mail(
-            user.getEmail(), 
-            "Pet Clinic - Payment Confirmation", 
-            "default", 
+            user.getEmail(),
+            "Pet Clinic - Payment Confirmation",
+            "default",
             "Pet Clinic confirmation email",
             "Dear, " + user.getUsername() + "\n" +
             "Your bill has been successfully paid",
-            "Thank you for choosing Pet Clinic.", 
-            user.getUsername(), 
+            "Thank you for choosing Pet Clinic.",
+            user.getUsername(),
             "ChamplainPetClinic@gmail.com"
     );
 }
@@ -414,17 +421,21 @@ private Mail generateConfirmationEmail(UserDetails user) {
 ## Understanding Rethrower and Role Components
 
 ### Rethrower Utility
+
 - The `Rethrower` utility is included for consistency with the billing service's implementation.
 - It's primarily used by `AuthServiceClient` to handle and transform error responses from the Auth Service.
 - While the billing service uses this pattern, you can simplify your implementation if you don't need the same level of error handling.
 
 #### When to Use the Full Implementation
+
 Consider using the full implementation with `Rethrower` if you:
+
 1. Need to parse error responses in a specific format
 2. Want to maintain consistency with the billing service's error handling
 3. Plan to add more complex error handling in the future
 
 ### Role DTO
+
 - The `Role` class is included for completeness as part of the `UserDetails` DTO.
 - The billing service doesn't use the `roles` field in its current implementation.
 - You can safely omit the `roles` field if your service doesn't need role-based functionality.
@@ -473,11 +484,13 @@ return Mono.when(sendEmail).thenReturn(saveBill).flatMap(m -> m);
 ## Mailer Service Technical Details
 
 ### Endpoint
+
 - **URL**: `POST /mail`
 - **Port**: `8080` (default)
 - **Content-Type**: `application/json`
 
 ### Request Body Structure
+
 ```json
 {
   "EmailSendTo": "user@example.com",
@@ -492,18 +505,23 @@ return Mono.when(sendEmail).thenReturn(saveBill).flatMap(m -> m);
 ```
 
 ### Response
+
 - **Success**: `200 OK` with message `"Message sent to {email}"`
 - **Bad Request**: `400 Bad Request` if mail object is invalid
 - **Internal Server Error**: `500 Internal Server Error` if sending fails
 
 ### Service Architecture
+
 The Mailer Service is built with Go and uses:
+
 - **Framework**: Gin
 - **SMTP Library**: gopkg.in/mail.v2
 - **Port**: 8080
 
 ### Environment Variables Required
+
 The Mailer Service requires the following environment variables:
+
 - `SMTP_SERVER`: SMTP server hostname
 - `SMTP_USER`: SMTP username
 - `SMTP_PASS`: SMTP password

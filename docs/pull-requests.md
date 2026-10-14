@@ -3,14 +3,16 @@
 Back to [Main page](../README.md)
 
 <!-- TOC -->
-* [Pull Request and Code Review Guidelines](#pull-request-and-code-review-guidelines)
-  * [Pull Request Guidelines](#pull-request-guidelines)
-    * [Pull Requests (PR) Naming](#pull-requests-pr-naming)
-    * [Pull Request Commit Naming](#pull-request-commit-naming)
-  * [Code Review Guidelines](#code-review-guidelines)
-    * [Frontend Checklist](#frontend-checklist)
-    * [Backend Checklist](#backend-checklist)
-    * [General Checklist](#general-checklist)
+
+- [Pull Request and Code Review Guidelines](#pull-request-and-code-review-guidelines)
+  - [Pull Request Guidelines](#pull-request-guidelines)
+    - [Pull Requests (PR) Naming](#pull-requests-pr-naming)
+    - [Pull Request Commit Naming](#pull-request-commit-naming)
+  - [Code Review Guidelines](#code-review-guidelines)
+    - [Frontend Checklist](#frontend-checklist)
+    - [Backend Checklist](#backend-checklist)
+    - [General Checklist](#general-checklist)
+
 <!-- TOC -->
 
 ## Pull Request Guidelines
@@ -50,7 +52,6 @@ feat(TEAMTAG-JiraID): short description (#420)
 - [ ] Uses proper React hooks and patterns
 - [ ] No manual URL concatenation with baseURL
 - [ ] External URLs (http://, https://) are not affected by versioning system
-
 
 ### Backend Checklist
 

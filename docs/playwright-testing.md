@@ -66,20 +66,20 @@ tests/
 ### Basic Test Structure
 
 ```typescript
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-describe('Feature Name', () => {
-  test('descriptive test name', async ({ page }) => {
+describe("Feature Name", () => {
+  test("descriptive test name", async ({ page }) => {
     // Arrange - Use baseURL from config or environment variable
-    await page.goto('/target-page'); // Relative URL if baseURL is set in playwright config
+    await page.goto("/target-page"); // Relative URL if baseURL is set in playwright config
     // OR
     // await page.goto(process.env.BASE_URL + '/target-page'); # To do this the environment variables need to be set in the playwright config
-    
+
     // Act
-    await page.getByRole('button', { name: 'Action' }).click();
-    
+    await page.getByRole("button", { name: "Action" }).click();
+
     // Assert
-    await expect(page.locator('.result')).toBeVisible();
+    await expect(page.locator(".result")).toBeVisible();
   });
 });
 ```
@@ -93,16 +93,16 @@ Always use environment variables if possible or Playwright's baseURL configurati
 > Note for this to be done the configurations regarding the environment configuration need to be in place in the `playwright.config.ts` in the root of the `petclinic-frontend` directory or else the use of process.env will not work. As mentioned [below](#environment-variables).
 
 ```typescript
-describe('Homepage Tests', () => {
-  test('should display homepage content', async ({ page }) => {
+describe("Homepage Tests", () => {
+  test("should display homepage content", async ({ page }) => {
     // Option 1: Use relative URL with baseURL from config
-    await page.goto('/home');
-    
+    await page.goto("/home");
+
     // Option 2: Use environment variable with fallback
-    const baseURL = process.env.BASE_URL || 'http://localhost:3000';
+    const baseURL = process.env.BASE_URL || "http://localhost:3000";
     await page.goto(`${baseURL}/home`);
-    
-    await expect(page.locator('h1')).toBeVisible();
+
+    await expect(page.locator("h1")).toBeVisible();
   });
 });
 ```
@@ -111,23 +111,23 @@ describe('Homepage Tests', () => {
 
 ```typescript
 // GOOD: Web-first assertions wait automatically
-await expect(page.locator('.element')).toBeVisible();
-await expect(page.locator('.count')).toHaveCount(3);
+await expect(page.locator(".element")).toBeVisible();
+await expect(page.locator(".count")).toHaveCount(3);
 
 // AVOID: Manual waits
-await page.waitForSelector('.element');
-expect(await page.locator('.element').isVisible()).toBe(true);
+await page.waitForSelector(".element");
+expect(await page.locator(".element").isVisible()).toBe(true);
 ```
 
 ### 3. Prefer Role-Based Selectors
 
 ```typescript
 // GOOD: Semantic selectors
-await page.getByRole('button', { name: 'Submit' }).click();
-await page.getByPlaceholder('Enter email').fill('test@example.com');
+await page.getByRole("button", { name: "Submit" }).click();
+await page.getByPlaceholder("Enter email").fill("test@example.com");
 
 // AVOID: CSS selectors when role-based alternatives exist
-await page.locator('#submit-btn').click();
+await page.locator("#submit-btn").click();
 ```
 
 ### 4. Authentication Patterns
@@ -135,24 +135,24 @@ await page.locator('#submit-btn').click();
 For tests requiring authentication, use a consistent pattern with proper URL handling:
 
 ```typescript
-describe('Authenticated User Features', () => {
-  test('authenticated user action', async ({ page }) => {
+describe("Authenticated User Features", () => {
+  test("authenticated user action", async ({ page }) => {
     // Option 1: Use relative URLs if baseURL is configured
-    await page.goto('/users/login');
-    
+    await page.goto("/users/login");
+
     // Option 2: Use environment variable
-    const baseURL = process.env.BASE_URL || 'http://localhost:3000';
+    const baseURL = process.env.BASE_URL || "http://localhost:3000";
     await page.goto(`${baseURL}/users/login`);
-    
+
     // Authenticate as admin
-    await page.getByPlaceholder('Enter your email').fill('admin@admin.com');
-    await page.getByPlaceholder('Enter your password').fill('pwd');
-    await page.getByRole('button', { name: 'Login' }).click();
-    
+    await page.getByPlaceholder("Enter your email").fill("admin@admin.com");
+    await page.getByPlaceholder("Enter your password").fill("pwd");
+    await page.getByRole("button", { name: "Login" }).click();
+
     // Wait for navigation
-    await page.waitForURL('**/home');
-    await expect(page.getByRole('button', { name: 'Admin' })).toBeVisible();
-    
+    await page.waitForURL("**/home");
+    await expect(page.getByRole("button", { name: "Admin" })).toBeVisible();
+
     // Test logic here
   });
 });
@@ -161,10 +161,10 @@ describe('Authenticated User Features', () => {
 ### 5. Proper Test Cleanup
 
 ```typescript
-describe('Feature Tests', () => {
-  test('test name', async ({ page }) => {
+describe("Feature Tests", () => {
+  test("test name", async ({ page }) => {
     // Test logic
-    
+
     // Cleanup
     await page.close();
   });
@@ -189,8 +189,8 @@ describe('Feature Tests', () => {
 
 ```typescript
 // Use standard Node.js environment variables
-const baseURL = process.env.FRONTEND_URL || 'http://localhost:3000';
-const apiURL = process.env.BACKEND_URL || 'http://localhost:8080/api';
+const baseURL = process.env.FRONTEND_URL || "http://localhost:3000";
+const apiURL = process.env.BACKEND_URL || "http://localhost:8080/api";
 ```
 
 #### Option 2: Configure dotenv in Playwright Config
@@ -198,17 +198,17 @@ const apiURL = process.env.BACKEND_URL || 'http://localhost:8080/api';
 Add dotenv configuration to `playwright.config.ts`:
 
 ```typescript
-import { defineConfig } from '@playwright/test';
-import dotenv from 'dotenv';
-import path from 'path';
+import { defineConfig } from "@playwright/test";
+import dotenv from "dotenv";
+import path from "path";
 
 // Load environment variables from .env file
-dotenv.config({ path: path.resolve(__dirname, '.env.test') });
+dotenv.config({ path: path.resolve(__dirname, ".env.test") });
 
 export default defineConfig({
   // ... rest of config
   use: {
-    baseURL: process.env.BASE_URL || 'http://localhost:3000',
+    baseURL: process.env.BASE_URL || "http://localhost:3000",
   },
 });
 ```
@@ -219,12 +219,12 @@ export default defineConfig({
 // In playwright.config.ts
 export default defineConfig({
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: "http://localhost:3000",
   },
 });
 
 // In tests - use relative URLs
-await page.goto('/home');
+await page.goto("/home");
 ```
 
 Common environment variables for tests:

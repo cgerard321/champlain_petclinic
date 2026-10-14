@@ -4,8 +4,8 @@ test('client can cancel a visit with a reason', async ({ page }) => {
   await page.goto('http://localhost:3000/users/login');
 
   await page
-      .getByPlaceholder('Enter your email or username')
-      .fill('george@email.com');
+    .getByPlaceholder('Enter your email or username')
+    .fill('george@email.com');
   await page.getByPlaceholder('Enter your password').fill('pwd');
   await page.getByRole('button', { name: 'Login' }).click();
 
@@ -22,23 +22,21 @@ test('client can cancel a visit with a reason', async ({ page }) => {
   const visitId = await visitLink.innerText();
 
   const visitResponsePromise = page.waitForResponse(
-      response =>
-          response.request().method() === 'GET' &&
-          response.url().includes(`/gateway/visits/${visitId}`)
+    response =>
+      response.request().method() === 'GET' &&
+      response.url().includes(`/gateway/visits/${visitId}`)
   );
 
   await visitLink.click();
 
   const visit = await (await visitResponsePromise).json();
 
-  await expect(page).toHaveURL(
-      `http://localhost:3000/visits/${visit.visitId}`
-  );
+  await expect(page).toHaveURL(`http://localhost:3000/visits/${visit.visitId}`);
 
   const statusValue = page
-      .locator('.visit-field')
-      .filter({ hasText: 'Status:' })
-      .locator('.visit-value');
+    .locator('.visit-field')
+    .filter({ hasText: 'Status:' })
+    .locator('.visit-value');
 
   await expect(statusValue).toHaveText('CONFIRMED');
 
@@ -46,19 +44,15 @@ test('client can cancel a visit with a reason', async ({ page }) => {
 
   await expect(page.getByText('Cancel Visit')).toBeVisible();
 
-  await page
-      .getByLabel('Appointment is no longer needed')
-      .check();
+  await page.getByLabel('Appointment is no longer needed').check();
 
   const cancelResponsePromise = page.waitForResponse(
-      response =>
-          response.request().method() === 'PATCH' &&
-          response.url().includes(`/gateway/visits/${visitId}`)
+    response =>
+      response.request().method() === 'PATCH' &&
+      response.url().includes(`/gateway/visits/${visitId}`)
   );
 
-  await page
-      .getByRole('button', { name: 'Confirm Cancellation' })
-      .click();
+  await page.getByRole('button', { name: 'Confirm Cancellation' }).click();
 
   const cancelResponse = await cancelResponsePromise;
 
@@ -67,7 +61,7 @@ test('client can cancel a visit with a reason', async ({ page }) => {
   const cancelledVisit = await cancelResponse.json();
 
   expect(cancelledVisit.cancellationReason).toBe(
-      'APPOINTMENT_NO_LONGER_NEEDED'
+    'APPOINTMENT_NO_LONGER_NEEDED'
   );
 
   await expect(statusValue).toHaveText('CANCELLED');

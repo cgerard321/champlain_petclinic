@@ -68,4 +68,3 @@ export class WsConnection {
     return apiUrl.replace(/^http/, 'ws');
   }
 }
-

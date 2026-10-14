@@ -78,7 +78,9 @@ test('filters visits by selected statuses and preserves selection when the sideb
   await expect
     .poll(async () => {
       const displayedStatuses = await getDisplayedStatuses(page);
-      return displayedStatuses.length > 0 && displayedStatuses.every((status) => status === statusToKeep);
+      return (
+        displayedStatuses.length > 0 && displayedStatuses.every((status) => status === statusToKeep)
+      );
     })
     .toBe(true);
 
@@ -91,7 +93,9 @@ test('filters visits by selected statuses and preserves selection when the sideb
   await expect
     .poll(async () => {
       const displayedStatuses = await getDisplayedStatuses(page);
-      return displayedStatuses.length > 0 && displayedStatuses.every((status) => status === statusToKeep);
+      return (
+        displayedStatuses.length > 0 && displayedStatuses.every((status) => status === statusToKeep)
+      );
     })
     .toBe(true);
 

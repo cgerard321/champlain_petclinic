@@ -22,10 +22,7 @@ export class AuthState {
   logout(): Observable<void> {
     let _ = this.apollo.client.clearStore();
 
-    return this.http
-      .post<void>('/logout', {})
-      .pipe(tap(() => this._isAuthenticated.set(false)));
-
+    return this.http.post<void>('/logout', {}).pipe(tap(() => this._isAuthenticated.set(false)));
   }
 
   checkSession(): Observable<void> {

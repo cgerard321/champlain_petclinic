@@ -1,85 +1,191 @@
 <div class="auth-shell">
-    <div class="auth-card">
-        <h1 class="auth-title">Forgot password</h1>
-        <p class="auth-subtitle">Enter your email and we’ll send you a reset link.</p>
+  <div class="auth-card">
+    <h1 class="auth-title">Forgot password</h1>
+    <p class="auth-subtitle">
+      Enter your email and we’ll send you a reset link.
+    </p>
 
-        <div class="auth-alert" ng-repeat="error in errorMessages" role="alert">
-            <button type="button" class="auth-alert__close" ng-click="clearErrorMessages($index)" aria-label="Dismiss error">&times;</button>
-            <strong>Error:</strong> {{ error }}
-        </div>
-
-        <form name="forgotForm" ng-submit="$ctrl.forgotPwdPost()" novalidate>
-            <div class="field">
-                <label for="email" class="field__label">Email</label>
-                <input id="email"
-                       name="email"
-                       type="email"
-                       class="field__input"
-                       ng-model="forgotPwdPost.email"
-                       required
-                       autocomplete="email"
-                       placeholder="you@example.com"/>
-            </div>
-
-            <button
-                    class="btn-primary"
-                    type="submit"
-                    ng-disabled="forgotForm.$invalid || $ctrl.loading">
-                {{ $ctrl.loading === true ? 'Sending...' : 'Send reset link' }}
-            </button>
-
-            <div class="auth-secondary">
-                <a class="link" href="" ng-click="$ctrl.goLogin()">Back to login</a>
-            </div>
-        </form>
+    <div class="auth-alert" ng-repeat="error in errorMessages" role="alert">
+      <button
+        type="button"
+        class="auth-alert__close"
+        ng-click="clearErrorMessages($index)"
+        aria-label="Dismiss error"
+      >
+        &times;
+      </button>
+      <strong>Error:</strong> {{ error }}
     </div>
+
+    <form name="forgotForm" ng-submit="$ctrl.forgotPwdPost()" novalidate>
+      <div class="field">
+        <label for="email" class="field__label">Email</label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          class="field__input"
+          ng-model="forgotPwdPost.email"
+          required
+          autocomplete="email"
+          placeholder="you@example.com"
+        />
+      </div>
+
+      <button
+        class="btn-primary"
+        type="submit"
+        ng-disabled="forgotForm.$invalid || $ctrl.loading"
+      >
+        {{ $ctrl.loading === true ? 'Sending...' : 'Send reset link' }}
+      </button>
+
+      <div class="auth-secondary">
+        <a class="link" href="" ng-click="$ctrl.goLogin()">Back to login</a>
+      </div>
+    </form>
+  </div>
 </div>
 
 <style>
-    .auth-shell{
-        min-height:100dvh; display:grid; place-items:center; padding:24px;
-        background:
-                radial-gradient(900px 500px at 10% -20%, rgba(17,24,39,0.02), transparent 60%),
-                radial-gradient(700px 400px at 110% 110%, rgba(17,24,39,0.03), transparent 60%),
-                linear-gradient(180deg,#f6f7fb 0%,#fff 100%);
-        color:#111827; font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,sans-serif;
-    }
-    .auth-card{
-        width:100%; max-width:480px; background:#fff; border:1px solid #e5e7eb; border-radius:16px;
-        padding:28px; box-shadow:0 10px 20px rgba(17,24,39,.06), 0 2px 6px rgba(17,24,39,.04);
-    }
-    .auth-title{ margin:0 0 6px; font-size:1.6rem; font-weight:700; color:#0f172a; }
-    .auth-subtitle{ margin:0 0 22px; color:#6b7280; }
+  .auth-shell {
+    min-height: 100dvh;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background:
+      radial-gradient(
+        900px 500px at 10% -20%,
+        rgba(17, 24, 39, 0.02),
+        transparent 60%
+      ),
+      radial-gradient(
+        700px 400px at 110% 110%,
+        rgba(17, 24, 39, 0.03),
+        transparent 60%
+      ),
+      linear-gradient(180deg, #f6f7fb 0%, #fff 100%);
+    color: #111827;
+    font-family:
+      system-ui,
+      -apple-system,
+      "Segoe UI",
+      Roboto,
+      Inter,
+      sans-serif;
+  }
+  .auth-card {
+    width: 100%;
+    max-width: 480px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow:
+      0 10px 20px rgba(17, 24, 39, 0.06),
+      0 2px 6px rgba(17, 24, 39, 0.04);
+  }
+  .auth-title {
+    margin: 0 0 6px;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+  .auth-subtitle {
+    margin: 0 0 22px;
+    color: #6b7280;
+  }
 
-    .auth-alert{ position:relative; background:#fee2e2; border:1px solid #fecaca; color:#991b1b;
-        border-radius:12px; padding:12px 40px 12px 12px; margin-bottom:12px; }
-    .auth-alert__close{ position:absolute; right:8px; top:6px; background:transparent; border:0; color:#991b1b;
-        font-size:20px; cursor:pointer; }
+  .auth-alert {
+    position: relative;
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+    border-radius: 12px;
+    padding: 12px 40px 12px 12px;
+    margin-bottom: 12px;
+  }
+  .auth-alert__close {
+    position: absolute;
+    right: 8px;
+    top: 6px;
+    background: transparent;
+    border: 0;
+    color: #991b1b;
+    font-size: 20px;
+    cursor: pointer;
+  }
 
-    .field{ display:flex; flex-direction:column; margin-bottom:16px; }
-    .field__label{ margin-bottom:6px; font-weight:600; color:#111827; }
-    .field__input{
-        height:52px; font-size:16px; background:#fff; color:#111827; border:1px solid #d1d5db;
-        border-radius:12px; padding:0 14px; outline:none; transition:border-color .15s, box-shadow .15s;
-    }
-    .field__input::placeholder{ color:#9ca3af; }
-    .field__input:focus{ border-color:#6366f1; box-shadow:0 0 0 3px rgba(99,102,241,.22); }
+  .field {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 16px;
+  }
+  .field__label {
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #111827;
+  }
+  .field__input {
+    height: 52px;
+    font-size: 16px;
+    background: #fff;
+    color: #111827;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    padding: 0 14px;
+    outline: none;
+    transition:
+      border-color 0.15s,
+      box-shadow 0.15s;
+  }
+  .field__input::placeholder {
+    color: #9ca3af;
+  }
+  .field__input:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.22);
+  }
 
-    .btn-primary{
-        width:100%; height:52px; border:0; border-radius:12px; font-weight:700;
-        background:linear-gradient(90deg,#6366f1,#8b5cf6);
-        color:#fff; cursor:pointer;
-        transition:opacity .15s, transform .06s;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        font-size:16px;
-    }
-    .btn-primary:hover{ opacity:.95; }
-    .btn-primary:active{ transform:translateY(1px); }
-    .btn-primary[disabled]{ opacity:.6; cursor:not-allowed; }
+  .btn-primary {
+    width: 100%;
+    height: 52px;
+    border: 0;
+    border-radius: 12px;
+    font-weight: 700;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+    color: #fff;
+    cursor: pointer;
+    transition:
+      opacity 0.15s,
+      transform 0.06s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+  .btn-primary:hover {
+    opacity: 0.95;
+  }
+  .btn-primary:active {
+    transform: translateY(1px);
+  }
+  .btn-primary[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 
-    .auth-secondary{ display:flex; justify-content:flex-end; margin-top:10px; }
-    .link{ color:#2563eb; text-decoration:none; font-weight:600; }
-    .link:hover{ text-decoration:underline; }
+  .auth-secondary {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+  }
+  .link {
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .link:hover {
+    text-decoration: underline;
+  }
 </style>

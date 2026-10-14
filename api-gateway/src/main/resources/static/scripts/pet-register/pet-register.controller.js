@@ -49,7 +49,7 @@ angular.module("petRegister").controller("PetRegisterController", [
           var r = (Math.random() * 16) | 0,
             v = c === "x" ? r : (r & 0x3) | 0x8;
           return v.toString(16);
-        }
+        },
       );
     }
     self.randomUUID = generateUUID();
@@ -100,7 +100,7 @@ angular.module("petRegister").controller("PetRegisterController", [
                 .map(function (e) {
                   return e.field + ": " + e.defaultMessage;
                 })
-                .join("\r\n")
+                .join("\r\n"),
           );
         });
     };

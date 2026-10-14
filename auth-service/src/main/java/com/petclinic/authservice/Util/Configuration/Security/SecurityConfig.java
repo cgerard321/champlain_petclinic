@@ -53,22 +53,22 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/users/*/public-profile")).permitAll()
-                .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/actuator/prometheus")).permitAll()
-                .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/actuator/health")).permitAll()
-                .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET,"/users/verification/*")).permitAll()
-                .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/users/verification/**")).permitAll()
-                // should skip filters
-                .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST,"/users/login")).permitAll()
+                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/users/*/public-profile")).permitAll()
+                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/actuator/prometheus")).permitAll()
+                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/actuator/health")).permitAll()
+                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/users/verification/*")).permitAll()
+                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/users/verification/**")).permitAll()
+                        // should skip filters
+                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/users/login")).permitAll()
                         .requestMatchers(AntPathRequestMatcher.antMatcher("/users/forgot_password")).permitAll()
                         .requestMatchers(AntPathRequestMatcher.antMatcher("/users/reset_password")).permitAll()
-                .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.HEAD,"/users")).authenticated()
-                .requestMatchers(AntPathRequestMatcher.antMatcher( HttpMethod.POST,"/users")).permitAll()
-                .anyRequest().authenticated())
+                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.HEAD, "/users")).authenticated()
+                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/users")).permitAll()
+                        .anyRequest().authenticated())
                 .logout(logout -> logout
                         .logoutUrl("/api/v1/users/logout")
                         .logoutSuccessHandler((httpServletRequest, httpServletResponse, authentication) ->
-                            httpServletResponse.setStatus(HttpServletResponse.SC_NO_CONTENT)
+                                httpServletResponse.setStatus(HttpServletResponse.SC_NO_CONTENT)
                         )
                         .addLogoutHandler((request, response, auth) -> {
                             for (Cookie cookie : request.getCookies()) {
@@ -88,7 +88,6 @@ public class SecurityConfig {
                 jwtTokenFilter,
                 UsernamePasswordAuthenticationFilter.class
         );
-
 
 
         return http.build();

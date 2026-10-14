@@ -3,14 +3,16 @@
 Back to [Main page](../README.md)
 
 <!-- TOC -->
-* [General Conventions](#general-conventions)
-  * [Structure](#structure)
-    * [Branch Naming](#branch-naming)
-  * [Setup](#setup)
-  * [Story Workflow](#story-workflow)
-  * [Merge Conflicts / Updating your Branch](#merge-conflicts--updating-your-branch)
-  * [Useful Git Commands](#useful-git-commands)
-  * [SSH Keys](#ssh-keys)
+
+- [General Conventions](#general-conventions)
+  - [Structure](#structure)
+    - [Branch Naming](#branch-naming)
+  - [Setup](#setup)
+  - [Story Workflow](#story-workflow)
+  - [Merge Conflicts / Updating your Branch](#merge-conflicts--updating-your-branch)
+  - [Useful Git Commands](#useful-git-commands)
+  - [SSH Keys](#ssh-keys)
+
 <!-- TOC -->
 
 ## Structure
@@ -22,10 +24,10 @@ Back to [Main page](../README.md)
 
 - Branches will be named according to the following convention: type/TEAMTAG-JiraID_Description
   I like to break it down into 4 'folders' or types:
-    - feat/
-    - bug/
-    - doc/
-    - conf/
+  - feat/
+  - bug/
+  - doc/
+  - conf/
 - After the slash, add your TEAMTAG
 - After the TEAMTAG, add a slash and then the JIRA id (it will be something like CPC-4).
 - The full branch name would look like this `feat/TEAMA-CPC-4_Add_Test_Scenario_New_Pet` and would be created and navigated to by executing the following command:
@@ -54,33 +56,39 @@ git clone https://github.com/cgerard321/champlain_petclinic
 ```
 cd champlain_petclinic/
 ```
+
 To see that the remote origin has been correctly set up, type:
+
 ```
 git remote add upstream https://github.com/cgerard321/champlain_petclinic.git
 ```
+
 - If we type `git remote -v` we should see 4 different connections, push and fetch for our upstream and for our origin
 - Now that you have setup your clone, move on to the 'story workflow section'
-
 
 ## Story Workflow
 
 - So you've setup your clone of the repo and started your first story. Now what?
 - We will first navigate to our project in the file explorer, right-click, and select 'git bash here'
 - In the current command line, you should see in parentheses, the branch you are currently on. We want to start this 'new story process' from our origin's main branch.
+
 ```
 Christine@DESKTOP-2VF5PQD MINGW64 /e/champlain_petclinic (main)
 ```
+
 - If it says main, great. Skip this next line. If not, type the following to 'checkout' origin's main branch:
+
 ```
 git checkout main
 ```
 
-- Next, we will want to update our local project with any code our fellow devs have pushed while we were gone. 
+- Next, we will want to update our local project with any code our fellow devs have pushed while we were gone.
 - To do this we must first 'download' the code using the following command:
 
 ```
 git fetch origin --all
 ```
+
 - Usually, you would want to 'download' changes from all branches, but if you only need to fetch changes from main or from a specific branch, then replace `--all` with either `main` or `your_branch_name`
 - We are telling git to download the latest stuff from the main branch on our remote
 - Then we want to actually start our story fresh with that code, so we will reset our local environment with that newly fetched code:
@@ -190,7 +198,6 @@ git push -force-with-lease
 
 ![image](https://github.com/cgerard321/champlain_petclinic/assets/57333167/a0110160-7072-4ea7-952b-1d63b5df2947)
 
-
 - At this point, if you go back to your pull request, you should be able to automatically merge the branch.
 
 ## Useful Git Commands
@@ -294,13 +301,16 @@ git stash pop
 ```
 
 ---
+
 ## SSH Keys
+
 Note: This section is if you are using **SSH keys to clone your repo** and have already generated your GitHub SSH keys and ran your keygen in your terminal (console of your computer)
 
 A common problem you face when setting the SSH key on the Mac is that when you restart your computer the ssh key makes you authenticate with your passphrase.
 To set the password and not make it ask for your passphrase everytime you run a command needing permissions. Run the command:
+
 ```
 ssh-add
 ```
-and enter your passphrase when prompted (Note: if you are not using the default filename, you'll need to specify your key filename `ssh-add ~/.ssh/myprivatekeyname)`. The system will print Identity Added if successful.
 
+and enter your passphrase when prompted (Note: if you are not using the default filename, you'll need to specify your key filename `ssh-add ~/.ssh/myprivatekeyname)`. The system will print Identity Added if successful.

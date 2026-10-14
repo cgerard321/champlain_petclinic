@@ -3,7 +3,6 @@ import { WsConnection, WsConnectionStatus } from '@core/services/ws-connection';
 import { LogMessage } from '@features/docker-logs/models/log-message';
 import { TailLogsParams } from '@features/docker-logs/models/tail-log-params';
 
-
 @Injectable({ providedIn: 'root' })
 export class DockerLogs {
   private readonly ws = new WsConnection();

@@ -10,7 +10,6 @@ profile:
 
 # Use default scope - Qodana will analyze the entire project by default
 
-
 #Enable inspections
 include:
   - name: VulnerableLibrariesGlobal
@@ -25,7 +24,6 @@ include:
   - name: UnusedField
   - name: UnusedMethod
   - name: UnusedClass
-
 
 exclude:
   # Exclude regex warnings that are false positives in JaCoCo reports

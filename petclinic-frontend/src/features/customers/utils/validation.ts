@@ -18,9 +18,8 @@ export const validateUsernameAvailability = async (
   username: string
 ): Promise<string | null> => {
   try {
-    const { checkUsernameAvailability } = await import(
-      '../api/checkUsernameAvailability'
-    );
+    const { checkUsernameAvailability } =
+      await import('../api/checkUsernameAvailability');
     const response = await checkUsernameAvailability(username);
     if (!response.data) {
       return 'validation.usernameTaken';

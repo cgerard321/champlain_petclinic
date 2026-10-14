@@ -7,7 +7,10 @@
     } @else {
       <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-service">
         <mat-label>Service</mat-label>
-        <mat-select [formField]="logForm.serviceName" (selectionChange)="onServiceChange($event.value)">
+        <mat-select
+          [formField]="logForm.serviceName"
+          (selectionChange)="onServiceChange($event.value)"
+        >
           @for (service of services(); track service.name) {
             <mat-option [value]="service.name">{{ service.name }}</mat-option>
           }

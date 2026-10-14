@@ -8,10 +8,11 @@ interface DeleteVetPhotoProps {
 }
 
 const DeleteVetPhoto: React.FC<DeleteVetPhotoProps> = ({
-                                                         vetId,
-                                                         onPhotoDeleted,
-                                                       }) => {
-  const [showConfirmModal, setShowConfirmModal] = React.useState<boolean>(false);
+  vetId,
+  onPhotoDeleted,
+}) => {
+  const [showConfirmModal, setShowConfirmModal] =
+    React.useState<boolean>(false);
   const [alertState, setAlertState] = React.useState<{
     show: boolean;
     title: string;
@@ -49,42 +50,52 @@ const DeleteVetPhoto: React.FC<DeleteVetPhotoProps> = ({
   };
 
   return (
-      <>
-        <Button variant="danger" onClick={() => setShowConfirmModal(true)}>
-          Delete Photo
-        </Button>
+    <>
+      <Button variant="danger" onClick={() => setShowConfirmModal(true)}>
+        Delete Photo
+      </Button>
 
-        {/* Confirmation Modal */}
-        <Modal show={showConfirmModal} onHide={() => setShowConfirmModal(false)} centered>
-          <Modal.Header closeButton>
-            <Modal.Title>Confirm Deletion</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            Are you sure you want to delete the vet&apos;s photo?
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowConfirmModal(false)}>
-              Cancel
-            </Button>
-            <Button variant="danger" onClick={handleConfirmDelete}>
-              Delete
-            </Button>
-          </Modal.Footer>
-        </Modal>
+      {/* Confirmation Modal */}
+      <Modal
+        show={showConfirmModal}
+        onHide={() => setShowConfirmModal(false)}
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Deletion</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Are you sure you want to delete the vet&apos;s photo?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setShowConfirmModal(false)}
+          >
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={handleConfirmDelete}>
+            Delete
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
-        {/* Alert Result Modal */}
-        <Modal show={alertState.show} onHide={handleAlertClose} centered>
-          <Modal.Header closeButton>
-            <Modal.Title>{alertState.title}</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>{alertState.message}</Modal.Body>
-          <Modal.Footer>
-            <Button variant={alertState.isSuccess ? 'primary' : 'secondary'} onClick={handleAlertClose}>
-              OK
-            </Button>
-          </Modal.Footer>
-        </Modal>
-      </>
+      {/* Alert Result Modal */}
+      <Modal show={alertState.show} onHide={handleAlertClose} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>{alertState.title}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>{alertState.message}</Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant={alertState.isSuccess ? 'primary' : 'secondary'}
+            onClick={handleAlertClose}
+          >
+            OK
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </>
   );
 };
 

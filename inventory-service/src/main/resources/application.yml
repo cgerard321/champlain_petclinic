@@ -6,7 +6,6 @@ logging:
     root: INFO
     com.petclinic: DEBUG
 
-
 spring:
   config:
     activate:

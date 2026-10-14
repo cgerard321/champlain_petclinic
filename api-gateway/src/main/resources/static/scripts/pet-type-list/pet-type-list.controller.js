@@ -44,9 +44,10 @@ angular.module("petTypeList").controller("PetTypeListController", [
         },
         function (error) {
           alert(
-            "Failed to add pet type: " + (error.data.message || "Unknown error")
+            "Failed to add pet type: " +
+              (error.data.message || "Unknown error"),
           );
-        }
+        },
       );
     };
 
@@ -71,9 +72,9 @@ angular.module("petTypeList").controller("PetTypeListController", [
         function (error) {
           alert(
             "Failed to update pet type: " +
-              (error.data.message || "Unknown error")
+              (error.data.message || "Unknown error"),
           );
-        }
+        },
       );
     };
 
@@ -84,7 +85,7 @@ angular.module("petTypeList").controller("PetTypeListController", [
 
     self.deletePetType = function (petTypeId) {
       let isConfirmed = confirm(
-        "Are you sure you want to delete this pet type?"
+        "Are you sure you want to delete this pet type?",
       );
       if (isConfirmed) {
         $http.delete("api/gateway/owners/petTypes/" + petTypeId).then(
@@ -95,9 +96,9 @@ angular.module("petTypeList").controller("PetTypeListController", [
           function (error) {
             alert(
               "Failed to delete pet type: " +
-                (error.data.message || "Unknown error")
+                (error.data.message || "Unknown error"),
             );
-          }
+          },
         );
       }
     };
@@ -136,7 +137,7 @@ angular.module("petTypeList").controller("PetTypeListController", [
 
           self.totalItems = self.allPetTypes.length;
           self.totalPages = Math.ceil(
-            self.totalItems / parseInt(self.pageSize)
+            self.totalItems / parseInt(self.pageSize),
           );
 
           applyPagination();
@@ -153,7 +154,7 @@ angular.module("petTypeList").controller("PetTypeListController", [
 
     self.searchPetTypesByPaginationAndFilters = function (
       currentPage = 0,
-      prevOrNextPressed = false
+      prevOrNextPressed = false,
     ) {
       self.selectedSize = document.getElementById("sizeInput").value;
 

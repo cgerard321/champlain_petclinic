@@ -84,7 +84,8 @@
   justify-content: center;
   line-height: 1;
   font-size: 1rem;
-  font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji',
+  font-family:
+    'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji',
     'Segoe UI Symbol', system-ui, sans-serif;
 }
 

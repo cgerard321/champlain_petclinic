@@ -61,7 +61,7 @@ Without the polyfill, `$localize` never exists at runtime and the app fails to s
 
 - **When it loads:** `loadActiveTranslations()` in `src/app/app.config.ts`, registered through `provideAppInitializer`. Angular waits for it before bootstrapping the app.
 
-- **Why it must finish before bootstrap:** the Angular compiler turns every `i18n` attribute into a `$localize` tagged template, evaluated the first time its component renders. `loadTranslations()` only affects calls evaluated *after* it, so anything rendered earlier stays French for the rest of the session.
+- **Why it must finish before bootstrap:** the Angular compiler turns every `i18n` attribute into a `$localize` tagged template, evaluated the first time its component renders. `loadTranslations()` only affects calls evaluated _after_ it, so anything rendered earlier stays French for the rest of the session.
 
 - **Files must live in `public/`, not `src/`.** The dev server and nginx both serve `public/` at the site root, which is why the loader fetches the absolute path `/i18n/en.json`.
 
@@ -165,8 +165,16 @@ Both ids above come out of `flattenTranslations()` as `vets.list.title` and `vet
 - **Attributes need their own marker.** Translate `placeholder`, `aria-label`, `title` and `alt` too, not only visible text:
 
   ```html
-  <input matInput placeholder="Rechercher" i18n-placeholder="@@vets.list.search" />
-  <button mat-icon-button aria-label="Fermer" i18n-aria-label="@@common.close">
+  <input
+    matInput
+    placeholder="Rechercher"
+    i18n-placeholder="@@vets.list.search"
+  />
+  <button
+    mat-icon-button
+    aria-label="Fermer"
+    i18n-aria-label="@@common.close"
+  ></button>
   ```
 
 ---
@@ -219,25 +227,25 @@ Note the `"locale": "fr"` and the French values: extraction gives you the **sour
 Specs run on Vitest. Install the catalogue yourself rather than relying on the loader:
 
 ```ts
-import { clearTranslations, loadTranslations } from '@angular/localize';
+import { clearTranslations, loadTranslations } from "@angular/localize";
 
-describe('Footer', () => {
+describe("Footer", () => {
   afterEach(() => {
     clearTranslations();
   });
 
-  it('renders the English text', async () => {
-    loadTranslations({ 'footer.brand': 'PetClinic Employee Portal' });
+  it("renders the English text", async () => {
+    loadTranslations({ "footer.brand": "PetClinic Employee Portal" });
     // render only after loading, never before
   });
 });
 ```
 
-* **`loadTranslations()`** takes a simple translations object, not an object with `{ locale, translations }`. If you read a real file, extract just the translations part first.
-* **In a spec, write the ids out flat.** `loadTranslations({ 'settings.security.title': 'Security' })`, not the grouped shape of `en.json`. A spec installs the catalogue directly, so nothing flattens it for you. `flattenTranslations()` is covered on its own in `app.config.spec.ts`, including an integration case that feeds the loader a grouped catalogue and checks the English actually lands.
-* **Call it before `TestBed.createComponent`.** Loading after the component renders has no effect.
-* **`clearTranslations()` in `afterEach` is mandatory.** The catalogue is global memory, so translations loaded by one test leak into the next and test order becomes important.
-* To test the loader itself instead of a component, mock `fetch` with `vi.stubGlobal`. See `src/app/app.config.spec.ts` for the success cases and failure paths.
+- **`loadTranslations()`** takes a simple translations object, not an object with `{ locale, translations }`. If you read a real file, extract just the translations part first.
+- **In a spec, write the ids out flat.** `loadTranslations({ 'settings.security.title': 'Security' })`, not the grouped shape of `en.json`. A spec installs the catalogue directly, so nothing flattens it for you. `flattenTranslations()` is covered on its own in `app.config.spec.ts`, including an integration case that feeds the loader a grouped catalogue and checks the English actually lands.
+- **Call it before `TestBed.createComponent`.** Loading after the component renders has no effect.
+- **`clearTranslations()` in `afterEach` is mandatory.** The catalogue is global memory, so translations loaded by one test leak into the next and test order becomes important.
+- To test the loader itself instead of a component, mock `fetch` with `vi.stubGlobal`. See `src/app/app.config.spec.ts` for the success cases and failure paths.
 
 ```bash
 npm test
@@ -247,18 +255,18 @@ npm test
 
 ## 8. Troubleshooting
 
-| Symptom | Likely cause | Fix |
-| --- | --- | --- |
-| A string stays French after switching to `EN` | The id is missing from `en.json`, or its group nesting does not spell the id out | Add it, or fix the group names. Use the extraction in section 6 as a checklist |
+| Symptom                                                                                                            | Likely cause                                                                                                                                                                                                                        | Fix                                                                                                                                           |
+| ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| A string stays French after switching to `EN`                                                                      | The id is missing from `en.json`, or its group nesting does not spell the id out                                                                                                                                                    | Add it, or fix the group names. Use the extraction in section 6 as a checklist                                                                |
 | **Nothing** translates after the catalogue was reorganised, and the console shows `Could not load en translations` | A group was renamed, a level was added or removed, or the `flattenTranslations()` call was dropped from the loader. `loadTranslations()` throws on the first value that is not a string, so one bad group kills the whole catalogue | Make every nesting path spell its id out exactly, and check `loadTranslations(flattenTranslations(translations))` is still in `app.config.ts` |
-| Nothing translates, `$localize is not defined` | The polyfill is not declared | Add `"polyfills": ["@angular/localize/init"]` to the `build` target in `angular.json` |
-| `Cannot find name '$localize'` when compiling | The global is not typed. The polyfill makes it exist at runtime, but TypeScript needs to be told about it | Add `"@angular/localize"` to `types` in **both** `tsconfig.app.json` and `tsconfig.spec.json` |
-| Part of the page is English and part French | Something rendered before the loader finished | Move the string out of module scope (section 5) |
-| App starts in French, console shows `Could not load en translations` | `en.json` is missing or not valid JSON. nginx serves `index.html` for unknown paths, so this arrives as a parse error rather than a 404 | Confirm the file is in `public/i18n/` and open `/i18n/en.json` in the browser — you should see raw JSON, not the app |
-| `Missing locale data for the locale "xx"` | `localStorage.lang` holds something other than `fr` or `en` | Clear the key. The stored value is not validated today |
-| The English text changed by itself after somebody edited the French | The element uses `i18n` with no `@@id`, so the generated hash moved | Give it an explicit `@@id` |
-| The language resets on every reload | `localStorage` is blocked or cleared by the browser | Check the browser settings, and that `switchLang` actually ran |
-| A spec renders English when it should render French | An earlier test left the catalogue loaded | Add `clearTranslations()` in `afterEach` |
+| Nothing translates, `$localize is not defined`                                                                     | The polyfill is not declared                                                                                                                                                                                                        | Add `"polyfills": ["@angular/localize/init"]` to the `build` target in `angular.json`                                                         |
+| `Cannot find name '$localize'` when compiling                                                                      | The global is not typed. The polyfill makes it exist at runtime, but TypeScript needs to be told about it                                                                                                                           | Add `"@angular/localize"` to `types` in **both** `tsconfig.app.json` and `tsconfig.spec.json`                                                 |
+| Part of the page is English and part French                                                                        | Something rendered before the loader finished                                                                                                                                                                                       | Move the string out of module scope (section 5)                                                                                               |
+| App starts in French, console shows `Could not load en translations`                                               | `en.json` is missing or not valid JSON. nginx serves `index.html` for unknown paths, so this arrives as a parse error rather than a 404                                                                                             | Confirm the file is in `public/i18n/` and open `/i18n/en.json` in the browser — you should see raw JSON, not the app                          |
+| `Missing locale data for the locale "xx"`                                                                          | `localStorage.lang` holds something other than `fr` or `en`                                                                                                                                                                         | Clear the key. The stored value is not validated today                                                                                        |
+| The English text changed by itself after somebody edited the French                                                | The element uses `i18n` with no `@@id`, so the generated hash moved                                                                                                                                                                 | Give it an explicit `@@id`                                                                                                                    |
+| The language resets on every reload                                                                                | `localStorage` is blocked or cleared by the browser                                                                                                                                                                                 | Check the browser settings, and that `switchLang` actually ran                                                                                |
+| A spec renders English when it should render French                                                                | An earlier test left the catalogue loaded                                                                                                                                                                                           | Add `clearTranslations()` in `afterEach`                                                                                                      |
 
 ---
 

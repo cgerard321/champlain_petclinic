@@ -124,7 +124,7 @@ angular.module("petForm").controller("PetFormController", [
                 .map(function (e) {
                   return e.field + ": " + e.defaultMessage;
                 })
-                .join("\r\n")
+                .join("\r\n"),
           );
         });
     };

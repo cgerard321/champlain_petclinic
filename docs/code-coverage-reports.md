@@ -69,17 +69,17 @@ When you create a pull request, the CI/CD pipeline automatically generates a cov
 
 Each microservice has specific coverage requirements that must be met for the CI/CD pipeline to pass (they all should reach 90%):
 
-| Service           | Team Responsibility             |
-| ----------------- | ------------------------------- |
+| Service           | Team Responsibility               |
+| ----------------- | --------------------------------- |
 | API Gateway       | All Teams (Shared Responsibility) |
-| Auth Service      | Auth Team                      |
-| Billing Service   | Billing Team                   |
-| Cart Service      | Cart Team                      |
-| Customers Service | Customers Team                 |
-| Inventory Service | Inventory Team                 |
-| Products Service  | Products Team                  |
-| Vet Service       | Vet Team                       |
-| Visits Service    | Visits Team                    |
+| Auth Service      | Auth Team                         |
+| Billing Service   | Billing Team                      |
+| Cart Service      | Cart Team                         |
+| Customers Service | Customers Team                    |
+| Inventory Service | Inventory Team                    |
+| Products Service  | Products Team                     |
+| Vet Service       | Vet Team                          |
+| Visits Service    | Visits Team                       |
 
 **Important Notes:**
 
@@ -105,7 +105,7 @@ The JaCoCo HTML report provides a comprehensive view of code coverage:
 
 2. **Package View:**
 
-   - Click on any package 
+   - Click on any package
    - See coverage for all classes in the package
    - Identify which classes need more testing
 
@@ -128,10 +128,6 @@ The JaCoCo HTML report provides a comprehensive view of code coverage:
 - **Method Coverage:** Percentage of methods called by tests
 - **Class Coverage:** Percentage of classes with at least one method covered
 
-
-
-
-
 **: Coverage reports not appearing in artifacts**
 
 - Ensure the workflow completed successfully
@@ -144,8 +140,6 @@ The JaCoCo HTML report provides a comprehensive view of code coverage:
 - Add tests for missing coverage areas
 - Consider if the threshold is appropriate for the service
 
-
-
 **: Cannot access HTML reports**
 
 - Try downloading artifacts from a different browser
@@ -156,8 +150,8 @@ The JaCoCo HTML report provides a comprehensive view of code coverage:
 If you encounter issues with coverage reports:
 
 1. Check the [GitHub Actions logs](https://github.com/cgerard321/champlain_petclinic/actions)
-2. Review the [Java Coding Standards](java-coding-standards.md) 
-3. Refer to the [JaCoCo documentation](https://www.jacoco.org/jacoco/trunk/doc/) 
+2. Review the [Java Coding Standards](java-coding-standards.md)
+3. Refer to the [JaCoCo documentation](https://www.jacoco.org/jacoco/trunk/doc/)
 
 ---
 

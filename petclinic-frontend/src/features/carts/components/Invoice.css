@@ -1,141 +1,149 @@
 .invoice-modal-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(15, 23, 42, 0.55);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 2000;
-    padding: 1rem;
-    backdrop-filter: blur(4px);
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 1rem;
+  backdrop-filter: blur(4px);
 }
 
 @keyframes invoice-pop {
-    from { opacity: 0; transform: translateY(12px) scale(0.98); }
-    to { opacity: 1; transform: none; }
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .invoice-modal-content {
-    background: #fff;
-    border: 1px solid rgba(37, 99, 235, 0.14);
-    border-radius: 16px;
-    max-width: 900px;
-    width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
-    padding: 1.75rem;
-    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.18);
-    color: #1e293b;
-    animation: invoice-pop 0.25s ease-out;
+  background: #fff;
+  border: 1px solid rgba(37, 99, 235, 0.14);
+  border-radius: 16px;
+  max-width: 900px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 1.75rem;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.18);
+  color: #1e293b;
+  animation: invoice-pop 0.25s ease-out;
 }
 
 .invoice-nav button[disabled] {
-    opacity: 0.5;
+  opacity: 0.5;
 }
 
 .invoice-body h3 {
-    font-size: 1.15rem;
-    font-weight: 700;
-    margin: 1.5rem 0 0.75rem;
-    padding-bottom: 0.4rem;
-    border-bottom: 2px solid rgba(37, 99, 235, 0.2);
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 1.5rem 0 0.75rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 2px solid rgba(37, 99, 235, 0.2);
 }
 
 .invoice-body h3:first-child {
-    margin-top: 0;
+  margin-top: 0;
 }
 
 .invoice-client-info p {
-    display: grid;
-    grid-template-columns: 120px 1fr;
-    margin: 0.3rem 0;
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  margin: 0.3rem 0;
 }
 
 .invoice-date {
-    margin-top: 1rem;
-    color: #64748b;
+  margin-top: 1rem;
+  color: #64748b;
 }
 
 .invoice-card {
-    border-bottom: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 0.75rem;
-    transition: background 0.2s;
+  border-bottom: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.75rem;
+  transition: background 0.2s;
 }
 
 .invoice-card:hover {
-    background: rgba(37, 99, 235, 0.05);
+  background: rgba(37, 99, 235, 0.05);
 }
 
 .invoice-card h4 {
-    margin: 0 0 0.3rem;
-    font-weight: 600;
+  margin: 0 0 0.3rem;
+  font-weight: 600;
 }
 
 .invoice-card p {
-    margin: 0.15rem 0;
-    color: #475569;
+  margin: 0.15rem 0;
+  color: #475569;
 }
 
 .invoice-taxes {
-    margin: 1.5rem 0 0 auto;
-    max-width: 320px;
-    padding: 1rem 1.25rem;
-    background: #f8fafc;
-    border-radius: 12px;
+  margin: 1.5rem 0 0 auto;
+  max-width: 320px;
+  padding: 1rem 1.25rem;
+  background: #f8fafc;
+  border-radius: 12px;
 }
 
 .invoice-taxes p {
-    margin: 0.3rem 0;
+  margin: 0.3rem 0;
 }
 
 .invoice-taxes h3 {
-    margin: 0.75rem 0 0;
-    padding: 0.75rem 0 0;
-    border-bottom: none;
-    border-top: 1px solid #e2e8f0;
-    color: #2563eb;
+  margin: 0.75rem 0 0;
+  padding: 0.75rem 0 0;
+  border-bottom: none;
+  border-top: 1px solid #e2e8f0;
+  color: #2563eb;
 }
 
 .invoice-close {
-    background: transparent;
-    border: none;
-    font-size: 1.25rem;
-    cursor: pointer;
+  background: transparent;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
 }
 
 .invoice-modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 1.25rem;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.25rem;
 }
 
 .download-invoice-btn {
-    background: linear-gradient(90deg, #2563eb, #3b82f6);
-    color: #fff;
-    border: none;
-    padding: 0.6rem 1.1rem;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: transform 0.15s, box-shadow 0.15s;
+  background: linear-gradient(90deg, #2563eb, #3b82f6);
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
 }
 
 .download-invoice-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
 }
 
 @media (max-width: 600px) {
-    .invoice-modal-content {
-        padding: 1.25rem;
-    }
+  .invoice-modal-content {
+    padding: 1.25rem;
+  }
 
-    .invoice-client-info p {
-        grid-template-columns: 1fr;
-    }
+  .invoice-client-info p {
+    grid-template-columns: 1fr;
+  }
 
-    .invoice-taxes {
-        max-width: none;
-    }
+  .invoice-taxes {
+    max-width: none;
+  }
 }

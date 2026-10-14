@@ -75,8 +75,8 @@ Use a **relative URL**: `apiBaseUrlInterceptor` prepends the API host and sets `
 ### 2. Consume it in the page, and always tie it to a lifecycle
 
 ```ts
-import { Component, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Component, inject } from "@angular/core";
+import { toSignal } from "@angular/core/rxjs-interop";
 
 export class InventoryList {
   private readonly inventoryService = inject(InventoryService);
@@ -112,7 +112,7 @@ sse.stream(url, options?, requestOptions?, method = 'GET')
 ```
 
 | Param            | Type                  | Description                                                                    |
-|------------------|-----------------------|--------------------------------------------------------------------------------|
+| ---------------- | --------------------- | ------------------------------------------------------------------------------ |
 | `url`            | `string`              | Endpoint (relative URLs get the API base URL).                                 |
 | `options`        | `Partial<SseOptions>` | Stream behaviour, see below.                                                   |
 | `requestOptions` | `SseRequestOptions`   | `headers`, `params`, `body`, `context`, `withCredentials`.                     |
@@ -123,7 +123,7 @@ The return type depends on `responseType`: `Observable<Event>` for `'event'`, `O
 ### `SseOptions`
 
 | Option              | Default     | Description                                                                                                                         |
-|---------------------|-------------|-------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | `keepAlive`         | `true`      | Reconnect automatically after the response ends or a recoverable error. Set `false` for finite streams that end after sending data. |
 | `reconnectionDelay` | `3000`      | Milliseconds to wait before reconnecting (only with `keepAlive`).                                                                   |
 | `responseType`      | `'event'`   | `'event'` emits `MessageEvent`s (plus `ErrorEvent`s). `'text'` emits only the message `data` string.                                |
@@ -144,7 +144,7 @@ Each message arrives as a `MessageEvent`:
 Errors and reconnect notices arrive as `ErrorEvent`s with `type === 'error'`, so **filter them out** if you only want data:
 
 ```ts
-filter((event): event is MessageEvent => event.type !== 'error')
+filter((event): event is MessageEvent => event.type !== "error");
 ```
 
 For terminal HTTP errors the `ErrorEvent` also has `status` and `statusText` (cast to `SseErrorEvent`).
@@ -154,7 +154,9 @@ For terminal HTTP errors the `ErrorEvent` also has `status` and `statusText` (ca
 Only the `data` string of each message. No error events are emitted; failures still surface through the Observable's `error` channel.
 
 ```ts
-this.sse.stream('/api/updates', { responseType: 'text' }).subscribe((data) => console.log(data));
+this.sse
+  .stream("/api/updates", { responseType: "text" })
+  .subscribe((data) => console.log(data));
 ```
 
 Messages with empty `data` are ignored.
@@ -164,7 +166,7 @@ Messages with empty `data` are ignored.
 ## Reconnection and errors
 
 | Situation                                                  | `keepAlive: true` (default)                                                                                   | `keepAlive: false`                                    |
-|------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|-------------------------------------------------------|
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
 | Server closes the response normally                        | Emits an `ErrorEvent` ("Server response ended, will reconnect in …ms"), waits `reconnectionDelay`, reconnects | Observable **completes**                              |
 | Network failure (status `0`)                               | Emits an `ErrorEvent`, reconnects after the delay                                                             | Emits an `ErrorEvent`, then the Observable **errors** |
 | HTTP error (4xx/5xx) or `ApiError` from `errorInterceptor` | Emits an `ErrorEvent` (with `status`), then the Observable **errors**, with no reconnect                      | Same                                                  |
@@ -214,10 +216,12 @@ If the server sends `id:` fields, the client remembers the last one and sends it
 Use `HttpTestingController`. **Always pass `keepAlive: false` in tests**, otherwise the stream schedules a reconnect and never completes.
 
 ```ts
-service.getInventories().subscribe((result) => expect(result).toEqual(inventory));
+service
+  .getInventories()
+  .subscribe((result) => expect(result).toEqual(inventory));
 
-const request = http.expectOne('/api/gateway/inventories');
-expect(request.request.method).toBe('GET');
+const request = http.expectOne("/api/gateway/inventories");
+expect(request.request.method).toBe("GET");
 
 request.flush(`data: ${JSON.stringify(inventory)}`);
 ```

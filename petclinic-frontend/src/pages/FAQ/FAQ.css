@@ -5,7 +5,8 @@
 .faq-intro {
   padding: 48px 20px 24px;
   border-bottom: 1px solid var(--ring);
-  background: radial-gradient(
+  background:
+    radial-gradient(
       700px 180px at 20% -60px,
       rgba(37, 99, 235, 0.06),
       transparent 60%

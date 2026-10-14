@@ -1,133 +1,133 @@
 /* EditReviewModal.css */
 
 .erm-modal-dialog .modal-content {
-    width: 100%;
-    max-width: none;
-    border-radius: 0;
+  width: 100%;
+  max-width: none;
+  border-radius: 0;
 }
 
 .erm-close-btn {
-    position: absolute;
-    top: -15px;
-    right: 0px;
-    font-size: 1.5rem;
-    font-weight: bold;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    color: #000;
-    z-index: 10;
+  position: absolute;
+  top: -15px;
+  right: 0px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #000;
+  z-index: 10;
 }
 
 .erm-button-container {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
 }
 
 .erm-button-container > .btn {
-    padding: 5px 12px;
-    font-size: 15px;
-    font-weight: 400;
-    border-radius: 4px;
+  padding: 5px 12px;
+  font-size: 15px;
+  font-weight: 400;
+  border-radius: 4px;
 }
 
 .erm-button-container .cancel-btn {
-    background-color: #fff;
-    color: #000000;
-    border: 1.5px solid #b9b9b9;
-    padding: 5px 12px;
-    font-size: 14px;
-    border-radius: 4px;
-    cursor: pointer;
+  background-color: #fff;
+  color: #000000;
+  border: 1.5px solid #b9b9b9;
+  padding: 5px 12px;
+  font-size: 14px;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .erm-button-container .cancel-btn:hover {
-    color: #000000;
-    background-color: #f0f0f0;
-    border: 1.5px solid #b9b9b9;
+  color: #000000;
+  background-color: #f0f0f0;
+  border: 1.5px solid #b9b9b9;
 }
 
 .erm-button-container .cancel-btn:active {
-    background-color: #f9f9f9;
-    color: #000;
-    border: 1.5px solid #b9b9b9;
-    outline: none;
+  background-color: #f9f9f9;
+  color: #000;
+  border: 1.5px solid #b9b9b9;
+  outline: none;
 }
 
 .erm-button-container .cancel-btn:focus {
-    background-color: #f9f9f9;
-    color: #000;
-    border: 1.5px solid #b9b9b9;
+  background-color: #f9f9f9;
+  color: #000;
+  border: 1.5px solid #b9b9b9;
 }
 
 .erm-close-btn:hover,
 .erm-close-btn:focus,
 .erm-close-btn:active {
-    color: #000;
-    background: transparent;
-    box-shadow: none;
+  color: #000;
+  background: transparent;
+  box-shadow: none;
 }
 
 .erm-body {
-    padding: 0px;
+  padding: 0px;
 }
 
 .erm-title {
-    font-weight: 500;
-    font-size: 16px;
-    text-align: left;
-    margin-bottom: 4px;
+  font-weight: 500;
+  font-size: 16px;
+  text-align: left;
+  margin-bottom: 4px;
 }
 
 .erm-subtitle {
-    font-size: 14px;
-    color: #555;
-    margin-bottom: 12px;
-    text-align: left;
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 12px;
+  text-align: left;
 }
 
 .erm-section {
-    margin-bottom: 12px;
+  margin-bottom: 12px;
 }
 
 .erm-label {
-    display: block;
-    font-weight: 500;
-    margin-bottom: 4px;
-    font-size: 13px;
+  display: block;
+  font-weight: 500;
+  margin-bottom: 4px;
+  font-size: 13px;
 }
 
 .erm-footer > .btn:hover {
-    background-color: #007bff;
+  background-color: #007bff;
 }
 
 .reviewbox-container {
-    margin-top: 10px;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 
 .review-box {
-    width: 100%;
-    min-height: 200px;
-    max-height: 300px;
-    resize: none;
-    padding: 8px 12px;
-    font-size: 14px;
-    line-height: 1.5;
-    text-align: left;
-    overflow-y: auto;
+  width: 100%;
+  min-height: 200px;
+  max-height: 300px;
+  resize: none;
+  padding: 8px 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: left;
+  overflow-y: auto;
 }
 
 .erm-error {
-    background-color: #fee;
-    color: #c33;
-    padding: 10px;
-    border-radius: 4px;
-    margin-bottom: 12px;
-    font-size: 14px;
-    border: 1px solid #fcc;
+  background-color: #fee;
+  color: #c33;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  border: 1px solid #fcc;
 }

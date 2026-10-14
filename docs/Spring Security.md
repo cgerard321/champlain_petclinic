@@ -3,67 +3,69 @@
 Back to [Main page](../README.md)
 
 <!-- TOC -->
-* [Spring Security](#spring-security)
-* [Explanation](#explanation)
-    * [WARNING](#warning)
-  * [1. Basics](#1-basics)
-    * [What is it ?](#what-is-it-)
-  * [My code](#my-code)
-    * [@Configuration](#configuration)
-    * [@EnableWebSecurity](#enablewebsecurity)
-  * [Injections](#injections)
-  * [Authentication Manager Bean](#authentication-manager-bean)
-  * [Security Filter Chain Bean](#security-filter-chain-bean)
-    * [Authorize Http Requests](#authorize-http-requests)
-    * [Logout](#logout)
-    * [Logout URL](#logout-url)
-    * [Logout Success Handler](#logout-success-handler)
-    * [Add logout Handler](#add-logout-handler)
-    * [Http basic](#http-basic)
-    * [Authentication Entry Point](#authentication-entry-point)
-    * [And](#and)
-    * [CSRF disabled](#csrf-disabled)
-    * [CSRF](#csrf)
-    * [CORS](#cors)
-    * [CORS Definition](#cors-definition)
-    * [Add Filter Before](#add-filter-before)
-    * [Http Build](#http-build)
-  * [CORS Configuration](#cors-configuration)
-  * [User Details Service](#user-details-service)
-  * [Password Encoder](#password-encoder)
-    * [Config file](#config-file)
-* [More Information](#more-information)
-  * [User Details Service Implementation](#user-details-service-implementation)
-  * [How to change password](#how-to-change-password)
-    * [In the controller](#in-the-controller)
-    * [In the service](#in-the-service)
-    * [The HTML pages](#the-html-pages)
-    * [forgot_password_form.html](#forgot_password_formhtml)
-    * [message.html](#messagehtml)
-    * [reset_password_form.html](#reset_password_formhtml)
-* [Example of security IN API-Gateway](#example-of-security-in-api-gateway)
-  * [Filter in API-Gateway](#filter-in-api-gateway)
-  * [Make call to auth-service](#make-call-to-auth-service)
-    * [The filter in auth-service](#the-filter-in-auth-service)
-  * [Configure spring security in Api-Gateway](#configure-spring-security-in-api-gateway)
-    * [In config, for logout handler:](#in-config-for-logout-handler)
-  * [My full security config :](#my-full-security-config-)
-* [What to fix in the Pet-Clinic project](#what-to-fix-in-the-pet-clinic-project)
-    * [CORS is disabled, this is bad practice](#cors-is-disabled-this-is-bad-practice)
-    * [Outdated version](#outdated-version)
-    * [Bad handling of security token](#bad-handling-of-security-token)
-    * [Bad logout](#bad-logout)
-    * [Returning token](#returning-token)
-    * [Overhaul of the roles](#overhaul-of-the-roles)
-    * [Password Reset](#password-reset)
-    * [Move Secret](#move-secret)
-    * [Create a default admin](#create-a-default-admin)
-    * [Error Handling:](#error-handling)
-    * [Transform to HTTPS instead of HTTP](#transform-to-https-instead-of-http)
-  * [Multi-Factor Authentication](#multi-factor-authentication)
-  * [Adding a security Documentation page](#adding-a-security-documentation-page)
-  * [Content Filtering](#content-filtering)
-  * [Backup](#backup)
+
+- [Spring Security](#spring-security)
+- [Explanation](#explanation)
+  - [WARNING](#warning)
+  - [1. Basics](#1-basics)
+    - [What is it ?](#what-is-it-)
+  - [My code](#my-code)
+    - [@Configuration](#configuration)
+    - [@EnableWebSecurity](#enablewebsecurity)
+  - [Injections](#injections)
+  - [Authentication Manager Bean](#authentication-manager-bean)
+  - [Security Filter Chain Bean](#security-filter-chain-bean)
+    - [Authorize Http Requests](#authorize-http-requests)
+    - [Logout](#logout)
+    - [Logout URL](#logout-url)
+    - [Logout Success Handler](#logout-success-handler)
+    - [Add logout Handler](#add-logout-handler)
+    - [Http basic](#http-basic)
+    - [Authentication Entry Point](#authentication-entry-point)
+    - [And](#and)
+    - [CSRF disabled](#csrf-disabled)
+    - [CSRF](#csrf)
+    - [CORS](#cors)
+    - [CORS Definition](#cors-definition)
+    - [Add Filter Before](#add-filter-before)
+    - [Http Build](#http-build)
+  - [CORS Configuration](#cors-configuration)
+  - [User Details Service](#user-details-service)
+  - [Password Encoder](#password-encoder)
+    - [Config file](#config-file)
+- [More Information](#more-information)
+  - [User Details Service Implementation](#user-details-service-implementation)
+  - [How to change password](#how-to-change-password)
+    - [In the controller](#in-the-controller)
+    - [In the service](#in-the-service)
+    - [The HTML pages](#the-html-pages)
+    - [forgot_password_form.html](#forgot_password_formhtml)
+    - [message.html](#messagehtml)
+    - [reset_password_form.html](#reset_password_formhtml)
+- [Example of security IN API-Gateway](#example-of-security-in-api-gateway)
+  - [Filter in API-Gateway](#filter-in-api-gateway)
+  - [Make call to auth-service](#make-call-to-auth-service)
+    - [The filter in auth-service](#the-filter-in-auth-service)
+  - [Configure spring security in Api-Gateway](#configure-spring-security-in-api-gateway)
+    - [In config, for logout handler:](#in-config-for-logout-handler)
+  - [My full security config :](#my-full-security-config-)
+- [What to fix in the Pet-Clinic project](#what-to-fix-in-the-pet-clinic-project)
+  - [CORS is disabled, this is bad practice](#cors-is-disabled-this-is-bad-practice)
+  - [Outdated version](#outdated-version)
+  - [Bad handling of security token](#bad-handling-of-security-token)
+  - [Bad logout](#bad-logout)
+  - [Returning token](#returning-token)
+  - [Overhaul of the roles](#overhaul-of-the-roles)
+  - [Password Reset](#password-reset)
+  - [Move Secret](#move-secret)
+  - [Create a default admin](#create-a-default-admin)
+  - [Error Handling:](#error-handling)
+  - [Transform to HTTPS instead of HTTP](#transform-to-https-instead-of-http)
+  - [Multi-Factor Authentication](#multi-factor-authentication)
+  - [Adding a security Documentation page](#adding-a-security-documentation-page)
+  - [Content Filtering](#content-filtering)
+  - [Backup](#backup)
+
 <!-- TOC -->
 
 # Explanation
@@ -104,7 +106,7 @@ This that Beans will be created here that Spring might read.
 
 This configures spring security with the beans in this class.
 
-#Official "Add this annotation to an @Configuration class to have the Spring Security configuration defined in any `WebSecurityConfigurer` or more likely by exposing a `SecurityFilterChain` bean." 
+#Official "Add this annotation to an @Configuration class to have the Spring Security configuration defined in any `WebSecurityConfigurer` or more likely by exposing a `SecurityFilterChain` bean."
 
 In other words, you tell spring that this configuration class is for spring security.
 
@@ -846,30 +848,51 @@ public void sendEmail(String recipientEmail, String link) throws MessagingExcept
 
 ```html
 <html xmlns:th="<http://www.w3.org/1999/xhtml>">
-<head>
-    <link rel="stylesheet" href="<https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css>" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <head>
+    <link
+      rel="stylesheet"
+      href="<https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css>"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
 
     <title>Reset Password</title>
-</head>
-<div>
+  </head>
+  <div>
     <h2 class="text-center">Forgot Password</h2>
-</div>
+  </div>
 
-<div class="text-center" th:if="${error != null}">
+  <div class="text-center" th:if="${error != null}">
     <p class="text-danger">[[${error}]]</p>
-</div>
-<div class="text-center" th:if="${message != null}">
+  </div>
+  <div class="text-center" th:if="${message != null}">
     <p class="text-warning">[[${message}]]</p>
-</div>
-<form th:action="@{/api/v1/users/forgot_password}" method="post" style="max-width: 420px; margin: 0 auto;">
+  </div>
+  <form
+    th:action="@{/api/v1/users/forgot_password}"
+    method="post"
+    style="max-width: 420px; margin: 0 auto;"
+  >
     <div class="border border-secondary rounded p-3">
-        <div>            <p>We will be sending a reset password link to your email.</p>
-        </div>        <div>            <p>                <input type="email" name="email" class="form-control" placeholder="Enter your e-mail" required autofocus/>
-            </p>            <p class="text-center">
-                <input type="submit" value="Send" class="btn btn-primary" />
-            </p>        </div>    </div></form>
+      <div><p>We will be sending a reset password link to your email.</p></div>
+      <div>
+        <p>
+          <input
+            type="email"
+            name="email"
+            class="form-control"
+            placeholder="Enter your e-mail"
+            required
+            autofocus
+          />
+        </p>
+        <p class="text-center">
+          <input type="submit" value="Send" class="btn btn-primary" />
+        </p>
+      </div>
+    </div>
+  </form>
 </html>
-
 ```
 
 ### message.html
@@ -877,19 +900,21 @@ public void sendEmail(String recipientEmail, String link) throws MessagingExcept
 ```html
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="<https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css>" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <head>
+    <meta charset="UTF-8" />
+    <link
+      rel="stylesheet"
+      href="<https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css>"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
 
     <title>Menard Comics</title>
-</head>
-<body>
-<h1 class="text-center">
-    [[${message}]]
-</h1>
-</body>
+  </head>
+  <body>
+    <h1 class="text-center">[[${message}]]</h1>
+  </body>
 </html>
-
 ```
 
 ### reset_password_form.html
@@ -1451,11 +1476,10 @@ The logout is done though the front end only, the backend should handle it as we
 
 ```jsx
 function purgeUser() {
-        localStorage.removeItem("token")
-        localStorage.removeItem("username")
-        localStorage.removeItem("email")
-        }
-
+  localStorage.removeItem("token");
+  localStorage.removeItem("username");
+  localStorage.removeItem("email");
+}
 ```
 
 ### Returning token

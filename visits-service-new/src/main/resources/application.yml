@@ -19,7 +19,6 @@ app:
     host: localhost
     port: 8000
 
-
 logging:
   level:
     root: INFO
@@ -66,7 +65,6 @@ spring:
       username: ${DB_USER}
       password: ${DB_PASSWORD}
       authentication-database: admin
-
 ---
 spring:
   config:

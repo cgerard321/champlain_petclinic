@@ -1,25 +1,43 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" ng-app="petClinicApp">
+  <head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+    <meta charset="utf-8" />
+    <meta content="IE=edge" http-equiv="X-UA-Compatible" />
+    <meta
+      content="width=device-width, initial-scale=1, user-scalable=0, minimal-ui"
+      name="viewport"
+    />
 
-<head>
-    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
-    <meta charset="utf-8"/>
-    <meta content="IE=edge" http-equiv="X-UA-Compatible"/>
-    <meta content="width=device-width, initial-scale=1, user-scalable=0, minimal-ui" name="viewport"/>
-
-    <link href="/images/favicon.png" rel="shortcut icon" type="image/x-icon"/>
+    <link href="/images/favicon.png" rel="shortcut icon" type="image/x-icon" />
     <title>PetClinic :: Veterinarians</title>
 
-    <link href="/css/petclinic.css" rel="stylesheet" type="text/css"/>
-    <link href="/css/vets/modal.css" rel="stylesheet" type="text/css"/>
-    <link href="/css/vets/vetTable.css" rel="stylesheet" type="text/css"/>
+    <link href="/css/petclinic.css" rel="stylesheet" type="text/css" />
+    <link href="/css/vets/modal.css" rel="stylesheet" type="text/css" />
+    <link href="/css/vets/vetTable.css" rel="stylesheet" type="text/css" />
 
-    <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link
+      crossorigin="anonymous"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
 
-    <script crossorigin="anonymous" src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
-    <script crossorigin="anonymous" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
-    <script crossorigin="anonymous" src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script
+      crossorigin="anonymous"
+      src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+    ></script>
+    <script
+      crossorigin="anonymous"
+      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+    ></script>
+    <script
+      crossorigin="anonymous"
+      src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+    ></script>
 
     <script src="/webjars/angular/1.8.3/angular.min.js"></script>
     <script src="/webjars/angular-ui-router/1.0.28/release/angular-ui-router.min.js"></script>
@@ -47,28 +65,39 @@
     <script src="scripts/auth/login-form/login-form.component.js"></script>
 
     <script src="scripts/auth/signup/signup-form.js"></script>
-</head>
+  </head>
 
-<body id="bg">
-<div class="container-fluid">
-    <div ui-view=""></div>
-</div>
+  <body id="bg">
+    <div class="container-fluid">
+      <div ui-view=""></div>
+    </div>
 
-<!-- Confirmation Modal Backdrop & Container -->
-<div id="confirmationBackdrop" class="confirmation-modal-backdrop modalOff">
-    <div class="confirmation-modal">
+    <!-- Confirmation Modal Backdrop & Container -->
+    <div id="confirmationBackdrop" class="confirmation-modal-backdrop modalOff">
+      <div class="confirmation-modal">
         <div class="confirmation-modal-header">
-            <h5 id="confirmationModalTitle">Notification</h5>
+          <h5 id="confirmationModalTitle">Notification</h5>
         </div>
         <div class="modal-body">
-            <p id="confirmationModalBody"></p>
+          <p id="confirmationModalBody"></p>
         </div>
         <div class="confirmation-modal-footer">
-            <button id="confirmationModalCancelBtn" type="button" class="btn btn-secondary">Close</button>
-            <button id="confirmationModalConfirmBtn" type="button" class="btn btn-primary">Confirm</button>
+          <button
+            id="confirmationModalCancelBtn"
+            type="button"
+            class="btn btn-secondary"
+          >
+            Close
+          </button>
+          <button
+            id="confirmationModalConfirmBtn"
+            type="button"
+            class="btn btn-primary"
+          >
+            Confirm
+          </button>
         </div>
+      </div>
     </div>
-</div>
-
-</body>
+  </body>
 </html>

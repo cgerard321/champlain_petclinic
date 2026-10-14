@@ -3,7 +3,7 @@
 ## Service Status
 
 | Service         | Endpoint                                                           | Status                                                                                                                                                                                                                            |
-|-----------------|--------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| --------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Customer Portal | https://petclinic.benmusicgeek.synology.me/                        | [![Customer Portal Health](https://github.com/DylanBrass/petclinic-monitor/actions/workflows/health-customer-portal.yml/badge.svg)](https://github.com/DylanBrass/petclinic-monitor/actions/workflows/health-customer-portal.yml) |
 | Backend API     | https://petclinic-backend.benmusicgeek.synology.me/actuator/health | [![Backend API Health](https://github.com/DylanBrass/petclinic-monitor/actions/workflows/health-backend-api.yml/badge.svg)](https://github.com/DylanBrass/petclinic-monitor/actions/workflows/health-backend-api.yml)             |
 | Employee Portal | https://petclinic-emp-portal.benmusicgeek.synology.me/login        | [![Employee Portal Health](https://github.com/DylanBrass/petclinic-monitor/actions/workflows/health-employee-portal.yml/badge.svg)](https://github.com/DylanBrass/petclinic-monitor/actions/workflows/health-employee-portal.yml) |
@@ -14,10 +14,10 @@
 Champlain Final Project 1 420-N52-LA Pet Clinic repo
 
 - [Champlain Pet Clinic](#champlain-pet-clinic)
-    - [Source](#source)
-    - [Getting Started](#getting-started)
-    - [Questions or Issues?](#questions-or-issues)
-    - [Development Notes](#development-notes)
+  - [Source](#source)
+  - [Getting Started](#getting-started)
+  - [Questions or Issues?](#questions-or-issues)
+  - [Development Notes](#development-notes)
 - [Pull Request Guidelines](docs/pull-requests.md)
 - [Git Guidelines](docs/git-tips.md)
 - [React Coding Standards](docs/react-coding-standards.md)
@@ -71,7 +71,6 @@ If there's tests that are commented out, they need to be fixed. They were likely
 [See Here](https://plantuml.benmusicgeek.synology.me/proxy?cache=no&src=https://raw.githubusercontent.com/cgerard321/champlain_petclinic/main/docs/diagrams/C4/champlain-pet-clinic-ms_C4_L2_container_diagram.puml&fmt=svg)
 
 ![C4 L2](https://plantuml.benmusicgeek.synology.me/proxy?cache=no&src=https://raw.githubusercontent.com/cgerard321/champlain_petclinic/main/docs/diagrams/C4/champlain-pet-clinic-ms_C4_L2_container_diagram.puml&fmt=svg)
-
 
 ## C4 Deployment Diagram
 

@@ -49,7 +49,8 @@
   scroll-snap-align: start;
   border-radius: 14px;
   border: 1px solid rgba(37, 99, 235, 0.12);
-  background: radial-gradient(
+  background:
+    radial-gradient(
       140% 120% at 50% 0%,
       rgba(37, 99, 235, 0.08),
       transparent 65%

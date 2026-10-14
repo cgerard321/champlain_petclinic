@@ -19,7 +19,8 @@
   aspect-ratio: 1;
   border-radius: 16px;
   overflow: hidden;
-  background: radial-gradient(
+  background:
+    radial-gradient(
       140% 120% at 20% 0%,
       rgba(37, 99, 235, 0.1),
       rgba(255, 255, 255, 0)

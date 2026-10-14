@@ -3,8 +3,10 @@
 Back to [Main page](../README.md)
 
 <!-- TOC -->
-* [Environment Configuration](#environment-configuration)
-  * [Environment Variables Setup for Frontend Application](#environment-variables-setup-for-frontend-application)
+
+- [Environment Configuration](#environment-configuration)
+  - [Environment Variables Setup for Frontend Application](#environment-variables-setup-for-frontend-application)
+
 <!-- TOC -->
 
 ## Environment Variables Setup for Frontend Application

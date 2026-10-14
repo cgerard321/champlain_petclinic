@@ -3,15 +3,17 @@
 Back to [Main page](../README.md)
 
 <!-- TOC -->
-* [Backend Standards (Java Spring Boot 3.x)](#backend-standards-java-spring-boot-3x)
-  * [API Gateway Controller Standards](#api-gateway-controller-standards)
-    * [API Versioning](#api-versioning)
-    * [Security Annotations](#security-annotations)
-    * [Response Patterns](#response-patterns)
-  * [Service Client Standards](#service-client-standards)
-* [API Design Guidelines](#api-design-guidelines)
-  * [Endpoint Patterns](#endpoint-patterns)
-  * [Request/Response Standards](#requestresponse-standards)
+
+- [Backend Standards (Java Spring Boot 3.x)](#backend-standards-java-spring-boot-3x)
+  - [API Gateway Controller Standards](#api-gateway-controller-standards)
+    - [API Versioning](#api-versioning)
+    - [Security Annotations](#security-annotations)
+    - [Response Patterns](#response-patterns)
+  - [Service Client Standards](#service-client-standards)
+- [API Design Guidelines](#api-design-guidelines)
+  - [Endpoint Patterns](#endpoint-patterns)
+  - [Request/Response Standards](#requestresponse-standards)
+
 <!-- TOC -->
 
 ## API Gateway Controller Standards
@@ -33,7 +35,7 @@ Back to [Main page](../README.md)
 public class VetController {
 
     private final VetsServiceClient vetsServiceClient;
-    
+
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VetResponseDTO> getVets() {
@@ -67,6 +69,7 @@ public class VetController {
 ## Endpoint Patterns
 
 **RESTful Resource Naming:**
+
 ```
 GET    /api/v2/gateway/vets              # Get all vets
 GET    /api/v2/gateway/vets/{vetId}      # Get specific vet
@@ -90,4 +93,3 @@ DELETE /api/v2/gateway/vets/{vetId}/educations/{eduId}   # Delete education
 - Include validation annotations on request DTOs
 - Use proper HTTP status codes (200, 201, 400, 404), we want to avoid 500 errors, that means we did not handle something properly
 - Include meaningful error messages in responses
-

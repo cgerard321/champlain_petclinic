@@ -65,7 +65,6 @@
     }
   },
 
-
   "fields": {
     "username": "Nom d'utilisateur :",
     "firstName": "Prénom :",
@@ -241,11 +240,7 @@
     }
   },
 
-  "customerProfile":
-  {
+  "customerProfile": {
     "title": "Profile de {{name}}"
   }
 }
-
-
-

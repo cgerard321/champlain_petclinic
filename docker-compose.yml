@@ -27,10 +27,13 @@ x-healthchecks:
       retries: 10
       start_period: 15s
 
-
   mysql: &mysql
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -P 3306 -u${DB_USER} -p${DB_PASSWORD}"]
+      test:
+        [
+          "CMD-SHELL",
+          "mysqladmin ping -h 127.0.0.1 -P 3306 -u${DB_USER} -p${DB_PASSWORD}",
+        ]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -90,7 +93,6 @@ services:
       - ./employee-frontend/src:/app/src
     env_file:
       - .env
-
 
   visits-service-new:
     <<: *springboot
@@ -215,7 +217,7 @@ services:
   mailer-service:
     build: mailer-service
     ports:
-      - "8081:8080"        # port exposed for development purposes only
+      - "8081:8080" # port exposed for development purposes only
     env_file:
       - .env
     environment:
