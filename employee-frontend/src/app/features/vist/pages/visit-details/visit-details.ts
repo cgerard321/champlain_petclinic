@@ -3,8 +3,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
-import { VisitResponseModel } from '@features/vist/models/vist.model';
-import { VisitService } from '@features/vist/services/vist-service';
+import { VisitResponseModel } from '@features/vist/models/VisitResponseModel';
+import { VisitService } from '@features/vist/services/visit-service';
 
 @Component({
   selector: 'app-visit-details',
@@ -24,7 +24,7 @@ export class VisitDetails implements OnInit {
     const visitId = this.route.snapshot.paramMap.get('visitId');
 
     if (!visitId) {
-      this.errorMessage.set('No visit ID was provided.');
+      this.errorMessage.set($localize`No visit ID was provided.`);
       this.isLoading.set(false);
       return;
     }
@@ -39,8 +39,8 @@ export class VisitDetails implements OnInit {
 
         this.errorMessage.set(
           error instanceof HttpErrorResponse && error.status === 404
-            ? 'Visit not found.'
-            : 'Unable to load visit details.',
+            ? $localize`Visit not found.`
+            : $localize`Unable to load visit details.`,
         );
       },
     });

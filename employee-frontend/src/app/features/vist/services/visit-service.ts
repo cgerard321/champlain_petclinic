@@ -8,6 +8,7 @@ import { SseClient } from '@core/services/sse-client';
 import { Status } from '@features/vist/models/Status';
 import { TimeSlot } from '@features/vist/models/TimeSlot';
 import { Visit } from '@features/vist/models/Visit';
+import { VisitResponseModel } from '@features/vist/models/VisitResponseModel';
 
 @Injectable({ providedIn: 'root' })
 export class VisitService {
@@ -44,6 +45,10 @@ export class VisitService {
         filter((event): event is MessageEvent<string> => event.type !== 'error'),
         map((event) => JSON.parse(event.data) as Visit),
       );
+  }
+
+  getVisitById(visitId: string): Observable<VisitResponseModel> {
+    return this.http.get<VisitResponseModel>(`/api/gateway/visits/${encodeURIComponent(visitId)}`);
   }
 
   getAvailableTimeSlots(practitionerId: string, date: string): Observable<TimeSlot[]> {

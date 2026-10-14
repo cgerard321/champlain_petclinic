@@ -11,10 +11,11 @@ import { Status } from '@features/vist/models/Status';
 import { Visit } from '@features/vist/models/Visit';
 import { VisitService } from '@features/vist/services/visit-service';
 import { Roles } from '@shared/models/roles';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-visit',
-  imports: [DatePipe, MatButtonModule, MatDialogModule, MatSnackBarModule],
+  imports: [DatePipe, MatButtonModule, MatDialogModule, MatSnackBarModule, RouterLink],
   styleUrl: './VistListTable.css',
   templateUrl: './VistListTable.html',
 })
