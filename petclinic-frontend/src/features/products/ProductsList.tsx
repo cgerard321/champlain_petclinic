@@ -4,7 +4,7 @@ import {
   normalizeProductSearch,
 } from '@/features/products/utils/localizedProduct';
 import * as React from 'react';
-import { useState, useEffect, useCallback, JSX } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef, JSX } from 'react';
 import { getAllProducts } from '@/features/products/api/getAllProducts.ts';
 import './ProductList.css';
 import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
@@ -20,6 +20,8 @@ import ProductBundle from './components/ProductBundle';
 //import ProductSearch from './components/ProductSearch';
 import Reveal from '@/shared/components/animations/Reveal';
 import { loadRecentlyViewed } from './utils/recentlyViewed';
+
+const CATALOG_PAGE_SIZE = 8;
 
 interface ProductsListProps {
   searchQuery: string;
@@ -52,6 +54,18 @@ const ProductList = function Productlist({
     ProductModel[]
   >([]);
   const [filteredList, setFilteredList] = useState<ProductModel[]>([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const catalogRef = useRef<HTMLDivElement>(null);
+
+  const handlePageChange = (direction: number): void => {
+    setCurrentPage(page => page + direction);
+    catalogRef.current?.scrollIntoView({
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        ? 'instant'
+        : 'smooth',
+      block: 'start',
+    });
+  };
 
   const fetchProducts = useCallback(async (): Promise<void> => {
     setIsLoading(true);
@@ -138,6 +152,26 @@ const ProductList = function Productlist({
     }
   }, [sortCriteria, productList, searchQuery, language, t]);
 
+  const totalPages = Math.ceil(filteredList.length / CATALOG_PAGE_SIZE);
+  const firstVisibleProduct = currentPage * CATALOG_PAGE_SIZE + 1;
+  const lastVisibleProduct = Math.min(
+    (currentPage + 1) * CATALOG_PAGE_SIZE,
+    filteredList.length
+  );
+
+  const paginatedProducts = useMemo(() => {
+    const startIndex = currentPage * CATALOG_PAGE_SIZE;
+    return filteredList.slice(startIndex, startIndex + CATALOG_PAGE_SIZE);
+  }, [currentPage, filteredList]);
+
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [filters, searchQuery, sortCriteria]);
+
+  useEffect(() => {
+    setCurrentPage(page => Math.min(page, Math.max(totalPages - 1, 0)));
+  }, [totalPages]);
+
   const handleProductClick = (product: ProductModel): void => {
     setRecentlyClickedProducts(prev => {
       const updated = prev.filter(p => p.productId !== product.productId);
@@ -177,13 +211,13 @@ const ProductList = function Productlist({
       <div className="main-content">
         {view === 'catalog' && (
           <Reveal delay={80}>
-            <div className="products-section-container ">
-              <h2 className="section-title category-title">{t('catalog')}</h2>
+<div ref={catalogRef} className="products-section-container ">
+  <h2 className="section-title category-title">{t('catalog')}</h2>
               {isLoading ? (
                 <p>{t('loading')}</p>
               ) : filteredList.length > 0 ? (
-                <div className="grid">
-                  {filteredList.map((p, i) => (
+                <div className="grid catalog-grid">
+                  {paginatedProducts.map((p, i) => (
                     <Reveal key={p.productId} delay={i * 60 + 120}>
                       <div onClick={() => handleProductClick(p)}>
                         <Product
@@ -201,6 +235,52 @@ const ProductList = function Productlist({
                 <p style={{ textAlign: 'center', margin: '40px 0' }}>
                   {t('noItems')}
                 </p>
+              )}
+              {!isLoading && filteredList.length > 0 && (
+                <div className="catalog-pagination-container">
+                  <nav
+                    className="catalog-pagination"
+                    aria-label="Product pages"
+                  >
+                    <button
+                      type="button"
+                      className="catalog-pagination-button"
+                      onClick={() => handlePageChange(-1)}
+                      disabled={currentPage === 0}
+                      aria-label="Previous product page"
+                      title="Previous page"
+                    >
+                      <span aria-hidden="true">&lsaquo;</span>
+                    </button>
+
+                    <span
+                      className="catalog-page-number active"
+                      aria-current="page"
+                      aria-label={`Current product page ${currentPage + 1}`}
+                    >
+                      {currentPage + 1}
+                    </span>
+
+                    <button
+                      type="button"
+                      className="catalog-pagination-button"
+                      onClick={() => handlePageChange(1)}
+                      disabled={currentPage + 1 >= totalPages}
+                      aria-label="Next product page"
+                      title="Next page"
+                    >
+                      <span aria-hidden="true">&rsaquo;</span>
+                    </button>
+                  </nav>
+
+                  <span
+                    className="catalog-pagination-status"
+                    aria-live="polite"
+                  >
+                    {firstVisibleProduct}&ndash;{lastVisibleProduct} /{' '}
+                    {filteredList.length}
+                  </span>
+                </div>
               )}
             </div>
           </Reveal>

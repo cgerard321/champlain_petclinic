@@ -13,8 +13,12 @@ import { getPetTypeImage } from '@/features/customers/utils/petTypeMapping';
 import axiosInstance from '@/shared/api/axiosInstance';
 import './ProfilePage.css';
 import { PetResponseModel } from '@/features/customers/models/PetResponseModel';
+import { useTranslation } from 'react-i18next';
+
 const ProfilePage: React.FC = (): JSX.Element => {
   const { user } = useUser();
+  const { t } = useTranslation('customers');
+
   const [edit, setEdit] = React.useState<boolean>(false);
 
   const [customer, setCustomer] = React.useState<CustomerResponseModel | null>(
@@ -164,18 +168,18 @@ const ProfilePage: React.FC = (): JSX.Element => {
         } else {
           setPetImageUrls(previousUrls => ({
             ...previousUrls,
-            [petId]: getPetTypeImage(petTypeId, petTypes),
+            [petId]: getPetTypeImage(petTypeId, petTypes, t),
           }));
         }
       } catch (error) {
         console.error(`Error fetching pet photo for ${petId}:`, error);
         setPetImageUrls(previousUrls => ({
           ...previousUrls,
-          [petId]: getPetTypeImage(petTypeId, petTypes),
+          [petId]: getPetTypeImage(petTypeId, petTypes, t),
         }));
       }
     },
-    [petTypes]
+    [petTypes, t]
   );
 
   React.useEffect(() => {
