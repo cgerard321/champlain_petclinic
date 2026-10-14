@@ -356,4 +356,25 @@ class ProductRepositoryIntegrationTest extends PostgresTestContainerBase {
     }
 
 
+
+    @Test
+    void frenchTextSurvivesDatabaseRoundTripAndUpdates() {
+        Product product = Product.builder().productId(UUID.randomUUID().toString())
+                .productName("Cat Litter").productDescription("Clumping litter")
+                .productNameFr("Litière pour chats").productDescriptionFr("Contrôle des odeurs")
+                .productSalePrice(12.99).build();
+        StepVerifier.create(productRepository.save(product)
+                .flatMap(saved -> productRepository.findProductByProductId(saved.getProductId()))
+                .flatMap(found -> {
+                    assertEquals("Cat Litter", found.getProductName());
+                    assertEquals("Litière pour chats", found.getProductNameFr());
+                    assertEquals("Contrôle des odeurs", found.getProductDescriptionFr());
+                    found.setProductNameFr("Nouvelle litière");
+                    return productRepository.save(found);
+                })
+                .flatMap(saved -> productRepository.findProductByProductId(saved.getProductId())))
+                .assertNext(found -> assertEquals("Nouvelle litière", found.getProductNameFr()))
+                .verifyComplete();
+    }
+
 }
