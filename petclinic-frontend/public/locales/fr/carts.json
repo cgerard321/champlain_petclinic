@@ -192,5 +192,12 @@
     "price": "Prix :",
     "quantity": "Quantité :",
     "download": "Télécharger la facture"
+  },
+  "taxes": {
+    "GST": "TPS",
+    "PST": "TVP",
+    "HST": "TVH",
+    "QST": "TVQ",
+    "ESTIMATED": "Taxes estimées"
   }
 }

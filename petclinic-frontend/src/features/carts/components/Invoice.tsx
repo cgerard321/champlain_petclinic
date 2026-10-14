@@ -1,7 +1,12 @@
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import './Invoice.css';
-import { computeTaxes, formatTaxRate, roundToCents } from '../utils/taxUtils';
+import {
+  computeTaxes,
+  formatTaxRate,
+  roundToCents,
+  taxLabelKey,
+} from '../utils/taxUtils';
 import type { ShippingMethod } from '@/shared/api/cart';
 
 export interface InvoiceItem {
@@ -355,8 +360,10 @@ function Invoice({
                         ).toFixed(2);
                         return (
                           <p key={i}>
-                            {l.name} ({formatTaxRate(l.rate)}%): $
-                            {displayAmount}
+                            {t(`taxes.${taxLabelKey(l.name, prov)}`, {
+                              defaultValue: l.name,
+                            })}{' '}
+                            ({formatTaxRate(l.rate)}%): ${displayAmount}
                           </p>
                         );
                       })}

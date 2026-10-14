@@ -192,5 +192,12 @@
     "price": "Price:",
     "quantity": "Quantity:",
     "download": "Download Invoice"
+  },
+  "taxes": {
+    "GST": "GST",
+    "PST": "PST",
+    "HST": "HST",
+    "QST": "QST",
+    "ESTIMATED": "Estimated Taxes"
   }
 }

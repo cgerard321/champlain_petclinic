@@ -39,7 +39,12 @@ import {
   setCartCountInLS,
   setCartIdInLS,
 } from '../api/cartEvent';
-import { computeTaxes, formatTaxRate, roundToCents } from '../utils/taxUtils';
+import {
+  computeTaxes,
+  formatTaxRate,
+  roundToCents,
+  taxLabelKey,
+} from '../utils/taxUtils';
 import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
 import { getCustomerOrders } from '../api/getCustomerOrders';
 import type { OrderModel } from '../models/OrderModel';
@@ -1295,7 +1300,13 @@ const UserCart: React.FC = () => {
                 </p>
                 {resolvedTaxLines.map(line => (
                   <p key={`${line.name}-${line.rate}`} className="summary-item">
-                    {line.name} ({formatTaxRate(line.rate)}%):{' '}
+                    {t(
+                      `taxes.${taxLabelKey(line.name, billingInfo?.province)}`,
+                      {
+                        defaultValue: line.name,
+                      }
+                    )}{' '}
+                    ({formatTaxRate(line.rate)}%):{' '}
                     {formatPrice(line.amount ?? 0)}
                   </p>
                 ))}
