@@ -2,6 +2,7 @@ package com.petclinic.cartsservice.businesslayer;
 
 import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.CartRepository;
+import com.petclinic.cartsservice.dataaccesslayer.Order;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.domainclientlayer.CustomerClient;
 import com.petclinic.cartsservice.domainclientlayer.CustomerResponseModel;
@@ -9,6 +10,7 @@ import com.petclinic.cartsservice.domainclientlayer.ProductClient;
 import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
 import com.petclinic.cartsservice.domainclientlayer.CartItemRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
+import com.petclinic.cartsservice.presentationlayer.OrderResponseModel;
 import com.petclinic.cartsservice.presentationlayer.WishlistItemRequestModel;
 import com.petclinic.cartsservice.presentationlayer.WishlistTransferDirection;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
@@ -17,19 +19,13 @@ import com.petclinic.cartsservice.utils.exceptions.OutOfStockException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -50,6 +46,9 @@ class CartServiceUnitTest {
 
     @Mock
     private CustomerClient customerClient;
+
+    @Mock
+    private OrderServiceImpl orderService;
 
     @BeforeEach
     void init() {
@@ -1454,7 +1453,7 @@ class CartServiceUnitTest {
     @Test
     void testGetRecentPurchases_ReturnsList() {
         CartRepository cartRepository = Mockito.mock(CartRepository.class);
-        CartServiceImpl service = new CartServiceImpl(cartRepository, null, customerClient);
+        CartServiceImpl service = new CartServiceImpl(cartRepository, null, customerClient, orderService);
 
         String customerId = "customer-123";
         List<CartProduct> recentPurchases = List.of(
@@ -1473,7 +1472,7 @@ class CartServiceUnitTest {
     @Test
     void testGetRecentPurchases_ReturnsEmptyListIfNull() {
         CartRepository cartRepository = Mockito.mock(CartRepository.class);
-        CartServiceImpl service = new CartServiceImpl(cartRepository, null, customerClient);
+        CartServiceImpl service = new CartServiceImpl(cartRepository, null, customerClient, orderService);
 
         String customerId = "customer-456";
         Cart cart = Cart.builder().cartId("cart456").customerId(customerId).recentPurchases(null).build();
@@ -1956,16 +1955,38 @@ class CartServiceUnitTest {
                         e.getMessage().equals("Cart is empty"))
                 .verify();
     }
+
     @Test
     void testCheckoutCart_AllBranches() {
+        // Arrange
         String cartId = "test-cart-id";
         Cart cart = Cart.builder()
                 .cartId(cartId)
+                .customerId("test-customer-id")
                 .products(Arrays.asList(product1, product2))
                 .recentPurchases(Arrays.asList(product1))
                 .build();
+        when(cartRepository.findCartByCartId(cartId))
+                .thenReturn(Mono.just(cart));
 
-        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
+        OrderResponseModel orderResponse = OrderResponseModel.builder()
+                .orderId(UUID.randomUUID().toString())
+                .customerId("test-customer-id")
+                .products(cart.getProducts())
+                .total(100.0)
+                .build();
+
+        when(orderService.createOrder(any(Cart.class)))
+                .thenAnswer(invocation -> {
+                    Cart checkoutCart = invocation.getArgument(0);
+                    assertEquals("test-customer-id", checkoutCart.getCustomerId());
+                    assertEquals(2, checkoutCart.getProducts().size());
+                    assertTrue(checkoutCart.getSubtotal() > 0);
+                    assertTrue(checkoutCart.getTvq() > 0);
+                    assertTrue(checkoutCart.getTvc() > 0);
+                    assertTrue(checkoutCart.getTotal() > 0);
+                    return Mono.just(orderResponse);
+                });
 
         ProductResponseModel productResponse = ProductResponseModel.builder()
                 .productId(product1.getProductId())
@@ -1980,8 +2001,12 @@ class CartServiceUnitTest {
 
         when(productClient.getProductsByType("Food"))
                 .thenReturn(Flux.just(productResponse));
-        when(cartRepository.save(any(Cart.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
 
+        when(cartRepository.save(any(Cart.class)))
+                .thenAnswer(invocation ->
+                        Mono.just(invocation.getArgument(0)));
+
+        // Act & Assert: Successful checkout
         StepVerifier.create(cartService.checkoutCart(cartId))
                 .assertNext(response -> {
                     assertEquals(cartId, response.getCartId());
@@ -1991,23 +2016,40 @@ class CartServiceUnitTest {
                 })
                 .verifyComplete();
 
-        when(cartRepository.findCartByCartId("notfound")).thenReturn(Mono.empty());
+        // Verify checkout operations
+        verify(cartRepository).findCartByCartId(cartId);
+        verify(cartRepository).save(any(Cart.class));
+        verify(orderService).createOrder(any(Cart.class));
+
+        // Act & Assert: Cart not found
+        when(cartRepository.findCartByCartId("notfound"))
+                .thenReturn(Mono.empty());
+
         StepVerifier.create(cartService.checkoutCart("notfound"))
-                .expectErrorMatches(e -> e instanceof NotFoundException)
+                .expectError(NotFoundException.class)
                 .verify();
 
-        Cart emptyCart = Cart.builder().cartId(cartId).products(Collections.emptyList()).build();
+        // Act & Assert: Empty cart
+        Cart emptyCart = Cart.builder()
+                .cartId("empty")
+                .customerId("test-customer-id")
+                .products(Collections.emptyList())
+                .build();
+
         when(cartRepository.findCartByCartId("empty")).thenReturn(Mono.just(emptyCart));
         StepVerifier.create(cartService.checkoutCart("empty"))
-                .expectErrorMatches(e -> e instanceof InvalidInputException)
+                .expectError(InvalidInputException.class)
                 .verify();
+
+        verify(orderService, times(1)).createOrder(any(Cart.class));
     }
+
 
     @Test
         void testGetRecommendationPurchases_ReturnsRecommendations() {
                 CartRepository cartRepository = Mockito.mock(CartRepository.class);
                 ProductClient productClient = Mockito.mock(ProductClient.class);
-                CartServiceImpl service = new CartServiceImpl(cartRepository, productClient, customerClient);
+                CartServiceImpl service = new CartServiceImpl(cartRepository, productClient, customerClient, orderService);
 
                 String customerId = "customer-rec";
                 List<CartProduct> recommendations = List.of(CartProduct.builder().productId("prod1").build());
@@ -2027,7 +2069,7 @@ class CartServiceUnitTest {
         void testGetRecommendationPurchases_ReturnsEmptyList() {
                 CartRepository cartRepository = Mockito.mock(CartRepository.class);
                 ProductClient productClient = Mockito.mock(ProductClient.class);
-                CartServiceImpl service = new CartServiceImpl(cartRepository, productClient, customerClient);
+                CartServiceImpl service = new CartServiceImpl(cartRepository, productClient, customerClient, orderService);
 
                 String customerId = "customer-empty";
                 Cart cart = Mockito.mock(Cart.class);
@@ -2132,5 +2174,126 @@ class CartServiceUnitTest {
 
         verify(cartRepository, never()).save(any(Cart.class));
     }
+
+
+
+
+    @Test
+    void checkoutCart_CartSaveFails_DoesNotCreateOrder() {
+        // Arrange
+        String cartId = "cart-save-failure";
+
+        Cart cart = Cart.builder()
+                .cartId(cartId)
+                .customerId("customer-123")
+                .products(new ArrayList<>(List.of(product1, product2)))
+                .recentPurchases(new ArrayList<>())
+                .build();
+
+        when(cartRepository.findCartByCartId(cartId))
+                .thenReturn(Mono.just(cart));
+
+        ProductResponseModel productResponse = ProductResponseModel.builder()
+                .productId(product1.getProductId())
+                .productName(product1.getProductName())
+                .productType("Food")
+                .build();
+
+        when(productClient.getProductByProductId(anyString()))
+                .thenReturn(Mono.just(productResponse));
+
+        when(productClient.getProductsByType("Food"))
+                .thenReturn(Flux.just(productResponse));
+
+        when(cartRepository.save(any(Cart.class)))
+                .thenReturn(Mono.error(new RuntimeException("Cart save failed")));
+        // Act & Assert
+        StepVerifier.create(cartService.checkoutCart(cartId))
+                .expectErrorMatches(error -> error instanceof RuntimeException &&
+                                "Cart save failed".equals(error.getMessage()))
+                .verify();
+        verify(cartRepository).save(any(Cart.class));
+        verify(orderService, never())
+                .createOrder(any(Cart.class));
+    }
+
+
+    @Test
+    void checkoutCart_RecommendationFails_DoesNotCreateOrder() {
+        // Arrange
+        String cartId = "cart-recommendation-failure";
+
+        Cart cart = Cart.builder()
+                .cartId(cartId)
+                .customerId("customer-123")
+                .products(new ArrayList<>(List.of(product1)))
+                .recentPurchases(new ArrayList<>())
+                .build();
+
+        when(cartRepository.findCartByCartId(cartId))
+                .thenReturn(Mono.just(cart));
+        when(productClient.getProductByProductId(product1.getProductId()))
+                .thenReturn(Mono.error(new RuntimeException("Recommendation service failed")));
+
+        // Act & Assert
+        StepVerifier.create(cartService.checkoutCart(cartId))
+                .expectErrorMatches(error -> error instanceof RuntimeException &&
+                                "Recommendation service failed".equals(error.getMessage()))
+                .verify();
+        verify(productClient)
+                .getProductByProductId(product1.getProductId());
+        verify(cartRepository, never())
+                .save(any(Cart.class));
+        verify(orderService, never())
+                .createOrder(any(Cart.class));
+    }
+
+
+    @Test
+    void checkoutCart_OrderCreationFails_PropagatesError() {
+        // Arrange
+        String cartId = "cart-order-failure";
+
+        Cart cart = Cart.builder()
+                .cartId(cartId)
+                .customerId("customer-123")
+                .products(new ArrayList<>(List.of(product1, product2)))
+                .recentPurchases(new ArrayList<>())
+                .build();
+
+        when(cartRepository.findCartByCartId(cartId))
+                .thenReturn(Mono.just(cart));
+
+        ProductResponseModel productResponse = ProductResponseModel.builder()
+                .productId(product1.getProductId())
+                .productName(product1.getProductName())
+                .productType("Food")
+                .build();
+
+        when(productClient.getProductByProductId(anyString()))
+                .thenReturn(Mono.just(productResponse));
+
+        when(productClient.getProductsByType("Food"))
+                .thenReturn(Flux.just(productResponse));
+
+        when(cartRepository.save(any(Cart.class)))
+                .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+
+        when(orderService.createOrder(any(Cart.class)))
+                .thenReturn(Mono.error(new RuntimeException("Order creation failed")));
+        // Act & Assert
+        StepVerifier.create(cartService.checkoutCart(cartId))
+                .expectErrorMatches(error -> error instanceof RuntimeException &&
+                                "Order creation failed".equals(error.getMessage()))
+                .verify();
+        verify(cartRepository).save(any(Cart.class));
+        verify(orderService).createOrder(any(Cart.class));
+        InOrder inOrder = inOrder(cartRepository, orderService);
+        inOrder.verify(cartRepository).save(any(Cart.class));
+        inOrder.verify(orderService).createOrder(any(Cart.class));
+    }
+
+
+
 
 }
