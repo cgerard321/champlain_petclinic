@@ -152,7 +152,11 @@ public class InventoryServiceClient {
     ) {
         return webClient.put()
                 .uri(inventoryServiceUrl + "/{inventoryId}/products/{productId}", inventoryId, productId)
-                .header("X-Actor-Username", changedBy)
+                .headers(headers -> {
+                    if (changedBy != null) {
+                        headers.set("X-Actor-Username", changedBy);
+                    }
+                })
                 .body(Mono.just(model), ProductRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
@@ -171,6 +175,14 @@ public class InventoryServiceClient {
                 .bodyToMono(ProductResponseDTO.class);
     }
 
+    public Mono<ProductResponseDTO> updateProductInInventory(
+            ProductRequestDTO model,
+            String inventoryId,
+            String productId
+    ) {
+        return updateProductInInventory(model, inventoryId, productId, null);
+    }
+
     public Mono<Void> deleteProductInInventory(
             String inventoryId,
             String productId,
@@ -178,13 +190,21 @@ public class InventoryServiceClient {
     ) {
         return webClient.delete()
                 .uri(inventoryServiceUrl + "/{inventoryId}/products/{productId}", inventoryId, productId)
-                .header("X-Actor-Username", changedBy)
+                .headers(headers -> {
+                    if (changedBy != null) {
+                        headers.set("X-Actor-Username", changedBy);
+                    }
+                })
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError,
                         response -> rethrower.rethrow(response, ex ->
                                 new ProductListNotFoundException(
                                         ex.get("message").toString(), NOT_FOUND)))
                 .bodyToMono(Void.class);
+    }
+
+    public Mono<Void> deleteProductInInventory(String inventoryId, String productId) {
+        return deleteProductInInventory(inventoryId, productId, null);
     }
 
 
@@ -419,7 +439,11 @@ public class InventoryServiceClient {
     ) {
         return webClient.post()
                 .uri(inventoryServiceUrl + "/{inventoryId}/products", inventoryId)
-                .header("X-Actor-Username", changedBy)
+                .headers(headers -> {
+                    if (changedBy != null) {
+                        headers.set("X-Actor-Username", changedBy);
+                    }
+                })
                 .body(Mono.just(model), ProductRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
@@ -437,6 +461,13 @@ public class InventoryServiceClient {
                 .bodyToMono(ProductResponseDTO.class);
     }
 
+    public Mono<ProductResponseDTO> addSupplyToInventory(
+            final ProductRequestDTO model,
+            final String inventoryId
+    ) {
+        return addSupplyToInventory(model, inventoryId, null);
+    }
+
     public Mono<ProductResponseDTO> consumeProduct(
             String inventoryId,
             String productId,
@@ -445,12 +476,20 @@ public class InventoryServiceClient {
         return webClient.patch()
                 .uri(inventoryServiceUrl + "/{inventoryId}/products/{productId}/consume",
                         inventoryId, productId)
-                .header("X-Actor-Username", changedBy)
+                .headers(headers -> {
+                    if (changedBy != null) {
+                        headers.set("X-Actor-Username", changedBy);
+                    }
+                })
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError,
                         response -> Mono.error(new InventoryNotFoundException(
                                 "Product not found in inventory: " + inventoryId, NOT_FOUND)))
                 .bodyToMono(ProductResponseDTO.class);
+    }
+
+    public Mono<ProductResponseDTO> consumeProduct(String inventoryId, String productId) {
+        return consumeProduct(inventoryId, productId, null);
     }
 
     public Mono<Integer> getQuantityOfProductsInInventory(final String inventoryId) {
@@ -520,7 +559,11 @@ public class InventoryServiceClient {
                         .path("/{inventoryId}/products/{productId}/restockProduct")
                         .queryParam("productQuantity", productQuantity)
                         .build(inventoryId, productId))
-                .header("X-Actor-Username", changedBy)
+                .headers(headers -> {
+                    if (changedBy != null) {
+                        headers.set("X-Actor-Username", changedBy);
+                    }
+                })
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError,
@@ -528,6 +571,14 @@ public class InventoryServiceClient {
                                 "Product: " + productId
                                         + " not found in inventory: " + inventoryId)))
                 .bodyToMono(ProductResponseDTO.class);
+    }
+
+    public Mono<ProductResponseDTO> restockLowStockProduct(
+            final String inventoryId,
+            final String productId,
+            final Integer productQuantity
+    ) {
+        return restockLowStockProduct(inventoryId, productId, productQuantity, null);
     }
 
     public Flux<Map<String, Object>> getSupplyHistory(
@@ -548,4 +599,3 @@ public class InventoryServiceClient {
 
 
 }
-

@@ -163,19 +163,22 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
             String productId,
             String changedBy
     ) {
-        return productRepository.findProductByInventoryIdAndProductId(inventoryId, productId)
+        return inventoryRepository.findInventoryByInventoryId(inventoryId)
                 .switchIfEmpty(Mono.error(new NotFoundException(
-                        "Product not found with id: " + productId)))
-                .flatMap(product ->
-                        productRepository.delete(product)
-                                .then(recordSupplyChange(
-                                        inventoryId,
-                                        product.getProductId(),
-                                        product.getProductName(),
-                                        product.getProductQuantity(),
-                                        0,
-                                        SupplyAuditAction.DELETED,
-                                        changedBy)));
+                        "Inventory not found, make sure it exists, inventoryId: " + inventoryId)))
+                .then(productRepository.findProductByInventoryIdAndProductId(inventoryId, productId)
+                        .switchIfEmpty(Mono.error(new NotFoundException(
+                                "Product not found, make sure it exists, productId: " + productId)))
+                        .flatMap(product ->
+                                productRepository.delete(product)
+                                        .then(recordSupplyChange(
+                                                inventoryId,
+                                                product.getProductId(),
+                                                product.getProductName(),
+                                                product.getProductQuantity(),
+                                                0,
+                                                SupplyAuditAction.DELETED,
+                                                changedBy))));
     }
 
     @Override
@@ -929,6 +932,5 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     }
 
 }
-
 
 

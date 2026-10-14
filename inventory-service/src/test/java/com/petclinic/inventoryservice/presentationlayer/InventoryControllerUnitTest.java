@@ -8,6 +8,7 @@ import com.petclinic.inventoryservice.datalayer.Product.Status;
 import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
 import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -40,6 +41,13 @@ class InventoryControllerUnitTest {
     WebTestClient webTestClient;
     @MockBean
     ProductInventoryService productInventoryService;
+
+    @BeforeEach
+    void configureActorHeader() {
+        webTestClient = webTestClient.mutate()
+                .defaultHeader("X-Actor-Username", "test-user")
+                .build();
+    }
 
     ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
             .inventoryId("1")
@@ -214,7 +222,8 @@ class InventoryControllerUnitTest {
     @Test
     public void deleteProductInInventory_byProductId_shouldSucceed() {
         //arrange
-        when(productInventoryService.deleteProductInInventory(productResponseDTO.getInventoryId(), productResponseDTO.getProductId()))
+        when(productInventoryService.deleteProductInInventory(
+                productResponseDTO.getInventoryId(), productResponseDTO.getProductId(), "test-user"))
                 .thenReturn(Mono.empty());
         //act and assert
         webTestClient.delete()
@@ -620,7 +629,8 @@ class InventoryControllerUnitTest {
                 .productSalePrice(15.99)
                 .build();
 
-        when(productInventoryService.updateProductInInventory(any(), eq(inventoryId), eq(productId)))
+        when(productInventoryService.updateProductInInventory(
+                any(), eq(inventoryId), eq(productId), eq("test-user")))
                 .thenReturn(Mono.just(responseDTO));
 
         // Act and Assert
@@ -643,7 +653,7 @@ class InventoryControllerUnitTest {
                 });
 
         verify(productInventoryService, times(1))
-                .updateProductInInventory(any(), eq(inventoryId), eq(productId));
+                .updateProductInInventory(any(), eq(inventoryId), eq(productId), eq("test-user"));
     }
 
     @Test
@@ -659,7 +669,8 @@ class InventoryControllerUnitTest {
                 .productSalePrice(15.99)
                 .build();
 
-        when(productInventoryService.updateProductInInventory(any(), eq(inventoryId), eq(productId)))
+        when(productInventoryService.updateProductInInventory(
+                any(), eq(inventoryId), eq(productId), eq("test-user")))
                 .thenReturn(Mono.error(new NotFoundException("Product not found")));
 
         // Act and Assert
@@ -674,7 +685,7 @@ class InventoryControllerUnitTest {
                 .jsonPath("$.message", "Product not found");
 
         verify(productInventoryService, times(1))
-                .updateProductInInventory(any(), eq(inventoryId), eq(productId));
+                .updateProductInInventory(any(), eq(inventoryId), eq(productId), eq("test-user"));
     }
 
 
@@ -691,7 +702,8 @@ class InventoryControllerUnitTest {
                 .productSalePrice(15.99)
                 .build();
 
-        when(productInventoryService.updateProductInInventory(any(), eq(inventoryId), eq(productId)))
+        when(productInventoryService.updateProductInInventory(
+                any(), eq(inventoryId), eq(productId), eq("test-user")))
                 .thenReturn(Mono.error(new InvalidInputException("Invalid input")));
 
         // Act and Assert
@@ -706,7 +718,7 @@ class InventoryControllerUnitTest {
                 .jsonPath("$.message", "Invalid input");
 
         verify(productInventoryService, times(1))
-                .updateProductInInventory(any(), eq(inventoryId), eq(productId));
+                .updateProductInInventory(any(), eq(inventoryId), eq(productId), eq("test-user"));
     }
 
     @Test
@@ -730,7 +742,8 @@ class InventoryControllerUnitTest {
         //arrange
         String invalidProductId = "invalid";
 
-        when(productInventoryService.deleteProductInInventory(productResponseDTO.getInventoryId(), invalidProductId))
+        when(productInventoryService.deleteProductInInventory(
+                productResponseDTO.getInventoryId(), invalidProductId, "test-user"))
                 .thenReturn(Mono.error(new NotFoundException()));
 
         //act and assert
@@ -747,7 +760,8 @@ class InventoryControllerUnitTest {
         //arrange
         String invalidInventoryId = "invalid";
 
-        when(productInventoryService.deleteProductInInventory(invalidInventoryId, productResponseDTO.getProductId()))
+        when(productInventoryService.deleteProductInInventory(
+                invalidInventoryId, productResponseDTO.getProductId(), "test-user"))
                 .thenReturn(Mono.error(new NotFoundException()));
 
         //act and assert
@@ -780,7 +794,7 @@ class InventoryControllerUnitTest {
                 .productSalePrice(15.99)
                 .build();
 
-        when(productInventoryService.addSupplyToInventory(any(), eq(inventoryId)))
+        when(productInventoryService.addSupplyToInventory(any(), eq(inventoryId), eq("test-user")))
                 .thenReturn(Mono.just(responseDTO));
 
         // Act and Assert
@@ -803,7 +817,7 @@ class InventoryControllerUnitTest {
                 });
 
         verify(productInventoryService, times(1))
-                .addSupplyToInventory(any(), eq(inventoryId));
+                .addSupplyToInventory(any(), eq(inventoryId), eq("test-user"));
     }
 
     @Test
@@ -818,7 +832,7 @@ class InventoryControllerUnitTest {
                 .productSalePrice(15.99)
                 .build();
 
-        when(productInventoryService.addSupplyToInventory(any(), eq(inventoryId)))
+        when(productInventoryService.addSupplyToInventory(any(), eq(inventoryId), eq("test-user")))
                 .thenReturn(Mono.error(new InvalidInputException("Invalid input")));
 
         // Act and Assert
@@ -833,7 +847,7 @@ class InventoryControllerUnitTest {
                 .jsonPath("$.message", "Invalid input");
 
         verify(productInventoryService, times(1))
-                .addSupplyToInventory(any(), eq(inventoryId));
+                .addSupplyToInventory(any(), eq(inventoryId), eq("test-user"));
     }
 
     @Test
@@ -1114,7 +1128,7 @@ class InventoryControllerUnitTest {
                 .status(AVAILABLE)
                 .build();
 
-        when(productInventoryService.addSupplyToInventory(any(), eq(inventoryId)))
+        when(productInventoryService.addSupplyToInventory(any(), eq(inventoryId), eq("test-user")))
                 .thenReturn(Mono.just(responseDTO));
 
         // Act and Assert
@@ -1138,7 +1152,7 @@ class InventoryControllerUnitTest {
                 });
 
         verify(productInventoryService, times(1))
-                .addSupplyToInventory(any(), eq(inventoryId));
+                .addSupplyToInventory(any(), eq(inventoryId), eq("test-user"));
     }
 
     @Test
@@ -1166,7 +1180,7 @@ class InventoryControllerUnitTest {
                 .build();
 
         // Mocking the service method to return the expected response
-        when(productInventoryService.addSupplyToInventory(any(), eq(inventoryId)))
+        when(productInventoryService.addSupplyToInventory(any(), eq(inventoryId), eq("test-user")))
                 .thenReturn(Mono.just(responseDTO));
 
         // Act and Assert
@@ -1183,7 +1197,7 @@ class InventoryControllerUnitTest {
                     assertEquals(Status.OUT_OF_STOCK, dto.getStatus());  // Assert the status is OUT_OF_STOCK
                 });
 
-        verify(productInventoryService, times(1)).addSupplyToInventory(any(), eq(inventoryId));
+        verify(productInventoryService, times(1))        .addSupplyToInventory(any(), eq(inventoryId), eq("test-user"));
     }
 
     @Test
@@ -1211,7 +1225,7 @@ class InventoryControllerUnitTest {
                 .build();
 
         // Mocking the service method to return the expected response
-        when(productInventoryService.addSupplyToInventory(any(), eq(inventoryId))
+        when(productInventoryService.addSupplyToInventory(any(), eq(inventoryId), eq("test-user"))
         ).thenReturn(Mono.just(responseDTO));
 
         // Act and Assert
@@ -1228,7 +1242,7 @@ class InventoryControllerUnitTest {
                     assertEquals(RE_ORDER, dto.getStatus());  // Assert the status is REORDER
                 });
 
-        verify(productInventoryService, times(1)).addSupplyToInventory(any(), eq(inventoryId));
+        verify(productInventoryService, times(1))        .addSupplyToInventory(any(), eq(inventoryId), eq("test-user"));
     }
 
 //    @Test
@@ -1300,7 +1314,8 @@ class InventoryControllerUnitTest {
                 .status(AVAILABLE)
                 .build();
 
-        when(productInventoryService.updateProductInInventory(any(), eq(inventoryId), eq(productId)))
+        when(productInventoryService.updateProductInInventory(
+                any(), eq(inventoryId), eq(productId), eq("test-user")))
                 .thenReturn(Mono.just(responseDTO));
 
         // Act and Assert
@@ -1324,7 +1339,7 @@ class InventoryControllerUnitTest {
                 });
 
         verify(productInventoryService, times(1))
-                .updateProductInInventory(any(), eq(inventoryId), eq(productId));
+                .updateProductInInventory(any(), eq(inventoryId), eq(productId), eq("test-user"));
 
 
     }
@@ -1355,7 +1370,8 @@ class InventoryControllerUnitTest {
                 .build();
 
         // Mocking the service to return the updated product with the OUT_OF_STOCK status
-        when(productInventoryService.updateProductInInventory(any(), eq(inventoryId), eq(productId)))
+        when(productInventoryService.updateProductInInventory(
+                any(), eq(inventoryId), eq(productId), eq("test-user")))
                 .thenReturn(Mono.just(responseDTO));
 
         // Act and Assert
@@ -1380,7 +1396,7 @@ class InventoryControllerUnitTest {
 
         // Verify that the service method was called exactly once
         verify(productInventoryService, times(1))
-                .updateProductInInventory(any(), eq(inventoryId), eq(productId));
+                .updateProductInInventory(any(), eq(inventoryId), eq(productId), eq("test-user"));
 
     }
 
@@ -1411,7 +1427,8 @@ class InventoryControllerUnitTest {
                 .build();
 
         // Mocking the service to return the updated product with the REORDER status
-        when(productInventoryService.updateProductInInventory(any(), eq(inventoryId), eq(productId)))
+        when(productInventoryService.updateProductInInventory(
+                any(), eq(inventoryId), eq(productId), eq("test-user")))
                 .thenReturn(Mono.just(responseDTO));
 
         // Act and Assert
@@ -1436,7 +1453,7 @@ class InventoryControllerUnitTest {
 
         // Verify that the service method was called exactly once
         verify(productInventoryService, times(1))
-                .updateProductInInventory(any(), eq(inventoryId), eq(productId));
+                .updateProductInInventory(any(), eq(inventoryId), eq(productId), eq("test-user"));
 
 
     }
@@ -1766,7 +1783,8 @@ class InventoryControllerUnitTest {
                 .productQuantity(productQuantity)
                 .build();
 
-        when(productInventoryService.restockLowStockProduct(inventoryId, productId, productQuantity))
+        when(productInventoryService.restockLowStockProduct(
+                inventoryId, productId, productQuantity, "test-user"))
                 .thenReturn(Mono.just(updatedProductResponseDTO));
 
         // Act and Assert
@@ -1784,7 +1802,8 @@ class InventoryControllerUnitTest {
                 });
 
         // Verify that the service method was called with the correct arguments
-        verify(productInventoryService, times(1)).restockLowStockProduct(inventoryId, productId, productQuantity);
+        verify(productInventoryService, times(1))
+                .restockLowStockProduct(inventoryId, productId, productQuantity, "test-user");
     }
 
     @Test
@@ -1802,7 +1821,7 @@ class InventoryControllerUnitTest {
                 .expectStatus().isBadRequest();
 
         // Verify that the service method was not called
-        verify(productInventoryService, times(0)).restockLowStockProduct(any(), any(), any());
+        verify(productInventoryService, times(0)).restockLowStockProduct(any(), any(), any(), any());
     }
 
     @Test
@@ -1812,7 +1831,8 @@ class InventoryControllerUnitTest {
         String productId = "nonExistentProductId";
         Integer productQuantity = 10;
 
-        when(productInventoryService.restockLowStockProduct(inventoryId, productId, productQuantity))
+        when(productInventoryService.restockLowStockProduct(
+                inventoryId, productId, productQuantity, "test-user"))
                 .thenReturn(Mono.empty());
 
         // Act and Assert
@@ -1823,7 +1843,8 @@ class InventoryControllerUnitTest {
                 .expectStatus().isNotFound();
 
         // Verify that the service method was called with the correct arguments
-        verify(productInventoryService, times(1)).restockLowStockProduct(inventoryId, productId, productQuantity);
+        verify(productInventoryService, times(1))
+                .restockLowStockProduct(inventoryId, productId, productQuantity, "test-user");
     }
 
     @Test
@@ -2266,7 +2287,7 @@ class InventoryControllerUnitTest {
         String productId = "productId_1";
 
         // Mock the service to return the updated product
-        when(productInventoryService.consumeProduct(inventoryId, productId))
+        when(productInventoryService.consumeProduct(inventoryId, productId, "test-user"))
                 .thenReturn(Mono.just(productResponseDTO));
 
         // Act and Assert
@@ -2282,7 +2303,7 @@ class InventoryControllerUnitTest {
                 });
 
         // Verify that the service was called with the correct inventoryId and productId
-        verify(productInventoryService, times(1)).consumeProduct(inventoryId, productId);
+        verify(productInventoryService, times(1)).consumeProduct(inventoryId, productId, "test-user");
     }
 
     @Test
@@ -2292,7 +2313,7 @@ class InventoryControllerUnitTest {
         String invalidProductId = "invalidProductId";
 
         // Mock the service to return an error
-        when(productInventoryService.consumeProduct(invalidInventoryId, invalidProductId))
+        when(productInventoryService.consumeProduct(invalidInventoryId, invalidProductId, "test-user"))
                 .thenReturn(Mono.error(new NotFoundException()));
 
         // Act and Assert
@@ -2313,7 +2334,7 @@ class InventoryControllerUnitTest {
         String invalidProductId = "invalidProductId";
 
         // Mock the service to return an error
-        when(productInventoryService.consumeProduct(inventoryId, invalidProductId))
+        when(productInventoryService.consumeProduct(inventoryId, invalidProductId, "test-user"))
                 .thenReturn(Mono.error(new NotFoundException()));
 
         // Act and Assert
@@ -2334,7 +2355,7 @@ class InventoryControllerUnitTest {
         String productId = "productId_1";
 
         // Mock the service to return an error
-        when(productInventoryService.consumeProduct(invalidInventoryId, productId))
+        when(productInventoryService.consumeProduct(invalidInventoryId, productId, "test-user"))
                 .thenReturn(Mono.error(new NotFoundException()));
 
         // Act and Assert
@@ -2355,7 +2376,7 @@ class InventoryControllerUnitTest {
         String productId = "productId_1";
 
         // Mock the service to return an error
-        when(productInventoryService.consumeProduct(inventoryId, productId))
+        when(productInventoryService.consumeProduct(inventoryId, productId, "test-user"))
                 .thenReturn(Mono.error(new InvalidInputException("Product quantity is 0")));
 
         // Act and Assert
