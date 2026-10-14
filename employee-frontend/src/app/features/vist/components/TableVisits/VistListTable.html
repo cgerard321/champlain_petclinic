@@ -22,7 +22,7 @@
         }
       </tr>
 
-      @for (visits of visit(); track visits.visitId) {
+      @for (visits of visibleVisits(); track visits.visitId) {
         <tr>
           <td>{{ visits.visitId }}</td>
           <td>{{ visits.vetFirstName }} {{ visits.vetLastName }}</td>
