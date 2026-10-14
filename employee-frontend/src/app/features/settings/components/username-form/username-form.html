@@ -61,9 +61,7 @@
 
   @if (suggestions().length > 0) {
     <div class="suggestions">
-      <span id="suggestions-label" i18n="@@settings.security.username.suggestions">
-        Suggestions
-      </span>
+      <span id="suggestions-label">{{ suggestionsLabel() }}</span>
 
       <ul class="suggestion-list" aria-labelledby="suggestions-label">
         @for (suggestion of suggestions(); track suggestion) {

@@ -15,6 +15,7 @@ import {
   isSameAsCurrent,
   isValidUsername,
   normalizeUsername,
+  suggestAlternatives,
   suggestUsernames,
   UsernameRuleId,
 } from '@features/settings/models/username-rules';
@@ -79,8 +80,18 @@ export class UsernameForm implements SettingsSectionForm {
   protected readonly sameAsCurrent = computed(() => isSameAsCurrent(this.draft(), this.current()));
   protected readonly preview = computed(() => normalizeUsername(this.draft()));
 
-  protected readonly suggestions = computed(() =>
-    this.valid() ? [] : suggestUsernames(this.draft()),
+  protected readonly suggestions = computed(() => {
+    if (this.errorMessage()) {
+      return suggestAlternatives(this.draft());
+    }
+
+    return this.valid() ? [] : suggestUsernames(this.draft());
+  });
+
+  protected readonly suggestionsLabel = computed(() =>
+    this.errorMessage()
+      ? $localize`:@@settings.security.username.tryInstead:Essayez plutôt`
+      : $localize`:@@settings.security.username.suggestions:Suggestions`,
   );
 
   protected readonly errorText = computed(() => {
