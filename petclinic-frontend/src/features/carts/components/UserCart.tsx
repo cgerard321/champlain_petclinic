@@ -1517,16 +1517,15 @@ const UserCart: React.FC = () => {
         </div>
 
         {showBillingForm && (
-
-              <CartBillingForm
-                isOpen={true}
-                onClose={() => setShowBillingForm(false)}
-                onSubmit={async billing => {
-                  setBillingInfo(billing);
-                  await handleCheckout(billing);
-                  setShowBillingForm(false);
-                }}
-              />
+          <CartBillingForm
+            isOpen={true}
+            onClose={() => setShowBillingForm(false)}
+            onSubmit={async billing => {
+              setBillingInfo(billing);
+              await handleCheckout(billing);
+              setShowBillingForm(false);
+            }}
+          />
         )}
 
         {isCheckoutModalOpen && (
