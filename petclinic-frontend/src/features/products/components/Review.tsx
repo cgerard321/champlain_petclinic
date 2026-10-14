@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { JSX, useState } from 'react';
 import { RatingModel } from '@/features/products/models/ProductModels/RatingModel.ts';
 import defaultProfile from '@/assets/Customers/defaultProfilePicture.png';
@@ -25,6 +26,7 @@ export function Review({
   onLike,
   searchQuery,
 }: ReviewProps): JSX.Element {
+  const { t } = useTranslation('products');
   const [showExpanded, setShowExpanded] = useState(false);
   const [hasOverflow, setHasOverflow] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
@@ -49,27 +51,29 @@ export function Review({
       <div className="product-review-author">
         <img
           src={rating.reviewerPhoto || defaultProfile}
-          alt={`${rating.reviewerUsername || 'Customer'} profile picture`}
+          alt={t('photoAlt', {
+            name: rating.reviewerUsername || t('customer'),
+          })}
           onError={event => {
             event.currentTarget.onerror = null;
             event.currentTarget.src = defaultProfile;
           }}
         />
-        <span>{rating.reviewerUsername || 'Customer'}</span>
+        <span>{rating.reviewerUsername || t('customer')}</span>
       </div>
       {canEdit && (
         <div className="review-card-actions">
           <button
             className="review-card-edit-btn"
             onClick={onEdit}
-            title="Edit your review"
+            title={t('editReviewTitle')}
           >
             <FaPen />
           </button>
           <button
             className="review-card-delete-btn"
             onClick={onDelete}
-            title="Delete your review"
+            title={t('deleteReviewTitle')}
           >
             <FaTrash />
           </button>
@@ -108,7 +112,7 @@ export function Review({
           variant="secondary"
           onClick={() => setShowExpanded(!showExpanded)}
         >
-          {showExpanded ? 'Collapse' : 'Expand'}
+          {showExpanded ? t('collapseReview') : t('expandReview')}
         </Button>
       )}
       <div className="review-helpful-row">
