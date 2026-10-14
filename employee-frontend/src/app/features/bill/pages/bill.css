@@ -90,6 +90,53 @@
   font-size: 1.25rem;
 }
 
+/* Bill filter */
+.bill-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin: 0 24px 24px;
+  padding: 20px;
+  border: 1px solid #e0eae0;
+  border-radius: 12px;
+  background: #f7faf7;
+}
+
+.bill-filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  color: #315842;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.bill-filters input,
+.bill-filters select {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid #aebfb1;
+  border-radius: 8px;
+  background: #fff;
+  color: #1b382b;
+  font: inherit;
+  font-weight: 400;
+}
+
+.bill-filters input:focus-visible,
+.bill-filters select:focus-visible {
+  outline: 3px solid #8dbb8f;
+  outline-offset: 2px;
+}
+
+.bill-filters .bill-secondary-action {
+  align-self: end;
+  min-height: 42px;
+}
+
 /* Bill lookup */
 
 .bill-lookup {
@@ -150,50 +197,54 @@
 
 .bill-table {
   width: 100%;
-  min-width: 620px;
+  table-layout: fixed;
   border-collapse: collapse;
   text-align: left;
 }
 
 .bill-table th {
-  padding: 14px 24px;
+  padding: 14px 10px;
   background: #f7faf7;
   color: #4a6353;
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  overflow-wrap: anywhere;
 }
 
 .bill-table td {
-  padding: 14px 24px;
+  padding: 14px 10px;
   border-top: 1px solid #e0eae0;
+  vertical-align: middle;
+  overflow-wrap: anywhere;
 }
 
 .bill-table th:last-child,
 .bill-table td:last-child {
-  min-width: 190px;
+  width: 26%;
 }
 
 /* Bill actions */
 
 .bill-row-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 10px;
-  white-space: nowrap;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .bill-table-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 78px;
-  min-height: 38px;
-  padding: 8px 14px;
+  min-width: 0;
+  min-height: 40px;
+  padding: 8px;
   border: 1px solid #1b382b;
   border-radius: 8px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: center;
   font: inherit;
   font-size: 0.875rem;
   font-weight: 600;
@@ -224,6 +275,11 @@
 .bill-table-button:focus-visible {
   outline: 3px solid #8dbb8f;
   outline-offset: 2px;
+}
+
+.bill-table-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* Empty and error states */

@@ -80,6 +80,12 @@
       "copyright": "© 2026 Champlain Pet Clinic. All rights reserved."
     },
     "visits": {
+      "showFilters": "Show filters",
+      "filterButton": "Filter By",
+      "hideFilters": "Hide filters",
+      "sidebarLabel": "Visit filters",
+      "statusMenuLabel": "Visit statuses",
+      "listLabel": "Visit list",
       "title": "List of Visits",
       "visitId": "Visit ID",
       "veterinarianFullName": "Veterinarian full name",
