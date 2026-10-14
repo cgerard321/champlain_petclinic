@@ -81,6 +81,7 @@ class InventoryServiceClientIntegrationTest {
                 "productId",
                 "inventoryId",
                 "name",
+                null,
                 "desc",
                 10.00,
                 2,
@@ -108,6 +109,7 @@ class InventoryServiceClientIntegrationTest {
                 "productId",
                 "inventoryId",
                 "name",
+                null,
                 "desc",
                 10.00,
                 2,
@@ -172,6 +174,7 @@ class InventoryServiceClientIntegrationTest {
                 "productId",
                 "inventoryId",
                 "name",
+                null,
                 "desc",
                 10.00,
                 2,
@@ -183,6 +186,7 @@ class InventoryServiceClientIntegrationTest {
                 "productId",
                 "inventoryId",
                 "name",
+                null,
                 "desc",
                 10.00,
                 2,
@@ -288,6 +292,7 @@ class InventoryServiceClientIntegrationTest {
                 productId,
                 inventoryId,
                 "Restocked Product",
+                null,
                 "Restocked Description",
                 100.00,
                 productQuantity,
@@ -354,6 +359,7 @@ class InventoryServiceClientIntegrationTest {
                 productId,
                 newInventoryId,
                 "name",
+                null,
                 "desc",
                 10.00,
                 2,
@@ -407,6 +413,7 @@ class InventoryServiceClientIntegrationTest {
                 "productId1",
                 "inventoryId1",
                 "name1",
+                null,
                 "desc1",
                 10.00,
                 2,
@@ -419,6 +426,7 @@ class InventoryServiceClientIntegrationTest {
                 "productId2",
                 "inventoryId2",
                 "name2",
+                null,
                 "desc2",
                 12.00,
                 3,
@@ -455,6 +463,7 @@ class InventoryServiceClientIntegrationTest {
                 "productId",
                 "inventoryId",
                 "name",
+                null,
                 "desc",
                 10.00,
                 2,
@@ -556,6 +565,7 @@ class InventoryServiceClientIntegrationTest {
                 "productId",
                 "inventoryId",
                 "name",
+                null,
                 "desc",
                 10.00,
                 2,
@@ -655,6 +665,7 @@ class InventoryServiceClientIntegrationTest {
                 "productId",
                 "inventoryId",
                 "name",
+                null,
                 "desc",
                 10.00,
                 2,
@@ -727,6 +738,7 @@ class InventoryServiceClientIntegrationTest {
                 "productId",
                 "inventoryId",
                 "name",
+                null,
                 "desc",
                 10.00,
                 2,
@@ -773,6 +785,7 @@ class InventoryServiceClientIntegrationTest {
                 "productId",
                 "inventoryId1",
                 "name",
+                null,
                 "desc",
                 10.00,
                 2,
@@ -847,6 +860,7 @@ class InventoryServiceClientIntegrationTest {
                 "p1",
                 "inv1",
                 "A",
+                null,
                 "d",
                 10.0,
                 1,
@@ -858,6 +872,7 @@ class InventoryServiceClientIntegrationTest {
                 "p2",
                 "inv1",
                 "B",
+                null,
                 "d",
                 20.0,
                 2,
@@ -981,6 +996,7 @@ class InventoryServiceClientIntegrationTest {
                 "p1",
                 "inv1",
                 "name",
+                null,
                 "d",
                 10.0,
                 5,
@@ -1020,6 +1036,7 @@ class InventoryServiceClientIntegrationTest {
                 "p1",
                 "inv1",
                 "Supply",
+                null,
                 "d",
                 10.0,
                 1,
@@ -1035,6 +1052,36 @@ class InventoryServiceClientIntegrationTest {
         StepVerifier.create(inventoryServiceClient.addSupplyToInventory(new ProductRequestDTO(), "inv1"))
                 .expectNext(p)
                 .verifyComplete();
+    }
+
+    @Test
+    void addSupplyToInventory_shouldForwardSupplierNameAndReadItFromResponse() throws Exception {
+        MockWebServer supplierServer = new MockWebServer();
+        supplierServer.start();
+        try {
+            InventoryServiceClient supplierClient = new InventoryServiceClient(
+                    "localhost", String.valueOf(supplierServer.getPort()));
+            ReflectionTestUtils.setField(supplierClient, "rethrower", new Rethrower(new ObjectMapper()));
+
+            ProductRequestDTO request = ProductRequestDTO.builder()
+                    .productName("Bandages")
+                    .supplierName("Clinic Supplier")
+                    .build();
+            supplierServer.enqueue(new MockResponse()
+                    .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .setBody("{\"productId\":\"p1\",\"inventoryId\":\"inv1\",\"productName\":\"Bandages\",\"supplierName\":\"Clinic Supplier\"}"));
+
+            StepVerifier.create(supplierClient.addSupplyToInventory(request, "inv1"))
+                    .assertNext(response -> assertEquals("Clinic Supplier", response.getSupplierName()))
+                    .verifyComplete();
+
+            var recordedRequest = supplierServer.takeRequest();
+            assertEquals("POST", recordedRequest.getMethod());
+            assertEquals("Clinic Supplier",
+                    objectMapper.readTree(recordedRequest.getBody().readUtf8()).path("supplierName").asText());
+        } finally {
+            supplierServer.shutdown();
+        }
     }
 
     @Test
@@ -1073,6 +1120,7 @@ class InventoryServiceClientIntegrationTest {
                 "p1",
                 "inv1",
                 "N",
+                null,
                 "d",
                 10.0,
                 1,
@@ -1195,6 +1243,7 @@ class InventoryServiceClientIntegrationTest {
                 "p1",
                 "inv1",
                 "Alpha",
+                null,
                 "d",
                 10.0,
                 1,

@@ -504,16 +504,16 @@ class CartServiceUnitTest {
                         List.of(),
                         WishlistTransferDirection.TO_CART))
                 .assertNext(response -> {
-                    assertEquals(1, response.getProducts().size(), "Only in-stock item should move to cart");
+                    assertEquals(1, response.getProducts().size(), "Only in-stock item should be added to cart");
                     assertEquals(
                             inStockWishlistProduct.getProductId(),
                             response.getProducts().get(0).getProductId()
                     );
-                    assertTrue(
-                            response.getWishListProducts().stream()
-                                    .anyMatch(p -> p.getProductId().equals(outOfStockWishlistProduct.getProductId())),
-                            "Out-of-stock item should remain in wishlist"
-                    );
+                    assertEquals(2, response.getWishListProducts().size(), "Both items should remain in wishlist");
+                    assertTrue(response.getWishListProducts().stream()
+                            .anyMatch(p -> p.getProductId().equals(inStockWishlistProduct.getProductId())));
+                    assertTrue(response.getWishListProducts().stream()
+                            .anyMatch(p -> p.getProductId().equals(outOfStockWishlistProduct.getProductId())));
                     assertTrue(
                             response.getMessage() != null && response.getMessage().contains("Skipped"),
                             "Response message should indicate skipped items"
@@ -660,6 +660,42 @@ class CartServiceUnitTest {
                 .verifyComplete();
 
         verify(cartRepository, times(1)).save(any(Cart.class));
+    }
+
+    @Test
+    void addProductToCart_ProductInWishlist_KeepsProductInBothLists() {
+        String cartId = "cart-2042";
+        String productId = "06a7d573-bcab-4db3-956f-773324b92a80";
+
+        CartProduct wishlistItem = CartProduct.builder()
+                .productId(productId)
+                .productName("Dog Food")
+                .quantityInCart(2)
+                .productQuantity(10)
+                .build();
+
+        Cart cart = Cart.builder()
+                .cartId(cartId)
+                .products(new ArrayList<>())
+                .wishListProducts(new ArrayList<>(List.of(wishlistItem)))
+                .build();
+
+        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
+        when(productClient.getProductByProductId(productId))
+                .thenReturn(Mono.just(ProductResponseModel.builder()
+                        .productId(productId)
+                        .productName("Dog Food")
+                        .productQuantity(10)
+                        .build()));
+
+        StepVerifier.create(cartService.addProductToCart(cartId, new CartItemRequestModel(productId, 1)))
+                .assertNext(response -> {
+                    assertTrue(response.getProducts().stream()
+                            .anyMatch(p -> productId.equals(p.getProductId()) && p.getQuantityInCart() == 1));
+                    assertTrue(response.getWishListProducts().stream()
+                            .anyMatch(p -> productId.equals(p.getProductId()) && p.getQuantityInCart() == 2));
+                })
+                .verifyComplete();
     }
 
     @Test
@@ -1470,13 +1506,13 @@ class CartServiceUnitTest {
 
                 StepVerifier.create(cartService.transferWishlist(cartId, List.of(), WishlistTransferDirection.TO_CART))
                 .assertNext(resp -> {
-                    assertEquals("No items in wishlist to move.", resp.getMessage());
+                    assertEquals("No items in wishlist to add.", resp.getMessage());
                     assertTrue(resp.getProducts().isEmpty());
                 })
                 .verifyComplete();
     }
         @Test
-        void testTransferWishlist_ToCart_ItemsMoved() {
+        void testTransferWishlist_ToCart_ItemsAddedAndKeptInWishlist() {
         String cartId = "cart-2";
         CartProduct wishItem = CartProduct.builder()
                 .productId("prod-1")
@@ -1489,25 +1525,23 @@ class CartServiceUnitTest {
         cart.setWishListProducts(List.of(wishItem));
         cart.setProducts(new ArrayList<>());
 
-        Cart savedCart = new Cart();
-        savedCart.setCartId(cartId);
-        savedCart.setWishListProducts(new ArrayList<>());
-        savedCart.setProducts(List.of(wishItem));
-
         when(productClient.getProductByProductId("prod-1")).thenReturn(Mono.just(ProductResponseModel.builder()
                 .productId("prod-1")
                 .productName("Test Product")
                 .productQuantity(10)
                 .build()));
         when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
-        when(cartRepository.save(any())).thenReturn(Mono.just(savedCart));
+        when(cartRepository.save(any())).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
 
                 StepVerifier.create(cartService.transferWishlist(cartId, List.of(), WishlistTransferDirection.TO_CART))
                 .assertNext(resp -> {
-                                        assertEquals("Moved 2 item(s) from wishlist to cart.", resp.getMessage());
+                    assertEquals("Added 2 wishlist item(s) to cart.", resp.getMessage());
                     assertEquals(1, resp.getProducts().size());
                     assertEquals("prod-1", resp.getProducts().get(0).getProductId());
                     assertEquals(2, resp.getProducts().get(0).getQuantityInCart());
+                    assertEquals(1, resp.getWishListProducts().size());
+                    assertEquals("prod-1", resp.getWishListProducts().get(0).getProductId());
+                    assertEquals(2, resp.getWishListProducts().get(0).getQuantityInCart());
                 })
                 .verifyComplete();
     }
@@ -1540,7 +1574,7 @@ class CartServiceUnitTest {
     }
 
     @Test
-    void testTransferWishlist_ToCart_SelectedItemMovesAndUnselectedItemStaysInWishlist() {
+    void testTransferWishlist_ToCart_SelectedItemIsAddedAndAllItemsStayInWishlist() {
         String cartId = "cart-2";
         CartProduct wishItem = CartProduct.builder()
                 .productId("prod-1")
@@ -1570,15 +1604,17 @@ class CartServiceUnitTest {
 
         StepVerifier.create(cartService.transferWishlist(cartId, List.of("prod-1"), WishlistTransferDirection.TO_CART))
                 .assertNext(resp -> {
-                    assertEquals("Moved 2 item(s) from wishlist to cart.", resp.getMessage());
+                    assertEquals("Added 2 wishlist item(s) to cart.", resp.getMessage());
 
                     assertEquals(1, resp.getProducts().size());
                     assertEquals("prod-1", resp.getProducts().get(0).getProductId());
                     assertEquals(2, resp.getProducts().get(0).getQuantityInCart());
 
-                    assertEquals(1, resp.getWishListProducts().size());
-                    assertEquals("prod-2", resp.getWishListProducts().get(0).getProductId());
-                    assertEquals(1, resp.getWishListProducts().get(0).getQuantityInCart());
+                    assertEquals(2, resp.getWishListProducts().size());
+                    assertTrue(resp.getWishListProducts().stream()
+                            .anyMatch(p -> p.getProductId().equals("prod-1") && p.getQuantityInCart() == 2));
+                    assertTrue(resp.getWishListProducts().stream()
+                            .anyMatch(p -> p.getProductId().equals("prod-2") && p.getQuantityInCart() == 1));
                 })
                 .verifyComplete();
     }
@@ -1620,7 +1656,7 @@ class CartServiceUnitTest {
     }
 
     @Test
-    void testTransferWishlist_ToCart_PartialStockLeavesRemainderInWishlist() {
+    void testTransferWishlist_ToCart_PartialStockKeepsOriginalWishlistQuantity() {
         String cartId = "cart-2";
         CartProduct wishItem = CartProduct.builder()
                 .productId("prod-1")
@@ -1645,8 +1681,8 @@ class CartServiceUnitTest {
                 .assertNext(resp -> {
                     assertEquals(2, resp.getProducts().get(0).getQuantityInCart());
                     assertEquals(1, resp.getWishListProducts().size());
-                    assertEquals(3, resp.getWishListProducts().get(0).getQuantityInCart());
-                    assertTrue(resp.getMessage().contains("Moved 2 item(s)"));
+                    assertEquals(5, resp.getWishListProducts().get(0).getQuantityInCart());
+                    assertTrue(resp.getMessage().contains("Added 2 wishlist item(s)"));
                     assertTrue(resp.getMessage().contains("Skipped 3 item(s)"));
                 })
                 .verifyComplete();
@@ -1672,30 +1708,21 @@ class CartServiceUnitTest {
         cart.setWishListProducts(List.of(wishItem));
         cart.setProducts(List.of(cartItem));
 
-        Cart savedCart = new Cart();
-        savedCart.setCartId(cartId);
-        savedCart.setWishListProducts(new ArrayList<>());
-        CartProduct merged = CartProduct.builder()
-                .productId("prod-1")
-                .productName("Test Product")
-                .quantityInCart(5) // 3 + 2
-                .productSalePrice(10.0) // <-- Add this line!
-                .build();
-        savedCart.setProducts(List.of(merged));
-
         when(productClient.getProductByProductId("prod-1")).thenReturn(Mono.just(ProductResponseModel.builder()
                 .productId("prod-1")
                 .productName("Test Product")
                 .productQuantity(10)
                 .build()));
         when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
-        when(cartRepository.save(any())).thenReturn(Mono.just(savedCart));
+        when(cartRepository.save(any())).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
 
                 StepVerifier.create(cartService.transferWishlist(cartId, List.of(), WishlistTransferDirection.TO_CART))
                 .assertNext(resp -> {
-                                        assertEquals("Moved 2 item(s) from wishlist to cart.", resp.getMessage());
+                    assertEquals("Added 2 wishlist item(s) to cart.", resp.getMessage());
                     assertEquals(1, resp.getProducts().size());
                     assertEquals(5, resp.getProducts().get(0).getQuantityInCart());
+                    assertEquals(1, resp.getWishListProducts().size());
+                    assertEquals(2, resp.getWishListProducts().get(0).getQuantityInCart());
                 })
                 .verifyComplete();
     }
@@ -1738,6 +1765,9 @@ class CartServiceUnitTest {
                 .assertNext(resp -> {
                     assertEquals(1, resp.getProducts().size());
                     assertTrue(resp.getProducts().stream()
+                            .anyMatch(p -> p.getProductId().equals("prod-in-stock") && p.getQuantityInCart() == 2));
+                    assertEquals(2, resp.getWishListProducts().size());
+                    assertTrue(resp.getWishListProducts().stream()
                             .anyMatch(p -> p.getProductId().equals("prod-in-stock") && p.getQuantityInCart() == 2));
                     assertTrue(resp.getWishListProducts().stream()
                             .anyMatch(p -> p.getProductId().equals("prod-out")));
