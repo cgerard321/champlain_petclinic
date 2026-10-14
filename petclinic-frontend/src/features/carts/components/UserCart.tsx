@@ -11,7 +11,9 @@ import { ProductModel } from '../models/ProductModel';
 import './cart-shared.css';
 import './UserCart.css';
 import { NavBar } from '@/layouts/AppNavBar';
-import { FaShoppingCart } from 'react-icons/fa';
+import { FaShoppingCart, FaHeart, FaRegHeart } from 'react-icons/fa';
+import { useAddToWishlist } from '../api/addToWishlistFromProducts';
+import { useRemoveFromWishlistByIcon } from '../api/removeProductFromWishlist';
 import ImageContainer from '@/features/products/components/ImageContainer';
 import axiosInstance from '@/shared/api/axiosInstance';
 import getErrorMessage from '@/shared/api/getErrorMessage';
@@ -36,6 +38,8 @@ import {
 } from '../api/cartEvent';
 import { computeTaxes, formatTaxRate, roundToCents } from '../utils/taxUtils';
 import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
+import { getCustomerOrders } from '../api/getCustomerOrders';
+import type { OrderModel } from '../models/OrderModel';
 interface ProductAPIResponse {
   productId: string;
   imageId?: string;
@@ -89,8 +93,36 @@ const UserCart: React.FC = () => {
   const [voucherError, setVoucherError] = useState<string | null>(null);
 
   const [movingAll, setMovingAll] = useState<boolean>(false);
+  const [orders, setOrders] = useState<OrderModel[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(true);
+  const [ordersError, setOrdersError] = useState<string | null>(null);
 
   const [promoPercent, setPromoPercent] = useState<number | null>(null);
+
+  const fetchOrders = useCallback(async (): Promise<void> => {
+    if (!customerId) {
+      setOrders([]);
+      setOrdersLoading(false);
+      return;
+    }
+
+    setOrdersLoading(true);
+    setOrdersError(null);
+
+    try {
+      const data = await getCustomerOrders(customerId);
+      setOrders(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Failed to fetch orders:', error);
+      setOrdersError('Could not load previous orders.');
+    } finally {
+      setOrdersLoading(false);
+    }
+  }, [customerId]);
+
+  useEffect(() => {
+    void fetchOrders();
+  }, [fetchOrders]);
 
   const toProductModel = useCallback(
     (product: ProductAPIResponse): ProductModel => ({
@@ -252,6 +284,34 @@ const UserCart: React.FC = () => {
         'error'
       );
     }
+  };
+
+  const { addToWishlist: addRecommendationToWishlist } = useAddToWishlist();
+  const { removeFromWishlistByIcon } = useRemoveFromWishlistByIcon();
+
+  const isInWishlist = (productId: string): boolean =>
+    wishlistItems.some(p => p.productId === productId);
+
+  const toggleRecommendationWishlist = async (
+    productId: string
+  ): Promise<void> => {
+    let success;
+    if (isInWishlist(productId)) {
+      success = await removeFromWishlistByIcon(productId);
+    } else {
+      success = await addRecommendationToWishlist(productId, 1);
+    }
+
+    if (!success) {
+      showToast('Could not update wishlist.', 'error');
+      return;
+    }
+
+    const { data } = await axiosInstance.get<CartDetailsModel>(
+      `/carts/${cartId}`,
+      { useV2: false }
+    );
+    syncCartState(data);
   };
 
   // Recommendation purchases state
@@ -905,6 +965,21 @@ const UserCart: React.FC = () => {
       // Reset LS so navbar badge = 0 without API
       setCartCountInLS(0);
 
+      // Refresh cart data to retrieve the newly created order
+
+      await fetchOrders();
+
+      try {
+        const { data } = await axiosInstance.get<CartDetailsModel>(
+          `/carts/${cartId}`,
+          { useV2: false }
+        );
+
+        syncCartState(data);
+      } catch (err) {
+        console.error('Failed to refresh orders after checkout:', err);
+      }
+
       // Fetch recent purchases after checkout
       if (customerId) {
         try {
@@ -982,6 +1057,12 @@ const UserCart: React.FC = () => {
   const hasMovableWishlistItems = wishlistItems.some(
     item => item.productQuantity == null || item.productQuantity > 0
   );
+
+  const displayAddToCartOrPurchaseAgain = (productId: string): string => {
+    return recentPurchasesList.some(item => item.productId === productId)
+      ? 'Purchase Again'
+      : 'Add to Cart';
+  };
 
   return (
     <div>
@@ -1160,6 +1241,73 @@ const UserCart: React.FC = () => {
           )}
         </div>
 
+        {/* Previous Orders */}
+        <div className="orders-section cart-panel cart-panel--padded">
+          <h2>Your Orders</h2>
+
+          {ordersLoading ? (
+            <p>Loading your orders...</p>
+          ) : ordersError ? (
+            <p className="error">{ordersError}</p>
+          ) : orders.length === 0 ? (
+            <p>You have not placed any orders yet.</p>
+          ) : (
+            <div className="orders-list">
+              {orders.map(order => (
+                <div key={order.orderId} className="order-card cart-card">
+                  <div className="order-header">
+                    <h3>Order #{order.orderId}</h3>
+
+                    <p>
+                      Placed on:{' '}
+                      {new Date(order.orderDate).toLocaleDateString()}
+                    </p>
+                  </div>
+
+                  <div className="order-products">
+                    {order.products.map(item => (
+                      <div key={item.productId} className="order-product">
+                        <div
+                          className="recent-purchase-image"
+                          onClick={() =>
+                            redirectToProductPageOnClick(item.productId)
+                          }
+                        >
+                          <ImageContainer
+                            productId={item.productId}
+                            imageId={item.imageId}
+                          />
+                        </div>
+
+                        <div className="order-product-details">
+                          <h4>{item.productName}</h4>
+
+                          <p>Qty: {item.quantityInCart}</p>
+
+                          <p>{formatPrice(item.productSalePrice)} each</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="order-footer">
+                    <span>Subtotal: {formatPrice(order.subtotal)}</span>
+                    <span>TVQ: {formatPrice(order.tvq)}</span>
+                    <span>TVC: {formatPrice(order.tvc)}</span>
+
+                    {order.promoPercent != null && (
+                      <span>Promo: {order.promoPercent}%</span>
+                    )}
+
+                    <strong>Total: {formatPrice(order.total)}</strong>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Recent purchases*/}
         <div className="recent-purchases-section cart-panel cart-panel--padded">
           <h2>Recent Purchases</h2>
           <div className="recent-purchases-list cart-scroll-strip">
@@ -1191,7 +1339,7 @@ const UserCart: React.FC = () => {
                       htmlFor={`recent-qty-${item.productId}`}
                       className="recent-purchase-qty-label"
                     >
-                      Qty:
+                      Quantity:
                     </label>
                     <input
                       id={`recent-qty-${item.productId}`}
@@ -1328,6 +1476,18 @@ const UserCart: React.FC = () => {
                   key={item.productId}
                   className="recommendation-purchase-card cart-card"
                 >
+                  <button
+                    className="wishlist-heart-btn"
+                    title="Add to Wishlist"
+                    onClick={() => toggleRecommendationWishlist(item.productId)}
+                  >
+                    {isInWishlist(item.productId) && (
+                      <FaHeart style={{ color: '#e11d48' }} />
+                    )}
+                    {!isInWishlist(item.productId) && (
+                      <FaRegHeart style={{ color: '#000' }} />
+                    )}
+                  </button>
                   <div className="recent-purchase-image-container">
                     <div
                       onClick={() =>
@@ -1345,14 +1505,14 @@ const UserCart: React.FC = () => {
                     {item.productName}
                   </div>
                   <div className="recommendation-product-price recent-purchase-price">
-                    ${formatPrice(item.productSalePrice)}
+                    {formatPrice(item.productSalePrice)}
                   </div>
                   <div className="recommendation-qty-row recent-purchase-qty-row">
                     <label
                       htmlFor={`recommendation-qty-${item.productId}`}
                       className="recommendation-qty-label recent-purchase-qty-label"
                     >
-                      Qty:
+                      Quantity:
                     </label>
                     <input
                       id={`recommendation-qty-${item.productId}`}
@@ -1374,7 +1534,7 @@ const UserCart: React.FC = () => {
                     className="purchase-again-btn cart-button cart-button--brand"
                     onClick={() => handlePurchaseRecommendation(item)}
                   >
-                    Purchase Again
+                    {displayAddToCartOrPurchaseAgain(item.productId)}
                   </button>
                   <div className="recommendation-total recent-purchase-total">
                     Total: $
