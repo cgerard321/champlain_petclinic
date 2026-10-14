@@ -41,6 +41,8 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import com.petclinic.billing.exceptions.CustomerNotFoundException;
+import com.petclinic.billing.exceptions.VetNotFoundException;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
@@ -473,9 +475,10 @@ public class BillServiceImplTest {
 
         // Mock AuthServiceClient response
         UserDetails userDetails = new UserDetails();
-        userDetails.setUserId("customer-456");
-        Mockito.when(authClient.getUserById("customer-456", "JWTToken"))
-                .thenReturn(Mono.just(userDetails)); // Ensure a non-null Mono is returned
+        userDetails.setUserId("owner-456");
+
+        Mockito.when(authClient.getUserById("JWTToken", "owner-456"))
+                .thenReturn(Mono.just(userDetails));
 
         // Mock repository insert
         Mockito.when(repo.findById(Mockito.anyString()))
@@ -502,6 +505,40 @@ public class BillServiceImplTest {
         verify(vetClient).getVetByVetId("vet-123");
         verify(customerServiceClient).getCustomerByCustomerId("customer-456");
     }
+
+    //test cust and vet exception
+    @Test
+    void createBill_customerNotFound() {
+        BillRequestDTO dto = buildBillRequestDTO();
+
+        when(vetClient.getVetByVetId(dto.getVetId())).thenReturn(Mono.just(new VetResponseDTO()));
+        when(customerServiceClient.getCustomerByCustomerId(dto.getCustomerId())).thenReturn(Mono.empty());
+
+        StepVerifier.create(billService.createBill(
+                Mono.just(dto), false, "CAD", "JWTToken"))
+                .expectErrorMatches(error -> error instanceof CustomerNotFoundException && error.getMessage().equals("Customer not found with customerId: " + dto.getCustomerId()))
+                .verify();
+
+        verify(repo, never()).insert(any(Bill.class));
+    }
+
+    @Test
+    void createBill_vetNotFound() {
+        BillRequestDTO dto = buildBillRequestDTO();
+
+        when(vetClient.getVetByVetId(dto.getVetId())).thenReturn(Mono.empty());
+        when(customerServiceClient.getCustomerByCustomerId(dto.getCustomerId())).thenReturn(Mono.just(new CustomerResponseDTO()));
+        StepVerifier.create(billService.createBill(
+                Mono.just(dto), false, "CAD", "JWTToken"))
+                .expectErrorMatches(error -> error instanceof VetNotFoundException && error.getMessage().equals("Vet not found with vetId: " + dto.getVetId()))
+                .verify();
+        verify(repo, never()).insert(any(Bill.class));
+    }
+
+
+
+
+
 
     @Test
     void createBill_withIdCollision_shouldRetryAndSucceed() {
@@ -796,6 +833,55 @@ public class BillServiceImplTest {
     }
 
     @Test
+    public void updateBill_zeroAmount_shouldReturnBadRequest() {
+        BillRequestDTO request = buildBillRequestDTO();
+        request.setAmount(BigDecimal.ZERO);
+
+        StepVerifier.create(
+                        billService.updateBill("bill-123", Mono.just(request)))
+                .expectErrorMatches(error ->
+                        error instanceof ResponseStatusException &&
+                                ((ResponseStatusException) error).getStatus() ==
+                                        HttpStatus.BAD_REQUEST)
+                .verify();
+
+        verify(repo, never()).save(any(Bill.class));
+    }
+
+    @Test
+    public void updateBill_invalidDueDate_shouldReturnBadRequest() {
+        BillRequestDTO request = buildBillRequestDTO();
+        request.setDueDate(request.getDate().minusDays(1));
+
+        StepVerifier.create(
+                        billService.updateBill("bill-123", Mono.just(request)))
+                .expectErrorMatches(error ->
+                        error instanceof ResponseStatusException &&
+                                ((ResponseStatusException) error).getStatus() ==
+                                        HttpStatus.BAD_REQUEST)
+                .verify();
+
+        verify(repo, never()).save(any(Bill.class));
+    }
+
+    @Test
+    public void updateBill_blankVisitType_shouldReturnBadRequest() {
+        BillRequestDTO request = buildBillRequestDTO();
+        request.setVisitType("   ");
+
+        StepVerifier.create(
+                        billService.updateBill("bill-123", Mono.just(request)))
+                .expectErrorMatches(error ->
+                        error instanceof ResponseStatusException &&
+                                ((ResponseStatusException) error).getStatus() ==
+                                        HttpStatus.BAD_REQUEST)
+                .verify();
+
+        verify(repo, never()).save(any(Bill.class));
+    }
+
+
+    @Test
     public void test_getBillByNonExistentBillId() {
         String nonExistentBillId = "nonExistentId";
 
@@ -857,9 +943,9 @@ public class BillServiceImplTest {
         // Assert
         StepVerifier.create(result)
                 .expectErrorMatches(throwable ->
-                        throwable instanceof ResponseStatusException &&
-                                ((ResponseStatusException) throwable).getStatus().equals(HttpStatus.NOT_FOUND) &&
-                                throwable.getMessage().contains("Customer ID does not exist"))
+                        throwable instanceof CustomerNotFoundException &&
+                                throwable.getMessage().equals(
+                                        "Customer not found with customerId: " + nonExistentCustomerId))
                 .verify();
 
         verify(customerServiceClient, times(1)).getCustomerByCustomerId(nonExistentCustomerId);
@@ -1423,6 +1509,88 @@ public void testGenerateBillPdf_BillNotFound() {
         StepVerifier.create(result)
                 .expectNext(0L)
                 .verifyComplete();
+    }
+
+    @Test
+    void getAllBillsByPage_ArchivedOnly_ShouldReturnArchivedBills() {
+        Bill archivedBill = buildBill();
+        archivedBill.setBillId("ARCHIVED-1");
+        archivedBill.setArchive(true);
+        archivedBill.setBillStatus(BillStatus.PAID);
+
+        when(repo.findAllByArchiveTrue())
+                .thenReturn(Flux.just(archivedBill));
+        when(repo.findAllBillsByBillStatus(BillStatus.UNPAID))
+                .thenReturn(Flux.empty());
+
+        StepVerifier.create(billService.getAllBillsByPage(
+                        PageRequest.of(0, 10),
+                        null, null, null, null,
+                        null, null, null, null,
+                        true))
+                .assertNext(dto ->
+                        assertEquals("ARCHIVED-1", dto.getBillId()))
+                .verifyComplete();
+
+        verify(repo).findAllByArchiveTrue();
+        verify(repo, never()).findAll();
+        verify(repo, never()).findAllByArchiveFalse();
+    }
+
+    @Test
+    void getNumberOfBillsWithFilters_ArchivedOnly_ShouldCountArchivedBills() {
+        Bill archivedBill = buildBill();
+        archivedBill.setArchive(true);
+        archivedBill.setBillStatus(BillStatus.PAID);
+
+        when(repo.findAllByArchiveTrue())
+                .thenReturn(Flux.just(archivedBill));
+
+        StepVerifier.create(billService.getNumberOfBillsWithFilters(
+                        null, null, null, null,
+                        null, null, null, null,
+                        true))
+                .expectNext(1L)
+                .verifyComplete();
+
+        verify(repo).findAllByArchiveTrue();
+        verify(repo, never()).findAll();
+        verify(repo, never()).findAllByArchiveFalse();
+    }
+
+    @Test
+    void getAllBillsByPage_ArchivedOnlyWithCustomerId_ShouldReturnMatchingBills() {
+        Bill matchingBill = buildBill();
+        matchingBill.setBillId("ARCHIVED-MATCH");
+        matchingBill.setCustomerId("CUSTOMER-1");
+        matchingBill.setArchive(true);
+        matchingBill.setBillStatus(BillStatus.PAID);
+
+        Bill otherBill = buildBill();
+        otherBill.setBillId("ARCHIVED-OTHER");
+        otherBill.setCustomerId("CUSTOMER-2");
+        otherBill.setArchive(true);
+        otherBill.setBillStatus(BillStatus.PAID);
+
+        when(repo.findAllByArchiveTrue())
+                .thenReturn(Flux.just(otherBill, matchingBill));
+        when(repo.findAllBillsByBillStatus(BillStatus.UNPAID))
+                .thenReturn(Flux.empty());
+
+        StepVerifier.create(billService.getAllBillsByPage(
+                        PageRequest.of(0, 10),
+                        null, "CUSTOMER-1", null, null,
+                        null, null, null, null,
+                        true))
+                .assertNext(dto -> {
+                    assertEquals("ARCHIVED-MATCH", dto.getBillId());
+                    assertEquals("CUSTOMER-1", dto.getCustomerId());
+                })
+                .verifyComplete();
+
+        verify(repo).findAllByArchiveTrue();
+        verify(repo, never()).findAll();
+        verify(repo, never()).findAllByArchiveFalse();
     }
 
     @Test
@@ -2621,3 +2789,4 @@ public void testGenerateBillPdf_BillNotFound() {
     }
 
 }
+

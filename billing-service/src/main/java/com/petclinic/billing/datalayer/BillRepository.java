@@ -42,6 +42,8 @@ public interface BillRepository extends ReactiveMongoRepository<Bill, String> {
 
     Flux<Bill> findAllByArchiveFalse();
 
+    Flux<Bill> findAllByArchiveTrue();
+
     Flux<Bill> findAllByDateBefore(LocalDate date);
 
     Flux<Bill> findByCustomerIdAndAmountBetween(String customerId, BigDecimal minAmount, BigDecimal maxAmount);

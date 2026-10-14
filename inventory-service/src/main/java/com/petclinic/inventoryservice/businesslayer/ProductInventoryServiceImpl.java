@@ -114,7 +114,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                                             existingProduct.setProductQuantity(requestDTO.getProductQuantity());
                                             existingProduct.setProductSalePrice(requestDTO.getProductSalePrice());
                                             existingProduct.setLastUpdatedAt(LocalDateTime.now());
-
+                                            existingProduct.setExpirationDate(requestDTO.getExpirationDate());                                   
                                             // Set Status based on the product quantity
 //                                            if (existingProduct.getProductQuantity() == 0) {
 //                                                existingProduct.setStatus(Status.OUT_OF_STOCK);
@@ -630,6 +630,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                                 product.setInventoryId(inventoryId);
                                 product.setProductId(EntityDTOUtil.generateUUID());
                                 product.setLastUpdatedAt(LocalDateTime.now());
+                                product.setExpirationDate(requestDTO.getExpirationDate());
                                 return productRepository.save(product)
                                         .map(EntityDTOUtil::toProductResponseDTO);
                             });
