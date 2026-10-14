@@ -81,7 +81,47 @@
         "description": "Explore veterinarian profiles and discover their areas of expertise.",
         "sample_preview": "Sample profiles · Design preview",
         "button": "Explore directory",
-        "preview_note": "Veterinarian directory coming soon."
+        "preview_note": "Veterinarian directory coming soon.",
+        "layout_preview_note": "Explore the layout with fictional profiles."
+      },
+      "list": {
+        "back": "Back to veterinarians",
+        "title": "Veterinarian directory",
+        "description": "Explore our team's profiles, specialties, and working hours.",
+        "preview_title": "Preview · Fictional profiles",
+        "preview_description": "These examples demonstrate the layout. Contact details and working hours are fictional. Viewing and editing real profiles will be available later.",
+        "profiles_label": "Sample veterinarian profiles",
+        "empty": "No profiles to display."
+      },
+      "profile": {
+        "role": "Veterinarian",
+        "active": "Active profile",
+        "inactive": "Inactive profile",
+        "specialties": "Specialties",
+        "no_specialties": "No specialties provided.",
+        "about": "About",
+        "no_biography": "No biography provided.",
+        "contact": "Contact details",
+        "email": "Email",
+        "phone": "Phone",
+        "no_email": "Email not provided",
+        "no_phone": "Phone number not provided",
+        "hours": "Working hours",
+        "no_hours": "No working hours provided."
+      },
+      "preview": {
+        "general_medicine": "General medicine",
+        "preventive_care": "Preventive care",
+        "surgery": "Surgery",
+        "dentistry": "Dentistry",
+        "dermatology": "Dermatology",
+        "alex_biography": "Supports families with their pets' everyday care, from prevention to health checkups.",
+        "alex_days": "Monday, Wednesday, and Friday",
+        "alex_hours": "9 am – 5 pm",
+        "julie_biography": "Focuses on surgical and dental care, with particular attention to animals' comfort and recovery.",
+        "julie_days": "Tuesday and Thursday",
+        "julie_hours": "8 am – 4 pm",
+        "sam_biography": "Helps animals with skin conditions and supports their families with ongoing care."
       },
       "working_hours": {
         "heading": "Working hours",
