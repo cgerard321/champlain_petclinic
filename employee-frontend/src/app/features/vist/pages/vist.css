@@ -28,7 +28,7 @@ p {
   font: inherit;
 }
 
-@media (max-width: 700px) {
+@media (width <= 700px) {
   .visits-page {
     grid-template-columns: minmax(0, 1fr);
     gap: 16px;
