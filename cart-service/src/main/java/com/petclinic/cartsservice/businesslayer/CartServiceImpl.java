@@ -15,7 +15,6 @@ import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
 import com.petclinic.cartsservice.utils.exceptions.OutOfStockException;
 import com.petclinic.cartsservice.domainclientlayer.CustomerClient;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -118,13 +117,6 @@ public class CartServiceImpl implements CartService {
         return quantity == null ? 0 : Math.max(quantity, 0);
     }
 
-    private int safeQuantity(Integer quantity, int fallback) {
-        if (quantity == null || quantity <= 0) {
-            return Math.max(fallback, 0);
-        }
-        return quantity;
-    }
-
     @Override
     public Mono<CartResponseModel> getCartByCartId(String cartId) {
         return cartRepository.findCartByCartId(cartId)
@@ -222,44 +214,6 @@ public class CartServiceImpl implements CartService {
                     Cart orderCart = EntityModelUtil.storeCartOrder(cart);
 
                     String invoiceId = UUID.randomUUID().toString();
-                    List<CartProduct> products = cart.getProducts();
-                    //This keeps the full calculated receipt
-                    CartResponseModel checkoutResponse = EntityModelUtil.toCartResponseModel(cart, products);
-                    checkoutResponse.setInvoiceId(invoiceId);
-
-                    // --- Recent Purchases Logic ---
-                    List<CartProduct> updatedRecentPurchases = cart.getRecentPurchases() != null
-                            ? new ArrayList<>(cart.getRecentPurchases())
-                            : new ArrayList<>();
-
-                    for (CartProduct purchasedProduct : products) {
-                        boolean found = false;
-                        for (CartProduct recent : updatedRecentPurchases) {
-                            if (recent.getProductId().equals(purchasedProduct.getProductId())) {
-                                recent.setQuantityInCart(
-                                        recent.getQuantityInCart() + purchasedProduct.getQuantityInCart()
-                                );
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (!found) {
-                            updatedRecentPurchases.add(purchasedProduct);
-                        }
-                    }
-                    cart.setRecentPurchases(updatedRecentPurchases);
-
-                    // --- Recommendation Purchases Logic ---
-                    return Flux.fromIterable(products)
-                            .map(CartProduct::getProductId)
-                            .flatMap(productClient::getProductByProductId)
-                            .filter(product -> product.getProductType() != null)
-                            .map(ProductResponseModel::getProductType)
-                            .distinct()
-                            .flatMap(productClient::getProductsByType)
-                            .distinct(ProductResponseModel::getProductId)
-                            .map(this::toCartProduct)
-                            .collectList()
                     orderCart.setInvoiceId(invoiceId);
 
                     List<CartProduct> purchasedProducts = orderCart.getProducts();
@@ -278,16 +232,16 @@ public class CartServiceImpl implements CartService {
                                 cart.setShippingMethod(ShippingMethod.PICKUP);
                                 cart.setShippingCost(ShippingMethod.PICKUP.getCost());
 
-                                return cartRepository.save(cart)
-                                        .thenReturn(checkoutResponse);
-
-                                    });
                                 return cartRepository.save(cart);
                             })
                             .flatMap(savedCart -> orderService.createOrder(orderCart))
-                            .map(savedOrder ->
-                                    new CartResponseModel(invoiceId, cartId, purchasedProducts, total)
-                            );
+                            .map(savedOrder -> {
+                                CartResponseModel response =
+                                        new CartResponseModel(invoiceId, cartId, purchasedProducts, total);
+                                response.setShippingMethod(orderCart.getShippingMethod());
+                                response.setShippingCost(orderCart.getShippingCost());
+                                return response;
+                            });
                 });
     }
 
