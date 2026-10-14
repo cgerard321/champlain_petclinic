@@ -13,4 +13,6 @@ public class RatingResponseModel {
     private Byte rating;
     private String review;
     private String customerId;
+    private long likeCount;
+    private boolean likedByCurrentUser;
 }
