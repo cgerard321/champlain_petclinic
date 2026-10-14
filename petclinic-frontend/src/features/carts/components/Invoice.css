@@ -7,11 +7,18 @@
     justify-content: center;
     z-index: 2000;
     padding: 1rem;
+    backdrop-filter: blur(4px);
+}
+
+@keyframes invoice-pop {
+    from { opacity: 0; transform: translateY(12px) scale(0.98); }
+    to { opacity: 1; transform: none; }
 }
 
 .invoice-modal-content {
     background: #fff;
     border: 1px solid rgba(37, 99, 235, 0.14);
+    border-top: 4px solid #2563eb;
     border-radius: 16px;
     max-width: 900px;
     width: 100%;
@@ -20,6 +27,7 @@
     padding: 1.75rem;
     box-shadow: 0 10px 28px rgba(15, 23, 42, 0.18);
     color: #1e293b;
+    animation: invoice-pop 0.25s ease-out;
 }
 
 .invoice-nav button[disabled] {
@@ -51,7 +59,13 @@
 
 .invoice-card {
     border-bottom: 1px solid #e2e8f0;
-    padding: 0.75rem 0;
+    border-radius: 8px;
+    padding: 0.75rem;
+    transition: background 0.2s;
+}
+
+.invoice-card:hover {
+    background: rgba(37, 99, 235, 0.05);
 }
 
 .invoice-card h4 {
@@ -81,6 +95,7 @@
     padding: 0.75rem 0 0;
     border-bottom: none;
     border-top: 1px solid #e2e8f0;
+    color: #2563eb;
 }
 
 .invoice-close {
@@ -97,17 +112,19 @@
 }
 
 .download-invoice-btn {
-    background: #0b5fff;
+    background: linear-gradient(90deg, #2563eb, #3b82f6);
     color: #fff;
     border: none;
     padding: 0.6rem 1.1rem;
     border-radius: 8px;
     cursor: pointer;
     font-weight: 600;
+    transition: transform 0.15s, box-shadow 0.15s;
 }
 
 .download-invoice-btn:hover {
-    background: #094bdb;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
 }
 
 @media (max-width: 600px) {
