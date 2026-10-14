@@ -363,9 +363,11 @@
 /* Existing CPC-1913 styling */
 
 @media (width <= 640px) {
-  .bill-page {
-    padding: 24px 16px 32px;
+    .bill-page {
+      padding: 16px 12px 24px;
+    }
   }
+  
 
   .bill-header {
     align-items: flex-start;
@@ -379,4 +381,58 @@
   .bill-card__header {
     flex-direction: column;
   }
+.bill-payment {
+  padding: 32px;
+  color: #1c4030;
+}
+
+.bill-payment h2 {
+  margin: 0 0 12px;
+  font-size: 28px;
+}
+
+.bill-payment p {
+  margin: 0 0 24px;
+}
+
+.bill-payment form {
+  display: grid;
+  gap: 12px;
+}
+
+.bill-payment label {
+  font-weight: 600;
+}
+
+.bill-payment input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #b8cbbf;
+  border-radius: 8px;
+  background: white;
+  font: inherit;
+}
+
+.bill-payment input:focus {
+  outline: 2px solid #1c4030;
+  outline-offset: 2px;
+}
+
+.bill-payment button {
+  width: 100%;
+}
+
+.bill-payment button[type='submit'] {
+  margin-top: 12px;
+}
+
+.bill-payment button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.bill-payment .bill-details-error {
+  color: #b42318;
 }
