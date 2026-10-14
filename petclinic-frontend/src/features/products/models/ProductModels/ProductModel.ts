@@ -19,7 +19,10 @@ export interface ProductModel {
   dateAdded: Date;
   releaseDate?: Date;
   deliveryType:
-    'DELIVERY' | 'PICKUP' | 'DELIVERY_AND_PICKUP' | 'NO_DELIVERY_OPTION';
+    | 'DELIVERY'
+    | 'PICKUP'
+    | 'DELIVERY_AND_PICKUP'
+    | 'NO_DELIVERY_OPTION';
 }
 
 export const emptyProductModel: ProductModel = {
