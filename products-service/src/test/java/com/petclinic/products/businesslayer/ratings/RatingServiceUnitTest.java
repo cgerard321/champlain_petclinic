@@ -578,6 +578,13 @@ class RatingServiceUnitTest {
                 .createdAt(LocalDateTime.now().minusHours(2))
                 .build();
 
+        when(productRepository.findProductByProductId(existingRating.getProductId()))
+                .thenReturn(Mono.just(
+                        Product.builder()
+                                .productId(existingRating.getProductId())
+                                .build()
+                ));
+
         when(ratingRepository.findRatingByCustomerIdAndProductId(
                 existingRating.getCustomerId(),
                 existingRating.getProductId()))
@@ -615,6 +622,13 @@ class RatingServiceUnitTest {
                 .review(rating1.getReview())
                 .createdAt(LocalDateTime.now().minusHours(49))
                 .build();
+
+        when(productRepository.findProductByProductId(existingRating.getProductId()))
+                .thenReturn(Mono.just(
+                        Product.builder()
+                                .productId(existingRating.getProductId())
+                                .build()
+                ));
 
         when(ratingRepository.findRatingByCustomerIdAndProductId(
                 existingRating.getCustomerId(),

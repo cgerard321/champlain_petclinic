@@ -113,7 +113,9 @@ public class RatingServiceImpl implements RatingService {
                 .flatMap(req ->
                         productRepository.findProductByProductId(productId)
                                 .switchIfEmpty(Mono.error(new NotFoundException("Product id not found: " + productId)))
-                                .then(ratingRepository.findRatingByCustomerIdAndProductId(customerId, productId))
+                                .flatMap(prod ->
+                                        ratingRepository.findRatingByCustomerIdAndProductId(customerId, productId)
+                                )
                                         .switchIfEmpty(Mono.error(new NotFoundException("Rating could not be found for customer " + customerId + " for product " + productId)))
                                         .flatMap(existingRating ->
                                            reviewSettingsRepository.findById(1L)
